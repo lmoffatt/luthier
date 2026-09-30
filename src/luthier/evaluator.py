@@ -279,7 +279,10 @@ def try_equal(env: Env, a: Term, b: Term, fuel: Fuel) -> Optional[bool]:
     a = whnf(env, a, fuel)
     b = whnf(env, b, fuel)
     if isinstance(a, Lit) and isinstance(b, Lit):
-        return a.value == b.value
+        try:
+            return bool(a.value == b.value)
+        except Exception:      # opaque values (arrays) have no decidable equality here: stuck
+            return None
     if isinstance(a, Pair) and isinstance(b, Pair):
         e1 = try_equal(env, a.fst, b.fst, fuel)
         if e1 is None: return None
@@ -371,8 +374,22 @@ def to_python(env: Env, v: Term):
     return _OPAQUE
 
 
+def is_opaque_type(env: Env, ty: Optional[Term]) -> bool:
+    """A type declared `T : U := extern "..."`: its values are Python objects that pass through
+    Luthier untouched; only externs operate on them."""
+    if ty is None:
+        return False
+    head, _ = unapply(ty)
+    if not isinstance(head, Var):
+        return False
+    d = env.defs.get(head.name)
+    return d is not None and isinstance(d.body, Extern) and isinstance(d.type, Univ)
+
+
 def from_python(env: Env, x, ty: Optional[Term]) -> Term:
     """Marshal a Python value into a Luthier value, guided by the declared type when given."""
+    if is_opaque_type(env, ty):
+        return Lit(x)
     head = None
     targs = []
     if ty is not None:

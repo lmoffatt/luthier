@@ -179,6 +179,10 @@ class Checker:
                 if ty is None:
                     self.err(f"extern {qname} needs a type")
                 ext = Extern(d.body.target, ty)
+                if isinstance(self.whnf(ty), Univ):
+                    # an opaque type: values are Python objects, handled only by externs
+                    self.env.defs[qname] = Def(qname, ty, ext, doc=d.doc)
+                    return
                 self.register_extern(d.body.target, ty)
                 self.env.defs[qname] = Def(qname, ty, ext, doc=d.doc)
                 w = self.whnf(ty)

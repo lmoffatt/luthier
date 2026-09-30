@@ -50,7 +50,13 @@ def pp(t, prec: int = 0) -> str:
     if isinstance(t, Con):
         return t.name
     if isinstance(t, Lit):
-        return repr(t.value) if isinstance(t.value, str) else str(t.value)
+        v = t.value
+        if isinstance(v, str):
+            return repr(v)
+        if isinstance(v, (int, float)):
+            return str(v)
+        shape = getattr(v, "shape", None)
+        return f"<{type(v).__name__}{' ' + str(shape) if shape is not None else ''}>"
     if isinstance(t, Univ):
         return "U"
     if isinstance(t, Extern):

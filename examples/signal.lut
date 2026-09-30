@@ -1,0 +1,24 @@
+-- An opaque type: numpy arrays pass through Luthier untouched; only externs operate on them.
+-- The law is about the environment's FFT: inverting it recovers the signal within tolerance.
+
+import "real"
+
+Signal : U := extern "python:numpy.ndarray"
+
+fft   : Signal -> Signal := extern "python:numpy.fft.fft"
+ifft  : Signal -> Signal := extern "python:numpy.fft.ifft"
+realPart : Signal -> Signal := extern "python:numpy.real"
+minus : Signal -> Signal -> Signal := extern "python:numpy.subtract"
+absS  : Signal -> Signal := extern "python:numpy.abs"
+maxS  : Signal -> R := extern "python:numpy.max"
+
+-- distance between two signals: the largest pointwise difference
+dist (a b : Signal) : R := maxS (absS (minus a b))
+
+Invertible : U := { f : Signal -> Signal | \ (x : Signal) { dist (realPart (ifft (f x))) x < 0.000000001 } }
+fftInvertible : Invertible := fft
+
+-- the generator lives in Python because the values do
+gen Signal := extern "python:luthier.pygen.normal_signal"
+
+test fftInvertible with 50

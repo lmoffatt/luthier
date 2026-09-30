@@ -385,3 +385,15 @@ twice (a : Small) : Int := a + a
         load([str(bad)])
     assert "type error" in str(e.value)
 
+
+
+# ------------------------------------------------------------------ opaque types
+
+def test_opaque_type_values_pass_through_and_externs_operate():
+    pytest.importorskip("numpy")
+    ck = load_example("signal.lut")
+    gens = gens_for(ck)
+    r = run_test(ck, gens, "fftInvertible", n=10, seed=1, deep=True)
+    assert r.passed and r.laws[0].cases == 10
+    assert r.laws[0].domains == ["Signal: registered Python generator, size up to 16"]
+    assert r.laws[0].sample_cases[0].startswith("x = <ndarray (")
