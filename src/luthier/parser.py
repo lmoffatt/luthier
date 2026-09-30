@@ -29,25 +29,40 @@ class Parser:
     def __init__(self, src: str):
         self.toks = tokenize(src)
         self.i = 0
-        self.skip_newlines = 0  # depth counter: inside (), {}, [] newlines are ignored
-        self.no_brace = 0       # while > 0, '{' does not start an atom (match scrutinee)
+        self.skip_newlines = 0    # depth counter: inside (), {}, [] newlines are ignored
+        self.strict_newlines = 0  # while > 0, a newline always ends the current phrase (subtype components)
+        self.no_brace = 0         # while > 0, '{' does not start an atom (match scrutinee)
 
     # ------------------------------------------------------------ helpers
+    def _skippable_newline(self, j: int) -> bool:
+        """A newline is skipped inside brackets, or at top level when the next line is indented
+        (a continuation of the same definition). Never in strict mode."""
+        if self.toks[j].kind != "newline":
+            return False
+        if self.skip_newlines > 0:
+            return True
+        if self.strict_newlines > 0:
+            return False
+        k = j
+        while self.toks[k].kind == "newline":
+            k += 1
+        return self.toks[k].kind != "eof" and self.toks[k].col > 0
+
     def peek(self, k=0) -> Token:
         j = self.i
         seen = 0
         while True:
-            t = self.toks[j]
-            if t.kind == "newline" and self.skip_newlines > 0:
+            if self._skippable_newline(j):
                 j += 1
                 continue
+            t = self.toks[j]
             if seen == k:
                 return t
             seen += 1
             j += 1
 
     def next(self) -> Token:
-        while self.toks[self.i].kind == "newline" and self.skip_newlines > 0:
+        while self._skippable_newline(self.i):
             self.i += 1
         t = self.toks[self.i]
         self.i += 1
@@ -97,15 +112,18 @@ class Parser:
     def parse_test(self) -> TestDirective:
         self.expect("keyword", "test")
         name = self.expect("name").text
-        n, exhaustive = 100, False
+        n, exhaustive, size = 100, False, None
         if self.at_kw("with"):
             self.next()
             n = int(self.expect("number").text)
         elif self.at_kw("exhaustive"):
             self.next()
             exhaustive = True
+        if self.at("name") and self.peek().text == "size":
+            self.next()
+            size = int(self.expect("number").text)
         self.end_of_block()
-        return TestDirective(name, n, exhaustive)
+        return TestDirective(name, n, exhaustive, size)
 
     def parse_import(self) -> ImportDirective:
         t = self.expect("keyword", "import")
@@ -121,10 +139,14 @@ class Parser:
         self.expect("keyword", "gen")
         tname = self.expect("name").text
         self.expect("symbol", ":=")
-        self.expect("keyword", "extern")
-        target = self.expect("string").text[1:-1]
+        if self.at_kw("extern"):
+            self.next()
+            target = self.expect("string").text[1:-1]
+            self.end_of_block()
+            return GenDirective(tname, target=target)
+        term = self.parse_term()
         self.end_of_block()
-        return GenDirective(tname, target)
+        return GenDirective(tname, term=term)
 
     def end_of_block(self):
         """A block ends at a newline followed by a token at column 0 (or eof)."""
@@ -451,6 +473,7 @@ class Parser:
         self.expect("symbol", "{")
         saved = self.skip_newlines
         self.skip_newlines = 0
+        self.strict_newlines += 1
         self._skip_raw_newlines()
         groups = []  # list of (names, type)
         while True:
@@ -470,6 +493,7 @@ class Parser:
             if self.at("name"):
                 continue
             self.err("expected another component or '|' in a subtype")
+        self.strict_newlines -= 1
         self.expect("symbol", "|")
         self.skip_newlines = saved + 1
         pred = self.parse_term()

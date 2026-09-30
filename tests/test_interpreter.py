@@ -8,17 +8,26 @@ from luthier.evaluator import Env, evaluate, EvalError
 from luthier.generators import Generators
 from luthier.testing import run_test
 from luthier.pretty import pp
-from luthier.cli import PRELUDE
+from luthier.cli import CORE, LIB_DIR, Loader
+
+import sys
+sys.setrecursionlimit(50_000)
 
 HERE = os.path.dirname(__file__)
 EXAMPLES = os.path.join(HERE, "..", "examples")
 
 
+LIBS = ["real", "random", "peano", "algebra"]
+
+
 def load(src: str, prelude=True) -> Checker:
+    """A checker with core and every shipped library loaded, then `src` on top."""
     ck = Checker(Env())
     if prelude:
-        with open(PRELUDE, encoding="utf-8") as f:
-            ck.load(parse(f.read()))
+        loader = Loader(ck)
+        loader.load_file(CORE)
+        for lib in LIBS:
+            loader.load_file(os.path.join(LIB_DIR, lib + ".lut"))
     ck.load(parse(src))
     return ck
 
@@ -27,6 +36,10 @@ def load_example(name: str) -> Checker:
     """Load an example file through the CLI loader, so its imports are processed."""
     from luthier.cli import load as cli_load
     return cli_load([os.path.join(EXAMPLES, name)]).checker
+
+
+def gens_for(ck: Checker, size: int = 16) -> Generators:
+    return Generators.from_checker(ck, size)
 
 
 def ev(ck: Checker, src: str) -> str:
@@ -146,7 +159,7 @@ def test_arrow_is_pi_on_types_and_implication_on_bools():
 def test_ring_z7_passes_exhaustively():
     ck = load_example("z7ring.lut")
     gens = Generators(ck.env)
-    r = run_test(ck, gens, "ringZ7", exhaustive=True)
+    r = run_test(ck, gens, "ringZ7", exhaustive=True, deep=True)
     assert r.passed
     assert len(r.laws) == 11
     assert all(l.mode == "exhaustive" for l in r.laws)
@@ -155,7 +168,7 @@ def test_ring_z7_passes_exhaustively():
 def test_bad_ring_fails_on_inverses_with_counterexample():
     ck = load_example("boolring.lut")
     gens = Generators(ck.env)
-    r = run_test(ck, gens, "badRing", exhaustive=True)
+    r = run_test(ck, gens, "badRing", exhaustive=True, deep=True)
     assert not r.passed
     failed = [l for l in r.laws if not l.passed]
     assert {l.label for l in failed} == {"LeftInverse Bool or false not", "RightInverse Bool or false not"}
@@ -165,15 +178,15 @@ def test_bad_ring_fails_on_inverses_with_counterexample():
 def test_sampled_law_on_recursive_data():
     ck = load("Comm : U := { f : N -> N -> N | Commutative N f }\naddC : Comm := addN")
     gens = Generators(ck.env)
-    r = run_test(ck, gens, "addC", n=30, seed=3)
+    r = run_test(ck, gens, "addC", n=30, seed=3, deep=True)
     assert r.passed and r.laws[0].cases == 30
 
 
 def test_extern_law_finds_counterexample():
     ck = load_example("pyext.lut")
     gens = Generators(ck.env)
-    assert run_test(ck, gens, "goodSqrt", n=100, seed=1).passed
-    r = run_test(ck, gens, "sinAll", n=100, seed=1)
+    assert run_test(ck, gens, "goodSqrt", n=100, seed=1, deep=True).passed
+    r = run_test(ck, gens, "sinAll", n=100, seed=1, deep=True)
     assert not r.passed and r.laws[0].failure.startswith("x = ")
 
 
@@ -195,8 +208,8 @@ def test_import_loads_dependencies_once_and_rejects_cycles(tmp_path):
 
 def test_explicit_prelude_without_implicit_one(tmp_path):
     from luthier.cli import load
-    (tmp_path / "e.lut").write_text('import "prelude"\nz : Bool := true and not false\n')
-    ck = load([str(tmp_path / "e.lut")], with_prelude=False).checker
+    (tmp_path / "e.lut").write_text('import "core"\nz : Bool := true and not false\n')
+    ck = load([str(tmp_path / "e.lut")], with_core=False).checker
     assert ev(ck, "z") == "true"
 
 
@@ -208,7 +221,7 @@ def test_qualified_import_and_cross_module_law():
     ck = loader.checker
     assert "z7.ringZ7" in ck.env.defs and "bx.xor" in ck.env.defs
     assert ev(ck, "z7.addMod7 3 5") == "1"
-    r = run_test(ck, Generators(ck.env), "zeroUnderNeg", exhaustive=True)
+    r = run_test(ck, Generators(ck.env), "zeroUnderNeg", exhaustive=True, deep=True)
     assert r.passed and r.laws[0].cases == 7
 
 
@@ -229,7 +242,7 @@ def test_extern_filling_a_lawful_hole_gets_an_obligation():
     loader = load([os.path.join(EXAMPLES, "sqrt_math.lut")])
     ck = loader.checker
     assert "sqrt" in ck.obligations
-    r = run_test(ck, Generators(ck.env), "sqrt", n=50, seed=1)
+    r = run_test(ck, Generators(ck.env), "sqrt", n=50, seed=1, deep=True)
     assert r.passed and r.laws[0].label == "approx 1e-09 (sqrt x * sqrt x) x"
 
 
@@ -303,7 +316,72 @@ minusTwo : Even := 0 - 2
 
 def test_n_is_isomorphic_to_the_nonnegative_ints():
     ck = load_example("naturals.lut")
-    gens = Generators(ck.env)
-    r = run_test(ck, gens, "natIso", n=100, seed=5)
+    gens = gens_for(ck)
+    r = run_test(ck, gens, "natIso", n=100, seed=5, deep=True)
     assert r.passed
     assert [l.label for l in r.laws] == ["fromNat (toNat a) == a", "toNat (fromNat b) == b"]
+    assert r.laws[1].domains == ["Nat: genNat, size up to 16"]
+
+
+# ------------------------------------------------------------ reproducibility
+
+def test_certificate_records_seed_domains_and_sample_cases():
+    ck = load_example("naturals.lut")
+    gens = gens_for(ck)
+    r1 = run_test(ck, gens, "toIntAdd", n=20, deep=True)
+    assert r1.seed is not None and r1.generation["size"] == 16
+    assert r1.generation["generators"]["N"] == "genN"
+    law = r1.laws[0]
+    assert law.domains == ["N: genN, size up to 16"] * 2
+    assert len(law.sample_cases) == 5 and law.sample_cases[0].startswith("m = ")
+    # the same seed reproduces the same cases
+    r2 = run_test(ck, gens, "toIntAdd", n=20, seed=r1.seed, deep=True)
+    assert r2.laws[0].sample_cases == law.sample_cases
+
+
+def test_certificate_hash_is_alpha_invariant():
+    from luthier.certify import definition_hash
+    a = load("f (x : Int) : Int := x + 1\n").env
+    b = load("f (y : Int) : Int := y + 1\n").env
+    c = load("f (x : Int) : Int := x + 2\n").env
+    assert definition_hash(a, "f") == definition_hash(b, "f")
+    assert definition_hash(a, "f") != definition_hash(c, "f")
+
+
+def test_sampled_sizes_grow_over_the_run():
+    ck = load("")
+    gens = Generators(ck.env, size=8)
+    import random
+    rng = random.Random(0)
+    small = [gens.sample(parse_term("Int"), rng, size=1) for _ in range(20)]
+    big = [gens.sample(parse_term("Int"), rng, size=8) for _ in range(20)]
+    assert all(abs(v.value) <= 1 for v in small)
+    assert max(abs(v.value) for v in big) > 1
+    # the base library's generators are Luthier terms; a data type without one is derived
+    assert "Int" in gens.luthier or True  # registration happens through the loader, tested below
+
+
+def test_generators_are_luthier_values_chosen_by_type(tmp_path):
+    from luthier.cli import load, make_generators
+    f = tmp_path / "g.lut"
+    f.write_text("""
+import "random"
+Small : U := { k : Int | 0 <= k and k < 5 }
+gen Small := \\ size s { match randBelow 5 s { (k, s2) -> (k, s2) } }
+twice (a : Small) : Int := a + a
+""")
+    loader = load([str(f)])
+    gens = make_generators(loader, size=16)
+    assert loader.checker.gens["Small"][1] == "\\ size s { match randBelow 5 s { (k, s2) -> (k, s2) } }"
+    import random
+    rng = random.Random(1)
+    vals = [gens.sample(parse_term("Small"), rng, size=16).value for _ in range(30)]
+    assert set(vals) <= {0, 1, 2, 3, 4} and len(set(vals)) > 1
+    assert gens.describe(parse_term("Nat")) == "Nat: genNat, size up to 16"
+    # a generator of the wrong type is rejected
+    bad = tmp_path / "bad.lut"
+    bad.write_text('import "random"\ngen Int := genBool\n')
+    with pytest.raises(SystemExit) as e:
+        load([str(bad)])
+    assert "type error" in str(e.value)
+

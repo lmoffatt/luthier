@@ -25,8 +25,8 @@ ringZ7: passed
 certificate: examples/z7ring.cert.json
 ```
 
-`Ring` is defined in the base library as a subtype with named components and
-the laws they satisfy. Declaring `ringZ7 : Ring Z7` records the obligation;
+`Ring` is defined in the `algebra` library as a subtype with named components
+and the laws they satisfy; the example starts with `import "algebra"`. Declaring `ringZ7 : Ring Z7` records the obligation;
 `test` runs it and writes the certificate. A wrong implementation fails with a
 counterexample:
 
@@ -50,7 +50,8 @@ pytest
 ## Layout
 
 - `src/luthier/` the interpreter: lexer, parser, checker, evaluator, generators, testing, cli
-- `src/luthier/prelude.lut` the base library, written in Luthier
+- `src/luthier/core.lut` the twenty lines the interpreter refers to by name (Bool, List, Maybe, Unit, Nat), loaded implicitly
+- `src/luthier/lib/` libraries written in Luthier, imported on demand: `real`, `random`, `peano`, `algebra`
 - `examples/` programs with their `test` directives
 - `docs/semantica/` the design: core elements, the subtype pattern, the grammar
 - `docs/audios/`, `docs/ideas/` the voice notes the design was distilled from
@@ -67,9 +68,19 @@ file imports it and fills it (`sqrt := extern "python:math.sqrt"`), inheriting
 the laws as obligations. `luthier test` writes a certificate with a hash of each
 definition's dependency cone; importing a file accepts entries whose hash still
 matches, so certified libraries are not rerun unless you pass `--deep`.
-`luthier check -v` shows what is certified, stale or pending. Imports are
-searched next to the importing file, then in `LUTHIER_PATH`, then in the base
-library. See `docs/semantica/03-librerias.md`.
+`luthier check -v` shows what is certified, stale or pending. Every run draws
+a seed and records it in the certificate, together with the generators used
+for each variable, the size reached and the first few cases, so
+`luthier test file.lut --seed N` repeats a run exactly; `--show-cases` prints
+every case as it is evaluated.
+
+Generators are Luthier values: `Gen A` is a function from a size and a seed to
+a value and the next seed; `import "random"` brings them for `Int`, `Nat`,
+`Bool` and `R` (`peano` adds `N`), and `gen T := term` picks one for a type. One parameter,
+`--size` (or `test x with n size k`), bounds every generated value and grows
+over a run. Imports are
+searched next to the importing file, then in `LUTHIER_PATH`, then in the
+shipped `lib/`. See `docs/semantica/03-librerias.md`.
 
 ## What is in version 0
 

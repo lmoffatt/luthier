@@ -1,13 +1,10 @@
 -- Functions from the Python environment, with the laws we believe they satisfy.
 
+import "real"
+
 sqrt : R -> R := extern "python:math.sqrt"
 sin  : R -> R := extern "python:math.sin"
 asin : R -> R := extern "python:math.asin"
-abs  : R -> R := extern "python:builtins.abs"
-
-approx (tol a b : R) : Bool := abs (a - b) < tol
-
-Positive : U := { x : R | x >= 0.0 }
 
 -- sqrt is an inverse of squaring, within tolerance, on the positive reals
 sqrtInverse (x : Positive) : Bool := approx 0.000000001 (sqrt x * sqrt x) x
@@ -15,9 +12,15 @@ sqrtInverse (x : Positive) : Bool := approx 0.000000001 (sqrt x * sqrt x) x
 SqrtLaw : U := { f : R -> R | \ (x : Positive) { approx 0.000000001 (f x * f x) x } }
 goodSqrt : SqrtLaw := sqrt
 
--- asin (sin x) == x only on [-pi/2, pi/2]; on all of R this must fail
+-- asin (sin x) == x only on [-pi/2, pi/2]. Stated on all of R the law is false and the test
+-- finds it at the edge; stated on the principal branch, the same function passes.
 SinInverse : U := { f : R -> R | \ (x : R) { approx 0.000001 (asin (f x)) x } }
 sinAll : SinInverse := sin
 
+Branch : U := { x : R | 0.0 - 1.5707963 <= x and x <= 1.5707963 }
+SinInverseOnBranch : U := { f : R -> R | \ (x : Branch) { approx 0.000001 (asin (f x)) x } }
+sinBranch : SinInverseOnBranch := sin
+
 test goodSqrt with 200
 test sinAll with 200
+test sinBranch with 200

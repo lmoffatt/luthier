@@ -20,15 +20,20 @@ from .generators import Generators, GenError
 from .certify import definition_hash, write_certificate  # noqa: F401 (re-export)
 
 
+SAMPLE_CASES = 5
+
+
 @dataclass
 class LawResult:
     label: str
     params: list            # ["x : Z7", ...]
-    mode: str               # "exhaustive" | "sampled"
+    mode: str               # "exhaustive" | "sampled" | "certified"
     cases: int
     passed: bool
     failure: Optional[str] = None   # counterexample, as text
     error: Optional[str] = None     # evaluation or generation error
+    domains: list = field(default_factory=list)       # how each parameter was generated
+    sample_cases: list = field(default_factory=list)  # the first few cases evaluated, as text
 
 
 @dataclass
@@ -38,6 +43,9 @@ class TestReport:
     when: str = ""
     hash: str = ""
     certified: bool = False   # taken from a certificate whose hash still matches, not rerun
+    seed: Optional[int] = None
+    run_seed: Optional[int] = None   # the run's seed this definition's seed was derived from
+    generation: dict = field(default_factory=dict)
 
     @property
     def passed(self) -> bool:
@@ -55,6 +63,8 @@ class TestReport:
         verdict = "passed" if self.passed else ("no laws" if not self.laws else "FAILED")
         if self.certified:
             verdict += f" (certified {self.when}, hash {self.hash}; not rerun)"
+        elif self.seed is not None and self.run_seed is None:
+            verdict += f"  [seed {self.seed}]"
         return f"{self.definition}: {verdict}\n" + "\n".join(lines)
 
 
@@ -114,13 +124,31 @@ def _split_and(env: Env, t: Term) -> list:
 
 
 def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
-            exhaustive: bool, rng: random.Random) -> LawResult:
+            exhaustive: bool, rng: random.Random, show_cases: bool = False,
+            size: Optional[int] = None) -> LawResult:
     env = checker.env
+    if size is None:
+        size = gens.size
     try:
         params, body = peel(checker, law)
     except Exception as e:
         return LawResult(label, [], "sampled", 0, False, error=f"cannot type the law: {e}")
     param_txt = [f"{n_} : {pp(t)}" for n_, t in params]
+    try:
+        domains = [gens.describe(t, size) for _, t in params]
+    except Exception:
+        domains = []
+    samples: list = []
+
+    def record(values):
+        txt = show(values)
+        if len(samples) < SAMPLE_CASES:
+            samples.append(txt)
+        if show_cases:
+            print(f"       case {cases}: {txt}")
+
+    def result(mode, cases, passed, failure=None, error=None):
+        return LawResult(label, param_txt, mode, cases, passed, failure, error, domains, samples)
 
     def evaluate(values) -> Optional[bool]:
         t = law
@@ -140,6 +168,7 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
             nonlocal cases
             if i == len(params):
                 cases += 1
+                record(acc)
                 b, r = evaluate(acc)
                 if b is None:
                     raise EvalError(f"did not reduce to a Bool on ({show(acc)}): {pp(r)}")
@@ -148,7 +177,7 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
                 return None
             name, ty = params[i]
             ty_i = subst(ty, {p: v for (p, _), v in zip(params, acc)})
-            vals = gens.enumerate(ty_i)
+            vals = gens.enumerate(ty_i, size)
             if vals is None:
                 raise GenError(f"{pp(ty_i)} is not finitely enumerable; use `with n`")
             for v in vals:
@@ -159,34 +188,43 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
         try:
             bad = rec(0, [])
         except (GenError, EvalError) as e:
-            return LawResult(label, param_txt, "exhaustive", cases, False, error=str(e))
+            return result("exhaustive", cases, False, error=str(e))
         if bad is not None:
-            return LawResult(label, param_txt, "exhaustive", cases, False, failure=show(bad))
-        return LawResult(label, param_txt, "exhaustive", cases, True)
+            return result("exhaustive", cases, False, failure=show(bad))
+        return result("exhaustive", cases, True)
     try:
-        for _ in range(n):
+        for i in range(n):
+            # size grows with the case number: small cases first, so a counterexample is minimal
+            size_i = 1 + (i * size) // max(n, 1)
             values = []
             for (name, ty) in params:
                 ty_i = subst(ty, {p: v for (p, _), v in zip(params, values)})
-                values.append(gens.sample(ty_i, rng))
+                values.append(gens.sample(ty_i, rng, size_i))
             cases += 1
+            record(values)
             b, r = evaluate(values)
             if b is None:
-                return LawResult(label, param_txt, "sampled", cases, False,
-                                 error=f"did not reduce to a Bool on ({show(values)}): {pp(r)}")
+                return result("sampled", cases, False,
+                              error=f"did not reduce to a Bool on ({show(values)}): {pp(r)}")
             if b is False:
-                return LawResult(label, param_txt, "sampled", cases, False, failure=show(values))
+                return result("sampled", cases, False, failure=show(values))
     except (GenError, EvalError) as e:
-        return LawResult(label, param_txt, "sampled", cases, False, error=str(e))
-    return LawResult(label, param_txt, "sampled", cases, True)
+        return result("sampled", cases, False, error=str(e))
+    return result("sampled", cases, True)
 
 
 def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
              exhaustive: bool = False, seed: Optional[int] = None, deep: bool = False,
-             prefix: str = "") -> TestReport:
-    """`deep=False` accepts a certificate whose hash matches instead of rerunning."""
+             prefix: str = "", show_cases: bool = False, size: Optional[int] = None) -> TestReport:
+    """`deep=False` accepts a certificate whose hash matches instead of rerunning.
+    Without a seed one is drawn and recorded, so the run can be repeated from the certificate."""
+    if seed is None:
+        seed = random.randrange(2 ** 31)
     rng = random.Random(seed)
-    report = TestReport(name, when=time.strftime("%Y-%m-%dT%H:%M:%S"))
+    generation = dict(gens.generation())
+    if size is not None:
+        generation["size"] = size
+    report = TestReport(name, when=time.strftime("%Y-%m-%dT%H:%M:%S"), seed=seed, generation=generation)
     if name not in checker.env.defs:
         report.laws.append(LawResult(name, [], "sampled", 0, False, error="no such definition"))
         return report
@@ -195,10 +233,13 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
     if entry is not None and not deep:
         report.certified = True
         report.when = entry.get("when", "")
+        report.seed = entry.get("seed")
+        report.generation = entry.get("generation", {})
         for l in entry.get("laws", []):
             report.laws.append(LawResult(l["label"], l.get("params", []), "certified",
                                          l.get("cases", 0), l.get("passed", False),
-                                         l.get("failure"), l.get("error")))
+                                         l.get("failure"), l.get("error"),
+                                         l.get("domains", []), l.get("sample_cases", [])))
         return report
     for ob in checker.obligations.get(name, []):
         try:
@@ -207,7 +248,7 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
             report.laws.append(LawResult(ob.label, [], "sampled", 0, False, error=f"cannot flatten: {e}"))
             continue
         for label, closed in pieces:
-            report.laws.append(run_law(checker, gens, label, closed, n, exhaustive, rng))
+            report.laws.append(run_law(checker, gens, label, closed, n, exhaustive, rng, show_cases, size))
     return report
 
 

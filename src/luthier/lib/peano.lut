@@ -1,0 +1,25 @@
+-- The conceptual naturals, built from nothing: the ones that reduce by hand.
+-- Int is the machine's integer. They are two representations of one idea, related by
+-- functions with laws (see examples/naturals.lut), not by a subtype.
+
+import "random"
+
+N : U := data { zero : N ; succ : N -> N }
+
+addN (m n : N) : N
+  | m, zero   := m
+  | m, succ k := succ (addN m k)
+
+mulN (m n : N) : N
+  | m, zero   := zero
+  | m, succ k := addN (mulN m k) m
+
+toInt (n : N) : Int
+  | zero   := 0
+  | succ k := 1 + toInt k
+
+-- total on Int: negatives go to zero. The laws that make it an inverse of toInt live on Nat.
+fromInt (k : Int) : N := if k <= 0 then zero else succ (fromInt (k - 1))
+
+genN : Gen N := \ size s { match genIntBetween 0 size size s { (k, s2) -> (fromInt k, s2) } }
+gen N := genN

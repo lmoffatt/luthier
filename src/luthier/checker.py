@@ -69,6 +69,7 @@ class Checker:
         self.prefix: str = ""          # module prefix of the file being loaded ("" at top level)
         self.recording: bool = True    # whether checks against subtypes record obligations
         self.certified: dict = {}      # qualified name -> certificate entry accepted at import
+        self.gens: dict = {}           # qualified type name -> ("luthier", label, term) | ("extern", target, None)
 
     # ----------------------------------------------------------- namespaces
     def qualify(self, name: str) -> str:
@@ -126,7 +127,26 @@ class Checker:
         for d in prog.defs:
             self.add_def(d)
         for g in prog.gens:
-            pass  # generators are registered by the test runner
+            self.add_gen(g)
+
+    def add_gen(self, g: GenDirective):
+        """`gen T := term`: the term must be a `Gen T`. Recorded by the qualified type name."""
+        q = self.resolve(g.type_name)
+        if q is None:
+            self.err(f"gen: unknown type {g.type_name}")
+        if g.term is None:
+            self.gens[q] = ("extern", g.target, None)
+            return
+        if self.resolve("Gen") is None:
+            self.err('gen: `Gen` is not in scope; add `import "random"`')
+        want = App(Var(self.resolve("Gen")), Var(q))
+        self.current_def = f"gen {q}"
+        try:
+            with self.silent():
+                term = self.check([], g.term, want)
+        finally:
+            self.current_def = None
+        self.gens[q] = ("luthier", pp(g.term), term)
 
     def add_def(self, d: Def):
         qname = self.qualify(d.name)
@@ -454,14 +474,24 @@ class Checker:
         return False
 
     def coerce(self, ctx: Ctx, term: Term, have: Term, want: Term) -> Term:
-        cur = have
-        for _ in range(32):
-            if self.conv(cur, want):
-                return term
-            b = self.strip_subtype(cur)
-            if b is None:
-                break
-            cur = b
+        """Accept `term : have` where `want` is expected: equal types, a subtype seen in its base
+        (forget), a base seen in a subtype (an obligation), or pairs of those, component by component."""
+        if self.convertible(have, want):
+            return term
+        w = self.whnf(want)
+        if isinstance(w, Subtype):
+            inner = self.coerce(ctx, term, have, w.base)
+            self.subtype_obligation(ctx, inner, w, want)
+            return inner
+        hw = self.whnf(self.base_type(have))
+        if isinstance(w, Sigma) and isinstance(hw, Sigma):
+            # project with a match and coerce each component; the obligations fall on the projections
+            pat = PPair(PVar("p1"), PVar("p2"))
+            fst = Match(term, ((pat, Var("p1")),))
+            snd = Match(term, ((pat, Var("p2")),))
+            self.coerce(ctx, fst, hw.fst, w.fst)
+            self.coerce(ctx, snd, subst(hw.snd, {hw.name: fst}), subst(w.snd, {w.name: fst}))
+            return term
         self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected")
 
     def subtype_obligation(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):

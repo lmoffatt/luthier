@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import importlib
 import os
+import random
 import sys
 
 from .parser import parse, parse_term, ParseError
@@ -14,8 +15,10 @@ from .testing import run_test
 from .certify import cert_path, read_certificate, write_certificate, definition_hash
 from .pretty import pp
 
-PRELUDE_DIR = os.path.dirname(__file__)
-PRELUDE = os.path.join(PRELUDE_DIR, "prelude.lut")
+PACKAGE_DIR = os.path.dirname(__file__)
+CORE = os.path.join(PACKAGE_DIR, "core.lut")          # loaded implicitly
+LIB_DIR = os.path.join(PACKAGE_DIR, "lib")            # `import "algebra"`, `import "random"`, ...
+PRELUDE = CORE  # old name
 
 
 def search_dirs(importer: str) -> list:
@@ -23,7 +26,8 @@ def search_dirs(importer: str) -> list:
     for d in os.environ.get("LUTHIER_PATH", "").split(os.pathsep):
         if d:
             dirs.append(d)
-    dirs.append(PRELUDE_DIR)
+    dirs.append(LIB_DIR)
+    dirs.append(PACKAGE_DIR)   # `import "core"` when running with --no-core
     return dirs
 
 
@@ -39,6 +43,13 @@ def resolve_import(path: str, importer: str) -> str:
 
 def qualify(prefix: str, name: str) -> str:
     return f"{prefix}.{name}" if prefix else name
+
+
+def derive_seed(run_seed: int, name: str) -> int:
+    """Each definition gets its own seed, derived from the run's, so one number repeats the run."""
+    import hashlib
+    h = hashlib.sha256(f"{run_seed}:{name}".encode()).digest()
+    return int.from_bytes(h[:4], "big") % (2 ** 31)
 
 
 class Loader:
@@ -85,7 +96,7 @@ class Loader:
         for d in prog.defs:
             self.origin[qualify(prefix, d.name)] = (path, prefix, d.name)
         for t in prog.tests:
-            self.tests.append((qualify(prefix, t.name), t.n, t.exhaustive, top))
+            self.tests.append((qualify(prefix, t.name), t.n, t.exhaustive, t.size, top))
         self.accept_certificate(path, prefix)
         self.stack.pop()
         self.loaded.add(key)
@@ -106,41 +117,36 @@ class Loader:
         return [(p, pre, path) for p, pre, top, path in self.programs if top]
 
 
-def load(paths: list, with_prelude: bool = True) -> Loader:
+def load(paths: list, with_core: bool = True) -> Loader:
     checker = Checker(Env())
     loader = Loader(checker)
-    if with_prelude:
-        loader.load_file(PRELUDE)
+    if with_core:
+        loader.load_file(CORE)
     for path in paths:
         loader.load_file(path, top=True)
     return loader
 
 
-def make_generators(loader: Loader, int_range) -> Generators:
-    gens = Generators(loader.checker.env, int_range=int_range)
-    for prog, prefix, _, _ in loader.programs:
-        for g in prog.gens:
-            spec = g.target.split(":", 1)[1] if g.target.startswith("python:") else g.target
-            if ":" in spec:
-                mod, attr = spec.split(":", 1)
-            else:
-                mod, _, attr = spec.rpartition(".")
-            fn = importlib.import_module(mod)
-            for part in attr.split("."):
-                fn = getattr(fn, part)
-            gens.register(qualify(prefix, g.type_name), fn)
-    return gens
+def make_generators(loader: Loader, size: int = 16) -> Generators:
+    return Generators.from_checker(loader.checker, size)
 
 
 def cmd_check(args):
-    loader = load(args.files, not args.no_prelude)
+    loader = load(args.files, not args.no_core)
     ck = loader.checker
     n_defs = sum(len(p.defs) for p, _, _ in loader.top_programs())
-    pending = [q for q in ck.obligations if q not in ck.certified]
-    print(f"ok: {n_defs} definitions, {len(ck.obligations)} with laws, "
-          f"{len(ck.certified)} certified, {len(pending)} pending test")
+    package = os.path.abspath(PACKAGE_DIR)
+
+    def shown(q):   # the shipped libraries' own certified laws are not the user's business
+        path = loader.origin.get(q, ("",))[0]
+        return not (path.startswith(package) and q in ck.certified)
+    obligations = {q: o for q, o in ck.obligations.items() if shown(q)}
+    certified = [q for q in obligations if q in ck.certified]
+    pending = [q for q in obligations if q not in ck.certified]
+    print(f"ok: {n_defs} definitions, {len(obligations)} with laws, "
+          f"{len(certified)} certified, {len(pending)} pending test")
     if args.verbose:
-        for q, obls in ck.obligations.items():
+        for q, obls in obligations.items():
             if q in ck.certified:
                 status = f"certified ({ck.certified[q].get('when', '')})"
             elif q in loader.stale:
@@ -153,36 +159,50 @@ def cmd_check(args):
 
 
 def cmd_test(args):
-    loader = load(args.files, not args.no_prelude)
+    loader = load(args.files, not args.no_core)
     ck = loader.checker
-    gens = make_generators(loader, (args.int_min, args.int_max))
+    gens = make_generators(loader, args.size)
     directives = []
     if args.name:
-        directives.append((args.name, args.n, args.exhaustive))
+        directives.append((args.name, args.n, args.exhaustive, args.size))
     else:
-        directives = [(q, args.n if args.n_given else n, ex or args.exhaustive)
-                      for q, n, ex, top in loader.tests if top]
+        directives = [(q, args.n if args.n_given else n, ex or args.exhaustive, sz or args.size)
+                      for q, n, ex, sz, top in loader.tests if top]
         if not directives:
             for prog, prefix, _ in loader.top_programs():
                 for d in prog.defs:
                     q = qualify(prefix, d.name)
                     if q in ck.obligations:
-                        directives.append((q, args.n, args.exhaustive))
+                        directives.append((q, args.n, args.exhaustive, args.size))
     reports = []
     ok = True
-    for name, n, exhaustive in directives:
+    run_seed = args.seed if args.seed is not None else random.randrange(2 ** 31)
+    if any(not ex for _, _, ex, _ in directives):
+        print(f"run seed {run_seed} (repeat with --seed {run_seed})")
+    for name, n, exhaustive, size in directives:
         path, prefix, _ = loader.origin.get(name, (None, "", name))
         is_top = any(p == path for _, _, p in loader.top_programs())
-        r = run_test(ck, gens, name, n=n, exhaustive=exhaustive, seed=args.seed,
-                     deep=args.deep or is_top, prefix=prefix)
+        if args.show_cases:
+            print(f"{name}:")
+        r = run_test(ck, gens, name, n=n, exhaustive=exhaustive, seed=derive_seed(run_seed, name),
+                     deep=args.deep or is_top, prefix=prefix, show_cases=args.show_cases, size=size)
+        r.run_seed = run_seed
         print(r.summary())
         reports.append(r)
         ok = ok and r.passed
-    imported_pending = [q for q in ck.obligations
-                        if q not in ck.certified and loader.origin.get(q, ("",))[0] not in
-                        {p for _, _, p in loader.top_programs()} and q not in {r.definition for r in reports}]
-    if imported_pending:
-        print("pending in imported files (run `luthier test` on them, or --deep): " + ", ".join(imported_pending))
+    tops = {p for _, _, p in loader.top_programs()}
+    done = {r.definition for r in reports}
+    by_file: dict = {}
+    for q in ck.obligations:
+        path = loader.origin.get(q, ("",))[0]
+        if q in ck.certified or path in tops or q in done or not path:
+            continue
+        by_file.setdefault(path, []).append(q)
+    for path, names in by_file.items():
+        state = "stale certificate" if any(q in loader.stale for q in names) else "no certificate"
+        rel = os.path.relpath(path)
+        print(f"imported, {state}: {', '.join(names)}\n"
+              f"  run `luthier test {rel}` to certify them, or add --deep to run them here")
     if reports and not args.no_cert:
         by_file: dict = {}
         for r in reports:
@@ -201,7 +221,7 @@ def cmd_test(args):
 
 
 def cmd_eval(args):
-    loader = load(args.files, not args.no_prelude)
+    loader = load(args.files, not args.no_core)
     ck = loader.checker
     try:
         t = parse_term(args.term)
@@ -221,7 +241,7 @@ def main(argv=None):
     p = sub.add_parser("check", help="parse and type-check .lut files")
     p.add_argument("files", nargs="+")
     p.add_argument("-v", "--verbose", action="store_true")
-    p.add_argument("--no-prelude", action="store_true", help="do not load the base library implicitly")
+    p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_check)
 
     p = sub.add_parser("test", help="run the laws of a definition")
@@ -230,23 +250,45 @@ def main(argv=None):
     p.add_argument("--n", type=int, default=100, help="sampled cases per law")
     p.add_argument("--exhaustive", action="store_true")
     p.add_argument("--seed", type=int, default=None)
-    p.add_argument("--int-min", type=int, default=-16)
-    p.add_argument("--int-max", type=int, default=16)
+    p.add_argument("--size", type=int, default=16,
+                   help="largest size of generated values (Int range, N magnitude, nesting); "
+                        "grows from 1 to this over a sampled run; the Int range for exhaustive")
     p.add_argument("--deep", action="store_true", help="rerun even where a matching certificate exists")
+    p.add_argument("--show-cases", action="store_true", help="print every case as it is evaluated")
     p.add_argument("--no-cert", action="store_true")
-    p.add_argument("--no-prelude", action="store_true", help="do not load the base library implicitly")
+    p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_test)
 
     p = sub.add_parser("eval", help="evaluate a term in the context of .lut files")
     p.add_argument("files", nargs="+")
     p.add_argument("term")
-    p.add_argument("--no-prelude", action="store_true", help="do not load the base library implicitly")
+    p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_eval)
 
     args = ap.parse_args(argv)
     raw = argv if argv is not None else sys.argv[1:]
     args.n_given = any(a == "--n" or a.startswith("--n=") for a in raw)
-    return args.fn(args)
+    return run_deep(lambda: args.fn(args))
+
+
+def run_deep(fn):
+    """The evaluator is recursive and unary naturals are deep: give it a big stack."""
+    import threading
+    result = {}
+
+    def target():
+        try:
+            sys.setrecursionlimit(200_000)
+            result["value"] = fn()
+        except BaseException as e:  # re-raised in the caller
+            result["error"] = e
+    threading.stack_size(512 * 1024 * 1024)
+    th = threading.Thread(target=target)
+    th.start()
+    th.join()
+    if "error" in result:
+        raise result["error"]
+    return result.get("value", 0)
 
 
 if __name__ == "__main__":

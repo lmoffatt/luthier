@@ -15,9 +15,9 @@ En versión 0 el módulo no se construye como valor Σ: se implementa por prefij
     import "x.lut"            -- plano: las definiciones entran al espacio del importador; colisión con cuerpo es error
     import "x.lut" as m       -- calificado: se alcanzan como m.f; sin colisiones
 
-Búsqueda: al lado del archivo que importa, después los directorios de `LUTHIER_PATH`, después la librería base. `.lut` es opcional. Importar dos veces bajo el mismo prefijo no hace nada; el mismo archivo puede cargarse bajo dos prefijos distintos. Un ciclo es error. El preludio se importa solo; con `--no-prelude` se escribe `import "prelude"`.
+Búsqueda: al lado del archivo que importa, después los directorios de `LUTHIER_PATH`, después `lib/` del paquete. `.lut` es opcional. Importar dos veces bajo el mismo prefijo no hace nada; el mismo archivo puede cargarse bajo dos prefijos distintos. Un ciclo es error. `core.lut` se importa solo; con `--no-core` se escribe `import "core"`.
 
-Resolución de nombres dentro de un módulo `m`: primero `m.x` (lo propio), después `x` (los globales: preludio y lo importado plano en la raíz). Un módulo no ve las definiciones de quien lo importa. Los constructores y los `data` se prefijan igual que las funciones.
+Resolución de nombres dentro de un módulo `m`: primero `m.x` (lo propio), después `x` (los globales: core y lo importado plano en la raíz). Un módulo no ve las definiciones de quien lo importa. Los constructores y los `data` se prefijan igual que las funciones.
 
 ## 3. Declaración e implementación: el hueco como parámetro
 

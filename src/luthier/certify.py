@@ -12,7 +12,7 @@ import os
 from dataclasses import asdict
 
 from .syntax import *
-from .subst import map_names
+from .subst import map_names, alpha_normalize
 from .pretty import pp
 from .evaluator import Env
 
@@ -69,21 +69,24 @@ def _strip(prefix: str):
 
 def canonical_text(env: Env, qname: str, prefix: str) -> str:
     strip = _strip(prefix)
+
+    def show(t: Term) -> str:
+        return pp(alpha_normalize(map_names(t, strip)))
     lines = []
     for n in sorted(cone(env, qname), key=strip):   # order by canonical name, so the prefix does not matter
         d = env.defs.get(n)
         if d is None:
             continue
-        ty = pp(map_names(d.type, strip)) if d.type is not None else "?"
+        ty = show(d.type) if d.type is not None else "?"
         if d.data is not None:
-            cons = " ; ".join(f"{strip(c.name)} : {pp(map_names(c.type, strip))}" for c in d.data.constructors)
+            cons = " ; ".join(f"{strip(c.name)} : {show(c.type)}" for c in d.data.constructors)
             body = "data { " + cons + " }"
         elif d.body is None:
             body = "?"
         elif isinstance(d.body, Extern):
             body = f'extern "{d.body.target}"'
         else:
-            body = pp(map_names(d.body, strip))
+            body = show(d.body)
         lines.append(f"{strip(n)} : {ty} := {body}")
     return "\n".join(lines)
 
@@ -113,6 +116,9 @@ def write_certificate(path: str, reports: list, names: dict):
             "hash": r.hash,
             "when": r.when,
             "passed": r.passed,
+            "seed": r.seed,
+            "run_seed": r.run_seed,
+            "generation": r.generation,
             "laws": [asdict(l) for l in r.laws],
         }
     with open(path, "w", encoding="utf-8") as f:

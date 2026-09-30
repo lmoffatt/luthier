@@ -199,12 +199,16 @@ class TestDirective:
     name: str
     n: int = 100
     exhaustive: bool = False
+    size: Optional[int] = None    # largest size of generated values; None: the runner's default
 
 
 @dataclass
 class GenDirective:
+    """`gen T := term` chooses a Luthier generator (of type Gen T) for values of T;
+    `gen T := extern "python:mod.fn"` a Python one, called as fn(rng, size)."""
     type_name: str
-    target: str
+    target: Optional[str] = None
+    term: Optional[Term] = None
 
 
 @dataclass

@@ -1,10 +1,7 @@
 -- A specification: the laws a square root must satisfy, with the function left as a hole.
 -- An implementation file imports this and fills the hole; the laws are then its obligations.
 
-abs : R -> R := extern "python:builtins.abs"
-approx (tol a b : R) : Bool := abs (a - b) < tol
-
-Positive : U := { x : R | x >= 0.0 }
+import "real"
 
 SquareRoot : U := { f : Positive -> R | \ (x : Positive) { approx 0.000000001 (f x * f x) x } }
 

@@ -94,13 +94,13 @@ def is_value(t: Term) -> bool:
     return is_con_value(t) or isinstance(t, (Lit, Pair, Lam, Pi, Sigma, Univ, Subtype))
 
 
-def match_pattern(env: Env, p: Pattern, v: Term, fuel) -> dict:
+def match_pattern(env: Env, p: Pattern, v: Term, fuel, unfold: bool = True) -> dict:
     """Bindings if whnf(v) matches p; raises NoMatch on a definite mismatch, Stuck on a neutral value."""
     if isinstance(p, PWild):
         return {}
     if isinstance(p, PVar):
         return {p.name: v}
-    v = whnf(env, v, fuel)
+    v = whnf(env, v, fuel, unfold)
     if isinstance(p, PLit):
         if isinstance(v, Lit):
             if v.value == p.value:
@@ -109,8 +109,8 @@ def match_pattern(env: Env, p: Pattern, v: Term, fuel) -> dict:
         raise Stuck() if not is_value(v) else NoMatch()
     if isinstance(p, PPair):
         if isinstance(v, Pair):
-            b = match_pattern(env, p.fst, v.fst, fuel)
-            b.update(match_pattern(env, p.snd, v.snd, fuel))
+            b = match_pattern(env, p.fst, v.fst, fuel, unfold)
+            b.update(match_pattern(env, p.snd, v.snd, fuel, unfold))
             return b
         raise Stuck() if not is_value(v) else NoMatch()
     if isinstance(p, PCon):
@@ -126,7 +126,7 @@ def match_pattern(env: Env, p: Pattern, v: Term, fuel) -> dict:
             raise NoMatch()
         b = {}
         for q, a in zip(p.args, args):
-            b.update(match_pattern(env, q, a, fuel))
+            b.update(match_pattern(env, q, a, fuel, unfold))
         return b
     raise TypeError(f"match_pattern: unknown pattern {p!r}")
 
@@ -151,7 +151,7 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
             head = whnf(env, head, fuel, unfold)
             if isinstance(head, Lam):
                 try:
-                    b = match_pattern(env, head.param, args[0], fuel)
+                    b = match_pattern(env, head.param, args[0], fuel, unfold)
                 except NoMatch:
                     raise EvalError(f"argument {pp(args[0])} does not match pattern of {pp(head)}")
                 except Stuck:
@@ -195,7 +195,7 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
             try:
                 for p, b in t.branches:
                     try:
-                        binds = match_pattern(env, p, s, fuel)
+                        binds = match_pattern(env, p, s, fuel, unfold)
                     except NoMatch:
                         continue
                     chosen = (b, binds)

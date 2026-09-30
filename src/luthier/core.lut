@@ -1,0 +1,21 @@
+-- Luthier core: the only definitions the interpreter itself refers to by name.
+-- Loaded implicitly. Everything else is a library under lib/, imported on demand.
+
+-- `==`, `<` and the other comparisons produce Bools; `a and b`, `a or b` and `p -> q` on Bools
+-- elaborate to these functions; `if` is a match on true and false; a law is Bool-valued.
+Bool : U := data { true : Bool ; false : Bool }
+
+not (b : Bool) : Bool := match b { true -> false ; false -> true }
+and (a b : Bool) : Bool := match a { true -> b ; false -> false }
+or (a b : Bool) : Bool := match a { true -> true ; false -> b }
+implies (a b : Bool) : Bool := match a { true -> b ; false -> true }
+
+-- the bridge with the environment marshals these
+Unit : U := data { unit : Unit }
+Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
+
+-- `[a, b, c]` is sugar for cons and nil
+List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
+
+-- the non-negative machine integer: the size of a generated value, among other things
+Nat : U := { k : Int | 0 <= k }

@@ -1,0 +1,45 @@
+{
+  "genNat": {
+    "hash": "baacf27b1069f5c4",
+    "when": "2026-09-30T20:11:51",
+    "passed": true,
+    "seed": 1596903682,
+    "run_seed": 11,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "0 <= match genIntBetween 0 size size s { (p1, p2) -> p1 }",
+        "params": [
+          "size : Nat",
+          "s : Int"
+        ],
+        "mode": "sampled",
+        "cases": 300,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Nat: genNat, size up to 16",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": [
+          "size = 1, s = 1",
+          "size = 0, s = 1",
+          "size = 1, s = 0",
+          "size = 0, s = -1",
+          "size = 0, s = 0"
+        ]
+      }
+    ]
+  }
+}

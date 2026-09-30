@@ -157,3 +157,77 @@ def map_names(t: Term, f) -> Term:
         return Match(map_names(t.scrut, f),
                      tuple((map_pattern_names(q, f), map_names(b, f)) for q, b in t.branches))
     raise TypeError(f"map_names: unknown term {t!r}")
+
+
+def alpha_normalize(t: Term) -> Term:
+    """Rename every bound variable to _0, _1, ... in traversal order, so two alpha-equivalent
+    terms print identically (used for certificate hashes)."""
+    counter = [0]
+
+    def fresh_name():
+        n = f"_{counter[0]}"
+        counter[0] += 1
+        return n
+
+    def go_pat(p: Pattern, env: dict) -> Pattern:
+        if isinstance(p, PVar):
+            new = fresh_name()
+            env[p.name] = new
+            return PVar(new)
+        if isinstance(p, PCon):
+            return PCon(p.name, tuple(go_pat(a, env) for a in p.args))
+        if isinstance(p, PPair):
+            return PPair(go_pat(p.fst, env), go_pat(p.snd, env))
+        return p
+
+    def go(t: Term, env: dict) -> Term:
+        if isinstance(t, Var):
+            return Var(env.get(t.name, t.name))
+        if isinstance(t, (Lit, Univ, Con, Extern)):
+            return t
+        if isinstance(t, App):
+            return App(go(t.fn, env), go(t.arg, env))
+        if isinstance(t, Pair):
+            return Pair(go(t.fst, env), go(t.snd, env))
+        if isinstance(t, Arrow):
+            return Arrow(go(t.lhs, env), go(t.rhs, env))
+        if isinstance(t, BinOp):
+            return BinOp(t.op, go(t.lhs, env), go(t.rhs, env))
+        if isinstance(t, And):
+            return And(go(t.lhs, env), go(t.rhs, env))
+        if isinstance(t, Forget):
+            return Forget(go(t.arg, env))
+        if isinstance(t, Lam):
+            ann = go(t.ann, env) if t.ann is not None else None
+            env2 = dict(env)
+            p = go_pat(t.param, env2)
+            return Lam(p, go(t.body, env2), ann)
+        if isinstance(t, Pi):
+            dom = go(t.dom, env)
+            env2 = dict(env)
+            name = t.name if t.name == "_" else fresh_name()
+            if t.name != "_":
+                env2[t.name] = name
+            return Pi(name, dom, go(t.cod, env2))
+        if isinstance(t, Sigma):
+            fst = go(t.fst, env)
+            env2 = dict(env)
+            name = t.name if t.name == "_" else fresh_name()
+            if t.name != "_":
+                env2[t.name] = name
+            return Sigma(name, fst, go(t.snd, env2))
+        if isinstance(t, Subtype):
+            base = go(t.base, env)
+            env2 = dict(env)
+            p = go_pat(t.param, env2)
+            return Subtype(p, base, go(t.pred, env2))
+        if isinstance(t, Match):
+            brs = []
+            for q, b in t.branches:
+                env2 = dict(env)
+                q2 = go_pat(q, env2)
+                brs.append((q2, go(b, env2)))
+            return Match(go(t.scrut, env), tuple(brs))
+        raise TypeError(f"alpha_normalize: unknown term {t!r}")
+
+    return go(t, {})

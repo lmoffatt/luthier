@@ -97,6 +97,6 @@ def pp(t, prec: int = 0) -> str:
         return "{ " + pp_pat(t.param) + " : " + pp(t.base) + " | " + pp(t.pred) + " }"
     if isinstance(t, Match):
         br = " ; ".join(pp_pat(p) + " -> " + pp(b) for p, b in t.branches)
-        s = "match " + pp(t.scrut, APP + 1) + " { " + br + " }"
+        s = "match " + pp(t.scrut, APP) + " { " + br + " }"
         return f"({s})" if prec > APP else s
     return repr(t)

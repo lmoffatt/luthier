@@ -1,0 +1,50 @@
+-- Laws over binary operations, and the structures built from them.
+-- The operation comes first, the quantified variables last, so a partial application
+-- is a predicate the test can fill.
+
+Associative   (A : U) (f : A -> A -> A) (x y z : A) : Bool := f (f x y) z == f x (f y z)
+Commutative   (A : U) (f : A -> A -> A) (x y : A)   : Bool := f x y == f y x
+LeftIdentity  (A : U) (f : A -> A -> A) (e : A) (x : A) : Bool := f e x == x
+RightIdentity (A : U) (f : A -> A -> A) (e : A) (x : A) : Bool := f x e == x
+LeftDistrib   (A : U) (f g : A -> A -> A) (x y z : A) : Bool := g x (f y z) == f (g x y) (g x z)
+RightDistrib  (A : U) (f g : A -> A -> A) (x y z : A) : Bool := g (f y z) x == f (g y x) (g z x)
+LeftInverse   (A : U) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := f (inv x) x == e
+RightInverse  (A : U) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := f x (inv x) == e
+
+Monoid (A : U) : U := {
+  op : A -> A -> A
+  e  : A
+  |
+  Associative A op & LeftIdentity A op e & RightIdentity A op e
+}
+
+Semiring (A : U) : U := {
+  add mul  : A -> A -> A
+  zero one : A
+  |
+  Associative A add & Commutative A add
+  & LeftIdentity A add zero & RightIdentity A add zero
+  & Associative A mul & LeftIdentity A mul one & RightIdentity A mul one
+  & LeftDistrib A add mul & RightDistrib A add mul
+}
+
+-- A ring is a semiring whose addition has inverses.
+Ring (A : U) : U := {
+  add mul  : A -> A -> A
+  zero one : A
+  neg      : A -> A
+  |
+  Associative A add & Commutative A add
+  & LeftIdentity A add zero & RightIdentity A add zero
+  & LeftInverse A add zero neg & RightInverse A add zero neg
+  & Associative A mul & LeftIdentity A mul one & RightIdentity A mul one
+  & LeftDistrib A add mul & RightDistrib A add mul
+}
+
+-- Two types are isomorphic when a pair of functions cancel both ways.
+Iso (A B : U) : U := {
+  to   : A -> B
+  from : B -> A
+  |
+  \ (a : A) { from (to a) == a } & \ (b : B) { to (from b) == b }
+}
