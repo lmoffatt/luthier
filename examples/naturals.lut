@@ -1,0 +1,33 @@
+-- Peano naturals from the prelude: reduction by hand and sampled laws over recursive data.
+
+CommutativeOp : U := { f : N -> N -> N | Commutative N f & Associative N f }
+
+addC : CommutativeOp := addN
+mulC : CommutativeOp := mulN
+
+-- distributivity as a law over a pair of operations
+Distrib : U := { f g : N -> N -> N | LeftDistrib N f g }
+addMul : Distrib := (addN, mulN)
+
+test addC with 200
+test mulC with 100
+test addMul with 100
+
+-- N is the conceptual natural, built from nothing; Int is the machine's integer. They are not
+-- isomorphic: Int has negatives. N is isomorphic to the non-negative integers, and the isomorphism
+-- respects + and *. That is the conceptual test of the machine's numbers against the definition.
+
+toNat (n : N) : Nat := toInt n
+fromNat (k : Nat) : N := fromInt k
+
+natIso : Iso N Nat := (toNat, fromNat)
+
+AddHom : U := { f : N -> Int | \ (m n : N) { f (addN m n) == f m + f n } }
+MulHom : U := { f : N -> Int | \ (m n : N) { f (mulN m n) == f m * f n } }
+toIntAdd : AddHom := toInt
+toIntMul : MulHom := toInt
+
+test toNat with 100
+test natIso with 200
+test toIntAdd with 200
+test toIntMul with 100

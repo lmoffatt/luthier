@@ -1,0 +1,13 @@
+-- Qualified imports: two modules whose names could clash live side by side.
+-- A law written here about their functions is this file's obligation, even if both modules are certified.
+
+import "z7ring.lut" as z7
+import "xor.lut" as bx
+
+isZero (k : z7.Z7) : Bool := k == 0
+
+-- negation maps zero to zero and nonzero to nonzero: the parities agree, so their xor is false
+NegKeepsZero : U := { f : z7.Z7 -> Bool | \ (a : z7.Z7) { bx.xor (f (z7.negMod7 a)) (f a) == false } }
+zeroUnderNeg : NegKeepsZero := isZero
+
+test zeroUnderNeg exhaustive

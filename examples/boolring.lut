@@ -1,0 +1,13 @@
+-- Bool with xor and and is a ring (the field with two elements).
+
+import "xor.lut"
+
+ringBool : Ring Bool := (xor, and, false, true, same)
+
+-- (or, and) is a semiring but not a ring: or has no inverses. The test must find it.
+semiringOr : Semiring Bool := (or, and, false, true)
+badRing    : Ring Bool     := (or, and, false, true, not)
+
+test ringBool exhaustive
+test semiringOr exhaustive
+test badRing exhaustive
