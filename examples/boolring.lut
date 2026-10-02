@@ -4,11 +4,13 @@ import "algebra"
 
 import "xor.lut"
 
-ringBool : Ring Bool := (xor, and, false, true, same)
+eqB (a b : Bool) : Bool := a == b
+
+ringBool : Ring Bool := { eq := eqB, add := xor, mul := and, zero := false, one := true, neg := same }
 
 -- (or, and) is a semiring but not a ring: or has no inverses. The test must find it.
-semiringOr : Semiring Bool := (or, and, false, true)
-badRing    : Ring Bool     := (or, and, false, true, not)
+semiringOr : Semiring Bool := { eq := eqB, add := or, mul := and, zero := false, one := true }
+badRing    : Ring Bool     := { eq := eqB, add := or, mul := and, zero := false, one := true, neg := not }
 
 test ringBool exhaustive
 test semiringOr exhaustive

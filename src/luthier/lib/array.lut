@@ -1,80 +1,91 @@
--- Vectors and matrices as primitives. A `Vec` or a `Mat` is a numpy array that passes
--- through Luthier untouched; the operations below are externs, and what certifies them is
--- the algebraic laws at the end, not a second implementation. Programs compose these
--- primitives and are compared against externs that do the whole computation at once.
+-- Vectors and matrices: the carriers, their leaves and their accessors.
 --
--- Shapes are not in the types yet (a design case): a shape mismatch is a runtime error from
--- the environment. The laws therefore quantify over a `Frame`, one generated value whose
--- components have compatible shapes.
+-- A `Vec` or a `Mat` is a numpy array that passes through Luthier untouched. Luthier sees it
+-- through accessors (`at`, `entry`, `length`, `rows`, `cols`, `row`) and builds it through their
+-- duals (`tabulate`, `tabulateMat`, `stack`): a program can define any operation as a recursion
+-- over an index and never hold the array as a list. The leaves below are externs. What they
+-- mean is stated twice: by the definition `...Def` written through the accessors, when the laws
+-- alone would not pin the operation down (dot, det, matVec), and by the laws of the algebraic
+-- structures in `algebra.lut`, which the leaves instantiate. The laws `Agrees` certify that each
+-- extern computes its definition within the rounding of n terms.
+--
+-- Shapes are not in the types (a design case): a mismatch is a runtime error from the
+-- environment, and the laws quantify over a `Frame` of compatible shapes.
 
 import "real"
-
-sqrtR : R -> R := extern "python:math.sqrt"
 
 Vec : U := extern "python:numpy.ndarray"
 Mat : U := extern "python:numpy.ndarray"
 
--- construction and reading
-fromList : List R -> Vec := extern "python:luthier.arrays.from_list"
-toList   : Vec -> List R := extern "python:luthier.arrays.to_list"
-fromRows : List Vec -> Mat := extern "python:luthier.arrays.from_rows"
-length   : Vec -> Int := extern "python:luthier.arrays.length"
-rows     : Mat -> Int := extern "python:luthier.arrays.rows"
-cols     : Mat -> Int := extern "python:luthier.arrays.cols"
-at       : Vec -> Int -> R := extern "python:luthier.arrays.at"
-entry    : Mat -> Int -> Int -> R := extern "python:luthier.arrays.entry"
-zeros    : Int -> Vec := extern "python:luthier.arrays.zeros"
-identity : Int -> Mat := extern "python:luthier.arrays.identity"
+-- ---------------------------------------------------------------- accessors and their duals
+length : Vec -> Int := extern "python:luthier.arrays.length"
+rows   : Mat -> Int := extern "python:luthier.arrays.rows"
+cols   : Mat -> Int := extern "python:luthier.arrays.cols"
+at     : Vec -> Int -> R := extern "python:luthier.arrays.at"
+entry  : Mat -> Int -> Int -> R := extern "python:luthier.arrays.entry"
+row    : Mat -> Int -> Vec := extern "python:luthier.arrays.row"
+last   : Vec -> R := extern "python:luthier.arrays.last"
 
--- the dual of the accessors: an array from a function of its index. The environment walks
--- the indices and calls the function for each entry.
 tabulate    : Int -> (Int -> R) -> Vec := extern "python:luthier.arrays.tabulate"
 tabulateMat : Int -> Int -> (Int -> Int -> R) -> Mat := extern "python:luthier.arrays.tabulate_mat"
+stack       : Int -> (Int -> Vec) -> Mat := extern "python:luthier.arrays.stack"   -- row i is f i
 
--- vector algebra
+-- ---------------------------------------------------------------- construction and pieces
+fromList : List R -> Vec := extern "python:luthier.arrays.from_list"
+toList   : Vec -> List R := extern "python:luthier.arrays.to_list"
+zeros    : Int -> Vec := extern "python:luthier.arrays.zeros"
+ones     : Int -> Vec := extern "python:luthier.arrays.ones"
+identity : Int -> Mat := extern "python:luthier.arrays.identity"
+head     : Vec -> Int -> Vec := extern "python:luthier.arrays.head"       -- the first n entries
+append   : Vec -> R -> Vec := extern "python:luthier.arrays.append"
+concat   : Vec -> Vec -> Vec := extern "python:luthier.arrays.concat"
+
+-- ---------------------------------------------------------------- the leaves
 add   : Vec -> Vec -> Vec := extern "python:luthier.arrays.add"
 sub   : Vec -> Vec -> Vec := extern "python:luthier.arrays.sub"
 scale : R -> Vec -> Vec := extern "python:luthier.arrays.scale"
 dot   : Vec -> Vec -> R := extern "python:luthier.arrays.dot"
 norm  : Vec -> R := extern "python:luthier.arrays.norm"
 total : Vec -> R := extern "python:luthier.arrays.total"
+product : Vec -> R := extern "python:luthier.arrays.product"
 minimum : Vec -> R := extern "python:luthier.arrays.minimum"
 maximum : Vec -> R := extern "python:luthier.arrays.maximum"
 
--- matrix algebra
 outer     : Vec -> Vec -> Mat := extern "python:luthier.arrays.outer"
 matVec    : Mat -> Vec -> Vec := extern "python:luthier.arrays.mat_vec"
 matMul    : Mat -> Mat -> Mat := extern "python:luthier.arrays.mat_mul"
 transpose : Mat -> Mat := extern "python:luthier.arrays.transpose"
 trace     : Mat -> R := extern "python:luthier.arrays.trace"
-frob      : Mat -> R := extern "python:luthier.arrays.frob"               -- Frobenius norm
 det       : Mat -> R := extern "python:luthier.arrays.det"
-solve     : Mat -> Vec -> Vec := extern "python:luthier.arrays.solve"     -- x with A x = b
-cond      : Mat -> R := extern "python:luthier.arrays.cond"               -- 2-norm condition number
+frob      : Mat -> R := extern "python:luthier.arrays.frob"
+cond      : Mat -> R := extern "python:luthier.arrays.cond"
+solve      : Mat -> Vec -> Vec := extern "python:luthier.arrays.solve"          -- x with A x = b
+eigvalsSym : Mat -> Vec := extern "python:luthier.arrays.eigvals_sym"           -- ascending
+invSqrtSym : Mat -> Mat := extern "python:luthier.arrays.inv_sqrt_sym"          -- M with M A M = I
 
--- comparison. Entrywise |a - b| <= tol (1 + |a| + |b|); `==` on arrays is not decidable here.
+-- n standard normals from a seed, and the next seed
+normalVec : Int -> Int -> Vec * Int := extern "python:luthier.arrays.normal_vec"
+
+-- ---------------------------------------------------------------- comparison
+-- `==` does not decide on arrays. Entrywise |a - b| <= tol (1 + |a| + |b|).
 approxR   : R -> R -> R -> Bool := extern "python:luthier.arrays.approx"
 approxVec : R -> Vec -> Vec -> Bool := extern "python:luthier.arrays.approx"
 approxMat : R -> Mat -> Mat -> Bool := extern "python:luthier.arrays.approx"
 
 -- The tolerance of a law: a sum of n products rounds to about n eps times the size of the
--- terms summed, and the terms can cancel, so a law whose two sides may be near zero scales
--- its tolerance by the product of the norms involved, not by the result. The slack covers
--- the few extra operations each side performs. Declared once, here.
-factorial (n : Int) : Int := if n <= 1 then 1 else n * factorial (n - 1)
-powR (x : R) (n : Int) : R := if n <= 0 then 1.0 else x * powR x (n - 1)
-
+-- terms, and the terms can cancel, so a law whose sides may be near zero scales its tolerance
+-- by the norms involved, not by the result. The slack covers the few extra operations each
+-- side performs. Declared once, here.
 roundingSlack : R := 8.0
 tolOf (n : Int) : R := roundingSlack * toR n * eps
 scaledTol (n : Int) (magnitude : R) : R := tolOf n * (1.0 + magnitude)
 
--- ---------------------------------------------------------------- the definitions
--- What each primitive means, written in Luthier through the accessors: a recursion over an
--- index, never over a list, so the term that is rewritten at each step is a counter and an
--- opaque reference, of constant size. These are the reference; the externs above are the
--- implementation, and the laws `Agrees` below certify that they compute the same thing.
+sqrtR : R -> R := extern "python:math.sqrt"
+factorial (n : Int) : Int := if n <= 1 then 1 else n * factorial (n - 1)
+powR (x : R) (n : Int) : R := if n <= 0 then 1.0 else x * powR x (n - 1)
 
--- sum_{k = lo}^{hi - 1} f k
+-- ---------------------------------------------------------------- the definitions
+-- sum_{k = lo}^{hi - 1} f k, a recursion over the index
 sumFrom (lo hi : Int) (f : Int -> R) : R := if lo >= hi then 0.0 else f lo + sumFrom (lo + 1) hi f
 sumTo (n : Int) (f : Int -> R) : R := sumFrom 0 n f
 
@@ -82,6 +93,7 @@ dotDef (x y : Vec) : R := sumTo (length x) (\ k { at x k * at y k })
 normDef (x : Vec) : R := sqrtR (dotDef x x)
 totalDef (x : Vec) : R := sumTo (length x) (\ k { at x k })
 addDef (x y : Vec) : Vec := tabulate (length x) (\ k { at x k + at y k })
+subDef (x y : Vec) : Vec := tabulate (length x) (\ k { at x k - at y k })
 scaleDef (c : R) (x : Vec) : Vec := tabulate (length x) (\ k { c * at x k })
 outerDef (x y : Vec) : Mat := tabulateMat (length x) (length y) (\ i j { at x i * at y j })
 matVecDef (a : Mat) (x : Vec) : Vec := tabulate (rows a) (\ i { sumTo (cols a) (\ j { entry a i j * at x j }) })
@@ -89,67 +101,26 @@ matMulDef (a b : Mat) : Mat := tabulateMat (rows a) (cols b) (\ i j { sumTo (col
 transposeDef (a : Mat) : Mat := tabulateMat (cols a) (rows a) (\ i j { entry a j i })
 traceDef (a : Mat) : R := sumTo (rows a) (\ i { entry a i i })
 
--- the determinant by Laplace expansion along the first row; minor i j drops row 0 and column j
+-- the determinant by Laplace expansion along the first row; minor j drops row 0 and column j
 minor (a : Mat) (j : Int) : Mat :=
   tabulateMat (rows a - 1) (cols a - 1) (\ r c { entry a (r + 1) (if c < j then c else c + 1) })
 detDef (a : Mat) : R :=
   if rows a == 1 then entry a 0 0
   else sumTo (cols a) (\ j { (if j mod 2 == 0 then 1.0 else 0.0 - 1.0) * entry a 0 j * detDef (minor a j) })
 
--- ---------------------------------------------------------------- the laws
--- The operation comes first, the quantified variables last, so a partial application is
--- the predicate a test fills. One generated frame with compatible shapes: A is m x n, S is
--- n x n symmetric positive definite, x and z have length n, y has length m.
+-- ---------------------------------------------------------------- the frame and the laws
+-- A is m x n, S is n x n symmetric positive definite, x and z have length n, y has length m.
 Frame : U := { A : Mat, S : Mat, x : Vec, z : Vec, y : Vec | true }
-gen Vec := extern "python:luthier.arrays.gen_vec"
-gen Mat := extern "python:luthier.arrays.gen_mat"
 gen Frame := extern "python:luthier.arrays.gen_frame"
 
-DotCommutes (d : Vec -> Vec -> R) (f : Frame) : Bool :=
-  approxR (tolOf (length f.x)) (d f.x f.z) (d f.z f.x)
-
-DotLinear (d : Vec -> Vec -> R) (f : Frame) : Bool :=
-  approxR (scaledTol (length f.x) (norm f.x * (norm f.x + norm f.z))) (d (add f.x f.z) f.x) (d f.x f.x + d f.z f.x)
-
-NormIsDot (d : Vec -> Vec -> R) (f : Frame) : Bool :=
-  approxR (tolOf (length f.x)) (norm f.x * norm f.x) (d f.x f.x)
-
--- <A x, y> = <x, A^T y>: transpose is the adjoint of matVec
-TransposeIsAdjoint (mv : Mat -> Vec -> Vec) (f : Frame) : Bool :=
-  approxR (scaledTol (rows f.A * cols f.A) (frob f.A * norm f.x * norm f.y)) (dot (mv f.A f.x) f.y) (dot f.x (mv (transpose f.A) f.y))
-
-TransposeInvolutive (tr : Mat -> Mat) (f : Frame) : Bool :=
-  approxMat 0.0 (tr (tr f.A)) f.A
-
--- (y x^T) z = (x . z) y
-OuterActs (o : Vec -> Vec -> Mat) (f : Frame) : Bool :=
-  approxVec (scaledTol (length f.x) (norm f.y * norm f.x * norm f.z)) (matVec (o f.y f.x) f.z) (scale (dot f.x f.z) f.y)
-
--- (A S) x = A (S x)
-MatMulAssociates (mm : Mat -> Mat -> Mat) (f : Frame) : Bool :=
-  approxVec (scaledTol (rows f.A * cols f.A) (frob f.A * frob f.S * norm f.x)) (matVec (mm f.A f.S) f.x) (matVec f.A (matVec f.S f.x))
-
--- S (solve S b) = b. The residual is bounded by the condition number of S times the
--- rounding of the solve, so the tolerance carries cond S.
-SolveInverts (sv : Mat -> Vec -> Vec) (f : Frame) : Bool :=
-  approxVec (cond f.S * tolOf (length f.x * length f.x)) (matVec f.S (sv f.S f.x)) f.x
-
-DetOfTranspose (dt : Mat -> R) (f : Frame) : Bool :=
-  approxR (tolOf (length f.x * length f.x)) (dt f.S) (dt (transpose f.S))
-
-DetPositive (dt : Mat -> R) (f : Frame) : Bool := dt f.S > 0.0
-
--- toList undoes fromList: embedding the list read back gives the same vector, exactly
-ListRoundTrip (fl : List R -> Vec) (l : List R) : Bool := approxVec 0.0 (fl (toList (fl l))) (fl l)
-
--- each extern agrees with its definition, within the rounding of n terms
+-- each leaf agrees with its definition, within the rounding of n terms
 DotAgrees (d : Vec -> Vec -> R) (f : Frame) : Bool :=
   approxR (scaledTol (length f.x) (norm f.x * norm f.z)) (d f.x f.z) (dotDef f.x f.z)
-NormAgrees (nm : Vec -> R) (f : Frame) : Bool :=
-  approxR (tolOf (length f.x)) (nm f.x) (normDef f.x)
+NormAgrees (nm : Vec -> R) (f : Frame) : Bool := approxR (tolOf (length f.x)) (nm f.x) (normDef f.x)
 TotalAgrees (t : Vec -> R) (f : Frame) : Bool :=
   approxR (scaledTol (length f.x) (norm f.x)) (t f.x) (totalDef f.x)
 AddAgrees (ad : Vec -> Vec -> Vec) (f : Frame) : Bool := approxVec 0.0 (ad f.x f.z) (addDef f.x f.z)
+SubAgrees (sb : Vec -> Vec -> Vec) (f : Frame) : Bool := approxVec 0.0 (sb f.x f.z) (subDef f.x f.z)
 ScaleAgrees (sc : R -> Vec -> Vec) (f : Frame) : Bool := approxVec 0.0 (sc (at f.y 0) f.x) (scaleDef (at f.y 0) f.x)
 OuterAgrees (o : Vec -> Vec -> Mat) (f : Frame) : Bool := approxMat 0.0 (o f.y f.x) (outerDef f.y f.x)
 MatVecAgrees (mv : Mat -> Vec -> Vec) (f : Frame) : Bool :=
@@ -158,52 +129,54 @@ MatMulAgrees (mm : Mat -> Mat -> Mat) (f : Frame) : Bool :=
   approxMat (scaledTol (cols f.A) (frob f.A * frob f.S)) (mm f.A f.S) (matMulDef f.A f.S)
 TransposeAgrees (tr : Mat -> Mat) (f : Frame) : Bool := approxMat 0.0 (tr f.A) (transposeDef f.A)
 TraceAgrees (t : Mat -> R) (f : Frame) : Bool := approxR (scaledTol (rows f.S) (frob f.S)) (t f.S) (traceDef f.S)
--- Laplace expansion has n! terms, so the definition is only evaluated up to laplaceLimit;
--- its rounding is bounded by n! eps times the product of row norms, which the Frobenius norm
--- to the n-th power dominates
+-- Laplace has n! terms, so the definition is only evaluated up to laplaceLimit; its rounding is
+-- bounded by n! eps times the product of the row norms, dominated by the Frobenius norm to the n
 laplaceLimit : Int := 4
 DetAgrees (dt : Mat -> R) (f : Frame) : Bool :=
   rows f.S > laplaceLimit or approxR (scaledTol (factorial (rows f.S)) (powR (frob f.S) (rows f.S))) (dt f.S) (detDef f.S)
 
--- the certified primitives: each is its extern, with the laws in its type
-Inner      : U := { d : Vec -> Vec -> R | DotAgrees d & DotCommutes d & DotLinear d & NormIsDot d }
-Norm       : U := { nm : Vec -> R | NormAgrees nm }
-Total      : U := { t : Vec -> R | TotalAgrees t }
-Addition   : U := { ad : Vec -> Vec -> Vec | AddAgrees ad }
-Scaling    : U := { sc : R -> Vec -> Vec | ScaleAgrees sc }
-Action     : U := { mv : Mat -> Vec -> Vec | MatVecAgrees mv & TransposeIsAdjoint mv }
-Transpose  : U := { tr : Mat -> Mat | TransposeAgrees tr & TransposeInvolutive tr }
-Outer      : U := { o : Vec -> Vec -> Mat | OuterAgrees o & OuterActs o }
-Product    : U := { mm : Mat -> Mat -> Mat | MatMulAgrees mm & MatMulAssociates mm }
-Trace      : U := { t : Mat -> R | TraceAgrees t }
-Solver     : U := { sv : Mat -> Vec -> Vec | SolveInverts sv }
-Det        : U := { dt : Mat -> R | DetAgrees dt & DetOfTranspose dt & DetPositive dt }
-Embedding  : U := { fl : List R -> Vec | ListRoundTrip fl }
+-- leaves the laws characterize, no definition needed
+SolveInverts (sv : Mat -> Vec -> Vec) (f : Frame) : Bool :=
+  approxVec (cond f.S * tolOf (length f.x * length f.x)) (matVec f.S (sv f.S f.x)) f.x
+EigenvaluesSumToTrace (ev : Mat -> Vec) (f : Frame) : Bool :=
+  approxR (scaledTol (rows f.S) (frob f.S)) (total (ev f.S)) (trace f.S)
+EigenvaluesMultiplyToDet (ev : Mat -> Vec) (f : Frame) : Bool :=
+  approxR (cond f.S * tolOf (rows f.S * rows f.S)) (product (ev f.S)) (det f.S)
+InvSqrtInverts (m : Mat -> Mat) (f : Frame) : Bool :=
+  approxMat (cond f.S * tolOf (rows f.S * rows f.S)) (matMul (m f.S) (matMul f.S (m f.S))) (identity (rows f.S))
+ListRoundTrip (fl : List R -> Vec) (l : List R) : Bool := approxVec 0.0 (fl (toList (fl l))) (fl l)
 
-inner     : Inner := dot
-vnorm     : Norm := norm
-vtotal    : Total := total
-addition  : Addition := add
-scaling   : Scaling := scale
-action    : Action := matVec
-transposed : Transpose := transpose
-outerProd : Outer := outer
-product   : Product := matMul
-mtrace    : Trace := trace
-solver    : Solver := solve
-determinant : Det := det
-embedding : Embedding := fromList
+-- ---------------------------------------------------------------- the certified leaves
+inner     : { d : Vec -> Vec -> R | DotAgrees d } := dot
+vnorm     : { nm : Vec -> R | NormAgrees nm } := norm
+vtotal    : { t : Vec -> R | TotalAgrees t } := total
+addition  : { ad : Vec -> Vec -> Vec | AddAgrees ad } := add
+subtraction : { sb : Vec -> Vec -> Vec | SubAgrees sb } := sub
+scaling   : { sc : R -> Vec -> Vec | ScaleAgrees sc } := scale
+outerProd : { o : Vec -> Vec -> Mat | OuterAgrees o } := outer
+action    : { mv : Mat -> Vec -> Vec | MatVecAgrees mv } := matVec
+mproduct  : { mm : Mat -> Mat -> Mat | MatMulAgrees mm } := matMul
+transposed : { tr : Mat -> Mat | TransposeAgrees tr } := transpose
+mtrace    : { t : Mat -> R | TraceAgrees t } := trace
+determinant : { dt : Mat -> R | DetAgrees dt } := det
+solver    : { sv : Mat -> Vec -> Vec | SolveInverts sv } := solve
+spectrum  : { ev : Mat -> Vec | EigenvaluesSumToTrace ev & EigenvaluesMultiplyToDet ev } := eigvalsSym
+invSqrt   : { m : Mat -> Mat | InvSqrtInverts m } := invSqrtSym
+embedding : { fl : List R -> Vec | ListRoundTrip fl } := fromList
 
 test inner with 100
 test vnorm with 100
 test vtotal with 100
 test addition with 100
+test subtraction with 100
 test scaling with 100
-test mtrace with 100
-test action with 100
-test transposed with 100
 test outerProd with 100
-test product with 100
-test solver with 100
+test action with 100
+test mproduct with 100
+test transposed with 100
+test mtrace with 100
 test determinant with 30
+test solver with 100
+test spectrum with 100
+test invSqrt with 100
 test embedding with 100

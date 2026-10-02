@@ -3,13 +3,14 @@
 import "peano"
 import "algebra"
 
-CommutativeOp : U := { f : N -> N -> N | Commutative N f & Associative N f }
+eqN (a b : N) : Bool := a == b
+CommutativeOp : U := { f : N -> N -> N | Commutative N eqN f & Associative N eqN f }
 
 addC : CommutativeOp := addN
 mulC : CommutativeOp := mulN
 
 -- distributivity as a law over a pair of operations
-Distrib : U := { f g : N -> N -> N | LeftDistrib N f g }
+Distrib : U := { f g : N -> N -> N | LeftDistrib N eqN f g }
 addMul : Distrib := (addN, mulN)
 
 test addC with 200
@@ -23,7 +24,8 @@ test addMul with 100
 toNat (n : N) : Nat := toInt n
 fromNat (k : Nat) : N := fromInt k
 
-natIso : Iso N Nat := (toNat, fromNat)
+eqNat (a b : Nat) : Bool := a == b
+natIso : Iso N Nat := { eqA := eqN, eqB := eqNat, to := toNat, from := fromNat }
 
 AddHom : U := { f : N -> Int | \ (m n : N) { f (addN m n) == f m + f n } }
 MulHom : U := { f : N -> Int | \ (m n : N) { f (mulN m n) == f m * f n } }

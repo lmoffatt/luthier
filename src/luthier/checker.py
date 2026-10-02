@@ -178,12 +178,11 @@ class Checker:
             if isinstance(d.body, Extern):
                 if ty is None:
                     self.err(f"extern {qname} needs a type")
-                ext = Extern(d.body.target, ty)
                 if isinstance(self.whnf(ty), Univ):
                     # an opaque type: values are Python objects, handled only by externs
-                    self.env.defs[qname] = Def(qname, ty, ext, doc=d.doc)
+                    self.env.defs[qname] = Def(qname, ty, Extern(d.body.target, ty), doc=d.doc)
                     return
-                self.register_extern(d.body.target, ty)
+                ext = Extern(self.register_extern(d.body.target, ty), ty)
                 self.env.defs[qname] = Def(qname, ty, ext, doc=d.doc)
                 w = self.whnf(ty)
                 if isinstance(w, Subtype):
@@ -193,7 +192,13 @@ class Checker:
             if ty is not None:
                 # declare first so the body can be recursive
                 self.env.defs[qname] = Def(qname, ty, None, doc=d.doc)
+                before = len(self.obligations.get(qname, []))
                 body = self.check([], d.body, ty)
+                w = self.whnf(ty)
+                if isinstance(w, Subtype) and len(self.obligations.get(qname, [])) == before:
+                    # the body was already of this subtype (an instance built by another
+                    # definition): the laws still belong to this name, so `test` can run them
+                    self.subtype_obligation([], body, w, ty)
             else:
                 if d.name in free_vars(d.body):
                     self.err(f"recursive definition {qname} needs a declared type")
@@ -252,7 +257,11 @@ class Checker:
         except (ImportError, AttributeError) as e:
             self.err(f"cannot resolve extern {target!r}: {e}")
         base = self.pi_chain(ty)
-        self.env.externs[target] = ExternInfo(fn, pi_arity(base), base)
+        # keyed by target and type: one Python function may be declared at several types
+        # (approx on R, on Vec, on Mat), and each declaration marshals by its own
+        key = f"{target}@{pp(base)}"
+        self.env.externs[key] = ExternInfo(fn, pi_arity(base), base)
+        return key
 
     def pi_chain(self, ty: Term) -> Term:
         """Each arrow exposed (a subtype of a function type is seen as the function type), so
@@ -522,8 +531,7 @@ class Checker:
             # an extern inside a term takes the expected type, as a definition takes its declared one
             if isinstance(w, Univ):
                 self.err("an extern type is only allowed as the body of a definition")
-            self.register_extern(t.target, ty)
-            return Extern(t.target, ty)
+            return Extern(self.register_extern(t.target, ty), ty)
         if isinstance(t, Lam) and isinstance(w, Pi):
             if t.ann is not None:
                 ann = self.check(ctx, t.ann, Univ())

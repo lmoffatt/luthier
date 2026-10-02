@@ -184,3 +184,75 @@ def tabulate(n, f):
 
 def tabulate_mat(m, n, f):
     return np.array([[float(f(i, j)) for j in range(int(n))] for i in range(int(m))])
+
+
+# ------------------------------------------------------------------ rows, pieces, stacking
+
+def row(a, i):
+    return np.asarray(a)[int(i)].copy()
+
+
+def stack(n, f):
+    """A matrix whose row i is the vector f(i), for i below n."""
+    return np.vstack([np.asarray(f(i), dtype=float) for i in range(int(n))])
+
+
+def ones(n):
+    return np.ones(int(n))
+
+
+def head(v, n):
+    """The first n entries."""
+    return np.asarray(v)[: int(n)].copy()
+
+
+def last(v):
+    return float(np.asarray(v)[-1])
+
+
+def append(v, x):
+    return np.append(np.asarray(v, dtype=float), float(x))
+
+
+def concat(a, b):
+    return np.concatenate([np.asarray(a, dtype=float), np.asarray(b, dtype=float)])
+
+
+# ------------------------------------------------------------------ spectral (leaves with laws)
+
+def eigvals_sym(a):
+    """Eigenvalues of a symmetric matrix, ascending."""
+    return np.linalg.eigvalsh(np.asarray(a))
+
+
+def inv_sqrt_sym(a):
+    """The symmetric M with M A M = I, for A symmetric positive definite."""
+    w, V = np.linalg.eigh(np.asarray(a))
+    return (V / np.sqrt(w)) @ V.T
+
+
+def product(v):
+    return float(np.prod(np.asarray(v)))
+
+
+# ------------------------------------------------------------------ randomness threaded by seed
+
+def normal_vec(n, seed):
+    """n standard normals from a seed, and the next seed."""
+    rng = np.random.default_rng(int(seed) % (2 ** 63))
+    return (rng.standard_normal(int(n)), int(rng.integers(0, 2 ** 62)))
+
+
+# ------------------------------------------------------------------ fixed-dimension generators
+# For the laws of the algebraic structures, which quantify over several vectors at once: without
+# dimensions in the types, the only way to make them compatible is one dimension for the run.
+
+LAW_DIM = 5
+
+
+def gen_vec_fixed(rng: random.Random, size: int):
+    return _vec(rng, LAW_DIM, size)
+
+
+def gen_mat_fixed(rng: random.Random, size: int):
+    return _mat(rng, LAW_DIM, LAW_DIM, size)

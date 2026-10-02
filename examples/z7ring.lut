@@ -4,6 +4,7 @@ import "algebra"
 
 Z7 : U := { k : Int | 0 <= k and k < 7 }
 
+eqZ7 (a b : Z7) : Bool := a == b
 addMod7 (a b : Z7) : Z7 := (a + b) mod 7
 mulMod7 (a b : Z7) : Z7 := (a * b) mod 7
 negMod7 (a : Z7)   : Z7 := (7 - a) mod 7
@@ -11,7 +12,7 @@ negMod7 (a : Z7)   : Z7 := (7 - a) mod 7
 zero7 : Z7 := 0
 one7  : Z7 := 1
 
-ringZ7 : Ring Z7 := (addMod7, mulMod7, zero7, one7, negMod7)
+ringZ7 : Ring Z7 := { eq := eqZ7, add := addMod7, mul := mulMod7, zero := zero7, one := one7, neg := negMod7 }
 
 test addMod7 exhaustive
 test mulMod7 exhaustive

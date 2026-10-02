@@ -151,7 +151,13 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
     while True:
         if isinstance(t, App):
             head, args = unapply(t)
+            head0 = head
             head = whnf(env, head, fuel, unfold)
+            if isinstance(head, App) and head != head0:
+                # the head unfolded to an application (a constant defined as a partial
+                # application): merge its arguments with ours and reduce the whole
+                t = apply(head, args)
+                continue
             if isinstance(head, Lam):
                 try:
                     b = match_pattern(env, head.param, args[0], fuel, unfold)

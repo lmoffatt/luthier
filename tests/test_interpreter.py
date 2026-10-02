@@ -161,7 +161,7 @@ def test_ring_z7_passes_exhaustively():
     gens = Generators(ck.env)
     r = run_test(ck, gens, "ringZ7", exhaustive=True, deep=True)
     assert r.passed
-    assert len(r.laws) == 11
+    assert len(r.laws) == 13
     assert all(l.mode == "exhaustive" for l in r.laws)
 
 
@@ -171,12 +171,12 @@ def test_bad_ring_fails_on_inverses_with_counterexample():
     r = run_test(ck, gens, "badRing", exhaustive=True, deep=True)
     assert not r.passed
     failed = [l for l in r.laws if not l.passed]
-    assert {l.label for l in failed} == {"LeftInverse Bool or false not", "RightInverse Bool or false not"}
+    assert {l.label for l in failed} == {"LeftInverse Bool eqB or false not", "RightInverse Bool eqB or false not"}
     assert failed[0].failure == "x = true"
 
 
 def test_sampled_law_on_recursive_data():
-    ck = load("Comm : U := { f : N -> N -> N | Commutative N f }\naddC : Comm := addN")
+    ck = load("eqN (a b : N) : Bool := a == b\nComm : U := { f : N -> N -> N | Commutative N eqN f }\naddC : Comm := addN")
     gens = Generators(ck.env)
     r = run_test(ck, gens, "addC", n=30, seed=3, deep=True)
     assert r.passed and r.laws[0].cases == 30
