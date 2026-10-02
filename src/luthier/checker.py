@@ -552,6 +552,11 @@ class Checker:
         if (isinstance(t, Var) and t.name == "__nil__" or (isinstance(t, App) and self._is_cons(t))) \
                 and not isinstance(w, Subtype):
             return self.check_list(ctx, t, w)
+        if isinstance(w, Subtype) and isinstance(t, Match) and isinstance(w.pred, Con) and w.pred.name == "true":
+            # a record type that names components and states no law: check each branch against
+            # it, so a record literal in a branch still sees the component names
+            term, _ = self.check_match(ctx, t, ty)
+            return term
         if isinstance(w, Subtype):
             if self.inferable(t):
                 term, tty = self.infer(ctx, t)
@@ -660,6 +665,10 @@ class Checker:
         catch_all = False
         for pat, body in t.branches:
             pat2, ctx2 = self.bind_pattern(ctx, pat, sw, binding=False)
+            if isinstance(pat2, PVar):
+                # a variable pattern is the scrutinee itself: it keeps the declared type, so a
+                # value of a record type keeps its component names
+                ctx2 = ctx2[:-1] + [(pat2.name, sty)]
             if isinstance(pat2, (PVar, PWild)):
                 catch_all = True
             elif isinstance(pat2, PCon):

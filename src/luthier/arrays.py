@@ -256,3 +256,31 @@ def gen_vec_fixed(rng: random.Random, size: int):
 
 def gen_mat_fixed(rng: random.Random, size: int):
     return _mat(rng, LAW_DIM, LAW_DIM, size)
+
+
+# ------------------------------------------------------------------ matrix arithmetic, entrywise
+
+def madd(a, b):
+    return np.asarray(a) + np.asarray(b)
+
+
+def msub(a, b):
+    return np.asarray(a) - np.asarray(b)
+
+
+def mscale(c, a):
+    return float(c) * np.asarray(a)
+
+
+def hadamard(a, b):
+    """Entrywise product."""
+    return np.asarray(a) * np.asarray(b)
+
+
+def max_abs(a):
+    return float(np.max(np.abs(np.asarray(a))))
+
+
+def index(v, k):
+    """Entry k of a vector of whole numbers, as an Int."""
+    return int(round(float(np.asarray(v)[int(k)])))

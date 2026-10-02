@@ -63,6 +63,14 @@ solve      : Mat -> Vec -> Vec := extern "python:luthier.arrays.solve"          
 eigvalsSym : Mat -> Vec := extern "python:luthier.arrays.eigvals_sym"           -- ascending
 invSqrtSym : Mat -> Mat := extern "python:luthier.arrays.inv_sqrt_sym"          -- M with M A M = I
 
+madd     : Mat -> Mat -> Mat := extern "python:luthier.arrays.madd"
+msub     : Mat -> Mat -> Mat := extern "python:luthier.arrays.msub"
+mscale   : R -> Mat -> Mat := extern "python:luthier.arrays.mscale"
+hadamard : Mat -> Mat -> Mat := extern "python:luthier.arrays.hadamard"       -- entrywise product
+maxAbs    : Vec -> R := extern "python:luthier.arrays.max_abs"
+maxAbsMat : Mat -> R := extern "python:luthier.arrays.max_abs"
+index    : Vec -> Int -> Int := extern "python:luthier.arrays.index"          -- entry k of whole numbers
+
 -- n standard normals from a seed, and the next seed
 normalVec : Int -> Int -> Vec * Int := extern "python:luthier.arrays.normal_vec"
 
@@ -100,6 +108,13 @@ matVecDef (a : Mat) (x : Vec) : Vec := tabulate (rows a) (\ i { sumTo (cols a) (
 matMulDef (a b : Mat) : Mat := tabulateMat (rows a) (cols b) (\ i j { sumTo (cols a) (\ k { entry a i k * entry b k j }) })
 transposeDef (a : Mat) : Mat := tabulateMat (cols a) (rows a) (\ i j { entry a j i })
 traceDef (a : Mat) : R := sumTo (rows a) (\ i { entry a i i })
+maddDef (a b : Mat) : Mat := tabulateMat (rows a) (cols a) (\ i j { entry a i j + entry b i j })
+msubDef (a b : Mat) : Mat := tabulateMat (rows a) (cols a) (\ i j { entry a i j - entry b i j })
+mscaleDef (c : R) (a : Mat) : Mat := tabulateMat (rows a) (cols a) (\ i j { c * entry a i j })
+hadamardDef (a b : Mat) : Mat := tabulateMat (rows a) (cols a) (\ i j { entry a i j * entry b i j })
+maxFrom (lo hi : Int) (f : Int -> R) (best : R) : R :=
+  if lo >= hi then best else maxFrom (lo + 1) hi f (if f lo > best then f lo else best)
+maxAbsDef (x : Vec) : R := maxFrom 0 (length x) (\ k { abs (at x k) }) 0.0
 
 -- the determinant by Laplace expansion along the first row; minor j drops row 0 and column j
 minor (a : Mat) (j : Int) : Mat :=
@@ -129,6 +144,11 @@ MatMulAgrees (mm : Mat -> Mat -> Mat) (f : Frame) : Bool :=
   approxMat (scaledTol (cols f.A) (frob f.A * frob f.S)) (mm f.A f.S) (matMulDef f.A f.S)
 TransposeAgrees (tr : Mat -> Mat) (f : Frame) : Bool := approxMat 0.0 (tr f.A) (transposeDef f.A)
 TraceAgrees (t : Mat -> R) (f : Frame) : Bool := approxR (scaledTol (rows f.S) (frob f.S)) (t f.S) (traceDef f.S)
+MaddAgrees (f : Mat -> Mat -> Mat) (fr : Frame) : Bool := approxMat 0.0 (f fr.S fr.S) (maddDef fr.S fr.S)
+MsubAgrees (f : Mat -> Mat -> Mat) (fr : Frame) : Bool := approxMat 0.0 (f fr.S (transpose fr.S)) (msubDef fr.S (transpose fr.S))
+MscaleAgrees (f : R -> Mat -> Mat) (fr : Frame) : Bool := approxMat 0.0 (f (at fr.x 0) fr.A) (mscaleDef (at fr.x 0) fr.A)
+HadamardAgrees (f : Mat -> Mat -> Mat) (fr : Frame) : Bool := approxMat 0.0 (f fr.A fr.A) (hadamardDef fr.A fr.A)
+MaxAbsAgrees (f : Vec -> R) (fr : Frame) : Bool := f fr.x == maxAbsDef fr.x
 -- Laplace has n! terms, so the definition is only evaluated up to laplaceLimit; its rounding is
 -- bounded by n! eps times the product of the row norms, dominated by the Frobenius norm to the n
 laplaceLimit : Int := 4
@@ -163,6 +183,11 @@ solver    : { sv : Mat -> Vec -> Vec | SolveInverts sv } := solve
 spectrum  : { ev : Mat -> Vec | EigenvaluesSumToTrace ev & EigenvaluesMultiplyToDet ev } := eigvalsSym
 invSqrt   : { m : Mat -> Mat | InvSqrtInverts m } := invSqrtSym
 embedding : { fl : List R -> Vec | ListRoundTrip fl } := fromList
+maddition : { f : Mat -> Mat -> Mat | MaddAgrees f } := madd
+msubtraction : { f : Mat -> Mat -> Mat | MsubAgrees f } := msub
+mscaling  : { f : R -> Mat -> Mat | MscaleAgrees f } := mscale
+entrywise : { f : Mat -> Mat -> Mat | HadamardAgrees f } := hadamard
+largest   : { f : Vec -> R | MaxAbsAgrees f } := maxAbs
 
 test inner with 100
 test vnorm with 100
@@ -180,3 +205,8 @@ test solver with 100
 test spectrum with 100
 test invSqrt with 100
 test embedding with 100
+test maddition with 50
+test msubtraction with 50
+test mscaling with 50
+test entrywise with 50
+test largest with 100
