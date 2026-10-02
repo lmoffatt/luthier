@@ -364,6 +364,10 @@ class Parser:
         if t.kind == "keyword" and t.text == "forget":
             self.next()
             return Forget(self.parse_atom())
+        if t.kind == "keyword" and t.text == "extern":
+            # an extern as a term: its type comes from the context it is checked against
+            self.next()
+            return Extern(self.expect("string").text[1:-1])
         if t.kind == "symbol" and t.text == "\\":
             return self.parse_lambda()
         if t.kind == "symbol" and t.text == "(":

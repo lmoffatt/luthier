@@ -312,7 +312,7 @@ class Checker:
             return t, Univ()
         if isinstance(t, Extern):
             if t.type is None:
-                self.err("extern is only allowed as the body of a definition")
+                self.err("an extern needs its type from the context: use it where the expected type is known")
             return t, t.type
         if isinstance(t, App):
             return self.infer_app(ctx, t)
@@ -497,6 +497,12 @@ class Checker:
     # ---------------------------------------------------------------- check
     def check(self, ctx: Ctx, t: Term, ty: Term) -> Term:
         w = self.whnf(ty)
+        if isinstance(t, Extern) and t.type is None:
+            # an extern inside a term takes the expected type, as a definition takes its declared one
+            if isinstance(w, Univ):
+                self.err("an extern type is only allowed as the body of a definition")
+            self.register_extern(t.target, ty)
+            return Extern(t.target, ty)
         if isinstance(t, Lam) and isinstance(w, Pi):
             if t.ann is not None:
                 ann = self.check(ctx, t.ann, Univ())
