@@ -43,7 +43,8 @@ class Env:
     datas: dict = field(default_factory=dict)       # name -> DataDecl (elaborated)
     cons: dict = field(default_factory=dict)        # constructor name -> (data name, full type)
     externs: dict = field(default_factory=dict)     # target -> ExternInfo
-    fuel: int = 200_000
+    fuel: int = 200_000                 # steps per reduction in the checker (types, conversion)
+    run_fuel: int = 50_000_000          # steps per evaluation of a closed term (law cases, eval)
 
     def is_global(self, name: str) -> bool:
         return name in self.defs or name in self.datas or name in BUILTIN_TYPES
@@ -629,7 +630,10 @@ def nf(env: Env, t: Term, fuel: Fuel) -> Term:
 
 
 def evaluate(env: Env, t: Term, fuel: Optional[int] = None) -> Term:
-    return nf(env, t, Fuel(fuel or env.fuel))
+    """The value of a closed term: by environments and call by need (machine.py), falling back
+    to substitution for what that does not handle."""
+    from .machine import normalize
+    return normalize(env, t, Fuel(fuel or env.run_fuel))
 
 
 # ------------------------------------------------------------- conversion

@@ -162,7 +162,7 @@ def cmd_test(args):
     loader = load(args.files, not args.no_core)
     ck = loader.checker
     if args.fuel is not None:
-        ck.env.fuel = args.fuel
+        ck.env.run_fuel = args.fuel
     gens = make_generators(loader, args.size)
     directives = []
     if args.name:
@@ -226,7 +226,7 @@ def cmd_eval(args):
     loader = load(args.files, not args.no_core)
     ck = loader.checker
     if args.fuel is not None:
-        ck.env.fuel = args.fuel
+        ck.env.run_fuel = args.fuel
     try:
         t = parse_term(args.term)
         with ck.silent():
@@ -261,8 +261,7 @@ def main(argv=None):
     p.add_argument("--show-cases", action="store_true", help="print every case as it is evaluated")
     p.add_argument("--no-cert", action="store_true")
     p.add_argument("--fuel", type=int, default=None,
-                   help="reduction steps allowed per evaluation (default 200000); a law that "
-                        "accumulates over an ensemble needs more")
+                   help="steps allowed per evaluation of a law case or term (default 50000000)")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_test)
 
@@ -270,8 +269,7 @@ def main(argv=None):
     p.add_argument("files", nargs="+")
     p.add_argument("term")
     p.add_argument("--fuel", type=int, default=None,
-                   help="reduction steps allowed per evaluation (default 200000); a law that "
-                        "accumulates over an ensemble needs more")
+                   help="steps allowed per evaluation of a law case or term (default 50000000)")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_eval)
 

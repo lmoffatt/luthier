@@ -14,6 +14,7 @@ from typing import Optional
 from .syntax import *
 from .subst import subst, free_vars
 from .pretty import pp
+from .machine import normalize
 from .evaluator import Env, Fuel, whnf, nf, apply, as_bool, EvalError
 from .checker import Checker, Obligation
 from .generators import Generators, GenError
@@ -154,7 +155,7 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
         t = law
         for v in values:
             t = App(t, v)
-        r = nf(env, t, Fuel(env.fuel))
+        r = normalize(env, t, Fuel(env.run_fuel))
         return as_bool(r), r
 
     def show(values):

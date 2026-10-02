@@ -218,3 +218,26 @@ Costo medido: las trece leyes de `array.lut` tardan 16 s, de los cuales 13 son e
 por Laplace con 30 casos y n <= 4, por las llamadas de ida y vuelta a Python en cada entrada
 de cada menor. Un evaluador con entornos (normalización por evaluación) bajaría el costo de
 lo nativo de cuadrático a lineal; sigue pendiente el caso 2 (dimensiones en el tipo).
+
+## 21. Evaluador con entornos y llamada por necesidad (resuelto el 2026-10-02)
+
+`machine.py` evalúa términos cerrados a valores: una función es una clausura (cuerpo y
+entorno), un argumento es un thunk que se calcula la primera vez que se pide y queda
+guardado, y una constante global se calcula una sola vez por corrida. Las posiciones de cola
+(cuerpo de una clausura aplicada, rama elegida de un match) corren en un bucle. Lo usan los
+casos de las leyes y `eval`; el checker sigue con sustitución para los tipos, que son chicos y
+tienen variables libres. Lo que la máquina no maneja (variable libre, hueco sin llenar, nodo
+previo a la elaboración) cae al evaluador por sustitución; con `LUTHIER_TRACE_FALLBACK=1` se
+ve cada caída. Dos presupuestos: `fuel` (checker, 200 000) y `run_fuel` (ejecución, 50
+millones, `--fuel`). Medido en sonolocalización:
+
+| corrida | antes | ahora |
+|---|---|---|
+| intercambiabilidad, 50 casos | ~25 s | 2,5 s |
+| calibración, 5 casos de 400 actualizaciones | 5 min y `--fuel` | 39 s |
+| distances_python.lut completo | ~2 min | 13 s |
+| tests de Luthier | 5 s | 3,4 s |
+
+Y los `match` que forzaban argumentos en `belief.lut` dejaron de hacer falta: la versión
+directa tarda lo mismo. Los casos 2 y 17 quedan resueltos en costo; falta lo de las
+dimensiones en el tipo.
