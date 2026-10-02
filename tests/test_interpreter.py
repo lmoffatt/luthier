@@ -319,7 +319,7 @@ def test_n_is_isomorphic_to_the_nonnegative_ints():
     gens = gens_for(ck)
     r = run_test(ck, gens, "natIso", n=100, seed=5, deep=True)
     assert r.passed
-    assert [l.label for l in r.laws] == ["fromNat (toNat a) == a", "toNat (fromNat b) == b"]
+    assert [l.label for l in r.laws] == ["eqN (fromNat (toNat a)) a", "eqNat (toNat (fromNat b)) b"]
     assert r.laws[1].domains == ["Nat: genNat, size up to 16"]
 
 
