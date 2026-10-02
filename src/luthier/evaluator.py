@@ -509,7 +509,13 @@ def is_opaque_type(env: Env, ty: Optional[Term]) -> bool:
     if not isinstance(head, Var):
         return False
     d = env.defs.get(head.name)
-    return d is not None and isinstance(d.body, Extern) and isinstance(d.type, Univ)
+    if d is not None and isinstance(d.body, Extern) and isinstance(d.type, Univ):
+        return True
+    # an alias of an opaque type (`ThetaPos : U := Vec`) is opaque too
+    if d is not None and d.body is not None and not isinstance(d.body, Extern) and isinstance(d.type, Univ):
+        return is_opaque_type(env, d.body)
+    # a declared type without a body (an interface's carrier) holds environment values
+    return d is not None and d.body is None and d.data is None and isinstance(d.type, Univ)
 
 
 def _component(x, name: str, i: int):
