@@ -75,6 +75,10 @@ class Parser:
     def at_sym(self, text) -> bool:
         return self.at("symbol", text)
 
+    def _peek_is_sym_after_name(self, text) -> bool:
+        t = self.peek(1)
+        return t.kind == "symbol" and t.text == text
+
     def at_kw(self, text) -> bool:
         return self.at("keyword", text)
 
@@ -482,12 +486,37 @@ class Parser:
 
     def parse_brace(self) -> Term:
         """Subtype: { x : T | p }  or  { a b : A, c : B | p }.
-        Component groups are separated by ',', ';' or a line break; the predicate follows '|'."""
+        Component groups are separated by ',', ';' or a line break; the predicate follows '|'.
+        Record literal: { a := x, b := y }, fields by name, checked against a type with those
+        components."""
         self.expect("symbol", "{")
         saved = self.skip_newlines
         self.skip_newlines = 0
         self.strict_newlines += 1
         self._skip_raw_newlines()
+        if self.at("name") and self._peek_is_sym_after_name(":="):
+            fields = []
+            while True:
+                name = self.expect("name").text
+                self.expect("symbol", ":=")
+                self.skip_newlines = saved + 1
+                val = self.parse_term()
+                self.skip_newlines = 0
+                fields.append((name, val))
+                self._skip_raw_newlines()
+                if self.at_sym(",") or self.at_sym(";"):
+                    self.next()
+                    self._skip_raw_newlines()
+                    continue
+                if self.at_sym("}"):
+                    break
+                if self.at("name"):
+                    continue
+                self.err("expected another field or '}' in a record literal")
+            self.strict_newlines -= 1
+            self.skip_newlines = saved
+            self.expect("symbol", "}")
+            return RecordLit(tuple(fields))
         groups = []  # list of (names, type)
         while True:
             names = [self.expect("name").text]

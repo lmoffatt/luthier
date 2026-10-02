@@ -33,6 +33,11 @@ def free_vars(t: Term) -> set[str]:
         return free_vars(t.lhs) | free_vars(t.rhs)
     if isinstance(t, Forget):
         return free_vars(t.arg)
+    if isinstance(t, RecordLit):
+        out = set()
+        for _, v in t.fields:
+            out |= free_vars(v)
+        return out
     if isinstance(t, Proj):
         return free_vars(t.term)
     if isinstance(t, Subtype):
@@ -75,6 +80,8 @@ def subst(t: Term, mapping: dict[str, Term]) -> Term:
         return And(subst(t.lhs, mapping), subst(t.rhs, mapping))
     if isinstance(t, Forget):
         return Forget(subst(t.arg, mapping))
+    if isinstance(t, RecordLit):
+        return RecordLit(tuple((n, subst(v, mapping)) for n, v in t.fields))
     if isinstance(t, Proj):
         return Proj(subst(t.term, mapping), t.field)
     if isinstance(t, Lam):
@@ -148,6 +155,8 @@ def map_names(t: Term, f) -> Term:
         return And(map_names(t.lhs, f), map_names(t.rhs, f))
     if isinstance(t, Forget):
         return Forget(map_names(t.arg, f))
+    if isinstance(t, RecordLit):
+        return RecordLit(tuple((n, map_names(v, f)) for n, v in t.fields))
     if isinstance(t, Proj):
         return Proj(map_names(t.term, f), t.field)
     if isinstance(t, Lam):
@@ -203,6 +212,8 @@ def alpha_normalize(t: Term) -> Term:
             return And(go(t.lhs, env), go(t.rhs, env))
         if isinstance(t, Forget):
             return Forget(go(t.arg, env))
+        if isinstance(t, RecordLit):
+            return RecordLit(tuple((n, go(v, env)) for n, v in t.fields))
         if isinstance(t, Proj):
             return Proj(go(t.term, env), t.field)
         if isinstance(t, Lam):

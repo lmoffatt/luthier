@@ -123,6 +123,13 @@ class Forget(Term):
 
 
 @dataclass(frozen=True)
+class RecordLit(Term):
+    """`{ a := x, b := y }`: a value of a type with named components, given by name. It takes
+    its shape from the type it is checked against and elaborates to the pair chain."""
+    fields: tuple  # of (name, Term)
+
+
+@dataclass(frozen=True)
 class Proj(Term):
     """`t.field` before elaboration: a component of a value whose type names its components.
     Elaborates to a one-branch match on the type's component pattern."""

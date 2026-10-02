@@ -118,6 +118,8 @@ def pp(t, prec: int = 0) -> str:
     if isinstance(t, Forget):
         s = "forget " + pp(t.arg, APP + 1)
         return f"({s})" if prec > APP else s
+    if isinstance(t, RecordLit):
+        return "{ " + ", ".join(f"{n} := {pp(v)}" for n, v in t.fields) + " }"
     if isinstance(t, Subtype):
         return "{ " + pp_pat(t.param) + " : " + pp(t.base) + " | " + pp(t.pred) + " }"
     if isinstance(t, Proj):

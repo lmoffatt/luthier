@@ -17,7 +17,7 @@ import importlib
 from .syntax import *
 from .subst import subst, fresh, free_vars
 from .pretty import pp, pp_pat
-from .evaluator import (Env, ExternInfo, Fuel, whnf, conv, unapply, apply, as_bool,
+from .evaluator import (Env, ExternInfo, Fuel, whnf, conv, unapply, apply, as_bool, record_components,
                         EvalError, BUILTIN_TYPES)
 
 
@@ -314,6 +314,8 @@ class Checker:
             if t.type is None:
                 self.err("an extern needs its type from the context: use it where the expected type is known")
             return t, t.type
+        if isinstance(t, RecordLit):
+            self.err("a record literal needs its type from the context: use it where the expected type is known")
         if isinstance(t, App):
             return self.infer_app(ctx, t)
         if isinstance(t, Lam):
@@ -497,6 +499,25 @@ class Checker:
     # ---------------------------------------------------------------- check
     def check(self, ctx: Ctx, t: Term, ty: Term) -> Term:
         w = self.whnf(ty)
+        if isinstance(t, RecordLit):
+            rc = record_components(self.env, ty)
+            if rc is None:
+                self.err(f"a record literal needs a type with named components, not {pp(ty)}")
+            hname, names, _ = rc
+            given = dict(t.fields)
+            if len(given) != len(t.fields):
+                self.err(f"a field is given twice in a {hname} literal")
+            missing = [n for n in names if n not in given]
+            extra = [n for n in given if n not in names]
+            if missing or extra:
+                self.err(f"{hname} literal: missing {missing}, unknown {extra}" if missing and extra
+                         else f"{hname} literal: missing fields {missing}" if missing
+                         else f"{hname} literal: unknown fields {extra}")
+            vals = [given[n] for n in names]
+            term = vals[-1]
+            for v in reversed(vals[:-1]):
+                term = Pair(v, term)
+            return self.check(ctx, term, ty)
         if isinstance(t, Extern) and t.type is None:
             # an extern inside a term takes the expected type, as a definition takes its declared one
             if isinstance(w, Univ):
