@@ -204,3 +204,17 @@ por los tipos declarados). Nuevo: cuando el predicado de un subtipo es una ley c
 (`Causal waveform` en `Emitter`), el generador por rechazo no podía decidirla; ahora la prueba
 con unos pocos argumentos generados y rechaza el valor ante un contraejemplo. Certificar la
 ley sigue siendo tarea de la obligación, no del generador.
+
+## 20. Evaluador con entornos: lista de deseos urgente (2026-10-02)
+
+Decidido con Luciano al escribir `lib/array.lut`. El evaluador reduce por sustitución (caso
+17) y eso limita todo lo nativo. Mientras tanto, los arreglos son opacos (`Vec`, `Mat` de
+numpy) y Luthier los ve por accesores (`at`, `entry`, `length`, `rows`, `cols`) y los
+construye por su dual (`tabulate`, `tabulateMat`): las definiciones nativas son recursiones
+sobre un índice, no sobre una lista, y el término que se reescribe es de tamaño constante.
+Regla adoptada: extern siempre; ley siempre; definición nativa solo cuando la ley no
+determina la operación (dot, det, una likelihood), no cuando la caracteriza (solve, autovector).
+Costo medido: las trece leyes de `array.lut` tardan 16 s, de los cuales 13 son el determinante
+por Laplace con 30 casos y n <= 4, por las llamadas de ida y vuelta a Python en cada entrada
+de cada menor. Un evaluador con entornos (normalización por evaluación) bajaría el costo de
+lo nativo de cuadrático a lineal; sigue pendiente el caso 2 (dimensiones en el tipo).

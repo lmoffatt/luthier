@@ -172,3 +172,15 @@ def cond(a):
 def frob(a):
     """Frobenius norm of a matrix."""
     return float(np.linalg.norm(np.asarray(a)))
+
+
+# ------------------------------------------------------------------ construction by index
+# The dual of the accessors: Python walks the indices and calls a Luthier function for each
+# entry, so a program can build an array without ever holding it as a list.
+
+def tabulate(n, f):
+    return np.array([float(f(k)) for k in range(int(n))])
+
+
+def tabulate_mat(m, n, f):
+    return np.array([[float(f(i, j)) for j in range(int(n))] for i in range(int(m))])
