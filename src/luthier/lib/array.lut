@@ -1,84 +1,86 @@
--- Vectors and matrices: the carriers, their leaves and their accessors.
+-- Vectors and matrices: the carriers, their leaves and their accessors. An interface: the
+-- carriers and the leaves are declared without a body, and `array_python.lut` binds them to
+-- numpy. Everything else here is written in Luthier over the leaves.
 --
--- A `Vec` or a `Mat` is a numpy array that passes through Luthier untouched. Luthier sees it
+-- A `Vec` or a `Mat` is a value Luthier does not take apart. Luthier sees it
 -- through accessors (`at`, `entry`, `length`, `rows`, `cols`, `row`) and builds it through their
 -- duals (`tabulate`, `tabulateMat`, `stack`): a program can define any operation as a recursion
--- over an index and never hold the array as a list. The leaves below are externs. What they
+-- over an index and never hold the array as a list. The leaves below have no body. What they
 -- mean is stated twice: by the definition `...Def` written through the accessors, when the laws
 -- alone would not pin the operation down (dot, det, matVec), and by the laws of the algebraic
 -- structures in `algebra.lut`, which the leaves instantiate. The laws `Agrees` certify that each
--- extern computes its definition within the rounding of n terms.
+-- implementation computes its definition within the rounding of n terms.
 --
 -- Shapes are not in the types (a design case): a mismatch is a runtime error from the
 -- environment, and the laws quantify over a `Frame` of compatible shapes.
 
 import "real"
 
-Vec : U := extern "python:numpy.ndarray"
-Mat : U := extern "python:numpy.ndarray"
+Vec : U
+Mat : U
 
 -- ---------------------------------------------------------------- accessors and their duals
-length : Vec -> Int := extern "python:luthier.arrays.length"
-rows   : Mat -> Int := extern "python:luthier.arrays.rows"
-cols   : Mat -> Int := extern "python:luthier.arrays.cols"
-at     : Vec -> Int -> R := extern "python:luthier.arrays.at"
-entry  : Mat -> Int -> Int -> R := extern "python:luthier.arrays.entry"
-row    : Mat -> Int -> Vec := extern "python:luthier.arrays.row"
-last   : Vec -> R := extern "python:luthier.arrays.last"
+length : Vec -> Int
+rows   : Mat -> Int
+cols   : Mat -> Int
+at     : Vec -> Int -> R
+entry  : Mat -> Int -> Int -> R
+row    : Mat -> Int -> Vec
+last   : Vec -> R
 
-tabulate    : Int -> (Int -> R) -> Vec := extern "python:luthier.arrays.tabulate"
-tabulateMat : Int -> Int -> (Int -> Int -> R) -> Mat := extern "python:luthier.arrays.tabulate_mat"
-stack       : Int -> (Int -> Vec) -> Mat := extern "python:luthier.arrays.stack"   -- row i is f i
+tabulate    : Int -> (Int -> R) -> Vec
+tabulateMat : Int -> Int -> (Int -> Int -> R) -> Mat
+stack       : Int -> (Int -> Vec) -> Mat   -- row i is f i
 
 -- ---------------------------------------------------------------- construction and pieces
-fromList : List R -> Vec := extern "python:luthier.arrays.from_list"
-toList   : Vec -> List R := extern "python:luthier.arrays.to_list"
-zeros    : Int -> Vec := extern "python:luthier.arrays.zeros"
-ones     : Int -> Vec := extern "python:luthier.arrays.ones"
-identity : Int -> Mat := extern "python:luthier.arrays.identity"
-head     : Vec -> Int -> Vec := extern "python:luthier.arrays.head"       -- the first n entries
-append   : Vec -> R -> Vec := extern "python:luthier.arrays.append"
-concat   : Vec -> Vec -> Vec := extern "python:luthier.arrays.concat"
+fromList : List R -> Vec
+toList   : Vec -> List R
+zeros    : Int -> Vec
+ones     : Int -> Vec
+identity : Int -> Mat
+head     : Vec -> Int -> Vec       -- the first n entries
+append   : Vec -> R -> Vec
+concat   : Vec -> Vec -> Vec
 
 -- ---------------------------------------------------------------- the leaves
-add   : Vec -> Vec -> Vec := extern "python:luthier.arrays.add"
-sub   : Vec -> Vec -> Vec := extern "python:luthier.arrays.sub"
-scale : R -> Vec -> Vec := extern "python:luthier.arrays.scale"
-dot   : Vec -> Vec -> R := extern "python:luthier.arrays.dot"
-norm  : Vec -> R := extern "python:luthier.arrays.norm"
-total : Vec -> R := extern "python:luthier.arrays.total"
-product : Vec -> R := extern "python:luthier.arrays.product"
-minimum : Vec -> R := extern "python:luthier.arrays.minimum"
-maximum : Vec -> R := extern "python:luthier.arrays.maximum"
+add   : Vec -> Vec -> Vec
+sub   : Vec -> Vec -> Vec
+scale : R -> Vec -> Vec
+dot   : Vec -> Vec -> R
+norm  : Vec -> R
+total : Vec -> R
+product : Vec -> R
+minimum : Vec -> R
+maximum : Vec -> R
 
-outer     : Vec -> Vec -> Mat := extern "python:luthier.arrays.outer"
-matVec    : Mat -> Vec -> Vec := extern "python:luthier.arrays.mat_vec"
-matMul    : Mat -> Mat -> Mat := extern "python:luthier.arrays.mat_mul"
-transpose : Mat -> Mat := extern "python:luthier.arrays.transpose"
-trace     : Mat -> R := extern "python:luthier.arrays.trace"
-det       : Mat -> R := extern "python:luthier.arrays.det"
-frob      : Mat -> R := extern "python:luthier.arrays.frob"
-cond      : Mat -> R := extern "python:luthier.arrays.cond"
-solve      : Mat -> Vec -> Vec := extern "python:luthier.arrays.solve"          -- x with A x = b
-eigvalsSym : Mat -> Vec := extern "python:luthier.arrays.eigvals_sym"           -- ascending
-invSqrtSym : Mat -> Mat := extern "python:luthier.arrays.inv_sqrt_sym"          -- M with M A M = I
+outer     : Vec -> Vec -> Mat
+matVec    : Mat -> Vec -> Vec
+matMul    : Mat -> Mat -> Mat
+transpose : Mat -> Mat
+trace     : Mat -> R
+det       : Mat -> R
+frob      : Mat -> R
+cond      : Mat -> R
+solve      : Mat -> Vec -> Vec          -- x with A x = b
+eigvalsSym : Mat -> Vec           -- ascending
+invSqrtSym : Mat -> Mat          -- M with M A M = I
 
-madd     : Mat -> Mat -> Mat := extern "python:luthier.arrays.madd"
-msub     : Mat -> Mat -> Mat := extern "python:luthier.arrays.msub"
-mscale   : R -> Mat -> Mat := extern "python:luthier.arrays.mscale"
-hadamard : Mat -> Mat -> Mat := extern "python:luthier.arrays.hadamard"       -- entrywise product
-maxAbs    : Vec -> R := extern "python:luthier.arrays.max_abs"
-maxAbsMat : Mat -> R := extern "python:luthier.arrays.max_abs"
-index    : Vec -> Int -> Int := extern "python:luthier.arrays.index"          -- entry k of whole numbers
+madd     : Mat -> Mat -> Mat
+msub     : Mat -> Mat -> Mat
+mscale   : R -> Mat -> Mat
+hadamard : Mat -> Mat -> Mat       -- entrywise product
+maxAbs    : Vec -> R
+maxAbsMat : Mat -> R
+index    : Vec -> Int -> Int          -- entry k of whole numbers
 
 -- n standard normals from a seed, and the next seed
-normalVec : Int -> Int -> Vec * Int := extern "python:luthier.arrays.normal_vec"
+normalVec : Int -> Int -> Vec * Int
 
 -- ---------------------------------------------------------------- comparison
 -- `==` does not decide on arrays. Entrywise |a - b| <= tol (1 + |a| + |b|).
-approxR   : R -> R -> R -> Bool := extern "python:luthier.arrays.approx"
-approxVec : R -> Vec -> Vec -> Bool := extern "python:luthier.arrays.approx"
-approxMat : R -> Mat -> Mat -> Bool := extern "python:luthier.arrays.approx"
+approxR   : R -> R -> R -> Bool
+approxVec : R -> Vec -> Vec -> Bool
+approxMat : R -> Mat -> Mat -> Bool
 
 -- The tolerance of a law: a sum of n products rounds to about n eps times the size of the
 -- terms, and the terms can cancel, so a law whose sides may be near zero scales its tolerance
@@ -88,7 +90,6 @@ roundingSlack : R := 8.0
 tolOf (n : Int) : R := roundingSlack * toR n * eps
 scaledTol (n : Int) (magnitude : R) : R := tolOf n * (1.0 + magnitude)
 
-sqrtR : R -> R := extern "python:math.sqrt"
 factorial (n : Int) : Int := if n <= 1 then 1 else n * factorial (n - 1)
 powR (x : R) (n : Int) : R := if n <= 0 then 1.0 else x * powR x (n - 1)
 
@@ -126,7 +127,6 @@ detDef (a : Mat) : R :=
 -- ---------------------------------------------------------------- the frame and the laws
 -- A is m x n, S is n x n symmetric positive definite, x and z have length n, y has length m.
 Frame : U := { A : Mat, S : Mat, x : Vec, z : Vec, y : Vec | true }
-gen Frame := extern "python:luthier.arrays.gen_frame"
 
 -- each leaf agrees with its definition, within the rounding of n terms
 DotAgrees (d : Vec -> Vec -> R) (f : Frame) : Bool :=
@@ -166,47 +166,3 @@ InvSqrtInverts (m : Mat -> Mat) (f : Frame) : Bool :=
   approxMat (cond f.S * tolOf (rows f.S * rows f.S)) (matMul (m f.S) (matMul f.S (m f.S))) (identity (rows f.S))
 ListRoundTrip (fl : List R -> Vec) (l : List R) : Bool := approxVec 0.0 (fl (toList (fl l))) (fl l)
 
--- ---------------------------------------------------------------- the certified leaves
-inner     : { d : Vec -> Vec -> R | DotAgrees d } := dot
-vnorm     : { nm : Vec -> R | NormAgrees nm } := norm
-vtotal    : { t : Vec -> R | TotalAgrees t } := total
-addition  : { ad : Vec -> Vec -> Vec | AddAgrees ad } := add
-subtraction : { sb : Vec -> Vec -> Vec | SubAgrees sb } := sub
-scaling   : { sc : R -> Vec -> Vec | ScaleAgrees sc } := scale
-outerProd : { o : Vec -> Vec -> Mat | OuterAgrees o } := outer
-action    : { mv : Mat -> Vec -> Vec | MatVecAgrees mv } := matVec
-mproduct  : { mm : Mat -> Mat -> Mat | MatMulAgrees mm } := matMul
-transposed : { tr : Mat -> Mat | TransposeAgrees tr } := transpose
-mtrace    : { t : Mat -> R | TraceAgrees t } := trace
-determinant : { dt : Mat -> R | DetAgrees dt } := det
-solver    : { sv : Mat -> Vec -> Vec | SolveInverts sv } := solve
-spectrum  : { ev : Mat -> Vec | EigenvaluesSumToTrace ev & EigenvaluesMultiplyToDet ev } := eigvalsSym
-invSqrt   : { m : Mat -> Mat | InvSqrtInverts m } := invSqrtSym
-embedding : { fl : List R -> Vec | ListRoundTrip fl } := fromList
-maddition : { f : Mat -> Mat -> Mat | MaddAgrees f } := madd
-msubtraction : { f : Mat -> Mat -> Mat | MsubAgrees f } := msub
-mscaling  : { f : R -> Mat -> Mat | MscaleAgrees f } := mscale
-entrywise : { f : Mat -> Mat -> Mat | HadamardAgrees f } := hadamard
-largest   : { f : Vec -> R | MaxAbsAgrees f } := maxAbs
-
-test inner with 100
-test vnorm with 100
-test vtotal with 100
-test addition with 100
-test subtraction with 100
-test scaling with 100
-test outerProd with 100
-test action with 100
-test mproduct with 100
-test transposed with 100
-test mtrace with 100
-test determinant with 30
-test solver with 100
-test spectrum with 100
-test invSqrt with 100
-test embedding with 100
-test maddition with 50
-test msubtraction with 50
-test mscaling with 50
-test entrywise with 50
-test largest with 100

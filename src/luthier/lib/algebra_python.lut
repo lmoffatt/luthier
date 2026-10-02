@@ -1,0 +1,22 @@
+-- The algebraic instances certified on the numpy implementation of the arrays.
+
+import "real"
+import "array"
+import "array_python"
+import "algebra"
+
+gen Vec := extern "python:luthier.arrays.gen_vec_fixed"
+gen Mat := extern "python:luthier.arrays.gen_mat_fixed"
+
+-- the laws need every generated vector of the same dimension
+lawDim : Int := 5
+
+vec5      : VectorSpace Vec := vecSpace lawDim
+euclid5   : InnerProductSpace Vec := euclidean lawDim
+matrices5 : LinearMaps Vec Mat := matrices lawDim
+
+test intRing with 100
+test realField with 100
+test vec5 with 50
+test euclid5 with 50
+test matrices5 with 50

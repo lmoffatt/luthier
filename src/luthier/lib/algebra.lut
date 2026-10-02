@@ -12,7 +12,8 @@
 -- for the magnitudes the generators produce (size 16), and say so in their tolerance.
 --
 -- Dimensions are not in the types (a design case), so the vector space instances take the
--- dimension as a value and the generators for their laws produce that one dimension.
+-- dimension as a value. The instances are written over the leaves of array.lut; they are
+-- certified in algebra_python.lut, where the leaves and the generators are bound.
 
 import "real"
 import "array"
@@ -172,17 +173,3 @@ euclidean (n : Int) : InnerProductSpace Vec := { space := vecSpace n, eqR := eqR
 matrices (n : Int) : LinearMaps Vec Mat := {
   on := euclidean n, apply := matVec, compose := matMul, id := identity n, adjoint := transpose }
 
--- the laws need every generated vector of the same dimension
-lawDim : Int := 5
-gen Vec := extern "python:luthier.arrays.gen_vec_fixed"
-gen Mat := extern "python:luthier.arrays.gen_mat_fixed"
-
-vec5      : VectorSpace Vec := vecSpace lawDim
-euclid5   : InnerProductSpace Vec := euclidean lawDim
-matrices5 : LinearMaps Vec Mat := matrices lawDim
-
-test intRing with 100
-test realField with 100
-test vec5 with 50
-test euclid5 with 50
-test matrices5 with 50

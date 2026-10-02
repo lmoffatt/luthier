@@ -4,6 +4,10 @@
 abs  : R -> R := extern "python:builtins.abs"
 toR  : Int -> R := extern "python:builtins.float"
 ulp  : R -> R := extern "python:math.ulp"         -- the distance to the next double
+sqrtR : R -> R := extern "python:math.sqrt"
+cbrtR : R -> R := extern "python:math.cbrt"
+expR  : R -> R := extern "python:math.exp"
+logR  : R -> R := extern "python:math.log"
 
 -- the machine epsilon: the ulp of one, 2^-52. The rounding error of one operation is at
 -- most half of it; of a sum of n terms, about n times it.

@@ -1,0 +1,504 @@
+{
+  "vec5": {
+    "hash": "07f12239f6496147",
+    "when": "2026-10-02T20:09:22",
+    "passed": true,
+    "seed": 1525396067,
+    "run_seed": 7,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "Frame",
+        "Mat",
+        "Vec"
+      ]
+    },
+    "laws": [
+      {
+        "label": "Reflexive Vec eqVec",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "Symmetric Vec eqVec",
+        "params": [
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "Associative Vec eqVec add",
+        "params": [
+          "x : Vec",
+          "y : Vec",
+          "z : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "Commutative Vec eqVec add",
+        "params": [
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "LeftIdentity Vec eqVec add (zeros lawDim)",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "LeftInverse Vec eqVec add (zeros lawDim) (scale (0.0 - 1.0))",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "ScaleAssociates Vec eqVec scale",
+        "params": [
+          "a : R",
+          "b : R",
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = 0.1903165266597011, b = -0.9967195884059432, x = <ndarray (5,)>",
+          "a = -0.5970171225619683, b = -0.22861896705231022, x = <ndarray (5,)>",
+          "a = -0.498279779252641, b = 0.5247946188091068, x = <ndarray (5,)>",
+          "a = 0.2076508962590382, b = 0.4113423585746776, x = <ndarray (5,)>",
+          "a = 1.3209830219338543, b = -0.3025211407412862, x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "ScaleUnit Vec eqVec scale",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "ScaleDistribV Vec eqVec add scale",
+        "params": [
+          "a : R",
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = 0.21378007152019496, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = 0.5984610555426289, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = -0.5261809074344985, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = -0.2736714180500137, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = -1.8182481954286511, x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "ScaleDistribR Vec eqVec add scale",
+        "params": [
+          "a : R",
+          "b : R",
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = 0.1187569188479376, b = -0.3341035251874027, x = <ndarray (5,)>",
+          "a = 0.9696778447185288, b = -0.3264231166063649, x = <ndarray (5,)>",
+          "a = -0.03350836895969489, b = 0.3233998224820245, x = <ndarray (5,)>",
+          "a = -0.8461412059631734, b = -0.4175873834584287, x = <ndarray (5,)>",
+          "a = 1.2494040355283893, b = 0.34535746292123104, x = <ndarray (5,)>"
+        ]
+      }
+    ]
+  },
+  "euclid5": {
+    "hash": "dab1a221b1a82895",
+    "when": "2026-10-02T20:09:22",
+    "passed": true,
+    "seed": 1029634384,
+    "run_seed": 7,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "Frame",
+        "Mat",
+        "Vec"
+      ]
+    },
+    "laws": [
+      {
+        "label": "SymmetricForm Vec eqR dot",
+        "params": [
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "BilinearAdd Vec eqR (vecSpace lawDim).add dot",
+        "params": [
+          "x : Vec",
+          "y : Vec",
+          "z : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>",
+          "x = <ndarray (5,)>, y = <ndarray (5,)>, z = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "BilinearScale Vec eqR (vecSpace lawDim).scale dot",
+        "params": [
+          "a : R",
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = 0.9498325322969607, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = -0.34019258157925236, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = 0.43984809373695466, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = 0.5182497125363432, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = -0.21064899201434129, x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "PositiveForm Vec (vecSpace lawDim).eq (vecSpace lawDim).zero dot",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>"
+        ]
+      }
+    ]
+  },
+  "matrices5": {
+    "hash": "43480cfe329845b4",
+    "when": "2026-10-02T20:09:22",
+    "passed": true,
+    "seed": 642063476,
+    "run_seed": 7,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "Frame",
+        "Mat",
+        "Vec"
+      ]
+    },
+    "laws": [
+      {
+        "label": "ActsLinearlyAdd Vec Mat (euclidean lawDim).space.eq (euclidean lawDim).space.add matVec",
+        "params": [
+          "a : Mat",
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Mat: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "ActsLinearlyScale Vec Mat (euclidean lawDim).space.eq (euclidean lawDim).space.scale matVec",
+        "params": [
+          "a : Mat",
+          "c : R",
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Mat: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = <ndarray (5, 5)>, c = -0.6167085269251638, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, c = -0.6167870095246872, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, c = -0.5701430601023836, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, c = -0.8552350243284987, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, c = -0.8119655096551277, x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "ComposeActs Vec Mat (euclidean lawDim).space.eq matVec matMul",
+        "params": [
+          "a : Mat",
+          "b : Mat",
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Mat: registered Python generator, size up to 16",
+          "Mat: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = <ndarray (5, 5)>, b = <ndarray (5, 5)>, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, b = <ndarray (5, 5)>, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, b = <ndarray (5, 5)>, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, b = <ndarray (5, 5)>, x = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, b = <ndarray (5, 5)>, x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "IdentityActs Vec Mat (euclidean lawDim).space.eq matVec (identity lawDim)",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>",
+          "x = <ndarray (5,)>"
+        ]
+      },
+      {
+        "label": "AdjointOfInner Vec Mat (euclidean lawDim).eqR (euclidean lawDim).inner matVec transpose",
+        "params": [
+          "a : Mat",
+          "x : Vec",
+          "y : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Mat: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16",
+          "Vec: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
+          "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      }
+    ]
+  }
+}
