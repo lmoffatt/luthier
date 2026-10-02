@@ -255,11 +255,12 @@ class Checker:
         self.env.externs[target] = ExternInfo(fn, pi_arity(base), base)
 
     def pi_chain(self, ty: Term) -> Term:
-        """The type with subtypes stripped and each Pi exposed, so arity and result type can be read."""
+        """Each arrow exposed (a subtype of a function type is seen as the function type), so
+        arity can be read; domains and the final result keep their declared types."""
         w = self.whnf(self.base_type(ty))
         if isinstance(w, Pi):
             return Pi(w.name, w.dom, self.pi_chain(w.cod))
-        return w
+        return ty
 
     # ---------------------------------------------------------- obligations
     def add_obligation(self, ctx: Ctx, term: Term, label: str):
@@ -287,6 +288,10 @@ class Checker:
             if q is None:
                 if t.name in ("__nil__", "__cons__"):
                     self.err("a list literal needs an expected type or a first element")
+                if "." in t.name:
+                    dotted = self.infer_dotted(ctx, t.name)
+                    if dotted is not None:
+                        return dotted
                 self.err(f"unbound name {t.name}")
             if q in self.env.cons:
                 return Con(q), self.env.cons[q][1]
@@ -384,7 +389,70 @@ class Checker:
             return Subtype(param, base, pred), Univ()
         if isinstance(t, Match):
             return self.check_match(ctx, t, None)
+        if isinstance(t, Proj):
+            base, bty = self.infer(ctx, t.term)
+            return self.project(ctx, base, bty, t.field)
         self.err(f"cannot infer {t!r}")
+
+    # ---------------------------------------------------------- projections
+    def infer_dotted(self, ctx: Ctx, name: str):
+        """`a.b.c` that is not a qualified name: the longest prefix that is a variable or a
+        definition, then one projection per remaining segment. A module is a record whose
+        components are its definitions, so qualification and projection share the dot; the
+        whole name is tried first, which is what makes a module alias win."""
+        segs = name.split(".")
+        for k in range(len(segs) - 1, 0, -1):
+            prefix, fields = ".".join(segs[:k]), segs[k:]
+            ty = lookup(ctx, prefix) if k == 1 else None
+            if ty is not None:
+                term = Var(prefix)
+            else:
+                q = self.resolve(prefix)
+                if q is None:
+                    continue
+                if q in self.env.cons:
+                    term, ty = Con(q), self.env.cons[q][1]
+                elif q in self.env.defs:
+                    term, ty = Var(q), self.env.defs[q].type
+                else:
+                    term, ty = Var(q), Univ()
+            for f in fields:
+                term, ty = self.project(ctx, term, ty, f)
+            return term, ty
+        return None
+
+    def project(self, ctx: Ctx, term: Term, ty: Term, field: str):
+        """`term.field` as a one-branch match on the component pattern of term's type. The type
+        of the component may mention earlier components; those become projections too."""
+        w = self.whnf(ty)
+        while isinstance(w, Subtype) and not isinstance(w.param, PPair):
+            w = self.whnf(w.base)          # a refinement { x : T | p } has the components of T
+        if not isinstance(w, Subtype):
+            self.err(f"{pp(term)} : {pp(ty)} has no named components, so .{field} means nothing")
+        names = pattern_vars(w.param)
+        hits = [n for n in names if n.split("~")[0] == field]
+        if not hits:
+            shown = ", ".join(n.split("~")[0] for n in names)
+            self.err(f"{pp(term)} : {pp(ty)} has no component {field}; its components are {shown}")
+        var = hits[0]
+
+        def keep_only(p: Pattern, name: str) -> Pattern:
+            if isinstance(p, PVar):
+                return p if p.name == name else PWild()
+            if isinstance(p, PPair):
+                return PPair(keep_only(p.fst, name), keep_only(p.snd, name))
+            if isinstance(p, PCon):
+                return PCon(p.name, tuple(keep_only(a, name) for a in p.args))
+            return p
+
+        proj = Match(term, ((keep_only(w.param, var), Var(var)),))
+        with self.silent():
+            _, ctx2 = self.bind_pattern(ctx, w.param, w.base)
+        fty = lookup(ctx2, var)
+        for n in names:
+            if n != var and n in free_vars(fty):
+                fty = subst(fty, {n: Match(term, ((keep_only(w.param, n), Var(n)),))})
+        return proj, fty
 
     def infer_app(self, ctx: Ctx, t: App):
         f, fty = self.infer(ctx, t.fn)
@@ -443,10 +511,11 @@ class Checker:
             a = self.check(ctx, t.fst, w.fst)
             b = self.check(ctx, t.snd, subst(w.snd, {w.name: a}))
             return Pair(a, b)
-        if isinstance(t, Match):
+        if isinstance(t, Match) and not isinstance(w, Subtype):
             term, _ = self.check_match(ctx, t, ty)
             return term
-        if isinstance(t, Var) and t.name == "__nil__" or (isinstance(t, App) and self._is_cons(t)):
+        if (isinstance(t, Var) and t.name == "__nil__" or (isinstance(t, App) and self._is_cons(t))) \
+                and not isinstance(w, Subtype):
             return self.check_list(ctx, t, w)
         if isinstance(w, Subtype):
             if self.inferable(t):
@@ -499,6 +568,8 @@ class Checker:
         self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected")
 
     def subtype_obligation(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):
+        if isinstance(sub.pred, Con) and sub.pred.name == "true":
+            return          # `{ a : A, b : B | true }` names components and states no law
         applied = App(Lam(sub.param, sub.pred, ann=sub.base), value)
         local = {n for n, _ in ctx}
         if not (free_vars(value) & local):

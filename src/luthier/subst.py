@@ -33,6 +33,8 @@ def free_vars(t: Term) -> set[str]:
         return free_vars(t.lhs) | free_vars(t.rhs)
     if isinstance(t, Forget):
         return free_vars(t.arg)
+    if isinstance(t, Proj):
+        return free_vars(t.term)
     if isinstance(t, Subtype):
         return free_vars(t.base) | (free_vars(t.pred) - set(pattern_vars(t.param)))
     if isinstance(t, Match):
@@ -73,6 +75,8 @@ def subst(t: Term, mapping: dict[str, Term]) -> Term:
         return And(subst(t.lhs, mapping), subst(t.rhs, mapping))
     if isinstance(t, Forget):
         return Forget(subst(t.arg, mapping))
+    if isinstance(t, Proj):
+        return Proj(subst(t.term, mapping), t.field)
     if isinstance(t, Lam):
         ann = subst(t.ann, mapping) if t.ann is not None else None
         p, body = _under_binder(t.param, t.body, mapping)
@@ -144,6 +148,8 @@ def map_names(t: Term, f) -> Term:
         return And(map_names(t.lhs, f), map_names(t.rhs, f))
     if isinstance(t, Forget):
         return Forget(map_names(t.arg, f))
+    if isinstance(t, Proj):
+        return Proj(map_names(t.term, f), t.field)
     if isinstance(t, Lam):
         return Lam(map_pattern_names(t.param, f), map_names(t.body, f),
                    map_names(t.ann, f) if t.ann is not None else None)
@@ -197,6 +203,8 @@ def alpha_normalize(t: Term) -> Term:
             return And(go(t.lhs, env), go(t.rhs, env))
         if isinstance(t, Forget):
             return Forget(go(t.arg, env))
+        if isinstance(t, Proj):
+            return Proj(go(t.term, env), t.field)
         if isinstance(t, Lam):
             ann = go(t.ann, env) if t.ann is not None else None
             env2 = dict(env)

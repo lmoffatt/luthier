@@ -1,0 +1,206 @@
+# Casos de diseño que trajo Sonolocalización
+
+2026-09-30. Lo que apareció al escribir `~/Projects/sonolocalizacion/luthier/*.lut` sobre
+`sonolik` (trazas, ruido, ventana, escena sintética), con el commit `49cab6e` de Luthier.
+El trato de la nota de traspaso: Sonolocalización define las leyes; lo que no se puede
+expresar vuelve acá. Cada caso dice qué se quiso escribir, qué se escribió en su lugar, y
+qué le faltaría a Luthier. El resultado del lado de Sonolocalización: seis archivos (uno solo de
+declaraciones), 33 leyes certificadas, un hallazgo sobre el dominio de una postcondición (la identidad
+Cov = ρ/2 vale solo donde el template cae dentro de la ventana), y estos nueve casos.
+
+## 1. Resolución de `extern` relativa al archivo
+
+`luthier check luthier/traza.lut` falla con `No module named 'sonolik'` aunque se corra
+desde la raíz del proyecto: el script de consola pone su propio directorio en `sys.path`,
+no el de trabajo. Funciona con `PYTHONPATH=.` o con `python -m luthier.cli`. Propuesta:
+agregar a `sys.path` el directorio del `.lut` que declara el `extern` (y quizás el de
+trabajo), o admitir una forma relativa `extern "python:./sonolik.trace.gcc"`.
+
+## 2. Leyes sobre arreglos
+
+Quise escribir "la grilla de retardos es estrictamente creciente y de paso uniforme" y
+"ningún bin del espectro es cero". Son `forall` sobre los elementos de un arreglo de
+decenas de miles de valores. Pasarlo como `List R` lo marshalea entero a cons/nil y lo
+recorre en el intérprete; con 131 072 puntos no es viable. Quedaron como predicados
+`extern` (`lagsUniform : Trace -> Bool`, `psdMin : NoisePSD -> R`), o sea la ley se corre
+en Python y Luthier solo la nombra. Faltaría un tipo indexado (`Vec n R` o un opaco con
+`length` y `at`) y un `forall` que Luthier evalúe llamando al `at` sin desarmar el valor,
+o una forma declarada de delegar el cuantificador al entorno y que el certificado lo diga.
+
+## 3. Leyes estadísticas
+
+Las dos postcondiciones centrales de `gcc` son sobre esperanzas: E[g(τ)] = a ρ(τ − τ₀) y
+Cov[g(t₁), g(t₂)] = ρ(t₁ − t₂)/2. Una esperanza se mide promediando realizaciones del
+ruido. Luthier no tiene ese cuantificador, así que el promedio lo hace Python
+(`ensemble_mean_error(scene, n)`) y la ley quedó enunciada sobre el estadístico de
+conjunto, `MeanLaw := { e : Scene -> Int -> R | e s 200 < 0.03 }`, no sobre el
+correlador. Es honesto pero desplaza el sujeto de la ley. Lo que haría falta es la
+equivalencia estadística `a ≈ b` con umbral y muestra de `00-elementos-fundamentales.md`
+sección 4, como cuantificador "sobre n realizaciones de la variable aleatoria x", con `n`
+registrado en el certificado.
+
+Un intento intermedio no funcionó: pasar el correlador (`f : Signal -> ... -> Trace`) a
+un `extern` de orden superior para que Python promedie llamándolo. `to_python` convierte
+una lambda en un callable, pero cuando Python la llama con un arreglo, `from_python(x,
+None)` no tiene el tipo y desarma el arreglo en una lista de literales; y un objeto opaco
+sin tipo no vuelve. Con el tipo de la lambda a mano (lo tiene el checker) los argumentos
+podrían entrar como opacos.
+
+## 4. Contraejemplos opacos
+
+Cuando una ley sobre `Scene` falla, el certificado dice `counterexample: s = <Scene>`. No
+se puede reproducir el caso salvo repitiendo toda la corrida con `--seed` y `--show-cases`
+hasta llegar a él. Dos remedios compatibles: un `show` registrable por tipo opaco (`show
+Scene := extern "python:...describe_scene"`) que el certificado use al imprimir, y guardar
+por caso la semilla con que el generador lo produjo, así `luthier eval` puede regenerarlo.
+
+## 5. Leyes sobre una corrida concreta
+
+Las etapas 00 a 04 del experimento cero corren sobre las sesiones A y B. La afirmación que
+importa ("el rms horizontal contra la cinta es menor que 5 cm") es sobre esos datos, y se
+comprueba una vez. Luthier v0 tiene un solo modo de comprobación, casos generados, y no
+hay forma de declarar `Passes validacionA 5.0` y certificarlo como instancia, con el hash
+de los datos de entrada además del de la definición. Es el `Veredicto` que la gramática
+deja abierto (sección 7): el modo (muestreado con `n`, exhaustivo, instancia, demostración)
+lo cierra el `test` y lo registra el certificado. Sin esto, la parte de Sonolocalización
+que más pide certificación, la del campo, no se puede luthierizar.
+
+## 6. Objetos que son archivos
+
+La idea original de luSono: los objetos son archivos y cada sentencia es una línea de
+bash (`python 02_fine_peaks.py --session A`). Para eso hace falta: un tipo con
+instanciación (el mismo `Peaks` como npz, como csv), funciones que cambien la
+instanciación, y un `extern` que corra un proceso con argumentos y lea su salida, con el
+hash del archivo producido en el certificado. `pipeline.lut` en Sonolocalización deja
+las etapas como huecos tipados para que se vea la forma; ninguna corre.
+
+## 7. Obligación dentro de un `match`
+
+Escribí el generador de un subtipo de `Int` como en `random.lut`:
+
+    Oversample : U := { k : Int | 4 <= k and k <= 32 }
+    genOversample : Gen Oversample := \ size s { match randBelow 29 s { (k, s2) -> (4 + k, s2) } }
+
+La coerción de `4 + k` a `Oversample` dentro de la rama dejó la ley
+`4 <= 4 + k and 4 + k <= 32` con `k` cuantificado libremente, y `test` la refutó con
+`k = -1`. La obligación perdió que `k` es la primera componente de `randBelow 29 s`, que
+está en `[0, 29)`. Escrito como `\ size s { genIntBetween 4 32 size s }`, la coerción cae
+sobre el par entero y la ley queda sobre `size` y `s`, que es la correcta, y pasa. Es un
+caso del refinamiento `|>` de la gramática (sección 5): dentro de la rama, la ley debería
+poder asumir lo que el `match` estableció sobre las variables del patrón, o al menos la
+obligación debería cuantificar sobre el escrutinado y no sobre las variables del patrón.
+
+## 8. Subtipo por patrón
+
+`{ (lo, hi) : R * R | 0.0 < lo and lo < hi }` está en la gramática (sección 4) y da
+`parse error: expected 'name', got '('`. La forma con componentes nombradas
+`{ lo : R, hi : R | ... }` funciona. O se implementa el patrón, o se saca de la gramática.
+
+## 9. Un generador de Python saltea el predicado
+
+`gen T := extern "python:..."` registra la función y `Generators.sample` devuelve lo que
+produce sin evaluar el predicado de `T`. Con `Nperseg : { k : Int | 256 <= k and k <= 8192 }`
+y un generador de Python, cualquier entero habría pasado como `Nperseg` sin aviso. El
+generador escrito en Luthier sí deja obligación (caso 7), así que la asimetría es de
+confianza: lo de Python se cree, lo de Luthier se comprueba. Dos salidas: comprobar el
+predicado sobre lo que devuelve Python (y contarlo como rechazo), o marcar en el
+certificado que ese dominio es una afirmación externa sin certificado.
+
+## 10. El producto de tipos asocia distinto que la tupla
+
+`Position : U := R * R * R` se parsea como `(R * R) * R`, pero la tupla `(x, y, z)` y el
+patrón `(x, y, z)` asocian a la derecha, `(x, (y, z))`. Entonces `match p { (x, y, z) -> ... }`
+sobre ese tipo falla con `tuple pattern (y, z) against non-pair type R`. Escribiendo el tipo
+como `R * (R * R)` funciona. La gramática dice que el par asocia a la derecha; el `*` sobre
+tipos debería hacer lo mismo, o el desazucarado de la tupla debería seguir al tipo.
+
+## 11. El orden de las definiciones importa
+
+`00-elementos-fundamentales.md` dice que un programa es un conjunto de definiciones sin
+orden y que las dependencias se leen de los nombres. El verificador de v0 chequea en el
+orden del archivo: usar `distance` antes de definirla da `unbound name distance`. O se hace
+una pasada previa que junte las firmas, o se documenta que el orden es el del archivo.
+
+## 12. Un literal de lista contra un subtipo se rechaza
+
+`d : NormDist Position := [((0.0, 0.0, 0.0), 0.25), ((1.0, 0.0, 0.0), 0.75)]` da
+`a list literal was given but { d : Dist Position | Normalised Position d } was expected`.
+Declarando primero `d0 : Dist Position := [...]` y después `d : NormDist Position := d0`, el
+valor cerrado se comprueba contra el predicado y se acepta. El azúcar de lista debería
+coercionarse igual que un nombre.
+
+## 13. Un predicado trivialmente verdadero deja una obligación pendiente
+
+`Scene : U := { frame : Frame, ... | true }` existe porque las componentes nombradas solo
+se escriben en la forma de subtipo. Cada función que construye una `Scene`
+(`withEmitters : Scene`) aparece como pendiente de test aunque su ley sea `true`. O se
+descarga `true` al verificar, o hace falta una forma de registro sin predicado.
+
+## 14. Acceso a componentes con nombre (resuelto el 2026-10-01)
+
+Sin proyección, cada tipo con componentes nombradas arrastraba una función por componente
+(`positionOf`, `receiverPosition`, `clockOf`, `fsOf`...), con nombres globales que chocaban
+entre tipos y un programa que parecía Java. Se implementó `e.position` como azúcar del
+`match` de una rama sobre el patrón del tipo, con el mismo punto de la calificación de
+módulos: un módulo es un registro cuyas componentes son sus definiciones, así que no hace
+falta `::`. De paso el subtipo con componentes nombradas pasó a ser un producto dependiente.
+Ver la sección 8 de la gramática.
+
+## 14. `gen` solo acepta un nombre, y busca el generador por el tipo tal como está escrito
+
+`gen Probability Position := genProb` es error de sintaxis, y `gen (Probability Position)`
+también. Hay que definir un alias, `PositionProbability : U := Probability Position`, y
+registrar `gen PositionProbability := ...`. Pero el generador se busca por el tipo tal como
+está escrito en la ley: una ley sobre `p : Probability Position` no encuentra el generador
+del alias, así que todo el programa tiene que escribir el alias. Dos arreglos posibles: que
+`gen` acepte un término de tipo, o que la búsqueda normalice el tipo antes de comparar.
+
+## 15. Un `extern` no puede ser un atributo de módulo
+
+`eps : R := extern "python:sys.float_info.epsilon"` falla con `No module named
+'sys.float_info'`: la resolución parte en el último punto y lo anterior tiene que ser un
+módulo importable. Se resolvió con `ulp : R -> R := extern "python:math.ulp"` y `eps := ulp 1.0`.
+La forma `módulo:atributo.atributo` existe en el código pero no está documentada.
+
+## 16. Una obligación cuantificada sobre un tipo no se puede testear, y la instancia no la hereda
+
+`pushforward (A B : U) (f : A -> B) (p : Probability A) : Probability B := mapMeasure A B f p`
+deja la obligación "el resultado suma uno" cuantificada sobre `A` y `B`, y `test` falla con
+`no generator for U`. Es la ley del functor y es verdadera por construcción (los pesos no se
+tocan), así que es candidata a `probado` más que a `testeado`. La salida natural, declarar
+una instancia `shiftBy (v : Position) (p : PositionProbability) : PositionProbability :=
+pushforward ... p`, no sirve: como el cuerpo ya tiene el tipo declarado, la instancia no
+genera obligación ("no laws"). Hubo que escribir la ley a mano como predicado sobre la
+instancia (`ShiftSumsToOne`) y un subtipo `Functorial`. Propuesta: que una instancia de una
+definición con obligaciones pendientes sobre tipos herede esas obligaciones, especializadas.
+
+## 17. El costo de los valores de lista
+
+Normalizar una lista de cuarenta celdas `(Position * Weight)` y comprobar que suma uno
+tarda unos diez segundos por caso en el intérprete: dos casos de `test shift`, 23 s. Con
+cien casos por ley, veinte minutos. El generador quedó en diez celdas. El evaluador reduce
+por sustitución, y cada paso recorre el término entero; con listas de decenas de elementos
+eso es cuadrático o peor. Es el mismo problema del caso 2 visto desde el costo: hace falta
+un evaluador con entornos, o un primitivo de arreglo que no se desarme en cons.
+
+## 18. `R` no estaba definido en ningún lado (resuelto)
+
+`Prob`, `Density` y `Nats` son subtipos de `R`, y `R` no era una definición sino un nombre
+cableado en el intérprete (`BUILTIN_TYPES`), contra la sección 1 de la gramática. Resuelto
+el mismo día: `Int`, `R` y `String` son huecos declarados en `core.lut`; el intérprete los
+llena con literales, aritmética y comparaciones y reserva solo `Law`. Lo que falta es lo que
+pide `00-elementos` sección 3: `R` como estructura con sus operaciones como funciones y sus
+leyes (aproximadas, porque es un double), de las que `eps` en `real.lut` es la primera.
+
+## 19. El plan B, y lo que cerró (2026-10-01, noche)
+
+`luthier.load` carga un programa desde Python; `Program.fill(nombre, fn)` llena un hueco con
+una función de Python (aridad del tipo, firma chequeada); `eval`, `test`, `blocked_by`,
+`record`. Los registros cruzan como dataclasses, las listas por su tipo de elemento, las
+funciones como callables tipados en los dos sentidos. Al hacerlo se cerraron los casos 12 (un
+literal de lista contra un subtipo se acepta y deja la obligación) y 13 (`| true` no deja
+obligación), y el 3 en parte (una función de Luthier pasada a Python recibe sus argumentos
+por los tipos declarados). Nuevo: cuando el predicado de un subtipo es una ley cuantificada
+(`Causal waveform` en `Emitter`), el generador por rechazo no podía decidirla; ahora la prueba
+con unos pocos argumentos generados y rechaza el valor ante un contraejemplo. Certificar la
+ley sigue siendo tarea de la obligación, no del generador.

@@ -24,7 +24,10 @@ class OutOfFuel(EvalError):
     pass
 
 
-BUILTIN_TYPES = ("Int", "R", "String", "Law")
+# `Law` is the interpreter's own: the type of a conjunction of quantified laws. Int, R and
+# String are declared in core.lut as holes the environment fills; the interpreter supplies
+# their literals, arithmetic and comparisons.
+BUILTIN_TYPES = ("Law",)
 
 
 @dataclass
@@ -182,8 +185,17 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
                 d = env.defs[t.name]
                 if d.body is not None and d.data is None:
                     body = d.body
-                    # constants unfold freely; functions and externs unfold only when applied (see App)
-                    if isinstance(body, (Lam, Extern)):
+                    # constants unfold freely; functions and externs unfold only when applied (see App),
+                    # except an extern of arity zero, which is a constant the environment provides
+                    if isinstance(body, Extern):
+                        info = env.externs.get(body.target)
+                        if info is not None and info.arity == 0:
+                            r = try_extern(env, body, [], fuel)
+                            if r is not None:
+                                t = r
+                                continue
+                        return t
+                    if isinstance(body, Lam):
                         return t
                     fuel.tick()
                     t = body
@@ -308,14 +320,17 @@ def try_extern(env: Env, head: Extern, args, fuel: Fuel) -> Optional[Term]:
     if info is None or len(args) < info.arity:
         return None
     vals = []
+    ty = info.type
     for a in args[:info.arity]:
         v = nf(env, a, fuel)
         if free_vars(v) - set(env.defs) - set(env.datas):
             return None
-        py = to_python(env, v)
+        dom = ty.dom if isinstance(ty, Pi) else None
+        py = to_python(env, v, dom)
         if py is _OPAQUE:
             return None
         vals.append(py)
+        ty = subst(ty.cod, {ty.name: v}) if isinstance(ty, Pi) else ty
     fuel.tick()
     try:
         result = info.fn(*vals)
@@ -337,8 +352,112 @@ def result_type(ty: Term, arity: int) -> Term:
 
 _OPAQUE = object()
 
+_RECORD_CLASSES: dict = {}
 
-def to_python(env: Env, v: Term):
+
+def record_class(name: str, fields: list):
+    """The Python class for a Luthier type with named components: a dataclass with those
+    fields, made once per (name, fields). What a filled hole receives and may return."""
+    import dataclasses
+    key = (name, tuple(fields))
+    cls = _RECORD_CLASSES.get(key)
+    if cls is None:
+        cls = dataclasses.make_dataclass(name.split(".")[-1], list(fields))
+        cls.__luthier_type__ = name
+        _RECORD_CLASSES[key] = cls
+    return cls
+
+
+def record_components(env: Env, ty: Optional[Term]):
+    """For a type whose unfolding is a subtype with named components, (head name, [names], base),
+    where base is the Sigma chain of the components; None for any other type."""
+    if ty is None:
+        return None
+    head, _ = unapply(ty)
+    w = whnf(env, ty, Fuel(env.fuel))
+    while isinstance(w, Subtype) and not isinstance(w.param, PPair):
+        w = whnf(env, w.base, Fuel(env.fuel))
+    if not isinstance(w, Subtype):
+        return None
+    names = [n.split("~")[0] for n in pattern_vars(w.param)]
+    hname = head.name if isinstance(head, Var) else "Record"
+    return hname, names, w.base
+
+
+def strip_subtypes(env: Env, ty: Term) -> Term:
+    w = whnf(env, ty, Fuel(env.fuel))
+    while isinstance(w, Subtype):
+        w = whnf(env, w.base, Fuel(env.fuel))
+    return w
+
+
+def pi_chain(env: Env, ty: Term) -> Term:
+    """The function type with each arrow exposed (a subtype of a function type is seen as the
+    function type), so arity can be read. Domains and the final result keep their declared
+    types: a record stays a record, a subtype keeps its laws."""
+    w = strip_subtypes(env, ty)
+    if isinstance(w, Pi):
+        return Pi(w.name, w.dom, pi_chain(env, w.cod))
+    return ty
+
+
+def to_python(env: Env, v: Term, ty: Optional[Term] = None):
+    """Marshal a Luthier value into Python, guided by the declared type when given: a record
+    becomes a dataclass, a list keeps its element type, a function receives its arguments by
+    their declared types. Without a type: literals, flat tuples, lists, callables."""
+    if ty is not None and not is_opaque_type(env, ty):
+        rc = record_components(env, ty)
+        if rc is not None:
+            hname, names, base = rc
+            cur = whnf(env, base, Fuel(env.fuel))
+            t = v
+            vals = []
+            for i, name in enumerate(names):
+                if i < len(names) - 1:
+                    if not isinstance(t, Pair):
+                        return _OPAQUE
+                    comp_ty = cur.fst if isinstance(cur, Sigma) else None
+                    vals.append(to_python(env, t.fst, comp_ty))
+                    if isinstance(cur, Sigma):
+                        cur = whnf(env, subst(cur.snd, {cur.name: t.fst}), Fuel(env.fuel))
+                    t = t.snd
+                else:
+                    vals.append(to_python(env, t, cur))
+            if any(x is _OPAQUE for x in vals):
+                return _OPAQUE
+            return record_class(hname, names)(*vals)
+        w = strip_subtypes(env, ty)
+        h, targs = unapply(w)
+        if isinstance(h, Var) and h.name == "List" and len(targs) == 1:
+            items = []
+            t = v
+            while True:
+                hh, aa = unapply(t)
+                if isinstance(hh, Con) and hh.name == "cons":
+                    x = to_python(env, aa[-2], targs[0])
+                    if x is _OPAQUE:
+                        return _OPAQUE
+                    items.append(x)
+                    t = aa[-1]
+                    continue
+                if isinstance(hh, Con) and hh.name == "nil":
+                    return items
+                return _OPAQUE
+        if isinstance(w, Pi):
+            # any function value (a lambda, a global function, a partial application, an extern)
+            # crosses as a Python callable that applies it and marshals by the declared types
+            chain = pi_chain(env, ty)
+
+            def call_typed(*xs):
+                t = v
+                c = chain
+                for x in xs:
+                    dom = c.dom if isinstance(c, Pi) else None
+                    a = from_python(env, x, dom)
+                    t = App(t, a)
+                    c = subst(c.cod, {c.name: a}) if isinstance(c, Pi) else c
+                return to_python(env, nf(env, t, Fuel(env.fuel)), c)
+            return call_typed
     if isinstance(v, Lit):
         return v.value
     if isinstance(v, Pair):
@@ -386,10 +505,55 @@ def is_opaque_type(env: Env, ty: Optional[Term]) -> bool:
     return d is not None and isinstance(d.body, Extern) and isinstance(d.type, Univ)
 
 
+def _component(x, name: str, i: int):
+    if isinstance(x, dict):
+        return x[name]
+    if isinstance(x, (tuple, list)):
+        return x[i]
+    return getattr(x, name)
+
+
 def from_python(env: Env, x, ty: Optional[Term]) -> Term:
-    """Marshal a Python value into a Luthier value, guided by the declared type when given."""
+    """Marshal a Python value into a Luthier value, guided by the declared type when given.
+    A type with named components accepts a dataclass, any object with those attributes, a
+    dict, or a tuple in order; a function type accepts a Python callable, registered as an
+    extern the evaluator calls."""
     if is_opaque_type(env, ty):
         return Lit(x)
+    if ty is not None and isinstance(x, Extern):
+        return x
+    rc = record_components(env, ty)
+    if rc is not None and not isinstance(x, (int, float, str, bool)):
+        hname, names, base = rc
+        cur = whnf(env, base, Fuel(env.fuel))
+        comps = []
+        for i, name in enumerate(names):
+            try:
+                piece = _component(x, name, i)
+            except (KeyError, IndexError, AttributeError, TypeError) as e:
+                raise EvalError(f"cannot read component {name} of {hname} from {x!r}: {e}")
+            if i < len(names) - 1:
+                if not isinstance(cur, Sigma):
+                    raise EvalError(f"{hname}: expected a pair type for component {name}")
+                val = from_python(env, piece, cur.fst)
+                comps.append(val)
+                cur = whnf(env, subst(cur.snd, {cur.name: val}), Fuel(env.fuel))
+            else:
+                comps.append(from_python(env, piece, cur))
+        t = comps[-1]
+        for c in reversed(comps[:-1]):
+            t = Pair(c, t)
+        return t
+    if callable(x) and not isinstance(x, type) and ty is not None and isinstance(strip_subtypes(env, ty), Pi):
+        chain = pi_chain(env, ty)
+        n = 0
+        c = chain
+        while isinstance(c, Pi):
+            n += 1
+            c = c.cod
+        target = f"python:{getattr(x, '__module__', 'callable')}.{getattr(x, '__qualname__', 'fn')}#{id(x)}"
+        env.externs[target] = ExternInfo(x, n, chain)
+        return Extern(target, ty)
     head = None
     targs = []
     if ty is not None:

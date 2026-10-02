@@ -10,6 +10,14 @@ and (a b : Bool) : Bool := match a { true -> b ; false -> false }
 or (a b : Bool) : Bool := match a { true -> true ; false -> b }
 implies (a b : Bool) : Bool := match a { true -> b ; false -> true }
 
+-- The numbers and strings of the environment, as holes: declared here, filled by the
+-- interpreter, which supplies their literals (`3`, `3.0`, `"a"`), arithmetic and comparisons.
+-- `R` is the environment's real, an IEEE double; what can be said about it (its epsilon, its
+-- operations as functions, approximate equality) lives in the `real` library.
+Int    : U
+R      : U
+String : U
+
 -- the bridge with the environment marshals these
 Unit : U := data { unit : Unit }
 Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }

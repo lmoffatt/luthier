@@ -1,7 +1,13 @@
--- Real numbers from the environment, with approximate equality.
+-- The real numbers of the environment. `R` itself is declared in core.lut as a hole the
+-- interpreter fills with IEEE doubles; this library says what can be said about it.
 
 abs  : R -> R := extern "python:builtins.abs"
 toR  : Int -> R := extern "python:builtins.float"
+ulp  : R -> R := extern "python:math.ulp"         -- the distance to the next double
+
+-- the machine epsilon: the ulp of one, 2^-52. The rounding error of one operation is at
+-- most half of it; of a sum of n terms, about n times it.
+eps : R := ulp 1.0
 
 approx (tol a b : R) : Bool := abs (a - b) < tol
 

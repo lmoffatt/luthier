@@ -86,5 +86,5 @@ shipped `lib/`. See `docs/semantica/03-librerias.md`.
 
 Definitions `name : Type := term`, holes (declared without body), `data` with
 pattern matching, dependent functions `(x : A) -> B`, pairs `A * B`, subtypes
-`{ x : T | p }` with named components, `extern` to Python, and `test` with
-sampled or exhaustive generation. No proofs, no `Term` as a value yet.
+`{ x : T | p }` with named components, `extern` to Python, projections `e.field` of a subtype's named components (and `(f x).field`),
+and `test` with sampled or exhaustive generation. No proofs, no `Term` as a value yet.

@@ -27,11 +27,14 @@ class GenError(Exception):
 
 
 class Generators:
-    def __init__(self, env: Env, size: int = 16, max_tries: int = 2000, recursive_bias: float = 0.8):
+    def __init__(self, env: Env, size: int = 16, max_tries: int = 2000, recursive_bias: float = 0.8,
+                 checker=None, law_probes: int = 5):
         self.env = env
         self.size = size                    # the largest size a run reaches
         self.max_tries = max_tries
         self.recursive_bias = recursive_bias
+        self.checker = checker              # to type a quantified predicate when a subtype's law is one
+        self.law_probes = law_probes        # how many arguments such a law is probed on before a value is accepted
         self.luthier: dict = {}             # qualified type name -> (label, Gen term)
         self.custom: dict = {}              # qualified type name -> python fn(rng, size)
 
@@ -39,7 +42,7 @@ class Generators:
     def from_checker(cls, checker, size: int = 16) -> "Generators":
         """Generators with the `gen` directives the checker saw (Luthier terms; externs by import)."""
         import importlib
-        g = cls(checker.env, size=size)
+        g = cls(checker.env, size=size, checker=checker)
         for tname, (kind, label, term) in checker.gens.items():
             if kind == "luthier":
                 g.register_luthier(tname, label, term)
@@ -101,7 +104,7 @@ class Generators:
             rejected = []
             for _ in range(self.max_tries):
                 v = self.sample(w.base, rng, size, depth)
-                if self.satisfies(w, v):
+                if self.satisfies(w, v, rng, size, depth):
                     return v
                 if len(rejected) < 5:
                     rejected.append(pp(v))
@@ -122,15 +125,46 @@ class Generators:
             raise GenError(f"generator {label} for {pp(ty)} did not return a pair: {pp(r)}")
         return r.fst
 
-    def satisfies(self, sub: Subtype, v: Term) -> bool:
+    def satisfies(self, sub: Subtype, v: Term, rng: Optional[random.Random] = None,
+                  size: Optional[int] = None, depth: int = 0) -> bool:
+        """Whether `v` satisfies the subtype's predicate. Exhaustive enumeration calls this
+        without a random stream; a quantified law is then probed with a fixed one."""
+        rng = rng if rng is not None else random.Random(0)
+        size = size if size is not None else self.size
         try:
-            r = whnf(self.env, App(Lam(sub.param, sub.pred), v), self.fuel())
+            return self.law_holds(App(Lam(sub.param, sub.pred), v), rng, size, depth, sub, v)
         except EvalError as e:
             raise GenError(f"evaluating the predicate of {pp(sub)} on {pp(v)}: {e}")
+
+    def law_holds(self, law: Term, rng: random.Random, size: int, depth: int, sub, v) -> bool:
+        """A predicate that reduces to a Bool decides; one that is a quantified law (a record
+        whose component must be causal, say) is probed on a few generated arguments: a
+        counterexample rejects the value, none found accepts it. Certifying the law is the
+        obligation's job, not the generator's."""
+        r = whnf(self.env, law, self.fuel())
         b = as_bool(r)
-        if b is None:
+        if b is not None:
+            return b
+        if isinstance(r, And):
+            return self.law_holds(r.lhs, rng, size, depth, sub, v) and self.law_holds(r.rhs, rng, size, depth, sub, v)
+        if self.checker is None:
             raise GenError(f"the predicate of {pp(sub)} did not reduce to a Bool on {pp(v)}: {pp(r)}")
-        return b
+        with self.checker.silent():
+            _, ty = self.checker.infer([], r)
+        if not isinstance(self.checker.whnf(ty), Pi):
+            raise GenError(f"the predicate of {pp(sub)} did not reduce to a Bool on {pp(v)}: {pp(r)}")
+        for _ in range(self.law_probes):
+            t, tyc = r, ty
+            while isinstance((pw := self.checker.whnf(tyc)), Pi):
+                a = self.sample(pw.dom, rng, size, depth + 1)
+                t = App(t, a)
+                tyc = subst(pw.cod, {pw.name: a})
+            rb = as_bool(whnf(self.env, t, self.fuel()))
+            if rb is None:
+                raise GenError(f"the law {pp(r)} of {pp(sub)} did not reduce to a Bool when probed: {pp(t)}")
+            if rb is False:
+                return False
+        return True
 
     def constructor_args(self, dname: str, cname: str, targs):
         """Argument types of a constructor, with the data parameters instantiated."""

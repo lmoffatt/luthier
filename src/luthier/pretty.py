@@ -29,6 +29,25 @@ def _pat_atom(p) -> str:
     return f"({s})" if isinstance(p, PCon) and p.args else s
 
 
+def _projected_name(p):
+    """The one variable of a tuple pattern whose other components are wildcards, or None."""
+    if not isinstance(p, PPair):
+        return None
+    names = []
+    def walk(q):
+        if isinstance(q, PVar):
+            names.append(q.name)
+            return True
+        if isinstance(q, PWild):
+            return True
+        if isinstance(q, PPair):
+            return walk(q.fst) and walk(q.snd)
+        return False
+    if not walk(p) or len(names) != 1:
+        return None
+    return names[0]
+
+
 PREC = {"&": 0, "->": 1, "or": 2, "and": 3, "==": 4, "/=": 4, "<": 4, "<=": 4, ">": 4, ">=": 4,
         "+": 5, "-": 5, "*": 6, "/": 6, "mod": 6}
 APP = 7
@@ -101,6 +120,13 @@ def pp(t, prec: int = 0) -> str:
         return f"({s})" if prec > APP else s
     if isinstance(t, Subtype):
         return "{ " + pp_pat(t.param) + " : " + pp(t.base) + " | " + pp(t.pred) + " }"
+    if isinstance(t, Proj):
+        return pp(t.term, APP + 1) + "." + t.field
+    if isinstance(t, Match) and len(t.branches) == 1:
+        pat, body = t.branches[0]
+        name = _projected_name(pat)
+        if name is not None and isinstance(body, Var) and body.name == name:
+            return pp(t.scrut, APP + 1) + "." + name.split("~")[0]
     if isinstance(t, Match):
         br = " ; ".join(pp_pat(p) + " -> " + pp(b) for p, b in t.branches)
         s = "match " + pp(t.scrut, APP) + " { " + br + " }"

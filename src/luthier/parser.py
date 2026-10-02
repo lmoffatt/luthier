@@ -308,11 +308,20 @@ class Parser:
         return BinOp(op, lhs, rhs)
 
     def parse_app(self) -> Term:
-        fn = self.parse_atom()
+        fn = self.parse_postfix(self.parse_atom())
         while self.starts_atom():
-            arg = self.parse_atom()
+            arg = self.parse_postfix(self.parse_atom())
             fn = App(fn, arg)
         return fn
+
+    def parse_postfix(self, t: Term) -> Term:
+        """`(term).field`: projection of a named component. A dotted name `x.field` arrives as one
+        name token and is resolved by the checker; this handles the dot after a closing bracket."""
+        while self.at_sym(".") and self.peek(1).kind == "name":
+            self.next()
+            for field in self.next().text.split("."):   # `(x).a.b` arrives as the one name token `a.b`
+                t = Proj(t, field)
+        return t
 
     def starts_atom(self) -> bool:
         t = self.peek()
@@ -504,9 +513,10 @@ class Parser:
         types = [t for ns, t in groups for _ in ns]
         if len(names) == 1:
             return Subtype(PVar(names[0]), types[0], pred)
+        # a dependent product: a later component's type may mention the earlier names
         base = types[-1]
-        for t in reversed(types[:-1]):
-            base = Sigma("_", t, base)
+        for n, t in reversed(list(zip(names[:-1], types[:-1]))):
+            base = Sigma(n, t, base)
         pat = PVar(names[-1])
         for n in reversed(names[:-1]):
             pat = PPair(PVar(n), pat)

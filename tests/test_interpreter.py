@@ -397,3 +397,55 @@ def test_opaque_type_values_pass_through_and_externs_operate():
     assert r.passed and r.laws[0].cases == 10
     assert r.laws[0].domains == ["Signal: registered Python generator, size up to 16"]
     assert r.laws[0].sample_cases[0].startswith("x = <ndarray (")
+
+
+# ------------------------------------------------------------------ projections
+
+def test_projection_of_named_components():
+    ck = load("""
+P : U := { x : R, y : R | true }
+pt : P := (1.0, 2.0)
+f (p : P) : R := p.x + p.y
+""")
+    assert ev(ck, "f pt") == "3.0"
+    assert ev(ck, "pt.y") == "2.0"
+    t, ty = ck.infer([], parse_term("pt.y"))
+    assert pp(t) == "pt.y" and pp(ty) == "R"
+
+
+def test_projection_through_refinements_type_parameters_and_parentheses():
+    ck = load("""
+Id (A : U) : U := A
+Box (F : U -> U) : U := { v : F R, w : F R | true }
+b : Box Id := (1.0, 2.0)
+S : U := { inner : Box Id, k : R | k > 0.0 }
+Small : U := { s : S | s.k < 10.0 }
+s : Small := ((1.0, 2.0), 3.0)
+pick (q : Small) : R := q.inner.w + q.k
+mk (x : R) : S := ((x, x), x)
+""")
+    assert ev(ck, "b.w") == "2.0"
+    assert ev(ck, "pick s") == "5.0"
+    assert ev(ck, "(mk 4.0).k") == "4.0"
+
+
+def test_projection_of_a_dependent_component_types_against_the_value():
+    ck = load("""
+D : U := { n : Int, m : { k : Int | k <= n } | true }
+d : D := (3, 2)
+g (x : D) : Int := x.m + x.n
+""")
+    assert ev(ck, "g d") == "5"
+    _, ty = ck.infer([], parse_term("d.m"))
+    assert pp(ty) == "{ k : Int | k <= d.n }"
+
+
+def test_projection_errors_and_qualified_names_win():
+    with pytest.raises(TypeCheckError) as e:
+        load("P : U := { x : R, y : R | true }\npt : P := (1.0, 2.0)\nz : R := pt.z")
+    assert "no component z" in str(e.value)
+    with pytest.raises(TypeCheckError):
+        load("a : R := 1.0\nb : R := a.x")
+    # a dotted name that is a module member is the member, not a projection
+    ck = load_example("qualified.lut")
+    assert ev(ck, "z7.addMod7 3 5") == "1"

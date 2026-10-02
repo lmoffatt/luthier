@@ -122,6 +122,14 @@ class Forget(Term):
     arg: Term
 
 
+@dataclass(frozen=True)
+class Proj(Term):
+    """`t.field` before elaboration: a component of a value whose type names its components.
+    Elaborates to a one-branch match on the type's component pattern."""
+    term: Term
+    field: str
+
+
 # ---------------------------------------------------------------- patterns
 
 class Pattern:
