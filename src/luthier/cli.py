@@ -166,7 +166,15 @@ def cmd_test(args):
     gens = make_generators(loader, args.size)
     directives = []
     if args.name:
-        directives.append((args.name, args.n, args.exhaustive, args.size))
+        # the file's own directive for that name gives its case count and mode, unless the
+        # command line sets them
+        own = [(q, n, ex, sz) for q, n, ex, sz, top in loader.tests
+               if q == args.name or q.endswith("." + args.name)]
+        if own:
+            q, n, ex, sz = own[0]
+            directives.append((q, args.n if args.n_given else n, ex or args.exhaustive, sz or args.size))
+        else:
+            directives.append((args.name, args.n, args.exhaustive, args.size))
     else:
         directives = [(q, args.n if args.n_given else n, ex or args.exhaustive, sz or args.size)
                       for q, n, ex, sz, top in loader.tests if top]
