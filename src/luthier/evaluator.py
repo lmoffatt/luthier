@@ -505,6 +505,22 @@ def is_opaque_type(env: Env, ty: Optional[Term]) -> bool:
     Luthier untouched; only externs operate on them."""
     if ty is None:
         return False
+    # a refinement of an opaque type (`VecOf n`, `{ v : Vec | ... }`) holds the same values
+    w = ty
+    for _ in range(32):
+        if isinstance(w, Subtype):
+            w = w.base
+            continue
+        h0, a0 = unapply(w)
+        if a0 and isinstance(h0, Var) and h0.name in env.defs and env.defs[h0.name].body is not None \
+                and not isinstance(env.defs[h0.name].body, Extern):
+            w2 = whnf(env, w, Fuel(env.fuel))
+            if w2 == w:
+                break
+            w = w2
+            continue
+        break
+    ty = w
     head, _ = unapply(ty)
     if not isinstance(head, Var):
         return False

@@ -1,7 +1,7 @@
 {
   "intRing": {
     "hash": "c76f0d4338b728db",
-    "when": "2026-10-02T18:07:56",
+    "when": "2026-10-03T20:54:22",
     "passed": true,
     "seed": 1716080495,
     "run_seed": 7,
@@ -10,9 +10,12 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "Mat",
-        "Vec"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
@@ -313,7 +316,7 @@
   },
   "realField": {
     "hash": "155653912e4f39da",
-    "when": "2026-10-02T18:07:56",
+    "when": "2026-10-03T20:54:22",
     "passed": true,
     "seed": 1523181087,
     "run_seed": 7,
@@ -322,9 +325,12 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "Mat",
-        "Vec"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
@@ -1077,6 +1083,619 @@
           "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
           "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>",
           "a = <ndarray (5, 5)>, x = <ndarray (5,)>, y = <ndarray (5,)>"
+        ]
+      }
+    ]
+  },
+  "vecSpace": {
+    "hash": "07cbb8abc7e46c1b",
+    "when": "2026-10-03T20:54:23",
+    "passed": true,
+    "seed": 1150428223,
+    "run_seed": 7,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "length (add a b) == n",
+        "params": [
+          "n : Dim",
+          "a : VecOf n",
+          "b : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1,)>, b = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1,)>, b = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1,)>, b = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1,)>, b = <ndarray (1,)>",
+          "n = 2, a = <ndarray (2,)>, b = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "length (zeros n) == n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1"
+        ]
+      },
+      {
+        "label": "length (scale (0.0 - 1.0) a) == n",
+        "params": [
+          "n : Dim",
+          "a : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1,)>",
+          "n = 2, a = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "length (scale c a) == n",
+        "params": [
+          "n : Dim",
+          "c : R",
+          "a : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, c = -0.9585134919091254, a = <ndarray (1,)>",
+          "n = 1, c = 0.23749590148210498, a = <ndarray (1,)>",
+          "n = 1, c = -0.004952851099878641, a = <ndarray (1,)>",
+          "n = 1, c = 0.9994653680378993, a = <ndarray (1,)>",
+          "n = 1, c = 0.0794846609980131, a = <ndarray (1,)>"
+        ]
+      },
+      {
+        "label": "Reflexive (VecOf n) \\ a b { eqVec a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 2, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "Symmetric (VecOf n) \\ a b { eqVec a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 2, x = <ndarray (2,)>, y = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "Associative (VecOf n) \\ a b { eqVec a b } \\ a b { add a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n",
+          "z : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, z = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, z = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, z = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, z = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, z = <ndarray (1,)>"
+        ]
+      },
+      {
+        "label": "Commutative (VecOf n) \\ a b { eqVec a b } \\ a b { add a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+        ]
+      },
+      {
+        "label": "LeftIdentity (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } (zeros n)",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>"
+        ]
+      },
+      {
+        "label": "LeftInverse (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } (zeros n) \\ a { scale (0.0 - 1.0) a }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 2, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "ScaleAssociates (VecOf n) \\ a b { eqVec a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "a : R",
+          "b : R",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = 0.46406933612285406, b = 0.6570919690616421, x = <ndarray (1,)>",
+          "n = 1, a = -0.9137359021778324, b = 0.6136795911738289, x = <ndarray (1,)>",
+          "n = 1, a = -0.2782468556489517, b = -0.6765954135817065, x = <ndarray (1,)>",
+          "n = 1, a = -0.2928477500480078, b = 0.5391079340215519, x = <ndarray (1,)>",
+          "n = 2, a = -1.5202018703413231, b = 1.799182562640652, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "ScaleUnit (VecOf n) \\ a b { eqVec a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 2, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "ScaleDistribV (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "a : R",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = -0.7169092643993755, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = -0.24884205280049154, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = -0.2396424997986546, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = -0.36374941066960065, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 2, a = -1.825038496928605, x = <ndarray (2,)>, y = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "ScaleDistribR (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "a : R",
+          "b : R",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = 0.43370191133033664, b = 0.2540206556899778, x = <ndarray (1,)>",
+          "n = 1, a = 0.8715652158518177, b = -0.7096448370408979, x = <ndarray (1,)>",
+          "n = 1, a = 0.8016492694024562, b = -0.2243117895995448, x = <ndarray (1,)>",
+          "n = 1, a = 0.850163289170256, b = -0.31651206562948175, x = <ndarray (1,)>",
+          "n = 1, a = -1.2261833439844798, b = 1.7171783306324198, x = <ndarray (1,)>"
+        ]
+      }
+    ]
+  },
+  "matrices": {
+    "hash": "ae651c1d8d26e98f",
+    "when": "2026-10-03T20:54:23",
+    "passed": true,
+    "seed": 360495499,
+    "run_seed": 7,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "length (matVec a x) == n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 2, a = <ndarray (2, 2)>, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "rows (matMul a b) == n and cols (matMul a b) == n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "b : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "n = 2, a = <ndarray (2, 2)>, b = <ndarray (2, 2)>"
+        ]
+      },
+      {
+        "label": "rows (identity n) == n and cols (identity n) == n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 2"
+        ]
+      },
+      {
+        "label": "rows (transpose a) == n and cols (transpose a) == n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>"
+        ]
+      },
+      {
+        "label": "ActsLinearlyAdd (VecOf n) (MatOf n n) (euclidean n).space.eq (euclidean n).space.add \\ a x { matVec a x }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>"
+        ]
+      },
+      {
+        "label": "ActsLinearlyScale (VecOf n) (MatOf n n) (euclidean n).space.eq (euclidean n).space.scale \\ a x { matVec a x }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "c : R",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>, c = -0.32716267535633237, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, c = 0.8641446346198349, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, c = 0.8647212020834123, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, c = -0.5897611148773991, x = <ndarray (1,)>",
+          "n = 2, a = <ndarray (2, 2)>, c = -1.9022325805052502, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "ComposeActs (VecOf n) (MatOf n n) (euclidean n).space.eq \\ a x { matVec a x } \\ a b { matMul a b }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "b : MatOf n n",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 2, a = <ndarray (2, 2)>, b = <ndarray (2, 2)>, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "IdentityActs (VecOf n) (MatOf n n) (euclidean n).space.eq \\ a x { matVec a x } (identity n)",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 2, x = <ndarray (2,)>"
+        ]
+      },
+      {
+        "label": "AdjointOfInner (VecOf n) (MatOf n n) (euclidean n).eqR (euclidean n).inner \\ a x { matVec a x } \\ a { transpose a }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, y = <ndarray (1,)>"
         ]
       }
     ]

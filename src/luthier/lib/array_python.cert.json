@@ -1,7 +1,7 @@
 {
   "inner": {
-    "hash": "1fb5e37847f6bcbd",
-    "when": "2026-10-03T20:47:00",
+    "hash": "3926a696e0b11c91",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 350508466,
     "run_seed": 7,
@@ -10,15 +10,21 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "DotAgrees dot",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -26,21 +32,23 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
         ]
       }
     ]
   },
   "vnorm": {
-    "hash": "71753f1eec62e87a",
-    "when": "2026-10-03T20:47:00",
+    "hash": "10fb9f4f7cd9503a",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 512710769,
     "run_seed": 7,
@@ -49,15 +57,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "NormAgrees norm",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "x : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -65,21 +78,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>"
         ]
       }
     ]
   },
   "vtotal": {
-    "hash": "df4ef17eb7c8dba8",
-    "when": "2026-10-03T20:47:00",
+    "hash": "5794197b5905b65d",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 1911982633,
     "run_seed": 7,
@@ -88,15 +102,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "TotalAgrees total",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "x : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -104,21 +123,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>"
         ]
       }
     ]
   },
   "addition": {
-    "hash": "9f8bfc0fec6b3688",
-    "when": "2026-10-03T20:47:00",
+    "hash": "4bbd7bc1dced3207",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 1655393681,
     "run_seed": 7,
@@ -127,15 +147,21 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "AddAgrees add",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -143,21 +169,23 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
         ]
       }
     ]
   },
   "subtraction": {
-    "hash": "7bd9e75be27a436b",
-    "when": "2026-10-03T20:47:00",
+    "hash": "919227f9f20539d2",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 326533327,
     "run_seed": 7,
@@ -166,15 +194,21 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "SubAgrees sub",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -182,21 +216,23 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
         ]
       }
     ]
   },
   "scaling": {
-    "hash": "e35a3daf6e65bb0d",
-    "when": "2026-10-03T20:47:00",
+    "hash": "a6b9fb4948401624",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 555976940,
     "run_seed": 7,
@@ -205,15 +241,21 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "ScaleAgrees scale",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "c : R",
+          "x : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -221,21 +263,23 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, c = 0.10349974411692164, x = <ndarray (1,)>",
+          "n = 1, c = -0.8781917207269332, x = <ndarray (1,)>",
+          "n = 1, c = 0.7731172280339227, x = <ndarray (1,)>",
+          "n = 1, c = 0.24387228286950613, x = <ndarray (1,)>",
+          "n = 1, c = 0.866711193670888, x = <ndarray (1,)>"
         ]
       }
     ]
   },
   "outerProd": {
-    "hash": "0d6420609566cdb6",
-    "when": "2026-10-03T20:47:00",
+    "hash": "e2c88c5da1363c8c",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 1546726988,
     "run_seed": 7,
@@ -244,15 +288,22 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "OuterAgrees outer",
         "params": [
-          "f : Frame"
+          "m : Dim",
+          "n : Dim",
+          "x : VecOf m",
+          "y : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -260,21 +311,24 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "m = 1, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "m = 1, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "m = 1, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "m = 1, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+          "m = 1, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
         ]
       }
     ]
   },
   "action": {
-    "hash": "1e451a592dc8cb4c",
-    "when": "2026-10-03T20:47:00",
+    "hash": "e305a167b4faf8f4",
+    "when": "2026-10-03T21:04:00",
     "passed": true,
     "seed": 630615550,
     "run_seed": 7,
@@ -283,15 +337,22 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "MatVecAgrees matVec",
         "params": [
-          "f : Frame"
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "x : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -299,21 +360,24 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>"
         ]
       }
     ]
   },
   "mproduct": {
-    "hash": "32971e9819cc387d",
-    "when": "2026-10-03T20:47:01",
+    "hash": "bad99ecd0db67024",
+    "when": "2026-10-03T21:04:01",
     "passed": true,
     "seed": 1650486447,
     "run_seed": 7,
@@ -322,15 +386,23 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "MatMulAgrees matMul",
         "params": [
-          "f : Frame"
+          "m : Dim",
+          "k : Dim",
+          "n : Dim",
+          "a : MatOf m k",
+          "b : MatOf k n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -338,21 +410,25 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "m = 1, k = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, k = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, k = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, k = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, k = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>"
         ]
       }
     ]
   },
   "transposed": {
-    "hash": "bbb60b5a52155b24",
-    "when": "2026-10-03T20:47:01",
+    "hash": "308348a700909ab3",
+    "when": "2026-10-03T21:04:01",
     "passed": true,
     "seed": 1866946852,
     "run_seed": 7,
@@ -361,15 +437,21 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "TransposeAgrees transpose",
         "params": [
-          "f : Frame"
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -377,21 +459,23 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "m = 1, n = 1, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>"
         ]
       }
     ]
   },
   "mtrace": {
-    "hash": "0b6b18262f4ee8a5",
-    "when": "2026-10-03T20:47:01",
+    "hash": "d108230ad5c1128b",
+    "when": "2026-10-03T21:04:01",
     "passed": true,
     "seed": 1511138722,
     "run_seed": 7,
@@ -400,15 +484,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "TraceAgrees trace",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "a : MatOf n n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -416,21 +505,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>"
         ]
       }
     ]
   },
   "determinant": {
-    "hash": "917a37db43b0207e",
-    "when": "2026-10-03T20:47:01",
+    "hash": "acbd0632fe7fe9a4",
+    "when": "2026-10-03T21:04:01",
     "passed": true,
     "seed": 1348561566,
     "run_seed": 7,
@@ -439,15 +529,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "DetAgrees det",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "a : MatOf n n"
         ],
         "mode": "sampled",
         "cases": 30,
@@ -455,21 +550,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (2, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (2,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 1, a = <ndarray (1, 1)>",
+          "n = 2, a = <ndarray (2, 2)>",
+          "n = 2, a = <ndarray (2, 2)>"
         ]
       }
     ]
   },
   "solver": {
-    "hash": "596e2dbe1c1ebd6f",
-    "when": "2026-10-03T20:47:01",
+    "hash": "083ced1bb0791fb8",
+    "when": "2026-10-03T21:04:01",
     "passed": true,
     "seed": 611054695,
     "run_seed": 7,
@@ -478,15 +574,21 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "SolveInverts solve",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "s : SpdOf n",
+          "x : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -494,21 +596,23 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, s = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, s = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, s = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, s = <ndarray (1, 1)>, x = <ndarray (1,)>",
+          "n = 1, s = <ndarray (1, 1)>, x = <ndarray (1,)>"
         ]
       }
     ]
   },
   "spectrum": {
-    "hash": "3318b2a22e797d98",
-    "when": "2026-10-03T20:47:01",
+    "hash": "02d8d0783119d542",
+    "when": "2026-10-03T21:04:01",
     "passed": true,
     "seed": 495282025,
     "run_seed": 7,
@@ -517,15 +621,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "EigvalsAgree eigvalsSym",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "s : SpdOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -533,20 +642,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>"
         ]
       },
       {
         "label": "EigenvaluesSumToTrace eigvalsSym",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "s : SpdOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -554,20 +665,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>"
         ]
       },
       {
         "label": "EigenvaluesMultiplyToDet eigvalsSym",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "s : SpdOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -575,21 +688,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>"
         ]
       }
     ]
   },
   "invSqrt": {
-    "hash": "947bc7197564438d",
-    "when": "2026-10-03T20:47:16",
+    "hash": "df0f806ce4931187",
+    "when": "2026-10-03T21:04:15",
     "passed": true,
     "seed": 1533983714,
     "run_seed": 7,
@@ -598,15 +712,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "InvSqrtAgrees invSqrtSym",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "s : SpdOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -614,20 +733,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>"
         ]
       },
       {
         "label": "InvSqrtInverts invSqrtSym",
         "params": [
-          "f : Frame"
+          "n : Dim",
+          "s : SpdOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -635,21 +756,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>",
+          "n = 1, s = <ndarray (1, 1)>"
         ]
       }
     ]
   },
   "embedding": {
     "hash": "fb438d043cd6784a",
-    "when": "2026-10-03T20:48:56",
+    "when": "2026-10-03T21:06:29",
     "passed": true,
     "seed": 361734452,
     "run_seed": 7,
@@ -658,8 +780,12 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
@@ -687,8 +813,8 @@
     ]
   },
   "maddition": {
-    "hash": "14217f70d54d6ec6",
-    "when": "2026-10-03T20:48:56",
+    "hash": "4cbd7f6d0be92b60",
+    "when": "2026-10-03T21:06:29",
     "passed": true,
     "seed": 351585726,
     "run_seed": 7,
@@ -697,15 +823,22 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "MaddAgrees madd",
         "params": [
-          "fr : Frame"
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "b : MatOf m n"
         ],
         "mode": "sampled",
         "cases": 50,
@@ -713,21 +846,24 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (2, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (2,)>)"
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 2, n = 2, a = <ndarray (2, 2)>, b = <ndarray (2, 2)>"
         ]
       }
     ]
   },
   "msubtraction": {
-    "hash": "dfac38e7ad9bc277",
-    "when": "2026-10-03T20:48:56",
+    "hash": "08fe8dbd407f0d00",
+    "when": "2026-10-03T21:06:29",
     "passed": true,
     "seed": 226338360,
     "run_seed": 7,
@@ -736,15 +872,22 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "MsubAgrees msub",
         "params": [
-          "fr : Frame"
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "b : MatOf m n"
         ],
         "mode": "sampled",
         "cases": 50,
@@ -752,21 +895,24 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)"
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 2, n = 1, a = <ndarray (2, 1)>, b = <ndarray (2, 1)>"
         ]
       }
     ]
   },
   "mscaling": {
-    "hash": "fe79e59012b67831",
-    "when": "2026-10-03T20:48:56",
+    "hash": "2dbdb9304532aa2f",
+    "when": "2026-10-03T21:06:29",
     "passed": true,
     "seed": 497574604,
     "run_seed": 7,
@@ -775,15 +921,22 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "MscaleAgrees mscale",
         "params": [
-          "fr : Frame"
+          "m : Dim",
+          "n : Dim",
+          "c : R",
+          "a : MatOf m n"
         ],
         "mode": "sampled",
         "cases": 50,
@@ -791,21 +944,24 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)"
+          "m = 1, n = 1, c = -0.20481731009464355, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, c = -0.015627236627069552, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, c = 0.7456501347213855, a = <ndarray (1, 1)>",
+          "m = 1, n = 1, c = -0.8197348394955837, a = <ndarray (1, 1)>",
+          "m = 2, n = 1, c = -1.92724356870273, a = <ndarray (2, 1)>"
         ]
       }
     ]
   },
   "entrywise": {
-    "hash": "daf40691f722ad63",
-    "when": "2026-10-03T20:48:56",
+    "hash": "01fae8709c43dfbd",
+    "when": "2026-10-03T21:06:29",
     "passed": true,
     "seed": 759246749,
     "run_seed": 7,
@@ -814,15 +970,22 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "HadamardAgrees hadamard",
         "params": [
-          "fr : Frame"
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "b : MatOf m n"
         ],
         "mode": "sampled",
         "cases": 50,
@@ -830,21 +993,24 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (2, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (2,)>)"
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 1, n = 1, a = <ndarray (1, 1)>, b = <ndarray (1, 1)>",
+          "m = 2, n = 2, a = <ndarray (2, 2)>, b = <ndarray (2, 2)>"
         ]
       }
     ]
   },
   "largest": {
-    "hash": "30746079f0289f70",
-    "when": "2026-10-03T20:48:57",
+    "hash": "7f4f6de45ed526d4",
+    "when": "2026-10-03T21:06:29",
     "passed": true,
     "seed": 2104848910,
     "run_seed": 7,
@@ -853,15 +1019,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "MaxAbsAgrees maxAbs",
         "params": [
-          "fr : Frame"
+          "n : Dim",
+          "x : VecOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -869,21 +1040,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "Frame: registered Python generator, size up to 16"
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)",
-          "fr = (<ndarray (1, 1)>, <ndarray (1, 1)>, <ndarray (1,)>, <ndarray (1,)>, <ndarray (1,)>)"
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>",
+          "n = 1, x = <ndarray (1,)>"
         ]
       }
     ]
   },
   "rank": {
-    "hash": "017eec5caac7a90d",
-    "when": "2026-10-03T20:47:30",
+    "hash": "96b534f211c787d3",
+    "when": "2026-10-03T21:04:30",
     "passed": true,
     "seed": 665075121,
     "run_seed": 7,
@@ -892,15 +1064,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "RankAgrees retainedRank",
         "params": [
-          "f : SingularFrame"
+          "n : Dim2",
+          "s : DeficientOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -908,21 +1085,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "SingularFrame: registered Python generator, size up to 16"
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)"
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>"
         ]
       }
     ]
   },
   "pseudoInverse": {
-    "hash": "6728c0914b66d275",
-    "when": "2026-10-03T20:47:50",
+    "hash": "14bc6646bafe5023",
+    "when": "2026-10-03T21:04:59",
     "passed": true,
     "seed": 793304050,
     "run_seed": 7,
@@ -931,15 +1109,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "PinvAgrees pinvSym",
         "params": [
-          "f : SingularFrame"
+          "n : Dim2",
+          "s : DeficientOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -947,21 +1130,22 @@
         "failure": null,
         "error": null,
         "domains": [
-          "SingularFrame: registered Python generator, size up to 16"
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)"
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>"
         ]
       }
     ]
   },
   "pseudoInvSqrt": {
-    "hash": "16a5a2d7654d2966",
-    "when": "2026-10-03T20:48:24",
+    "hash": "0bb68397594f1e7b",
+    "when": "2026-10-03T21:05:45",
     "passed": true,
     "seed": 1479480674,
     "run_seed": 7,
@@ -970,15 +1154,20 @@
       "growth": "1 to size over a sampled run",
       "generators": {},
       "python_generators": [
-        "Frame",
-        "SingularFrame"
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
       ]
     },
     "laws": [
       {
         "label": "PinvSqrtAgrees pinvSqrtSym",
         "params": [
-          "f : SingularFrame"
+          "n : Dim2",
+          "s : DeficientOf n"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -986,14 +1175,15 @@
         "failure": null,
         "error": null,
         "domains": [
-          "SingularFrame: registered Python generator, size up to 16"
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)",
-          "f = (<ndarray (1, 2)>, <ndarray (2, 2)>, <ndarray (2,)>, <ndarray (2,)>, <ndarray (1,)>)"
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>",
+          "n = 2, s = <ndarray (2, 2)>"
         ]
       }
     ]

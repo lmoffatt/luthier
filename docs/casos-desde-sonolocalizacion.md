@@ -241,3 +241,23 @@ millones, `--fuel`). Medido en sonolocalización:
 Y los `match` que forzaban argumentos en `belief.lut` dejaron de hacer falta: la versión
 directa tarda lo mismo. Los casos 2 y 17 quedan resueltos en costo; falta lo de las
 dimensiones en el tipo.
+
+## 22. Dimensiones en el tipo, operadores por tipo, espectro nativo (resuelto el 2026-10-03)
+
+- Dimensiones como refinamientos: `VecOf n`, `MatOf m n`, `SpdOf n`, `DeficientOf n` sobre los
+  portadores opacos. Una hoja devuelve `Vec` o `Mat` sin forma; donde se espera un tipo con
+  forma, la forma es una obligación que `test` verifica (por ejemplo `length (add a b) == n` en
+  `vecSpace (n : Dim)`, en toda dimensión). Los generadores de familias de tipos reciben los
+  argumentos (`gen VecOf := extern ...` se llama `fn(rng, size, n)`). Las leyes cuantifican sobre
+  las dimensiones primero: desaparecieron el `Frame` y los generadores de dimensión fija.
+  Los refinamientos y alias de tipos opacos se marshalean como opacos.
+- Operadores: `operator + := f` registra f para los tipos de sus dos argumentos; `x + y` se
+  resuelve por los tipos de los operandos y cae a la aritmética de Int y R si nada coincide.
+- Espectro nativo: Jacobi (rotaciones, barridos cíclicos), funciones espectrales, subespacio
+  retenido, pseudoinversa. Dos lecciones: lo de fuera de la diagonal se suma directo (restar la
+  diagonal de la norma cancela debajo de sqrt eps), y el par (A, V) se fuerza en cada rotación:
+  la llamada por necesidad no evita la fuga del acumulador perezoso.
+- `real.lut` declara y `real_python.lut` vincula, como el resto. `--name` respeta la directiva.
+
+Queda abierto: argumentos implícitos (hoy la dimensión se pasa explícita), y dimensiones que el
+checker verifique estáticamente en lugar de por obligación.

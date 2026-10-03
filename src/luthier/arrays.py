@@ -146,22 +146,6 @@ def _mat(rng: random.Random, m: int, n: int, size: int):
     return np.array([[rng.uniform(-size, size) for _ in range(n)] for _ in range(m)])
 
 
-def gen_vec(rng: random.Random, size: int):
-    return _vec(rng, _dim(rng, size), size)
-
-
-def gen_mat(rng: random.Random, size: int):
-    return _mat(rng, _dim(rng, size), _dim(rng, size), size)
-
-
-def gen_frame(rng: random.Random, size: int):
-    """Compatible shapes for the laws: A is m x n, S is n x n symmetric positive definite,
-    x and z have length n, y has length m. Returned in the order the record declares."""
-    m, n = _dim(rng, size), _dim(rng, size)
-    A = _mat(rng, m, n, size)
-    B = _mat(rng, n, n, size)
-    S = B.T @ B + np.eye(n)
-    return (A, S, _vec(rng, n, size), _vec(rng, n, size), _vec(rng, m, size))
 
 
 def cond(a):
@@ -243,19 +227,7 @@ def normal_vec(n, seed):
     return (rng.standard_normal(int(n)), int(rng.integers(0, 2 ** 62)))
 
 
-# ------------------------------------------------------------------ fixed-dimension generators
-# For the laws of the algebraic structures, which quantify over several vectors at once: without
-# dimensions in the types, the only way to make them compatible is one dimension for the run.
 
-LAW_DIM = 5
-
-
-def gen_vec_fixed(rng: random.Random, size: int):
-    return _vec(rng, LAW_DIM, size)
-
-
-def gen_mat_fixed(rng: random.Random, size: int):
-    return _mat(rng, LAW_DIM, LAW_DIM, size)
 
 
 # ------------------------------------------------------------------ matrix arithmetic, entrywise
@@ -312,10 +284,35 @@ def pinv_sqrt_sym(a):
     return (V[:, keep] / np.sqrt(w[keep])) @ V[:, keep].T
 
 
-def gen_frame_singular(rng: random.Random, size: int):
-    """A frame whose S is positive semidefinite of rank below n: the Gram matrix of fewer
-    vectors than its dimension."""
-    n = max(2, _dim(rng, size))
+
+# ------------------------------------------------------------------ generators by dimension
+# The shapes are in the types (VecOf n, MatOf m n); each generator receives the dimensions.
+
+def gen_dim(rng: random.Random, size: int):
+    return rng.randint(1, max(1, min(size, 8)))
+
+
+def gen_dim2(rng: random.Random, size: int):
+    return rng.randint(2, max(2, min(size, 8)))
+
+
+def gen_vec_of(rng: random.Random, size: int, n):
+    return _vec(rng, int(n), size)
+
+
+def gen_mat_of(rng: random.Random, size: int, m, n):
+    return _mat(rng, int(m), int(n), size)
+
+
+def gen_spd_of(rng: random.Random, size: int, n):
+    """B^T B + I: symmetric, eigenvalues at least one."""
+    B = _mat(rng, int(n), int(n), size)
+    return B.T @ B + np.eye(int(n))
+
+
+def gen_deficient_of(rng: random.Random, size: int, n):
+    """The Gram matrix of fewer vectors than the dimension: positive semidefinite, rank below n."""
+    n = int(n)
     r = rng.randint(1, n - 1)
     B = _mat(rng, r, n, size)
-    return (B, B.T @ B, _vec(rng, n, size), _vec(rng, n, size), _vec(rng, r, size))
+    return B.T @ B

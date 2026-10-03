@@ -5,18 +5,19 @@ import "array"
 import "array_python"
 import "algebra"
 
-gen Vec := extern "python:luthier.arrays.gen_vec_fixed"
-gen Mat := extern "python:luthier.arrays.gen_mat_fixed"
 
--- the laws need every generated vector of the same dimension
+-- the dimension the structure laws are certified at
 lawDim : Int := 5
 
-vec5      : VectorSpace Vec := vecSpace lawDim
-euclid5   : InnerProductSpace Vec := euclidean lawDim
-matrices5 : LinearMaps Vec Mat := matrices lawDim
+-- the structure's laws at one dimension, and the shapes of the operations at every dimension
+vec5      : VectorSpace (VecOf lawDim) := vecSpace lawDim
+euclid5   : InnerProductSpace (VecOf lawDim) := euclidean lawDim
+matrices5 : LinearMaps (VecOf lawDim) (MatOf lawDim lawDim) := matrices lawDim
 
 test intRing with 100
 test realField with 100
 test vec5 with 50
 test euclid5 with 50
 test matrices5 with 50
+test vecSpace with 50
+test matrices with 50

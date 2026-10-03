@@ -59,8 +59,12 @@ normalVec : Int -> Int -> Vec * Int := extern "python:luthier.arrays.normal_vec"
 approxR : R -> R -> R -> Bool := extern "python:luthier.arrays.approx"
 approxVec : R -> Vec -> Vec -> Bool := extern "python:luthier.arrays.approx"
 approxMat : R -> Mat -> Mat -> Bool := extern "python:luthier.arrays.approx"
-gen Frame := extern "python:luthier.arrays.gen_frame"
-gen SingularFrame := extern "python:luthier.arrays.gen_frame_singular"
+gen Dim := extern "python:luthier.arrays.gen_dim"
+gen Dim2 := extern "python:luthier.arrays.gen_dim2"
+gen VecOf := extern "python:luthier.arrays.gen_vec_of"
+gen MatOf := extern "python:luthier.arrays.gen_mat_of"
+gen SpdOf := extern "python:luthier.arrays.gen_spd_of"
+gen DeficientOf := extern "python:luthier.arrays.gen_deficient_of"
 
 -- ---------------------------------------------------------------- the certified leaves
 inner     : { d : Vec -> Vec -> R | DotAgrees d } := dot

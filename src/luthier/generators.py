@@ -19,7 +19,7 @@ from typing import Optional, Callable
 from .syntax import *
 from .subst import subst
 from .pretty import pp
-from .evaluator import Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError
+from .evaluator import to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError
 
 
 class GenError(Exception):
@@ -65,26 +65,29 @@ class Generators:
         return Fuel(self.env.fuel)
 
     # -------------------------------------------------------------- sample
-    def registered(self, ty: Term) -> Optional[str]:
-        """The name of a registered generator for `ty`, looked up on the type as written
-        (before unfolding: `Nat` has its own generator, its unfolding is a subtype of Int)."""
+    def registered(self, ty: Term):
+        """The name of a registered generator for `ty` and the type's arguments, looked up on the
+        type as written (before unfolding: `Nat` has its own generator, its unfolding is a
+        subtype of Int). A generator for a type family (`VecOf n`) receives the arguments."""
         h, args = unapply(ty)
-        if isinstance(h, Var) and not args and (h.name in self.luthier or h.name in self.custom):
-            return h.name
+        if isinstance(h, Var) and (h.name in self.luthier or h.name in self.custom):
+            return h.name, args
         w = whnf(self.env, ty, self.fuel(), unfold=False)
         h, args = unapply(w)
-        if isinstance(h, Var) and not args and (h.name in self.luthier or h.name in self.custom):
-            return h.name
+        if isinstance(h, Var) and (h.name in self.luthier or h.name in self.custom):
+            return h.name, args
         return None
 
     def sample(self, ty: Term, rng: random.Random, size: Optional[int] = None, depth: int = 0) -> Term:
         if size is None:
             size = self.size
-        reg = self.registered(ty)
-        if reg is not None:
+        found = self.registered(ty)
+        if found is not None:
+            reg, targs = found
             if reg in self.luthier:
-                return self.run_luthier(reg, rng, size, ty)
-            return from_python(self.env, self.custom[reg](rng, size), whnf(self.env, ty, self.fuel()))
+                return self.run_luthier(reg, rng, size, ty, targs)
+            pyargs = [to_python(self.env, nf(self.env, a, self.fuel())) for a in targs]
+            return from_python(self.env, self.custom[reg](rng, size, *pyargs), whnf(self.env, ty, self.fuel()))
         w = whnf(self.env, ty, self.fuel())
         h, args = unapply(w)
         name = h.name if isinstance(h, Var) else None
@@ -114,9 +117,11 @@ class Generators:
             raise GenError(f"no generator for the function type {pp(w)}; give it a `gen`")
         raise GenError(f"no generator for {pp(w)}")
 
-    def run_luthier(self, name: str, rng: random.Random, size: int, ty: Term) -> Term:
+    def run_luthier(self, name: str, rng: random.Random, size: int, ty: Term, targs=()) -> Term:
         label, gen = self.luthier[name]
         seed = rng.randrange(2 ** 31)
+        for a in targs:
+            gen = App(gen, a)
         try:
             r = nf(self.env, App(App(gen, Lit(size)), Lit(seed)), self.fuel())
         except EvalError as e:
@@ -208,8 +213,9 @@ class Generators:
         """How values of this type are produced, for the certificate."""
         if size is None:
             size = self.size
-        reg = self.registered(ty)
-        if reg is not None:
+        found = self.registered(ty)
+        if found is not None:
+            reg, _ = found
             if reg in self.luthier:
                 return f"{reg}: {self.luthier[reg][0]}, size up to {size}"
             return f"{reg}: registered Python generator, size up to {size}"

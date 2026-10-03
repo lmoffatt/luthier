@@ -11,9 +11,9 @@
 -- values; transitivity fails at that scale and is not stated. The instances below are valid
 -- for the magnitudes the generators produce (size 16), and say so in their tolerance.
 --
--- Dimensions are not in the types (a design case), so the vector space instances take the
--- dimension as a value. The instances are written over the leaves of array.lut; they are
--- certified in algebra_python.lut, where the leaves and the generators are bound.
+-- The vector space instances are indexed by the dimension, VectorSpace (VecOf n). They are
+-- written over the leaves of array.lut and certified in algebra_python.lut, where the leaves
+-- and the generators are bound.
 
 import "real"
 import "array"
@@ -163,13 +163,15 @@ realField : Field R := {
   eq := eqR, add := \ (a b : R) { a + b }, mul := \ (a b : R) { a * b },
   zero := 0.0, one := 1.0, neg := \ (a : R) { 0.0 - a }, inv := invR }
 
--- Vec of one dimension, over R. The dimension is a value because it is not in the type.
+-- Vectors of dimension n, over R. The leaves act on bare arrays; each operation here is the
+-- leaf seen at the shaped type, so its result's shape is an obligation `test` checks.
 eqVec : Vec -> Vec -> Bool := approxVec (roundingSlack * magnitude * magnitude * eps)
-vecSpace (n : Int) : VectorSpace Vec := {
-  eq := eqVec, add := add, zero := zeros n, neg := scale (0.0 - 1.0), scale := scale }
+vecSpace (n : Dim) : VectorSpace (VecOf n) := {
+  eq := \ a b { eqVec a b }, add := \ a b { add a b }, zero := zeros n,
+  neg := \ a { scale (0.0 - 1.0) a }, scale := \ c a { scale c a } }
 
-euclidean (n : Int) : InnerProductSpace Vec := { space := vecSpace n, eqR := eqR, inner := dot }
+euclidean (n : Dim) : InnerProductSpace (VecOf n) := { space := vecSpace n, eqR := eqR, inner := \ a b { dot a b } }
 
-matrices (n : Int) : LinearMaps Vec Mat := {
-  on := euclidean n, apply := matVec, compose := matMul, id := identity n, adjoint := transpose }
-
+matrices (n : Dim) : LinearMaps (VecOf n) (MatOf n n) := {
+  on := euclidean n, apply := \ a x { matVec a x }, compose := \ a b { matMul a b },
+  id := identity n, adjoint := \ a { transpose a } }
