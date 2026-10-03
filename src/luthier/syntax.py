@@ -218,6 +218,19 @@ class TestDirective:
 
 
 @dataclass
+class OperatorDirective:
+    """`operator + := f`: the binary function f gives `+` its meaning for the types of f's two
+    arguments. Kept in the order of the definitions, so later definitions can use it."""
+    op: str
+    term: Term
+    line: int = 0
+
+    @property
+    def name(self) -> str:
+        return f"operator {self.op}"
+
+
+@dataclass
 class GenDirective:
     """`gen T := term` chooses a Luthier generator (of type Gen T) for values of T;
     `gen T := extern "python:mod.fn"` a Python one, called as fn(rng, size)."""

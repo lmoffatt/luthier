@@ -284,3 +284,38 @@ def max_abs(a):
 def index(v, k):
     """Entry k of a vector of whole numbers, as an Int."""
     return int(round(float(np.asarray(v)[int(k)])))
+
+
+# ------------------------------------------------------------------ the retained subspace
+# The eigenvalues of a symmetric matrix kept are those above n * eps * max |eigenvalue|: below
+# that they are indistinguishable from rounding, and directions with them (a gauge) are dropped.
+
+def _retained(w):
+    return w > w.size * np.finfo(float).eps * np.max(np.abs(w))
+
+
+def retained_rank(a):
+    return int(np.sum(_retained(np.linalg.eigvalsh(np.asarray(a)))))
+
+
+def pinv_sym(a):
+    """The pseudo-inverse of a symmetric matrix on its retained subspace."""
+    w, V = np.linalg.eigh(np.asarray(a))
+    keep = _retained(w)
+    return (V[:, keep] / w[keep]) @ V[:, keep].T
+
+
+def pinv_sqrt_sym(a):
+    """M with M A M the projector on the retained subspace of A."""
+    w, V = np.linalg.eigh(np.asarray(a))
+    keep = _retained(w)
+    return (V[:, keep] / np.sqrt(w[keep])) @ V[:, keep].T
+
+
+def gen_frame_singular(rng: random.Random, size: int):
+    """A frame whose S is positive semidefinite of rank below n: the Gram matrix of fewer
+    vectors than its dimension."""
+    n = max(2, _dim(rng, size))
+    r = rng.randint(1, n - 1)
+    B = _mat(rng, r, n, size)
+    return (B, B.T @ B, _vec(rng, n, size), _vec(rng, n, size), _vec(rng, r, size))

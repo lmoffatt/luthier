@@ -45,6 +45,9 @@ cond : Mat -> R := extern "python:luthier.arrays.cond"
 solve : Mat -> Vec -> Vec := extern "python:luthier.arrays.solve"
 eigvalsSym : Mat -> Vec := extern "python:luthier.arrays.eigvals_sym"
 invSqrtSym : Mat -> Mat := extern "python:luthier.arrays.inv_sqrt_sym"
+retainedRank : Mat -> Int := extern "python:luthier.arrays.retained_rank"
+pinvSym : Mat -> Mat := extern "python:luthier.arrays.pinv_sym"
+pinvSqrtSym : Mat -> Mat := extern "python:luthier.arrays.pinv_sqrt_sym"
 madd : Mat -> Mat -> Mat := extern "python:luthier.arrays.madd"
 msub : Mat -> Mat -> Mat := extern "python:luthier.arrays.msub"
 mscale : R -> Mat -> Mat := extern "python:luthier.arrays.mscale"
@@ -57,6 +60,7 @@ approxR : R -> R -> R -> Bool := extern "python:luthier.arrays.approx"
 approxVec : R -> Vec -> Vec -> Bool := extern "python:luthier.arrays.approx"
 approxMat : R -> Mat -> Mat -> Bool := extern "python:luthier.arrays.approx"
 gen Frame := extern "python:luthier.arrays.gen_frame"
+gen SingularFrame := extern "python:luthier.arrays.gen_frame_singular"
 
 -- ---------------------------------------------------------------- the certified leaves
 inner     : { d : Vec -> Vec -> R | DotAgrees d } := dot
@@ -72,8 +76,11 @@ transposed : { tr : Mat -> Mat | TransposeAgrees tr } := transpose
 mtrace    : { t : Mat -> R | TraceAgrees t } := trace
 determinant : { dt : Mat -> R | DetAgrees dt } := det
 solver    : { sv : Mat -> Vec -> Vec | SolveInverts sv } := solve
-spectrum  : { ev : Mat -> Vec | EigenvaluesSumToTrace ev & EigenvaluesMultiplyToDet ev } := eigvalsSym
-invSqrt   : { m : Mat -> Mat | InvSqrtInverts m } := invSqrtSym
+spectrum  : { ev : Mat -> Vec | EigvalsAgree ev & EigenvaluesSumToTrace ev & EigenvaluesMultiplyToDet ev } := eigvalsSym
+invSqrt   : { m : Mat -> Mat | InvSqrtAgrees m & InvSqrtInverts m } := invSqrtSym
+rank      : { r : Mat -> Int | RankAgrees r } := retainedRank
+pseudoInverse : { m : Mat -> Mat | PinvAgrees m } := pinvSym
+pseudoInvSqrt : { m : Mat -> Mat | PinvSqrtAgrees m } := pinvSqrtSym
 embedding : { fl : List R -> Vec | ListRoundTrip fl } := fromList
 maddition : { f : Mat -> Mat -> Mat | MaddAgrees f } := madd
 msubtraction : { f : Mat -> Mat -> Mat | MsubAgrees f } := msub
@@ -96,6 +103,9 @@ test determinant with 30
 test solver with 100
 test spectrum with 100
 test invSqrt with 100
+test rank with 100
+test pseudoInverse with 100
+test pseudoInvSqrt with 100
 test embedding with 100
 test maddition with 50
 test msubtraction with 50

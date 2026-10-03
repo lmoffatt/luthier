@@ -449,3 +449,21 @@ def test_projection_errors_and_qualified_names_win():
     # a dotted name that is a module member is the member, not a projection
     ck = load_example("qualified.lut")
     assert ev(ck, "z7.addMod7 3 5") == "1"
+
+
+# ------------------------------------------------------------------ operators by type
+
+def test_operator_resolves_by_operand_types():
+    ck = load("""
+P : U := { a : Int, b : Int | true }
+addP (p q : P) : P := (p.a + q.a, p.b + q.b)
+scaleP (k : Int) (p : P) : P := (k * p.a, k * p.b)
+operator + := addP
+operator * := scaleP
+firstOf (p : P) : Int := p.a
+x : P := (1, 2)
+y : P := 3 * x + x
+z : Int := 3 * 4 + 1
+""")
+    assert ev(ck, "firstOf y") == "4"
+    assert ev(ck, "z") == "13"

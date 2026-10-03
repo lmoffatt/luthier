@@ -106,6 +106,8 @@ class Parser:
                 prog.tests.append(self.parse_test())
             elif self.at_kw("gen"):
                 prog.gens.append(self.parse_gen())
+            elif self.at_kw("operator"):
+                prog.defs.append(self.parse_operator())
             elif self.at_kw("import"):
                 prog.imports.append(self.parse_import())
             else:
@@ -138,6 +140,16 @@ class Parser:
             alias = self.expect("name").text
         self.end_of_block()
         return ImportDirective(path, alias, t.line)
+
+    def parse_operator(self) -> OperatorDirective:
+        t = self.expect("keyword", "operator")
+        op_tok = self.next()
+        if op_tok.kind not in ("symbol", "keyword") and op_tok.text not in ("mod",):
+            self.err("expected an operator after 'operator'")
+        self.expect("symbol", ":=")
+        term = self.parse_term()
+        self.end_of_block()
+        return OperatorDirective(op_tok.text, term, t.line)
 
     def parse_gen(self) -> GenDirective:
         self.expect("keyword", "gen")

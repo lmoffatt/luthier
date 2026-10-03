@@ -70,6 +70,7 @@ class Checker:
         self.recording: bool = True    # whether checks against subtypes record obligations
         self.certified: dict = {}      # qualified name -> certificate entry accepted at import
         self.gens: dict = {}           # qualified type name -> ("luthier", label, term) | ("extern", target, None)
+        self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
 
     # ----------------------------------------------------------- namespaces
     def qualify(self, name: str) -> str:
@@ -129,6 +130,38 @@ class Checker:
         for g in prog.gens:
             self.add_gen(g)
 
+    def add_operator(self, d: OperatorDirective):
+        """`operator op := f`: f must take two arguments; op on values of their types means f."""
+        self.current_def = d.name
+        try:
+            term, ty = self.infer([], d.term)
+            w = self.whnf(self.base_type(ty))
+            if not isinstance(w, Pi):
+                self.err(f"operator {d.op}: {pp(d.term)} is not a function")
+            w2 = self.whnf(self.base_type(w.cod))
+            if not isinstance(w2, Pi):
+                self.err(f"operator {d.op}: {pp(d.term)} does not take two arguments")
+            self.operators.setdefault(d.op, []).append((w.dom, w2.dom, w2.cod, term))
+        finally:
+            self.current_def = None
+
+    def resolve_operator(self, ctx: Ctx, op: str, l: Term, lt: Term, rhs: Term):
+        """A registered meaning of `op` whose first argument takes l and whose second takes the
+        right-hand side, or None. The right side is inferred when it can be, so the types of
+        both operands choose; otherwise the first candidate for the left type is checked."""
+        cands = [c for c in self.operators.get(op, ())
+                 if self.convertible(lt, c[0]) or self.conv(self.base_type(lt), self.base_type(c[0]))]
+        if not cands:
+            return None
+        if self.inferable(rhs):
+            r, rt = self.infer(ctx, rhs)
+            for d1, d2, cod, f in cands:
+                if self.convertible(rt, d2) or self.conv(self.base_type(rt), self.base_type(d2)):
+                    return App(App(f, l), self.coerce(ctx, r, rt, d2)), cod
+            return None
+        d1, d2, cod, f = cands[0]
+        return App(App(f, l), self.check(ctx, rhs, d2)), cod
+
     def add_gen(self, g: GenDirective):
         """`gen T := term`: the term must be a `Gen T`. Recorded by the qualified type name."""
         q = self.resolve(g.type_name)
@@ -149,6 +182,9 @@ class Checker:
         self.gens[q] = ("luthier", pp(g.term), term)
 
     def add_def(self, d: Def):
+        if isinstance(d, OperatorDirective):
+            self.add_operator(d)
+            return
         qname = self.qualify(d.name)
         self.current_def = qname
         try:
@@ -483,6 +519,10 @@ class Checker:
         if op == "*" and self.conv(lt, Univ()):
             r = self.check(ctx, t.rhs, Univ())
             return Sigma("_", l, r), Univ()
+        if op in self.operators:
+            res = self.resolve_operator(ctx, op, l, lt, t.rhs)
+            if res is not None:
+                return res
         if op in ("==", "/="):
             if self.inferable(t.rhs):
                 r, rt = self.infer(ctx, t.rhs)

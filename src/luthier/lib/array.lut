@@ -76,6 +76,18 @@ index    : Vec -> Int -> Int          -- entry k of whole numbers
 -- n standard normals from a seed, and the next seed
 normalVec : Int -> Int -> Vec * Int
 
+-- ---------------------------------------------------------------- operators
+-- The arithmetic of vectors and matrices written with + - *: each operator is resolved by the
+-- types of its two operands, and falls back to the arithmetic of Int and R when none applies.
+operator + := add
+operator - := sub
+operator * := scale        -- R * Vec
+operator + := madd
+operator - := msub
+operator * := mscale       -- R * Mat
+operator * := matVec       -- Mat * Vec
+operator * := matMul       -- Mat * Mat
+
 -- ---------------------------------------------------------------- comparison
 -- `==` does not decide on arrays. Entrywise |a - b| <= tol (1 + |a| + |b|).
 approxR   : R -> R -> R -> Bool
@@ -124,6 +136,78 @@ detDef (a : Mat) : R :=
   if rows a == 1 then entry a 0 0
   else sumTo (cols a) (\ j { (if j mod 2 == 0 then 1.0 else 0.0 - 1.0) * entry a 0 j * detDef (minor a j) })
 
+-- ---------------------------------------------------------------- the spectrum, natively
+-- Jacobi's method: a plane rotation J(p, q) chosen to zero the entry (p, q) of a symmetric A,
+-- A <- J^T A J and V <- V J, in cyclic sweeps over all pairs until what is left off the diagonal
+-- is below jacobiTol times the size of A. The diagonal is then the spectrum and V its vectors.
+-- The rotation of Golub and Van Loan: with r = (A_qq - A_pp) / (2 A_pq), t = sign r /
+-- (|r| + sqrt(r^2 + 1)) is the tangent of the smaller angle, c = 1 / sqrt(t^2 + 1), s = t c.
+jacobiTol : R := eps
+maxSweeps : Int := 30
+
+rotation (n p q : Int) (c s : R) : Mat :=
+  tabulateMat n n (\ i j {
+    if i == p and j == p then c else if i == q and j == q then c
+    else if i == p and j == q then s else if i == q and j == p then 0.0 - s
+    else if i == j then 1.0 else 0.0 })
+
+-- the size of what is off the diagonal, summed directly: frob^2 minus the diagonal would
+-- cancel, and lose everything below sqrt(eps) of the matrix
+offDiagonal (a : Mat) : R :=
+  sqrtR (sumTo (rows a) (\ i { sumTo (cols a) (\ j { if i == j then 0.0 else entry a i j * entry a i j }) }))
+
+-- one rotation on the pair (p, q); a pair already zero is left alone. The pair is carried
+-- through hundreds of rotations, so both components are evaluated at each one: a lazy pair
+-- would hold the whole chain of pending rotations (the accumulator leak of lazy evaluation).
+rotate (p q : Int) (av : Mat * Mat) : Mat * Mat :=
+  match av { (a, v) ->
+  if entry a p q == 0.0 then (a, v)
+  else match (entry a q q - entry a p p) / (2.0 * entry a p q) { r ->
+       match (if r >= 0.0 then 1.0 else 0.0 - 1.0) / (abs r + sqrtR (r * r + 1.0)) { t ->
+       match 1.0 / sqrtR (t * t + 1.0) { c ->
+       match rotation (rows a) p q c (t * c) { j ->
+       match matMul (transpose j) (matMul a j) { a2 -> match matMul v j { v2 -> (a2, v2) } } } } } } }
+
+-- a sweep: every pair p < q in order
+sweepFrom (p q : Int) (av : Mat * Mat) : Mat * Mat :=
+  match av { (a, v) ->
+  if p >= rows a - 1 then av
+  else if q >= rows a then sweepFrom (p + 1) (p + 2) av
+  else sweepFrom p (q + 1) (rotate p q av) }
+
+jacobi (a0 : Mat) (k : Int) (av : Mat * Mat) : Mat * Mat :=
+  match av { (a, v) ->
+  if k >= maxSweeps or offDiagonal a <= jacobiTol * frob a0 then av
+  else jacobi a0 (k + 1) (sweepFrom 0 1 av) }
+
+-- the spectrum and the vectors, unordered: column k of V belongs to entry k of the diagonal
+eigenDef (a : Mat) : Vec * Mat :=
+  match jacobi a 0 (a, identity (rows a)) { (d, v) -> (tabulate (rows d) (\ i { entry d i i }), v) }
+
+sumToInt (n : Int) (f : Int -> Int) : Int := if n <= 0 then 0 else f (n - 1) + sumToInt (n - 1) f
+
+-- ascending order, by rank: entry i goes to the number of entries before it in the order
+rankIn (x : Vec) (i : Int) : Int :=
+  sumToInt (length x) (\ j { if at x j < at x i or (at x j == at x i and j < i) then 1 else 0 })
+sortedDef (x : Vec) : Vec :=
+  tabulate (length x) (\ k { sumTo (length x) (\ i { if rankIn x i == k then at x i else 0.0 }) })
+
+eigvalsDef (a : Mat) : Vec := match eigenDef a { (e, v) -> sortedDef e }
+
+-- a function of a symmetric matrix through its spectrum: V diag(f lambda) V^T
+spectralMap (f : R -> R) (a : Mat) : Mat :=
+  match eigenDef a { (e, v) -> matMul (matMul v (tabulateMat (length e) (length e) (\ i j { if i == j then f (at e i) else 0.0 }))) (transpose v) }
+
+-- the retained subspace: eigenvalues above n eps times the largest in size
+retainedFloor (a : Mat) : R :=
+  match eigenDef a { (e, v) -> toR (length e) * eps * maxFrom 0 (length e) (\ k { abs (at e k) }) 0.0 }
+retainedRankDef (a : Mat) : Int :=
+  match eigenDef a { (e, v) -> match retainedFloor a { fl -> sumToInt (length e) (\ k { if at e k > fl then 1 else 0 }) } }
+
+invSqrtDef (a : Mat) : Mat := spectralMap (\ x { 1.0 / sqrtR x }) a
+pinvDef (a : Mat) : Mat := match retainedFloor a { fl -> spectralMap (\ x { if x > fl then 1.0 / x else 0.0 }) a }
+pinvSqrtDef (a : Mat) : Mat := match retainedFloor a { fl -> spectralMap (\ x { if x > fl then 1.0 / sqrtR x else 0.0 }) a }
+
 -- ---------------------------------------------------------------- the frame and the laws
 -- A is m x n, S is n x n symmetric positive definite, x and z have length n, y has length m.
 Frame : U := { A : Mat, S : Mat, x : Vec, z : Vec, y : Vec | true }
@@ -154,6 +238,21 @@ MaxAbsAgrees (f : Vec -> R) (fr : Frame) : Bool := f fr.x == maxAbsDef fr.x
 laplaceLimit : Int := 4
 DetAgrees (dt : Mat -> R) (f : Frame) : Bool :=
   rows f.S > laplaceLimit or approxR (scaledTol (factorial (rows f.S)) (powR (frob f.S) (rows f.S))) (dt f.S) (detDef f.S)
+
+-- the spectral leaves agree with Jacobi's spectrum; their tolerance is the rounding of n
+-- rotations of n^2 entries, amplified by the condition number where the map inverts
+spectralTol (s : Mat) : R := cond s * scaledTol (rows s * rows s) (frob s)
+EigvalsAgree (ev : Mat -> Vec) (f : Frame) : Bool :=
+  approxVec (scaledTol (rows f.S * rows f.S) (frob f.S)) (ev f.S) (eigvalsDef f.S)
+InvSqrtAgrees (m : Mat -> Mat) (f : Frame) : Bool :=
+  approxMat (spectralTol f.S) (m f.S) (invSqrtDef f.S)
+
+-- the retained subspace, on frames whose S is singular
+SingularFrame : U := Frame
+singularTol (s : Mat) : R := scaledTol (rows s * rows s) (frob s) * (1.0 + frob s * frob (pinvDef s))
+RankAgrees (r : Mat -> Int) (f : SingularFrame) : Bool := r f.S == retainedRankDef f.S
+PinvAgrees (m : Mat -> Mat) (f : SingularFrame) : Bool := approxMat (singularTol f.S) (m f.S) (pinvDef f.S)
+PinvSqrtAgrees (m : Mat -> Mat) (f : SingularFrame) : Bool := approxMat (singularTol f.S) (m f.S) (pinvSqrtDef f.S)
 
 -- leaves the laws characterize, no definition needed
 SolveInverts (sv : Mat -> Vec -> Vec) (f : Frame) : Bool :=
