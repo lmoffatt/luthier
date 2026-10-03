@@ -17,7 +17,7 @@ HERE = os.path.dirname(__file__)
 EXAMPLES = os.path.join(HERE, "..", "examples")
 
 
-LIBS = ["real", "random", "peano", "algebra"]
+LIBS = ["real", "real_python", "random", "peano", "algebra"]
 
 
 def load(src: str, prelude=True) -> Checker:

@@ -17,6 +17,7 @@ def write(tmp_path, name, src):
 def test_a_filled_hole_evaluates_and_its_laws_are_certified(tmp_path):
     path = write(tmp_path, "sq.lut", '''
 import "real"
+import "real_python"
 Sqrt : U := { f : Positive -> R | \\ (x : Positive) { approx 0.000000001 (f x * f x) x } }
 root : Sqrt
 twice (x : Positive) : R := root x + root x
@@ -49,6 +50,7 @@ def test_the_signature_is_checked_against_the_type(tmp_path):
 def test_records_cross_as_dataclasses_in_both_directions(tmp_path):
     path = write(tmp_path, "pt.lut", '''
 import "real"
+import "real_python"
 Pt : U := { x : R, y : R | true }
 norm : Pt -> R
 mk   : R -> Pt
@@ -76,6 +78,7 @@ far (r : R) : R := norm (mk r)
 def test_a_value_hole_a_list_and_a_returned_callable(tmp_path):
     path = write(tmp_path, "misc.lut", '''
 import "real"
+import "real_python"
 c : R
 sumList : List R -> R
 scale : R -> (R -> R)
@@ -99,6 +102,7 @@ holds (e : Ev) (x : R) : Bool := e.region x
 def test_a_luthier_function_passed_to_python_receives_typed_arguments(tmp_path):
     path = write(tmp_path, "fn.lut", '''
 import "real"
+import "real_python"
 Pt : U := { x : R, y : R | true }
 applyAt : (Pt -> R) -> R -> R
 norm2 (p : Pt) : R := p.x * p.x + p.y * p.y
@@ -111,6 +115,7 @@ norm2 (p : Pt) : R := p.x * p.x + p.y * p.y
 def test_filling_a_hole_makes_dependent_certificates_stale(tmp_path):
     path = write(tmp_path, "dep.lut", '''
 import "real"
+import "real_python"
 k : R
 Big : U := { f : R -> R | \\ (x : R) { f x >= x } }
 grow : Big := \\ x { x + k }
