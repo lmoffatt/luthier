@@ -1,6 +1,5 @@
 -- R2: the laws of Codec mention Codec, only declared, because they are on its cycle; csv is a
 -- branch over a defined Codec; sigma is a hole of a defined type, used in term position.
-import "real"
 
 Codec : { parse : String -> Maybe Int, render : Int -> String }
 RoundTrip (c : Codec) (n : Int) : Bool := match c.parse (c.render n) { nothing -> false ; just m -> m == n }

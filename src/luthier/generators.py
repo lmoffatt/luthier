@@ -103,6 +103,14 @@ class Generators:
             a = self.sample(w.fst, rng, size, depth)
             b = self.sample(subst(w.snd, {w.name: a}), rng, size, depth)
             return Pair(a, b)
+        if isinstance(w, Sum):
+            if not w.alts:
+                raise GenError("Empty has no values")
+            i = rng.randrange(len(w.alts))
+            label, alt = w.alts[i]
+            return Inj(i, label, self.sample(alt, rng, size, depth + 1), ty)
+        if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
+            return self.sample(w.base, rng, size, depth)
         if isinstance(w, Subtype):
             rejected = []
             for _ in range(self.max_tries):
@@ -235,6 +243,10 @@ class Generators:
             return f"{pp(w)}: all values"
         if isinstance(w, Sigma):
             return f"({self.describe(w.fst, size)}) * ({self.describe(w.snd, size)})"
+        if isinstance(w, Sum):
+            return " | ".join(f"{l} ({self.describe(a, size)})" for l, a in w.alts)
+        if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
+            return self.describe(w.base, size)
         if isinstance(w, Subtype):
             return f"{self.describe(w.base, size)} where {pp(w.pred)}"
         return pp(w)
@@ -280,6 +292,16 @@ class Generators:
                     return None
                 out += [Pair(a, b) for b in ss]
             return out
+        if isinstance(w, Sum):
+            out = []
+            for i, (label, alt) in enumerate(w.alts):
+                vs = self.enumerate(alt, size)
+                if vs is None:
+                    return None
+                out += [Inj(i, label, v, ty) for v in vs]
+            return out
+        if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
+            return self.enumerate(w.base, size)
         if isinstance(w, Subtype):
             base = self.enumerate(w.base, size)
             if base is None:

@@ -60,6 +60,41 @@ class Sigma(Term):
 
 
 @dataclass(frozen=True)
+class Sum(Term):
+    """`< a : A | b : B >`, `(a : A) + (b : B)`, `A + B`: the primitive sum (04 §2). Structural:
+    the labels are binders and two sums with the same alternative types, in order, are the
+    same type. `alts` is a tuple of (label, type)."""
+    alts: tuple
+
+    def labels(self) -> list:
+        return [l for l, _ in self.alts]
+
+
+@dataclass(frozen=True)
+class Inj(Term):
+    """Injection into alternative `index` of a sum, written with its label. `type` is the sum
+    type it was elaborated against, kept so an elaborated term can be typed again."""
+    index: int
+    label: str
+    arg: Term
+    type: Optional[Term] = None
+
+
+@dataclass(frozen=True)
+class NoLaw(Term):
+    """The predicate of a labeled product: `{ a : A, b : B }` is `Subtype((a, b), A * B, NoLaw())`.
+    It states nothing; the subtype is the product with names for its positions."""
+    def __repr__(self): return "nolaw"
+
+
+@dataclass(frozen=True)
+class Named(Term):
+    """`(x : A)` alone, before elaboration: a named position of a product or a sum."""
+    name: str
+    type: Term
+
+
+@dataclass(frozen=True)
 class Pair(Term):
     fst: Term
     snd: Term
@@ -90,9 +125,11 @@ class Con(Term):
 
 @dataclass(frozen=True)
 class Extern(Term):
-    """A hole filled by the environment, by name."""
+    """A hole filled by the environment, by name. `provisional`: written `extern provisional`,
+    exempt from the requirement that the types it builds on be defined (05 R5)."""
     target: str
     type: Optional[Term] = None
+    provisional: bool = False
 
 
 @dataclass(frozen=True)
@@ -172,6 +209,14 @@ class PLit(Pattern):
     value: object
 
 
+@dataclass(frozen=True)
+class PInj(Pattern):
+    """A label of a sum applied to a pattern for its payload (`PWild` for a Unit alternative)."""
+    index: int
+    label: str
+    arg: Pattern
+
+
 def pattern_vars(p: Pattern) -> list[str]:
     if isinstance(p, PVar):
         return [p.name]
@@ -182,6 +227,8 @@ def pattern_vars(p: Pattern) -> list[str]:
         return out
     if isinstance(p, PPair):
         return pattern_vars(p.fst) + pattern_vars(p.snd)
+    if isinstance(p, PInj):
+        return pattern_vars(p.arg)
     return []
 
 
@@ -207,6 +254,10 @@ class Def:
     body: Optional[Term]  # None: hole
     data: Optional[DataDecl] = None
     doc: str = ""
+    alias: bool = False   # `name = term`: expanded wherever it is used; no states (05 R7)
+    line: int = 0
+    pending: bool = False  # a declared type `T : base` whose laws are not given yet: its body is
+                           # the labeled base, so the laws can be written over it (05 §1)
 
 
 @dataclass

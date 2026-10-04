@@ -32,6 +32,7 @@ class Parser:
         self.skip_newlines = 0    # depth counter: inside (), {}, [] newlines are ignored
         self.strict_newlines = 0  # while > 0, a newline always ends the current phrase (subtype components)
         self.no_brace = 0         # while > 0, '{' does not start an atom (match scrutinee)
+        self.in_angle = 0         # while > 0, '>' closes a sum `< a : A | b : B >` instead of comparing
 
     # ------------------------------------------------------------ helpers
     def _skippable_newline(self, j: int) -> bool:
@@ -187,6 +188,15 @@ class Parser:
         binders = []
         while self.at_sym("("):
             binders.append(self.parse_binder())
+        if self.at_sym("="):
+            # an alias: `name binders = term`, expanded wherever it is used (05 R7)
+            self.next()
+            body = self.parse_term()
+            self.end_of_block()
+            for names, btype in reversed(binders):
+                for n in reversed(names):
+                    body = Lam(PVar(n), body, ann=btype)
+            return Def(name, None, body, alias=True, line=name_tok.line)
         typ = None
         if self.at_sym(":"):
             self.next()
@@ -199,8 +209,12 @@ class Parser:
                 data = self.parse_data(name, binders)
             elif self.at_kw("extern"):
                 self.next()
+                provisional = False
+                if self.at_kw("provisional"):
+                    self.next()
+                    provisional = True
                 target = self.expect("string").text[1:-1]
-                body = Extern(target)
+                body = Extern(target, provisional=provisional)
             else:
                 body = self.parse_term()
         # clauses: | pat, pat := body   (each on its own indented line)
@@ -223,7 +237,7 @@ class Parser:
                 raise ParseError(f"line {name_tok.line}: clauses need parameters in the header")
             body = self.clauses_to_match(binders, clauses)
         if data is not None:
-            return Def(name, typ or Univ(), None, data=data)
+            return Def(name, typ or Univ(), None, data=data, line=name_tok.line)
         # wrap binders: type becomes Pi chain, body becomes Lam chain
         for names, btype in reversed(binders):
             for n in reversed(names):
@@ -233,7 +247,7 @@ class Parser:
                     body = Lam(PVar(n), body, ann=btype)
         if typ is None and body is None:
             self.err(f"definition {name!r} needs a type or a body")
-        return Def(name, typ, body)
+        return Def(name, typ, body, line=name_tok.line)
 
     def _peek_after_nl_is(self, sym) -> bool:
         j = self.i
@@ -314,6 +328,8 @@ class Parser:
 
     def _at_op(self, ops) -> bool:
         t = self.peek()
+        if self.in_angle > 0 and t.kind == "symbol" and t.text in (">", "|"):
+            return False
         return (t.kind in ("symbol", "keyword", "name")) and t.text in ops
 
     def make_binop(self, op, lhs, rhs) -> Term:
@@ -383,7 +399,13 @@ class Parser:
         if t.kind == "keyword" and t.text == "extern":
             # an extern as a term: its type comes from the context it is checked against
             self.next()
-            return Extern(self.expect("string").text[1:-1])
+            provisional = False
+            if self.at_kw("provisional"):
+                self.next()
+                provisional = True
+            return Extern(self.expect("string").text[1:-1], provisional=provisional)
+        if t.kind == "symbol" and t.text == "<":
+            return self.parse_union()
         if t.kind == "symbol" and t.text == "\\":
             return self.parse_lambda()
         if t.kind == "symbol" and t.text == "(":
@@ -477,10 +499,32 @@ class Parser:
             if self.at_sym("*"):
                 self.next()
                 snd = self.parse_binop(6)
-                for n in reversed(names):
-                    snd = Sigma(n, dom, snd)
+                comps = [(n, dom) for n in names]
+                # `(a : A) * (b : B)`: the last position named too, a labeled product
+                while isinstance(snd, Sigma) and snd.name != "_":
+                    comps.append((snd.name, snd.fst))
+                    snd = snd.snd
+                if isinstance(snd, Named):
+                    comps.append((snd.name, snd.type))
+                    return labeled_product(comps)
+                for n, d in reversed(comps):
+                    snd = Sigma(n, d, snd)
                 return snd
-            self.err("expected '->' or '*' after a dependent binder")
+            if self.at_sym("+"):
+                # `(a : A) + (b : B)`: a sum with named alternatives
+                if len(names) != 1:
+                    self.err("an alternative of a sum has one name")
+                alts = [(names[0], dom)]
+                while self.at_sym("+"):
+                    self.next()
+                    nxt = self.parse_binop(6)
+                    if not isinstance(nxt, Named):
+                        self.err("every alternative of a named sum is written `(label : Type)`")
+                    alts.append((nxt.name, nxt.type))
+                return Sum(tuple(alts))
+            if len(names) == 1:
+                return Named(names[0], dom)   # a named position, finished by `*` or `+` around it
+            self.err("expected '->', '*' or '+' after a dependent binder")
         first = self.parse_term()
         if self.at_sym(","):
             items = [first]
@@ -555,9 +599,15 @@ class Parser:
                 continue
             if self.at_sym("|"):
                 break
+            if self.at_sym("}"):
+                # `{ a : A, b : B }`: a labeled product, no law (04 §2)
+                self.strict_newlines -= 1
+                self.skip_newlines = saved
+                self.expect("symbol", "}")
+                return labeled_product([(n, t) for ns, t in groups for n in ns])
             if self.at("name"):
                 continue
-            self.err("expected another component or '|' in a subtype")
+            self.err("expected another component, '|' or '}' in a record type")
         self.strict_newlines -= 1
         self.expect("symbol", "|")
         self.skip_newlines = saved + 1
@@ -577,6 +627,26 @@ class Parser:
         for n in reversed(names[:-1]):
             pat = PPair(PVar(n), pat)
         return Subtype(pat, base, pred)
+
+    def parse_union(self) -> Term:
+        """`< a : A | b : B >`: a sum with named alternatives (04 §2)."""
+        self.expect("symbol", "<")
+        self.skip_newlines += 1
+        self.in_angle += 1
+        alts = []
+        while True:
+            label = self.expect("name").text
+            self.expect("symbol", ":")
+            ty = self.parse_term()
+            alts.append((label, ty))
+            if self.at_sym("|"):
+                self.next()
+                continue
+            break
+        self.in_angle -= 1
+        self.skip_newlines -= 1
+        self.expect("symbol", ">")
+        return Sum(tuple(alts))
 
     def _skip_raw_newlines(self):
         while self.toks[self.i].kind == "newline":
@@ -664,6 +734,21 @@ class Parser:
                 p = PPair(q, p)
             return p
         self.err("expected a pattern")
+
+
+def labeled_product(comps) -> Term:
+    """`{ a : A, b : B, c : C }` as `Subtype((a, (b, c)), (a : A) * (b : B) * C, NoLaw())`: the
+    product with names for its positions; a later type may mention an earlier name."""
+    if len(comps) == 1:
+        n, t = comps[0]
+        return Subtype(PVar(n), t, NoLaw())
+    base = comps[-1][1]
+    for n, t in reversed(comps[:-1]):
+        base = Sigma(n, t, base)
+    pat = PVar(comps[-1][0])
+    for n, _ in reversed(comps[:-1]):
+        pat = PPair(PVar(n), pat)
+    return Subtype(pat, base, NoLaw())
 
 
 def parse(src: str) -> Program:

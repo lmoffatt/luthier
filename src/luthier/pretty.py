@@ -21,12 +21,40 @@ def pp_pat(p) -> str:
             p = p.snd
         items.append(p)
         return "(" + ", ".join(pp_pat(x) for x in items) + ")"
+    if isinstance(p, PInj):
+        if isinstance(p.arg, PWild):
+            return p.label
+        return p.label + " " + _pat_atom(p.arg)
     return str(p)
 
 
 def _pat_atom(p) -> str:
     s = pp_pat(p)
-    return f"({s})" if isinstance(p, PCon) and p.args else s
+    return f"({s})" if (isinstance(p, PCon) and p.args) or (isinstance(p, PInj) and not isinstance(p.arg, PWild)) else s
+
+
+def _labeled_components(param, base):
+    """[(label, type)] of a labeled product `Subtype(param, base, NoLaw())`, or None."""
+    names = []
+
+    def walk(q):
+        if isinstance(q, PVar):
+            names.append(q.name.split("~")[0])
+            return True
+        if isinstance(q, PPair):
+            return walk(q.fst) and walk(q.snd)
+        return False
+    if not walk(param):
+        return None
+    types = []
+    t = base
+    for _ in names[:-1]:
+        if not isinstance(t, Sigma):
+            return None
+        types.append(t.fst)
+        t = t.snd
+    types.append(t)
+    return list(zip(names, types))
 
 
 def _projected_name(p):
@@ -120,8 +148,29 @@ def pp(t, prec: int = 0) -> str:
         return f"({s})" if prec > APP else s
     if isinstance(t, RecordLit):
         return "{ " + ", ".join(f"{n} := {pp(v)}" for n, v in t.fields) + " }"
+    if isinstance(t, Subtype) and isinstance(t.pred, NoLaw):
+        comps = _labeled_components(t.param, t.base)
+        if comps is not None:
+            return "{ " + ", ".join(f"{n} : {pp(ty)}" for n, ty in comps) + " }"
+        return "{ " + pp_pat(t.param) + " : " + pp(t.base) + " }"
     if isinstance(t, Subtype):
+        comps = _labeled_components(t.param, t.base) if isinstance(t.param, PPair) else None
+        if comps is not None:
+            return "{ " + ", ".join(f"{n} : {pp(ty)}" for n, ty in comps) + " | " + pp(t.pred) + " }"
         return "{ " + pp_pat(t.param) + " : " + pp(t.base) + " | " + pp(t.pred) + " }"
+    if isinstance(t, Sum):
+        if [l for l, _ in t.alts] == ["left", "right"]:
+            return _infix("+", t.alts[0][1], t.alts[1][1], prec)
+        return "< " + " | ".join(f"{l} : {pp(a)}" for l, a in t.alts) + " >"
+    if isinstance(t, Inj):
+        if isinstance(t.arg, Con) and t.arg.name.split(".")[-1] == "unit":
+            return t.label
+        s = t.label + " " + pp(t.arg, APP + 1)
+        return f"({s})" if prec > APP else s
+    if isinstance(t, NoLaw):
+        return "nolaw"
+    if isinstance(t, Named):
+        return f"({t.name} : {pp(t.type)})"
     if isinstance(t, Proj):
         return pp(t.term, APP + 1) + "." + t.field
     if isinstance(t, Match) and len(t.branches) == 1:

@@ -1,9 +1,13 @@
--- Luthier core: the only definitions the interpreter itself refers to by name.
--- Loaded implicitly. Everything else is a library under lib/, imported on demand.
+-- Luthier core: the kernel's own definitions (04 §2), loaded implicitly. Everything else is a
+-- library under lib/, imported on demand.
+
+-- the terminal and the initial type
+Unit : U := data { unit : Unit }
+Empty : U := data { }
 
 -- `==`, `<` and the other comparisons produce Bools; `a and b`, `a or b` and `p -> q` on Bools
 -- elaborate to these functions; `if` is a match on true and false; a law is Bool-valued.
-Bool : U := data { true : Bool ; false : Bool }
+Bool = < true : Unit | false : Unit >
 
 not (b : Bool) : Bool := match b { true -> false ; false -> true }
 and (a b : Bool) : Bool := match a { true -> b ; false -> false }
@@ -12,15 +16,13 @@ implies (a b : Bool) : Bool := match a { true -> b ; false -> true }
 
 -- The numbers and strings of the environment, as holes: declared here, filled by the
 -- interpreter, which supplies their literals (`3`, `3.0`, `"a"`), arithmetic and comparisons.
--- `R` is the environment's real, an IEEE double; what can be said about it (its epsilon, its
--- operations as functions, approximate equality) lives in the `real` library.
+-- `R` is the environment's real, an IEEE double; what can be said about it (its epsilon,
+-- approximate equality) lives in the `real` library.
 Int    : U
 R      : U
 String : U
 
--- the bridge with the environment marshals these
-Unit : U := data { unit : Unit }
-Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
+Maybe (A : U) = < nothing : Unit | just : A >
 
 -- `[a, b, c]` is sugar for cons and nil
 List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }

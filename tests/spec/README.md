@@ -6,5 +6,4 @@ must accept and a file it must reject. A rejected file carries the fragment of t
 it must produce in a comment `-- expect: ...`. Files not ending in `.accept.lut` or `.reject.lut`
 are imported by others and not run on their own.
 
-`tests/test_spec.py` runs the suite. Until the specification is implemented every case is marked
-xfail; a case that passes is reported as XPASS, the signal to drop its mark.
+`tests/test_spec.py` runs the suite.

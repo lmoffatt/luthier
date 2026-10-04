@@ -71,6 +71,10 @@ class Checker:
         self.certified: dict = {}      # qualified name -> certificate entry accepted at import
         self.gens: dict = {}           # qualified type name -> ("luthier", label, term) | ("extern", target, None)
         self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
+        self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
+        self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
+        self.provisional: dict = {}    # name -> [declared types it builds on], for `extern provisional`
+        self.primitives = {"Int", "R", "String"}   # holes of core.lut the interpreter fills
 
     # ----------------------------------------------------------- namespaces
     def qualify(self, name: str) -> str:
@@ -104,6 +108,21 @@ class Checker:
         w = self.whnf(ty)
         return isinstance(w, Var) and w.name == name
 
+    def is_unit(self, ty: Term) -> bool:
+        w = self.whnf(ty)
+        return isinstance(w, Var) and w.name == "Unit"
+
+    def is_bool(self, ty: Term) -> bool:
+        """`Bool` is `< true : Unit | false : Unit >`; positionally, any sum of two units is it."""
+        w = self.whnf(self.base_type(ty))
+        if isinstance(w, Var) and w.name == "Bool":
+            return True
+        return isinstance(w, Sum) and len(w.alts) == 2 and all(self.is_unit(a) for _, a in w.alts)
+
+    def sum_of(self, ty: Term) -> Optional[Sum]:
+        w = self.whnf(self.base_type(ty))
+        return w if isinstance(w, Sum) else None
+
     def strip_subtype(self, ty: Term) -> Optional[Term]:
         w = self.whnf(ty)
         return w.base if isinstance(w, Subtype) else None
@@ -119,16 +138,259 @@ class Checker:
         w = self.whnf(ty)
         if isinstance(w, Var) and w.name in ("Bool", "Law"):
             return True
+        if self.is_bool(w):
+            return True
         if isinstance(w, Pi):
             return self.is_law(subst(w.cod, {w.name: Var(fresh(w.name))}))
         return False
 
     # -------------------------------------------------------------- program
     def load(self, prog: Program):
-        for d in prog.defs:
-            self.add_def(d)
+        """The whole file at once (05 §2): its entries are grouped by name, the dependency graph is
+        built from the names each one mentions, and the objects (strongly connected components)
+        are checked in an order where every dependency comes first."""
+        from .graph import file_objects
+        for obj in file_objects(self, prog):
+            self.load_object(obj)
         for g in prog.gens:
             self.add_gen(g)
+
+    # ------------------------------------------------------------ objects
+    def load_object(self, obj):
+        """One object: first every declared base, then every law and value, then the types the
+        laws define. Then the rules that need the object: R2."""
+        members = obj.members
+        names = {self.qualify(m.name) for m in members if m.kind != "operator"}
+        # an operator directive goes first, unless its function is in this same object (the
+        # function's own body uses the operator symbol on other types): then it goes last
+        late_ops = [m for m in members if m.kind == "operator" and (m.refs & {x.name for x in members})]
+        for m in members:
+            if m.kind == "operator" and m not in late_ops:
+                self.add_operator(m.defn)
+            elif m.kind == "alias":
+                self.add_alias(m)
+        pending = [m for m in members if m.kind == "entry" and m.pending]
+        for m in members:
+            if m.kind != "entry":
+                continue
+            if m.pending:
+                self.declare_pending(m)
+            elif m.decl is not None and m.decl.type is not None and (m.defn is None or m.defn is not m.decl):
+                self.add_def(Def(m.name, m.decl.type, None, line=m.decl.line))
+            elif m.defn is not None and m.defn.type is not None and m.defn.data is None and len(members) > 1:
+                # a complete definition in a cycle: its type first, so the others can use it
+                self.add_def(Def(m.name, m.defn.type, None, line=m.defn.line))
+        for m in members:
+            if m.kind == "entry" and not m.pending and m.defn is not None:
+                d = m.defn
+                if m.decl is not None and m.decl is not d:
+                    d = Def(m.name, d.type, d.body, data=d.data, line=d.line)
+                self.add_def(d, object_names=names)
+        for m in pending:
+            if m.defn is not None:
+                self.define_pending(m)
+        for m in late_ops:
+            self.add_operator(m.defn)
+        for q in names:
+            self.check_defined_types(q, names)
+
+    def add_alias(self, m):
+        """`name = term`: elaborated once; wherever the name is used it unfolds to the term. It has
+        no states and cannot be declared or defined (05 R7)."""
+        d = m.alias
+        qname = self.qualify(d.name)
+        self.current_def = qname
+        try:
+            if m.decl is not None or m.defn is not None:
+                what = "defined" if m.defn is not None and m.defn.body is not None else "declared"
+                self.err(f"{d.name} is an alias and cannot be {what}")
+            if qname in self.env.defs:
+                self.err(f"{d.name} is an alias and cannot be defined twice")
+            body, ty = self.infer([], d.body)
+            self.env.defs[qname] = Def(qname, ty, body, alias=True, line=d.line)
+            self.register_labels(qname, body, ty)
+            self.check_defined_types(qname, {qname})
+        finally:
+            self.current_def = None
+
+    # ------------------------------------------------------------ declared types
+    def declare_pending(self, m):
+        """`T : base` whose body, given later in the same object, is a predicate: until then `T` is
+        the labeled base, so the laws of the object can be written over its components."""
+        qname = self.qualify(m.name)
+        self.current_def = qname
+        try:
+            params, base_src = _peel_pi(m.decl.type)
+            ctx: Ctx = []
+            for n, t in params:
+                ctx.append((n, self.check(ctx, t, Univ())))
+            base = self.check(ctx, base_src, Univ())
+            shape = base if (isinstance(base, Subtype) and isinstance(base.pred, NoLaw)) else \
+                Subtype(PVar(fresh("x")), base, NoLaw())
+            ty: Term = Univ()
+            body: Term = shape
+            for n, t in reversed(ctx):
+                ty = Pi(n, t, ty)
+                body = Lam(PVar(n), body, t)
+            self.env.defs[qname] = Def(qname, ty, body, pending=True, line=m.decl.line)
+            m.base_ctx, m.base = ctx, base
+        finally:
+            self.current_def = None
+
+    def define_pending(self, m):
+        """The body of a declared type: a predicate over its base, or a law, or a conjunction of
+        laws, whose first parameter is the type itself (05 R6)."""
+        qname = self.qualify(m.name)
+        self.current_def = qname
+        try:
+            ctx, base = m.base_ctx, m.base
+            body_src = m.defn.body
+            for n, _ in ctx:
+                if not (isinstance(body_src, Lam) and isinstance(body_src.param, PVar)):
+                    self.err(f"{m.name} is declared with parameters; its definition takes them too")
+                body_src = body_src.body
+            shape = self.env.defs[qname].body
+            for _ in ctx:
+                shape = shape.body
+            param = shape.param
+            if not ctx:
+                # a declared name used as a type that turns out to be given a value of its base:
+                # an ordinary definition (`n : Int`, `n := 3`, used in `VecOf n`)
+                try:
+                    with self.silent():
+                        self.check([], body_src, base)
+                    self.env.defs[qname] = Def(qname, base, None, line=m.defn.line)
+                    value = self.check([], body_src, base)
+                    self.env.defs[qname] = Def(qname, base, value, line=m.defn.line)
+                    return
+                except TypeCheckError:
+                    self.env.defs[qname] = Def(qname, Univ(), self.env.defs[qname].body if
+                                               self.env.defs[qname].pending else shape, pending=True,
+                                               line=m.decl.line)
+            fn = self.as_predicate(ctx, qname, body_src, shape, base)
+            self.check_labels_touched(m.name, shape, fn)
+            pred = _apply_law(fn, pattern_to_term(shape.param))
+            sub = Subtype(param, shape.base, pred)
+            ty: Term = Univ()
+            body: Term = sub
+            for n, t in reversed(ctx):
+                ty = Pi(n, t, ty)
+                body = Lam(PVar(n), body, t)
+            self.env.defs[qname] = Def(qname, ty, body, line=m.defn.line)
+        finally:
+            self.current_def = None
+
+    def as_predicate(self, ctx: Ctx, qname: str, src: Term, shape: Subtype, base: Term) -> Term:
+        """The predicate of a declared type, with the shape's pattern variables free."""
+        self_ty: Term = Var(qname)
+        for n, _ in ctx:
+            self_ty = App(self_ty, Var(n))
+        try:
+            with self.silent():
+                fn = self.check(ctx, src, Pi("_", self_ty, Var("Bool")))
+            fn = self.check(ctx, src, Pi("_", self_ty, Var("Bool")))
+        except TypeCheckError:
+            with self.silent():
+                try:
+                    fn, fty = self.infer(ctx, src)
+                except TypeCheckError:
+                    fn, fty = None, None
+            if fn is None or not self._law_over(fty, self_ty):
+                shown = pp(fty) if fty is not None else "something else"
+                self.err(f"{qname} was declared as a refinement of {pp(base)}, but its body has type {shown}")
+        return fn
+
+    def _law_over(self, ty: Term, self_ty: Term) -> bool:
+        if isinstance(ty, Var) and ty.name == "Law":
+            return True
+        w = self.whnf(ty)
+        if isinstance(w, Var) and w.name == "Law":
+            return True
+        return isinstance(w, Pi) and self.conv(w.dom, self_ty) and self.is_law(subst(w.cod, {w.name: Var(fresh("c"))}))
+
+    def check_labels_touched(self, name: str, shape: Subtype, fn: Term):
+        """R3: the law that defines a type over a labeled base touches every label. `fn` is the
+        law as written, a function of the whole value (or a conjunction of such)."""
+        labels = [n for n in pattern_vars(shape.param)]
+        touched = self.labels_touched_by(fn, labels)
+        self._report_untouched(name, labels, touched)
+
+    def _report_untouched(self, name: str, labels: list, touched: set):
+        if not touched:
+            self.err(f"the predicate of {name} touches none of its labels" if len(labels) > 1 else
+                     f"the predicate of {name} does not mention its argument")
+        for lab in labels:
+            if lab not in touched:
+                self.err(f"label {lab.split('~')[0]} of {name} is touched by no law")
+
+    def labels_touched_by(self, fn: Term, labels: list) -> set:
+        if isinstance(fn, And):
+            return self.labels_touched_by(fn.lhs, labels) | self.labels_touched_by(fn.rhs, labels)
+        if isinstance(fn, Lam) and isinstance(fn.param, PVar):
+            return _projections_of(fn.body, fn.param.name, labels)
+        h, args = unapply(fn)
+        if isinstance(h, Var) and h.name in self.env.defs:
+            body = self.env.defs[h.name].body
+            for _ in args:
+                if not isinstance(body, Lam):
+                    return set(labels)
+                body = body.body
+            if isinstance(body, Lam) and isinstance(body.param, PVar):
+                return _projections_of(body.body, body.param.name, labels)
+        return set(labels)
+
+    # ------------------------------------------------------------ R2
+    def defined(self, q: str) -> bool:
+        """Whether a type name has a definition (05 §1): a body that is not pending, a data, an
+        alias, or a primitive of the kernel. A provisional extern type is debt, not a definition."""
+        if q in self.primitives or q in BUILTIN_TYPES:
+            return True
+        d = self.env.defs.get(q)
+        if d is None:
+            return q in self.env.datas
+        if d.data is not None or d.alias:
+            return True
+        if d.pending or d.body is None:
+            return False
+        if isinstance(d.body, Extern) and d.body.provisional:
+            return False
+        return True
+
+    def is_type_name(self, q: str) -> bool:
+        d = self.env.defs.get(q)
+        if d is None or d.type is None:
+            return False
+        t = d.type
+        while isinstance(t, Pi):
+            t = t.cod
+        return isinstance(t, Univ)
+
+    def check_defined_types(self, q: str, object_names: set):
+        """R2: every type a definition mentions is defined, unless it is in the definition's own
+        object. Declarations and provisional externs are exempt."""
+        d = self.env.defs.get(q)
+        if d is None or (d.body is None and d.data is None) or d.pending:
+            return
+        if isinstance(d.body, Extern) and d.body.provisional:
+            return
+        used = set()
+        if d.type is not None:
+            used |= _global_names(d.type)
+        if d.body is not None and not isinstance(d.body, Extern):
+            used |= _global_names(d.body)
+        if d.data is not None:
+            for c in d.data.constructors:
+                used |= _global_names(c.type)
+        for n in sorted(used):
+            if n == q or n in object_names or not self.is_type_name(n):
+                continue
+            if not self.defined(n):
+                self.current_def = q
+                try:
+                    self.err(f"{n.split('.')[-1] if self.prefix else n} is used as a type but is only declared "
+                             f"(05 R2): define it, or take it as a parameter")
+                finally:
+                    self.current_def = None
 
     def add_operator(self, d: OperatorDirective):
         """`operator op := f`: f must take two arguments; op on values of their types means f."""
@@ -181,7 +443,7 @@ class Checker:
             self.current_def = None
         self.gens[q] = ("luthier", pp(g.term), term)
 
-    def add_def(self, d: Def):
+    def add_def(self, d: Def, object_names: Optional[set] = None):
         if isinstance(d, OperatorDirective):
             self.add_operator(d)
             return
@@ -189,7 +451,10 @@ class Checker:
         self.current_def = qname
         try:
             existing = self.env.defs.get(qname)
-            if existing is not None and (existing.body is not None or existing.data is not None):
+            if existing is not None and existing.alias:
+                self.err(f"{d.name} is an alias and cannot be defined")
+            if existing is not None and (existing.body is not None or existing.data is not None) \
+                    and not existing.pending:
                 self.err(f"{qname} is defined twice")
             if qname in self.env.datas:
                 self.err(f"{qname} is defined twice")
@@ -197,6 +462,10 @@ class Checker:
                 if existing is not None:
                     self.err(f"{qname} was declared as a value, it cannot become a data type")
                 self.add_data(d, qname)
+                return
+            if existing is not None and existing.pending and d.body is not None:
+                # a declared type of an imported file, defined here by its laws
+                self.define_pending(_pending_member(d, existing))
                 return
             ty = None
             if d.type is not None:
@@ -209,25 +478,19 @@ class Checker:
             if d.body is None:
                 if ty is None:
                     self.err(f"{qname} has neither type nor body")
-                self.env.defs[qname] = Def(qname, ty, None, doc=d.doc)
+                self.env.defs[qname] = Def(qname, ty, None, doc=d.doc, line=d.line)
                 return
             if isinstance(d.body, Extern):
-                if ty is None:
-                    self.err(f"extern {qname} needs a type")
-                if isinstance(self.whnf(ty), Univ):
-                    # an opaque type: values are Python objects, handled only by externs
-                    self.env.defs[qname] = Def(qname, ty, Extern(d.body.target, ty), doc=d.doc)
-                    return
-                ext = Extern(self.register_extern(d.body.target, ty), ty)
-                self.env.defs[qname] = Def(qname, ty, ext, doc=d.doc)
-                w = self.whnf(ty)
-                if isinstance(w, Subtype):
-                    # the environment's function is checked against the declared laws by `test`
-                    self.subtype_obligation([], Var(qname), w, ty)
+                self.add_extern(qname, d, ty)
                 return
             if ty is not None:
+                if existing is not None and existing.body is None and not _ends_in_universe(ty):
+                    # a declared name given a body: an inhabitant of its base, or a predicate over it (R6)
+                    body = self._inhabitant_or_predicate(qname, d, ty)
+                    if body is not None:
+                        return
                 # declare first so the body can be recursive
-                self.env.defs[qname] = Def(qname, ty, None, doc=d.doc)
+                self.env.defs[qname] = Def(qname, ty, None, doc=d.doc, line=d.line)
                 before = len(self.obligations.get(qname, []))
                 body = self.check([], d.body, ty)
                 w = self.whnf(ty)
@@ -239,9 +502,78 @@ class Checker:
                 if d.name in free_vars(d.body):
                     self.err(f"recursive definition {qname} needs a declared type")
                 body, ty = self.infer([], d.body)
-            self.env.defs[qname] = Def(qname, ty, body, doc=d.doc)
+            if _ends_in_universe(ty):
+                self.check_new_type(qname, body)
+            self.env.defs[qname] = Def(qname, ty, body, doc=d.doc, line=d.line)
         finally:
             self.current_def = None
+
+    def _inhabitant_or_predicate(self, qname: str, d: Def, ty: Term):
+        """`x : T` then `x := t`: if `t` is a `T`, the ordinary definition (returns None and the
+        caller proceeds); if it is a predicate over `T`, `x` becomes that subtype of `T`."""
+        try:
+            with self.silent():
+                self.env.defs[qname] = Def(qname, ty, None, doc=d.doc, line=d.line)
+                self.check([], d.body, ty)
+            return None
+        except TypeCheckError as first:
+            first_error = first
+        shape = ty if isinstance(ty, Subtype) and isinstance(ty.pred, NoLaw) else \
+            Subtype(PVar(fresh("x")), ty, NoLaw())
+        self.env.defs[qname] = Def(qname, Univ(), shape, pending=True, line=d.line)
+        try:
+            fn = self.as_predicate([], qname, d.body, shape, ty)
+        except TypeCheckError:
+            self.env.defs[qname] = Def(qname, ty, None, doc=d.doc, line=d.line)
+            raise
+        self.check_labels_touched(d.name, shape, fn)
+        pred = _apply_law(fn, pattern_to_term(shape.param))
+        body = Subtype(shape.param, shape.base, pred)
+        self.env.defs[qname] = Def(qname, Univ(), body, doc=d.doc, line=d.line)
+        return body
+
+    def check_new_type(self, qname: str, body: Term):
+        """R4: a definition makes a new type only by laws (a subtype with a predicate) or by
+        recursion (a data); R3: the predicate touches every label of its base."""
+        b = body
+        while isinstance(b, Lam):
+            b = b.body
+        if isinstance(b, Subtype) and not isinstance(b.pred, NoLaw) and \
+                not (isinstance(b.pred, Con) and b.pred.name == "true"):
+            labels = pattern_vars(b.param)
+            touched = set(labels) & free_vars(b.pred)
+            if len(labels) > 1 or touched or not self.kernel:
+                self._report_untouched(qname.split(".")[-1], labels, touched)
+            return
+        if self.kernel:
+            return
+        name = qname.split(".")[-1]
+        self.err(f"{name} names a structural type and states no law; write {name} = {pp(b)}, "
+                 f"or declare {name} : {pp(b)} and define it by its laws (05 R4)")
+
+    def add_extern(self, qname: str, d: Def, ty: Optional[Term]):
+        """R5: an extern gives a value of a defined type, never a type; `extern provisional` lifts
+        both requirements and is recorded as debt."""
+        provisional = d.body.provisional
+        if ty is None:
+            self.err(f"extern {qname} needs a type")
+        if _ends_in_universe(ty):
+            if not provisional:
+                self.err(f"an extern gives a value, not a type: define {d.name} natively, or write "
+                         f"extern provisional (05 R5)")
+            self.env.defs[qname] = Def(qname, ty, Extern(d.body.target, ty, provisional=True), doc=d.doc,
+                                       line=d.line)
+            self.provisional[qname] = []
+            return
+        ext = Extern(self.register_extern(d.body.target, ty), ty, provisional=provisional)
+        self.env.defs[qname] = Def(qname, ty, ext, doc=d.doc, line=d.line)
+        if provisional:
+            self.provisional[qname] = sorted(n for n in _global_names(ty)
+                                             if self.is_type_name(n) and not self.defined(n))
+        w = self.whnf(ty)
+        if isinstance(w, Subtype):
+            # the environment's function is checked against the declared laws by `test`
+            self.subtype_obligation([], Var(qname), w, ty)
 
     def add_data(self, d: Def, qname: str):
         decl = d.data
@@ -271,6 +603,16 @@ class Checker:
                 full = Pi(n, t, full)
             qdecl.constructors.append(Constructor(qc, cty))
             self.env.cons[qc] = (qname, full)
+        recursive = any(qname in _global_names(dom)
+                        for c in qdecl.constructors for _, dom in _peel_pi(c.type)[0])
+        if not self.kernel and not recursive:
+            alts = []
+            for c in qdecl.constructors:
+                doms = [t for _, t in _peel_pi(c.type)[0]]
+                payload = "Unit" if not doms else " * ".join(pp(t) for t in doms)
+                alts.append(f"{c.name.split('.')[-1]} : {payload}")
+            name = qname.split(".")[-1]
+            self.err(f"{name} is not recursive; write {name} = < {' | '.join(alts)} > (05 R4)")
 
     def _codomain(self, ty: Term) -> Term:
         while isinstance(ty, Pi):
@@ -330,6 +672,8 @@ class Checker:
             if ty is not None:
                 return t, ty
             q = self.resolve(t.name)
+            if q is None and t.name in self.labels:
+                return self.label_value(t.name)
             if q is None:
                 if t.name in ("__nil__", "__cons__"):
                     self.err("a list literal needs an expected type or a first element")
@@ -361,6 +705,22 @@ class Checker:
             return t, t.type
         if isinstance(t, RecordLit):
             self.err("a record literal needs its type from the context: use it where the expected type is known")
+        if isinstance(t, Sum):
+            alts = []
+            for label, a in t.alts:
+                if label in [l for l, _ in alts]:
+                    self.err(f"label {label} appears twice in a sum")
+                alts.append((label, self.check(ctx, a, Univ())))
+            return Sum(tuple(alts)), Univ()
+        if isinstance(t, Inj):
+            if t.type is None:
+                self.err(f"the injection {pp(t)} needs its sum type from the context")
+            return t, t.type
+        if isinstance(t, Named):
+            self.err(f"({t.name} : {pp(t.type)}) names a position of a product or a sum; "
+                     f"write it next to another with `*` or `+`")
+        if isinstance(t, NoLaw):
+            return t, Var("Law")
         if isinstance(t, App):
             return self.infer_app(ctx, t)
         if isinstance(t, Lam):
@@ -395,7 +755,7 @@ class Checker:
             if self.conv(lt, Univ()):
                 r = self.check(ctx, t.rhs, Univ())
                 return Pi("_", l, r), Univ()
-            if self.is_type(self.base_type(lt), "Bool"):
+            if self.is_bool(lt):
                 r = self.check(ctx, t.rhs, Var("Bool"))
                 return App(App(Var("implies"), l), r), Var("Bool")
             self.err(f"'->' expects a type or a Bool on the left, got {pp(l)} : {pp(lt)}")
@@ -415,6 +775,9 @@ class Checker:
             if b is None:
                 self.err(f"forget applied to {pp(a)} : {pp(ta)}, which is not a subtype")
             return a, b
+        if isinstance(t, Subtype) and isinstance(t.pred, NoLaw):
+            base = self.check(ctx, t.base, Univ())
+            return Subtype(t.param, base, NoLaw()), Univ()
         if isinstance(t, Subtype):
             base = self.check(ctx, t.base, Univ())
             param, ctx2 = self.bind_pattern(ctx, t.param, base)
@@ -515,6 +878,22 @@ class Checker:
             l = self.check(ctx, t.lhs, Var("Bool"))
             r = self.check(ctx, t.rhs, Var("Bool"))
             return App(App(Var(op), l), r), Var("Bool")
+        if op == "+" and self._type_operand(ctx, t):
+            # `A + B + C` is `A + (B + C)`: anonymous sums inject with left and right (04 §2)
+            operands = []
+
+            def flatten(x):
+                if isinstance(x, BinOp) and x.op == "+":
+                    flatten(x.lhs)
+                    flatten(x.rhs)
+                else:
+                    operands.append(x)
+            flatten(t)
+            types = [self.check(ctx, x, Univ()) for x in operands]
+            out = types[-1]
+            for a in reversed(types[:-1]):
+                out = Sum((("left", a), ("right", out)))
+            return out, Univ()
         l, lt = self.infer(ctx, t.lhs)
         if op == "*" and self.conv(lt, Univ()):
             r = self.check(ctx, t.rhs, Univ())
@@ -524,6 +903,9 @@ class Checker:
             if res is not None:
                 return res
         if op in ("==", "/="):
+            if self.contains_function(lt):
+                self.err(f"no structural equality on {pp(self.base_type(lt))}: compare with an equality "
+                         f"given as a parameter or a component (05 R8)")
             if self.inferable(t.rhs):
                 r, rt = self.infer(ctx, t.rhs)
                 if not (self.convertible(lt, rt) or self.convertible(rt, lt)
@@ -548,6 +930,11 @@ class Checker:
     # ---------------------------------------------------------------- check
     def check(self, ctx: Ctx, t: Term, ty: Term) -> Term:
         w = self.whnf(ty)
+        sm = w if isinstance(w, Sum) else None
+        if sm is not None:
+            inj = self.try_injection(ctx, t, sm, ty)
+            if inj is not None:
+                return inj
         if isinstance(t, RecordLit):
             rc = record_components(self.env, ty)
             if rc is None:
@@ -592,11 +979,18 @@ class Checker:
         if (isinstance(t, Var) and t.name == "__nil__" or (isinstance(t, App) and self._is_cons(t))) \
                 and not isinstance(w, Subtype):
             return self.check_list(ctx, t, w)
-        if isinstance(w, Subtype) and isinstance(t, Match) and isinstance(w.pred, Con) and w.pred.name == "true":
+        if isinstance(w, Subtype) and isinstance(t, Match) and (isinstance(w.pred, NoLaw) or
+                                                               (isinstance(w.pred, Con) and w.pred.name == "true")):
             # a record type that names components and states no law: check each branch against
             # it, so a record literal in a branch still sees the component names
             term, _ = self.check_match(ctx, t, ty)
             return term
+        if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
+            # a labeled product is the product: check against it, report against the labels
+            if self.inferable(t):
+                term, tty = self.infer(ctx, t)
+                return self.coerce(ctx, term, tty, ty)
+            return self.check(ctx, t, w.base)
         if isinstance(w, Subtype):
             if self.inferable(t):
                 term, tty = self.infer(ctx, t)
@@ -611,7 +1005,9 @@ class Checker:
         return self.coerce(ctx, term, tty, ty)
 
     def inferable(self, t: Term) -> bool:
-        return not isinstance(t, (Lam, Pair, Match)) and not (
+        if isinstance(t, Var) and t.name in self.labels and self.resolve(t.name) is None:
+            return self.labels[t.name] is not None
+        return not isinstance(t, (Lam, Pair, Match, RecordLit)) and not (
             isinstance(t, Var) and t.name == "__nil__") and not (isinstance(t, App) and self._is_cons(t))
 
     def convertible(self, have: Term, want: Term) -> bool:
@@ -632,6 +1028,11 @@ class Checker:
         if self.convertible(have, want):
             return term
         w = self.whnf(want)
+        if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
+            try:
+                return self.coerce(ctx, term, have, w.base)
+            except TypeCheckError:
+                self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected")
         if isinstance(w, Subtype):
             inner = self.coerce(ctx, term, have, w.base)
             self.subtype_obligation(ctx, inner, w, want)
@@ -642,14 +1043,22 @@ class Checker:
             pat = PPair(PVar("p1"), PVar("p2"))
             fst = Match(term, ((pat, Var("p1")),))
             snd = Match(term, ((pat, Var("p2")),))
-            self.coerce(ctx, fst, hw.fst, w.fst)
-            self.coerce(ctx, snd, subst(hw.snd, {hw.name: fst}), subst(w.snd, {w.name: fst}))
+            try:
+                self.coerce(ctx, fst, hw.fst, w.fst)
+                self.coerce(ctx, snd, subst(hw.snd, {hw.name: fst}), subst(w.snd, {w.name: fst}))
+            except TypeCheckError:
+                self.current_def, saved = None, self.current_def
+                try:
+                    raise TypeCheckError((f"in {saved}: " if saved else "") +
+                                         f"{pp(term)} has type {pp(have)} but {pp(want)} was expected")
+                finally:
+                    self.current_def = saved
             return term
         self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected")
 
     def subtype_obligation(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):
-        if isinstance(sub.pred, Con) and sub.pred.name == "true":
-            return          # `{ a : A, b : B | true }` names components and states no law
+        if isinstance(sub.pred, NoLaw) or (isinstance(sub.pred, Con) and sub.pred.name == "true"):
+            return          # a labeled product names components and states no law
         applied = App(Lam(sub.param, sub.pred, ann=sub.base), value)
         local = {n for n, _ in ctx}
         if not (free_vars(value) & local):
@@ -713,11 +1122,18 @@ class Checker:
                 catch_all = True
             elif isinstance(pat2, PCon):
                 covered.add(pat2.name)
+            elif isinstance(pat2, PInj):
+                covered.add(pat2.label)
             if result_ty is None:
                 body2, result_ty = self.infer(ctx2, body)
             else:
                 body2 = self.check(ctx2, body, result_ty)
             branches.append((pat2, body2))
+        if isinstance(sw, Sum) and not catch_all:
+            got = {p.index for p, _ in branches if isinstance(p, PInj)}
+            missing = [l for i, (l, _) in enumerate(sw.alts) if i not in got]
+            if missing:
+                self.err(f"match on {pp(scrut)} does not cover: {', '.join(missing)}")
         h, _ = unapply(sw)
         if isinstance(h, Var) and h.name in self.env.datas and not catch_all:
             names = {c.name for c in self.env.datas[h.name].constructors}
@@ -725,6 +1141,100 @@ class Checker:
             if missing:
                 self.err(f"match on {pp(scrut)} does not cover: {', '.join(sorted(missing))}")
         return Match(scrut, tuple(branches)), result_ty
+
+    # ------------------------------------------------------------- sums
+    def _type_operand(self, ctx: Ctx, t: BinOp) -> bool:
+        """Whether `a + b` is a sum of types: its leftmost operand is a type."""
+        x = t
+        while isinstance(x, BinOp) and x.op == "+":
+            x = x.lhs
+        try:
+            with self.silent():
+                _, xt = self.infer(ctx, x)
+        except TypeCheckError:
+            return False
+        return isinstance(self.whnf(xt), Univ)
+
+    def try_injection(self, ctx: Ctx, t: Term, sm: Sum, ty: Term) -> Optional[Term]:
+        """`label` or `label arg` checked against a sum with that label: the injection."""
+        head, args = unapply(t)
+        if not isinstance(head, Var) or lookup(ctx, head.name) is not None:
+            return None
+        labels = sm.labels()
+        if head.name not in labels or len(args) > 1:
+            return None
+        i = labels.index(head.name)
+        alt = sm.alts[i][1]
+        if not args:
+            if not self.is_unit(alt):
+                return None      # a label of a non-unit alternative alone is the injection function
+            return Inj(i, head.name, Con("unit"), ty)
+        return Inj(i, head.name, self.check(ctx, args[0], alt), ty)
+
+    def register_labels(self, qname: str, body: Term, ty: Term):
+        """An alias whose body is a sum makes its labels usable without an expected type: a label
+        of a unit alternative is a value, any other is the function into the sum (taking the
+        alias's parameters first). A label two aliases share is usable only by the expected type."""
+        params = []
+        b = body
+        while isinstance(b, Lam):
+            params.append((b.param.name, b.ann))
+            b = b.body
+        if not isinstance(b, Sum):
+            return
+        for i, (label, _) in enumerate(b.alts):
+            if label in self.labels and self.labels[label] is not None and self.labels[label][0] != qname:
+                self.labels[label] = None
+            elif label not in self.labels:
+                self.labels[label] = (qname, i, params)
+
+    def label_value(self, label: str):
+        entry = self.labels[label]
+        if entry is None:
+            self.err(f"label {label} belongs to several sums: use it where the expected type is known")
+        qname, i, params = entry
+        sum_ty: Term = Var(qname)
+        for n, _ in params:
+            sum_ty = App(sum_ty, Var(n))
+        w = self.whnf(sum_ty)
+        alt = w.alts[i][1]
+        if self.is_unit(alt):
+            term = Inj(i, label, Con("unit"), sum_ty)
+            ty = sum_ty
+        else:
+            x = fresh("x")
+            term = Lam(PVar(x), Inj(i, label, Var(x), sum_ty), alt)
+            ty = Pi("_", alt, sum_ty)
+        for n, ann in reversed(params):
+            term = Lam(PVar(n), term, ann)
+            ty = Pi(n, ann, ty)
+        return term, ty
+
+    def contains_function(self, ty: Term, depth: int = 0) -> bool:
+        """Whether values of `ty` can contain a function, so `==` is not structural (05 R8)."""
+        if depth > 20:
+            return False
+        w = self.whnf(self.base_type(ty))
+        if isinstance(w, Pi):
+            return True
+        if isinstance(w, Sigma):
+            return self.contains_function(w.fst, depth + 1) or \
+                self.contains_function(subst(w.snd, {w.name: Var(fresh(w.name))}), depth + 1)
+        if isinstance(w, Sum):
+            return any(self.contains_function(a, depth + 1) for _, a in w.alts)
+        h, args = unapply(w)
+        if isinstance(h, Var) and h.name in self.env.datas:
+            return any(self.contains_function(a, depth + 1) for a in args
+                       if self._is_type_term(a))
+        return False
+
+    def _is_type_term(self, a: Term) -> bool:
+        try:
+            with self.silent():
+                _, at = self.infer([], a)
+            return isinstance(self.whnf(at), Univ)
+        except (TypeCheckError, EvalError):
+            return False
 
     # ------------------------------------------------------------- patterns
     def bind_pattern(self, ctx: Ctx, p: Pattern, ty: Term, binding: bool = True):
@@ -734,10 +1244,22 @@ class Checker:
         if isinstance(p, PWild):
             return p, ctx
         if isinstance(p, PVar):
+            if not binding:
+                sm = self.sum_of(ty)
+                if sm is not None and p.name in sm.labels():
+                    return self.bind_pattern(ctx, PCon(p.name, ()), ty, binding)
             q = self.resolve(p.name) if not binding else None
             if q is not None and q in self.env.cons and self._con_of_type(q, ty):
                 return self.bind_pattern(ctx, PCon(q, ()), ty, binding)
             return p, ctx + [(p.name, ty)]
+        if isinstance(p, PInj):
+            sm = self.sum_of(ty)
+            if sm is None or p.index >= len(sm.alts):
+                self.err(f"pattern {pp_pat(p)} against {pp(ty)}, which is not a sum with that alternative")
+            if isinstance(p.arg, PWild):
+                return p, ctx
+            a, ctx2 = self.bind_pattern(ctx, p.arg, sm.alts[p.index][1], binding)
+            return PInj(p.index, p.label, a), ctx2
         if isinstance(p, PLit):
             return p, ctx
         w = self.whnf(self.base_type(ty))
@@ -749,6 +1271,14 @@ class Checker:
             snd_ty = subst(w.snd, {w.name: ft}) if ft is not None else w.snd
             s, ctx3 = self.bind_pattern(ctx2, p.snd, snd_ty, binding)
             return PPair(f, s), ctx3
+        if isinstance(p, PCon) and isinstance(w, Sum) and p.name in w.labels():
+            i = w.labels().index(p.name)
+            if not p.args:
+                return PInj(i, p.name, PWild()), ctx
+            if len(p.args) > 1:
+                self.err(f"label {p.name} takes one pattern for its payload; group several with a tuple")
+            a, ctx2 = self.bind_pattern(ctx, p.args[0], w.alts[i][1], binding)
+            return PInj(i, p.name, a), ctx2
         if isinstance(p, PCon):
             q = self.resolve(p.name)
             if q is None or q not in self.env.cons:
@@ -783,3 +1313,161 @@ class Checker:
         dname, _ = self.env.cons[cname]
         h, _ = unapply(self.whnf(self.base_type(ty)))
         return isinstance(h, Var) and h.name == dname
+
+
+# ---------------------------------------------------------------- helpers of the object rules
+
+def _pending_member(d: Def, existing: Def):
+    """A Member-like view of a declared type defined in another file than its declaration."""
+    from .graph import Member
+    body = existing.body
+    ctx = []
+    while isinstance(body, Lam):
+        ctx.append((body.param.name, body.ann))
+        body = body.body
+    m = Member("entry", d.name, d.line, decl=Def(d.name, existing.type, None, line=existing.line), defn=d,
+               pending=True)
+    m.base_ctx, m.base = ctx, body.base
+    return m
+
+
+def _ends_in_universe(t: Term) -> bool:
+    while isinstance(t, Pi):
+        t = t.cod
+    return isinstance(t, Univ)
+
+
+def _peel_pi(t: Term):
+    params = []
+    while isinstance(t, Pi):
+        params.append((t.name, t.dom))
+        t = t.cod
+    return params, t
+
+
+def _apply_law(fn: Term, whole: Term) -> Term:
+    """The predicate a law, or a conjunction of laws, states about the value `whole`."""
+    if isinstance(fn, And):
+        return And(_apply_law(fn.lhs, whole), _apply_law(fn.rhs, whole))
+    if isinstance(fn, Lam) and isinstance(fn.param, PVar):
+        return subst(fn.body, {fn.param.name: whole})
+    return App(fn, whole)
+
+
+def _law_applications(pred: Term, labels: list):
+    """(law, position) for each place the predicate applies a law to the whole value."""
+    out = []
+    target = set(labels)
+
+    def is_whole(a):
+        return set(free_vars(a)) >= target and isinstance(a, (Pair, Var))
+
+    def walk(t):
+        if isinstance(t, And):
+            walk(t.lhs)
+            walk(t.rhs)
+            return
+        h, args = unapply(t)
+        hit = False
+        for i, a in enumerate(args):
+            if is_whole(a):
+                out.append((h, i))
+                hit = True
+        if not hit:
+            out.append((t, -1))
+    walk(pred)
+    return out
+
+
+def _projections_of(body: Term, param: str, labels: list) -> set:
+    """Labels of `param` projected in `body`; all of them if `param` is used whole."""
+    names = {l.split("~")[0]: l for l in labels}
+    found = set()
+    whole = [False]
+
+    def walk(t):
+        if isinstance(t, Match) and isinstance(t.scrut, Var) and t.scrut.name == param and len(t.branches) == 1:
+            pat, b = t.branches[0]
+            vs = [v for v in pattern_vars(pat)]
+            if len(vs) == 1 and isinstance(b, Var) and b.name == vs[0]:
+                lab = names.get(vs[0].split("~")[0])
+                if lab is not None:
+                    found.add(lab)
+                    return
+            for p_, b_ in t.branches:
+                walk(b_)
+            return
+        if isinstance(t, Var):
+            if t.name == param:
+                whole[0] = True
+            return
+        for child in _children(t):
+            walk(child)
+    walk(body)
+    return set(labels) if whole[0] else found
+
+
+def _children(t: Term) -> list:
+    if isinstance(t, App):
+        return [t.fn, t.arg]
+    if isinstance(t, Lam):
+        return [t.body] + ([t.ann] if t.ann is not None else [])
+    if isinstance(t, (Pi,)):
+        return [t.dom, t.cod]
+    if isinstance(t, Sigma):
+        return [t.fst, t.snd]
+    if isinstance(t, (Pair,)):
+        return [t.fst, t.snd]
+    if isinstance(t, (BinOp, And, Arrow)):
+        return [t.lhs, t.rhs]
+    if isinstance(t, Match):
+        return [t.scrut] + [b for _, b in t.branches]
+    if isinstance(t, Subtype):
+        return [t.base, t.pred]
+    if isinstance(t, Sum):
+        return [a for _, a in t.alts]
+    if isinstance(t, Inj):
+        return [t.arg]
+    if isinstance(t, Forget):
+        return [t.arg]
+    return []
+
+
+def _global_names(t: Term, bound=frozenset()) -> set:
+    """The free names of an elaborated term (globals: locals are bound by its binders)."""
+    out = set()
+
+    def walk(t, bound):
+        if isinstance(t, Var):
+            if t.name not in bound:
+                out.add(t.name)
+            return
+        if isinstance(t, Lam):
+            if t.ann is not None:
+                walk(t.ann, bound)
+            walk(t.body, bound | set(pattern_vars(t.param)))
+            return
+        if isinstance(t, Pi):
+            walk(t.dom, bound)
+            walk(t.cod, bound | {t.name})
+            return
+        if isinstance(t, Sigma):
+            walk(t.fst, bound)
+            walk(t.snd, bound | {t.name})
+            return
+        if isinstance(t, Subtype):
+            walk(t.base, bound)
+            walk(t.pred, bound | set(pattern_vars(t.param)))
+            return
+        if isinstance(t, Match):
+            walk(t.scrut, bound)
+            for p, b in t.branches:
+                walk(b, bound | set(pattern_vars(p)))
+            return
+        if isinstance(t, Inj):
+            walk(t.arg, bound)
+            return
+        for c in _children(t):
+            walk(c, bound)
+    walk(t, set(bound))
+    return out

@@ -14,8 +14,17 @@ def fresh(base: str) -> str:
 def free_vars(t: Term) -> set[str]:
     if isinstance(t, Var):
         return {t.name}
-    if isinstance(t, (Lit, Univ, Con, Extern)):
+    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
         return set()
+    if isinstance(t, Sum):
+        out = set()
+        for _, a in t.alts:
+            out |= free_vars(a)
+        return out
+    if isinstance(t, Inj):
+        return free_vars(t.arg) | (free_vars(t.type) if t.type is not None else set())
+    if isinstance(t, Named):
+        return free_vars(t.type)
     if isinstance(t, Lam):
         fv = free_vars(t.body) - set(pattern_vars(t.param))
         if t.ann is not None:
@@ -57,6 +66,8 @@ def rename_pattern(p: Pattern, mapping: dict) -> Pattern:
         return PCon(p.name, tuple(rename_pattern(a, mapping) for a in p.args))
     if isinstance(p, PPair):
         return PPair(rename_pattern(p.fst, mapping), rename_pattern(p.snd, mapping))
+    if isinstance(p, PInj):
+        return PInj(p.index, p.label, rename_pattern(p.arg, mapping))
     return p
 
 
@@ -66,8 +77,14 @@ def subst(t: Term, mapping: dict[str, Term]) -> Term:
         return t
     if isinstance(t, Var):
         return mapping.get(t.name, t)
-    if isinstance(t, (Lit, Univ, Con, Extern)):
+    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
         return t
+    if isinstance(t, Sum):
+        return Sum(tuple((l, subst(a, mapping)) for l, a in t.alts))
+    if isinstance(t, Inj):
+        return Inj(t.index, t.label, subst(t.arg, mapping), subst(t.type, mapping) if t.type is not None else None)
+    if isinstance(t, Named):
+        return Named(t.name, subst(t.type, mapping))
     if isinstance(t, App):
         return App(subst(t.fn, mapping), subst(t.arg, mapping))
     if isinstance(t, Pair):
@@ -131,6 +148,8 @@ def map_pattern_names(p: Pattern, f) -> Pattern:
         return PCon(f(p.name), tuple(map_pattern_names(a, f) for a in p.args))
     if isinstance(p, PPair):
         return PPair(map_pattern_names(p.fst, f), map_pattern_names(p.snd, f))
+    if isinstance(p, PInj):
+        return PInj(p.index, p.label, map_pattern_names(p.arg, f))
     return p
 
 
@@ -141,8 +160,14 @@ def map_names(t: Term, f) -> Term:
         return Var(f(t.name))
     if isinstance(t, Con):
         return Con(f(t.name))
-    if isinstance(t, (Lit, Univ, Extern)):
+    if isinstance(t, (Lit, Univ, Extern, NoLaw)):
         return t
+    if isinstance(t, Sum):
+        return Sum(tuple((l, map_names(a, f)) for l, a in t.alts))
+    if isinstance(t, Inj):
+        return Inj(t.index, t.label, map_names(t.arg, f), map_names(t.type, f) if t.type is not None else None)
+    if isinstance(t, Named):
+        return Named(t.name, map_names(t.type, f))
     if isinstance(t, App):
         return App(map_names(t.fn, f), map_names(t.arg, f))
     if isinstance(t, Pair):
@@ -193,13 +218,22 @@ def alpha_normalize(t: Term) -> Term:
             return PCon(p.name, tuple(go_pat(a, env) for a in p.args))
         if isinstance(p, PPair):
             return PPair(go_pat(p.fst, env), go_pat(p.snd, env))
+        if isinstance(p, PInj):
+            return PInj(p.index, p.label, go_pat(p.arg, env))
         return p
 
     def go(t: Term, env: dict) -> Term:
         if isinstance(t, Var):
             return Var(env.get(t.name, t.name))
-        if isinstance(t, (Lit, Univ, Con, Extern)):
+        if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
             return t
+        if isinstance(t, Sum):
+            return Sum(tuple((l, go(a, env)) for l, a in t.alts))
+        if isinstance(t, Inj):
+            # the label is a name of the position, not part of the value: hash by index
+            return Inj(t.index, "", go(t.arg, env), None)
+        if isinstance(t, Named):
+            return Named(t.name, go(t.type, env))
         if isinstance(t, App):
             return App(go(t.fn, env), go(t.arg, env))
         if isinstance(t, Pair):

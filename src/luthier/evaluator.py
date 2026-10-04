@@ -72,11 +72,19 @@ def is_con_value(t: Term) -> bool:
     return isinstance(h, Con)
 
 
+UNIT = Con("unit")
+BOOL_TYPE = Sum((("true", Var("Unit")), ("false", Var("Unit"))))
+
+
 def bool_con(b: bool) -> Term:
-    return Con("true") if b else Con("false")
+    """`Bool` is `< true : Unit | false : Unit >` (04 §5)."""
+    return Inj(0, "true", UNIT, Var("Bool")) if b else Inj(1, "false", UNIT, Var("Bool"))
 
 
 def as_bool(t: Term) -> Optional[bool]:
+    """A value of `Bool`: by position, so a value of any sum of two units reads as a Bool."""
+    if isinstance(t, Inj) and t.index in (0, 1):
+        return t.index == 0
     if isinstance(t, Con) and t.name == "true":
         return True
     if isinstance(t, Con) and t.name == "false":
@@ -95,7 +103,7 @@ class Stuck(Exception):
 
 
 def is_value(t: Term) -> bool:
-    return is_con_value(t) or isinstance(t, (Lit, Pair, Lam, Pi, Sigma, Univ, Subtype))
+    return is_con_value(t) or isinstance(t, (Lit, Pair, Lam, Pi, Sigma, Univ, Subtype, Sum, Inj, NoLaw))
 
 
 def match_pattern(env: Env, p: Pattern, v: Term, fuel, unfold: bool = True) -> dict:
@@ -116,6 +124,12 @@ def match_pattern(env: Env, p: Pattern, v: Term, fuel, unfold: bool = True) -> d
             b = match_pattern(env, p.fst, v.fst, fuel, unfold)
             b.update(match_pattern(env, p.snd, v.snd, fuel, unfold))
             return b
+        raise Stuck() if not is_value(v) else NoMatch()
+    if isinstance(p, PInj):
+        if isinstance(v, Inj):
+            if v.index != p.index:
+                raise NoMatch()
+            return match_pattern(env, p.arg, v.arg, fuel, unfold)
         raise Stuck() if not is_value(v) else NoMatch()
     if isinstance(p, PCon):
         h, args = unapply(v)
@@ -307,6 +321,10 @@ def try_equal(env: Env, a: Term, b: Term, fuel: Fuel) -> Optional[bool]:
         if e1 is None: return None
         if not e1: return False
         return try_equal(env, a.snd, b.snd, fuel)
+    if isinstance(a, Inj) and isinstance(b, Inj):
+        if a.index != b.index:
+            return False
+        return try_equal(env, a.arg, b.arg, fuel)
     ha, aa = unapply(a)
     hb, ab = unapply(b)
     if isinstance(ha, Con) and isinstance(hb, Con):
@@ -465,6 +483,8 @@ def to_python(env: Env, v: Term, ty: Optional[Term] = None):
                     c = subst(c.cod, {c.name: a}) if isinstance(c, Pi) else c
                 return to_python(env, nf(env, t, Fuel(env.fuel)), c)
             return call_typed
+    if isinstance(v, Inj):
+        return _inj_to_python(env, v, ty)
     if isinstance(v, Lit):
         return v.value
     if isinstance(v, Pair):
@@ -498,6 +518,58 @@ def to_python(env: Env, v: Term, ty: Optional[Term] = None):
             return to_python(env, nf(env, t, Fuel(env.fuel)))
         return call
     return _OPAQUE
+
+
+def _sum_of(env: Env, ty: Optional[Term]):
+    """The sum a type unfolds to, or None."""
+    if ty is None:
+        return None
+    w = strip_subtypes(env, ty)
+    return w if isinstance(w, Sum) else None
+
+
+def _inj_to_python(env: Env, v: Inj, ty: Optional[Term]):
+    """A value of a sum in Python: a Bool is a bool; `nothing` is None and `just x` is x (the
+    Maybe convention); any other alternative is the pair (label, payload)."""
+    sm = _sum_of(env, ty)
+    labels = sm.labels() if sm is not None else None
+    alt_ty = sm.alts[v.index][1] if sm is not None and v.index < len(sm.alts) else None
+    label = labels[v.index] if labels is not None and v.index < len(labels) else v.label
+    if label in ("true", "false") and (labels is None or labels == ["true", "false"]):
+        return label == "true"
+    payload = None
+    if not (isinstance(v.arg, Con) and v.arg.name == "unit"):
+        payload = to_python(env, v.arg, alt_ty)
+        if payload is _OPAQUE:
+            return _OPAQUE
+    if labels == ["nothing", "just"] or (labels is None and label in ("nothing", "just")):
+        return payload
+    return (label, payload)
+
+
+def _sum_from_python(env: Env, x, sm: Sum, ty: Term) -> Term:
+    labels = sm.labels()
+    unit_alts = [i for i, (_, a) in enumerate(sm.alts) if _is_unit_type(env, a)]
+    if isinstance(x, bool) and len(sm.alts) == 2 and len(unit_alts) == 2:
+        i = 0 if x else 1
+        return Inj(i, labels[i], UNIT, ty)
+    if isinstance(x, tuple) and len(x) == 2 and isinstance(x[0], str) and x[0] in labels:
+        i = labels.index(x[0])
+        arg = UNIT if i in unit_alts else from_python(env, x[1], sm.alts[i][1])
+        return Inj(i, labels[i], arg, ty)
+    if x is None and unit_alts:
+        i = unit_alts[0]
+        return Inj(i, labels[i], UNIT, ty)
+    payload = [i for i in range(len(sm.alts)) if i not in unit_alts]
+    if len(payload) == 1:
+        i = payload[0]
+        return Inj(i, labels[i], from_python(env, x, sm.alts[i][1]), ty)
+    raise EvalError(f"cannot read {x!r} as a value of {pp(ty)}: give (label, value)")
+
+
+def _is_unit_type(env: Env, t: Term) -> bool:
+    w = whnf(env, t, Fuel(env.fuel))
+    return isinstance(w, Var) and w.name == "Unit"
 
 
 def is_opaque_type(env: Env, ty: Optional[Term]) -> bool:
@@ -551,6 +623,9 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
         return Lit(x)
     if ty is not None and isinstance(x, Extern):
         return x
+    sm = _sum_of(env, ty)
+    if sm is not None:
+        return _sum_from_python(env, x, sm, ty)
     rc = record_components(env, ty)
     if rc is not None and not isinstance(x, (int, float, str, bool)):
         hname, names, base = rc
@@ -640,6 +715,10 @@ def nf(env: Env, t: Term, fuel: Fuel) -> Term:
         return Sigma(t.name, nf(env, t.fst, fuel), nf(env, t.snd, fuel))
     if isinstance(t, Pair):
         return Pair(nf(env, t.fst, fuel), nf(env, t.snd, fuel))
+    if isinstance(t, Inj):
+        return Inj(t.index, t.label, nf(env, t.arg, fuel), t.type)
+    if isinstance(t, Sum):
+        return Sum(tuple((l, nf(env, a, fuel)) for l, a in t.alts))
     if isinstance(t, And):
         return And(nf(env, t.lhs, fuel), nf(env, t.rhs, fuel))
     if isinstance(t, Subtype):
@@ -666,10 +745,23 @@ def conv(env: Env, a: Term, b: Term, fuel: Fuel, depth: int = 0) -> bool:
         raise EvalError("conversion check too deep")
     a = whnf(env, a, fuel)
     b = whnf(env, b, fuel)
+    # a labeled product is the product: its labels are binders (04 §2)
+    while isinstance(a, Subtype) and isinstance(a.pred, NoLaw):
+        a = whnf(env, a.base, fuel)
+    while isinstance(b, Subtype) and isinstance(b.pred, NoLaw):
+        b = whnf(env, b.base, fuel)
     if a == b:
         return True
     if isinstance(a, Var) and isinstance(b, Var):
         return a.name == b.name
+    if isinstance(a, Sum) and isinstance(b, Sum):
+        # structural and positional: labels do not count
+        return len(a.alts) == len(b.alts) and all(
+            conv(env, x, y, fuel, depth + 1) for (_, x), (_, y) in zip(a.alts, b.alts))
+    if isinstance(a, Inj) and isinstance(b, Inj):
+        return a.index == b.index and conv(env, a.arg, b.arg, fuel, depth + 1)
+    if isinstance(a, NoLaw) and isinstance(b, NoLaw):
+        return True
     if isinstance(a, Lit) and isinstance(b, Lit):
         return a.value == b.value
     if isinstance(a, Univ) and isinstance(b, Univ):

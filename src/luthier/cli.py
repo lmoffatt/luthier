@@ -85,7 +85,9 @@ class Loader:
             child = prefix if imp.alias is None else qualify(prefix, imp.alias)
             self.load_file(resolve_import(imp.path, path), child)
         saved = self.checker.prefix
+        saved_kernel = self.checker.kernel
         self.checker.prefix = prefix
+        self.checker.kernel = os.path.abspath(path) == os.path.abspath(CORE)
         try:
             self.checker.load(prog)
         except TypeCheckError as e:
@@ -94,6 +96,7 @@ class Loader:
             raise SystemExit(f"{path}: evaluation error while checking: {e}")
         finally:
             self.checker.prefix = saved
+            self.checker.kernel = saved_kernel
         for d in prog.defs:
             self.origin[qualify(prefix, d.name)] = (path, prefix, d.name)
         for t in prog.tests:
@@ -145,7 +148,12 @@ def cmd_check(args):
     certified = [q for q in obligations if q in ck.certified]
     pending = [q for q in obligations if q not in ck.certified]
     print(f"ok: {n_defs} definitions, {len(obligations)} with laws, "
-          f"{len(certified)} certified, {len(pending)} pending test")
+          f"{len(certified)} certified, {len(pending)} pending test"
+          + (f", {len(ck.provisional)} provisional" if ck.provisional else ""))
+    if args.verbose and ck.provisional:
+        for q, over in ck.provisional.items():
+            what = f"builds on {', '.join(over)}" if over else "an extern type nobody has defined"
+            print(f"  provisional {q}: {what}")
     if args.verbose:
         for q, obls in obligations.items():
             if q in ck.certified:

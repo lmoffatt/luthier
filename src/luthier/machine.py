@@ -22,7 +22,8 @@ from __future__ import annotations
 from typing import Optional
 
 from .syntax import (Term, Var, Lit, Univ, Lam, App, Pi, Sigma, Pair, Arrow, BinOp, Con, Extern,
-                     Subtype, Match, And, Forget, Pattern, PVar, PWild, PCon, PPair, PLit)
+                     Subtype, Match, And, Forget, Pattern, PVar, PWild, PCon, PPair, PLit,
+                     Sum, Inj, NoLaw, PInj)
 from .subst import subst, free_vars
 from .evaluator import (Env, Fuel, EvalError, OutOfFuel, ExternInfo, unapply, from_python, to_python,
                         strip_subtypes, pi_chain, result_type, _OPAQUE, nf as subst_nf)
@@ -64,6 +65,16 @@ class VPair(Value):
     def __init__(self, fst, snd):
         self.fst = fst
         self.snd = snd
+
+
+class VInj(Value):
+    """A value of a sum: the alternative's position, its label (for display) and its payload."""
+    __slots__ = ("index", "label", "arg")
+
+    def __init__(self, index, label, arg):
+        self.index = index
+        self.label = label
+        self.arg = arg
 
 
 class VClosure(Value):
@@ -108,8 +119,9 @@ class Thunk:
         return Thunk(value=v)
 
 
-TRUE = VCon("true", [])
-FALSE = VCon("false", [])
+UNIT_V = VCon("unit", [])
+TRUE = VInj(0, "true", None)
+FALSE = VInj(1, "false", None)
 
 
 def vbool(b: bool) -> Value:
@@ -246,6 +258,8 @@ class Machine:
                 return VCon(term.name, [])
             if isinstance(term, Pair):
                 return VPair(Thunk(term.fst, env), Thunk(term.snd, env))
+            if isinstance(term, Inj):
+                return VInj(term.index, term.label, Thunk(term.arg, env))
             if isinstance(term, BinOp):
                 a = self.eval(term.lhs, env)
                 b = self.eval(term.rhs, env)
@@ -257,7 +271,7 @@ class Machine:
                 if term.type is not None and isinstance(term.type, Univ):
                     return VType(term, {})
                 return self.extern_value(term)
-            if isinstance(term, (Pi, Sigma, Univ, Subtype, Arrow)):
+            if isinstance(term, (Pi, Sigma, Univ, Subtype, Arrow, Sum, NoLaw)):
                 return VType(term, env)
             raise Unsupported(type(term).__name__)
 
@@ -285,6 +299,14 @@ class Machine:
                 return None
             a.update(b)
             return a
+        if isinstance(p, PInj):
+            if not isinstance(v, VInj):
+                raise Unsupported("label pattern on a value that is not of a sum")
+            if v.index != p.index:
+                return None
+            if isinstance(p.arg, PWild):
+                return {}
+            return self.match(p.arg, v.arg if v.arg is not None else Thunk.of(UNIT_V))
         if isinstance(p, PCon):
             if not isinstance(v, VCon):
                 raise Unsupported("constructor pattern on a non-constructor")
@@ -348,6 +370,12 @@ class Machine:
         if isinstance(a, VPair) and isinstance(b, VPair):
             return self.equal(self.force(a.fst), self.force(b.fst)) and \
                 self.equal(self.force(a.snd), self.force(b.snd))
+        if isinstance(a, VInj) and isinstance(b, VInj):
+            if a.index != b.index:
+                return False
+            if a.arg is None or b.arg is None:
+                return True
+            return self.equal(self.force(a.arg), self.force(b.arg))
         raise Unsupported("== on these values")
 
     # ------------------------------------------------------------ the environment
@@ -373,7 +401,12 @@ class Machine:
     def to_python(self, v: Value, ty: Optional[Term]):
         if isinstance(v, VLit):
             return v.value
-        if v is TRUE or (isinstance(v, VCon) and v.name == "true" and not v.args):
+        if isinstance(v, VInj) and v.label in ("true", "false") and (v.arg is None or True):
+            from .evaluator import _sum_of
+            sm = _sum_of(self.env, ty)
+            if sm is None or sm.labels() == ["true", "false"]:
+                return v.label == "true"
+        if isinstance(v, VCon) and v.name == "true" and not v.args:
             return True
         if isinstance(v, VCon) and v.name == "false" and not v.args:
             return False
@@ -430,6 +463,9 @@ class Machine:
             return t
         if isinstance(v, VPair):
             return Pair(self.quote(self.force(v.fst)), self.quote(self.force(v.snd)))
+        if isinstance(v, VInj):
+            arg = Con("unit") if v.arg is None else self.quote(self.force(v.arg))
+            return Inj(v.index, v.label, arg)
         if isinstance(v, VClosure):
             return self._close(v.lam, v.env)
         if isinstance(v, VExtern):
