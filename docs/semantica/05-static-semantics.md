@@ -287,6 +287,16 @@ the round trip needs the equality that R8 makes a component. Translations as a c
 language names and certifies, and several canonical presentations of Luthier itself with their
 equivalences, are for version 1 or 2.
 
+Some presentations have no computable translation, and then their equivalence is a law. A
+probability kernel from parameters to data is read three ways: a sampler, a likelihood, and the
+probability integral transform of each datum. Going from the likelihood to the sampler needs an
+inversion or a chain of Monte Carlo, and from the sampler to the likelihood an estimate of a density;
+neither is a function one can write exactly. `Kernel` in `lib/probability.lut` is the head of the
+object and the three are its components, with one law per side of the triangle: the density-pair
+laws (sample and likelihood), the slope of the transform is the density (transform and likelihood),
+and simulated data have a uniform transform (sample and transform). The project certifies it on the
+model of the tape distances, with two negative controls, each breaking one side.
+
 ## 10. Open
 
 - The tests for the semantic dependence of section 4: their syntax (a test mode that searches for a

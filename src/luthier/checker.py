@@ -915,10 +915,23 @@ class Checker:
             for a in reversed(types[:-1]):
                 out = Sum((("left", a), ("right", out)))
             return out, Univ()
+        if op == "*" and self._type_operand(ctx, t, "*"):
+            # `A * B * C` is `A * (B * C)`, as the tuple `(a, b, c)` is `(a, (b, c))`
+            operands = []
+
+            def flatten_prod(x):
+                if isinstance(x, BinOp) and x.op == "*":
+                    flatten_prod(x.lhs)
+                    flatten_prod(x.rhs)
+                else:
+                    operands.append(x)
+            flatten_prod(t)
+            types = [self.check(ctx, x, Univ()) for x in operands]
+            out = types[-1]
+            for a in reversed(types[:-1]):
+                out = Sigma("_", a, out)
+            return out, Univ()
         l, lt = self.infer(ctx, t.lhs)
-        if op == "*" and self.conv(lt, Univ()):
-            r = self.check(ctx, t.rhs, Univ())
-            return Sigma("_", l, r), Univ()
         if op in self.operators:
             res = self.resolve_operator(ctx, op, l, lt, t.rhs)
             if res is not None:
@@ -1183,10 +1196,10 @@ class Checker:
         return Match(scrut, tuple(branches)), result_ty
 
     # ------------------------------------------------------------- sums
-    def _type_operand(self, ctx: Ctx, t: BinOp) -> bool:
-        """Whether `a + b` is a sum of types: its leftmost operand is a type."""
+    def _type_operand(self, ctx: Ctx, t: BinOp, op: str = "+") -> bool:
+        """Whether `a + b` (or `a * b`) is a sum (a product) of types: its leftmost operand is a type."""
         x = t
-        while isinstance(x, BinOp) and x.op == "+":
+        while isinstance(x, BinOp) and x.op == op:
             x = x.lhs
         try:
             with self.silent():

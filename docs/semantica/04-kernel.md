@@ -70,7 +70,8 @@ Notes on each.
   (isomorphic, not equal). The reading where labels are the identity (a record as a function
   from its set of labels) is a translation, not an equality.
 - **Anonymous sums** inject with the labels `left` and `right`: `A + B` is
-  `< left : A | right : B >`. A sum of more than two associates to the right. An alternative of
+  `< left : A | right : B >`. A sum of more than two associates to the right, and so does a
+  product: `A * B * C` is `A * (B * C)`, like the tuple `(a, b, c)`, which is `(a, (b, c))`. An alternative of
   type `Unit` is injected by its label alone: in `< true : Unit | false : Unit >`, `true` is
   `true unit`.
 - **Dependence.** In `(x : A) -> B` and `(x : A) * (y : B)`, `B` may mention `x`. A sum has no

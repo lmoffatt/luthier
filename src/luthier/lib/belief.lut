@@ -205,7 +205,6 @@ evidenceDeparture (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Thet
 -- project on a direction v drawn at random: u = Phi(v^T (theta - m') / sqrt(v^T P'^{-1} v)) is
 -- uniform on [0, 1] when the updated belief is the posterior. Its first two moments are
 -- compared with their standard errors over the ensemble, as for the discrete update.
-normalCdf (x : R) : R := 0.5 * (1.0 + erfR (x / sqrtR 2.0))
 
 projectedRank (Y : U) (f : BeliefFamily Vec GaussianBelief Y) (s : Sampler Vec Y) (b : GaussianBelief) (seed : Int) : R * Int :=
   match f.draw b seed { (t, s1) ->

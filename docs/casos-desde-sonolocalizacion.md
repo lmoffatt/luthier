@@ -114,6 +114,9 @@ sobre ese tipo falla con `tuple pattern (y, z) against non-pair type R`. Escribi
 como `R * (R * R)` funciona. La gramática dice que el par asocia a la derecha; el `*` sobre
 tipos debería hacer lo mismo, o el desazucarado de la tupla debería seguir al tipo.
 
+(Resuelto el 2026-10-04: un producto de más de dos tipos asocia a la derecha, como la tupla;
+`04 §2`.)
+
 ## 11. El orden de las definiciones importa (decidido el 2026-10-04)
 
 `00-elementos-fundamentales.md` dice que un programa es un conjunto de definiciones sin

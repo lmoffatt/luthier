@@ -135,6 +135,57 @@ DensityPair (Theta Y : U) : U := {
   |
   ShiftByZero Theta Y sample lik & ScoreIsGradient Theta Y sample lik & InfoIsSymmetric Theta Y sample lik & IsDensityOf Theta Y sample lik }
 
+-- ---------------------------------------------------------------- the kernel and its three presentations
+-- A kernel Theta ~> data is one object read three ways: forward, as a sampler; through its
+-- density, as a likelihood; and through its distribution function, as the probability integral
+-- transform of each datum: entry k of `pit y t` is the probability that datum k falls below y_k.
+-- The kernel is the head and the three are its presentations; its laws say they present the same
+-- thing, one law for each side of the triangle:
+--   sample and lik    the laws of a density pair (above)
+--   pit and lik       the slope of pit is the density: sum_k log (d pit_k / d y_k) = loglik y t
+--   sample and pit    data the sampler draws have a uniform pit
+-- A transform entry by entry supposes the data independent given the parameter. The first two
+-- moments of the uniform, 1/2 and 1/3, are compared with their standard errors over the ensemble,
+-- as the calibration laws of belief.lut do. The density-pair laws test the first two Bartlett
+-- identities only; the uniform pit tests the whole distribution of each datum.
+
+normalCdf (x : R) : R := 0.5 * (1.0 + erfR (x / sqrtR 2.0))
+
+KernelParts (Theta : U) = { sample : Sampler Theta Vec, lik : Likelihood Theta Vec, pit : Vec -> Theta -> Vec }
+
+-- y with entry j moved by h
+bumped (y : Vec) (j : Fin y.n) (h : R) : Vec := (y.n, \ i { if i == j then y.f i + h else y.f i })
+
+-- the slope of pit_j along y_j, by central difference with step fdStep: the truncation is of order
+-- (fdStep / sigma)^2, below 1e-6 for the sigmas of the tape (1 cm and up)
+pitSlope (Theta : U) (k : KernelParts Theta) (y : Vec) (t : Theta) (j : Fin y.n) : R :=
+  (at (k.pit (bumped y j fdStep) t) j - at (k.pit (bumped y j (0.0 - fdStep)) t) j) / (2.0 * fdStep)
+
+pitTol : R := 1e-6
+
+PresentsDensityPair (Theta : U) (k : KernelParts Theta) (t : Theta) (seed : Int) : Bool :=
+  ShiftByZero Theta Vec k.sample k.lik t seed and ScoreIsGradient Theta Vec k.sample k.lik t seed
+  and InfoIsSymmetric Theta Vec k.sample k.lik t seed and IsDensityOf Theta Vec k.sample k.lik t seed
+
+PitIsDensity (Theta : U) (k : KernelParts Theta) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Vec k.sample t seed { y ->
+  approxR pitTol (sumTo y.n (\ j { logR (pitSlope Theta k y t j) })) (k.lik.loglik y t) }
+
+-- sums of u and u^2 over every entry of the pit of n draws, and how many entries
+pitMoments (Theta : U) (k : KernelParts Theta) (t : Theta) (n i seed : Int) (s1 s2 : R) (count : Int) : R * R * Int :=
+  if i >= n then (s1, s2, count)
+  else match k.sample t seed { (y, next) -> match k.pit y t { u ->
+       pitMoments Theta k t n (i + 1) next (s1 + total u) (s2 + dot u u) (count + length u) } }
+
+PitUniform (Theta : U) (k : KernelParts Theta) (t : Theta) (seed : Int) : Bool :=
+  match pitMoments Theta k t ensembleSize 0 seed 0.0 0.0 0 { (a, c, count) ->
+  match toR count { n ->
+  abs (a / n - 0.5) / sqrtR (1.0 / 12.0 / n) < zMax
+  and abs (c / n - 1.0 / 3.0) / sqrtR (4.0 / 45.0 / n) < zMax } }
+
+Kernel (Theta : U) : KernelParts Theta
+Kernel (Theta : U) := PresentsDensityPair Theta & PitIsDensity Theta & PitUniform Theta
+
 -- ---------------------------------------------------------------- the Gaussian construction
 -- A mean model: the predicted observations and their Jacobian with respect to the parameter.
 MeanModel (Theta : U) = {
@@ -178,3 +229,12 @@ profiled (Theta : U) (m : MeanModel Theta) : Likelihood Theta Vec := {
 gaussianSampler (Theta : U) (m : ScaledModel Theta) : Sampler Theta Vec :=
   \ t seed { match m.model.mean t { mu -> match normalVec (length mu) seed { (z, s2) ->
     (mu + expR (m.logSigma t) * z, s2) } } }
+
+-- The distribution function of the scaled model, datum by datum: Phi((y_k - mean_k) / sigma).
+gaussianPit (Theta : U) (m : ScaledModel Theta) : Vec -> Theta -> Vec :=
+  \ y t { match m.model.mean t { mu -> match expR (m.logSigma t) { s ->
+    (y.n, \ j { normalCdf ((y.f j - at mu j) / s) }) } } }
+
+-- the scaled model as a kernel: its three presentations built from the one model
+gaussianKernel (Theta : U) (m : ScaledModel Theta) : Kernel Theta :=
+  { sample := gaussianSampler Theta m, lik := gaussian Theta m, pit := gaussianPit Theta m }
