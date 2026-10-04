@@ -438,6 +438,17 @@ class Parser:
         return body
 
     def parse_paren(self) -> Term:
+        # `name (x : T) :` at column 0 inside a term: a new definition reached while the previous
+        # one is still open, which means a bracket is missing above
+        before = self.toks[self.i - 1] if self.i > 0 else None
+        if before is not None and before.kind == "name" and before.col == 0 and self._binder_ahead_from(1) \
+                and self.peek(0).kind == "symbol" and self.peek(0).text == "(":
+            k = 1
+            while self.peek(k).kind == "name":
+                k += 1
+            if self.peek(k).kind == "symbol" and self.peek(k).text == ":":
+                self.err(f"'{before.text}' at the start of a line reads as a new definition, but the previous "
+                         f"definition is still open: a closing bracket is probably missing above")
         self.expect("symbol", "(")
         self.skip_newlines += 1
         saved_nb, self.no_brace = self.no_brace, 0
