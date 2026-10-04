@@ -2,6 +2,7 @@
 from __future__ import annotations
 import argparse
 import importlib
+import json
 import os
 import random
 import sys
@@ -230,6 +231,83 @@ def cmd_test(args):
     return 0 if ok else 1
 
 
+def _parse_setting(text: str):
+    """`name=value`: an int, a float, a bool or a string, by what the text looks like."""
+    name, sep, raw = text.partition("=")
+    if not sep or not name:
+        raise SystemExit(f"--set expects name=value, got {text!r}")
+    raw = raw.strip()
+    if raw in ("true", "false"):
+        return name.strip(), raw == "true"
+    try:
+        return name.strip(), int(raw)
+    except ValueError:
+        pass
+    try:
+        return name.strip(), float(raw)
+    except ValueError:
+        return name.strip(), raw
+
+
+def cmd_run(args):
+    from .syntax import Pi
+    """Evaluate a program's `main` (or --entry) after giving its parameter holes their values,
+    and record the run: the hash of main's dependency cone, the parameters, the result."""
+    import datetime
+    from .api import Program
+    from .certify import definition_hash, read_certificate
+    loader = load(args.files, not args.no_core)
+    ck = loader.checker
+    if args.fuel is not None:
+        ck.env.run_fuel = args.fuel
+    prog = Program(loader)
+    settings = dict(_parse_setting(x) for x in (args.set or []))
+    for name, value in settings.items():
+        q = prog.resolve(name)
+        d = ck.env.defs.get(q)
+        if d is None or d.body is not None or d.data is not None:
+            raise SystemExit(f"--set {name}: not a hole of the program")
+        if isinstance(ck.whnf(d.type), Pi):
+            raise SystemExit(f"--set {name}: a function hole cannot be set from the command line")
+        prog.fill(name, (lambda v: (lambda: v))(value))
+    entry = args.entry
+    q = prog.resolve(entry)
+    if q not in ck.env.defs:
+        raise SystemExit(f"no definition {entry!r} to run")
+    open_holes = [h for h in prog.holes() if h not in prog.filled]
+    needed = [h for h in open_holes if h in set(cone_names(ck.env, q))]
+    if needed:
+        raise SystemExit(f"{entry} depends on holes without a value: {', '.join(needed)}; give them with --set name=value")
+    started = datetime.datetime.now().isoformat(timespec="seconds")
+    try:
+        value = prog.eval(entry)
+    except EvalError as e:
+        raise SystemExit(f"error: {e}")
+    path, prefix, local = loader.origin.get(q, (args.files[0], "", entry))
+    record = {
+        "entry": entry,
+        "hash": definition_hash(ck.env, q, prefix),
+        "when": started,
+        "parameters": settings,
+        "result": value if isinstance(value, (int, float, str, bool, type(None))) else pp(value) if hasattr(value, "__class__") and not isinstance(value, (list, dict)) else value,
+    }
+    if not args.no_record:
+        rec_path = os.path.splitext(path)[0] + ".run.json"
+        runs = read_certificate(rec_path)
+        runs.setdefault("runs", []).append(record)
+        with open(rec_path, "w", encoding="utf-8") as f:
+            json.dump(runs, f, indent=2, ensure_ascii=False, default=str)
+        print(f"run recorded: {rec_path}")
+    if record["result"] is not None:
+        print(record["result"])
+    return 0
+
+
+def cone_names(env, q):
+    from .certify import cone
+    return cone(env, q)
+
+
 def cmd_eval(args):
     loader = load(args.files, not args.no_core)
     ck = loader.checker
@@ -272,6 +350,16 @@ def main(argv=None):
                    help="steps allowed per evaluation of a law case or term (default 50000000)")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_test)
+
+    p = sub.add_parser("run", help="run a program: evaluate its main after setting its parameters")
+    p.add_argument("files", nargs="+")
+    p.add_argument("--entry", default="main", help="the definition to evaluate (default: main)")
+    p.add_argument("--set", action="append", metavar="NAME=VALUE",
+                   help="give a parameter hole its value; repeatable")
+    p.add_argument("--fuel", type=int, default=None, help="steps allowed for the evaluation")
+    p.add_argument("--no-record", action="store_true", help="do not append to the .run.json record")
+    p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
+    p.set_defaults(fn=cmd_run)
 
     p = sub.add_parser("eval", help="evaluate a term in the context of .lut files")
     p.add_argument("files", nargs="+")
