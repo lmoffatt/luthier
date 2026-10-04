@@ -75,6 +75,8 @@ class Checker:
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
         self.provisional: dict = {}    # name -> [declared types it builds on], for `extern provisional`
         self.primitives = {"Int", "R", "String"}   # holes of core.lut the interpreter fills
+        self.path: list = []           # conditions of the enclosing `if` branches (Bool terms)
+        self.lets: list = []           # (name, term): `match e { x -> ... }` binds x to e
 
     # ----------------------------------------------------------- namespaces
     def qualify(self, name: str) -> str:
@@ -416,9 +418,11 @@ class Checker:
         if not cands:
             return None
         if self.inferable(rhs):
-            r, rt = self.infer(ctx, rhs)
+            with self.silent():
+                r, rt = self.infer(ctx, rhs)
             for d1, d2, cod, f in cands:
                 if self.convertible(rt, d2) or self.conv(self.base_type(rt), self.base_type(d2)):
+                    r, rt = self.infer(ctx, rhs)
                     return App(App(f, l), self.coerce(ctx, r, rt, d2)), cod
             return None
         d1, d2, cod, f = cands[0]
@@ -654,6 +658,23 @@ class Checker:
         if not self.recording or self.current_def is None:
             return
         name = self.current_def
+        if self.lets:
+            # a variable bound by `match e { x -> ... }` is e: the law speaks of e, not of every x
+            bound = {}
+            for n, t in self.lets:
+                bound[n] = subst(t, bound) if bound else t
+            term = subst(term, bound)
+            ctx = [(n, subst(t, bound)) for n, t in ctx if n not in bound]
+        if self.path:
+            # raised inside a branch: the branch's condition is a precondition of the law (05 §7)
+            try:
+                with self.silent():
+                    _, tt = self.infer(ctx, term)
+                if self.is_bool(tt):
+                    for cond in reversed(self.path):
+                        term = App(App(Var("implies"), cond), term)
+            except (TypeCheckError, EvalError):
+                pass
         self.obligations.setdefault(name, []).append(Obligation(name, list(ctx), term, label))
 
     class _Silent:
@@ -1059,7 +1080,10 @@ class Checker:
     def subtype_obligation(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):
         if isinstance(sub.pred, NoLaw) or (isinstance(sub.pred, Con) and sub.pred.name == "true"):
             return          # a labeled product names components and states no law
-        applied = App(Lam(sub.param, sub.pred, ann=sub.base), value)
+        if isinstance(sub.param, PVar) and not (free_vars(value) & set(pattern_vars(sub.param)) - {sub.param.name}):
+            applied = subst(sub.pred, {sub.param.name: value})     # readable: the law on the value
+        else:
+            applied = App(Lam(sub.param, sub.pred, ann=sub.base), value)
         local = {n for n, _ in ctx}
         if not (free_vars(value) & local):
             try:
@@ -1124,10 +1148,23 @@ class Checker:
                 covered.add(pat2.name)
             elif isinstance(pat2, PInj):
                 covered.add(pat2.label)
-            if result_ty is None:
-                body2, result_ty = self.infer(ctx2, body)
-            else:
-                body2 = self.check(ctx2, body, result_ty)
+            cond = None
+            if isinstance(pat2, PInj) and pat2.index in (0, 1) and self.is_bool(sty):
+                cond = scrut if pat2.index == 0 else App(Var("not"), scrut)
+                self.path.append(cond)
+            let = isinstance(pat2, PVar)
+            if let:
+                self.lets.append((pat2.name, scrut))
+            try:
+                if result_ty is None:
+                    body2, result_ty = self.infer(ctx2, body)
+                else:
+                    body2 = self.check(ctx2, body, result_ty)
+            finally:
+                if cond is not None:
+                    self.path.pop()
+                if let:
+                    self.lets.pop()
             branches.append((pat2, body2))
         if isinstance(sw, Sum) and not catch_all:
             got = {p.index for p, _ in branches if isinstance(p, PInj)}

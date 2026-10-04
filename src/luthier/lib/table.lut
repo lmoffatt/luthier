@@ -1,0 +1,78 @@
+-- Tables and the codec that reads and writes them as text.
+--
+-- A table has n rows and named, typed columns; its cells are what a column name and a row give,
+-- `cell : String -> Fin n -> Maybe Cell`, nothing where the table has no such column. The table
+-- of luthier/tables.py is a value of this type as it is: its `cell` is the function.
+--
+-- A codec is a parse and a render between text and tables, with the equality of tables it is
+-- judged by, and four laws pin it down:
+--   RoundTrip      reading what was written gives back the table
+--   Canonical      read, write, read again: the same as reading once (writing is canonical)
+--   Tolerant       a text written differently but with the same content reads the same
+--   Rejects        a text with a defect is not read
+-- Canonical follows from RoundTrip on the tables parse produces; it is tested on texts, so it
+-- covers tables the table generator may not reach. Rejects is the negative control: a codec
+-- that read anything would pass the first three.
+
+import "real"
+
+Cell = < int : Int | real : R | text : String >
+Table = { nRows : Nat, names : List String, kinds : List String, cell : String -> Fin nRows -> Maybe Cell }
+
+-- ---------------------------------------------------------------- lists and quantifiers
+listLength (A : U) (xs : List A) : Int := match xs { nil -> 0 ; cons x rest -> 1 + listLength A rest }
+
+-- a law on every index below n, as a recursion, so it evaluates to a Bool on a concrete table
+forallBelow (n : Int) (p : Fin n -> Bool) : Bool := if n <= 0 then true else forallBelow (n - 1) (\ k { p k }) and p (n - 1)
+
+-- the first index below n where p fails, or -1: for messages that point at the row
+firstFailing (k : Nat) (n : Int) (p : Fin n -> Bool) : Int :=
+  if k >= n then 0 - 1 else if p k then firstFailing (k + 1) n p else k
+
+-- ---------------------------------------------------------------- accessors
+nCols (t : Table) : Int := listLength String t.names
+
+pairIn (ns ks : List String) (n k : String) : Bool :=
+  match ns { nil -> false ; cons a rest -> match ks { nil -> false ; cons b more -> (a == n and b == k) or pairIn rest more n k } }
+
+-- a column of this name and type: "int", "float" or "str"
+hasColumn (t : Table) (name kind : String) : Bool := pairIn t.names t.kinds name kind
+
+-- The cells of a column read as one type. Where the column is missing or of another type they
+-- give 0, 0.0 and "": the invariants of a schema rule that out before any cell is read.
+intAt (t : Table) (c : String) (r : Fin t.nRows) : Int :=
+  match t.cell c r { just v -> (match v { int k -> k ; real x -> 0 ; text s -> 0 }) ; nothing -> 0 }
+realAt (t : Table) (c : String) (r : Fin t.nRows) : R :=
+  match t.cell c r { just v -> (match v { int k -> toR k ; real x -> x ; text s -> 0.0 }) ; nothing -> 0.0 }
+textAt (t : Table) (c : String) (r : Fin t.nRows) : String :=
+  match t.cell c r { just v -> (match v { int k -> "" ; real x -> "" ; text s -> s }) ; nothing -> "" }
+
+-- two tables are the same when they have the same columns and every cell agrees
+sameCells (t : Table) (u : { v : Table | v.nRows == t.nRows }) (ns : List String) : Bool :=
+  match ns { nil -> true ; cons n rest -> forallBelow t.nRows (\ r { t.cell n r == u.cell n r }) and sameCells t u rest }
+sameTable (t u : Table) : Bool :=
+  if t.nRows == u.nRows then t.names == u.names and t.kinds == u.kinds and sameCells t u t.names else false
+
+-- ---------------------------------------------------------------- the codec
+Codec : { parse : String -> Maybe Table, render : Table -> String, eq : Table -> Table -> Bool }
+
+sameParse (c : Codec) (a b : Maybe Table) : Bool :=
+  match a { nothing -> (match b { nothing -> true ; just y -> false })
+          ; just x -> (match b { nothing -> false ; just y -> c.eq x y }) }
+
+-- A table and a text with the same content written differently; a text that is a rendering,
+-- possibly written differently; a text with one defect. Their generators give them meaning.
+Perturbed = { table : Table, text : String }
+TableText = String
+BrokenText = String
+
+RoundTrip (c : Codec) (t : Table) : Bool := sameParse c (c.parse (c.render t)) (just t)
+
+Canonical (c : Codec) (s : TableText) : Bool :=
+  match c.parse s { nothing -> true ; just t -> sameParse c (c.parse (c.render t)) (just t) }
+
+Tolerant (c : Codec) (p : Perturbed) : Bool := sameParse c (c.parse p.text) (just p.table)
+
+Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b { nothing -> true ; just t -> false }
+
+Codec := RoundTrip & Canonical & Tolerant & Rejects

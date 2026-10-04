@@ -1,0 +1,22 @@
+-- The real numbers of the environment. `R` itself is declared in core.lut as a hole the
+-- interpreter fills with IEEE doubles, with its literals and arithmetic; this library declares
+-- the functions on it, without a body, and says what can be said about them. real_python.lut
+-- binds them to Python's math.
+
+abs  : R -> R
+toR  : Int -> R
+ulp  : R -> R         -- the distance to the next double
+sqrtR : R -> R
+cbrtR : R -> R
+expR  : R -> R
+logR  : R -> R
+erfR  : R -> R
+roundR : R -> Int     -- the nearest whole number
+
+-- the machine epsilon: the ulp of one, 2^-52. The rounding error of one operation is at
+-- most half of it; of a sum of n terms, about n times it.
+eps : R := ulp 1.0
+
+approx (tol a b : R) : Bool := abs (a - b) < tol
+
+Positive : U := { x : R | x >= 0.0 }

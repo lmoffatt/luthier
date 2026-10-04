@@ -1,0 +1,18 @@
+-- luthier/tables.py as a model of the codec of table.lut, and its certification.
+
+import "real"
+import "real_python"
+import "table"
+
+parseTable  : String -> Maybe Table := extern "python:luthier.tables.parse"
+renderTable : Table -> String := extern "python:luthier.tables.render"
+parseError  : String -> String := extern "python:luthier.tables.parse_error"
+
+gen Table := extern "python:luthier.tables.gen_table"
+gen Perturbed := extern "python:luthier.tables.gen_perturbed"
+gen TableText := extern "python:luthier.tables.gen_text"
+gen BrokenText := extern "python:luthier.tables.gen_broken"
+
+csv : Codec := { parse := parseTable, render := renderTable, eq := sameTable }
+
+test csv with 200

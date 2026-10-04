@@ -193,14 +193,28 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
         if bad is not None:
             return result("exhaustive", cases, False, failure=show(bad))
         return result("exhaustive", cases, True)
+    def draw(size_i):
+        """One case. A parameter whose type depends on earlier ones may be empty for them (Fin 0):
+        the case is drawn again, since a law holds vacuously where it has no arguments."""
+        for attempt in range(50):
+            values = []
+            try:
+                for (name, ty) in params:
+                    ty_i = subst(ty, {p: v for (p, _), v in zip(params, values)})
+                    values.append(gens.sample(ty_i, rng, size_i))
+                return values
+            except GenError:
+                if not values:
+                    raise
+        return None     # every draw met an empty domain: this case holds vacuously
+
     try:
         for i in range(n):
             # size grows with the case number: small cases first, so a counterexample is minimal
             size_i = 1 + (i * size) // max(n, 1)
-            values = []
-            for (name, ty) in params:
-                ty_i = subst(ty, {p: v for (p, _), v in zip(params, values)})
-                values.append(gens.sample(ty_i, rng, size_i))
+            values = draw(size_i)
+            if values is None:
+                continue
             cases += 1
             record(values)
             b, r = evaluate(values)
@@ -211,6 +225,8 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
                 return result("sampled", cases, False, failure=show(values))
     except (GenError, EvalError) as e:
         return result("sampled", cases, False, error=str(e))
+    if cases == 0 and n > 0:
+        return result("sampled", 0, False, error="no case could be drawn: every draw met an empty domain")
     return result("sampled", cases, True)
 
 

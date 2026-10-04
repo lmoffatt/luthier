@@ -1,0 +1,100 @@
+-- The numpy implementation of the leaves of array.lut, the generators of its shapes, and the
+-- certification that each leaf computes its native definition (and the laws it does not need).
+-- An array of numpy is a value of `Vec` or `Mat` as it is (04 §6): nothing here converts.
+
+import "real"
+import "real_python"
+import "array"
+
+add : Vec -> Vec -> Vec := extern "python:luthier.arrays.add"
+sub : Vec -> Vec -> Vec := extern "python:luthier.arrays.sub"
+scale : R -> Vec -> Vec := extern "python:luthier.arrays.scale"
+dot : Vec -> Vec -> R := extern "python:luthier.arrays.dot"
+norm : Vec -> R := extern "python:luthier.arrays.norm"
+total : Vec -> R := extern "python:luthier.arrays.total"
+product : Vec -> R := extern "python:luthier.arrays.product"
+minimum : Vec -> R := extern "python:luthier.arrays.minimum"
+maximum : Vec -> R := extern "python:luthier.arrays.maximum"
+outer : Vec -> Vec -> Mat := extern "python:luthier.arrays.outer"
+matVec : Mat -> Vec -> Vec := extern "python:luthier.arrays.mat_vec"
+matMul : Mat -> Mat -> Mat := extern "python:luthier.arrays.mat_mul"
+transpose : Mat -> Mat := extern "python:luthier.arrays.transpose"
+trace : Mat -> R := extern "python:luthier.arrays.trace"
+det : Mat -> R := extern "python:luthier.arrays.det"
+frob : Mat -> R := extern "python:luthier.arrays.frob"
+cond : Mat -> R := extern "python:luthier.arrays.cond"
+solve : Mat -> Vec -> Vec := extern "python:luthier.arrays.solve"
+eigvalsSym : Mat -> Vec := extern "python:luthier.arrays.eigvals_sym"
+invSqrtSym : Mat -> Mat := extern "python:luthier.arrays.inv_sqrt_sym"
+retainedRank : Mat -> Int := extern "python:luthier.arrays.retained_rank"
+pinvSym : Mat -> Mat := extern "python:luthier.arrays.pinv_sym"
+pinvSqrtSym : Mat -> Mat := extern "python:luthier.arrays.pinv_sqrt_sym"
+madd : Mat -> Mat -> Mat := extern "python:luthier.arrays.madd"
+msub : Mat -> Mat -> Mat := extern "python:luthier.arrays.msub"
+mscale : R -> Mat -> Mat := extern "python:luthier.arrays.mscale"
+hadamard : Mat -> Mat -> Mat := extern "python:luthier.arrays.hadamard"
+maxAbs : Vec -> R := extern "python:luthier.arrays.max_abs"
+maxAbsMat : Mat -> R := extern "python:luthier.arrays.max_abs"
+normalVec : Int -> Int -> Vec * Int := extern "python:luthier.arrays.normal_vec"
+approxR : R -> R -> R -> Bool := extern "python:luthier.arrays.approx"
+approxVec : R -> Vec -> Vec -> Bool := extern "python:luthier.arrays.approx"
+approxMat : R -> Mat -> Mat -> Bool := extern "python:luthier.arrays.approx"
+gen Dim := extern "python:luthier.arrays.gen_dim"
+gen Dim2 := extern "python:luthier.arrays.gen_dim2"
+gen VecOf := extern "python:luthier.arrays.gen_vec_of"
+gen MatOf := extern "python:luthier.arrays.gen_mat_of"
+gen SpdOf := extern "python:luthier.arrays.gen_spd_of"
+gen DeficientOf := extern "python:luthier.arrays.gen_deficient_of"
+
+-- ---------------------------------------------------------------- the certified leaves
+-- The spectral leaves are compared with Jacobi's method written natively, whose cost grows as
+-- n^5 in the interpreter; their tests stop at matrices of size 6.
+inner     : { d : Vec -> Vec -> R | DotAgrees d } := dot
+vnorm     : { nm : Vec -> R | NormAgrees nm } := norm
+vtotal    : { t : Vec -> R | TotalAgrees t } := total
+addition  : { ad : Vec -> Vec -> Vec | AddAgrees ad } := add
+subtraction : { sb : Vec -> Vec -> Vec | SubAgrees sb } := sub
+scaling   : { sc : R -> Vec -> Vec | ScaleAgrees sc } := scale
+outerProd : { o : Vec -> Vec -> Mat | OuterAgrees o } := outer
+action    : { mv : Mat -> Vec -> Vec | MatVecAgrees mv } := matVec
+mproduct  : { mm : Mat -> Mat -> Mat | MatMulAgrees mm } := matMul
+transposed : { tr : Mat -> Mat | TransposeAgrees tr } := transpose
+mtrace    : { t : Mat -> R | TraceAgrees t } := trace
+determinant : { dt : Mat -> R | DetAgrees dt } := det
+solver    : { sv : Mat -> Vec -> Vec | SolveInverts sv } := solve
+spectrum  : { ev : Mat -> Vec | EigvalsAgree ev & EigenvaluesSumToTrace ev & EigenvaluesMultiplyToDet ev } := eigvalsSym
+invSqrt   : { m : Mat -> Mat | InvSqrtAgrees m & InvSqrtInverts m } := invSqrtSym
+rank      : { r : Mat -> Int | RankAgrees r } := retainedRank
+pseudoInverse : { m : Mat -> Mat | PinvAgrees m } := pinvSym
+pseudoInvSqrt : { m : Mat -> Mat | PinvSqrtAgrees m } := pinvSqrtSym
+maddition : { f : Mat -> Mat -> Mat | MaddAgrees f } := madd
+msubtraction : { f : Mat -> Mat -> Mat | MsubAgrees f } := msub
+mscaling  : { f : R -> Mat -> Mat | MscaleAgrees f } := mscale
+entrywise : { f : Mat -> Mat -> Mat | HadamardAgrees f } := hadamard
+largest   : { f : Vec -> R | MaxAbsAgrees f } := maxAbs
+frobenius : { f : Mat -> R | FrobAgrees f } := frob
+
+test inner with 100
+test vnorm with 100
+test vtotal with 100
+test addition with 100
+test subtraction with 100
+test scaling with 100
+test outerProd with 100
+test action with 100
+test mproduct with 100
+test transposed with 100
+test mtrace with 100
+test determinant with 30
+test solver with 100
+test spectrum with 100 size 6
+test invSqrt with 100 size 6
+test rank with 100 size 6
+test pseudoInverse with 100 size 6
+test pseudoInvSqrt with 100 size 6
+test maddition with 50
+test msubtraction with 50
+test mscaling with 50
+test entrywise with 50
+test largest with 100
+test frobenius with 100

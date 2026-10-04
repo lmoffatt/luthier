@@ -1,0 +1,180 @@
+-- Probability as it is computed with: a sampler and a likelihood as one kernel read two ways,
+-- the information the likelihood reports, and the identities that tie the two together.
+--
+-- A kernel Theta ~> Y gives, for each parameter, a probability on the data. Read forward it is
+-- a sampler: a parameter and a seed give data and the next seed (the seed is the Omega of the
+-- probability space). Read through its density it is a likelihood. The likelihood here is not
+-- a bare number: it reports its score, the gradient of the log-likelihood, and the Fisher
+-- information it claims, as the paper's diagnostics need (Moffatt, "Likelihood approximations
+-- distort the ion channel kinetic information in macroscopic currents").
+--
+-- A pair (sampler, likelihood) is lawful when the likelihood is the density of the sampler.
+-- The laws checked are the two of the paper, measured at the generating parameter over an
+-- ensemble of draws: the mean score is zero, and the distortion C = H^{-1/2} J H^{-1/2} is the
+-- identity, with H the reported information averaged over the ensemble and J the covariance of
+-- the score. Each entry is compared with its own standard error; nothing assumes the score is
+-- Gaussian.
+
+import "real"
+import "random"
+import "array"
+
+log2pi : R := logR (2.0 * 3.141592653589793)
+
+-- ---------------------------------------------------------------- sampler and likelihood
+Draw (Y : U) = Int -> Y * Int              -- seed in, a value and the next seed out
+Sampler (Theta Y : U) = Theta -> Draw Y
+
+drawAt (Theta Y : U) (s : Sampler Theta Y) (t : Theta) (seed : Int) : Y := match s t seed { (y, s2) -> y }
+
+-- What a likelihood reports. `shift` moves a parameter along a direction of the parameter
+-- space, the space the score and the information live in.
+Likelihood (Theta Y : U) = {
+  shift  : Theta -> Vec -> Theta
+  loglik : Y -> Theta -> R
+  score  : Y -> Theta -> Vec
+  info   : Y -> Theta -> Mat }
+
+-- ---------------------------------------------------------------- laws of one likelihood
+-- The score is the gradient: the slope of the log-likelihood along the score equals the norm
+-- of the score. Central difference with step eps^(1/3), whose truncation and rounding are
+-- both of order eps^(2/3); the tolerance sqrt eps leaves a margin of a hundred.
+fdStep : R := cbrtR eps
+fdTol  : R := sqrtR eps
+
+ScoreIsGradient (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Y s t seed { y ->
+  match l.score y t { g ->
+  match norm g { ng ->
+  if ng == 0.0 then true else
+  match scale (fdStep / ng) g { v ->
+  match (l.loglik y (l.shift t v) - l.loglik y (l.shift t (scale (0.0 - 1.0) v))) / (2.0 * fdStep) { slope ->
+  approxR (fdTol * (1.0 + abs (l.loglik y t))) slope ng } } } } }
+
+-- Moving by the zero direction leaves the parameter where it was. Theta has no equality of
+-- its own, so the law reads it through what the likelihood sees: the log-likelihood, exactly.
+ShiftByZero (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Y s t seed { y ->
+  l.loglik y (l.shift t (zeros (length (l.score y t)))) == l.loglik y t }
+
+InfoIsSymmetric (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Y s t seed { y -> match l.info y t { h -> approxMat 0.0 h (transpose h) } }
+
+-- ---------------------------------------------------------------- the ensemble diagnostics
+-- Draws per measurement, and the z beyond which an entry is a departure. With d parameters
+-- there are d + d (d + 1) / 2 entries; at z = 5 a calibrated pair passes each case with
+-- probability above 1 - 1e-4 for d up to 16.
+ensembleSize : Int := 400
+zMax : R := 5.0
+
+-- pass 1: the reported information, summed over n draws
+sumInfo (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (n k seed : Int) (acc : Mat) : Mat :=
+  if k >= n then acc
+  else match s t seed { (y, s2) -> match madd acc (l.info y t) { a2 -> sumInfo Theta Y s l t n (k + 1) s2 a2 } }
+
+-- pass 2, over the same draws: the whitened score w = M s, with M H M = I, and its moments
+Moments = { sw : Vec, ss : Vec, sww : Mat, sq : Mat }
+
+sumWhite (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (m : Mat)
+         (n k seed : Int) (sw ss : Vec) (sww sq : Mat) : Moments :=
+  if k >= n then { sw := sw, ss := ss, sww := sww, sq := sq }
+  else match s t seed { (y, s2) ->
+       match l.score y t { g ->
+       match matVec m g { w ->
+       match outer w w { p ->
+       match add sw w { sw2 -> match add ss g { ss2 ->
+       match madd sww p { sww2 -> match madd sq (hadamard p p) { sq2 ->
+       sumWhite Theta Y s l t m n (k + 1) s2 sw2 ss2 sww2 sq2 } } } } } } } }
+
+-- What the ensemble measures.
+--   meanScore  the mean score, in score units
+--   bias       H^{-1} times the mean score: how far the estimate is pushed, in parameter units
+--   reported   H, the mean reported information
+--   distortion C, the covariance of the whitened score; the identity when calibrated
+--   zMean      the whitened mean score over its standard error, entry by entry
+--   zC         C minus the identity over the standard error of each entry
+Diagnosis = { meanScore : Vec, bias : Vec, reported : Mat, distortion : Mat, zMean : Vec, zC : Mat }
+
+delta (i j : Int) : R := if i == j then 1.0 else 0.0
+
+diagnose (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (n seed : Int) : Diagnosis :=
+  match s t seed { (y0, s1) ->
+  match l.info y0 t { h0 ->
+  match mscale (1.0 / toR n) (sumInfo Theta Y s l t n 1 s1 h0) { h ->
+  match invSqrtSym h { m ->
+  match rows h { d ->
+  match sumWhite Theta Y s l t m n 0 seed (zeros d) (zeros d) (mscale 0.0 h) (mscale 0.0 h) { mo ->
+  match scale (1.0 / toR n) mo.sw { wbar ->
+  match mscale (1.0 / toR n) mo.sww { ww ->
+  match msub ww (outer wbar wbar) { c ->
+  match msub (mscale (1.0 / toR n) mo.sq) (hadamard ww ww) { var ->
+  match scale (1.0 / toR n) mo.ss { sbar ->
+  { meanScore := sbar,
+    bias := solve h sbar,
+    reported := h,
+    distortion := c,
+    zMean := tabulate d (\ k { at wbar k / sqrtR (entry c k k / toR n) }),
+    zC := tabulateMat d d (\ i j { (entry c i j - delta i j) / sqrtR (entry var i j / toR n) }) } } } } } } } } } } } }
+
+-- the two scalars of the paper: the typical factor and its spread across directions
+logEigs (c : Mat) : Vec := match eigvalsSym c { e -> tabulate (length e) (\ k { logR (at e k) }) }
+magnitude (c : Mat) : R := match logEigs c { le -> expR (total le / toR (length le)) }
+anisotropy (c : Mat) : R :=
+  match logEigs c { le -> match total le / toR (length le) { mu ->
+  expR (sqrtR (sumTo (length le) (\ k { (at le k - mu) * (at le k - mu) }) / toR (length le))) } }
+
+-- The likelihood is the density of the sampler: at every parameter, mean score zero and
+-- delivered information equal to reported, entry by entry within zMax standard errors.
+IsDensityOf (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match diagnose Theta Y s l t ensembleSize seed { dg ->
+  maxAbs dg.zMean < zMax and maxAbsMat dg.zC < zMax }
+
+DensityPair (Theta Y : U) : U := {
+  sample : Sampler Theta Y
+  lik    : Likelihood Theta Y
+  |
+  ShiftByZero Theta Y sample lik & ScoreIsGradient Theta Y sample lik & InfoIsSymmetric Theta Y sample lik & IsDensityOf Theta Y sample lik }
+
+-- ---------------------------------------------------------------- the Gaussian construction
+-- A mean model: the predicted observations and their Jacobian with respect to the parameter.
+MeanModel (Theta : U) = {
+  shift : Theta -> Vec -> Theta
+  mean  : Theta -> Vec
+  jac   : Theta -> Mat }
+
+-- A scaled model: a mean model whose parameter also carries u = log sigma, a homogeneous
+-- error, with its gradient in the parameter space.
+ScaledModel (Theta : U) = {
+  model     : MeanModel Theta
+  logSigma  : Theta -> R
+  dLogSigma : Theta -> Vec }
+
+-- Full Gaussian likelihood, u = log sigma a parameter. With r = y - mean, J the Jacobian,
+-- K the number of observations and g the gradient of u:
+--   loglik = -1/2 e^{-2u} |r|^2 - K u - K/2 log 2 pi
+--   score  = e^{-2u} J^T r + (e^{-2u} |r|^2 - K) g
+--   info   = e^{-2u} J^T J + 2 K g g^T
+gaussian (Theta : U) (m : ScaledModel Theta) : Likelihood Theta Vec := {
+  shift := m.model.shift,
+  loglik := \ y t { match y - m.model.mean t { r -> match m.logSigma t { u ->
+    0.0 - 0.5 * expR (0.0 - 2.0 * u) * dot r r - toR (length r) * u - 0.5 * toR (length r) * log2pi } } },
+  score := \ y t { match y - m.model.mean t { r -> match expR (0.0 - 2.0 * m.logSigma t) { e ->
+    e * (transpose (m.model.jac t) * r) + (e * dot r r - toR (length r)) * m.dLogSigma t } } },
+  info := \ y t { match m.model.jac t { j -> match expR (0.0 - 2.0 * m.logSigma t) { e ->
+    e * (transpose j * j) + (2.0 * toR (rows j)) * outer (m.dLogSigma t) (m.dLogSigma t) } } } }
+
+-- Profile likelihood, sigma eliminated by its maximum sigma^2 = RSS / K:
+--   loglik = -K/2 log(2 pi RSS / K) - K/2
+--   score  = (K / RSS) J^T r
+--   info   = (K / RSS) J^T J
+profiled (Theta : U) (m : MeanModel Theta) : Likelihood Theta Vec := {
+  shift := m.shift,
+  loglik := \ y t { match y - m.mean t { r -> match toR (length r) { k ->
+    0.0 - 0.5 * k * logR (2.0 * 3.141592653589793 * dot r r / k) - 0.5 * k } } },
+  score := \ y t { match y - m.mean t { r -> (toR (length r) / dot r r) * (transpose (m.jac t) * r) } },
+  info := \ y t { match y - m.mean t { r -> match m.jac t { j -> (toR (length r) / dot r r) * (transpose j * j) } } } }
+
+-- The sampler of the scaled model: mean plus sigma times standard normals drawn from the seed.
+gaussianSampler (Theta : U) (m : ScaledModel Theta) : Sampler Theta Vec :=
+  \ t seed { match m.model.mean t { mu -> match normalVec (length mu) seed { (z, s2) ->
+    (mu + expR (m.logSigma t) * z, s2) } } }

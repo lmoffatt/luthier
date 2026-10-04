@@ -29,3 +29,7 @@ List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
 
 -- the non-negative machine integer: the size of a generated value, among other things
 Nat : U := { k : Int | 0 <= k }
+
+-- the finite type of n indices: a vector of length n is a function `Fin n -> R` (04 §6), and an
+-- array of the environment is a value of that type, applied by indexing
+Fin (n : Int) : U := { k : Int | 0 <= k and k < n }

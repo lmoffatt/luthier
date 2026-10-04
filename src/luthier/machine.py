@@ -26,7 +26,8 @@ from .syntax import (Term, Var, Lit, Univ, Lam, App, Pi, Sigma, Pair, Arrow, Bin
                      Sum, Inj, NoLaw, PInj)
 from .subst import subst, free_vars
 from .evaluator import (Env, Fuel, EvalError, OutOfFuel, ExternInfo, unapply, from_python, to_python,
-                        strip_subtypes, pi_chain, result_type, _OPAQUE, nf as subst_nf)
+                        strip_subtypes, pi_chain, result_type, _OPAQUE, nf as subst_nf,
+                        is_indexable, index_foreign, fin_bound, shaped, whnf as subst_whnf)
 
 
 class NotClosed(Exception):
@@ -78,11 +79,19 @@ class VInj(Value):
 
 
 class VClosure(Value):
-    __slots__ = ("lam", "env")
+    """A lambda with its environment. A lambda over `Fin n` is a table: each index is computed
+    at most once (call by need, extended to the entries of a finite function)."""
+    __slots__ = ("lam", "env", "memo")
 
     def __init__(self, lam, env):
         self.lam = lam
         self.env = env
+        self.memo = {} if (lam.ann is not None and _is_fin(lam.ann)) else None
+
+
+def _is_fin(t) -> bool:
+    h, args = unapply(t)
+    return isinstance(h, Var) and h.name == "Fin" and len(args) == 1
 
 
 class VExtern(Value):
@@ -211,6 +220,22 @@ class Machine:
                 tail = None
                 while i <= last:
                     if isinstance(f, VClosure):
+                        if f.memo is not None:
+                            k = self.force(thunks[i])
+                            key = k.value if isinstance(k, VLit) else None
+                            if key is not None and key in f.memo:
+                                f = f.memo[key]
+                                i += 1
+                                continue
+                            binds = self.match(f.lam.param, Thunk.of(k))
+                            env2 = dict(f.env)
+                            env2.update(binds)
+                            r = self.eval(f.lam.body, env2)
+                            if key is not None:
+                                f.memo[key] = r
+                            f = r
+                            i += 1
+                            continue
                         binds = self.match(f.lam.param, thunks[i])
                         if binds is None:
                             raise EvalError(f"argument does not match the pattern of a lambda")
@@ -228,6 +253,11 @@ class Machine:
                             f = self.call_extern(f.term, f.info, got)
                         else:
                             f = VExtern(f.term, f.info, got)
+                    elif isinstance(f, VLit) and is_indexable(f.value):
+                        k = self.force(thunks[i])
+                        if not (isinstance(k, VLit) and isinstance(k.value, int)):
+                            raise EvalError("an array is applied to something that is not an index")
+                        f = self.eval(index_foreign(f.value, k.value), {})
                     elif isinstance(f, VType):
                         f = VType(App(self.quote(f), self.quote(self.force(thunks[i]))), {})
                     else:
@@ -401,6 +431,31 @@ class Machine:
     def to_python(self, v: Value, ty: Optional[Term]):
         if isinstance(v, VLit):
             return v.value
+        if ty is not None:
+            sh = shaped(self.env, ty)
+            if sh is not None and isinstance(v, VPair):
+                k, cod = sh
+                dims = []
+                cur = v
+                for _ in range(k):
+                    if not isinstance(cur, VPair):
+                        break
+                    d = self.force(cur.fst)
+                    dims.append(d.value)
+                    cur = self.force(cur.snd)
+                else:
+                    return self.materialize(cur, dims, cod)
+            w = strip_subtypes(self.env, ty)
+            if isinstance(w, Pi) and fin_bound(self.env, w.dom) is not None and isinstance(v, (VClosure, VExtern)):
+                dims, c = [], w
+                while isinstance(c, Pi) and fin_bound(self.env, c.dom) is not None:
+                    d = subst_whnf(self.env, fin_bound(self.env, c.dom), Fuel(self.env.fuel))
+                    if not isinstance(d, Lit):
+                        break
+                    dims.append(d.value)
+                    c = subst_whnf(self.env, c.cod, Fuel(self.env.fuel))
+                else:
+                    return self.materialize(v, dims, c)
         if isinstance(v, VInj) and v.label in ("true", "false") and (v.arg is None or True):
             from .evaluator import _sum_of
             sm = _sum_of(self.env, ty)
@@ -418,6 +473,34 @@ class Machine:
             raise Unsupported("a value the environment cannot receive")
         return py
 
+    def materialize(self, f: Value, dims: list, cod: Optional[Term]):
+        """The array of a function over Fin d1 x ... x Fin dk (04 §6), kept with the value so the
+        same function is not evaluated again when it crosses a second time."""
+        if isinstance(f, VLit) and is_indexable(f.value):
+            return f.value
+        cache = getattr(self.env, "_materialized", None)
+        if cache is None:
+            cache = {}
+            self.env._materialized = cache
+        hit = cache.get(id(f))
+        if hit is not None and hit[0] is f:
+            return hit[1]
+        import numpy as np
+
+        def rec(g, ds):
+            if not ds:
+                return self.to_python(g, cod)
+            return [rec(self.apply1(g, Thunk.of(VLit(i))), ds[1:]) for i in range(ds[0])]
+        out = rec(f, list(dims))
+        try:
+            arr = np.asarray(out, dtype=float)
+        except (TypeError, ValueError):
+            arr = out
+        if len(cache) > 4096:
+            cache.clear()
+        cache[id(f)] = (f, arr)
+        return arr
+
     def _callable(self, f: Value, ty: Term):
         chain = pi_chain(self.env, ty)
 
@@ -433,6 +516,17 @@ class Machine:
         return call
 
     def apply1(self, f: Value, th: Thunk) -> Value:
+        if isinstance(f, VClosure) and f.memo is not None:
+            k = self.force(th)
+            key = k.value if isinstance(k, VLit) else None
+            if key is not None and key in f.memo:
+                return f.memo[key]
+            env2 = dict(f.env)
+            env2.update(self.match(f.lam.param, Thunk.of(k)))
+            r = self.eval(f.lam.body, env2)
+            if key is not None:
+                f.memo[key] = r
+            return r
         if isinstance(f, VClosure):
             binds = self.match(f.lam.param, th)
             if binds is None:
@@ -447,6 +541,9 @@ class Machine:
             if len(got) == f.info.arity:
                 return self.call_extern(f.term, f.info, got)
             return VExtern(f.term, f.info, got)
+        if isinstance(f, VLit) and is_indexable(f.value):
+            k = self.force(th)
+            return self.eval(index_foreign(f.value, k.value), {})
         raise EvalError("applying a value that is not a function")
 
     def from_python(self, x, ty: Optional[Term]) -> Value:

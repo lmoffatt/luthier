@@ -355,7 +355,7 @@ def main(argv=None):
     p.add_argument("--show-cases", action="store_true", help="print every case as it is evaluated")
     p.add_argument("--no-cert", action="store_true")
     p.add_argument("--fuel", type=int, default=None,
-                   help="steps allowed per evaluation of a law case or term (default 50000000)")
+                   help="steps allowed per evaluation of a law case or term (default 2000000000)")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_test)
 
@@ -373,7 +373,7 @@ def main(argv=None):
     p.add_argument("files", nargs="+")
     p.add_argument("term")
     p.add_argument("--fuel", type=int, default=None,
-                   help="steps allowed per evaluation of a law case or term (default 50000000)")
+                   help="steps allowed per evaluation of a law case or term (default 2000000000)")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_eval)
 

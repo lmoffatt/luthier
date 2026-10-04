@@ -1,0 +1,280 @@
+-- Vectors and matrices. A vector of length n is a function from the n indices to the reals,
+-- `Fin n -> R`, and a matrix of m rows and n columns is `Fin m -> Fin n -> R` (04 §6). A vector
+-- of any length carries its length: `{ n : Nat, f : Fin n -> R }`. An array of numpy is a value
+-- of these types as it is: it crosses into Luthier without conversion, applying it is indexing,
+-- and a function written in Luthier crosses into numpy as the array of its values.
+--
+-- What is native here: the types, their accessors and constructors, and a definition of each
+-- operation written through the accessors (`addDef`, `matVecDef`, the determinant by Laplace,
+-- the spectrum by Jacobi). The operations numpy computes faster are declared without a body,
+-- as leaves; `array_python.lut` binds them to numpy and certifies, by the laws `...Agrees`, that
+-- each one computes its native definition within the rounding of the terms it sums.
+
+import "real"
+
+Vec = { n : Nat, f : Fin n -> R }
+Mat = { m : Nat, n : Nat, f : Fin m -> Fin n -> R }
+
+-- ---------------------------------------------------------------- shapes
+Dim  : U := { n : Int | 1 <= n }
+Dim2 : U := { n : Int | 2 <= n }
+VecOf (k : Int) : U := { v : Vec | v.n == k }
+MatOf (r c : Int) : U := { a : Mat | a.m == r and a.n == c }
+MatRows (r : Int) : U := { a : Mat | a.m == r }
+Square : U := { a : Mat | a.m == a.n }
+NonEmptyVec : U := { v : Vec | 1 <= v.n }
+
+-- ---------------------------------------------------------------- accessors and constructors
+length (v : Vec) : Int := v.n
+at (v : Vec) (k : Fin v.n) : R := v.f k
+rows (a : Mat) : Int := a.m
+cols (a : Mat) : Int := a.n
+entry (a : Mat) (i : Fin a.m) (j : Fin a.n) : R := a.f i j
+row (a : Mat) (i : Fin a.m) : Vec := (a.n, a.f i)
+last (v : NonEmptyVec) : R := v.f (v.n - 1)
+
+tabulate (n : Nat) (g : Fin n -> R) : Vec := (n, g)
+tabulateMat (m n : Nat) (g : Fin m -> Fin n -> R) : Mat := (m, n, g)
+zeros (n : Nat) : Vec := (n, \ k { 0.0 })
+ones (n : Nat) : Vec := (n, \ k { 1.0 })
+identity (n : Nat) : Mat := (n, n, \ i j { if i == j then 1.0 else 0.0 })
+append (v : Vec) (x : R) : Vec := (v.n + 1, \ k { if k < v.n then v.f k else x })
+head (v : Vec) (k : { m : Nat | m <= v.n }) : Vec := (k, \ i { v.f i })     -- the first k entries
+index (v : Vec) (k : Fin v.n) : Int := roundR (v.f k)      -- entry k of a vector of whole numbers
+
+-- ---------------------------------------------------------------- the leaves
+add   : Vec -> Vec -> Vec
+sub   : Vec -> Vec -> Vec
+scale : R -> Vec -> Vec
+dot   : Vec -> Vec -> R
+norm  : Vec -> R
+total : Vec -> R
+product : Vec -> R
+minimum : Vec -> R
+maximum : Vec -> R
+
+outer     : Vec -> Vec -> Mat
+matVec    : Mat -> Vec -> Vec
+matMul    : Mat -> Mat -> Mat
+transpose : Mat -> Mat
+trace     : Mat -> R
+det       : Mat -> R
+frob      : Mat -> R
+cond      : Mat -> R
+solve      : Mat -> Vec -> Vec        -- x with A x = b
+eigvalsSym : Mat -> Vec               -- ascending
+invSqrtSym : Mat -> Mat               -- M with M A M = I
+retainedRank : Mat -> Int             -- eigenvalues above n eps max |eigenvalue|
+pinvSym : Mat -> Mat                  -- the pseudo-inverse on the retained subspace
+pinvSqrtSym : Mat -> Mat              -- M with M A M the projector on the retained subspace
+
+madd     : Mat -> Mat -> Mat
+msub     : Mat -> Mat -> Mat
+mscale   : R -> Mat -> Mat
+hadamard : Mat -> Mat -> Mat          -- entrywise product
+maxAbs    : Vec -> R
+maxAbsMat : Mat -> R
+
+-- n standard normals from a seed, and the next seed
+normalVec : Int -> Int -> Vec * Int
+
+-- ---------------------------------------------------------------- operators
+-- The arithmetic of vectors and matrices written with + - *: each operator is resolved by the
+-- types of its two operands, and falls back to the arithmetic of Int and R when none applies.
+operator + := add
+operator - := sub
+operator * := scale        -- R * Vec
+operator + := madd
+operator - := msub
+operator * := mscale       -- R * Mat
+operator * := matVec       -- Mat * Vec
+operator * := matMul       -- Mat * Mat
+
+-- ---------------------------------------------------------------- comparison
+-- Functions have no structural equality (05 R8): vectors compare entrywise,
+-- |a - b| <= tol (1 + |a| + |b|).
+approxR   : R -> R -> R -> Bool
+approxVec : R -> Vec -> Vec -> Bool
+approxMat : R -> Mat -> Mat -> Bool
+
+-- The tolerance of a law: a sum of n products rounds to about n eps times the size of the
+-- terms, and the terms can cancel, so a law whose sides may be near zero scales its tolerance
+-- by the norms involved, not by the result. The slack covers the few extra operations each
+-- side performs. Declared once, here.
+roundingSlack : R := 8.0
+tolOf (n : Int) : R := roundingSlack * toR n * eps
+scaledTol (n : Int) (magnitude : R) : R := tolOf n * (1.0 + magnitude)
+
+factorial (n : Int) : Int := if n <= 1 then 1 else n * factorial (n - 1)
+powR (x : R) (n : Int) : R := if n <= 0 then 1.0 else x * powR x (n - 1)
+
+-- ---------------------------------------------------------------- the definitions
+-- sum over the n indices of f, a recursion over n
+-- f 0 + (f 1 + (... + (f (n - 1) + 0.0))): the order of the sum is part of its rounding
+sumFrom (n : Int) (lo : Nat) (f : Fin n -> R) : R := if lo >= n then 0.0 else f lo + sumFrom n (lo + 1) f
+sumTo (n : Int) (f : Fin n -> R) : R := sumFrom n 0 f
+sumToInt (n : Int) (f : Fin n -> Int) : Int := if n <= 0 then 0 else sumToInt (n - 1) (\ k { f k }) + f (n - 1)
+-- the largest of f over the n indices, starting from `best`
+maxOver (n : Int) (f : Fin n -> R) (best : R) : R :=
+  if n <= 0 then best else maxOver (n - 1) (\ k { f k }) (if f (n - 1) > best then f (n - 1) else best)
+
+dotDef (x : Vec) (y : VecOf x.n) : R := sumTo x.n (\ k { x.f k * y.f k })
+normDef (x : Vec) : R := sqrtR (dotDef x x)
+totalDef (x : Vec) : R := sumTo x.n (\ k { x.f k })
+addDef (x : Vec) (y : VecOf x.n) : Vec := (x.n, \ k { x.f k + y.f k })
+subDef (x : Vec) (y : VecOf x.n) : Vec := (x.n, \ k { x.f k - y.f k })
+scaleDef (c : R) (x : Vec) : Vec := (x.n, \ k { c * x.f k })
+outerDef (x y : Vec) : Mat := (x.n, y.n, \ i j { x.f i * y.f j })
+matVecDef (a : Mat) (x : VecOf a.n) : Vec := (a.m, \ i { sumTo a.n (\ j { a.f i j * x.f j }) })
+matMulDef (a : Mat) (b : MatRows a.n) : Mat := (a.m, b.n, \ i j { sumTo a.n (\ k { a.f i k * b.f k j }) })
+transposeDef (a : Mat) : Mat := (a.n, a.m, \ i j { a.f j i })
+traceDef (a : Square) : R := sumTo a.m (\ i { a.f i i })
+maddDef (a : Mat) (b : MatOf a.m a.n) : Mat := (a.m, a.n, \ i j { a.f i j + b.f i j })
+msubDef (a : Mat) (b : MatOf a.m a.n) : Mat := (a.m, a.n, \ i j { a.f i j - b.f i j })
+mscaleDef (c : R) (a : Mat) : Mat := (a.m, a.n, \ i j { c * a.f i j })
+hadamardDef (a : Mat) (b : MatOf a.m a.n) : Mat := (a.m, a.n, \ i j { a.f i j * b.f i j })
+maxAbsDef (x : Vec) : R := maxOver x.n (\ k { abs (x.f k) }) 0.0
+frobDef (a : Mat) : R := sqrtR (sumTo a.m (\ i { sumTo a.n (\ j { a.f i j * a.f i j }) }))
+
+-- the determinant by Laplace expansion along the first row; minor j drops row 0 and column j
+sign (j : Int) : R := if j mod 2 == 0 then 1.0 else 0.0 - 1.0
+minor (a : Square) (j : Fin a.n) : Mat :=
+  (a.m - 1, a.n - 1, \ r c { a.f (r + 1) (if c < j then c else c + 1) })
+detDef (a : Square) : R :=
+  if a.m <= 1 then (if a.m == 1 then a.f 0 0 else 1.0)
+  else sumTo a.n (\ j { sign j * a.f 0 j * detDef (minor a j) })
+
+-- ---------------------------------------------------------------- the spectrum, natively
+-- Jacobi's method: a plane rotation J(p, q) chosen to zero the entry (p, q) of a symmetric A,
+-- A <- J^T A J and V <- V J, in cyclic sweeps over all pairs until what is left off the diagonal
+-- is below jacobiTol times the size of A. The diagonal is then the spectrum and V its vectors.
+-- The rotation of Golub and Van Loan: with r = (A_qq - A_pp) / (2 A_pq), t = sign r /
+-- (|r| + sqrt(r^2 + 1)) is the tangent of the smaller angle, c = 1 / sqrt(t^2 + 1), s = t c.
+-- Written over the native definitions, not the leaves, so it does not depend on what it certifies.
+jacobiTol : R := eps
+maxSweeps : Int := 30
+
+rotation (n : Nat) (p q : Fin n) (c s : R) : Mat :=
+  (n, n, \ i j {
+    if i == p and j == p then c else if i == q and j == q then c
+    else if i == p and j == q then s else if i == q and j == p then 0.0 - s
+    else if i == j then 1.0 else 0.0 })
+
+-- the size of what is off the diagonal, summed directly: frob^2 minus the diagonal would
+-- cancel, and lose everything below sqrt(eps) of the matrix
+offDiagonal (a : Mat) : R :=
+  sqrtR (sumTo a.m (\ i { sumTo a.n (\ j { if i == j then 0.0 else a.f i j * a.f i j }) }))
+
+-- one rotation on the pair (p, q); a pair already zero is left alone
+rotate (n : Nat) (p q : Fin n) (av : MatOf n n * MatOf n n) : MatOf n n * MatOf n n :=
+  match av { (a, v) ->
+  if a.f p q == 0.0 then (a, v)
+  else match (a.f q q - a.f p p) / (2.0 * a.f p q) { r ->
+       match (if r >= 0.0 then 1.0 else 0.0 - 1.0) / (abs r + sqrtR (r * r + 1.0)) { t ->
+       match 1.0 / sqrtR (t * t + 1.0) { c ->
+       match rotation n p q c (t * c) { j ->
+       (matMulDef (transposeDef j) (matMulDef a j), matMulDef v j) } } } } }
+
+-- a sweep: every pair p < q in order
+sweepFrom (n : Nat) (p q : Nat) (av : MatOf n n * MatOf n n) : MatOf n n * MatOf n n :=
+  if p + 1 >= n then av
+  else if q >= n then sweepFrom n (p + 1) (p + 2) av
+  else sweepFrom n p (q + 1) (rotate n p q av)
+
+jacobi (n : Nat) (a0 : MatOf n n) (k : Int) (av : MatOf n n * MatOf n n) : MatOf n n * MatOf n n :=
+  match av { (a, v) ->
+  if k >= maxSweeps or offDiagonal a <= jacobiTol * frobDef a0 then av
+  else jacobi n a0 (k + 1) (sweepFrom n 0 1 av) }
+
+-- the spectrum and the vectors, unordered: column k of V belongs to entry k of the diagonal
+eigenDef (a : Square) : Vec * Mat :=
+  match jacobi a.m a 0 (a, identity a.m) { (d, v) -> ((d.m, \ i { d.f i i }), v) }
+
+-- ascending order, by rank: entry i goes to the number of entries before it in the order
+rankIn (x : Vec) (i : Fin x.n) : Int :=
+  sumToInt x.n (\ j { if x.f j < x.f i or (x.f j == x.f i and j < i) then 1 else 0 })
+sortedDef (x : Vec) : Vec :=
+  (x.n, \ k { sumTo x.n (\ i { if rankIn x i == k then x.f i else 0.0 }) })
+
+eigvalsDef (a : Square) : Vec := match eigenDef a { (e, v) -> sortedDef e }
+
+-- a function of a symmetric matrix through its spectrum: V diag(f lambda) V^T
+spectralMap (f : R -> R) (a : Square) : Mat :=
+  match eigenDef a { (e, v) ->
+    matMulDef (matMulDef v (e.n, e.n, \ i j { if i == j then f (e.f i) else 0.0 })) (transposeDef v) }
+
+-- the retained subspace: eigenvalues above n eps times the largest in size
+retainedFloor (a : Square) : R :=
+  match eigenDef a { (e, v) -> toR e.n * eps * maxOver e.n (\ k { abs (e.f k) }) 0.0 }
+retainedRankDef (a : Square) : Int :=
+  match eigenDef a { (e, v) -> match retainedFloor a { fl -> sumToInt e.n (\ k { if e.f k > fl then 1 else 0 }) } }
+
+invSqrtDef (a : Square) : Mat := spectralMap (\ x { 1.0 / sqrtR x }) a
+pinvDef (a : Square) : Mat := match retainedFloor a { fl -> spectralMap (\ x { if x > fl then 1.0 / x else 0.0 }) a }
+pinvSqrtDef (a : Square) : Mat := match retainedFloor a { fl -> spectralMap (\ x { if x > fl then 1.0 / sqrtR x else 0.0 }) a }
+
+-- symmetric positive definite, and positive semidefinite of rank below n: their predicates use
+-- the leaves, and their values come from the generators of array_python.lut
+SpdOf (n : Int) : U := { a : Mat | a.m == n and a.n == n and approxMat 0.0 a (transpose a) and minimum (eigvalsSym a) > 0.0 }
+DeficientOf (n : Int) : U := { a : Mat | a.m == n and a.n == n and retainedRank a < n }
+
+-- ---------------------------------------------------------------- each leaf agrees with its definition
+DotAgrees (d : Vec -> Vec -> R) (n : Dim) (x y : VecOf n) : Bool :=
+  approxR (scaledTol n (norm x * norm y)) (d x y) (dotDef x y)
+NormAgrees (nm : Vec -> R) (n : Dim) (x : VecOf n) : Bool := approxR (tolOf n) (nm x) (normDef x)
+TotalAgrees (t : Vec -> R) (n : Dim) (x : VecOf n) : Bool := approxR (scaledTol n (norm x)) (t x) (totalDef x)
+AddAgrees (ad : Vec -> Vec -> Vec) (n : Dim) (x y : VecOf n) : Bool := approxVec 0.0 (ad x y) (addDef x y)
+SubAgrees (sb : Vec -> Vec -> Vec) (n : Dim) (x y : VecOf n) : Bool := approxVec 0.0 (sb x y) (subDef x y)
+ScaleAgrees (sc : R -> Vec -> Vec) (n : Dim) (c : R) (x : VecOf n) : Bool := approxVec 0.0 (sc c x) (scaleDef c x)
+OuterAgrees (o : Vec -> Vec -> Mat) (m n : Dim) (x : VecOf m) (y : VecOf n) : Bool := approxMat 0.0 (o x y) (outerDef x y)
+MatVecAgrees (mv : Mat -> Vec -> Vec) (m n : Dim) (a : MatOf m n) (x : VecOf n) : Bool :=
+  approxVec (scaledTol n (frob a * norm x)) (mv a x) (matVecDef a x)
+MatMulAgrees (mm : Mat -> Mat -> Mat) (m k n : Dim) (a : MatOf m k) (b : MatOf k n) : Bool :=
+  approxMat (scaledTol k (frob a * frob b)) (mm a b) (matMulDef a b)
+TransposeAgrees (tr : Mat -> Mat) (m n : Dim) (a : MatOf m n) : Bool := approxMat 0.0 (tr a) (transposeDef a)
+TraceAgrees (t : Mat -> R) (n : Dim) (a : MatOf n n) : Bool := approxR (scaledTol n (frob a)) (t a) (traceDef a)
+FrobAgrees (f : Mat -> R) (m n : Dim) (a : MatOf m n) : Bool := approxR (tolOf (m * n)) (f a) (frobDef a)
+MaddAgrees (f : Mat -> Mat -> Mat) (m n : Dim) (a b : MatOf m n) : Bool := approxMat 0.0 (f a b) (maddDef a b)
+MsubAgrees (f : Mat -> Mat -> Mat) (m n : Dim) (a b : MatOf m n) : Bool := approxMat 0.0 (f a b) (msubDef a b)
+MscaleAgrees (f : R -> Mat -> Mat) (m n : Dim) (c : R) (a : MatOf m n) : Bool := approxMat 0.0 (f c a) (mscaleDef c a)
+HadamardAgrees (f : Mat -> Mat -> Mat) (m n : Dim) (a b : MatOf m n) : Bool := approxMat 0.0 (f a b) (hadamardDef a b)
+MaxAbsAgrees (f : Vec -> R) (n : Dim) (x : VecOf n) : Bool := approxR 0.0 (f x) (maxAbsDef x)
+-- Laplace has n! terms, so the definition is only evaluated up to laplaceLimit; its rounding is
+-- bounded by n! eps times the product of the row norms, dominated by the Frobenius norm to the n
+laplaceLimit : Int := 4
+DetAgrees (dt : Mat -> R) (n : Dim) (a : MatOf n n) : Bool :=
+  n > laplaceLimit or approxR (scaledTol (factorial n) (powR (frob a) n)) (dt a) (detDef a)
+-- the spectral leaves agree with Jacobi's spectrum
+spectralTol (s : Mat) : R := cond s * scaledTol (s.m * s.m) (frob s)
+EigvalsAgree (ev : Mat -> Vec) (n : Dim) (s : SpdOf n) : Bool :=
+  approxVec (scaledTol (n * n) (frob s)) (ev s) (eigvalsDef s)
+InvSqrtAgrees (m : Mat -> Mat) (n : Dim) (s : SpdOf n) : Bool := approxMat (spectralTol s) (m s) (invSqrtDef s)
+singularTol (s : Square) : R := scaledTol (s.m * s.m) (frob s) * (1.0 + frob s * frob (pinvDef s))
+RankAgrees (r : Mat -> Int) (n : Dim2) (s : DeficientOf n) : Bool := r s == retainedRankDef s
+PinvAgrees (m : Mat -> Mat) (n : Dim2) (s : DeficientOf n) : Bool := approxMat (singularTol s) (m s) (pinvDef s)
+PinvSqrtAgrees (m : Mat -> Mat) (n : Dim2) (s : DeficientOf n) : Bool := approxMat (singularTol s) (m s) (pinvSqrtDef s)
+
+-- ---------------------------------------------------------------- laws the definitions do not need
+DotCommutes (d : Vec -> Vec -> R) (n : Dim) (x y : VecOf n) : Bool := approxR (tolOf n) (d x y) (d y x)
+DotLinear (d : Vec -> Vec -> R) (n : Dim) (x y z : VecOf n) : Bool :=
+  approxR (scaledTol n (norm z * (norm x + norm y))) (d (add x y) z) (d x z + d y z)
+-- <A x, y> = <x, A^T y>: transpose is the adjoint of matVec
+TransposeIsAdjoint (mv : Mat -> Vec -> Vec) (m n : Dim) (a : MatOf m n) (x : VecOf n) (y : VecOf m) : Bool :=
+  approxR (scaledTol (m * n) (frob a * norm x * norm y)) (dot (mv a x) y) (dot x (mv (transpose a) y))
+TransposeInvolutive (tr : Mat -> Mat) (m n : Dim) (a : MatOf m n) : Bool := approxMat 0.0 (tr (tr a)) a
+-- (y x^T) z = (x . z) y
+OuterActs (o : Vec -> Vec -> Mat) (m n : Dim) (y : VecOf m) (x z : VecOf n) : Bool :=
+  approxVec (scaledTol n (norm y * norm x * norm z)) (matVec (o y x) z) (scale (dot x z) y)
+-- (A B) x = A (B x)
+MatMulAssociates (mm : Mat -> Mat -> Mat) (m k n : Dim) (a : MatOf m k) (b : MatOf k n) (x : VecOf n) : Bool :=
+  approxVec (scaledTol (k * n) (frob a * frob b * norm x)) (matVec (mm a b) x) (matVec a (matVec b x))
+SolveInverts (sv : Mat -> Vec -> Vec) (n : Dim) (s : SpdOf n) (x : VecOf n) : Bool :=
+  approxVec (cond s * tolOf (n * n)) (matVec s (sv s x)) x
+DetOfTranspose (dt : Mat -> R) (n : Dim) (s : SpdOf n) : Bool := approxR (tolOf (n * n)) (dt s) (dt (transpose s))
+DetPositive (dt : Mat -> R) (n : Dim) (s : SpdOf n) : Bool := dt s > 0.0
+EigenvaluesSumToTrace (ev : Mat -> Vec) (n : Dim) (s : SpdOf n) : Bool :=
+  approxR (scaledTol n (frob s)) (total (ev s)) (trace s)
+EigenvaluesMultiplyToDet (ev : Mat -> Vec) (n : Dim) (s : SpdOf n) : Bool :=
+  approxR (cond s * tolOf (n * n)) (product (ev s)) (det s)
+InvSqrtInverts (m : Mat -> Mat) (n : Dim) (s : SpdOf n) : Bool :=
+  approxMat (cond s * tolOf (n * n)) (matMul (m s) (matMul s (m s))) (identity n)

@@ -1,0 +1,177 @@
+-- Algebraic structures as types with laws, and their instances.
+--
+-- A structure is a record of operations and the laws they satisfy; an instance is a record
+-- of values, mostly externs, checked against it. Every structure carries its own equality
+-- `eq`, because what "equal" means depends on the carrier: exact on Int, within rounding on
+-- R, entrywise within rounding on arrays. The laws are written against `eq`, once, and hold
+-- for every carrier. The operation comes first and the quantified variables last, so a
+-- partial application is the predicate a test fills.
+--
+-- Floating point is a setoid only up to a tolerance that depends on the magnitude of the
+-- values; transitivity fails at that scale and is not stated. The instances below are valid
+-- for the magnitudes the generators produce (size 16), and say so in their tolerance.
+--
+-- The vector space instances are indexed by the dimension, VectorSpace (VecOf n). They are
+-- written over the leaves of array.lut and certified in algebra_python.lut, where the leaves
+-- and the generators are bound.
+
+import "real"
+import "array"
+
+-- ---------------------------------------------------------------- equality
+Reflexive  (A : U) (eq : A -> A -> Bool) (x : A) : Bool := eq x x
+Symmetric  (A : U) (eq : A -> A -> Bool) (x y : A) : Bool := eq x y -> eq y x
+
+Setoid (A : U) : U := { eq : A -> A -> Bool | Reflexive A eq & Symmetric A eq }
+
+-- ---------------------------------------------------------------- laws of one operation
+Associative   (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (x y z : A) : Bool := eq (f (f x y) z) (f x (f y z))
+Commutative   (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (x y : A) : Bool := eq (f x y) (f y x)
+LeftIdentity  (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (x : A) : Bool := eq (f e x) x
+RightIdentity (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (x : A) : Bool := eq (f x e) x
+LeftInverse   (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := eq (f (inv x) x) e
+RightInverse  (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := eq (f x (inv x)) e
+LeftDistrib   (A : U) (eq : A -> A -> Bool) (f g : A -> A -> A) (x y z : A) : Bool := eq (g x (f y z)) (f (g x y) (g x z))
+RightDistrib  (A : U) (eq : A -> A -> Bool) (f g : A -> A -> A) (x y z : A) : Bool := eq (g (f y z) x) (f (g y x) (g z x))
+
+-- ---------------------------------------------------------------- isomorphism
+-- Two maps that undo each other, each side judged by its own equality.
+Iso (A B : U) : U := {
+  eqA  : A -> A -> Bool
+  eqB  : B -> B -> Bool
+  to   : A -> B
+  from : B -> A
+  |
+  \ (a : A) { eqA (from (to a)) a } & \ (b : B) { eqB (to (from b)) b } }
+
+-- ---------------------------------------------------------------- semiring, ring, field
+Semiring (A : U) : U := {
+  eq       : A -> A -> Bool
+  add mul  : A -> A -> A
+  zero one : A
+  |
+  Reflexive A eq & Symmetric A eq
+  & Associative A eq add & Commutative A eq add
+  & LeftIdentity A eq add zero & RightIdentity A eq add zero
+  & Associative A eq mul & LeftIdentity A eq mul one & RightIdentity A eq mul one
+  & LeftDistrib A eq add mul & RightDistrib A eq add mul }
+
+Ring (A : U) : U := {
+  eq       : A -> A -> Bool
+  add mul  : A -> A -> A
+  zero one : A
+  neg      : A -> A
+  |
+  Reflexive A eq & Symmetric A eq
+  & Associative A eq add & Commutative A eq add
+  & LeftIdentity A eq add zero & RightIdentity A eq add zero
+  & LeftInverse A eq add zero neg & RightInverse A eq add zero neg
+  & Associative A eq mul & LeftIdentity A eq mul one & RightIdentity A eq mul one
+  & LeftDistrib A eq add mul & RightDistrib A eq add mul }
+
+-- every element but zero has an inverse
+Invertible (A : U) (eq : A -> A -> Bool) (mul : A -> A -> A) (zero one : A) (inv : A -> A) (x : A) : Bool :=
+  eq x zero or eq (mul x (inv x)) one
+
+Field (A : U) : U := {
+  eq       : A -> A -> Bool
+  add mul  : A -> A -> A
+  zero one : A
+  neg inv  : A -> A
+  |
+  Reflexive A eq & Symmetric A eq
+  & Associative A eq add & Commutative A eq add
+  & LeftIdentity A eq add zero & LeftInverse A eq add zero neg
+  & Associative A eq mul & Commutative A eq mul & LeftIdentity A eq mul one
+  & LeftDistrib A eq add mul
+  & Invertible A eq mul zero one inv }
+
+-- ---------------------------------------------------------------- vector space over R
+ScaleAssociates (V : U) (eq : V -> V -> Bool) (sc : R -> V -> V) (a b : R) (x : V) : Bool := eq (sc (a * b) x) (sc a (sc b x))
+ScaleUnit       (V : U) (eq : V -> V -> Bool) (sc : R -> V -> V) (x : V) : Bool := eq (sc 1.0 x) x
+ScaleDistribV   (V : U) (eq : V -> V -> Bool) (ad : V -> V -> V) (sc : R -> V -> V) (a : R) (x y : V) : Bool :=
+  eq (sc a (ad x y)) (ad (sc a x) (sc a y))
+ScaleDistribR   (V : U) (eq : V -> V -> Bool) (ad : V -> V -> V) (sc : R -> V -> V) (a b : R) (x : V) : Bool :=
+  eq (sc (a + b) x) (ad (sc a x) (sc b x))
+
+VectorSpace (V : U) : U := {
+  eq    : V -> V -> Bool
+  add   : V -> V -> V
+  zero  : V
+  neg   : V -> V
+  scale : R -> V -> V
+  |
+  Reflexive V eq & Symmetric V eq
+  & Associative V eq add & Commutative V eq add
+  & LeftIdentity V eq add zero & LeftInverse V eq add zero neg
+  & ScaleAssociates V eq scale & ScaleUnit V eq scale
+  & ScaleDistribV V eq add scale & ScaleDistribR V eq add scale }
+
+-- ---------------------------------------------------------------- inner product space
+SymmetricForm (V : U) (eq : R -> R -> Bool) (ip : V -> V -> R) (x y : V) : Bool := eq (ip x y) (ip y x)
+BilinearAdd   (V : U) (eq : R -> R -> Bool) (ad : V -> V -> V) (ip : V -> V -> R) (x y z : V) : Bool :=
+  eq (ip (ad x y) z) (ip x z + ip y z)
+BilinearScale (V : U) (eq : R -> R -> Bool) (sc : R -> V -> V) (ip : V -> V -> R) (a : R) (x y : V) : Bool :=
+  eq (ip (sc a x) y) (a * ip x y)
+-- positive: the form of a vector with itself is positive unless the vector is zero
+PositiveForm  (V : U) (eqV : V -> V -> Bool) (zero : V) (ip : V -> V -> R) (x : V) : Bool := ip x x > 0.0 or eqV x zero
+
+InnerProductSpace (V : U) : U := {
+  space : VectorSpace V
+  eqR   : R -> R -> Bool
+  inner : V -> V -> R
+  |
+  SymmetricForm V eqR inner & BilinearAdd V eqR space.add inner & BilinearScale V eqR space.scale inner
+  & PositiveForm V space.eq space.zero inner }
+
+-- ---------------------------------------------------------------- linear maps on an inner product space
+-- Matrices as the maps: `apply` acts, `compose` is the product, `adjoint` the transpose, and the
+-- adjoint is characterized by the inner product.
+ActsLinearlyAdd   (V M : U) (eq : V -> V -> Bool) (ad : V -> V -> V) (ap : M -> V -> V) (a : M) (x y : V) : Bool :=
+  eq (ap a (ad x y)) (ad (ap a x) (ap a y))
+ActsLinearlyScale (V M : U) (eq : V -> V -> Bool) (sc : R -> V -> V) (ap : M -> V -> V) (a : M) (c : R) (x : V) : Bool :=
+  eq (ap a (sc c x)) (sc c (ap a x))
+ComposeActs       (V M : U) (eq : V -> V -> Bool) (ap : M -> V -> V) (cp : M -> M -> M) (a b : M) (x : V) : Bool :=
+  eq (ap (cp a b) x) (ap a (ap b x))
+IdentityActs      (V M : U) (eq : V -> V -> Bool) (ap : M -> V -> V) (id : M) (x : V) : Bool := eq (ap id x) x
+AdjointOfInner    (V M : U) (eqR : R -> R -> Bool) (ip : V -> V -> R) (ap : M -> V -> V) (adj : M -> M) (a : M) (x y : V) : Bool :=
+  eqR (ip (ap a x) y) (ip x (ap (adj a) y))
+
+LinearMaps (V M : U) : U := {
+  on      : InnerProductSpace V
+  apply   : M -> V -> V
+  compose : M -> M -> M
+  id      : M
+  adjoint : M -> M
+  |
+  ActsLinearlyAdd V M on.space.eq on.space.add apply & ActsLinearlyScale V M on.space.eq on.space.scale apply
+  & ComposeActs V M on.space.eq apply compose & IdentityActs V M on.space.eq apply id
+  & AdjointOfInner V M on.eqR on.inner apply adjoint }
+
+-- ---------------------------------------------------------------- instances
+-- Int, exact
+intRing : Ring Int := {
+  eq := \ (a b : Int) { a == b }, add := \ (a b : Int) { a + b }, mul := \ (a b : Int) { a * b },
+  zero := 0, one := 1, neg := \ (a : Int) { 0 - a } }
+
+-- R, within rounding. Valid for magnitudes up to the generator's size: a product of two such
+-- values rounds to size^2 eps, hence the factor.
+magnitude : R := 16.0
+eqR : R -> R -> Bool := approxR (roundingSlack * magnitude * magnitude * eps)
+invR : R -> R := \ (x : R) { if x == 0.0 then 0.0 else 1.0 / x }
+realField : Field R := {
+  eq := eqR, add := \ (a b : R) { a + b }, mul := \ (a b : R) { a * b },
+  zero := 0.0, one := 1.0, neg := \ (a : R) { 0.0 - a }, inv := invR }
+
+-- Vectors of dimension n, over R. The leaves act on bare arrays; each operation here is the
+-- leaf seen at the shaped type, so its result's shape is an obligation `test` checks.
+eqVec : Vec -> Vec -> Bool := approxVec (roundingSlack * magnitude * magnitude * eps)
+vecSpace (n : Dim) : VectorSpace (VecOf n) := {
+  eq := \ a b { eqVec a b }, add := \ a b { add a b }, zero := zeros n,
+  neg := \ a { scale (0.0 - 1.0) a }, scale := \ c a { scale c a } }
+
+euclidean (n : Dim) : InnerProductSpace (VecOf n) := { space := vecSpace n, eqR := eqR, inner := \ a b { dot a b } }
+
+matrices (n : Dim) : LinearMaps (VecOf n) (MatOf n n) := {
+  on := euclidean n, apply := \ a x { matVec a x }, compose := \ a b { matMul a b },
+  id := identity n, adjoint := \ a { transpose a } }

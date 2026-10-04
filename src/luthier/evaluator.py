@@ -44,7 +44,7 @@ class Env:
     cons: dict = field(default_factory=dict)        # constructor name -> (data name, full type)
     externs: dict = field(default_factory=dict)     # target -> ExternInfo
     fuel: int = 200_000                 # steps per reduction in the checker (types, conversion)
-    run_fuel: int = 50_000_000          # steps per evaluation of a closed term (law cases, eval)
+    run_fuel: int = 2_000_000_000       # steps per evaluation of a closed term (law cases, eval, run)
 
     def is_global(self, name: str) -> bool:
         return name in self.defs or name in self.datas or name in BUILTIN_TYPES
@@ -199,6 +199,12 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
                 r = try_extern(env, head, args, fuel)
                 if r is not None:
                     t = r
+                    continue
+            if isinstance(head, Lit) and is_indexable(head.value):
+                i = whnf(env, args[0], fuel, unfold)
+                if isinstance(i, Lit) and isinstance(i.value, int):
+                    fuel.tick()
+                    t = apply(index_foreign(head.value, i.value), args[1:])
                     continue
             return apply(head, args)
         if isinstance(t, Var):
@@ -431,6 +437,33 @@ def to_python(env: Env, v: Term, ty: Optional[Term] = None):
     becomes a dataclass, a list keeps its element type, a function receives its arguments by
     their declared types. Without a type: literals, flat tuples, lists, callables."""
     if ty is not None and not is_opaque_type(env, ty):
+        sh = shaped(env, ty)
+        if sh is not None:
+            k, cod = sh
+            dims = []
+            t = whnf(env, v, Fuel(env.fuel))
+            for _ in range(k):
+                if not isinstance(t, Pair):
+                    return _OPAQUE
+                d = whnf(env, t.fst, Fuel(env.fuel))
+                if not isinstance(d, Lit):
+                    return _OPAQUE
+                dims.append(d.value)
+                t = t.snd
+            return materialize(env, whnf(env, t, Fuel(env.fuel)), dims, cod)
+        wf = strip_subtypes(env, ty)
+        if isinstance(wf, Pi):
+            b0 = fin_bound(env, wf.dom)
+            if b0 is not None:
+                dims, c = [], wf
+                while isinstance(c, Pi) and fin_bound(env, c.dom) is not None:
+                    d = whnf(env, fin_bound(env, c.dom), Fuel(env.fuel))
+                    if not isinstance(d, Lit):
+                        break
+                    dims.append(d.value)
+                    c = whnf(env, c.cod, Fuel(env.fuel))
+                else:
+                    return materialize(env, v, dims, c)
         rc = record_components(env, ty)
         if rc is not None:
             hname, names, base = rc
@@ -518,6 +551,85 @@ def to_python(env: Env, v: Term, ty: Optional[Term] = None):
             return to_python(env, nf(env, t, Fuel(env.fuel)))
         return call
     return _OPAQUE
+
+
+# ------------------------------------------------------ arrays of the environment (04 §6)
+
+def is_indexable(x) -> bool:
+    """An object of the environment that is a value of a function type over `Fin n`."""
+    return hasattr(x, "shape") and hasattr(x, "__getitem__") and getattr(x, "ndim", 0) >= 1 \
+        or isinstance(x, list)
+
+
+def index_foreign(x, i: int) -> Term:
+    """`v i` for an array or a list of the environment: the interpreter checks the range itself,
+    because Python would accept a negative index silently."""
+    n = len(x)
+    if not (0 <= i < n):
+        raise EvalError(f"index {i} is outside Fin {n}")
+    e = x[i]
+    if hasattr(e, "ndim") and getattr(e, "ndim", 0) >= 1:
+        return Lit(e)
+    if hasattr(e, "item"):
+        e = e.item()
+    if isinstance(e, bool):
+        return bool_con(e)
+    if isinstance(e, (int, float, str)):
+        return Lit(e)
+    return Lit(e)
+
+
+def fin_bound(env: Env, dom: Term) -> Optional[Term]:
+    """`n` if `dom` is `Fin n`, as written (before unfolding), else None."""
+    h, args = unapply(dom)
+    if isinstance(h, Var) and h.name == "Fin" and len(args) == 1:
+        return args[0]
+    return None
+
+
+def shaped(env: Env, ty: Optional[Term]):
+    """For a type `{ n1 : Int, ..., nk : Int, f : Fin n1 -> ... -> Fin nk -> C }` (a vector, a
+    matrix), (k, C); else None. Its values cross to Python as one k-dimensional array."""
+    if ty is None:
+        return None
+    w = strip_subtypes(env, ty)
+    names = []
+    while isinstance(w, Sigma):
+        fw = strip_subtypes(env, w.fst)
+        if not (isinstance(fw, Var) and fw.name == "Int"):
+            return None
+        names.append(w.name)
+        w = strip_subtypes(env, w.snd)
+    if not names:
+        return None
+    for n in names:
+        if not isinstance(w, Pi):
+            return None
+        b = fin_bound(env, w.dom)
+        if not (isinstance(b, Var) and b.name == n):
+            return None
+        w = whnf(env, w.cod, Fuel(env.fuel))
+    return len(names), w
+
+
+def materialize(env: Env, f: Term, dims: list, cod: Optional[Term]):
+    """The array of the values of a function over Fin d1 x ... x Fin dk."""
+    import numpy as np
+    if isinstance(f, Lit) and is_indexable(f.value):
+        return f.value
+
+    def rec(t, ds):
+        if not ds:
+            v = nf(env, t, Fuel(env.run_fuel))
+            py = to_python(env, v, cod)
+            return py
+        return [rec(App(t, Lit(i)), ds[1:]) for i in range(ds[0])]
+    out = rec(f, list(dims))
+    try:
+        arr = np.asarray(out, dtype=float)
+        return arr
+    except (TypeError, ValueError):
+        return out
 
 
 def _sum_of(env: Env, ty: Optional[Term]):
@@ -626,6 +738,24 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
     sm = _sum_of(env, ty)
     if sm is not None:
         return _sum_from_python(env, x, sm, ty)
+    if is_indexable(x) or hasattr(x, "shape"):
+        sh = shaped(env, ty)
+        if sh is not None:
+            k, _ = sh
+            import numpy as np
+            shape = np.shape(x)
+            if len(shape) < k:
+                raise EvalError(f"an array of shape {shape} cannot be a value of {pp(ty)}")
+            t: Term = Lit(x)
+            for d in reversed(shape[:k]):
+                t = Pair(Lit(int(d)), t)
+            return t
+        wf = strip_subtypes(env, ty) if ty is not None else None
+        if isinstance(wf, Pi) and fin_bound(env, wf.dom) is not None:
+            d = whnf(env, fin_bound(env, wf.dom), Fuel(env.fuel))
+            if isinstance(d, Lit) and len(x) != d.value:
+                raise EvalError(f"an array of length {len(x)} cannot be a value of {pp(ty)}")
+            return Lit(x)
     rc = record_components(env, ty)
     if rc is not None and not isinstance(x, (int, float, str, bool)):
         hname, names, base = rc
@@ -811,9 +941,70 @@ def conv(env: Env, a: Term, b: Term, fuel: Fuel, depth: int = 0) -> bool:
         return a.op == b.op and conv(env, a.lhs, b.lhs, fuel, depth + 1) and conv(env, a.rhs, b.rhs, fuel, depth + 1)
     if isinstance(a, Match) and isinstance(b, Match):
         if len(a.branches) != len(b.branches) or not conv(env, a.scrut, b.scrut, fuel, depth + 1):
-            return False
-        for (p1, b1), (p2, b2) in zip(a.branches, b.branches):
-            if p1 != p2 or not conv(env, b1, b2, fuel, depth + 1):
-                return False
-        return True
+            pass
+        else:
+            ok = True
+            for (p1, b1), (p2, b2) in zip(a.branches, b.branches):
+                ren = _pattern_renaming(p1, p2)
+                if ren is None or not conv(env, b1, subst(b2, {k: Var(v) for k, v in ren.items() if k != v}),
+                                           fuel, depth + 1):
+                    ok = False
+                    break
+            if ok:
+                return True
+    # a definition whose body is stuck on a variable stays folded in whnf; to compare, unfold it
+    for x, y, flip in ((a, b, False), (b, a, True)):
+        ux = _delta(env, x)
+        if ux is not None:
+            return conv(env, ux, y, fuel, depth + 1) if not flip else conv(env, y, ux, fuel, depth + 1)
     return False
+
+
+def _delta(env: Env, t: Term) -> Optional[Term]:
+    """One unfolding of the global definition at the head of `t`, beta-reduced, or None."""
+    h, args = unapply(t)
+    if not isinstance(h, Var) or h.name not in env.defs:
+        return None
+    d = env.defs[h.name]
+    if d.body is None or d.data is not None or isinstance(d.body, Extern):
+        return None
+    body = d.body
+    out = body
+    rest = list(args)
+    while rest and isinstance(out, Lam) and isinstance(out.param, PVar):
+        out = subst(out.body, {out.param.name: rest.pop(0)})
+    if rest and isinstance(out, Lam):
+        return None
+    return apply(out, rest)
+
+
+def _pattern_renaming(p1, p2) -> Optional[dict]:
+    """A renaming of the variables of p2 to those of p1 if the two patterns have the same shape."""
+    if isinstance(p1, PVar) and isinstance(p2, PVar):
+        return {p2.name: p1.name}
+    if isinstance(p1, PWild) and isinstance(p2, PWild):
+        return {}
+    if isinstance(p1, PLit) and isinstance(p2, PLit):
+        return {} if p1.value == p2.value else None
+    if isinstance(p1, PPair) and isinstance(p2, PPair):
+        a = _pattern_renaming(p1.fst, p2.fst)
+        b = _pattern_renaming(p1.snd, p2.snd)
+        if a is None or b is None:
+            return None
+        a.update(b)
+        return a
+    if isinstance(p1, PCon) and isinstance(p2, PCon):
+        if p1.name != p2.name or len(p1.args) != len(p2.args):
+            return None
+        out = {}
+        for x, y in zip(p1.args, p2.args):
+            r = _pattern_renaming(x, y)
+            if r is None:
+                return None
+            out.update(r)
+        return out
+    if isinstance(p1, PInj) and isinstance(p2, PInj):
+        if p1.index != p2.index:
+            return None
+        return _pattern_renaming(p1.arg, p2.arg)
+    return None

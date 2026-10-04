@@ -1,0 +1,102 @@
+-- Optimization: Levenberg-Marquardt as types with laws, written over the array leaves.
+--
+-- An objective is what is minimised: a value, its gradient, and a positive step matrix (the
+-- Fisher information, or Gauss-Newton). The algorithm is split into pieces that each carry a
+-- law: one step is one trial that either accepts or rejects; `finished` says why the run
+-- stops; the driver iterates the step until it does. Correctness does not depend on the path:
+-- a run that ends `converged` is certified by the gradient and the step matrix at its end,
+-- computed afresh from the objective, not from the state.
+
+import "real"
+import "array"
+
+Objective = { value : Vec -> R, grad : Vec -> Vec, stepMatrix : Vec -> Mat }
+
+-- the state of a run; `accepted` is whether the last trial was accepted
+LMState = { x : Vec, phi : R, mu : R, iter : Int, accepted : Bool }
+
+-- The damping schedule: the algorithm's own constants, not criteria about the data.
+muInit : R := 0.001
+muFactor : R := 3.0
+muMin : R := 1e-15
+muMax : R := 1e15
+
+start (o : Objective) (x0 : Vec) : LMState := { x := x0, phi := o.value x0, mu := muInit, iter := 0, accepted := true }
+
+diagOf (m : Mat) : Mat := tabulateMat (rows m) (cols m) (\ i j { if i == j then entry m i i else 0.0 })
+
+-- the damped step: (M + mu diag M) delta = -g
+dampedStep (o : Objective) (x : Vec) (mu : R) : Vec :=
+  match o.stepMatrix x { m -> (0.0 - 1.0) * solve (m + mu * diagOf m) (o.grad x) }
+
+-- one trial
+lmStep (o : Objective) (s : LMState) : LMState :=
+  match s.x + dampedStep o s.x s.mu { xt -> match o.value xt { pt ->
+  if pt < s.phi
+  then { x := xt, phi := pt, mu := (if s.mu / muFactor > muMin then s.mu / muFactor else muMin), iter := s.iter + 1, accepted := true }
+  else { x := s.x, phi := s.phi, mu := s.mu * muFactor, iter := s.iter + 1, accepted := false } } }
+
+-- the Newton decrement: half of g^T M^-1 g, the decrease the step matrix predicts to the minimum
+decrement (o : Objective) (x : Vec) : R := match o.grad x { g -> 0.5 * dot g (solve (o.stepMatrix x) g) }
+
+Reason = < running : Unit | converged : Unit | exhausted : Unit | stalled : Unit >
+
+finished (tol : R) (maxIter : Int) (o : Objective) (s : LMState) : Reason :=
+  if decrement o s.x < tol then converged
+  else if s.iter >= maxIter then exhausted
+  else if s.mu > muMax then stalled
+  else running
+
+Run = { state : LMState, reason : Reason }
+
+-- the reasons as integers, for an implementation outside Luthier that cannot build a Reason
+reasonCode (r : Reason) : Int := match r { running -> 0 ; converged -> 1 ; exhausted -> 2 ; stalled -> 3 }
+codeReason (k : Int) : Reason := if k == 1 then converged else if k == 2 then exhausted else if k == 3 then stalled else running
+
+minimize (tol : R) (maxIter : Int) (o : Objective) (s : LMState) : Run :=
+  match finished tol maxIter o s { running -> minimize tol maxIter o (lmStep o s) ; r -> { state := s, reason := r } }
+
+-- the trace of a run, every state from the start to the end
+runTrace (tol : R) (maxIter : Int) (o : Objective) (s : LMState) : List LMState :=
+  match finished tol maxIter o s { running -> cons LMState s (runTrace tol maxIter o (lmStep o s)) ; r -> cons LMState s (nil LMState) }
+
+-- ---------------------------------------------------------------- the laws
+-- An accepted trial lowers the value and does not raise the damping; a rejected one leaves
+-- the point and the value where they were and raises the damping.
+Step = Objective -> LMState -> LMState
+Direction = Objective -> Vec -> R -> Vec
+Runner = Objective -> Vec -> Run
+
+StepRule (step : Step) (o : Objective) (s : LMState) : Bool :=
+  match step o s { s2 ->
+  if s2.accepted then s2.phi < s.phi and s2.mu <= s.mu
+  else approxVec 0.0 s2.x s.x and s2.phi == s.phi and s2.mu > s.mu }
+
+-- the damped step is a descent direction wherever the gradient is not zero
+DescentDirection (dir : Direction) (o : Objective) (x : Vec) (mu : R) : Bool :=
+  match o.grad x { g -> norm g == 0.0 or dot g (dir o x mu) < 0.0 }
+
+-- a run that says converged ends where the decrement is below the tolerance and the step
+-- matrix is positive definite, both recomputed from the objective
+Certified (tol : R) (run : Runner) (o : Objective) (x0 : Vec) : Bool :=
+  match run o x0 { r ->
+  match r.reason {
+    converged -> decrement o r.state.x < tol and minimum (eigvalsSym (o.stepMatrix r.state.x)) > 0.0
+  ; running -> false
+  ; exhausted -> true
+  ; stalled -> true } }
+
+-- the run converges from this start (a property of an instance, not of the algorithm)
+Converges (run : Runner) (o : Objective) (x0 : Vec) : Bool :=
+  match (run o x0).reason { converged -> true ; running -> false ; exhausted -> false ; stalled -> false }
+
+-- the native runner: minimize from the start state of x0
+lmRunner (tol : R) (maxIter : Int) : Runner := \ o x0 { minimize tol maxIter o (start o x0) }
+
+-- ---------------------------------------------------------------- as a maximizer
+-- belief.lut's Maximizer maximizes a log posterior: minimize its negative.
+negate (f : Vec -> R) (g : Vec -> Vec) (m : Vec -> Mat) : Objective :=
+  { value := \ x { 0.0 - f x }, grad := \ x { (0.0 - 1.0) * g x }, stepMatrix := m }
+
+lmMaximizer (tol : R) (maxIter : Int) (f : Vec -> R) (g : Vec -> Vec) (m : Vec -> Mat) (x0 : Vec) : Vec :=
+  match negate f g m { o -> (minimize tol maxIter o (start o x0)).state.x }

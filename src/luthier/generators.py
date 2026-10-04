@@ -19,7 +19,8 @@ from typing import Optional, Callable
 from .syntax import *
 from .subst import subst
 from .pretty import pp
-from .evaluator import to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError
+from .evaluator import (to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError,
+                        fin_bound, strip_subtypes)
 
 
 class GenError(Exception):
@@ -81,6 +82,13 @@ class Generators:
     def sample(self, ty: Term, rng: random.Random, size: Optional[int] = None, depth: int = 0) -> Term:
         if size is None:
             size = self.size
+        fb = fin_bound(self.env, ty)
+        if fb is not None:
+            d = whnf(self.env, fb, self.fuel())
+            if isinstance(d, Lit) and isinstance(d.value, int):
+                if d.value <= 0:
+                    raise GenError(f"Fin {d.value} has no values")
+                return Lit(rng.randrange(d.value))
         found = self.registered(ty)
         if found is not None:
             reg, targs = found
@@ -121,6 +129,24 @@ class Generators:
                     rejected.append(pp(v))
             raise GenError(f"could not find a value of {pp(w)} in {self.max_tries} tries "
                            f"(rejected, for example: {', '.join(rejected)}); give it a `gen`")
+        if isinstance(w, Pi) and fin_bound(self.env, w.dom) is not None:
+            # a function over a finite domain is its table (04 §6)
+            d = whnf(self.env, fin_bound(self.env, w.dom), self.fuel())
+            if isinstance(d, Lit) and isinstance(d.value, int):
+                n = max(d.value, 0)
+                cod = w.cod
+                vals = [self.sample(cod if w.name == "_" else subst(cod, {w.name: Lit(i)}), rng, size, depth + 1)
+                        for i in range(n)]
+                if all(isinstance(v, Lit) and isinstance(v.value, (int, float)) and not isinstance(v.value, bool)
+                       for v in vals):
+                    import numpy as np
+                    return Lit(np.asarray([v.value for v in vals], dtype=float))
+                if all(isinstance(v, Lit) and hasattr(v.value, "ndim") for v in vals) and vals:
+                    import numpy as np
+                    return Lit(np.stack([v.value for v in vals]))
+                x = "i"
+                branches = tuple((PLit(i), v) for i, v in enumerate(vals))
+                return Lam(PVar(x), Match(Var(x), branches), None)
         if isinstance(w, Pi):
             raise GenError(f"no generator for the function type {pp(w)}; give it a `gen`")
         raise GenError(f"no generator for {pp(w)}")
@@ -261,6 +287,11 @@ class Generators:
         """All values of a finite type, or None. Int is taken in [-size, size]."""
         if size is None:
             size = self.size
+        fb = fin_bound(self.env, ty)
+        if fb is not None:
+            d = whnf(self.env, fb, self.fuel())
+            if isinstance(d, Lit) and isinstance(d.value, int):
+                return [Lit(i) for i in range(max(d.value, 0))]
         w = whnf(self.env, ty, self.fuel())
         h, args = unapply(w)
         name = h.name if isinstance(h, Var) else None

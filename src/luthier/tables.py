@@ -33,6 +33,44 @@ class Table:
                 return k
         raise KeyError(name)
 
+    # the components of the native type of lib/table.lut: this table is a value of it as it is
+    @property
+    def nRows(self) -> int:
+        return len(self.rows)
+
+    @property
+    def names(self) -> list:
+        return [n for n, _ in self.columns]
+
+    @property
+    def kinds(self) -> list:
+        return [ty for _, ty in self.columns]
+
+    def cell(self, name: str, row: int):
+        """None where there is no such column; otherwise (label, value) of the sum Cell."""
+        for k, (n, ty) in enumerate(self.columns):
+            if n == name:
+                return (_LABEL[ty], self.rows[row][k])
+        return None
+
+
+_LABEL = {"int": "int", "float": "real", "str": "text"}
+
+
+def as_table(x) -> "Table":
+    """A table built in Luthier crosses as a record of its components; read it back as a Table."""
+    if isinstance(x, Table):
+        return x
+    names, kinds, n = list(x.names), list(x.kinds), int(x.nRows)
+    rows = []
+    for r in range(n):
+        row = []
+        for name in names:
+            c = x.cell(name, r)
+            row.append(c[1] if isinstance(c, tuple) else c)
+        rows.append(tuple(row))
+    return Table(tuple(zip(names, kinds)), tuple(rows))
+
 
 class ParseError(ValueError):
     pass
@@ -49,6 +87,7 @@ def _cell(value, typ: str) -> str:
 
 
 def render(t: Table) -> str:
+    t = as_table(t)
     buf = io.StringIO()
     w = csv.writer(buf, lineterminator="\n", quoting=csv.QUOTE_MINIMAL)
     w.writerow([f"{n}:{ty}" for n, ty in t.columns])
@@ -116,6 +155,7 @@ def read_file(path: str) -> Optional[Table]:
 
 
 def write_file(path: str, t: Table) -> None:
+    t = as_table(t)
     with open(path, "w", newline="") as f:
         f.write(render(t))
 
