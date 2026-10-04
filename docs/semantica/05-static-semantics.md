@@ -83,8 +83,7 @@ Two kinds of object, distinguished by the form of their definition and not by a 
   constructors of its own: its values are its models, given as values of the labeled base.
 
 A body computes; a law only checks. Whether laws pin down a unique inhabitant is undecidable
-and is never asked. Two bodies for one meaning (`f#1`, `f#2` of `00 §1`) are two names, and their
-agreement is a law to test (`04 §6`).
+and is never asked. Two bodies for one meaning are two names, and their agreement is a law to test (`04 §6`).
 
 ## 2. Reading a program
 
@@ -229,6 +228,13 @@ name; it is not a state the name has once and for all.
 
 - The obligations of a name are the laws its type states, applied to its body, quantified over the
   laws' parameters. `test n` runs the obligations of `n`, and of every member of `n`'s object.
+- An obligation raised inside a branch of `if c then a else b` carries `c` (or `not c`) as a
+  precondition: `f lo` in the `else` of `if lo >= n` owes `lo < n` only where `lo >= n` fails. An
+  obligation raised inside `match e { x -> t }` speaks of `e`, not of every `x`: the variable is a
+  name for `e`. Without these, every recursion over indices owes laws that are false.
+- A sampled case whose parameters cannot be drawn, because a parameter's type depends on earlier
+  ones and is empty for them (`k : Fin n` with `n = 0`), holds vacuously and is skipped; a law none
+  of whose cases could be drawn is reported as an error, not as passed.
 - A law quantified over all models of a theory has no generator of models and stays pending; it is
   certified per model, on each concrete value that inhabits the theory.
 - `run` and `eval` require every name in the cone of the entry to be defined. They do not require

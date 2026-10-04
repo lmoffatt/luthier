@@ -1,0 +1,20 @@
+-- The integers modulo 7 as a ring: a refinement of Int, three operations, and the laws of
+-- `Ring` from the algebra library, checked on every case.
+
+import "algebra"
+
+Z7 : U := { k : Int | 0 <= k and k < 7 }
+
+eqZ7 (a b : Z7) : Bool := a == b
+addMod7 (a b : Z7) : Z7 := (a + b) mod 7
+mulMod7 (a b : Z7) : Z7 := (a * b) mod 7
+negMod7 (a : Z7) : Z7 := (7 - a) mod 7
+
+ringZ7 : Ring Z7 := (eqZ7, addMod7, mulMod7, 0, 1, negMod7)
+
+-- or and and on Bool satisfy every law of a ring but the inverses
+eqB (a b : Bool) : Bool := a == b
+badRing : Ring Bool := (eqB, or, and, false, true, not)
+
+test ringZ7 exhaustive
+test badRing exhaustive

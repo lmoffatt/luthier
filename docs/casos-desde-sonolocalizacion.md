@@ -311,3 +311,33 @@ Es el piloto propuesto para probar la especificación antes de revisar las demá
 tipo por definición, y lo que falta son tres reglas del intérprete, no leyes: aplicar un objeto de
 Python indexando con verificación de rango, materializar una lambda cuando Python espera un
 array, y la correspondencia entre tipo y representación; `04 §6`.)
+
+## 25. Las obligaciones de índice necesitan la rama y el "let" (2026-10-04)
+
+Con `at (v : Vec) (k : Fin v.n)`, `sumTo` escrito como recursión debía `lo < n` en la llamada `f lo`
+de la rama `else` de `if lo >= n`, cuantificado sobre todo `lo`: falso. Y `match index m.i k { i ->
+... at t (3 * i + a) ... }` cuantificaba la obligación sobre todo entero `i`, olvidando que `i` es
+`index m.i k`. Resuelto en el intérprete y escrito en `05 §7`: la condición de la rama es
+precondición de la ley, y una variable ligada por `match e { x -> ... }` es `e`.
+
+## 26. Una tabla perezosa en un algoritmo iterativo (2026-10-04)
+
+Jacobi escrito sobre las definiciones nativas (`matMulDef`, una lambda) se quedó sin combustible
+en matrices de 6 x 6: cada rotación es una lambda que lee la anterior, y cada entrada leída recalcula
+toda la historia. Resuelto en la máquina: una lambda sobre `Fin n` se calcula una vez por índice,
+la llamada por necesidad extendida a las entradas (`04 §6`, regla 4).
+
+## 27. El orden de una suma es parte de su redondeo (2026-10-04)
+
+La primera reescritura de `experiment_zero` dio la sesión A en 12 cifras significativas, no bit a
+bit: el `sumTo` nuevo sumaba `((0 + f0) + f1) + f2` y el viejo `f0 + (f1 + (f2 + 0))`, y el LM
+amplifica la diferencia del último bit. Con el orden viejo coincide exactamente: sigma
+0.04868865334248189 m sin `parlante_A2`. Anotado en `04 §6`.
+
+## 28. Lo que la reescritura no pudo certificar en el archivo puro (2026-10-04)
+
+Las obligaciones de `table.lut` sobre tablas (`sameCells`, `sameTable`) no tienen generador ahí:
+una función con dominio `String` no se genera como tabla. Se certificaron desde `table_python.lut`
+con `--name ... --deep`, que escribe en el certificado de origen. Las obligaciones de funciones
+cuantificadas sobre `U` (las de `probability`, `belief`) siguen sin generador y se certifican por
+modelo, como dice `05 §7`.

@@ -142,7 +142,7 @@ in a position the reduction needs does not reduce.
 ## 5. Surface forms and their translations
 
 Everything below is sugar: each form translates into the kernel, and a form that needed a new
-kernel construct would not be sugar (`02 §2`).
+kernel construct would not be sugar (`02 §4`).
 
 | surface | kernel |
 |---|---|
@@ -189,9 +189,20 @@ of the environment, and the interpreter has three rules for it:
    `(n : Int) * (Fin n -> R)`, is the pair `(arr.shape[0], arr)`. The shape is checked when the
    value crosses: an array declared `VecOf 3` must have shape `(3,)`.
 
+4. *Each entry once.* A lambda over `Fin n` is a table: the interpreter computes each of its
+   entries at most once, as it computes each argument once (call by need). The semantics does not
+   change, since functions are pure; without it, an iterative algorithm written with lambdas
+   (Jacobi's rotations, each a lambda over the previous one) recomputes its whole history at every
+   read.
+
 Two values of a function type, one a lambda and the other an array, are compared by an
 observational equality, point by point over `Fin n` (`05` R8); since the domain is finite the
 comparison is exhaustive.
+
+The order of a sum is part of its rounding. `sumTo n f` is `f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`;
+written the other way it gives a result that differs in the last bits, which an optimizer
+downstream amplifies. The rewrite of experiment zero reproduced its earlier results bit for bit
+only once the order matched.
 
 What does need certifying is that the operations the environment provides compute what their
 native definitions say. A function may be given natively, as an extern, or both. Writing it
@@ -203,12 +214,12 @@ inputs:
 `addDef` is the native definition; `test` runs the law with `ad` bound to the extern. The
 libraries call these laws `Agrees`; the name is local to Luthier.
 
-## 7. What changes against the interpreter of 2026-10-04
+## 7. Status of the interpreter
 
-So the distance to implementation is explicit. Present: Π, Σ, `data`, `match`, recursion with
-fuel, subtypes with obligations, records with `|`, projections, externs, `Int`/`R`/`String`,
-`Unit`, `Empty` (as `data { }`), aliases nowhere. Missing or different: `A + B` and
-`< x : A | y : B >` (the checker rejects `+` on types); records without `|`; the named last
-component in `(x : A) * (y : B)`; aliases with `=`; `extern provisional`; `Bool` and `Maybe` are
-`data` in `core.lut` and would become aliases of sums; non-recursive `data` is accepted and would
-be rejected.
+Implemented on 2026-10-04 (branch `kernel-v0`): every former and term of sections 2 and 3, the
+surface forms of section 5 except those noted below, the reduction of section 4, and the four
+rules of section 6. `tests/spec` (the accept/reject programs) and `tests/test_kernel.py` pass.
+
+Not yet: quote and unquote; local definitions in a block; a union `< ... >` written as the
+argument of an application needs parentheses (`List (< a : A | b : B >)`), because `<` after a
+term is a comparison.
