@@ -1,0 +1,6 @@
+-- R8: an alias is not a name with states; it cannot also be declared or defined.
+-- expect: Stats is an alias and cannot be defined
+import "real"
+
+Stats = { mean : R, var : R }
+Stats := \s { s.var >= 0.0 }

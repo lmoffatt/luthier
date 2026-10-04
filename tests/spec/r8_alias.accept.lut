@@ -1,0 +1,6 @@
+-- R8: `=` abbreviates a term; the alias has no state of its own and claims nothing.
+import "real"
+
+Stats = { mean : R, var : R }
+meanVar (x y : R) : Stats := (x, y)
+first (s : Stats) : R := s.mean

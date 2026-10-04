@@ -20,6 +20,7 @@ Palabras reservadas: `data`, `match`, `extern`, `test`. Nada más. `U`, `Unit`, 
     programa  ::= { definición }
 
     definición ::= nombre ":" término [ ":=" término ]         -- sin ":=" es un hueco
+                 | nombre "=" término                           -- (2026-10-04) alias: se expande antes de verificar, no tiene estados; 04 R8
                  | nombre ":" término ":=" "extern" [ "provisional" ] string
                                                                 -- hueco que el entorno llena por ese nombre
                  | nombre ":" "U" ":=" "data" "{" { constructor } "}"

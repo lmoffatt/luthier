@@ -32,7 +32,7 @@ Todo símbolo que aparece en el documento se define acá.
 - `x : A := t` define `x` como el término `t`, de tipo `A`.
 - Un hueco es una definición con tipo y sin cuerpo, `f : A`. El símbolo `?` aparece solo como azúcar dentro de un término (sección 1) y no es parte del núcleo.
 - `≡` es igualdad definicional: dos términos que se reducen a la misma forma normal. No es una proposición; es un juicio que decide el reductor.
-- `=` es el tipo identidad: la proposición "a y b son iguales". Sus términos son caminos (paths).
+- `=` es el tipo identidad: la proposición "a y b son iguales". Sus términos son caminos (paths). (2026-10-04: en la versión 0, que no tiene capa de demostraciones, `nombre = término` al nivel de definición es un alias, `04` R8; la reconciliación con el tipo identidad queda abierta.)
 - `U` es el universo: el tipo cuyos términos son tipos.
 - `Π (x : A). B` es el tipo de las funciones dependientes: a cada `x : A` le asignan un término de `B`, donde `B` puede mencionar a `x`. Si `B` no menciona a `x` se escribe `A → B`.
 - `Σ (x : A). B` es el tipo de los pares dependientes: un `x : A` junto con un término de `B`, donde `B` puede mencionar a `x`.
@@ -45,7 +45,7 @@ Todo símbolo que aparece en el documento se define acá.
 
 Un programa Luthier es un conjunto finito de definiciones. No hay statements ni secuencia. El orden en que se escriben no importa: la dependencia entre definiciones se lee de los nombres que cada una usa, y eso da el grafo dirigido de definiciones del audio 2026-05-29 15.11.47 [01:48].
 
-(2026-10-04: el grafo no es acíclico y un ciclo no es error. Las componentes fuertemente conexas son las unidades de cierre: un tipo opaco y las operaciones cuyas leyes se necesitan mutuamente forman un ciclo y se definen juntas; eso es un objeto. Lo que no cicla es extensión y se define encima. Para ver los ciclos el verificador lee el programa entero antes de tipar; `04 §2`.)
+(2026-10-04: el grafo no es acíclico y un ciclo no es error. Pero la unidad de cierre no es el ciclo sino el *cluster*: el conjunto de nombres que las leyes conectan entre sí, dependan o no unos de otros en círculo. Un tipo opaco y sus operaciones, atados por leyes que los mencionan, forman un cluster y se definen juntos; eso es un objeto. Lo que ninguna ley toca queda solo declarado. Para ver los clusters el verificador lee el programa entero antes de tipar; `04 §2`.)
 
 Cada definición tiene la forma `nombre : Tipo := término`. El tipo es la proposición que el nombre afirma (audio 2026-05-26 12.32.24 [00:51]; audio 2026-08-31 19.48.17 [01:02]); el término es la evidencia, que en el caso de una función es su implementación. Esto cubre la doble definición que pide el audio 2026-05-29 14.28.55 [03:42]: "desde las propiedades" es el tipo, "operativamente" es el cuerpo.
 

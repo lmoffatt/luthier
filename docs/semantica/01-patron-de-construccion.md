@@ -4,7 +4,7 @@ Borrador 0, 2026-09-29. Recoge lo decidido en las sesiones posteriores al borrad
 
 ## 0. Notación nueva respecto de `00`
 
-- `:=` define. `=` es la proposición de igualdad (reservada para la capa de demostraciones, ausente en la versión 0). `==` es la igualdad decidible, una función a `Bool` que existe para algunos tipos.
+- `:=` define. `=` es la proposición de igualdad (reservada para la capa de demostraciones, ausente en la versión 0). `==` es la igualdad decidible, una función a `Bool` que existe para algunos tipos. (2026-10-04: mientras no haya capa de demostraciones, `nombre = término` al nivel de definición es un alias, `04` R8.)
 - `\ x { t }` es la función que a `x` le asigna `t`. Las llaves delimitan el alcance de `x` y, más adelante, un bloque con definiciones locales.
 - `f a` es aplicación por yuxtaposición, asocia a la izquierda y liga más fuerte que cualquier operador; `f(a)` es lo mismo. `f (a, b)` aplica `f` a un par.
 - `(x : A) -> B` es el tipo de función, con `B` pudiendo mencionar a `x`; `A -> B` cuando no. `(x : A) × B` es el par dependiente.

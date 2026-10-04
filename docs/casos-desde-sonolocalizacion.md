@@ -122,8 +122,8 @@ orden del archivo: usar `distance` antes de definirla da `unbound name distance`
 una pasada previa que junte las firmas, o se documenta que el orden es el del archivo.
 
 Resuelto por `04-static-semantics.md §2`: la pasada previa deja de ser opcional, porque las
-reglas se juzgan sobre las componentes fuertemente conexas del grafo y eso exige el programa
-entero. Pendiente de implementar.
+reglas se juzgan sobre los clusters (los nombres que las leyes conectan) y eso exige el
+programa entero. Pendiente de implementar.
 
 ## 12. Un literal de lista contra un subtipo se rechaza
 
