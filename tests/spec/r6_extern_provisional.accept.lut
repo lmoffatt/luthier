@@ -1,0 +1,4 @@
+-- R6: in a hurry, an extern may build on a type that is declared and not defined, if it
+-- says so. The checker records it under `provisional`; it is never certified.
+Signal : U
+duration : Signal -> Int := extern provisional "python:builtins.len"

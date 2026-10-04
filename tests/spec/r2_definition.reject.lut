@@ -1,0 +1,5 @@
+-- R2: a definition over a type that is merely declared, outside its cycle, is rejected.
+-- Nothing ties Foo to anything: no law mentions it.
+-- expect: Foo is declared but not defined
+Foo : U
+size (x : Foo) : Int := 3

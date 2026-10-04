@@ -1,0 +1,6 @@
+-- R3: a component no law touches leaves the type undefined.
+-- expect: component mul of Semi is touched by no law
+import "algebra"
+
+Semi (A : U) : { add : A -> A -> A, mul : A -> A -> A }
+Semi A := Associative A add

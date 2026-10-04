@@ -2,15 +2,18 @@
 
 Borrador 0, 2026-09-29. Propuesta para discutir, no decisión tomada. Sale de leer los 42 audios, la consolidación de ideas, los informes del mentor, la charla con Gemini, y del pedido de esta sesión: nombrar los ciudadanos de primera y comprobar que el núcleo se ejecuta a mano. Donde una idea está en los audios se cita el audio; donde es una propuesta nueva se dice que es propuesta.
 
+Nota del 2026-10-04: `04-static-semantics.md` fija los estados de un nombre (declarado, definido, determinado, certificado) y las reglas sobre el grafo de dependencias. Donde este documento diga otra cosa, vale `04`; las notas marcadas "2026-10-04" señalan los puntos.
+
 ## Los elementos, en el orden para pensar
 
 Diez palabras. Con las cinco primeras se lee cualquier programa; con las tres siguientes se fabrican tipos; las dos últimas son lo que corre.
 
 - **Tipo.** Un objeto: `N`, `Bool`, `N -> N`. Una colección de valores y a la vez una afirmación sobre ellos.
-- **Valor.** Un elemento de un tipo, `4 : N`. El juicio `a : A` ("a es un A") es la relación básica.
+- **Valor.** Un elemento de un tipo, `4 : N`. El juicio `a : A` ("a es un A") es la relación básica. (2026-10-04: un valor es un tipo con un solo habitante, `4` es `{ n : N | n == 4 }`; `a : A` se lee "a refina a A". Tipo y valor difieren en cuánto está determinado el nombre, no en especie; `04 §1`.)
 - **Función.** Una flecha entre tipos, `f : A -> B`. Es un valor del tipo `A -> B`, sin categoría aparte: puede ser argumento y resultado.
 - **Definición.** Darle nombre a un valor, `nombre : Tipo := valor`. El único acto del lenguaje. Un programa es un conjunto de definiciones sin orden; las dependencias entre nombres dan el grafo.
-- **Hueco.** Una definición sin valor, `nombre : Tipo`. Una hipótesis: input, función externa, pendiente. Lo que depende de un hueco no se ejecuta.
+- **Hueco.** Una definición sin valor, `nombre : Tipo`. Una hipótesis: input, función externa, pendiente. Lo que depende de un hueco no se ejecuta. (2026-10-04: es el estado *declarado*. Un hueco puede además estar *definido*, cuando las leyes de su ciclo lo atan, sin estar *determinado*; `04 §1`.)
+- **Determinación.** (2026-10-04.) Darle cuerpo a un nombre. Si el cuerpo es un término del tipo declarado, el nombre queda en ese habitante; si es un predicado sobre el tipo declarado, el nombre es el subtipo que ese predicado recorta. No hace falta símbolo para distinguirlos: los tipos `T` y `T -> Bool` nunca coinciden.
 - **Función dependiente.** `(x : A) -> B x`: el tipo del resultado depende del argumento. Es el "para todo". Sin dependencia, la flecha común.
 - **Dato.** `data { ... }`: un tipo definido por sus constructores. Suma de productos con recursión. De acá salen `Bool`, `N`, listas, pares, `Result`.
 - **Subtipo.** `{ x : T | p x }`: los valores de `T` que cumplen `p`, con certificado. `p` es cualquier función a `Bool`, incluidas leyes sobre funciones; cumplir se comprueba con `test` y queda registrado. `Ring`, `Subtraction`, `Library` son subtipos. Es lo que hace a Luthier.
@@ -40,7 +43,9 @@ Todo símbolo que aparece en el documento se define acá.
 
 ## 1. La unidad es la definición
 
-Un programa Luthier es un conjunto finito de definiciones. No hay statements ni secuencia. El orden en que se escriben no importa: la dependencia entre definiciones se lee de los nombres que cada una usa, y eso da el grafo dirigido acíclico (DAG) de definiciones del audio 2026-05-29 15.11.47 [01:48]. Un ciclo de dependencia es un error del programa.
+Un programa Luthier es un conjunto finito de definiciones. No hay statements ni secuencia. El orden en que se escriben no importa: la dependencia entre definiciones se lee de los nombres que cada una usa, y eso da el grafo dirigido de definiciones del audio 2026-05-29 15.11.47 [01:48].
+
+(2026-10-04: el grafo no es acíclico y un ciclo no es error. Las componentes fuertemente conexas son las unidades de cierre: un tipo opaco y las operaciones cuyas leyes se necesitan mutuamente forman un ciclo y se definen juntas; eso es un objeto. Lo que no cicla es extensión y se define encima. Para ver los ciclos el verificador lee el programa entero antes de tipar; `04 §2`.)
 
 Cada definición tiene la forma `nombre : Tipo := término`. El tipo es la proposición que el nombre afirma (audio 2026-05-26 12.32.24 [00:51]; audio 2026-08-31 19.48.17 [01:02]); el término es la evidencia, que en el caso de una función es su implementación. Esto cubre la doble definición que pide el audio 2026-05-29 14.28.55 [03:42]: "desde las propiedades" es el tipo, "operativamente" es el cuerpo.
 
@@ -208,6 +213,8 @@ Olvido, en tres líneas sobre el mismo programa:
 `olvidar a ≡ 4`. La anotación se fue; el valor quedó.
 
 ## 9. Lo que este núcleo deja abierto
+
+(2026-10-04: la sintaxis concreta está en `02`; los estados de una definición y qué puede mencionar cada una, en `04`.)
 
 - La sintaxis concreta. Lo de arriba es notación matemática; hay que elegir una superficie que se lea.
 - Recursor simple o dependiente para `data`. Para probar caminos por inducción hace falta el dependiente.

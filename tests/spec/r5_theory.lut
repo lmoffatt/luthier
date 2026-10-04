@@ -1,0 +1,8 @@
+-- The declared cycle that r5_fill_all and r5_fill_partial fill. Not run on its own.
+Table : U
+nRows : Table -> Int
+nCols : Table -> Int
+sameTable : Table -> Table -> Bool
+
+NonNegative (t : Table) : Bool := 0 <= nRows t and 0 <= nCols t
+Reflexive (t : Table) : Bool := sameTable t t

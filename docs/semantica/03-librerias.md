@@ -23,6 +23,8 @@ Resolución de nombres dentro de un módulo `m`: primero `m.x` (lo propio), desp
 
 Un archivo puede declarar `sqrt : SquareRoot` sin cuerpo, con las leyes en el tipo, y otro archivo darle cuerpo, `sqrt := extern "python:math.sqrt"`. El tipo de la implementación, si se escribe, tiene que coincidir con el declarado; si se omite, se hereda. Las leyes del tipo declarado pasan a ser obligaciones de la implementación. Así una especificación tiene tantas implementaciones como archivos la llenen, y todas se comparan contra las mismas leyes. Es la separación declaración e implementación de C++, y es el functor de ML: el hueco es el parámetro.
 
+(2026-10-04: los huecos se llenan por ciclo y por archivo. Si un archivo le da cuerpo a un hueco de una componente fuertemente conexa, les da cuerpo a todos los de esa componente (R5): el archivo es la unidad que cierra un objeto, que es la lectura de §1. Un `extern` es una definición y exige que los tipos que menciona estén definidos, es decir, que su ciclo tenga leyes; `extern provisional` lo exime y queda registrado como deuda en el certificado (R6). Un tipo opaco `T : U := extern` solo se acepta dentro de un ciclo con leyes (R3); `04 §3` y `§4`.)
+
 ## 4. Qué viaja: el certificado con hash
 
 `luthier test x.lut` escribe `x.cert.json` con, por definición, las leyes corridas, el modo, los casos, el resultado, y un hash del **cono de dependencias**: la definición y todo lo que referencia, transitivamente, escrito con el prefijo del módulo quitado. Cambiar `addN` cambia el hash de todo lo que lo usa.
@@ -38,4 +40,5 @@ Por defecto `luthier test` corre las directivas de los archivos dados en la lín
 - Módulos como valores pasables (`fft : FFTLib := import "fft.lut"`), y functores explícitos.
 - Visibilidad: en versión 0 todo es público. Lo privado son definiciones locales de un bloque, cuando existan los bloques.
 - Los `extern` hacen que un `.lut` dependa de paquetes de Python; hoy eso no se declara en ningún lado.
+- (2026-10-04) Si un archivo que importa una definición `provisional` puede certificarse, o hereda la marca.
 - Un `test` que corre dentro de un módulo importado escribe en el certificado del módulo; falta decidir si el importador puede exigir un `n` mínimo en el tipo o en la directiva.

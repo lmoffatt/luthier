@@ -1,0 +1,7 @@
+-- R4: a labeled product without laws is the product, usable where it is written.
+import "real"
+
+meanVar (x y : R) : { mean : R, var : R } := (x, y)
+first (p : { mean : R, var : R }) : R := p.mean
+-- the labels are binder names: the same type as R * R
+asPair (p : { mean : R, var : R }) : R * R := p

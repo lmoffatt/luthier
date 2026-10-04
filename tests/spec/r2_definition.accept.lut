@@ -1,0 +1,17 @@
+-- R2: a definition builds on defined names; here the laws of Table's cycle mention Table,
+-- which is only declared, and that is legal because they are members of the same cycle.
+Table : U
+nRows : Table -> Int
+nCols : Table -> Int
+intAt : Table -> String -> Int -> Int
+hasColumn : Table -> String -> String -> Bool
+sameTable : Table -> Table -> Bool
+
+NonNegative (t : Table) : Bool := 0 <= nRows t and 0 <= nCols t
+Reflexive (t : Table) : Bool := sameTable t t
+Symmetric (t u : Table) : Bool := sameTable t u -> sameTable u t
+IntColumn (t : Table) (c : String) (i : Int) : Bool :=
+  hasColumn t c "int" and 0 <= i and i < nRows t -> intAt t c i == intAt t c i
+
+-- defined over Table once its cycle is defined
+shape (t : Table) : Int * Int := (nRows t, nCols t)

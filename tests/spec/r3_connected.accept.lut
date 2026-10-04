@@ -1,0 +1,6 @@
+-- R3: the laws of a cycle connect all its components.
+-- Components: add, zero, neg. Laws: Associative (add), Identity (add, zero), Inverse (add, zero, neg).
+import "algebra"
+
+Group (A : U) : { add : A -> A -> A, zero : A, neg : A -> A }
+Group A := Associative A add & Identity A add zero & LeftInverse A add zero neg

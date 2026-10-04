@@ -1,0 +1,5 @@
+-- R3: an opaque carrier is defined only by the laws of its cycle. Alone, it is determined
+-- and not defined, and nothing may build on it.
+-- expect: Table is determined by an extern but no law mentions it
+Table : U := extern "python:luthier.tables.Table"
+nRows : Table -> Int := extern "python:luthier.tables.n_rows"

@@ -30,6 +30,8 @@ Un concepto es una función ordinaria que devuelve leyes. No es una primitiva ni
 
 La unidad de especificación es el grupo de funciones con las leyes que las relacionan; una función sola con postcondición es el grupo de tamaño uno. `read (write s k a) k == a` no es postcondición de `read` ni de `write`: es una relación entre ambas, y por eso se definen juntas.
 
+(2026-10-04: esto se vuelve exigencia. El grupo está definido solo cuando sus leyes conectan todas sus componentes: el hipergrafo de leyes sobre componentes es conexo y las cubre. Una componente que ninguna ley toca deja al grupo sin definir, y `{ ... | true }` no define nada; `04 §3`, regla R3.)
+
 Para reales, las leyes usan tolerancia: `a ≈[tol] b := abs (a - b) < tol`.
 
 Cuando se agregue la capa de demostraciones, la misma función devuelve un tipo en lugar de una lista: una ley testeada `(A, p)` se vuelve `(a : A) -> Cierto (p a)`, con `Cierto : Bool -> U` que manda `true` a `⊤` y `false` a `⊥`. El concepto no cambia.
@@ -45,6 +47,8 @@ Todo el patrón es una definición. Un subtipo es un tipo y un predicado sobre �
 
 `{ x : T | P x }` es la azúcar de `Subtype T P`. El nombre es el estándar: subobjeto en teoría de categorías (un predicado `T -> Ω` clasifica un mono `S -> T`; acá `fst` es el mono), subset type o `sig` en teoría de tipos.
 
+(2026-10-04: el subtipo es la *definición* de un tipo declarado. Se declara la base con sus etiquetas, `Codec : { parse : String -> Maybe T, render : T -> String }`, se escriben las leyes sobre ella, y se define `Codec := RoundTrip & Canonical`. El patrón de dos nombres, `Codec` sin leyes y `LawfulCodec` con ellas, queda obsoleto: era un nombre para un tipo. Las etiquetas son nombres de ligadura, no parte de la identidad del tipo; `04 §1` y R4.)
+
 `P` devuelve un `Veredicto`, no un `Bool`, porque hay dos formas de comprobar: para un valor de `N` el predicado se evalúa y el veredicto es exacto; para una función el predicado son leyes que se muestrean con `n` casos y el veredicto es estadístico. `Bool` es el caso exacto. El certificado es el veredicto guardado con sus parámetros (leyes, `n`, generador, rango, máquina, fecha). Poner la diferencia en el veredicto y no en dos nociones de subtipo es lo que mantiene una sola definición.
 
 Un concepto es el predicado `P` cuando `T` es un tipo de funciones. No hace falta la palabra.
@@ -55,6 +59,8 @@ Fallo y certificado son un solo tipo, un árbol:
       node : (what : Term) -> (arg : Term) -> (verdict : Verdict) -> (children : List Report) -> Report
     }
     Verdict : U := data { ok ; fail ; sampled : (n : N) -> Verdict ; proved }
+
+(2026-10-04: dos veredictos más, previstos en `04`: `witnessed`, para una ley existencial que se cumple exhibiendo un caso (la no separabilidad de una ley, `04 §7`), y la marca `provisional` de una definición `extern provisional`, que no es un veredicto sobre una ley sino una deuda registrada sobre la definición y la deja fuera de la certificación; R6.)
 
 Cada nodo dice qué se comprobó (`what`, un quote del predicado o subtipo, como `'{ Associative add }`), sobre qué (`arg`), con qué resultado, y de qué sub-comprobaciones dependió. Un fallo de `Ring` es un nodo `Ring` con un hijo por ley, y cada hijo con su argumento. Un certificado es el mismo árbol con `ok` o `sampled n` en los nodos. `Result A := ok A + fail Report`, sin parámetro de error.
 
@@ -127,8 +133,8 @@ La segunda ley es la que hace falta para que un `write` que borra todo lo demás
 
 ## 4. Lo que queda abierto
 
-- El campo de leyes en `Def`: si es un campo más junto al cuerpo y al texto, o si las leyes van siempre en definiciones aparte y se atan por nombre.
-- Igualdad decidible como concepto (`Eq A`) que otros conceptos reciben o exigen.
+- ~~El campo de leyes en `Def`: si es un campo más junto al cuerpo y al texto, o si las leyes van siempre en definiciones aparte y se atan por nombre.~~ (Cerrado el 2026-10-04: las leyes son el cuerpo de la definición del tipo, un predicado sobre su base declarada; `04 §1`, R7.)
+- Igualdad decidible como concepto (`Eq A`) que otros conceptos reciben o exigen. (2026-10-04: sigue abierto; con R2 el código genérico sobre un tipo declarado la recibe como parámetro, `04 §4`.)
 - Generadores: filtrado sobre el tipo base o definidos por el usuario, y cómo se declara el rango.
 - Si el doble uso del nombre (tipo y constructor) se mantiene o se separa con mayúscula y minúscula.
 - Cómo se compone el `Report` al anidar subtipos y al iterar: cortar en el primer fallo, acumular todos, o decorar el valor con el registro y seguir (las tres formas de propagación que MCMC necesita).

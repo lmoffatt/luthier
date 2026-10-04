@@ -114,12 +114,16 @@ sobre ese tipo falla con `tuple pattern (y, z) against non-pair type R`. Escribi
 como `R * (R * R)` funciona. La gramática dice que el par asocia a la derecha; el `*` sobre
 tipos debería hacer lo mismo, o el desazucarado de la tupla debería seguir al tipo.
 
-## 11. El orden de las definiciones importa
+## 11. El orden de las definiciones importa (decidido el 2026-10-04)
 
 `00-elementos-fundamentales.md` dice que un programa es un conjunto de definiciones sin
 orden y que las dependencias se leen de los nombres. El verificador de v0 chequea en el
 orden del archivo: usar `distance` antes de definirla da `unbound name distance`. O se hace
 una pasada previa que junte las firmas, o se documenta que el orden es el del archivo.
+
+Resuelto por `04-static-semantics.md §2`: la pasada previa deja de ser opcional, porque las
+reglas se juzgan sobre las componentes fuertemente conexas del grafo y eso exige el programa
+entero. Pendiente de implementar.
 
 ## 12. Un literal de lista contra un subtipo se rechaza
 
@@ -129,12 +133,16 @@ Declarando primero `d0 : Dist Position := [...]` y después `d : NormDist Positi
 valor cerrado se comprueba contra el predicado y se acepta. El azúcar de lista debería
 coercionarse igual que un nombre.
 
-## 13. Un predicado trivialmente verdadero deja una obligación pendiente
+## 13. Un predicado trivialmente verdadero deja una obligación pendiente (decidido el 2026-10-04)
 
 `Scene : U := { frame : Frame, ... | true }` existe porque las componentes nombradas solo
 se escriben en la forma de subtipo. Cada función que construye una `Scene`
 (`withEmitters : Scene`) aparece como pendiente de test aunque su ley sea `true`. O se
 descarga `true` al verificar, o hace falta una forma de registro sin predicado.
+
+Resuelto por `04` en la dirección contraria a las dos propuestas: `{ ... | true }` no define
+nada (R3), y el registro con etiquetas sin `|` es el producto, estructural, que se escribe
+donde se usa y no se nombra con `:=` (R4). `Scene` tiene que escribir su ley o ser el producto.
 
 ## 14. Acceso a componentes con nombre (resuelto el 2026-10-01)
 
@@ -173,6 +181,10 @@ pushforward ... p`, no sirve: como el cuerpo ya tiene el tipo declarado, la inst
 genera obligación ("no laws"). Hubo que escribir la ley a mano como predicado sobre la
 instancia (`ShiftSumsToOne`) y un subtipo `Functorial`. Propuesta: que una instancia de una
 definición con obligaciones pendientes sobre tipos herede esas obligaciones, especializadas.
+
+(2026-10-04: a medias. `04 §5` hace que las obligaciones de un nombre sean las leyes de su
+ciclo aplicadas a su determinación, así que una instancia que cierra un ciclo hereda sus
+leyes. La ley cuantificada sobre `U` sigue sin generador y sigue siendo candidata a `proved`.)
 
 ## 17. El costo de los valores de lista
 
@@ -261,3 +273,20 @@ dimensiones en el tipo.
 
 Queda abierto: argumentos implícitos (hoy la dimensión se pasa explícita), y dimensiones que el
 checker verifique estáticamente en lugar de por obligación.
+
+## 23. Un tipo declarado se usa como si estuviera definido (2026-10-04)
+
+`table.lut` declara `Table : U` sin ninguna ley, y `table_python.lut` lo llena con
+`Table : U := extern "python:luthier.tables.Table"` y diez externs sueltos, `nRows : Table -> Int
+:= extern ...`. El checker acepta todo: `add_def` solo pide que el tipo declarado tipe contra
+`U`, y un hueco tipa. Se probó con seis archivos mínimos: `A : U` seguido de `a : A := extern`,
+de `f : A -> Int := \x { 3 }`, de `a : A := b` con `b : A` hueco, y de `A : U := extern` más
+`a : A := extern`; los cuatro pasan `luthier check`. Decir "esto es una Table" no garantiza nada,
+que es lo que la nota de voz del 2026-10-04 señala.
+
+Resuelto en el diseño por `04-static-semantics.md`: declarar y definir son dos estados, una
+definición solo construye sobre nombres definidos (R2), un tipo opaco se define por las leyes
+de su ciclo (R3), y `extern provisional` es la salida para el apuro (R6). Los seis archivos
+están en `tests/spec/` como `r2_*`, `r3_extern_type_without_laws` y `r6_*`. Lo que `table.lut`
+tiene que ganar son las leyes de `Table` (cotas de fila, tipo de columna, qué respeta
+`sameTable`); `Codec` y `LawfulCodec` pasan a ser un nombre en dos estados (`04 §6`).

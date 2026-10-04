@@ -13,13 +13,18 @@ Dos capas. El núcleo es lo que `Term` representa y lo que se ejecuta a mano. La
 
 Palabras reservadas: `data`, `match`, `extern`, `test`. Nada más. `U`, `Unit`, `Bool`, `N`, `R`, `List`, `Maybe`, `Resultado` son nombres de definiciones de la librería base, no palabras reservadas.
 
+(2026-10-04: lo anterior quedó corto. Las reservadas del intérprete son quince: `data`, `match`, `extern`, `test`, `with`, `exhaustive`, `gen`, `import`, `forget`, `U`, `operator`, `if`, `then`, `else`, y `provisional` como calificador de `extern`. `and`, `or`, `mod` son nombres comunes con tratamiento infijo.)
+
 ## 2. Núcleo
 
     programa  ::= { definición }
 
     definición ::= nombre ":" término [ ":=" término ]         -- sin ":=" es un hueco
-                 | nombre ":" término ":=" "extern" string     -- hueco que el entorno llena por ese nombre
+                 | nombre ":" término ":=" "extern" [ "provisional" ] string
+                                                                -- hueco que el entorno llena por ese nombre
                  | nombre ":" "U" ":=" "data" "{" { constructor } "}"
+
+(2026-10-04: la forma no cambia, cambia lo que acepta. `nombre : T` declara; un `nombre := t` posterior lo determina, y si `t : T` es un habitante, si `t : T -> Bool` o es una `Law` sobre `T`, `nombre` es el subtipo `{ x : T | t x }`. El mismo `:` para "es un valor de" y "es un subtipo de": la relación es refinamiento y el cuerpo decide. `provisional` levanta la exigencia de que los tipos de un extern estén definidos; `04 §1`, R6, R7.)
 
     constructor ::= nombre ":" término                          -- el término es el tipo del constructor; su codominio es el data que se define
 
@@ -71,6 +76,7 @@ Precedencias, de mayor a menor: aplicación; operadores de usuario según su dec
               | "(" término "," término { "," término } ")"    -- par, asocia a la derecha
               | "{" patrón ":" término "|" término "}"         -- subtipo: { x : T | p }  ≡  Subtype T (\ x { p })
               | "{" { nombre ":" término } "|" término "}"     -- subtipo con componentes nombradas; ≡ { (a, b, ...) : A * B * ... | p }
+              | "{" { nombre ":" término } "}"                 -- (2026-10-04) producto con etiquetas, sin ley: es A * B * ... con nombres para sus posiciones
               | "[" [ término { "," término } ] "]"            -- lista
               | "'" "{" término "}"           -- quote: la sintaxis como Term
               | "$" "{" término "}"           -- unquote, solo dentro de un quote
@@ -119,6 +125,8 @@ Nombres del lenguaje y de la librería en inglés; la documentación en castella
     subtraction : Subtraction := sub     -- hueco hasta que un test produzca el certificado; lo que depende de él espera
     test subtraction with 1000           -- corre las leyes con 1000 casos; ok: certificado n = 1000; fail: contraejemplo
 
+(2026-10-04: con `04`, `Subtraction` se escribe en dos estados de un solo nombre. Declarado, `Subtraction : N -> N -> N`, con las leyes como definiciones sobre él, `AdditiveInverse (s : Subtraction) (x y : N) : Bool := ...`; y definido, `Subtraction := AdditiveInverse & BoundedInverse`. El resto no cambia. Lo mismo para `Ring`: `Ring (A : U) : { add : A -> A -> A, mul : ..., zero : A, one : A }` y después `Ring A := Associative add & ...`.)
+
     Ring (A : U) := {
       add  : A -> A -> A
       mul  : A -> A -> A
@@ -141,6 +149,8 @@ Las leyes son predicados con la operación primero y las variables cuantificadas
 Alternativa a evaluar: la ley en el tipo de la componente en vez de en el `|`, `add : Associative A & Commutative A`, `zero : Identity add`, dejando el `|` para las leyes que cruzan componentes (`Distributive add mul`). Más compacto; cuesta un `forget` implícito en cada uso de la componente.
 
 ## 7. Abierto
+
+(2026-10-04: lo que `04` cierra de esta lista: la forma de `test` (directiva del archivo y comando; corre las obligaciones del ciclo del nombre, `04 §5`), el acceso a componentes (punto, `§8`), y la declaración de operadores (`operator`, `§8`). Sigue abierto lo demás.)
 
 - Cómo una ley con variables cuantificadas (`InversaAditiva r : N -> N -> Bool`) se vuelve un `Predicate` sin fijar `n`: el modo de comprobación (muestreo con `n`, exhaustivo, demostración) queda abierto en el tipo y lo cierra el `test`, registrándolo en el certificado. Es la forma de `Veredicto`.
 - Sintaxis para la evaluación guardada `(quote, valor)`; candidatos `[| f x |]` o un prefijo con llaves.
@@ -171,4 +181,5 @@ El intérprete de versión 0 está en `src/luthier/`. Al escribirlo se decidiero
 - Líneas de continuación: dentro de una definición de nivel superior, una línea indentada continúa la anterior.
 - `Int`, `R` y `String` son definiciones (2026-10-01, tarde): huecos declarados en `core.lut`, que el intérprete llena con sus literales, aritmética y comparaciones. Antes estaban cableados en el intérprete (`BUILTIN_TYPES`), contra lo que dice la sección 1; ahora el intérprete solo reserva `Law`. Lo que se puede decir de `R` (su épsilon, sus operaciones como funciones) va en `lib/real.lut`.
 - Sin preludio (2026-10-01): lo implícito es `core.lut`, solo lo que el elaborador nombra (`Bool` con `and`/`or`/`implies`, `List`, `Maybe`, `Unit`, `Nat`). El resto son librerías en `lib/`, importadas por nombre: `real` (abs, toR, approx, Positive), `random` (Gen y generadores), `peano` (N), `algebra` (leyes y estructuras). El criterio: es núcleo lo que el intérprete necesita para funcionar; todo lo demás se pide.
+- Lo que `04` revierte (2026-10-04). Tres decisiones de esta lista dejan de valer: el chequeo en el orden del archivo (el verificador lee el programa entero, arma el grafo y chequea por componentes fuertemente conexas, `04 §2`); los registros `{ ... | true }` como forma de nombrar componentes sin ley (son el producto con etiquetas, sin `|`, y no se nombran con `:=`, R3 y R4); y que `T : U := extern` baste para tener un tipo opaco (lo determina, y solo las leyes de su ciclo lo definen, R3). Se agrega el calificador `provisional` de `extern` (R6).
 - Proyección de componentes (2026-10-01): `e.position` es la componente `position` de un valor cuyo tipo es un subtipo con componentes nombradas; se elabora al `match` de una rama sobre el patrón del tipo, y se imprime como se escribió. Vale también tras un paréntesis, `(f x).campo`, y a través de refinamientos (`{ s : Scene | p }` tiene las componentes de `Scene`). El punto es el mismo de la calificación de módulos y no hace falta otro símbolo (`::` quedó descartado): un módulo es un registro cuyas componentes son sus definiciones, así que calificar es proyectar. La regla de resolución: primero el nombre entero como nombre calificado; si no existe, el prefijo más largo que sea variable o definición, y una proyección por segmento restante. El subtipo con componentes nombradas es ahora un producto dependiente, `{ n : Int, m : { k : Int | k <= n } | ... }`: el tipo de una componente puede mencionar las anteriores, y el tipo de `d.m` las sustituye por proyecciones de `d`.
