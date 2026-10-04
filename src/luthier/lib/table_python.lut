@@ -1,0 +1,28 @@
+-- luthier/tables.py as the implementation of table.lut, and its certification.
+
+import "real"
+import "real_python"
+import "table"
+
+Table : U := extern "python:luthier.tables.Table"
+
+nRows     : Table -> Int := extern "python:luthier.tables.n_rows"
+nCols     : Table -> Int := extern "python:luthier.tables.n_cols"
+hasColumn : Table -> String -> String -> Bool := extern "python:luthier.tables.has_column"
+intAt     : Table -> String -> Int -> Int := extern "python:luthier.tables.int_at"
+realAt    : Table -> String -> Int -> R := extern "python:luthier.tables.real_at"
+textAt    : Table -> String -> Int -> String := extern "python:luthier.tables.text_at"
+sameTable : Table -> Table -> Bool := extern "python:luthier.tables.same"
+
+parseTable  : String -> Maybe Table := extern "python:luthier.tables.parse"
+renderTable : Table -> String := extern "python:luthier.tables.render"
+parseError  : String -> String := extern "python:luthier.tables.parse_error"
+
+gen Table := extern "python:luthier.tables.gen_table"
+gen Perturbed := extern "python:luthier.tables.gen_perturbed"
+gen TableText := extern "python:luthier.tables.gen_text"
+gen BrokenText := extern "python:luthier.tables.gen_broken"
+
+csv : LawfulCodec := { parse := parseTable, render := renderTable }
+
+test csv with 200

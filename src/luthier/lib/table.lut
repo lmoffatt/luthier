@@ -1,0 +1,66 @@
+-- Tables and the codec that reads and writes them as text.
+--
+-- A table has named, typed columns (int, float, str) and rows. Luthier sees it through its
+-- accessors and never as a list of cells. A codec is the pair parse and render between text and
+-- tables, and four laws pin it down:
+--   RoundTrip      reading what was written gives back the table
+--   Canonical      read, write, read again: the same as reading once (writing is canonical)
+--   Tolerant       a text written differently but with the same content reads the same
+--   Rejects        a text with a defect is not read
+-- Canonical follows from RoundTrip on the tables parse produces; it is tested on texts, so it
+-- covers tables the table generator may not reach. Rejects is the negative control: a codec
+-- that read anything would pass the first three.
+--
+-- The declarations have no body; table_python.lut binds them to luthier/tables.py.
+
+import "real"
+
+Table : U
+
+-- ---------------------------------------------------------------- accessors
+nRows     : Table -> Int
+nCols     : Table -> Int
+hasColumn : Table -> String -> String -> Bool    -- a column of this name and type
+intAt     : Table -> String -> Int -> Int        -- column, row
+realAt    : Table -> String -> Int -> R
+textAt    : Table -> String -> Int -> String
+sameTable : Table -> Table -> Bool
+
+-- ---------------------------------------------------------------- the codec
+parseTable  : String -> Maybe Table
+renderTable : Table -> String
+parseError  : String -> String                   -- why a text is not read; empty when it is
+
+Codec : U := { parse : String -> Maybe Table, render : Table -> String | true }
+
+sameParse (a b : Maybe Table) : Bool :=
+  match a { nothing -> (match b { nothing -> true ; just y -> false })
+          ; just x -> (match b { nothing -> false ; just y -> sameTable x y }) }
+
+-- ---------------------------------------------------------------- generated texts
+-- A table and a text with the same content written differently; a text that is a rendering,
+-- possibly written differently; a text with one defect.
+Perturbed : U := { table : Table, text : String | true }
+TableText : U := String
+BrokenText : U := String
+
+-- ---------------------------------------------------------------- the laws
+RoundTrip (c : Codec) (t : Table) : Bool := sameParse (c.parse (c.render t)) (just Table t)
+
+Canonical (c : Codec) (s : TableText) : Bool :=
+  match c.parse s { nothing -> true ; just t -> sameParse (c.parse (c.render t)) (just Table t) }
+
+Tolerant (c : Codec) (p : Perturbed) : Bool := sameParse (c.parse p.text) (just Table p.table)
+
+Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b { nothing -> true ; just t -> false }
+
+LawfulCodec : U := { c : Codec | RoundTrip c & Canonical c & Tolerant c & Rejects c }
+
+-- ---------------------------------------------------------------- quantifiers over rows
+-- Laws about the content of one table are conjunctions over its rows, written as recursions
+-- over the row index, so they evaluate to a Bool for a concrete table as well as a generated one.
+forallBelow (n : Int) (p : Int -> Bool) : Bool := if n <= 0 then true else p (n - 1) and forallBelow (n - 1) p
+
+-- the first index below n where p fails, or -1: for messages that point at the row
+firstFailing (k n : Int) (p : Int -> Bool) : Int :=
+  if k >= n then 0 - 1 else if p k then firstFailing (k + 1) n p else k

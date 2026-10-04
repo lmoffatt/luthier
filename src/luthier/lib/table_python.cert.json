@@ -1,0 +1,106 @@
+{
+  "csv": {
+    "hash": "49ab5669473fa276",
+    "when": "2026-10-04T08:30:08",
+    "passed": true,
+    "seed": 533946834,
+    "run_seed": 7,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "BrokenText",
+        "Perturbed",
+        "Table",
+        "TableText"
+      ]
+    },
+    "laws": [
+      {
+        "label": "RoundTrip (parseTable, renderTable)",
+        "params": [
+          "t : Table"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Table: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "t = <Table>",
+          "t = <Table>",
+          "t = <Table>",
+          "t = <Table>",
+          "t = <Table>"
+        ]
+      },
+      {
+        "label": "Canonical (parseTable, renderTable)",
+        "params": [
+          "s : TableText"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "TableText: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "s = ' c0 : int , c1 : str , c2 : float , c3 : float \\n\\n'",
+          "s = ' c0 : str , c1 : int , c2 : int \\n\"\"\"b\\n.\"\" -\", -42980317117545 , 44851930 '",
+          "s = ' c0 : str , c1 : int , c2 : float , c3 : int , c4 : float \\r\\na--abbxx, -186675651773225 ,0,5984596154081939,-0.587369043373797\\r'",
+          "s = 'c0:float,c1:float,c2:float,c3:str\\n'",
+          "s = 'c0:str,c1:str,c2:str,c3:int\\r\\ny,aeb +,-69, 942 \\r\\n\\n'"
+        ]
+      },
+      {
+        "label": "Tolerant (parseTable, renderTable)",
+        "params": [
+          "p : Perturbed"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Perturbed: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "p = (<Table>, ' c0 : str , c1 : int , c2 : str \\n')",
+          "p = (<Table>, 'c0:str,c1:str,c2:float\\r\\n')",
+          "p = (<Table>, 'c0:int,c1:float,c2:int\\r\\n 64337510998572 ,-0.79094689986731237,640799997112\\r')",
+          "p = (<Table>, ' c0 : str , c1 : int , c2 : str , c3 : float \\n\\n')",
+          "p = (<Table>, ' c0 : float , c1 : int , c2 : float , c3 : str \\r\\n0.9189496749159831,45276900377330,0.0,\"e\"\".z\"\\r\\n')"
+        ]
+      },
+      {
+        "label": "Rejects (parseTable, renderTable)",
+        "params": [
+          "b : BrokenText"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "BrokenText: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "b = 'c0:str,c1:str,c2:float\\n90--. ,\"-ex0-z,a\",inf\\n18,\"\\n\",1.796360763913183\\n'",
+          "b = 'c0:str\\n\".\\rbex+9\",extra\\n\"z\\nyz\\re\"\\n'",
+          "b = 'c0:int,c0:str,c2:float,c3:str,c4:int\\n-73164894812344099,,-0.20287381249703662,\"0 b9\\r\\n\",-403\\n'",
+          "b = 'c0:real\\n30523309535419\\n'",
+          "b = 'c0:str,c1:int\\n\"-y-\"\"az\",abc\\n'"
+        ]
+      }
+    ]
+  }
+}
