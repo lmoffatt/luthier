@@ -305,3 +305,9 @@ teoría con su igualdad como componente, de la que `csv` es un modelo (`05 §8`)
 la primera ley es una reducción beta, la extensionalidad se decide enumerando el dominio finito,
 y un array de numpy es una representación de un valor de ese tipo, cuya ida y vuelta se certifica.
 Es el piloto propuesto para probar la especificación antes de revisar las demás librerías.
+
+(2026-10-04, más tarde: el caso se disuelve. Con `VecOf n = Fin n -> R`, `at` es aplicar y
+`tabulate` es escribir una lambda, y la primera ley es beta; un array de numpy es un valor de ese
+tipo por definición, y lo que falta son tres reglas del intérprete, no leyes: aplicar un objeto de
+Python indexando con verificación de rango, materializar una lambda cuando Python espera un
+array, y la correspondencia entre tipo y representación; `04 §6`.)

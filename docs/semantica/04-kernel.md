@@ -168,17 +168,40 @@ Two different senses of "primitive" must not be confused.
 - *Semantically primitive* is what the kernel has: the formers of section 2 and `Int`, `R`,
   `String`. Every other type is defined natively from them (`05` R5).
 - *Primitive for performance* is an extern: a value computed by the environment because it is
-  faster there. A numpy array is not a primitive type: `VecOf n` is natively the function type
-  `(i : { k : Int | 0 <= k and k < n }) -> R`, and a numpy array is a representation of a value
-  of that type, crossing the boundary by a translation whose round trip can be certified.
+  faster there. A numpy array is not a primitive type: with `Fin n = { k : Int | 0 <= k and k < n }`,
+  `VecOf n` is natively the function type `Fin n -> R`, a matrix is `Fin m -> Fin n -> R`
+  (a vector of vectors, by currying), and a numpy array *is* a value of that type. Nothing is
+  converted and nothing about the representation needs certifying: indexing an array that was
+  built from a function gives back that function's values exactly.
 
-A function may be given natively, as an extern, or both. Writing it both ways is worth it only
-where the extern is in doubt; then a law compares them on generated inputs:
+A value of a function type with a finite domain can therefore be a Luthier lambda or an object
+of the environment, and the interpreter has three rules for it:
+
+1. *Applying an object of the environment.* If `v : Fin n -> A` came from Python, `v i` evaluates
+   as `v[i]`. The interpreter checks `0 <= i < n` itself, because that is the obligation of
+   `Fin n` and Python would accept `v[-1]` silently.
+2. *Passing a lambda to the environment.* A Python function that expects an array and receives a
+   lambda over `Fin n` gets the array of its `n` values: the interpreter evaluates it at every
+   index (it *materializes* it), which is possible only because the domain is finite. The cost
+   is `n` evaluations; a materialized value is kept so it is not built twice.
+3. *Representation by type.* `Fin n -> R` is a one-dimensional ndarray, `Fin m -> Fin n -> R` a
+   two-dimensional one, `Fin n -> A` for a non-numeric `A` a list; a vector of unknown length,
+   `(n : Int) * (Fin n -> R)`, is the pair `(arr.shape[0], arr)`. The shape is checked when the
+   value crosses: an array declared `VecOf 3` must have shape `(3,)`.
+
+Two values of a function type, one a lambda and the other an array, are compared by an
+observational equality, point by point over `Fin n` (`05` R8); since the domain is finite the
+comparison is exhaustive.
+
+What does need certifying is that the operations the environment provides compute what their
+native definitions say. A function may be given natively, as an extern, or both. Writing it
+both ways is worth it only where the extern is in doubt; then a law compares them on generated
+inputs:
 
     AddAgrees (ad : Vec -> Vec -> Vec) (n : Dim) (x y : VecOf n) : Bool := approxVec 0.0 (ad x y) (addDef x y)
 
-`addDef` is the native definition through the accessors; `test` runs the law with `ad` bound to
-the extern. The libraries call these laws `Agrees`; the name is local to Luthier.
+`addDef` is the native definition; `test` runs the law with `ad` bound to the extern. The
+libraries call these laws `Agrees`; the name is local to Luthier.
 
 ## 7. What changes against the interpreter of 2026-10-04
 
