@@ -103,5 +103,7 @@ file accepts the entries whose hash still matches, so certified libraries are no
 `--seed N` repeats it exactly.
 
 Generators are Luthier values (`Gen A = Nat -> Int -> A * Int`, in `random`) or Python functions
-(`gen T := extern "python:mod.fn"`); a function over `Fin n` is generated as its table. One
+(`gen T := extern "python:mod.fn"`); a function over `Fin n` is generated as its table, a
+function of an infinite domain as a constant or an affine map (a thin sample, and the certificate
+says so). One
 parameter, `--size`, bounds every generated value and grows over a run.

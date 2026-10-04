@@ -147,6 +147,17 @@ class Generators:
                 x = "i"
                 branches = tuple((PLit(i), v) for i, v in enumerate(vals))
                 return Lam(PVar(x), Match(Var(x), branches), None)
+        if isinstance(w, Pi) and w.name == "_":
+            # a function of an infinite domain: a constant, or an affine map when both sides are
+            # numbers. A thin sample of the function space, and the certificate says so.
+            dw = whnf(self.env, w.dom, self.fuel())
+            cw = whnf(self.env, w.cod, self.fuel())
+            if isinstance(dw, Var) and dw.name == "R" and isinstance(cw, Var) and cw.name == "R" and rng.random() < 0.5:
+                a = self.sample(w.cod, rng, size, depth + 1)
+                b = self.sample(w.cod, rng, size, depth + 1)
+                return Lam(PVar("x"), BinOp("+", BinOp("*", a, Var("x")), b), w.dom)
+            c = self.sample(w.cod, rng, size, depth + 1)
+            return Lam(PWild(), c, w.dom)
         if isinstance(w, Pi):
             raise GenError(f"no generator for the function type {pp(w)}; give it a `gen`")
         raise GenError(f"no generator for {pp(w)}")
@@ -269,6 +280,10 @@ class Generators:
             return f"{pp(w)}: all values"
         if isinstance(w, Sigma):
             return f"({self.describe(w.fst, size)}) * ({self.describe(w.snd, size)})"
+        if isinstance(w, Pi) and fin_bound(self.env, w.dom) is not None:
+            return f"{pp(w)}: drawn as its table"
+        if isinstance(w, Pi):
+            return f"{pp(w)}: constant functions (affine on R -> R), a thin sample"
         if isinstance(w, Sum):
             return " | ".join(f"{l} ({self.describe(a, size)})" for l, a in w.alts)
         if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):

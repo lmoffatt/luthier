@@ -1152,9 +1152,12 @@ class Checker:
             if isinstance(pat2, PInj) and pat2.index in (0, 1) and self.is_bool(sty):
                 cond = scrut if pat2.index == 0 else App(Var("not"), scrut)
                 self.path.append(cond)
-            let = isinstance(pat2, PVar)
-            if let:
-                self.lets.append((pat2.name, scrut))
+            # `match e { x -> t }` and `match e { (x, y) -> t }` name e, or its components: an
+            # obligation in t speaks of e, not of every x and y (05 §7)
+            lets = _tuple_lets(pat2, scrut)
+            let = bool(lets)
+            for nm, tm in lets:
+                self.lets.append((nm, tm))
             try:
                 if result_ty is None:
                     body2, result_ty = self.infer(ctx2, body)
@@ -1163,7 +1166,7 @@ class Checker:
             finally:
                 if cond is not None:
                     self.path.pop()
-                if let:
+                for _ in lets:
                     self.lets.pop()
             branches.append((pat2, body2))
         if isinstance(sw, Sum) and not catch_all:
@@ -1353,6 +1356,24 @@ class Checker:
 
 
 # ---------------------------------------------------------------- helpers of the object rules
+
+def _tuple_lets(pat: Pattern, scrut: Term) -> list:
+    """(variable, the term it names) for a pattern made of variables, wildcards and tuples."""
+    def plain(p):
+        return isinstance(p, (PVar, PWild)) or (isinstance(p, PPair) and plain(p.fst) and plain(p.snd))
+    if not plain(pat):
+        return []
+    if isinstance(pat, PVar):
+        return [(pat.name, scrut)]
+
+    def keep_only(p, name):
+        if isinstance(p, PVar):
+            return p if p.name == name else PWild()
+        if isinstance(p, PPair):
+            return PPair(keep_only(p.fst, name), keep_only(p.snd, name))
+        return p
+    return [(v, Match(scrut, ((keep_only(pat, v), Var(v)),))) for v in pattern_vars(pat)]
+
 
 def _pending_member(d: Def, existing: Def):
     """A Member-like view of a declared type defined in another file than its declaration."""

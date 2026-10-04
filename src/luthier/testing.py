@@ -94,12 +94,21 @@ def peel(checker: Checker, law: Term):
 
 
 def flatten(checker: Checker, ob: Obligation) -> list:
-    """One (label, closed law) per conjunct of the obligation's predicate."""
+    """One (label, closed law) per conjunct of the obligation's predicate, quantified only over the
+    parameters it mentions (and those their types mention): a law that does not mention a
+    variable needs no values of it, and a function of an infinite domain could not be drawn."""
     env = checker.env
     out = []
     for leaf in _split_and(env, ob.term):
-        closed = leaf
+        used = set(free_vars(leaf))
+        params = []
         for name, ty in reversed(ob.params):
+            if name in used:
+                params.append((name, ty))
+                used |= free_vars(ty)
+        params.reverse()
+        closed = leaf
+        for name, ty in reversed(params):
             closed = Lam(PVar(name), closed, ann=ty)
         out.append((_label(leaf), closed))
     return out

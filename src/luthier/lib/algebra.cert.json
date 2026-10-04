@@ -1,0 +1,1243 @@
+{
+  "intRing": {
+    "hash": "644c9f44b4757e64",
+    "when": "2026-10-04T20:19:31",
+    "passed": true,
+    "seed": 807705398,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "Reflexive Int \\ a b { a == b }",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 1",
+          "x = -1",
+          "x = -1",
+          "x = 1",
+          "x = 1"
+        ]
+      },
+      {
+        "label": "Symmetric Int \\ a b { a == b }",
+        "params": [
+          "x : Int",
+          "y : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = -1, y = -1",
+          "x = 0, y = 1",
+          "x = 0, y = 1",
+          "x = 1, y = 1",
+          "x = -1, y = 1"
+        ]
+      },
+      {
+        "label": "Associative Int \\ a b { a == b } \\ a b { a + b }",
+        "params": [
+          "x : Int",
+          "y : Int",
+          "z : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = -1, y = 1, z = -1",
+          "x = -1, y = 0, z = -1",
+          "x = -1, y = 0, z = 1",
+          "x = -1, y = -1, z = 0",
+          "x = -1, y = 1, z = 1"
+        ]
+      },
+      {
+        "label": "Commutative Int \\ a b { a == b } \\ a b { a + b }",
+        "params": [
+          "x : Int",
+          "y : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = -1, y = 0",
+          "x = 0, y = -1",
+          "x = 1, y = 1",
+          "x = -1, y = 1",
+          "x = -1, y = 1"
+        ]
+      },
+      {
+        "label": "LeftIdentity Int \\ a b { a == b } \\ a b { a + b } 0",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 0",
+          "x = -1",
+          "x = 1",
+          "x = -1"
+        ]
+      },
+      {
+        "label": "RightIdentity Int \\ a b { a == b } \\ a b { a + b } 0",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 1",
+          "x = 0",
+          "x = -1",
+          "x = -1",
+          "x = -1"
+        ]
+      },
+      {
+        "label": "LeftInverse Int \\ a b { a == b } \\ a b { a + b } 0 \\ a { 0 - a }",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 1",
+          "x = 0",
+          "x = 0",
+          "x = 0",
+          "x = 0"
+        ]
+      },
+      {
+        "label": "RightInverse Int \\ a b { a == b } \\ a b { a + b } 0 \\ a { 0 - a }",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = -1",
+          "x = 1",
+          "x = 1",
+          "x = 1",
+          "x = -1"
+        ]
+      },
+      {
+        "label": "Associative Int \\ a b { a == b } \\ a b { a * b }",
+        "params": [
+          "x : Int",
+          "y : Int",
+          "z : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = -1, y = 1, z = 0",
+          "x = -1, y = -1, z = 1",
+          "x = 0, y = 1, z = 1",
+          "x = 0, y = -1, z = 1",
+          "x = -1, y = -1, z = -1"
+        ]
+      },
+      {
+        "label": "LeftIdentity Int \\ a b { a == b } \\ a b { a * b } 1",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = -1",
+          "x = 1",
+          "x = -1",
+          "x = 1",
+          "x = 0"
+        ]
+      },
+      {
+        "label": "RightIdentity Int \\ a b { a == b } \\ a b { a * b } 1",
+        "params": [
+          "x : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = -1",
+          "x = 1",
+          "x = 0"
+        ]
+      },
+      {
+        "label": "LeftDistrib Int \\ a b { a == b } \\ a b { a + b } \\ a b { a * b }",
+        "params": [
+          "x : Int",
+          "y : Int",
+          "z : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0, z = 0",
+          "x = 1, y = 0, z = 1",
+          "x = 1, y = 0, z = 1",
+          "x = -1, y = 1, z = 1",
+          "x = -1, y = 0, z = 1"
+        ]
+      },
+      {
+        "label": "RightDistrib Int \\ a b { a == b } \\ a b { a + b } \\ a b { a * b }",
+        "params": [
+          "x : Int",
+          "y : Int",
+          "z : Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+        ],
+        "sample_cases": [
+          "x = 1, y = -1, z = -1",
+          "x = 1, y = -1, z = -1",
+          "x = 0, y = 1, z = 1",
+          "x = 0, y = -1, z = -1",
+          "x = 1, y = 1, z = 1"
+        ]
+      }
+    ]
+  },
+  "realField": {
+    "hash": "721a047907cb3920",
+    "when": "2026-10-04T20:19:31",
+    "passed": true,
+    "seed": 14568751,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "Reflexive R eqR",
+        "params": [
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.004149606627512403",
+          "x = -0.982361631984368",
+          "x = -0.6728336013212384",
+          "x = 0.9629800285365782",
+          "x = -0.016903681250597824"
+        ]
+      },
+      {
+        "label": "Symmetric R eqR",
+        "params": [
+          "x : R",
+          "y : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = -0.06406168626372288, y = -0.645226903428743",
+          "x = -0.4127684311828641, y = -0.20598989863759432",
+          "x = -0.852493457756579, y = 0.38873590560253946",
+          "x = 0.15824035525306002, y = 0.4254578089657175",
+          "x = 0.38274040346847227, y = -0.8909833549615453"
+        ]
+      },
+      {
+        "label": "Associative R eqR \\ a b { a + b }",
+        "params": [
+          "x : R",
+          "y : R",
+          "z : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.6872720014651033, y = -0.30137956021113976, z = -0.7360975855901986",
+          "x = 0.17864121950127054, y = 0.5796272643894971, z = 0.7353399339680622",
+          "x = -0.5917349365597195, y = 0.22939724765718328, z = 0.3136192262755042",
+          "x = -0.07519576277571627, y = -0.46385248233301635, z = 0.9539975217039021",
+          "x = 0.8192746338695516, y = 0.79844281110609, z = 0.813860416703279"
+        ]
+      },
+      {
+        "label": "Commutative R eqR \\ a b { a + b }",
+        "params": [
+          "x : R",
+          "y : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = -0.6216224112707827, y = -0.4084386113889078",
+          "x = -0.7820581819479915, y = -0.07896432550746857",
+          "x = 0.8335945004996044, y = 0.7587378672323428",
+          "x = -0.3673278170577823, y = 0.16253658168124363",
+          "x = 0.40047102202979046, y = -0.10034200304789942"
+        ]
+      },
+      {
+        "label": "LeftIdentity R eqR \\ a b { a + b } 0.0",
+        "params": [
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.33375090156342435",
+          "x = 0.8930505934243655",
+          "x = 0.3785091660215909",
+          "x = -0.5707884479041099",
+          "x = 0.10661336890874296"
+        ]
+      },
+      {
+        "label": "LeftInverse R eqR \\ a b { a + b } 0.0 \\ a { 0.0 - a }",
+        "params": [
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.8848193977175403",
+          "x = 0.3424751019047281",
+          "x = 0.8278567593501265",
+          "x = -0.11392025540302053",
+          "x = -0.8109133809540254"
+        ]
+      },
+      {
+        "label": "Associative R eqR \\ a b { a * b }",
+        "params": [
+          "x : R",
+          "y : R",
+          "z : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.438477375523193, y = -0.8707814395295845, z = -0.4361777190987346",
+          "x = 0.5564279112323745, y = 0.029588077707568994, z = -0.15170511057295455",
+          "x = 0.44442030947356703, y = -0.0215785301169662, z = 0.017020142744746503",
+          "x = -0.2549047498861068, y = -0.4439847001178938, z = 0.05485127394997025",
+          "x = -0.4152211701254003, y = -0.2901938003925675, z = -0.45708697970257806"
+        ]
+      },
+      {
+        "label": "Commutative R eqR \\ a b { a * b }",
+        "params": [
+          "x : R",
+          "y : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = -0.7932861513642067, y = 0.7171086433611971",
+          "x = 0.4876168686294682, y = 0.5989394506027446",
+          "x = 0.7118924558654869, y = -0.3333352348762397",
+          "x = 0.9368301170137752, y = 0.37465250511124015",
+          "x = -0.1896529942486347, y = 0.031415145308023806"
+        ]
+      },
+      {
+        "label": "LeftIdentity R eqR \\ a b { a * b } 1.0",
+        "params": [
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.23499873811984662",
+          "x = 0.3510915770084251",
+          "x = -0.8816663343657118",
+          "x = 0.33766509150677426",
+          "x = 0.9414589487274625"
+        ]
+      },
+      {
+        "label": "LeftDistrib R eqR \\ a b { a + b } \\ a b { a * b }",
+        "params": [
+          "x : R",
+          "y : R",
+          "z : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.18760900863848495, y = -0.36341886263399026, z = -0.9087131127843708",
+          "x = 0.9246269212992464, y = -0.43500426623288324, z = -0.8858833341331052",
+          "x = -0.9970107858063118, y = -0.3264125345635678, z = -0.49489279806200637",
+          "x = 0.46228126014275994, y = 0.9518811529625499, z = -0.7308267150235019",
+          "x = -0.517732142596369, y = 0.22196813257713455, z = 0.6567059668711317"
+        ]
+      },
+      {
+        "label": "Invertible R eqR \\ a b { a * b } 0.0 1.0 invR",
+        "params": [
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = -0.7277174714892378",
+          "x = -0.874482668225498",
+          "x = 0.5800951810262305",
+          "x = -0.6707469559498471",
+          "x = 0.7602269470650973"
+        ]
+      }
+    ]
+  },
+  "vecSpace": {
+    "hash": "a0901045f3b13583",
+    "when": "2026-10-04T20:19:31",
+    "passed": true,
+    "seed": 129233284,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "(add a b).n == n",
+        "params": [
+          "n : Dim",
+          "a : VecOf n",
+          "b : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "0 <= n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1"
+        ]
+      },
+      {
+        "label": "(zeros n).n == n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 2"
+        ]
+      },
+      {
+        "label": "(scale (0.0 - 1.0) a).n == n",
+        "params": [
+          "n : Dim",
+          "a : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "(scale c a).n == n",
+        "params": [
+          "n : Dim",
+          "c : R",
+          "a : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, c = -0.30187924450048853, a = (1, <ndarray (1,)>)",
+          "n = 1, c = -0.7381216791530953, a = (1, <ndarray (1,)>)",
+          "n = 1, c = -0.7336408355809825, a = (1, <ndarray (1,)>)",
+          "n = 1, c = -0.007382887071246014, a = (1, <ndarray (1,)>)",
+          "n = 1, c = 1.8654706591494556, a = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "Reflexive (VecOf n) \\ a b { eqVec a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 2, x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "Symmetric (VecOf n) \\ a b { eqVec a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "Associative (VecOf n) \\ a b { eqVec a b } \\ a b { add a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n",
+          "z : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), z = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), z = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), z = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), z = (1, <ndarray (1,)>)",
+          "n = 2, x = (2, <ndarray (2,)>), y = (2, <ndarray (2,)>), z = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "Commutative (VecOf n) \\ a b { eqVec a b } \\ a b { add a b }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 2, x = (2, <ndarray (2,)>), y = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "LeftIdentity (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } (zeros n)",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 2, x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "LeftInverse (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } (zeros n) \\ a { scale (0.0 - 1.0) a }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "ScaleAssociates (VecOf n) \\ a b { eqVec a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "a : R",
+          "b : R",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = -0.2087040363138637, b = -0.34204739059241596, x = (1, <ndarray (1,)>)",
+          "n = 1, a = -0.2501240883799227, b = 0.8141080376498262, x = (1, <ndarray (1,)>)",
+          "n = 1, a = -0.8344254835210645, b = 0.027617746360931283, x = (1, <ndarray (1,)>)",
+          "n = 1, a = -0.8734224732257909, b = -0.9014376793283787, x = (1, <ndarray (1,)>)",
+          "n = 2, a = -0.07625362338609865, b = -1.3493732969327286, x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "ScaleUnit (VecOf n) \\ a b { eqVec a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 2, x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "ScaleDistribV (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "a : R",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = 0.1570032582124974, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = -0.22684945306845905, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = 0.5677886736091069, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = -0.8800770252688268, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = 0.8681435520821292, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "ScaleDistribR (VecOf n) \\ a b { eqVec a b } \\ a b { add a b } \\ c a { scale c a }",
+        "params": [
+          "n : Dim",
+          "a : R",
+          "b : R",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = 0.4225239303821118, b = -0.20839934856325226, x = (1, <ndarray (1,)>)",
+          "n = 1, a = 0.16015909691995445, b = -0.9220382019672346, x = (1, <ndarray (1,)>)",
+          "n = 1, a = -0.5739174743896094, b = -0.043810366082357444, x = (1, <ndarray (1,)>)",
+          "n = 1, a = 0.9557434192700476, b = -0.27195047016302176, x = (1, <ndarray (1,)>)",
+          "n = 2, a = -0.8301822569389579, b = -1.0589186691174195, x = (2, <ndarray (2,)>)"
+        ]
+      }
+    ]
+  },
+  "matrices": {
+    "hash": "51eff7130226c703",
+    "when": "2026-10-04T20:19:32",
+    "passed": true,
+    "seed": 158319010,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "(matVec a x).n == n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 2, a = (2, 2, <ndarray (2, 2)>), x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "(matMul a b).m == n and (matMul a b).n == n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "b : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "n = 2, a = (2, 2, <ndarray (2, 2)>), b = (2, 2, <ndarray (2, 2)>)"
+        ]
+      },
+      {
+        "label": "0 <= n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1"
+        ]
+      },
+      {
+        "label": "(identity n).m == n and (identity n).n == n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1"
+        ]
+      },
+      {
+        "label": "(transpose a).m == n and (transpose a).n == n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "ActsLinearlyAdd (VecOf n) (MatOf n n) (euclidean n).space.eq (euclidean n).space.add \\ a x { matVec a x }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 2, a = (2, 2, <ndarray (2, 2)>), x = (2, <ndarray (2,)>), y = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "ActsLinearlyScale (VecOf n) (MatOf n n) (euclidean n).space.eq (euclidean n).space.scale \\ a x { matVec a x }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "c : R",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = -0.40651811603518606, x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = -0.17883201380680025, x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = -0.2163759131746843, x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = 0.28644352922507976, x = (1, <ndarray (1,)>)",
+          "n = 2, a = (2, 2, <ndarray (2, 2)>), c = -1.4723012744270618, x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "ComposeActs (VecOf n) (MatOf n n) (euclidean n).space.eq \\ a x { matVec a x } \\ a b { matMul a b }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "b : MatOf n n",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)"
+        ]
+      },
+      {
+        "label": "IdentityActs (VecOf n) (MatOf n n) (euclidean n).space.eq \\ a x { matVec a x } (identity n)",
+        "params": [
+          "n : Dim",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>)",
+          "n = 2, x = (2, <ndarray (2,)>)"
+        ]
+      },
+      {
+        "label": "AdjointOfInner (VecOf n) (MatOf n n) (euclidean n).eqR (euclidean n).inner \\ a x { matVec a x } \\ a { transpose a }",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 2, a = (2, 2, <ndarray (2, 2)>), x = (2, <ndarray (2,)>), y = (2, <ndarray (2,)>)"
+        ]
+      }
+    ]
+  }
+}

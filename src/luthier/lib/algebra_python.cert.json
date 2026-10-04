@@ -1,0 +1,513 @@
+{
+  "vec5": {
+    "hash": "13f9b6195ab3c0b9",
+    "when": "2026-10-04T20:24:45",
+    "passed": true,
+    "seed": 1659134107,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "Reflexive (VecOf lawDim) \\ a b { eqVec a b }",
+        "params": [
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "Symmetric (VecOf lawDim) \\ a b { eqVec a b }",
+        "params": [
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "Associative (VecOf lawDim) \\ a b { eqVec a b } \\ a b { add a b }",
+        "params": [
+          "x : VecOf lawDim",
+          "y : VecOf lawDim",
+          "z : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "Commutative (VecOf lawDim) \\ a b { eqVec a b } \\ a b { add a b }",
+        "params": [
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "LeftIdentity (VecOf lawDim) \\ a b { eqVec a b } \\ a b { add a b } (zeros lawDim)",
+        "params": [
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "LeftInverse (VecOf lawDim) \\ a b { eqVec a b } \\ a b { add a b } (zeros lawDim) \\ a { scale (0.0 - 1.0) a }",
+        "params": [
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "ScaleAssociates (VecOf lawDim) \\ a b { eqVec a b } \\ c a { scale c a }",
+        "params": [
+          "a : R",
+          "b : R",
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = -0.12600736235457766, b = -0.2980954390162851, x = (5, <ndarray (5,)>)",
+          "a = -0.728394509329469, b = -0.36359464124769536, x = (5, <ndarray (5,)>)",
+          "a = 0.2349320782453046, b = 0.6340589980117812, x = (5, <ndarray (5,)>)",
+          "a = -0.16870540729212036, b = -0.0742601165295278, x = (5, <ndarray (5,)>)",
+          "a = 1.9515250841779688, b = -0.6482863381797315, x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "ScaleUnit (VecOf lawDim) \\ a b { eqVec a b } \\ c a { scale c a }",
+        "params": [
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "ScaleDistribV (VecOf lawDim) \\ a b { eqVec a b } \\ a b { add a b } \\ c a { scale c a }",
+        "params": [
+          "a : R",
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = -0.25162426485065215, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = 0.43970602536651704, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = 0.26103034763400257, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = 0.4193684002489666, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = 1.916444011818231, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "ScaleDistribR (VecOf lawDim) \\ a b { eqVec a b } \\ a b { add a b } \\ c a { scale c a }",
+        "params": [
+          "a : R",
+          "b : R",
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = -0.4559291942225103, b = -0.29033721860214445, x = (5, <ndarray (5,)>)",
+          "a = 0.9419140027533857, b = -0.6755381799489506, x = (5, <ndarray (5,)>)",
+          "a = -0.4414697575475286, b = -0.09270623865586525, x = (5, <ndarray (5,)>)",
+          "a = 0.6735838203963349, b = 0.8676468940954405, x = (5, <ndarray (5,)>)",
+          "a = -0.509776564028813, b = -0.7693911463538718, x = (5, <ndarray (5,)>)"
+        ]
+      }
+    ]
+  },
+  "euclid5": {
+    "hash": "e839711385b3ad71",
+    "when": "2026-10-04T20:24:46",
+    "passed": true,
+    "seed": 1942300396,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "SymmetricForm (VecOf lawDim) eqR \\ a b { dot a b }",
+        "params": [
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "BilinearAdd (VecOf lawDim) eqR (vecSpace lawDim).add \\ a b { dot a b }",
+        "params": [
+          "x : VecOf lawDim",
+          "y : VecOf lawDim",
+          "z : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>), z = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "BilinearScale (VecOf lawDim) eqR (vecSpace lawDim).scale \\ a b { dot a b }",
+        "params": [
+          "a : R",
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = -0.8870288256230416, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = 0.325561680354272, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = -0.04090702042841787, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = -0.7980977747238833, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = -1.2108064264177338, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "PositiveForm (VecOf lawDim) (vecSpace lawDim).eq (vecSpace lawDim).zero \\ a b { dot a b }",
+        "params": [
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)"
+        ]
+      }
+    ]
+  },
+  "matrices5": {
+    "hash": "a57de93ce235dcc1",
+    "when": "2026-10-04T20:24:46",
+    "passed": true,
+    "seed": 930129318,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "ActsLinearlyAdd (VecOf lawDim) (MatOf lawDim lawDim) (euclidean lawDim).space.eq (euclidean lawDim).space.add \\ a x { matVec a x }",
+        "params": [
+          "a : MatOf lawDim lawDim",
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "ActsLinearlyScale (VecOf lawDim) (MatOf lawDim lawDim) (euclidean lawDim).space.eq (euclidean lawDim).space.scale \\ a x { matVec a x }",
+        "params": [
+          "a : MatOf lawDim lawDim",
+          "c : R",
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "MatOf: registered Python generator, size up to 16",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = (5, 5, <ndarray (5, 5)>), c = -0.837370811598658, x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), c = 0.8314235174340923, x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), c = -0.6030480957162305, x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), c = 0.73877748581807, x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), c = -0.12291234874841583, x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "ComposeActs (VecOf lawDim) (MatOf lawDim lawDim) (euclidean lawDim).space.eq \\ a x { matVec a x } \\ a b { matMul a b }",
+        "params": [
+          "a : MatOf lawDim lawDim",
+          "b : MatOf lawDim lawDim",
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "IdentityActs (VecOf lawDim) (MatOf lawDim lawDim) (euclidean lawDim).space.eq \\ a x { matVec a x } (identity lawDim)",
+        "params": [
+          "x : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)",
+          "x = (5, <ndarray (5,)>)"
+        ]
+      },
+      {
+        "label": "AdjointOfInner (VecOf lawDim) (MatOf lawDim lawDim) (euclidean lawDim).eqR (euclidean lawDim).inner \\ a x { matVec a x } \\ a { transpose a }",
+        "params": [
+          "a : MatOf lawDim lawDim",
+          "x : VecOf lawDim",
+          "y : VecOf lawDim"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
+          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
+        ]
+      }
+    ]
+  }
+}

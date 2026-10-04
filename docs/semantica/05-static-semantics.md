@@ -231,7 +231,13 @@ name; it is not a state the name has once and for all.
 - An obligation raised inside a branch of `if c then a else b` carries `c` (or `not c`) as a
   precondition: `f lo` in the `else` of `if lo >= n` owes `lo < n` only where `lo >= n` fails. An
   obligation raised inside `match e { x -> t }` speaks of `e`, not of every `x`: the variable is a
-  name for `e`. Without these, every recursion over indices owes laws that are false.
+  name for `e`; inside `match e { (x, y) -> t }`, `x` and `y` name the components of `e`. Without these, every recursion over indices owes laws that are false.
+- An obligation is quantified only over the parameters it mentions, and those their types mention.
+  `DotAgrees (d : Vec -> Vec -> R) (n : Dim) (x y : VecOf n)` owes `y.n == x.n` inside, which does
+  not mention `d`; drawing a `d` would be both unnecessary and impossible.
+- A function is drawn as its table when its domain is `Fin n`; of an infinite domain, as a constant,
+  or an affine map on `R -> R`. The second is a thin sample of the function space, and the
+  certificate's description of the generator says so.
 - A sampled case whose parameters cannot be drawn, because a parameter's type depends on earlier
   ones and is empty for them (`k : Fin n` with `n = 0`), holds vacuously and is skipped; a law none
   of whose cases could be drawn is reported as an error, not as passed.
@@ -294,3 +300,8 @@ equivalences, are for version 1 or 2.
 - Equality as a degree: for samplers, two values are equal in distribution when a test does not
   separate them; the equality component would return a verdict with its level instead of a `Bool`.
 - Whether an alias may abbreviate a value (`two = 1 + 1`) as well as a type.
+- Obligations under a constructor or label pattern. In `match m { just x -> t }` the variable is not
+  a projection of `m` (which may be `nothing`), so an obligation in `t` is still quantified over
+  every `x`; it should carry `m == just x` as a precondition, as a branch of `if` carries its
+  condition. Patterns of variables, wildcards and tuples of any length already name the parts of
+  the scrutinee.

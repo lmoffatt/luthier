@@ -1,0 +1,2668 @@
+{
+  "last": {
+    "hash": "451d6c9f3d057658",
+    "when": "2026-10-04T20:16:40",
+    "passed": true,
+    "seed": 1840760158,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= v.n - 1 and v.n - 1 < v.n",
+        "params": [
+          "v : NonEmptyVec"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R) where 1 <= v.n"
+        ],
+        "sample_cases": [
+          "v = (1, <ndarray (1,)>)",
+          "v = (1, <ndarray (1,)>)",
+          "v = (1, <ndarray (1,)>)",
+          "v = (1, <ndarray (1,)>)",
+          "v = (1, <ndarray (1,)>)"
+        ]
+      }
+    ]
+  },
+  "append": {
+    "hash": "120777fb4adaaece",
+    "when": "2026-10-04T20:16:44",
+    "passed": true,
+    "seed": 856273042,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= v.n + 1",
+        "params": [
+          "v : Vec",
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "v = (0, <ndarray (0,)>), x = 0.7354246197625158",
+          "v = (1, <ndarray (1,)>), x = -0.6934363549299314",
+          "v = (1, <ndarray (1,)>), x = 0.6586796978680725",
+          "v = (0, <ndarray (0,)>), x = -0.8553522899612758",
+          "v = (0, <ndarray (0,)>), x = 0.8994982088646606"
+        ]
+      },
+      {
+        "label": "k < v.n -> 0 <= k and k < v.n",
+        "params": [
+          "v : Vec",
+          "x : R",
+          "k : Fin (v.n + 1)"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R)",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < v.n + 1"
+        ],
+        "sample_cases": [
+          "v = (0, <ndarray (0,)>), x = 0.560777664968861, k = 0",
+          "v = (1, <ndarray (1,)>), x = -0.9632569059062577, k = 1",
+          "v = (0, <ndarray (0,)>), x = 0.4607633869192178, k = 0",
+          "v = (0, <ndarray (0,)>), x = 0.9249886132355141, k = 0",
+          "v = (0, <ndarray (0,)>), x = -0.37442138575953576, k = 0"
+        ]
+      }
+    ]
+  },
+  "head": {
+    "hash": "4daf78ce087ff2bc",
+    "when": "2026-10-04T20:16:47",
+    "passed": true,
+    "seed": 708683251,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= i and i < v.n",
+        "params": [
+          "v : Vec",
+          "k : { m : Nat | m <= v.n }",
+          "i : Fin k"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k where m <= v.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k~14423 and k~14423 < k"
+        ],
+        "sample_cases": [
+          "v = (1, <ndarray (1,)>), k = 1, i = 0",
+          "v = (1, <ndarray (1,)>), k = 1, i = 0",
+          "v = (1, <ndarray (1,)>), k = 1, i = 0",
+          "v = (1, <ndarray (1,)>), k = 1, i = 0",
+          "v = (1, <ndarray (1,)>), k = 1, i = 0"
+        ]
+      }
+    ]
+  },
+  "sumFrom": {
+    "hash": "3b53d9a6ea1ec00b",
+    "when": "2026-10-04T20:16:51",
+    "passed": true,
+    "seed": 1280114119,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "not (lo >= n) -> 0 <= lo and lo < n",
+        "params": [
+          "n : Int",
+          "lo : Nat",
+          "f : Fin n -> R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Fin n -> R"
+        ],
+        "sample_cases": [
+          "n = -1, lo = 1, f = <ndarray (0,)>",
+          "n = 0, lo = 1, f = <ndarray (0,)>",
+          "n = 1, lo = 0, f = <ndarray (1,)>",
+          "n = -1, lo = 0, f = <ndarray (0,)>",
+          "n = 1, lo = 1, f = <ndarray (1,)>"
+        ]
+      },
+      {
+        "label": "not (lo >= n) -> 0 <= lo + 1",
+        "params": [
+          "n : Int",
+          "lo : Nat",
+          "f : Fin n -> R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Fin n -> R"
+        ],
+        "sample_cases": [
+          "n = 1, lo = 1, f = <ndarray (1,)>",
+          "n = -1, lo = 0, f = <ndarray (0,)>",
+          "n = 0, lo = 0, f = <ndarray (0,)>",
+          "n = 0, lo = 1, f = <ndarray (0,)>",
+          "n = 1, lo = 0, f = <ndarray (1,)>"
+        ]
+      }
+    ]
+  },
+  "sumToInt": {
+    "hash": "60fa2e0806024bce",
+    "when": "2026-10-04T20:16:55",
+    "passed": true,
+    "seed": 627569652,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "not (n <= 0) -> 0 <= k and k < n",
+        "params": [
+          "n : Int",
+          "f : Fin n -> Int",
+          "k : Fin (n - 1)"
+        ],
+        "mode": "sampled",
+        "cases": 93,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Fin n -> Int",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n - 1"
+        ],
+        "sample_cases": [
+          "n = 2, f = <ndarray (2,)>, k = 0",
+          "n = 2, f = <ndarray (2,)>, k = 0",
+          "n = 2, f = <ndarray (2,)>, k = 0",
+          "n = 2, f = <ndarray (2,)>, k = 0",
+          "n = 2, f = <ndarray (2,)>, k = 0"
+        ]
+      },
+      {
+        "label": "not (n <= 0) -> 0 <= n - 1 and n - 1 < n",
+        "params": [
+          "n : Int",
+          "f : Fin n -> Int"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Fin n -> Int"
+        ],
+        "sample_cases": [
+          "n = 0, f = <ndarray (0,)>",
+          "n = -1, f = <ndarray (0,)>",
+          "n = 0, f = <ndarray (0,)>",
+          "n = 0, f = <ndarray (0,)>",
+          "n = -1, f = <ndarray (0,)>"
+        ]
+      }
+    ]
+  },
+  "maxOver": {
+    "hash": "4fb596f4c3c5a9fc",
+    "when": "2026-10-04T20:16:59",
+    "passed": true,
+    "seed": 1921382734,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "not (n <= 0) -> 0 <= k and k < n",
+        "params": [
+          "n : Int",
+          "f : Fin n -> R",
+          "best : R",
+          "k : Fin (n - 1)"
+        ],
+        "mode": "sampled",
+        "cases": 93,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Fin n -> R",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n - 1"
+        ],
+        "sample_cases": [
+          "n = 2, f = <ndarray (2,)>, best = 0.8959350688485972, k = 0",
+          "n = 2, f = <ndarray (2,)>, best = -1.3413813378001884, k = 0",
+          "n = 2, f = <ndarray (2,)>, best = -1.1555220726247422, k = 0",
+          "n = 2, f = <ndarray (2,)>, best = 1.0106668862874537, k = 0",
+          "n = 2, f = <ndarray (2,)>, best = 1.2329835264323283, k = 0"
+        ]
+      },
+      {
+        "label": "not (n <= 0) -> 0 <= n - 1 and n - 1 < n",
+        "params": [
+          "n : Int",
+          "f : Fin n -> R",
+          "best : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Fin n -> R",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "n = -1, f = <ndarray (0,)>, best = 0.4677246088344911",
+          "n = -1, f = <ndarray (0,)>, best = -0.6227804073291066",
+          "n = -1, f = <ndarray (0,)>, best = -0.8071989833507895",
+          "n = 0, f = <ndarray (0,)>, best = -0.9094786068061318",
+          "n = 0, f = <ndarray (0,)>, best = 0.8328125187541793"
+        ]
+      },
+      {
+        "label": "not (n <= 0) -> f (n - 1) > best -> 0 <= n - 1 and n - 1 < n",
+        "params": [
+          "n : Int",
+          "f : Fin n -> R",
+          "best : R"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+          "Fin n -> R",
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "n = -1, f = <ndarray (0,)>, best = -0.22782088370902276",
+          "n = 1, f = <ndarray (1,)>, best = -0.5856512205111948",
+          "n = -1, f = <ndarray (0,)>, best = -0.648487405709792",
+          "n = 1, f = <ndarray (1,)>, best = -0.9254439469821971",
+          "n = 0, f = <ndarray (0,)>, best = 0.8008884578449991"
+        ]
+      }
+    ]
+  },
+  "dotDef": {
+    "hash": "da8a9923d2c77263",
+    "when": "2026-10-04T20:17:02",
+    "passed": true,
+    "seed": 1873482114,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= k and k < y.n",
+        "params": [
+          "x : Vec",
+          "y : VecOf x.n",
+          "k : Fin x.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R)",
+          "VecOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < x.n"
+        ],
+        "sample_cases": [
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0"
+        ]
+      }
+    ]
+  },
+  "normDef": {
+    "hash": "f4477a418273d9e2",
+    "when": "2026-10-04T20:22:57",
+    "passed": true,
+    "seed": 1045250506,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "x.n == x.n",
+        "params": [
+          "x : Vec"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R: drawn as its table)"
+        ],
+        "sample_cases": [
+          "x = (1, <ndarray (1,)>)",
+          "x = (1, <ndarray (1,)>)",
+          "x = (1, <ndarray (1,)>)",
+          "x = (0, <ndarray (0,)>)",
+          "x = (1, <ndarray (1,)>)"
+        ]
+      }
+    ]
+  },
+  "addDef": {
+    "hash": "42db2c7a8369fd01",
+    "when": "2026-10-04T20:17:10",
+    "passed": true,
+    "seed": 474822604,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= k and k < y.n",
+        "params": [
+          "x : Vec",
+          "y : VecOf x.n",
+          "k : Fin x.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R)",
+          "VecOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < x.n"
+        ],
+        "sample_cases": [
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0"
+        ]
+      }
+    ]
+  },
+  "subDef": {
+    "hash": "05ba32146714fb0d",
+    "when": "2026-10-04T20:17:13",
+    "passed": true,
+    "seed": 480632130,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= k and k < y.n",
+        "params": [
+          "x : Vec",
+          "y : VecOf x.n",
+          "k : Fin x.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin n -> R)",
+          "VecOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < x.n"
+        ],
+        "sample_cases": [
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0",
+          "x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>), k = 0"
+        ]
+      }
+    ]
+  },
+  "matVecDef": {
+    "hash": "163a1c5600b9646a",
+    "when": "2026-10-04T20:17:17",
+    "passed": true,
+    "seed": 2071183045,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= j and j < x.n",
+        "params": [
+          "a : Mat",
+          "x : VecOf a.n",
+          "i : Fin a.m",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R))",
+          "VecOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), i = 0, j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), i = 0, j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), i = 0, j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), i = 0, j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), i = 0, j = 0"
+        ]
+      }
+    ]
+  },
+  "matMulDef": {
+    "hash": "a68331b82b085c23",
+    "when": "2026-10-04T20:17:21",
+    "passed": true,
+    "seed": 819685864,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= k and k < b.m",
+        "params": [
+          "a : Mat",
+          "b : MatRows a.n",
+          "i : Fin a.m",
+          "j : Fin b.n",
+          "k : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R))",
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a~14422.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < b.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0, j = 0, k = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0, j = 0, k = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0, j = 0, k = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0, j = 0, k = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0, j = 0, k = 0"
+        ]
+      }
+    ]
+  },
+  "traceDef": {
+    "hash": "ace8b6283403b105",
+    "when": "2026-10-04T20:17:25",
+    "passed": true,
+    "seed": 1890188061,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= i and i < a.n",
+        "params": [
+          "a : Square",
+          "i : Fin a.m"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), i = 0"
+        ]
+      }
+    ]
+  },
+  "maddDef": {
+    "hash": "5829656b5680ba98",
+    "when": "2026-10-04T20:23:01",
+    "passed": true,
+    "seed": 2001206725,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= i and i < b.m",
+        "params": [
+          "a : Mat",
+          "b : MatOf a.m a.n",
+          "i : Fin a.m"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table))",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m"
+        ],
+        "sample_cases": [
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0"
+        ]
+      },
+      {
+        "label": "0 <= j and j < b.n",
+        "params": [
+          "a : Mat",
+          "b : MatOf a.m a.n",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table))",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), j = 0"
+        ]
+      }
+    ]
+  },
+  "msubDef": {
+    "hash": "b313d38ba3b25cf4",
+    "when": "2026-10-04T20:23:05",
+    "passed": true,
+    "seed": 632614892,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= i and i < b.m",
+        "params": [
+          "a : Mat",
+          "b : MatOf a.m a.n",
+          "i : Fin a.m"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table))",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m"
+        ],
+        "sample_cases": [
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0"
+        ]
+      },
+      {
+        "label": "0 <= j and j < b.n",
+        "params": [
+          "a : Mat",
+          "b : MatOf a.m a.n",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table))",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), j = 0"
+        ]
+      }
+    ]
+  },
+  "hadamardDef": {
+    "hash": "1fd967a8f1bd622e",
+    "when": "2026-10-04T20:23:09",
+    "passed": true,
+    "seed": 2068092874,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= i and i < b.m",
+        "params": [
+          "a : Mat",
+          "b : MatOf a.m a.n",
+          "i : Fin a.m"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table))",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m"
+        ],
+        "sample_cases": [
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 0, <ndarray (1, 0)>), b = (1, 0, <ndarray (1, 0)>), i = 0"
+        ]
+      },
+      {
+        "label": "0 <= j and j < b.n",
+        "params": [
+          "a : Mat",
+          "b : MatOf a.m a.n",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table))",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0",
+          "a = (0, 1, <ndarray (0,)>), b = (0, 1, <ndarray (0, 1)>), j = 0"
+        ]
+      }
+    ]
+  },
+  "minor": {
+    "hash": "3731da446e6d4450",
+    "when": "2026-10-04T20:17:43",
+    "passed": true,
+    "seed": 472546979,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= a.m - 1",
+        "params": [
+          "a : Square",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0"
+        ]
+      },
+      {
+        "label": "0 <= a.n - 1",
+        "params": [
+          "a : Square",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0"
+        ]
+      },
+      {
+        "label": "0 <= r + 1 and r + 1 < a.m",
+        "params": [
+          "a : Square",
+          "j : Fin a.n",
+          "r : Fin (a.m - 1)",
+          "c : Fin (a.n - 1)"
+        ],
+        "mode": "sampled",
+        "cases": 93,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m - 1",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n - 1"
+        ],
+        "sample_cases": [
+          "a = (2, 2, <ndarray (2, 2)>), j = 0, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 1, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 1, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 1, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 0, r = 0, c = 0"
+        ]
+      },
+      {
+        "label": "0 <= match (c < j) { true -> c ; false -> c + 1 } and match (c < j) { true -> c ; false -> c + 1 } < a.n",
+        "params": [
+          "a : Square",
+          "j : Fin a.n",
+          "r : Fin (a.m - 1)",
+          "c : Fin (a.n - 1)"
+        ],
+        "mode": "sampled",
+        "cases": 93,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.m - 1",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n - 1"
+        ],
+        "sample_cases": [
+          "a = (2, 2, <ndarray (2, 2)>), j = 0, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 1, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 0, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 0, r = 0, c = 0",
+          "a = (2, 2, <ndarray (2, 2)>), j = 0, r = 0, c = 0"
+        ]
+      }
+    ]
+  },
+  "detDef": {
+    "hash": "1f055b7420d2a65a",
+    "when": "2026-10-04T20:17:50",
+    "passed": true,
+    "seed": 1160029639,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "a.m <= 1 -> a.m == 1 -> 0 <= 0 and 0 < a.m",
+        "params": [
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (0, 0, <ndarray (0,)>)"
+        ]
+      },
+      {
+        "label": "a.m <= 1 -> a.m == 1 -> 0 <= 0 and 0 < a.n",
+        "params": [
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.m <= 1) -> 0 <= 0 and 0 < a.m",
+        "params": [
+          "a : Square",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0"
+        ]
+      },
+      {
+        "label": "not (a.m <= 1) -> (minor a j).m == (minor a j).n",
+        "params": [
+          "a : Square",
+          "j : Fin a.n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R)) where a.m == a.n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0",
+          "a = (1, 1, <ndarray (1, 1)>), j = 0"
+        ]
+      }
+    ]
+  },
+  "rotate": {
+    "hash": "68cdd34eb582aa06",
+    "when": "2026-10-04T20:23:14",
+    "passed": true,
+    "seed": 2114528919,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= p and p < a.m",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "0 <= q and q < a.n",
+        "params": [
+          "n : Nat",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> 0 <= q and q < a.m",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> 0 <= q and q < a.n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> 0 <= p and p < a.m",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> 0 <= p and p < a.n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> 0 <= p and p < a.m",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> 0 <= q and q < a.n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)))).m == a.n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> (matMulDef a (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0))))).m == (transposeDef (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0))))).n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> (matMulDef (transposeDef (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0))))) (matMulDef a (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)))))).m == n and (matMulDef (transposeDef (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0))))) (matMulDef a (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)))))).n == n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)))).m == v.n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n",
+          "v : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "not (a.f p q == 0.0) -> (matMulDef v (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0))))).m == n and (matMulDef v (rotation n p q (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0)) ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (1.0 / sqrtR ((match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) * (match ((a.f q q - a.f p p) / (2.0 * a.f p q) >= 0.0) { true -> 1.0 ; false -> 0.0 - 1.0 } / (abs ((a.f q q - a.f p p) / (2.0 * a.f p q)) + sqrtR (((a.f q q - a.f p p) / (2.0 * a.f p q)) * ((a.f q q - a.f p p) / (2.0 * a.f p q)) + 1.0))) + 1.0))))).n == n",
+        "params": [
+          "n : Nat",
+          "p : Fin n",
+          "q : Fin n",
+          "a : MatOf n n",
+          "v : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, p = 0, q = 0, a = (1, 1, <ndarray (1, 1)>), v = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "sweepFrom": {
+    "hash": "82c5eb266b08bb4a",
+    "when": "2026-10-04T20:23:22",
+    "passed": true,
+    "seed": 948069424,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "not (p + 1 >= n) -> q >= n -> 0 <= p + 1",
+        "params": [
+          "n : Nat",
+          "p : Nat",
+          "q : Nat"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+        ],
+        "sample_cases": [
+          "n = 1, p = 1, q = 1",
+          "n = 0, p = 1, q = 0",
+          "n = 1, p = 1, q = 1",
+          "n = 1, p = 0, q = 1",
+          "n = 0, p = 0, q = 1"
+        ]
+      },
+      {
+        "label": "not (p + 1 >= n) -> q >= n -> 0 <= p + 2",
+        "params": [
+          "n : Nat",
+          "p : Nat",
+          "q : Nat"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 1",
+          "n = 1, p = 1, q = 1",
+          "n = 1, p = 1, q = 1",
+          "n = 0, p = 0, q = 0",
+          "n = 0, p = 1, q = 1"
+        ]
+      },
+      {
+        "label": "not (p + 1 >= n) -> not (q >= n) -> 0 <= q + 1",
+        "params": [
+          "n : Nat",
+          "p : Nat",
+          "q : Nat"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 1",
+          "n = 1, p = 0, q = 0",
+          "n = 1, p = 1, q = 0",
+          "n = 1, p = 0, q = 1",
+          "n = 0, p = 0, q = 1"
+        ]
+      },
+      {
+        "label": "not (p + 1 >= n) -> not (q >= n) -> 0 <= p and p < n",
+        "params": [
+          "n : Nat",
+          "p : Nat",
+          "q : Nat"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+        ],
+        "sample_cases": [
+          "n = 1, p = 1, q = 0",
+          "n = 0, p = 1, q = 1",
+          "n = 1, p = 0, q = 1",
+          "n = 0, p = 1, q = 0",
+          "n = 0, p = 0, q = 0"
+        ]
+      },
+      {
+        "label": "not (p + 1 >= n) -> not (q >= n) -> 0 <= q and q < n",
+        "params": [
+          "n : Nat",
+          "p : Nat",
+          "q : Nat"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+        ],
+        "sample_cases": [
+          "n = 1, p = 0, q = 1",
+          "n = 0, p = 1, q = 0",
+          "n = 1, p = 1, q = 1",
+          "n = 0, p = 1, q = 0",
+          "n = 1, p = 1, q = 1"
+        ]
+      }
+    ]
+  },
+  "eigenDef": {
+    "hash": "16c4bb7b8d8a6ab0",
+    "when": "2026-10-04T20:23:26",
+    "passed": true,
+    "seed": 2053793173,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "a.m == a.m and a.n == a.m",
+        "params": [
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)"
+        ]
+      },
+      {
+        "label": "a.m == a.m and a.n == a.m",
+        "params": [
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "(identity a.m).m == a.m and (identity a.m).n == a.m",
+        "params": [
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "0 <= i and i < d.n",
+        "params": [
+          "a : Square",
+          "d : MatOf a.m a.m",
+          "i : Fin d.m"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table)) where a.m == a.n",
+          "MatOf: registered Python generator, size up to 16",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < d.m"
+        ],
+        "sample_cases": [
+          "a = (1, 1, <ndarray (1, 1)>), d = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), d = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), d = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), d = (1, 1, <ndarray (1, 1)>), i = 0",
+          "a = (1, 1, <ndarray (1, 1)>), d = (1, 1, <ndarray (1, 1)>), i = 0"
+        ]
+      }
+    ]
+  },
+  "spectralMap": {
+    "hash": "2f781f6f63d91e23",
+    "when": "2026-10-04T20:37:14",
+    "passed": true,
+    "seed": 223664298,
+    "run_seed": 3,
+    "generation": {
+      "size": 6,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "(eigenDef a).e.n == (eigenDef a).v.n",
+        "params": [
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "(Int in [-6, 6] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-6, 6] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (0, 0, <ndarray (0,)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)",
+          "a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      },
+      {
+        "label": "(transposeDef (eigenDef a).v).m == (matMulDef (eigenDef a).v ((eigenDef a).e.n, (eigenDef a).e.n, \\ i j { match (i == j) { true -> f ((eigenDef a).e.f i) ; false -> 0.0 } })).n",
+        "params": [
+          "f : R -> R",
+          "a : Square"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R -> R: constant functions (affine on R -> R), a thin sample",
+          "(Int in [-6, 6] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((Int in [-6, 6] (Python fallback; import \"random\" for genInt) where 0 <= k) * (Fin m -> Fin n -> R: drawn as its table)) where a.m == a.n"
+        ],
+        "sample_cases": [
+          "f = \\ _ { 0.32310190026497776 }, a = (1, 1, <ndarray (1, 1)>)",
+          "f = \\ _ { 0.17650123672138718 }, a = (0, 0, <ndarray (0,)>)",
+          "f = \\ x { 0.201109872871982 * x + 0.5994258808002775 }, a = (0, 0, <ndarray (0,)>)",
+          "f = \\ x { 0.20772373067020689 * x + -0.6848304743155531 }, a = (0, 0, <ndarray (0,)>)",
+          "f = \\ x { 0.40280308577908985 * x + 0.747134747282405 }, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "DotAgrees": {
+    "hash": "6bf3b5758dfaa6f7",
+    "when": "2026-10-04T20:23:37",
+    "passed": true,
+    "seed": 1639033451,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "y.n == x.n",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
+        ]
+      }
+    ]
+  },
+  "AddAgrees": {
+    "hash": "6c1eec5c4779ac9e",
+    "when": "2026-10-04T20:23:41",
+    "passed": true,
+    "seed": 592638344,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "y.n == x.n",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
+        ]
+      }
+    ]
+  },
+  "SubAgrees": {
+    "hash": "15ea0021c8f0ea1d",
+    "when": "2026-10-04T20:23:46",
+    "passed": true,
+    "seed": 1736900972,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "y.n == x.n",
+        "params": [
+          "n : Dim",
+          "x : VecOf n",
+          "y : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
+          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
+        ]
+      }
+    ]
+  },
+  "MatVecAgrees": {
+    "hash": "8f42b4eeaf2e5b9d",
+    "when": "2026-10-04T20:23:50",
+    "passed": true,
+    "seed": 1682639926,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "x.n == a.n",
+        "params": [
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "x : VecOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "VecOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)"
+        ]
+      }
+    ]
+  },
+  "MatMulAgrees": {
+    "hash": "044017fb7ba6d67a",
+    "when": "2026-10-04T20:23:54",
+    "passed": true,
+    "seed": 949109112,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "b.m == a.n",
+        "params": [
+          "m : Dim",
+          "k : Dim",
+          "n : Dim",
+          "a : MatOf m k",
+          "b : MatOf k n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "m = 1, k = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, k = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, k = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, k = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, k = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "TraceAgrees": {
+    "hash": "71bd5e8109dd97df",
+    "when": "2026-10-04T20:23:58",
+    "passed": true,
+    "seed": 1928504987,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "a.m == a.n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "MaddAgrees": {
+    "hash": "d41580509ddf41d5",
+    "when": "2026-10-04T20:24:03",
+    "passed": true,
+    "seed": 50992336,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "b.m == a.m and b.n == a.n",
+        "params": [
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "b : MatOf m n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "MsubAgrees": {
+    "hash": "92fbee91bb050f3d",
+    "when": "2026-10-04T20:24:07",
+    "passed": true,
+    "seed": 1401985251,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "b.m == a.m and b.n == a.n",
+        "params": [
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "b : MatOf m n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "HadamardAgrees": {
+    "hash": "1159ae22a8cd9454",
+    "when": "2026-10-04T20:24:11",
+    "passed": true,
+    "seed": 2057206154,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "b.m == a.m and b.n == a.n",
+        "params": [
+          "m : Dim",
+          "n : Dim",
+          "a : MatOf m n",
+          "b : MatOf m n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
+          "m = 1, n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "DetAgrees": {
+    "hash": "722975da20a9c8f7",
+    "when": "2026-10-04T20:24:15",
+    "passed": true,
+    "seed": 1520854953,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "a.m == a.n",
+        "params": [
+          "n : Dim",
+          "a : MatOf n n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "MatOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, a = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "EigvalsAgree": {
+    "hash": "e3c83885b7243b4c",
+    "when": "2026-10-04T20:24:20",
+    "passed": true,
+    "seed": 252456658,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim",
+          "s : SpdOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "InvSqrtAgrees": {
+    "hash": "1ef9f0a99a6f051f",
+    "when": "2026-10-04T20:24:24",
+    "passed": true,
+    "seed": 2114605852,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim",
+          "s : SpdOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "SpdOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)",
+          "n = 1, s = (1, 1, <ndarray (1, 1)>)"
+        ]
+      }
+    ]
+  },
+  "RankAgrees": {
+    "hash": "67a10d3eec2efb58",
+    "when": "2026-10-04T20:24:28",
+    "passed": true,
+    "seed": 988043432,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim2",
+          "s : DeficientOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)"
+        ]
+      }
+    ]
+  },
+  "PinvAgrees": {
+    "hash": "8eba54cb1b1ec1e8",
+    "when": "2026-10-04T20:24:32",
+    "passed": true,
+    "seed": 1176315760,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim2",
+          "s : DeficientOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)"
+        ]
+      },
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim2",
+          "s : DeficientOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)"
+        ]
+      }
+    ]
+  },
+  "PinvSqrtAgrees": {
+    "hash": "aefc83b4a502828a",
+    "when": "2026-10-04T20:24:37",
+    "passed": true,
+    "seed": 1204319960,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim2",
+          "s : DeficientOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)"
+        ]
+      },
+      {
+        "label": "s.m == s.n",
+        "params": [
+          "n : Dim2",
+          "s : DeficientOf n"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim2: registered Python generator, size up to 16",
+          "DeficientOf: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)",
+          "n = 2, s = (2, 2, <ndarray (2, 2)>)"
+        ]
+      }
+    ]
+  },
+  "InvSqrtInverts": {
+    "hash": "1049e83d10b393d1",
+    "when": "2026-10-04T20:24:41",
+    "passed": true,
+    "seed": 1779703961,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= n",
+        "params": [
+          "n : Dim"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1",
+          "n = 1"
+        ]
+      }
+    ]
+  }
+}

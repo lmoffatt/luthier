@@ -139,11 +139,12 @@ def _dim(rng: random.Random, size: int) -> int:
 
 
 def _vec(rng: random.Random, n: int, size: int):
-    return np.array([rng.uniform(-size, size) for _ in range(n)])
+    return np.array([rng.uniform(-size, size) for _ in range(max(n, 0))], dtype=float)
 
 
 def _mat(rng: random.Random, m: int, n: int, size: int):
-    return np.array([[rng.uniform(-size, size) for _ in range(n)] for _ in range(m)])
+    m, n = max(m, 0), max(n, 0)
+    return np.array([[rng.uniform(-size, size) for _ in range(n)] for _ in range(m)], dtype=float).reshape(m, n)
 
 
 
