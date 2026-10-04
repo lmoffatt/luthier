@@ -140,6 +140,25 @@ class Program:
         py = to_python(self.env, v, ty)
         return v if py is _OPAQUE else py
 
+    def call(self, name: str, *args):
+        """Apply a definition to Python values and marshal the result to Python. Each argument
+        is marshaled by the declared type of its parameter, so a record parameter takes a
+        dataclass, a dict or a tuple, and an opaque one takes the Python object itself."""
+        from .evaluator import from_python, pi_chain, subst
+        q = self.resolve(name)
+        ty = self.env.defs[q].type
+        chain = pi_chain(self.env, ty)
+        t: Term = Var(q)
+        for x in args:
+            if not isinstance(chain, Pi):
+                raise EvalError(f"{name} takes fewer than {len(args)} arguments")
+            a = from_python(self.env, x, chain.dom)
+            t = App(t, a)
+            chain = subst(chain.cod, {chain.name: a})
+        v = evaluate(self.env, t)
+        py = to_python(self.env, v, chain)
+        return v if py is _OPAQUE else py
+
     # ------------------------------------------------------------------ laws
     def obligations(self) -> list:
         """The definitions that carry laws, those of the files given to `load` first."""
