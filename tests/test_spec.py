@@ -1,9 +1,9 @@
-"""The specification suite of docs/semantica/04-static-semantics.md.
+"""The specification suite of docs/semantica/04-kernel.md and 05-static-semantics.md.
 
 Every `*.accept.lut` under tests/spec must load without error; every `*.reject.lut` must fail
-with a message containing the fragment of its `-- expect:` comment. The static semantics of
-`04` is not implemented yet, so each case is marked xfail; a case that starts passing is
-reported as XPASS, which is the signal to drop its mark.
+with a message containing the fragment of its `-- expect:` comment. The kernel of `04` and the
+static semantics of `05` are not implemented yet, so each case is marked xfail; a case that
+starts passing is reported as XPASS, which is the signal to drop its mark.
 """
 import glob
 import os
@@ -19,7 +19,7 @@ SPEC = os.path.join(HERE, "spec")
 ACCEPT = sorted(glob.glob(os.path.join(SPEC, "*.accept.lut")))
 REJECT = sorted(glob.glob(os.path.join(SPEC, "*.reject.lut")))
 
-NOT_IMPLEMENTED = pytest.mark.xfail(reason="static semantics of 04 not implemented", strict=False)
+NOT_IMPLEMENTED = pytest.mark.xfail(reason="04 kernel and 05 static semantics not implemented", strict=False)
 
 
 def expected_fragment(path: str) -> str:

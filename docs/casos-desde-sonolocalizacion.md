@@ -121,9 +121,9 @@ orden y que las dependencias se leen de los nombres. El verificador de v0 cheque
 orden del archivo: usar `distance` antes de definirla da `unbound name distance`. O se hace
 una pasada previa que junte las firmas, o se documenta que el orden es el del archivo.
 
-Resuelto por `04-static-semantics.md §2`: la pasada previa deja de ser opcional, porque las
-reglas se juzgan sobre los clusters (los nombres que las leyes conectan) y eso exige el
-programa entero. Pendiente de implementar.
+Resuelto por `05-static-semantics.md §2`: la pasada previa deja de ser opcional, porque las
+reglas se juzgan sobre los objetos (las componentes fuertemente conexas del grafo de
+dependencias) y eso exige el programa entero. Pendiente de implementar.
 
 ## 12. Un literal de lista contra un subtipo se rechaza
 
@@ -140,9 +140,10 @@ se escriben en la forma de subtipo. Cada función que construye una `Scene`
 (`withEmitters : Scene`) aparece como pendiente de test aunque su ley sea `true`. O se
 descarga `true` al verificar, o hace falta una forma de registro sin predicado.
 
-Resuelto por `04` en la dirección contraria a las dos propuestas: `{ ... | true }` no define
+Resuelto por `05` en la dirección contraria a las dos propuestas: `{ ... | true }` no define
 nada (R3), y el registro con etiquetas sin `|` es el producto, estructural, que se escribe
-donde se usa y no se nombra con `:=` (R4). `Scene` tiene que escribir su ley o ser el producto.
+donde se usa o se nombra con un alias, `Scene = { frame : Frame, ... }`, nunca con `:=` (R4, R7).
+`Scene` tiene que escribir su ley o ser un alias del producto.
 
 ## 14. Acceso a componentes con nombre (resuelto el 2026-10-01)
 
@@ -182,9 +183,10 @@ genera obligación ("no laws"). Hubo que escribir la ley a mano como predicado s
 instancia (`ShiftSumsToOne`) y un subtipo `Functorial`. Propuesta: que una instancia de una
 definición con obligaciones pendientes sobre tipos herede esas obligaciones, especializadas.
 
-(2026-10-04: a medias. `04 §5` hace que las obligaciones de un nombre sean las leyes de su
-ciclo aplicadas a su determinación, así que una instancia que cierra un ciclo hereda sus
-leyes. La ley cuantificada sobre `U` sigue sin generador y sigue siendo candidata a `proved`.)
+(2026-10-04: sin resolver. `05 §7` deja dicho que una ley cuantificada sobre todos los modelos
+de una teoría, o sobre `U`, no tiene generador y se certifica modelo por modelo; la herencia de
+obligaciones especializadas que este caso pide sigue siendo propuesta, y la ley del functor
+sigue siendo candidata a `proved`.)
 
 ## 17. El costo de los valores de lista
 
@@ -284,9 +286,22 @@ de `f : A -> Int := \x { 3 }`, de `a : A := b` con `b : A` hueco, y de `A : U :=
 `a : A := extern`; los cuatro pasan `luthier check`. Decir "esto es una Table" no garantiza nada,
 que es lo que la nota de voz del 2026-10-04 señala.
 
-Resuelto en el diseño por `04-static-semantics.md`: declarar y definir son dos estados, una
-definición solo construye sobre nombres definidos (R2), un tipo opaco se define por las leyes
-de su ciclo (R3), y `extern provisional` es la salida para el apuro (R6). Los seis archivos
-están en `tests/spec/` como `r2_*`, `r3_extern_type_without_laws` y `r6_*`. Lo que `table.lut`
-tiene que ganar son las leyes de `Table` (cotas de fila, tipo de columna, qué respeta
-`sameTable`); `Codec` y `LawfulCodec` pasan a ser un nombre en dos estados (`04 §6`).
+Resuelto en el diseño por `04-kernel.md` y `05-static-semantics.md`: declarar y definir son dos
+estados, una definición solo usa tipos definidos (R2), y un extern da valores, nunca tipos (R5),
+con `extern provisional` como salida para el apuro. Los casos están en `tests/spec/` como `r2_*`
+y `r5_*`. Lo que `table.lut` tiene que hacer: definir `Table` nativamente (una función de columna
+y fila a celda, o un alias de producto si no tiene invariantes), y escribir el códec como una
+teoría con su igualdad como componente, de la que `csv` es un modelo (`05 §8`). `Codec` y
+`LawfulCodec` pasan a ser un solo nombre.
+
+## 24. `array.lut` no ata sus accesores (2026-10-04)
+
+`Vec : U` es un hueco opaco, `at` y `tabulate` son huecos que numpy llena, y todo lo demás
+(`addDef`, `matVecDef`, `transposeDef`) está escrito con esos dos. Pero las leyes que definen a
+`Vec` no están en ningún lado: falta `at (tabulate n f) i == f i` para `0 <= i < n`, falta
+`length (tabulate n f) == n`, y falta la extensionalidad. Numpy podría devolver cualquier cosa en
+`at` y las leyes `Agrees` seguirían comparando contra una definición escrita sobre ese mismo
+`at`. Con `04` y `05`, `VecOf n` es nativamente la función `(i : { k : Int | 0 <= k and k < n }) -> R`,
+la primera ley es una reducción beta, la extensionalidad se decide enumerando el dominio finito,
+y un array de numpy es una representación de un valor de ese tipo, cuya ida y vuelta se certifica.
+Es el piloto propuesto para probar la especificación antes de revisar las demás librerías.

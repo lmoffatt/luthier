@@ -1,0 +1,4 @@
+-- 04 §3: the recursor of a data type is a library definition, written with match and recursion.
+N : U := data { zero : N ; succ : N -> N }
+recN (P : U) (z : P) (s : N -> P -> P) (n : N) : P := match n { zero -> z ; succ m -> s m (recN P z s m) }
+add (m n : N) : N := recN N m (\k r { succ r }) n

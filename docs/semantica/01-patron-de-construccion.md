@@ -4,7 +4,7 @@ Borrador 0, 2026-09-29. Recoge lo decidido en las sesiones posteriores al borrad
 
 ## 0. Notación nueva respecto de `00`
 
-- `:=` define. `=` es la proposición de igualdad (reservada para la capa de demostraciones, ausente en la versión 0). `==` es la igualdad decidible, una función a `Bool` que existe para algunos tipos. (2026-10-04: mientras no haya capa de demostraciones, `nombre = término` al nivel de definición es un alias, `04` R8.)
+- `:=` define. `=` es la proposición de igualdad (reservada para la capa de demostraciones, ausente en la versión 0). `==` es la igualdad decidible, una función a `Bool` que existe para algunos tipos. (2026-10-04: mientras no haya capa de demostraciones, `nombre = término` al nivel de definición es un alias, `05` R7.)
 - `\ x { t }` es la función que a `x` le asigna `t`. Las llaves delimitan el alcance de `x` y, más adelante, un bloque con definiciones locales.
 - `f a` es aplicación por yuxtaposición, asocia a la izquierda y liga más fuerte que cualquier operador; `f(a)` es lo mismo. `f (a, b)` aplica `f` a un par.
 - `(x : A) -> B` es el tipo de función, con `B` pudiendo mencionar a `x`; `A -> B` cuando no. `(x : A) × B` es el par dependiente.
@@ -30,7 +30,7 @@ Un concepto es una función ordinaria que devuelve leyes. No es una primitiva ni
 
 La unidad de especificación es el grupo de funciones con las leyes que las relacionan; una función sola con postcondición es el grupo de tamaño uno. `read (write s k a) k == a` no es postcondición de `read` ni de `write`: es una relación entre ambas, y por eso se definen juntas.
 
-(2026-10-04: esto se vuelve exigencia. El grupo está definido solo cuando sus leyes conectan todas sus componentes: el hipergrafo de leyes sobre componentes es conexo y las cubre. Una componente que ninguna ley toca deja al grupo sin definir, y `{ ... | true }` no define nada; `04 §3`, regla R3.)
+(2026-10-04: esto se vuelve exigencia. El grupo, declarado como un tipo, sus leyes y su definición por esas leyes forman un ciclo del grafo de dependencias, y ese ciclo es el objeto (`05 §3`). Las leyes tienen que tocar todas las etiquetas de la base: una que ninguna ley toca es una función suelta yuxtapuesta, y `{ ... | true }` no define nada; `05` R3. La relación entre una operación definida a partir de otras y la misma operación caracterizada por una propiedad es un teorema: una ley sobre una rama, `04 §6`.)
 
 Para reales, las leyes usan tolerancia: `a ≈[tol] b := abs (a - b) < tol`.
 
@@ -47,7 +47,7 @@ Todo el patrón es una definición. Un subtipo es un tipo y un predicado sobre �
 
 `{ x : T | P x }` es la azúcar de `Subtype T P`. El nombre es el estándar: subobjeto en teoría de categorías (un predicado `T -> Ω` clasifica un mono `S -> T`; acá `fst` es el mono), subset type o `sig` en teoría de tipos.
 
-(2026-10-04: el subtipo es la *definición* de un tipo declarado. Se declara la base con sus etiquetas, `Codec : { parse : String -> Maybe T, render : T -> String }`, se escriben las leyes sobre ella, y se define `Codec := RoundTrip & Canonical`. El patrón de dos nombres, `Codec` sin leyes y `LawfulCodec` con ellas, queda obsoleto: era un nombre para un tipo. Las etiquetas son nombres de ligadura, no parte de la identidad del tipo; `04 §1` y R4.)
+(2026-10-04: el subtipo es la *definición* de un tipo declarado. Se declara la base con sus etiquetas, `Codec : { parse : String -> Maybe T, render : T -> String }`, se escriben las leyes sobre ella, y se define `Codec := RoundTrip & Canonical`. El patrón de dos nombres, `Codec` sin leyes y `LawfulCodec` con ellas, queda obsoleto: era un nombre para un tipo. Las etiquetas son nombres de ligadura, no parte de la identidad del tipo, y un producto sin leyes no se nombra con `:=` sino con un alias; `04 §2`, `05` R4 y R7. Los dos tipos de objeto: un tipo concreto, definido nativamente, con constructores, y una teoría, un subtipo de una base con etiquetas, sin constructores, cuyos valores son sus modelos; `05 §1`.)
 
 `P` devuelve un `Veredicto`, no un `Bool`, porque hay dos formas de comprobar: para un valor de `N` el predicado se evalúa y el veredicto es exacto; para una función el predicado son leyes que se muestrean con `n` casos y el veredicto es estadístico. `Bool` es el caso exacto. El certificado es el veredicto guardado con sus parámetros (leyes, `n`, generador, rango, máquina, fecha). Poner la diferencia en el veredicto y no en dos nociones de subtipo es lo que mantiene una sola definición.
 
@@ -60,7 +60,7 @@ Fallo y certificado son un solo tipo, un árbol:
     }
     Verdict : U := data { ok ; fail ; sampled : (n : N) -> Verdict ; proved }
 
-(2026-10-04: dos veredictos más, previstos en `04`: `witnessed`, para una ley existencial que se cumple exhibiendo un caso (la no separabilidad de una ley, `04 §7`), y la marca `provisional` de una definición `extern provisional`, que no es un veredicto sobre una ley sino una deuda registrada sobre la definición y la deja fuera de la certificación; R6.)
+(2026-10-04: lo certificado no es un nombre sino una ley aplicada a valores, con un grado: un punto, muestreado `n`, exhaustivo, atestiguado (`witnessed`, una ley existencial que se cumple exhibiendo un caso, como la no separabilidad de `05 §4`) y demostrado, ausente en la versión 0; `05 §7`. La marca `provisional` de un `extern provisional` no es un veredicto sino una deuda registrada sobre la definición, que la deja fuera de la certificación; `05` R5.)
 
 Cada nodo dice qué se comprobó (`what`, un quote del predicado o subtipo, como `'{ Associative add }`), sobre qué (`arg`), con qué resultado, y de qué sub-comprobaciones dependió. Un fallo de `Ring` es un nodo `Ring` con un hijo por ley, y cada hijo con su argumento. Un certificado es el mismo árbol con `ok` o `sampled n` en los nodos. `Result A := ok A + fail Report`, sin parámetro de error.
 
@@ -133,8 +133,8 @@ La segunda ley es la que hace falta para que un `write` que borra todo lo demás
 
 ## 4. Lo que queda abierto
 
-- ~~El campo de leyes en `Def`: si es un campo más junto al cuerpo y al texto, o si las leyes van siempre en definiciones aparte y se atan por nombre.~~ (Cerrado el 2026-10-04: las leyes son el cuerpo de la definición del tipo, un predicado sobre su base declarada; `04 §1`, R7.)
-- Igualdad decidible como concepto (`Eq A`) que otros conceptos reciben o exigen. (2026-10-04: sigue abierto; con R2 el código genérico sobre un tipo declarado la recibe como parámetro, `04 §4`.)
+- ~~El campo de leyes en `Def`: si es un campo más junto al cuerpo y al texto, o si las leyes van siempre en definiciones aparte y se atan por nombre.~~ (Cerrado el 2026-10-04: las leyes son el cuerpo de la definición del tipo, un predicado sobre su base declarada; `05 §1`, R6.)
+- Igualdad decidible como concepto (`Eq A`) que otros conceptos reciben o exigen. (Cerrado el 2026-10-04: `==` existe solo donde la igualdad es estructural; sobre funciones, y sobre lo que las contenga, una ley recibe la igualdad que usa como parámetro o como componente de su teoría, la igualdad observacional de la presentación; `05` R8. Abierto: la igualdad como grado, para samplers, `05 §10`.)
 - Generadores: filtrado sobre el tipo base o definidos por el usuario, y cómo se declara el rango.
 - Si el doble uso del nombre (tipo y constructor) se mantiene o se separa con mayúscula y minúscula.
 - Cómo se compone el `Report` al anidar subtipos y al iterar: cortar en el primer fallo, acumular todos, o decorar el valor con el registro y seguir (las tres formas de propagación que MCMC necesita).

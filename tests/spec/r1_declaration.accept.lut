@@ -1,6 +1,3 @@
--- R1: a declaration may mention names that are declared and not yet defined.
--- Table is declared; the holes below build the cycle of declarations the laws will close.
-Table : U
-nRows : Table -> Int
-intAt : Table -> String -> Int -> Int
-sameTable : Table -> Table -> Bool
+-- R1: a declaration may mention a type that is only declared.
+Codec : { parse : String -> Maybe Int, render : Int -> String }
+csvLike : Codec

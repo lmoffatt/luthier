@@ -2,20 +2,21 @@
 
 Borrador 0, 2026-09-29. Propuesta para discutir, no decisión tomada. Sale de leer los 42 audios, la consolidación de ideas, los informes del mentor, la charla con Gemini, y del pedido de esta sesión: nombrar los ciudadanos de primera y comprobar que el núcleo se ejecuta a mano. Donde una idea está en los audios se cita el audio; donde es una propuesta nueva se dice que es propuesta.
 
-Nota del 2026-10-04: `04-static-semantics.md` fija los estados de un nombre (declarado, definido, determinado, certificado) y las reglas sobre el grafo de dependencias. Donde este documento diga otra cosa, vale `04`; las notas marcadas "2026-10-04" señalan los puntos.
+Nota del 2026-10-04: la especificación técnica de la versión 0 está en `04-kernel.md` (el núcleo: formadores de tipos, términos, reducción, azúcar) y `05-static-semantics.md` (estados de un nombre, objetos, reglas, certificación). Donde este documento diga otra cosa, valen esos dos; las notas marcadas "2026-10-04" señalan los puntos.
 
 ## Los elementos, en el orden para pensar
 
 Diez palabras. Con las cinco primeras se lee cualquier programa; con las tres siguientes se fabrican tipos; las dos últimas son lo que corre.
 
 - **Tipo.** Un objeto: `N`, `Bool`, `N -> N`. Una colección de valores y a la vez una afirmación sobre ellos.
-- **Valor.** Un elemento de un tipo, `4 : N`. El juicio `a : A` ("a es un A") es la relación básica. (2026-10-04: un valor es un tipo con un solo habitante, `4` es `{ n : N | n == 4 }`; `a : A` se lee "a refina a A". Tipo y valor difieren en cuánto está determinado el nombre, no en especie; `04 §1`.)
+- **Valor.** Un elemento de un tipo, `4 : N`. El juicio `a : A` ("a es un A") es la relación básica. (2026-10-04: un valor es un tipo con un solo habitante, `4` es `{ n : N | n == 4 }`; `a : A` se lee "a refina a A". Tipo y valor difieren en cuánto está determinado el nombre, no en especie; `05 §1`.)
 - **Función.** Una flecha entre tipos, `f : A -> B`. Es un valor del tipo `A -> B`, sin categoría aparte: puede ser argumento y resultado.
 - **Definición.** Darle nombre a un valor, `nombre : Tipo := valor`. El único acto del lenguaje. Un programa es un conjunto de definiciones sin orden; las dependencias entre nombres dan el grafo.
-- **Hueco.** Una definición sin valor, `nombre : Tipo`. Una hipótesis: input, función externa, pendiente. Lo que depende de un hueco no se ejecuta. (2026-10-04: es el estado *declarado*. Un hueco puede además estar *definido*, cuando las leyes de su ciclo lo atan, sin estar *determinado*; `04 §1`.)
-- **Determinación.** (2026-10-04.) Darle cuerpo a un nombre. Si el cuerpo es un término del tipo declarado, el nombre queda en ese habitante; si es un predicado sobre el tipo declarado, el nombre es el subtipo que ese predicado recorta. No hace falta símbolo para distinguirlos: los tipos `T` y `T -> Bool` nunca coinciden.
+- **Hueco.** Una definición sin valor, `nombre : Tipo`. Una hipótesis: input, función externa, pendiente. Lo que depende de un hueco no se ejecuta. (2026-10-04: es el estado *declarado*; los otros dos son *definido*, con cuerpo, y *certificado*, con leyes testeadas y graduadas; `05 §1`.)
+- **Definición de un declarado.** (2026-10-04.) Darle cuerpo a un nombre ya declarado. Si el cuerpo es un término del tipo declarado, el nombre queda en ese habitante; si es un predicado sobre el tipo declarado, el nombre es el subtipo que ese predicado recorta. No hace falta símbolo para distinguirlos: los tipos `T` y `T -> Bool` nunca coinciden; `05` R6.
+- **Alias.** (2026-10-04.) `nombre = término` abrevia un término; se expande antes de verificar y no tiene estados; `05` R7.
 - **Función dependiente.** `(x : A) -> B x`: el tipo del resultado depende del argumento. Es el "para todo". Sin dependencia, la flecha común.
-- **Dato.** `data { ... }`: un tipo definido por sus constructores. Suma de productos con recursión. De acá salen `Bool`, `N`, listas, pares, `Result`.
+- **Dato.** `data { ... }`: un tipo definido por sus constructores. Suma de productos con recursión. De acá salen `Bool`, `N`, listas, pares, `Result`. (2026-10-04: producto, suma, exponencial, `Unit` y `Empty` pasan a ser primitivos y estructurales; `data` queda para los tipos recursivos, `N`, `List`; `Bool` es `< true : Unit | false : Unit >`; `04 §2`.)
 - **Subtipo.** `{ x : T | p x }`: los valores de `T` que cumplen `p`, con certificado. `p` es cualquier función a `Bool`, incluidas leyes sobre funciones; cumplir se comprueba con `test` y queda registrado. `Ring`, `Subtraction`, `Library` son subtipos. Es lo que hace a Luthier.
 - **Aplicar.** `f a`.
 - **Reducir.** Reemplazar el argumento en el cuerpo hasta que no quede nada por hacer. Ejecutar a mano es esto.
@@ -32,7 +33,7 @@ Todo símbolo que aparece en el documento se define acá.
 - `x : A := t` define `x` como el término `t`, de tipo `A`.
 - Un hueco es una definición con tipo y sin cuerpo, `f : A`. El símbolo `?` aparece solo como azúcar dentro de un término (sección 1) y no es parte del núcleo.
 - `≡` es igualdad definicional: dos términos que se reducen a la misma forma normal. No es una proposición; es un juicio que decide el reductor.
-- `=` es el tipo identidad: la proposición "a y b son iguales". Sus términos son caminos (paths). (2026-10-04: en la versión 0, que no tiene capa de demostraciones, `nombre = término` al nivel de definición es un alias, `04` R8; la reconciliación con el tipo identidad queda abierta.)
+- `=` es el tipo identidad: la proposición "a y b son iguales". Sus términos son caminos (paths). (2026-10-04: en la versión 0, que no tiene capa de demostraciones, `nombre = término` al nivel de definición es un alias, `05` R7; la reconciliación con el tipo identidad queda abierta.)
 - `U` es el universo: el tipo cuyos términos son tipos.
 - `Π (x : A). B` es el tipo de las funciones dependientes: a cada `x : A` le asignan un término de `B`, donde `B` puede mencionar a `x`. Si `B` no menciona a `x` se escribe `A → B`.
 - `Σ (x : A). B` es el tipo de los pares dependientes: un `x : A` junto con un término de `B`, donde `B` puede mencionar a `x`.
@@ -45,7 +46,7 @@ Todo símbolo que aparece en el documento se define acá.
 
 Un programa Luthier es un conjunto finito de definiciones. No hay statements ni secuencia. El orden en que se escriben no importa: la dependencia entre definiciones se lee de los nombres que cada una usa, y eso da el grafo dirigido de definiciones del audio 2026-05-29 15.11.47 [01:48].
 
-(2026-10-04: el grafo no es acíclico y un ciclo no es error. Pero la unidad de cierre no es el ciclo sino el *cluster*: el conjunto de nombres que las leyes conectan entre sí, dependan o no unos de otros en círculo. Un tipo opaco y sus operaciones, atados por leyes que los mencionan, forman un cluster y se definen juntos; eso es un objeto. Lo que ninguna ley toca queda solo declarado. Para ver los clusters el verificador lee el programa entero antes de tipar; `04 §2`.)
+(2026-10-04: el grafo no es acíclico y un ciclo no es error: es un objeto. Un tipo declarado, las leyes que lo mencionan y su definición por esas leyes forman un ciclo, y se definen juntos. Lo que menciona al objeto sin estar en su ciclo es una rama, una entidad nueva que depende de él en un sentido. Para ver los ciclos el verificador lee el programa entero antes de tipar; `05 §2` y `§3`.)
 
 Cada definición tiene la forma `nombre : Tipo := término`. El tipo es la proposición que el nombre afirma (audio 2026-05-26 12.32.24 [00:51]; audio 2026-08-31 19.48.17 [01:02]); el término es la evidencia, que en el caso de una función es su implementación. Esto cubre la doble definición que pide el audio 2026-05-29 14.28.55 [03:42]: "desde las propiedades" es el tipo, "operativamente" es el cuerpo.
 
@@ -86,6 +87,8 @@ Ejecutar un programa a mano es elegir una definición sin variables libres y red
 
 Tres primitivas: `U`, `Π` y `data`. Todo lo demás se define en Luthier.
 
+(2026-10-04: el núcleo elegido es otro, `04 §2`: `U`, la exponencial Π, el producto Σ, la suma, `Empty`, `Unit`, el subtipo, `data` para los tipos recursivos, y los primitivos `Int`, `R`, `String`. Producto y suma son derivables de `data`, pero primitivos dejan escrita la estructura de categoría bicartesiana cerrada y hacen que lo único que da un tipo nuevo con nombre propio sea la recursión o las leyes. El criterio de la elección no es la minimalidad sino que las reglas de `05` se enuncien sin traducción. Lo que sigue en esta sección queda como la otra presentación posible.)
+
 - `U`, el universo. Hace falta para que una función devuelva un tipo, que es lo que el audio 2026-05-29 14.03.24 [00:15] identifica como tipo dependiente. Detalle conocido: `U : U` es inconsistente; el remedio estándar es una jerarquía `U₀ : U₁ : ...`. Es la "trampa" del audio 2026-05-29 14.06.25 [00:00]. A mano se ignora hasta que muerde.
 - `Π`, la función dependiente. Es el cuantificador "para todo" (audio 2026-05-31 20.10.46 [00:04]: los cuantificadores tienen que ser ciudadanos de primera).
 - `data`, los tipos inductivos. Se declaran los constructores y se obtiene el recursor con sus reglas de reducción.
@@ -109,6 +112,8 @@ Qué pasa con los candidatos que se nombraron al abrir esta sesión:
 | Verdadero y falso | No como `Bool` | Una proposición es un tipo. Es verdadera si tiene un término. `⊤` y `⊥` son los dos extremos. `Bool` es un dato más. |
 | Verdadero por definición | Primitivo | Es la igualdad definicional `≡`. Es lo que se ejecuta a mano (sección 4). |
 | Dirección y dato (puntero) | No es primitivo | El nombre es la referencia. La dirección de memoria es una decoración del nivel más bajo de equivalencia (audio 2026-05-30 18.01.53 [02:48]). Sin mutación ni tiempo, el puntero no tiene qué distinguir. |
+
+(2026-10-04: dos filas de esta tabla cambian. `Int`, `R` y `String` son primitivos del núcleo, huecos que el intérprete llena (`04 §2`): definir el double de IEEE con `data` no tiene sentido. `Bool` es la suma de dos `Unit`. Y la distinción que importa es otra: primitivo semántico (el núcleo) contra primitivo de rendimiento (un extern, que da valores y nunca tipos); `04 §6`, `05` R5.)
 
 ## 4. Las dos igualdades, y los niveles que vienen después
 
@@ -142,9 +147,9 @@ Lo único primitivo acá es el pacto de arranque: la implementación (lo poco qu
 
 ## 6. Lo que queda fuera del núcleo, y por qué
 
-- Números concretos (`R`, punto flotante, matrices): estructuras definidas con `data` y con huecos para lo que el entorno provee. El error, el intervalo y la muestra son `Σ`.
+- Números concretos (`R`, punto flotante, matrices): estructuras definidas con `data` y con huecos para lo que el entorno provee. El error, el intervalo y la muestra son `Σ`. (2026-10-04: las matrices y los vectores son tipos nativos, `VecOf n` es la función de los índices a `R`; numpy es una representación de sus valores, `04 §6`.)
 - El functor olvido: es la primera proyección de un `Σ`, o cualquier función no inyectiva. El audio 2026-06-05 13.16.35 [00:44] ya lo dice: olvidar es proyectar. Qué olvidar y cuándo es política de librería. La ley del audio 2026-05-29 15.04.28 [00:39] (olvidar y aplicar da lo mismo que aplicar y olvidar) es un camino que se prueba caso por caso.
-- Lo externo: un hueco que el entorno llena. Cómo lo llena (protocolo, serialización) es asunto de cada implementación de Luthier.
+- Lo externo: un hueco que el entorno llena. Cómo lo llena (protocolo, serialización) es asunto de cada implementación de Luthier. (2026-10-04: lo externo da valores de tipos definidos, nunca tipos; `extern provisional` es la excepción registrada como deuda; `05` R5.)
 - Probabilidad, base de datos de corridas, estimación de costo: librerías que decoran caminos con `Σ`.
 - Punteros, mutación, secuencia, clases, herencia, control de flujo: no existen. `if` es el recursor de `Bool`. `while` es recursión. La secuencia es dependencia.
 
@@ -214,7 +219,7 @@ Olvido, en tres líneas sobre el mismo programa:
 
 ## 9. Lo que este núcleo deja abierto
 
-(2026-10-04: la sintaxis concreta está en `02`; los estados de una definición y qué puede mencionar cada una, en `04`.)
+(2026-10-04: la sintaxis concreta está en `02` y en `04 §5`; los estados de una definición y qué puede mencionar cada una, en `05`. El recursor de un `data` es una definición de librería escrita con `match` y recursión general, `04 §3`; la jerarquía de universos sigue abierta.)
 
 - La sintaxis concreta. Lo de arriba es notación matemática; hay que elegir una superficie que se lea.
 - Recursor simple o dependiente para `data`. Para probar caminos por inducción hace falta el dependiente.

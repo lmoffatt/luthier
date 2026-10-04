@@ -1,5 +1,4 @@
--- R3: `true` touches no component, so it defines nothing.
--- expect: the law true touches no component of Perturbed
-Table : U
-Perturbed : { table : Table, text : String }
-Perturbed := true
+-- R3: a predicate that touches nothing defines nothing.
+-- expect: the predicate of Tagged touches none of its labels
+Tagged : { tag : String, value : Int }
+Tagged := \p { true }

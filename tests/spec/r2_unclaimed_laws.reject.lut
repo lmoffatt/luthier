@@ -1,0 +1,5 @@
+-- R2: laws written over a declared type that no definition claims are branches over an
+-- undefined type: the object has no head.
+-- expect: Codec is used as a type but is only declared
+Codec : { parse : String -> Maybe Int, render : Int -> String }
+RoundTrip (c : Codec) (n : Int) : Bool := match c.parse (c.render n) { nothing -> false ; just m -> m == n }

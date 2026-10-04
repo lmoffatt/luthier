@@ -1,0 +1,4 @@
+-- R5 with R2: an extern over a type that is only declared.
+-- expect: Signal is used as a type but is only declared
+Signal : U
+duration : Signal -> Int := extern "python:builtins.len"
