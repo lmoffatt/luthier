@@ -591,7 +591,7 @@ class Machine:
         """The array of a function over Fin d1 x ... x Fin dk (04 §6), kept with the value so the
         same function is not evaluated again when it crosses a second time."""
         if isinstance(f, VLit) and is_indexable(f.value):
-            return f.value
+            return _full_shape(f.value, dims, self.env, cod)
         cache = getattr(self.env, "_materialized", None)
         if cache is None:
             cache = {}
@@ -606,8 +606,10 @@ class Machine:
                 return self.to_python(g, cod)
             return [rec(self.apply1(g, Thunk.of(VLit(i))), ds[1:]) for i in range(ds[0])]
         out = rec(f, list(dims))
-        from .evaluator import _is_int_type
-        if _is_int_type(self.env, cod):
+        from .evaluator import _is_int_type, scalar_kind
+        if scalar_kind(self.env, cod) == "Rational":
+            arr = np.asarray(out, dtype=object)         # exact: never rounded to doubles
+        elif _is_int_type(self.env, cod):
             for v in np.asarray(out, dtype=object).ravel():
                 check_int64(v, "an array of numpy")
             arr = np.asarray(out, dtype=np.int64)
@@ -616,6 +618,7 @@ class Machine:
                 arr = np.asarray(out, dtype=float)
             except (TypeError, ValueError):
                 arr = out
+        arr = _full_shape(arr, dims, self.env, cod)
         if len(cache) > 4096:
             cache.clear()
         cache[id(f)] = (f, arr)
@@ -706,6 +709,18 @@ class Machine:
 import os
 _TRACE = os.environ.get("LUTHIER_TRACE_FALLBACK")
 fallbacks: dict = {}
+
+
+def _full_shape(arr, dims: list, env: Env, cod):
+    """An empty table keeps all its dimensions: the table of `Fin 0 -> Fin n -> A` is an array of
+    shape (0, n), not the (0,) that an empty list of rows makes, or numpy cannot multiply it."""
+    import numpy as np
+    if dims and any(d == 0 for d in dims) and tuple(np.shape(arr)) != tuple(dims):
+        from .evaluator import _is_int_type, scalar_kind
+        kind = scalar_kind(env, cod) if cod is not None else None
+        dtype = np.int64 if kind == "Int" else object if kind == "Rational" else float
+        return np.zeros(dims, dtype=dtype)
+    return arr
 
 
 def _conjuncts(t: Term) -> list:

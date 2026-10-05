@@ -123,7 +123,7 @@ def _check_array_finite(x):
                 raise EvalError("NaN or an infinity in an array from the environment")
 
 
-SCALARS = ("Int", "Float64", "Real", "String")
+SCALARS = ("Int", "Float64", "Real", "Rational", "String")
 DOUBLE_EXACT = 2 ** 53
 
 
@@ -157,6 +157,13 @@ def _scalar_from_python(x, kind: str, ty: Term) -> Term:
                 raise EvalError(f"{x} from the environment has no exact double, so it is not a value of {pp(ty)}")
             x = float(x)
         return Lit(finite(x, "a value from the environment"))
+    if kind == "Rational":
+        from fractions import Fraction
+        if isinstance(x, bool) or not isinstance(x, (int, Fraction)):
+            raise EvalError(f"{x!r} ({type(x).__name__}) from the environment is not a value of "
+                            f"{pp(ty)}: a Rational crosses as a fractions.Fraction (a float is converted "
+                            f"exactly by toQ, not here)")
+        return Lit(Fraction(x))
     if not isinstance(x, str):
         raise EvalError(f"{x!r} ({type(x).__name__}) from the environment is not a value of "
                         f"{pp(ty)}: a String crosses as a Python str")
@@ -172,6 +179,12 @@ def _array_for(env: "Env", x, k: int, cod: Optional[Term], ty: Term):
     kind = scalar_kind(env, cod)
     if kind is None or kind == "String":
         return x
+    if kind == "Rational":
+        from fractions import Fraction
+        items = list(np.asarray(x, dtype=object).ravel())
+        if any(isinstance(e, bool) or not isinstance(e, (int, Fraction)) for e in items):
+            raise EvalError(f"an array that is not of fractions cannot be a value of {pp(ty)}")
+        return np.asarray([Fraction(e) for e in items], dtype=object).reshape(np.shape(x))
     a = np.asarray(x)
     if a.ndim != k:
         raise EvalError(f"an array of shape {a.shape} cannot be a value of {pp(ty)}: "
@@ -801,6 +814,9 @@ def shaped(env: Env, ty: Optional[Term]):
 def materialize(env: Env, f: Term, dims: list, cod: Optional[Term]):
     """The array of the values of a function over Fin d1 x ... x Fin dk."""
     import numpy as np
+    if any(d == 0 for d in dims):
+        kind = scalar_kind(env, cod) if cod is not None else None
+        return np.zeros(dims, dtype=np.int64 if kind == "Int" else object if kind == "Rational" else float)
     if isinstance(f, Lit) and is_indexable(f.value):
         return f.value
 
@@ -811,6 +827,8 @@ def materialize(env: Env, f: Term, dims: list, cod: Optional[Term]):
             return py
         return [rec(App(t, Lit(i)), ds[1:]) for i in range(ds[0])]
     out = rec(f, list(dims))
+    if scalar_kind(env, cod) == "Rational":
+        return np.asarray(out, dtype=object)       # exact: never rounded to doubles
     if _is_int_type(env, cod):
         flat = np.asarray(out, dtype=object).ravel()
         for v in flat:

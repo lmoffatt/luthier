@@ -153,6 +153,9 @@ class Generators:
             return Lit(rng.randint(-size, size))
         if name == "Float64":
             return Lit(rng.uniform(-size, size))
+        if name == "Rational":
+            from fractions import Fraction
+            return Lit(Fraction(rng.randint(-size * 10 ** 6, size * 10 ** 6), rng.randint(1, 10 ** 6)))
         if name == "String":
             return Lit("".join(rng.choice("abcxyz") for _ in range(rng.randint(0, min(size, 6)))))
         if name in self.env.datas:

@@ -135,14 +135,34 @@ the file, filled by the importing file, not as an explicit parameter of every fu
 declares `num : NumberModel` and writes over `num.T`; a program imports it with `num := float64`.
 This is the file as a structure with its holes as parameters (`03 §1`).
 
-## 8. Open
+## 8. Done 2026-10-05: the rationals and the rounding law
 
-- **Rational.** ℚ exact, natively or with Python's `Fraction` as its representation. It is a model
-  of an ordered field (not complete) where the laws of `+ − × /` hold exactly.
-- **The rounding law.** `Float64` as a model of a field with rounding: with `toQ : Float64 ->
-  Rational` the exact embedding, `|toQ (x ⊕ y) − (toQ x + toQ y)| ≤ u · |toQ x + toQ y|` away from
-  overflow, testable exactly in `Rational`. From it the tolerance of a sum of n terms follows, and the
-  constants of `array` (`roundingSlack`) become certified instead of supposed.
+- **Rational** is a primitive of `core.lut`, `Rational : Real`, represented by Python's `Fraction`,
+  with `+ − × /` and comparisons exact and no `mod`; its values come from the conversions of
+  `lib/rational.lut` (`fromInt`, `ratio`, `toQ`). `rationalField : OrderedField Rational` is
+  certified exactly.
+- **The rounding law.** `toQ : Float64 -> Rational` is the inclusion of the finite doubles, exact
+  (`nearest (toQ x) == x`) and order-preserving. Each operation of `Float64` rounds the exact one,
+  `|toQ (x ⊕ y) − (toQ x + toQ y)| ≤ u · |toQ x + toQ y|` with `u = 2^-53`, and the square root so
+  that `|r² − x| ≤ (2u + u²) x`, certified with no tolerance over `NormalDouble` (magnitudes
+  between 1e-150 and 1e150, drawn uniformly in the exponent, so every scale is tested). A
+  negative control (an addition three units off in the last place) fails it in every case.
+- **What follows for sums.** A sum of n terms is within `gamma n = n u / (1 − n u)` of the exact
+  sum relative to the sum of the absolute values, and an inner product likewise (Higham 2002, §3.1
+  and §4.2); certified for `sumTo` and for numpy's `total`, `dot` and `matVec`, whatever order they
+  sum in.
+- **The doubles are not a field.** `float64Field : OrderedField Float64` is gone: its laws were false
+  outside the box they were sampled in, since under cancellation no fixed relative tolerance makes
+  addition associative, and a box is not closed under the operations. The folds of the doubles
+  (`sumTo`, `pow`) are `foldWith`, a fold of an operation with no laws claimed, in the same order, so
+  every result is the same bit for bit; the vector space, the Euclidean space and the linear maps over
+  `float64Field` in `algebra_python` are replaced by the rounding laws of the numpy leaves.
+- **Not derived yet.** The tolerances that compare a numpy leaf with its native definition
+  (`...Agrees`, `roundingSlack`) stay where the rounding law gives no bound by itself: the
+  determinant, the spectrum, solving and the pseudo-inverse, whose error depends on the
+  conditioning of the matrix.
+
+## 9. Open
 - **Intervals or balls.** A realization whose value encloses the true real; the law
   `f_Float64 x ∈ f_Interval x` certifies an approximation without computing `f` over the reals. A
   comparison of two overlapping intervals has no answer; the model answers with a probability, and a

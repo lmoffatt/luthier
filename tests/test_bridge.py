@@ -210,3 +210,20 @@ def test_a_law_blocked_by_a_hole_is_reported_with_its_name():
               "a : { u : Unit | \\ (x : Int) { Above x } } := unit\n")
     r = run_laws(ck, "a")
     assert r.laws[0].outcome == "not run" and "k" in r.laws[0].error
+
+
+# ------------------------------------------------------------------ the rationals (06 §8)
+
+def test_rationals_are_exact_and_cross_as_fractions():
+    ck = load('third : Rational := extern "python:bridge_externs.third"\n'
+              'one : Bool := third + third + third == third * (third + third + third) / third\n'
+              'notHalf : Rational := extern "python:bridge_externs.a_float"\n')
+    assert ev(ck, "third * third") == "1/9"
+    assert ev(ck, "one") == "true"
+    with pytest.raises(EvalError, match="Fraction"):
+        ev(ck, "notHalf")
+
+
+def test_mod_is_not_defined_on_rationals():
+    with pytest.raises(TypeCheckError, match="mod"):
+        load('q : Rational := extern "python:bridge_externs.third"\nr : Rational := q mod q\n')

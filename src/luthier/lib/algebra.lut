@@ -203,22 +203,11 @@ intRing : CommutativeRing Int := {
   add := { monoid := { op := \ (a b : Int) { a + b }, unit := 0 }, inv := \ (a : Int) { 0 - a } },
   mul := { op := \ (a b : Int) { a * b }, unit := 1 } }
 
--- Float64, the realization of the reals that runs: an ordered field within rounding. Valid for
--- magnitudes up to the generator's size: a product of two such values rounds to size^2 eps. The
--- type says more than that: outside the box the laws are false, since cancellation breaks any fixed
--- relative tolerance ((1e8 + -1e8) + 3e-9 is 3e-9, and 1e8 + (-1e8 + 3e-9) is 0). Narrowing the
--- carrier to the box does not help, since the box is not closed under the operations. The object
--- that represents the doubles is a field with the rounding law of 06 §8, tested exactly in Rational;
--- until then this instance is certified on the box it is sampled in, and the libraries rest on it.
-lawMagnitude : Float64 := 16.0
-float64Field : OrderedField Float64 := {
-  field := {
-    ring := {
-      eq  := approx (roundingSlack * lawMagnitude * lawMagnitude * eps),
-      add := { monoid := { op := \ (a b : Float64) { a + b }, unit := 0.0 }, inv := \ (a : Float64) { 0.0 - a } },
-      mul := { op := \ (a b : Float64) { a * b }, unit := 1.0 } },
-    inv := \ (x : Float64) { if x == 0.0 then 0.0 else 1.0 / x } },
-  le := \ (a b : Float64) { a <= b } }
+-- Float64 is not a field: under cancellation no fixed relative tolerance makes its addition
+-- associative ((1e8 + -1e8) + 3e-9 is 3e-9, 1e8 + (-1e8 + 3e-9) is 0), and a box of magnitudes is not
+-- closed under its operations. What the doubles are is in rational.lut: operations that round the
+-- exact ones on the rationals, certified at every scale, with the bounds of sums that follow. The
+-- sums and products of the doubles below are folds of their operations, with no laws claimed.
 
 -- Bool under and, and under or; the nonnegative doubles under the larger of two
 allOf : Monoid Bool exactBool := { op := and, unit := true }
@@ -229,13 +218,18 @@ largest : Monoid NonNegative exactNonNegative := { op := \ a b { if a > b then a
 -- The product of a monoid over n terms, associated to the right: f 0 op (f 1 op (... op (f (n - 1)
 -- op unit))). A sum, a maximum, a power and a quantifier over the indices are each one of these.
 -- The order is part of the rounding of a sum (04 §6).
-foldFrom (A : U) (eq : Setoid A) (M : Monoid A eq) (n : Int) (lo : Nat) (f : Fin n -> A) : A :=
-  if lo >= n then M.unit else M.op (f lo) (foldFrom A eq M n (lo + 1) f)
-fold (A : U) (eq : Setoid A) (M : Monoid A eq) (n : Int) (f : Fin n -> A) : A := foldFrom A eq M n 0 f
+-- foldWith is the fold of any operation and unit, with no law: what the doubles have.
+foldWithFrom (A : U) (op : A -> A -> A) (unit : A) (n : Int) (lo : Nat) (f : Fin n -> A) : A :=
+  if lo >= n then unit else op (f lo) (foldWithFrom A op unit n (lo + 1) f)
+foldWith (A : U) (op : A -> A -> A) (unit : A) (n : Int) (f : Fin n -> A) : A := foldWithFrom A op unit n 0 f
+fold (A : U) (eq : Setoid A) (M : Monoid A eq) (n : Int) (f : Fin n -> A) : A := foldWith A M.op M.unit n f
 
 power (A : U) (eq : Setoid A) (M : Monoid A eq) (a : A) (k : Nat) : A := fold A eq M k (\ i { a })
+powerWith (A : U) (op : A -> A -> A) (unit : A) (a : A) (k : Nat) : A := foldWith A op unit k (\ i { a })
 
-sumTo (n : Int) (f : Fin n -> Float64) : Float64 := fold Float64 float64Field.field.ring.eq float64Field.field.ring.add.monoid n f
+-- the sum of n doubles, associated to the right; rational.lut certifies it within gamma n of the
+-- exact sum (sumToRounds)
+sumTo (n : Int) (f : Fin n -> Float64) : Float64 := foldWith Float64 (\ (a b : Float64) { a + b }) 0.0 n f
 sumToInt (n : Int) (f : Fin n -> Int) : Int := fold Int exactInt intRing.add.monoid n f
 factorial (n : Int) : Int := fold Int exactInt intRing.mul n (\ i { i + 1 })
 

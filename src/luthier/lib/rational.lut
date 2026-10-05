@@ -1,0 +1,115 @@
+-- The rationals, exactly, and the doubles measured against them (06 §8).
+--
+-- Rational is primitive (core.lut): a fraction of two integers, with + - * / and comparisons exact.
+-- Its structure is an ordered field, certified exactly here. Every finite double is a rational, and
+-- toQ is that inclusion; with it each operation of Float64 is compared with the exact one, and the
+-- rounding law (the double is the exact result times 1 + delta, |delta| <= u) is tested with no
+-- tolerance, because the comparison is in Rational. From it follow the bounds the libraries use: a sum
+-- of n terms is within gamma n of the exact sum, an inner product within gamma n of the exact one
+-- (Higham, Accuracy and Stability of Numerical Algorithms, 2002, §3.1 and §4.2).
+--
+-- The doubles are not a field: under cancellation no fixed relative tolerance makes their addition
+-- associative ((1e8 + -1e8) + 3e-9 is 3e-9, 1e8 + (-1e8 + 3e-9) is 0). This is the structure they
+-- have instead: operations that round the exact ones, at every scale of the doubles.
+
+import "real"
+import "real_python"
+import "algebra"
+
+-- ---------------------------------------------------------------- the rationals
+fromInt : Int -> Rational := extern "python:fractions.Fraction"
+ratio : Int -> { d : Int | d /= 0 } -> Rational := extern "python:luthier.rational.ratio"
+zeroQ : Rational := fromInt 0
+oneQ : Rational := fromInt 1
+absQ (q : Rational) : Rational := if q < zeroQ then zeroQ - q else q
+
+exactRational : Setoid Rational := \ (a b : Rational) { a == b }
+
+-- an ordered field, exactly: every law holds with ==
+rationalField : OrderedField Rational := {
+  field := {
+    ring := {
+      eq  := exactRational,
+      add := { monoid := { op := \ (a b : Rational) { a + b }, unit := zeroQ }, inv := \ (a : Rational) { zeroQ - a } },
+      mul := { op := \ (a b : Rational) { a * b }, unit := oneQ } },
+    inv := \ (x : Rational) { if x == zeroQ then zeroQ else oneQ / x } },
+  le := \ (a b : Rational) { a <= b } }
+
+-- the exact sum of n rationals
+sumQ (n : Int) (f : Fin n -> Rational) : Rational := fold Rational exactRational rationalField.field.ring.add.monoid n f
+
+-- ---------------------------------------------------------------- the doubles inside them
+-- the double nearest to a rational, ties to even: the rounding every operation of the doubles makes
+nearest : Rational -> Float64 := extern "python:luthier.rational.nearest"
+
+-- every finite double is a rational: toQ is that inclusion, exact, so rounding undoes it, and it keeps
+-- the order
+ToQExact (f : Float64 -> Rational) (x : Float64) : Bool := nearest (f x) == x
+ToQKeepsOrder (f : Float64 -> Rational) (x y : Float64) : Bool := (x <= y) == (f x <= f y)
+toQ : { f : Float64 -> Rational | ToQExact f & ToQKeepsOrder f } := extern "python:fractions.Fraction"
+
+-- the unit roundoff of binary64, 2^-53: half the distance from 1 to the next double
+unitRoundoff : Rational := ratio 1 9007199254740992
+
+-- gamma n = n u / (1 - n u): the relative error that n roundings in a row can reach (Higham, §3.1)
+gamma (n : Nat) : Rational := let nu = fromInt n * unitRoundoff in nu / (oneQ - nu)
+
+-- The doubles whose exponents leave room, zero included: between 1e-150 and 1e150 in magnitude, a
+-- product, a quotient or a sum of a few is normal and finite, so the relative rounding law holds for it.
+-- Its generator draws the exponent uniformly, so a law over it is tested at every scale.
+NormalDouble : U := { x : Float64 | x == 0.0 or (1.0e-150 <= abs x and abs x <= 1.0e150) }
+NonZeroDouble : U := { x : NormalDouble | x /= 0.0 }
+gen NormalDouble := extern "python:luthier.rational.gen_normal_double"
+
+-- ---------------------------------------------------------------- the rounding law
+-- an operation of two doubles rounds the exact one: the double is the exact result times 1 + delta,
+-- |delta| <= u (06 §8), compared in Rational, so with no tolerance
+Rounds (op : Float64 -> Float64 -> Float64) (exact : Rational -> Rational -> Rational) (x y : Float64) : Bool :=
+  let e = exact (toQ x) (toQ y) in absQ (toQ (op x y) - e) <= unitRoundoff * absQ e
+
+float64Add : { f : Float64 -> Float64 -> Float64 | \ (x y : NormalDouble) { Rounds f (\ a b { a + b }) x y } } :=
+  \ (a b : Float64) { a + b }
+float64Sub : { f : Float64 -> Float64 -> Float64 | \ (x y : NormalDouble) { Rounds f (\ a b { a - b }) x y } } :=
+  \ (a b : Float64) { a - b }
+float64Mul : { f : Float64 -> Float64 -> Float64 | \ (x y : NormalDouble) { Rounds f (\ a b { a * b }) x y } } :=
+  \ (a b : Float64) { a * b }
+-- the law is not empty: an addition off by three units in the last place breaks it wherever its
+-- result is not zero (the negative control of the four above)
+offByThree : { f : Float64 -> Float64 -> Float64 | \ (x y : NormalDouble) { x + y == 0.0 or not (Rounds f (\ a b { a + b }) x y) } } :=
+  \ (a b : Float64) { (a + b) * 1.0000000000000007 }
+float64Div : { f : Float64 -> Float64 -> Float64 | \ (x : NormalDouble) (y : NonZeroDouble) { Rounds f (\ a b { a / b }) x y } } :=
+  \ (a b : Float64) { a / b }
+
+-- the square root rounds the exact one: r = sqrt x (1 + delta), so |r^2 - x| <= (2 u + u^2) x, which
+-- Rational can state without the irrational root
+RootRounds (s : Float64 -> Float64) (x : NormalDouble) : Bool :=
+  if x < 0.0 then true
+  else let r = toQ (s x) in absQ (r * r - toQ x) <= (unitRoundoff + unitRoundoff + unitRoundoff * unitRoundoff) * toQ x
+float64Sqrt : { s : Float64 -> Float64 | RootRounds s } := sqrt
+
+-- ---------------------------------------------------------------- what follows for sums
+-- A sum of n doubles, however it is associated, is within gamma n of the exact sum relative to the sum
+-- of the absolute values (Higham, eq. 4.4, with gamma (n - 1); gamma n is what is stated). sumTo of
+-- algebra is the sum the native definitions use.
+SumWithinGamma (s : (n : Nat) -> (Fin n -> Float64) -> Float64) (n : Nat) (f : Fin n -> NormalDouble) : Bool :=
+  absQ (toQ (s n f) - sumQ n (\ k { toQ (f k) })) <= gamma n * sumQ n (\ k { absQ (toQ (f k)) })
+sumToRounds : { s : (n : Nat) -> (Fin n -> Float64) -> Float64 | SumWithinGamma s } := sumTo
+
+-- An inner product of length n is within gamma n of the exact one, relative to the sum of the absolute
+-- values of the products (Higham, eq. 3.5)
+InnerWithinGamma (d : (n : Nat) -> (Fin n -> Float64) -> (Fin n -> Float64) -> Float64) (n : Nat)
+                 (x y : Fin n -> NormalDouble) : Bool :=
+  absQ (toQ (d n x y) - sumQ n (\ k { toQ (x k) * toQ (y k) })) <= gamma n * sumQ n (\ k { absQ (toQ (x k) * toQ (y k)) })
+innerOf (n : Int) (x y : Fin n -> Float64) : Float64 := sumTo n (\ k { x k * y k })
+innerRounds : { d : (n : Nat) -> (Fin n -> Float64) -> (Fin n -> Float64) -> Float64 | InnerWithinGamma d } := innerOf
+
+test rationalField with 100
+test toQ with 200
+test float64Add with 300
+test float64Sub with 300
+test float64Mul with 300
+test float64Div with 300
+test offByThree with 300
+test float64Sqrt with 300
+test sumToRounds with 100
+test innerRounds with 100

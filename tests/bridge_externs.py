@@ -83,3 +83,12 @@ def bad_table_of(n):
 def maybe_index(n):
     """Just an index that may be out of the range its type allows."""
     return ("just", n)
+
+
+def third():
+    from fractions import Fraction
+    return Fraction(1, 3)
+
+
+def a_float():
+    return 0.5

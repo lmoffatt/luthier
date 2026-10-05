@@ -150,7 +150,8 @@ their case M = X = V. Structures by inclusion: `Setoid`, `TotalOrder`, `Monoid`,
 setoid, joined by distributivity), `CommutativeRing`, `Field`, `OrderedField`,
 `CompleteOrderedField`; `VectorSpace K F V` over a field, `InnerProductSpace K F V` over an ordered
 field, `LinearMaps`. Instances: `intRing : CommutativeRing Int`, `realField : CompleteOrderedField
-Real` (axiom), `float64Field : OrderedField Float64` (within rounding, tested).
+Real` (axiom). `float64Field` was removed on 2026-10-05: the doubles are not a field; what they have
+is the rounding law of `rational.lut` (06 §8).
 
 A symmetric matrix and a commutative operation are different objects under one law. The matrix is a
 symmetric bilinear form (equivalently a self-adjoint map, `⟨x, A y⟩ == ⟨A x, y⟩`); on the basis its

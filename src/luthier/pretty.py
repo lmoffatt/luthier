@@ -102,6 +102,9 @@ def pp(t, prec: int = 0) -> str:
             return repr(v)
         if isinstance(v, (int, float)):
             return str(v)
+        from fractions import Fraction
+        if isinstance(v, Fraction):
+            return f"{v.numerator}/{v.denominator}" if v.denominator != 1 else f"{v.numerator}/1"
         shape = getattr(v, "shape", None)
         return f"<{type(v).__name__}{' ' + str(shape) if shape is not None else ''}>"
     if isinstance(t, Univ):

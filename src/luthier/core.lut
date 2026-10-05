@@ -20,11 +20,15 @@ implies (a b : Bool) : Bool := match a { true -> b ; false -> true }
 --            the algebra library, and code that runs computes with an approximation of them
 --   Float64  the finite IEEE doubles: every one is a real number, so Float64 refines Real; their
 --            operations are the machine's, rounded; literals 3.0; NaN and infinities are errors
+--   Rational the rationals, exactly: a fraction of two integers, every one a real number, so Rational
+--            refines Real; + - * / and comparisons are exact; no literals, values come from the
+--            conversions of lib/rational.lut. What the doubles are compared against (06 §8)
 --   String   text; literals "a"
-Int     : U := primitive "integer"
-Real    : U := primitive "real"
-Float64 : Real := primitive "ieee754-binary64"
-String  : U := primitive "unicode"
+Int      : U := primitive "integer"
+Real     : U := primitive "real"
+Float64  : Real := primitive "ieee754-binary64"
+Rational : Real := primitive "rational"
+String   : U := primitive "unicode"
 
 Maybe (A : U) = < nothing : Unit | just : A >
 

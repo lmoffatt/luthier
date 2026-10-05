@@ -54,8 +54,8 @@ withRow (a : Mat Float64) (i : Fin a.m) (r : VecOf a.n) : Mat Float64 := (a.m, a
 swapRows (a : Mat Float64) (i j : Fin a.m) : Mat Float64 :=
   (a.m, a.n, \ p q { if p == i then a.f j q else if p == j then a.f i q else a.f p q })
 
--- x^k, the power of the multiplicative monoid of Float64
-pow (x : Float64) (k : Nat) : Float64 := power Float64 float64Field.field.ring.eq float64Field.field.ring.mul x k
+-- x^k, k products of x in a row (the doubles have no monoid: rational.lut)
+pow (x : Float64) (k : Nat) : Float64 := powerWith Float64 (\ (a b : Float64) { a * b }) 1.0 x k
 
 -- ---------------------------------------------------------------- the definitions
 dotDef (x : Vec Float64) (y : VecOf x.n) : Float64 := sumTo x.n (\ k { x.f k * y.f k })
@@ -171,7 +171,7 @@ positiveSemidefinite (a : SymmetricSquare) : Bool := minimum (eigvalsSym a) >= 0
 
 -- Hadamard's bound on the size of a determinant: the product of the norms of the rows
 hadamardBound (a : Mat Float64) : Float64 :=
-  fold Float64 float64Field.field.ring.eq float64Field.field.ring.mul a.m (\ i { norm (row a i) })
+  foldWith Float64 (\ (a b : Float64) { a * b }) 1.0 a.m (\ i { norm (row a i) })
 
 -- ---------------------------------------------------------------- derivatives
 -- g is the gradient of f at t, on a space Theta that vectors move along by `shift`: the slope of f

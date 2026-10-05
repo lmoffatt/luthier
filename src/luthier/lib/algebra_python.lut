@@ -1,42 +1,52 @@
--- The structures of algebra on the numpy leaves of array.lut: the vectors of length n are a
--- Euclidean space and the n by n matrices act on them as linear maps. These instances are the
--- characterization of the leaves that form them (add, scale, dot, matVec, matMul, transpose,
--- identity); array.lut states, on each leaf, the laws that are not structural.
+-- The numpy leaves of array.lut measured against the exact operations they stand for: each rounds the
+-- operation on the rationals the doubles are (06 §8, rational.lut), at every scale of NormalDouble.
+-- An entrywise operation rounds each entry once; an inner product, a sum and each row of a product of
+-- a matrix and a vector are within gamma n of the exact one, relative to the sum of the absolute
+-- values of their terms (Higham, eq. 3.5 and 4.4), whatever order numpy sums in.
+--
+-- This replaces the vector space, the Euclidean space and the linear maps over float64Field: the
+-- doubles are not a field, and those laws held only in the box they were sampled in.
 
 import "real"
 import "algebra"
 import "array"
 import "array_python"
+import "rational"
 
--- Vectors of dimension n, over Float64, within the rounding of algebra's float64Field. The leaves
--- act on bare arrays; each operation here is the leaf seen at the shaped type, so its result's
--- shape is an obligation `test` checks.
-vecSpace (n : Dim) : VectorSpace Float64 float64Field.field (VecOf n) := {
-  eq := approxVec (roundingSlack * lawMagnitude * lawMagnitude * eps),
-  add := { monoid := { op := \ a b { add a b }, unit := zeros n }, inv := \ a { scale (0.0 - 1.0) a } },
-  scale := \ c a { scale c a } }
+-- an entrywise operation of two vectors rounds the exact one entry by entry
+VecRounds (op : Vec Float64 -> Vec Float64 -> Vec Float64) (exact : Rational -> Rational -> Rational)
+          (n : Nat) (x y : Fin n -> NormalDouble) : Bool :=
+  let r = op (n, x) (n, y) in
+  if r.n == n then forallBelow n (\ k { let e = exact (toQ (x k)) (toQ (y k)) in absQ (toQ (r.f k) - e) <= unitRoundoff * absQ e })
+  else false
 
-euclidean (n : Dim) : Euclidean Float64 float64Field (VecOf n) n := {
-  space := { space := vecSpace n, inner := dot },
-  basis := \ i { row (identity n) i } }
+-- scaling a vector rounds each product once
+ScaleRounds (s : Float64 -> Vec Float64 -> Vec Float64) (n : Nat) (c : NormalDouble) (x : Fin n -> NormalDouble) : Bool :=
+  let r = s c (n, x) in
+  if r.n == n then forallBelow n (\ k { let e = toQ c * toQ (x k) in absQ (toQ (r.f k) - e) <= unitRoundoff * absQ e })
+  else false
 
-matrices (n : Dim) : LinearMaps Float64 float64Field (VecOf n) (MatOf n n) := {
-  on := (euclidean n).space, apply := \ a x { matVec a x }, compose := \ a b { matMul a b },
-  id := identity n, adjoint := \ a { transpose a } }
+-- each entry of a matrix times a vector is an inner product, within gamma n of the exact one
+MatVecWithinGamma (mv : Mat Float64 -> Vec Float64 -> Vec Float64) (m n : Nat)
+                  (a : Fin m -> Fin n -> NormalDouble) (x : Fin n -> NormalDouble) : Bool :=
+  let r = mv (m, n, a) (n, x) in
+  if r.n == m then forallBelow m (\ i {
+    absQ (toQ (r.f i) - sumQ n (\ k { toQ (a i k) * toQ (x k) })) <= gamma n * sumQ n (\ k { absQ (toQ (a i k) * toQ (x k)) }) })
+  else false
 
--- the dimension the structure laws are certified at
-lawDim : Int := 5
-
--- the structure's laws at one dimension, and the shapes of the operations at every dimension
-vec5      : VectorSpace Float64 float64Field.field (VecOf lawDim) := vecSpace lawDim
-euclid5   : Euclidean Float64 float64Field (VecOf lawDim) lawDim := euclidean lawDim
-matrices5 : LinearMaps Float64 float64Field (VecOf lawDim) (MatOf lawDim lawDim) := matrices lawDim
+addRounds : { f : Vec Float64 -> Vec Float64 -> Vec Float64 | VecRounds f (\ a b { a + b }) } := add
+subRounds : { f : Vec Float64 -> Vec Float64 -> Vec Float64 | VecRounds f (\ a b { a - b }) } := sub
+scaleRounds : { f : Float64 -> Vec Float64 -> Vec Float64 | ScaleRounds f } := scale
+dotRounds : { d : (n : Nat) -> (Fin n -> Float64) -> (Fin n -> Float64) -> Float64 | InnerWithinGamma d } :=
+  \ (n : Nat) (x y : Fin n -> Float64) { dot (n, x) (n, y) }
+totalRounds : { s : (n : Nat) -> (Fin n -> Float64) -> Float64 | SumWithinGamma s } :=
+  \ (n : Nat) (f : Fin n -> Float64) { total (n, f) }
+matVecRounds : { f : Mat Float64 -> Vec Float64 -> Vec Float64 | MatVecWithinGamma f } := matVec
 
 test intRing with 100
-test float64Field with 100
-test vec5 with 50
-test euclid5 with 50
-test matrices5 with 50
-test vecSpace with 50
-test euclidean with 50
-test matrices with 50
+test addRounds with 100
+test subRounds with 100
+test scaleRounds with 100
+test dotRounds with 100
+test totalRounds with 100
+test matVecRounds with 50 size 8

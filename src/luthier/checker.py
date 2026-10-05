@@ -1285,13 +1285,15 @@ class Checker:
             return BinOp(op, l, r), Var("Bool")
         bt = self.base_type(lt)
         bw = self.whnf(bt)
-        num = isinstance(bw, Var) and bw.name in ("Int", "Float64")
+        num = isinstance(bw, Var) and bw.name in ("Int", "Float64", "Rational")
+        if isinstance(bw, Var) and bw.name == "Rational" and op == "mod":
+            self.err("mod is defined on Int and Float64; on Rational every division is exact")
         if op == "+" and isinstance(bw, Var) and bw.name == "String":
             r = self.check(ctx, t.rhs, bt)
             return BinOp(op, l, r), bt
         if not num:
             hint = "; the operations of Real are not computed (06 §2)" if self._is_real(bw) else ""
-            self.err(f"operator {op} expects Int or Float64, got {pp(l)} : {pp(lt)}{hint}")
+            self.err(f"operator {op} expects Int, Float64 or Rational, got {pp(l)} : {pp(lt)}{hint}")
         r = self.check(ctx, t.rhs, bt)
         if op in ("<", "<=", ">", ">="):
             return BinOp(op, l, r), Var("Bool")
