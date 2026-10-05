@@ -23,6 +23,7 @@ BINOPS = [
     ("*", "/", "mod"),
 ]
 RIGHT_ASSOC = {"&", "->"}
+NEGATE = "__negate__"     # the head of a unary minus, until the checker knows the operand's type
 
 
 class Parser:
@@ -186,6 +187,12 @@ class Parser:
         name_tok = self.expect("name")
         name = name_tok.text
         binders = []
+        implicit = 0
+        # implicit parameters first, `{A B : U}`, then the explicit ones
+        while self.at_sym("{") and self._binder_ahead():
+            names, typ = self.parse_binder("{", "}")
+            binders.append((names, typ))
+            implicit += len(names)
         while self.at_sym("("):
             binders.append(self.parse_binder())
         if self.at_sym("="):
@@ -253,7 +260,7 @@ class Parser:
                     body = Lam(PVar(n), body, ann=btype)
         if typ is None and body is None:
             self.err(f"definition {name!r} needs a type or a body")
-        return Def(name, typ, body, line=name_tok.line)
+        return Def(name, typ, body, line=name_tok.line, implicit=implicit)
 
     def _peek_after_nl_is(self, sym) -> bool:
         j = self.i
@@ -282,9 +289,9 @@ class Parser:
             branches.append((tuple_pat(pats), rhs))
         return Match(tuple_term(names), tuple(branches))
 
-    def parse_binder(self):
-        """( x y : T )"""
-        self.expect("symbol", "(")
+    def parse_binder(self, open_: str = "(", close: str = ")"):
+        """( x y : T ), or { x y : T } for implicit parameters"""
+        self.expect("symbol", open_)
         self.skip_newlines += 1
         names = [self.expect("name").text]
         while self.at("name"):
@@ -292,8 +299,18 @@ class Parser:
         self.expect("symbol", ":")
         typ = self.parse_term()
         self.skip_newlines -= 1
-        self.expect("symbol", ")")
+        self.expect("symbol", close)
         return (names, typ)
+
+    def _binder_ahead(self) -> bool:
+        """After `{` in a header: names and then `:`, an implicit binder (and not a record type)."""
+        k = 1
+        if self.peek(k).kind != "name":
+            return False
+        while self.peek(k).kind == "name":
+            k += 1
+        t = self.peek(k)
+        return t.kind == "symbol" and t.text == ":"
 
     def parse_data(self, name, binders) -> DataDecl:
         self.expect("keyword", "data")
@@ -346,6 +363,12 @@ class Parser:
         return BinOp(op, lhs, rhs)
 
     def parse_app(self) -> Term:
+        if self.at_sym("-"):
+            # unary minus: `-x` is the negation of x, `-f x` of `f x`; as an argument it needs
+            # parentheses, `f (-x)`, since `f -x` is `f - x`. The checker makes it `0 - x` or
+            # `0.0 - x` by the type of x.
+            self.next()
+            return App(Var(NEGATE), self.parse_app())
         fn = self.parse_postfix(self.parse_atom())
         while self.starts_atom():
             arg = self.parse_postfix(self.parse_atom())
@@ -367,7 +390,7 @@ class Parser:
             return False
         if t.kind in ("name", "number", "string"):
             return True
-        if t.kind == "keyword" and t.text in ("U", "match", "forget", "if"):
+        if t.kind == "keyword" and t.text in ("U", "match", "forget", "if", "let"):
             return True
         if t.kind == "symbol" and t.text in ("(", "[", "\\"):
             return True
@@ -399,6 +422,16 @@ class Parser:
             self.expect("keyword", "else")
             b = self.parse_term()
             return Match(c, ((PCon("true", ()), a), (PCon("false", ()), b)))
+        if t.kind == "keyword" and t.text == "let":
+            # `let p = e in body` is `match e { p -> body }`: the name stands for e, with the
+            # meaning 05 §7 gives a variable bound by a match
+            self.next()
+            pat = self.parse_pattern()
+            self.expect("symbol", "=")
+            value = self.parse_term()
+            self.expect("keyword", "in")
+            body = self.parse_term()
+            return Match(value, ((pat, body),))
         if t.kind == "keyword" and t.text == "forget":
             self.next()
             return Forget(self.parse_atom())

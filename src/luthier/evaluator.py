@@ -46,9 +46,6 @@ class Env:
     fuel: int = 200_000                 # steps per reduction in the checker (types, conversion)
     run_fuel: int = 2_000_000_000       # steps per evaluation of a closed term (law cases, eval, run)
 
-    def is_global(self, name: str) -> bool:
-        return name in self.defs or name in self.datas or name in BUILTIN_TYPES
-
 
 # ------------------------------------------------------------------ helpers
 

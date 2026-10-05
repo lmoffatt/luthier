@@ -74,8 +74,9 @@ logPredictive (Theta Y : U) (l : LogLik Theta Y) (b : Discrete Theta) (y : Y) : 
 -- a uniform number in [0, 1) from the seed, with Luthier's own generator
 uniform01 (s : Int) : Float64 * Int := match randBelow 1073741824 s { (k, s2) -> (toFloat64 k / 1073741824.0, s2) }
 
--- the index where the cumulative weight first passes u
-indexAt (w : Vec Float64) (u : Float64) (k : Int) (acc : Float64) : Int :=
+-- the index where the cumulative weight first passes u, searching from k, which starts at 0 and only
+-- grows (an Int would let k be negative, where w.f k has no value)
+indexAt (w : Vec Float64) (u : Float64) (k : Nat) (acc : Float64) : Int :=
   if k >= w.n - 1 then k
   else if acc + w.f k > u then k
   else indexAt w u (k + 1) (acc + w.f k)

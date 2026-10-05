@@ -122,7 +122,24 @@ variable or a definition, and one projection per remaining segment. In a depende
 of a later component may mention earlier ones, and the type of `d.m` replaces them by projections
 of `d`.
 
-## 7. Open
+## 7. Added 2026-10-05 (phase 6 of the repair plan)
+
+- `let p = e in body` is `match e { p -> body }`: the pattern may be a name or a tuple, and the
+  name stands for `e` with the meaning `05 §7` gives a variable a match binds. It replaces the
+  chains `match e1 { x -> match e2 { y -> ... } }` that ended in `} } } }`.
+- `-x` is the negation: `0 - x` on an `Int`, `0.0 - x` on a `Float64`, an error on any other type.
+  It binds looser than application, `-f x` is `-(f x)`, and as an argument it needs parentheses:
+  `f (-x)`, since `f -x` is `f - x`.
+- `{A B : U}` before the other parameters of a definition makes them implicit: where the
+  definition is applied they are inferred by matching the types of the explicit arguments against
+  those of the parameters (first order, through aliases and refinements). An argument whose type is
+  not inferable alone (an unannotated lambda) is checked once the others solved the unknowns. When
+  the first argument of an application is itself a type, the implicit parameters are taken as given
+  explicitly, so every application written before they existed means what it meant. An implicit
+  parameter is a type or a type operator; one that no argument determines is an error that asks
+  for it explicitly.
+
+## 8. Open
 
 - Quote and unquote: the syntax of a term as a value of `Term`.
 - Local definitions in a block, `{ x := t ; u }`.

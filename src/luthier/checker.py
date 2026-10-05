@@ -75,6 +75,8 @@ class Checker:
         self.gens_by: dict = {}        # generator key -> the name its `gen` was written on
         self.object_of: dict = {}      # qualified name -> the members of its object (a strongly connected component)
         self._operand_memo: dict = {}  # id of an operand -> (operand, context, whether it is a type)
+        self.implicit_params: dict = {}  # qualified name -> how many leading parameters are implicit
+        self._meta_names: set = set()     # the unknowns made for implicit parameters, all distinct
         self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
@@ -111,10 +113,6 @@ class Checker:
     def err(self, msg: str):
         where = f"in {self.current_def}: " if self.current_def else ""
         raise TypeCheckError(where + msg)
-
-    def is_type(self, ty: Term, name: str) -> bool:
-        w = self.whnf(ty)
-        return isinstance(w, Var) and w.name == name
 
     def is_unit(self, ty: Term) -> bool:
         w = self.whnf(ty)
@@ -159,6 +157,9 @@ class Checker:
         built from the names each one mentions, and the objects (strongly connected components)
         are checked in an order where every dependency comes first."""
         from .graph import file_objects
+        for d in prog.defs:
+            if getattr(d, "implicit", 0):
+                self.implicit_params[self.qualify(d.name)] = d.implicit
         for obj in file_objects(self, prog):
             self.load_object(obj)
         for g in prog.gens:
@@ -536,6 +537,14 @@ class Checker:
             ty = None
             if d.type is not None:
                 ty = self.check([], d.type, Univ())
+                k = self.implicit_params.get(qname, 0)
+                w = ty
+                for _ in range(k):
+                    w = self.whnf(w)
+                    if not isinstance(w, Pi) or not _ends_in_universe(w.dom):
+                        self.err(f"an implicit parameter of {d.name} must be a type (of type U or a type "
+                                 f"operator): it is inferred from the types of the explicit arguments")
+                    w = w.cod
             if existing is not None:
                 # filling a hole: the type must agree with the declaration
                 if ty is not None and not self.conv(ty, existing.type):
@@ -1000,12 +1009,157 @@ class Checker:
         return proj, fty
 
     def infer_app(self, ctx: Ctx, t: App):
+        if isinstance(t.fn, Var) and t.fn.name == "__negate__":
+            return self.infer_negation(ctx, t.arg)
+        h, args = unapply(t)
+        if isinstance(h, Var) and lookup(ctx, h.name) is None:
+            q = self.resolve(h.name)
+            k = self.implicit_params.get(q, 0) if q is not None else 0
+            if k:
+                res = self.infer_implicit_app(ctx, h, args, k)
+                if res is not None:
+                    return res
         f, fty = self.infer(ctx, t.fn)
         w = self.whnf(self.base_type(fty))
         if not isinstance(w, Pi):
             self.err(f"{pp(f)} : {pp(fty)} is not a function, cannot apply it to {pp(t.arg)}")
         a = self.check(ctx, t.arg, w.dom)
         return App(f, a), subst(w.cod, {w.name: a})
+
+    # ------------------------------------------------------------ implicit arguments
+    def infer_implicit_app(self, ctx: Ctx, h: Var, args: list, k: int):
+        """`f a1 ... an` where f's first k parameters are implicit types. When a1 is itself a type the
+        call gives them explicitly, as every call did before implicit parameters existed, and the
+        ordinary path checks it (None is returned). Otherwise each implicit parameter is an unknown,
+        solved by unifying the type of each explicit argument with the type of its parameter; an
+        argument whose type cannot be inferred alone (a lambda) is checked once the others solved
+        what its type needs. The elaborated term passes every argument explicitly."""
+        try:
+            with self.silent():
+                _, a0t = self.infer(ctx, args[0])
+            if _ends_in_universe(self.whnf(a0t)) or isinstance(self.whnf(a0t), Univ):
+                return None
+        except TypeCheckError:
+            pass
+        f, fty = self.infer(ctx, h)
+        metas = []
+        ty = fty
+        for _ in range(k):
+            w = self.whnf(ty)
+            if not isinstance(w, Pi):
+                self.err(f"{h.name} has {k} implicit parameters but its type has fewer arrows")
+            m = f"?{w.name.split('~')[0]}~{len(self._meta_names)}"
+            self._meta_names.add(m)
+            metas.append(m)
+            ty = subst(w.cod, {w.name: Var(m)}) if w.name != "_" else w.cod
+        sol: dict = {}
+        # the parameter types, each with the arguments before it in place of their names
+        doms, rest = [], ty
+        for a in args:
+            w = self.whnf(rest)
+            if not isinstance(w, Pi):
+                self.err(f"{h.name} is applied to more arguments than its type takes")
+            doms.append(w)
+            rest = subst(w.cod, {w.name: a}) if w.name != "_" else w.cod
+        inferred: dict = {}
+        for i, a in enumerate(args):
+            if self._mentions_metas(doms[i].dom, metas):
+                got = self._try_infer(ctx, a)
+                if got is not None:
+                    inferred[i] = got
+                    self.unify(doms[i].dom, got[1], sol, metas)
+        unsolved = [m for m in metas if m not in sol]
+        if unsolved:
+            names = ", ".join(m[1:].split("~")[0] for m in unsolved)
+            self.err(f"cannot infer the implicit parameter(s) {names} of {h.name} from its arguments; "
+                     f"give them explicitly, {h.name} {' '.join('T' for _ in metas)} ...")
+        term: Term = f
+        for m in metas:
+            term = App(term, sol[m])
+        ty = fty
+        for m in metas:
+            w = self.whnf(ty)
+            ty = subst(w.cod, {w.name: sol[m]}) if w.name != "_" else w.cod
+        for i, a in enumerate(args):
+            w = self.whnf(ty)
+            if i in inferred:
+                ae, at = inferred[i]
+                a2 = self.coerce(ctx, ae, at, w.dom)
+            else:
+                a2 = self.check(ctx, a, w.dom)
+            term = App(term, a2)
+            ty = subst(w.cod, {w.name: a2}) if w.name != "_" else w.cod
+        return term, ty
+
+    def _try_infer(self, ctx: Ctx, a: Term):
+        """The elaboration and type of a term when it has one by itself; None for a term only checking
+        gives a type (an unannotated lambda), with any obligation the attempt recorded taken back."""
+        cd = self.current_def
+        mark = len(self.obligations.get(cd, [])) if cd is not None else 0
+        try:
+            return self.infer(ctx, a)
+        except TypeCheckError:
+            if cd is not None and cd in self.obligations:
+                del self.obligations[cd][mark:]
+            return None
+
+    def _mentions_metas(self, t: Term, metas: list) -> bool:
+        return bool(free_vars(t) & set(metas))
+
+    def unify(self, p: Term, t: Term, sol: dict, metas: list, depth: int = 0):
+        """First-order matching of a parameter type `p`, with unknowns among `metas`, against an
+        argument's type `t`, recording solutions in `sol`. What it cannot match it leaves: the
+        argument is checked against the solved type afterwards, which reports a real mismatch."""
+        if depth > 40:
+            return
+        p = subst(p, {m: v for m, v in sol.items()}) if sol else p
+        if not self._mentions_metas(p, metas):
+            return
+        if isinstance(p, Var) and p.name in metas:
+            sol[p.name] = t
+            return
+        tw = t
+        for attempt in range(3):
+            if isinstance(p, Pi) and isinstance(tw, Pi):
+                self.unify(p.dom, tw.dom, sol, metas, depth + 1)
+                pc = subst(p.cod, {p.name: Var(tw.name)}) if p.name != "_" and tw.name != "_" else p.cod
+                self.unify(pc, tw.cod, sol, metas, depth + 1)
+                return
+            if isinstance(p, Sigma) and isinstance(tw, Sigma):
+                self.unify(p.fst, tw.fst, sol, metas, depth + 1)
+                ps = subst(p.snd, {p.name: Var(tw.name)}) if p.name != "_" and tw.name != "_" else p.snd
+                self.unify(ps, tw.snd, sol, metas, depth + 1)
+                return
+            if isinstance(p, Sum) and isinstance(tw, Sum) and len(p.alts) == len(tw.alts):
+                for (_, x), (_, y) in zip(p.alts, tw.alts):
+                    self.unify(x, y, sol, metas, depth + 1)
+                return
+            hp, ap = unapply(p)
+            ht, at = unapply(tw)
+            if isinstance(hp, Var) and isinstance(ht, Var) and hp.name == ht.name and len(ap) == len(at) and ap:
+                for x, y in zip(ap, at):
+                    self.unify(x, y, sol, metas, depth + 1)
+                return
+            # unfold the argument's type (an alias, a refinement) and the parameter's, and try again
+            nt = self.whnf(tw)
+            if isinstance(nt, Subtype) and not isinstance(self.whnf(p), Subtype):
+                nt = self.whnf(nt.base)
+            np_ = self.whnf(p)
+            if nt == tw and np_ == p:
+                return
+            tw, p = nt, np_
+
+    def infer_negation(self, ctx: Ctx, x: Term):
+        """`-x`: `0 - x` on an Int, `0.0 - x` on a Float64, and on any other type the meaning of `-`
+        registered for it applied to its zero is not guessed: the negation is an error there."""
+        _, xt = self.infer(ctx, x)
+        prim = self.whnf(self.base_type(xt))
+        if isinstance(prim, Var) and prim.name == "Int":
+            return self.infer(ctx, BinOp("-", Lit(0), x))
+        if isinstance(prim, Var) and prim.name == "Float64":
+            return self.infer(ctx, BinOp("-", Lit(0.0), x))
+        self.err(f"unary minus on {pp(xt)}: it is defined on Int and Float64; write the negation of "
+                 f"this type explicitly")
 
     def infer_binop(self, ctx: Ctx, t: BinOp):
         op = t.op
@@ -1656,31 +1810,6 @@ def _apply_law(fn: Term, whole: Term) -> Term:
     if isinstance(fn, Lam) and isinstance(fn.param, PVar):
         return subst(fn.body, {fn.param.name: whole})
     return App(fn, whole)
-
-
-def _law_applications(pred: Term, labels: list):
-    """(law, position) for each place the predicate applies a law to the whole value."""
-    out = []
-    target = set(labels)
-
-    def is_whole(a):
-        return set(free_vars(a)) >= target and isinstance(a, (Pair, Var))
-
-    def walk(t):
-        if isinstance(t, And):
-            walk(t.lhs)
-            walk(t.rhs)
-            return
-        h, args = unapply(t)
-        hit = False
-        for i, a in enumerate(args):
-            if is_whole(a):
-                out.append((h, i))
-                hit = True
-        if not hit:
-            out.append((t, -1))
-    walk(pred)
-    return out
 
 
 def _projections_of(body: Term, param: str, labels: list) -> set:

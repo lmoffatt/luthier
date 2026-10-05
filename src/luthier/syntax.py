@@ -273,6 +273,7 @@ class Def:
     line: int = 0
     pending: bool = False  # a declared type `T : base` whose laws are not given yet: its body is
                            # the labeled base, so the laws can be written over it (05 §1)
+    implicit: int = 0      # how many leading parameters are implicit, `{A : U}`: inferred where it is applied
 
 
 @dataclass

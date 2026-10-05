@@ -6,7 +6,10 @@
 -- the magnitude: x or -x, whichever is not negative
 AbsIsMagnitude (f : Float64 -> NonNegative) (x : Float64) : Bool := f x >= 0.0 and (f x == x or f x == 0.0 - x)
 abs  : { f : Float64 -> NonNegative | AbsIsMagnitude f }
-toFloat64 : Int -> Float64        -- the nearest double to an integer, exact below 2^53
+-- the nearest double to an integer, exact below 2^53. A conversion with one implementation, not a
+-- function a model chooses (as sqrt or exp are), so it is bound here: the generator of Float64 in
+-- random.lut uses it, and a program that does not import real_python still draws numbers
+toFloat64 : Int -> Float64 := extern "python:builtins.float"
 ulp  : Float64 -> Float64         -- the distance to the next double
 sqrt : Float64 -> Float64
 cbrt : Float64 -> Float64

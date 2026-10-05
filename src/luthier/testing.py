@@ -97,13 +97,6 @@ class TestReport:
         return f"{self.definition}: {verdict}\n" + "\n".join(lines)
 
 
-def obligation_law(ob: Obligation) -> Term:
-    t = ob.term
-    for name, ty in reversed(ob.params):
-        t = Lam(PVar(name), t, ann=ty)
-    return t
-
-
 def peel(checker: Checker, law: Term):
     """Split a closed law into ([(name, type)], body) by its Pi type."""
     with checker.silent():
