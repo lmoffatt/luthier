@@ -384,6 +384,9 @@ def cmd_run(args):
     if args.fuel is not None:
         ck.env.run_fuel = args.fuel
     prog = Program(loader)
+    ck.env.checked = bool(getattr(args, "checked", False))
+    if ck.env.checked:
+        ck.env._machine_globals = {}     # values computed while checking crossed unchecked
     settings = {}
     for name, raw in (_parse_setting(x) for x in (args.set or [])):
         q = prog.resolve(name)
@@ -576,6 +579,8 @@ def main(argv=None):
     p.add_argument("--no-record", action="store_true", help="do not append to the .run.json record")
     p.add_argument("--require-certified", action="store_true",
                    help="refuse to run unless every name with laws in the cone of the entry is certified")
+    p.add_argument("--checked", action="store_true",
+                   help="test every value an extern gives against the refinements of its type, as it crosses")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_run)
 

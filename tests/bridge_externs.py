@@ -72,3 +72,14 @@ def gen_unit_point(rng, size):
 def gen_positive_wrongly(rng, size):
     """A generator that claims positive numbers and gives a negative one."""
     return -1.0
+
+
+def bad_table_of(n):
+    """A table with a column of an unknown kind: not a Table of table.lut."""
+    from luthier.tables import Table
+    return Table((("a", "int"), ("b", "weird")), ((1, 2),))
+
+
+def maybe_index(n):
+    """Just an index that may be out of the range its type allows."""
+    return ("just", n)

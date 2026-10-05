@@ -180,8 +180,14 @@ Every refinement in the type of an extern is an obligation on the value it gives
 predicate of a subtype, the codomain of each arrow quantified over its domain (`neg : Float64 ->
 NonNegative` owes `neg x >= 0.0` for every `x`), each component of a record or a pair, and each
 entry of an array (`pairI : Vec (Fin nodes)` owes that every entry is below `nodes`); the dimensions
-of an array are read off its shape and owe nothing. A refinement under a constructor of a sum or a
-data type (the `Table` of a `Maybe Table`) is not entered yet.
+of an array are read off its shape and owe nothing. Under a constructor of a sum (the `Table` of a
+`Maybe Table`) each law of the payload becomes `match v { just t -> L t ; _ -> true }`, and a law
+quantified over something whose type depends on the payload (a row `r : Fin t.nRows`) is quantified
+over the base of that type with its refinement as a precondition inside the match. A refinement
+deeper in a payload (a field of a record in a sum) and one under a data type are not entered.
+`luthier run --checked` tests every value an extern gives against the Bool laws of its type as it
+crosses, each entry of an array and each component of a record included; a quantified law is left to
+`test`, and a function an extern gives is tested when it is called.
 Files: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`,
 `r5_extern_type.reject.lut`, `r5_extern_over_declared.reject.lut`.
 

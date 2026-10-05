@@ -181,3 +181,32 @@ def test_the_generator_of_an_alias_is_the_generator_of_its_type():
           'c : { u : Unit | \\ (p : { x : Float64, y : Float64 }) { OnCircle p } } := unit'
     ck = load(src)
     assert run_laws(ck, "c", n=50).passed
+
+
+# ------------------------------------------------------------------ phase 4 of the plan
+
+def test_a_refinement_under_a_constructor_is_an_obligation():
+    src = 'Idx = Fin 3\nMI = < nothing : Unit | just : Fin 3 >\n' \
+          'pick : Int -> MI := extern "python:bridge_externs.maybe_index"\n'
+    ck = load(src)
+    labels = [o.label for o in ck.obligations.get(ck.resolve("pick"), [])]
+    assert labels and all("just" in l for l in labels)
+    assert not run_laws(ck, "pick", n=40).passed      # pick 5 is just 5, outside Fin 3
+
+
+def test_run_checked_tests_what_an_extern_gives(tmp_path):
+    from luthier.cli import main
+    lut = tmp_path / "checked.lut"
+    lut.write_text('import "real"\nimport "real_python"\nimport "table"\nimport "table_python"\n'
+                   'mkTable : Int -> Table := extern "python:bridge_externs.bad_table_of"\n'
+                   'main : Int := (mkTable 3).nRows\n')
+    assert main(["run", str(lut), "--no-record"]) == 0
+    with pytest.raises(SystemExit, match="outside Table"):
+        main(["run", str(lut), "--checked", "--no-record"])
+
+
+def test_a_law_blocked_by_a_hole_is_reported_with_its_name():
+    ck = load("k : Int\nAbove (x : Int) : Bool := x + k > x\n"
+              "a : { u : Unit | \\ (x : Int) { Above x } } := unit\n")
+    r = run_laws(ck, "a")
+    assert r.laws[0].outcome == "not run" and "k" in r.laws[0].error

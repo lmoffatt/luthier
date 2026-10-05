@@ -220,7 +220,9 @@ class Generators:
         for a in targs:
             gen = App(gen, a)
         try:
-            r = nf(self.env, App(App(gen, Lit(size)), Lit(seed)), self.fuel())
+            # on the machine the laws run on, with the fuel of a run
+            from .machine import normalize
+            r = normalize(self.env, App(App(gen, Lit(size)), Lit(seed)), Fuel(self.env.run_fuel))
         except EvalError as e:
             raise GenError(f"generator {label} for {pp(ty)} failed on size {size}, seed {seed}: {e}")
         if not isinstance(r, Pair):

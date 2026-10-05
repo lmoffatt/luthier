@@ -20,6 +20,15 @@ class EvalError(Exception):
     pass
 
 
+class HoleBlocked(EvalError):
+    """A closed evaluation reached a name without a value: a hole not filled, an axiom, an extern not
+    registered. Not a failure of what is evaluated: it cannot be evaluated in this program."""
+
+    def __init__(self, msg: str, names=()):
+        super().__init__(msg)
+        self.names = list(names)
+
+
 class OutOfFuel(EvalError):
     pass
 
@@ -45,6 +54,7 @@ class Env:
     externs: dict = field(default_factory=dict)     # target -> ExternInfo
     fuel: int = 200_000                 # steps per reduction in the checker (types, conversion)
     run_fuel: int = 2_000_000_000       # steps per evaluation of a closed term (law cases, eval, run)
+    checked: bool = False               # `run --checked`: every value an extern gives is tested against its type
 
 
 # ------------------------------------------------------------------ helpers

@@ -15,7 +15,7 @@ from .syntax import *
 from .subst import subst, free_vars
 from .pretty import pp
 from .machine import normalize
-from .evaluator import Env, Fuel, whnf, nf, apply, as_bool, EvalError, OutOfFuel
+from .evaluator import Env, Fuel, whnf, nf, apply, as_bool, EvalError, OutOfFuel, HoleBlocked
 from .checker import Checker, Obligation
 from .generators import Generators, GenError, OutsideType
 from .certify import definition_hash, write_certificate, fingerprint, generator_fingerprint  # noqa: F401
@@ -195,6 +195,9 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
         """An exception while drawing or evaluating: a generator whose value is outside its type,
         or an evaluation error, fails the law; a type with no generator, a domain the draws cannot
         reach, or a reduction out of fuel leaves it not run."""
+        if isinstance(e, HoleBlocked):
+            names = ", ".join(e.names) if e.names else "a name"
+            return result(mode, cases, False, outcome=NOT_RUN, error=f"depends on holes without a value: {names}")
         if isinstance(e, OutsideType) or (isinstance(e, EvalError) and not isinstance(e, OutOfFuel)):
             return result(mode, cases, False, error=str(e))
         return result(mode, cases, False, error=str(e), outcome=NOT_RUN)

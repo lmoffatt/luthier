@@ -23,9 +23,10 @@ from typing import Optional
 
 from .syntax import (Term, Var, Lit, Univ, Lam, App, Pi, Sigma, Pair, Arrow, BinOp, Con, Extern,
                      Subtype, Match, And, Forget, Pattern, PVar, PWild, PCon, PPair, PLit,
-                     Sum, Inj, NoLaw, PInj, Primitive, Axiom)
+                     Sum, Inj, NoLaw, PInj, Primitive, Axiom, pattern_vars)
 from .subst import subst, free_vars
-from .evaluator import (Env, Fuel, EvalError, OutOfFuel, ExternInfo, unapply, from_python, to_python,
+from .pretty import pp
+from .evaluator import (Env, Fuel, EvalError, OutOfFuel, HoleBlocked, ExternInfo, unapply, from_python, to_python,
                         strip_subtypes, pi_chain, result_type, _OPAQUE, nf as subst_nf,
                         is_indexable, index_foreign, fin_bound, shaped, whnf as subst_whnf, finite,
                         check_int64, _is_numpy_fn)
@@ -33,6 +34,10 @@ from .evaluator import (Env, Fuel, EvalError, OutOfFuel, ExternInfo, unapply, fr
 
 class NotClosed(Exception):
     """The term mentions something without a value: a free variable or an unfilled hole."""
+
+    def __init__(self, msg: str, name: str = ""):
+        super().__init__(msg)
+        self.name = name
 
 
 class Unsupported(Exception):
@@ -177,12 +182,12 @@ class Machine:
             elif isinstance(d.body, Primitive):
                 v = VType(Var(name), {})
             elif isinstance(d.body, Axiom):
-                raise NotClosed(f"{name} is an axiom: its laws are assumed and it has no computation")
+                raise NotClosed(f"{name} is an axiom: its laws are assumed and it has no computation", name)
             elif d.body is None:
                 if isinstance(d.type, Univ):
                     v = VType(Var(name), {})     # a declared type: its values come from outside
                 else:
-                    raise NotClosed(f"{name} is declared but has no definition")
+                    raise NotClosed(f"{name} is declared but has no definition", name)
             elif isinstance(d.body, Extern):
                 if isinstance(d.type, Univ) or self._is_universe(d.type):
                     v = VType(Var(name), {})     # an opaque type
@@ -191,7 +196,7 @@ class Machine:
             else:
                 v = self.eval(d.body, {})
         else:
-            raise NotClosed(f"unbound name {name}")
+            raise NotClosed(f"unbound name {name}", name)
         self.globals[name] = (d0, v)
         return v
 
@@ -201,7 +206,7 @@ class Machine:
     def extern_value(self, t: Extern) -> Value:
         info = self.env.externs.get(t.target)
         if info is None:
-            raise NotClosed(f'extern "{t.target}" is not registered')
+            raise NotClosed(f'extern "{t.target}" is not registered', t.target)
         if info.arity == 0:
             return self.call_extern(t, info, [])
         return VExtern(t, info, [])
@@ -434,7 +439,108 @@ class Machine:
             raise
         except Exception as e:
             raise EvalError(f'extern "{term.target}" raised {type(e).__name__}: {e}')
-        return self.from_python(result, result_type(info.type, info.arity))
+        rty = result_type(info.type, info.arity)
+        value = self.from_python(result, rty)
+        if self.env.checked and self.refined(rty):
+            self.check_refinements(value, rty, f'extern "{term.target.split("@")[0]}"')
+        return value
+
+    def refined(self, ty: Term, depth: int = 0) -> bool:
+        """Whether a type has a refinement `check_refinements` would test, remembered per type, so a
+        run with --checked pays only where there is something to check."""
+        cache = getattr(self.env, "_refined_types", None)
+        if cache is None:
+            cache = {}
+            self.env._refined_types = cache
+        hit = cache.get(id(ty))
+        if hit is not None and hit[0] is ty:
+            return hit[1]
+        answer = False
+        if depth <= 16:
+            w = subst_whnf(self.env, ty, Fuel(self.env.fuel))
+            if isinstance(w, Subtype):
+                if not isinstance(w.pred, NoLaw) and not (isinstance(w.pred, Con) and w.pred.name == "true"):
+                    answer = True
+                else:
+                    sh = shaped(self.env, ty)
+                    if sh is not None:
+                        cw = subst_whnf(self.env, sh[1], Fuel(self.env.fuel))
+                        answer = isinstance(cw, Subtype)
+                    else:
+                        b = w.base
+                        while isinstance(b, Sigma) and not answer:
+                            answer = self.refined(b.fst, depth + 1)
+                            b = b.snd
+                        if not answer and not isinstance(b, Sigma):
+                            answer = self.refined(b, depth + 1)
+            elif isinstance(w, Sigma):
+                answer = self.refined(w.fst, depth + 1) or self.refined(w.snd, depth + 1)
+        cache[id(ty)] = (ty, answer)
+        return answer
+
+    def check_refinements(self, v: Value, ty: Term, where: str, depth: int = 0):
+        """`run --checked`: the value an extern gave, tested against every refinement of its type
+        whose predicate is a Bool (05 R5 at run time): the predicate of a subtype, each component of a
+        record or a pair, each entry of an array of a refined type. A quantified law is left to `test`;
+        a function is tested when it is called, since it crosses as an extern."""
+        if depth > 16:
+            return
+        try:
+            self._check_refinements(v, ty, where, depth)
+        except Unsupported:
+            pass        # a check the machine cannot make (a value it cannot quote) is skipped, not escalated
+
+    def _check_refinements(self, v: Value, ty: Term, where: str, depth: int):
+        w = subst_whnf(self.env, ty, Fuel(self.env.fuel))
+        if isinstance(w, Subtype):
+            if not isinstance(w.pred, NoLaw) and not (isinstance(w.pred, Con) and w.pred.name == "true"):
+                # each law of the predicate (a conjunction is split) applied to the value itself, as a
+                # closure: quoting a value that holds functions (a Table and its cell) is not possible,
+                # and is not needed; a law that is quantified (a function) is left to `test`
+                for law in _conjuncts(w.pred):
+                    pred = self.eval(Lam(w.param, law, ann=w.base), {})
+                    try:
+                        r = self.apply1(pred, Thunk.of(v))
+                    except Unsupported:
+                        continue
+                    if isinstance(r, VInj) and r.label == "false":
+                        try:
+                            shown = pp(self.quote(v))[:160]
+                        except Unsupported:
+                            shown = "the value"
+                        raise EvalError(f"{where} gave a value outside {pp(ty)} (run --checked): "
+                                        f"{shown} does not satisfy {pp(law)[:120]}")
+            sh = shaped(self.env, ty)
+            if sh is not None and isinstance(v, VPair):
+                k, cod = sh
+                arr = v
+                for _ in range(k):
+                    arr = self.force(arr.snd) if isinstance(arr, VPair) else arr
+                if isinstance(arr, VLit) and is_indexable(arr.value):
+                    cw = subst_whnf(self.env, cod, Fuel(self.env.fuel))
+                    if isinstance(cw, Subtype):
+                        import numpy as np
+                        for e in np.asarray(arr.value).ravel():
+                            self.check_refinements(VLit(e.item() if hasattr(e, "item") else e), cod, where, depth + 1)
+                return
+            if isinstance(w.param, PPair) and isinstance(v, VPair):
+                binds = self.match(w.param, Thunk.of(v))
+                cur = subst_whnf(self.env, w.base, Fuel(self.env.fuel))
+                for name in pattern_vars(w.param):
+                    if not isinstance(cur, Sigma):
+                        self.check_refinements(self.force(binds[name]), cur, where, depth + 1)
+                        break
+                    self.check_refinements(self.force(binds[name]), cur.fst, where, depth + 1)
+                    cur = subst_whnf(self.env, subst(cur.snd, {cur.name: self.quote(self.force(binds[name]))})
+                                     if cur.name != "_" else cur.snd, Fuel(self.env.fuel))
+                return
+            self.check_refinements(v, w.base, where, depth + 1)
+            return
+        if isinstance(w, Sigma) and isinstance(v, VPair):
+            a = self.force(v.fst)
+            self.check_refinements(a, w.fst, where, depth + 1)
+            snd = subst(w.snd, {w.name: self.quote(a)}) if w.name != "_" else w.snd
+            self.check_refinements(self.force(v.snd), snd, where, depth + 1)
 
     def to_python(self, v: Value, ty: Optional[Term]):
         if isinstance(v, VLit):
@@ -602,17 +708,27 @@ _TRACE = os.environ.get("LUTHIER_TRACE_FALLBACK")
 fallbacks: dict = {}
 
 
+def _conjuncts(t: Term) -> list:
+    if isinstance(t, And):
+        return _conjuncts(t.lhs) + _conjuncts(t.rhs)
+    return [t]
+
+
 def normalize(env: Env, t: Term, fuel: Fuel) -> Term:
-    """The value of a closed term, as a term. Falls back to the substitution evaluator for
-    what the machine does not handle; a function value is normalized there too, since its
-    normal form is under a binder."""
+    """The value of a closed term, as a term: closed values have this one evaluator. A name with
+    no value (a hole, an axiom) is reported as HoleBlocked, with its name, instead of handing the
+    term to the substitution evaluator to come back stuck. The normal form of a function value is
+    under a binder, which is the substitution evaluator's: printing a function is not computing a
+    value. A node the machine does not evaluate still falls back, and is counted (`fallbacks`)."""
     try:
         m = Machine(env, fuel)
         v = m.eval(t, {})
         if isinstance(v, (VClosure, VType)):
             return subst_nf(env, m.quote(v), fuel)
         return m.quote(v)
-    except (NotClosed, Unsupported) as e:
+    except NotClosed as e:
+        raise HoleBlocked(f"depends on {e.name or 'a name'} without a value: {e}", [e.name] if e.name else [])
+    except Unsupported as e:
         key = f"{type(e).__name__}: {e}"
         fallbacks[key] = fallbacks.get(key, 0) + 1
         if _TRACE:

@@ -698,6 +698,71 @@ class Checker:
             snd = Match(value, ((PPair(PWild(), PVar(b)), Var(b)),))
             self.extern_obligations(ctx, fst, w.fst, depth + 1)
             self.extern_obligations(ctx, snd, w.snd if w.name == "_" else subst(w.snd, {w.name: fst}), depth + 1)
+            return
+        if isinstance(w, Sum):
+            for i, (label, alt) in enumerate(w.alts):
+                self._sum_payload_obligations(ctx, value, i, label, alt)
+
+    def _sum_payload_obligations(self, ctx: Ctx, value: Term, i: int, label: str, alt: Term):
+        """The laws of the payload of one alternative of a sum an extern gives (the Table of the
+        `just` of a `Maybe Table`, 07 §9), as obligations on the value: `match v { just x -> L x ;
+        _ -> true }`. A law quantified over something whose type depends on the payload (a row
+        `r : Fin x.nRows`) is quantified over the base of that type instead (`r : Int`), and its
+        refinement becomes a precondition inside the match, so the obligation is a law over the
+        extern's arguments that `test` can draw. Laws in another form are left, as are refinements
+        deeper in the payload (a field of a record)."""
+        aw = self.whnf(alt)
+        if not isinstance(aw, Subtype) or isinstance(aw.pred, NoLaw) or \
+                (isinstance(aw.pred, Con) and aw.pred.name == "true"):
+            return
+        from .evaluator import bool_con
+        x = _readable_name(label[:1] or "x", ctx, value)
+        whole = pattern_to_term(aw.param)
+        leaves = []
+
+        def walk(t):
+            if isinstance(t, And):
+                walk(t.lhs)
+                walk(t.rhs)
+                return
+            h, args = unapply(t)
+            if args and whole is not None and args[-1] == whole:
+                leaves.append(apply(h, list(args[:-1]) + [Var(x)]))
+            elif isinstance(aw.param, PVar):
+                leaves.append(subst(t, {aw.param.name: Var(x)}))
+        walk(aw.pred)
+        for leaf in leaves:
+            try:
+                with self.silent():
+                    _, lty = self.infer(ctx + [(x, alt)], leaf)
+            except TypeCheckError:
+                continue
+            params, guards, ok = [], [], True
+            t = lty
+            while True:
+                tw = self.whnf(t)
+                if not isinstance(tw, Pi):
+                    break
+                pname = _readable_name(tw.name if tw.name != "_" else "y", ctx + params + [(x, alt)], value)
+                dom = tw.dom
+                if x in free_vars(dom):
+                    dw = self.whnf(dom)
+                    if isinstance(dw, Subtype) and isinstance(dw.param, PVar) and x not in free_vars(dw.base):
+                        guards.append(subst(dw.pred, {dw.param.name: Var(pname)}))
+                        dom = dw.base
+                    else:
+                        ok = False
+                        break
+                params.append((pname, dom))
+                leaf = App(leaf, Var(pname))
+                t = subst(tw.cod, {tw.name: Var(pname)}) if tw.name != "_" else tw.cod
+            if not ok or not self.is_bool(t):
+                continue
+            body = leaf
+            for g in reversed(guards):
+                body = App(App(Var("implies"), g), body)
+            term = Match(value, ((PInj(i, label, PVar(x)), body), (PWild(), bool_con(True))))
+            self.add_obligation(ctx + params, term, f"{label} of {pp(alt)}")
 
     def add_data(self, d: Def, qname: str):
         decl = d.data
@@ -1420,7 +1485,15 @@ class Checker:
 
     def decide_closed(self, t: Term) -> Optional[bool]:
         """True/False if the closed predicate reduces to Bools (through conjunctions); None if a
-        conjunct is a quantified law or is stuck, in which case `test` decides."""
+        conjunct is a quantified law or is stuck, in which case `test` decides. Tried first on the
+        machine the laws run on; the reduction below reads the structure of a law (a conjunction)."""
+        from .machine import Machine, VInj, NotClosed, Unsupported
+        try:
+            v = Machine(self.env, Fuel(self.env.fuel)).eval(t, {})
+            if isinstance(v, VInj) and v.label in ("true", "false"):
+                return v.label == "true"
+        except (NotClosed, Unsupported, EvalError):
+            pass
         r = whnf(self.env, t, self.fuel())
         if isinstance(r, And):
             a = self.decide_closed(r.lhs)
