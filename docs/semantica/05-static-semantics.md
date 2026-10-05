@@ -176,6 +176,12 @@ Files: `r4_product_inline.accept.lut`, `r4_recursive_data.accept.lut`,
 a type nobody has defined yet or on a Python type nobody has described: it is accepted, recorded
 in the certificate under `provisional` with the names it builds on, listed by `luthier check -v`,
 and never certified.
+Every refinement in the type of an extern is an obligation on the value it gives (2026-10-05): the
+predicate of a subtype, the codomain of each arrow quantified over its domain (`neg : Float64 ->
+NonNegative` owes `neg x >= 0.0` for every `x`), each component of a record or a pair, and each
+entry of an array (`pairI : Vec (Fin nodes)` owes that every entry is below `nodes`); the dimensions
+of an array are read off its shape and owe nothing. A refinement under a constructor of a sum or a
+data type (the `Table` of a `Maybe Table`) is not entered yet.
 Files: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`,
 `r5_extern_type.reject.lut`, `r5_extern_over_declared.reject.lut`.
 
@@ -187,7 +193,12 @@ Files: `r6_predicate_body.accept.lut`, `r6_body_type.reject.lut`.
 **R7. An alias is written with `=` and has no state.** `AB = A * B` makes `AB` stand for the term
 on the right everywhere; the checker expands it before anything else, so an alias is never
 declared, defined or certified. A name that is an alias and is also declared or defined is an
-error.
+error. A generator given to an alias is the generator of the type the alias stands for
+(2026-10-05): `gen FullCoords` with `FullCoords = VecOf (freeDim + 1)` draws every `VecOf 16`, and
+two aliases of one type cannot both have one. A distribution that means something (a broken graph,
+a complete one) is a type with a law, `{ g : DistanceGraph | not (ValidGraph g) }`, and every value
+its generator gives is checked against that law; a value outside is an error that names the
+generator.
 Files: `r7_alias.accept.lut`, `r7_alias_defined.reject.lut`.
 
 **R8. `==` exists only where equality is structural.** `==` is defined on `Int`, `Float64`, `String`,

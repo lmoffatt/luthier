@@ -286,12 +286,10 @@ def gen_perturbed(rng: random.Random, size: int):
     return (t, _perturb(rng, t))
 
 
-def gen_text(rng: random.Random, size: int) -> str:
-    return _perturb(rng, gen_table(rng, size))
-
-
-def gen_broken(rng: random.Random, size: int) -> str:
-    """A text that must be rejected: one defect in an otherwise valid rendering."""
+def gen_broken(rng: random.Random, size: int):
+    """A text that must be rejected, with the name of its one defect: an otherwise valid rendering
+    with a cell of an unknown type, a repeated name, a bad or non-finite number, or a ragged row.
+    The pair is a `BrokenText` of table.lut."""
     t = gen_table(rng, max(size, 2))
     while not t.rows:
         t = gen_table(rng, max(size, 2))
@@ -299,24 +297,25 @@ def gen_broken(rng: random.Random, size: int) -> str:
     numeric = [k for k, (_, ty) in enumerate(t.columns) if ty != "str"]
     kind = rng.choice(["ragged", "unknown type", "repeated name", "bad number", "not finite"])
     if kind == "unknown type":
-        return lines[0].replace(":" + t.columns[0][1], ":real", 1) + "\n" + "\n".join(lines[1:])
+        return lines[0].replace(":" + t.columns[0][1], ":real", 1) + "\n" + "\n".join(lines[1:]), kind
     if kind == "repeated name" and len(t.columns) >= 2:
         header = ",".join(f"{t.columns[0][0]}:{ty}" if k == 1 else f"{n}:{ty}"
                           for k, (n, ty) in enumerate(t.columns))
-        return header + "\n" + "\n".join(lines[1:])
+        return header + "\n" + "\n".join(lines[1:]), kind
     if kind in ("bad number", "not finite") and numeric:
         k = numeric[0]
-        bad = "abc" if kind == "bad number" or t.columns[k][1] == "int" else rng.choice(["nan", "inf", "-inf"])
+        nonfinite = kind == "not finite" and t.columns[k][1] != "int"
+        bad = rng.choice(["nan", "inf", "-inf"]) if nonfinite else "abc"
         row = list(t.rows[0])
         cells = [_cell(v, ty) for v, (_, ty) in zip(row, t.columns)]
         cells[k] = bad
         buf = io.StringIO()
         csv.writer(buf, lineterminator="\n").writerow(cells)
         body = render(Table(t.columns, t.rows[1:])).split("\n", 1)[1]
-        return lines[0] + "\n" + buf.getvalue() + body
+        return lines[0] + "\n" + buf.getvalue() + body, "not finite" if nonfinite else "bad number"
     # ragged: a row with one cell more
     buf = io.StringIO()
     csv.writer(buf, lineterminator="\n").writerow(
         [_cell(v, ty) for v, (_, ty) in zip(t.rows[0], t.columns)] + ["extra"])
     body = render(Table(t.columns, t.rows[1:])).split("\n", 1)[1]
-    return lines[0] + "\n" + buf.getvalue() + body
+    return lines[0] + "\n" + buf.getvalue() + body, "ragged"

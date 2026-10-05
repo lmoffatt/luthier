@@ -267,6 +267,7 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
                                          l.get("failure"), l.get("error"),
                                          l.get("domains", []), l.get("sample_cases", [])))
         return report
+    before = {k: list(v) for k, v in gens.checked.items()}
     for ob in checker.obligations.get(name, []):
         try:
             pieces = flatten(checker, ob)
@@ -275,6 +276,9 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
             continue
         for label, closed in pieces:
             report.laws.append(run_law(checker, gens, label, closed, n, exhaustive, rng, show_cases, size))
+    checked = gens.checked_since(before)
+    if checked:
+        report.generation["registered_values"] = checked
     return report
 
 

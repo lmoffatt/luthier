@@ -246,21 +246,42 @@ def cmd_test(args):
 
 
 def _parse_setting(text: str):
-    """`name=value`: an int, a float, a bool or a string, by what the text looks like."""
+    """`name=value`, split; the value stays text until the hole's declared type reads it."""
     name, sep, raw = text.partition("=")
     if not sep or not name:
         raise SystemExit(f"--set expects name=value, got {text!r}")
-    raw = raw.strip()
-    if raw in ("true", "false"):
-        return name.strip(), raw == "true"
-    try:
-        return name.strip(), int(raw)
-    except ValueError:
-        pass
-    try:
-        return name.strip(), float(raw)
-    except ValueError:
-        return name.strip(), raw
+    return name.strip(), raw.strip()
+
+
+def typed_setting(env, name: str, raw: str, ty):
+    """The text of `--set name=raw` read by the declared type of the hole: an Int, a Float64, a
+    String or a Bool, and nothing else. Reading by the type, not by how the text looks, keeps
+    `--set dir=2026` a String and `--set sigma=3` a Float64 (06 §6)."""
+    import math
+    from .evaluator import scalar_kind, strip_subtypes, _sum_of
+    kind = scalar_kind(env, ty)
+    if kind == "String":
+        return raw
+    if kind == "Int":
+        try:
+            return int(raw)
+        except ValueError:
+            raise SystemExit(f"--set {name}={raw}: {name} is {pp(ty)}, and {raw!r} is not an integer")
+    if kind in ("Float64", "Real"):
+        try:
+            x = float(raw)
+        except ValueError:
+            raise SystemExit(f"--set {name}={raw}: {name} is {pp(ty)}, and {raw!r} is not a number")
+        if not math.isfinite(x):
+            raise SystemExit(f"--set {name}={raw}: NaN and infinities are not values of {pp(ty)}")
+        return x
+    sm = _sum_of(env, ty)
+    if sm is not None and sm.labels() == ["true", "false"]:
+        if raw not in ("true", "false"):
+            raise SystemExit(f"--set {name}={raw}: {name} is a Bool, give true or false")
+        return raw == "true"
+    raise SystemExit(f"--set {name}: {name} is {pp(ty)}; only holes of Int, Float64, String or Bool "
+                     f"(or refinements of them) can be set from the command line")
 
 
 def cmd_run(args):
@@ -275,15 +296,20 @@ def cmd_run(args):
     if args.fuel is not None:
         ck.env.run_fuel = args.fuel
     prog = Program(loader)
-    settings = dict(_parse_setting(x) for x in (args.set or []))
-    for name, value in settings.items():
+    settings = {}
+    for name, raw in (_parse_setting(x) for x in (args.set or [])):
         q = prog.resolve(name)
-        d = ck.env.defs.get(q)
+        d = ck.env.defs.get(q) if q is not None else None
         if d is None or d.body is not None or d.data is not None:
             raise SystemExit(f"--set {name}: not a hole of the program")
         if isinstance(ck.whnf(d.type), Pi):
             raise SystemExit(f"--set {name}: a function hole cannot be set from the command line")
-        prog.fill(name, (lambda v: (lambda: v))(value))
+        value = typed_setting(ck.env, name, raw, d.type)
+        settings[name] = value
+        try:
+            prog.fill(name, (lambda v: (lambda: v))(value))
+        except (TypeCheckError, EvalError) as e:
+            raise SystemExit(f"--set {name}={raw}: {e}")
     entry = args.entry
     q = prog.resolve(entry)
     if q not in ck.env.defs:

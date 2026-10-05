@@ -97,6 +97,14 @@ sums; a value of a refinement passed where its base is expected needs no rule (`
 
 ## 6. The bridge with the environment
 
+- **A value is checked against its declared type when it crosses** (2026-10-05). An `Int` is a
+  Python `int` or a numpy integer, never a `bool` or a `float`; a `Float64` is a `float`, or an
+  `int` with an exact double, promoted; a `String` is a `str`; `Unit` is `None`. An array as a
+  value of `Fin n -> Int` has an integer dtype, and as one of `Fin n -> Float64` a float dtype (an
+  integer array is promoted), with exactly as many dimensions as indices. A number where a record,
+  a pair or a function is expected is an error. `luthier run --set name=value` reads the value by
+  the declared type of the hole, so `--set dir=2026` is a `String` and `--set sigma=3` a `Float64`.
+
 - **NaN is always an error.** It is not a number and means nothing in any computation here. A NaN
   that arrives from Python is an error at the crossing, and the interpreter's arithmetic fails rather
   than produce one.

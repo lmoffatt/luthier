@@ -10,7 +10,6 @@ parseError  : String -> String := extern "python:luthier.tables.parse_error"
 
 gen Table := extern "python:luthier.tables.gen_table"
 gen Perturbed := extern "python:luthier.tables.gen_perturbed"
-gen TableText := extern "python:luthier.tables.gen_text"
 gen BrokenText := extern "python:luthier.tables.gen_broken"
 
 csv : Codec := { parse := parseTable, render := renderTable, eq := sameTable }

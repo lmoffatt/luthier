@@ -18,7 +18,7 @@ from .syntax import *
 from .subst import subst, fresh, free_vars
 from .pretty import pp, pp_pat
 from .evaluator import (Env, ExternInfo, Fuel, whnf, conv, unapply, apply, as_bool, record_components,
-                        EvalError, BUILTIN_TYPES)
+                        EvalError, BUILTIN_TYPES, shaped, generator_key)
 
 
 class TypeCheckError(Exception):
@@ -69,7 +69,8 @@ class Checker:
         self.prefix: str = ""          # module prefix of the file being loaded ("" at top level)
         self.recording: bool = True    # whether checks against subtypes record obligations
         self.certified: dict = {}      # qualified name -> certificate entry accepted at import
-        self.gens: dict = {}           # qualified type name -> ("luthier", label, term) | ("extern", target, None)
+        self.gens: dict = {}           # generator key (05 R7: aliases unfolded) -> ("luthier", label, term) | ("extern", target, None)
+        self.gens_by: dict = {}        # generator key -> the name its `gen` was written on
         self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
@@ -434,8 +435,23 @@ class Checker:
         q = self.resolve(g.type_name)
         if q is None:
             self.err(f"gen: unknown type {g.type_name}")
+        d = self.env.defs.get(q)
+        if d is not None and d.alias:
+            # an alias is the type it stands for (05 R7): its generator is that type's
+            if _ends_in_universe(d.type) and not isinstance(self.whnf(d.type), Univ):
+                self.err(f"gen {g.type_name}: {g.type_name} is an alias of a type operator; give the "
+                         f"generator to the type it stands for")
+            key, _, _ = generator_key(self.env, Var(q))
+        else:
+            key = q
+        prior = self.gens_by.get(key)
+        if prior is not None and prior != g.type_name:
+            self.err(f"gen {g.type_name}: {prior} already has a generator, and {g.type_name} is the same "
+                     f"type ({key}); an alias has no identity of its own (05 R7), so a distribution that "
+                     f"means something needs a type with a law (a subtype)")
+        self.gens_by[key] = g.type_name
         if g.term is None:
-            self.gens[q] = ("extern", g.target, None)
+            self.gens[key] = ("extern", g.target, None)
             return
         if self.resolve("Gen") is None:
             self.err('gen: `Gen` is not in scope; add `import "random"`')
@@ -446,7 +462,7 @@ class Checker:
                 term = self.check([], g.term, want)
         finally:
             self.current_def = None
-        self.gens[q] = ("luthier", pp(g.term), term)
+        self.gens[key] = ("luthier", pp(g.term), term)
 
     def add_def(self, d: Def, object_names: Optional[set] = None):
         if isinstance(d, OperatorDirective):
@@ -590,10 +606,44 @@ class Checker:
         if provisional:
             self.provisional[qname] = sorted(n for n in _global_names(ty)
                                              if self.is_type_name(n) and not self.defined(n))
+        # the environment's value is checked against every refinement of its type by `test`
+        self.extern_obligations([], Var(qname), ty)
+
+    def extern_obligations(self, ctx: Ctx, value: Term, ty: Term, depth: int = 0):
+        """Every refinement in the type of a value the environment gives, as an obligation on that
+        value (05 R5): the predicate of a subtype; the codomain of each arrow, quantified over its
+        domain; each component of a record or a pair. The dimensions of an array are read off the
+        array's shape by the bridge and owe nothing; its entries do (`Vec (Fin n)` owes that each
+        entry is below n). A sum or a data type is not entered: a refinement under a constructor
+        (the `Table` of a `Maybe Table`) stays unchecked (07 §9)."""
+        if depth > 16:
+            return
         w = self.whnf(ty)
         if isinstance(w, Subtype):
-            # the environment's function is checked against the declared laws by `test`
-            self.subtype_obligation([], Var(qname), w, ty)
+            if not isinstance(w.pred, NoLaw) and not (isinstance(w.pred, Con) and w.pred.name == "true"):
+                self.subtype_obligation(ctx, value, w, ty)
+            if isinstance(w.param, PPair):
+                labels = [n.split("~")[0] for n in pattern_vars(w.param)]
+                if shaped(self.env, ty) is not None:
+                    labels = labels[-1:]       # an array: only the entries can break a refinement
+                for label in labels:
+                    with self.silent():
+                        proj, fty = self.project(ctx, value, ty, label)
+                    self.extern_obligations(ctx, proj, fty, depth + 1)
+                return
+            self.extern_obligations(ctx, value, w.base, depth + 1)
+            return
+        if isinstance(w, Pi):
+            x = _readable_name(w.name if w.name != "_" else "x", ctx, value)
+            cod = w.cod if w.name == "_" else subst(w.cod, {w.name: Var(x)})
+            self.extern_obligations(ctx + [(x, w.dom)], App(value, Var(x)), cod, depth + 1)
+            return
+        if isinstance(w, Sigma):
+            a, b = fresh("a"), fresh("b")
+            fst = Match(value, ((PPair(PVar(a), PWild()), Var(a)),))
+            snd = Match(value, ((PPair(PWild(), PVar(b)), Var(b)),))
+            self.extern_obligations(ctx, fst, w.fst, depth + 1)
+            self.extern_obligations(ctx, snd, w.snd if w.name == "_" else subst(w.snd, {w.name: fst}), depth + 1)
 
     def add_data(self, d: Def, qname: str):
         decl = d.data
@@ -1012,7 +1062,9 @@ class Checker:
             # an extern inside a term takes the expected type, as a definition takes its declared one
             if isinstance(w, Univ):
                 self.err("an extern type is only allowed as the body of a definition")
-            return Extern(self.register_extern(t.target, ty), ty)
+            ext = Extern(self.register_extern(t.target, ty), ty)
+            self.extern_obligations(ctx, ext, ty)
+            return ext
         if isinstance(t, Lam) and isinstance(w, Pi):
             if t.ann is not None:
                 ann = self.check(ctx, t.ann, Univ())
@@ -1455,6 +1507,16 @@ def _pending_member(d: Def, existing: Def):
                pending=True)
     m.base_ctx, m.base = ctx, body.base
     return m
+
+
+def _readable_name(base: str, ctx: Ctx, value: Term) -> str:
+    """A parameter name for an obligation that a reader can follow: the base, primed until it is
+    neither bound in the context nor free in the value."""
+    name = base.split("~")[0]
+    taken = {n for n, _ in ctx} | free_vars(value)
+    while name in taken:
+        name += "'"
+    return name
 
 
 def _ends_in_universe(t: Term) -> bool:

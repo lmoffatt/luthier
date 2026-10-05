@@ -103,15 +103,104 @@ def _from_environment_number(x):
 
 
 def _check_array_finite(x):
-    try:
-        import numpy as np
-        a = np.asarray(x)
-        if a.dtype.kind == "f" and a.size and not np.isfinite(a).all():
+    """NaN and infinities are not values of Float64, inside an array either (06 §6). An array of
+    objects is read entry by entry."""
+    import numpy as np
+    a = np.asarray(x)
+    if a.dtype.kind == "f":
+        if a.size and not np.isfinite(a).all():
             raise EvalError("NaN or an infinity in an array from the environment")
-    except EvalError:
-        raise
-    except Exception:
-        pass
+    elif a.dtype.kind == "O":
+        for e in a.ravel():
+            if isinstance(e, (float, np.floating)) and not np.isfinite(e):
+                raise EvalError("NaN or an infinity in an array from the environment")
+
+
+SCALARS = ("Int", "Float64", "Real", "String")
+DOUBLE_EXACT = 2 ** 53
+
+
+def scalar_kind(env: "Env", ty: Optional[Term]) -> Optional[str]:
+    """The primitive a type refines (`Nat` and `Fin n` refine Int, `NonNegative` refines Float64),
+    or None. What a value of the environment must be to cross as a value of the type."""
+    if ty is None:
+        return None
+    w = strip_subtypes(env, ty)
+    if isinstance(w, Var) and w.name in SCALARS:
+        return w.name
+    return None
+
+
+def _scalar_from_python(x, kind: str, ty: Term) -> Term:
+    """A value of the environment as a value of a primitive type, checked against it (06 §6):
+    an Int is a Python int (not a bool); a Float64 is a float, or an int that has an exact double,
+    promoted; a String is a str. Anything else is an error at the crossing, so the arithmetic of
+    the interpreter never sees a value of the wrong kind."""
+    if kind == "Int":
+        if isinstance(x, bool) or not isinstance(x, int):
+            raise EvalError(f"{x!r} ({type(x).__name__}) from the environment is not a value of "
+                            f"{pp(ty)}: an Int crosses as a Python int")
+        return Lit(x)
+    if kind in ("Float64", "Real"):
+        if isinstance(x, bool) or not isinstance(x, (int, float)):
+            raise EvalError(f"{x!r} ({type(x).__name__}) from the environment is not a value of "
+                            f"{pp(ty)}: a Float64 crosses as a Python float")
+        if isinstance(x, int):
+            if abs(x) > DOUBLE_EXACT:
+                raise EvalError(f"{x} from the environment has no exact double, so it is not a value of {pp(ty)}")
+            x = float(x)
+        return Lit(finite(x, "a value from the environment"))
+    if not isinstance(x, str):
+        raise EvalError(f"{x!r} ({type(x).__name__}) from the environment is not a value of "
+                        f"{pp(ty)}: a String crosses as a Python str")
+    return Lit(x)
+
+
+def _array_for(env: "Env", x, k: int, cod: Optional[Term], ty: Term):
+    """An array of the environment as a value of a function over k indices (04 §6, 06 §7): with
+    entries of Int it is an int64 array, with entries of Float64 a float64 array (an integer array
+    is promoted, when its entries have exact doubles), finite; with entries of a primitive type
+    it has exactly k dimensions. Other entries (strings, records) are kept as given."""
+    import numpy as np
+    kind = scalar_kind(env, cod)
+    if kind is None or kind == "String":
+        return x
+    a = np.asarray(x)
+    if a.ndim != k:
+        raise EvalError(f"an array of shape {a.shape} cannot be a value of {pp(ty)}: "
+                        f"its entries are {kind}, so it has {k} dimension(s)")
+    if kind == "Int":
+        if a.size == 0:
+            return a.astype(np.int64)
+        if a.dtype.kind not in "iu":
+            raise EvalError(f"an array of {a.dtype} cannot be a value of {pp(ty)}: its entries are Int")
+        if a.dtype.kind == "u" and int(a.max()) > INT64_MAX:
+            raise EvalError(f"an array of {a.dtype} does not fit in 64 bits as a value of {pp(ty)}")
+        return a if a.dtype == np.int64 else a.astype(np.int64)
+    if a.dtype.kind == "f":
+        a = a if a.dtype == np.float64 else a.astype(np.float64)
+    elif a.dtype.kind in "iu" or a.size == 0:
+        if a.size and int(np.abs(a).max()) > DOUBLE_EXACT:
+            raise EvalError(f"an integer array with entries beyond 2^53 cannot be a value of {pp(ty)}")
+        a = a.astype(np.float64)
+    else:
+        raise EvalError(f"an array of {a.dtype} cannot be a value of {pp(ty)}: its entries are {kind}")
+    if a.size and not np.isfinite(a).all():
+        raise EvalError("NaN or an infinity in an array from the environment")
+    return a
+
+
+def _is_structured(env: "Env", ty: Term) -> bool:
+    """Whether a type is known to have structure (a product, a function, a record, an array, a
+    data), so a bare number or string from the environment cannot be one of its values. A type
+    variable or a declared type without a body says nothing, and stays permissive."""
+    w = strip_subtypes(env, ty)
+    if isinstance(w, (Sigma, Pi)):
+        return True
+    if record_components(env, ty) is not None:
+        return True
+    h, _ = unapply(w)
+    return isinstance(h, Var) and h.name in env.datas and h.name != "Unit"
 BOOL_TYPE = Sum((("true", Var("Unit")), ("false", Var("Unit"))))
 
 
@@ -462,6 +551,45 @@ def record_components(env: Env, ty: Optional[Term]):
     names = [n.split("~")[0] for n in pattern_vars(w.param)]
     hname = head.name if isinstance(head, Var) else "Record"
     return hname, names, w.base
+
+
+def unfold_aliases(env: Env, ty: Term, limit: int = 64) -> Term:
+    """The type an alias stands for, through any chain of aliases (05 R7); every other name stays."""
+    for _ in range(limit):
+        h, args = unapply(ty)
+        if not isinstance(h, Var):
+            return ty
+        d = env.defs.get(h.name)
+        if d is None or not d.alias or d.body is None:
+            return ty
+        body, rest = d.body, list(args)
+        while rest and isinstance(body, Lam) and isinstance(body.param, PVar):
+            body = subst(body.body, {body.param.name: rest.pop(0)})
+        if isinstance(body, Lam):
+            return ty                   # an alias of a type operator, not applied fully
+        ty = apply(body, rest) if rest else body
+    return ty
+
+
+def generator_key(env: Env, ty: Term):
+    """What a generator is attached to: a type, with its aliases unfolded, so an alias and the type
+    it stands for share one generator (05 R7). Returns (key, family, args): `key` names the type
+    exactly (`VecOf 16` for `ThetaFull = VecOf (freeDim + 1)`, the type itself for a record alias),
+    and `family`, `args` name the type operator and its arguments when it is an application, for a
+    generator given to the whole family (`gen VecOf`)."""
+    t = unfold_aliases(env, ty)
+    h, args = unapply(t)
+    if isinstance(h, Var) and not args:
+        return h.name, None, []
+    if isinstance(h, Var):
+        shown = []
+        for a in args:
+            try:
+                shown.append(pp(nf(env, a, Fuel(env.fuel))))
+            except EvalError:
+                shown.append(pp(a))
+        return h.name + " " + " ".join(f"({s})" if " " in s else s for s in shown), h.name, list(args)
+    return pp(t), None, []
 
 
 def strip_subtypes(env: Env, ty: Term) -> Term:
@@ -815,26 +943,36 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
         x = _from_environment_number(x)
     elif hasattr(x, "shape") and hasattr(x, "dtype"):
         _check_array_finite(x)
+    kind = scalar_kind(env, ty)
+    if kind is not None:
+        return _scalar_from_python(x, kind, ty)
+    if ty is not None and _is_unit_type(env, strip_subtypes(env, ty)):
+        if x is not None:
+            raise EvalError(f"{x!r} from the environment is not a value of {pp(ty)}: Unit crosses as None")
+        return Con("unit")
     if is_indexable(x) or hasattr(x, "shape"):
         sh = shaped(env, ty)
         if sh is not None:
             k, cod = sh
             import numpy as np
-            if _is_int_type(env, cod) and hasattr(x, "dtype") and x.dtype.kind not in "iu":
-                raise EvalError(f"an array of {x.dtype} cannot be a value of {pp(ty)}: its entries are Int")
             shape = np.shape(x)
             if len(shape) < k:
                 raise EvalError(f"an array of shape {shape} cannot be a value of {pp(ty)}")
+            x = _array_for(env, x, k, cod, ty)
             t: Term = Lit(x)
             for d in reversed(shape[:k]):
                 t = Pair(Lit(int(d)), t)
             return t
         wf = strip_subtypes(env, ty) if ty is not None else None
         if isinstance(wf, Pi) and fin_bound(env, wf.dom) is not None:
-            d = whnf(env, fin_bound(env, wf.dom), Fuel(env.fuel))
+            dims, c = [], wf
+            while isinstance(c, Pi) and fin_bound(env, c.dom) is not None:
+                dims.append(whnf(env, fin_bound(env, c.dom), Fuel(env.fuel)))
+                c = strip_subtypes(env, c.cod)
+            d = dims[0]
             if isinstance(d, Lit) and len(x) != d.value:
                 raise EvalError(f"an array of length {len(x)} cannot be a value of {pp(ty)}")
-            return Lit(x)
+            return Lit(_array_for(env, x, len(dims), c, ty))
     rc = record_components(env, ty)
     if rc is not None and not isinstance(x, (int, float, str, bool)):
         hname, names, base = rc
@@ -872,6 +1010,9 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
     if ty is not None:
         head, targs = unapply(ty)
     tname = head.name if isinstance(head, Var) else None
+    if isinstance(x, (bool, int, float, str)) and ty is not None and tname not in ("N", "Maybe") \
+            and _is_structured(env, ty):
+        raise EvalError(f"{x!r} ({type(x).__name__}) from the environment is not a value of {pp(ty)}")
     if isinstance(x, bool):
         return bool_con(x)
     if tname == "N" and isinstance(x, int):
@@ -894,10 +1035,16 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
             t = App(App(App(Con("cons"), elt), from_python(env, item, elt)), t)
         return t
     if isinstance(x, tuple):
-        if isinstance(ty, Sigma):
-            a = from_python(env, x[0], ty.fst)
+        ws = strip_subtypes(env, ty) if ty is not None else None
+        if isinstance(ws, Sigma):
+            if len(x) < 2:
+                raise EvalError(f"{x!r} from the environment is not a value of {pp(ty)}: a pair has two parts")
+            a = from_python(env, x[0], ws.fst)
             rest = x[1:] if len(x) > 2 else x[1]
-            return Pair(a, from_python(env, rest, ty.snd))
+            snd = ws.snd if ws.name == "_" else subst(ws.snd, {ws.name: a})
+            return Pair(a, from_python(env, rest, snd))
+        if ty is not None and _is_structured(env, ty):
+            raise EvalError(f"a tuple from the environment is not a value of {pp(ty)}")
         t = from_python(env, x[-1], None)
         for item in reversed(x[:-1]):
             t = Pair(from_python(env, item, None), t)

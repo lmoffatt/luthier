@@ -20,11 +20,15 @@ from .syntax import *
 from .subst import subst
 from .pretty import pp
 from .evaluator import (to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError,
-                        fin_bound, strip_subtypes)
+                        fin_bound, strip_subtypes, generator_key, scalar_kind)
 
 
 class GenError(Exception):
     pass
+
+
+class EmptyDomain(GenError):
+    """A type with no values (`Fin 0`, `Empty`): a law quantified over it holds vacuously (05 §7)."""
 
 
 class Generators:
@@ -36,8 +40,9 @@ class Generators:
         self.recursive_bias = recursive_bias
         self.checker = checker              # to type a quantified predicate when a subtype's law is one
         self.law_probes = law_probes        # how many arguments such a law is probed on before a value is accepted
-        self.luthier: dict = {}             # qualified type name -> (label, Gen term)
-        self.custom: dict = {}              # qualified type name -> python fn(rng, size)
+        self.luthier: dict = {}             # generator key (generator_key) -> (label, Gen term)
+        self.custom: dict = {}              # generator key -> python fn(rng, size)
+        self.checked: dict = {}             # generator key -> [values drawn, values outside the type]
 
     @classmethod
     def from_checker(cls, checker, size: int = 16) -> "Generators":
@@ -67,17 +72,53 @@ class Generators:
 
     # -------------------------------------------------------------- sample
     def registered(self, ty: Term):
-        """The name of a registered generator for `ty` and the type's arguments, looked up on the
-        type as written (before unfolding: `Nat` has its own generator, its unfolding is a
-        subtype of Int). A generator for a type family (`VecOf n`) receives the arguments."""
-        h, args = unapply(ty)
-        if isinstance(h, Var) and (h.name in self.luthier or h.name in self.custom):
-            return h.name, args
+        """The registered generator for `ty` and the arguments it receives. A type with a name of
+        its own (`Nat`, not its unfolding to a subtype of Int) or an instance (`VecOf 16`) is looked
+        up first, with its aliases unfolded, since an alias is the type it stands for (05 R7); then
+        the family (`gen VecOf`), which receives the arguments."""
+        tables = (self.luthier, self.custom)
+        key, family, args = generator_key(self.env, ty)
+        if any(key in t for t in tables):
+            return key, []
+        if family is not None and any(family in t for t in tables):
+            return family, args
         w = whnf(self.env, ty, self.fuel(), unfold=False)
         h, args = unapply(w)
-        if isinstance(h, Var) and (h.name in self.luthier or h.name in self.custom):
+        if isinstance(h, Var) and any(h.name in t for t in tables):
             return h.name, args
         return None
+
+    def laws_of(self, ty: Term) -> list:
+        """The subtypes with a predicate that `ty` unfolds through, outermost first: what a value
+        must satisfy to be of the type."""
+        out = []
+        w = whnf(self.env, ty, self.fuel())
+        for _ in range(32):
+            if not isinstance(w, Subtype):
+                break
+            if not isinstance(w.pred, NoLaw) and not (isinstance(w.pred, Con) and w.pred.name == "true"):
+                out.append(w)
+            if isinstance(w.param, PPair):
+                break
+            w = whnf(self.env, w.base, self.fuel())
+        return out
+
+    def from_registered(self, reg: str, ty: Term, make, rng: random.Random, size: int, depth: int) -> Term:
+        """A value of a registered generator, checked against the predicate of its type. A generator
+        is a claim that its values are of the type, so a value outside is an error that names the
+        generator: drawing again would hide the disagreement between the generator and the type's
+        laws, which is often what a law over the type is there to see (a negative control drawn
+        from `BrokenGraph`, say). Case 9 of the sonolocalización notes."""
+        laws = self.laws_of(ty)
+        tally = self.checked.setdefault(reg, [0, 0])
+        v = make()
+        tally[0] += 1
+        bad = next((sub for sub in laws if not self.satisfies(sub, v, rng, size, depth)), None)
+        if bad is not None:
+            tally[1] += 1
+            raise GenError(f"the generator {reg} gave a value outside {pp(ty)}: {pp(v)[:200]} does not "
+                           f"satisfy {pp(bad)[:200]}")
+        return v
 
     def sample(self, ty: Term, rng: random.Random, size: Optional[int] = None, depth: int = 0) -> Term:
         if size is None:
@@ -87,15 +128,18 @@ class Generators:
             d = whnf(self.env, fb, self.fuel())
             if isinstance(d, Lit) and isinstance(d.value, int):
                 if d.value <= 0:
-                    raise GenError(f"Fin {d.value} has no values")
+                    raise EmptyDomain(f"Fin {d.value} has no values")
                 return Lit(rng.randrange(d.value))
         found = self.registered(ty)
         if found is not None:
             reg, targs = found
             if reg in self.luthier:
-                return self.run_luthier(reg, rng, size, ty, targs)
+                return self.from_registered(reg, ty, lambda: self.run_luthier(reg, rng, size, ty, targs),
+                                            rng, size, depth)
             pyargs = [to_python(self.env, nf(self.env, a, self.fuel())) for a in targs]
-            return from_python(self.env, self.custom[reg](rng, size, *pyargs), whnf(self.env, ty, self.fuel()))
+            wty = whnf(self.env, ty, self.fuel())
+            return self.from_registered(
+                reg, ty, lambda: from_python(self.env, self.custom[reg](rng, size, *pyargs), wty), rng, size, depth)
         w = whnf(self.env, ty, self.fuel())
         h, args = unapply(w)
         name = h.name if isinstance(h, Var) else None
@@ -113,7 +157,7 @@ class Generators:
             return Pair(a, b)
         if isinstance(w, Sum):
             if not w.alts:
-                raise GenError("Empty has no values")
+                raise EmptyDomain("Empty has no values")
             i = rng.randrange(len(w.alts))
             label, alt = w.alts[i]
             return Inj(i, label, self.sample(alt, rng, size, depth + 1), ty)
@@ -140,7 +184,9 @@ class Generators:
                 if all(isinstance(v, Lit) and isinstance(v.value, (int, float)) and not isinstance(v.value, bool)
                        for v in vals):
                     import numpy as np
-                    return Lit(np.asarray([v.value for v in vals], dtype=float))
+                    # the table of a function to Int is an int64 array, as the bridge reads it (06 §7)
+                    kind = scalar_kind(self.env, w.cod if w.name == "_" else subst(w.cod, {w.name: Lit(0)}))
+                    return Lit(np.asarray([v.value for v in vals], dtype=np.int64 if kind == "Int" else float))
                 if all(isinstance(v, Lit) and hasattr(v.value, "ndim") for v in vals) and vals:
                     import numpy as np
                     return Lit(np.stack([v.value for v in vals]))
@@ -186,11 +232,29 @@ class Generators:
         except EvalError as e:
             raise GenError(f"evaluating the predicate of {pp(sub)} on {pp(v)}: {e}")
 
+    def decide(self, law: Term) -> Optional[bool]:
+        """The Bool a closed predicate evaluates to, on the machine the laws run on, with the fuel
+        of a run; None when it is not a Bool (a quantified law, a conjunction of laws) or the machine
+        does not evaluate it, and the substitution evaluator is asked instead."""
+        from .machine import Machine, Unsupported, NotClosed, VInj, VCon
+        try:
+            v = Machine(self.env, Fuel(self.env.run_fuel)).eval(law, {})
+        except (Unsupported, NotClosed):
+            return None
+        if isinstance(v, VInj) and v.label in ("true", "false"):
+            return v.label == "true"
+        if isinstance(v, VCon) and v.name in ("true", "false") and not v.args:
+            return v.name == "true"
+        return None
+
     def law_holds(self, law: Term, rng: random.Random, size: int, depth: int, sub, v) -> bool:
         """A predicate that reduces to a Bool decides; one that is a quantified law (a record
         whose component must be causal, say) is probed on a few generated arguments: a
         counterexample rejects the value, none found accepts it. Certifying the law is the
         obligation's job, not the generator's."""
+        b = self.decide(law)
+        if b is not None:
+            return b
         r = whnf(self.env, law, self.fuel())
         b = as_bool(r)
         if b is not None:
@@ -205,11 +269,16 @@ class Generators:
             raise GenError(f"the predicate of {pp(sub)} did not reduce to a Bool on {pp(v)}: {pp(r)}")
         for _ in range(self.law_probes):
             t, tyc = r, ty
-            while isinstance((pw := self.checker.whnf(tyc)), Pi):
-                a = self.sample(pw.dom, rng, size, depth + 1)
-                t = App(t, a)
-                tyc = subst(pw.cod, {pw.name: a})
-            rb = as_bool(whnf(self.env, t, self.fuel()))
+            try:
+                while isinstance((pw := self.checker.whnf(tyc)), Pi):
+                    a = self.sample(pw.dom, rng, size, depth + 1)
+                    t = App(t, a)
+                    tyc = subst(pw.cod, {pw.name: a})
+            except EmptyDomain:
+                continue        # no arguments for this probe: the law holds on it vacuously
+            rb = self.decide(t)
+            if rb is None:
+                rb = as_bool(whnf(self.env, t, self.fuel()))
             if rb is None:
                 raise GenError(f"the law {pp(r)} of {pp(sub)} did not reduce to a Bool when probed: {pp(t)}")
             if rb is False:
@@ -295,7 +364,19 @@ class Generators:
     def generation(self) -> dict:
         return {"size": self.size, "growth": "1 to size over a sampled run",
                 "generators": {k: v[0] for k, v in sorted(self.luthier.items())},
-                "python_generators": sorted(self.custom)}
+                "python_generators": sorted(self.custom),
+                "checked_against_type": "every value of a registered generator is tested against the "
+                                        "predicate of its type; a value outside is an error"}
+
+    def checked_since(self, before: dict) -> dict:
+        """For each registered generator used since `before` (a copy of `checked`), how many of its
+        values were drawn and how many fell outside their type."""
+        out = {}
+        for reg, (drawn, outside) in sorted(self.checked.items()):
+            d0, o0 = before.get(reg, (0, 0))
+            if drawn > d0:
+                out[reg] = {"drawn": drawn - d0, "outside_type": outside - o0}
+        return out
 
     # ----------------------------------------------------------- enumerate
     def enumerate(self, ty: Term, size: Optional[int] = None) -> Optional[list]:

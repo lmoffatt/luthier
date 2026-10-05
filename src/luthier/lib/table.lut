@@ -82,19 +82,22 @@ sameParse (c : Codec) (a b : Maybe Table) : Bool :=
   match a { nothing -> (match b { nothing -> true ; just y -> false })
           ; just x -> (match b { nothing -> false ; just y -> c.eq x y }) }
 
--- A table and a text with the same content written differently; a text that is a rendering,
--- possibly written differently; a text with one defect. Their generators give them meaning.
+-- A table and a text with the same content written differently; a text with one defect, and the
+-- name of its defect. An alias is the type it stands for (05 R7), so a generator of a String alias
+-- would be the generator of every String; these are records, and their generators give values of
+-- them and of nothing else. That the defect of a BrokenText is real is not stated: it needs the
+-- grammar of the format written natively, which the parser of luthier/tables.py holds today.
 Perturbed = { table : Table, text : String }
-TableText = String
-BrokenText = String
+BrokenText = { text : String, defect : String }
 
 RoundTrip (c : Codec) (t : Table) : Bool := sameParse c (c.parse (c.render t)) (just t)
 
-Canonical (c : Codec) (s : TableText) : Bool :=
-  match c.parse s { nothing -> true ; just t -> sameParse c (c.parse (c.render t)) (just t) }
+-- a text that parses renders to a text that parses to the same table
+Canonical (c : Codec) (p : Perturbed) : Bool :=
+  match c.parse p.text { nothing -> true ; just t -> sameParse c (c.parse (c.render t)) (just t) }
 
 Tolerant (c : Codec) (p : Perturbed) : Bool := sameParse c (c.parse p.text) (just p.table)
 
-Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b { nothing -> true ; just t -> false }
+Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b.text { nothing -> true ; just t -> false }
 
 Codec := RoundTrip & Canonical & Tolerant & Rejects
