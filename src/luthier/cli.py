@@ -294,6 +294,14 @@ def cmd_test(args):
         print(r.summary())
         reports.append(r)
         ok = ok and r.passed
+    fell: dict = {}
+    for r in reports:
+        for k, v in r.generation.get("evaluator_fallbacks", {}).items():
+            fell[k] = fell.get(k, 0) + v
+    if fell:
+        total = sum(fell.values())
+        shown = "; ".join(f"{k} ({v})" for k, v in sorted(fell.items(), key=lambda kv: -kv[1])[:3])
+        print(f"{total} evaluations fell back from the machine to the substitution evaluator: {shown}")
     tops = {p for _, _, p in loader.top_programs()}
     done = {r.definition for r in reports}
     by_file: dict = {}

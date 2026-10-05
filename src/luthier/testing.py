@@ -345,6 +345,8 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
     from .certify import cone
     report.provisional = [x for x in cone(checker.env, name) if x in checker.provisional]
     before = {k: list(v) for k, v in gens.checked.items()}
+    from . import machine
+    fell_before = dict(machine.fallbacks)
     for ob in checker.obligations.get(name, []):
         try:
             pieces = flatten(checker, ob)
@@ -357,6 +359,10 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
     checked = gens.checked_since(before)
     if checked:
         report.generation["registered_values"] = checked
+    fell = {k: v - fell_before.get(k, 0) for k, v in machine.fallbacks.items() if v > fell_before.get(k, 0)}
+    if fell:
+        # evaluations the call-by-need machine left to the substitution evaluator (plan 4.3)
+        report.generation["evaluator_fallbacks"] = fell
     report.generators = {k: generator_fingerprint(checker, k) for k in sorted(checked)}
     return report
 

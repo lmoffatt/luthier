@@ -49,18 +49,37 @@ def cone(env: Env, qname: str) -> list:
         d = env.defs.get(n)
         if d is None:
             continue
-        refs = set()
-        if d.type is not None:
-            refs |= names_in(d.type)
-        if d.data is not None:
-            for c in d.data.constructors:
-                refs |= names_in(c.type)
-        elif d.body is not None and not isinstance(d.body, (Extern, Primitive, Axiom)):
-            refs |= names_in(d.body)
-        for r in refs:
+        for r in _refs_of(env, n, d):
             if r in env.defs or r in env.cons:
                 todo.append(r)
     return sorted(seen)
+
+
+def _cache(env: Env) -> dict:
+    """Per definition object, what the certificates compute about it: its references, its rendered
+    line, its externs. A definition replaced (a hole filled) is a new object, so a new entry."""
+    c = getattr(env, "_certify_cache", None)
+    if c is None:
+        c = {}
+        env._certify_cache = c
+    return c
+
+
+def _refs_of(env: Env, n: str, d) -> set:
+    key = ("refs", n, id(d))
+    hit = _cache(env).get(key)
+    if hit is not None and hit[0] is d:
+        return hit[1]
+    refs = set()
+    if d.type is not None:
+        refs |= names_in(d.type)
+    if d.data is not None:
+        for c in d.data.constructors:
+            refs |= names_in(c.type)
+    elif d.body is not None and not isinstance(d.body, (Extern, Primitive, Axiom)):
+        refs |= names_in(d.body)
+    _cache(env)[key] = (d, refs)
+    return refs
 
 
 def _strip(prefix: str):
@@ -79,9 +98,15 @@ def canonical_text(env: Env, qname: str, prefix: str) -> str:
     def show(t: Term) -> str:
         return pp(alpha_normalize(map_names(t, strip)))
     lines = []
+    cache = _cache(env)
     for n in sorted(cone(env, qname), key=strip):   # order by canonical name, so the prefix does not matter
         d = env.defs.get(n)
         if d is None:
+            continue
+        key = ("line", n, id(d), prefix)
+        hit = cache.get(key)
+        if hit is not None and hit[0] is d:
+            lines.append(hit[1])
             continue
         ty = show(d.type) if d.type is not None else "?"
         if d.data is not None:
@@ -93,7 +118,9 @@ def canonical_text(env: Env, qname: str, prefix: str) -> str:
             body = f'extern "{d.body.target}"'
         else:
             body = show(d.body)
-        lines.append(f"{strip(n)} : {ty} := {body}")
+        line = f"{strip(n)} : {ty} := {body}"
+        cache[key] = (d, line)
+        lines.append(line)
     return "\n".join(lines)
 
 
@@ -194,10 +221,19 @@ def externs_of_cone(env: Env, qname: str) -> list:
     """Every extern the cone of a definition calls: the bodies that are externs and the externs
     written inside other bodies (a field of a record literal)."""
     acc: set = set()
+    cache = _cache(env)
     for n in cone(env, qname):
         d = env.defs.get(n)
-        if d is not None and d.body is not None:
-            _externs_in(d.body, acc)
+        if d is None or d.body is None:
+            continue
+        key = ("externs", n, id(d))
+        hit = cache.get(key)
+        if hit is None or hit[0] is not d:
+            found: set = set()
+            _externs_in(d.body, found)
+            hit = (d, found)
+            cache[key] = hit
+        acc |= hit[1]
     return sorted(acc)
 
 

@@ -74,6 +74,7 @@ class Checker:
         self.gens: dict = {}           # generator key (05 R7: aliases unfolded) -> ("luthier", label, term) | ("extern", target, None)
         self.gens_by: dict = {}        # generator key -> the name its `gen` was written on
         self.object_of: dict = {}      # qualified name -> the members of its object (a strongly connected component)
+        self._operand_memo: dict = {}  # id of an operand -> (operand, context, whether it is a type)
         self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
@@ -432,20 +433,46 @@ class Checker:
         """A registered meaning of `op` whose first argument takes l and whose second takes the
         right-hand side, or None. The right side is inferred when it can be, so the types of
         both operands choose; otherwise the first candidate for the left type is checked."""
+        head = self._head(lt)
         cands = [c for c in self.operators.get(op, ())
-                 if self.convertible(lt, c[0]) or self.conv(self.base_type(lt), self.base_type(c[0]))]
+                 if self._heads_may_meet(head, self._head(c[0]))
+                 and (self.convertible(lt, c[0]) or self.conv(self.base_type(lt), self.base_type(c[0])))]
         if not cands:
             return None
         if self.inferable(rhs):
-            with self.silent():
-                r, rt = self.infer(ctx, rhs)
+            # inferred once, with its obligations recorded, and the obligations taken back if no
+            # meaning of the operator takes it (inferring it silently and then again doubled the work
+            # at every level of a nested expression)
+            cd = self.current_def
+            mark = len(self.obligations.get(cd, [])) if cd is not None else 0
+            r, rt = self.infer(ctx, rhs)
             for d1, d2, cod, f in cands:
                 if self.convertible(rt, d2) or self.conv(self.base_type(rt), self.base_type(d2)):
-                    r, rt = self.infer(ctx, rhs)
                     return App(App(f, l), self.coerce(ctx, r, rt, d2)), cod
+            if cd is not None and cd in self.obligations:
+                del self.obligations[cd][mark:]
             return None
         d1, d2, cod, f = cands[0]
         return App(App(f, l), self.check(ctx, rhs, d2)), cod
+
+    def _head(self, ty: Term):
+        """The outermost former of a type, below its refinements: a primitive's name, or the class of
+        the former (a product, a function type, a sum). What two types must share to be convertible."""
+        w = self.whnf(self.base_type(ty))
+        if isinstance(w, Var):
+            return ("name", w.name)
+        h, _ = unapply(w)
+        if isinstance(h, Var):
+            return ("applied", h.name)
+        return ("former", type(w).__name__)
+
+    @staticmethod
+    def _heads_may_meet(a, b) -> bool:
+        if a[0] == "name" and a[1] in ("Int", "Float64", "Real", "String"):
+            return b == a
+        if b[0] == "name" and b[1] in ("Int", "Float64", "Real", "String"):
+            return b == a
+        return True
 
     def add_gen(self, g: GenDirective):
         """`gen T := term`: the term must be a `Gen T`. Recorded by the qualified type name."""
@@ -482,6 +509,7 @@ class Checker:
         self.gens[key] = ("luthier", pp(g.term), term)
 
     def add_def(self, d: Def, object_names: Optional[set] = None):
+        self._operand_memo.clear()      # its entries name terms of the previous definition
         if isinstance(d, OperatorDirective):
             self.add_operator(d)
             return
@@ -1324,16 +1352,56 @@ class Checker:
 
     # ------------------------------------------------------------- sums
     def _type_operand(self, ctx: Ctx, t: BinOp, op: str = "+") -> bool:
-        """Whether `a + b` (or `a * b`) is a sum (a product) of types: its leftmost operand is a type."""
+        """Whether `a + b` (or `a * b`) is a sum (a product) of types: its leftmost operand is a type.
+        Decided by the operand's form where it can be (a literal, a local of a type that is not U, an
+        application of a function whose result is not a type), and by inferring it otherwise, once
+        per operand: a chain `a + b + c` asks the question at every `+` about the same `a`."""
         x = t
         while isinstance(x, BinOp) and x.op == op:
             x = x.lhs
+        quick = self._is_type_by_form(ctx, x)
+        if quick is not None:
+            return quick
+        hit = self._operand_memo.get(id(x))
+        if hit is not None and hit[0] is x and hit[1] is ctx:
+            return hit[2]
         try:
             with self.silent():
                 _, xt = self.infer(ctx, x)
+            answer = isinstance(self.whnf(xt), Univ)
         except TypeCheckError:
+            answer = False
+        self._operand_memo[id(x)] = (x, ctx, answer)
+        return answer
+
+    def _is_type_by_form(self, ctx: Ctx, x: Term) -> Optional[bool]:
+        """True or False when the form of a term says whether it is a type; None when it does not."""
+        if isinstance(x, (Lit, Pair, Lam, RecordLit)):
             return False
-        return isinstance(self.whnf(xt), Univ)
+        if isinstance(x, (Univ, Pi, Sigma, Sum, Subtype, Arrow)):
+            return True
+        h, args = unapply(x)
+        if isinstance(h, Var):
+            local = lookup(ctx, h.name)
+            if local is not None:
+                if args:
+                    return None
+                return isinstance(self.whnf(local), Univ)
+            q = self.resolve(h.name)
+            d = self.env.defs.get(q) if q is not None else None
+            if d is not None and d.type is not None and not d.alias:
+                cod = d.type
+                for _ in args:
+                    if not isinstance(cod, Pi):
+                        return None
+                    cod = cod.cod
+                while isinstance(cod, Pi):
+                    return False            # a function value, partially applied: not a type
+                if isinstance(cod, Univ):
+                    return True
+                if isinstance(cod, Var) and cod.name in ("Int", "Float64", "Real", "String", "Bool"):
+                    return False
+        return None
 
     def try_injection(self, ctx: Ctx, t: Term, sm: Sum, ty: Term) -> Optional[Term]:
         """`label` or `label arg` checked against a sum with that label: the injection."""
