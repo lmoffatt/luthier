@@ -197,9 +197,14 @@ type takes the equality it uses as a parameter or as a component of its theory: 
 equality of the presentation. `algebra.lut` already does so (each structure carries its `eq`).
 Files: `r8_equality_parameter.accept.lut`, `r8_equality_function.reject.lut`.
 
+**R9. Function types are contravariant in the domain and covariant in the codomain** (decided
+2026-10-05, not implemented; `06 §5`). A function `A -> B` passes where `A' -> B'` is expected when
+`A'` refines `A` and `B` refines `B'`.
+Files (in `tests/spec/next/`): `r9_variance.accept.lut`, `r9_variance.reject.lut`.
+
 ## 6. Reports that do not reject
 
-`luthier check -v` reports, without rejecting:
+`luthier check -v` reports, without rejecting (2026-10-05: also the axioms, `06 §3`):
 
 - every `provisional` extern and what it builds on (R5);
 - for each concrete type with laws, the table of observers against constructors, and the cells
@@ -220,6 +225,7 @@ functions), over a domain, by a mode. The grades, from weakest to strongest:
 | exhaustive | every case of a finite domain |
 | witnessed | an existential law: a case exhibited (section 4) |
 | proved | universal; not in version 0 |
+| assumed | an axiom: the laws are stated and taken as true, never tested (`06 §3`; decided, not implemented) |
 
 A certificate entry records the law, the values it was applied to, the grade with its `n`, the
 generators, the seed, the first cases, and the hash of the dependency cone (`03 §4`). The grade of

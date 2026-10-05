@@ -42,6 +42,8 @@ directives.
 
 A data definition `x : U := data { ... }` is a definition whose body is a `data` term
 (section 2). The body of a definition is a term, a `data`, or `extern "target"` (section 4).
+Two more bodies are decided, not implemented (`06`): `primitive "..."`, a type the interpreter
+provides, and `axiom "..."`, a value whose laws are assumed.
 
 Directives: `import "file" [as m]` (`03`), `test x [with n | exhaustive] [size k]` (`05 §7`),
 `gen T := g` (the generator of `T`), and `operator op := f` (the meaning of an infix operator
@@ -59,7 +61,7 @@ on the argument types of `f`). Directives are not definitions and have no states
 | unit | `Unit` | | `unit` | none needed |
 | subtype | `{ x : T \| p }` | `{ x : A, y : B \| p }` | a term of `T` for which `p` holds (an obligation) | a term of the subtype is a term of `T` |
 | recursive type | `data { c1 : ... ; c2 : ... }` | constructors are named | the constructors | `match` on constructors, with recursion |
-| primitives | `Int`, `R`, `String` | | literals `3`, `3.0`, `"a"` | arithmetic and comparisons |
+| primitives | `Int`, `R`, `String` (to become `Int`, `Real`, `Float64`, `String`: `06`) | | literals `3`, `3.0`, `"a"` | arithmetic and comparisons |
 
 Notes on each.
 
@@ -87,7 +89,9 @@ Notes on each.
   distinct constructors give distinct values, and each constructor is injective. Those facts
   are not axioms to state; they hold by construction. A non-recursive sum of products is
   written with the structural formers and named with an alias (`05` R4).
-- **Primitives** are holes of the kernel filled by the interpreter: their literals,
+- **Primitives** (2026-10-05: to be written with the body `primitive "..."`, which says what each
+  one is, and `R` to be replaced by `Real`, the ideal, and `Float64 : Real`, the finite doubles;
+  `06-numbers.md`) are holes of the kernel filled by the interpreter: their literals,
   arithmetic, comparisons and structural equality. `R` is an IEEE double. What can be said
   about them (epsilon, approximate equality) is library (`lib/real.lut`).
 

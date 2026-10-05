@@ -1,0 +1,5 @@
+-- 06 §5: a function with a smaller domain does not pass where a larger one is expected.
+-- expect: but Real -> Float64 was expected
+half (x : Float64) : Float64 := x / 2.0
+applyR (g : Real -> Float64) (x : Real) : Float64 := g x
+z : Float64 := applyR half 3.0
