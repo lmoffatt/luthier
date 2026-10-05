@@ -210,9 +210,9 @@ def bool_con(b: bool) -> Term:
 
 
 def as_bool(t: Term) -> Optional[bool]:
-    """A value of `Bool`: by position, so a value of any sum of two units reads as a Bool."""
-    if isinstance(t, Inj) and t.index in (0, 1):
-        return t.index == 0
+    """A value of `Bool`, by its label: an alternative of another sum is not a truth value."""
+    if isinstance(t, Inj) and t.label in ("true", "false"):
+        return t.label == "true"
     if isinstance(t, Con) and t.name == "true":
         return True
     if isinstance(t, Con) and t.name == "false":
@@ -863,7 +863,7 @@ def _sum_from_python(env: Env, x, sm: Sum, ty: Term) -> Term:
             return Inj(1, "negInf", UNIT, ty)
         return Inj(0, "finite", Lit(x), ty)
     unit_alts = [i for i, (_, a) in enumerate(sm.alts) if _is_unit_type(env, a)]
-    if isinstance(x, bool) and len(sm.alts) == 2 and len(unit_alts) == 2:
+    if isinstance(x, bool) and labels == ["true", "false"] and len(unit_alts) == 2:
         i = 0 if x else 1
         return Inj(i, labels[i], UNIT, ty)
     if isinstance(x, tuple) and len(x) == 2 and isinstance(x[0], str) and x[0] in labels:

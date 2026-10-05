@@ -83,8 +83,11 @@ rounding law that makes the tolerance a consequence instead of a constant, and i
 the departure certifiable by enclosure.
 
 Where a value of `Real` that is not known to be a double must enter a leaf, the conversion is
-explicit: `toFloat64 : Real -> Float64`, the rounding to the nearest double. It is exact on values
-that are already doubles.
+explicit: the rounding to the nearest double, exact on values that are already doubles. It waits for a
+`Real` that computes (intervals or balls, section 8): until then nothing has a value of `Real` that is
+not a double, and no law over `Real` is tested. The conversion that exists is `toFloat64 : Int ->
+Float64`, the nearest double to an integer, exact below 2^53 (decided 2026-10-05: the name stays with
+the integers, where its 37 uses are).
 
 ## 5. Variance of function types
 

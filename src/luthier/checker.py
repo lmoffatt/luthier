@@ -13,6 +13,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 import importlib
+import os
+import sys
 
 from .syntax import *
 from .subst import subst, fresh, free_vars
@@ -118,11 +120,12 @@ class Checker:
         return isinstance(w, Var) and w.name == "Unit"
 
     def is_bool(self, ty: Term) -> bool:
-        """`Bool` is `< true : Unit | false : Unit >`; positionally, any sum of two units is it."""
+        """`Bool` is `< true : Unit | false : Unit >`, by its labels: another sum of two units
+        (`< wrong : Unit | right : Unit >`) is not a Bool, and its first alternative is not true."""
         w = self.whnf(self.base_type(ty))
         if isinstance(w, Var) and w.name == "Bool":
             return True
-        return isinstance(w, Sum) and len(w.alts) == 2 and all(self.is_unit(a) for _, a in w.alts)
+        return isinstance(w, Sum) and w.labels() == ["true", "false"] and all(self.is_unit(a) for _, a in w.alts)
 
     def sum_of(self, ty: Term) -> Optional[Sum]:
         w = self.whnf(self.base_type(ty))
@@ -340,11 +343,22 @@ class Checker:
             body = self.env.defs[h.name].body
             for _ in args:
                 if not isinstance(body, Lam):
-                    return set(labels)
+                    return self._undecidable_touch(fn, labels)
                 body = body.body
             if isinstance(body, Lam) and isinstance(body.param, PVar):
                 return _projections_of(body.body, body.param.name, labels)
-        return set(labels)
+        return self._undecidable_touch(fn, labels)
+
+    def _undecidable_touch(self, fn: Term, labels: list) -> set:
+        """R3 is read off the law as written: a function of the whole value whose body projects its
+        labels. A law in another form (an application whose body is not such a function) does not say
+        which labels it touches; counting them all as touched would let a predicate define a type it
+        does not constrain, so it is an error (05 R3)."""
+        if os.environ.get("LUTHIER_R3_REPORT"):
+            print(f"[R3 undecidable] {self.current_def}: {pp(fn)[:160]}", file=sys.stderr)
+            return set(labels)
+        self.err(f"cannot tell which labels of the base {pp(fn)[:120]} touches; write the law as a function "
+                 f"of the whole value, \\ x {{ ... x.label ... }}, or name one that is (05 R3)")
 
     # ------------------------------------------------------------ R2
     def defined(self, q: str) -> bool:
@@ -1010,7 +1024,9 @@ class Checker:
                 return res
         if op in ("==", "/="):
             if self.contains_function(lt):
-                self.err(f"no structural equality on {pp(self.base_type(lt))}: compare with an equality "
+                why = ("the reals have no computable equality; compare Float64 values, or "
+                       if self._mentions_real(lt) else "")
+                self.err(f"no structural equality on {pp(self.base_type(lt))}: {why}compare with an equality "
                          f"given as a parameter or a component (05 R8)")
             if self.inferable(t.rhs):
                 r, rt = self.infer(ctx, t.rhs)
@@ -1197,7 +1213,8 @@ class Checker:
             return term
         hint = ""
         if isinstance(w, Var) and w.name == "Float64" and self._is_real(self.base_type(have)):
-            hint = "; a Real becomes a Float64 only by rounding: toFloat64 (06 §4)"
+            hint = ("; a Real has no computation of its own (06 §3), so nothing turns it into a Float64 yet: "
+                    "write the code over Float64, or generic in its number type (06 §4)")
         self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected{hint}")
 
     def subtype_obligation(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):
@@ -1373,23 +1390,46 @@ class Checker:
             ty = Pi(n, ann, ty)
         return term, ty
 
-    def contains_function(self, ty: Term, depth: int = 0) -> bool:
-        """Whether values of `ty` can contain a function, so `==` is not structural (05 R8)."""
-        if depth > 20:
-            return False
+    def contains_function(self, ty: Term, seen: Optional[set] = None) -> bool:
+        """Whether `==` is not structural on values of `ty` (05 R8): they can contain a function, or a
+        Real, whose equality is the axiom's and not computable. A data type is looked into through
+        the types of its constructors, instantiated; one already being looked into adds nothing, so a
+        recursive type ends without a depth cut that would let `==` through."""
+        seen = set() if seen is None else seen
         w = self.whnf(self.base_type(ty))
+        if isinstance(w, Var) and w.name == "Real":
+            return True
         if isinstance(w, Pi):
             return True
         if isinstance(w, Sigma):
-            return self.contains_function(w.fst, depth + 1) or \
-                self.contains_function(subst(w.snd, {w.name: Var(fresh(w.name))}), depth + 1)
+            return self.contains_function(w.fst, seen) or \
+                self.contains_function(subst(w.snd, {w.name: Var(fresh(w.name))}), seen)
         if isinstance(w, Sum):
-            return any(self.contains_function(a, depth + 1) for _, a in w.alts)
+            return any(self.contains_function(a, seen) for _, a in w.alts)
         h, args = unapply(w)
         if isinstance(h, Var) and h.name in self.env.datas:
-            return any(self.contains_function(a, depth + 1) for a in args
-                       if self._is_type_term(a))
+            key = pp(w)
+            if key in seen:
+                return False
+            seen.add(key)
+            for c in self.env.datas[h.name].constructors:
+                cty = self.env.cons[c.name][1]
+                for a in args:
+                    cw = self.whnf(cty)
+                    if not isinstance(cw, Pi):
+                        break
+                    cty = subst(cw.cod, {cw.name: a})
+                cw = self.whnf(cty)
+                while isinstance(cw, Pi):
+                    if self.contains_function(cw.dom, seen):
+                        return True
+                    cw = self.whnf(cw.cod if cw.name == "_" else subst(cw.cod, {cw.name: Var(fresh(cw.name))}))
+            return False
         return False
+
+    def _mentions_real(self, ty: Term) -> bool:
+        w = self.whnf(self.base_type(ty))
+        return isinstance(w, Var) and w.name == "Real"
 
     def _is_type_term(self, a: Term) -> bool:
         try:
@@ -1442,6 +1482,11 @@ class Checker:
                 self.err(f"label {p.name} takes one pattern for its payload; group several with a tuple")
             a, ctx2 = self.bind_pattern(ctx, p.args[0], w.alts[i][1], binding)
             return PInj(i, p.name, a), ctx2
+        if isinstance(p, PCon) and p.name in ("true", "false") and not p.args:
+            # the labels of Bool are never a variable: `if c` on a sum of two other units, or a pattern
+            # `true` against another type, would otherwise bind anything and take its branch always
+            self.err(f"{p.name} is a label of Bool, and the value matched is of type {pp(ty)}: the condition "
+                     f"of an if, and a match on true and false, need a Bool")
         if isinstance(p, PCon):
             q = self.resolve(p.name)
             if q is None or q not in self.env.cons:
@@ -1602,7 +1647,7 @@ def _children(t: Term) -> list:
     if isinstance(t, App):
         return [t.fn, t.arg]
     if isinstance(t, Lam):
-        return [t.body] + ([t.ann] if t.ann is not None else [])
+        return [t.body] + ([t.ann] if t.ann is not None else []) + ([t.res] if t.res is not None else [])
     if isinstance(t, (Pi,)):
         return [t.dom, t.cod]
     if isinstance(t, Sigma):
@@ -1618,7 +1663,9 @@ def _children(t: Term) -> list:
     if isinstance(t, Sum):
         return [a for _, a in t.alts]
     if isinstance(t, Inj):
-        return [t.arg]
+        return [t.arg] + ([t.type] if t.type is not None else [])
+    if isinstance(t, Extern):
+        return [t.type] if t.type is not None else []
     if isinstance(t, Forget):
         return [t.arg]
     return []
@@ -1636,7 +1683,10 @@ def _global_names(t: Term, bound=frozenset()) -> set:
         if isinstance(t, Lam):
             if t.ann is not None:
                 walk(t.ann, bound)
-            walk(t.body, bound | set(pattern_vars(t.param)))
+            inner = bound | set(pattern_vars(t.param))
+            if t.res is not None:
+                walk(t.res, inner)
+            walk(t.body, inner)
             return
         if isinstance(t, Pi):
             walk(t.dom, bound)
@@ -1657,6 +1707,8 @@ def _global_names(t: Term, bound=frozenset()) -> set:
             return
         if isinstance(t, Inj):
             walk(t.arg, bound)
+            if t.type is not None:
+                walk(t.type, bound)
             return
         for c in _children(t):
             walk(c, bound)

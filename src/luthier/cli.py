@@ -213,7 +213,7 @@ def cmd_check(args):
           + (f", {len(ck.provisional)} provisional" if ck.provisional else ""))
     if args.verbose and ck.axioms:
         for q, desc in ck.axioms.items():
-            print(f"  assumed {q}: {desc}")
+            print(f"  assumed {q}: {desc}; its laws are stated and never tested (06 §3)")
     if args.verbose and ck.provisional:
         for q, over in ck.provisional.items():
             what = f"builds on {', '.join(over)}" if over else "an extern type nobody has defined"

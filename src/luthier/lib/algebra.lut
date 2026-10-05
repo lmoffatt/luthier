@@ -204,7 +204,12 @@ intRing : CommutativeRing Int := {
   mul := { op := \ (a b : Int) { a * b }, unit := 1 } }
 
 -- Float64, the realization of the reals that runs: an ordered field within rounding. Valid for
--- magnitudes up to the generator's size: a product of two such values rounds to size^2 eps.
+-- magnitudes up to the generator's size: a product of two such values rounds to size^2 eps. The
+-- type says more than that: outside the box the laws are false, since cancellation breaks any fixed
+-- relative tolerance ((1e8 + -1e8) + 3e-9 is 3e-9, and 1e8 + (-1e8 + 3e-9) is 0). Narrowing the
+-- carrier to the box does not help, since the box is not closed under the operations. The object
+-- that represents the doubles is a field with the rounding law of 06 §8, tested exactly in Rational;
+-- until then this instance is certified on the box it is sampled in, and the libraries rest on it.
 lawMagnitude : Float64 := 16.0
 float64Field : OrderedField Float64 := {
   field := {
