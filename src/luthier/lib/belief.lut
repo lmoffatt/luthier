@@ -155,7 +155,7 @@ drawGaussian (n : Nat) (b : GaussianBelief n) (seed : Int) : VecOf n * Int :=
 -- measured both ways, it makes `same` a symmetric relation
 meanGap (n : Nat) (a c : GaussianBelief n) : Float64 := match a.mean - c.mean { d -> sqrt (dot d (a.precision * d)) }
 
-gaussianFamily (n : Nat) (Y : U) (maximize : Maximizer) (l : Likelihood (VecOf n) Y) (tol : Float64) : BeliefFamily (VecOf n) (GaussianBelief n) Y := {
+gaussianFamily (n : Nat) (Y : U) (maximize : Maximizer) (l : Likelihood (VecOf n) Y) (tol : { t : Float64 | 0.0 < t }) : BeliefFamily (VecOf n) (GaussianBelief n) Y := {
   update := laplaceUpdate n Y maximize l,
   predictive := laplaceEvidence n Y maximize l,
   draw := drawGaussian n,
