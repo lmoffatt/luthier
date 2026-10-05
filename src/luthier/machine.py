@@ -583,11 +583,38 @@ class Machine:
             return False
         if isinstance(v, (VClosure, VExtern)) and ty is not None and isinstance(strip_subtypes(self.env, ty), Pi):
             return self._callable(v, ty)
+        if isinstance(v, VCon) and ty is not None:
+            items = self._list_to_python(v, ty)
+            if items is not None:
+                return items
         t = self.quote(v)
         py = to_python(self.env, t, ty)
         if py is _OPAQUE:
             raise Unsupported("a value the environment cannot receive")
         return py
+
+    def _list_to_python(self, v: Value, ty: Term) -> Optional[list]:
+        """A `List A` as a Python list, each element converted on the machine by A: a list of vectors
+        computed here crosses entry by entry through materialize, as a vector does, instead of being
+        quoted and materialized again by the substitution evaluator. None if ty is not a list."""
+        w = strip_subtypes(self.env, ty)
+        h, args = unapply(w)
+        if not (isinstance(h, Var) and h.name == "List" and len(args) == 1 and "List" in self.env.datas):
+            return None
+        elt = args[0]
+        nparams = len(self.env.datas["List"].params)
+        out = []
+        cur = v
+        while True:
+            cur = self.force(cur) if isinstance(cur, Thunk) else cur
+            if not isinstance(cur, VCon):
+                return None
+            if cur.name == "nil":
+                return out
+            if cur.name != "cons" or len(cur.args) < nparams + 2:
+                return None
+            out.append(self.to_python(self.force(cur.args[nparams]), elt))
+            cur = cur.args[nparams + 1]
 
     def materialize(self, f: Value, dims: list, cod: Optional[Term]):
         """The array of a function over Fin d1 x ... x Fin dk (04 §6), kept with the value so the

@@ -117,3 +117,8 @@ def dependent_pair(k):
     """A record of nodes and two vectors of nodes of one length, as the environment gives it."""
     k = int(k)
     return (k + 1, (1, np.array([0])), (1, np.array([k])))
+
+
+def sum_all(vs):
+    """The sum of every entry of a list of vectors."""
+    return float(sum(float(np.sum(np.asarray(v, dtype=float))) for v in vs))

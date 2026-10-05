@@ -323,6 +323,17 @@ def gen_mat_rows(rng: random.Random, size: int, m):
     return _mat(rng, int(m), rng.randint(0, max(size, 0)), size)
 
 
+def gen_square(rng: random.Random, size: int):
+    """A square matrix of a size between 0 and size, its entries as those of any matrix."""
+    n = rng.randint(0, max(size, 0))
+    return _mat(rng, n, n, size)
+
+
+def gen_square_of(rng: random.Random, size: int, n):
+    """A square matrix of size n."""
+    return _mat(rng, int(n), int(n), size)
+
+
 def gen_symmetric(rng: random.Random, size: int):
     """B + B^T, of a size between 1 and size: symmetric, any spectrum."""
     n = rng.randint(1, max(size, 1))

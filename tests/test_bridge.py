@@ -321,3 +321,15 @@ def test_an_alias_of_fin_is_drawn_from_its_range():
     assert all(0 <= gens.sample(three, rng, 5).value < 3 for _ in range(20))
     with pytest.raises(EmptyDomain):
         gens.sample(empty, rng, 5)
+
+
+def test_a_list_of_vectors_computed_on_the_machine_crosses_entry_by_entry():
+    """A list crosses to Python element by element, each vector materialized on the machine, as a
+    vector alone does; it used to be quoted whole and materialized by the substitution evaluator."""
+    from luthier.machine import normalize
+    from luthier.evaluator import Fuel
+    ck = load('sumAll : List V -> Float64 := extern "python:bridge_externs.sum_all"\n'
+              'xs : List V := cons V (3, \\ k { 1.0 }) (cons V (2, \\ k { 2.0 }) (nil V))\n')
+    with ck.silent():
+        t, _ = ck.infer([], parse_term("sumAll xs"))
+    assert pp(normalize(ck.env, t, Fuel(10 ** 6))) == "7.0"
