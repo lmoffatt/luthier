@@ -19,7 +19,7 @@ from typing import Optional, Callable
 from .syntax import *
 from .subst import subst, free_vars
 from .pretty import pp
-from .evaluator import (to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError,
+from .evaluator import (unfold_aliases, to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError,
                         fin_bound, strip_subtypes, generator_key, scalar_kind)
 
 
@@ -130,6 +130,10 @@ class Generators:
         if size is None:
             size = self.size
         fb = fin_bound(self.env, ty)
+        if fb is None:
+            # an alias of Fin (`Node p = Fin (p.n / 3)`) is Fin: drawn from its range, and empty when
+            # the range is, instead of by rejection over Int, which takes its every try to find that out
+            fb = fin_bound(self.env, unfold_aliases(self.env, ty))
         if fb is not None:
             d = whnf(self.env, fb, self.fuel())
             if isinstance(d, Lit) and isinstance(d.value, int):
@@ -452,6 +456,10 @@ class Generators:
         if size is None:
             size = self.size
         fb = fin_bound(self.env, ty)
+        if fb is None:
+            # an alias of Fin (`Node p = Fin (p.n / 3)`) is Fin: drawn from its range, and empty when
+            # the range is, instead of by rejection over Int, which takes its every try to find that out
+            fb = fin_bound(self.env, unfold_aliases(self.env, ty))
         if fb is not None:
             d = whnf(self.env, fb, self.fuel())
             if isinstance(d, Lit) and isinstance(d.value, int):

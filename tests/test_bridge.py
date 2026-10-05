@@ -305,3 +305,19 @@ def test_an_obligation_that_is_the_condition_of_its_branch_is_discharged():
     ck = load("k : Int\nPos : U := { x : Int | x > 0 }\nuse (x : Pos) : Int := x\n"
               "f : Int := if k > 0 then use k else 0\n")
     assert not ck.obligations.get(ck.resolve("f"))
+
+
+def test_an_alias_of_fin_is_drawn_from_its_range():
+    """`Node3 k = Fin k` is drawn as Fin k: from its range, and found empty when the range is,
+    instead of by rejection over Int, which spent every one of its tries to find that out."""
+    from luthier.generators import EmptyDomain
+    from luthier.syntax import Univ
+    ck = load("Node3 (k : Int) = Fin k\n")
+    gens = Generators.from_checker(ck)
+    with ck.silent():
+        empty = ck.check([], parse_term("Node3 0"), Univ())
+        three = ck.check([], parse_term("Node3 3"), Univ())
+    rng = random.Random(0)
+    assert all(0 <= gens.sample(three, rng, 5).value < 3 for _ in range(20))
+    with pytest.raises(EmptyDomain):
+        gens.sample(empty, rng, 5)
