@@ -17,7 +17,7 @@ import itertools
 from typing import Optional, Callable
 
 from .syntax import *
-from .subst import subst
+from .subst import subst, free_vars
 from .pretty import pp
 from .evaluator import (to_python, Env, Fuel, whnf, nf, unapply, apply, from_python, as_bool, EvalError,
                         fin_bound, strip_subtypes, generator_key, scalar_kind)
@@ -29,6 +29,11 @@ class GenError(Exception):
 
 class EmptyDomain(GenError):
     """A type with no values (`Fin 0`, `Empty`): a law quantified over it holds vacuously (05 §7)."""
+
+
+class OutsideType(GenError):
+    """A registered generator gave a value outside its type: the generator is wrong, and a law
+    drawing from it fails rather than goes unrun."""
 
 
 class Generators:
@@ -43,6 +48,7 @@ class Generators:
         self.luthier: dict = {}             # generator key (generator_key) -> (label, Gen term)
         self.custom: dict = {}              # generator key -> python fn(rng, size)
         self.checked: dict = {}             # generator key -> [values drawn, values outside the type]
+        self.bounded = False                # set when an enumeration took Int in a box
 
     @classmethod
     def from_checker(cls, checker, size: int = 16) -> "Generators":
@@ -116,8 +122,8 @@ class Generators:
         bad = next((sub for sub in laws if not self.satisfies(sub, v, rng, size, depth)), None)
         if bad is not None:
             tally[1] += 1
-            raise GenError(f"the generator {reg} gave a value outside {pp(ty)}: {pp(v)[:200]} does not "
-                           f"satisfy {pp(bad)[:200]}")
+            raise OutsideType(f"the generator {reg} gave a value outside {pp(ty)}: {pp(v)[:200]} does not "
+                              f"satisfy {pp(bad)[:200]}")
         return v
 
     def sample(self, ty: Term, rng: random.Random, size: Optional[int] = None, depth: int = 0) -> Term:
@@ -247,6 +253,48 @@ class Generators:
             return v.name == "true"
         return None
 
+    def applied_type(self, r: Term) -> Optional[Term]:
+        """The type of a named law applied to some of its arguments (`NamesDistinct t`), read off its
+        declared type with those arguments substituted; None for anything else. Inferring it with the
+        checker instead costs a full check for every value a generator gives."""
+        h, args = unapply(r)
+        if not isinstance(h, Var):
+            return None
+        d = self.env.defs.get(h.name)
+        if d is None or d.type is None:
+            return None
+        ty = d.type
+        for a in args:
+            w = whnf(self.env, ty, self.fuel())
+            if not isinstance(w, Pi):
+                return None
+            ty = w.cod if w.name == "_" else subst(w.cod, {w.name: a})
+        return ty
+
+    def probe_annotated(self, r: Lam, rng: random.Random, size: int, depth: int, sub) -> bool:
+        """A quantified law that is an elaborated lambda carries the types of its parameters, so it
+        is probed by drawing from them, with no type inference per value (what made checking a
+        generated Table cost a second)."""
+        for _ in range(self.law_probes):
+            t = r
+            try:
+                while True:
+                    w = whnf(self.env, t, self.fuel())
+                    if isinstance(w, Lam) and w.ann is not None and isinstance(w.param, PVar):
+                        t = App(w, self.sample(w.ann, rng, size, depth + 1))
+                        continue
+                    break
+            except EmptyDomain:
+                continue        # no arguments for this probe: the law holds on it vacuously
+            rb = self.decide(t)
+            if rb is None:
+                rb = as_bool(whnf(self.env, t, self.fuel()))
+            if rb is None:
+                raise GenError(f"the law of {pp(sub)} did not reduce to a Bool when probed: {pp(t)[:200]}")
+            if rb is False:
+                return False
+        return True
+
     def law_holds(self, law: Term, rng: random.Random, size: int, depth: int, sub, v) -> bool:
         """A predicate that reduces to a Bool decides; one that is a quantified law (a record
         whose component must be causal, say) is probed on a few generated arguments: a
@@ -261,16 +309,20 @@ class Generators:
             return b
         if isinstance(r, And):
             return self.law_holds(r.lhs, rng, size, depth, sub, v) and self.law_holds(r.rhs, rng, size, depth, sub, v)
-        if self.checker is None:
+        if isinstance(r, Lam) and r.ann is not None and isinstance(r.param, PVar):
+            return self.probe_annotated(r, rng, size, depth, sub)
+        ty = self.applied_type(r)
+        if ty is None and self.checker is None:
             raise GenError(f"the predicate of {pp(sub)} did not reduce to a Bool on {pp(v)}: {pp(r)}")
-        with self.checker.silent():
-            _, ty = self.checker.infer([], r)
-        if not isinstance(self.checker.whnf(ty), Pi):
+        if ty is None:
+            with self.checker.silent():
+                _, ty = self.checker.infer([], r)
+        if not isinstance(whnf(self.env, ty, self.fuel()), Pi):
             raise GenError(f"the predicate of {pp(sub)} did not reduce to a Bool on {pp(v)}: {pp(r)}")
         for _ in range(self.law_probes):
             t, tyc = r, ty
             try:
-                while isinstance((pw := self.checker.whnf(tyc)), Pi):
+                while isinstance((pw := whnf(self.env, tyc, self.fuel())), Pi):
                     a = self.sample(pw.dom, rng, size, depth + 1)
                     t = App(t, a)
                     tyc = subst(pw.cod, {pw.name: a})
@@ -380,7 +432,9 @@ class Generators:
 
     # ----------------------------------------------------------- enumerate
     def enumerate(self, ty: Term, size: Optional[int] = None) -> Optional[list]:
-        """All values of a finite type, or None. Int is taken in [-size, size]."""
+        """All values of a finite type, or None. Int is taken in [-size, size], and then the
+        enumeration is of a box, not of the type: `bounded` records it, so the grade says
+        "bounded" and not "exhaustive" (05 §7)."""
         if size is None:
             size = self.size
         fb = fin_bound(self.env, ty)
@@ -392,6 +446,7 @@ class Generators:
         h, args = unapply(w)
         name = h.name if isinstance(h, Var) else None
         if name == "Int":
+            self.bounded = True
             return [Lit(i) for i in range(-size, size + 1)]
         if name in self.env.datas:
             decl = self.env.datas[name]
@@ -430,8 +485,63 @@ class Generators:
         if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
             return self.enumerate(w.base, size)
         if isinstance(w, Subtype):
+            interval = self.int_interval(w)
+            if interval is not None:
+                lo, hi = interval        # the predicate bounds the integer: every value is in [lo, hi)
+                return [Lit(i) for i in range(lo, hi) if self.satisfies(w, Lit(i))]
             base = self.enumerate(w.base, size)
             if base is None:
                 return None
             return [v for v in base if self.satisfies(w, v)]
         return None
+
+    def int_interval(self, sub: Subtype):
+        """For a refinement of Int whose predicate is a conjunction bounding its parameter on both
+        sides by closed integers (`0 <= k and k < n`), the interval [lo, hi) holding every value;
+        else None. What makes enumerating such a type exhaustive and not bounded."""
+        if not isinstance(sub.param, PVar):
+            return None
+        bw = whnf(self.env, sub.base, self.fuel())
+        if not (isinstance(bw, Var) and bw.name == "Int"):
+            return None
+        k = sub.param.name
+        lo, hi = None, None
+
+        def closed_int(t):
+            if k in free_vars(t):
+                return None
+            try:
+                r = whnf(self.env, t, self.fuel())
+            except EvalError:
+                return None
+            return r.value if isinstance(r, Lit) and isinstance(r.value, int) and not isinstance(r.value, bool) else None
+
+        def walk(t):
+            nonlocal lo, hi
+            h, args = unapply(t)
+            if isinstance(h, Var) and h.name == "and" and len(args) == 2:
+                walk(args[0])
+                walk(args[1])
+                return
+            if not isinstance(t, BinOp) or t.op not in ("<", "<=", ">", ">="):
+                return
+            op, a, b = t.op, t.lhs, t.rhs
+            if isinstance(b, Var) and b.name == k:           # c op k  is  k (flipped op) c
+                op, a, b = {"<": ">", "<=": ">=", ">": "<", ">=": "<="}[op], b, a
+            if not (isinstance(a, Var) and a.name == k):
+                return
+            c = closed_int(b)
+            if c is None:
+                return
+            if op == "<":
+                hi = c if hi is None else min(hi, c)
+            elif op == "<=":
+                hi = c + 1 if hi is None else min(hi, c + 1)
+            elif op == ">":
+                lo = c + 1 if lo is None else max(lo, c + 1)
+            else:
+                lo = c if lo is None else max(lo, c)
+        walk(sub.pred)
+        if lo is None or hi is None:
+            return None
+        return lo, max(lo, hi)

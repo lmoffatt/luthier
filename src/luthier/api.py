@@ -200,8 +200,10 @@ class Program:
         report = run_test(self.checker, gens, q, n=n, exhaustive=exhaustive, seed=seed, deep=deep,
                           prefix=prefix, size=size)
         if certificate and path is not None and not report.certified:
-            write_certificate(cert_path(path), [report], {q: local})
-            if report.passed:
+            keep = {lc for qq, (p, pre, lc) in self.loader.origin.items()
+                    if p == path and qq in self.checker.obligations}
+            write_certificate(cert_path(path), [report], {q: local}, keep)
+            if report.passed and not report.provisional:
                 self.checker.certified[q] = {"hash": report.hash, "when": report.when, "passed": True}
         return report
 

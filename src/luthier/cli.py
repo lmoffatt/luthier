@@ -13,7 +13,8 @@ from .checker import Checker, TypeCheckError
 from .evaluator import Env, EvalError, evaluate
 from .generators import Generators
 from .testing import run_test
-from .certify import cert_path, read_certificate, write_certificate, definition_hash
+from .certify import (cert_path, read_certificate, write_certificate, definition_hash, entries_of,
+                      fingerprint, hash_of, why_different, generator_fingerprint)
 from .pretty import pp
 
 PACKAGE_DIR = os.path.dirname(__file__)
@@ -65,6 +66,9 @@ class Loader:
         self.tests: list = []             # (qualified name, n, exhaustive, top)
         self.origin: dict = {}            # qualified name -> (path, prefix, name in file)
         self.stale: list = []             # qualified names whose certificate no longer matches
+        self.stale_why: dict = {}         # qualified name -> why its certificate is not trusted
+        self.known: dict = {}             # qualified name -> its matching entry, when that test did not pass
+        self.cert_files: list = []        # (path, prefix) in load order, accepted once all is loaded
 
     def load_file(self, path: str, prefix: str = "", top: bool = False):
         path = os.path.abspath(path)
@@ -104,21 +108,74 @@ class Loader:
             self.origin[qualify(prefix, d.name)] = (path, prefix, d.name)
         for t in prog.tests:
             self.tests.append((qualify(prefix, t.name), t.n, t.exhaustive, t.size, top))
-        self.accept_certificate(path, prefix)
+        self.cert_files.append((path, prefix))
         self.stack.pop()
         self.loaded.add(key)
         self.programs.append((prog, prefix, top, path))
 
+    def accept_certificates(self):
+        """Trust the certificates of every loaded file, once the whole program is loaded and every
+        hole it fills is filled (05 §7): an entry is trusted when its hash matches the definition's
+        fingerprint now, its generators are unchanged, and it ran at least the cases its directive
+        asks for. A certificate keeps an entry per filling of the holes; the one that matches is
+        this program's."""
+        directives = {}
+        for q, n, ex, sz, top in self.tests:
+            directives[q] = (n, ex)
+        env = self.checker.env
+        for path, prefix in self.cert_files:
+            cert = read_certificate(cert_path(path))
+            for name, value in cert.items():
+                q = qualify(prefix, name)
+                if q not in self.checker.obligations or q in self.checker.certified:
+                    continue
+                entries = entries_of(value)
+                if not entries:
+                    continue
+                fp = fingerprint(env, q, prefix)
+                h = hash_of(fp)
+                match = next((e for e in entries if e.get("hash") == h), None)
+                if match is None:
+                    self._stale(q, why_different(entries[0].get("fingerprint", {}), fp))
+                    continue
+                why = self._unacceptable(match, directives.get(q))
+                if why is not None:
+                    self._stale(q, why)
+                    continue
+                outcome = match.get("outcome") or ("passed" if match.get("passed") else "failed")
+                if outcome == "passed" and match.get("provisional"):
+                    self.known[q] = dict(match, outcome="passed over provisional externs "
+                                                       + ", ".join(match["provisional"]) + ", not certified")
+                elif outcome == "passed":
+                    self.checker.certified[q] = match
+                else:
+                    self.known[q] = match
+
+    def _stale(self, q: str, why: str):
+        if q not in self.stale:
+            self.stale.append(q)
+        self.stale_why[q] = why
+
+    def _unacceptable(self, entry: dict, directive) -> str:
+        for key, fpg in (entry.get("generators") or {}).items():
+            if generator_fingerprint(self.checker, key) != fpg:
+                return f"the generator {key} changed"
+        if directive is not None:
+            n, exhaustive = directive
+            if exhaustive and entry.get("mode") != "exhaustive":
+                return "its directive asks for an exhaustive test"
+            if not exhaustive and entry.get("n", 0) < n:
+                return f"it ran {entry.get('n', 0)} cases and its directive asks for {n}"
+        return None
+
     def accept_certificate(self, path: str, prefix: str):
-        cert = read_certificate(cert_path(path))
-        for name, entry in cert.items():
-            q = qualify(prefix, name)
-            if q not in self.checker.obligations:
-                continue
-            if entry.get("passed") and entry.get("hash") == definition_hash(self.checker.env, q, prefix):
-                self.checker.certified[q] = entry
-            else:
-                self.stale.append(q)
+        """One file's certificates, as accept_certificates does for all."""
+        saved = self.cert_files
+        self.cert_files = [(path, prefix)]
+        try:
+            self.accept_certificates()
+        finally:
+            self.cert_files = saved
 
     def top_programs(self):
         return [(p, pre, path) for p, pre, top, path in self.programs if top]
@@ -131,6 +188,7 @@ def load(paths: list, with_core: bool = True) -> Loader:
         loader.load_file(CORE)
     for path in paths:
         loader.load_file(path, top=True)
+    loader.accept_certificates()
     return loader
 
 
@@ -164,8 +222,11 @@ def cmd_check(args):
         for q, obls in obligations.items():
             if q in ck.certified:
                 status = f"certified ({ck.certified[q].get('when', '')})"
+            elif q in loader.known:
+                e = loader.known[q]
+                status = f"{e.get('outcome') or 'failed'} in its last test ({e.get('when', '')})"
             elif q in loader.stale:
-                status = "stale certificate, needs test"
+                status = f"stale certificate: {loader.stale_why.get(q, 'it no longer matches')}; needs test"
             else:
                 status = "pending"
             path, prefix, _ = loader.origin.get(q, ("?", "", q))
@@ -199,6 +260,24 @@ def cmd_test(args):
                     q = qualify(prefix, d.name)
                     if q in ck.obligations:
                         directives.append((q, args.n, args.exhaustive, args.size))
+    if args.imports:
+        # 05 §7: a library with holes is certified per filling; this program is one, so the
+        # imported obligations without a certificate for it are run here and written to their files
+        own = {q: (n, ex, sz) for q, n, ex, sz, top in loader.tests}
+        have = {q for q, _, _, _ in directives}
+        for q in ck.obligations:
+            if q in have or q in ck.certified:
+                continue
+            n, ex, sz = own.get(q, (args.n, args.exhaustive, args.size))
+            directives.append((q, args.n if args.n_given else n, ex, sz))
+            have.add(q)
+    # 05 §7: `test n` runs the obligations of n and of every member of n's object
+    seen = {q for q, _, _, _ in directives}
+    for q, n, ex, sz in list(directives):
+        for m in ck.object_of.get(q, []):
+            if m not in seen and m in ck.obligations:
+                directives.append((m, n, ex, sz))
+                seen.add(m)
     reports = []
     ok = True
     run_seed = args.seed if args.seed is not None else random.randrange(2 ** 31)
@@ -227,7 +306,7 @@ def cmd_test(args):
         state = "stale certificate" if any(q in loader.stale for q in names) else "no certificate"
         rel = os.path.relpath(path)
         print(f"imported, {state}: {', '.join(names)}\n"
-              f"  run `luthier test {rel}` to certify them, or add --deep to run them here")
+              f"  run `luthier test {rel}` to certify them, or add --imports to run them here")
     if reports and not args.no_cert:
         by_file: dict = {}
         for r in reports:
@@ -240,7 +319,8 @@ def cmd_test(args):
             by_file[path][0].append(r)
             by_file[path][1][r.definition] = local
         for path, (rs, names) in by_file.items():
-            write_certificate(cert_path(path), rs, names)
+            keep = {local for q, (p, pre, local) in loader.origin.items() if p == path and q in ck.obligations}
+            write_certificate(cert_path(path), rs, names, keep)
             print(f"certificate: {cert_path(path)}")
     return 0 if ok else 1
 
@@ -318,18 +398,32 @@ def cmd_run(args):
     needed = [h for h in open_holes if h in set(cone_names(ck.env, q))]
     if needed:
         raise SystemExit(f"{entry} depends on holes without a value: {', '.join(needed)}; give them with --set name=value")
+    path, prefix, local = loader.origin.get(q, (args.files[0], "", entry))
+    cone_state = cone_states(loader, q)
+    counts: dict = {}
+    for state in cone_state.values():
+        kind = state.split(":")[0].split(" (")[0]
+        counts[kind] = counts.get(kind, 0) + 1
+    shown = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
+    print(f"the cone of {entry}: {shown}")
+    weak = {n: st for n, st in cone_state.items() if not st.startswith("certified")}
+    if weak and args.require_certified:
+        lines = "\n".join(f"  {n}: {st}" for n, st in sorted(weak.items()))
+        raise SystemExit(f"--require-certified: {len(weak)} names of the cone of {entry} are not certified\n{lines}")
     started = datetime.datetime.now().isoformat(timespec="seconds")
     try:
         value = prog.eval(entry)
     except EvalError as e:
         raise SystemExit(f"error: {e}")
-    path, prefix, local = loader.origin.get(q, (args.files[0], "", entry))
     record = {
         "entry": entry,
         "hash": definition_hash(ck.env, q, prefix),
         "when": started,
         "parameters": settings,
         "result": value if isinstance(value, (int, float, str, bool, type(None))) else pp(value) if hasattr(value, "__class__") and not isinstance(value, (list, dict)) else value,
+        "fingerprint": fingerprint(ck.env, q, prefix),
+        "luthier": luthier_revision(),
+        "cone": {"counts": counts, "not certified": dict(sorted(weak.items()))},
     }
     if not args.no_record:
         rec_path = os.path.splitext(path)[0] + ".run.json"
@@ -341,6 +435,77 @@ def cmd_run(args):
     if record["result"] is not None:
         print(record["result"])
     return 0
+
+
+def cmd_certify(args):
+    """Each file is tested by its own process (`luthier test file`), so the files of a project are
+    certified at once and each writes only its own certificate; a file's line says how its
+    definitions came out."""
+    import subprocess
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+
+    def one(path):
+        cmd = [sys.executable, "-m", "luthier.cli", "test", path] + (["--imports"] if args.imports else [])
+        if args.seed is not None:
+            cmd += ["--seed", str(args.seed)]
+        t0 = time.time()
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        verdicts = {}
+        for line in r.stdout.splitlines():
+            if line and not line.startswith(" ") and ": " in line and not line.startswith(("run seed", "certificate", "imported")):
+                v = line.split(": ", 1)[1].split(" ")[0].split(",")[0]
+                verdicts[v] = verdicts.get(v, 0) + 1
+        err = r.stderr.strip().splitlines()[-1] if r.returncode not in (0, 1) and r.stderr.strip() else ""
+        return path, r.returncode, verdicts, time.time() - t0, err, r.stdout
+    ok = True
+    with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
+        for path, code, verdicts, secs, err, out in pool.map(one, args.files):
+            shown = ", ".join(f"{k} {v}" for k, v in sorted(verdicts.items())) or "nothing tested"
+            print(f"{os.path.relpath(path)}: {shown}  ({secs:.0f} s)" + (f"\n  error: {err}" if err else ""))
+            ok = ok and code == 0
+    return 0 if ok else 1
+
+
+def cone_states(loader: Loader, q: str) -> dict:
+    """The state of every name with laws in the cone of q (05 §7): certified, failed or not run in
+    its last test, stale (and why), pending, or provisional; and the axioms it rests on, assumed."""
+    from .certify import cone
+    ck = loader.checker
+    out = {}
+    for n in cone(ck.env, q):
+        if n in ck.axioms:
+            out[n] = "assumed (an axiom)"
+        elif n in ck.provisional:
+            out[n] = "provisional (an extern over a type nobody has defined)"
+        elif n not in ck.obligations:
+            continue
+        elif n in ck.certified:
+            out[n] = f"certified ({ck.certified[n].get('when', '')})"
+        elif n in loader.known:
+            out[n] = f"{loader.known[n].get('outcome') or 'failed'} ({loader.known[n].get('when', '')})"
+        elif n in loader.stale:
+            out[n] = f"stale: {loader.stale_why.get(n, 'it no longer matches')}"
+        else:
+            out[n] = "pending"
+    return out
+
+
+def luthier_revision() -> dict:
+    """The commit of the interpreter's repository and whether its tree had changes, when it is a
+    git checkout; with the fingerprint of its sources, which the certificates also use."""
+    import subprocess
+    from .certify import interpreter_fingerprint
+    out = {"interpreter": interpreter_fingerprint()}
+    try:
+        head = subprocess.run(["git", "-C", PACKAGE_DIR, "rev-parse", "HEAD"], capture_output=True, text=True, timeout=10)
+        dirty = subprocess.run(["git", "-C", PACKAGE_DIR, "status", "--porcelain", "--", "."], capture_output=True, text=True, timeout=10)
+        if head.returncode == 0:
+            out["commit"] = head.stdout.strip()
+            out["changes"] = bool(dirty.stdout.strip())
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return out
 
 
 def cone_names(env, q):
@@ -384,6 +549,9 @@ def main(argv=None):
                    help="largest size of generated values (Int range, N magnitude, nesting); "
                         "grows from 1 to this over a sampled run; the Int range for exhaustive")
     p.add_argument("--deep", action="store_true", help="rerun even where a matching certificate exists")
+    p.add_argument("--imports", action="store_true",
+                   help="also run the imported obligations with no certificate for this program, and "
+                        "write them to their own files' certificates")
     p.add_argument("--show-cases", action="store_true", help="print every case as it is evaluated")
     p.add_argument("--no-cert", action="store_true")
     p.add_argument("--fuel", type=int, default=None,
@@ -398,8 +566,18 @@ def main(argv=None):
                    help="give a parameter hole its value; repeatable")
     p.add_argument("--fuel", type=int, default=None, help="steps allowed for the evaluation")
     p.add_argument("--no-record", action="store_true", help="do not append to the .run.json record")
+    p.add_argument("--require-certified", action="store_true",
+                   help="refuse to run unless every name with laws in the cone of the entry is certified")
     p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
     p.set_defaults(fn=cmd_run)
+
+    p = sub.add_parser("certify", help="run the test directives of several files, each as its own "
+                                       "`luthier test`, in parallel, and summarize")
+    p.add_argument("files", nargs="+")
+    p.add_argument("--jobs", type=int, default=os.cpu_count() or 1, help="files tested at once")
+    p.add_argument("--seed", type=int, default=None, help="the run seed of every file")
+    p.add_argument("--imports", action="store_true", help="pass --imports to every `luthier test`")
+    p.set_defaults(fn=cmd_certify)
 
     p = sub.add_parser("eval", help="evaluate a term in the context of .lut files")
     p.add_argument("files", nargs="+")

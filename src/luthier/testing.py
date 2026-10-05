@@ -15,26 +15,35 @@ from .syntax import *
 from .subst import subst, free_vars
 from .pretty import pp
 from .machine import normalize
-from .evaluator import Env, Fuel, whnf, nf, apply, as_bool, EvalError
+from .evaluator import Env, Fuel, whnf, nf, apply, as_bool, EvalError, OutOfFuel
 from .checker import Checker, Obligation
-from .generators import Generators, GenError
-from .certify import definition_hash, write_certificate  # noqa: F401 (re-export)
+from .generators import Generators, GenError, OutsideType
+from .certify import definition_hash, write_certificate, fingerprint, generator_fingerprint  # noqa: F401
 
 
 SAMPLE_CASES = 5
+
+
+PASSED, FAILED, NOT_RUN = "passed", "failed", "not run"
 
 
 @dataclass
 class LawResult:
     label: str
     params: list            # ["x : Z7", ...]
-    mode: str               # "exhaustive" | "sampled" | "certified"
+    mode: str               # "exhaustive" | "bounded" | "sampled" | "certified"
     cases: int
     passed: bool
     failure: Optional[str] = None   # counterexample, as text
-    error: Optional[str] = None     # evaluation or generation error
+    error: Optional[str] = None     # evaluation or generation error, or why the law was not run
     domains: list = field(default_factory=list)       # how each parameter was generated
     sample_cases: list = field(default_factory=list)  # the first few cases evaluated, as text
+    outcome: str = ""       # passed | failed (a counterexample, or an error on a case) | not run (05 §7)
+
+    def __post_init__(self):
+        if not self.outcome:
+            self.outcome = PASSED if self.passed else FAILED
+        self.passed = self.outcome == PASSED
 
 
 @dataclass
@@ -47,21 +56,40 @@ class TestReport:
     seed: Optional[int] = None
     run_seed: Optional[int] = None   # the run's seed this definition's seed was derived from
     generation: dict = field(default_factory=dict)
+    n: int = 0                # the cases asked for each law
+    mode: str = "sampled"     # what was asked: sampled or exhaustive
+    fingerprint: dict = field(default_factory=dict)   # what the test ran (certify.fingerprint)
+    generators: dict = field(default_factory=dict)    # registered generators drawn from -> their fingerprint
+    provisional: list = field(default_factory=list)   # provisional externs in its cone: never certified (05 R5)
+
+    @property
+    def outcome(self) -> str:
+        """failed if a law failed; not run if none failed and some could not be run; passed when
+        every law passed."""
+        if not self.laws:
+            return "no laws"
+        if any(l.outcome == FAILED for l in self.laws):
+            return FAILED
+        if any(l.outcome == NOT_RUN for l in self.laws):
+            return NOT_RUN
+        return PASSED
 
     @property
     def passed(self) -> bool:
-        return bool(self.laws) and all(l.passed for l in self.laws)
+        return self.outcome == PASSED
 
     def summary(self) -> str:
         lines = []
         for l in self.laws:
-            head = "ok  " if l.passed else "FAIL"
+            head = {PASSED: "ok  ", FAILED: "FAIL", NOT_RUN: "skip"}[l.outcome]
             lines.append(f"  {head} {l.label}   [{l.mode}, {l.cases} cases]")
             if l.failure:
                 lines.append(f"       counterexample: {l.failure}")
             if l.error:
-                lines.append(f"       error: {l.error}")
-        verdict = "passed" if self.passed else ("no laws" if not self.laws else "FAILED")
+                lines.append(f"       {'not run' if l.outcome == NOT_RUN else 'error'}: {l.error}")
+        verdict = {PASSED: "passed", FAILED: "FAILED", NOT_RUN: "NOT RUN", "no laws": "no laws"}[self.outcome]
+        if self.provisional and self.outcome == PASSED:
+            verdict += f", over provisional externs ({', '.join(self.provisional)}): not certified"
         if self.certified:
             verdict += f" (certified {self.when}, hash {self.hash}; not rerun)"
         elif self.seed is not None and self.run_seed is None:
@@ -142,7 +170,7 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
     try:
         params, body = peel(checker, law)
     except Exception as e:
-        return LawResult(label, [], "sampled", 0, False, error=f"cannot type the law: {e}")
+        return LawResult(label, [], "sampled", 0, False, error=f"cannot type the law: {e}", outcome=NOT_RUN)
     param_txt = [f"{n_} : {pp(t)}" for n_, t in params]
     try:
         domains = [gens.describe(t, size) for _, t in params]
@@ -157,8 +185,26 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
         if show_cases:
             print(f"       case {cases}: {txt}")
 
-    def result(mode, cases, passed, failure=None, error=None):
-        return LawResult(label, param_txt, mode, cases, passed, failure, error, domains, samples)
+    def result(mode, cases, passed, failure=None, error=None, outcome=""):
+        return LawResult(label, param_txt, mode, cases, passed, failure, error, domains, samples, outcome)
+
+    def stuck(values, r):
+        """A law that does not reduce to a Bool: not run when what blocks it is a hole without a
+        value (a library tested without the file that fills it), failed otherwise."""
+        holes = sorted(x for x in free_vars(r) if x in env.defs and env.defs[x].body is None
+                       and env.defs[x].data is None)
+        if holes:
+            return result(mode_now, cases, False, outcome=NOT_RUN,
+                          error=f"depends on holes without a value: {', '.join(holes[:6])}")
+        return result(mode_now, cases, False, error=f"did not reduce to a Bool on ({show(values)}): {pp(r)}")
+
+    def broken(mode, e):
+        """An exception while drawing or evaluating: a generator whose value is outside its type,
+        or an evaluation error, fails the law; a type with no generator, a domain the draws cannot
+        reach, or a reduction out of fuel leaves it not run."""
+        if isinstance(e, OutsideType) or (isinstance(e, EvalError) and not isinstance(e, OutOfFuel)):
+            return result(mode, cases, False, error=str(e))
+        return result(mode, cases, False, error=str(e), outcome=NOT_RUN)
 
     def evaluate(values) -> Optional[bool]:
         t = law
@@ -171,8 +217,10 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
         return ", ".join(f"{n_} = {pp(v)}" for (n_, _), v in zip(params, values))
 
     cases = 0
+    mode_now = "sampled"
     if exhaustive:
-        spaces = []
+        gens.bounded = False
+        mode_now = "exhaustive"
         # enumerate sequentially; dependent types are instantiated with earlier values
         def rec(i, acc):
             nonlocal cases
@@ -181,7 +229,7 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
                 record(acc)
                 b, r = evaluate(acc)
                 if b is None:
-                    raise EvalError(f"did not reduce to a Bool on ({show(acc)}): {pp(r)}")
+                    raise _Stuck(acc, r)
                 if b is False:
                     return acc
                 return None
@@ -197,14 +245,20 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
             return None
         try:
             bad = rec(0, [])
+        except _Stuck as st:
+            mode_now = "bounded" if gens.bounded else "exhaustive"
+            return stuck(st.values, st.term)
         except (GenError, EvalError) as e:
-            return result("exhaustive", cases, False, error=str(e))
+            return broken("bounded" if gens.bounded else "exhaustive", e)
+        mode_now = "bounded" if gens.bounded else "exhaustive"
         if bad is not None:
-            return result("exhaustive", cases, False, failure=show(bad))
-        return result("exhaustive", cases, True)
+            return result(mode_now, cases, False, failure=show(bad))
+        return result(mode_now, cases, True)
+
     def draw(size_i):
         """One case. A parameter whose type depends on earlier ones may be empty for them (Fin 0):
-        the case is drawn again, since a law holds vacuously where it has no arguments."""
+        the case is drawn again, since a law holds vacuously where it has no arguments. A
+        generator whose value is outside its type is not drawn again: it is wrong."""
         for attempt in range(50):
             values = []
             try:
@@ -212,31 +266,48 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
                     ty_i = subst(ty, {p: v for (p, _), v in zip(params, values)})
                     values.append(gens.sample(ty_i, rng, size_i))
                 return values
+            except OutsideType:
+                raise
             except GenError:
                 if not values:
                     raise
         return None     # every draw met an empty domain: this case holds vacuously
 
+    unreachable = None
     try:
         for i in range(n):
             # size grows with the case number: small cases first, so a counterexample is minimal
             size_i = 1 + (i * size) // max(n, 1)
-            values = draw(size_i)
+            try:
+                values = draw(size_i)
+            except OutsideType:
+                raise
+            except GenError as e:
+                if size_i < size:
+                    unreachable = e     # a type out of reach at this size (a matrix of 3 rows at size 1)
+                    continue
+                raise
             if values is None:
                 continue
             cases += 1
             record(values)
             b, r = evaluate(values)
             if b is None:
-                return result("sampled", cases, False,
-                              error=f"did not reduce to a Bool on ({show(values)}): {pp(r)}")
+                return stuck(values, r)
             if b is False:
                 return result("sampled", cases, False, failure=show(values))
     except (GenError, EvalError) as e:
-        return result("sampled", cases, False, error=str(e))
+        return broken("sampled", e)
     if cases == 0 and n > 0:
-        return result("sampled", 0, False, error="no case could be drawn: every draw met an empty domain")
+        return result("sampled", 0, False, outcome=NOT_RUN,
+                      error=str(unreachable) if unreachable is not None else
+                      "no case could be drawn: every draw met an empty domain")
     return result("sampled", cases, True)
+
+
+class _Stuck(Exception):
+    def __init__(self, values, term):
+        self.values, self.term = values, term
 
 
 def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
@@ -265,20 +336,28 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
             report.laws.append(LawResult(l["label"], l.get("params", []), "certified",
                                          l.get("cases", 0), l.get("passed", False),
                                          l.get("failure"), l.get("error"),
-                                         l.get("domains", []), l.get("sample_cases", [])))
+                                         l.get("domains", []), l.get("sample_cases", []),
+                                         l.get("outcome", "")))
         return report
+    report.n = n
+    report.mode = "exhaustive" if exhaustive else "sampled"
+    report.fingerprint = fingerprint(checker.env, name, prefix)
+    from .certify import cone
+    report.provisional = [x for x in cone(checker.env, name) if x in checker.provisional]
     before = {k: list(v) for k, v in gens.checked.items()}
     for ob in checker.obligations.get(name, []):
         try:
             pieces = flatten(checker, ob)
         except Exception as e:
-            report.laws.append(LawResult(ob.label, [], "sampled", 0, False, error=f"cannot flatten: {e}"))
+            report.laws.append(LawResult(ob.label, [], "sampled", 0, False, error=f"cannot flatten: {e}",
+                                         outcome=NOT_RUN))
             continue
         for label, closed in pieces:
             report.laws.append(run_law(checker, gens, label, closed, n, exhaustive, rng, show_cases, size))
     checked = gens.checked_since(before)
     if checked:
         report.generation["registered_values"] = checked
+    report.generators = {k: generator_fingerprint(checker, k) for k in sorted(checked)}
     return report
 
 

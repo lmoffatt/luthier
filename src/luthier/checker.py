@@ -71,6 +71,7 @@ class Checker:
         self.certified: dict = {}      # qualified name -> certificate entry accepted at import
         self.gens: dict = {}           # generator key (05 R7: aliases unfolded) -> ("luthier", label, term) | ("extern", target, None)
         self.gens_by: dict = {}        # generator key -> the name its `gen` was written on
+        self.object_of: dict = {}      # qualified name -> the members of its object (a strongly connected component)
         self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
@@ -165,6 +166,8 @@ class Checker:
         laws define. Then the rules that need the object: R2."""
         members = obj.members
         names = {self.qualify(m.name) for m in members if m.kind != "operator"}
+        for q in names:
+            self.object_of[q] = sorted(names)     # 05 §7: `test n` runs every member of n's object
         # an operator directive goes first, unless its function is in this same object (the
         # function's own body uses the operator symbol on other types): then it goes last
         late_ops = [m for m in members if m.kind == "operator" and (m.refs & {x.name for x in members})]

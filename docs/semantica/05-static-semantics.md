@@ -259,6 +259,7 @@ functions), over a domain, by a mode. The grades, from weakest to strongest:
 |---|---|
 | point | one case evaluated |
 | sampled `n` | `n` cases from a declared generator, size growing over the run |
+| bounded | every case of a box of an infinite domain (`Int` in [-size, size]) |
 | exhaustive | every case of a finite domain |
 | witnessed | an existential law: a case exhibited (section 4) |
 | proved | universal; not in version 0 |
@@ -290,6 +291,30 @@ name; it is not a state the name has once and for all.
   certification; a run whose cone contains uncertified or provisional names records that in its
   `.run.json`.
 - Importing a file accepts its certificate entries by hash, unchanged.
+
+As implemented (2026-10-05, phase 2 of `docs/plan-2026-10-05.md`):
+
+- A law has one of three outcomes: *passed*; *failed*, by a counterexample, an evaluation error on a
+  case, or a registered generator whose value is outside its type; *not run*, when a parameter has no
+  generator, no case could be drawn, the reduction ran out of fuel, or the law is blocked by a hole
+  without a value. A definition passed when every law passed, failed when one failed, and is not run
+  otherwise. Only passed is certified.
+- The hash of an entry covers the code of the cone, the Python behind every extern it calls (the
+  source files of the module's directory, or the installed package and its version) and the
+  interpreter; the entry also records the generators it drew from, with their fingerprints, and the
+  case count and mode it ran. It is trusted when all of them match and the count reaches the file's
+  directive; otherwise `check -v` says which part changed.
+- The comparison happens once the whole program is loaded and its holes filled. A certificate keeps
+  an entry per filling of a name (up to four); `luthier test f --imports` runs the imported
+  obligations with no entry for the program `f` and writes them to their own files. Names that no
+  longer exist are pruned when a certificate is written.
+- A test whose cone has a provisional extern records it, and is never certified (R5).
+- `luthier run` prints the states of the names with laws in the cone of its entry, records them in
+  `.run.json` with the fingerprint and the revision of the interpreter, and with `--require-certified`
+  refuses to run unless every one is certified. `luthier certify f1 f2 ...` tests several files at
+  once, each in its own process.
+- The grade "bounded" is given when an enumeration took `Int` in a box; a refinement of `Int` bounded
+  on both sides by closed integers is enumerated over its interval, exhaustively.
 
 ## 8. Example
 
