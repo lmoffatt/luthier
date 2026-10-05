@@ -112,20 +112,26 @@ gaussianLogDensity (b : GaussianBelief) (t : Vec Float64) : Float64 :=
   match t - b.mean { d -> 0.0 - 0.5 * dot d (b.precision * d) }
 
 -- A maximizer takes the log posterior, its gradient, a positive step matrix and a start, and
--- returns where the log posterior is largest. Levenberg-Marquardt is one; what any maximizer must
--- satisfy (it ascends, and stops where the gradient vanishes) is stated in optimization.lut, over
--- the objective it is given, and certified for each maximizer on its problems.
-Maximizer = (Vec Float64 -> Float64) -> (Vec Float64 -> Vec Float64) -> (Vec Float64 -> Mat Float64) -> Vec Float64 -> Vec Float64
+-- returns where it stopped and whether it converged there: a method with a budget can run out of it
+-- before the gradient vanishes, and says so. Levenberg-Marquardt is one; what any maximizer must
+-- satisfy (it ascends, and where it says it converged the gradient vanishes) is stated in
+-- optimization.lut, and certified for each maximizer on its problems.
+MaxResult = { x : Vec Float64, converged : Bool }
+Maximizer = (Vec Float64 -> Float64) -> (Vec Float64 -> Vec Float64) -> (Vec Float64 -> Mat Float64) -> Vec Float64 -> MaxResult
 
 -- Laplace's update: the new mean is the maximum of belief times likelihood, the new precision
 -- the prior precision plus the information the likelihood reports there. The step matrix is
 -- the same sum, positive wherever the posterior is proper.
+laplaceMode (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : MaxResult :=
+  maximize (\ t { gaussianLogDensity b t + l.loglik y t })
+           (\ t { l.score y t - b.precision * (t - b.mean) })
+           (\ t { b.precision + l.info y t })
+           b.mean
+-- the Gaussian belief at a mode m: mean m, precision the prior's plus the information there
+laplaceAt (Y : U) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) (m : Vec Float64) : GaussianBelief :=
+  { mean := m, precision := b.precision + l.info y m }
 laplaceUpdate (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : GaussianBelief :=
-  match maximize (\ t { gaussianLogDensity b t + l.loglik y t })
-                 (\ t { l.score y t - b.precision * (t - b.mean) })
-                 (\ t { b.precision + l.info y t })
-                 b.mean { m ->
-  { mean := m, precision := b.precision + l.info y m } }
+  laplaceAt Y l b y (laplaceMode Y maximize l b y).x
 
 -- ---------------------------------------------------------------- the Gaussian family
 -- log det of a symmetric positive definite matrix, from its spectrum

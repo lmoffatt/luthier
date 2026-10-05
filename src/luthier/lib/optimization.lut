@@ -98,10 +98,6 @@ Certified (tol : Float64) (run : Runner) (o : Objective) (x0 : Vec Float64) : Bo
   ; exhausted -> true
   ; stalled -> true } }
 
--- the run converges from this start (a property of an instance, not of the algorithm)
-Converges (run : Runner) (o : Objective) (x0 : Vec Float64) : Bool :=
-  match (run o x0).reason { converged -> true ; running -> false ; exhausted -> false ; stalled -> false }
-
 -- the native runner: minimize from the start state of x0
 lmRunner (tol : Float64) (maxIter : Int) : Runner := \ o x0 { minimize tol maxIter o (start o x0) }
 
@@ -112,12 +108,15 @@ negate (dim : Nat) (f : Vec Float64 -> Float64) (g : Vec Float64 -> Vec Float64)
   { dim := dim, value := \ x { 0.0 - f x }, grad := \ x { (0.0 - 1.0) * g x }, stepMatrix := m }
 
 lmMaximizer (tol : Float64) (maxIter : Int) : Maximizer :=
-  \ f g m x0 { match negate x0.n f g m { o -> (minimize tol maxIter o (start o x0)).state.x } }
+  \ f g m x0 { match negate x0.n f g m { o -> match minimize tol maxIter o (start o x0) { r ->
+    { x := r.state.x, converged := (match r.reason { converged -> true ; running -> false ; exhausted -> false ; stalled -> false }) } } } }
 
 -- What any maximizer must satisfy on the log posterior it is given: the value does not fall from
--- the start, and it stops where the Newton decrement is below fdTol. Certified for each maximizer
+-- the start, and where it says it converged the Newton decrement is below fdTol. That it converges
+-- within its budget is a quality of the method on a problem, not a law: Levenberg-Marquardt runs out
+-- of 200 iterations from a few starts of optimization_check, and says so. Certified for each maximizer
 -- on its problems; the functions it takes have no generator.
 MaximizerAscends (mx : Maximizer) (f : Vec Float64 -> Float64) (g : Vec Float64 -> Vec Float64) (m : Vec Float64 -> Mat Float64) (x0 : Vec Float64) : Bool :=
-  f (mx f g m x0) >= f x0
+  f (mx f g m x0).x >= f x0
 MaximizerStationary (mx : Maximizer) (f : Vec Float64 -> Float64) (g : Vec Float64 -> Vec Float64) (m : Vec Float64 -> Mat Float64) (x0 : Vec Float64) : Bool :=
-  decrement (negate x0.n f g m) (mx f g m x0) < fdTol
+  let r = mx f g m x0 in if r.converged then decrement (negate x0.n f g m) r.x < fdTol else true

@@ -181,6 +181,46 @@ class Loader:
         return [(p, pre, path) for p, pre, top, path in self.programs if top]
 
 
+def find_lock(path: str):
+    """The luthier.lock nearest to a program, in its directory or one above: the commit of the
+    interpreter the project pins (plan 5.9), or None."""
+    d = os.path.dirname(os.path.abspath(path))
+    while True:
+        candidate = os.path.join(d, "luthier.lock")
+        if os.path.isfile(candidate):
+            with open(candidate, encoding="utf-8") as f:
+                for line in f:
+                    line = line.split("#", 1)[0].strip()
+                    if line:
+                        return candidate, line
+            return candidate, ""
+        parent = os.path.dirname(d)
+        if parent == d:
+            return None
+        d = parent
+
+
+def lock_status(paths: list):
+    """Whether the interpreter running is the one the project pins: None without a lock, else
+    (lock path, pinned commit, running revision, agrees)."""
+    found = find_lock(paths[0]) if paths else None
+    if found is None:
+        return None
+    lock, pinned = found
+    rev = luthier_revision()
+    running = rev.get("commit", "")
+    agrees = bool(pinned) and running.startswith(pinned) and not rev.get("changes", False)
+    return lock, pinned, rev, agrees
+
+
+def warn_lock(paths: list):
+    st = lock_status(paths)
+    if st is not None and not st[3]:
+        lock, pinned, rev, _ = st
+        running = rev.get("commit", "unknown")[:12] + (" with uncommitted changes" if rev.get("changes") else "")
+        print(f"warning: {os.path.relpath(lock)} pins luthier {pinned[:12]}, and this is {running}", file=sys.stderr)
+
+
 def load(paths: list, with_core: bool = True) -> Loader:
     checker = Checker(Env())
     loader = Loader(checker)
@@ -197,6 +237,7 @@ def make_generators(loader: Loader, size: int = 16) -> Generators:
 
 
 def cmd_check(args):
+    warn_lock(args.files)
     loader = load(args.files, not args.no_core)
     ck = loader.checker
     n_defs = sum(len(p.defs) for p, _, _ in loader.top_programs())
@@ -235,6 +276,7 @@ def cmd_check(args):
 
 
 def cmd_test(args):
+    warn_lock(args.files)
     loader = load(args.files, not args.no_core)
     ck = loader.checker
     if args.fuel is not None:
@@ -379,6 +421,7 @@ def cmd_run(args):
     import datetime
     from .api import Program
     from .certify import definition_hash, read_certificate
+    warn_lock(args.files)
     loader = load(args.files, not args.no_core)
     ck = loader.checker
     if args.fuel is not None:
@@ -416,7 +459,7 @@ def cmd_run(args):
         kind = state.split(":")[0].split(" (")[0]
         counts[kind] = counts.get(kind, 0) + 1
     shown = ", ".join(f"{k} {v}" for k, v in sorted(counts.items()))
-    print(f"the cone of {entry}: {shown}")
+    print(f"the cone of {entry}: {shown}" if shown else f"the cone of {entry} has no laws")
     weak = {n: st for n, st in cone_state.items() if not st.startswith("certified")}
     if weak and args.require_certified:
         lines = "\n".join(f"  {n}: {st}" for n, st in sorted(weak.items()))
@@ -434,6 +477,7 @@ def cmd_run(args):
         "result": value if isinstance(value, (int, float, str, bool, type(None))) else pp(value) if hasattr(value, "__class__") and not isinstance(value, (list, dict)) else value,
         "fingerprint": fingerprint(ck.env, q, prefix),
         "luthier": luthier_revision(),
+        "lock": (lambda st: None if st is None else {"file": os.path.relpath(st[0]), "pinned": st[1], "agrees": st[3]})(lock_status(args.files)),
         "cone": {"counts": counts, "not certified": dict(sorted(weak.items()))},
     }
     if not args.no_record:
