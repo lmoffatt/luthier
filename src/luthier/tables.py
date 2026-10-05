@@ -15,6 +15,7 @@ from __future__ import annotations
 import csv
 import io
 import math
+import re
 import random
 from dataclasses import dataclass
 from typing import Optional
@@ -96,29 +97,42 @@ def render(t: Table) -> str:
     return buf.getvalue()
 
 
+# The format as table.lut specifies it (WellFormed): CSV read strictly, ASCII white space around a
+# number or a header cell, an int `[+-]digits`, a float a decimal with an optional exponent and a finite
+# value. Python's int() and float() accept more (underscores, other scripts' digits, nan and inf); these
+# are checked first.
+_SPACE = " \t\n\r\x0b\x0c"
+_INT = re.compile(r"[+-]?[0-9]+\Z")
+_FLOAT = re.compile(r"[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?\Z")
+
+
 def _read(raw: str, typ: str, where: str):
     if typ == "str":
         return raw
-    s = raw.strip()
-    try:
-        if typ == "int":
-            return int(s)
-        x = float(s)
-    except ValueError:
-        raise ParseError(f"{where}: {raw!r} is not a {typ}")
+    s = raw.strip(_SPACE)
+    if typ == "int":
+        if not _INT.match(s):
+            raise ParseError(f"{where}: {raw!r} is not a int")
+        return int(s)
+    if not _FLOAT.match(s):
+        raise ParseError(f"{where}: {raw!r} is not a float")
+    x = float(s)
     if not math.isfinite(x):
         raise ParseError(f"{where}: {raw!r} is not a finite float")
     return x
 
 
 def parse_or_raise(text: str) -> Table:
-    lines = [r for r in csv.reader(io.StringIO(text, newline="")) if r]   # blank lines carry nothing
+    try:
+        lines = [r for r in csv.reader(io.StringIO(text, newline=""), strict=True) if r]   # blank lines carry nothing
+    except csv.Error as e:
+        raise ParseError(f"not CSV: {e}")
     if not lines:
         raise ParseError("no header")
     columns = []
     for cell in lines[0]:
         name, sep, typ = cell.partition(":")
-        name, typ = name.strip(), typ.strip()
+        name, typ = name.strip(_SPACE), typ.strip(_SPACE)
         if not sep or typ not in TYPES:
             raise ParseError(f"header cell {cell!r} is not name:type with type in {TYPES}")
         if not name:
@@ -287,9 +301,14 @@ def gen_perturbed(rng: random.Random, size: int):
 
 
 def gen_broken(rng: random.Random, size: int):
-    """A text that must be rejected, with the name of its one defect: an otherwise valid rendering
-    with a cell of an unknown type, a repeated name, a bad or non-finite number, or a ragged row.
-    The pair is a `BrokenText` of table.lut."""
+    """A text that must be rejected: an otherwise valid rendering with one defect, a cell of an unknown
+    type, a repeated name, a bad or non-finite number, or a ragged row. A `BrokenText` of table.lut,
+    whose law (not WellFormed) every value is checked against."""
+    return _broken_with_defect(rng, size)[0]
+
+
+def _broken_with_defect(rng: random.Random, size: int):
+    """The broken text and the name of its defect."""
     t = gen_table(rng, max(size, 2))
     while not t.rows:
         t = gen_table(rng, max(size, 2))

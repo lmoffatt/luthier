@@ -61,10 +61,13 @@ Sampler (Theta Y : U) = Theta -> Draw Y
 
 drawAt (Theta Y : U) (s : Sampler Theta Y) (t : Theta) (seed : Int) : Y := match s t seed { (y, s2) -> y }
 
--- What a likelihood reports. `shift` moves a parameter along a direction of the parameter
--- space, the space the score and the information live in: the vectors act on Theta.
+-- What a likelihood reports. `dim` is the dimension of the space of directions at a parameter, the
+-- space the score and the information live in; `shift` moves a parameter along a direction of that
+-- dimension: the vectors act on Theta. A shift that takes only directions of the parameter's dimension
+-- can keep the parameter inside its type (a refined Theta, the positions of a fixed number of nodes).
 Likelihood (Theta Y : U) = {
-  shift  : Theta -> Vec Float64 -> Theta
+  dim    : Theta -> Nat
+  shift  : (t : Theta) -> VecOf (dim t) -> Theta
   loglik : Y -> Theta -> Float64
   score  : Y -> Theta -> Vec Float64
   info   : Y -> Theta -> Mat Float64 }
@@ -76,16 +79,21 @@ Likelihood (Theta Y : U) = {
 -- exactly for the zero vector and within fdTol for a composition, which rounds.
 ShiftByZero (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
   match drawAt Theta Y s t seed { y ->
-  LeftIdentity (Vec Float64) Theta (\ a b { l.loglik y a == l.loglik y b }) (\ v p { l.shift p v }) (zeros (l.score y t).n) t }
+  LeftIdentity (Vec Float64) Theta (\ a b { l.loglik y a == l.loglik y b }) (\ v p { l.shift p v }) (zeros (l.dim t)) t }
 
 ShiftComposes (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
-  match s t seed { (y, s2) -> match (l.score y t).n { d ->
+  match s t seed { (y, s2) -> match l.dim t { d ->
   match normalVec d s2 { (u, s3) -> match normalVec d s3 { (v, s4) ->
   Associative (Vec Float64) Theta (\ a b { approx fdTol (l.loglik y a) (l.loglik y b) }) (\ p q { add p q }) (\ w p { l.shift p w }) u v t } } } }
 
 -- the score is the gradient of the log-likelihood
 ScoreIsGradient (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
-  match drawAt Theta Y s t seed { y -> IsGradient Theta l.shift (l.loglik y) (l.score y) t }
+  match drawAt Theta Y s t seed { y -> IsGradient Theta (\ p v { l.shift p v }) (l.loglik y) (l.score y) t }
+
+-- the score and the information live in the space of directions: their dimension is dim
+TangentShapes (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Y s t seed { y ->
+  (l.score y t).n == l.dim t and (l.info y t).m == l.dim t and (l.info y t).n == l.dim t }
 
 -- the information reported is a Fisher information: symmetric and positive semidefinite
 InfoIsPositive (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
@@ -152,12 +160,22 @@ IsDensityOf (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Th
   match diagnose Theta Y s l t ensembleSize seed { dg ->
   maxAbs dg.zMean < zMax and maxAbsMat dg.zC < zMax }
 
-DensityPair (Theta Y : U) : U := {
+-- A pair over a space Theta is lawful at the parameters of a domain D, a part of Theta given by its
+-- inclusion `at` (the layouts within a box, the errors within a range): the laws are stated at those
+-- parameters, and a shift may take a parameter out of D while it stays in Theta. A domain is a type
+-- with its law, so where the laws are tested is said by a type, not by a generator. DensityPair is
+-- the pair lawful at every parameter, D = Theta.
+DensityPairOn (Theta Y : U) (D : U) (at : D -> Theta) : U := {
   sample : Sampler Theta Y
   lik    : Likelihood Theta Y
   |
-  ShiftByZero Theta Y sample lik & ShiftComposes Theta Y sample lik & ScoreIsGradient Theta Y sample lik
-  & InfoIsPositive Theta Y sample lik & IsDensityOf Theta Y sample lik }
+  \ (d : D) (seed : Int) { TangentShapes Theta Y sample lik (at d) seed }
+  & \ (d : D) (seed : Int) { ShiftByZero Theta Y sample lik (at d) seed }
+  & \ (d : D) (seed : Int) { ShiftComposes Theta Y sample lik (at d) seed }
+  & \ (d : D) (seed : Int) { ScoreIsGradient Theta Y sample lik (at d) seed }
+  & \ (d : D) (seed : Int) { InfoIsPositive Theta Y sample lik (at d) seed }
+  & \ (d : D) (seed : Int) { IsDensityOf Theta Y sample lik (at d) seed } }
+DensityPair (Theta Y : U) = DensityPairOn Theta Y Theta (\ (t : Theta) { t })
 
 -- ---------------------------------------------------------------- the kernel and its three presentations
 -- A kernel Theta ~> data is one object read three ways: forward, as a sampler; through its
@@ -192,16 +210,19 @@ PitIsDensity (Theta : U) (sample : Sampler Theta (Vec Float64)) (lik : Likelihoo
 PitUniform (Theta : U) (sample : Sampler Theta (Vec Float64)) (pit : Vec Float64 -> Theta -> Vec Float64) (t : Theta) (seed : Int) : Bool :=
   UniformDraws (\ s { match sample t s { (y, next) -> (pit y t, next) } }) seed
 
-Kernel (Theta : U) : U := {
-  pair : DensityPair Theta (Vec Float64)
+KernelOn (Theta : U) (D : U) (at : D -> Theta) : U := {
+  pair : DensityPairOn Theta (Vec Float64) D at
   pit  : Vec Float64 -> Theta -> Vec Float64
   |
-  PitIsDensity Theta pair.sample pair.lik pit & PitUniform Theta pair.sample pit }
+  \ (d : D) (seed : Int) { PitIsDensity Theta pair.sample pair.lik pit (at d) seed }
+  & \ (d : D) (seed : Int) { PitUniform Theta pair.sample pit (at d) seed } }
+Kernel (Theta : U) = KernelOn Theta Theta (\ (t : Theta) { t })
 
 -- ---------------------------------------------------------------- the Gaussian construction
 -- A mean model: the predicted observations and their Jacobian with respect to the parameter.
 MeanModel (Theta : U) = {
-  shift : Theta -> Vec Float64 -> Theta
+  dim   : Theta -> Nat
+  shift : (t : Theta) -> VecOf (dim t) -> Theta
   mean  : Theta -> Vec Float64
   jac   : Theta -> Mat Float64 }
 
@@ -218,6 +239,7 @@ ScaledModel (Theta : U) = {
 --   score  = e^{-2u} J^T r + (e^{-2u} |r|^2 - K) g
 --   info   = e^{-2u} J^T J + 2 K g g^T
 gaussian (Theta : U) (m : ScaledModel Theta) : Likelihood Theta (Vec Float64) := {
+  dim := m.model.dim,
   shift := m.model.shift,
   loglik := \ y t { match y - m.model.mean t { r -> match m.logSigma t { u ->
     0.0 - 0.5 * exp (0.0 - 2.0 * u) * dot r r - toFloat64 r.n * u - 0.5 * toFloat64 r.n * log2pi } } },
@@ -231,6 +253,7 @@ gaussian (Theta : U) (m : ScaledModel Theta) : Likelihood Theta (Vec Float64) :=
 --   score  = (K / RSS) J^T r
 --   info   = (K / RSS) J^T J
 profiled (Theta : U) (m : MeanModel Theta) : Likelihood Theta (Vec Float64) := {
+  dim := m.dim,
   shift := m.shift,
   loglik := \ y t { match y - m.mean t { r -> match toFloat64 r.n { k ->
     0.0 - 0.5 * k * log (2.0 * pi * dot r r / k) - 0.5 * k } } },

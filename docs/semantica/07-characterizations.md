@@ -220,13 +220,21 @@ evidence, calibration), `Codec` (round trip, canonical, tolerant, rejects), and 
   type without a generator would stay pending. The laws quantify over shaped values instead.
 - The laws of a type are not checked on values the environment returns: a table that
   `luthier/tables.py` parses is a `Table` by its type, and nothing tests its schema laws on it.
-  Either the bridge checks a refinement on what crosses, or each extern returning a lawful type is
-  certified by a law-lambda; neither is in place.
+  2026-10-05: both are in place. The laws of the payload of a sum an extern returns are obligations
+  (`parseTable` owes the four laws of `Table` on what it parses), and `run --checked` tests what
+  crosses. The format of tables is a grammar in `table.lut` (`WellFormed`), which the parser of
+  `tables.py` implements and the codec's laws certify (`ReadsTheFormat`, `ReadsMutations`).
 - The parameter spaces of the positions (`ThetaPos`, `ThetaFull`) are `Vec Float64`, not vectors of
   their dimension: `Likelihood` is invariant in Theta (its `shift` takes and gives one), and the
   Gaussian beliefs, `Objective` and `Maximizer` work on `Vec Float64`, so a refined Theta does not
   pass. The dimension is a precondition of `embed`, `meanDist` and `jacDist` (`HasFree`) and is
   what the generators produce. An `Objective` over `VecOf dim` would carry it; not done.
+  2026-10-05: `Likelihood` and `MeanModel` carry the dimension of their directions (`dim`), and
+  `shift` takes a direction of it, so a pair over the vectors of one dimension is written without a
+  guard; `DensityPairOn` and `KernelOn` state their laws over a domain (a type with its law, the
+  layouts in a box and the errors in a range) inside the space, which a shift may leave. Still open:
+  the beliefs and the optimizer work over `Vec Float64`, so the likelihoods built for them on the
+  gauge-fixed model (`fastFull`, `fixedLik`) are partial functions typed over every vector.
 - `Maximizer` and `Objective`: laws quantified over functions of an infinite domain have no
   generator, so an objective built by `negate` and the `Maximizer` type itself stay pending; they
   are certified on the problems of `optimization_check` by law-lambdas.
