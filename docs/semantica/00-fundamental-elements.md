@@ -40,6 +40,34 @@ ones and the subtype with laws. There are no mutable variables, sequence, pointe
 Against categories: types are objects, functions arrows, the product, sum and exponential are the
 structure of a bicartesian closed category, and the subtype is a mono with a certificate.
 
+## What types are for: a check is made once
+
+Luciano, 2026-10-06 (`sonolocalizacion/Lucianos ideas dir/funcion de los tipos en Luthier.txt`): a
+program should never check the same thing twice. Belonging to a type is the certificate that a value
+passed the check the type states, so when a value is checked, the result is recorded by giving the
+value a finer type, and nothing downstream checks it again. This is the reason the subtype is the
+element that makes Luthier.
+
+It is the principle of `07` (one name for each concept) applied to facts instead of names: one
+check for each fact. It acts at three moments.
+
+- When a program is certified, a law tested on a name is recorded in a certificate and accepted by
+  hash afterwards (`05 §7`).
+- When a program runs, a condition refines the variables it tests inside its branch (`05` R11), and a
+  check whose evidence must outlive the branch returns the value at its refined type (`05 §9`,
+  *Checks*). Between two different checks, as a fast one and the predicate it stands for, the
+  relation is a law certified once, so at run time only one of them is made.
+- At the boundary of a program a check about the world refines the content it read, since the file it
+  was read from can change between the check and the use.
+
+How much the type of a result should say depends on what it costs to know it again. For
+`y = sin x` the type can be a real, a real in [-1, 1], or `sin x` itself; the bound is useful and
+cheap, and `sin x` itself matters only to symbolic algebra. For `b = mapOpt b0 f x`, the optimum of
+the function `f` on the data `x` from the start `b0`, the type can be a vector, an optimum, an
+optimum of `f` and `x`, or an optimum of `f` and `x` from `b0`; since finding it is expensive and a
+local optimum depends on its start, the last is the right one, a type indexed by every input of the
+computation. A cheap result carries its bound; an expensive one carries its inputs and its witness.
+
 ## 0. Notation
 
 Every symbol used in this document.

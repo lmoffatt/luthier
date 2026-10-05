@@ -240,6 +240,18 @@ equal to the argument type; associativity of an operation is the law of an actio
 Structures are built by inclusion of the ones below them. `algebra` is imported by every library
 that states a property.
 
+**R11. A condition refines in its branch** (decided 2026-10-06, `00`, *What types are for*; not
+implemented). In `if p x then a else b`, where `x` is a variable of type `T` and `p x` is a `Bool`,
+`x` has the type `{ x : T | p x }` inside `a` and `{ x : T | not (p x) }` inside `b`. A coercion of
+`x` to that refined type there owes nothing: the condition is the check, made once. If `a` asks for
+`{ x : T | p x }` and the condition is another predicate `q x`, the coercion owes `q x -> p x`, an
+obligation certified like any other; usually it is a law the program already states about `q`, as
+`ReportsValidity` relates `firstViolation` to `ValidGraph`. The same holds for a pattern: inside
+`match m { just y -> a ; ... }`, `a` knows `m == just y` (section 10). The rule replaces the
+precondition of section 7, which only weakens an obligation raised in a branch, and the textual
+discharge the interpreter does today (an obligation equal to the condition of its branch).
+Files: to be written with the implementation.
+
 ## 6. Reports that do not reject
 
 `luthier check -v` reports, without rejecting (2026-10-05: also the axioms, `06 §3`):
@@ -388,6 +400,48 @@ laws (sample and likelihood), the slope of the transform is the density (transfo
 and simulated data have a uniform transform (sample and transform). The project certifies it on the
 model of the tape distances, with two negative controls, each breaking one side.
 
+**Checks** (decided 2026-10-06). A subtype `{ x : T | p x }`, with `p : T -> Bool`, has two
+presentations. One is its characteristic function, `p` itself, which says yes or no. The other is
+the partial inverse of its inclusion, `refine p : T -> Maybe { x : T | p x }`, which gives the same
+value at its finer type, or nothing. Each gives the other, so neither is written twice. The Bool is
+the primary form: laws are Bool-valued, and Bools compose with `and`, `or` and `not`. `refine` is
+written once, generically, and R11 is what makes it typable:
+
+    refine (T : U) (p : T -> Bool) (x : T) : Maybe { y : T | p y } := if p x then just x else nothing
+
+Which one a program uses depends on whether the evidence must outlive the branch. Where the result
+of the check is used inside the branch, the Bool and R11 suffice. Where the value leaves it (it is
+returned, stored in a record, passed on later), and at the boundary of a program (a value read from
+a file or given by an extern), the evidence travels in the type: the check returns the refined value.
+Checks chained at a boundary (read, then validate, then fit) compose by the bind of `Maybe`, or of a
+sum with a reason, and stop at the first failure.
+
+Other contexts ask for other forms, each derived from `p` and tied to it by a law:
+
+- *The reason of a failure.* `T -> < ok : { x : T | p x } | failed : E >`, failed exactly when `p`
+  fails. `firstViolation` with `ReportsValidity` is this form for a distance graph.
+- *Every failure.* `T -> List E`, empty exactly when `p` holds. It accumulates the failures where
+  the bind stops at the first, which makes it an applicative functor. For a graph checked by hand, all
+  the violations at once.
+- *A witness.* A check that computes evidence returns it: a dependent pair `(x, w)` with a law
+  saying `w` attests `p x`. A Cholesky factor attests positive definiteness, the least distance
+  attests separation, the seed that caught a mutant attests the control, the failing row attests a
+  violation, the decrement and the final spectrum attest convergence. `refine` is the case where
+  the witness is the value itself (*certifying algorithms*: R. M. McConnell, K. Mehlhorn, S. Näher
+  and P. Schweitzer, Computer Science Review 5, 2011).
+- *A statistical verdict.* A test with a false failure rate (`UniformDraws`, `IsDensityOf`, the
+  transform of the residuals) does not establish a fact about the value, so refining by it would
+  claim what the test does not show, and a Bool loses its level. It returns a verdict with its
+  statistic and its level (equality as a degree, section 10).
+- *A tolerance.* A check by `approx tol` refines with `tol` in the type: `approx` does not compose,
+  since `a` near `b` and `b` near `c` do not make `a` near `c` within the same `tol`.
+
+A check about the world refines the content it read. Whether a directory holds a
+graph is true when it is asked and may be false when the graph is read; the check and the use are
+one operation (`readGraph` returning a graph or the reason it could not), and the content is
+validated after. `run --checked` is the one deliberate exception to checking once: it checks again
+every value that crosses from Python, to debug the bridge.
+
 ## 10. Open
 
 - The tests for the semantic dependence of section 4: their syntax (a test mode that searches for a
@@ -405,4 +459,7 @@ model of the tape distances, with two negative controls, each breaking one side.
   a projection of `m` (which may be `nothing`), so an obligation in `t` is still quantified over
   every `x`; it should carry `m == just x` as a precondition, as a branch of `if` carries its
   condition. Patterns of variables, wildcards and tuples of any length already name the parts of
-  the scrutinee.
+  the scrutinee. Decided 2026-10-06 as part of R11.
+- Checks recorded in types (R11 and section 9, *Checks*), decided and not implemented: the rule in
+  the checker, `refine` and its derived forms in a library, and the code that checks twice or keeps
+  a check as data (`plan-2026-10-05.md`, "Added 2026-10-06").
