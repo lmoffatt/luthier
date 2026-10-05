@@ -14,22 +14,30 @@ and (a b : Bool) : Bool := match a { true -> b ; false -> false }
 or (a b : Bool) : Bool := match a { true -> true ; false -> b }
 implies (a b : Bool) : Bool := match a { true -> b ; false -> true }
 
--- The numbers and strings of the environment, as holes: declared here, filled by the
--- interpreter, which supplies their literals (`3`, `3.0`, `"a"`), arithmetic and comparisons.
--- `R` is the environment's real, an IEEE double; what can be said about it (its epsilon,
--- approximate equality) lives in the `real` library.
-Int    : U
-R      : U
-String : U
+-- The numbers and the text of the interpreter (06 §2). Each body says what it is.
+--   Int      the integers, without bound; literals 3, arithmetic, comparisons
+--   Real     the real numbers, the ideal: nothing computes them; their structure is an axiom of
+--            the algebra library, and code that runs computes with an approximation of them
+--   Float64  the finite IEEE doubles: every one is a real number, so Float64 refines Real; their
+--            operations are the machine's, rounded; literals 3.0; NaN and infinities are errors
+--   String   text; literals "a"
+Int     : U := primitive "integer"
+Real    : U := primitive "real"
+Float64 : Real := primitive "ieee754-binary64"
+String  : U := primitive "unicode"
 
 Maybe (A : U) = < nothing : Unit | just : A >
 
 -- `[a, b, c]` is sugar for cons and nil
 List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
 
--- the non-negative machine integer: the size of a generated value, among other things
+-- an infinity that means something, asked for in the type: the log-likelihood of an impossible
+-- datum is minus infinity (06 §6)
+ExtendedReal = < finite : Float64 | negInf : Unit | posInf : Unit >
+
+-- the integers from 0: the size of a generated value, among other things
 Nat : U := { k : Int | 0 <= k }
 
--- the finite type of n indices: a vector of length n is a function `Fin n -> R` (04 §6), and an
+-- the finite type of n indices: a vector of length n is a function `Fin n -> Float64` (04 §6), and an
 -- array of the environment is a value of that type, applied by indexing
 Fin (n : Int) : U := { k : Int | 0 <= k and k < n }

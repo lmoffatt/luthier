@@ -13,7 +13,10 @@ addMod7 (a b : Z7) : Z7 := (a + b) mod 7
 mulMod7 (a b : Z7) : Z7 := (a * b) mod 7
 negMod7 (a : Z7) : Z7 := (7 - a) mod 7
 
-ringZ7 : Ring Z7 := (eqZ7, addMod7, mulMod7, 0, 1, negMod7)
+ringZ7 : CommutativeRing Z7 := {
+  eq  := eqZ7,
+  add := { monoid := { op := addMod7, unit := 0 }, inv := negMod7 },
+  mul := { op := mulMod7, unit := 1 } }
 
 test ringZ7 exhaustive
 ```
@@ -21,19 +24,23 @@ test ringZ7 exhaustive
 ```
 $ luthier test examples/z7ring.lut
 ringZ7: passed
-  ok   Associative Z7 eqZ7 addMod7   [exhaustive, 343 cases]
-  ok   Commutative Z7 eqZ7 addMod7   [exhaustive, 49 cases]
+  ok   Associative Z7 Z7 eqZ7 addMod7 addMod7   [exhaustive, 343 cases]
+  ok   LeftIdentity Z7 Z7 eqZ7 addMod7 0   [exhaustive, 7 cases]
   ...
-  ok   RightDistrib Z7 eqZ7 addMod7 mulMod7   [exhaustive, 343 cases]
+  ok   Symmetric Z7 Z7 (eqZ7, ((addMod7, 0), negMod7), mulMod7, 1).eq (eqZ7, ((addMod7, 0), negMod7), mulMod7, 1).mul.op   [exhaustive, 49 cases]
 ```
 
-`Ring` is a type in the `algebra` library: a record of operations, with its own equality, and the
-laws they satisfy. Declaring `ringZ7 : Ring Z7` records the obligation; `test` runs it and writes
+`CommutativeRing` is a type in the `algebra` library, built from the structures below it: an
+abelian group and a monoid over one equality, joined by distributivity, with a symmetric product.
+Declaring `ringZ7 : CommutativeRing Z7` records the obligation; `test` runs it and writes
 the certificate. A wrong implementation fails with a counterexample:
 
 ```
-badRing : Ring Bool := (eqB, or, and, false, true, not)
-  FAIL LeftInverse Bool eqB or false not   [exhaustive, 1 cases]
+badRing : Ring Bool := {
+  eq  := eqB,
+  add := { monoid := { op := or, unit := false }, inv := not },
+  mul := { op := and, unit := true } }
+  FAIL LeftInverse Bool eqB (or, false).op (or, false).unit not   [exhaustive, 1 cases]
        counterexample: x = true
 ```
 
@@ -58,7 +65,7 @@ The checker reads the whole program and checks it object by object: a declared t
 its definition form a cycle of the dependency graph, and that cycle is the object. A definition
 may use only types that are defined; a lawless product is not a new type and is named with `=`;
 the environment (Python) gives values, never types. Products, sums and functions are primitive and
-structural; `data` is for recursive types. A vector is a function `Fin n -> R`, and a numpy array
+structural; `data` is for recursive types. A vector is a function `Fin n -> Float64`, and a numpy array
 is a value of that type as it is.
 
 The specification: `docs/semantica/04-kernel.md` (the kernel: type formers, terms, reduction, the
@@ -85,7 +92,7 @@ pytest
   (elaboration, obligations, the rules), `evaluator.py` and `machine.py` (reduction; call by need),
   `generators.py`, `testing.py`, `certify.py`, `cli.py`, `api.py` (loading a program from Python).
 - `src/luthier/core.lut`: the kernel's own definitions, loaded implicitly: `Unit`, `Empty`, `Bool`,
-  `Int`, `R`, `String`, `Maybe`, `List`, `Nat`, `Fin`.
+  `Int`, `Float64`, `String`, `Maybe`, `List`, `Nat`, `Fin`.
 - `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/semantica/03-libraries.md`).
 - `tests/spec/`: one program the checker must accept and one it must reject per rule of 05, and the
   kernel's type formers. `tests/test_kernel.py`: the mechanisms.

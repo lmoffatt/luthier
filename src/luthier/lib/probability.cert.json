@@ -1,0 +1,611 @@
+{
+  "InfoIsPositive": {
+    "hash": "329ac066cd413686",
+    "when": "2026-10-05T13:13:35",
+    "passed": false,
+    "seed": 749729332,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Float64": "genFloat64",
+        "Int": "genInt",
+        "Nat": "genNat"
+      },
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "SymmetricSquare",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "symmetric 0.0 (l.info (drawAt Theta Y s t seed) t) -> (l.info (drawAt Theta Y s t seed) t).m == (l.info (drawAt Theta Y s t seed) t).n",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "symmetric 0.0 (l.info (drawAt Theta Y s t seed) t) -> symmetric 0.0 (l.info (drawAt Theta Y s t seed) t)",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      }
+    ]
+  },
+  "diagnose": {
+    "hash": "3469e0a44128fa8a",
+    "when": "2026-10-05T13:13:50",
+    "passed": false,
+    "seed": 1534622966,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Float64": "genFloat64",
+        "Int": "genInt",
+        "Nat": "genNat"
+      },
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "SymmetricSquare",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= k and k < (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw).n",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "k : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= k and k < (msub (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww) (outer (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw) (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw))).m",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "k : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= k and k < (msub (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww) (outer (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw) (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw))).n",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "k : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= i and i < (msub (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww) (outer (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw) (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw))).m",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "i : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= j and j < (msub (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww) (outer (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw) (scale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sw))).n",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "j : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= i and i < (msub (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sq) (hadamard (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww) (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww))).m",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "i : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= j and j < (msub (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sq) (hadamard (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww) (mscale (1.0 / toFloat64 n) (sumWhite Theta Y s l t (invSqrtSym (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) n 0 seed (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (zeros (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t)))) (mscale 0.0 (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))))).sww))).n",
+        "params": [
+          "Theta : U",
+          "Y : U",
+          "s : Sampler Theta Y",
+          "l : Likelihood Theta Y",
+          "t : Theta",
+          "n : Int",
+          "seed : Int",
+          "j : Fin (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "U",
+          "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+          "(Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample)))",
+          "Theta",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16",
+          "Int: genInt, size up to 16 where 0 <= k and k < (mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 (s t seed).s1 (l.info (s t seed).y0 t))).m"
+        ],
+        "sample_cases": []
+      }
+    ]
+  },
+  "pitSlope": {
+    "hash": "ea489ae6fea26b93",
+    "when": "2026-10-05T13:14:06",
+    "passed": false,
+    "seed": 2106015037,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Float64": "genFloat64",
+        "Int": "genInt",
+        "Nat": "genNat"
+      },
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "SymmetricSquare",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= j and j < (pit (bumped y j fdStep) t).n",
+        "params": [
+          "Theta : U",
+          "pit : Vec Float64 -> Theta -> Vec Float64",
+          "y : Vec Float64",
+          "t : Theta",
+          "j : Fin y.n"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "Vec Float64 -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+          "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+          "Theta",
+          "Int: genInt, size up to 16 where 0 <= k and k < y.n"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "0 <= j and j < (pit (bumped y j (0.0 - fdStep)) t).n",
+        "params": [
+          "Theta : U",
+          "pit : Vec Float64 -> Theta -> Vec Float64",
+          "y : Vec Float64",
+          "t : Theta",
+          "j : Fin y.n"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "Vec Float64 -> Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+          "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+          "Theta",
+          "Int: genInt, size up to 16 where 0 <= k and k < y.n"
+        ],
+        "sample_cases": []
+      }
+    ]
+  },
+  "gaussianPit": {
+    "hash": "c314f891b45c45d4",
+    "when": "2026-10-05T13:14:22",
+    "passed": false,
+    "seed": 1748902323,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Float64": "genFloat64",
+        "Int": "genInt",
+        "Nat": "genNat"
+      },
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "SymmetricSquare",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "0 <= j and j < (m.model.mean t).n",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "y : Vec Float64",
+          "t : Theta",
+          "j : Fin y.n"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+          "Theta",
+          "Int: genInt, size up to 16 where 0 <= k and k < y.n"
+        ],
+        "sample_cases": []
+      }
+    ]
+  },
+  "gaussianKernel": {
+    "hash": "4da2c219acf292c3",
+    "when": "2026-10-05T13:14:37",
+    "passed": false,
+    "seed": 670760982,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Float64": "genFloat64",
+        "Int": "genInt",
+        "Nat": "genNat"
+      },
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "SpdOf",
+        "SymmetricSquare",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "ShiftByZero Theta (Vec Float64) (gaussianSampler Theta m) (gaussian Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "ShiftComposes Theta (Vec Float64) (gaussianSampler Theta m) (gaussian Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "ScoreIsGradient Theta (Vec Float64) (gaussianSampler Theta m) (gaussian Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "InfoIsPositive Theta (Vec Float64) (gaussianSampler Theta m) (gaussian Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "IsDensityOf Theta (Vec Float64) (gaussianSampler Theta m) (gaussian Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "PitIsDensity Theta (gaussianSampler Theta m, gaussian Theta m).sample (gaussianSampler Theta m, gaussian Theta m).lik (gaussianPit Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      },
+      {
+        "label": "PitUniform Theta (gaussianSampler Theta m, gaussian Theta m).sample (gaussianPit Theta m)",
+        "params": [
+          "Theta : U",
+          "m : ScaledModel Theta",
+          "t : Theta",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 0,
+        "passed": false,
+        "failure": null,
+        "error": "no generator for U",
+        "domains": [
+          "U",
+          "((Theta -> Vec Float64 -> Theta: constant functions (affine on R -> R), a thin sample) * ((Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Mat Float64: constant functions (affine on R -> R), a thin sample))) * ((Theta -> Float64: constant functions (affine on R -> R), a thin sample) * (Theta -> Vec Float64: constant functions (affine on R -> R), a thin sample))",
+          "Theta",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": []
+      }
+    ]
+  }
+}

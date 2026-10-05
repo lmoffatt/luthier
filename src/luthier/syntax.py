@@ -37,6 +37,7 @@ class Lam(Term):
     param: "Pattern"
     body: Term
     ann: Optional[Term] = None  # optional annotation of the parameter type
+    res: Optional[Term] = None  # the result type the body was checked against, kept by elaboration
 
 
 @dataclass(frozen=True)
@@ -57,6 +58,20 @@ class Sigma(Term):
     name: str
     fst: Term
     snd: Term
+
+
+@dataclass(frozen=True)
+class Primitive(Term):
+    """`primitive "description"`: a type the interpreter provides (06 §2). `base` is the type it
+    refines (`Float64 : Real`), None for a type of its own."""
+    desc: str
+    base: Optional[Term] = None
+
+
+@dataclass(frozen=True)
+class Axiom(Term):
+    """`axiom "description"`: a value whose laws are assumed, never tested (06 §3)."""
+    desc: str
 
 
 @dataclass(frozen=True)

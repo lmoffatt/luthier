@@ -73,6 +73,45 @@ def is_con_value(t: Term) -> bool:
 
 
 UNIT = Con("unit")
+
+
+def finite(x, what: str = ""):
+    """A float result must be a real number: NaN and an overflow to infinity are errors (06 §6)."""
+    if isinstance(x, float) and (x != x or x in (float("inf"), float("-inf"))):
+        kind = "NaN" if x != x else "an overflow to infinity"
+        raise EvalError(f"{kind} in {what}" if what else kind)
+    return x
+
+
+INT64_MAX = 2 ** 63 - 1
+
+
+def check_int64(x, where: str):
+    """An integer crossing into numpy must fit in 64 bits, which numpy would wrap around (06 §6)."""
+    if isinstance(x, int) and not isinstance(x, bool) and not (-INT64_MAX - 1 <= x <= INT64_MAX):
+        raise EvalError(f"{x} does not fit in 64 bits and cannot cross into {where}")
+    return x
+
+
+def _from_environment_number(x):
+    """A number from the environment: NaN and infinities are not values of Float64 (06 §6)."""
+    if hasattr(x, "item") and not hasattr(x, "shape") or (hasattr(x, "shape") and getattr(x, "shape", None) == ()):
+        x = x.item()
+    if isinstance(x, float):
+        finite(x, "a value from the environment")
+    return x
+
+
+def _check_array_finite(x):
+    try:
+        import numpy as np
+        a = np.asarray(x)
+        if a.dtype.kind == "f" and a.size and not np.isfinite(a).all():
+            raise EvalError("NaN or an infinity in an array from the environment")
+    except EvalError:
+        raise
+    except Exception:
+        pass
 BOOL_TYPE = Sum((("true", Var("Unit")), ("false", Var("Unit"))))
 
 
@@ -184,7 +223,8 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
                 t = apply(subst(head.body, b), args[1:])
                 continue
             if isinstance(head, Var) and head.name in env.defs and env.defs[head.name].body is not None \
-                    and env.defs[head.name].data is None:
+                    and env.defs[head.name].data is None \
+                    and not isinstance(env.defs[head.name].body, (Primitive, Axiom)):
                 body = env.defs[head.name].body
                 if isinstance(body, Extern):
                     r = try_extern(env, body, args, fuel)
@@ -210,6 +250,8 @@ def whnf(env: Env, t: Term, fuel: Fuel, unfold: bool = True) -> Term:
         if isinstance(t, Var):
             if t.name in env.defs and unfold:
                 d = env.defs[t.name]
+                if d.body is not None and d.data is None and isinstance(d.body, (Primitive, Axiom)):
+                    return t
                 if d.body is not None and d.data is None:
                     body = d.body
                     # constants unfold freely; functions and externs unfold only when applied (see App),
@@ -297,11 +339,11 @@ def prim(env: Env, op: str, a: Term, b: Term, fuel: Fuel) -> Optional[Term]:
     if isinstance(a, Lit) and isinstance(b, Lit) and not isinstance(a.value, str) and not isinstance(b.value, str):
         x, y = a.value, b.value
         try:
-            if op == "+": return Lit(x + y)
-            if op == "-": return Lit(x - y)
-            if op == "*": return Lit(x * y)
-            if op == "/": return Lit(x // y if isinstance(x, int) and isinstance(y, int) else x / y)
-            if op == "mod": return Lit(x % y)
+            if op in ("+", "-", "*", "/", "mod"):
+                r = (x + y if op == "+" else x - y if op == "-" else x * y if op == "*"
+                     else (x // y if isinstance(x, int) and isinstance(y, int) else x / y) if op == "/"
+                     else x % y)
+                return Lit(finite(r, f"{x} {op} {y}"))
             if op == "<": return bool_con(x < y)
             if op == "<=": return bool_con(x <= y)
             if op == ">": return bool_con(x > y)
@@ -360,6 +402,8 @@ def try_extern(env: Env, head: Extern, args, fuel: Fuel) -> Optional[Term]:
         py = to_python(env, v, dom)
         if py is _OPAQUE:
             return None
+        if _is_numpy_fn(info.fn):
+            check_int64(py, f'extern "{head.target}"')
         vals.append(py)
         ty = subst(ty.cod, {ty.name: v}) if isinstance(ty, Pi) else ty
     fuel.tick()
@@ -370,6 +414,11 @@ def try_extern(env: Env, head: Extern, args, fuel: Fuel) -> Optional[Term]:
     ret_type = result_type(info.type, info.arity)
     r = from_python(env, result, ret_type)
     return apply(r, args[info.arity:])
+
+
+def _is_numpy_fn(fn) -> bool:
+    mod = getattr(fn, "__module__", None) or ""
+    return mod.startswith("numpy") or type(fn).__name__ == "ufunc"
 
 
 def result_type(ty: Term, arity: int) -> Term:
@@ -574,7 +623,9 @@ def index_foreign(x, i: int) -> Term:
         e = e.item()
     if isinstance(e, bool):
         return bool_con(e)
-    if isinstance(e, (int, float, str)):
+    if isinstance(e, float):
+        return Lit(finite(e, f"entry {i} of an array"))
+    if isinstance(e, (int, str)):
         return Lit(e)
     return Lit(e)
 
@@ -625,11 +676,23 @@ def materialize(env: Env, f: Term, dims: list, cod: Optional[Term]):
             return py
         return [rec(App(t, Lit(i)), ds[1:]) for i in range(ds[0])]
     out = rec(f, list(dims))
+    if _is_int_type(env, cod):
+        flat = np.asarray(out, dtype=object).ravel()
+        for v in flat:
+            check_int64(v, "an array of numpy")
+        return np.asarray(out, dtype=np.int64)
     try:
         arr = np.asarray(out, dtype=float)
         return arr
     except (TypeError, ValueError):
         return out
+
+
+def _is_int_type(env: Env, t: Optional[Term]) -> bool:
+    if t is None:
+        return False
+    w = strip_subtypes(env, t)
+    return isinstance(w, Var) and w.name == "Int"
 
 
 def _sum_of(env: Env, ty: Optional[Term]):
@@ -661,6 +724,16 @@ def _inj_to_python(env: Env, v: Inj, ty: Optional[Term]):
 
 def _sum_from_python(env: Env, x, sm: Sum, ty: Term) -> Term:
     labels = sm.labels()
+    if labels == ["finite", "negInf", "posInf"] and isinstance(x, (int, float)) and not isinstance(x, bool):
+        # ExtendedReal: an infinity that means something (06 §6); NaN is still an error
+        x = float(x)
+        if x != x:
+            raise EvalError("NaN from the environment is not a value of ExtendedReal")
+        if x == float("inf"):
+            return Inj(2, "posInf", UNIT, ty)
+        if x == float("-inf"):
+            return Inj(1, "negInf", UNIT, ty)
+        return Inj(0, "finite", Lit(x), ty)
     unit_alts = [i for i, (_, a) in enumerate(sm.alts) if _is_unit_type(env, a)]
     if isinstance(x, bool) and len(sm.alts) == 2 and len(unit_alts) == 2:
         i = 0 if x else 1
@@ -738,11 +811,17 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
     sm = _sum_of(env, ty)
     if sm is not None:
         return _sum_from_python(env, x, sm, ty)
+    if isinstance(x, float) or (hasattr(x, "dtype") and getattr(x, "shape", None) == ()):
+        x = _from_environment_number(x)
+    elif hasattr(x, "shape") and hasattr(x, "dtype"):
+        _check_array_finite(x)
     if is_indexable(x) or hasattr(x, "shape"):
         sh = shaped(env, ty)
         if sh is not None:
-            k, _ = sh
+            k, cod = sh
             import numpy as np
+            if _is_int_type(env, cod) and hasattr(x, "dtype") and x.dtype.kind not in "iu":
+                raise EvalError(f"an array of {x.dtype} cannot be a value of {pp(ty)}: its entries are Int")
             shape = np.shape(x)
             if len(shape) < k:
                 raise EvalError(f"an array of shape {shape} cannot be a value of {pp(ty)}")
@@ -838,7 +917,7 @@ def nf(env: Env, t: Term, fuel: Fuel) -> Term:
     if isinstance(t, App):
         return App(nf(env, t.fn, fuel), nf(env, t.arg, fuel))
     if isinstance(t, Lam):
-        return Lam(t.param, nf(env, t.body, fuel), t.ann)
+        return Lam(t.param, nf(env, t.body, fuel), t.ann, t.res)
     if isinstance(t, Pi):
         return Pi(t.name, nf(env, t.dom, fuel), nf(env, t.cod, fuel))
     if isinstance(t, Sigma):
@@ -966,7 +1045,7 @@ def _delta(env: Env, t: Term) -> Optional[Term]:
     if not isinstance(h, Var) or h.name not in env.defs:
         return None
     d = env.defs[h.name]
-    if d.body is None or d.data is not None or isinstance(d.body, Extern):
+    if d.body is None or d.data is not None or isinstance(d.body, (Extern, Primitive, Axiom)):
         return None
     body = d.body
     out = body

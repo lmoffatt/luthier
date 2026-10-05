@@ -21,18 +21,19 @@
 -- those directions, which is how the gauge of the positions enters without inventing a scale.
 
 import "real"
+import "algebra"
 import "random"
 import "array"
 import "probability"
 
-LogLik (Theta Y : U) = Y -> Theta -> R
+LogLik (Theta Y : U) = Y -> Theta -> Float64
 
 -- ---------------------------------------------------------------- a family of beliefs
 BeliefFamily (Theta B Y : U) = {
   update     : B -> Y -> B                -- the belief after one datum
-  predictive : B -> Y -> R                -- log p(y | b): the increment of the log evidence
+  predictive : B -> Y -> Float64                -- log p(y | b): the increment of the log evidence
   draw       : B -> Int -> Theta * Int    -- a parameter drawn from the belief, and the next seed
-  same       : B -> B -> Bool             -- two beliefs that say the same thing
+  same       : Setoid B                   -- two beliefs that say the same thing
   }
 
 -- the cursor: the belief after a list of data
@@ -49,35 +50,35 @@ Exchangeable (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Theta Y) 
   f.same (f.update (f.update b y1) y2) (f.update (f.update b y2) y1) }
 
 -- the log evidence of two data, accumulated in either order
-evidenceTol : R := sqrtR eps
+evidenceTol : Float64 := sqrt eps
 EvidenceChains (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Theta Y) (b : B) (seed : Int) : Bool :=
   match twoData Theta B Y f s b seed { (y1, y2) ->
   match f.update b y1 { b1 -> match f.update b y2 { b2 ->
-  approxR evidenceTol (f.predictive b y1 + f.predictive b1 y2) (f.predictive b y2 + f.predictive b2 y1) } } }
+  approx evidenceTol (f.predictive b y1 + f.predictive b1 y2) (f.predictive b y2 + f.predictive b2 y1) } } }
 
 -- ---------------------------------------------------------------- discrete beliefs
 -- n support points given by index, and unnormalised log weights
-Discrete (Theta : U) = { size : Int, point : Int -> Theta, logw : Vec }
+Discrete (Theta : U) = { size : Int, point : Int -> Theta, logw : Vec Float64 }
 
-logSumExp (v : Vec) : R := match maximum v { m -> m + logR (sumTo (length v) (\ k { expR (at v k - m) })) }
+logSumExp (v : Vec Float64) : Float64 := match maximum v { m -> m + log (sumTo v.n (\ k { exp (v.f k - m) })) }
 
-weights (Theta : U) (b : Discrete Theta) : Vec :=
-  match logSumExp b.logw { z -> tabulate b.size (\ k { expR (at b.logw k - z) }) }
+weights (Theta : U) (b : Discrete Theta) : Vec Float64 :=
+  match logSumExp b.logw { z -> (b.size, \ k { exp (b.logw.f k - z) }) }
 
 bayes (Theta Y : U) (l : LogLik Theta Y) (b : Discrete Theta) (y : Y) : Discrete Theta :=
-  { size := b.size, point := b.point, logw := tabulate b.size (\ k { at b.logw k + l y (b.point k) }) }
+  { size := b.size, point := b.point, logw := (b.size, \ k { b.logw.f k + l y (b.point k) }) }
 
-logPredictive (Theta Y : U) (l : LogLik Theta Y) (b : Discrete Theta) (y : Y) : R :=
+logPredictive (Theta Y : U) (l : LogLik Theta Y) (b : Discrete Theta) (y : Y) : Float64 :=
   logSumExp (bayes Theta Y l b y).logw - logSumExp b.logw
 
 -- a uniform number in [0, 1) from the seed, with Luthier's own generator
-uniform01 (s : Int) : R * Int := match randBelow 1073741824 s { (k, s2) -> (toR k / 1073741824.0, s2) }
+uniform01 (s : Int) : Float64 * Int := match randBelow 1073741824 s { (k, s2) -> (toFloat64 k / 1073741824.0, s2) }
 
 -- the index where the cumulative weight first passes u
-indexAt (w : Vec) (u : R) (k : Int) (acc : R) : Int :=
-  if k >= length w - 1 then k
-  else if acc + at w k > u then k
-  else indexAt w u (k + 1) (acc + at w k)
+indexAt (w : Vec Float64) (u : Float64) (k : Int) (acc : Float64) : Int :=
+  if k >= w.n - 1 then k
+  else if acc + w.f k > u then k
+  else indexAt w u (k + 1) (acc + w.f k)
 
 drawIndex (Theta : U) (b : Discrete Theta) (seed : Int) : Int * Int :=
   match uniform01 seed { (u, s2) -> (indexAt (weights Theta b) u 0 0.0, s2) }
@@ -90,45 +91,35 @@ discreteFamily (Theta Y : U) (l : LogLik Theta Y) : BeliefFamily Theta (Discrete
 
 -- Calibration of a discrete update. Draw an atom k from the belief, data at its point, and
 -- update; the randomized rank u = W(< k) + v W(k) of the drawn atom under the updated weights
--- W, with v uniform, is uniform on [0, 1] for the exact update. Its first two moments, 1/2 and
--- 1/3, are compared with their standard errors over the ensemble.
-rankOf (Theta Y : U) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Theta) (seed : Int) : R * Int :=
+-- W, with v uniform, is uniform on [0, 1] for the exact update (UniformDraws).
+rankOf (Theta Y : U) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Theta) (seed : Int) : Float64 * Int :=
   match drawIndex Theta b seed { (k, s1) ->
   match s (b.point k) s1 { (y, s2) ->
   match weights Theta (bayes Theta Y l b y) { w ->
   match uniform01 s2 { (v, s3) ->
-  match sumTo k (\ j { at w j }) + v * at w k { u -> (u, s3) } } } } }
-
--- sums of u and u^2 over n draws
-rankMoments (Theta Y : U) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Theta)
-            (n k seed : Int) (s1 s2 : R) : R * R :=
-  if k >= n then (s1, s2)
-  else match rankOf Theta Y l s b seed { (u, next) ->
-       match s1 + u { a -> match s2 + u * u { c -> rankMoments Theta Y l s b n (k + 1) next a c } } }
+  match sumTo k (\ j { w.f j }) + v * w.f k { u -> (u, s3) } } } } }
 
 Calibrated (Theta Y : U) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Theta) (seed : Int) : Bool :=
-  match rankMoments Theta Y l s b ensembleSize 0 seed 0.0 0.0 { (a, c) ->
-  match toR ensembleSize { n ->
-  abs (a / n - 0.5) / sqrtR (1.0 / 12.0 / n) < zMax
-  and abs (c / n - 1.0 / 3.0) / sqrtR (4.0 / 45.0 / n) < zMax } }
+  UniformDraws (\ q { match rankOf Theta Y l s b q { (u, next) -> ((1, \ k { u }), next) } }) seed
 
 -- ---------------------------------------------------------------- Gaussian beliefs
 -- Information form: the mean and the precision, the inverse covariance. Zero precision along a
 -- direction is a belief that knows nothing there. The log density is up to a constant.
-GaussianBelief = { mean : Vec, precision : Mat }
+GaussianBelief = { mean : Vec Float64, precision : Mat Float64 }
 
-gaussianLogDensity (b : GaussianBelief) (t : Vec) : R :=
+gaussianLogDensity (b : GaussianBelief) (t : Vec Float64) : Float64 :=
   match t - b.mean { d -> 0.0 - 0.5 * dot d (b.precision * d) }
 
 -- A maximizer takes the log posterior, its gradient, a positive step matrix and a start, and
--- returns where the log posterior is largest. Levenberg-Marquardt is one; optimization.lut
--- will state what any maximizer must satisfy.
-Maximizer = (Vec -> R) -> (Vec -> Vec) -> (Vec -> Mat) -> Vec -> Vec
+-- returns where the log posterior is largest. Levenberg-Marquardt is one; what any maximizer must
+-- satisfy (it ascends, and stops where the gradient vanishes) is stated in optimization.lut, over
+-- the objective it is given, and certified for each maximizer on its problems.
+Maximizer = (Vec Float64 -> Float64) -> (Vec Float64 -> Vec Float64) -> (Vec Float64 -> Mat Float64) -> Vec Float64 -> Vec Float64
 
 -- Laplace's update: the new mean is the maximum of belief times likelihood, the new precision
 -- the prior precision plus the information the likelihood reports there. The step matrix is
 -- the same sum, positive wherever the posterior is proper.
-laplaceUpdate (Y : U) (maximize : Maximizer) (l : Likelihood Vec Y) (b : GaussianBelief) (y : Y) : GaussianBelief :=
+laplaceUpdate (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : GaussianBelief :=
   match maximize (\ t { gaussianLogDensity b t + l.loglik y t })
                  (\ t { l.score y t - b.precision * (t - b.mean) })
                  (\ t { b.precision + l.info y t })
@@ -137,28 +128,29 @@ laplaceUpdate (Y : U) (maximize : Maximizer) (l : Likelihood Vec Y) (b : Gaussia
 
 -- ---------------------------------------------------------------- the Gaussian family
 -- log det of a symmetric positive definite matrix, from its spectrum
-logDet (m : Mat) : R := match eigvalsSym m { e -> sumTo (length e) (\ k { logR (at e k) }) }
+logDet (m : Mat Float64) : Float64 := match eigvalsSym m { e -> sumTo e.n (\ k { log (e.f k) }) }
 
 -- Laplace's evidence for one datum: the log of the integral of belief times likelihood, from
 -- the second-order expansion at the new mean m' with the new precision P':
 --   log p(y | b) = l(y; m') - 1/2 (m' - m)^T P (m' - m) + 1/2 log det P - 1/2 log det P'
 -- It needs a proper belief: P positive definite.
-laplaceEvidence (Y : U) (maximize : Maximizer) (l : Likelihood Vec Y) (b : GaussianBelief) (y : Y) : R :=
+laplaceEvidence (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : Float64 :=
   match laplaceUpdate Y maximize l b y { b2 -> match b2.mean - b.mean { d ->
   l.loglik y b2.mean - 0.5 * dot d (b.precision * d) + 0.5 * logDet b.precision - 0.5 * logDet b2.precision } }
 
 -- a draw from a proper Gaussian belief: mean + P^{-1/2} z
-drawGaussian (b : GaussianBelief) (seed : Int) : Vec * Int :=
-  match normalVec (length b.mean) seed { (z, s2) -> (b.mean + invSqrtSym b.precision * z, s2) }
+drawGaussian (b : GaussianBelief) (seed : Int) : Vec Float64 * Int :=
+  match normalVec b.mean.n seed { (z, s2) -> (b.mean + invSqrtSym b.precision * z, s2) }
 
--- the distance between the means of two Gaussian beliefs, in standard deviations of the first
-meanGap (a c : GaussianBelief) : R := match a.mean - c.mean { d -> sqrtR (dot d (a.precision * d)) }
+-- the distance between the means of two Gaussian beliefs, in standard deviations of the first;
+-- measured both ways, it makes `same` a symmetric relation
+meanGap (a c : GaussianBelief) : Float64 := match a.mean - c.mean { d -> sqrt (dot d (a.precision * d)) }
 
-gaussianFamily (Y : U) (maximize : Maximizer) (l : Likelihood Vec Y) (tol : R) : BeliefFamily Vec GaussianBelief Y := {
+gaussianFamily (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (tol : Float64) : BeliefFamily (Vec Float64) GaussianBelief Y := {
   update := laplaceUpdate Y maximize l,
   predictive := laplaceEvidence Y maximize l,
   draw := drawGaussian,
-  same := \ a c { meanGap a c < tol and approxMat tol a.precision c.precision } }
+  same := \ a c { meanGap a c < tol and meanGap c a < tol and approxMat tol a.precision c.precision } }
 
 -- ---------------------------------------------------------------- approximations that converge
 -- An approximate update departs from the exact laws by an amount that must vanish as the data
@@ -171,14 +163,14 @@ gaussianFamily (Y : U) (maximize : Maximizer) (l : Likelihood Vec Y) (tol : R) :
 -- of the verdict: a sequence still moving by the margin has not reached its limit. The search stops without a verdict when the
 -- departure falls below the floor the computation can resolve, and fails when it has not
 -- stabilized after maxHalvings: a departure that never settles to its order is structural.
-orderMargin : R := 0.1
-settleTol : R := orderMargin / 4.0
+orderMargin : Float64 := 0.1
+settleTol : Float64 := orderMargin / 4.0
 maxHalvings : Int := 12
 
-observedOrder (d1 d2 : R) : R := logR (d1 / d2) / logR 2.0
+observedOrder (d1 d2 : Float64) : Float64 := log (d1 / d2) / log 2.0
 
 -- the order the departure settles to below sigma, or a negative number if it never settles
-settledOrder (departure : R -> Int -> R) (floor : R) (sigma : R) (seed : Int) (depth : Int) (d1 d2 : R) (last : R) : R :=
+settledOrder (departure : Float64 -> Int -> Float64) (floor : Float64) (sigma : Float64) (seed : Int) (depth : Int) (d1 d2 : Float64) (last : Float64) : Float64 :=
   if d2 < floor then last
   else match departure (sigma / 2.0) seed { d3 ->
        if d3 < floor then last
@@ -187,39 +179,29 @@ settledOrder (departure : R -> Int -> R) (floor : R) (sigma : R) (seed : Int) (d
             else if depth >= maxHalvings then 0.0 - 1.0
             else settledOrder departure floor (sigma / 2.0) seed (depth + 1) d2 d3 o } }
 
-ConvergesAtOrder (q : R) (floor : R) (departure : R -> Int -> R) (sigma : R) (seed : Int) : Bool :=
+ConvergesAtOrder (q : Float64) (floor : Float64) (departure : Float64 -> Int -> Float64) (sigma : Float64) (seed : Int) : Bool :=
   match departure sigma seed { d1 -> match departure (sigma / 2.0) seed { d2 ->
   if d1 < floor or d2 < floor then true
   else settledOrder departure floor (sigma / 2.0) seed 1 d1 d2 (observedOrder d1 d2) > q - orderMargin } }
 
 -- the two departures of an update from the exact laws, in natural units
-exchangeDeparture (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Theta Y) (b : B) (gap : B -> B -> R) (seed : Int) : R :=
+exchangeDeparture (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Theta Y) (b : B) (gap : B -> B -> Float64) (seed : Int) : Float64 :=
   match twoData Theta B Y f s b seed { (y1, y2) ->
   gap (f.update (f.update b y1) y2) (f.update (f.update b y2) y1) }
 
-evidenceDeparture (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Theta Y) (b : B) (seed : Int) : R :=
+evidenceDeparture (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Theta Y) (b : B) (seed : Int) : Float64 :=
   match twoData Theta B Y f s b seed { (y1, y2) ->
   abs ((f.predictive b y1 + f.predictive (f.update b y1) y2) - (f.predictive b y2 + f.predictive (f.update b y2) y1)) }
 
 -- Calibration of a Gaussian update. Draw theta from the belief, data at theta, update, and
 -- project on a direction v drawn at random: u = Phi(v^T (theta - m') / sqrt(v^T P'^{-1} v)) is
--- uniform on [0, 1] when the updated belief is the posterior. Its first two moments are
--- compared with their standard errors over the ensemble, as for the discrete update.
-
-projectedRank (Y : U) (f : BeliefFamily Vec GaussianBelief Y) (s : Sampler Vec Y) (b : GaussianBelief) (seed : Int) : R * Int :=
+-- uniform on [0, 1] when the updated belief is the posterior (UniformDraws).
+projectedRank (Y : U) (f : BeliefFamily (Vec Float64) GaussianBelief Y) (s : Sampler (Vec Float64) Y) (b : GaussianBelief) (seed : Int) : Float64 * Int :=
   match f.draw b seed { (t, s1) ->
   match s t s1 { (y, s2) ->
   match f.update b y { b2 ->
-  match normalVec (length t) s2 { (v, s3) ->
-  (normalCdf (dot v (t - b2.mean) / sqrtR (dot v (solve b2.precision v))), s3) } } } }
+  match normalVec t.n s2 { (v, s3) ->
+  (normalCdf (dot v (t - b2.mean) / sqrt (dot v (solve b2.precision v))), s3) } } } }
 
-projectedMoments (Y : U) (f : BeliefFamily Vec GaussianBelief Y) (s : Sampler Vec Y) (b : GaussianBelief)
-                 (n k seed : Int) (s1 s2 : R) : R * R :=
-  if k >= n then (s1, s2)
-  else match projectedRank Y f s b seed { (u, next) -> projectedMoments Y f s b n (k + 1) next (s1 + u) (s2 + u * u) }
-
-CalibratedGaussian (Y : U) (f : BeliefFamily Vec GaussianBelief Y) (s : Sampler Vec Y) (b : GaussianBelief) (seed : Int) : Bool :=
-  match projectedMoments Y f s b ensembleSize 0 seed 0.0 0.0 { (a, c) ->
-  match toR ensembleSize { n ->
-  abs (a / n - 0.5) / sqrtR (1.0 / 12.0 / n) < zMax
-  and abs (c / n - 1.0 / 3.0) / sqrtR (4.0 / 45.0 / n) < zMax } }
+CalibratedGaussian (Y : U) (f : BeliefFamily (Vec Float64) GaussianBelief Y) (s : Sampler (Vec Float64) Y) (b : GaussianBelief) (seed : Int) : Bool :=
+  UniformDraws (\ q { match projectedRank Y f s b q { (u, next) -> ((1, \ k { u }), next) } }) seed

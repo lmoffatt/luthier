@@ -1,0 +1,106 @@
+{
+  "csv": {
+    "hash": "141de3b9ec4eca51",
+    "when": "2026-10-05T14:58:43",
+    "passed": true,
+    "seed": 1868374804,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "BrokenText",
+        "Perturbed",
+        "Table",
+        "TableText"
+      ]
+    },
+    "laws": [
+      {
+        "label": "RoundTrip (parseTable, renderTable, sameTable)",
+        "params": [
+          "t : Table"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Table: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "t = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#139954140870656\")",
+          "t = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'float' (cons String 'str' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139954141048640\")",
+          "t = (0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#139954140860416\")",
+          "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#139954140859648\")",
+          "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#139954141044288\")"
+        ]
+      },
+      {
+        "label": "Canonical (parseTable, renderTable, sameTable)",
+        "params": [
+          "s : TableText"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "TableText: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "s = 'c0:float,c1:str,c2:int\\n0.00,\"a-+ a\\n\", -537956369042 \\n'",
+          "s = 'c0:str,c1:int,c2:float,c3:int,c4:str\\n+0-+9,-30867,-0.48806586477681324,-953754568810220,\":,9.\"'",
+          "s = ' c0 : int , c1 : str \\n 59728863965541971 ,yb \\n'",
+          "s = ' c0 : int , c1 : str , c2 : float , c3 : float '",
+          "s = 'c0:int,c1:float,c2:float,c3:float,c4:float\\n-56552456975409154,-2.2350869029664879e-52,-0.43211482481447683,0.7225542949661838,-0.45455345507056055\\n\\n'"
+        ]
+      },
+      {
+        "label": "Tolerant (parseTable, renderTable, sameTable)",
+        "params": [
+          "p : Perturbed"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Perturbed: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "p = ((0, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'float' (cons String 'float' (cons String 'str' (nil String))), extern \"python:luthier.tables.Table.cell#139954137955456\"), 'c0:float,c1:float,c2:str\\r')",
+          "p = ((1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#139954138018688\"), ' c0 : float , c1 : float \\n-0.5006330082474189,0.8059742508821215\\n')",
+          "p = ((0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'str' (cons String 'str' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#139954138010368\"), 'c0:int,c1:str,c2:str,c3:float\\n\\n')",
+          "p = ((0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139954138021184\"), ' c0 : str \\n')",
+          "p = ((0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#139954138110912\"), ' c0 : float , c1 : int \\n')"
+        ]
+      },
+      {
+        "label": "Rejects (parseTable, renderTable, sameTable)",
+        "params": [
+          "b : BrokenText"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "BrokenText: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "b = 'c0:str,c1:str\\nz+, -a,extra\\n'",
+          "b = 'c0:float\\n1.8512386285303455,extra\\n'",
+          "b = 'c0:str,c1:float,c2:str,c3:float,c4:int\\n,-inf,\"9.xa\\rb\",1.6785282837911475,-75430764017534741\\n'",
+          "b = 'c0:real,c1:str\\n\"\\r\",\"x\\ry\"\"a\"\\n'",
+          "b = 'c0:float,c0:float,c2:float,c3:int,c4:str\\n-1.7635535758725625,-0.4900400394689135,7.790210811105602e+79,-785849489382640903,\"a\\r\"\"\"\\n-208.5527523756936,0.4361919176470126,-1.4046948736552207,-9100483,\"9.,,y\"\\n'"
+        ]
+      }
+    ]
+  }
+}

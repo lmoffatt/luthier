@@ -149,7 +149,7 @@ Files: `r1_declaration.accept.lut`, `r1_declaration.reject.lut`.
 
 **R2. A definition uses defined types.** For a definition `n`, every name that occurs in type
 position in its declared type or its body is defined, unless it belongs to `n`'s own object. In
-term position a declared name is allowed: a hole of a defined type is a parameter (`sigma : R`,
+term position a declared name is allowed: a hole of a defined type is a parameter (`sigma : Float64`,
 set by `luthier run --set`), and what depends on it does not reduce until it is filled. Code over
 a type that is only declared, outside that type's object, must take the type as a parameter.
 Files: `r2_definition.accept.lut`, `r2_definition.reject.lut`, `r2_unclaimed_laws.reject.lut`.
@@ -190,17 +190,38 @@ declared, defined or certified. A name that is an alias and is also declared or 
 error.
 Files: `r7_alias.accept.lut`, `r7_alias_defined.reject.lut`.
 
-**R8. `==` exists only where equality is structural.** `==` is defined on `Int`, `R`, `String`,
+**R8. `==` exists only where equality is structural.** `==` is defined on `Int`, `Float64`, `String`,
 `Unit`, `Empty`, and on products, sums, recursive `data` and subtypes built from types that have
 it. Not on exponentials, and not on anything containing one. A law that compares values of such a
 type takes the equality it uses as a parameter or as a component of its theory: the observational
 equality of the presentation. `algebra.lut` already does so (each structure carries its `eq`).
 Files: `r8_equality_parameter.accept.lut`, `r8_equality_function.reject.lut`.
 
-**R9. Function types are contravariant in the domain and covariant in the codomain** (decided
-2026-10-05, not implemented; `06 §5`). A function `A -> B` passes where `A' -> B'` is expected when
+**R9. Function types are contravariant in the domain and covariant in the codomain** (`06 §5`). A function `A -> B` passes where `A' -> B'` is expected when
 `A'` refines `A` and `B` refines `B'`.
-Files (in `tests/spec/next/`): `r9_variance.accept.lut`, `r9_variance.reject.lut`.
+Files: `r9_variance.accept.lut`, `r9_variance.reject.lut`.
+
+**R10. A law characterizes; a second implementation is not a law** (decided 2026-10-05; `07`).
+The laws of an object are the mathematical properties that determine its operations, up to the
+equality of the presentation: bilinearity and an orthonormal basis for an inner product,
+multilinearity, alternation and `det I == 1` for a determinant. A definition of the operation
+written in the kernel (a sum over the indices) is a *model* of those laws, certified against
+them like any other; an implementation of the environment is another model. That two models
+agree (`Agrees`) is a corollary of the laws characterizing the object, useful to tighten a
+tolerance, and never the law itself. An object whose only laws compare it with a second
+implementation is reported as *consistent, not characterized* (section 6). The rule is not
+decided by the checker: it is a rule for the one who writes the laws, and `check -v` makes the
+difference visible.
+
+Two consequences, from the same discussion. Each concept is identified with the mathematical object
+that best represents it (a vector space, a ring, an inner product space, a symmetric bilinear form),
+and that object is the invariant of its type: the leaf, the instance or the value is declared at the
+structure, so the structure's laws are its obligations, not laws stated apart on a copy. And a law
+has one name: it is written once in `lib/algebra.lut`, in its most general form, and a special case
+is an application of it, never a second declaration (commutativity is `Symmetric` with result type
+equal to the argument type; associativity of an operation is the law of an action of a set on itself).
+Structures are built by inclusion of the ones below them. `algebra` is imported by every library
+that states a property.
 
 ## 6. Reports that do not reject
 
@@ -211,7 +232,12 @@ Files (in `tests/spec/next/`): `r9_variance.accept.lut`, `r9_variance.reject.lut
   with no law: *sufficient completeness* (Guttag, 1977). A full table says everything observable
   about every constructed value. An extensionality law (two values are equal when every observer
   agrees on them) turns "same observations" into "same value";
-- holes that the entry of `luthier run` depends on.
+- holes that the entry of `luthier run` depends on;
+- (decided, not implemented) for each operation with laws, whether they characterize it (R10) or
+  only compare it with another implementation. Version 0 can only tell the two apart by name:
+  a law whose body applies the operation and another definition to the same arguments and compares
+  the results is a comparison. Characterization proper is a judgement the author makes and `07`
+  records.
 
 ## 7. Certification
 
@@ -225,7 +251,7 @@ functions), over a domain, by a mode. The grades, from weakest to strongest:
 | exhaustive | every case of a finite domain |
 | witnessed | an existential law: a case exhibited (section 4) |
 | proved | universal; not in version 0 |
-| assumed | an axiom: the laws are stated and taken as true, never tested (`06 §3`; decided, not implemented) |
+| assumed | an axiom: the laws are stated and taken as true, never tested (`06 §3`) |
 
 A certificate entry records the law, the values it was applied to, the grade with its `n`, the
 generators, the seed, the first cases, and the hash of the dependency cone (`03 §4`). The grade of
@@ -239,10 +265,10 @@ name; it is not a state the name has once and for all.
   obligation raised inside `match e { x -> t }` speaks of `e`, not of every `x`: the variable is a
   name for `e`; inside `match e { (x, y) -> t }`, `x` and `y` name the components of `e`. Without these, every recursion over indices owes laws that are false.
 - An obligation is quantified only over the parameters it mentions, and those their types mention.
-  `DotAgrees (d : Vec -> Vec -> R) (n : Dim) (x y : VecOf n)` owes `y.n == x.n` inside, which does
+  `DotAgrees (d : Vec -> Vec -> Float64) (n : Dim) (x y : VecOf n)` owes `y.n == x.n` inside, which does
   not mention `d`; drawing a `d` would be both unnecessary and impossible.
 - A function is drawn as its table when its domain is `Fin n`; of an infinite domain, as a constant,
-  or an affine map on `R -> R`. The second is a thin sample of the function space, and the
+  or an affine map on `Float64 -> Float64`. The second is a thin sample of the function space, and the
   certificate's description of the generator says so.
 - A sampled case whose parameters cannot be drawn, because a parameter's type depends on earlier
   ones and is empty for them (`k : Fin n` with `n = 0`), holds vacuously and is skipped; a law none
@@ -257,7 +283,7 @@ name; it is not a state the name has once and for all.
 ## 8. Example
 
     -- a concrete type, defined natively: a table is a function from a column and a row to a cell
-    Cell = < int : Int | real : R | text : String >
+    Cell = < int : Int | real : Float64 | text : String >
     Table = { columns : List String, nRows : Int, cell : String -> Int -> Maybe Cell }
 
     -- a theory, declared, its laws, then defined: the cycle Codec -> laws -> Codec is the object
@@ -292,6 +318,10 @@ as obligations, and pass), with two limits: it is certified per model, not for a
 the round trip needs the equality that R8 makes a component. Translations as a concept the
 language names and certifies, and several canonical presentations of Luthier itself with their
 equivalences, are for version 1 or 2.
+
+Two models of one characterized object agree where the laws determine it: that is what the
+`Agrees` laws of the libraries state, and it is where they belong, as a corollary (R10), not as a
+definition.
 
 Some presentations have no computable translation, and then their equivalence is a law. A
 probability kernel from parameters to data is read three ways: a sampler, a likelihood, and the

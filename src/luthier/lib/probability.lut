@@ -16,10 +16,44 @@
 -- Gaussian.
 
 import "real"
+import "algebra"
 import "random"
 import "array"
 
-log2pi : R := logR (2.0 * 3.141592653589793)
+pi : Float64 := 3.141592653589793
+log2pi : Float64 := log (2.0 * pi)
+
+-- ---------------------------------------------------------------- uniform values
+-- Draws per measurement, and the z beyond which an entry is a departure. With d parameters
+-- there are d + d (d + 1) / 2 entries; at z = 5 a calibrated pair passes each case with
+-- probability above 1 - 1e-4 for d up to 16.
+ensembleSize : Int := 400
+zMax : Float64 := 5.0
+
+-- Values uniform on [0, 1]: their first two moments, 1/2 and 1/3, each within zMax standard
+-- errors (the variances of u and u^2 are 1/12 and 4/45). A probability integral transform of data
+-- from the right model is uniform, and so is the rank of the truth under a calibrated belief.
+uniformMoments (s1 s2 : Float64) (count : Int) : Bool :=
+  match toFloat64 count { n ->
+  abs (s1 / n - 0.5) / sqrt (1.0 / 12.0 / n) < zMax and abs (s2 / n - 1.0 / 3.0) / sqrt (4.0 / 45.0 / n) < zMax }
+
+-- sums of u and u^2 over every entry of n draws, and how many entries
+uniformSums (draw : Int -> Vec Float64 * Int) (n i seed : Int) (s1 s2 : Float64) (count : Int) : Float64 * Float64 * Int :=
+  if i >= n then (s1, s2, count)
+  else match draw seed { (u, next) -> uniformSums draw n (i + 1) next (s1 + total u) (s2 + dot u u) (count + u.n) }
+
+-- the values the draws produce, over an ensemble, are uniform on [0, 1]
+UniformDraws (draw : Int -> Vec Float64 * Int) (seed : Int) : Bool :=
+  match uniformSums draw ensembleSize 0 seed 0.0 0.0 0 { (a, c, count) -> uniformMoments a c count }
+
+normalCdf (x : Float64) : Float64 := 0.5 * (1.0 + erf (x / sqrt 2.0))
+
+-- n standard normals from a seed, and the next seed: n of them, and their probability integral
+-- transform is uniform. The law tests each value's distribution, not their independence.
+NormalLength (g : Int -> Int -> Vec Float64 * Int) (n : Dim) (seed : Int) : Bool := match g n seed { (z, next) -> z.n == n }
+NormalDraws (g : Int -> Int -> Vec Float64 * Int) (n : Dim) (seed : Int) : Bool :=
+  UniformDraws (\ s { match g n s { (z, next) -> ((z.n, \ k { normalCdf (z.f k) }), next) } }) seed
+normalVec : { g : Int -> Int -> Vec Float64 * Int | NormalLength g & NormalDraws g }
 
 -- ---------------------------------------------------------------- sampler and likelihood
 Draw (Y : U) = Int -> Y * Int              -- seed in, a value and the next seed out
@@ -28,55 +62,46 @@ Sampler (Theta Y : U) = Theta -> Draw Y
 drawAt (Theta Y : U) (s : Sampler Theta Y) (t : Theta) (seed : Int) : Y := match s t seed { (y, s2) -> y }
 
 -- What a likelihood reports. `shift` moves a parameter along a direction of the parameter
--- space, the space the score and the information live in.
+-- space, the space the score and the information live in: the vectors act on Theta.
 Likelihood (Theta Y : U) = {
-  shift  : Theta -> Vec -> Theta
-  loglik : Y -> Theta -> R
-  score  : Y -> Theta -> Vec
-  info   : Y -> Theta -> Mat }
+  shift  : Theta -> Vec Float64 -> Theta
+  loglik : Y -> Theta -> Float64
+  score  : Y -> Theta -> Vec Float64
+  info   : Y -> Theta -> Mat Float64 }
 
 -- ---------------------------------------------------------------- laws of one likelihood
--- The score is the gradient: the slope of the log-likelihood along the score equals the norm
--- of the score. Central difference with step eps^(1/3), whose truncation and rounding are
--- both of order eps^(2/3); the tolerance sqrt eps leaves a margin of a hundred.
-fdStep : R := cbrtR eps
-fdTol  : R := sqrtR eps
-
-ScoreIsGradient (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
-  match drawAt Theta Y s t seed { y ->
-  match l.score y t { g ->
-  match norm g { ng ->
-  if ng == 0.0 then true else
-  match scale (fdStep / ng) g { v ->
-  match (l.loglik y (l.shift t v) - l.loglik y (l.shift t (scale (0.0 - 1.0) v))) / (2.0 * fdStep) { slope ->
-  approxR (fdTol * (1.0 + abs (l.loglik y t))) slope ng } } } } }
-
--- Moving by the zero direction leaves the parameter where it was. Theta has no equality of
--- its own, so the law reads it through what the likelihood sees: the log-likelihood, exactly.
+-- The vectors act on Theta: the zero vector leaves a parameter where it is, and moving by u + v is
+-- moving by v and then by u (LeftIdentity and Associative, the laws of an action). Theta has no
+-- equality of its own, so the laws read it through what the likelihood sees: the log-likelihood,
+-- exactly for the zero vector and within fdTol for a composition, which rounds.
 ShiftByZero (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
   match drawAt Theta Y s t seed { y ->
-  l.loglik y (l.shift t (zeros (length (l.score y t)))) == l.loglik y t }
+  LeftIdentity (Vec Float64) Theta (\ a b { l.loglik y a == l.loglik y b }) (\ v p { l.shift p v }) (zeros (l.score y t).n) t }
 
-InfoIsSymmetric (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
-  match drawAt Theta Y s t seed { y -> match l.info y t { h -> approxMat 0.0 h (transpose h) } }
+ShiftComposes (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match s t seed { (y, s2) -> match (l.score y t).n { d ->
+  match normalVec d s2 { (u, s3) -> match normalVec d s3 { (v, s4) ->
+  Associative (Vec Float64) Theta (\ a b { approx fdTol (l.loglik y a) (l.loglik y b) }) (\ p q { add p q }) (\ w p { l.shift p w }) u v t } } } }
+
+-- the score is the gradient of the log-likelihood
+ScoreIsGradient (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Y s t seed { y -> IsGradient Theta l.shift (l.loglik y) (l.score y) t }
+
+-- the information reported is a Fisher information: symmetric and positive semidefinite
+InfoIsPositive (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta Y s t seed { y -> match l.info y t { h -> if symmetric 0.0 h then positiveSemidefinite h else false } }
 
 -- ---------------------------------------------------------------- the ensemble diagnostics
--- Draws per measurement, and the z beyond which an entry is a departure. With d parameters
--- there are d + d (d + 1) / 2 entries; at z = 5 a calibrated pair passes each case with
--- probability above 1 - 1e-4 for d up to 16.
-ensembleSize : Int := 400
-zMax : R := 5.0
-
 -- pass 1: the reported information, summed over n draws
-sumInfo (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (n k seed : Int) (acc : Mat) : Mat :=
+sumInfo (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (n k seed : Int) (acc : Mat Float64) : Mat Float64 :=
   if k >= n then acc
   else match s t seed { (y, s2) -> match madd acc (l.info y t) { a2 -> sumInfo Theta Y s l t n (k + 1) s2 a2 } }
 
 -- pass 2, over the same draws: the whitened score w = M s, with M H M = I, and its moments
-Moments = { sw : Vec, ss : Vec, sww : Mat, sq : Mat }
+Moments = { sw : Vec Float64, ss : Vec Float64, sww : Mat Float64, sq : Mat Float64 }
 
-sumWhite (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (m : Mat)
-         (n k seed : Int) (sw ss : Vec) (sww sq : Mat) : Moments :=
+sumWhite (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (m : Mat Float64)
+         (n k seed : Int) (sw ss : Vec Float64) (sww sq : Mat Float64) : Moments :=
   if k >= n then { sw := sw, ss := ss, sww := sww, sq := sq }
   else match s t seed { (y, s2) ->
        match l.score y t { g ->
@@ -93,35 +118,33 @@ sumWhite (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta
 --   distortion C, the covariance of the whitened score; the identity when calibrated
 --   zMean      the whitened mean score over its standard error, entry by entry
 --   zC         C minus the identity over the standard error of each entry
-Diagnosis = { meanScore : Vec, bias : Vec, reported : Mat, distortion : Mat, zMean : Vec, zC : Mat }
-
-delta (i j : Int) : R := if i == j then 1.0 else 0.0
+Diagnosis = { meanScore : Vec Float64, bias : Vec Float64, reported : Mat Float64, distortion : Mat Float64, zMean : Vec Float64, zC : Mat Float64 }
 
 diagnose (Theta Y : U) (s : Sampler Theta Y) (l : Likelihood Theta Y) (t : Theta) (n seed : Int) : Diagnosis :=
   match s t seed { (y0, s1) ->
   match l.info y0 t { h0 ->
-  match mscale (1.0 / toR n) (sumInfo Theta Y s l t n 1 s1 h0) { h ->
+  match mscale (1.0 / toFloat64 n) (sumInfo Theta Y s l t n 1 s1 h0) { h ->
   match invSqrtSym h { m ->
-  match rows h { d ->
+  match h.m { d ->
   match sumWhite Theta Y s l t m n 0 seed (zeros d) (zeros d) (mscale 0.0 h) (mscale 0.0 h) { mo ->
-  match scale (1.0 / toR n) mo.sw { wbar ->
-  match mscale (1.0 / toR n) mo.sww { ww ->
+  match scale (1.0 / toFloat64 n) mo.sw { wbar ->
+  match mscale (1.0 / toFloat64 n) mo.sww { ww ->
   match msub ww (outer wbar wbar) { c ->
-  match msub (mscale (1.0 / toR n) mo.sq) (hadamard ww ww) { var ->
-  match scale (1.0 / toR n) mo.ss { sbar ->
+  match msub (mscale (1.0 / toFloat64 n) mo.sq) (hadamard ww ww) { var ->
+  match scale (1.0 / toFloat64 n) mo.ss { sbar ->
   { meanScore := sbar,
     bias := solve h sbar,
     reported := h,
     distortion := c,
-    zMean := tabulate d (\ k { at wbar k / sqrtR (entry c k k / toR n) }),
-    zC := tabulateMat d d (\ i j { (entry c i j - delta i j) / sqrtR (entry var i j / toR n) }) } } } } } } } } } } } }
+    zMean := (d, \ k { wbar.f k / sqrt (c.f k k / toFloat64 n) }),
+    zC := (d, d, \ i j { (c.f i j - (identity d).f i j) / sqrt (var.f i j / toFloat64 n) }) } } } } } } } } } } } }
 
 -- the two scalars of the paper: the typical factor and its spread across directions
-logEigs (c : Mat) : Vec := match eigvalsSym c { e -> tabulate (length e) (\ k { logR (at e k) }) }
-magnitude (c : Mat) : R := match logEigs c { le -> expR (total le / toR (length le)) }
-anisotropy (c : Mat) : R :=
-  match logEigs c { le -> match total le / toR (length le) { mu ->
-  expR (sqrtR (sumTo (length le) (\ k { (at le k - mu) * (at le k - mu) }) / toR (length le))) } }
+logEigs (c : Mat Float64) : Vec Float64 := match eigvalsSym c { e -> (e.n, \ k { log (e.f k) }) }
+magnitude (c : Mat Float64) : Float64 := match logEigs c { le -> exp (total le / toFloat64 le.n) }
+anisotropy (c : Mat Float64) : Float64 :=
+  match logEigs c { le -> match total le / toFloat64 le.n { mu ->
+  exp (sqrt (sumTo le.n (\ k { (le.f k - mu) * (le.f k - mu) }) / toFloat64 le.n)) } }
 
 -- The likelihood is the density of the sampler: at every parameter, mean score zero and
 -- delivered information equal to reported, entry by entry within zMax standard errors.
@@ -133,7 +156,8 @@ DensityPair (Theta Y : U) : U := {
   sample : Sampler Theta Y
   lik    : Likelihood Theta Y
   |
-  ShiftByZero Theta Y sample lik & ScoreIsGradient Theta Y sample lik & InfoIsSymmetric Theta Y sample lik & IsDensityOf Theta Y sample lik }
+  ShiftByZero Theta Y sample lik & ShiftComposes Theta Y sample lik & ScoreIsGradient Theta Y sample lik
+  & InfoIsPositive Theta Y sample lik & IsDensityOf Theta Y sample lik }
 
 -- ---------------------------------------------------------------- the kernel and its three presentations
 -- A kernel Theta ~> data is one object read three ways: forward, as a sampler; through its
@@ -141,100 +165,88 @@ DensityPair (Theta Y : U) : U := {
 -- transform of each datum: entry k of `pit y t` is the probability that datum k falls below y_k.
 -- The kernel is the head and the three are its presentations; its laws say they present the same
 -- thing, one law for each side of the triangle:
---   sample and lik    the laws of a density pair (above)
+--   sample and lik    a density pair (above)
 --   pit and lik       the slope of pit is the density: sum_k log (d pit_k / d y_k) = loglik y t
 --   sample and pit    data the sampler draws have a uniform pit
--- A transform entry by entry supposes the data independent given the parameter. The first two
--- moments of the uniform, 1/2 and 1/3, are compared with their standard errors over the ensemble,
--- as the calibration laws of belief.lut do. The density-pair laws test the first two Bartlett
--- identities only; the uniform pit tests the whole distribution of each datum.
+-- A transform entry by entry supposes the data independent given the parameter. The density-pair
+-- laws test the first two Bartlett identities only; the uniform pit tests the whole distribution
+-- of each datum.
 
-normalCdf (x : R) : R := 0.5 * (1.0 + erfR (x / sqrtR 2.0))
-
-KernelParts (Theta : U) = { sample : Sampler Theta Vec, lik : Likelihood Theta Vec, pit : Vec -> Theta -> Vec }
+-- the three presentations without their laws: what a control that breaks one side is
+KernelParts (Theta : U) = { sample : Sampler Theta (Vec Float64), lik : Likelihood Theta (Vec Float64), pit : Vec Float64 -> Theta -> Vec Float64 }
 
 -- y with entry j moved by h
-bumped (y : Vec) (j : Fin y.n) (h : R) : Vec := (y.n, \ i { if i == j then y.f i + h else y.f i })
+bumped (y : Vec Float64) (j : Fin y.n) (h : Float64) : Vec Float64 := (y.n, \ i { if i == j then y.f i + h else y.f i })
 
 -- the slope of pit_j along y_j, by central difference with step fdStep: the truncation is of order
 -- (fdStep / sigma)^2, below 1e-6 for the sigmas of the tape (1 cm and up)
-pitSlope (Theta : U) (k : KernelParts Theta) (y : Vec) (t : Theta) (j : Fin y.n) : R :=
-  (at (k.pit (bumped y j fdStep) t) j - at (k.pit (bumped y j (0.0 - fdStep)) t) j) / (2.0 * fdStep)
+pitSlope (Theta : U) (pit : Vec Float64 -> Theta -> Vec Float64) (y : Vec Float64) (t : Theta) (j : Fin y.n) : Float64 :=
+  ((pit (bumped y j fdStep) t).f j - (pit (bumped y j (0.0 - fdStep)) t).f j) / (2.0 * fdStep)
 
-pitTol : R := 1e-6
+pitTol : Float64 := 1e-6
 
-PresentsDensityPair (Theta : U) (k : KernelParts Theta) (t : Theta) (seed : Int) : Bool :=
-  ShiftByZero Theta Vec k.sample k.lik t seed and ScoreIsGradient Theta Vec k.sample k.lik t seed
-  and InfoIsSymmetric Theta Vec k.sample k.lik t seed and IsDensityOf Theta Vec k.sample k.lik t seed
+PitIsDensity (Theta : U) (sample : Sampler Theta (Vec Float64)) (lik : Likelihood Theta (Vec Float64)) (pit : Vec Float64 -> Theta -> Vec Float64) (t : Theta) (seed : Int) : Bool :=
+  match drawAt Theta (Vec Float64) sample t seed { y ->
+  approx pitTol (sumTo y.n (\ j { log (pitSlope Theta pit y t j) })) (lik.loglik y t) }
 
-PitIsDensity (Theta : U) (k : KernelParts Theta) (t : Theta) (seed : Int) : Bool :=
-  match drawAt Theta Vec k.sample t seed { y ->
-  approxR pitTol (sumTo y.n (\ j { logR (pitSlope Theta k y t j) })) (k.lik.loglik y t) }
+PitUniform (Theta : U) (sample : Sampler Theta (Vec Float64)) (pit : Vec Float64 -> Theta -> Vec Float64) (t : Theta) (seed : Int) : Bool :=
+  UniformDraws (\ s { match sample t s { (y, next) -> (pit y t, next) } }) seed
 
--- sums of u and u^2 over every entry of the pit of n draws, and how many entries
-pitMoments (Theta : U) (k : KernelParts Theta) (t : Theta) (n i seed : Int) (s1 s2 : R) (count : Int) : R * R * Int :=
-  if i >= n then (s1, s2, count)
-  else match k.sample t seed { (y, next) -> match k.pit y t { u ->
-       pitMoments Theta k t n (i + 1) next (s1 + total u) (s2 + dot u u) (count + length u) } }
-
-PitUniform (Theta : U) (k : KernelParts Theta) (t : Theta) (seed : Int) : Bool :=
-  match pitMoments Theta k t ensembleSize 0 seed 0.0 0.0 0 { (a, c, count) ->
-  match toR count { n ->
-  abs (a / n - 0.5) / sqrtR (1.0 / 12.0 / n) < zMax
-  and abs (c / n - 1.0 / 3.0) / sqrtR (4.0 / 45.0 / n) < zMax } }
-
-Kernel (Theta : U) : KernelParts Theta
-Kernel (Theta : U) := PresentsDensityPair Theta & PitIsDensity Theta & PitUniform Theta
+Kernel (Theta : U) : U := {
+  pair : DensityPair Theta (Vec Float64)
+  pit  : Vec Float64 -> Theta -> Vec Float64
+  |
+  PitIsDensity Theta pair.sample pair.lik pit & PitUniform Theta pair.sample pit }
 
 -- ---------------------------------------------------------------- the Gaussian construction
 -- A mean model: the predicted observations and their Jacobian with respect to the parameter.
 MeanModel (Theta : U) = {
-  shift : Theta -> Vec -> Theta
-  mean  : Theta -> Vec
-  jac   : Theta -> Mat }
+  shift : Theta -> Vec Float64 -> Theta
+  mean  : Theta -> Vec Float64
+  jac   : Theta -> Mat Float64 }
 
 -- A scaled model: a mean model whose parameter also carries u = log sigma, a homogeneous
 -- error, with its gradient in the parameter space.
 ScaledModel (Theta : U) = {
   model     : MeanModel Theta
-  logSigma  : Theta -> R
-  dLogSigma : Theta -> Vec }
+  logSigma  : Theta -> Float64
+  dLogSigma : Theta -> Vec Float64 }
 
 -- Full Gaussian likelihood, u = log sigma a parameter. With r = y - mean, J the Jacobian,
 -- K the number of observations and g the gradient of u:
 --   loglik = -1/2 e^{-2u} |r|^2 - K u - K/2 log 2 pi
 --   score  = e^{-2u} J^T r + (e^{-2u} |r|^2 - K) g
 --   info   = e^{-2u} J^T J + 2 K g g^T
-gaussian (Theta : U) (m : ScaledModel Theta) : Likelihood Theta Vec := {
+gaussian (Theta : U) (m : ScaledModel Theta) : Likelihood Theta (Vec Float64) := {
   shift := m.model.shift,
   loglik := \ y t { match y - m.model.mean t { r -> match m.logSigma t { u ->
-    0.0 - 0.5 * expR (0.0 - 2.0 * u) * dot r r - toR (length r) * u - 0.5 * toR (length r) * log2pi } } },
-  score := \ y t { match y - m.model.mean t { r -> match expR (0.0 - 2.0 * m.logSigma t) { e ->
-    e * (transpose (m.model.jac t) * r) + (e * dot r r - toR (length r)) * m.dLogSigma t } } },
-  info := \ y t { match m.model.jac t { j -> match expR (0.0 - 2.0 * m.logSigma t) { e ->
-    e * (transpose j * j) + (2.0 * toR (rows j)) * outer (m.dLogSigma t) (m.dLogSigma t) } } } }
+    0.0 - 0.5 * exp (0.0 - 2.0 * u) * dot r r - toFloat64 r.n * u - 0.5 * toFloat64 r.n * log2pi } } },
+  score := \ y t { match y - m.model.mean t { r -> match exp (0.0 - 2.0 * m.logSigma t) { e ->
+    e * (transpose (m.model.jac t) * r) + (e * dot r r - toFloat64 r.n) * m.dLogSigma t } } },
+  info := \ y t { match m.model.jac t { j -> match exp (0.0 - 2.0 * m.logSigma t) { e ->
+    e * (transpose j * j) + (2.0 * toFloat64 j.m) * outer (m.dLogSigma t) (m.dLogSigma t) } } } }
 
 -- Profile likelihood, sigma eliminated by its maximum sigma^2 = RSS / K:
 --   loglik = -K/2 log(2 pi RSS / K) - K/2
 --   score  = (K / RSS) J^T r
 --   info   = (K / RSS) J^T J
-profiled (Theta : U) (m : MeanModel Theta) : Likelihood Theta Vec := {
+profiled (Theta : U) (m : MeanModel Theta) : Likelihood Theta (Vec Float64) := {
   shift := m.shift,
-  loglik := \ y t { match y - m.mean t { r -> match toR (length r) { k ->
-    0.0 - 0.5 * k * logR (2.0 * 3.141592653589793 * dot r r / k) - 0.5 * k } } },
-  score := \ y t { match y - m.mean t { r -> (toR (length r) / dot r r) * (transpose (m.jac t) * r) } },
-  info := \ y t { match y - m.mean t { r -> match m.jac t { j -> (toR (length r) / dot r r) * (transpose j * j) } } } }
+  loglik := \ y t { match y - m.mean t { r -> match toFloat64 r.n { k ->
+    0.0 - 0.5 * k * log (2.0 * pi * dot r r / k) - 0.5 * k } } },
+  score := \ y t { match y - m.mean t { r -> (toFloat64 r.n / dot r r) * (transpose (m.jac t) * r) } },
+  info := \ y t { match y - m.mean t { r -> match m.jac t { j -> (toFloat64 r.n / dot r r) * (transpose j * j) } } } }
 
 -- The sampler of the scaled model: mean plus sigma times standard normals drawn from the seed.
-gaussianSampler (Theta : U) (m : ScaledModel Theta) : Sampler Theta Vec :=
-  \ t seed { match m.model.mean t { mu -> match normalVec (length mu) seed { (z, s2) ->
-    (mu + expR (m.logSigma t) * z, s2) } } }
+gaussianSampler (Theta : U) (m : ScaledModel Theta) : Sampler Theta (Vec Float64) :=
+  \ t seed { match m.model.mean t { mu -> match normalVec mu.n seed { (z, s2) ->
+    (mu + exp (m.logSigma t) * z, s2) } } }
 
 -- The distribution function of the scaled model, datum by datum: Phi((y_k - mean_k) / sigma).
-gaussianPit (Theta : U) (m : ScaledModel Theta) : Vec -> Theta -> Vec :=
-  \ y t { match m.model.mean t { mu -> match expR (m.logSigma t) { s ->
-    (y.n, \ j { normalCdf ((y.f j - at mu j) / s) }) } } }
+gaussianPit (Theta : U) (m : ScaledModel Theta) : Vec Float64 -> Theta -> Vec Float64 :=
+  \ y t { match m.model.mean t { mu -> match exp (m.logSigma t) { s ->
+    (y.n, \ j { normalCdf ((y.f j - mu.f j) / s) }) } } }
 
 -- the scaled model as a kernel: its three presentations built from the one model
 gaussianKernel (Theta : U) (m : ScaledModel Theta) : Kernel Theta :=
-  { sample := gaussianSampler Theta m, lik := gaussian Theta m, pit := gaussianPit Theta m }
+  { pair := { sample := gaussianSampler Theta m, lik := gaussian Theta m }, pit := gaussianPit Theta m }

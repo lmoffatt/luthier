@@ -1,0 +1,77 @@
+{
+  "normalVec": {
+    "hash": "664dd035c34385c1",
+    "when": "2026-10-05T14:58:36",
+    "passed": true,
+    "seed": 404955008,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Float64": "genFloat64",
+        "Int": "genInt",
+        "Nat": "genNat"
+      },
+      "python_generators": [
+        "DeficientOf",
+        "Dim",
+        "Dim2",
+        "MatOf",
+        "MatRows",
+        "SpdOf",
+        "SymmetricSquare",
+        "VecOf"
+      ]
+    },
+    "laws": [
+      {
+        "label": "NormalLength normalVec",
+        "params": [
+          "n : Dim",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 20,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, seed = 0",
+          "n = 1, seed = -1",
+          "n = 1, seed = -2",
+          "n = 3, seed = -3",
+          "n = 1, seed = 2"
+        ]
+      },
+      {
+        "label": "NormalDraws normalVec",
+        "params": [
+          "n : Dim",
+          "seed : Int"
+        ],
+        "mode": "sampled",
+        "cases": 20,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Dim: registered Python generator, size up to 16",
+          "Int: genInt, size up to 16"
+        ],
+        "sample_cases": [
+          "n = 1, seed = -1",
+          "n = 1, seed = 0",
+          "n = 2, seed = -2",
+          "n = 3, seed = 0",
+          "n = 1, seed = 4"
+        ]
+      }
+    ]
+  }
+}

@@ -224,7 +224,7 @@ def _refs(t: Term, bound: set, resolve, out: set, ops: dict):
         if r is not None:
             out.add(r)
         return
-    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
+    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw, Primitive, Axiom)):
         return
     if isinstance(t, Lam):
         if t.ann is not None:

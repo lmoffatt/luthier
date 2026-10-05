@@ -33,7 +33,7 @@ Two kinds of object come out of this, told apart by the form of the definition (
 
 - a *concrete type* is defined natively, from the kernel: a `data`, an exponential, a product, a
   sum, a subtype of those. Its values are built by its constructors. `Vec` is
-  `{ n : Nat, f : Fin n -> R }`; a value is built by giving a length and a function.
+  `{ n : Nat, f : Fin n -> Float64 }`; a value is built by giving a length and a function.
 - a *theory* is a subtype of a labeled base, usually parameterized: `Group (A : U)`, `Codec`. It
   has no constructors of its own; its values are its *models*, records of operations that satisfy
   its laws. `csv : Codec := { parse := extern "...", render := extern "...", eq := sameTable }` is
@@ -48,7 +48,7 @@ the theory on that record.
 Most laws compare two things. On `Int` and on data, `==` is structural and decidable; on functions,
 and on anything that contains one, it is not (`05` R8). A theory therefore carries its own equality
 as a component, as `Ring` carries `eq` and `Codec` carries `eq`: exact on `Int`, within rounding on
-`R`, entrywise within rounding on vectors, cell by cell on tables. The laws are written against
+`Float64`, entrywise within rounding on vectors, cell by cell on tables. The laws are written against
 that equality once and hold for every carrier.
 
 ## 4. The certificate
@@ -73,13 +73,26 @@ certificate and travels with the value instead of being checked again at every u
 Short form: Luthier is concepts carried through the whole language, with semantic requirements
 that run and whose result is kept.
 
-## 6. An operation defined twice
+## 6. Characterize, do not reimplement
 
-An operation can be defined from others, and also characterized by a property (`a - b := a + neg
-b`, and `(a - b) + b == a`); the link between both is a theorem, which in version 0 is a law on a
-branch, tested. The libraries use this for the environment's operations: each leaf numpy computes
-has a native definition through the accessors, and a law `...Agrees` compares them on generated
-inputs (`04 §6`). Writing both is worth it only where the extern is in doubt.
+The laws of an object say what it is, by the properties that determine its operations. The inner
+product of a Euclidean space is the bilinear, symmetric, positive form for which the standard basis
+is orthonormal; from that, `dot x y` as a sum of products is a theorem. A determinant is the
+multilinear alternating function of the rows with `det I == 1`; Laplace's expansion is one way to
+compute it. Written this way, the laws are the mathematics of the object, and any implementation
+is a model of them.
+
+What is not a law: a second implementation. "The fast `dot` equals the slow `dot`" says the two
+agree, which is useful, and says nothing about what either computes; both could be wrong together.
+The libraries were first written that way, with a native definition as the reference and a law
+`...Agrees` per leaf, and `07-characterizations.md` records what each object's laws should be
+instead. Where an object is characterized, a native definition and an extern are two models
+certified against the same laws, and their agreement is a corollary (`05` R10).
+
+Some characterizations need a witness (the maximum of a vector is an entry of it; a spectrum comes
+with its eigenvectors): an existential law, which version 0 cannot run (`05 §10`). Until it can,
+the law is written with the witness as one more component (`eigen` returns the vectors with the
+values), or stays as the universal half with the existential noted.
 
 ## 7. Example: a store
 

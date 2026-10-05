@@ -10,11 +10,17 @@ addMod7 (a b : Z7) : Z7 := (a + b) mod 7
 mulMod7 (a b : Z7) : Z7 := (a * b) mod 7
 negMod7 (a : Z7) : Z7 := (7 - a) mod 7
 
-ringZ7 : Ring Z7 := (eqZ7, addMod7, mulMod7, 0, 1, negMod7)
+ringZ7 : CommutativeRing Z7 := {
+  eq  := eqZ7,
+  add := { monoid := { op := addMod7, unit := 0 }, inv := negMod7 },
+  mul := { op := mulMod7, unit := 1 } }
 
 -- or and and on Bool satisfy every law of a ring but the inverses
 eqB (a b : Bool) : Bool := a == b
-badRing : Ring Bool := (eqB, or, and, false, true, not)
+badRing : Ring Bool := {
+  eq  := eqB,
+  add := { monoid := { op := or, unit := false }, inv := not },
+  mul := { op := and, unit := true } }
 
 test ringZ7 exhaustive
 test badRing exhaustive

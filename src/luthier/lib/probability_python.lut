@@ -1,0 +1,11 @@
+-- The generator of standard normals of probability.lut, bound to numpy, and its certification.
+
+import "real"
+import "algebra"
+import "array"
+import "array_python"
+import "probability"
+
+normalVec := extern "python:luthier.arrays.normal_vec"
+
+test normalVec with 20

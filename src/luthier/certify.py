@@ -49,7 +49,7 @@ def cone(env: Env, qname: str) -> list:
         if d.data is not None:
             for c in d.data.constructors:
                 refs |= names_in(c.type)
-        elif d.body is not None and not isinstance(d.body, Extern):
+        elif d.body is not None and not isinstance(d.body, (Extern, Primitive, Axiom)):
             refs |= names_in(d.body)
         for r in refs:
             if r in env.defs or r in env.cons:

@@ -5,5 +5,5 @@ Codec : { parse : String -> Maybe Int, render : Int -> String }
 RoundTrip (c : Codec) (n : Int) : Bool := match c.parse (c.render n) { nothing -> false ; just m -> m == n }
 Codec := RoundTrip
 
-sigma : R
-scaled (x : R) : R := sigma * x
+sigma : Float64
+scaled (x : Float64) : Float64 := sigma * x

@@ -1,23 +1,42 @@
--- The algebraic instances certified on the numpy implementation of the arrays.
+-- The structures of algebra on the numpy leaves of array.lut: the vectors of length n are a
+-- Euclidean space and the n by n matrices act on them as linear maps. These instances are the
+-- characterization of the leaves that form them (add, scale, dot, matVec, matMul, transpose,
+-- identity); array.lut states, on each leaf, the laws that are not structural.
 
 import "real"
+import "algebra"
 import "array"
 import "array_python"
-import "algebra"
 
+-- Vectors of dimension n, over Float64, within the rounding of algebra's float64Field. The leaves
+-- act on bare arrays; each operation here is the leaf seen at the shaped type, so its result's
+-- shape is an obligation `test` checks.
+vecSpace (n : Dim) : VectorSpace Float64 float64Field.field (VecOf n) := {
+  eq := approxVec (roundingSlack * lawMagnitude * lawMagnitude * eps),
+  add := { monoid := { op := \ a b { add a b }, unit := zeros n }, inv := \ a { scale (0.0 - 1.0) a } },
+  scale := \ c a { scale c a } }
+
+euclidean (n : Dim) : Euclidean Float64 float64Field (VecOf n) n := {
+  space := { space := vecSpace n, inner := dot },
+  basis := \ i { row (identity n) i } }
+
+matrices (n : Dim) : LinearMaps Float64 float64Field (VecOf n) (MatOf n n) := {
+  on := (euclidean n).space, apply := \ a x { matVec a x }, compose := \ a b { matMul a b },
+  id := identity n, adjoint := \ a { transpose a } }
 
 -- the dimension the structure laws are certified at
 lawDim : Int := 5
 
 -- the structure's laws at one dimension, and the shapes of the operations at every dimension
-vec5      : VectorSpace (VecOf lawDim) := vecSpace lawDim
-euclid5   : InnerProductSpace (VecOf lawDim) := euclidean lawDim
-matrices5 : LinearMaps (VecOf lawDim) (MatOf lawDim lawDim) := matrices lawDim
+vec5      : VectorSpace Float64 float64Field.field (VecOf lawDim) := vecSpace lawDim
+euclid5   : Euclidean Float64 float64Field (VecOf lawDim) lawDim := euclidean lawDim
+matrices5 : LinearMaps Float64 float64Field (VecOf lawDim) (MatOf lawDim lawDim) := matrices lawDim
 
 test intRing with 100
-test realField with 100
+test float64Field with 100
 test vec5 with 50
 test euclid5 with 50
 test matrices5 with 50
 test vecSpace with 50
+test euclidean with 50
 test matrices with 50

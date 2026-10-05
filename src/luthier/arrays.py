@@ -305,6 +305,18 @@ def gen_mat_of(rng: random.Random, size: int, m, n):
     return _mat(rng, int(m), int(n), size)
 
 
+def gen_mat_rows(rng: random.Random, size: int, m):
+    """m rows and between 0 and size columns."""
+    return _mat(rng, int(m), rng.randint(0, max(size, 0)), size)
+
+
+def gen_symmetric(rng: random.Random, size: int):
+    """B + B^T, of a size between 1 and size: symmetric, any spectrum."""
+    n = rng.randint(1, max(size, 1))
+    B = _mat(rng, n, n, size)
+    return B + B.T
+
+
 def gen_spd_of(rng: random.Random, size: int, n):
     """B^T B + I: symmetric, eigenvalues at least one."""
     B = _mat(rng, int(n), int(n), size)

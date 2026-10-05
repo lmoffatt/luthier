@@ -74,7 +74,7 @@ A name passes through three states: declared (its base is known), defined (it ha
 certified (some of its laws passed `test`, each with a grade: a point, `n` sampled cases, every
 case of a finite domain). A definition may use only types that are defined, except those of its
 own object (`05` R2); that is what makes "this is a Table" guarantee something. A hole of a defined
-type is a parameter: `sigma : R` can be used, and what depends on it does not reduce until it is
+type is a parameter: `sigma : Float64` can be used, and what depends on it does not reduce until it is
 given a value. This is the principle "you do not execute code until it is defined" of the voice
 note 2026-05-30 18.09.57 [00:53].
 
@@ -101,10 +101,10 @@ left; each step is a definitional equality. Mathematics does not execute, it che
 
 The kernel chosen to start with (`04 §2`): `U`; the exponential, with its dependent form; the
 product, with its dependent form; the sum; `Empty` and `Unit`; the subtype; `data` for recursive
-types; and `Int`, `R` and `String`, the only primitive types, filled by the interpreter. `Bool` is
+types; and `Int`, `Float64` and `String`, the only primitive types, filled by the interpreter. `Bool` is
 `< true : Unit | false : Unit >`, `Maybe A` is `< nothing : Unit | just : A >`, and `Fin n`, the
 type of the n indices `{ k : Int | 0 <= k and k < n }`, is in the core because a vector of length
-n is a function `Fin n -> R`.
+n is a function `Fin n -> Float64`.
 
 This is one presentation among several. A smaller one would keep only `U`, the dependent function
 and `data`, deriving products, sums and the empty and unit types from `data`. The choice was made
@@ -113,7 +113,7 @@ able to state the equivalence of its presentations (voice note 2026-10-04; `05 �
 
 Two senses of "primitive" must not be confused (`04 §6`). Semantically primitive is the kernel.
 Primitive for performance is an extern: a value computed by the environment because it is faster
-there. A numpy array is not a primitive type; it is a value of `Fin n -> R`.
+there. A numpy array is not a primitive type; it is a value of `Fin n -> Float64`.
 
 ## 4. The two equalities, and the levels after them
 
@@ -138,7 +138,7 @@ Not in version 0.
 
 ## 6. What stays outside the kernel
 
-- Numbers beyond `Int` and `R`, vectors and matrices: native types built from the kernel; numpy is
+- Numbers beyond `Int` and `Float64`, vectors and matrices: native types built from the kernel; numpy is
   their representation.
 - What the environment computes: values given by `extern`, never types (`05` R5). `extern
   provisional` is the escape hatch for working in a hurry, recorded as debt.

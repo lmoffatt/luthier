@@ -88,6 +88,8 @@ class Loader:
         saved_kernel = self.checker.kernel
         self.checker.prefix = prefix
         self.checker.kernel = os.path.abspath(path) == os.path.abspath(CORE)
+        saved_library = self.checker.library
+        self.checker.library = os.path.abspath(path).startswith(os.path.abspath(PACKAGE_DIR) + os.sep)
         try:
             self.checker.load(prog)
         except TypeCheckError as e:
@@ -97,6 +99,7 @@ class Loader:
         finally:
             self.checker.prefix = saved
             self.checker.kernel = saved_kernel
+            self.checker.library = saved_library
         for d in prog.defs:
             self.origin[qualify(prefix, d.name)] = (path, prefix, d.name)
         for t in prog.tests:
@@ -150,6 +153,9 @@ def cmd_check(args):
     print(f"ok: {n_defs} definitions, {len(obligations)} with laws, "
           f"{len(certified)} certified, {len(pending)} pending test"
           + (f", {len(ck.provisional)} provisional" if ck.provisional else ""))
+    if args.verbose and ck.axioms:
+        for q, desc in ck.axioms.items():
+            print(f"  assumed {q}: {desc}")
     if args.verbose and ck.provisional:
         for q, over in ck.provisional.items():
             what = f"builds on {', '.join(over)}" if over else "an extern type nobody has defined"

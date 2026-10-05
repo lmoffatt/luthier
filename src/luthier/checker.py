@@ -74,7 +74,8 @@ class Checker:
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
         self.provisional: dict = {}    # name -> [declared types it builds on], for `extern provisional`
-        self.primitives = {"Int", "R", "String"}   # holes of core.lut the interpreter fills
+        self.library: bool = False     # loading core.lut or a library of the distribution (lib/)
+        self.axioms: dict = {}         # name -> description, for `axiom` (06 §3)
         self.path: list = []           # conditions of the enclosing `if` branches (Bool terms)
         self.lets: list = []           # (name, term): `match e { x -> ... }` binds x to e
 
@@ -345,7 +346,7 @@ class Checker:
     def defined(self, q: str) -> bool:
         """Whether a type name has a definition (05 §1): a body that is not pending, a data, an
         alias, or a primitive of the kernel. A provisional extern type is debt, not a definition."""
-        if q in self.primitives or q in BUILTIN_TYPES:
+        if q in BUILTIN_TYPES:
             return True
         d = self.env.defs.get(q)
         if d is None:
@@ -486,6 +487,21 @@ class Checker:
                 return
             if isinstance(d.body, Extern):
                 self.add_extern(qname, d, ty)
+                return
+            if isinstance(d.body, Primitive):
+                if not self.kernel:
+                    self.err(f"primitive is allowed only in core.lut: {d.name} must be defined natively")
+                base = None if (ty is None or isinstance(self.whnf(ty), Univ)) else ty
+                self.env.defs[qname] = Def(qname, Univ(), Primitive(d.body.desc, base), doc=d.doc, line=d.line)
+                return
+            if isinstance(d.body, Axiom):
+                if not self.library:
+                    self.err(f"an axiom is allowed only in core.lut and lib/: {d.name} must be tested, "
+                             f"not assumed")
+                if ty is None:
+                    self.err(f"axiom {d.name} needs a type")
+                self.env.defs[qname] = Def(qname, ty, Axiom(d.body.desc), doc=d.doc, line=d.line)
+                self.axioms[qname] = d.body.desc
                 return
             if ty is not None:
                 if existing is not None and existing.body is None and not _ends_in_universe(ty):
@@ -658,9 +674,9 @@ class Checker:
         if not self.recording or self.current_def is None:
             return
         name = self.current_def
+        bound = {}
         if self.lets:
             # a variable bound by `match e { x -> ... }` is e: the law speaks of e, not of every x
-            bound = {}
             for n, t in self.lets:
                 bound[n] = subst(t, bound) if bound else t
             term = subst(term, bound)
@@ -672,7 +688,7 @@ class Checker:
                     _, tt = self.infer(ctx, term)
                 if self.is_bool(tt):
                     for cond in reversed(self.path):
-                        term = App(App(Var("implies"), cond), term)
+                        term = App(App(Var("implies"), subst(cond, bound) if bound else cond), term)
             except (TypeCheckError, EvalError):
                 pass
         self.obligations.setdefault(name, []).append(Obligation(name, list(ctx), term, label))
@@ -716,7 +732,7 @@ class Checker:
             if isinstance(t.value, int):
                 return t, Var("Int")
             if isinstance(t.value, float):
-                return t, Var("R")
+                return t, Var("Float64")
             return t, Var("String")
         if isinstance(t, Univ):
             return t, Univ()
@@ -749,6 +765,9 @@ class Checker:
                 self.err(f"cannot infer the type of {pp(t)}: annotate the parameter or give an expected type")
             dom = self.check(ctx, t.ann, Univ())
             param, ctx2 = self.bind_pattern(ctx, t.param, dom)
+            if t.res is not None and isinstance(param, PVar):
+                # elaborated: the body was checked against its result type already
+                return Lam(param, t.body, dom, t.res), Pi(param.name, dom, t.res)
             body, cod = self.infer(ctx2, t.body)
             name = param.name if isinstance(param, PVar) else fresh("p")
             if not isinstance(param, PVar):
@@ -950,12 +969,13 @@ class Checker:
             return BinOp(op, l, r), Var("Bool")
         bt = self.base_type(lt)
         bw = self.whnf(bt)
-        num = isinstance(bw, Var) and bw.name in ("Int", "R")
+        num = isinstance(bw, Var) and bw.name in ("Int", "Float64")
         if op == "+" and isinstance(bw, Var) and bw.name == "String":
             r = self.check(ctx, t.rhs, bt)
             return BinOp(op, l, r), bt
         if not num:
-            self.err(f"operator {op} expects Int or R, got {pp(l)} : {pp(lt)}")
+            hint = "; the operations of Real are not computed (06 §2)" if self._is_real(bw) else ""
+            self.err(f"operator {op} expects Int or Float64, got {pp(l)} : {pp(lt)}{hint}")
         r = self.check(ctx, t.rhs, bt)
         if op in ("<", "<=", ">", ">="):
             return BinOp(op, l, r), Var("Bool")
@@ -1002,7 +1022,9 @@ class Checker:
             pt = pattern_to_term(param)
             cod = subst(w.cod, {w.name: pt}) if pt is not None else w.cod
             body = self.check(ctx2, t.body, cod)
-            return Lam(param, body, w.dom)
+            # keep the result type: a component projected out of a value is typed again later
+            # (a law of an enclosing structure), and must have the type it was checked at
+            return Lam(param, body, w.dom, cod if isinstance(param, PVar) else None)
         if isinstance(t, Pair) and isinstance(w, Sigma):
             a = self.check(ctx, t.fst, w.fst)
             b = self.check(ctx, t.snd, subst(w.snd, {w.name: a}))
@@ -1045,16 +1067,46 @@ class Checker:
             isinstance(t, Var) and t.name == "__nil__") and not (isinstance(t, App) and self._is_cons(t))
 
     def convertible(self, have: Term, want: Term) -> bool:
-        """`have` is `want`, or a subtype of it (through any number of layers)."""
+        """`have` is `want`, or a subtype of it (through any number of layers), including the
+        refinement of a primitive type (`Float64 : Real`), or a function type that passes for
+        `want` by variance (05 R9)."""
         cur = have
         for _ in range(32):
             if self.conv(cur, want):
                 return True
             b = self.strip_subtype(cur)
             if b is None:
-                return False
+                b = self.primitive_base(cur)
+            if b is None:
+                return self.function_passes(cur, want)
             cur = b
         return False
+
+    def primitive_base(self, ty: Term) -> Optional[Term]:
+        """`Real` for `Float64`: the type a primitive refines, or None."""
+        w = self.whnf(ty)
+        if isinstance(w, Var):
+            d = self.env.defs.get(w.name)
+            if d is not None and isinstance(d.body, Primitive) and d.body.base is not None:
+                return d.body.base
+        return None
+
+    def _is_real(self, ty: Term) -> bool:
+        w = self.whnf(ty)
+        return isinstance(w, Var) and w.name == "Real"
+
+    def function_passes(self, have: Term, want: Term) -> bool:
+        """R9: `A -> B` passes for `A' -> B'` when A' refines A and B refines B'."""
+        hw = self.whnf(self.base_type(have))
+        ww = self.whnf(self.base_type(want))
+        if not (isinstance(hw, Pi) and isinstance(ww, Pi)):
+            return False
+        if hw == ww:
+            return False
+        x = Var(fresh("x"))
+        if not self.convertible(ww.dom, hw.dom):
+            return False
+        return self.convertible(subst(hw.cod, {hw.name: x}), subst(ww.cod, {ww.name: x}))
 
     def coerce(self, ctx: Ctx, term: Term, have: Term, want: Term) -> Term:
         """Accept `term : have` where `want` is expected: equal types, a subtype seen in its base
@@ -1088,7 +1140,10 @@ class Checker:
                 finally:
                     self.current_def = saved
             return term
-        self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected")
+        hint = ""
+        if isinstance(w, Var) and w.name == "Float64" and self._is_real(self.base_type(have)):
+            hint = "; a Real becomes a Float64 only by rounding: toFloat64 (06 §4)"
+        self.err(f"{pp(term)} has type {pp(have)} but {pp(want)} was expected{hint}")
 
     def subtype_obligation(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):
         if isinstance(sub.pred, NoLaw) or (isinstance(sub.pred, Con) and sub.pred.name == "true"):

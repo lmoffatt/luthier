@@ -1,6 +1,8 @@
 # Numbers: the ideal, its realization, and the arrays over them
 
-Draft 1, 2026-10-05. Decided in the discussion of 2026-10-04 and 2026-10-05; not implemented yet.
+Draft 1, 2026-10-05. Decided in the discussion of 2026-10-04 and 2026-10-05. Implemented the same day:
+sections 2, 3, 5, 6 and the arrays over any type of section 7; not yet: the generic definitions
+through a number model (section 4 and the end of section 7), which still compute with `Float64`.
 It changes `04-kernel.md` (the primitive types, the bodies `primitive` and `axiom`) and
 `05-static-semantics.md` (the variance of function types, the grade "assumed", the bridge with the
 environment), which carry notes pointing here.

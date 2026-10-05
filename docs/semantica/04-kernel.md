@@ -42,8 +42,8 @@ directives.
 
 A data definition `x : U := data { ... }` is a definition whose body is a `data` term
 (section 2). The body of a definition is a term, a `data`, or `extern "target"` (section 4).
-Two more bodies are decided, not implemented (`06`): `primitive "..."`, a type the interpreter
-provides, and `axiom "..."`, a value whose laws are assumed.
+Two more bodies (`06`): `primitive "..."`, a type the interpreter provides, allowed only in
+`core.lut`; and `axiom "..."`, a value whose laws are assumed, allowed only in `core.lut` and `lib/`.
 
 Directives: `import "file" [as m]` (`03`), `test x [with n | exhaustive] [size k]` (`05 §7`),
 `gen T := g` (the generator of `T`), and `operator op := f` (the meaning of an infix operator
@@ -61,14 +61,14 @@ on the argument types of `f`). Directives are not definitions and have no states
 | unit | `Unit` | | `unit` | none needed |
 | subtype | `{ x : T \| p }` | `{ x : A, y : B \| p }` | a term of `T` for which `p` holds (an obligation) | a term of the subtype is a term of `T` |
 | recursive type | `data { c1 : ... ; c2 : ... }` | constructors are named | the constructors | `match` on constructors, with recursion |
-| primitives | `Int`, `R`, `String` (to become `Int`, `Real`, `Float64`, `String`: `06`) | | literals `3`, `3.0`, `"a"` | arithmetic and comparisons |
+| primitives | `Int`, `Real`, `Float64`, `String` (`06`) | | literals `3` (`Int`), `3.0` (`Float64`), `"a"` | arithmetic and comparisons on `Int` and `Float64` |
 
 Notes on each.
 
 - **Exponential, product, sum** are primitive and structural. Their named forms are the same
   types with names for the positions: the names are binders, like the parameter names of a
-  function, and are not part of the type's identity. `{ mean : R, var : R }`, `(m : R) * (v : R)`
-  and `R * R` are the same type; `{ a : A, b : B }` and `{ b : B, a : A }` are different types
+  function, and are not part of the type's identity. `{ mean : Float64, var : Float64 }`, `(m : Float64) * (v : Float64)`
+  and `Float64 * Float64` are the same type; `{ a : A, b : B }` and `{ b : B, a : A }` are different types
   (isomorphic, not equal). The reading where labels are the identity (a record as a function
   from its set of labels) is a translation, not an equality.
 - **Anonymous sums** inject with the labels `left` and `right`: `A + B` is
@@ -89,11 +89,13 @@ Notes on each.
   distinct constructors give distinct values, and each constructor is injective. Those facts
   are not axioms to state; they hold by construction. A non-recursive sum of products is
   written with the structural formers and named with an alias (`05` R4).
-- **Primitives** (2026-10-05: to be written with the body `primitive "..."`, which says what each
-  one is, and `R` to be replaced by `Real`, the ideal, and `Float64 : Real`, the finite doubles;
-  `06-numbers.md`) are holes of the kernel filled by the interpreter: their literals,
-  arithmetic, comparisons and structural equality. `R` is an IEEE double. What can be said
-  about them (epsilon, approximate equality) is library (`lib/real.lut`).
+- **Primitives** are types the interpreter provides, each defined in `core.lut` with the body
+  `primitive "..."` that says what it is (`06 §2`): `Int` is the integers without bound, `Real` the
+  real numbers (the ideal, whose operations nothing computes and whose structure is an axiom of
+  `lib/algebra.lut`), `Float64 : Real` the finite IEEE doubles, `String` text. The interpreter
+  supplies their literals, the arithmetic and comparisons of `Int` and `Float64`, and their
+  structural equality. What can be said about the doubles (epsilon, approximate equality) is library
+  (`lib/real.lut`).
 
 The kernel is therefore a bicartesian closed category (products, sums, exponentials, a
 terminal and an initial type) with the dependent forms of the product and the exponential,
@@ -135,7 +137,7 @@ Evaluation reduces terms by these rules, each a definitional equality:
   never reach evaluation;
 - **iota**: a `match` on a constructor, a label injection or a pair reduces to the branch that
   matches, with the pattern variables substituted;
-- **prim**: arithmetic and comparisons on literals of `Int`, `R`, `String`; `==` on values of
+- **prim**: arithmetic and comparisons on literals of `Int`, `Float64`, `String`; `==` on values of
   types with structural equality (`05` R8);
 - **extern**: an extern applied to as many closed arguments as its type has parameters calls the
   environment and converts the result back.
@@ -170,11 +172,11 @@ kernel construct would not be sugar (`02 §4`).
 
 Two different senses of "primitive" must not be confused.
 
-- *Semantically primitive* is what the kernel has: the formers of section 2 and `Int`, `R`,
+- *Semantically primitive* is what the kernel has: the formers of section 2 and `Int`, `Float64`,
   `String`. Every other type is defined natively from them (`05` R5).
 - *Primitive for performance* is an extern: a value computed by the environment because it is
   faster there. A numpy array is not a primitive type: with `Fin n = { k : Int | 0 <= k and k < n }`,
-  `VecOf n` is natively the function type `Fin n -> R`, a matrix is `Fin m -> Fin n -> R`
+  `VecOf n` is natively the function type `Fin n -> Float64`, a matrix is `Fin m -> Fin n -> Float64`
   (a vector of vectors, by currying), and a numpy array *is* a value of that type. Nothing is
   converted and nothing about the representation needs certifying: indexing an array that was
   built from a function gives back that function's values exactly.
@@ -189,9 +191,9 @@ of the environment, and the interpreter has three rules for it:
    lambda over `Fin n` gets the array of its `n` values: the interpreter evaluates it at every
    index (it *materializes* it), which is possible only because the domain is finite. The cost
    is `n` evaluations; a materialized value is kept so it is not built twice.
-3. *Representation by type.* `Fin n -> R` is a one-dimensional ndarray, `Fin m -> Fin n -> R` a
+3. *Representation by type.* `Fin n -> Float64` is a one-dimensional ndarray, `Fin m -> Fin n -> Float64` a
    two-dimensional one, `Fin n -> A` for a non-numeric `A` a list; a vector of unknown length,
-   `(n : Int) * (Fin n -> R)`, is the pair `(arr.shape[0], arr)`. The shape is checked when the
+   `(n : Int) * (Fin n -> Float64)`, is the pair `(arr.shape[0], arr)`. The shape is checked when the
    value crosses: an array declared `VecOf 3` must have shape `(3,)`.
 
 4. *Each entry once.* A lambda over `Fin n` is a table: the interpreter computes each of its
@@ -204,20 +206,22 @@ Two values of a function type, one a lambda and the other an array, are compared
 observational equality, point by point over `Fin n` (`05` R8); since the domain is finite the
 comparison is exhaustive.
 
-The order of a sum is part of its rounding. `sumTo n f` is `f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`;
+The order of a sum is part of its rounding. `sumTo n f` is `f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`, the
+fold of `algebra` over the additive monoid of `Float64`, which associates to the right;
 written the other way it gives a result that differs in the last bits, which an optimizer
 downstream amplifies. The rewrite of experiment zero reproduced its earlier results bit for bit
 only once the order matched.
 
-What does need certifying is that the operations the environment provides compute what their
-native definitions say. A function may be given natively, as an extern, or both. Writing it
-both ways is worth it only where the extern is in doubt; then a law compares them on generated
-inputs:
+What does need certifying is that the operations the environment provides satisfy the laws
+that characterize them (`05` R10, `07`). A function may be given natively, as an extern, or
+both; each is a model of the same laws. Writing it both ways adds, as a corollary, that the two
+agree, which tightens the tolerance:
 
     AddAgrees (ad : Vec -> Vec -> Vec) (n : Dim) (x y : VecOf n) : Bool := approxVec 0.0 (ad x y) (addDef x y)
 
 `addDef` is the native definition; `test` runs the law with `ad` bound to the extern. The
-libraries call these laws `Agrees`; the name is local to Luthier.
+libraries call these laws `Agrees`; the name is local to Luthier. Until 2026-10-05 they were the
+only laws of the leaves, which `01 §6` explains is not enough.
 
 ## 7. Status of the interpreter
 

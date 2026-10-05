@@ -14,7 +14,7 @@ def fresh(base: str) -> str:
 def free_vars(t: Term) -> set[str]:
     if isinstance(t, Var):
         return {t.name}
-    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
+    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw, Primitive, Axiom)):
         return set()
     if isinstance(t, Sum):
         out = set()
@@ -27,6 +27,8 @@ def free_vars(t: Term) -> set[str]:
         return free_vars(t.type)
     if isinstance(t, Lam):
         fv = free_vars(t.body) - set(pattern_vars(t.param))
+        if t.res is not None:
+            fv |= free_vars(t.res) - set(pattern_vars(t.param))
         if t.ann is not None:
             fv |= free_vars(t.ann)
         return fv
@@ -77,7 +79,7 @@ def subst(t: Term, mapping: dict[str, Term]) -> Term:
         return t
     if isinstance(t, Var):
         return mapping.get(t.name, t)
-    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
+    if isinstance(t, (Lit, Univ, Con, Extern, NoLaw, Primitive, Axiom)):
         return t
     if isinstance(t, Sum):
         return Sum(tuple((l, subst(a, mapping)) for l, a in t.alts))
@@ -103,6 +105,9 @@ def subst(t: Term, mapping: dict[str, Term]) -> Term:
         return Proj(subst(t.term, mapping), t.field)
     if isinstance(t, Lam):
         ann = subst(t.ann, mapping) if t.ann is not None else None
+        if t.res is not None:
+            p, both = _under_binder(t.param, Pair(t.body, t.res), mapping)
+            return Lam(p, both.fst, ann, both.snd)
         p, body = _under_binder(t.param, t.body, mapping)
         return Lam(p, body, ann)
     if isinstance(t, Pi):
@@ -160,7 +165,7 @@ def map_names(t: Term, f) -> Term:
         return Var(f(t.name))
     if isinstance(t, Con):
         return Con(f(t.name))
-    if isinstance(t, (Lit, Univ, Extern, NoLaw)):
+    if isinstance(t, (Lit, Univ, Extern, NoLaw, Primitive, Axiom)):
         return t
     if isinstance(t, Sum):
         return Sum(tuple((l, map_names(a, f)) for l, a in t.alts))
@@ -186,7 +191,8 @@ def map_names(t: Term, f) -> Term:
         return Proj(map_names(t.term, f), t.field)
     if isinstance(t, Lam):
         return Lam(map_pattern_names(t.param, f), map_names(t.body, f),
-                   map_names(t.ann, f) if t.ann is not None else None)
+                   map_names(t.ann, f) if t.ann is not None else None,
+                   map_names(t.res, f) if t.res is not None else None)
     if isinstance(t, Pi):
         return Pi(t.name, map_names(t.dom, f), map_names(t.cod, f))
     if isinstance(t, Sigma):
@@ -225,7 +231,7 @@ def alpha_normalize(t: Term) -> Term:
     def go(t: Term, env: dict) -> Term:
         if isinstance(t, Var):
             return Var(env.get(t.name, t.name))
-        if isinstance(t, (Lit, Univ, Con, Extern, NoLaw)):
+        if isinstance(t, (Lit, Univ, Con, Extern, NoLaw, Primitive, Axiom)):
             return t
         if isinstance(t, Sum):
             return Sum(tuple((l, go(a, env)) for l, a in t.alts))
@@ -254,7 +260,7 @@ def alpha_normalize(t: Term) -> Term:
             ann = go(t.ann, env) if t.ann is not None else None
             env2 = dict(env)
             p = go_pat(t.param, env2)
-            return Lam(p, go(t.body, env2), ann)
+            return Lam(p, go(t.body, env2), ann, go(t.res, env2) if t.res is not None else None)
         if isinstance(t, Pi):
             dom = go(t.dom, env)
             env2 = dict(env)

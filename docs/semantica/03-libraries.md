@@ -78,10 +78,10 @@ file; it is how an obligation whose generator lives in another file (a table gen
 
 | file | what it holds |
 |---|---|
-| `real`, `real_python` | functions on `R` (declared, bound to Python's math), `approx`, `Positive` |
-| `random` | `Gen A = Nat -> Int -> A * Int`, a congruential generator, generators for `Int`, `Nat`, `Bool`, `R`, lists |
+| `real`, `real_python` | functions on `Float64` (declared, bound to Python's math), `approx` (the equality of `Float64` within a relative tolerance), `NonNegative`, the tolerances of laws |
+| `random` | `Gen A = Nat -> Int -> A * Int`, a congruential generator, generators for `Int`, `Nat`, `Bool`, `Float64`, lists |
 | `array`, `array_python` | `Vec`, `Mat`, their shapes, native definitions of every operation including the determinant and Jacobi's spectrum, numpy leaves certified against them |
-| `algebra`, `algebra_python` | setoids, rings, fields, vector and inner product spaces, linear maps; instances on `Int`, `R`, vectors |
+| `algebra`, `algebra_python` | setoids, rings, fields, vector and inner product spaces, linear maps; instances on `Int`, `Float64`, vectors |
 | `probability` | samplers and likelihoods, the kernel with its three presentations (sampler, likelihood, transform), the Gaussian and profile constructions, the ensemble diagnostics |
 | `belief` | belief families, discrete and Gaussian (Laplace) beliefs, their laws |
 | `optimization` | Levenberg-Marquardt in pieces, each with its law |

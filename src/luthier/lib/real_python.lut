@@ -2,12 +2,14 @@
 
 import "real"
 
-abs : R -> R := extern "python:builtins.abs"
-toR : Int -> R := extern "python:builtins.float"
-ulp : R -> R := extern "python:math.ulp"
-sqrtR : R -> R := extern "python:math.sqrt"
-cbrtR : R -> R := extern "python:math.cbrt"
-expR : R -> R := extern "python:math.exp"
-logR : R -> R := extern "python:math.log"
-erfR : R -> R := extern "python:math.erf"
-roundR : R -> Int := extern "python:builtins.round"
+abs := extern "python:builtins.abs"
+toFloat64 : Int -> Float64 := extern "python:builtins.float"
+ulp : Float64 -> Float64 := extern "python:math.ulp"
+sqrt : Float64 -> Float64 := extern "python:math.sqrt"
+cbrt : Float64 -> Float64 := extern "python:math.cbrt"
+exp : Float64 -> Float64 := extern "python:math.exp"
+log : Float64 -> Float64 := extern "python:math.log"
+erf : Float64 -> Float64 := extern "python:math.erf"
+round : Float64 -> Int := extern "python:builtins.round"
+
+test abs with 100

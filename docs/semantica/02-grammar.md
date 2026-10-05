@@ -20,7 +20,7 @@ A dotted name `m.f` is one token; it is a qualified name or a projection, resolv
 
 Reserved words: `data`, `match`, `extern`, `provisional`, `test`, `with`, `exhaustive`, `gen`,
 `import`, `forget`, `U`, `operator`, `if`, `then`, `else`. `and`, `or` and `mod` are ordinary names
-written infix; `Bool`, `Int`, `R`, `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat`, `Fin` are
+written infix; `Bool`, `Int`, `Float64`, `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat`, `Fin` are
 definitions of `core.lut`.
 
 Layout: an act starts at column 0, and an indented line continues the act above it. Inside
@@ -95,7 +95,7 @@ An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types
 
 A pattern `name` is a constructor of the scrutinee's data type or a label of its sum if it names
 one, and a variable otherwise. A label of a sum is an injection: `circle 2.0` against
-`< circle : R | square : R >`, `true` against `Bool`. A union `< ... >` written as the argument of
+`< circle : Float64 | square : Float64 >`, `true` against `Bool`. A union `< ... >` written as the argument of
 an application needs parentheses, because `<` after a term is a comparison.
 
 ## 4. Translations into the kernel

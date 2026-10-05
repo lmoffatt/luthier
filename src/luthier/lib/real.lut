@@ -1,22 +1,34 @@
--- The real numbers of the environment. `R` itself is declared in core.lut as a hole the
--- interpreter fills with IEEE doubles, with its literals and arithmetic; this library declares
--- the functions on it, without a body, and says what can be said about them. real_python.lut
--- binds them to Python's math.
+-- The functions on Float64. `Float64` is primitive (core.lut, 06 §2): the finite doubles, with
+-- their literals and the machine's arithmetic. This library declares the functions on them without
+-- a body; real_python.lut binds them to Python's math. It also gives the equality of Float64
+-- within rounding and the tolerances of the laws that compare computed values.
 
-abs  : R -> R
-toR  : Int -> R
-ulp  : R -> R         -- the distance to the next double
-sqrtR : R -> R
-cbrtR : R -> R
-expR  : R -> R
-logR  : R -> R
-erfR  : R -> R
-roundR : R -> Int     -- the nearest whole number
+-- the magnitude: x or -x, whichever is not negative
+AbsIsMagnitude (f : Float64 -> NonNegative) (x : Float64) : Bool := f x >= 0.0 and (f x == x or f x == 0.0 - x)
+abs  : { f : Float64 -> NonNegative | AbsIsMagnitude f }
+toFloat64 : Int -> Float64        -- the nearest double to an integer, exact below 2^53
+ulp  : Float64 -> Float64         -- the distance to the next double
+sqrt : Float64 -> Float64
+cbrt : Float64 -> Float64
+exp  : Float64 -> Float64
+log  : Float64 -> Float64
+erf  : Float64 -> Float64
+round : Float64 -> Int            -- the nearest whole number
 
 -- the machine epsilon: the ulp of one, 2^-52. The rounding error of one operation is at
 -- most half of it; of a sum of n terms, about n times it.
-eps : R := ulp 1.0
+eps : Float64 := ulp 1.0
 
-approx (tol a b : R) : Bool := abs (a - b) < tol
+-- Equal within a tolerance relative to the size of the values, |a - b| <= tol (1 + |a| + |b|):
+-- the equality of Float64 as a realization of Real (06 §4). With tol 0 it is exact equality.
+approx (tol a b : Float64) : Bool := abs (a - b) <= tol * (1.0 + abs a + abs b)
 
-Positive : U := { x : R | x >= 0.0 }
+NonNegative : U := { x : Float64 | x >= 0.0 }
+
+-- The tolerance of a law: a sum of n products rounds to about n eps times the size of the
+-- terms, and the terms can cancel, so a law whose sides may be near zero scales its tolerance
+-- by the norms involved, not by the result. The slack covers the few extra operations each
+-- side performs. Declared once, here.
+roundingSlack : Float64 := 8.0
+tolOf (n : Int) : Float64 := roundingSlack * toFloat64 n * eps
+scaledTol (n : Int) (magnitude : Float64) : Float64 := tolOf n * (1.0 + magnitude)

@@ -19,7 +19,7 @@ genIntBetween (lo hi : Int) : Gen Int := \ size s { match randBelow (hi - lo + 1
 genInt  : Gen Int  := \ size s { genIntBetween (0 - size) size size s }
 genNat  : Gen Nat  := \ size s { genIntBetween 0 size size s }
 genBool : Gen Bool := \ size s { match randBelow 2 s { (k, s2) -> (k == 1, s2) } }
-genR    : Gen R    := \ size s { match randBelow 2000001 s { (k, s2) -> (toR (k - 1000000) / 1000000.0 * toR size, s2) } }
+genFloat64    : Gen Float64    := \ size s { match randBelow 2000001 s { (k, s2) -> (toFloat64 (k - 1000000) / 1000000.0 * toFloat64 size, s2) } }
 
 genListN (A : U) (g : Gen A) (len : Int) (size : Nat) (s : Int) : List A * Int :=
   if len <= 0 then (nil A, s)
@@ -30,4 +30,5 @@ genList (A : U) (g : Gen A) : Gen (List A) := \ size s { match randBelow (size +
 gen Int  := genInt
 gen Nat  := genNat
 gen Bool := genBool
-gen R    := genR
+gen Float64    := genFloat64
+

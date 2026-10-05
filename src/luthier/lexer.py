@@ -6,7 +6,7 @@ import re
 SYMBOLS = [":=", "->", "==", "/=", "<=", ">=", "'{", "${",
            ":", "(", ")", "{", "}", "[", "]", ",", "|", "&", "\\", "*", "+", "-", "/", "<", ">", "=", ";", "."]
 KEYWORDS = {"data", "match", "extern", "test", "with", "exhaustive", "gen", "import", "forget", "U", "operator",
-            "if", "then", "else", "provisional"}
+            "if", "then", "else", "provisional", "primitive", "axiom"}
 INFIX_NAMES = {"and", "or", "mod"}  # ordinary names that are also infix operators
 
 TOKEN_RE = re.compile(r"""

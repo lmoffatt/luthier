@@ -23,11 +23,12 @@ from typing import Optional
 
 from .syntax import (Term, Var, Lit, Univ, Lam, App, Pi, Sigma, Pair, Arrow, BinOp, Con, Extern,
                      Subtype, Match, And, Forget, Pattern, PVar, PWild, PCon, PPair, PLit,
-                     Sum, Inj, NoLaw, PInj)
+                     Sum, Inj, NoLaw, PInj, Primitive, Axiom)
 from .subst import subst, free_vars
 from .evaluator import (Env, Fuel, EvalError, OutOfFuel, ExternInfo, unapply, from_python, to_python,
                         strip_subtypes, pi_chain, result_type, _OPAQUE, nf as subst_nf,
-                        is_indexable, index_foreign, fin_bound, shaped, whnf as subst_whnf)
+                        is_indexable, index_foreign, fin_bound, shaped, whnf as subst_whnf, finite,
+                        check_int64, _is_numpy_fn)
 
 
 class NotClosed(Exception):
@@ -173,6 +174,10 @@ class Machine:
             d = env.defs[name]
             if d.data is not None:
                 v = VType(Var(name), {})
+            elif isinstance(d.body, Primitive):
+                v = VType(Var(name), {})
+            elif isinstance(d.body, Axiom):
+                raise NotClosed(f"{name} is an axiom: its laws are assumed and it has no computation")
             elif d.body is None:
                 if isinstance(d.type, Univ):
                     v = VType(Var(name), {})     # a declared type: its values come from outside
@@ -370,11 +375,11 @@ class Machine:
                 return VLit(x + y)
             raise Unsupported(f"{op} on strings")
         try:
-            if op == "+": return VLit(x + y)
-            if op == "-": return VLit(x - y)
-            if op == "*": return VLit(x * y)
-            if op == "/": return VLit(x // y if isinstance(x, int) and isinstance(y, int) else x / y)
-            if op == "mod": return VLit(x % y)
+            if op in ("+", "-", "*", "/", "mod"):
+                r = (x + y if op == "+" else x - y if op == "-" else x * y if op == "*"
+                     else (x // y if isinstance(x, int) and isinstance(y, int) else x / y) if op == "/"
+                     else x % y)
+                return VLit(finite(r, f"{x} {op} {y}"))
             if op == "<": return vbool(x < y)
             if op == "<=": return vbool(x <= y)
             if op == ">": return vbool(x > y)
@@ -412,10 +417,13 @@ class Machine:
     def call_extern(self, term: Extern, info: ExternInfo, args: list) -> Value:
         ty = info.type
         vals = []
+        numpy_fn = _is_numpy_fn(info.fn)
         for th in args:
             v = self.force(th)
             dom = ty.dom if isinstance(ty, Pi) else None
             py = self.to_python(v, dom)
+            if numpy_fn:
+                check_int64(py, f'extern "{term.target}"')
             vals.append(py)
             if isinstance(ty, Pi):
                 ty = subst(ty.cod, {ty.name: self.quote(v)}) if ty.name in free_vars(ty.cod) else ty.cod
@@ -492,10 +500,16 @@ class Machine:
                 return self.to_python(g, cod)
             return [rec(self.apply1(g, Thunk.of(VLit(i))), ds[1:]) for i in range(ds[0])]
         out = rec(f, list(dims))
-        try:
-            arr = np.asarray(out, dtype=float)
-        except (TypeError, ValueError):
-            arr = out
+        from .evaluator import _is_int_type
+        if _is_int_type(self.env, cod):
+            for v in np.asarray(out, dtype=object).ravel():
+                check_int64(v, "an array of numpy")
+            arr = np.asarray(out, dtype=np.int64)
+        else:
+            try:
+                arr = np.asarray(out, dtype=float)
+            except (TypeError, ValueError):
+                arr = out
         if len(cache) > 4096:
             cache.clear()
         cache[id(f)] = (f, arr)

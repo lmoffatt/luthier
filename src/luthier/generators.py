@@ -101,7 +101,7 @@ class Generators:
         name = h.name if isinstance(h, Var) else None
         if name == "Int":
             return Lit(rng.randint(-size, size))
-        if name == "R":
+        if name == "Float64":
             return Lit(rng.uniform(-size, size))
         if name == "String":
             return Lit("".join(rng.choice("abcxyz") for _ in range(rng.randint(0, min(size, 6)))))
@@ -152,7 +152,7 @@ class Generators:
             # numbers. A thin sample of the function space, and the certificate says so.
             dw = whnf(self.env, w.dom, self.fuel())
             cw = whnf(self.env, w.cod, self.fuel())
-            if isinstance(dw, Var) and dw.name == "R" and isinstance(cw, Var) and cw.name == "R" and rng.random() < 0.5:
+            if isinstance(dw, Var) and dw.name == "Float64" and isinstance(cw, Var) and cw.name == "Float64" and rng.random() < 0.5:
                 a = self.sample(w.cod, rng, size, depth + 1)
                 b = self.sample(w.cod, rng, size, depth + 1)
                 return Lam(PVar("x"), BinOp("+", BinOp("*", a, Var("x")), b), w.dom)
@@ -269,8 +269,8 @@ class Generators:
         name = h.name if isinstance(h, Var) else None
         if name == "Int":
             return f"Int in [-{size}, {size}] (Python fallback; import \"random\" for genInt)"
-        if name == "R":
-            return f"R uniform in [-{size}, {size}] (Python fallback; import \"random\" for genR)"
+        if name == "Float64":
+            return f"Float64 uniform in [-{size}, {size}] (Python fallback; import \"random\" for genFloat64)"
         if name == "String":
             return "String: short random strings (fallback)"
         if name in self.env.datas:

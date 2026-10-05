@@ -215,6 +215,12 @@ class Parser:
                     provisional = True
                 target = self.expect("string").text[1:-1]
                 body = Extern(target, provisional=provisional)
+            elif self.at_kw("primitive"):
+                self.next()
+                body = Primitive(self.expect("string").text[1:-1])
+            elif self.at_kw("axiom"):
+                self.next()
+                body = Axiom(self.expect("string").text[1:-1])
             else:
                 body = self.parse_term()
         # clauses: | pat, pat := body   (each on its own indented line)

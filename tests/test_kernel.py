@@ -106,8 +106,8 @@ double (n : N) : N
 
 def test_sums_inject_by_label_and_match_on_labels():
     ck = load("""
-Shape = < circle : R | square : R >
-area (s : Shape) : R := match s { circle r -> 3.0 * r * r ; square a -> a * a }
+Shape = < circle : Float64 | square : Float64 >
+area (s : Shape) : Float64 := match s { circle r -> 3.0 * r * r ; square a -> a * a }
 c : Shape := circle 2.0
 S = Int + Bool
 s : S := right true
@@ -130,7 +130,7 @@ orZero (m : Maybe Int) : Int := match m { nothing -> 0 ; just k -> k }
 
 
 def test_extern_call():
-    ck = load('sq : R -> R := extern "python:math.sqrt"')
+    ck = load('sq : Float64 -> Float64 := extern "python:math.sqrt"')
     assert ev(ck, "sq 16.0") == "4.0"
 
 
@@ -195,6 +195,20 @@ bad : Codec := { parse := read, render := show }
 
 
 # ------------------------------------------------------------------ testing
+
+def test_a_component_of_a_nested_structure_keeps_the_type_it_was_checked_at():
+    # the outer law sees `inner`, a lambda whose body infers Int; it was checked at Small,
+    # and the law must be typed at Small too
+    ck = load("""
+Small : U := { k : Int | 0 <= k and k < 4 }
+Closed (A : U) (op : A -> A -> A) (x y : A) : Bool := op x y == op y x
+Inner (A : U) : U := { op : A -> A -> A | Closed A op }
+Outer (A : U) : U := { inner : Inner A, unit : A | \\ (x : A) { inner unit x == x } }
+outer : Outer Small := { inner := \\ a b { (a * b) mod 4 }, unit := 1 }
+""")
+    r = run_test(ck, Generators(ck.env), "outer", exhaustive=True, deep=True)
+    assert r.passed, [(l.label, l.error, l.failure) for l in r.laws if not l.passed]
+
 
 def test_a_group_passes_exhaustively_and_a_wrong_one_fails_with_a_counterexample():
     ck = load(LAWS + """
@@ -327,25 +341,25 @@ def test_a_declared_type_of_one_file_is_defined_by_its_laws_in_another(tmp_path)
 
 def test_projection_of_named_components():
     ck = load("""
-P = { x : R, y : R }
+P = { x : Float64, y : Float64 }
 pt : P := (1.0, 2.0)
-f (p : P) : R := p.x + p.y
+f (p : P) : Float64 := p.x + p.y
 """)
     assert ev(ck, "f pt") == "3.0"
     t, ty = ck.infer([], parse_term("pt.y"))
-    assert pp(t) == "pt.y" and pp(ty) == "R"
+    assert pp(t) == "pt.y" and pp(ty) == "Float64"
 
 
 def test_projection_through_refinements_aliases_and_parentheses():
     ck = load("""
 Id (A : U) = A
-Box (F : U -> U) = { v : F R, w : F R }
+Box (F : U -> U) = { v : F Float64, w : F Float64 }
 b : Box Id := (1.0, 2.0)
-S : U := { inner : Box Id, k : R | k > 0.0 and inner.v <= inner.w }
+S : U := { inner : Box Id, k : Float64 | k > 0.0 and inner.v <= inner.w }
 Small : U := { s : S | s.k < 10.0 }
 s : Small := ((1.0, 2.0), 3.0)
-pick (q : Small) : R := q.inner.w + q.k
-mk (x : R) : S := ((x, x), x)
+pick (q : Small) : Float64 := q.inner.w + q.k
+mk (x : Float64) : S := ((x, x), x)
 """)
     assert ev(ck, "b.w") == "2.0"
     assert ev(ck, "pick s") == "5.0"
@@ -365,7 +379,7 @@ g (x : D) : Int := x.m + x.n
 
 def test_projection_errors():
     with pytest.raises(TypeCheckError) as e:
-        load("P = { x : R, y : R }\npt : P := (1.0, 2.0)\nz : R := pt.z")
+        load("P = { x : Float64, y : Float64 }\npt : P := (1.0, 2.0)\nz : Float64 := pt.z")
     assert "no component z" in str(e.value)
 
 
@@ -404,11 +418,11 @@ duration : Signal -> Int := extern provisional "python:builtins.len"
 
 def test_a_filled_hole_evaluates_and_its_laws_are_certified(tmp_path):
     path = write(tmp_path, "sq.lut", '''
-Positive : U := { x : R | x > 0.0 }
-close (a b : R) : Bool := a - b < 0.000000001 and b - a < 0.000000001
-Sqrt : U := { f : Positive -> R | \\ (x : Positive) { close (f x * f x) x } }
+Positive : U := { x : Float64 | x > 0.0 }
+close (a b : Float64) : Bool := a - b < 0.000000001 and b - a < 0.000000001
+Sqrt : U := { f : Positive -> Float64 | \\ (x : Positive) { close (f x * f x) x } }
 root : Sqrt
-twice (x : Positive) : R := root x + root x
+twice (x : Positive) : Float64 := root x + root x
 ''')
     P = luthier.load(path)
     assert P.holes() == ["root"]
@@ -420,7 +434,7 @@ twice (x : Positive) : R := root x + root x
 
 
 def test_the_signature_is_checked_against_the_type(tmp_path):
-    P = luthier.load(write(tmp_path, "f.lut", 'f : R -> R -> R\n'))
+    P = luthier.load(write(tmp_path, "f.lut", 'f : Float64 -> Float64 -> Float64\n'))
     with pytest.raises(FillError):
         P.fill("f", lambda a: a)
     P.fill("f", lambda a, b: a * b)
@@ -429,15 +443,15 @@ def test_the_signature_is_checked_against_the_type(tmp_path):
 
 def test_records_and_sums_cross_both_ways(tmp_path):
     path = write(tmp_path, "pt.lut", '''
-Pt = { x : R, y : R }
-norm : Pt -> R
-mk : R -> Pt
-far (r : R) : R := norm (mk r)
-Shape = < circle : R | square : R >
+Pt = { x : Float64, y : Float64 }
+norm : Pt -> Float64
+mk : Float64 -> Pt
+far (r : Float64) : Float64 := norm (mk r)
+Shape = < circle : Float64 | square : Float64 >
 describe : Shape -> String
-classify : R -> Shape
-positive : R -> Bool
-firstPositive : List R -> Maybe R
+classify : Float64 -> Shape
+positive : Float64 -> Bool
+firstPositive : List Float64 -> Maybe Float64
 ''')
     P = luthier.load(path)
     seen = []
@@ -463,10 +477,46 @@ firstPositive : List R -> Maybe R
 
 def test_a_luthier_function_passed_to_python_receives_typed_arguments(tmp_path):
     path = write(tmp_path, "fn.lut", '''
-Pt = { x : R, y : R }
-applyAt : (Pt -> R) -> R -> R
-norm2 (p : Pt) : R := p.x * p.x + p.y * p.y
+Pt = { x : Float64, y : Float64 }
+applyAt : (Pt -> Float64) -> Float64 -> Float64
+norm2 (p : Pt) : Float64 := p.x * p.x + p.y * p.y
 ''')
     P = luthier.load(path)
     P.fill("applyAt", lambda f, r: f((r, r)))
     assert P.eval("applyAt norm2 3.0") == 18.0
+
+
+# ------------------------------------------------------------------ numbers and the bridge (06)
+
+def _eval(tmp_path, src: str, term: str):
+    import luthier
+    p = tmp_path / "bridge.lut"
+    p.write_text(src)
+    return luthier.load(str(p)).eval(term)
+
+
+def test_nan_from_the_environment_is_an_error(tmp_path):
+    from luthier.evaluator import EvalError
+    with pytest.raises(EvalError, match="NaN"):
+        _eval(tmp_path, 'npSqrt : Float64 -> Float64 := extern "python:numpy.sqrt"\n', "npSqrt (0.0 - 1.0)")
+
+
+def test_overflow_to_infinity_is_an_error(tmp_path):
+    from luthier.evaluator import EvalError
+    with pytest.raises(EvalError, match="overflow|infinite"):
+        _eval(tmp_path, "big : Float64 := 1e308 * 10.0\n", "big")
+
+
+def test_an_integer_beyond_64_bits_does_not_cross_into_numpy(tmp_path):
+    from luthier.evaluator import EvalError
+    src = 'npAbs : Int -> Int := extern "python:numpy.abs"\n'
+    with pytest.raises(EvalError, match="64"):
+        _eval(tmp_path, src, "npAbs (2 * 9223372036854775807)")
+
+
+def test_axioms_are_listed_by_check(tmp_path, capsys):
+    from luthier.cli import main
+    p = tmp_path / "uses_reals.lut"
+    p.write_text('import "algebra"\n')
+    assert main(["check", str(p), "-v"]) == 0
+    assert "assumed realField" in capsys.readouterr().out

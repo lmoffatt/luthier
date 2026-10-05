@@ -169,6 +169,10 @@ def pp(t, prec: int = 0) -> str:
         return f"({s})" if prec > APP else s
     if isinstance(t, NoLaw):
         return "nolaw"
+    if isinstance(t, Primitive):
+        return f'primitive "{t.desc}"'
+    if isinstance(t, Axiom):
+        return f'axiom "{t.desc}"'
     if isinstance(t, Named):
         return f"({t.name} : {pp(t.type)})"
     if isinstance(t, Proj):

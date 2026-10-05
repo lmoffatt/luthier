@@ -344,3 +344,81 @@ una función con dominio `String` no se genera como tabla. Se certificaron desde
 con `--name ... --deep`, que escribe en el certificado de origen. Las obligaciones de funciones
 cuantificadas sobre `U` (las de `probability`, `belief`) siguen sin generador y se certifican por
 modelo, como dice `05 §7`.
+
+## 29. Las leyes de `array` reproducen la implementación en vez de caracterizar (2026-10-05)
+
+Luciano lo señaló: el desarrollo teórico de objetos como tipos con leyes no se usó en los casos
+clave. `Vec` es un tipo estructural sin leyes; cada hoja de numpy tiene como única ley que coincide
+con una definición nativa (`DotAgrees d := approx (d x y) (dotDef x y)`), que es una segunda
+implementación y no dice qué es el producto interno. Las leyes que sí lo caracterizan (bilineal,
+simétrico, positivo, base ortonormal) existen en `algebra` y se aplican aparte a una instancia; las
+de las matrices (`ComposeActs`, `AdjointOfInner`) están en `array` como "laws the definitions do
+not need". `Table` tiene accesores que devuelven 0 donde falta la columna y ninguna ley del
+esquema; `Objective` es un registro sin ley que no ata `grad` a `value`. `Kernel`, `BeliefFamily`
+y `Codec` sí siguen el patrón. Resuelto en el diseño: regla R10 en `05`, `01 §6` reescrito y
+`07-characterizations.md` con las leyes de cada objeto; las librerías se reescriben después de la
+revisión.
+
+El mismo día, `Symmetric` entró a `array` porque Jacobi declarado sobre `Square` divergió en una
+matriz no simétrica al certificar `spectralMap`: una precondición matemática que no estaba en el
+tipo, del mismo género.
+
+## 30. Una ley, un nombre; las estructuras por inclusión (2026-10-05)
+
+Al tipar la matriz simétrica apareció un segundo `Symmetric` (el tipo de `array` junto a la ley de
+`algebra`), y renombrarlo a `SymmetricMat` era peor: dos nombres para lo mismo. Luciano: "el
+principio es no declarar lo mismo con dos nombres distintos", "algebra tiene que ser importada
+siempre", "y eso para todo, associativity, etc.: buscar el objeto matemático que mejor lo
+represente y ponerlo como invariante". Revisando `algebra` con ese criterio salieron más
+duplicados: `Commutative` era `Symmetric` con resultado en el mismo tipo; `ScaleAssociates`,
+`ComposeActs` y `Associative` eran la misma ley (la de una acción, con la operación como el caso de
+un conjunto que actúa sobre sí mismo); `ScaleUnit` e `IdentityActs` eran `LeftIdentity`;
+`ScaleDistribV`, `ActsLinearlyAdd` y `LeftDistrib` una sola; `ScaleDistribR`, `RightDistrib` y
+`BilinearAdd` otra. Quedó una ley por nombre en su forma general, y las estructuras armadas por
+inclusión (`Setoid`, `Monoid`, `Group`, `AbelianGroup`, `Ring`, `CommutativeRing`, `Field`,
+`OrderedField`, `CompleteOrderedField`, `VectorSpace` sobre un cuerpo, `InnerProductSpace` sobre un
+cuerpo ordenado). `float64Field` pasó a ser `OrderedField Float64`, el objeto que representa a los
+doubles; `intRing` un `CommutativeRing Int`.
+
+Sobre la matriz simétrica, Luciano notó que una matriz simétrica y una operación simétrica son
+cosas distintas, aunque la matriz obedezca la ley. La matriz es una forma bilineal simétrica (un
+operador autoadjunto); sobre la base la forma es la función de las entradas, así que `Symmetric`
+sobre los índices es la ley sobre todos los vectores por bilinealidad, y sobre los índices es
+finita y se verifica exhaustivamente.
+
+Las estructuras anidadas destaparon un defecto del intérprete: una lambda chequeada contra
+`V -> V -> V` perdía el tipo del resultado al elaborarse, y una ley de la estructura de afuera
+que proyectaba esa componente la volvía a inferir como `Vec Float64`. La lambda elaborada guarda
+ahora el tipo contra el que se chequeó su cuerpo (`Lam.res`).
+
+## 31. La reescritura por objetos, en todas las librerías (2026-10-05)
+
+Con el criterio del caso 30 se revisaron los .lut enteros y Luciano aprobó todas las
+observaciones. Lo que el criterio encontró, además de los duplicados de `algebra`:
+
+- Las 24 copias certificadas de `array_python` (`inner := dot`, …) desaparecieron: cada hoja se
+  declara en `array.lut` con sus leyes en el tipo y se certifica a sí misma.
+- La simetría de una matriz estaba escrita de tres maneras (`SymmetricSquare`, `SpdOf` con
+  `approxMat 0.0 a (transpose a)`, `InfoIsSymmetric`). Quedó una, `symmetric tol a`, que es
+  `Symmetric` sobre los índices juzgada por `approx tol`. Las matrices calculadas por numpy
+  (`invSqrtSym`, `pinvSqrtSym`) no son exactamente simétricas: la primera certificación con
+  simetría exacta falló en las dos, y por eso la tolerancia es un argumento.
+- La uniformidad estaba escrita tres veces (`PitUniform`, `Calibrated`, `CalibratedGaussian`) y
+  ahora es `UniformDraws`; la usa también `normalVec`, que por primera vez tiene una ley (su
+  transformada integral es uniforme), con lo que empieza a responder la crítica de `random.lut`.
+- `Kernel` repetía a mano las leyes de `DensityPair`; ahora lo contiene.
+- La distancia entre dos nodos y su jacobiano estaban escritos tres veces (distances,
+  experiment_zero, distance_graph); ahora viven en `positions.lut`. El orden de las operaciones
+  quedó igual y experiment_zero sigue dando lo mismo bit a bit.
+- `shift` es una acción de los vectores sobre Theta: `ShiftByZero` era `LeftIdentity` y faltaba
+  `Associative` (`ShiftComposes`).
+- Tipar `BeliefFamily.same` como `Setoid` mostró que el `same` gaussiano no era simétrico: medía la
+  distancia entre medias con la precisión de la primera creencia solamente.
+- Tipar los accesores de `Table` con la columna como precondición obligó a ordenar `ValidGraph`
+  (primero el esquema, después las filas) y mostró que experiment_zero ajustaba el grafo sin
+  validarlo.
+- Los pliegues sobre `Fin n` (`sumTo`, `sumToInt`, `maxOver`, `forallBelow`, `factorial`,
+  `powR`) eran todos el pliegue de un monoide; ahora hay un `fold` en `algebra`, asociado a la
+  derecha, y los demás se definen con él.
+
+Lo que quedó abierto está en `07 §9`.

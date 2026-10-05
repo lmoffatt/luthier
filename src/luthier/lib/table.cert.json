@@ -63,24 +63,28 @@
     ]
   },
   "firstFailing": {
-    "hash": "a68aa14551d9fdf7",
-    "when": "2026-10-04T20:06:44",
+    "hash": "5bcdc10058dca97f",
+    "when": "2026-10-05T13:13:04",
     "passed": true,
-    "seed": 1441021817,
-    "run_seed": 1,
+    "seed": 343385702,
+    "run_seed": 3,
     "generation": {
       "size": 16,
       "growth": "1 to size over a sampled run",
       "generators": {},
-      "python_generators": []
+      "python_generators": [
+        "BrokenText",
+        "Perturbed",
+        "Table",
+        "TableText"
+      ]
     },
     "laws": [
       {
         "label": "not (k >= n) -> 0 <= k and k < n",
         "params": [
           "k : Nat",
-          "n : Int",
-          "p : Fin n -> Bool"
+          "n : Int"
         ],
         "mode": "sampled",
         "cases": 100,
@@ -89,15 +93,14 @@
         "error": null,
         "domains": [
           "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-          "Fin n -> Bool"
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
         ],
         "sample_cases": [
-          "k = 0, n = -1, p = <ndarray (0,)>",
-          "k = 1, n = -1, p = <ndarray (0,)>",
-          "k = 1, n = -1, p = <ndarray (0,)>",
-          "k = 0, n = 0, p = <ndarray (0,)>",
-          "k = 1, n = -1, p = <ndarray (0,)>"
+          "k = 1, n = -1",
+          "k = 0, n = 1",
+          "k = 1, n = -1",
+          "k = 1, n = 1",
+          "k = 1, n = 0"
         ]
       },
       {
@@ -115,24 +118,24 @@
         "domains": [
           "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
           "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-          "Fin n -> Bool"
+          "Fin n -> Bool: drawn as its table"
         ],
         "sample_cases": [
-          "k = 0, n = 1, p = \\ i { match i { 0 -> false } }",
+          "k = 0, n = 0, p = <ndarray (0,)>",
           "k = 1, n = 1, p = \\ i { match i { 0 -> false } }",
           "k = 0, n = 0, p = <ndarray (0,)>",
-          "k = 0, n = 0, p = <ndarray (0,)>",
-          "k = 1, n = -1, p = <ndarray (0,)>"
+          "k = 1, n = -1, p = <ndarray (0,)>",
+          "k = 1, n = 0, p = <ndarray (0,)>"
         ]
       }
     ]
   },
   "sameCells": {
-    "hash": "8d66e307872e52ff",
-    "when": "2026-10-04T20:06:55",
+    "hash": "a318a347ad2a8c3b",
+    "when": "2026-10-05T13:13:04",
     "passed": true,
-    "seed": 1854106462,
-    "run_seed": 1,
+    "seed": 1758373365,
+    "run_seed": 3,
     "generation": {
       "size": 16,
       "growth": "1 to size over a sampled run",
@@ -150,9 +153,6 @@
         "params": [
           "t : Table",
           "u : { v : Table | v.nRows == t.nRows }",
-          "ns : List String",
-          "n : String",
-          "rest : List String",
           "r : Fin t.nRows"
         ],
         "mode": "sampled",
@@ -163,27 +163,24 @@
         "domains": [
           "Table: registered Python generator, size up to 16",
           "Table: registered Python generator, size up to 16 where v.nRows == t.nRows",
-          "List String: derived from its constructors, nesting up to 16",
-          "String: short random strings (fallback)",
-          "List String: derived from its constructors, nesting up to 16",
           "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < t.nRows"
         ],
         "sample_cases": [
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'int' (cons String 'int' (nil String))), extern \"python:luthier.tables.Table.cell#140651090977088\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140651090975424\"), ns = cons String 'x' (nil String), n = '', rest = cons String 'x' (nil String), r = 0",
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'float' (cons String 'str' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140651090972864\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#140651090972160\"), ns = cons String '' (nil String), n = '', rest = cons String '' (nil String), r = 0",
-          "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140651090971776\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140651090975680\"), ns = cons String 'b' (nil String), n = '', rest = cons String 'x' (nil String), r = 0",
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'str' (cons String 'int' (cons String 'int' (cons String 'str' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#140651090970304\"), u = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140651090970688\"), ns = nil String, n = '', rest = nil String, r = 0",
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'str' (cons String 'int' (cons String 'str' (nil String))))), extern \"python:luthier.tables.Table.cell#140651090968896\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140651090953088\"), ns = cons String '' (nil String), n = 'c', rest = cons String 'y' (nil String), r = 0"
+          "t = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140173461099072\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#140173461100160\"), r = 0",
+          "t = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140173461103936\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140173460874816\"), r = 0",
+          "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140173460959488\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140173460960960\"), r = 0",
+          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'int' (cons String 'str' (cons String 'int' (nil String))), extern \"python:luthier.tables.Table.cell#140173460959616\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140173460957760\"), r = 0",
+          "t = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140173460957440\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140173460948032\"), r = 0"
         ]
       }
     ]
   },
   "sameTable": {
-    "hash": "23d6cd30a79d97cf",
-    "when": "2026-10-04T20:06:55",
+    "hash": "62cf8cdd6550762d",
+    "when": "2026-10-05T13:13:05",
     "passed": true,
-    "seed": 1197096074,
-    "run_seed": 1,
+    "seed": 1342100913,
+    "run_seed": 3,
     "generation": {
       "size": 16,
       "growth": "1 to size over a sampled run",
@@ -212,11 +209,11 @@
           "Table: registered Python generator, size up to 16"
         ],
         "sample_cases": [
-          "t = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140515940937920\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'str' (cons String 'float' (cons String 'float' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140515930318528\")",
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'float' (cons String 'str' (nil String))))), extern \"python:luthier.tables.Table.cell#140515930318016\"), u = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'int' (cons String 'str' (cons String 'str' (nil String)))), extern \"python:luthier.tables.Table.cell#140515930318080\")",
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'str' (cons String 'str' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140515930318848\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'str' (cons String 'float' (cons String 'str' (nil String)))), extern \"python:luthier.tables.Table.cell#140515930316544\")",
-          "t = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#140515930317504\"), u = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'str' (cons String 'str' (cons String 'str' (nil String)))), extern \"python:luthier.tables.Table.cell#140515930316800\")",
-          "t = (0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#140515930316480\"), u = (0, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140515930315968\")"
+          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'str' (cons String 'float' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#139678738538304\"), u = (0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#139678738538048\")",
+          "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#139678738540096\"), u = (0, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#139678738539584\")",
+          "t = (0, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#139678738539712\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139678738539648\")",
+          "t = (0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#139678738539904\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'int' (cons String 'int' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#139678738539840\")",
+          "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#139678738539200\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'int' (cons String 'int' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#139678738539456\")"
         ]
       }
     ]
