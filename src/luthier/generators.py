@@ -161,9 +161,18 @@ class Generators:
         if name in self.env.datas:
             return self.sample_data(name, args, rng, size, depth)
         if isinstance(w, Sigma):
-            a = self.sample(w.fst, rng, size, depth)
-            b = self.sample(subst(w.snd, {w.name: a}), rng, size, depth)
-            return Pair(a, b)
+            # a second component whose type is empty for the first (entries of Fin 0 in a vector of some
+            # length, a record whose matrix has no columns) is drawn again with another first one, as a
+            # case is drawn again when one of its parameters is empty
+            for attempt in range(10):
+                a = self.sample(w.fst, rng, size, depth)
+                try:
+                    b = self.sample(subst(w.snd, {w.name: a}) if w.name != "_" else w.snd, rng, size, depth)
+                except EmptyDomain:
+                    if attempt == 9 or w.name == "_":
+                        raise
+                    continue
+                return Pair(a, b)
         if isinstance(w, Sum):
             if not w.alts:
                 raise EmptyDomain("Empty has no values")

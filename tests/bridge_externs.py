@@ -92,3 +92,28 @@ def third():
 
 def a_float():
     return 0.5
+
+
+def two_entries(n):
+    """A vector of two entries, whatever length it was asked for."""
+    return np.array([1.0, 2.0])
+
+
+def bounded_record(k):
+    """A record whose function stays below 100 on the indices its law quantifies over."""
+    return ((3, lambda x: int(x)), int(k))
+
+
+def unbounded_record(k):
+    """The same record, with a function that leaves the bound."""
+    return ((3, lambda x: 1000), int(k))
+
+
+def three_ints():
+    return [1, 2, 3]
+
+
+def dependent_pair(k):
+    """A record of nodes and two vectors of nodes of one length, as the environment gives it."""
+    k = int(k)
+    return (k + 1, (1, np.array([0])), (1, np.array([k])))

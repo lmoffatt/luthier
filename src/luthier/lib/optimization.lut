@@ -13,18 +13,18 @@ import "algebra"
 import "array"
 import "belief"
 
-Objective : { dim : Nat, value : Vec Float64 -> Float64, grad : Vec Float64 -> Vec Float64, stepMatrix : Vec Float64 -> Mat Float64 }
+Objective : { dim : Nat, value : VecOf dim -> Float64, grad : VecOf dim -> Vec Float64, stepMatrix : VecOf dim -> Mat Float64 }
 
 -- The gradient is the gradient of the value, and the step matrix is symmetric positive
 -- semidefinite. Whether it approximates the Hessian is a quality of the method, not a law of the
 -- objective.
-GradIsGradient (o : Objective) (x : VecOf o.dim) : Bool := IsGradient (Vec Float64) add o.value o.grad x
+GradIsGradient (o : Objective) (x : VecOf o.dim) : Bool := IsGradient (VecOf o.dim) o.dim (\ p v { add p v }) o.value o.grad x
 StepMatrixPositive (o : Objective) (x : VecOf o.dim) : Bool :=
   match o.stepMatrix x { m -> if symmetric 0.0 m then positiveSemidefinite m else false }
 Objective := GradIsGradient & StepMatrixPositive
 
--- the state of a run; `accepted` is whether the last trial was accepted
-LMState = { x : Vec Float64, phi : Float64, mu : Float64, iter : Int, accepted : Bool }
+-- the state of a run on the vectors of dimension n; `accepted` is whether the last trial was accepted
+LMState (n : Int) = { x : VecOf n, phi : Float64, mu : Float64, iter : Int, accepted : Bool }
 
 -- The damping schedule: the algorithm's own constants, not criteria about the data.
 muInit : Float64 := 0.001
@@ -32,65 +32,65 @@ muFactor : Float64 := 3.0
 muMin : Float64 := 1e-15
 muMax : Float64 := 1e15
 
-start (o : Objective) (x0 : Vec Float64) : LMState := { x := x0, phi := o.value x0, mu := muInit, iter := 0, accepted := true }
+start (o : Objective) (x0 : VecOf o.dim) : LMState o.dim := { x := x0, phi := o.value x0, mu := muInit, iter := 0, accepted := true }
 
 -- the diagonal part of a square matrix
 diagOf (m : Square) : Mat Float64 := (m.m, m.n, \ i j { if i == j then m.f i i else 0.0 })
 
 -- the damped step: (M + mu diag M) delta = -g
-dampedStep (o : Objective) (x : Vec Float64) (mu : Float64) : Vec Float64 :=
+dampedStep (o : Objective) (x : VecOf o.dim) (mu : Float64) : Vec Float64 :=
   match o.stepMatrix x { m -> (0.0 - 1.0) * solve (m + mu * diagOf m) (o.grad x) }
 
 -- one trial
-lmStep (o : Objective) (s : LMState) : LMState :=
+lmStep (o : Objective) (s : LMState o.dim) : LMState o.dim :=
   match s.x + dampedStep o s.x s.mu { xt -> match o.value xt { pt ->
   if pt < s.phi
   then { x := xt, phi := pt, mu := (if s.mu / muFactor > muMin then s.mu / muFactor else muMin), iter := s.iter + 1, accepted := true }
   else { x := s.x, phi := s.phi, mu := s.mu * muFactor, iter := s.iter + 1, accepted := false } } }
 
 -- the Newton decrement: half of g^T M^-1 g, the decrease the step matrix predicts to the minimum
-decrement (o : Objective) (x : Vec Float64) : Float64 := match o.grad x { g -> 0.5 * dot g (solve (o.stepMatrix x) g) }
+decrement (o : Objective) (x : VecOf o.dim) : Float64 := match o.grad x { g -> 0.5 * dot g (solve (o.stepMatrix x) g) }
 
 Reason = < running : Unit | converged : Unit | exhausted : Unit | stalled : Unit >
 
-finished (tol : Float64) (maxIter : Int) (o : Objective) (s : LMState) : Reason :=
+finished (tol : Float64) (maxIter : Int) (o : Objective) (s : LMState o.dim) : Reason :=
   if decrement o s.x < tol then converged
   else if s.iter >= maxIter then exhausted
   else if s.mu > muMax then stalled
   else running
 
-Run = { state : LMState, reason : Reason }
+Run (n : Int) = { state : LMState n, reason : Reason }
 
 -- the reasons as integers, for an implementation outside Luthier that cannot build a Reason
 reasonCode (r : Reason) : Int := match r { running -> 0 ; converged -> 1 ; exhausted -> 2 ; stalled -> 3 }
 codeReason (k : Int) : Reason := if k == 1 then converged else if k == 2 then exhausted else if k == 3 then stalled else running
 
-minimize (tol : Float64) (maxIter : Int) (o : Objective) (s : LMState) : Run :=
+minimize (tol : Float64) (maxIter : Int) (o : Objective) (s : LMState o.dim) : Run o.dim :=
   match finished tol maxIter o s { running -> minimize tol maxIter o (lmStep o s) ; r -> { state := s, reason := r } }
 
 -- the trace of a run, every state from the start to the end
-runTrace (tol : Float64) (maxIter : Int) (o : Objective) (s : LMState) : List LMState :=
-  match finished tol maxIter o s { running -> cons LMState s (runTrace tol maxIter o (lmStep o s)) ; r -> cons LMState s (nil LMState) }
+runTrace (tol : Float64) (maxIter : Int) (o : Objective) (s : LMState o.dim) : List (LMState o.dim) :=
+  match finished tol maxIter o s { running -> cons (LMState o.dim) s (runTrace tol maxIter o (lmStep o s)) ; r -> cons (LMState o.dim) s (nil (LMState o.dim)) }
 
 -- ---------------------------------------------------------------- the laws
 -- An accepted trial lowers the value and does not raise the damping; a rejected one leaves
 -- the point and the value where they were and raises the damping.
-Step = Objective -> LMState -> LMState
-Direction = Objective -> Vec Float64 -> Float64 -> Vec Float64
-Runner = Objective -> Vec Float64 -> Run
+Step = (o : Objective) -> LMState o.dim -> LMState o.dim
+Direction = (o : Objective) -> VecOf o.dim -> Float64 -> Vec Float64
+Runner = (o : Objective) -> VecOf o.dim -> Run o.dim
 
-StepRule (step : Step) (o : Objective) (s : LMState) : Bool :=
+StepRule (step : Step) (o : Objective) (s : LMState o.dim) : Bool :=
   match step o s { s2 ->
   if s2.accepted then s2.phi < s.phi and s2.mu <= s.mu
   else approxVec 0.0 s2.x s.x and s2.phi == s.phi and s2.mu > s.mu }
 
 -- the damped step is a descent direction wherever the gradient is not zero
-DescentDirection (dir : Direction) (o : Objective) (x : Vec Float64) (mu : Float64) : Bool :=
+DescentDirection (dir : Direction) (o : Objective) (x : VecOf o.dim) (mu : Float64) : Bool :=
   match o.grad x { g -> norm g == 0.0 or dot g (dir o x mu) < 0.0 }
 
 -- a run that says converged ends where the decrement is below the tolerance and the step
 -- matrix is positive definite, both recomputed from the objective
-Certified (tol : Float64) (run : Runner) (o : Objective) (x0 : Vec Float64) : Bool :=
+Certified (tol : Float64) (run : Runner) (o : Objective) (x0 : VecOf o.dim) : Bool :=
   match run o x0 { r ->
   match r.reason {
     converged -> decrement o r.state.x < tol and minimum (eigvalsSym (o.stepMatrix r.state.x)) > 0.0
@@ -103,12 +103,12 @@ lmRunner (tol : Float64) (maxIter : Int) : Runner := \ o x0 { minimize tol maxIt
 
 -- ---------------------------------------------------------------- as a maximizer
 -- belief.lut's Maximizer maximizes a log posterior: minimize its negative, on the vectors of the
--- dimension of the start.
-negate (dim : Nat) (f : Vec Float64 -> Float64) (g : Vec Float64 -> Vec Float64) (m : Vec Float64 -> Mat Float64) : Objective :=
-  { dim := dim, value := \ x { 0.0 - f x }, grad := \ x { (0.0 - 1.0) * g x }, stepMatrix := m }
+-- dimension n.
+negate (n : Nat) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (m : VecOf n -> Mat Float64) : Objective :=
+  { dim := n, value := \ x { 0.0 - f x }, grad := \ x { (0.0 - 1.0) * g x }, stepMatrix := m }
 
 lmMaximizer (tol : Float64) (maxIter : Int) : Maximizer :=
-  \ f g m x0 { match negate x0.n f g m { o -> match minimize tol maxIter o (start o x0) { r ->
+  \ n f g m x0 { match negate n f g m { o -> match minimize tol maxIter o (start o x0) { r ->
     { x := r.state.x, converged := (match r.reason { converged -> true ; running -> false ; exhausted -> false ; stalled -> false }) } } } }
 
 -- What any maximizer must satisfy on the log posterior it is given: the value does not fall from
@@ -116,7 +116,7 @@ lmMaximizer (tol : Float64) (maxIter : Int) : Maximizer :=
 -- within its budget is a quality of the method on a problem, not a law: Levenberg-Marquardt runs out
 -- of 200 iterations from a few starts of optimization_check, and says so. Certified for each maximizer
 -- on its problems; the functions it takes have no generator.
-MaximizerAscends (mx : Maximizer) (f : Vec Float64 -> Float64) (g : Vec Float64 -> Vec Float64) (m : Vec Float64 -> Mat Float64) (x0 : Vec Float64) : Bool :=
-  f (mx f g m x0).x >= f x0
-MaximizerStationary (mx : Maximizer) (f : Vec Float64 -> Float64) (g : Vec Float64 -> Vec Float64) (m : Vec Float64 -> Mat Float64) (x0 : Vec Float64) : Bool :=
-  let r = mx f g m x0 in if r.converged then decrement (negate x0.n f g m) r.x < fdTol else true
+MaximizerAscends (mx : Maximizer) (n : Nat) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (m : VecOf n -> Mat Float64) (x0 : VecOf n) : Bool :=
+  f (mx n f g m x0).x >= f x0
+MaximizerStationary (mx : Maximizer) (n : Nat) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (m : VecOf n -> Mat Float64) (x0 : VecOf n) : Bool :=
+  let r = mx n f g m x0 in if r.converged then decrement (negate n f g m) r.x < fdTol else true

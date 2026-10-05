@@ -100,38 +100,40 @@ rankOf (Theta Y : U) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Th
   match uniform01 s2 { (v, s3) ->
   match sumTo k (\ j { w.f j }) + v * w.f k { u -> (u, s3) } } } } }
 
-Calibrated (Theta Y : U) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Theta) (seed : Int) : Bool :=
-  UniformDraws (\ q { match rankOf Theta Y l s b q { (u, next) -> ((1, \ k { u }), next) } }) seed
+Calibrated (Theta Y : U) (e : Ensemble) (l : LogLik Theta Y) (s : Sampler Theta Y) (b : Discrete Theta) (seed : Int) : Bool :=
+  UniformDraws e (\ q { match rankOf Theta Y l s b q { (u, next) -> ((1, \ k { u }), next) } }) seed
 
 -- ---------------------------------------------------------------- Gaussian beliefs
--- Information form: the mean and the precision, the inverse covariance. Zero precision along a
--- direction is a belief that knows nothing there. The log density is up to a constant.
-GaussianBelief = { mean : Vec Float64, precision : Mat Float64 }
+-- Information form, on the vectors of a dimension n: the mean and the precision, the inverse
+-- covariance, an n x n matrix. Zero precision along a direction is a belief that knows nothing there.
+-- The log density is up to a constant.
+GaussianBelief (n : Int) = { mean : VecOf n, precision : MatOf n n }
 
-gaussianLogDensity (b : GaussianBelief) (t : Vec Float64) : Float64 :=
+gaussianLogDensity (n : Nat) (b : GaussianBelief n) (t : VecOf n) : Float64 :=
   match t - b.mean { d -> 0.0 - 0.5 * dot d (b.precision * d) }
 
--- A maximizer takes the log posterior, its gradient, a positive step matrix and a start, and
--- returns where it stopped and whether it converged there: a method with a budget can run out of it
--- before the gradient vanishes, and says so. Levenberg-Marquardt is one; what any maximizer must
--- satisfy (it ascends, and where it says it converged the gradient vanishes) is stated in
--- optimization.lut, and certified for each maximizer on its problems.
-MaxResult = { x : Vec Float64, converged : Bool }
-Maximizer = (Vec Float64 -> Float64) -> (Vec Float64 -> Vec Float64) -> (Vec Float64 -> Mat Float64) -> Vec Float64 -> MaxResult
+-- A maximizer works on the vectors of a dimension n: it takes the log posterior, its gradient, a
+-- positive step matrix and a start, and returns where it stopped and whether it converged there; it
+-- evaluates the functions only at vectors of that dimension, which their types say. A method with a
+-- budget can run out of it before the gradient vanishes, and says so. Levenberg-Marquardt is one;
+-- what any maximizer must satisfy (it ascends, and where it says it converged the gradient vanishes)
+-- is stated in optimization.lut, and certified for each maximizer on its problems.
+MaxResult (n : Int) = { x : VecOf n, converged : Bool }
+Maximizer = (n : Nat) -> (VecOf n -> Float64) -> (VecOf n -> Vec Float64) -> (VecOf n -> Mat Float64) -> VecOf n -> MaxResult n
 
 -- Laplace's update: the new mean is the maximum of belief times likelihood, the new precision
 -- the prior precision plus the information the likelihood reports there. The step matrix is
 -- the same sum, positive wherever the posterior is proper.
-laplaceMode (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : MaxResult :=
-  maximize (\ t { gaussianLogDensity b t + l.loglik y t })
-           (\ t { l.score y t - b.precision * (t - b.mean) })
-           (\ t { b.precision + l.info y t })
-           b.mean
+laplaceMode (n : Nat) (Y : U) (maximize : Maximizer) (l : Likelihood (VecOf n) Y) (b : GaussianBelief n) (y : Y) : MaxResult n :=
+  maximize n (\ t { gaussianLogDensity n b t + l.loglik y t })
+             (\ t { l.score y t - b.precision * (t - b.mean) })
+             (\ t { b.precision + l.info y t })
+             b.mean
 -- the Gaussian belief at a mode m: mean m, precision the prior's plus the information there
-laplaceAt (Y : U) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) (m : Vec Float64) : GaussianBelief :=
+laplaceAt (n : Nat) (Y : U) (l : Likelihood (VecOf n) Y) (b : GaussianBelief n) (y : Y) (m : VecOf n) : GaussianBelief n :=
   { mean := m, precision := b.precision + l.info y m }
-laplaceUpdate (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : GaussianBelief :=
-  laplaceAt Y l b y (laplaceMode Y maximize l b y).x
+laplaceUpdate (n : Nat) (Y : U) (maximize : Maximizer) (l : Likelihood (VecOf n) Y) (b : GaussianBelief n) (y : Y) : GaussianBelief n :=
+  laplaceAt n Y l b y (laplaceMode n Y maximize l b y).x
 
 -- ---------------------------------------------------------------- the Gaussian family
 -- log det of a symmetric positive definite matrix, from its spectrum
@@ -141,23 +143,23 @@ logDet (m : Mat Float64) : Float64 := match eigvalsSym m { e -> sumTo e.n (\ k {
 -- the second-order expansion at the new mean m' with the new precision P':
 --   log p(y | b) = l(y; m') - 1/2 (m' - m)^T P (m' - m) + 1/2 log det P - 1/2 log det P'
 -- It needs a proper belief: P positive definite.
-laplaceEvidence (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (b : GaussianBelief) (y : Y) : Float64 :=
-  match laplaceUpdate Y maximize l b y { b2 -> match b2.mean - b.mean { d ->
+laplaceEvidence (n : Nat) (Y : U) (maximize : Maximizer) (l : Likelihood (VecOf n) Y) (b : GaussianBelief n) (y : Y) : Float64 :=
+  match laplaceUpdate n Y maximize l b y { b2 -> match b2.mean - b.mean { d ->
   l.loglik y b2.mean - 0.5 * dot d (b.precision * d) + 0.5 * logDet b.precision - 0.5 * logDet b2.precision } }
 
 -- a draw from a proper Gaussian belief: mean + P^{-1/2} z
-drawGaussian (b : GaussianBelief) (seed : Int) : Vec Float64 * Int :=
-  match normalVec b.mean.n seed { (z, s2) -> (b.mean + invSqrtSym b.precision * z, s2) }
+drawGaussian (n : Nat) (b : GaussianBelief n) (seed : Int) : VecOf n * Int :=
+  match normalVec n seed { (z, s2) -> (b.mean + invSqrtSym b.precision * z, s2) }
 
 -- the distance between the means of two Gaussian beliefs, in standard deviations of the first;
 -- measured both ways, it makes `same` a symmetric relation
-meanGap (a c : GaussianBelief) : Float64 := match a.mean - c.mean { d -> sqrt (dot d (a.precision * d)) }
+meanGap (n : Nat) (a c : GaussianBelief n) : Float64 := match a.mean - c.mean { d -> sqrt (dot d (a.precision * d)) }
 
-gaussianFamily (Y : U) (maximize : Maximizer) (l : Likelihood (Vec Float64) Y) (tol : Float64) : BeliefFamily (Vec Float64) GaussianBelief Y := {
-  update := laplaceUpdate Y maximize l,
-  predictive := laplaceEvidence Y maximize l,
-  draw := drawGaussian,
-  same := \ a c { meanGap a c < tol and meanGap c a < tol and approxMat tol a.precision c.precision } }
+gaussianFamily (n : Nat) (Y : U) (maximize : Maximizer) (l : Likelihood (VecOf n) Y) (tol : Float64) : BeliefFamily (VecOf n) (GaussianBelief n) Y := {
+  update := laplaceUpdate n Y maximize l,
+  predictive := laplaceEvidence n Y maximize l,
+  draw := drawGaussian n,
+  same := \ a c { meanGap n a c < tol and meanGap n c a < tol and approxMat tol a.precision c.precision } }
 
 -- ---------------------------------------------------------------- approximations that converge
 -- An approximate update departs from the exact laws by an amount that must vanish as the data
@@ -203,12 +205,12 @@ evidenceDeparture (Theta B Y : U) (f : BeliefFamily Theta B Y) (s : Sampler Thet
 -- Calibration of a Gaussian update. Draw theta from the belief, data at theta, update, and
 -- project on a direction v drawn at random: u = Phi(v^T (theta - m') / sqrt(v^T P'^{-1} v)) is
 -- uniform on [0, 1] when the updated belief is the posterior (UniformDraws).
-projectedRank (Y : U) (f : BeliefFamily (Vec Float64) GaussianBelief Y) (s : Sampler (Vec Float64) Y) (b : GaussianBelief) (seed : Int) : Float64 * Int :=
+projectedRank (n : Nat) (Y : U) (f : BeliefFamily (VecOf n) (GaussianBelief n) Y) (s : Sampler (VecOf n) Y) (b : GaussianBelief n) (seed : Int) : Float64 * Int :=
   match f.draw b seed { (t, s1) ->
   match s t s1 { (y, s2) ->
   match f.update b y { b2 ->
   match normalVec t.n s2 { (v, s3) ->
   (normalCdf (dot v (t - b2.mean) / sqrt (dot v (solve b2.precision v))), s3) } } } }
 
-CalibratedGaussian (Y : U) (f : BeliefFamily (Vec Float64) GaussianBelief Y) (s : Sampler (Vec Float64) Y) (b : GaussianBelief) (seed : Int) : Bool :=
-  UniformDraws (\ q { match projectedRank Y f s b q { (u, next) -> ((1, \ k { u }), next) } }) seed
+CalibratedGaussian (n : Nat) (Y : U) (e : Ensemble) (f : BeliefFamily (VecOf n) (GaussianBelief n) Y) (s : Sampler (VecOf n) Y) (b : GaussianBelief n) (seed : Int) : Bool :=
+  UniformDraws e (\ q { match projectedRank n Y f s b q { (u, next) -> ((1, \ k { u }), next) } }) seed

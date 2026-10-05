@@ -50,7 +50,8 @@ gen SymmetricSquare := extern "python:luthier.arrays.gen_symmetric"
 gen DeficientOf := extern "python:luthier.arrays.gen_deficient_of"
 
 -- The spectral leaves are compared with Jacobi's method written natively, whose cost grows as
--- n^5 in the interpreter; their tests stop at matrices of size 6.
+-- n^5 in the interpreter: their tests stop at matrices of size 5 and 50 cases, which keeps each law
+-- under a minute (at size 6 and 100 cases they took up to two, 2026-10-06).
 test add with 100
 test sub with 100
 test scale with 100
@@ -69,11 +70,11 @@ test det with 30
 test frob with 100
 test cond with 100
 test solve with 100
-test eigvalsSym with 100 size 6
-test invSqrtSym with 100 size 6
-test retainedRank with 100 size 6
-test pinvSym with 100 size 6
-test pinvSqrtSym with 100 size 6
+test eigvalsSym with 50 size 5
+test invSqrtSym with 50 size 5
+test retainedRank with 50 size 5
+test pinvSym with 50 size 5
+test pinvSqrtSym with 50 size 5
 test madd with 50
 test msub with 50
 test mscale with 50

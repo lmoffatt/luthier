@@ -32,3 +32,9 @@ gen Nat  := genNat
 gen Bool := genBool
 gen Float64    := genFloat64
 
+-- A seed of a law that draws: one of 2^31, drawn over the whole range, so the cases of a law do not
+-- repeat their seeds as an Int drawn within the size would. 15 and 16 bits, each from 30 bits of
+-- randBelow reduced by a power of two, so each value has the same chance.
+Seed : U := { s : Int | 0 <= s and s < 2147483648 }
+genSeed : Gen Seed := \ size s { match randBelow 32768 s { (a, s2) -> match randBelow 65536 s2 { (b, s3) -> (a * 65536 + b, s3) } } }
+gen Seed := genSeed

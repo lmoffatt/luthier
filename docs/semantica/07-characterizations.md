@@ -232,12 +232,19 @@ evidence, calibration), `Codec` (round trip, canonical, tolerant, rejects), and 
   2026-10-05: `Likelihood` and `MeanModel` carry the dimension of their directions (`dim`), and
   `shift` takes a direction of it, so a pair over the vectors of one dimension is written without a
   guard; `DensityPairOn` and `KernelOn` state their laws over a domain (a type with its law, the
-  layouts in a box and the errors in a range) inside the space, which a shift may leave. Still open:
-  the beliefs and the optimizer work over `Vec Float64`, so the likelihoods built for them on the
-  gauge-fixed model (`fastFull`, `fixedLik`) are partial functions typed over every vector.
+  layouts in a box and the errors in a range) inside the space, which a shift may leave.
+  Later the same day: the dimension is one for the whole space (`dim : Nat`, Theta connected), and
+  the beliefs and the optimizer carry it too (`GaussianBelief n`, `MaxResult n`, `LMState n`, a
+  `Maximizer` over `VecOf n`), so every parameter space of the project is `VecOf` of its dimension
+  and no likelihood is typed over every vector. A density pair and a kernel also take how their
+  statistical laws are measured, an `Ensemble` (draws and zMax) and a `PitResolution` (the step and
+  the tolerance of the transform's slope), which the project states.
 - `Maximizer` and `Objective`: laws quantified over functions of an infinite domain have no
   generator, so an objective built by `negate` and the `Maximizer` type itself stay pending; they
-  are certified on the problems of `optimization_check` by law-lambdas.
+  are certified on the problems of `optimization_check` by law-lambdas. The obligation of `negate`,
+  that the record it builds from bare functions has the laws of an `Objective`, is false as stated:
+  those laws follow from the likelihood's where it is lawful, a precondition on a domain that the
+  types cannot say yet.
 - Rank is defined numerically, through the pseudo-inverse's threshold; the rank of the ideal object
   is not continuous and has no tolerance version.
 - The tolerances are written by hand (`roundingSlack`); `06 §8` makes them consequences of the

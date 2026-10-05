@@ -228,6 +228,19 @@ def normal_vec(n, seed):
     return (rng.standard_normal(int(n)), int(rng.integers(0, 2 ** 62)))
 
 
+def kolmogorov_distance(vs):
+    """The Kolmogorov distance of the entries of a list of vectors from the uniform on [0, 1]: on the
+    values sorted, the largest of i/n - u_i and u_i - (i - 1)/n, the operations of the native
+    definition of probability.lut in the same order, so the two agree exactly."""
+    parts = [np.asarray(v, dtype=float).ravel() for v in vs]
+    u = np.sort(np.concatenate(parts)) if parts else np.zeros(0)
+    n = u.size
+    if n == 0:
+        return 0.0
+    i = np.arange(1, n + 1, dtype=float)
+    return float(max(0.0, np.max(i / n - u), np.max(u - (i - 1.0) / n)))
+
+
 
 
 

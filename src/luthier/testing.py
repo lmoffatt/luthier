@@ -39,6 +39,8 @@ class LawResult:
     domains: list = field(default_factory=list)       # how each parameter was generated
     sample_cases: list = field(default_factory=list)  # the first few cases evaluated, as text
     outcome: str = ""       # passed | failed (a counterexample, or an error on a case) | not run (05 §7)
+    seconds: float = 0.0    # how long the law took, its cases and their generation
+    skipped: int = 0        # cases of a type's obligation where the computation raised: outside it
 
     def __post_init__(self):
         if not self.outcome:
@@ -82,7 +84,9 @@ class TestReport:
         lines = []
         for l in self.laws:
             head = {PASSED: "ok  ", FAILED: "FAIL", NOT_RUN: "skip"}[l.outcome]
-            lines.append(f"  {head} {l.label}   [{l.mode}, {l.cases} cases]")
+            took = f", {l.seconds:.1f} s" if l.seconds >= 0.05 else ""
+            skips = f", {l.skipped} where the computation raised" if l.skipped else ""
+            lines.append(f"  {head} {l.label}   [{l.mode}, {l.cases} cases{skips}{took}]")
             if l.failure:
                 lines.append(f"       counterexample: {l.failure}")
             if l.error:
@@ -156,8 +160,16 @@ def _split_and(env: Env, t: Term) -> list:
 
 def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
             exhaustive: bool, rng: random.Random, show_cases: bool = False,
-            size: Optional[int] = None) -> LawResult:
+            size: Optional[int] = None, of_type: bool = False) -> LawResult:
+    """`of_type`: the obligation of a type (a coercion inside a body, or what an extern owes), a
+    claim about the values a computation gives. A case where the computation raises gives no value,
+    so it is outside the claim: it is skipped and counted, and an obligation every case of which
+    raises is not run. A law stated in a definition's type fails on an error, as on a counterexample."""
     env = checker.env
+    skipped = 0
+
+    def raised(e) -> bool:
+        return of_type and isinstance(e, EvalError) and not isinstance(e, (OutOfFuel, HoleBlocked))
     if size is None:
         size = gens.size
     try:
@@ -179,7 +191,8 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
             print(f"       case {cases}: {txt}")
 
     def result(mode, cases, passed, failure=None, error=None, outcome=""):
-        return LawResult(label, param_txt, mode, cases, passed, failure, error, domains, samples, outcome)
+        return LawResult(label, param_txt, mode, cases, passed, failure, error, domains, samples, outcome,
+                         skipped=skipped)
 
     def stuck(values, r):
         """A law that does not reduce to a Bool: not run when what blocks it is a hole without a
@@ -283,17 +296,31 @@ def run_law(checker: Checker, gens: Generators, label: str, law: Term, n: int,
                     unreachable = e     # a type out of reach at this size (a matrix of 3 rows at size 1)
                     continue
                 raise
+            except EvalError as e:
+                if raised(e):           # the range of a parameter is computed, and the computation raised
+                    skipped += 1
+                    continue
+                raise
             if values is None:
                 continue
+            try:
+                b, r = evaluate(values)
+            except EvalError as e:
+                if raised(e):
+                    skipped += 1
+                    continue
+                raise
             cases += 1
             record(values)
-            b, r = evaluate(values)
             if b is None:
                 return stuck(values, r)
             if b is False:
                 return result("sampled", cases, False, failure=show(values))
     except (GenError, EvalError) as e:
         return broken("sampled", e)
+    if cases == 0 and skipped > 0:
+        return result("sampled", 0, False, outcome=NOT_RUN,
+                      error=f"the computation raised on every case drawn ({skipped}): no value to check")
     if cases == 0 and n > 0:
         return result("sampled", 0, False, outcome=NOT_RUN,
                       error=str(unreachable) if unreachable is not None else
@@ -351,7 +378,11 @@ def run_test(checker: Checker, gens: Generators, name: str, n: int = 100,
                                          outcome=NOT_RUN))
             continue
         for label, closed in pieces:
-            report.laws.append(run_law(checker, gens, label, closed, n, exhaustive, rng, show_cases, size))
+            started = time.perf_counter()
+            result = run_law(checker, gens, label, closed, n, exhaustive, rng, show_cases, size,
+                             of_type=ob.kind == "type")
+            result.seconds = round(time.perf_counter() - started, 3)
+            report.laws.append(result)
     checked = gens.checked_since(before)
     if checked:
         report.generation["registered_values"] = checked

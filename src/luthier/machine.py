@@ -439,7 +439,9 @@ class Machine:
             raise
         except Exception as e:
             raise EvalError(f'extern "{term.target}" raised {type(e).__name__}: {e}')
-        rty = result_type(info.type, info.arity)
+        # the result type with the arguments substituted for the names a dependent arrow binds
+        # (`MaxResult n` after n), which the loop above leaves in `ty` once every argument is in
+        rty = ty if len(args) == info.arity else result_type(info.type, info.arity)
         value = self.from_python(result, rty)
         if self.env.checked and self.refined(rty):
             self.check_refinements(value, rty, f'extern "{term.target.split("@")[0]}"')

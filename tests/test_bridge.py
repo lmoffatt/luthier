@@ -227,3 +227,81 @@ def test_rationals_are_exact_and_cross_as_fractions():
 def test_mod_is_not_defined_on_rationals():
     with pytest.raises(TypeCheckError, match="mod"):
         load('q : Rational := extern "python:bridge_externs.third"\nr : Rational := q mod q\n')
+
+
+# ------------------------------------------------------------------ found in phase 5
+
+def test_the_result_type_of_an_extern_has_its_arguments_in_it(tmp_path):
+    """`(n : Nat) -> VOf n`: the value is checked against `VOf 3` when n is 3, not against a type
+    with n free, so a vector of two entries is outside it."""
+    from luthier.cli import main
+    lut = tmp_path / "dependent.lut"
+    lut.write_text('V = { n : Nat, f : Fin n -> Float64 }\nVOf (k : Int) : U := { v : V | v.n == k }\n'
+                   'short : (n : Nat) -> VOf n := extern "python:bridge_externs.two_entries"\n'
+                   'main : Int := (short 3).n\n')
+    assert main(["run", str(lut), "--no-record"]) == 0
+    with pytest.raises(SystemExit, match="outside"):
+        main(["run", str(lut), "--checked", "--no-record"])
+
+
+RECORD = """
+R : { m : Nat, g : Int -> Int }
+Small (r : R) : Bool := r.m < 100
+Bounded (r : R) (x : Fin r.m) : Bool := r.g x < 100
+R := Small & Bounded
+P = { a : R, b : Int }
+"""
+
+
+def test_a_quantified_law_of_a_record_is_one_obligation_per_law():
+    """A record type bound by its pattern, with a law over more than the value (Bounded, over an
+    index): one obligation per law, the index drawn from Int with its range a precondition, so the
+    law reduces; before, the conjunction as a whole did not."""
+    ck = load(RECORD + 'good : Int -> P := extern "python:bridge_externs.bounded_record"\n'
+                       'bad : Int -> P := extern "python:bridge_externs.unbounded_record"\n')
+    assert len(ck.obligations.get(ck.resolve("good"), [])) >= 2
+    assert run_laws(ck, "good", n=30).passed
+    r = run_laws(ck, "bad", n=30)
+    assert not r.passed and any(l.failure for l in r.laws)
+
+
+def test_a_list_from_the_environment_is_read_into_a_refinement_of_a_list():
+    ck = load('len (xs : List Int) : Int := match xs { nil -> 0 ; cons x rest -> 1 + len rest }\n'
+              'three : { l : List Int | len l == 3 } := extern "python:bridge_externs.three_ints"\n')
+    assert ev(ck, "len three") == "3"
+
+
+DEPENDENT = """
+VF (k : Int) = { n : Nat, f : Fin n -> Fin k }
+SameLength (k : Int) (i : VF k) : U := { j : VF k | j.n == i.n }
+D = { nodes : Nat, i : VF nodes, j : SameLength nodes i }
+pairOf : Nat -> D := extern "python:bridge_externs.dependent_pair"
+copyOf (k : Int) (v : VF k) : VF k := (v.n, \\ q { v.f q })
+needSame (k : Int) (i : VF k) (j : SameLength k i) : Int := 0
+useBoth (k : Nat) : Int := let d = pairOf k in needSame d.nodes (copyOf d.nodes d.i) (copyOf d.nodes d.j)
+"""
+
+
+def test_a_component_that_depends_on_others_is_typed_again_in_its_obligation():
+    """The obligation of useBoth speaks of `(pairOf k).j`, whose type, `SameLength nodes i`, names the
+    other components of the record; the record comes from the environment, so the law does not reduce
+    away and `test` types it again: the component is read as a projection of the term, with those
+    components projections of it too, and the law runs."""
+    ck = load(DEPENDENT)
+    r = run_laws(ck, "useBoth", n=20)
+    assert r.passed, r.summary()
+
+
+def test_a_record_whose_component_is_empty_for_its_first_one_is_drawn_again():
+    """A vector of Fin 0 has only the empty value: a record that draws m = 0 and a length above 0 is
+    drawn again, as a case is drawn again when one of its parameters is empty."""
+    ck = load("R0 = { m : Nat, v : { n : Nat, f : Fin n -> Fin m } }\n"
+              "fine : { u : Unit | \\ (r : R0) { r.v.n >= 0 } } := unit\n")
+    r = run_laws(ck, "fine", n=200)
+    assert r.passed, r.summary()
+
+
+def test_an_obligation_that_is_the_condition_of_its_branch_is_discharged():
+    ck = load("k : Int\nPos : U := { x : Int | x > 0 }\nuse (x : Pos) : Int := x\n"
+              "f : Int := if k > 0 then use k else 0\n")
+    assert not ck.obligations.get(ck.resolve("f"))

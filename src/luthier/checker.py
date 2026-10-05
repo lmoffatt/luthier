@@ -33,6 +33,9 @@ class Obligation:
     params: list          # [(name, type)] local context where the check happened
     term: Term            # Bool-valued or law-valued, with the params free
     label: str
+    kind: str = "type"    # "law", stated in a definition's declared type, or "type", a coercion inside a
+                          # body or what an extern owes: a claim about the values a computation gives,
+                          # so a case where the computation raises is outside it (05 §7)
 
 
 Ctx = list  # list[tuple[str, Term]]
@@ -70,6 +73,7 @@ class Checker:
         self.current_def: Optional[str] = None
         self.prefix: str = ""          # module prefix of the file being loaded ("" at top level)
         self.recording: bool = True    # whether checks against subtypes record obligations
+        self._declared: Optional[Term] = None   # the declared type of the definition being checked
         self.certified: dict = {}      # qualified name -> certificate entry accepted at import
         self.gens: dict = {}           # generator key (05 R7: aliases unfolded) -> ("luthier", label, term) | ("extern", target, None)
         self.gens_by: dict = {}        # generator key -> the name its `gen` was written on
@@ -582,12 +586,16 @@ class Checker:
                 # declare first so the body can be recursive
                 self.env.defs[qname] = Def(qname, ty, None, doc=d.doc, line=d.line)
                 before = len(self.obligations.get(qname, []))
-                body = self.check([], d.body, ty)
-                w = self.whnf(ty)
-                if isinstance(w, Subtype) and len(self.obligations.get(qname, [])) == before:
-                    # the body was already of this subtype (an instance built by another
-                    # definition): the laws still belong to this name, so `test` can run them
-                    self.subtype_obligation([], body, w, ty)
+                saved, self._declared = self._declared, ty
+                try:
+                    body = self.check([], d.body, ty)
+                    w = self.whnf(ty)
+                    if isinstance(w, Subtype) and len(self.obligations.get(qname, [])) == before:
+                        # the body was already of this subtype (an instance built by another
+                        # definition): the laws still belong to this name, so `test` can run them
+                        self.subtype_obligation([], body, w, ty)
+                finally:
+                    self._declared = saved
             else:
                 if d.name in free_vars(d.body):
                     self.err(f"recursive definition {qname} needs a declared type")
@@ -839,7 +847,7 @@ class Checker:
         return ty
 
     # ---------------------------------------------------------- obligations
-    def add_obligation(self, ctx: Ctx, term: Term, label: str):
+    def add_obligation(self, ctx: Ctx, term: Term, label: str, kind: str = "type"):
         if not self.recording or self.current_def is None:
             return
         name = self.current_def
@@ -851,6 +859,11 @@ class Checker:
             term = subst(term, bound)
             ctx = [(n, subst(t, bound)) for n, t in ctx if n not in bound]
         if self.path:
+            # an obligation that is the condition of a branch it was raised in holds there: the branch
+            # discharges it (`if ValidGraph g then ...` owes `ValidGraph g` nothing more)
+            conds = [subst(cond, bound) if bound else cond for cond in self.path]
+            if any(c == term for c in conds):
+                return
             # raised inside a branch: the branch's condition is a precondition of the law (05 §7)
             try:
                 with self.silent():
@@ -860,7 +873,7 @@ class Checker:
                         term = App(App(Var("implies"), subst(cond, bound) if bound else cond), term)
             except (TypeCheckError, EvalError):
                 pass
-        self.obligations.setdefault(name, []).append(Obligation(name, list(ctx), term, label))
+        self.obligations.setdefault(name, []).append(Obligation(name, list(ctx), term, label, kind=kind))
 
     class _Silent:
         def __init__(self, ck): self.ck = ck
@@ -1014,6 +1027,53 @@ class Checker:
         self.err(f"cannot infer {t!r}")
 
     # ---------------------------------------------------------- projections
+    def _as_projection(self, ctx: Ctx, t: Match, want: Optional[Term] = None):
+        """A match that is a projection, `match e { (_, (x, _)) -> x }`, as `project` elaborates one, of a
+        component whose type depends on earlier ones (the pairs of a design, over its nodes): its type
+        is the component's, with those earlier components as projections of e. Checked as an ordinary
+        match, the type names components the pattern does not bind, which fails when the projection is
+        checked again against a precise type. A component that depends on none goes the ordinary way,
+        with the scrutinee inferred once. With `want`, checking: the elaborated term; else the term and
+        its type. None if not projection-shaped."""
+        if not self._projection_shaped(t):
+            return None
+        path = list(_var_paths(t.branches[0][0]))[0][1]
+        scrut, sty = self.infer(ctx, t.scrut)
+        w = self.whnf(sty)
+        while isinstance(w, Subtype) and not isinstance(w.param, PPair):
+            w = self.whnf(w.base)
+        field = None
+        if isinstance(w, Subtype) and self._component_depends(w.base, path):
+            field = dict((p_, name) for name, p_ in _var_paths(w.param)).get(path)
+        if field is None:
+            term, tty = self.check_match(ctx, t, want, inferred=(scrut, sty))
+            return term if want is not None else (term, tty)
+        term, tty = self.project(ctx, scrut, sty, field.split("~")[0])
+        return self.coerce(ctx, term, tty, want) if want is not None else (term, tty)
+
+    def _component_depends(self, base: Term, path: tuple) -> bool:
+        """Whether the component at `path` of a chain of dependent pairs mentions an earlier one."""
+        t, earlier = self.whnf(base), set()
+        for step in path:
+            if not isinstance(t, Sigma):
+                return False
+            if step == 0:
+                return bool(free_vars(t.fst) & earlier)
+            if t.name != "_":
+                earlier.add(t.name)
+            t = self.whnf(t.snd)
+        return bool(free_vars(t) & earlier)
+
+    @staticmethod
+    def _projection_shaped(t: Term) -> bool:
+        if not isinstance(t, Match) or len(t.branches) != 1:
+            return False
+        pat, body = t.branches[0]
+        if not isinstance(pat, PPair) or not isinstance(body, Var) or not _pairs_only(pat):
+            return False
+        bound = list(_var_paths(pat))
+        return len(bound) == 1 and bound[0][0] == body.name
+
     def infer_dotted(self, ctx: Ctx, name: str):
         """`a.b.c` that is not a qualified name: the longest prefix that is a variable or a
         definition, then one projection per remaining segment. A module is a record whose
@@ -1349,6 +1409,19 @@ class Checker:
             a = self.check(ctx, t.fst, w.fst)
             b = self.check(ctx, t.snd, subst(w.snd, {w.name: a}))
             return Pair(a, b)
+        if isinstance(t, Match) and self._projection_shaped(t) and (
+                not isinstance(w, Subtype) or isinstance(w.pred, NoLaw) or (isinstance(w.pred, Con) and w.pred.name == "true")):
+            # the ordinary way first; a component whose type names earlier ones fails it when the
+            # projection is checked again (a law typed by `test`), and is then typed as a projection
+            cd = self.current_def
+            mark = len(self.obligations.get(cd, [])) if cd is not None else 0
+            try:
+                term, _ = self.check_match(ctx, t, ty)
+                return term
+            except TypeCheckError:
+                if cd is not None and cd in self.obligations:
+                    del self.obligations[cd][mark:]
+                return self._as_projection(ctx, t, want=ty)
         if isinstance(t, Match) and not isinstance(w, Subtype):
             term, _ = self.check_match(ctx, t, ty)
             return term
@@ -1483,7 +1556,79 @@ class Checker:
                 return
             if b is False:
                 self.err(f"{pp(value)} does not satisfy {pp(ty)}")
-        self.add_obligation(ctx, applied, pp(ty))
+        # a law of a record bound by its pattern is a lambda applied to the value, which `test` does
+        # not take apart into its conjuncts as it does a law on a variable
+        # the laws a definition's declared type states, or a coercion inside a body (05 §7)
+        kind = "law" if ty is self._declared and not ctx else "type"
+        split = None if isinstance(sub.param, PVar) else self._quantified_conjuncts(ctx, value, sub, ty)
+        if split is not None:
+            for params, term in split:
+                self.add_obligation(ctx + params, term, pp(ty), kind)
+            return
+        self.add_obligation(ctx, applied, pp(ty), kind)
+
+    def _quantified_conjuncts(self, ctx: Ctx, value: Term, sub: Subtype, ty: Term):
+        """The laws of a refinement some of whose conjuncts quantify over more than the value (a
+        Table's NoCellsOffSchema, over a column and a row), one obligation each: the law applied to
+        the value, bound once, and quantified over its own parameters, so `test` draws them; the
+        predicate applied as a whole would not reduce to a Bool. A parameter whose type depends on
+        the value is drawn from the base of that type, its refinement a precondition, as for the
+        laws of a sum's payload. None when every conjunct is a Bool of the value, or when one is in
+        a form this cannot take apart: the predicate is then one obligation."""
+        whole = pattern_to_term(sub.param)
+        if not isinstance(sub.pred, And):
+            return None
+        x = _readable_name("v", ctx, value)
+        leaves = []
+
+        def walk(t):
+            if isinstance(t, And):
+                walk(t.lhs)
+                walk(t.rhs)
+                return
+            h, args = unapply(t)
+            if args and whole is not None and args[-1] == whole:
+                leaves.append(apply(h, list(args[:-1]) + [Var(x)]))
+            elif isinstance(sub.param, PVar):
+                leaves.append(subst(t, {sub.param.name: Var(x)}))
+            else:
+                leaves.append(None)
+        walk(sub.pred)
+        if any(leaf is None for leaf in leaves):
+            return None
+        out, quantified = [], False
+        for leaf in leaves:
+            try:
+                with self.silent():
+                    _, lty = self.infer(ctx + [(x, ty)], leaf)
+            except TypeCheckError:
+                return None
+            params, guards = [], []
+            t = lty
+            while True:
+                tw = self.whnf(t)
+                if not isinstance(tw, Pi):
+                    break
+                quantified = True
+                pname = _readable_name(tw.name if tw.name != "_" else "y", ctx + params + [(x, ty)], value)
+                dom = tw.dom
+                if x in free_vars(dom):
+                    dw = self.whnf(dom)
+                    if isinstance(dw, Subtype) and isinstance(dw.param, PVar) and x not in free_vars(dw.base):
+                        guards.append(subst(dw.pred, {dw.param.name: Var(pname)}))
+                        dom = dw.base
+                    else:
+                        return None
+                params.append((pname, dom))
+                leaf = App(leaf, Var(pname))
+                t = subst(tw.cod, {tw.name: Var(pname)}) if tw.name != "_" else tw.cod
+            if not self.is_bool(t):
+                return None
+            body = leaf
+            for g in reversed(guards):
+                body = App(App(Var("implies"), g), body)
+            out.append((params, Match(value, ((PVar(x), body),))))
+        return out if quantified else None
 
     def decide_closed(self, t: Term) -> Optional[bool]:
         """True/False if the closed predicate reduces to Bools (through conjunctions); None if a
@@ -1526,8 +1671,8 @@ class Checker:
             out = App(App(App(Con("cons"), elt), self.check(ctx, x, elt)), out)
         return out
 
-    def check_match(self, ctx: Ctx, t: Match, ty: Optional[Term]):
-        scrut, sty = self.infer(ctx, t.scrut)
+    def check_match(self, ctx: Ctx, t: Match, ty: Optional[Term], inferred=None):
+        scrut, sty = inferred if inferred is not None else self.infer(ctx, t.scrut)
         sw = self.whnf(self.base_type(sty))
         branches = []
         result_ty = ty
@@ -1852,6 +1997,21 @@ def _pending_member(d: Def, existing: Def):
                pending=True)
     m.base_ctx, m.base = ctx, body.base
     return m
+
+
+def _var_paths(p: Pattern, path: tuple = ()):
+    """The variables of a pattern of pairs, each with its position (0 the first, 1 the second)."""
+    if isinstance(p, PVar):
+        yield p.name, path
+    elif isinstance(p, PPair):
+        yield from _var_paths(p.fst, path + (0,))
+        yield from _var_paths(p.snd, path + (1,))
+
+
+def _pairs_only(p: Pattern) -> bool:
+    if isinstance(p, (PVar, PWild)):
+        return True
+    return isinstance(p, PPair) and _pairs_only(p.fst) and _pairs_only(p.snd)
 
 
 def _readable_name(base: str, ctx: Ctx, value: Term) -> str:

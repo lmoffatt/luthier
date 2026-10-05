@@ -322,6 +322,19 @@ As implemented (2026-10-05, phase 2 of `docs/plan-2026-10-05.md`):
 - The grade "bounded" is given when an enumeration took `Int` in a box; a refinement of `Int` bounded
   on both sides by closed integers is enumerated over its interval, exhaustively.
 
+Added 2026-10-06 (phase 5 of the plan):
+
+- An obligation is of one of two kinds. A *law* is stated by a definition's declared type
+  (`fastStep : { f : Step | StepAgrees f } := pyStep`). The obligation of a *type* is a coercion
+  inside a body, or a refinement of what an extern gives (R5): a claim about the values a computation
+  gives. A case where the computation raises gives no value, so for the obligation of a type it is
+  outside the claim: it is skipped and counted, and an obligation every case of which raises is not
+  run. For a law, an error on a case is a failure, as a counterexample is. The partiality itself
+  shows at run time, where the error stops the run.
+- A refinement of a record bound by its pattern (a `Table`), whose laws quantify over more than the
+  value (a column and a row), is one obligation per law, over the law's own parameters.
+- Each law of an entry records how long it took.
+
 ## 8. Example
 
     -- a concrete type, defined natively: a table is a function from a column and a row to a cell

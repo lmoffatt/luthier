@@ -520,7 +520,7 @@ def try_extern(env: Env, head: Extern, args, fuel: Fuel) -> Optional[Term]:
         result = info.fn(*vals)
     except Exception as e:  # the environment failed: report as an evaluation error
         raise EvalError(f'extern "{head.target}" raised {type(e).__name__}: {e}')
-    ret_type = result_type(info.type, info.arity)
+    ret_type = ty      # with the arguments substituted for the names a dependent arrow binds
     r = from_python(env, result, ret_type)
     return apply(r, args[info.arity:])
 
@@ -1034,6 +1034,15 @@ def from_python(env: Env, x, ty: Optional[Term]) -> Term:
     targs = []
     if ty is not None:
         head, targs = unapply(ty)
+        if not (isinstance(head, Var) and head.name in ("List", "Maybe", "N", "Unit")):
+            # a refinement of a list (a list of a given length) is read as the list it refines
+            w = whnf(env, ty, Fuel(env.fuel))
+            while isinstance(w, Subtype):
+                h2, a2 = unapply(w.base)
+                if isinstance(h2, Var) and h2.name in ("List", "Maybe", "N", "Unit"):
+                    head, targs = h2, a2
+                    break
+                w = whnf(env, w.base, Fuel(env.fuel))
     tname = head.name if isinstance(head, Var) else None
     if isinstance(x, (bool, int, float, str)) and ty is not None and tname not in ("N", "Maybe") \
             and _is_structured(env, ty):

@@ -44,8 +44,8 @@ SymmetricSquare : U := { a : Square | symmetric 0.0 a }
 -- ---------------------------------------------------------------- constructors
 row (a : Mat Float64) (i : Fin a.m) : Vec Float64 := (a.n, a.f i)
 last (v : NonEmptyVec) : Float64 := v.f (v.n - 1)
-zeros (n : Nat) : Vec Float64 := (n, \ k { 0.0 })
-ones (n : Nat) : Vec Float64 := (n, \ k { 1.0 })
+zeros (n : Nat) : VecOf n := (n, \ k { 0.0 })
+ones (n : Nat) : VecOf n := (n, \ k { 1.0 })
 identity (n : Nat) : Mat Float64 := (n, n, \ i j { if i == j then 1.0 else 0.0 })
 append (v : Vec Float64) (x : Float64) : Vec Float64 := (v.n + 1, \ k { if k < v.n then v.f k else x })
 head (v : Vec Float64) (k : { m : Nat | m <= v.n }) : Vec Float64 := (k, \ i { v.f i })     -- the first k entries
@@ -174,14 +174,17 @@ hadamardBound (a : Mat Float64) : Float64 :=
   foldWith Float64 (\ (a b : Float64) { a * b }) 1.0 a.m (\ i { norm (row a i) })
 
 -- ---------------------------------------------------------------- derivatives
--- g is the gradient of f at t, on a space Theta that vectors move along by `shift`: the slope of f
--- along g(t), by central difference, equals |g(t)|. Step eps^(1/3), whose truncation and rounding
--- are both of order eps^(2/3); the tolerance sqrt eps leaves a margin of a hundred.
+-- g is the gradient of f at t, on a space Theta that the vectors of dimension dim move along by
+-- `shift`: g(t) is one of those vectors, and the slope of f along it, by central difference, equals
+-- |g(t)|. Step eps^(1/3), whose truncation and rounding are both of order eps^(2/3); the tolerance
+-- sqrt eps leaves a margin of a hundred.
 fdStep : Float64 := cbrt eps
 fdTol  : Float64 := sqrt eps
 
-IsGradient (Theta : U) (shift : Theta -> Vec Float64 -> Theta) (f : Theta -> Float64) (g : Theta -> Vec Float64) (t : Theta) : Bool :=
-  match g t { v -> match norm v { nv ->
+IsGradient (Theta : U) (dim : Nat) (shift : Theta -> VecOf dim -> Theta) (f : Theta -> Float64) (g : Theta -> Vec Float64) (t : Theta) : Bool :=
+  match g t { v ->
+  if v.n /= dim then false else
+  match norm v { nv ->
   if nv == 0.0 then true else
   match scale (fdStep / nv) v { h ->
   match (f (shift t h) - f (shift t (scale (0.0 - 1.0) h))) / (2.0 * fdStep) { slope ->
@@ -359,3 +362,7 @@ operator - := msub
 operator * := mscale       -- Float64 * Mat
 operator * := matVec       -- Mat * Vec
 operator * := matMul       -- Mat * Mat
+
+-- The obligations of spectralMap run Jacobi's method natively at every case, and each rotation wraps
+-- the matrix of the one before, so the cost grows fast with the size: they stop at size 5.
+test spectralMap with 30 size 5
