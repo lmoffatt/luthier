@@ -33,6 +33,10 @@ Sources:
 - **This plan is committed before Luciano reads it**, so that his annotations on it are
   `git diff` against that commit.
 
+      Aca el problema es que constituye una step. 
+      La limitante aqui es mi capacidad de procesamiento de informacion, de modo que una step deberia ser un bocado de decision que yo pueda manejar y que tenga implicancias mas que locales. (analiza si es un buen criterio)
+
+
 ## 1. The order, and why
 
 The method needs pieces that don't exist yet: a decision log, a list of principles, a check of
@@ -98,6 +102,9 @@ of turns. A deterministic link (WM §3).
 - Caveat: exposure. A chat may hold things that shouldn't reach GitHub, and WM §8 pushes `main` at
   milestones. Question for Luciano in section 7.
 
+    entiendo que esto lo hago yo como lo vengo haciendo no hay nada tuyo que hacer o si?
+
+
 **1.2 `docs/principles.md`**, from Appendix B after Luciano has annotated it. Entries stay `proposed`
 until he writes `ok` on them; a model never writes it (WM §6).
 
@@ -105,6 +112,13 @@ until he writes `ok` on them; a model never writes it (WM §6).
 - Principles: for P4; against P8 (one more file to keep up).
 - Assumption: a principle can be stated in a sentence, with one assumption.
 - Who runs it: the model writes, Luciano marks.
+
+        Aqui la idea es que cada tanto un script llame a leer el repositorio a un agente y que analice dos cosas
+        1) si los principios se cumplen y si son utiles (es decir si se usan, un principio puede ser irrelevante, no servir para guiar o tomar ninguna decision)
+        2) Si los principios fallan en el sentido que entran en conflicto consigo mismo o con otros (y claro documentar eso como ocurre)
+
+        3) ver si hay hay nuevos principios en los documentos o en el repositorio en general que no figuran aqui: ver si entran en conflicto con los ppios corrientes y analizar el costo beneficio de incluirlos. 
+
 
 **1.3 `docs/decisions.md`**, from Appendix B, in the format of WM §6 with one change found while
 drafting the appendix: `Source:` carries the line, `path@commit:line`. Two of Luciano's confirmations
@@ -115,6 +129,8 @@ searching the file for it.
 - Principles: for P1, P4.
 - Assumption: entries get written when the decision is taken. Rebuilt afterwards, as Appendix B
   does, they cost an hour of transcript reading per session.
+
+
 
 **1.4 Sonolocalización.** `docs/decisions.md` and `docs/principles.md` at its root (a new `docs/`
 folder). The decisions about the method get a short entry there with a reference to Luthier's log
@@ -144,6 +160,9 @@ folder). The decisions about the method get a short entry there with a reference
 - Assumption: written instructions hold. `plan-mechanical-rules` reports that they degrade over a
   long run (the constant `lmMaxIter`, night of 2026-10-05), which is why 2.2 and phase 4 exist.
 
+        Esto promueve a estos documento a principios, esto esta bien al comienzo pero a la larga debe ser un documento vivo que va cambiando. Este documento que lee claude no deberia tener la metainformacion ya que es gastar tokens al pedo, las meta-anotaciones estaria fuera.  
+
+
 **2.2 Reminder at the end of a turn.** A `Stop` hook, next to the one of `plan-mechanical-rules`
 2.2, prints the commits of the session that touch D or E and that no entry of the log names. It
 doesn't block: not every commit is a decision.
@@ -151,6 +170,8 @@ doesn't block: not every commit is a decision.
 - Origin: [M]. Principles: for P6, P9; against P8 if it fires on routine commits, in which case it
   goes.
 - Who runs it: the hook.
+
+      ok
 
 **2.3 Local git for what git doesn't cover** (WM §8).
 
@@ -170,6 +191,9 @@ doesn't block: not every commit is a decision.
 - Undo: deleting the `.git` folder leaves the memory and the transcripts as they were.
 - Cost: minutes.
 
+      No pongas P2 P3 etc porque no se de que estas hablando, cuando es algo para que yo lo lea, debe dar un enunciado del principio. 
+      Ok
+
 ## Phase 3. Data
 
 **3.1 Manifests in sonolocalización.** `prototipo-cero/2026-09-07/manifest.sha256` and
@@ -181,6 +205,7 @@ doesn't block: not every commit is a decision.
 - Principles: for P2, P3.
 - Who runs it: the model; hashing is a check and produces no result.
 - Cost: minutes (about 5 GB of hashing).
+  ok
 
 **3.2 The git for large data, deferred.** WM §8 proposes a repository outside the folder, holding the
 raw data once and the derived data per run. With the disk at 97% it would take 5 GB that aren't
@@ -190,6 +215,8 @@ produce again and changes between runs. The manifest of 3.1 covers the raw data.
 
 - Principles: for P8; against P2 only for results that are expensive to produce again, of which there
   are none today.
+
+     ok
 
 ## Phase 4. Mechanical checks
 
@@ -204,6 +231,8 @@ repository is absent, the check warns and doesn't fail (P7). Output in the forma
   irnos a la mierda en la burocracia)".
 - Principles: for P1; for P8 (a script instead of a ritual).
 - Who runs it: the model and the hooks, like a lint.
+
+     
 
 **4.2 `scripts/check_spec_tests.py`.** The rules `R1` to `R11` of `05-static-semantics.md` against
 the names of the files of `tests/spec/`: each rule needs an `.accept.lut` and a `.reject.lut`, and a
