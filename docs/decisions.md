@@ -251,4 +251,30 @@ Source:     chat:8d5ce152:487
 Kind:       principle. For P4, P1; P8 is met, since there were real cases: R11 decided and not
             enforced, R10 without tests
 Status:     current; the first run, by workflow, on f079e0d
+
+D-2026-10-06-y  Every normative statement of docs/semantica carries an identifier, never reused:
+                R, G and C as today, S for 02, K for 04, N for 06, L for 07, and in 00, 01 and
+                03 only what code enforces. A checker message carries the identifier of its
+                rule, a test of tests/spec is named by it, and check_spec_tests.py grows into a
+                check of traceability with an explicit list of what the checker decides outside
+                the specification. The identifiers enter the specification once the report of
+                the correspondence audit is in; the code, in the next round of the interpreter,
+                since any change to it invalidates every certificate.
+Author:     the model, confirmed by Luciano
+Quote:      "Acetpo todas tus sugerencias."
+Source:     chat:8d5ce152:675
+Kind:       principle. For P2, P4; P8 is met, with real cases: R10 without tests, R11 not
+            enforced, four documents whose rules no code can cite
+Status:     current; not started
+
+D-2026-10-06-z  The invariant of stochasticity is written before A-9 builds generators on it, as
+                a library task under today's tester: the invariant, its statistical tests at a
+                level, and an extern source that draws in batches. Seed is a key and a counter.
+Author:     the model, from Luciano's observations on random.lut; confirmed by Luciano
+Quote:      "la mas importante en ningun momento se define la invariante de estoscasticidad"
+            "Acetpo todas tus sugerencias."
+Source:     luthier@d41026e:docs/Lucianos observations/random.lut.observations.txt:4
+            chat:8d5ce152:675
+Kind:       principle. For P10, P4; changes the order of A-9 in plan-2026-10-06
+Status:     current; starts when the correspondence audit, which reads the tree, is done
 ```
