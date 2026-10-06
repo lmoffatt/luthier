@@ -384,9 +384,13 @@ Three cases:
   certificates of the project took about ten hours).
 - Large, edited and not reproducible: nothing in these repositories is in this case.
 
-The proposal: a nested git with no remote in `prototipo-cero/2026-09-07/`, ignored by the parent as
-a directory, with the raw data committed once and the derived data committed per run, each commit
-naming the commit of the code that produced it. If the derived data grows past what that bears, the
+The proposal: a git with no remote whose working tree is `prototipo-cero/2026-09-07/` and whose
+repository lives outside it (`git --git-dir=~/data-git/<name>.git --work-tree=...`), tracking only
+what the parent ignores: the raw data committed once, the derived data committed per run, each
+commit naming the commit of the code that produced it. Draft 1 said a nested git inside the folder;
+writing the plan of 2026-10-06 found that sonolocalización already tracks 234 files of `derived/`
+and the voice notes in that folder, so a nested repository would overlap with the parent (decided by
+the implementation, `plan-working-method-2026-10-06.md`, step 3.3). If the derived data grows past what that bears, the
 step is git-annex, which keeps the content out of the history; DVC does the same with more
 machinery than the project needs.
 
