@@ -250,7 +250,8 @@ Quote:      "A mi lo que mas me importa es saber si las especificaciones de luth
 Source:     chat:8d5ce152:487
 Kind:       principle. For P4, P1; P8 is met, since there were real cases: R11 decided and not
             enforced, R10 without tests
-Status:     current; the first run, by workflow, on f079e0d
+Status:     current; the first run, by workflow, at b15f2a1 (an attempt at f079e0d failed to
+            authenticate); its report is docs/audits/2026-10-06_correspondence_v1_claude-opus-5-5.md
 
 D-2026-10-06-y  Every normative statement of docs/semantica carries an identifier, never reused:
                 R, G and C as today, S for 02, K for 04, N for 06, L for 07, and in 00, 01 and

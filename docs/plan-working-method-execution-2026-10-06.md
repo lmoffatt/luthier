@@ -71,7 +71,7 @@ Sonolocalización tracks 234 files under `prototipo-cero/2026-09-07/derived/` an
 | 4.3 | header check | dropped, D-2026-10-06-s |
 | 5.1 | fidelity audit | to do; needs an export of `7217f251` |
 | 5.2 | principles audit | to do; run by hand before a push |
-| 5.3 | correspondence audit | first run by workflow on `f079e0d`, D-2026-10-06-x |
+| 5.3 | correspondence audit | run by workflow at `b15f2a1`, report `docs/audits/2026-10-06_correspondence_v1_claude-opus-5-5.md`; script `60fd7d8`, its calibration against that run pending |
 | 6 | the list of working method §12 | items 1, 3, 4, 5, 10, 11, 12 done |
 
 The git for large derived data is deferred (decision D-2026-10-06-i) until a derived file exists that
@@ -296,7 +296,9 @@ Deferred by D-2026-10-06-s, then reinstated by D-2026-10-06-x: it is what matter
 Both directions over the whole specification: each document of `docs/semantica/` against the code and
 the tests, each group of modules against the specification, and `README.md` and `examples/` against
 both; a skeptic per unit tries to refute each finding; one report for Luciano (a screen of summary,
-bites, tables). The first run was a workflow at `b15f2a1`.
+bites, tables). The first run was a workflow at `b15f2a1`;
+`scripts/audit_correspondence_journal.py` wrote its results in the layout below, under
+`docs/audits/2026-10-06_correspondence_v1_claude-opus-5-5/`, with the report.
 
 `scripts/audit_correspondence.py`, with `prompts/audit_correspondence_*_v1.md` and the units in
 `prompts/audit_correspondence_units_v1.json`. It pins a commit in a throwaway worktree, runs the
