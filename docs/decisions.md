@@ -203,7 +203,7 @@ Source:     luthier@efd8143:docs/plan-working-method-2026-10-06.md:295
 Kind:       principle. For P8, P12; against P9, since the end-of-task report is now the only
             check on the decisions the model takes alone. Git itself carries commits at no
             real cost: 70 commits weigh nothing next to the 49 .ogg tracked in docs/audios.
-Status:     current
+Status:     current, except the deferral of step 5.3, reversed by D-2026-10-06-x
 
 D-2026-10-06-t  Sources are written in one grammar: repo@commit:path:line (or :a-b), and
                 chat:session8:line.
@@ -240,4 +240,15 @@ Quote:      "(esto es un principio generalizable a toda interaccion con IA)"
 Source:     luthier@efd8143:docs/plan-working-method-2026-10-06.md:323
 Kind:       principle. For P12
 Status:     current; ~/.claude/CLAUDE.md is outside git
+
+D-2026-10-06-x  The correspondence audit runs now, both directions, not deferred: that the
+                specification reflects the implementation and the documentation is what matters
+                most to Luciano. Reverses the part of D-2026-10-06-s that deferred step 5.3.
+Author:     Luciano
+Quote:      "A mi lo que mas me importa es saber si las especificaciones de luthier son un fiel
+            reflejo de la documentacion y de la implementacion"
+Source:     chat:8d5ce152:487
+Kind:       principle. For P4, P1; P8 is met, since there were real cases: R11 decided and not
+            enforced, R10 without tests
+Status:     current; the first run, by workflow, on f079e0d
 ```

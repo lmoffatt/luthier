@@ -168,24 +168,12 @@ step creates the file and 6.2 adds its lines.
 Done when: each file holds the answered text; no line carries a source, a quote, a date or an origin
 (no match for `annotation`, `chat:`, `@[0-9a-f]{7}`, `line [0-9]`).
 
-### 2.2 Reminder of commits that no decision names
+### 2.2 Reminder of commits that no decision names (dropped)
 
-Two hooks, in `.claude/settings.json` of each repository, each calling a script of the repository:
-
-- At the start of a session, `scripts/hooks/session_start.sh` writes `git rev-parse HEAD` of luthier
-  and of sonolocalización to `.git/claude-sessions/<session id>` in each (inside `.git`, so it is
-  never tracked).
-- When the model stops, `scripts/hooks/stop_decisions.py` lists the commits since that `HEAD` that
-  touch the specification or the implementation and whose message has no `Decision:` line, or
-  names an id that `docs/decisions.md` doesn't have. Paths in luthier: `src/`, `tests/`,
-  `docs/semantica/`. In sonolocalización: `prototipo-cero/luthier/`, `prototipo-cero/src/`,
-  `sonolik/`. If there are any and the hook's input has `stop_hook_active` false, it prints the list
-  on stderr and exits 2, so the model reads it and either writes the entries or says why there are
-  none; otherwise it exits 0. In sonolocalización it sits next to the `Stop` hook of
-  `plan-mechanical-rules` step 2.2.
-
-Done when, in a test session: a commit under `src/` with no `Decision:` line reaches the model at the
-stop, once; with `Decision: none` nothing is printed; the second stop ends the turn.
+Dropped by D-2026-10-06-s (a mechanism with a recurring cost waits for a real case): it needed a
+`Decision:` line in every commit. The report at the end of each task, a rule of `CLAUDE.md`, is the
+check that remains. If a decision taken alone ever goes unreported, the design that was here is in
+`5e4f134`.
 
 ### 2.3a Git for the model's memory
 
@@ -255,16 +243,9 @@ Done when: on today's tree it reports exactly two findings, R10 (a law character
 implementation is not a law) with no tests and R11 (a condition refines in its branch) not
 implemented, and exits 1; a test in `tests/` with a small specification of its own passes.
 
-### 4.3 `scripts/check_headers.py`
+### 4.3 Header check (dropped)
 
-A warning, never a failure (exit 0). Scope: `docs/**/*.md` first committed on 2026-10-06 or later,
-except Luciano's folders (`docs/Lucianos ideas/`, `docs/Lucianos observations/`, `docs/audios/`),
-`docs/chat/`, `docs/audits/` and the records (`decisions.md`, `principles.md`). Within its first 15
-lines a document has a date, a line starting `Written for`, a line starting `Source`, and `Status:`.
-
-Done when: it runs on the tree, and each finding of the first run is fixed or listed with a reason
-in `scripts/check_headers.allow`. If it ever flags a header that was fine for a human reader, it is
-removed (P8, no more bureaucracy than it pays for).
+Dropped by D-2026-10-06-s: no document has yet reached Luciano without a usable header.
 
 ## Phase 5. Audits by prompt
 
@@ -303,12 +284,17 @@ and the documents changed since. Output, for Luciano's three questions and the r
 Calibration: a run on the sources of draft 1's principles (`2a660c8`, `daa5b95`, the export of
 `7217f251`) with an empty `principles.md` should find P1 to P9, P12 and P13 again, or equivalents.
 
-The hook, after bite 4: `.githooks/pre-push` in luthier prints the date of the last audit and the
-number of commits since, and never blocks. Luciano sets `git config core.hooksPath .githooks` once.
+When it runs (bite 4, D-2026-10-06-o): before each push of `main` and on request, by hand. The
+reminder hook before a push was dropped by D-2026-10-06-s.
 
 Done when: the calibration run ends with its comparison against the list above.
 
 ### 5.3 The correspondence audit, the part that needs a model
+
+Deferred by D-2026-10-06-s, then reinstated by D-2026-10-06-x: it is what matters most to Luciano.
+The first run is a workflow over the whole specification, both directions, at `f079e0d`; its
+report goes to `docs/audits/`. The design below is what a script will repeat at each round of the
+interpreter.
 
 `prompts/audit_correspondence_v1.md`, `scripts/audit_correspondence.py`. Inputs:
 `docs/semantica/05-static-semantics.md` §5, `tests/spec/`, `src/luthier/checker.py`. Output: for each
