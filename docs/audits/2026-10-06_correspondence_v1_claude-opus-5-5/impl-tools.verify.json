@@ -1,0 +1,235 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-tools",
+   "direction": "impl",
+   "files": "src/luthier/cli.py, certify.py, testing.py, generators.py, graph.py, arrays.py, tables.py, rational.py, text.py"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a60413c0bebb86f67",
+  "agent_label": "verify impl-tools",
+  "started_at": "2026-10-06T12:20:32+00:00",
+  "finished_at": "2026-10-06T12:33:06+00:00",
+  "tokens": 163895,
+  "tool_calls": 71,
+  "duration_ms": 753906,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "d86c23d03ddf7a554db1e00e4f603f1b02ccc16113d0e25a9f59ce3d4bb97be9"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "IT-07",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "certify.py:26-33 names_in collects every Var via map_names, whose docstring (subst.py:161-163) assumes bound variables never collide with globals; cone() (certify.py:36-55) then follows any collected name that is in env.defs. Spec 03-libraries.md:61-63 (the mapper's 03:237-239 is off by 176 lines): the cone is 'the definition and everything it refers to ... bound variables renamed canonically', so the hash should be alpha-invariant. Reproduced: plain.lut `import \"algebra\"` gives 'ok: 0 ... 0 with laws'; shadow.lut adds `eqB : Int := 0` and check -v lists exactBool, exactInt, exactNonNegative, intRing, allOf, anyOf, largest as 'stale certificate: the code of its cone changed'. Minimal alpha counterexample: a.lut `f (x : Int) : Int := x + 1` + `x : Int := 0` gives definition_hash a9da98578a4b6bd2, cone [Int, f, x]; b.lut with `f (y : Int) : Int := y + 1` gives 3c6a36bafe8512bb, cone [Int, f]. A copy of examples/z7ring.lut (defines eqB at line 19) prints 'imported, stale certificate: exactBool, ..., largest' after `luthier test`. tests/test_kernel.py:262-268 has no global colliding with a binder."
+   },
+   {
+    "id": "IT-10",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "testing.py:71-72 returns 'no laws'. Reproduced: `Z3`, `inc`, `twice (a : Z3) : Z3 := inc (inc a)`, `test twice exhaustive` prints 'twice: no laws', exit 1, app.cert.json entry outcome 'no laws', passed false. 05-static-semantics.md:315-319 gives a closed set of three outcomes and 'A definition passed when every law passed', which read vacuously gives passed for zero laws; the code adds a fourth outcome. Edge case, so low."
+   },
+   {
+    "id": "IT-11",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "cli.py:289-293 takes own[0] among loader.tests matching q == name or q.endswith('.'+name); imports are loaded and their tests appended first (cli.py:88-90, 109-110). Reproduced exactly as described: `luthier test app.lut --name inc` prints 'L.inc: passed ... [exhaustive, 3 cases]' and writes lib.cert.json; the top-level inc (Pos) is never run, exit 0. Name resolution of 03-libraries.md:29-30 makes `inc` in the top file its own inc; 03:70-73 (mapper's 03:246-249 is off by 176) only sanctions `--name m.f --deep` for an imported one; README.md:83 shows `--name f` as testing f."
+   },
+   {
+    "id": "IT-12",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "testing.py:348-350. `luthier test app.lut --name nosuch` prints 'nosuch: FAILED / FAIL nosuch [sampled, 0 cases] / error: no such definition', exit 1. No line of docs/semantica covers an unknown --name (grep 'no such' finds nothing)."
+   },
+   {
+    "id": "IT-13",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:296-304. The directive part is documented by README.md:82 ('run the file's test directives'); the fallback is not. a.lut with inc, dec and no directive: both run sampled 100. b.lut with `test inc exhaustive`: only inc runs, dec stays pending. 05:291-292 says only what `test n` runs, not what `luthier test file` runs."
+   },
+   {
+    "id": "IT-14",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:293/297: `args.n if args.n_given else n`, `ex or args.exhaustive`, `sz or args.size`. `test p with 50 size 3`: `--size 100 --seed 2` gives '[sampled, 50 cases]' passed; `--n 7` gives 7 cases; `--exhaustive` gives '[bounded, 7 cases]', i.e. [-3,3], so the directive's size beat --size 16. The cited 02-grammar.md:279 does not exist (the file has 146 lines); the directive grammar is 02:45 and 04-kernel.md:48, neither says how options and directives combine. 08:236-237 (G12, decided) only says options have defaults."
+   },
+   {
+    "id": "IT-20",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:339-346 and testing.py:389-392 (comment cites plan 4.3). grep for fallback, 'fell back', 'substitution evaluator' in docs/semantica finds nothing; 04-kernel.md:199-203 mentions call by need only."
+   },
+   {
+    "id": "IT-21",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:347-359. z7ring copy: 'imported, stale certificate: exactBool, exactInt, exactNonNegative, intRing, allOf, anyOf, largest / run `luthier test .../lib/algebra.lut` to certify them, or add --imports'. The message is not specified; its --imports advice matches 05:326-327. The first advice cannot clear staleness caused by IT-07, since the colliding name comes from the importer."
+   },
+   {
+    "id": "IT-25",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "api.py:48-52 Program.resolve raises KeyError before cli.py:437/449 test the result. `luthier run r.lut --set nosuch=1` and `--entry nosuch` both end with traceback 'KeyError: \"no definition 'nosuch'\"', exit 1. Correction: 'not a hole of the program' is reachable for an existing non-hole (`--set main=2` prints '--set main: not a hole of the program'); only 'no definition ... to run' (cli.py:450) is unreachable."
+   },
+   {
+    "id": "IT-28",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "cli.py:463-466 with cone_states (cli.py:532-533) giving 'assumed (an axiom)'. Reproduced: e5.lut (import algebra, useReal, main) prints 1; with --require-certified: '1 names of the cone of main are not certified / realField: assumed (an axiom)', exit 1. The code follows the literal 05:330-332 ('refuses to run unless every one is certified') and 08:277-278 C6 ('a passed entry'), but 05:284 lists 'assumed' among the grades of certification and 06:56-58 records an axiom's obligations as assumed instead of pending, so the spec is ambiguous. tests/test_certificates.py:108-115 covers only a pending name."
+   },
+   {
+    "id": "IT-30",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:477, 490-491. Reproduced: shape prints ('circle', 1.5), pt prints Pt(x=1.0, y=2.0), `just 3` prints 3, nothing and unit print nothing and record null, a Bool prints True, inc prints '<function to_python.<locals>.call_typed at 0x...>'. `luthier eval` on the same names prints Luthier syntax (circle 1.5 : Shape, just 3 : Maybe Int). No spec line on the form of run's result (05:330-331 only says what .run.json records)."
+   },
+   {
+    "id": "IT-32",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:184-221, 240, 279, 424, 480. luthier.lock = deadbeef: check, run and test print 'warning: luthier.lock pins luthier deadbeef, and this is 60fd7d886d55' on stderr; eval prints nothing. 05:331 covers recording the interpreter revision in .run.json, not the lock. grep lock in docs/semantica and README finds nothing relevant."
+   },
+   {
+    "id": "IT-34",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "cli.py:510-513. Applying the loop to lines `luthier test` prints gives {'passed': 3, 'NOT': 1, 'FAILED': 1, 'no': 1, 'foo': 1} for 'a: passed', 'b: NOT RUN', 'c: FAILED', 'd: no laws', 'e: passed, over provisional externs (e): not certified', the fallback line of cli.py:346, and 'f: passed (certified ...; not rerun)'. 05:332-333 only says certify tests files each in its own process. certify itself was not run."
+   },
+   {
+    "id": "IT-36",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:257-269 lists four check -v reports; only the fourth (265-269) is marked 'decided, not implemented'. cmd_check (cli.py:239-275) prints only axioms, provisional externs and obligations; grep -i 'observer|completeness' in src/luthier/*.py finds nothing. e9.lut (data N, add, toInt, AddZero, addZ, hole `k : Int`, `main : Int := toInt zero + k`): check -v prints only 'addZ: AddZero [pending; e9.lut]', no mention of k. No other spec line declares the second and third reports unimplemented."
+   },
+   {
+    "id": "IT-40",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "testing.py:255-261: the exhaustive branch sends every EvalError to broken(), which fails the law (testing.py:214-215); raised() (171-172) is used only in the sampled loop (299-312). e7.lut: `Small : U := { k : Int | 0 <= k and k < 2 }`, `Big : U := { m : Int | m > -100 }`, `g (k : Small) : Big := 10 / (k - 1)`. `--exhaustive`: 'g: FAILED / FAIL 10 / (k - 1) > -100 [exhaustive, 2 cases] / error: division by zero in 10 / 0'. Sampled `--n 20`: 'passed [sampled, 10 cases, 10 where the computation raised]'. 05:339-345 (added 2026-10-06) says such a case is skipped and counted, with no mode restriction. No test in tests/ exercises the skip rule."
+   },
+   {
+    "id": "IT-44",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:262-265 vs 321-327. e25.lut: sampled gives 'q: NOT RUN ... every draw met an empty domain' and 'e: NOT RUN ... Fin 0 has no values', exit 1; --exhaustive gives 'q: passed [bounded, 0 cases]', 'e: passed [exhaustive, 0 cases]', and after writing the certificate check -v shows both 'certified'. 05:303-305 states the not-passed rule for sampled cases only; 08:263-264 C3 (decided, order of work 08:356) says a law none of whose cases evaluates is not run, in any mode. For e (Fin 0) the exhaustive pass is vacuously true, so the two readings differ."
+   },
+   {
+    "id": "IT-46",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:365 sets report.n = n (asked); cli.py:167 compares entry n with the directive. e7d.lut (e7 plus `test g with 20`): 10 cases evaluated, 10 raised, cert entry n = 20, laws cases 10, and check -v shows g certified. 05:323-324 says 'the count reaches the file's directive' without saying which count; 08:258-263 C3 (decided, not implemented) says evaluated cases, counted apart from vacuous, raised and false-premise ones."
+   },
+   {
+    "id": "IT-49",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "generators.py:156-166 and describe() 409-414 ('Python fallback; import \"random\" for genInt'). String length is randint(0, min(size, 6)). The Int box [-s, s] matches 05:280 and 08:97 (G3); a uniform sum label matches 08:100 ('equal unless given'). Float64 without bounds drawn in [-size, size] departs from 08:98 G3/G7 (decided, not implemented). Rational and String defaults are in no spec line."
+   },
+   {
+    "id": "IT-51",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "generators.py:167-179 (records), 188-197 (filter), 218-228 (constant/affine functions). e6.lut reproduced: 'q: passed [sampled, 50 cases]', check -v 'q ... [certified (...)]', domain '(Int -> Int: constant functions (affine on R -> R), a thin sample) * (...) where Flat (f, g)'. 05:306-307: a law over all models of a theory 'has no generator of models and stays pending; it is certified per model'; 08:104 and 08:186-190 (G9, decided) require a census. There is some tension with 05:300-302, which allows drawing a function of an infinite domain as a constant, but the rule specific to theories is explicit."
+   },
+   {
+    "id": "IT-55",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "generators.py:97-110 laws_of stops at a PPair parameter and never enters component types; from_registered (112-127) checks only those. e26.lut with compgen.bad_pair returning (-5, 0): 'FAIL p.a > 0 [sampled, 1 cases] counterexample: p = (-5, 0)', blaming q. Control with (3, 1) (outer predicate false): 'error: the generator Ordered gave a value outside Ordered'. 05:205-207 R7 and 08:213-214 G10 say every value is checked against its type and a value outside names the generator. tests/test_bridge.py:145-152 covers only an outer predicate. A law that does not touch the component would pass and be certified over values outside the type."
+   },
+   {
+    "id": "IT-58",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "generators.py:56-68 imports gen modules in from_checker, called by make_generators (cli.py:284) before any test. m.lut with `gen Pos := extern \"python:nosuchmodule.gen\"`: check says ok; test ends in 'ModuleNotFoundError: No module named nosuchmodule' and the unrelated law `other` never runs. A generator raising ValueError ends the run with 'ValueError: boom' (generators.py:152). `S : U := data { more : Int -> S -> S }` with a law over S ends in RecursionError from sample_data (generators.py:383-392, about 100000 frames). 05:315-319 gives a closed set of outcomes ('not run' when a parameter has no generator or no case could be drawn); a crash is none of them, so this is a divergence from a stated rule, not an absence of one."
+   },
+   {
+    "id": "IT-60",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "graph.py:51-86. Reproduced: 'in x: x is defined twice', 'in x: x is declared twice', 'A is an alias and cannot be defined twice', and 'x was declared with type Bool, but is defined with Int' in both orders. 05:199-202 (R7) covers alias plus declaration or definition; 05 §1 (41-80) and R6 (194-196) do not say a name has at most one definition or declaration. grep 'twice' in tests/*.py and tests/spec finds no test for duplicates."
+   },
+   {
+    "id": "IT-66",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "tables.py:90-97 renders `name:type` with no escaping; parse_or_raise (133-139) partitions on the first ':' and strips names. e8.lut: colon (names [\"a:b\"]) renders 'a:b:int\\n', `RoundTrip csv colon` = false; spaced ([\" a\"]) renders ' a:int\\n', false; empty (no columns, nRows 2) renders '\\n\\n\\n', false. `luthier test e8.lut` passes all three against Table's laws (table.lut:40-51). gen_table (tables.py:255-260) makes only names c0..c4 and at least one column, and lib/table_python.cert.json records csv passed with RoundTrip at 200 cases. RoundTrip is a law of Codec (table.lut:218, 244; 05:357-361; 07 §5)."
+   },
+   {
+    "id": "IT-67",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "tables.py:116 int(s). e20.lut: parseTable of a 50-digit cell gives just (...); of a 5000-digit cell 'raised ValueError: Exceeds the limit (4300 digits) for integer string conversion'; `ReadsTheFormat csv longInt` raises instead of evaluating (table.lut:230 requires just t on WellFormed text; IntCell table.lut:166 accepts any digits). 06-numbers.md:42-44 says Int is realized exactly without bound. The problem is broader than tables: a Luthier file with a 5000-digit Int literal (`big : Int := 111...1`) ends `luthier eval` with the same ValueError traceback."
+   },
+   {
+    "id": "IT-70",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "text.py:4-5 returns list(s). lib/text.lut has 26 lines: chars is at text.lut:17 with laws CharsRoundTrip & CharsAreSingle, `test chars with 200` at text.lut:26 (the mapper's text.lut:141 does not exist). table.lut:21 imports text. The library table of 03-libraries.md:79-88 (mapper's 03:255-264) lists neither text nor rational."
+   },
+   {
+    "id": "IT-01",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "cli.py:26-43 searches importer dir, LUTHIER_PATH, LIB_DIR, then PACKAGE_DIR (cli.py:32). 03-libraries.md:25-27 (mapper's 03:201-203) names three places. Reproduced: miss.lut 'cannot find import 'nosuch'', exit 1; `luthier check --no-core` on `import \"core\"` passes through the fourth place. tests/test_kernel.py:322-329 covers LUTHIER_PATH; no test for the missing-import message."
+   },
+   {
+    "id": "IT-02",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "cli.py:73-80, 113. two.lut importing col as a and as b: `b.flip b.first` gives 'blue : b.Color'; c.lut <-> d.lut gives 'import cycle: c.lut -> d.lut -> c.lut'. 03-libraries.md:26-27 allows any file under two prefixes, but `import \"core\" as k` fails: '.../core.lut: type error: in k.not: label false belongs to several sums'. tests/test_kernel.py:283-292 covers once-per-prefix and cycles; two prefixes have no test."
+   },
+   {
+    "id": "IT-03",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "low",
+    "evidence": "cli.py:84-102. p.lut `x : Int := (1 +` gives 'p.lut: parse error: line 3, col 0: expected a term'. tests/test_spec.py:36-41 checks only that the -- expect fragment is in the SystemExit text; all 17 reject fragments are checker messages, none is a parse or evaluation-while-checking error, and grep finds no test of those two forms. 05:141-143 specifies the fragment mechanism, not the message forms."
+   }
+  ],
+  "notes": "I covered all 27 entries, IT-01 to IT-70 as given. Every repro ran under scratchpad/audit/verify-impl-tools/<id>/ with --no-cert or on scratch copies. I never ran certify, and I wrote nothing into the repository. HEAD is 60fd7d8, and its diff from b15f2a1 touches no file under docs/semantica or src, so the line numbers hold for the audited commit.\n\nAll 27 entries survive: none was refuted. I corrected these statuses:\n- IT-10: covered_differently. 05:315-319 gives a closed set of three outcomes.\n- IT-58: covered_differently, for the same reason.\n- IT-01 and IT-02: covered_differently. There is a fourth search place, and `import \"core\" as k` fails.\n- IT-28: covered, medium. The code follows the literal 05:332 and 08 C6, but 05:284 lists assumed as a grade.\n- IT-25: partly corrected. The 'not a hole of the program' message is reachable for an existing non-hole.\n\nThe mapper's citation numbers are off in several places:\n- Every 03-libraries.md line it cites is 176 lines too high. The file has 96 lines; the right lines are 25-27, 61-63, 65-68, 70-73 and 79-88.\n- 02-grammar.md:279 does not exist. The test directive is at 02:45 and 04:48.\n- text.lut:141 does not exist. chars is at line 17 and its test at line 26.\n\nTwo things outside these entries:\n- IT-07 is stronger than reported. Two alpha-equivalent definitions, f (x) vs f (y), get different hashes when a global x exists, which breaks the canonical renaming promised by 03:62-63.\n- IT-67 goes beyond tables. Any Int literal over 4300 digits crashes the lexer or evaluator with a traceback, which contradicts 06:42 (Int realized exactly, without bound)."
+ }
+}

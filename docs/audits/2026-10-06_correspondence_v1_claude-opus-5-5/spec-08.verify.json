@@ -1,0 +1,522 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-08",
+   "direction": "spec",
+   "files": "docs/semantica/08-tests.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a54b913cc8268599e",
+  "agent_label": "verify spec-08",
+  "started_at": "2026-10-06T12:08:51+00:00",
+  "finished_at": "2026-10-06T12:21:53+00:00",
+  "tokens": 198883,
+  "tool_calls": 78,
+  "duration_ms": 781983,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "a00140cc9abe06378289fe582422e4abcb13549bbe00f18936d7af774faeba7a"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "spec-08#00",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "grep of 08 finds no per-rule status (only 'today' at 08:55, 226-228). 05:243 marks R11 'decided 2026-10-06; not implemented'. The only signals are 'Draft 1' (08:3), section 12 'Changes to other parts' and section 13 'Order of work'; nothing in 00-07 cross-references 08. plan-2026-10-06.md:66 and :412 carry the status. README.md:112-116 describes today's generators (Gen with Int, gen T := extern, constant or affine functions), which contradicts 08 read as current."
+   },
+   {
+    "id": "spec-08#01",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "random.lut:38 Seed = { s : Int | 0 <= s and s < 2147483648 }; genSeed (random.lut:39) gives a*65536+b with a<32768, b<65536, so [0, 2^31). No pytest names Seed or genSeed. Only the tracked library certificate src/luthier/lib/random.cert.json exercises genSeed's obligation (100 sampled cases, passed), and probability.lut:220-225 quantifies laws over Seed."
+   },
+   {
+    "id": "spec-08#02",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "random.lut:8 'Gen (A : U) = Nat -> Int -> A * Int'. 08:55 itself says 'as in lib/random.lut today with Seed in place of Int'. Plan A-9 (plan:412) 'Gen T with Seed'."
+   },
+   {
+    "id": "spec-08#03",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:482-513 checks a Luthier gen term against Gen T: verify-spec-08/g1a_type.lut fails 'genBool has type Gen Bool but Gen Small was expected'. A generator written as a definition gets an obligation: g1b_def.lut 'genSmall: Small [pending]', then FAIL counterexample s = 0. A Python generator (checker.py:501-503, kind 'extern') gets no type or obligation: g1c_extern.lut with gen Small := extern \"python:random.Random.random\" checks ok. No pytest exercises the Gen T typing (grep of tests: only extern gens at test_bridge.py:146,170,179)."
+   },
+   {
+    "id": "spec-08#04",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "generators.py:112-127 checks every value of a registered generator against laws_of(ty) and raises OutsideType; testing.py:214 fails the law. verify-spec-08/g1d_outside.lut: 'the generator Small gave a value outside Small: 7'. test_bridge.py:145 really exercises it (Python gen_positive_wrongly). For a Python generator there is no obligation certified on its own, only the draw-time check."
+   },
+   {
+    "id": "spec-08#05",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No distributional law on any generator in src (generators.py, arrays.py:305-355, random.lut). Declared via plan:221 ('generators as named values and functors (G1 to G4)', stage 3) and 08 open item 11.2."
+   },
+   {
+    "id": "spec-08#06",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "testing.py:342-343 random.Random(seed) is the source; generators.py:235 hands one seed per Luthier generator call; random.lut:10 nextSeed LCG has no laws. Declaration is weak: section 13 does not list the random source and plan A-9 only says 'Gen T with Seed'; plan:221 covers G1 generally."
+   },
+   {
+    "id": "spec-08#07",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "parser.py:109-110 and 156-167 parse 'gen'; lexer.py:8 keeps it a keyword; random.lut:30-33,40 and array_python.lut:43-52 rely on it; test_bridge.py:168,176 assert alias semantics. 08 section 13 step 7 and plan A-9 declare the removal."
+   },
+   {
+    "id": "spec-08#08",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "parser.py:120-133 accepts only 'with n', 'exhaustive', 'size n'. grep for census, metric, cost in src/luthier/*.py finds nothing relevant. Plan A-9."
+   },
+   {
+    "id": "spec-08#09",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "generators.py:156-159 Int uniform in [-size,size], Float64 rng.uniform(-size,size); random.lut:17 genIntBetween uniform by randBelow. No cumulative cost or log metric. Section 13 step 3, plan A-9."
+   },
+   {
+    "id": "spec-08#10",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g3a_small.lut exhaustive: Unit 1 case, Bool 2, Fin 4 4, Bool x Fin 3 6. Sampling is uniform (generators.py:142, 183; random.lut:21); no syntax to give a cost. test_kernel.py:213 (Bool group) and :242 (sum Dir) do exercise exhaustive Bool and sums."
+   },
+   {
+    "id": "spec-08#11",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "generators.py:526-528 int_interval requires the base to whnf to Int; Nat (core.lut:43) is a subtype, so { k : Nat | k < 21 } falls to enumerate(base) and the Int box [-16,16] (generators.py:470-472). verify-spec-08/g3b_nat.lut: natBounded (law x < 20) 'ok [bounded, 17 cases]' and check -v says 'certified'; the same law over { k : Int | 0 <= k and k < 21 } FAILS at x = 20. The entry's mode is 'exhaustive' (the request, testing.py:366) so cli.py:165 accepts it for an exhaustive directive. A false law over a finite type is certified; this also falls short of 05 'As implemented' (a refinement of Int bounded on both sides is enumerated exhaustively)."
+   },
+   {
+    "id": "spec-08#12",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g6a_exh.lut: ix (x : Int) exhaustive 'ok [bounded, 33 cases]', check ok. test_certificates.py:59-67 asserts the bounded grade. Sampled half holds (genNat [0,size] random.lut:20, or Int box filtered). Declared: section 13 step 3, plan A-9 'G6'."
+   },
+   {
+    "id": "spec-08#13",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g6a_exh.lut: fx Float64 exhaustive passes check, then 'not run: Float64 is not finitely enumerable' (testing.py:248-249); fs Float64 sampled with no bounds 'ok [sampled, 20 cases]' (generators.py:158-159). Section 13 step 3."
+   },
+   {
+    "id": "spec-08#15",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "generators.py:499-506 enumerates sums; 473-487 non-recursive data. Sampling: uniform constructor for sums (183), recursive_bias 0.8 for data (40, 387). test_kernel.py:242 is sampled recursive data; :249 is exhaustive over a sum."
+   },
+   {
+    "id": "spec-08#16",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g6a_exh.lut lx: 'not run: List Bool is not finitely enumerable' (generators.py:477-478 returns None for recursive data). Sampled lists: data fallback or random.lut:28 genList (uniform length [0,size]). Section 13 step 3."
+   },
+   {
+    "id": "spec-08#17",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "Sampled tables at generators.py:198-217; test_bridge.py:157 exercises a sampled Fin 4 -> Int table. enumerate has no Pi case (generators.py:452-518): verify-spec-08/g6a_exh.lut tx 'not run: Fin 2 -> Bool is not finitely enumerable'."
+   },
+   {
+    "id": "spec-08#18",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "generators.py:218-228 constant or affine; verify-spec-08/g9a_theory.lut fnInf (f : Float64 -> Float64) passes 20 sampled cases. 05:298-300 still describes this; 08:347 says it is replaced; section 13 step 4."
+   },
+   {
+    "id": "spec-08#19",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g9a_theory.lut: a law over a record type with two function components and a law ('Grad') passes 20 sampled cases, drawn as a Sigma of constant/affine functions filtered by the law (generators.py:167-196). No error, no census. Section 13 step 4."
+   },
+   {
+    "id": "spec-08#20",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "Exhaustive filters (generators.py:507-517). Sampling always rejects (188-197) whatever the predicate: verify-spec-08/g10a_interval.lut { k : Int | 100 <= k and k <= 200 } sampled 'not run: could not find a value ... in 2000 tries', while exhaustive gives 101 cases."
+   },
+   {
+    "id": "spec-08#21",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g5a_univ.lut: '\\ (A : U) (x : A) { x == x }' passes check; test says 'not run: no generator for U' (generators.py:231, testing.py:216). Plan A-5."
+   },
+   {
+    "id": "spec-08#22",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/g4a_dir.lut 'unexpected sampled', g4b_where.lut 'unexpected where', g4d_under.lut 'unexpected under', g4c_profile.lut 'unexpected tape' (parser.py:120-133). Plan A-9."
+   },
+   {
+    "id": "spec-08#23",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "Only global per-type registration (checker.py:482-513, generators.py:80-95). No per-parameter or per-test binding, so no precedence. Plan A-9."
+   },
+   {
+    "id": "spec-08#24",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "g5a_univ.lut: check ok; test 'not run: no generator for U' without naming A. generators.py:230 message names the type, not the parameter."
+   },
+   {
+    "id": "spec-08#25",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:181 domains = describe() per parameter; verify-spec-08/c3a_skip.cert.json law 'a' records 'Int in [-16, 16] (Python fallback; ...) where k > 12'. Entry 'generators' holds fingerprints of registered generators (testing.py:393). grep of tests for domains, describe, generators fingerprints or 'generator ... changed' finds nothing."
+   },
+   {
+    "id": "spec-08#26",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "Same as #21 (g5a_univ.lut). No tests/spec file for G5 refusal (ls tests/spec). Plan A-5."
+   },
+   {
+    "id": "spec-08#28",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "Concrete values inhabiting a theory carry their own obligations; no census syntax; a generic law over the theory is drawn by the Sigma path (g9a_theory.lut)."
+   },
+   {
+    "id": "spec-08#29",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "parser.py:120-133 has no instance argument; laws over (A : U) end 'not run: no generator for U' (g5a_univ.lut)."
+   },
+   {
+    "id": "spec-08#30",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "Theta : U at array.lut:184 (IsGradient), probability.lut:105-321, belief.lut:29-89. optimization.lut has no ': U' parameter at all (grep finds only line 54 Reason); it uses IsGradient at VecOf o.dim (optimization.lut:21) and imports belief. 08:135 naming optimization.lut is inaccurate."
+   },
+   {
+    "id": "spec-08#31",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "g6a_exh.lut: Int bounded and passed, Float64 runtime not run; check ok in both. Plan A-9 'G6'."
+   },
+   {
+    "id": "spec-08#32",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "testing.py:234-254 recursive full product with no budget or covering array. Plan A-9."
+   },
+   {
+    "id": "spec-08#33",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "array.lut:95 jacobiTol : Float64 := eps, array.lut:182 fdTol : Float64 := sqrt eps; grep finds no lmTol in this repository. Plan B-3."
+   },
+   {
+    "id": "spec-08#34",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No binding syntax (g4b_where.lut parse error)."
+   },
+   {
+    "id": "spec-08#35",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No log metric or zero atom in src (grep)."
+   },
+   {
+    "id": "spec-08#36",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "generators.py:156-159 and arrays.py:141-146 draw uniformly; no special values injected. Section 13 step 3."
+   },
+   {
+    "id": "spec-08#37",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "Fallback rng.uniform (generators.py:159, arrays.py:142) is continuous over [-size,size]. random.lut:22 genFloat64 is a grid of 2,000,001 points scaled by size, registered at random.lut:33 when random is imported. Neither uses the type's bounds."
+   },
+   {
+    "id": "spec-08#39",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "arrays.py:305-306 gen_dim randint(1, min(size,8)): never 0 nor 10. Dimensions come from gen Dim (array_python.lut:43). Plan B-7."
+   },
+   {
+    "id": "spec-08#40",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "arrays.py:337-355 symmetric, SPD (B^T B + I, no given spectrum), rank-deficient Gram. No other families, no distribution laws, no (kappa, A). Plan B-7."
+   },
+   {
+    "id": "spec-08#41",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No census or 'from' in lexer.py:8, parser.py, generators.py. Section 13 step 4, plan B-6."
+   },
+   {
+    "id": "spec-08#42",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "cli.py:255-274 lists axioms, provisional externs and obligation states only."
+   },
+   {
+    "id": "spec-08#44",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "Exhaustive Int interval works (generators.py:509-513, test_certificates.py:59 Z3). Sampling always rejects: verify-spec-08/g10a_interval.lut, { t : Float64 | 0.0 < t and t < 1e-9 } and { k : Int | 100 <= k and k <= 200 } both 'not run ... in 2000 tries'. The sampled half is declared (plan A-9 'G10'), so low; the Nat-base miss of the exhaustive half is the high finding #11."
+   },
+   {
+    "id": "spec-08#45",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "Only registered generators are tallied (generators.py:50,119-124, 441-449). c3a_skip.cert.json for law over { k : Int | k > 12 } records no acceptance rate."
+   },
+   {
+    "id": "spec-08#46",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "generators.py:189-197 GenError after max_tries; testing.py:216 makes it not run. g10a_interval.lut shows the message. grep of tests for 'could not find', 'tries', max_tries: nothing."
+   },
+   {
+    "id": "spec-08#49",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "generators.py:40 max_tries=2000, :171 range(10), :41 law_probes=5. Accurate at b15f2a1 (src unchanged through HEAD 60fd7d8)."
+   },
+   {
+    "id": "spec-08#50",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Only --size (cli.py:603) and directive 'size n' (parser.py:130-132) exist, recorded as generation.size (testing.py:345-346). Tries, redraws, probes fixed (generators.py:40-41,171). 08 G12's list omits the 50 redraws of a whole case (testing.py:271), which plan A-1 lists. No test of --size or the size directive (test_kernel.py:271 calls Generators(size=8) directly)."
+   },
+   {
+    "id": "spec-08#51",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:289 size_i = 1 + (i*size)//n; for n < size the maximum is below size (n=5, size 16: 1,4,7,10,13; n=15: max 15). verify-spec-08/g12a_size.lut (law x < 14 and x > -14) via run_test over 200 seeds: n=5 0 failures, n=15 37, n=16 66. The CLI help (cli.py:605 'grows from 1 to this over a sampled run') and generators.py:435 promise the same thing the code misses."
+   },
+   {
+    "id": "spec-08#52",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "certify.py:240-257 hash of {code, externs, interpreter}; generators only stale an entry (cli.py:160-162); certify.py:348 replaces the entry with the same hash, so another seed or n overwrites. Plan A-9."
+   },
+   {
+    "id": "spec-08#53",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "certify.py:26-33 names_in uses map_names, which visits bound variables too (subst.py:161-163 'renaming them too is harmless'); cone() (certify.py:52-54) follows any that are global. verify-spec-08/c1a_noclash.lut (import random, foo : Int) shows nothing; c1b_clash.lut (s : Int := 3) makes genNat and genSeed 'stale certificate: the code of its cone changed'; c1c_clash_size.lut (size : Int) also 'the generator Int changed'. 03 §4 (03-libraries.md:61-62) defines the cone as what the definition refers to, with bound variables renamed."
+   },
+   {
+    "id": "spec-08#54",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "certify.py:332-346 entry keys: hash, when, passed, outcome, n, mode, seed, run_seed, fingerprint, generators, provisional, generation, laws (cases, skipped, domains, seconds). No other budgets, dropped or false-premise counts, reach or labels (c3a_skip.cert.json)."
+   },
+   {
+    "id": "spec-08#55",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Law modes sampled/bounded/exhaustive (testing.py:34,262); 'assumed' for axioms (cli.py:257,533); no point, census, witnessed or 3/n (grep). g3b_nat.cert.json: entry mode 'exhaustive' while its law ran 'bounded'; check -v shows 'certified (date)' with no grade."
+   },
+   {
+    "id": "spec-08#56",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-08/c3a_skip.lut: g 'ok [sampled, 38 cases, 2 where the computation raised]' (skipped counted, testing.py:300-311); v (premise x > 1000 never true) '50 cases', counted as evaluated; a (k > 12, with 100) 25 cases and the 75 dropped draws are not counted (testing.py:295-297). No test mentions skipped."
+   },
+   {
+    "id": "spec-08#57",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:287 exactly n draws; cli.py:167 compares entry['n'] (requested, testing.py:365). c3a_skip.lut: 'test a with 100' evaluates 25 cases, passes, check -v 'certified'; cert n=100, cases=25. Declared in plan A-2, but 05 'As implemented' (05:320-323, 'the case count and mode it ran ... the count reaches the file's directive') reads either way, hence medium."
+   },
+   {
+    "id": "spec-08#58",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:321-327 give 'not run' with a reason. verify-spec-08/c3b_zero.lut: Fin 0 law 'not run: Fin 0 has no values'; an obligation raising every case 'not run: the computation raised on every case drawn (10)'. Dropped draws are not counted. The cited test_certificates.py:50 exercises the hole-blocked path (testing.py:197-205), not cases == 0; no test covers lines 321-327, so medium."
+   },
+   {
+    "id": "spec-08#59",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "c3a_skip.lut v: 'ok [sampled, 50 cases]', entry passed with no vacuity mark. 05 says nothing about false premises; the rule is new in 08 and declared in plan A-2 ('a vacuous pass is reported as such'), so low rather than medium."
+   },
+   {
+    "id": "spec-08#61",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-08/c4lib.lut run twice with --seed 7: both 'bad: FAILED' and 'good: passed' rerun (cli.py:334 deep=args.deep or is_top). c4app.lut: check -v 'bad ... failed in its last test', while 'luthier test c4app.lut' prints 'imported, no certificate: bad' (cli.py:352-358 ignores loader.known); with --imports it reruns bad. certify.py:348 replaces the same-hash entry, so a new seed overwrites. Plan A-3."
+   },
+   {
+    "id": "spec-08#62",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No classify, cover or Wilson in src (grep). Plan A-9 'labels (C5)'."
+   },
+   {
+    "id": "spec-08#63",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/c6a_reach.lut: f certified over [-16,16]; 'run --set k=100 --require-certified' prints 10000, exit 0. cli.py:463-466 checks only the certified state, as 05:327-330 and the help text say; the implemented part is tested (test_certificates.py:105). The reach comparison is declared (plan A-12, section 13 step 6), so low."
+   },
+   {
+    "id": "spec-08#64",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "cli.py:430-432 --checked tests externs against refinements; record (cli.py:472-482) has no 'not compared'. Section 13 step 6; open item 11.5."
+   },
+   {
+    "id": "spec-08#65",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-08/c7a_result.lut: main : { y : Int | y > 100 } := k * 2; run --set k=5 prints 10 with and without --checked; check -v shows main pending. Plan A-12."
+   },
+   {
+    "id": "spec-08#66",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "cli.py:472-489 writes result, cone hash, parameters to .run.json; certify.py:332-346 stores no results. No membership outcome or input hash."
+   },
+   {
+    "id": "spec-08#67",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "probability.lut:46-48 uniformMoments returns Bool; normalTail (38) unused for a level. plan:66 'Specified (08 C8 to C10), not implemented'."
+   },
+   {
+    "id": "spec-08#68",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "testing.py:317-318 the first counterexample returns; no repetition. Plan A-11."
+   },
+   {
+    "id": "spec-08#69",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No controls, rates or weak reports in src. Plan A-11."
+   },
+   {
+    "id": "spec-08#75",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "02-grammar.md:45-46 has the old test directive and the gen act, matching parser.py:120-167. Plan A-9 lists 02."
+   },
+   {
+    "id": "spec-08#76",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:202-205 (gen of an alias), 05:278-283 (grades without census), 05:298-300 (constant or affine), 05:453-454 (Generators from constructors open) unchanged. Declared in 08 section 12."
+   },
+   {
+    "id": "spec-08#14",
+    "verdict": "refuted",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "Behavior holds: verify-spec-08/g3c_prod.lut exhaustive Bool * Fin 3 6 cases, record { a : Bool, b : Fin 3 } 6, dependent { m : Fin 3, k : Fin (m + 1) } 6 (generators.py:488-498). The sampled dependent path is tested (test_bridge.py:295, R0). The exhaustive product path has no test: test_kernel.py:213 enumerates several parameters through testing.py:234 rec, not a Sigma type, and test_bridge.py:176 uses a registered Python generator. So half of the claim is untested."
+   },
+   {
+    "id": "spec-08#27",
+    "verdict": "refuted",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "A law over a declared (type) hole cannot be written: verify-spec-08/g5hole/tlib.lut (T : U; law over x : T) and clib.lut (Codec declared, RoundTrip over it, filled in capp.lut) both fail 'is used as a type but is only declared (05 R2)' (checker.py:417; 05:150-154 R2). The cited test_certificates.py:41 fills a value hole (k : Int), not a type. 08 G5 (08:128-129) offers per-filling certification as the alternative to quantifying over U, and 05 R2 forbids that law, so the two parts of the specification conflict."
+   },
+   {
+    "id": "spec-08#38",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "core.lut:21-22 documents finite doubles; evaluator.py:86-123 rejects NaN and infinities; test_kernel.py:498,504 and test_bridge.py:89 exercise it. A Python generator returning NaN goes through from_python (generators.py:152): verify-spec-08/g7a_nan.lut with nangen.py fails 'NaN in a value from the environment'. That generator path has no pytest of its own."
+   },
+   {
+    "id": "spec-08#43",
+    "verdict": "refuted",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "The first half is tested: tests/spec/r8_equality_function.reject.lut rejects f == g on Int -> Int, and test_checker_rules.py:50 rejects it for data holding functions. The second half, 'points its binding draws', does not exist: there are no bindings (G4), and the points come from the default generators (generators.py:156-159). So the claim is only partly implemented."
+   }
+  ],
+  "notes": "I covered all 54 entries of spec-08, re-reading docs/semantica/08-tests.md in full, 05 §7, R2 and R7, 02:45-46, 03 §4, src/luthier/generators.py, testing.py, cli.py, certify.py, parser.py:95-175, checker.py:482-513, random.lut, arrays.py:295-355, probability.lut:28-52, README.md:100-116, and every tests/*.py file that touches generators or certificates. src and docs/semantica are unchanged between b15f2a1 and HEAD 60fd7d8 (git diff --stat), so the working tree stands in for b15f2a1. All programs are under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-08/ (the type-hole programs are in its g5hole/ subdirectory). I never ran 'certify' and wrote nothing in the repository.\n\nChanges from the mapper:\n- #14 (implemented_tested) is refuted. The exhaustive enumeration of products has no test.\n- #27 (implemented_tested) is refuted. A law over a declared type hole is rejected by 05 R2, so the route G5 offers is unreachable, and the cited test fills a value hole.\n- #43 (implemented_tested) is refuted. Only the R8 half is tested, and bindings don't exist.\n- #58 goes from low to medium. The cited test exercises a different not-run path, and the cases == 0 branch has no test.\n- #44, #59 and #63 go from medium to low. Each is declared in plan A-9, A-2 or A-12, and the current docs (05, the CLI help) don't promise otherwise.\n\nThe strongest confirmed findings:\n- #11 (high). An exhaustive test over { k : Nat | k < 21 } certifies a law that is false at 20.\n- #53 (medium). A bound variable named like a global, such as 's' or 'size', spuriously pulls that global into the cone and stales random.lut's certificates.\n- #51 (medium). The size schedule never reaches the largest size when n < size, which contradicts the CLI's own --size help text.\n- #57 (medium). 'with 100' certifies with 25 evaluated cases."
+ }
+}

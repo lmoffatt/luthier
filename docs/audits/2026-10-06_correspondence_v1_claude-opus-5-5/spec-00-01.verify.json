@@ -1,0 +1,249 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-00-01",
+   "direction": "spec",
+   "files": "docs/semantica/00-fundamental-elements.md and docs/semantica/01-construction-pattern.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "af8163729df9acff0",
+  "agent_label": "verify spec-00-01",
+  "started_at": "2026-10-06T12:02:44+00:00",
+  "finished_at": "2026-10-06T12:13:41+00:00",
+  "tokens": 157842,
+  "tool_calls": 73,
+  "duration_ms": 657343,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "96f5f2b4c1a30075c2404897f7fbe1d6d889b5abd9430385cc0a42ff79ab7617"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "spec-00-01#03",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Reproduced in verify-spec-00-01/. value_ok.lut `z : { n : Int | n == 4 } := 2 + 2` is accepted. value_bad.lut `w : ... := 5` fails with '5 does not satisfy { n : Int | n == 4 }'. value_as_type.lut (`four : {n : Int | n == 4} := 4`, then `y : four := 4`) fails with 'four has type { n : Int | n == 4 } but U was expected', and value_as_type2.lut (`x : Int := 4; y : x := 4`) fails the same way. 05:44-46 keeps the type/value distinction 'on the surface', so the text supports both readings. The cited test tests/test_kernel.py:161 only checks closed-value membership in Z7. It does not exercise a value used as a type."
+   },
+   {
+    "id": "spec-00-01#07",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "infer.lut (`y := 3`, `f (x : Int) := x + 1`, `z := f y`) checks, and `eval z` gives 4. infer_rec.lut fails with 'recursive definition g needs a declared type' (checker.py:600-602). 02-grammar.md:36 makes the type optional (`[\":\" term]`), but 00:20 and 04:40 describe `x := t` only as filling a declaration. A grep of tests/, lib/ and examples/ finds no undeclared `x := t`: every untyped definition fills a declaration (test_certificates.py:44, test_kernel.py:299 and :335, test_checker_rules.py:69 and :78, r2/r6 spec files, table.lut:51)."
+   },
+   {
+    "id": "spec-00-01#12",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "Same behavior as reported, and a third behavior on top. bool_labels.lut: `v : Verdict := wrong; b : Bool := v` checks, `eval b` prints 'wrong : Bool', and `if b then 1 else 2` gives 1. bool_fn.lut: `f right` gives 2, so `right` acts as false. bool_direct.lut: `if v` is rejected. New in bool_law.lut: `AlwaysWrong (x : Int) : Bool := wrong` is accepted by check, but `luthier test` then fails the law with 'did not reduce to a Bool on (): wrong'. bool_law2.lut, the same law declared at Verdict, is rejected at check time ('must be Bool-valued'). So conv (evaluator.py:1148, positional), is_bool (checker.py:125-131, by labels) and as_bool (evaluator.py:863-866, by labels) give three answers. The spec says labels are binders (04:68-73), which k_bool_is_sum.accept.lut restates. test_checker_rules.py:24 and :32 assert the opposite rule, which is written only in docs/plan-2026-10-05.md:384, not in 04 or 05. Under either reading the implementation rejects something the spec accepts, or accepts something it later fails. Raised to high."
+   },
+   {
+    "id": "spec-00-01#18",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "once.lut: `f (x : Pos) : Pos := x` raises no obligation (checker.py:1446-1447). `g (x : Int) : Pos := if x > 0 then x else 1` owes `match (x > 0) {...} > 0`, re-checked by test, because R11 is not implemented (declared at 05:243 and 05:463). test_kernel.py:307 exercises certificate acceptance by hash. test_kernel.py:213 does not exercise 'check once', and no test covers the 'already of this subtype' path. 00:6 defers to 05, so low is right."
+   },
+   {
+    "id": "spec-00-01#20",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "`grep refine` over core.lut and lib/*.lut finds only comments (core.lut:21, :24; algebra.lut:131). checker.py:850-873 add_obligation discharges an obligation that is textually equal to its branch condition (`any(c == term for c in conds)`) and otherwise adds `implies cond`. That is the mechanism R11 replaces (05:250-252). test_bridge.py:304 tests that textual discharge, not R11."
+   },
+   {
+    "id": "spec-00-01#21",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:246-249 (R11: the coercion owes q x -> p x) and 05:463 declare this decided and not implemented. Nothing in checker.py, testing.py or cli.py selects one check over another by a certified relation."
+   },
+   {
+    "id": "spec-00-01#22",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:439-443 decides it and 05:463 declares it not implemented. cmd_run (cli.py:417) has only `--checked`. test_bridge.py:197 tests that flag, which 05:442 calls the deliberate exception."
+   },
+   {
+    "id": "spec-00-01#28",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "imp/a_bc.lut loads and main = 42. imp/a_cb.lut fails with 'c.lut: type error: in useB: unbound name base'. a_cb_late.lut, with the imports written after the definition, fails the same way. The qualified variants also depend on order: q_bc.lut (b flat, then c as m) gives 42, q_cb.lut fails. Cause: cli.py:88-90 loads and checks each import depth-first, in directive order, before the importer. One correction to the mapper: c seeing b does not break 03 §2. 03:29-30 says a module resolves `x` in 'core and what the root imported flat', so that visibility is specified. What contradicts 00:89-90 and 05:90-99 is the dependence on order. No test covers import order."
+   },
+   {
+    "id": "spec-00-01#29",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "imp2/one.lut (declaration, law and `Codec := RoundTrip` in one file) checks. imp2/model.lut (`import \"theory\"`, then `Codec := RoundTrip`) fails with 'theory.lut: type error: in RoundTrip: Codec is used as a type but is only declared (05 R2)'. cli.py:84-98 checks each file alone, and checker.py:167 computes objects per file (graph.file_objects). 05:90-97, 03:45 ('A declared type may likewise be defined by its laws in another file') and README.md:64 promise the whole-program reading. test_kernel.py:332 covers only a bare declaration whose law sits in the other file."
+   },
+   {
+    "id": "spec-00-01#30",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "mutual_data.lut (Tree/Forest, each directly recursive) fails with 'in Tree: unbound name Forest'. The reversed order fails with 'in Forest: unbound name Tree'. data_alias_cycle.lut fails with 'in Fn: unbound name Expr'. decl_data_cycle.lut (declaring `Forest : U` first) fails with 'Forest was declared as a value, it cannot become a data type', so mutually recursive data cannot be written at all. fn_cycle.lut is fine. checker.py:186-188 elaborates aliases first, and checker.py:196-198 pre-declares only non-data complete definitions. 04:232-234 'Not yet' does not list this. No test covers it (grep for Forest or mutual in tests: none)."
+   },
+   {
+    "id": "spec-00-01#33",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "some/some_laws.lut: `test --name v` reports 'v: NOT RUN', with 'ok Good [sampled, 100 cases]' and 'skip Odd ... Empty has no constructors'. `check -v` reports '0 certified' and 'v: T [not run in its last test]'. The cert JSON records per-law grades, but the name-level summary needs every law to pass (cli.py:145-150, testing.py). 05:54 ('some of its laws passed') and 05:318-319 ('Only passed is certified', where passed means every law passed) disagree, and 05:288-289 calls 'certified' a summary. Two readings, two outputs of check -v."
+   },
+   {
+    "id": "spec-00-01#34",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "medium",
+    "evidence": "point/point3.lut (`sigma : Float64`, `pos : { x : Float64 | x > 0.0 } := sigma`) plus point3.py (api fill of sigma with `lambda: 2.0`): test reports 'sigma > 0.0 sampled 100 True', which is one point evaluated 100 times. With exhaustive it reports 'exhaustive 1'. testing.py:229-328 has only the sampled, exhaustive and bounded modes. A closed law with no hole is decided by the checker at load (point2.lut gives 'g: no laws'; point2bad.lut is rejected with 'does not satisfy C'), so a 'point' grade is never recorded. The 'As implemented' list (05:313-335) does not mention the gap."
+   },
+   {
+    "id": "spec-00-01#42",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "low",
+    "evidence": "core.lut:27-31 has five `primitive` bodies: Int, Real, Float64, Rational, String. The mapper's line numbers are off: core.lut:30 is Rational and :33 is Maybe. 04:64 lists Int, Real, Float64, String. 06:138-142 adds Rational. 04:175-176 still says 'Int, Float64, String'. 00:6 defers to 04 and 05, so this is stale wording."
+   },
+   {
+    "id": "spec-00-01#45",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "parser.py:14-22 BINOPS has no `=`. parser.py:198-200 parses `=` only as an alias at the head of an act. propeq.lut `f (a b : Int) : Bool := a = b` gives 'parse error: ... unexpected '=' at end of definition'."
+   },
+   {
+    "id": "spec-00-01#48",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "syntax.py:3-4: 'The language-level `Term` datatype ... is not part of version 0'. 00:165 and 00:225 declare it."
+   },
+   {
+    "id": "spec-00-01#49",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "low",
+    "evidence": "Real (core.lut:28) and Rational (core.lut:30) are `primitive`, not built from the kernel. Vec and Mat are aliases built from Fin and the arrow (array.lut:22-23). This is stale wording against 06 §2 and §8."
+   },
+   {
+    "id": "spec-00-01#51",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "libs.lut, importing optimization, probability and belief, checks ('66 with laws'). They are plain .lut files with no interpreter support of their own. grep tests/*.py and tests/spec: no reference to any of the three. lib/ has no optimization.cert.json. This is a structural claim, so low stands."
+   },
+   {
+    "id": "spec-00-01#57",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "grep 'proved' in src/luthier/*.py: none. Declared absent at 00:222-223 and 05:283."
+   },
+   {
+    "id": "spec-00-01#64",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "obj/obj.lut (isEven and isOdd, each with a postcondition): `test --name isEven` also runs and reports isOdd (cli.py:316-321 via checker.py:179-180 object_of). grep object_of and 'object' in tests/*.py: no hit apart from the unrelated audit and check_quotes tests."
+   },
+   {
+    "id": "spec-00-01#68",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "r3_named.lut (the text of r3_dangling_label.reject.lut) is rejected with 'label mul of Semi is touched by no law'. The same type written as an alias (r3_alias.lut, `Semi (A : U) = {... | Associative A eq add}`) is accepted. Also accepted: r3_true_alias.lut (`Tagged = { tag : String, value : Int | true }`, plus a value of it), r3_inline.lut (a parameter type with a dangling mul) and r3_unlabeled_alias.lut (`W = { k : Int | true }`). Meanwhile r3_unlabeled.lut with `: U :=` is rejected ('does not mention its argument'). 05:157-159 states R3 for 'the body of a subtype' in general. test_certificates.py:50, :59 and test_bridge.py:209 rely on `{ u : Unit | \\ (x : Int) {...} }`, which never mentions u."
+   },
+   {
+    "id": "spec-00-01#69",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "ring_untyped.lut `Ring (A : U) : U := { eq, add | Comm A eq add }` gives 'parse error: line 2, col 24: expected ':', got ','. The `| laws` in 01:30 is plainly a placeholder, and 05:160 uses the same untyped shorthand, so the form reads as schematic. Typed one-line form: r3_connected.accept.lut."
+   },
+   {
+    "id": "spec-00-01#70",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "grep observer, concrete, theory and completeness in src/luthier/*.py: none. cmd_check (cli.py:239-283) prints no observers-by-constructors table. 05:260-263 lists that table without the '(decided, not implemented)' mark it gives the R10 bullet at 05:265. Under 05 §6 the missing table is a silently missing decided report, which would be high there. For this conceptual claim of 01, low."
+   },
+   {
+    "id": "spec-00-01#73",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "codec/codec.lut: `dec : Codec := { enc := extern \"python:builtins.str\", dec := extern \"python:builtins.int\", eq := sameInt }` checks. `test --name dec` passes RoundTrip on 30 cases, and `eval dec.enc 42` gives '42'. grep for `:= extern` inside record literals in tests/, lib/ and examples/: none. README.md:60 shows the form."
+   },
+   {
+    "id": "spec-00-01#77",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "testing.py:229-328 has sampled, exhaustive and bounded (bounded is tested at test_certificates.py:59; exhaustive at test_kernel.py:213). The one-case grade is missing (see #34). Witness and proof are declared absent (05:282-283, 01:92-95, 00:222-223)."
+   },
+   {
+    "id": "spec-00-01#84",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No witness grade in testing.py. The existential over finite indices is a fold, `GreatestOf` at array.lut:229 (228 is its comment), as 07:213-214 records. Declared in 01:92-95 and 05 §10."
+   },
+   {
+    "id": "spec-00-01#85",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "store/store.lut (verbatim from 01:101-106) checks. In store_model.lut, an association-list model passes ReadAfterWrite on 50 cases. A `write` that drops everything fails with a counterexample. (I named it `wipe` because `forget` is a reserved word.) grep for a parameterized declared type over a labeled base, defined later, in tests/, lib/ and examples/: none. The parameter path of define_pending (checker.py:256-295) is never exercised by a test."
+   },
+   {
+    "id": "spec-00-01#02",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "Int is core.lut:27 and Bool is core.lut:10. The mapper's refs are off: core.lut:30 is Rational and :17 is a comment. test_kernel.py:87 exercises Int and Bool arithmetic and `if`. test_kernel.py:121 shows Bool and Maybe are sums from core. `Int -> Bool` is exercised at test_kernel.py:176."
+   },
+   {
+    "id": "spec-00-01#04",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "formers.lut: `r := twice (adder 3) 1` evaluates to 7. test_sugar.py:66-72 evaluates `twice inc 5` = 7 (a function as argument). k_recursor.accept.lut only checks that the file loads. Returning a function is not exercised by the cited tests, but partial application appears at test_checker_rules.py:68 (`PosBoth : P2 -> Bool := Both pos`)."
+   },
+   {
+    "id": "spec-00-01#05",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "twice_decl.lut gives 'x is declared twice'. hole.lut: `eval scaled` gives 'depends on sigma without a value', and `run --set sigma=1.5 --entry scaled` gives 3.0. Covered by r1_declaration.accept.lut, test_kernel.py:296 (filling checks the declared type) and test_kernel.py:419 (a filled hole evaluates and is certified)."
+   },
+   {
+    "id": "spec-00-01#06",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "r6_pred.lut (`Pos : Int; Pos := \\ k { k > 0 }; b : Pos := 0`) is rejected with '0 does not satisfy Pos'. r6_inh.lut shows `x : Int; x := 4` is the inhabitant (it then cannot be a type, see #03). checker.py:609-631 _inhabitant_or_predicate. r6_predicate_body.accept.lut and r6_body_type.reject.lut test both sides. test_bridge.py:248-251 RECORD exercises a conjunction body."
+   }
+  ],
+  "notes": "I checked all 29 entries and confirmed every one, with two changes. #12 moves to contradicts/high. The checker accepts `AlwaysWrong (x : Int) : Bool := wrong`, the tester then fails it with 'did not reduce to a Bool', and evaluation treats `wrong` as true. That is three behaviors, and the tests assert both readings (k_bool_is_sum.accept.lut against test_checker_rules.py:24 and :32). For #28 the conclusion stands, but one of the mapper's supporting claims is wrong: 03:29-30 explicitly lets a module see what the root imported flat. What contradicts 00:89 and 05 §2 is the dependence on the order of import directives, which also holds for `as m` imports (q_bc against q_cb). Some line refs are off: core.lut:30 and :17 in #02, core.lut:30/31/33 in #42 (the primitives are core.lut:27-31), array.lut:228 in #84 (it is 229).\n\nAlso found: no test anywhere writes mutually recursive data, and there is no way to express it, because pre-declaring the type is rejected too.\n\nCoverage: every entry in 00-fundamental-elements.md and 01-construction-pattern.md that was listed, read against 03 §2-3, 04 §2, §6, §7, 05 §1, §2, R2, R3, R6, R11, §6, §7, §9, §10, 06 §2 and §8, README.md:47-69, and the cited code and tests. All programs are in /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-00-01/. `luthier test` wrote .cert.json files only there, and the repository is unmodified. HEAD moved to 60fd7d8 during the run, a commit made outside this session that adds scripts/audit_correspondence.py. Against b15f2a1, src/, tests/spec, docs/semantica, README.md and examples/ are identical. The only addition under tests/ is tests/test_audit_correspondence.py."
+ }
+}

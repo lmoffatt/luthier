@@ -1,0 +1,256 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-06",
+   "direction": "spec",
+   "files": "docs/semantica/06-numbers.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a28cd99e4035b2702",
+  "agent_label": "verify spec-06",
+  "started_at": "2026-10-06T11:50:36+00:00",
+  "finished_at": "2026-10-06T12:01:39+00:00",
+  "tokens": 126891,
+  "tool_calls": 59,
+  "duration_ms": 663661,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "74a45d80100c9586fddc5fbc4259e15ce36c563e6a6c2616b0212492b56fac5f"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "spec-06#01",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:408 builds Lit(float(t.text)) with no finiteness check; checker.py:916-917 types it Float64. e01a.lut `big : Float64 := 1e309; main : Float64 := big` passes check and `luthier run` prints inf. e01b.lut `nn : { x : Float64 | x >= 0.0 } := 1e309; main := nn > 1.0` checks and runs to True. finite() (evaluator.py:85-91) only fires on arithmetic results: e01c `0.0 - 1e309` and e01d `big * 1.0` error. `--set` is guarded separately (cli.py:402-406), so the literal is the only hole."
+   },
+   {
+    "id": "spec-06#02",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Reproduced: e02a `exp 1000.0` (real_python) errors with OverflowError from math.exp; e02b numpy.exp 1000.0 and e02c builtins.float \"inf\" error at the crossing ('an overflow to infinity in a value from the environment'); e02d `1e308 + 1e308` errors (machine.py:383-387). tests/test_kernel.py:504 does exercise arithmetic overflow (1e308 * 10.0). The only gap is the overflowing literal, which is the same root cause already counted as spec-06#01; graded medium here to avoid counting it twice (exp 1000.0 itself has no test)."
+   },
+   {
+    "id": "spec-06#03",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "checker.py coerce() (1504-1541) descends into Sigma only; convertible()/function_passes (1462-1502) handle Pi only; there is no Sum case. Rejected: e03a `(Float64 -> Float64) + Unit` as `(Float64 -> Real) + Unit`; e03b `Float64 + Unit` as `Real + Unit`; e03c/e03d the labeled forms `< f : Float64 -> Float64 | g : Unit >` and `< a : Float64 | b : Unit >`; e03f even `Nat2 + Unit` as `Int + Unit`. Accepted only when the injection is checked directly (e03e `t : < f : Float64 -> Real | g : Unit > := f half`). So an already-typed sum value never passes by variance, against 06 §5 'through products and sums'."
+   },
+   {
+    "id": "spec-06#04",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "machine.py:636-649 and evaluator.py:830-841 try np.asarray(out, dtype=float) for every element type other than Int and Rational. e04.lut (extern python repr): Fin 2 -> Bool gives array([1., 0.]); Fin 2 -> Maybe Int with nothing/just 5 gives array([nan, 5.]) (a NaN created by the bridge, against 06 §6); Fin 2 -> Float64 * Int gives a 2x2 float array with 7 as 7.0; Fin 2 -> String gives a list. Same through `luthier run` (e04r). 04-kernel.md:193-194 also says 'Fin n -> A for a non-numeric A a list'. The cited tests/test_bridge.py:326 tests a List of vectors crossing entry by entry, not the representation of a Fin n -> A table for other A, so no test covers the claim."
+   },
+   {
+    "id": "spec-06#05",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "e05.lut: `third : Real := ratio 1 3`; `kr : (Fin 2 -> Real) -> String` (repr) on `\\ k { third }` gives array([0.33333333, 0.33333333]), while the scalar `sr third` gives Fraction(1, 3); `luthier run` (e05r) same. The checker does refuse Real where Float64 is expected (e05c, hint at checker.py:1535-1539). Root cause is the same float fallback in materialize as spec-06#04 (scalar_kind 'Real' is neither Int nor Rational), but the effect is distinct: an exact Real is rounded to a double with no explicit conversion."
+   },
+   {
+    "id": "spec-06#06",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "algebra.lut:115-128: SupIsUpperBound states `s x -> le x (sup s)` for every predicate s, with no bounded-above hypothesis and no 'least'. The comment at 107-111 states the boundedness the law lacks. e06.lut: an instance `CompleteOrderedField Rational` with rationalField and sup := fromInt 50 fails with counterexample `s = \\ _ { true }, x = 73/1`: the law demands an upper bound of the whole field, which no nontrivial ordered field (including the reals) has, so `realField : CompleteOrderedField Real := axiom` (algebra.lut:132) assumes something false. Graded medium, not high: axioms are never tested and nothing derives from them, so no program behaves differently today; the stated law is still wrong."
+   },
+   {
+    "id": "spec-06#07",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "high",
+    "evidence": "array.lut:21-22 defines Vec and Mat; no Array anywhere in core.lut or lib/ (grep). e07.lut `import \"array\"; a : Array Int 3 := \\ k { k }` fails with 'unbound name Array'. The spec header (06-numbers.md:3-4) says the arrays of section 7 are implemented. Vec Int and Vec String work (e07b, tests/spec/n5_arrays.accept.lut). High by the rubric (rejects what the spec accepts), though the fix is a one-line alias."
+   },
+   {
+    "id": "spec-06#08",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "evaluator.py:154-159 rejects any int with |x| > 2^53 (DOUBLE_EXACT), same at 203-206 for integer arrays. e08.lut: an extern returning 2^60 (a power of two, exactly representable) as Float64 errors with '1152921504606846976 from the environment has no exact double', which is a false message; 2^53+1 correctly errors. tests/test_bridge.py:55 tests promotion of a small int only."
+   },
+   {
+    "id": "spec-06#09",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "core.lut:40 defines ExtendedReal as stated, and e09 `o` (extern -inf) gives negInf. But evaluator.py:880-889 does float(x) on any int in the finite branch without the Float64 rule of 06 §6: e09 `r` (2^53+1) gives `finite 9007199254740992.0` silently, and `q` (10^400) crashes with an uncaught Python OverflowError traceback at evaluator.py:882. No test mentions ExtendedReal (grep tests/). Status corrected to partial: the type and its infinities are implemented; the finite branch skips the crossing check."
+   },
+   {
+    "id": "spec-06#10",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Scalar arguments to numpy externs are checked (machine.py:427-431, evaluator.py:528-530; e10 `npMul 2^64 1` errors; tests/test_kernel.py:510). Not checked: an integer inside a List or a pair crossing into numpy. e10b: `npSumL : List Int -> Int := extern \"python:numpy.sum\"` on [2^64, 1] and `npSumP` on (2^64, 1) cross with no error (numpy happened to use object dtype, giving 2^64+1). And the spec's own example still happens inside numpy: e10 `npMul 2^62 4` gives 0, `npSum` of a table of two 2^62 gives -2^63, and `npSumL [2^63-1, 1]` gives -2^63. The rule is enforced for scalars and Fin n -> Int tables only."
+   },
+   {
+    "id": "spec-06#11",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "array.lut:217-252 and 321-335: DotAgrees, MatVecAgrees, MatMulAgrees, TraceAgrees, FrobAgrees (and NormOfInner, TotalOfOnes) still use tolOf/scaledTol from roundingSlack = 8.0 (real.lut), are claimed in the types of dot, matVec, matMul, trace, frob, and are certified (array_python.cert.json has 4 hits for each). 06 §8 line 160-163 lists only det, spectrum, solving and pseudo-inverse as where they 'stay', while §8 line 152 says dot and matVec are certified by the gamma law (rational.lut:91-103, algebra_python.lut:29-34). Two readings remain."
+   },
+   {
+    "id": "spec-06#12",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "core.lut:30 `Rational : Real := primitive \"rational\"`; e12.lut `import \"rational\"; third : Real := ratio 1 3` evaluates to `1/3 : Real`, a value of Real that is not a double, against 06 §4 line 87-88. Spec-internal: §8 made Rational : Real and §4 was not updated (the §2 table also omits Rational)."
+   },
+   {
+    "id": "spec-06#13",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "e13a-g: `x + x`, `x < x`, `x * 2.0` on x : Real are rejected ('operator + expects Int, Float64 or Rational ... the operations of Real are not computed'); `0.0 - x` and Real where Float64 is expected are rejected with the hint; unary minus rejected; `x == x` rejected (R8). Only the equality case has a test (tests/test_checker_rules.py:45-47); grep of tests/ finds no test for arithmetic or comparison on Real."
+   },
+   {
+    "id": "spec-06#14",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "e14a `(Float64 -> Float64) * (Float64 -> Float64)` passes as `(Float64 -> Real) * (Float64 -> Real)`; e14c a record with a Float64 -> Float64 field passes for one with Float64 -> Real; e14b `(Float64 -> Float64) * Int` is rejected as `(Real -> Float64) * Int`. checker.py:1520-1534 coerces Sigma component by component. grep of tests/ for variance/R9 finds only tests/spec/r9_variance.*, which use a bare function, not a product."
+   },
+   {
+    "id": "spec-06#32",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "algebra.lut:115-128: OrderedField = Field + TotalOrder + AddMonotone + MulPositive; CompleteOrderedField adds sup and SupIsUpperBound (whose defect is spec-06#06). OrderedField is certified through rationalField (rational.cert.json); CompleteOrderedField is only reached by tests/test_kernel.py test_axioms_are_listed_by_check ('assumed realField'), which tests the axiom grade, not the laws."
+   },
+   {
+    "id": "spec-06#34",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "array.lut:61-77: dotDef and the other definitions are over Float64 only; 06-numbers.md:4-5 declares the generic definitions not yet done."
+   },
+   {
+    "id": "spec-06#37",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "06-numbers.md:85-87 declares it waiting; checker.py:1535-1539 gives the hint; e13e confirms Real -> Float64 is refused. The implicit rounding that does happen is spec-06#05."
+   },
+   {
+    "id": "spec-06#38",
+    "verdict": "refuted",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Default behavior is as the mapper says: e38.lut, a law over Real under `luthier test`, reports 'NOT RUN ... no generator for Real' (generators.py:231). But nothing stops a program from declaring one: e38b.lut `gen Real := extern \"python:vgen.gen_real\"` (draws Python floats) is accepted outside lib/, and the law over Real is then reported 'ok ... [sampled, 5 cases]' with a certificate written. So a law over Real can be tested on doubles, which is the conflation 06 §1 and §3 set out to remove; the statement holds only by default. No pytest covers either case."
+   },
+   {
+    "id": "spec-06#39",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "real.lut:12 binds toFloat64 to builtins.float with no law in its type. e39: toFloat64 (2^53+1) = 9007199254740992.0 (nearest, ties to even), toFloat64 (-3) = -3.0, a 10^320 integer errors with OverflowError as an EvalError. grep finds no toFloat64 in tests/. 28 occurrences in lib/*.lut today, not 37."
+   },
+   {
+    "id": "spec-06#42",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "evaluator.py:166-169; e42.lut an extern returning 5 declared String errors '5 (int) from the environment is not a value of String'. The accepting path is exercised (tests/test_kernel.py:188 builtins.str as Int -> String, text.lut certificate); no test gives a non-str where String is declared (test_bridge.py:49 is the reverse)."
+   },
+   {
+    "id": "spec-06#51",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "grep of src/ and docs/semantica for NumberModel, num.T, `float64 :=` finds only 06-numbers.md:135; declared not done at 06-numbers.md:4-5."
+   },
+   {
+    "id": "spec-06#54",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "e54a `q : Rational := 3` and e54b `:= 1.5` are type errors; e54c `fromInt 3 + 1` and e54d `fromInt 3 == 3` rejected; e54e mod on Rational rejected (tested at tests/test_bridge.py:227); e54g unary minus rejected. No test for the absence of literals. Minor wording: Rational values also arrive from any extern returning a Fraction (tests/test_bridge.py:218), not only from fromInt, ratio, toQ."
+   },
+   {
+    "id": "spec-06#57",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "rational.lut:67-81 certifies Rounds for + - * / (and RootRounds for sqrt) with no tolerance; rational.cert.json has float64Add/Sub/Mul/Div. Float64 `mod` exists in the checker and evaluator (e57: 5.5 mod 2.0 = 1.5; (0.0 - 1e-20) mod 1.0 = 1.0, a rounded result) and no rounding law covers it; unary minus is exact, so uncovered but harmless."
+   },
+   {
+    "id": "spec-06#63",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "algebra.lut:221-231 sumTo = foldWith (right-associated, unit 0.0 last); array.lut:57-58 pow = powerWith. grep finds no sumTo/foldWith/pow in tests/; the certificate sumToRounds (rational.lut:96) bounds the error by gamma n, which holds in any order, so a change of order would not be caught. 04-kernel.md:209-210 still calls sumTo 'the fold of algebra over the additive monoid of Float64', against 06 §8."
+   },
+   {
+    "id": "spec-06#65",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "The not-yet part (number model) is accurate. The 'implemented' part overstates §5 (no sums, spec-06#03), §7 (no Array, spec-06#07) and also §6 (overflowing literals, spec-06#01; non-numeric tables as float arrays, spec-06#04)."
+   },
+   {
+    "id": "spec-06#66",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "Notes found at 04-kernel.md:45, 64, 93 and 05-static-semantics.md:217 (R9), 257, 284. 05 has no note pointing to 06 §6 for the bridge (its bridge text at 05:188-190 cites nothing in 06). 04:64, 04:93 and 04:175-176 list the primitives without Rational (04:175 also without Real); 04:209-210 contradicts 06 §8 on sumTo."
+   },
+   {
+    "id": "spec-06#67",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "README.md:94-95 lists core.lut as Unit, Empty, Bool, Int, Float64, String, Maybe, List, Nat, Fin (no Real, Rational, ExtendedReal); README.md:71-74 names 04 and 05 with 'rules R1 to R8' (05 has R9-R11) and does not mention 06; README.md:68 'A vector is a function Fin n -> Float64' while 06 §7 has arrays over any type. examples/ has only z7ring.lut, which does not touch the numbers."
+   },
+   {
+    "id": "spec-06#15",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "checker.py:1491-1502 function_passes: domain contravariant, codomain covariant. Copies of tests/spec/r9_variance.accept.lut (ok) and r9_variance.reject.lut (fails with '... but Real -> Float64 was expected', the expect fragment) behave as the tests require, so the cited tests exercise both halves. Extra cases: e15 (Int -> NatT passes for NatT -> Int), e15b (NatT -> Int refused for Int -> Int), e15c higher-order, e15d curried all as expected."
+   },
+   {
+    "id": "spec-06#16",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "convertible() (checker.py:1462-1476) strips subtypes and follows primitive_base (1478-1485). tests/spec/n1_numbers.accept.lut line 4 `y : Real := x` with x : Float64 loads (copy checked ok); e17 `n : Int := m` with m : NatT evaluates to 3."
+   },
+   {
+    "id": "spec-06#17",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "core.lut:27; e17 `2^62 * 4` = 18446744073709551616 and 10^20 * 10^20 = 10^40. The cited tests/spec/n1_numbers.accept.lut (`n : Int := 3`) does not exercise unboundedness; tests/test_kernel.py:510 does indirectly (2 * 9223372036854775807 is computed without wrapping and then refused at the numpy crossing)."
+   },
+   {
+    "id": "spec-06#18",
+    "verdict": "refuted",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "core.lut:43 `Nat : U := { k : Int | 0 <= k }` matches 06 §2 verbatim, and e18 `k : Nat := 0 - 1` is rejected ('0 - 1 does not satisfy Nat'). But the cited tests/test_bridge.py:23 only uses Nat inside a record type; grep finds no test that a negative value is refused as a Nat. Low because the definition is textually identical to the spec."
+   }
+  ],
+  "notes": "I re-ran every entry myself with new programs in /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-06/ (e01a.lut through e67, plus vx.py, vgen.py and vgen2.py as Python externs, run with PYTHONPATH=. from that directory). I didn't reuse the mapper's files. The repo is at 49c6a0f. The only changes since b15f2a1 are in docs/decisions.md and docs/plan-working-method-execution-2026-10-06.md, so src/, lib/, tests/ and docs/semantica/ are the audited versions. I didn't run pytest, because it would write .pytest_cache into the repo. I checked copies of the spec tests instead.\n\nSections covered: 06-numbers.md sections 0 to 8 for the cited claims, plus 04-kernel.md sections 1, 2 and 6, 05-static-semantics.md R5, R8, R9, section 6 and the certification table, README.md lines 60-100, and examples/.\n\nChanges to the mapper's verdicts:\n- #10 stays partial, but on stronger evidence. An integer that doesn't fit in 64 bits crosses into numpy with no error when it sits inside a List or a pair argument (e10b).\n- #38 goes from implemented_untested to partial. A user-written `gen Real` is accepted outside lib/, and laws over Real are then sampled with doubles and certified.\n- #18's cited test doesn't exercise the claim, so it goes to implemented_untested.\n- #09 goes to partial. The type is right, but the finite branch skips the Float64 crossing rule and crashes on 10^400.\n- #02 goes to medium, since its only gap is the same literal defect as #01.\n- #06 goes to medium. The completeness law is wrong (e06 gives the counterexample s = \\_ {true}), but axioms are never tested or used to derive anything, so no program behaves differently today.\n\nRoot causes shared between entries:\n- #04 and #05 come from one fallback in materialize: np.asarray(out, dtype=float) is tried for every element type except Int and Rational (machine.py:644-647, evaluator.py:837-841).\n- #01 and #02 come from one missing finiteness check on float literals (parser.py:408).\n\nTwo small findings outside the entries: the 2^53 threshold produces a false error message for 2^60 (\"has no exact double\"), and 04-kernel.md:175-176 lists the semantic primitives as Int, Float64, String without Real or Rational."
+ }
+}

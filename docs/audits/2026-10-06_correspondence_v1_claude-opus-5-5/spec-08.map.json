@@ -1,0 +1,1167 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-08",
+   "direction": "spec",
+   "files": "docs/semantica/08-tests.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a2e0461c05164be91",
+  "agent_label": "map spec-08",
+  "started_at": "2026-10-06T11:38:07+00:00",
+  "finished_at": "2026-10-06T11:50:32+00:00",
+  "tokens": 166775,
+  "tool_calls": 59,
+  "duration_ms": 745121,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "docs/semantica/08-tests.md, whole file (lines 1-368): preamble and decisions (1-24), 0 Notation (26-50), 1 Generators are values G1 (52-68), 2 Generic generators G2-G6 (70-142), 3 Numbers G7 (144-163), 4 Vectors and matrices G8 (165-182), 5 Functions and theories G9 (184-203), 6 Subtypes and dependent records G10-G11 (205-219), 7 Budgets G12 (221-237), 8 Certificates of definitions C1-C6 (239-283), 9 Certificates of results C7 (285-295), 10 Statistical laws C8-C10 (297-325), 11 Open (327-336), 12 Changes to other parts (338-352), 13 Order of work (354-368)"
+  ],
+  "claims": [
+   {
+    "id": "spec-08#00",
+    "spec_ref": "docs/semantica/08-tests.md:3",
+    "claim": "08 states its rules in the present tense ('How luthier test draws the cases of a law') with no per-rule implementation status; the only signals that they are future work are section 13 (Order of work) and docs/plan-2026-10-06.md (A-1 to A-12).",
+    "status": "partial",
+    "impl_refs": [
+     "docs/semantica/08-tests.md:354",
+     "docs/plan-2026-10-06.md:66",
+     "docs/plan-2026-10-06.md:412"
+    ],
+    "test_refs": [],
+    "evidence": "Unlike 05 R11 ('decided 2026-10-06; not implemented', 05:243), no G or C rule is marked. Nearly every rule below is unimplemented at b15f2a1; a reader of 08 alone cannot tell which rules hold today. Only the plan says 'Specified (08 C8 to C10), not implemented'.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#01",
+    "spec_ref": "docs/semantica/08-tests.md:37",
+    "claim": "A seed is a value of Seed, an integer in [0, 2^31).",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/random.lut:38",
+     "src/luthier/lib/random.lut:39"
+    ],
+    "test_refs": [],
+    "evidence": "Seed : U := { s : Int | 0 <= s and s < 2147483648 } with genSeed drawing 15+16 bits. No pytest or spec file exercises Seed or genSeed.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#02",
+    "spec_ref": "docs/semantica/08-tests.md:54",
+    "claim": "G1: Gen T = Nat -> Seed -> T * Seed (size and seed give a value and the next seed), 'as in lib/random.lut today with Seed in place of Int'.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/lib/random.lut:8"
+    ],
+    "test_refs": [],
+    "evidence": "random.lut:8 still has Gen (A : U) = Nat -> Int -> A * Int. The 'today' description is accurate. Declared in plan A-9 ('Gen T with Seed').",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#03",
+    "spec_ref": "docs/semantica/08-tests.md:55",
+    "claim": "G1: a generator is defined, typed and certified like any other value, and its type states what it promises.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:482",
+     "src/luthier/checker.py:503",
+     "src/luthier/checker.py:514",
+     "src/luthier/lib/array_python.lut:43"
+    ],
+    "test_refs": [],
+    "evidence": "A Luthier gen term is checked against Gen T: 'gen Small := genBool' is rejected 'genBool has type Gen Bool but Gen Small was expected' (scratch g1_gen_type.lut). A Luthier generator written as a definition gets ordinary obligations (genSmall pending, then FAIL on s = 0 in g1_gen_outside.lut). A Python generator 'gen T := extern ...' has no type or obligation at all. No test of the typing.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#04",
+    "spec_ref": "docs/semantica/08-tests.md:58",
+    "claim": "G1 Validity: every value a generator gives belongs to T; for Gen {x : T | p x} this is the obligation that p holds for every size and seed, tested as an extern's obligation (05 R5).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:112",
+     "src/luthier/generators.py:125",
+     "src/luthier/testing.py:214"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:145"
+    ],
+    "evidence": "Each drawn value of a registered generator is checked against the type's predicates at draw time; a value outside raises OutsideType and fails the law ('the generator Small gave a value outside Small: 4', g1_gen_outside.lut). For Python generators this is not an obligation of the generator certified on its own, only a check while some other law draws.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#05",
+    "spec_ref": "docs/semantica/08-tests.md:61",
+    "claim": "G1 Distribution: a generator that claims a distribution carries a law that the probability integral transform of its values is uniform, certified as a kernel is, with its own count of draws (G12).",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/arrays.py:305",
+     "src/luthier/lib/random.lut:17"
+    ],
+    "test_refs": [],
+    "evidence": "No generator states a distributional law; generators are bare Python functions or LCG terms. Covered by section 13 step 3 and open item 11.2.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#06",
+    "spec_ref": "docs/semantica/08-tests.md:65",
+    "claim": "The random source is an extern that gives seeds in batches; its laws (uniform, independent draws) are stated in Luthier and certified.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/testing.py:343",
+     "src/luthier/generators.py:235",
+     "src/luthier/lib/random.lut:10"
+    ],
+    "test_refs": [],
+    "evidence": "The source is Python random.Random(seed) inside the tester, which hands one seed per Luthier generator call; random.lut has an LCG (nextSeed) with no laws. Plan A-9.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#07",
+    "spec_ref": "docs/semantica/08-tests.md:68",
+    "claim": "`gen T := g` is removed: no type owns a generator.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/parser.py:109",
+     "src/luthier/parser.py:156",
+     "src/luthier/checker.py:482",
+     "src/luthier/lib/random.lut:30",
+     "src/luthier/lib/array_python.lut:43"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:168",
+     "tests/test_bridge.py:176"
+    ],
+    "evidence": "The gen act parses and registers per type (g1_gen_act.lut: 'ok'). random.lut and array_python.lut rely on it, and two tests assert its alias semantics. Declared: section 13 step 7.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#08",
+    "spec_ref": "docs/semantica/08-tests.md:72",
+    "claim": "There are four generic generators: value v, census vs (optionally with a cost), exhaustive, sampled m (linear, log, or a cost).",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/parser.py:120",
+     "src/luthier/syntax.py:280"
+    ],
+    "test_refs": [],
+    "evidence": "Only 'with n' (sampled, implicit linear) and 'exhaustive' exist; no value, census, metric or cost anywhere in src. Plan A-9.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#09",
+    "spec_ref": "docs/semantica/08-tests.md:82",
+    "claim": "G2: sampling draws u uniform in [0, C) and inverts the cumulative cost; linear is c(x)=1, log is c(x)=1/|x| and needs a positive lower bound on the magnitude; a census with costs and a range of numbers are drawn by the same rule.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:156",
+     "src/luthier/generators.py:158",
+     "src/luthier/lib/random.lut:17"
+    ],
+    "test_refs": [],
+    "evidence": "Numbers are uniform in [-size, size] (Python fallback or genIntBetween); no cumulative cost, no log metric. Section 13 step 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#10",
+    "spec_ref": "docs/semantica/08-tests.md:95",
+    "claim": "G3: Unit, Bool, Fin n: exhaustive gives every value; sampled draws by cost, equal unless given.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:132",
+     "src/luthier/generators.py:458",
+     "src/luthier/generators.py:499",
+     "src/luthier/generators.py:180",
+     "src/luthier/lib/random.lut:21"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:242",
+     "tests/test_kernel.py:213",
+     "tests/test_bridge.py:310"
+    ],
+    "evidence": "Exhaustive Unit (1 case), Bool (2), Fin 4 (4), Bool * Fin 3 (6) pass in g3_small.lut; sampling is uniform. A cost cannot be given, so only the default half exists.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#11",
+    "spec_ref": "docs/semantica/08-tests.md:96",
+    "claim": "G3: Int and Nat with bounds: exhaustive gives every value between them.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:509",
+     "src/luthier/generators.py:520",
+     "src/luthier/generators.py:527",
+     "src/luthier/generators.py:470",
+     "src/luthier/testing.py:366",
+     "src/luthier/cli.py:165"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59"
+    ],
+    "evidence": "int_interval only recognizes a base that whnf's to Int. B1 : U := { k : Nat | k < 21 } with law x < 20 and 'test natBounded exhaustive' PASSES '[bounded, 17 cases]' (values 0..16 from the [-16,16] box) and check -v reports it 'certified'; the same law over { k : Int | 0 <= k and k < 21 } FAILS at x = 20 (g3_nat_bounds.lut, g3_nat_cert.lut). The entry's mode is 'exhaustive' (what was asked), so cli.py:165 accepts it.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-08#12",
+    "spec_ref": "docs/semantica/08-tests.md:97",
+    "claim": "G3/G6: Int or Nat without bounds under exhaustive is an error; under sampled the metric runs over [-s, s] or [0, s].",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:470",
+     "src/luthier/generators.py:156",
+     "src/luthier/lib/random.lut:19",
+     "src/luthier/lib/random.lut:20"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59",
+     "tests/test_kernel.py:271"
+    ],
+    "evidence": "Sampled half holds (linear only). Exhaustive half is the opposite today: Int is enumerated in [-size, size] and graded 'bounded' (intUnbounded passes '[bounded, 33 cases]', g6_exhaustive.lut), and test_certificates.py:59 asserts that. Declared via section 13 step 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#13",
+    "spec_ref": "docs/semantica/08-tests.md:98",
+    "claim": "G3/G6: Float64 and Rational under exhaustive are a (static) error; under sampled they are drawn continuously over the bounds of the type, and without bounds it is an error (G7).",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/testing.py:248",
+     "src/luthier/generators.py:158",
+     "src/luthier/generators.py:160",
+     "src/luthier/lib/random.lut:22"
+    ],
+    "test_refs": [],
+    "evidence": "Exhaustive Float64 is only a runtime 'not run: Float64 is not finitely enumerable' after check says ok. Sampled Float64 with no bounds passes '[sampled, 20 cases]' (floatAny in g7_g9_g10.lut), drawn uniform in [-size, size]. Section 13 step 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#14",
+    "spec_ref": "docs/semantica/08-tests.md:99",
+    "claim": "G3: a product or record is exhaustive as the product of its components; sampled component by component, dependent ones in order (G11).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/generators.py:167",
+     "src/luthier/generators.py:488"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:213",
+     "tests/test_bridge.py:295",
+     "tests/test_bridge.py:176"
+    ],
+    "evidence": "Sigma is enumerated as the dependent product and sampled first then second with the first substituted. Bool * Fin 3 gives 6 exhaustive cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#15",
+    "spec_ref": "docs/semantica/08-tests.md:100",
+    "claim": "G3: a sum is exhaustive as each constructor with each payload; sampled draws a constructor by cost, then its payload.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:499",
+     "src/luthier/generators.py:473",
+     "src/luthier/generators.py:183",
+     "src/luthier/generators.py:387"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:242"
+    ],
+    "evidence": "Exhaustive holds for sums and non-recursive data. Sampling picks a sum constructor uniformly; for data it prefers recursive constructors with a fixed recursive_bias 0.8 (generators.py:40), not a cost.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#16",
+    "spec_ref": "docs/semantica/08-tests.md:101",
+    "claim": "G3/G6: List A and Vec A under exhaustive give every length up to the size with entries exhaustive; sampled draws a length (G8) then that many entries.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:477",
+     "src/luthier/lib/random.lut:28",
+     "src/luthier/arrays.py:305"
+    ],
+    "test_refs": [],
+    "evidence": "Exhaustive List Bool is 'not run: List Bool is not finitely enumerable' (g6_exhaustive.lut). Sampled lists come from the data fallback or genList (uniform length in [0, size]). Section 13 step 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#17",
+    "spec_ref": "docs/semantica/08-tests.md:102",
+    "claim": "G3: a function over Fin n is exhaustive as every table when the codomain is finite; sampled as a table with each entry from the codomain.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:198",
+     "src/luthier/generators.py:518"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:157"
+    ],
+    "evidence": "Sampled tables exist. Exhaustive 'Fin 2 -> Bool' is 'not run: ... is not finitely enumerable' (finTable in g6_exhaustive.lut), because enumerate has no Pi case.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#18",
+    "spec_ref": "docs/semantica/08-tests.md:103",
+    "claim": "G3/G9: a function over an infinite domain has no generic generator: both functors are an error, 'bind a census'.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:218",
+     "src/luthier/generators.py:226",
+     "src/luthier/generators.py:425"
+    ],
+    "test_refs": [],
+    "evidence": "Such a function is drawn as a constant or an affine map: law '\\ (f : Float64 -> Float64) (x : Float64) { f x == f x }' passes 20 cases (fnInf in g7_g9_g10.lut). 05 §7 (05:298) still describes this; section 12 says that paragraph is replaced by G9.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#19",
+    "spec_ref": "docs/semantica/08-tests.md:104",
+    "claim": "G3/G9: the models of a theory have no generic generator: an error, 'bind a census'.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:167",
+     "src/luthier/generators.py:188"
+    ],
+    "test_refs": [],
+    "evidence": "A theory value (a labeled base with function components) is drawn as a Sigma of constant functions filtered by its laws, which usually ends not run after 2000 tries. No census exists. Section 13 step 4.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#20",
+    "spec_ref": "docs/semantica/08-tests.md:105",
+    "claim": "G3: a subtype { x : T | p x } is exhaustive as the values of T where p holds; sampled within bounds when p is an interval, otherwise by a filter (G10).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:507",
+     "src/luthier/generators.py:188"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59",
+     "tests/test_kernel.py:213"
+    ],
+    "evidence": "Exhaustive filtering exists. Sampling always filters by rejection, interval or not (see spec-08#40).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#21",
+    "spec_ref": "docs/semantica/08-tests.md:106",
+    "claim": "G3/G5: U has no generator; drawing a type is an error under either functor (a static error, G5).",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:231",
+     "src/luthier/testing.py:216"
+    ],
+    "test_refs": [],
+    "evidence": "'r : { u : Unit | \\ (A : U) { Refl A } } := unit' passes luthier check ('ok'), and luthier test reports 'not run: no generator for U' (g5_universe.lut). Plan A-5.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#22",
+    "spec_ref": "docs/semantica/08-tests.md:108",
+    "claim": "G4: the test directive names its functor (with n is sampled; exhaustive), the metric of sampled, and may bind parameters or types inline (where) or through a profile (under); profile is an act.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/parser.py:120",
+     "src/luthier/parser.py:107",
+     "src/luthier/lexer.py:8"
+    ],
+    "test_refs": [],
+    "evidence": "'test good with 10 sampled linear' gives parse error 'unexpected sampled'; 'where { x := census [0, 1, 2] }' gives 'unexpected where'; 'profile tape := {...}' gives 'unexpected tape' (g4_*.lut). Plan A-9.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#23",
+    "spec_ref": "docs/semantica/08-tests.md:118",
+    "claim": "G4: a parameter binding applies in every law of the test; a type binding to every parameter of that type, aliases expanded; parameter beats type, where beats profile.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/checker.py:488",
+     "src/luthier/generators.py:80"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:168",
+     "tests/test_bridge.py:176"
+    ],
+    "evidence": "Only a global, per-type binding exists (gen T, aliases expanded to the type's key). No per-parameter or per-test binding, so no precedence.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#24",
+    "spec_ref": "docs/semantica/08-tests.md:120",
+    "claim": "G4: a parameter the functor cannot generate and nothing binds is a static error that names the parameter and the kind of binding it needs.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:230",
+     "src/luthier/generators.py:231",
+     "src/luthier/testing.py:216"
+    ],
+    "test_refs": [],
+    "evidence": "It surfaces at test time as 'not run: no generator for U' (or 'no generator for the function type ...; give it a gen'), without naming the parameter, and check accepts the file.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#25",
+    "spec_ref": "docs/semantica/08-tests.md:122",
+    "claim": "G4/C1: the certificate records, for every parameter of every law, the generator that drew it, expanded.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/testing.py:181",
+     "src/luthier/generators.py:396",
+     "src/luthier/testing.py:393",
+     "src/luthier/certify.py:276"
+    ],
+    "test_refs": [],
+    "evidence": "Each law records 'domains', one describe() string per parameter (e.g. 'Int in [-16, 16] (Python fallback...) where k > 12'), and the entry records fingerprints of registered generators used. There is no binding to expand, and no test inspects 'domains'.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#26",
+    "spec_ref": "docs/semantica/08-tests.md:127",
+    "claim": "G5: a binding of a parameter of type U, and a test of a law quantified over a parameter of type U, are static errors.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/checker.py:482",
+     "src/luthier/testing.py:216"
+    ],
+    "test_refs": [],
+    "evidence": "Same program as spec-08#21: luthier check is ok, luthier test says not run. Plan A-5 ('a spec file shows the refusal'); no such spec file exists.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#27",
+    "spec_ref": "docs/semantica/08-tests.md:128",
+    "claim": "G5: a law over a declared type is certified per filling of the hole (05 §7), with the generators of the type that fills it.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/certify.py:302",
+     "src/luthier/certify.py:348",
+     "src/luthier/cli.py:116",
+     "src/luthier/cli.py:305"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:41",
+     "tests/test_kernel.py:419"
+    ],
+    "evidence": "The certificate keeps up to MAX_ENTRIES=4 entries per name keyed by the hash of the filled cone; the library alone and the filled program are distinct entries. The test fills a value hole, not a type hole.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#28",
+    "spec_ref": "docs/semantica/08-tests.md:130",
+    "claim": "G5/G9: a law over the models of a theory is certified per model, the models listed in a census.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/testing.py:373"
+    ],
+    "test_refs": [],
+    "evidence": "Each concrete value inhabiting a theory has its own obligations and is tested (05 §7 'certified per model'), but there is no census listing the models; a generic law over the theory is drawn by the generic Sigma generator instead (spec-08#19).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#29",
+    "spec_ref": "docs/semantica/08-tests.md:132",
+    "claim": "G5: a test of a container names the instance it runs at.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/parser.py:120"
+    ],
+    "test_refs": [],
+    "evidence": "The directive has no instance argument; a law over (A : U) is 'not run: no generator for U'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#30",
+    "spec_ref": "docs/semantica/08-tests.md:134",
+    "claim": "G5: the libraries that quantify over a type where they mean a vector (Theta : U in probability.lut, belief.lut and optimization.lut, IsGradient in array.lut) are rewritten over VecOf n.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:184",
+     "src/luthier/lib/probability.lut:136",
+     "src/luthier/lib/belief.lut:29",
+     "src/luthier/lib/optimization.lut:21"
+    ],
+    "test_refs": [],
+    "evidence": "Theta : U remains in array.lut, probability.lut, belief.lut (section 13 step 2, plan B-2). Wording: optimization.lut has no 'Theta : U' (it only instantiates IsGradient at VecOf o.dim), so naming it is inaccurate.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#31",
+    "spec_ref": "docs/semantica/08-tests.md:138",
+    "claim": "G6: under exhaustive, a parameter of an infinite type (unbounded integer, Float64, Rational, Real) is a static error unless bound to a census.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:470",
+     "src/luthier/testing.py:248"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59"
+    ],
+    "evidence": "Unbounded Int is enumerated as a box and graded bounded; Float64 is a runtime 'not run'. check never refuses (g6_exhaustive.lut). Plan A-9.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#32",
+    "spec_ref": "docs/semantica/08-tests.md:140",
+    "claim": "G6: when the product of the finite parameters exceeds a budget, the cases are a covering array of pairs and the grade says so.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/testing.py:234"
+    ],
+    "test_refs": [],
+    "evidence": "Exhaustive mode enumerates the full product recursively with no budget and no covering array. Plan A-9 ('G6').",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#33",
+    "spec_ref": "docs/semantica/08-tests.md:146",
+    "claim": "G7: the bounds of a numeric parameter belong to its type; lmTol and the tolerances of the libraries become types with both bounds.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:95",
+     "src/luthier/lib/belief.lut:53",
+     "src/luthier/lib/belief.lut:176"
+    ],
+    "test_refs": [],
+    "evidence": "Library tolerances are plain Float64 constants (jacobiTol := eps, evidenceTol := sqrt eps, settleTol). lmTol is not in this repository (it is in the project, prototipo-cero). Plan B-3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#34",
+    "spec_ref": "docs/semantica/08-tests.md:150",
+    "claim": "G7: a double without bounds in its type takes them from its binding (sampled log in [1.0e-15, 1.0e-2]).",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/parser.py:120"
+    ],
+    "test_refs": [],
+    "evidence": "No binding syntax exists (spec-08#22).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#35",
+    "spec_ref": "docs/semantica/08-tests.md:156",
+    "claim": "G7: a log metric over a type that contains 0 draws 0 as an atom with a parameter probability, and draws a sign when both signs are allowed.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "No log metric anywhere in src.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#36",
+    "spec_ref": "docs/semantica/08-tests.md:159",
+    "claim": "G7: special values (bounds and their neighbours, 0, 1, -1 in the support, the program's literals inside the bounds) join every numeric generator with a total probability.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:156",
+     "src/luthier/arrays.py:141"
+    ],
+    "test_refs": [],
+    "evidence": "Numbers are uniform over [-size, size]; no special values are injected. Section 13 step 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#37",
+    "spec_ref": "docs/semantica/08-tests.md:161",
+    "claim": "G7: doubles are drawn continuously between the bounds.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:159",
+     "src/luthier/arrays.py:142",
+     "src/luthier/lib/random.lut:22",
+     "src/luthier/lib/random.lut:33"
+    ],
+    "test_refs": [],
+    "evidence": "The Python fallback and array entries use rng.uniform (continuous). But once 'import \"random\"' is in scope, 'gen Float64 := genFloat64' draws from a grid of 2,000,001 points ((k - 1e6)/1e6 * size), not continuously, and over [-size, size] rather than the type's bounds.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#38",
+    "spec_ref": "docs/semantica/08-tests.md:162",
+    "claim": "NaN and the infinities are not values of Float64 (core.lut), and no generator gives them.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:21",
+     "src/luthier/core.lut:29",
+     "src/luthier/cli.py:405",
+     "src/luthier/generators.py:159"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:498",
+     "tests/test_kernel.py:504",
+     "tests/test_bridge.py:89"
+    ],
+    "evidence": "core.lut documents Float64 as finite doubles; NaN and overflow from evaluation or the environment are errors; built-in generators are bounded uniforms. A Python generator returning NaN is caught at from_python, but no test covers that path specifically.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#39",
+    "spec_ref": "docs/semantica/08-tests.md:167",
+    "claim": "G8: a vector generator is a dimension generator and an entry generator; dimensions default to the census 0, 1, 2, 3, 5, 10, which a binding can change.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/arrays.py:305",
+     "src/luthier/arrays.py:313",
+     "src/luthier/lib/array_python.lut:43"
+    ],
+    "test_refs": [],
+    "evidence": "gen_dim draws randint(1, min(size, 8)): never 0, never 10. Dimensions come from the gen Dim directive, not a census. Section 13 step 3, plan B-7.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#40",
+    "spec_ref": "docs/semantica/08-tests.md:170",
+    "claim": "G8: structured matrices are drawn by named families (unit vectors, Dirichlet, positions in a box, symmetric, SPD with a given spectrum, Haar orthogonal, xLATMS-style prescribed singular values with kappa and a mode, low rank, nearly singular, scaled near under/overflow, diagonal, triangular); a family claiming a distribution states it as a law; a family can give (kappa, A).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/arrays.py:337",
+     "src/luthier/arrays.py:344",
+     "src/luthier/arrays.py:350"
+    ],
+    "test_refs": [],
+    "evidence": "Only symmetric (B + B^T), SPD (B^T B + I, spectrum not given) and rank-deficient Gram matrices exist; the other families, distribution laws and the (kappa, A) pair do not. Section 13 step 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#41",
+    "spec_ref": "docs/semantica/08-tests.md:186",
+    "claim": "G9: a function over an infinite domain, and a value of a theory, are bound by a test to a census, an explicit list of the program's values of that type; a member may be a family 'from f' whose arguments the binding draws.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/parser.py:120"
+    ],
+    "test_refs": [],
+    "evidence": "No census or 'from' form in the lexer, parser or generators. Section 13 step 4, plan B-6.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#42",
+    "spec_ref": "docs/semantica/08-tests.md:197",
+    "claim": "G9: the census is explicit, never implicit; `check -v` lists the candidates the program defines.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/cli.py:255",
+     "src/luthier/cli.py:262"
+    ],
+    "test_refs": [],
+    "evidence": "check -v lists axioms, provisional externs and the state of each obligation; it lists no census candidates.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#43",
+    "spec_ref": "docs/semantica/08-tests.md:202",
+    "claim": "G9: equality of functions is not structural (05 R8), so a law comparing two functions compares their values at points its binding draws.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1"
+    ],
+    "test_refs": [
+     "tests/spec/r8_equality_function.reject.lut",
+     "tests/test_checker_rules.py:50"
+    ],
+    "evidence": "== on a function type is rejected by the checker (R8 spec file), which leaves pointwise comparison as the only form a law can take. Drawing the points from a binding awaits G4.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#44",
+    "spec_ref": "docs/semantica/08-tests.md:207",
+    "claim": "G10: an interval predicate (lo <= x and x <= hi, strict or not, on an integer or a double) gives the bounds of G7, with no rejection.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/generators.py:509",
+     "src/luthier/generators.py:520",
+     "src/luthier/generators.py:188"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59"
+    ],
+    "evidence": "Only exhaustive enumeration of an Int base uses the interval. Sampling always rejects: { t : Float64 | 0.0 < t and t < 1.0e-9 } and { t : Float64 | 1.0e6 < t and t < 1.0e7 } both end 'not run: could not find a value ... in 2000 tries' (g7_g9_g10.lut).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#45",
+    "spec_ref": "docs/semantica/08-tests.md:209",
+    "claim": "G10: the filter's acceptance rate is recorded.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/generators.py:50",
+     "src/luthier/generators.py:441"
+    ],
+    "test_refs": [],
+    "evidence": "Only registered generators get [drawn, outside] tallies. A filtered subtype records nothing: c3_count.cert.json has no acceptance figure although 'x : Above' (k > 12) rejected most draws (3.5 s).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#46",
+    "spec_ref": "docs/semantica/08-tests.md:210",
+    "claim": "G10: the draw of one value gives up after a budget of tries (G12), and the law is not run with that reason.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/generators.py:190",
+     "src/luthier/generators.py:196",
+     "src/luthier/testing.py:216"
+    ],
+    "test_refs": [],
+    "evidence": "GenError 'could not find a value of ... in 2000 tries (rejected, for example: ...)' becomes outcome 'not run' (g7_g9_g10.lut). The budget is fixed (spec-08#50). No pytest exercises this path.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#47",
+    "spec_ref": "docs/semantica/08-tests.md:213",
+    "claim": "G10: every value a generator gives is checked against the predicate of its type.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/generators.py:112",
+     "src/luthier/generators.py:97",
+     "src/luthier/generators.py:192"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:145"
+    ],
+    "evidence": "from_registered checks each registered value against laws_of(ty); filtered values are accepted only when satisfies() holds; quantified predicates are probed law_probes times.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#48",
+    "spec_ref": "docs/semantica/08-tests.md:216",
+    "claim": "G11: components of a record or pair are drawn in dependency order, each with the earlier ones in its type; when a component's type is empty for the earlier ones, they are redrawn up to a budget (G12).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/generators.py:167",
+     "src/luthier/generators.py:171",
+     "src/luthier/testing.py:271"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:295",
+     "tests/test_bridge.py:285"
+    ],
+    "evidence": "Sigma sampling substitutes the first component into the second and retries 10 times on EmptyDomain; a case is also redrawn up to 50 times in testing.draw. Both budgets are fixed literals.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#49",
+    "spec_ref": "docs/semantica/08-tests.md:226",
+    "claim": "Description of today's code: 2000 tries per filtered value, 10 redraws of a dependent record, 5 probes of a quantified law.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/generators.py:40",
+     "src/luthier/generators.py:171",
+     "src/luthier/generators.py:41"
+    ],
+    "test_refs": [],
+    "evidence": "max_tries=2000, range(10), law_probes=5: the numbers are accurate at b15f2a1.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#50",
+    "spec_ref": "docs/semantica/08-tests.md:223",
+    "claim": "G12: the interpreter holds no fixed number for any budget (filter tries, record redraws, probes, draws per case, largest size, covering-array threshold, special-value and zero-atom probabilities, level runs and control seeds, distribution draws); luthier test takes each as an option with a default, and every entry records the values it ran with.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/cli.py:603",
+     "src/luthier/parser.py:130",
+     "src/luthier/generators.py:40",
+     "src/luthier/generators.py:171",
+     "src/luthier/testing.py:271",
+     "src/luthier/testing.py:344"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:271"
+    ],
+    "evidence": "Only the largest size is an option (--size, directive 'size n') and recorded (generation.size). Tries, redraws and probes are fixed. The list also omits a fixed budget that exists: 50 redraws of a whole case (testing.py:271), which plan A-1 does list ('redraws of a case'). Plan A-1.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#51",
+    "spec_ref": "docs/semantica/08-tests.md:230",
+    "claim": "G12: the largest size comes with a schedule that reaches it within the n cases.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/testing.py:289"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:271"
+    ],
+    "evidence": "size_i = 1 + (i*size)//n never reaches size when n < size: with n = 5 and size 16 the sizes are 1, 4, 7, 10, 13. The law 'x < 14 and x > -14' under 'test lt with 5' never failed over 300 seeds; with n = 16 it failed 98 times out of 300 (g12_size.lut, run via luthier.testing.run_test).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#52",
+    "spec_ref": "docs/semantica/08-tests.md:246",
+    "claim": "C1: an entry is identified by the law, the hash of its cone (05 §7) and its binding expanded; one law has as many entries as bindings it was tested under.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/certify.py:240",
+     "src/luthier/certify.py:256",
+     "src/luthier/certify.py:348",
+     "src/luthier/cli.py:160"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:27",
+     "tests/test_kernel.py:262"
+    ],
+    "evidence": "Identity is the hash of {cone code, extern Python, interpreter}; generator fingerprints are compared afterwards and only make an entry stale. A rerun with another n or seed replaces the entry with the same hash. Section 13 step 1, plan A-9.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#53",
+    "spec_ref": "docs/semantica/08-tests.md:247",
+    "claim": "C1 (via 05 §7): the cone whose hash identifies an entry is what the definition depends on.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/certify.py:26",
+     "src/luthier/certify.py:52",
+     "src/luthier/subst.py:161"
+    ],
+    "test_refs": [],
+    "evidence": "names_in collects bound variable names too, and cone() follows any that happen to be global. 'import \"random\"' plus 's : Int := 3' makes genNat and genSeed 'stale certificate: the code of its cone changed' (imp_random6.lut), because their bodies bind 's' in '\\ size s {...}' (random.lut:20, 39). An unrelated definition changes an entry's identity, which G9 (line 198) names as the thing to avoid.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#54",
+    "spec_ref": "docs/semantica/08-tests.md:250",
+    "claim": "C1: an entry also records the seed, the budgets (G12), the counts of C3, the reach, the labels (C5) and the time.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/certify.py:332",
+     "src/luthier/testing.py:43",
+     "src/luthier/testing.py:384"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:253"
+    ],
+    "evidence": "Recorded: seed, run_seed, when, per-law seconds, cases, skipped, domains, generation.size. Missing: the other budgets, the counts of dropped and false-premise cases, a reach, labels.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#55",
+    "spec_ref": "docs/semantica/08-tests.md:252",
+    "claim": "C2: grades from weakest: point, census of k, sampled n (with the bound 3/n at 95%), bounded, exhaustive, witnessed, assumed; a law whose parameters are drawn differently lists the reach of each and is summarized by the weakest.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/testing.py:34",
+     "src/luthier/testing.py:262",
+     "src/luthier/cli.py:257",
+     "src/luthier/cli.py:265",
+     "src/luthier/testing.py:366"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59",
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "Laws carry sampled, bounded or exhaustive; axioms are 'assumed'. No point, census, witnessed or 3/n bound. The summary is not the weakest: in g3_nat_cert.lut the law ran 'bounded' but the entry's mode is 'exhaustive', and check -v shows only 'certified (date)' with no grade.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#56",
+    "spec_ref": "docs/semantica/08-tests.md:258",
+    "claim": "C3: n counts evaluated cases; undrawable cases, cases skipped because a type obligation's computation raised, and false-premise cases are counted apart.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/testing.py:43",
+     "src/luthier/testing.py:300",
+     "src/luthier/testing.py:295",
+     "src/luthier/testing.py:304"
+    ],
+    "test_refs": [],
+    "evidence": "'cases' counts evaluations and 'skipped' counts raised type obligations. Undrawable cases (unreachable size, empty domain) are dropped without a count; false premises count as evaluated. 'skipped' is untested. Plan A-2.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#57",
+    "spec_ref": "docs/semantica/08-tests.md:262",
+    "claim": "C3: a test draws until n cases are evaluated or the draw budget is spent, and an entry is accepted only if its evaluated cases reach the directive's n.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/testing.py:287",
+     "src/luthier/cli.py:167"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:84"
+    ],
+    "evidence": "The loop makes exactly n draws, and acceptance compares the requested n of the entry. 'test a with 100' over { k : Int | k > 12 } evaluates 25 cases, passes, and check -v says 'certified' (c3_count.lut; entry n = 100, cases = 25). Plan A-2.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#58",
+    "spec_ref": "docs/semantica/08-tests.md:263",
+    "claim": "C3: a law none of whose cases evaluates is not run, with the counts as its reason.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/testing.py:321",
+     "src/luthier/testing.py:324"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:50"
+    ],
+    "evidence": "cases == 0 gives 'not run' with 'the computation raised on every case drawn (k)' or 'no case could be drawn: every draw met an empty domain' or the last GenError; only the skipped count is given, not the dropped draws.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#59",
+    "spec_ref": "docs/semantica/08-tests.md:264",
+    "claim": "C3: a law whose premises never held passed vacuously, and its entry says so.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/testing.py:313",
+     "src/luthier/testing.py:328"
+    ],
+    "test_refs": [],
+    "evidence": "Never (x : Int) : Bool := x > 1000 -> false, 'test v with 50': 'ok [sampled, 50 cases]', entry outcome passed, no vacuity mark (c3_vacuous.lut). Plan A-2.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#60",
+    "spec_ref": "docs/semantica/08-tests.md:266",
+    "claim": "C4: a test is deterministic given its code, its binding, its seed and n.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/testing.py:343",
+     "src/luthier/cli.py:50",
+     "src/luthier/generators.py:252"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:253"
+    ],
+    "evidence": "A Random(seed) drives every draw; per-definition seeds are derived from the run seed by SHA-256; satisfies() without a stream uses Random(0). Same seed gives the same sample cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#61",
+    "spec_ref": "docs/semantica/08-tests.md:267",
+    "claim": "C4: an entry whose identity, seed and n match is reused whatever its outcome; a failed or not-run one is reported as known with its date and reason and not run again; --deep reruns; a new seed makes a new entry.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/cli.py:333",
+     "src/luthier/testing.py:352",
+     "src/luthier/cli.py:150",
+     "src/luthier/cli.py:266",
+     "src/luthier/cli.py:313",
+     "src/luthier/certify.py:348"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307",
+     "tests/test_certificates.py:71"
+    ],
+    "evidence": "Only passed entries of imported files are reused; the top file is always rerun (deep=args.deep or is_top). In c4_lib.lut the failed 'bad' and the passed 'good' rerun with the same --seed; 'test c4_app.lut --imports' reruns 'bad'; without --imports it prints 'imported, no certificate: bad' while check -v says 'failed in its last test'. A new seed overwrites the entry. Plan A-3.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#62",
+    "spec_ref": "docs/semantica/08-tests.md:271",
+    "claim": "C5: laws and generators can label cases (classify), the entry records each label's share, and a law can require a share (cover), checked with a sequential Wilson bound; the law fails when the region is not reached.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "No classify, cover, labels or Wilson bound in src. Plan A-9 ('labels (C5)').",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#63",
+    "spec_ref": "docs/semantica/08-tests.md:277",
+    "claim": "C6: luthier run --require-certified requires, for each law in the cone, a passed entry whose reach covers what the run gives that law; --set values are compared with the reach when the run starts.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/cli.py:456",
+     "src/luthier/cli.py:463",
+     "src/luthier/cli.py:525"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "Only the certified status of each name is required. f : { g : Int -> Int | \\ (x : Int) { g x < 300 } } := \\ x { x * x }, certified over [-16, 16]; 'run --set k=100 --require-certified' runs and prints 10000, a value where the law is false (c6_reach.lut). Plan A-12.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-08#64",
+    "spec_ref": "docs/semantica/08-tests.md:280",
+    "claim": "C6: values computed during the run are compared with the reach at each call under --checked, and recorded as not compared otherwise.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/cli.py:430",
+     "src/luthier/cli.py:472"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:197"
+    ],
+    "evidence": "--checked tests extern values against their type's refinements, not against any reach; .run.json has no 'not compared' record. Open item 11.5 covers the variant without --checked.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#65",
+    "spec_ref": "docs/semantica/08-tests.md:287",
+    "claim": "C7: a result's membership in its type is checked once, where it is produced (refined value, witness, or statistical verdict); quantifiers inside the type are drawn by named generators.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/cli.py:468",
+     "src/luthier/api.py:135"
+    ],
+    "test_refs": [],
+    "evidence": "k : Int; main : { y : Int | y > 100 } := k * 2; 'luthier run --set k=5' prints 10 and exits 0, with or without --checked (c7_result.lut). Section 13 step 6, plan A-12.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#66",
+    "spec_ref": "docs/semantica/08-tests.md:294",
+    "claim": "C7: the outcome goes to .run.json with the hash of the inputs that index the result; .cert.json files never hold results.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/cli.py:472",
+     "src/luthier/cli.py:484",
+     "src/luthier/certify.py:326"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "Results go only to .run.json (with cone hash, parameters, fingerprint); write_certificate stores only test reports. No membership outcome is recorded and there is no hash of data inputs.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#67",
+    "spec_ref": "docs/semantica/08-tests.md:303",
+    "claim": "C8: a statistical law returns its statistic, its level alpha and its outcome; alpha from the null distribution (2(1 - Phi(zMax)) for a z statistic) or estimated by runs on the model, with its interval.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:34",
+     "src/luthier/lib/probability.lut:38",
+     "src/luthier/lib/probability.lut:48"
+    ],
+    "test_refs": [],
+    "evidence": "Statistical laws return Bool (uniformMoments compares with e.zMax). normalTail (probability.lut:38) computes the right alpha but nothing returns or records it. plan-2026-10-06.md:66 declares it 'Specified, not implemented'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#68",
+    "spec_ref": "docs/semantica/08-tests.md:310",
+    "claim": "C9: a failing statistical law is evaluated again with an independent derived seed and fails only if both fail; the entry records the first failure and the level alpha squared.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/testing.py:317"
+    ],
+    "test_refs": [],
+    "evidence": "The first counterexample ends the law; there is no repetition. Plan A-11.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#69",
+    "spec_ref": "docs/semantica/08-tests.md:315",
+    "claim": "C10: a law with controls records each control's detection rate over k seeds with a Wilson interval; below a threshold it is reported weak, a control never detected as undetected.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "No controls, rates or weak or undetected reports in src. Plan A-11.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#70",
+    "spec_ref": "docs/semantica/08-tests.md:329",
+    "claim": "Open: shrinking (Hedgehog-style integrated shrinking).",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared open; nothing implemented (the size schedule's 'small cases first' comment at testing.py:288 is the only minimization).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#71",
+    "spec_ref": "docs/semantica/08-tests.md:330",
+    "claim": "Open: which generators besides the random source, the orthogonal family and log-uniform numbers must carry a distributional law.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared open.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#72",
+    "spec_ref": "docs/semantica/08-tests.md:332",
+    "claim": "Open: whether a census of a type includes the members of its subtypes.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared open; censuses do not exist yet.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#73",
+    "spec_ref": "docs/semantica/08-tests.md:333",
+    "claim": "Open: whether the probes of a quantified law inside a type are enough, or a generator's laws must be certified by their own test first.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/generators.py:292",
+     "src/luthier/generators.py:316"
+    ],
+    "test_refs": [],
+    "evidence": "Declared open; today a quantified predicate is probed law_probes=5 times per drawn value.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#74",
+    "spec_ref": "docs/semantica/08-tests.md:335",
+    "claim": "Open: comparing values computed during a run with the reach without --checked; random memoized functions (G9).",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared open (items 5 and 6); line 201 also calls random functions 'a later generator'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#75",
+    "spec_ref": "docs/semantica/08-tests.md:340",
+    "claim": "Changes to 02: the test directive becomes 'test name [with n | exhaustive] [sampled metric] [size n] [under name] [where {bindings}]'; 'profile name := {bindings}' is a new act; the act gen is removed.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "docs/semantica/02-grammar.md:45",
+     "docs/semantica/02-grammar.md:46",
+     "src/luthier/parser.py:120",
+     "src/luthier/parser.py:156"
+    ],
+    "test_refs": [],
+    "evidence": "02 still has the old directive and the gen act, which match the parser. The change is pending (plan A-9 lists 02 among its files).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#76",
+    "spec_ref": "docs/semantica/08-tests.md:344",
+    "claim": "Changes to 05 and 03: R7's sentences on the generator of an alias go; 05 §7 gains 'census of k', redefines 'sampled n', replaces the constant or affine function draw by G9, and gains known outcomes; 05 §10 'Generators from constructors' is settled by G3 and G10; random.lut, array.lut, array_python.lut, probability.lut, belief.lut, optimization.lut change.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "docs/semantica/05-static-semantics.md:202",
+     "docs/semantica/05-static-semantics.md:279",
+     "docs/semantica/05-static-semantics.md:298",
+     "docs/semantica/05-static-semantics.md:453"
+    ],
+    "test_refs": [],
+    "evidence": "05 still describes the current behavior (gen for aliases, grades without census, constant or affine functions, the open item in §10), so 05 and 08 disagree about the same subjects until the change lands; 08 declares it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-08#77",
+    "spec_ref": "docs/semantica/08-tests.md:354",
+    "claim": "Order of work (steps 1-7) and 'R11 and refine go in the same round'.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "docs/plan-2026-10-06.md:404"
+    ],
+    "test_refs": [],
+    "evidence": "A plan, not behavior. None of the seven steps is done at b15f2a1 (plan items A-1 to A-12 are open).",
+    "severity": "low"
+   }
+  ],
+  "notes": "I covered all of docs/semantica/08-tests.md. Overall: 08 is a specification of future work. Almost none of G1-G12 and C1-C10 is implemented at b15f2a1. The parser still has the old directive ('test name [with n | exhaustive] [size n]'), the gen act and per-type generators (parser.py:107-157, random.lut:30-40, array_python.lut:43-52). The rules are 'declared' only through section 13 (Order of work) and docs/plan-2026-10-06.md (A-1 to A-12, plus line 66 'Specified, not implemented'). No rule in 08 carries a status marker the way 05 R11 does (spec-08#00). There are no tests/spec files for any G or C rule; tests/spec/README.md and scripts/check_spec_tests.py cover only 04 and 05.\n\nFindings that go beyond 'declared, not yet done', where today's behavior certifies something false or contradicts a concrete sentence:\n(1) spec-08#11, high: { k : Nat | k < 21 } under 'exhaustive' is enumerated in the [-size, size] box and graded 'bounded' inside an entry whose mode is 'exhaustive'. A law false at 20 is certified, and check -v shows 'certified' with no grade. The same predicate over an Int base fails correctly.\n(2) spec-08#57: an entry with 25 evaluated cases out of 100 is accepted as certified.\n(3) spec-08#51: the size schedule never reaches the largest size when n < size.\n(4) spec-08#63: --require-certified runs at --set values far outside what was tested.\n(5) spec-08#53: certify.cone follows bound variable names as globals. Defining 's' anywhere makes the base library's genNat and genSeed certificates stale. This sits on the 05 §7 boundary; C1 relies on it.\n(6) spec-08#61: known outcomes are rerun in the top file and with --imports.\n(7) spec-08#50: G12's list omits a fixed budget that exists (50 redraws of a case, testing.py:271).\n(8) spec-08#30: G5 names optimization.lut among the libraries with 'Theta : U', and it has none.\n\nThe parts of 08 that already hold: G11 dependent order and redraws; G10 checking every generated value; per-filling certificates; Fin tables; product, sum and finite-subtype enumeration; NaN exclusion; determinism by seed; results in .run.json and not in .cert.json. The 'today' numbers in G12 (2000, 10, 5) are also accurate.\n\nAll minimal programs are under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/spec-08/ (g1_*, g3_*, g4_*, g5_universe, g6_exhaustive, g7_g9_g10, g12_size, c3_*, c4_*, c6_reach, c7_result, imp_random*). Nothing under the repository was modified. The disappearance of docs/plan-mechanical-rules-2026-10-06.md from git status during the session was not caused by this audit."
+ }
+}

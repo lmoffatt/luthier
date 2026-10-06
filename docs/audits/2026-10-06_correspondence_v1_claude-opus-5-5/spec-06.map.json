@@ -1,0 +1,1040 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-06",
+   "direction": "spec",
+   "files": "docs/semantica/06-numbers.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a06c6c782682bbf77",
+  "agent_label": "map spec-06",
+  "started_at": "2026-10-06T11:14:05+00:00",
+  "finished_at": "2026-10-06T11:36:10+00:00",
+  "tokens": 191595,
+  "tool_calls": 98,
+  "duration_ms": 1322319,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "docs/semantica/06-numbers.md, all lines 1-176: header status (1-8), §0 Notation (10-18), §1 The problem (20-27, motivation only, no claims extracted beyond §2), §2 The types (29-50), §3 Axioms (52-64), §4 The ideal and its realizations (66-90), §5 Variance (92-99), §6 The bridge (101-120), §7 Arrays over any type (122-136), §8 Done 2026-10-05: rationals and rounding law (138-163), §9 Open (165-176)",
+   "Implementation checked: src/luthier/core.lut, src/luthier/lib/{algebra,algebra_python,array,array_python,rational,real,real_python}.lut, src/luthier/{checker,evaluator,machine,cli,parser,generators,rational}.py, lib certificates rational.cert.json and algebra_python.cert.json",
+   "Tests checked: tests/spec/n1-n5, r9_variance.*, tests/test_bridge.py, tests/test_kernel.py (numbers section), tests/test_checker_rules.py, tests/test_sugar.py; README.md for the documentation side"
+  ],
+  "claims": [
+   {
+    "id": "spec-06#01",
+    "spec_ref": "docs/semantica/06-numbers.md:48",
+    "claim": "Infinities and NaN are not values of Float64.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:408",
+     "src/luthier/checker.py:916-917",
+     "src/luthier/evaluator.py:85-91"
+    ],
+    "test_refs": [],
+    "evidence": "A literal that overflows is parsed with float(t.text) and no finiteness check, so `big : Float64 := 1e309` checks and `luthier run` prints `inf`; `nn : { x : Float64 | x >= 0.0 } := 1e309` passes its subtype check and `1e309 > 1.0` evaluates to true. finite() only guards arithmetic results (`big * 1.0` errors). Programs: audit/spec-06/inf_lit.lut, inf_lit2.lut, inf_lit3.lut.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#02",
+    "spec_ref": "docs/semantica/06-numbers.md:114",
+    "claim": "An overflow to an infinity is an error, as `exp 1000.0` already is.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/machine.py:383-387",
+     "src/luthier/evaluator.py:450-455",
+     "src/luthier/evaluator.py:103-109",
+     "src/luthier/lib/real_python.lut:10"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:504"
+    ],
+    "evidence": "Arithmetic overflow (`1e308 * 10.0`) and extern results are errors; `exp 1000.0` errors because math.exp raises OverflowError (audit/spec-06/exp.lut). A literal that overflows at parse time (`1e309`) is not an error and yields inf (see spec-06#01). No test for exp 1000.0 itself.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#03",
+    "spec_ref": "docs/semantica/06-numbers.md:97",
+    "claim": "The variance rule applies component by component through sums.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:1462-1476",
+     "src/luthier/checker.py:1504-1541"
+    ],
+    "test_refs": [],
+    "evidence": "coerce() descends only into Sigma (products); there is no Sum case. `s : < f : Float64 -> Float64 | g : Unit > := f half` then `t : < f : Float64 -> Real | g : Unit > := s` is rejected (\"s has type ... but ... was expected\"). Even plain refinement inside a sum fails: `s : < a : Float64 | b : Unit >` is not accepted as `< a : Real | b : Unit >`, nor is `Float64 -> < a : Float64 | b : Unit >` for `Float64 -> < a : Real | b : Unit >`. Programs: audit/spec-06/v_sum_inline.lut, v_sum_float.lut, v_sum_fn_codomain.lut.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#04",
+    "spec_ref": "docs/semantica/06-numbers.md:130-131",
+    "claim": "Crossing to the environment, `Fin n -> A` for any element type other than Float64 and Int is a list.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/machine.py:636-649",
+     "src/luthier/evaluator.py:830-841"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:326"
+    ],
+    "evidence": "materialize() tries np.asarray(out, dtype=float) for every other element type. Results passed to a Python extern that prints repr: `Fin 2 -> Bool` gives array([1., 0.]); `Fin 2 -> Maybe Int` with entries nothing, just 5 gives array([nan, 5.]) (a NaN created by the bridge, against §6 'NaN is always an error'); `Fin 2 -> Float64 * Int` gives a 2x2 float64 array with 7 turned into 7.0; `Fin 2 -> Rational` gives an object ndarray. Strings and named records do come as lists. Programs: audit/spec-06/b4.lut, b5.lut, b6.lut, b7.lut.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#05",
+    "spec_ref": "docs/semantica/06-numbers.md:85-86",
+    "claim": "A value of Real not known to be a double enters a leaf only through an explicit conversion (rounding to the nearest double).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/machine.py:646-647",
+     "src/luthier/evaluator.py:837-838",
+     "src/luthier/checker.py:1535-1539"
+    ],
+    "test_refs": [],
+    "evidence": "The checker refuses Real where Float64 is expected (with a hint), but a table `Fin n -> Real` whose entries are rationals is rounded silently when it crosses: `third : Real := ratio 1 3`, then `kr (\\ k { third })` with kr : (Fin 2 -> Real) -> String gives array([0.33333333, 0.33333333]); as a scalar the same value crosses as Fraction(1, 3). Program: audit/spec-06/b8.lut.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#06",
+    "spec_ref": "docs/semantica/06-numbers.md:63-64",
+    "claim": "CompleteOrderedField states completeness: every bounded set has a supremum, so the definition is the reals and not the rationals.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:107-132"
+    ],
+    "test_refs": [],
+    "evidence": "The only completeness law is SupIsUpperBound: `s x -> le x (sup s)` for every predicate s, with no boundedness hypothesis and no 'least'. For s = \\ x { true } it demands an element above every real, which no nontrivial ordered field has, so `realField : CompleteOrderedField Real := axiom` asserts something false of the reals (only a one-point structure satisfies the type). The comment at algebra.lut:107-111 admits 'least' is missing but not the missing bound. Never tested, by design, so nothing fails.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#07",
+    "spec_ref": "docs/semantica/06-numbers.md:124",
+    "claim": "`Array (A : U) (n : Nat) = Fin n -> A` is a type of the array library.",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:21-22"
+    ],
+    "test_refs": [],
+    "evidence": "array.lut defines Vec and Mat but no Array; nothing in core.lut or lib/ defines it. `import \"array\"` then `a : Array Int 3 := \\ k { k }` fails with 'unbound name Array'. The header (line 4) says the arrays of §7 are implemented. Program: audit/spec-06/arr.lut.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-06#08",
+    "spec_ref": "docs/semantica/06-numbers.md:104-105",
+    "claim": "A Float64 crosses as a float, or as an int with an exact double, promoted.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/evaluator.py:154-159",
+     "src/luthier/evaluator.py:203-206"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:55"
+    ],
+    "evidence": "The code requires |x| <= 2^53, which is sufficient but not the stated rule: 2^60 has an exact double and is rejected ('1152921504606846976 from the environment has no exact double'), same threshold for integer arrays. By the rubric this rejects what the text accepts; graded medium because only integers above 2^53 are affected and the fix may be one phrase in the spec. Program: audit/spec-06/b1.lut (a).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#09",
+    "spec_ref": "docs/semantica/06-numbers.md:115-118",
+    "claim": "An infinity that means something is asked for in the type: ExtendedReal = < finite : Float64 | negInf : Unit | posInf : Unit >.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/core.lut:40",
+     "src/luthier/evaluator.py:878-889"
+    ],
+    "test_refs": [],
+    "evidence": "Defined as stated, and -inf from Python becomes negInf, NaN is an error. But the finite branch does float(x) on any int without the Float64 rule: 2^53+1 becomes `finite 9007199254740992.0` silently, and 10**400 crashes with an uncaught Python OverflowError traceback instead of a crossing error. No test exercises ExtendedReal at all. Program: audit/spec-06/b1.lut (o, p, q, r).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#10",
+    "spec_ref": "docs/semantica/06-numbers.md:119-120",
+    "claim": "An integer that does not fit in 64 bits is an error when it crosses into numpy, which would wrap it around silently (2^62 * 4 is 0 in int64).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/evaluator.py:93-100",
+     "src/luthier/machine.py:427-431",
+     "src/luthier/machine.py:640-644",
+     "src/luthier/evaluator.py:528-530"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:510"
+    ],
+    "evidence": "Crossing values are checked (npAbs (2*9223372036854775807) errors; a table with 2^64 errors). The spec's own example still happens silently: `npMul : Int -> Int -> Int := extern \"python:numpy.multiply\"`, `npMul 4611686018427387904 4` gives 0, and numpy.sum over two entries 2^62 gives -2^63. Scalar arguments are checked only when the extern's module starts with 'numpy', not for luthier.arrays leaves. Programs: audit/spec-06/ov.lut, ov3.lut.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#11",
+    "spec_ref": "docs/semantica/06-numbers.md:160-163",
+    "claim": "The `...Agrees` tolerances and roundingSlack stay only where the rounding law gives no bound by itself: determinant, spectrum, solving, pseudo-inverse.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:217-252",
+     "src/luthier/lib/array.lut:321-335",
+     "src/luthier/lib/real.lut:35-37"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "DotAgrees, MatVecAgrees, MatMulAgrees, TraceAgrees, FrobAgrees and the total law still compare with constant tolerances built from roundingSlack = 8.0, alongside the new gamma laws in algebra_python.lut. Either the text means 'they also remain elsewhere' or these should have gone; two readings.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#12",
+    "spec_ref": "docs/semantica/06-numbers.md:87-88",
+    "claim": "Until a Real that computes exists, nothing has a value of Real that is not a double.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/core.lut:30",
+     "src/luthier/lib/rational.lut:21"
+    ],
+    "test_refs": [],
+    "evidence": "§8 made Rational : Real, so `import \"rational\"` then `third : Real := ratio 1 3` evaluates to `1/3 : Real`. The implementation follows §8; §4 was not updated. Spec-internal inconsistency. Program: audit/spec-06/q5.lut.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#13",
+    "spec_ref": "docs/semantica/06-numbers.md:45-46",
+    "claim": "Real has no implementation of its own: its operations are not computed by the interpreter.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:1346-1356",
+     "src/luthier/checker.py:1277-1287",
+     "src/luthier/checker.py:1535-1539"
+    ],
+    "test_refs": [
+     "tests/test_checker_rules.py:44"
+    ],
+    "evidence": "`x : Real` then `x + x`, `x < x` and `-x` are rejected ('operator + expects Int, Float64 or Rational ... the operations of Real are not computed'); Real where Float64 is expected is rejected with a hint. Only the equality case (R8) has a test. Programs: audit/spec-06/r_arith.lut, r_cmp.lut, r_neg.lut, r_to_float.lut.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#14",
+    "spec_ref": "docs/semantica/06-numbers.md:97-98",
+    "claim": "The variance rule applies component by component through products.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:1520-1534",
+     "src/luthier/checker.py:1491-1502"
+    ],
+    "test_refs": [],
+    "evidence": "`p : (Float64 -> Float64) * (Float64 -> Float64) := (half, half)` passes as `(Float64 -> Real) * (Float64 -> Real)`; `(Float64 -> Float64) * Int` is rejected as `(Real -> Float64) * Int`. No spec or unit test covers it. Programs: audit/spec-06/v_prod.lut, v_prod_rej.lut.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#15",
+    "spec_ref": "docs/semantica/06-numbers.md:94-97",
+    "claim": "f : A -> B passes where A' -> B' is expected when A' <: A and B <: B'; Float64 -> Float64 passes for Float64 -> Real and not for Real -> Float64.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1462-1502"
+    ],
+    "test_refs": [
+     "tests/spec/r9_variance.accept.lut",
+     "tests/spec/r9_variance.reject.lut"
+    ],
+    "evidence": "function_passes checks the domain contravariantly and the codomain covariantly; also correct for curried and higher-order cases and with Nat/Int refinements (audit/spec-06/v_curried.lut, v_hof*.lut, v_nat*.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#16",
+    "spec_ref": "docs/semantica/06-numbers.md:98-99",
+    "claim": "A value of a refinement passed where its base is expected needs no rule.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1462-1476",
+     "src/luthier/checker.py:1478-1485"
+    ],
+    "test_refs": [
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "convertible() strips subtypes and follows primitive_base (Float64 to Real); `y : Real := x` with x : Float64 loads.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#17",
+    "spec_ref": "docs/semantica/06-numbers.md:33",
+    "claim": "Int : U := primitive \"integer\", the integers without bound.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:27",
+     "src/luthier/machine.py:383-386"
+    ],
+    "test_refs": [
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "Python int arithmetic: `big * 4` with big = 2^62 evaluates to 18446744073709551616 (audit/spec-06/ov.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#18",
+    "spec_ref": "docs/semantica/06-numbers.md:34",
+    "claim": "Nat = { k : Int | 0 <= k }.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:43"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:23"
+    ],
+    "evidence": "Defined exactly so; used throughout the tests' vector types.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#19",
+    "spec_ref": "docs/semantica/06-numbers.md:35",
+    "claim": "Fin n = { k : Int | 0 <= k and k < n }.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:47"
+    ],
+    "test_refs": [
+     "tests/spec/n5_arrays.accept.lut",
+     "tests/test_bridge.py:310"
+    ],
+    "evidence": "Defined exactly so, with n : Int.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#20",
+    "spec_ref": "docs/semantica/06-numbers.md:36",
+    "claim": "Real : U := primitive \"real\", the ideal.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:28"
+    ],
+    "test_refs": [
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "Defined as stated.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#21",
+    "spec_ref": "docs/semantica/06-numbers.md:37",
+    "claim": "Float64 : Real := primitive \"ieee754-binary64\"; every finite double is a real, so Float64 refines Real as a set.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:29",
+     "src/luthier/checker.py:566-569",
+     "src/luthier/checker.py:1478-1485"
+    ],
+    "test_refs": [
+     "tests/spec/n1_numbers.accept.lut",
+     "tests/spec/r9_variance.accept.lut"
+    ],
+    "evidence": "The primitive keeps its declared base; primitive_base returns Real for Float64, so a Float64 passes where Real is expected.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#22",
+    "spec_ref": "docs/semantica/06-numbers.md:38",
+    "claim": "String : U := primitive \"unicode\".",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:31"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:107"
+    ],
+    "evidence": "Defined as stated.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#23",
+    "spec_ref": "docs/semantica/06-numbers.md:40",
+    "claim": "R disappears: it no longer names a type.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:27-31",
+     "src/luthier/generators.py:5",
+     "src/luthier/generators.py:425",
+     "src/luthier/evaluator.py:36-37"
+    ],
+    "test_refs": [
+     "tests/spec/n2_r_gone.reject.lut"
+    ],
+    "evidence": "`x : R := 1.0` fails with 'unbound name R'. Leftovers: generators.py:5 docstring lists R, generators.py:425 prints 'affine on R -> R' to users, evaluator.py:36-37 says 'Int, R and String are declared in core.lut as holes the environment fills', stale since they are primitives.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#24",
+    "spec_ref": "docs/semantica/06-numbers.md:40",
+    "claim": "Each primitive says in its body what it is; `primitive` is allowed only in core.lut (04 line 45, test n3 cites 06 §2).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:565-569",
+     "src/luthier/cli.py:93"
+    ],
+    "test_refs": [
+     "tests/spec/n3_primitive_outside_core.reject.lut"
+    ],
+    "evidence": "checker.kernel is true only for CORE; elsewhere 'primitive is allowed only in core.lut'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#25",
+    "spec_ref": "docs/semantica/06-numbers.md:42-44",
+    "claim": "The interpreter realizes Int exactly; an Int that crosses into numpy must fit in 64 bits or the crossing is an error.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:93-100",
+     "src/luthier/machine.py:427-431",
+     "src/luthier/machine.py:640-644"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:510"
+    ],
+    "evidence": "check_int64 on numpy extern arguments and on materialized Int tables. Gap on wraparound inside numpy reported in spec-06#10.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#26",
+    "spec_ref": "docs/semantica/06-numbers.md:46",
+    "claim": "Real's structure is an axiom.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:132"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "realField : CompleteOrderedField Real := axiom \"...\" (content problem in spec-06#06).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#27",
+    "spec_ref": "docs/semantica/06-numbers.md:49-50",
+    "claim": "The operations of Float64 are the machine's, not those of Real; a Float64 result is promoted to Real where a Real is expected.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1346-1361",
+     "src/luthier/machine.py:383-387"
+    ],
+    "test_refs": [
+     "tests/spec/n1_numbers.accept.lut",
+     "tests/spec/r9_variance.accept.lut"
+    ],
+    "evidence": "`z : Real := x * x + 1.0` with x : Float64 checks; `x * x + 1.0` evaluates with Python float ops to 3.25 (audit/spec-06/r_promote_op.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#28",
+    "spec_ref": "docs/semantica/06-numbers.md:54",
+    "claim": "realField : CompleteOrderedField Real := axiom \"the real numbers\".",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:132"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "Present with description 'the real numbers: the complete ordered field'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#29",
+    "spec_ref": "docs/semantica/06-numbers.md:56-57",
+    "claim": "`axiom` gives a value whose laws are assumed: the definition is accepted and its obligations get the grade 'assumed' instead of pending.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:571-579",
+     "src/luthier/cli.py:526-533",
+     "src/luthier/machine.py:184-185",
+     "src/luthier/evaluator.py:336",
+     "src/luthier/evaluator.py:362"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "No obligations are generated; the name goes to ck.axioms, shown as 'assumed (an axiom)' in cone states; evaluating it raises NotClosed. An axiom without a type is an error ('axiom x needs a type'), untested.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#30",
+    "spec_ref": "docs/semantica/06-numbers.md:58-59",
+    "claim": "What is stated without proof or test is listed by `luthier check -v`, as the provisional externs are.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:255-257"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "`luthier check -v src/luthier/lib/algebra.lut` prints 'assumed realField: ...; its laws are stated and never tested (06 §3)'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#31",
+    "spec_ref": "docs/semantica/06-numbers.md:59-60",
+    "claim": "An axiom is allowed only in core.lut and in the libraries of the distribution (lib/).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:571-574",
+     "src/luthier/cli.py:95-96"
+    ],
+    "test_refs": [
+     "tests/spec/n4_axiom_outside_lib.reject.lut"
+    ],
+    "evidence": "checker.library is true for any file under PACKAGE_DIR (src/luthier/), slightly wider than core.lut plus lib/; no other .lut lives there today.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#32",
+    "spec_ref": "docs/semantica/06-numbers.md:62-63",
+    "claim": "CompleteOrderedField lives in lib/algebra.lut with the laws of a field and of a total order compatible with it.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:97-128",
+     "src/luthier/lib/algebra.lut:30"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "Field, TotalOrder, AddMonotone and MulPositive are there; OrderedField is exercised through rationalField's certificate, CompleteOrderedField itself never (it is only used by the axiom).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#33",
+    "spec_ref": "docs/semantica/06-numbers.md:72-75",
+    "claim": "A leaf is declared over what it really receives and returns (dot : Vec Float64 -> Vec Float64 -> Float64 := extern), and its double result is promoted to Real where a Real is expected.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:321",
+     "src/luthier/lib/array_python.lut:14"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.cert.json",
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "dot is declared over Vec Float64 with DotAgrees and bound to luthier.arrays.dot; certified.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#34",
+    "spec_ref": "docs/semantica/06-numbers.md:76-78",
+    "claim": "A definition meant for every realization is generic in the number type: dotDef (A : U) (F : Ring A) (x : Vec A) (y : VecOf A x.n) : A.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:61-77"
+    ],
+    "test_refs": [],
+    "evidence": "Header line 4-5 declares it not yet done; dotDef and the other definitions are over Float64 only.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#35",
+    "spec_ref": "docs/semantica/06-numbers.md:80-81",
+    "claim": "A law comparing a leaf with its definition states the departure with a tolerance: the ...Agrees laws of array.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:217-315"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "DotAgrees, MatVecAgrees, DetAgrees, etc., all certified (passed) in array_python.cert.json.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#36",
+    "spec_ref": "docs/semantica/06-numbers.md:81-83",
+    "claim": "Two refinements are open (section 8): a rounding law that makes the tolerance a consequence, and intervals.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:64-104"
+    ],
+    "test_refs": [],
+    "evidence": "Stale cross-reference: §8 is now 'Done', the rounding law is implemented there, intervals are in §9; line 86 also says 'intervals or balls, section 8'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#37",
+    "spec_ref": "docs/semantica/06-numbers.md:85-87",
+    "claim": "The explicit conversion from a Real to the nearest double waits for a Real that computes.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/checker.py:1535-1539"
+    ],
+    "test_refs": [],
+    "evidence": "Declared as waiting; the checker's error hint says so. The implicit rounding that does happen is spec-06#05.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#38",
+    "spec_ref": "docs/semantica/06-numbers.md:88",
+    "claim": "No law over Real is tested.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/generators.py:231"
+    ],
+    "test_refs": [],
+    "evidence": "A law quantified over `x : Real` reports 'NOT RUN ... no generator for Real' under `luthier test` (audit/spec-06/lawreal_t.lut). No pytest checks this.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#39",
+    "spec_ref": "docs/semantica/06-numbers.md:88-90",
+    "claim": "toFloat64 : Int -> Float64 is the nearest double to an integer, exact below 2^53.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:12"
+    ],
+    "test_refs": [],
+    "evidence": "Bound to builtins.float (round to nearest even; OverflowError for huge ints surfaces as an EvalError). Used by genFloat64 and many laws, but no test checks its exactness or rounding. The '37 uses' figure is history (33 occurrences today).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#40",
+    "spec_ref": "docs/semantica/06-numbers.md:103",
+    "claim": "A value is checked against its declared type when it crosses from the environment.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:955-1100",
+     "src/luthier/machine.py:701-702",
+     "src/luthier/machine.py:438-443"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:49-104"
+    ],
+    "evidence": "Kind, dtype, shape and structure are checked at every crossing; refinements only as obligations or under `run --checked` (05 R5). The sentence does not say that refinements are excluded, which a reader could take the other way.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#41",
+    "spec_ref": "docs/semantica/06-numbers.md:103-104",
+    "claim": "An Int crosses as a Python int or a numpy integer, never a bool or a float.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:103-109",
+     "src/luthier/evaluator.py:146-150"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:60",
+     "tests/test_bridge.py:67"
+    ],
+    "evidence": "numpy scalars are unwrapped with .item(); bool and float raise 'not a value of Int'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#42",
+    "spec_ref": "docs/semantica/06-numbers.md:105",
+    "claim": "A String crosses as a str.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:166-169"
+    ],
+    "test_refs": [],
+    "evidence": "A non-str for a String raises an error in code; no test gives a non-str where String is declared (test_bridge.py:49 tests the reverse).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#43",
+    "spec_ref": "docs/semantica/06-numbers.md:105-106",
+    "claim": "Unit crosses as None.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:974-977"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:101"
+    ],
+    "evidence": "A non-None value for Unit is 'Unit crosses as None'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#44",
+    "spec_ref": "docs/semantica/06-numbers.md:106-107",
+    "claim": "An array as Fin n -> Int has an integer dtype; as Fin n -> Float64 a float dtype (an integer array is promoted); with exactly as many dimensions as indices.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:173-210"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:72",
+     "tests/test_bridge.py:77",
+     "tests/test_bridge.py:83"
+    ],
+    "evidence": "Bool arrays and float arrays are rejected for Int, uint64 above int64 is rejected (audit/spec-06/b2.lut, b3.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#45",
+    "spec_ref": "docs/semantica/06-numbers.md:107-108",
+    "claim": "A number where a record, a pair or a function is expected is an error.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:213-223",
+     "src/luthier/evaluator.py:1047-1049"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:95"
+    ],
+    "evidence": "Record case tested. Pair and function cases work but are untested: 3.0 for `Float64 * Float64` and for a record field `Float64 -> Float64` both give 'not a value of' (audit/spec-06/b1.lut e, g).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#46",
+    "spec_ref": "docs/semantica/06-numbers.md:108-109",
+    "claim": "`luthier run --set name=value` reads the value by the declared type of the hole: `--set dir=2026` is a String, `--set sigma=3` a Float64.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:386-414",
+     "src/luthier/cli.py:434-446"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:107"
+    ],
+    "evidence": "End to end: `luthier run set.lut --set dir=2026 --set sigma=3` prints 2026 and 1.5; sigma=inf is refused (audit/spec-06/set.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#47",
+    "spec_ref": "docs/semantica/06-numbers.md:111-113",
+    "claim": "NaN is always an error: a NaN from Python is an error at the crossing, and the interpreter's arithmetic fails rather than produce one.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/evaluator.py:85-91",
+     "src/luthier/evaluator.py:103-124",
+     "src/luthier/machine.py:383-392"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:498",
+     "tests/test_bridge.py:89"
+    ],
+    "evidence": "Crossing NaN, NaN in arrays and records (audit/spec-06/b1.lut d, s) are errors; 0.0/0.0 is 'division by zero'; inf - inf (only reachable through a 1e309 literal) is 'NaN in inf - inf'. The bridge itself can hand Python a NaN in the other direction (spec-06#04).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#48",
+    "spec_ref": "docs/semantica/06-numbers.md:125",
+    "claim": "Vec (A : U) = { n : Nat, f : Fin n -> A }.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:21"
+    ],
+    "test_refs": [
+     "tests/spec/n5_arrays.accept.lut"
+    ],
+    "evidence": "Vec Int and Vec Float64 load; Vec Real and Vec String also check (audit/spec-06/arr2.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#49",
+    "spec_ref": "docs/semantica/06-numbers.md:126",
+    "claim": "Mat (A : U) = { m : Nat, n : Nat, f : Fin m -> Fin n -> A }.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:22"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "Mat Float64 is used and certified throughout array_python; Mat over another type (Mat Int) checks but no test covers it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#50",
+    "spec_ref": "docs/semantica/06-numbers.md:129-131",
+    "claim": "Crossing to the environment, Fin n -> Float64 is a one-dimensional float64 ndarray and Fin n -> Int an int64 one with the range check of section 6.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/machine.py:619-654",
+     "src/luthier/evaluator.py:814-836"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:157"
+    ],
+    "evidence": "Python sees dtype float64 and int64 (audit/spec-06/ov3.lut dt, dtf); a 2^64 entry is refused. The pytest covers the generator's int64 table, not the materialization path.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#51",
+    "spec_ref": "docs/semantica/06-numbers.md:133-136",
+    "claim": "Generic definitions receive their number type through a file hole `num : NumberModel`, filled by the importer (`num := float64`).",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "No NumberModel anywhere in src/; the header (line 4-5) declares it not yet done.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#52",
+    "spec_ref": "docs/semantica/06-numbers.md:140-141",
+    "claim": "Rational is a primitive of core.lut, Rational : Real, represented by Python's Fraction.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:30",
+     "src/luthier/evaluator.py:161-165",
+     "src/luthier/evaluator.py:180-185"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:217"
+    ],
+    "evidence": "A float for a Rational is refused ('crosses as a fractions.Fraction'); an int is converted to Fraction.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#53",
+    "spec_ref": "docs/semantica/06-numbers.md:141",
+    "claim": "Rational has + - * / and comparisons exact, and no mod.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1346-1350",
+     "src/luthier/machine.py:383-392"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:217",
+     "tests/test_bridge.py:227"
+    ],
+    "evidence": "third+third+third == oneQ is true; division by zeroQ is an error; `mod` is a type error.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#54",
+    "spec_ref": "docs/semantica/06-numbers.md:141-142",
+    "claim": "Rational has no literals; its values come from fromInt, ratio and toQ of lib/rational.lut.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:20-21",
+     "src/luthier/lib/rational.lut:49",
+     "src/luthier/checker.py:910-918"
+    ],
+    "test_refs": [],
+    "evidence": "`q : Rational := 3` and `:= 1.5` are type errors (audit/spec-06/q2.lut, q3.lut); no test.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#55",
+    "spec_ref": "docs/semantica/06-numbers.md:142-143",
+    "claim": "rationalField : OrderedField Rational is certified exactly.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:26-36",
+     "src/luthier/lib/rational.lut:106"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "eq is ==; certificate 'passed', 100 cases; `luthier check rational.lut` shows nothing pending.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#56",
+    "spec_ref": "docs/semantica/06-numbers.md:144-145",
+    "claim": "toQ : Float64 -> Rational is the inclusion, exact (nearest (toQ x) == x) and order-preserving.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:43-49",
+     "src/luthier/rational.py:16-19"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "ToQExact and ToQKeepsOrder certified, 200 cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#57",
+    "spec_ref": "docs/semantica/06-numbers.md:145-146",
+    "claim": "Each operation of Float64 rounds the exact one: |toQ (x ⊕ y) - (toQ x + toQ y)| <= u |toQ x + toQ y|, u = 2^-53.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:52",
+     "src/luthier/lib/rational.lut:67-81"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "Certified for + - * / with no tolerance. Float64 also has `mod` (checker.py:1348 allows it; 5.5 mod 2.0 = 1.5) and unary minus, which no rounding law covers.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#58",
+    "spec_ref": "docs/semantica/06-numbers.md:147",
+    "claim": "The square root rounds so that |r^2 - x| <= (2u + u^2) x.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:85-88"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "RootRounds on float64Sqrt := sqrt (math.sqrt), certified, 300 cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#59",
+    "spec_ref": "docs/semantica/06-numbers.md:147-148",
+    "claim": "The rounding laws are certified over NormalDouble: magnitudes between 1e-150 and 1e150, exponent drawn uniformly.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:60-62",
+     "src/luthier/rational.py:25-34"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "Generator draws exponents in [-498, 498) (about 1.2e-150 to 8e149) with uniform mantissa and 2% zeros; values are checked against the NormalDouble predicate.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#60",
+    "spec_ref": "docs/semantica/06-numbers.md:148-149",
+    "claim": "A negative control (an addition three units off in the last place) fails the rounding law in every case.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:76-79"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "offByThree states the negated law and passes 300 cases, but excludes results equal to 0.0; 'in every case' should read 'wherever the result is not zero' as the library comment says.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#61",
+    "spec_ref": "docs/semantica/06-numbers.md:150-153",
+    "claim": "A sum of n terms and an inner product are within gamma n = n u / (1 - n u) of the exact one, relative to the sum of absolute values; certified for sumTo and numpy's total, dot and matVec.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/rational.lut:55",
+     "src/luthier/lib/rational.lut:94-104",
+     "src/luthier/lib/algebra_python.lut:29-44"
+    ],
+    "test_refs": [
+     "src/luthier/lib/rational.cert.json",
+     "src/luthier/lib/algebra_python.cert.json"
+    ],
+    "evidence": "sumToRounds, innerRounds, totalRounds, dotRounds, matVecRounds all passed.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#62",
+    "spec_ref": "docs/semantica/06-numbers.md:154-156",
+    "claim": "float64Field : OrderedField Float64 is gone.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:205-210"
+    ],
+    "test_refs": [],
+    "evidence": "No definition of float64Field in src/ (only comments mention it). A removal; there is nothing a test could load.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#63",
+    "spec_ref": "docs/semantica/06-numbers.md:156-158",
+    "claim": "The folds of the doubles (sumTo, pow) are foldWith, a fold with no laws claimed, in the same order.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:221-231",
+     "src/luthier/lib/array.lut:57-58"
+    ],
+    "test_refs": [],
+    "evidence": "sumTo and pow use foldWith/powerWith, right-associated. The 'same bit for bit' claim has no regression test. 04-kernel.md lines 212-214 still describe sumTo as 'the fold of algebra over the additive monoid of Float64'.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-06#64",
+    "spec_ref": "docs/semantica/06-numbers.md:158-159",
+    "claim": "The vector space, Euclidean space and linear maps over float64Field in algebra_python are replaced by the rounding laws of the numpy leaves.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra_python.lut:1-52"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra_python.cert.json"
+    ],
+    "evidence": "algebra_python.lut now holds VecRounds, ScaleRounds, MatVecWithinGamma and their instances, certified.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#65",
+    "spec_ref": "docs/semantica/06-numbers.md:3-5",
+    "claim": "Status: sections 2, 3, 5, 6 and the arrays over any type of section 7 are implemented; the generic definitions through a number model are not.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:1504-1541",
+     "src/luthier/lib/array.lut:21-22"
+    ],
+    "test_refs": [],
+    "evidence": "The not-yet part is accurate. The 'implemented' part overstates §5 (no sums, spec-06#03) and §7 (no Array, spec-06#07).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#66",
+    "spec_ref": "docs/semantica/06-numbers.md:6-8",
+    "claim": "04-kernel.md and 05-static-semantics.md carry notes pointing here for primitives, axiom bodies, variance, the grade assumed and the bridge.",
+    "status": "partial",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "04:45, 04:64, 04:93, 05:217 (R9), 05:257 and 05:284 point here. 05 has no note for the bridge pointing to 06 §6; 04:64 and 04:93 list the primitives without Rational; 04:212-214 contradicts 06 §8 on sumTo.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#67",
+    "spec_ref": "docs/semantica/06-numbers.md:15",
+    "claim": "README describes the numbers consistently with this specification.",
+    "status": "partial",
+    "impl_refs": [
+     "README.md:68-74",
+     "README.md:94-95"
+    ],
+    "test_refs": [],
+    "evidence": "README lists core.lut as Unit, Empty, Bool, Int, Float64, String, Maybe, List, Nat, Fin (no Real, Rational, ExtendedReal), names the specification as 04 and 05 with 'rules R1 to R8' (R9 is the variance rule of 06 §5) and does not mention 06; it says 'a vector is a function Fin n -> Float64' while §7 has arrays over any type.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#68",
+    "spec_ref": "docs/semantica/06-numbers.md:166-169",
+    "claim": "Intervals or balls: a realization that encloses the true real; comparisons of overlapping intervals answered with a probability.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Open; nothing implemented.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#69",
+    "spec_ref": "docs/semantica/06-numbers.md:170-172",
+    "claim": "Two levels of number theory: Rational with exact field operations and no exp, log, sqrt, erf; the number model a field extended by elementary functions.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:13-19"
+    ],
+    "test_refs": [],
+    "evidence": "Open. As a fact about today it holds: exp, log, sqrt, erf are declared only over Float64.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-06#70",
+    "spec_ref": "docs/semantica/06-numbers.md:173-176",
+    "claim": "Randomness: a random library should state laws of randomness; the fast batched generator is an extern.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/random.lut"
+    ],
+    "test_refs": [],
+    "evidence": "Open; random.lut states no randomness invariant, as the text says.",
+    "severity": "low"
+   }
+  ],
+  "notes": "I went through 06-numbers.md line by line against the code. The tests I touched pass (81 passed: test_spec, test_bridge, test_checker_rules, and the number tests of test_kernel), and the repo was left unchanged. Every probe program is under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/spec-06/, with px.py as the Python side (run with PYTHONPATH set to that directory).\n\nThe divergences that matter, all confirmed by running programs:\n1. Literal 1e309 parses to inf and is accepted as a Float64, even as a NonNeg. Root cause: parser.py:408 has no finiteness check.\n2. Variance and refinement are not carried through sums. Products work.\n3. When a table crosses to Python, every element type other than Int and Rational goes through np.asarray(dtype=float). So Bool becomes 1.0 and 0.0, Maybe Int becomes floats with NaN for nothing, a pair becomes a 2D array, and a Real table holding rationals is silently rounded to doubles. Both evaluators do this (machine.py:646, evaluator.py:837).\n4. The completeness law of CompleteOrderedField has no boundedness hypothesis, so the realField axiom asserts that every predicate on the reals has an upper bound.\n5. `Array` from §7 does not exist.\n\nMedium items:\n- The Float64 crossing uses |x| <= 2^53 where the text says \"an int with an exact double\".\n- ExtendedReal's finite branch rounds inexact ints and crashes with a Python traceback on huge ints. It has no test.\n- The spec's own wraparound example (2^62 * 4 is 0) still happens inside numpy.\n- The constant-tolerance Agrees laws remain for dot, matVec and the others.\n- §4 says no Real value is non-double, but §8's Rational makes that false.\n\nOutside my scope, noticed in passing: a pattern literal with an exponent (`match x { 1e3 -> ... }`) crashes the parser with an uncaught ValueError at parser.py:758. Also, tests/test_sugar.py:1 cites a nonexistent \"06 §6.1\".\n\nOn test_refs: for §8 I list the shipped certificate files, since the spec says \"certified\" and no pytest re-runs `luthier test` on the libraries. `luthier check` showing nothing pending for rational.lut means those certificates are current at b15f2a1."
+ }
+}

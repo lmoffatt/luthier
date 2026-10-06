@@ -1,0 +1,865 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-checker",
+   "direction": "impl",
+   "files": "src/luthier/checker.py"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a8ff313421c7b46ea",
+  "agent_label": "map impl-checker",
+  "started_at": "2026-10-06T11:39:28+00:00",
+  "finished_at": "2026-10-06T11:55:31+00:00",
+  "tokens": 226177,
+  "tool_calls": 51,
+  "duration_ms": 962288,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "src/luthier/checker.py, all 2148 lines (every function, every error message, every recorded datum used by cli/testing)",
+   "docs/semantica/05-static-semantics.md, all sections (0-10, R1-R11)",
+   "docs/semantica/04-kernel.md, all sections",
+   "docs/semantica/02-grammar.md, all sections (3, 5, 6, 7 used for the checker)",
+   "docs/semantica/03-libraries.md sections 2-3",
+   "docs/semantica/06-numbers.md sections 2, 3, 5, 8",
+   "docs/semantica/00-fundamental-elements.md and 01-construction-pattern.md (read for statements about the checker)",
+   "docs/semantica/07-characterizations.md section 9 and 08-tests.md sections 0, 12, 13 (only lines touching the checker)",
+   "tests/spec/*.accept.lut and *.reject.lut (all 37), tests/test_checker_rules.py, tests/test_sugar.py, tests/test_kernel.py, tests/test_bridge.py, tests/test_spec.py, test names of tests/test_certificates.py"
+  ],
+  "behaviors": [
+   {
+    "id": "B01",
+    "impl_ref": "src/luthier/checker.py:159",
+    "behavior": "The whole file is read at once; entries are grouped into objects (strongly connected components) and checked in dependency order, so order in the file does not matter and functions may be mutually recursive.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:88-99 (section 2)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_order_in_the_file_does_not_matter"
+    ],
+    "evidence": "load (159-170) calls graph.file_objects then load_object (173-211). The test defines b before a and isEven/isOdd mutually recursive; both evaluate.",
+    "severity": "low"
+   },
+   {
+    "id": "B02",
+    "impl_ref": "src/luthier/checker.py:196",
+    "behavior": "Mutually recursive data types cannot be written: a data definition is not pre-declared inside its object, so the first one fails with 'unbound name', and pre-declaring it hits B03.",
+    "spec_ref": "docs/semantica/04-kernel.md:113-114 (definitions may mention each other); docs/semantica/05-static-semantics.md:96-97 (each object checked as a block, declared types first)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Line 196 excludes `m.defn.data` from the forward declaration of cycle members. Program b07: `Tree : U := data { node : Int -> Forest -> Tree }` / `Forest : U := data { empty : Forest ; more : Tree -> Forest -> Forest }` gives 'in Tree: unbound name Forest'. b07b (with `Forest : U` declared first) gives 'Forest was declared as a value, it cannot become a data type'. A rose tree through List (`rose : Int -> List Rose -> Rose`) is accepted. The spec does not say whether data may be mutually recursive, and R4 would also need to say whether Tree (recursive only through Forest) counts as recursive.",
+    "severity": "medium"
+   },
+   {
+    "id": "B03",
+    "impl_ref": "src/luthier/checker.py:533",
+    "behavior": "A declared type `T : U` cannot be defined by a data body later ('T was declared as a value, it cannot become a data type'), with or without the type repeated.",
+    "spec_ref": "docs/semantica/04-kernel.md:40-44 (a definition fills an earlier declaration; a data definition is a definition); docs/semantica/05-static-semantics.md:194-197 (R6: the body has type T)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Programs b05 (`T : U` then `T : U := data { leaf : T ; node : T -> T -> T }`) and b05b (`T := data {...}`) are both rejected with 'in T: T was declared as a value, it cannot become a data type'. The body has type U, which is T's declared type, so R6 accepts it. The message also calls a type 'a value'.",
+    "severity": "high"
+   },
+   {
+    "id": "B04",
+    "impl_ref": "src/luthier/checker.py:220",
+    "behavior": "R7: a name that is an alias and is also declared or defined is an error ('X is an alias and cannot be defined' / 'cannot be declared' / 'cannot be defined twice').",
+    "spec_ref": "docs/semantica/05-static-semantics.md:199-202 (R7)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r7_alias_defined.reject.lut",
+     "tests/spec/r7_alias.accept.lut"
+    ],
+    "evidence": "Lines 220-224 and 525-526. Only the 'defined' message is exercised by a test; d05 (`Stats = {...}` then `Stats : U`) gives 'Stats is an alias and cannot be declared' and h05 (`A = Int`, `A = Float64`) gives 'A is an alias and cannot be defined twice', both untested.",
+    "severity": "medium"
+   },
+   {
+    "id": "B05",
+    "impl_ref": "src/luthier/checker.py:228",
+    "behavior": "R2 is applied to an alias itself: an alias that mentions a type that is only declared is rejected even if it is never used.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:150 (R2 is stated for a definition n); 05:199-201 (an alias is never declared, defined or certified)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "add_alias calls check_defined_types(qname, {qname}). Program d01b: `Foo : U` / `Pair2 = Foo * Foo` gives 'in Pair2: Foo is used as a type but is only declared (05 R2)'. An alias inside the object of the declared type is accepted (d01).",
+    "severity": "low"
+   },
+   {
+    "id": "B06",
+    "impl_ref": "src/luthier/checker.py:609",
+    "behavior": "R6: a declared name given a body becomes the inhabitant if the body has its type, else the subtype if the body is `T -> Bool` or a Law over T; otherwise 'X was declared as a refinement of B, but its body has type T'. With parameters, the body must take them ('declared with parameters; its definition takes them too').",
+    "spec_ref": "docs/semantica/05-static-semantics.md:194-197 (R6)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r6_predicate_body.accept.lut",
+     "tests/spec/r6_body_type.reject.lut",
+     "tests/test_kernel.py::test_a_declared_type_of_one_file_is_defined_by_its_laws_in_another"
+    ],
+    "evidence": "define_pending 256-297, as_predicate 299-317, _inhabitant_or_predicate 609-631. When neither checking nor inference succeeds the message says 'its body has type something else' and hides the cause: d03 (`Bounded (n : Int) : Int` / `Bounded := \\ k { k < 10 }`) and g05 (a predicate containing an uninferable `just 0`). The 'declared with parameters' message has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "B07",
+    "impl_ref": "src/luthier/checker.py:327",
+    "behavior": "R3 on a declared type defined by its laws, and on an inline subtype: every label must be touched; errors 'label L of X is touched by no law', 'the predicate of X touches none of its labels', and over an unlabeled base 'the predicate of X does not mention its argument'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:157-163 (R3)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r3_connected.accept.lut",
+     "tests/spec/r3_dangling_label.reject.lut",
+     "tests/spec/r3_true_predicate.reject.lut"
+    ],
+    "evidence": "check_labels_touched 327-340 and check_new_type 639-645. The unlabeled-base message is untested: d04b `Pos : U := { x : Int | 1 > 0 }` gives 'the predicate of Pos does not mention its argument'.",
+    "severity": "medium"
+   },
+   {
+    "id": "B08",
+    "impl_ref": "src/luthier/checker.py:2075",
+    "behavior": "R3 counts any use of the whole value as touching every label, so a predicate that constrains nothing passes when it hands the value to another function.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:157-159 (R3: a predicate that touches nothing defines nothing); 05:36-37 (a law touches the names and labels that occur free in it)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "_projections_of returns set(labels) when the parameter occurs whole. Program b08: `Tagged : { tag : String, value : Int }` / `Trivial (t : Tagged) : Bool := true` / `Tagged := \\ p { Trivial p }` is accepted, while `Tagged := \\ p { true }` (r3_true_predicate) and `Tagged := Trivial` are rejected. Under the syntactic definition of 05 section 0 no label occurs free in `Trivial p`; the spec does not say what a whole-value use touches.",
+    "severity": "medium"
+   },
+   {
+    "id": "B09",
+    "impl_ref": "src/luthier/checker.py:358",
+    "behavior": "A law whose labels cannot be read off its form (an application whose head's body is not a function of the whole value, or an extern predicate) is rejected: 'cannot tell which labels of the base ... touches; write the law as a function of the whole value'.",
+    "spec_ref": "none (R3 at docs/semantica/05-static-semantics.md:157-163 does not mention the form of the law)",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_checker_rules.py::test_a_law_whose_labels_cannot_be_read_is_an_error",
+     "tests/test_checker_rules.py::test_a_law_written_over_the_whole_value_is_read"
+    ],
+    "evidence": "`PosBoth : P2 -> Bool := Both pos` / `P2 := PosBoth` is rejected although Both projects both labels; `P2 := Both pos` is accepted. The rule is decided in docs/plan-2026-10-05.md, not in docs/semantica.",
+    "severity": "medium"
+   },
+   {
+    "id": "B10",
+    "impl_ref": "src/luthier/checker.py:363",
+    "behavior": "The environment variable LUTHIER_R3_REPORT turns the rejection of B09 into a line on stderr and counts every label as touched, so the program is accepted.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "d02 (the PosBoth program) is rejected by `luthier check`; with `LUTHIER_R3_REPORT=1 luthier check d02_r3_report_env.lut` it prints '[R3 undecidable] P2: PosBoth' and 'ok: 5 definitions'. Only docs/plan-2026-10-05.md:410 mentions it.",
+    "severity": "medium"
+   },
+   {
+    "id": "B11",
+    "impl_ref": "src/luthier/checker.py:395",
+    "behavior": "R2: every name of a type (type U or a type operator) mentioned in a definition's type, body or constructors must be defined unless it is in the definition's object; declarations and provisional extern bodies are exempt; holes of defined types may be used in term position. Error 'X is used as a type but is only declared (05 R2): define it, or take it as a parameter'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:150-155 (R2)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut",
+     "tests/spec/r2_definition.reject.lut",
+     "tests/spec/r2_unclaimed_laws.reject.lut",
+     "tests/spec/r5_extern_over_declared.reject.lut"
+    ],
+    "evidence": "defined() 370-384, is_type_name 386-393, check_defined_types 395-420. is_type_name (type ends in U) matches the spec's definition of type position (05:27-30).",
+    "severity": "low"
+   },
+   {
+    "id": "B12",
+    "impl_ref": "src/luthier/checker.py:382",
+    "behavior": "A type given by `extern provisional` counts as not defined: any non-provisional definition over it (native or extern) is rejected by R2 with 'is only declared'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:173-178 (R5: provisional lifts both requirements for that extern); 05:452 (section 10, open: whether what imports a provisional definition inherits the mark)",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/spec/r5_extern_provisional.accept.lut"
+    ],
+    "evidence": "b02: `Signal : U := extern provisional \"python:builtins.list\"` / `duration : Signal -> Int := extern \"python:builtins.len\"` and b02b (`twice (s : Signal) : Signal := s`) both give 'Signal is used as a type but is only declared (05 R2)'. The spec does not say a provisional type is undefined for R2, and the message is wrong: Signal has a body.",
+    "severity": "medium"
+   },
+   {
+    "id": "B13",
+    "impl_ref": "src/luthier/checker.py:633",
+    "behavior": "R4: a definition whose type ends in U must be a subtype with a predicate or a recursive data; otherwise 'X names a structural type and states no law; write X = ..., or declare X : ... and define it by its laws (05 R4)'. core.lut is exempt.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:165-171 (R4)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r4_product_named.reject.lut",
+     "tests/spec/r4_product_inline.accept.lut",
+     "tests/spec/r7_alias.accept.lut"
+    ],
+    "evidence": "check_new_type 636-650, called from add_def 603-604.",
+    "severity": "low"
+   },
+   {
+    "id": "B14",
+    "impl_ref": "src/luthier/checker.py:648",
+    "behavior": "R4 does not unfold a name: a type defined as another lawful type by name is rejected as 'structural'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:165-168 (R4: only if t is a subtype with a predicate)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "b06: `Even : U := { k : Int | k mod 2 == 0 }` / `Even2 : U := Even` gives 'Even2 names a structural type and states no law; write Even2 = Even'. Even is a subtype with a predicate, so reading t up to delta R4 accepts it; reading t syntactically it rejects it. The message calls a lawful type structural.",
+    "severity": "medium"
+   },
+   {
+    "id": "B15",
+    "impl_ref": "src/luthier/checker.py:803",
+    "behavior": "R4 on data: a data none of whose constructor domains mentions the type is rejected with 'X is not recursive; write X = < ... > (05 R4)'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:165-171 (R4); docs/semantica/04-kernel.md:86-91",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r4_data_nonrecursive.reject.lut",
+     "tests/spec/r4_recursive_data.accept.lut",
+     "tests/spec/k_recursor.accept.lut"
+    ],
+    "evidence": "Recursion is detected syntactically in constructor domains (803-804), so recursion through another data type is not seen (see B02).",
+    "severity": "low"
+   },
+   {
+    "id": "B16",
+    "impl_ref": "src/luthier/checker.py:789",
+    "behavior": "Data constructors: each must return the data type ('constructor c of T must return T'); constructor names are unique across all data types of a module ('constructor X is defined twice').",
+    "spec_ref": "docs/semantica/04-kernel.md:86-89 (a constructor builds a D); uniqueness: none (03-libraries.md:31 only says constructors are prefixed like functions)",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e04 `T : U := data { leaf : Int ; node : T -> T }` gives 'constructor leaf of T must return T'. e05 two data types both with constructor `mk` gives 'constructor mk is defined twice' (the uniqueness rule is not in the spec). Neither message is tested.",
+    "severity": "medium"
+   },
+   {
+    "id": "B17",
+    "impl_ref": "src/luthier/checker.py:527",
+    "behavior": "A name given two bodies is an error: 'X is defined twice'.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "b04: `x : Int := 1` / `x : Int := 2` gives 'in x: x is defined twice'.",
+    "severity": "low"
+   },
+   {
+    "id": "B18",
+    "impl_ref": "src/luthier/checker.py:552",
+    "behavior": "Filling a hole: a written type must be convertible (conv, no subtyping) with the declaration ('X was declared with type T, but is defined with T2'); an omitted type is inherited.",
+    "spec_ref": "docs/semantica/03-libraries.md:38-41",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_filling_a_hole_checks_the_declared_type",
+     "tests/test_kernel.py::test_a_filled_hole_evaluates_and_its_laws_are_certified"
+    ],
+    "evidence": "Lines 552-556.",
+    "severity": "low"
+   },
+   {
+    "id": "B19",
+    "impl_ref": "src/luthier/checker.py:544",
+    "behavior": "Implicit parameters `{A : U}` must be types or type operators: 'an implicit parameter of f must be a type ...'.",
+    "spec_ref": "docs/semantica/02-grammar.md:133-140",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_sugar.py::test_an_implicit_parameter_must_be_a_type"
+    ],
+    "evidence": "Lines 544-551.",
+    "severity": "low"
+   },
+   {
+    "id": "B20",
+    "impl_ref": "src/luthier/checker.py:565",
+    "behavior": "`primitive` bodies only in core.lut: 'primitive is allowed only in core.lut: X must be defined natively'.",
+    "spec_ref": "docs/semantica/04-kernel.md:45-46; docs/semantica/06-numbers.md:31-40",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/n3_primitive_outside_core.reject.lut",
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "Lines 565-570.",
+    "severity": "low"
+   },
+   {
+    "id": "B21",
+    "impl_ref": "src/luthier/checker.py:571",
+    "behavior": "`axiom` bodies only in core.lut and lib/ ('an axiom is allowed only in core.lut and lib/'), need a type, and are recorded for `check -v` ('assumed ...').",
+    "spec_ref": "docs/semantica/06-numbers.md:56-60 (section 3); docs/semantica/04-kernel.md:45-46",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/n4_axiom_outside_lib.reject.lut",
+     "tests/test_kernel.py::test_axioms_are_listed_by_check"
+    ],
+    "evidence": "Lines 571-579. 'axiom X needs a type' is reachable only inside the distribution.",
+    "severity": "low"
+   },
+   {
+    "id": "B22",
+    "impl_ref": "src/luthier/checker.py:599",
+    "behavior": "A recursive definition without a declared type is rejected: 'recursive definition f needs a declared type'.",
+    "spec_ref": "docs/semantica/04-kernel.md:113 (a definition with a declared type may mention itself)",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e06: `f := \\ (n : Int) { f n }` gives 'recursive definition f needs a declared type'. No test.",
+    "severity": "medium"
+   },
+   {
+    "id": "B23",
+    "impl_ref": "src/luthier/checker.py:652",
+    "behavior": "R5 on extern bodies: needs a type ('extern X needs a type'); an extern of a type is rejected ('an extern gives a value, not a type ... (05 R5)') unless provisional; provisional externs are recorded with the undefined type names they build on.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:173-178 (R5)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r5_extern_value.accept.lut",
+     "tests/spec/r5_extern_type.reject.lut",
+     "tests/spec/r5_extern_provisional.accept.lut",
+     "tests/test_kernel.py::test_provisional_externs_are_listed_and_never_certified",
+     "tests/test_certificates.py::test_a_test_over_a_provisional_extern_is_never_certified"
+    ],
+    "evidence": "Lines 652-672; e11 `x := extern \"python:builtins.abs\"` gives 'extern x needs a type'.",
+    "severity": "low"
+   },
+   {
+    "id": "B24",
+    "impl_ref": "src/luthier/checker.py:1393",
+    "behavior": "An `extern provisional` written inside a term (a record field, an argument) loses its provisional mark: it is not listed by `check -v` and a test over it is certified.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:175-178 (R5: provisional is recorded, listed by check -v, and never certified)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "check() builds `Extern(self.register_extern(t.target, ty), ty)` without `provisional`, although the parser keeps it (parser.py:441-444). Program prov/c01: `r : { q : R | \\ (x : Int) { q.f x >= 0 } } := { f := extern provisional \"python:builtins.abs\", g := \\ x { x } }` and `s : {...} := extern provisional \"python:builtins.abs\"`. `luthier test` prints 'r: passed' and writes \"provisional\": [] for r, while s gets 'passed, over provisional externs (s): not certified'. check -v lists only s.",
+    "severity": "high"
+   },
+   {
+    "id": "B25",
+    "impl_ref": "src/luthier/checker.py:669",
+    "behavior": "A provisional extern of a value over defined types is recorded with an empty list, the same record as a provisional type, so `check -v` describes it as 'an extern type nobody has defined'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:176-177 (recorded with the names it builds on)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Line 664 records [] for a provisional type and line 669-670 records [] for a value whose types are all defined; cli.py:262 prints 'an extern type nobody has defined' for []. In prov/c01, `s : {h : Int -> Int | ...} := extern provisional ...` is listed as 'provisional s: an extern type nobody has defined'.",
+    "severity": "low"
+   },
+   {
+    "id": "B26",
+    "impl_ref": "src/luthier/checker.py:819",
+    "behavior": "Extern targets are resolved by importing the Python module during `check`; targets without the `python:` prefix and in `module:attr` form are accepted; errors 'extern target ... must be module.attr or module:attr' and 'cannot resolve extern ...'.",
+    "spec_ref": "docs/semantica/04-kernel.md:127-129 (only `extern \"python:module.function\"`)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "d09: `extern \"builtins:abs\"` and `extern \"builtins.abs\"` are accepted; d09b `\"python:abs\"` gives 'must be module.attr or module:attr'; d09c gives 'cannot resolve extern ... No module named'. None is tested.",
+    "severity": "low"
+   },
+   {
+    "id": "B27",
+    "impl_ref": "src/luthier/checker.py:674",
+    "behavior": "Every refinement in an extern's type becomes an obligation on its value: subtype predicates, codomains quantified over the domain, components of records and pairs, array entries only, and the laws of a sum's payload as `match v { label x -> L x ; _ -> true }` with dependent quantifiers moved to their base plus a precondition; nesting cut at depth 16.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:179-187 (R5, 2026-10-05)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_the_codomain_of_an_extern_is_an_obligation",
+     "tests/test_bridge.py::test_the_entries_of_an_array_from_the_environment_are_an_obligation",
+     "tests/test_bridge.py::test_an_extern_with_no_refinement_owes_nothing",
+     "tests/test_bridge.py::test_a_refinement_under_a_constructor_is_an_obligation",
+     "tests/test_bridge.py::test_a_quantified_law_of_a_record_is_one_obligation_per_law"
+    ],
+    "evidence": "extern_obligations 674-712 and _sum_payload_obligations 714-773. The docstring at 679-680 still says a sum is not entered, which the code at 710-712 contradicts (stale comment only).",
+    "severity": "low"
+   },
+   {
+    "id": "B28",
+    "impl_ref": "src/luthier/checker.py:1389",
+    "behavior": "An extern inside a term takes the expected type; with no expected type 'an extern needs its type from the context'; with expected type U 'an extern type is only allowed as the body of a definition' (also for extern provisional).",
+    "spec_ref": "docs/semantica/04-kernel.md:127-129; docs/semantica/05-static-semantics.md:173-178",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e23: `P = { t : U, n : Int }` / `p : P := { t := extern \"python:builtins.list\", n := 3 }` gives 'an extern type is only allowed as the body of a definition'. The message suggests a definition body would be accepted, which R5 rejects unless provisional. No test of either message.",
+    "severity": "medium"
+   },
+   {
+    "id": "B29",
+    "impl_ref": "src/luthier/checker.py:850",
+    "behavior": "Obligations raised in a branch of `if c` get `c` (or `not c`) as a precondition; one equal to a branch condition is discharged; a variable or tuple bound by `match e { x -> t }` (and `let`) is replaced by e or its projections.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:293-296 (section 7); 05:251-252 (R11 names the textual discharge as what the interpreter does today)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_an_obligation_that_is_the_condition_of_its_branch_is_discharged",
+     "tests/test_sugar.py::test_a_let_inside_a_branch_carries_the_branch_condition",
+     "tests/test_sugar.py::test_let_binds_a_name_and_a_pattern"
+    ],
+    "evidence": "add_obligation 855-876; check_match 1693-1712; _tuple_lets 1970-1985.",
+    "severity": "low"
+   },
+   {
+    "id": "B30",
+    "impl_ref": "src/luthier/checker.py:871",
+    "behavior": "The branch precondition is added only when the obligation is Bool-valued: a quantified law (a function into Bool) raised in a branch is recorded without the condition, so `test` fails it on cases outside the branch.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:293-294 (an obligation raised inside a branch carries c as a precondition)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Program branch/i01: `F : U := { f : Int -> Int | \\ (x : Int) { f x >= 0 } }`, `use (g : F) : Int := 0`, `h (k : Int) : Int := if k > 0 then use (\\ x { x * x * k }) else 0`. The obligation of h is `\\ x { \\ x { (x * x) * k } x >= 0 }` with no `k > 0`, and `luthier test` reports 'h: FAILED ... counterexample: k = -1, x = -1', a case the branch never reaches.",
+    "severity": "high"
+   },
+   {
+    "id": "B31",
+    "impl_ref": "src/luthier/checker.py:1542",
+    "behavior": "Obligations are of kind 'law' (stated by a definition's declared type at top level) or 'type' (a coercion inside a body or what an extern owes), which `test` uses to skip raising cases of a type obligation.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:339-345 (section 7, added 2026-10-06)",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "Line 1562: `kind = \"law\" if ty is self._declared and not ctx else \"type\"`. kinds/f02 (sampled): `asType (b : Small) : Nat := 100 / (b * b)` passes with '10 where the computation raised', `asLaw : { h : Small -> Int | ... } := \\ x { 100 / (x * x) }` fails on division by zero, as specified. No test pins the classification. (In exhaustive mode, kinds/f01, asType FAILS too: testing.py ignores the kind there, outside this scope.)",
+    "severity": "medium"
+   },
+   {
+    "id": "B32",
+    "impl_ref": "src/luthier/checker.py:1550",
+    "behavior": "A closed value checked against a subtype is decided during `check`: a false predicate rejects the program ('X does not satisfy T'), a true one records nothing; the predicate is evaluated on the machine, so `check` may call externs.",
+    "spec_ref": "docs/semantica/04-kernel.md:83-84 (a term of T used where the subtype is expected creates an obligation, 05 section 7)",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py::test_closed_value_against_subtype_is_checked_now"
+    ],
+    "evidence": "subtype_obligation 1549-1558 and decide_closed 1633-1653. `Z7 : U := { k : Int | 0 <= k and k < 7 }` / `x : Z7 := 9` is a check error, where the spec describes an obligation for `test`. Only the module docstring (checker.py:8-10) states the rule. decide_closed also fails to decide a closed predicate whose value is a two-unit sum with other labels (a09b stays pending).",
+    "severity": "medium"
+   },
+   {
+    "id": "B33",
+    "impl_ref": "src/luthier/checker.py:1010",
+    "behavior": "An obligation raised by a coercion inside the predicate of a subtype is conjoined to the predicate (And), so it becomes part of membership in the type.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "Lines 1010-1020 (the comment calls it a precondition, the code conjoins). Program b03: `V = { n : Nat, f : Fin n -> Int }`, `Third : U := { v : V | v.f 2 > 0 }`, `short : Third := (1, \\ k { 5 })` is rejected with 'does not satisfy Third' because the conjunct `2 < v.n` is false; as an implication it would hold vacuously.",
+    "severity": "medium"
+   },
+   {
+    "id": "B34",
+    "impl_ref": "src/luthier/checker.py:1570",
+    "behavior": "A refinement of a record bound by its pattern whose conjuncts quantify over more than the value is split into one obligation per law, over the law's own parameters, with dependent ranges as preconditions.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:346-347",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_a_quantified_law_of_a_record_is_one_obligation_per_law"
+    ],
+    "evidence": "_quantified_conjuncts 1570-1631.",
+    "severity": "low"
+   },
+   {
+    "id": "B35",
+    "impl_ref": "src/luthier/checker.py:903",
+    "behavior": "Names resolve in the current module first, then globals; an unknown name is 'unbound name X' (this is how R1 is enforced for declarations).",
+    "spec_ref": "docs/semantica/05-static-semantics.md:145-148 (R1); docs/semantica/03-libraries.md:29-31",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r1_declaration.accept.lut",
+     "tests/spec/r1_declaration.reject.lut",
+     "tests/spec/n2_r_gone.reject.lut",
+     "tests/test_kernel.py::test_unbound_name_is_an_error"
+    ],
+    "evidence": "resolve 97-102 and infer 888-908.",
+    "severity": "low"
+   },
+   {
+    "id": "B36",
+    "impl_ref": "src/luthier/checker.py:927",
+    "behavior": "A sum with a repeated label is rejected: 'label X appears twice in a sum'.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "d07: `S = < a : Int | a : Bool >` gives 'label a appears twice in a sum'.",
+    "severity": "low"
+   },
+   {
+    "id": "B37",
+    "impl_ref": "src/luthier/checker.py:1796",
+    "behavior": "Labels of a sum named by an alias are usable with no expected type (a unit label is a value, another is a function taking the alias's parameters first); a label two aliases share gives 'label X belongs to several sums: use it where the expected type is known'.",
+    "spec_ref": "docs/semantica/03-libraries.md:31 (labels of sums named by an alias are prefixed like functions); docs/semantica/02-grammar.md:96-98 (a label against a sum is an injection)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "d06b `s := circle 2.0` is accepted; d06 (red in Color and in Light) gives 'label red belongs to several sums'; g03 `m := just 3` gives the confusing '3 has type Int but U was expected' because `just` takes Maybe's type parameter first.",
+    "severity": "low"
+   },
+   {
+    "id": "B38",
+    "impl_ref": "src/luthier/checker.py:1780",
+    "behavior": "Against an expected sum, a label is an injection; a unit alternative is injected by its label alone; anonymous sums use left/right.",
+    "spec_ref": "docs/semantica/04-kernel.md:74-78; docs/semantica/02-grammar.md:96-98",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_sum.accept.lut",
+     "tests/spec/k_union.accept.lut",
+     "tests/test_kernel.py::test_sums_inject_by_label_and_match_on_labels"
+    ],
+    "evidence": "try_injection 1780-1794.",
+    "severity": "low"
+   },
+   {
+    "id": "B39",
+    "impl_ref": "src/luthier/checker.py:125",
+    "behavior": "Bool is recognized by its labels (true, false) as an if condition, a subtype predicate or a law, while conversion accepts any sum of two units as Bool by position; so `if v` on `< wrong | right >` is rejected but `if asBool v` with `asBool (x : Verdict) : Bool := x` takes wrong as true.",
+    "spec_ref": "docs/semantica/04-kernel.md:68-73 (labels are binders, not part of a type's identity); tests/spec/k_bool_is_sum.accept.lut",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/spec/k_bool_is_sum.accept.lut",
+     "tests/test_checker_rules.py::test_a_sum_of_two_units_is_not_a_bool",
+     "tests/test_checker_rules.py::test_a_verdict_cannot_be_the_condition_of_an_if",
+     "tests/test_checker_rules.py::test_bool_itself_still_works"
+    ],
+    "evidence": "is_bool 125-131 and the guard at 1927-1931. a02 `if v then 1 else 2` gives 'true is a label of Bool, and the value matched is of type < wrong : Unit | right : Unit >'; a09 rejects `{ x : Int | AlwaysWrong x }`. a01 accepts `asBool (x : Verdict) : Bool := x` and `luthier eval a01_bool_shape.lut y` gives '1 : Int' for v = wrong. The by-label rule exists only in docs/plan-2026-10-05.md and the test docstring; 04 section 2 and the accept file say the two types are one.",
+    "severity": "high"
+   },
+   {
+    "id": "B40",
+    "impl_ref": "src/luthier/checker.py:945",
+    "behavior": "An unannotated lambda needs an expected type ('cannot infer the type of ...: annotate the parameter or give an expected type'); a tuple-pattern lambda's result type may not depend on its components.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e12: `f := \\ x { x }` gives 'cannot infer the type of \\ x { x }'. Lines 955-961 for the tuple-pattern restriction.",
+    "severity": "low"
+   },
+   {
+    "id": "B41",
+    "impl_ref": "src/luthier/checker.py:975",
+    "behavior": "`->` is a function type when its left side is a type and implication when it is a Bool; anything else is ''->' expects a type or a Bool on the left'.",
+    "spec_ref": "docs/semantica/02-grammar.md:62-63; docs/semantica/04-kernel.md:160",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_arrow_is_pi_on_types_and_implication_on_bools"
+    ],
+    "evidence": "e09 `x := 3 -> 4` gives the error; the error itself is untested.",
+    "severity": "low"
+   },
+   {
+    "id": "B42",
+    "impl_ref": "src/luthier/checker.py:986",
+    "behavior": "`&` conjoins laws into type Law; a non-law side is 'left/right side of '&' is not a law'.",
+    "spec_ref": "docs/semantica/04-kernel.md:124-126; docs/semantica/02-grammar.md:64",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r3_connected.accept.lut",
+     "tests/test_kernel.py::test_a_group_passes_exhaustively_and_a_wrong_one_fails_with_a_counterexample"
+    ],
+    "evidence": "e08 `L : Law := 3 & true` gives 'left side of '&' is not a law: 3 : Int' (untested message).",
+    "severity": "low"
+   },
+   {
+    "id": "B43",
+    "impl_ref": "src/luthier/checker.py:994",
+    "behavior": "`forget e` strips one subtype layer; on a non-subtype 'forget applied to X : T, which is not a subtype'.",
+    "spec_ref": "docs/semantica/02-grammar.md:88 (syntax only); docs/semantica/04-kernel.md:84-85 (forget is implicit)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e07: `x : Int := forget 3` is rejected.",
+    "severity": "low"
+   },
+   {
+    "id": "B44",
+    "impl_ref": "src/luthier/checker.py:938",
+    "behavior": "A lone named position `(x : A)` used as a type is rejected: '(x : A) names a position of a product or a sum; write it next to another with * or +'.",
+    "spec_ref": "docs/semantica/02-grammar.md:74-77 (grammar has only paired named positions)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e10: `T = (x : Int)` is rejected.",
+    "severity": "low"
+   },
+   {
+    "id": "B45",
+    "impl_ref": "src/luthier/checker.py:1003",
+    "behavior": "The predicate of a subtype must be Bool-valued or a Law: 'the predicate of a subtype must be Bool-valued or a law'.",
+    "spec_ref": "docs/semantica/04-kernel.md:82-84",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_checker_rules.py::test_a_sum_of_two_units_is_not_a_bool"
+    ],
+    "evidence": "Lines 1003-1009.",
+    "severity": "low"
+   },
+   {
+    "id": "B46",
+    "impl_ref": "src/luthier/checker.py:1077",
+    "behavior": "Dotted names: whole name first, else longest prefix that is a variable or definition, then one projection per segment; projections go through refinements and replace earlier components by projections; errors 'has no named components, so .f means nothing' and 'has no component f; its components are ...'.",
+    "spec_ref": "docs/semantica/02-grammar.md:114-123 (section 6)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_projection_of_named_components",
+     "tests/test_kernel.py::test_projection_through_refinements_aliases_and_parentheses",
+     "tests/test_kernel.py::test_projection_of_a_dependent_component_types_against_the_value",
+     "tests/test_kernel.py::test_projection_errors"
+    ],
+    "evidence": "infer_dotted 1077-1101, project 1103-1134. 'has no named components' (g07) is untested.",
+    "severity": "low"
+   },
+   {
+    "id": "B47",
+    "impl_ref": "src/luthier/checker.py:1540",
+    "behavior": "Generic typing errors: 'X has type T but T2 was expected', 'X : T is not a function, cannot apply it to Y', 'cannot compare X : T with Y : T2' for ==.",
+    "spec_ref": "docs/semantica/04-kernel.md:52-64 (typing of the formers); docs/semantica/04-kernel.md:68-73 (labels positional)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_label_order.reject.lut",
+     "tests/spec/r9_variance.reject.lut"
+    ],
+    "evidence": "coerce 1504-1540, infer_app 1150, infer_binop 1338-1342; e22 `1 == \"a\"` gives 'cannot compare 1 : Int with 'a' : String' (untested).",
+    "severity": "low"
+   },
+   {
+    "id": "B48",
+    "impl_ref": "src/luthier/checker.py:1155",
+    "behavior": "Implicit arguments are inferred by first-order matching through aliases and refinements; a first argument that is a type means they are given explicitly; errors 'cannot infer the implicit parameter(s) ...' and 'is applied to more arguments than its type takes'.",
+    "spec_ref": "docs/semantica/02-grammar.md:133-140",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_sugar.py::test_implicit_parameters_are_inferred_from_the_arguments",
+     "tests/test_sugar.py::test_implicit_parameters_can_still_be_given_explicitly",
+     "tests/test_sugar.py::test_an_implicit_parameter_that_cannot_be_inferred_is_an_error"
+    ],
+    "evidence": "infer_implicit_app 1155-1217, unify 1234-1275. e13 `idf 3 4` gives 'idf is applied to more arguments than its type takes' (untested).",
+    "severity": "low"
+   },
+   {
+    "id": "B49",
+    "impl_ref": "src/luthier/checker.py:1277",
+    "behavior": "Unary minus is `0 - x` on Int, `0.0 - x` on Float64, and an error on any other type (Rational included): 'unary minus on T: it is defined on Int and Float64'.",
+    "spec_ref": "docs/semantica/02-grammar.md:130-132",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_sugar.py::test_unary_minus_on_int_and_float",
+     "tests/test_sugar.py::test_unary_minus_on_another_type_is_an_error"
+    ],
+    "evidence": "e20 `-q` on Rational is rejected, as 02 section 7 says.",
+    "severity": "low"
+   },
+   {
+    "id": "B50",
+    "impl_ref": "src/luthier/checker.py:1295",
+    "behavior": "`+` and `*` whose leftmost operand is a type build a sum (left/right) or a product, both right associative; otherwise they are arithmetic.",
+    "spec_ref": "docs/semantica/02-grammar.md:62-64; docs/semantica/04-kernel.md:74-76",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_sum.accept.lut",
+     "tests/spec/k_named_product.accept.lut"
+    ],
+    "evidence": "Lines 1295-1326; _type_operand 1728-1749.",
+    "severity": "low"
+   },
+   {
+    "id": "B51",
+    "impl_ref": "src/luthier/checker.py:422",
+    "behavior": "`operator op := f` accepts any operator symbol (==, <, ...), not only + - * /; a registered meaning is tried before the built-in one, on primitive types too, so it redefines Int arithmetic and comparison and lets `==` on functions through R8. Errors 'operator op: f is not a function' / 'does not take two arguments'.",
+    "spec_ref": "docs/semantica/02-grammar.md:65 (An operator directive gives +, -, *, / a meaning); docs/semantica/05-static-semantics.md:210-215 (R8)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py::test_operator_resolves_by_operand_types"
+    ],
+    "evidence": "infer_binop resolves operators (1328-1331) before the R8 check (1332-1337). e01 `operator == := alwaysT` makes `luthier eval ... x` for `x := 1 == 2` print 'true : Bool'; e25 `operator < := andI` makes `3 < 4` evaluate to '12 : Int'; e24 registers `eqF` on functions and `S (f g : Int -> Int) : Bool := f == g` is accepted; b11 `operator + := sub` makes `5 + 3` give 2. e02/e03 show the two error messages (untested).",
+    "severity": "high"
+   },
+   {
+    "id": "B52",
+    "impl_ref": "src/luthier/checker.py:1332",
+    "behavior": "R8: `==` and `/=` are rejected on types that can contain a function or a Real (data types inspected through their instantiated constructors): 'no structural equality on T: ... (05 R8)', with 'the reals have no computable equality' for Real.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:210-215 (R8)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r8_equality_function.reject.lut",
+     "tests/spec/r8_equality_parameter.accept.lut",
+     "tests/test_checker_rules.py::test_the_reals_have_no_structural_equality",
+     "tests/test_checker_rules.py::test_a_recursive_data_type_holding_a_function_has_no_structural_equality",
+     "tests/test_checker_rules.py::test_a_recursive_data_type_of_numbers_has_it"
+    ],
+    "evidence": "contains_function 1835-1870.",
+    "severity": "low"
+   },
+   {
+    "id": "B53",
+    "impl_ref": "src/luthier/checker.py:1870",
+    "behavior": "R8 is not enforced on a type parameter (x y : A with A : U), on U itself, or on an opaque provisional type: `==` is accepted, and with A instantiated to a function type it evaluates to a stuck term instead of a Bool.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:210-213 (R8: == exists on Int, Float64, String, Unit, Empty and what is built from them, and not on anything containing an exponential)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "contains_function returns False for any Var that is not Real or a data. a08 `Comm (A : U) (f : A -> A -> A) (x y : A) : Bool := f x y == f y x` is accepted; h06 `r : Bool := Comm (Int -> Int) compose inc dbl` is accepted and `luthier eval` prints 'compose inc dbl == compose dbl inc : Bool'; a08b prints 'inc == inc : Bool'; b12 `b : Bool := Int == Float64` is accepted and evaluates to 'Int == Float64 : Bool'. The base library does not rely on this (no `==` at a type parameter in lib/).",
+    "severity": "high"
+   },
+   {
+    "id": "B54",
+    "impl_ref": "src/luthier/checker.py:1842",
+    "behavior": "`==` is allowed on Rational.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:210-211 (R8 lists Int, Float64, String, Unit, Empty; Rational missing); docs/semantica/06-numbers.md:140-143 (comparisons exact)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "g04: `b : Bool := fromInt 1 == fromInt 1` with `import \"rational\"` is accepted. R8's list predates Rational.",
+    "severity": "low"
+   },
+   {
+    "id": "B55",
+    "impl_ref": "src/luthier/checker.py:1346",
+    "behavior": "Arithmetic needs Int, Float64 or Rational on the left and the same base type on the right (no promotion); comparisons give Bool, arithmetic gives the base type of the left operand; Real gets the hint 'the operations of Real are not computed (06 section 2)'; `mod` on Rational is rejected; a Real where a Float64 is expected gets 'a Real has no computation of its own (06 section 3)'.",
+    "spec_ref": "docs/semantica/04-kernel.md:64; docs/semantica/06-numbers.md:45-46, 85-90, 140-143",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_mod_is_not_defined_on_rationals",
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "g01 `y : Real := x + x` and g02 `y : Float64 := x` (x : Real) show both Real hints; neither hint is tested.",
+    "severity": "medium"
+   },
+   {
+    "id": "B56",
+    "impl_ref": "src/luthier/checker.py:1351",
+    "behavior": "`+` on two Strings is concatenation.",
+    "spec_ref": "none (04-kernel.md:64 lists arithmetic on Int and Float64 only)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "b13: `s : String := \"a\" + \"b\"` evaluates to 'ab' : String.",
+    "severity": "low"
+   },
+   {
+    "id": "B57",
+    "impl_ref": "src/luthier/checker.py:1354",
+    "behavior": "Comparisons on String are rejected: 'operator < expects Int, Float64 or Rational, got 'a' : String'.",
+    "spec_ref": "docs/semantica/04-kernel.md:140-141 (prim: comparisons on literals of Int, Float64, String) against 04-kernel.md:64 (comparisons on Int and Float64)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "b13b: `c : Bool := \"a\" < \"b\"` is rejected. The two lines of 04 give two readings.",
+    "severity": "medium"
+   },
+   {
+    "id": "B58",
+    "impl_ref": "src/luthier/checker.py:1370",
+    "behavior": "A record literal is checked against a type with named components and reordered by the type; errors 'a record literal needs a type with named components, not T', 'a field is given twice in a P literal', 'P literal: missing [...], unknown [...]', and with no expected type 'a record literal needs its type from the context'.",
+    "spec_ref": "docs/semantica/04-kernel.md:162",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "d08 gives 'P literal: missing ['y'], unknown ['z']', d08b 'a field is given twice in a P literal', d08c 'needs a type with named components, not Int * Int'. Record literals are used by many tests, but no test exercises these errors.",
+    "severity": "medium"
+   },
+   {
+    "id": "B59",
+    "impl_ref": "src/luthier/checker.py:1659",
+    "behavior": "A list literal takes its element type from the expected type; with none the error says 'a list literal needs an expected type or a first element', although a first element is never used; against a non-List type 'a list literal was given but T was expected'.",
+    "spec_ref": "docs/semantica/04-kernel.md:161",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "b09: `xs := [1, 2, 3]` gives 'a list literal needs an expected type or a first element': the message promises an inference that does not exist.",
+    "severity": "low"
+   },
+   {
+    "id": "B60",
+    "impl_ref": "src/luthier/checker.py:1399",
+    "behavior": "A lambda's parameter annotation must be definitionally equal to the expected domain, so a lambda with a wider domain is rejected where R9 lets it pass.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:217-218 (R9); docs/semantica/06-numbers.md:94-98",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "a06: `f : Float64 -> Real := \\ (x : Real) { x }` gives 'parameter x annotated Real but expected Float64'. Float64 refines Real, so by R9 a function of type Real -> Real passes for Float64 -> Real.",
+    "severity": "high"
+   },
+   {
+    "id": "B61",
+    "impl_ref": "src/luthier/checker.py:1462",
+    "behavior": "Subtyping (convertible): refinements forget to their base, Float64 to Real, functions by variance (R9) at top level and inside products (coerce component by component), but not inside sums or data types.",
+    "spec_ref": "docs/semantica/06-numbers.md:96-98 (the checker applies the rule component by component through products and sums); docs/semantica/05-static-semantics.md:217-218",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/spec/r9_variance.accept.lut",
+     "tests/spec/r9_variance.reject.lut",
+     "tests/spec/n1_numbers.accept.lut"
+    ],
+    "evidence": "convertible 1462-1476, function_passes 1491-1502, coerce 1504-1540 (Sigma case only). a07c: `m1 : Maybe (Float64 -> Float64) := just half` / `m2 : Maybe (Float64 -> Real) := m1` gives 'm1 has type Maybe (Float64 -> Float64) but Maybe (Float64 -> Real) was expected'; a07d rejects `Maybe Nat` where `Maybe Int` is expected. a07b (a product) is accepted.",
+    "severity": "high"
+   },
+   {
+    "id": "B62",
+    "impl_ref": "src/luthier/checker.py:1714",
+    "behavior": "Match coverage: every label of a sum and every constructor of a data must have a branch unless a variable or _ catches the rest ('match on e does not cover: ...'); repeated branches for one label or constructor are accepted.",
+    "spec_ref": "docs/semantica/04-kernel.md:109-111 (one branch per constructor or label, none repeated and none missing)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py::test_match_must_cover_every_label"
+    ],
+    "evidence": "check_match 1714-1724 checks only missing ones. a05: `f (b : Bool) : Int := match b { true -> 1 ; true -> 2 ; false -> 3 }` is accepted. g06 shows data coverage ('does not cover: succ'), which has no test. No match in the base library repeats a branch, so enforcing the rule would not break it.",
+    "severity": "high"
+   },
+   {
+    "id": "B63",
+    "impl_ref": "src/luthier/checker.py:1714",
+    "behavior": "Coverage is checked only at the top of the scrutinee's type: a match on Int with literal patterns, or with nested patterns under a tuple or constructor, is accepted when incomplete and fails at run time.",
+    "spec_ref": "docs/semantica/04-kernel.md:109-112 (coverage stated for the constructors and labels of the type of t; literal and nested patterns allowed)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "b14: `f (n : Int) : Int := match n { 0 -> 1 ; 1 -> 2 }` and b14b: `f (p : Bool * Int) : Int := match p { (true, x) -> x }` pass check; `luthier eval` gives 'error: no branch of a match applies to its value' for f 5 and f (false, 3).",
+    "severity": "medium"
+   },
+   {
+    "id": "B64",
+    "impl_ref": "src/luthier/checker.py:1885",
+    "behavior": "Pattern resolution: a name is a label of the scrutinee's sum or a constructor of its data, otherwise a variable; errors 'tuple pattern ... against non-pair type', 'label X takes one pattern for its payload', 'unknown constructor X in pattern', 'constructor X belongs to D, but the scrutinee has type T', 'pattern ... does not bind all arguments of C', and others.",
+    "spec_ref": "docs/semantica/02-grammar.md:96-98",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_union.accept.lut",
+     "tests/spec/k_recursor.accept.lut"
+    ],
+    "evidence": "e14 to e18 show the five messages; none is tested.",
+    "severity": "medium"
+   },
+   {
+    "id": "B65",
+    "impl_ref": "src/luthier/checker.py:1927",
+    "behavior": "The `true`/`false` patterns produced by `if` are refused against a non-Bool ('true is a label of Bool, and the value matched is of type T'), while the same `match` written by hand binds `true` as a variable and always takes the first branch.",
+    "spec_ref": "docs/semantica/04-kernel.md:159 (if c then a else b is match c { true -> a ; false -> b }); docs/semantica/02-grammar.md:96-97 (a name that is not a label or constructor is a variable)",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_checker_rules.py::test_a_verdict_cannot_be_the_condition_of_an_if"
+    ],
+    "evidence": "a04: `n : Int := 5` / `y : Int := match n { true -> 1 ; false -> 2 }` is accepted and evaluates to '1 : Int' (a03 does the same on a Verdict), while `if n then 1 else 2` is rejected. The spec's translation makes the two the same program.",
+    "severity": "medium"
+   },
+   {
+    "id": "B66",
+    "impl_ref": "src/luthier/checker.py:482",
+    "behavior": "`gen T := term` is checked against `Gen T` (needs `random`), an alias's generator is keyed by the type it stands for, two aliases of one type conflict, an alias of a type operator is refused; errors 'gen: unknown type X', 'gen: `Gen` is not in scope; add `import \"random\"`', 'gen X: X is an alias of a type operator', 'gen X: Y already has a generator ... (05 R7)'.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:202-207 (R7, generators of aliases); docs/semantica/04-kernel.md:48-49; docs/semantica/08-tests.md:341-343 (gen to be removed)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_two_aliases_of_one_type_cannot_both_have_a_generator",
+     "tests/test_bridge.py::test_the_generator_of_an_alias_is_the_generator_of_its_type"
+    ],
+    "evidence": "h01, h02, h03, h04 show the other messages, all untested.",
+    "severity": "medium"
+   },
+   {
+    "id": "B67",
+    "impl_ref": "src/luthier/checker.py:497",
+    "behavior": "Two `gen` directives for the same type name are accepted silently and the last one wins.",
+    "spec_ref": "none (R7 at docs/semantica/05-static-semantics.md:203-204 forbids two aliases of one type both having a generator)",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "The conflict check skips when `prior == g.type_name`. b10: `gen Small := \\ s seed { (0, seed) }` then `gen Small := \\ s seed { (1, seed) }` passes `luthier check`.",
+    "severity": "medium"
+   },
+   {
+    "id": "B68",
+    "impl_ref": "src/luthier/checker.py:177",
+    "behavior": "Each name records the members of its object, which `luthier test n` uses to run the obligations of every member.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:291-292",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "object_of filled at 177-179, read at cli.py:319. No test checks that `test n` runs the other members of n's object.",
+    "severity": "medium"
+   },
+   {
+    "id": "B69",
+    "impl_ref": "src/luthier/checker.py:1699",
+    "behavior": "Inside `match m { just x -> t }` an obligation in t stays quantified over every x (no `m == just x` precondition); only variable, wildcard and tuple patterns name the scrutinee.",
+    "spec_ref": "docs/semantica/05-static-semantics.md:458-462 (section 10) and 243-253 (R11, decided 2026-10-06, not implemented)",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "_tuple_lets returns [] for a label or constructor pattern. The spec declares this as decided and not implemented, so it is reported with that status, not as a defect.",
+    "severity": "low"
+   }
+  ],
+  "notes": "I covered all 2148 lines of src/luthier/checker.py, reading every function and every error message. The probe programs are in /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/impl-checker/ (a*, b*, d* to i*, plus prov/c01, kinds/f01-f02, branch/i01). I ran only `luthier check`, `luthier eval` and `luthier test` there. git status shows the repository unchanged.\n\nHigh findings, in short:\n- B03 and B02: a declared type cannot be given a data body, so mutually recursive data types can't be written at all.\n- B24: `extern provisional` inside a term is certified (the certificate records \"provisional\": []).\n- B30: a quantified-law obligation raised in an `if` branch loses the branch condition, so test reports a false counterexample.\n- B39: Bool is recognized by its labels in conditions and predicates but by position in conversion. This contradicts 04 section 2 and k_bool_is_sum.accept.lut, and lets `wrong` act as `true`.\n- B51: `operator` accepts ==, < and the rest, redefines Int arithmetic and bypasses R8.\n- B53: R8 is not enforced at type parameters or on U, and `==` evaluates to a stuck term.\n- B60 and B61: R9 is not applied to lambda annotations or through sums.\n- B62: repeated match branches are accepted although 04 section 3 says none repeated.\n\nInternal behaviors, aggregated and not listed as entries:\n- Utilities: lookup, pi_arity, pattern_to_term, the whnf/conv wrappers, strip_subtype, base_type, is_unit, sum_of, is_law, _readable_name, _peel_pi, _apply_law, _children, _global_names, _var_paths, _pairs_only, _tuple_lets, _pending_member, _codomain.\n- Heuristics and caches: the memo in _type_operand and _is_type_by_form, _as_projection and _component_depends (elaboration of dependent projections), unify (depth cut 40), the extern_obligations depth cut 16, silent() and the rollback of obligations after trial inference.\n- Bookkeeping: register_extern keyed by target@type, the certified dict (filled by cli), the late ordering of operator directives inside an object.\n- Unreachable or guarded messages: 'bool literal', 'has neither type nor body', 'cannot infer <repr>', 'unknown pattern', 'has k implicit parameters but its type has fewer arrows'.\n- Kernel exemptions that apply only to core.lut: R4, non-recursive data, and an untouched single-label predicate.\n\nTwo observations outside this scope, for the other auditors:\n1. testing.py ignores the obligation kind in exhaustive mode. kinds/f01 FAILS asType on a division by zero; the same program sampled (f02) skips 10 raising cases, as 05 section 7 says.\n2. cli.py prints 'an extern type nobody has defined' for any provisional entry with an empty list (B25).\n\nA stale docstring at checker.py:679-680 says sums are not entered, but lines 710-712 enter them. There is also a cross-document inconsistency: tests/test_checker_rules.py cites a by-label Bool rule that exists only in docs/plan-2026-10-05.md, while tests/spec/k_bool_is_sum.accept.lut asserts the opposite."
+ }
+}

@@ -1,0 +1,284 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-checker",
+   "direction": "impl",
+   "files": "src/luthier/checker.py"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a4d1a360851fc8bbf",
+  "agent_label": "verify impl-checker",
+  "started_at": "2026-10-06T12:13:48+00:00",
+  "finished_at": "2026-10-06T12:25:33+00:00",
+  "tokens": 163288,
+  "tool_calls": 67,
+  "duration_ms": 705860,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "1a6751dd33c0e60f2f35c44a7bc9c14e79896ec98c5bd6b69ec524cbb81dd0fe"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "B02",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:196 forward-declares cycle members only when m.defn.data is None. Re-ran impl-checker/b07_mutual_data.lut: 'in Tree: unbound name Forest'; b07b (Forest : U first): 'Forest was declared as a value, it cannot become a data type'; b07c (rose tree through List) ok. Spec: 04-kernel.md:43 (a data definition is a definition), 04:113-114 (definitions may mention each other), 05:96-97 (an object checked as a block, declared types first). Ambiguity is real: add_data (checker.py:803-812) counts a data as recursive only if its own name occurs in a constructor domain, so even with forward declaration Tree (node : Int -> Forest -> Tree) would fail R4 'is not recursive'; 04:86-87 ('at least one constructor mentions the type being defined') does not say whether mention through Forest counts. No grep hit for 'mutual' in docs/semantica."
+   },
+   {
+    "id": "B03",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "checker.py:532-534 rejects any data body when a prior entry exists. Re-ran b05 and b05b: both 'in T: T was declared as a value, it cannot become a data type'. Spec accepts: 04-kernel.md:40 (x := t fills an earlier declaration), 04:43 (a data definition is a definition), 05:53 (defined: a definition, same file or another), 05:62 (x : U := data defines a recursive type), R6 05:194-195 (body of type T; a data has type U = T), 03-libraries.md:39-40 (a repeated type must agree). No spec line forbids it; no test or doc mentions the message (grep 'cannot become' only hits checker.py:534). The message calls a type 'a value'."
+   },
+   {
+    "id": "B05",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "checker.py:228 add_alias runs check_defined_types(qname, {qname}). The spec does cover aliases: 04-kernel.md:41 and R7 05:199-201 say an alias is expanded before checking and is never declared or defined; 05:25 says occurrence is read after expanding aliases; R2 (05:150) is stated for definitions, and R1 (05:145-147) lets declarations mention only-declared types. So a program and its alias-expanded form must behave the same. They do not: verify-impl-checker/v_b05_alias_in_decl.lut `Foo : U` / `Pair2 = Foo * Foo` / `swap : Pair2 -> Pair2` is rejected 'in Pair2: Foo is used as a type but is only declared (05 R2)', while v_b05_noalias_decl.lut `swap : Foo * Foo -> Foo * Foo` is accepted. The mapper's 'an alias inside the object is accepted (d01)' is wrong: in d01 Two is not on Codec's cycle. When the alias really is on the cycle (v_b05_alias_in_cycle.lut: RoundTrip calls Agree, Agree takes Two = Codec * Codec, Codec := RoundTrip) the result is 'in Two: unbound name Codec', because load_object (checker.py:184-188) adds aliases before declare_pending. The implementation rejects programs the specification accepts."
+   },
+   {
+    "id": "B08",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:2068-2075 _projections_of returns every label when the parameter occurs whole. b08 (`Tagged := \\ p { Trivial p }` with Trivial := true) is accepted. 05:36-37 ('touches the names and labels that occur free in it') and 05 §4 (05:122-124, without unfolding) leave a whole-value occurrence undefined: read syntactically, no label occurs in `Trivial p`. The base library depends on the lenient reading. I patched _projections_of out of tree (verify-impl-checker, Python monkeypatch) to ignore whole uses and checked all libs: Table (labels cell, nRows) and Codec (eq, parse, render) in lib/table.lut only get their labels touched through whole-value uses. So the spec cannot settle this without a decision that the library already assumes."
+   },
+   {
+    "id": "B09",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:356-367 _undecidable_touch. Re-ran d02: rejected with 'cannot tell which labels of the base PosBoth touches ... (05 R3)'. grep in docs/semantica finds no statement about the law's form; the rule is only in docs/plan-2026-10-05.md:166 and :410. Tested by tests/test_checker_rules.py:70. Under a strictly syntactic reading of 05:36-37, `P2 := PosBoth` touches no label and is rejected anyway (with another message); under an unfolding reading it touches both. So the spec is ambiguous, and the implementation picked a third behavior with its own message."
+   },
+   {
+    "id": "B10",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:363-365. `LUTHIER_R3_REPORT=1 luthier check d02_r3_report_env.lut` prints '[R3 undecidable] P2: PosBoth' and 'ok: 5 definitions'; without it the file is rejected. No line in docs/semantica, README or tests mentions it; grep finds it only at docs/plan-2026-10-05.md:410. It changes acceptance and nothing tests it."
+   },
+   {
+    "id": "B12",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:381-383 defined() returns False for a provisional extern; check_defined_types then rejects any non-provisional user. Re-ran b02 and b02b: 'Signal is used as a type but is only declared (05 R2)'. Also verify-impl-checker/v_b12b.lut: a native function over Signal is rejected. R5 (05:175-178) lifts both requirements 'for that extern', for 'working in a hurry on a type nobody has defined yet'; it does not say whether the provisional type counts as defined for R2. tests/spec/r5_extern_provisional.accept.lut makes both externs provisional, which matches the implementation's contagion but doesn't state it. 05:452 is open on the importer question only. `check -v` on the accept file lists 'provisional Signal: an extern type nobody has defined' and 'provisional duration: builds on Signal'. The R2 message ('only declared') is wrong for a name that has a body."
+   },
+   {
+    "id": "B14",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:633-650 check_new_type inspects the body syntactically (after peeling lambdas); Var Even is not a Subtype. Re-ran b06: 'Even2 names a structural type and states no law; write Even2 = Even'. R4 05:165-166 says 'only if t is a subtype with a predicate'; with delta (04:136) Even is one, so that reading accepts. 05:167-169 says the rule is aimed at a name 'that claims nothing', and Even2 adds no law, so that reading rejects. Two readings, different behavior. The word 'structural' in the message is wrong for a lawful type."
+   },
+   {
+    "id": "B17",
+    "verdict": "refuted",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:527-531. Re-ran b04: 'in x: x is defined twice'. A spec line does state it: 05-static-semantics.md:86 'Two bodies for one meaning are two names, and their agreement is a law to test (04 §6)'. Also 05:53 (a name in the 'defined' state has its body, singular) and 04-kernel.md:21. So it is covered. Severity medium because no test exercises it: grep for 'defined twice' in tests/ finds nothing."
+   },
+   {
+    "id": "B24",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "checker.py:1389-1395 builds Extern(self.register_extern(t.target, ty), ty) without provisional, though parser.py:441-446 keeps the flag. I reproduced it on my own copy, verify-impl-checker/v_b24.lut: `r : R := { f := extern provisional \"python:builtins.abs\", g := \\ x { x } }` with R defined by a law. `luthier check -v` lists only s ('1 provisional'). `luthier test` prints 'r: passed ... [sampled, 20 cases]', and v_b24.cert.json records r with \"passed\": true, \"provisional\": []. s, a top-level provisional, gets \"provisional\": [\"s\"]. Spec: 04-kernel.md:127-129 (provisional is the same value, marked as debt), grammar 02:87 allows `extern [provisional]` as an atom, and R5 05:176-178 plus 05:329 (a test whose cone has a provisional extern records it and is never certified). A decided rule goes unenforced and certification is granted."
+   },
+   {
+    "id": "B25",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "checker.py:664 (provisional type) and 669-670 (value over defined types) both record []; cli.py:260 prints 'an extern type nobody has defined' for []. In v_b24.lut, `s : Int -> Int := extern provisional ...` is listed as 'provisional s: an extern type nobody has defined'. R5 05:176-177 says it is recorded 'with the names it builds on'. An empty list is defensible for a value. The wrong part is the description."
+   },
+   {
+    "id": "B26",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "checker.py:819-833 register_extern strips an optional 'python:' prefix, accepts 'module:attr' and 'module.attr', and imports the module during check. Re-ran d09 (accepted 'builtins:abs' and 'builtins.abs'), d09b ('must be module.attr or module:attr'), d09c ('cannot resolve extern ... No module named'). The spec only shows `extern \"python:module.function\"` (04-kernel.md:127); every other spec mention is `extern \"...\"` (05:63, 06:73, 01:39). Nothing in tests/ matches either message. All extern targets in lib/ and examples/ use the python: prefix."
+   },
+   {
+    "id": "B30",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "checker.py:861-874: the branch condition is wrapped as `implies` only if self.is_bool(tt). A quantified law (a function into Bool, from subtype_obligation 1544-1548) is not Bool, so it is recorded bare. Copied impl-checker/branch/i01 to verify-impl-checker/v_b30.lut and ran `luthier test`: 'h: FAILED  \\ x { (x * x) * k } x >= 0 ... counterexample: k = -1, x = 1', a case the `if k > 0` branch never reaches. Spec 05:293-294: an obligation raised inside a branch carries c as a precondition, with no restriction to Bool-valued ones. R11 (05:243-253) is decided but not implemented and would replace this, so the 05 §7 rule is the one in force."
+   },
+   {
+    "id": "B32",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:1549-1558 calls decide_closed (1633-1653), which runs the predicate on the machine. The spec does cover the case: 04-kernel.md:83-84 says a term of T used where the subtype is expected creates an obligation (05 §7), and 05:291-292 says the obligations of a name are run by test. The implementation decides at check time instead. If the predicate is false, check fails: test_kernel.py:161-165, and verify-impl-checker/v_b32.lut `y : Pos := e 0` gives 'e 0 does not satisfy Pos'. If true, nothing is recorded: `x : Pos := e (0 - 3)` gives '0 with laws, 0 pending test', so no certificate entry or grade 'point' is ever produced. The predicate runs the Python extern builtins.abs during `check`. Only the checker.py:8-10 docstring states the rule. I'd keep it at medium, not high, because a false closed predicate fails either way and only the phase and the record differ. Status corrected from not_in_spec because 04:83-84 is a direct statement."
+   },
+   {
+    "id": "B33",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:1008-1020: the comment says 'a coercion inside the predicate is a precondition of the law', yet the code does pred = And(law, pred). Re-ran b03: 'in short: (1, \\ k { 5 }) does not satisfy Third', because the conjunct `2 < v.n` is false. grep for 'precondition' in docs/semantica hits only branches (05:294), sum payloads (05:186), R11 (05:251) and pattern matches (05:460). None covers a coercion inside a predicate. Conjunction and implication give different membership, and the spec says nothing either way."
+   },
+   {
+    "id": "B36",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "checker.py:928-931. Re-ran d07: 'label a appears twice in a sum'. 04-kernel.md:59,68-73 and 02-grammar.md:82 define sums and their labels but never mention duplicate labels. Untested (grep 'appears twice' in tests/ is empty)."
+   },
+   {
+    "id": "B37",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "checker.py:1816 and the label table (self.labels). Re-ran d06 ('label red belongs to several sums'), d06b (`s := circle 2.0` ok), g03 (`m := just 3` gives '3 has type Int but U was expected'). 03-libraries.md:31 says labels of alias-named sums are prefixed like functions, which implies they are names in scope. It specifies neither use without an expected type, nor that a parameterized alias's type parameters come first, nor the ambiguity error. 02-grammar.md:97 describes injection only 'against' a known sum."
+   },
+   {
+    "id": "B39",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "is_bool at checker.py:125-131 requires labels true,false. The guard at 1927-1931 rejects the PCon true/false that `if` produces. conv ignores labels. Re-ran a02 (`if v` on Verdict rejected), a09 (predicate of type Verdict rejected), a01 (`asBool (x : Verdict) : Bool := x` accepted). `luthier eval a01 y` gives '1 : Int', so wrong is taken as true by position. 04-kernel.md:68-73 says labels are binders and not part of a type's identity, and tests/spec/k_bool_is_sum.accept.lut says 'a value of a sum with the same shape is a Bool'. So Verdict and Bool are one type in the spec, and the spec accepts `if v` and the Verdict predicate. tests/test_checker_rules.py:24-37 enforce the opposite. The spec and the implementation disagree, and the implementation disagrees with itself (conversion by shape, conditions by label)."
+   },
+   {
+    "id": "B40",
+    "verdict": "refuted",
+    "corrected_status": "covered",
+    "corrected_severity": "low",
+    "evidence": "checker.py:945-946. Re-ran e12: 'cannot infer the type of \\ x { x }'. There is a spec line: 02-grammar.md:135-136 'An argument whose type is not inferable alone (an unannotated lambda) is checked once the others solved the unknowns', which states that an unannotated lambda cannot be inferred alone. The second half, the tuple-pattern restriction at checker.py:955-961, can't be reached from source: parser.py:478-489 gives tuple-pattern lambda parameters ann=None, so infer stops at line 946 first. The mapper's e19 does not even parse ('expected ')', got ':''). That part is dead code for surface programs, not a behavior."
+   },
+   {
+    "id": "B43",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "checker.py:994-999. Re-ran e07: 'forget applied to 3 : Int, which is not a subtype'. Spec has syntax only (02-grammar.md:88) and says forget is implicit (04-kernel.md:85). Extra: verify-impl-checker/v_b43.lut `y : Real := forget x` with x : Float64 is rejected the same way, although 06-numbers.md:37,47 make Float64 a refinement of Real. strip_subtype ignores primitive refinement, while convertible (1462-1476) honors it."
+   },
+   {
+    "id": "B44",
+    "verdict": "refuted",
+    "corrected_status": "covered",
+    "corrected_severity": "low",
+    "evidence": "checker.py:938-940. Re-ran e10: `T = (x : Int)` is rejected. The grammar does specify this. 02-grammar.md:71-89 has no atom `( name : term )` alone: named positions appear only followed by -> or *, or paired with * or +, and ':' is not an infix op (02:60). The spec rejects the form, and so does the implementation, at the checker rather than the parser. The only difference is the phase."
+   },
+   {
+    "id": "B51",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "infer_binop at checker.py:1327-1331 resolves registered operators before the built-ins and before the R8 check at 1332-1337. add_operator (422-435) accepts any op. Re-ran: e01 `operator == := alwaysT` makes `x := 1 == 2` evaluate to 'true : Bool'; e25 `operator < := andI` makes `3 < 4` give '12 : Int'; b11 `operator + := sub` makes `5 + 3` give '2 : Int'; e24 registers eqF on Int -> Int and `S (f g : Int -> Int) : Bool := f == g` is accepted, which R8 (05:210-212, 'not on exponentials') forbids. Spec is split: 02-grammar.md:65 limits the directive to + - * /, while 04-kernel.md:49 says 'an infix operator'. lib/ only registers + - * (grep ^operator). e02/e03 messages are untested."
+   },
+   {
+    "id": "B53",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "contains_function (checker.py:1835-1870) falls through to False for a type variable and for U. Re-ran a08 (accepted), a08b (`luthier eval` gives 'inc == inc : Bool', stuck), h06 ('compose inc dbl == compose dbl inc : Bool'), b12 (`Int == Float64` accepted, evaluates to 'Int == Float64 : Bool'). R8 05:210-214 lists where == exists and says a law over other types takes its equality as a parameter. A type parameter is not on the list. I checked the mapper's claim that the library doesn't depend on this with an out-of-tree monkeypatch (verify-impl-checker/patch_r8.py) that flags == at a type variable or U: it fires on a08 and b12 and on nothing in all of lib/. A decided rule is not enforced."
+   },
+   {
+    "id": "B54",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "contains_function returns False for Var Rational. Re-ran g04 (`fromInt 1 == fromInt 1` accepted). R8 05:210-211 omits Rational. 06-numbers.md:140-142 gives Rational 'comparisons exact', and 02-grammar.md:60 groups == with the comparisons, so the implementation follows 06 and the R8 list is stale."
+   },
+   {
+    "id": "B56",
+    "verdict": "refuted",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "checker.py:1351-1353. Re-ran b13: `\"a\" + \"b\"` evaluates to 'ab' : String. The mapper's 'none' misses 04-kernel.md:140, 'prim: arithmetic and comparisons on literals of Int, Float64, String'. That line puts arithmetic on String in the kernel without saying what it is, and it contradicts 04:64 and 04:96, which limit arithmetic to Int and Float64. So the behavior sits in the spec's ambiguity. It isn't absent from the spec. Untested."
+   },
+   {
+    "id": "B57",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:1354-1357 rejects non-numeric operands. Re-ran b13b: 'operator < expects Int, Float64 or Rational, got 'a' : String'. 04-kernel.md:140 lists comparisons on String literals, while 04:64 and 04:96 list comparisons on Int and Float64 only. Two readings, different behavior."
+   },
+   {
+    "id": "B60",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "checker.py:1397-1400 requires conv(ann, w.dom). Re-ran a06: 'parameter x annotated Real but expected Float64'. A more practical case, verify-impl-checker/v_b60.lut `f : Nat -> Int := \\ (x : Int) { x + 1 }`, is rejected with 'annotated Int but expected Nat'. The same function named first (v_b60b.lut: `g (x : Int) : Int := x + 1`, `f : Nat -> Int := g`) is accepted. R9 05:217-218 and 06-numbers.md:96-97 ('when a function value is checked against a function type') accept both. The spec accepts something the implementation rejects."
+   },
+   {
+    "id": "B61",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "coerce (checker.py:1504-1540) goes component by component only for Sigma. convertible/function_passes (1462-1502) handle only a top-level Pi. Re-ran a07c: `m2 : Maybe (Float64 -> Real) := m1` with m1 : Maybe (Float64 -> Float64) gives 'm1 has type Maybe (Float64 -> Float64) but Maybe (Float64 -> Real) was expected'. a07d rejects Maybe Nat where Maybe Int is expected. a07 (literal `just half`) and a07b (a product) are accepted. 06-numbers.md:97-98 says the rule is applied 'component by component through products and sums', and Maybe is a sum (04-kernel.md:168). The spec accepts what the implementation rejects. The r9 spec tests cover only top-level functions."
+   },
+   {
+    "id": "B62",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "check_match at checker.py:1714-1724 computes only missing labels and constructors. Re-ran a05: `match b { true -> 1 ; true -> 2 ; false -> 3 }` is accepted and `f true` evaluates to '1 : Int'. 04-kernel.md:109-111 says 'none repeated and none missing', so a decided rule is not enforced. g06 (data coverage, 'does not cover: succ') works but has no test; only label coverage is tested (test_kernel.py:155-158). I did not check the mapper's claim that no library match repeats a branch."
+   },
+   {
+    "id": "B63",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "Re-ran b14 and b14b. Both pass check, and `luthier eval` gives 'error: no branch of a match applies to its value' for y. 04-kernel.md:109-112 states coverage only for the constructors and labels of the type of t, and allows literal and nested patterns without saying what coverage means for them (Int has no labels, and a product has none at the top). The spec is silent, so behavior on these programs isn't decided."
+   },
+   {
+    "id": "B65",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "The guard at checker.py:1927-1931 fires on the PCon true/false that `if` produces. A hand-written pattern `true` parses as a variable and never reaches it, although the guard's own comment says it is meant for 'a pattern true against another type'. Re-ran a04 (`match n { true -> 1 ; false -> 2 }` on Int, '1 : Int') and a03 (same on a Verdict, '1 : Int'). The match behavior agrees with 02-grammar.md:96 (a name that is not a label is a variable). The `if` rejection is stated nowhere, and 04-kernel.md:159 translates `if` into exactly that match, so read literally the spec gives the two forms the same meaning."
+   },
+   {
+    "id": "B67",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "checker.py:496-500 skips the conflict when prior == g.type_name. Re-ran b10: two `gen Small` directives give 'ok'. 04-kernel.md:49 says 'the generator of T' and R7 05:202-204 covers only two aliases. I lowered severity because 08-tests.md:68 ('gen T := g ... is removed: no type owns a generator (G4)') and 08:337,368 decide that the gen act goes (decided, not implemented), so the spec has no rule for this act in its future form."
+   },
+   {
+    "id": "B01",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "low",
+    "evidence": "checker.py:159-170 and load_object 173-211. 05-static-semantics.md:88-99 says the program is read whole, objects are checked in dependency order, and order in the file is not significant. tests/test_kernel.py:137-145 defines b before a and isEven/isOdd mutually recursive. The 'each object as a block, declared types first' clause (05:96-97) has exceptions: mutually recursive data (B02), and an alias on the cycle of a declared type, which gives 'unbound name' because aliases are added before declarations (verify-impl-checker/v_b05_alias_in_cycle.lut, see B05)."
+   },
+   {
+    "id": "B04",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:220-224 and 525-526. R7 05:201-202 says a name that is an alias and is also declared or defined is an error. tests/spec/r7_alias_defined.reject.lut exercises only 'cannot be defined'. Re-ran d05 ('Stats is an alias and cannot be declared') and h05 ('A is an alias and cannot be defined twice', printed without the 'in A:' prefix). Both are untested. Two aliases of one name are not literally covered by R7."
+   },
+   {
+    "id": "B06",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "low",
+    "evidence": "checker.py:256-317 and 609-631 match R6 (05:194-197), and tests/spec/r6_*.lut pass the expected messages. Re-ran d03 ('its body has type something else', which hides the cause) and g05 (same message). Extra: d03b (`Bounded (n : Int) : Int` / `Bounded := \\ n k { k < n }`) is accepted as a parameterized refinement. Read literally, R6 says the body has type T or T -> Bool with T = (n : Int) -> Int, so the parameterized form that theories use (05:82) is practice beyond R6's wording. The 'declared with parameters' message (checker.py:266) has no test."
+   }
+  ],
+  "notes": "I verified all 33 entries against src/luthier/checker.py (identical between b15f2a1 and HEAD; only tests/test_audit_correspondence.py differs) and against docs/semantica 02, 03, 04, 05, 06 and 08. I re-ran every mapper program I cited. New programs and helpers are under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-impl-checker/. Two out-of-tree monkeypatch scripts there (patch_r3.py, patch_r8.py) check library reliance without touching the repo.\n\nCorrections:\n- B17: refuted. 05:86 covers it. Severity medium because it's untested.\n- B40: refuted. 02:135-136 covers it. The tuple-pattern part can't be reached from source.\n- B44: refuted. The grammar excludes the form.\n- B56: refuted. 04:140 mentions String arithmetic, so it's an ambiguity, not an absence.\n- B05: raised to high. An alias over a declared type is rejected while its expansion is accepted (v_b05_alias_in_decl vs v_b05_noalias_decl). Separately, an alias on the cycle of a declared type gives 'unbound name' (v_b05_alias_in_cycle). This second defect is not in the mapper's list.\n- B32: status changed to covered_differently, since 04:83-84 says it's an obligation for test. Check runs Python externs to decide closed values.\n- B67: lowered to low, because 08-tests.md decides that gen is removed.\n\nConfirmed high: B03, B24, B30, B39, B51, B53, B60, B61, B62.\n\nB08 detail: lib/table.lut (Table, Codec) relies on the whole-value R3 reading, so making R3 strict would break the library.\n\nNot verified: B62's claim that no library match repeats a branch."
+ }
+}

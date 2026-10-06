@@ -1,0 +1,860 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-tools",
+   "direction": "impl",
+   "files": "src/luthier/cli.py, certify.py, testing.py, generators.py, graph.py, arrays.py, tables.py, rational.py, text.py"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "abf73ecfb92425ed8",
+  "agent_label": "map impl-tools",
+  "started_at": "2026-10-06T11:48:38+00:00",
+  "finished_at": "2026-10-06T12:17:46+00:00",
+  "tokens": 336843,
+  "tool_calls": 91,
+  "duration_ms": 1748023,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "src/luthier/cli.py (all 674 lines: Loader, import resolution, certificate acceptance, lock, check, test, run, certify, eval, argument parser)",
+   "src/luthier/certify.py (all 351 lines: cone, canonical text, fingerprints, stale reasons, certificate read/write)",
+   "src/luthier/testing.py (all 396 lines: outcomes, summary, flatten, run_law sampled and exhaustive, run_test)",
+   "src/luthier/generators.py (all 569 lines: registered generators, fallbacks per type, subtype filter, functions, theories, enumeration, describe)",
+   "src/luthier/graph.py (all 407 lines: grouping by name, duplicate errors, dependency edges, objects)",
+   "src/luthier/arrays.py (all 355 lines; checked which functions are bound by lib/*.lut)",
+   "src/luthier/tables.py (all 340 lines: codec, generators)",
+   "src/luthier/rational.py, src/luthier/text.py (all)",
+   "Spec read in full: docs/semantica/00, 01, 02-grammar, 03, 04, 05, 06, 07, 08 (02-que-robar.md skipped as prior art)",
+   "Bindings of the scope modules: src/luthier/lib/array_python.lut, probability_python.lut, table.lut, table_python.lut, rational.lut, text.lut, random.lut and their *.cert.json",
+   "Tests: tests/test_certificates.py, test_spec.py, test_bridge.py, test_kernel.py, test_evaluators.py, test_checker_rules.py, test_sugar.py, tests/spec/*",
+   "User docs: README.md, examples/z7ring.lut and examples/z7ring.cert.json"
+  ],
+  "behaviors": [
+   {
+    "id": "IT-01",
+    "impl_ref": "src/luthier/cli.py:26-43",
+    "behavior": "import \"x\" resolves next to the importer, then LUTHIER_PATH, then lib/, then the package directory; .lut optional; a missing file stops with \"<importer>: cannot find import 'x'\"",
+    "spec_ref": "docs/semantica/03-libraries.md:201-203",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_luthier_path_is_searched",
+     "tests/test_kernel.py::test_import_loads_dependencies_once_and_rejects_cycles"
+    ],
+    "evidence": "The spec names three places; cli.py:32 adds a fourth (the package directory, so `import \"core\"` works under --no-core), not in 03. Scratch e27: a file with `import \"nosuch\"` gives \"miss.lut: cannot find import 'nosuch'\"; `luthier check --no-core` on a file with `import \"core\"` passes. The missing-import message has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-02",
+    "impl_ref": "src/luthier/cli.py:73-90",
+    "behavior": "a file is loaded once per (path, prefix), may be loaded under several prefixes, and an import cycle stops with \"import cycle: a.lut -> b.lut -> a.lut\"",
+    "spec_ref": "docs/semantica/03-libraries.md:202-203",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_import_loads_dependencies_once_and_rejects_cycles"
+    ],
+    "evidence": "e27: col.lut (`Color = < red : Unit | blue : Unit >`, flip, first) imported `as a` and `as b`; `luthier eval two.lut \"b.flip b.first\"` prints `blue : b.Color`. Exception: `import \"core\" as k` fails inside core.lut: \"type error: in k.not: label false belongs to several sums\", though 03:202 allows any file under two prefixes. Two prefixes have no test.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-03",
+    "impl_ref": "src/luthier/cli.py:84-102",
+    "behavior": "load failures stop the command with \"<path>: parse error: ...\", \"<path>: type error: ...\" or \"<path>: evaluation error while checking: ...\"",
+    "spec_ref": "docs/semantica/05-static-semantics.md:141-143",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_spec.py::test_rejected"
+    ],
+    "evidence": "Every tests/spec/*.reject.lut fragment is matched inside the type-error form. The parse-error and evaluation-error forms are not exercised by tests/spec.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-04",
+    "impl_ref": "src/luthier/cli.py:94-96",
+    "behavior": "`primitive` bodies are accepted only while loading core.lut; `axiom` bodies only while loading a file under src/luthier/",
+    "spec_ref": "docs/semantica/04-kernel.md:45-46; docs/semantica/06-numbers.md:59-60",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/n3_primitive_outside_core.reject.lut",
+     "tests/spec/n4_axiom_outside_lib.reject.lut"
+    ],
+    "evidence": "cli.py:96 tests the whole package directory where the spec says core.lut and lib/; today the same set, since core.lut is the only .lut directly in src/luthier.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-05",
+    "impl_ref": "src/luthier/cli.py:116-169",
+    "behavior": "once the whole program is loaded and holes filled, a certificate entry is trusted when its hash matches, every generator it drew from has the same fingerprint, and its mode and count meet the directive; a matching failed or not-run entry is kept as known",
+    "spec_ref": "docs/semantica/05-static-semantics.md:320-328; docs/semantica/03-libraries.md:241-244",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_certificate_is_trusted_on_import_while_the_hash_matches",
+     "tests/test_certificates.py::test_a_certificate_with_fewer_cases_than_the_directive_is_stale",
+     "tests/test_certificates.py::test_a_library_with_a_hole_is_certified_per_filling",
+     "tests/test_certificates.py::test_editing_the_python_behind_an_extern_makes_its_certificate_stale"
+    ],
+    "evidence": "e30: `gen Pos := extern \"python:mygen.pos\"`, `p : { u : Unit | \\ (x : Pos) { x > 0 } } := unit`, `test p with 10`; after editing only mygen.py, check -v prints \"stale certificate: the generator Pos changed; needs test\". That branch (cli.py:160-162) and \"its directive asks for an exhaustive test\" (cli.py:165-166) have no test. Edge: an exhaustive entry records n = 100 (TestDirective default, syntax.py:282), so changing the directive to `with 500` makes it stale (\"it ran 100 cases\") although every case was run.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-06",
+    "impl_ref": "src/luthier/certify.py:260-273",
+    "behavior": "check -v explains staleness: \"certified before fingerprints were recorded\", \"the interpreter changed\", \"the code of its cone changed\", \"the Python behind X changed\", \"the fingerprint changed\"",
+    "spec_ref": "docs/semantica/05-static-semantics.md:323-324",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_editing_the_python_behind_an_extern_makes_its_certificate_stale"
+    ],
+    "evidence": "Only \"Python behind\" is asserted by a test. e13 (copy of examples/z7ring.lut with the shipped examples/z7ring.cert.json): check -v prints \"ringZ7 ... [stale certificate: certified before fingerprints were recorded; needs test]\", so the example certificate the repository ships can never be trusted.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-07",
+    "impl_ref": "src/luthier/certify.py:26-55",
+    "behavior": "the dependency cone collects every name that occurs in a definition, bound variables included (names_in over map_names, subst.py:161-163), so a global of the importing program named like a bound variable of a library enters that library definition's cone and changes its hash",
+    "spec_ref": "docs/semantica/03-libraries.md:237-239; docs/semantica/05-static-semantics.md:24-26",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py::test_certificate_hash_is_alpha_invariant"
+    ],
+    "evidence": "e14: plain.lut = `import \"algebra\"`; shadow.lut = the same plus `eqB : Int := 0`. algebra.lut:23 uses eqB only as a parameter of Symmetric. definition_hash(intRing): fbfbe6ae81682137 vs 93531df454bb46a6; 'eqB' in cone(intRing): False vs True; intRing certified in plain, \"the code of its cone changed\" in shadow; `luthier check shadow.lut` says \"7 with laws, 0 certified, 7 pending test\" (plain: 0 with laws). The README example examples/z7ring.lut defines eqB, so `luthier test` on it ends with \"imported, stale certificate: exactBool, exactInt, exactNonNegative, intRing, allOf, anyOf, largest\" and advises `luthier test .../lib/algebra.lut`, which cannot clear it because the extra name comes from the importer. The alpha test has no global colliding with a binder.",
+    "severity": "high"
+   },
+   {
+    "id": "IT-08",
+    "impl_ref": "src/luthier/certify.py:161-257",
+    "behavior": "an entry's fingerprint is the hash of the canonical cone text (module prefix removed, binders renamed), a fingerprint per extern (hash of the .py files of its module's directory, package and version when installed, Python version for builtins), and the interpreter (every .py and .lut directly in src/luthier)",
+    "spec_ref": "docs/semantica/05-static-semantics.md:320-322",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_editing_the_python_behind_an_extern_makes_its_certificate_stale",
+     "tests/test_certificates.py::test_a_run_records_the_state_of_its_cone_and_can_require_it",
+     "tests/test_kernel.py::test_certificate_hash_is_alpha_invariant"
+    ],
+    "evidence": "Matches 05:320-322; any edit to an interpreter .py makes every certificate stale, as stated.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-09",
+    "impl_ref": "src/luthier/certify.py:290-351",
+    "behavior": "luthier test x.lut writes x.cert.json: per name a list of entries, the same hash replaced, others kept up to 4, names of the file without laws pruned; writing takes an flock on x.cert.json.lock, left on disk; an unreadable certificate is read as empty and overwritten",
+    "spec_ref": "docs/semantica/03-libraries.md:235-239; docs/semantica/05-static-semantics.md:286-289,325-328,348",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_names_that_no_longer_exist_are_pruned",
+     "tests/test_certificates.py::test_a_library_with_a_hole_is_certified_per_filling"
+    ],
+    "evidence": "src/luthier/lib holds 11 *.cert.json.lock files (git-ignored). The cap MAX_ENTRIES = 4 (certify.py:312) has no test; entries of earlier versions of an edited definition are kept as if they were other fillings (certify.py:348), since the writer cannot tell the two apart. The lock file and the silent reset of a corrupt certificate are not in the spec.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-10",
+    "impl_ref": "src/luthier/testing.py:71-72",
+    "behavior": "a test directive on a definition with no laws prints \"x: no laws\", sets exit status 1, and writes an entry with outcome \"no laws\"",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e10b: app.lut `twice (a : Z3) : Z3 := inc (inc a)` with `test twice exhaustive` gives \"twice: no laws\", exit 1, app.cert.json = {\"twice\": [{\"outcome\": \"no laws\", \"passed\": false, \"laws\": []}]}.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-11",
+    "impl_ref": "src/luthier/cli.py:286-295",
+    "behavior": "--name f takes the first loaded directive whose name is f or ends in \".f\"; imports load before the file's own directives, so an imported m.f wins over the top file's f and is tested and written into the imported file's certificate",
+    "spec_ref": "docs/semantica/03-libraries.md:246-249; README.md:83",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "e2: lib.lut `Small : U := { k : Int | 0 <= k and k < 3 }`, `inc (a : Small) : Small := (a + 1) mod 3`, `test inc exhaustive`; app.lut `import \"lib.lut\" as L`, `Pos : U := { k : Int | k > 0 }`, `inc (a : Pos) : Pos := a + 1`, `test inc with 20`. `luthier test app.lut --name inc` prints \"L.inc: passed ... certificate: .../lib.cert.json\"; the top-level inc is never run. The comment at cli.py:287 says \"the file's own directive\"; 03 only sanctions the qualified form `--name m.f --deep`.",
+    "severity": "high"
+   },
+   {
+    "id": "IT-12",
+    "impl_ref": "src/luthier/testing.py:348-350",
+    "behavior": "--name of an undefined name is reported as a failed law \"no such definition\" with exit status 1, not as an argument error",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e10b: `luthier test z.lut --name nosuch` prints \"nosuch: FAILED / FAIL nosuch [sampled, 0 cases] / error: no such definition\", exit 1.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-13",
+    "impl_ref": "src/luthier/cli.py:296-304",
+    "behavior": "without --name only the top files' test directives run; only when no top file has a directive are all its definitions with laws run; names with laws but no directive stay untested",
+    "spec_ref": "docs/semantica/05-static-semantics.md:291-292; README.md:82",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_certificates.py::test_names_that_no_longer_exist_are_pruned"
+    ],
+    "evidence": "e13 (copy of examples/z7ring.lut): after `luthier test z7ring.lut`, check -v still lists addMod7, mulMod7, negMod7 as \"[pending]\" and summarizes \"12 with laws, 1 certified, 11 pending test\" (3 own names without directives, 7 algebra names from IT-07, badRing failed). The spec does not say which names `luthier test file` runs.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-14",
+    "impl_ref": "src/luthier/cli.py:293",
+    "behavior": "--n overrides a directive's `with n` and --exhaustive forces exhaustive, but a directive's `size k` overrides --size",
+    "spec_ref": "docs/semantica/02-grammar.md:279",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e11: `Small (x : Int) : Bool := x * x < 2500`, `p : { u : Unit | \\ (x : Int) { Small x } } := unit`, `test p with 50 size 3`. `--size 100 --seed 2` gives \"passed [sampled, 50 cases]\" (size 100 would reach |x| >= 50); `--n 7` gives \"[sampled, 7 cases]\". The --size help (cli.py:603-605) does not say the directive wins.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-15",
+    "impl_ref": "src/luthier/cli.py:305-315",
+    "behavior": "--imports runs every loaded obligation without a trusted entry, libraries included, and writes each into its own file's certificate",
+    "spec_ref": "docs/semantica/05-static-semantics.md:326-327",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_library_with_a_hole_is_certified_per_filling"
+    ],
+    "evidence": "Read from cli.py:310-315 and 371-374 (not run, since it would write into src/luthier/lib): combined with IT-07, an importer that merely defines eqB would add entries to src/luthier/lib/algebra.cert.json and push older entries past the cap of 4.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-16",
+    "impl_ref": "src/luthier/cli.py:316-322",
+    "behavior": "test n also runs the obligations of every member of n's object",
+    "spec_ref": "docs/semantica/05-static-semantics.md:292",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e19: `isEven (n : Nat) : Bool := if n == 0 then true else isOdd (n - 1)`, `isOdd` symmetric, `test isEven with 10` prints results for isEven and isOdd. No test exercises the expansion.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-17",
+    "impl_ref": "src/luthier/cli.py:50-54",
+    "behavior": "a run seed is drawn or taken from --seed and printed (\"run seed S (repeat with --seed S)\") when any directive is sampled; each definition's seed is derived from the run seed and its name",
+    "spec_ref": "docs/semantica/05-static-semantics.md:287; README.md:109-110",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_certificate_records_seed_and_cases_and_the_seed_repeats_them"
+    ],
+    "evidence": "e22: two `luthier test r.lut --seed 42` runs give the same per-definition seeds (387138681, 1168338037) and first cases, also with --name b alone. The test exercises run_test with an explicit seed, not the CLI derivation.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-18",
+    "impl_ref": "src/luthier/cli.py:330-334",
+    "behavior": "definitions of the files named on the command line are always rerun; an imported definition with a trusted entry is shown \"(certified <when>, hash <h>; not rerun)\" with mode \"certified\" unless --deep",
+    "spec_ref": "docs/semantica/03-libraries.md:241-249; docs/semantica/05-static-semantics.md:311",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e10b: a second `luthier test z.lut` reruns inc; `luthier test app.lut --name inc` (app imports z) prints \"inc: passed (certified 2026-10-06T19:59:34, hash 4f45e369631ca934; not rerun)\". Tests call run_test with deep=True; the reuse path and --deep at the CLI are untested. 08-tests.md:266-269 (C4, decided) would also reuse failed entries.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-19",
+    "impl_ref": "src/luthier/testing.py:83-101",
+    "behavior": "test prints \"name: passed|FAILED|NOT RUN|no laws\" and per law \"ok|FAIL|skip label [mode, n cases, k where the computation raised, t s]\" with counterexample, error or not-run lines",
+    "spec_ref": "docs/semantica/05-static-semantics.md:315-319; README.md:25-44",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e13 output matches README's form: \"ringZ7: passed\", \"  ok   Associative Z7 Z7 eqZ7 addMod7 addMod7   [exhaustive, 343 cases]\", \"FAIL LeftInverse Bool eqB (or, false).op (or, false).unit not   [exhaustive, 1 cases]\", \"counterexample: x = true\".",
+    "severity": "low"
+   },
+   {
+    "id": "IT-20",
+    "impl_ref": "src/luthier/cli.py:339-346",
+    "behavior": "after a test, prints how many evaluations fell back from the machine to the substitution evaluator and records them in the entry's generation",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "Also testing.py:389-392. Comes from plan 4.3, not from docs/semantica.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-21",
+    "impl_ref": "src/luthier/cli.py:347-359",
+    "behavior": "after a test, lists imported obligations without a trusted entry (\"imported, stale certificate|no certificate: ...\") and advises `luthier test <file>` or --imports",
+    "spec_ref": "docs/semantica/03-libraries.md:241-244",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e13 shows the message; when staleness comes from IT-07 the first advice cannot work.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-22",
+    "impl_ref": "src/luthier/cli.py:360-375",
+    "behavior": "writes one certificate per file for every report not reused (failed and not run included), prints \"certificate: <path>\", --no-cert skips writing, exit status 0 only if every report passed",
+    "spec_ref": "docs/semantica/03-libraries.md:235; docs/semantica/05-static-semantics.md:319",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_law_blocked_by_a_hole_is_not_run_and_not_failed"
+    ],
+    "evidence": "--no-cert and the exit status are not in the spec.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-23",
+    "impl_ref": "src/luthier/cli.py:282-283",
+    "behavior": "--fuel sets the steps per evaluation for test, run and eval (default 2000000000)",
+    "spec_ref": "docs/semantica/04-kernel.md:115-116; docs/semantica/05-static-semantics.md:317",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "Default at evaluator.py:56 matches the help text (cli.py:613, 643); eval uses it through evaluate (evaluator.py:1127). Running out of fuel makes a law not run (testing.py:216).",
+    "severity": "low"
+   },
+   {
+    "id": "IT-24",
+    "impl_ref": "src/luthier/cli.py:378-446",
+    "behavior": "run --set name=value requires name=value, a non-function hole, and reads the value by the hole's declared type (String raw, Int, Float64 or Real finite, Bool true/false; others refused); a refinement is checked when the hole is filled",
+    "spec_ref": "docs/semantica/06-numbers.md:108-109; docs/semantica/05-static-semantics.md:152-153",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_a_setting_is_read_by_the_type_of_its_hole"
+    ],
+    "evidence": "e3 (holes `n : Nat`, `sigma : Float64`, `flag : Bool`, `g : Int -> Int`, `main : Int := n * 2`): `--set n=-3` gives \"--set n=-3: in n: n does not satisfy Nat\"; `--set n=4` prints 8; `--set n=4.0` \"is not an integer\"; `--set sigma=inf` \"NaN and infinities are not values of Float64\"; `--set flag=True` \"give true or false\"; `--set g=1` \"a function hole cannot be set\"; `--set n` \"--set expects name=value\". The test covers typed_setting only, not the CLI path.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-25",
+    "impl_ref": "src/luthier/cli.py:435-450",
+    "behavior": "run with an unknown --set name or an unknown --entry ends in a Python KeyError traceback; the messages \"not a hole of the program\" and \"no definition 'x' to run\" are unreachable",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e3: `--set nosuch=1` and `--entry nosuch` both end with \"KeyError: \\\"no definition 'nosuch'\\\"\" raised at api.py:53, because Program.resolve raises before cli.py:437 and 449 can test for None.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-26",
+    "impl_ref": "src/luthier/cli.py:451-454",
+    "behavior": "run refuses an entry whose cone has a hole without a value (\"main depends on holes without a value: k; give them with --set name=value\"); eval refuses the same through the evaluator",
+    "spec_ref": "docs/semantica/05-static-semantics.md:308-310",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e1: `k : Int`, `f (x : Int) : Int := x + k`, `main : Int := f 1`. `luthier run` prints the message above; `luthier eval e1_hole.lut \"f 1\"` prints \"error: depends on k without a value: k is declared but has no definition\", exit 1. Neither path has a test.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-27",
+    "impl_ref": "src/luthier/cli.py:456-462",
+    "behavior": "run prints the states of the names with laws in the entry's cone (certified, failed or not run, stale, pending, provisional, assumed) as counts",
+    "spec_ref": "docs/semantica/05-static-semantics.md:330-331",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_run_records_the_state_of_its_cone_and_can_require_it"
+    ],
+    "evidence": "cone_states at cli.py:525-546; e5 prints \"the cone of main: assumed 1\".",
+    "severity": "low"
+   },
+   {
+    "id": "IT-28",
+    "impl_ref": "src/luthier/cli.py:463-466",
+    "behavior": "--require-certified refuses to run unless every state in the cone starts with \"certified\", so an axiom (\"assumed\") or a provisional extern in the cone blocks the run",
+    "spec_ref": "docs/semantica/05-static-semantics.md:332; docs/semantica/05-static-semantics.md:284; docs/semantica/06-numbers.md:56-58",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_run_records_the_state_of_its_cone_and_can_require_it"
+    ],
+    "evidence": "e5: `import \"algebra\"`, `useReal (F : CompleteOrderedField Real) : Int := 1`, `main : Int := useReal realField`. `luthier run` prints 1; with --require-certified: \"1 names of the cone of main are not certified / realField: assumed (an axiom)\", exit 1. 05:284 makes \"assumed\" a grade and 06:56-58 says an axiom's obligations are recorded as assumed instead of pending, so whether an assumed name satisfies \"every one is certified\" has two readings. The test covers only a pending name.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-29",
+    "impl_ref": "src/luthier/cli.py:467-489",
+    "behavior": "run appends a record to <entry file>.run.json (entry, hash, when, parameters, result, fingerprint, interpreter revision, lock, cone counts and names not certified); --no-record skips it",
+    "spec_ref": "docs/semantica/05-static-semantics.md:309-310,330-331",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_run_records_the_state_of_its_cone_and_can_require_it"
+    ],
+    "evidence": "The record goes next to the file that defines the entry, which for an imported entry is the imported file. 08-tests.md:287-295 (C7, results checked once) is decided and not implemented.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-30",
+    "impl_ref": "src/luthier/cli.py:477",
+    "behavior": "run prints and records the entry's value as Python sees it: a sum as a tuple, a record as a dataclass repr, `just 3` as 3, nothing and unit as no output (null), a function as \"<function ... at 0x...>\"",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e3: `--entry shape` (circle 1.5) prints \"('circle', 1.5)\", `--entry pt` prints \"Pt(x=1.0, y=2.0)\", `--entry mb` (just 3) prints 3. e31: `--entry inc` prints and records \"<function to_python.<locals>.call_typed at 0x7fcd5c78af20>\"; `none : Maybe Int := nothing` prints nothing and records null, as Unit does.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-31",
+    "impl_ref": "src/luthier/cli.py:430-432",
+    "behavior": "run --checked tests every value an extern gives against the refinements of its type as it crosses",
+    "spec_ref": "docs/semantica/05-static-semantics.md:188-190,442-443",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_run_checked_tests_what_an_extern_gives",
+     "tests/test_bridge.py::test_the_result_type_of_an_extern_has_its_arguments_in_it"
+    ],
+    "evidence": "cli.py only sets the flag; the checks are in the evaluator.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-32",
+    "impl_ref": "src/luthier/cli.py:184-221",
+    "behavior": "check, test and run (not eval) look for the nearest luthier.lock upward and warn on stderr when the running interpreter's commit differs; run records the lock state",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e23: luthier.lock containing `deadbeef` gives \"warning: luthier.lock pins luthier deadbeef, and this is 49c6a0fe7d2e\" for check and run, nothing for eval. Comes from plan 5.9; neither docs/semantica nor README mention it.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-33",
+    "impl_ref": "src/luthier/cli.py:495-522",
+    "behavior": "certify runs `python -m luthier.cli test <file>` per file in parallel (--jobs, --seed, --imports) and prints one summary line per file; exit 0 only if every file exited 0",
+    "spec_ref": "docs/semantica/05-static-semantics.md:332-333",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "Read only (the audit rules forbid running certify). No test.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-34",
+    "impl_ref": "src/luthier/cli.py:510-513",
+    "behavior": "certify's summary counts verdicts by the first word after \": \", so NOT RUN is counted as \"NOT\", no laws as \"no\", a pass over provisional externs as \"passed\", and the fallback line as a verdict",
+    "spec_ref": "docs/semantica/05-static-semantics.md:175-178,332-333",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "Simulated by applying the loop of cli.py:510-513 to lines `luthier test` prints: result {'passed': 2, 'NOT': 1, 'FAILED': 1, 'no': 1, 'foo': 1} for \"a: passed\", \"b: NOT RUN\", \"c: FAILED\", \"d: no laws\", \"e: passed, over provisional externs (e): not certified\", \"12 evaluations fell back ...: foo (12)\".",
+    "severity": "low"
+   },
+   {
+    "id": "IT-35",
+    "impl_ref": "src/luthier/cli.py:239-275",
+    "behavior": "check prints \"ok: N definitions, L with laws, C certified, P pending test[, K provisional]\" (N counts acts of the top files; shipped-library obligations are hidden when certified and counted when not); -v lists assumed axioms, provisional externs with what they build on, and each obligation's state",
+    "spec_ref": "docs/semantica/05-static-semantics.md:257-259,288; docs/semantica/06-numbers.md:58-59",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_provisional_externs_are_listed_and_never_certified",
+     "tests/test_kernel.py::test_axioms_are_listed_by_check"
+    ],
+    "evidence": "e6: a file with the acts `Th : {...}`, `Flat`, `Th := Flat`, `q` (three names) reports \"ok: 4 definitions\". e14: adding `eqB : Int := 0` to a file importing algebra turns \"0 with laws\" into \"7 with laws, 0 certified, 7 pending test\", all of them library names. The counting rules are not specified.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-36",
+    "impl_ref": "src/luthier/cli.py:255-274",
+    "behavior": "check -v does not report the observers-against-constructors table of concrete types (sufficient completeness) nor the holes the entry of luthier run depends on",
+    "spec_ref": "docs/semantica/05-static-semantics.md:260-264",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "05:257-269 lists four reports; only the fourth (265-269, R10) is marked \"decided, not implemented\". grep for observer|completeness in src/luthier finds nothing. e9_check.lut (`N : U := data { zero : N ; succ : N -> N }`, add, toInt, `addZ : AddZero := add`, a hole `k : Int`, `main : Int := toInt zero + k`): check -v prints only \"addZ: AddZero [pending; e9_check.lut]\"; no table, no mention of k. Hole reporting exists only as run's refusal (IT-26).",
+    "severity": "high"
+   },
+   {
+    "id": "IT-37",
+    "impl_ref": "src/luthier/testing.py:30-81",
+    "behavior": "each law ends passed, failed or not run; a definition is failed if a law failed, not run if none failed and one was not run, passed otherwise; only passed is certified",
+    "spec_ref": "docs/semantica/05-static-semantics.md:315-319",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_law_blocked_by_a_hole_is_not_run_and_not_failed",
+     "tests/test_bridge.py::test_a_generator_outside_its_type_is_an_error",
+     "tests/test_kernel.py::test_a_group_passes_exhaustively_and_a_wrong_one_fails_with_a_counterexample",
+     "tests/test_bridge.py::test_a_law_blocked_by_a_hole_is_reported_with_its_name"
+    ],
+    "evidence": "Counterexample, evaluation error on a case and generator value outside its type fail (testing.py:207-216); hole and missing generator leave it not run.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-38",
+    "impl_ref": "src/luthier/testing.py:176-216",
+    "behavior": "secondary outcome paths: \"cannot type the law\" and \"cannot flatten\" (not run), \"did not reduce to a Bool on (...)\" (failed), out of fuel (not run), \"T is not finitely enumerable; use `with n`\" (not run)",
+    "spec_ref": "docs/semantica/05-static-semantics.md:315-319",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e25: `fl : { u : Unit | \\ (x : Float64) { x == x } } := unit` under --exhaustive gives \"skip x == x [exhaustive, 0 cases] not run: Float64 is not finitely enumerable; use `with n`\". A grep of tests/ finds none of these messages.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-39",
+    "impl_ref": "src/luthier/testing.py:299-323",
+    "behavior": "in a sampled run, a case of a type obligation where the computation raises is skipped and counted (\"k where the computation raised\"); if every case raises the law is not run",
+    "spec_ref": "docs/semantica/05-static-semantics.md:339-345",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e7: `Big : U := { x : Int | x > 0 - 100 }`, `g (k : Fin 3) : Big := 10 / (k - 1)`; `luthier test e7_raise.lut --name g --n 40 --seed 3` gives \"g: passed / ok 10 / (k - 1) > -100 [sampled, 28 cases, 12 where the computation raised]\". No test exercises skipping.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-40",
+    "impl_ref": "src/luthier/testing.py:230-265",
+    "behavior": "in an exhaustive run, a case of a type obligation where the computation raises is not skipped: the law fails with the error",
+    "spec_ref": "docs/semantica/05-static-semantics.md:339-345",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Same program as IT-39: `luthier test e7_raise.lut --name g --exhaustive` gives \"g: FAILED / FAIL 10 / (k - 1) > -100 [exhaustive, 2 cases] / error: division by zero in 10 / 0\". The `raised` test (testing.py:171-172) is applied only in the sampled loop (testing.py:299-312); the exhaustive branch sends every EvalError to broken() (testing.py:260-261). The spec states the rule for the obligation of a type with no mode restriction.",
+    "severity": "high"
+   },
+   {
+    "id": "IT-41",
+    "impl_ref": "src/luthier/testing.py:121-158",
+    "behavior": "an obligation is split at & into one law per conjunct, each quantified only over the context parameters it mentions and those their types mention",
+    "spec_ref": "docs/semantica/05-static-semantics.md:297-299,346-347",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_a_quantified_law_of_a_record_is_one_obligation_per_law"
+    ],
+    "evidence": "Parameters of the law's own lambda are all kept (peel, testing.py:104-118); only context parameters are dropped.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-42",
+    "impl_ref": "src/luthier/testing.py:127-134",
+    "behavior": "dropping an unmentioned context parameter also drops its emptiness, so an obligation that holds vacuously fails at values no call can reach",
+    "spec_ref": "docs/semantica/05-static-semantics.md:297-299; docs/semantica/05-static-semantics.md:303-305",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "e24: `Pos : U := { x : Int | x > 0 }`, `f (n : Nat) (k : Fin n) : Pos := n`. f can only be applied when n > 0, since Fin 0 is empty. `luthier test vac2.lut` gives \"f: FAILED / FAIL n > 0 [sampled, 3 cases] / counterexample: n = 0\" (bounded under --exhaustive too). The code follows 05:297-299 literally; 05:303-305 says a case whose dependent parameter is empty holds vacuously. The two lines give different verdicts here.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-43",
+    "impl_ref": "src/luthier/testing.py:267-305",
+    "behavior": "sampled cases grow in size from 1 to the maximum over the run; a case whose dependent parameter is empty is drawn again up to 50 times and then held vacuous and not counted; a type out of reach at a smaller size is skipped",
+    "spec_ref": "docs/semantica/05-static-semantics.md:279,303-305",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_sampled_sizes_grow_over_the_run",
+     "tests/test_bridge.py::test_a_record_whose_component_is_empty_for_its_first_one_is_drawn_again"
+    ],
+    "evidence": "With n smaller than size the schedule (testing.py:289) never reaches the maximum (n = 5, size 16 gives 1, 4, 7, 10, 13); 08-tests.md:230 (G12) asks for a schedule that reaches it (decided).",
+    "severity": "low"
+   },
+   {
+    "id": "IT-44",
+    "impl_ref": "src/luthier/testing.py:262-265",
+    "behavior": "a law with no case to evaluate is not run in a sampled run but passed with 0 cases (and certifiable) in an exhaustive run",
+    "spec_ref": "docs/semantica/05-static-semantics.md:303-305; docs/semantica/08-tests.md:263-264",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "e25: `NonPos : U := { m : Int | m <= 0 }`, `q : { u : Unit | \\ (n : NonPos) (k : Fin n) { k == k } } := unit`, `e : { u : Unit | \\ (k : Fin 0) { k == k } } := unit`. Sampled: \"q: NOT RUN ... no case could be drawn\", \"e: NOT RUN ... Fin 0 has no values\". Exhaustive: \"q: passed [bounded, 0 cases]\", \"e: passed [exhaustive, 0 cases]\". 05:303-305 says such a law is not reported as passed (stated for sampling); 08 C3 (decided) says a law none of whose cases evaluates is not run.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-45",
+    "impl_ref": "src/luthier/generators.py:452-569",
+    "behavior": "exhaustive enumeration: Fin by its range; Int in [-size, size] graded \"bounded\"; non-recursive data, pairs and sums by product; a refinement of Int with closed bounds on both sides over its interval (exhaustive); other subtypes by filtering the base; anything else not enumerable",
+    "spec_ref": "docs/semantica/05-static-semantics.md:280-281,334-335",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_enumerating_int_in_a_box_is_graded_bounded",
+     "tests/test_kernel.py::test_laws_over_sums_are_enumerated"
+    ],
+    "evidence": "README example: ringZ7 laws over Z7 graded exhaustive (e13).",
+    "severity": "low"
+   },
+   {
+    "id": "IT-46",
+    "impl_ref": "src/luthier/testing.py:365",
+    "behavior": "the entry records the number of cases asked, not evaluated; vacuous cases, skipped raising cases and cases with a false premise are not told apart, and acceptance compares the asked number with the directive",
+    "spec_ref": "docs/semantica/05-static-semantics.md:323-324; docs/semantica/08-tests.md:258-264",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "e7: `--n 40` evaluates 28 cases (12 raised) and records n = 40, which satisfies a `with 40` directive (cli.py:167). e19: the law \"not (n == 0) -> 0 <= n - 1\" counts n = 0 cases as passed. 05 \"the count reaches the file's directive\" does not say which count; 08 C3 (decided, not implemented) says evaluated cases, with the others counted apart.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-47",
+    "impl_ref": "src/luthier/testing.py:184-191",
+    "behavior": "each law records its parameters, the domain description of each, the first 5 cases and the seconds it took",
+    "spec_ref": "docs/semantica/05-static-semantics.md:286-287,348; docs/semantica/03-libraries.md:236-237",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_certificate_records_seed_and_cases_and_the_seed_repeats_them"
+    ],
+    "evidence": "The seconds field (testing.py:384) has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-48",
+    "impl_ref": "src/luthier/testing.py:369",
+    "behavior": "a test whose cone has provisional externs records their names under \"provisional\"; a passing entry is never certified and check -v shows it as \"passed over provisional externs ..., not certified\"",
+    "spec_ref": "docs/semantica/05-static-semantics.md:175-178,329",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py::test_a_test_over_a_provisional_extern_is_never_certified",
+     "tests/test_kernel.py::test_provisional_externs_are_listed_and_never_certified"
+    ],
+    "evidence": "Also cli.py:146-148. 05:177 says recorded \"with the names it builds on\"; the certificate records only the provisional names (e.g. [\"same\"]), what they build on is shown by check -v.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-49",
+    "impl_ref": "src/luthier/generators.py:153-166",
+    "behavior": "without a registered generator: Int uniform in [-size, size], Float64 uniform in [-size, size], Rational a random fraction, String up to 6 letters of \"abcxyz\", a data type from its constructors with nesting bounded by size, a sum by a uniform label",
+    "spec_ref": "docs/semantica/05-static-semantics.md:279-280; docs/semantica/08-tests.md:91-106,146-163",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py::test_sampled_sizes_grow_over_the_run",
+     "tests/test_kernel.py::test_sampled_law_on_recursive_data"
+    ],
+    "evidence": "05 fixes only the Int box (grade bounded). 08 G3/G7 (decided, not implemented) make Float64 without bounds an error. The domain text says \"Python fallback; import \\\"random\\\" for genInt\", which random.lut:30-33 honours.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-50",
+    "impl_ref": "src/luthier/generators.py:198-230",
+    "behavior": "a function over Fin n is drawn as its table (an int64 array for an Int codomain, a float array, stacked arrays, or a match-lambda); over an infinite non-dependent domain as a constant, or half the time an affine map on Float64 -> Float64; over an infinite dependent domain no generator",
+    "spec_ref": "docs/semantica/05-static-semantics.md:300-302; docs/semantica/06-numbers.md:129-131",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_the_table_of_a_function_to_int_is_an_int64_array"
+    ],
+    "evidence": "The certificate's domain text says \"constant functions (affine on R -> R), a thin sample\" (generators.py:425), with the name R that 06:40 removed. 08 G9 (decided) replaces this by a census.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-51",
+    "impl_ref": "src/luthier/generators.py:186-197",
+    "behavior": "models of a theory are drawn: records of constant or affine functions filtered by the theory's laws, so a law quantified over all models runs, passes and is certified",
+    "spec_ref": "docs/semantica/05-static-semantics.md:306-307",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "e6: `Th : { f : Int -> Int, g : Int -> Int }`, `Flat (t : Th) (x : Int) : Bool := t.f x == t.f (x + 1) and t.g x == t.g x`, `Th := Flat`, `q : { u : Unit | \\ (t : Th) { t.f 0 == t.f 5 } } := unit`, `test q with 50`. Result \"q: passed [sampled, 50 cases]\", check -v \"q ... [certified (...)]\", domain \"(Int -> Int: constant functions ...) * (...) where Flat (f, g)\". The spec: such a law \"has no generator of models and stays pending; it is certified per model\". 08 G9 (decided) also requires a census.",
+    "severity": "high"
+   },
+   {
+    "id": "IT-52",
+    "impl_ref": "src/luthier/generators.py:188-197",
+    "behavior": "a subtype without a registered generator is drawn by rejection from its base, up to 2000 tries, else not run \"could not find a value of T in 2000 tries (rejected, for example: ...); give it a `gen`\"; an Int refinement is therefore never drawn outside [-size, size]",
+    "spec_ref": "docs/semantica/08-tests.md:207-214,226",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "08 G12 describes the 2000 tries as today's fixed budget; G10's interval bounds without rejection and the recorded acceptance rate are decided and not implemented (int_interval, generators.py:520-569, is used only for enumeration). No test reaches the \"could not find a value\" message.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-53",
+    "impl_ref": "src/luthier/generators.py:167-179",
+    "behavior": "a dependent pair whose second component is empty for the drawn first one is drawn again, up to 10 times",
+    "spec_ref": "docs/semantica/08-tests.md:216-219,227",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_a_record_whose_component_is_empty_for_its_first_one_is_drawn_again"
+    ],
+    "evidence": "Matches G11 with the budget of 10 that G12 names.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-54",
+    "impl_ref": "src/luthier/generators.py:80-95",
+    "behavior": "a registered generator is found by the type's own name or instance with aliases unfolded, then by its family (receiving the arguments); a Fin bound is drawn from its range before any registered generator",
+    "spec_ref": "docs/semantica/05-static-semantics.md:202-204",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py::test_the_generator_of_an_alias_is_the_generator_of_its_type",
+     "tests/test_bridge.py::test_two_aliases_of_one_type_cannot_both_have_a_generator",
+     "tests/test_bridge.py::test_an_alias_of_fin_is_drawn_from_its_range"
+    ],
+    "evidence": "generators.py:132-142 checks Fin first, so a `gen` given to an alias of Fin is never used; the spec does not say.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-55",
+    "impl_ref": "src/luthier/generators.py:97-127",
+    "behavior": "a registered generator's value is checked only against the predicates of the outer subtype layers of its type; refinements inside components are not checked, so a component outside its type shows up as a counterexample of the law instead of an error naming the generator",
+    "spec_ref": "docs/semantica/05-static-semantics.md:205-207; docs/semantica/08-tests.md:213-214",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_bridge.py::test_a_generator_outside_its_type_is_an_error"
+    ],
+    "evidence": "e26: `Pos : U := { x : Int | x > 0 }`, `Ordered : U := { p : { a : Pos, b : Int } | p.a < p.b }`, `gen Ordered := extern \"python:compgen.bad_pair\"` returning (-5, 0), `q : { u : Unit | \\ (p : Ordered) { p.a > 0 } } := unit`. Result \"FAIL AIsPositive p [sampled, 1 cases] counterexample: p = (-5, 0)\", although (-5, 0) is not an Ordered. The test covers an outer predicate only. The outcome is failed either way; the blame lands on the definition, not the generator.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-56",
+    "impl_ref": "src/luthier/generators.py:248-356",
+    "behavior": "a predicate that is a quantified law is probed on 5 drawn arguments; a counterexample rejects the value, none accepts it",
+    "spec_ref": "docs/semantica/08-tests.md:228,333-334",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "08 G12 names \"5 today\" and open item 4 asks whether probes suffice. No direct test.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-57",
+    "impl_ref": "src/luthier/generators.py:233-246",
+    "behavior": "a Luthier generator `gen T := g` is applied to size and a seed drawn from the run's stream, evaluated on the machine; an evaluation error or a non-pair result leaves the law not run",
+    "spec_ref": "docs/semantica/04-kernel.md:48-49; docs/semantica/03-libraries.md:258; docs/semantica/08-tests.md:54-68",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "The next seed the generator returns is discarded (generators.py:246). 08 G1 (decided) changes the seed type to Seed and removes `gen T :=`; 04:48-49 still lists it.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-58",
+    "impl_ref": "src/luthier/generators.py:56-68",
+    "behavior": "Python generator failures escape as tracebacks: a `gen` naming a missing module aborts every test of the run (check accepts it), an exception inside a generator aborts the run, and a data type with no non-recursive constructor overflows the stack",
+    "spec_ref": "docs/semantica/05-static-semantics.md:316-317",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "e15: `gen Pos := extern \"python:nosuchmodule.gen\"`: `luthier check` says ok, `luthier test` ends with \"ModuleNotFoundError: No module named 'nosuchmodule'\". A generator raising ValueError ends the run with that traceback (generators.py:152). e17: `S : U := data { more : Int -> S -> S }` with a law over S ends with \"RecursionError: maximum recursion depth exceeded\" (sample_data, generators.py:377-393). The spec's outcomes would make such laws not run.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-59",
+    "impl_ref": "src/luthier/generators.py:396-449",
+    "behavior": "the entry records the generation (size, growth, Luthier and Python generators, values drawn and outside their type per registered generator) and a text per parameter describing how it was drawn",
+    "spec_ref": "docs/semantica/05-static-semantics.md:286-287,322-323; docs/semantica/03-libraries.md:236-237",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "Rational has no description case and falls back to the bare type name (generators.py:432). The acceptance rate of a filter that 08 G10 asks to record (decided) is not recorded.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-60",
+    "impl_ref": "src/luthier/graph.py:51-86",
+    "behavior": "a name defined twice, declared twice, or given two aliases is an error (\"x is defined twice\", \"x is declared twice\", \"A is an alias and cannot be defined twice\")",
+    "spec_ref": "docs/semantica/05-static-semantics.md:199-202",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/spec/r7_alias_defined.reject.lut"
+    ],
+    "evidence": "e21: `x : Int := 1` twice gives \"in x: x is defined twice\"; `x : Int` twice then `x := 3` gives \"x is declared twice\"; `A = Int` twice gives \"A is an alias and cannot be defined twice\". A declaration and a definition disagreeing give the same message in either order (\"x was declared with type Bool, but is defined with Int\"). 05 R7 covers alias plus definition; duplicates of one kind are not specified and have no test.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-61",
+    "impl_ref": "src/luthier/graph.py:88-197",
+    "behavior": "the dependency edges of a file come from declared types, bodies, data constructors, alias bodies and operator directives used by an infix operator; constructors and labels stand for their type, a projection for its head; objects are the strongly connected components, checked dependencies first",
+    "spec_ref": "docs/semantica/05-static-semantics.md:24-34,90-99",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py::test_order_in_the_file_does_not_matter",
+     "tests/spec/r3_connected.accept.lut",
+     "tests/spec/r2_unclaimed_laws.reject.lut"
+    ],
+    "evidence": "Aliases are nodes of the graph rather than expanded before it (05:93); no observable difference found.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-62",
+    "impl_ref": "src/luthier/arrays.py:60-133",
+    "behavior": "the numpy leaves bound in array_python.lut (add, sub, scale, dot, norm, total, product, minimum, maximum, outer, matVec, matMul, transpose, trace, det, frob, cond, solve, eigvalsSym, invSqrtSym, retainedRank, pinvSym, pinvSqrtSym, madd, msub, mscale, hadamard, maxAbs, approx) compute the values certified against array.lut's laws; maximum, minimum and maxAbs raise on an empty vector",
+    "spec_ref": "docs/semantica/07-characterizations.md:27-109,174-189; docs/semantica/06-numbers.md:150-153",
+    "status": "covered",
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:57-87",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "All entries passed. e29: `empty : Vec Float64 := (0, \\ k { 0.0 })`; `luthier eval arr.lut \"maximum empty\"` gives \"error: extern ... raised ValueError: zero-size array to reduction operation maximum which has no identity\". array.lut:326 types maximum over every Vec Float64 while IsMaximum (array.lut:230) quantifies over n : Dim (n >= 1), so n = 0 is never tested; 07:106-109 defines the maximum as an attained bound, which n = 0 lacks.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-63",
+    "impl_ref": "src/luthier/arrays.py:305-355",
+    "behavior": "shape generators: Dim in 1..min(size,8), Dim2 in 2..min(size,8), VecOf and MatOf entries uniform in [-size,size], MatRows with 0..size columns, Square 0..size, SymmetricSquare B + B^T, SpdOf B^T B + I, DeficientOf a Gram matrix of fewer vectors",
+    "spec_ref": "docs/semantica/08-tests.md:167-170",
+    "status": "covered",
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:43-52",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "Every value is checked against its type (05 R7). 08 G8 (decided) replaces the dimensions by the census 0, 1, 2, 3, 5, 10.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-64",
+    "impl_ref": "src/luthier/arrays.py:225-241",
+    "behavior": "normalVec gives n standard normals and the next seed from a seed; kolmogorovDistance computes the distance of pooled entries from the uniform in the order of the native definition",
+    "spec_ref": "docs/semantica/07-characterizations.md:197-202; docs/semantica/05-static-semantics.md:393-401",
+    "status": "covered",
+    "test_refs": [
+     "src/luthier/lib/probability_python.lut:13-14",
+     "src/luthier/lib/probability_python.cert.json"
+    ],
+    "evidence": "Both entries passed (20 and 200 cases).",
+    "severity": "low"
+   },
+   {
+    "id": "IT-65",
+    "impl_ref": "src/luthier/tables.py:82-164",
+    "behavior": "the CSV codec: header cells name:type with int, float or str; strict CSV; tolerant of CRLF, final newline, spaces around numbers and header cells, blank lines; rejects unknown or missing type, empty or repeated name, ragged rows, bad numbers, non-finite floats; render is canonical; parseError gives the reason",
+    "spec_ref": "docs/semantica/07-characterizations.md:221-226; docs/semantica/05-static-semantics.md:352-367",
+    "status": "covered",
+    "test_refs": [
+     "src/luthier/lib/table_python.lut:158",
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "The grammar WellFormed (table.lut:86-211) and the parser agree on white space, quotes and numbers; csv passed all seven laws over 200 cases.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-66",
+    "impl_ref": "src/luthier/tables.py:90-97",
+    "behavior": "render then parse does not give back every Table: a column name containing ':', a name with surrounding spaces, or a table with no columns is not read back, yet RoundTrip is certified because gen_table only makes names c0..c4 and at least one column",
+    "spec_ref": "docs/semantica/05-static-semantics.md:357-361; docs/semantica/07-characterizations.md:113-122,221-226",
+    "status": "covered_differently",
+    "test_refs": [
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "e8 (imports real, real_python, table, table_python): `colon : Table := { nRows := 0, names := [\"a:b\"], kinds := [\"int\"], cell := \\ c r { nothing } }`: `renderTable colon` = 'a:b:int\\n', `RoundTrip csv colon` = false, parseError says the header cell is not name:type. Same with names := [\" a\"] (read back as \"a\") and with `names := nil String, kinds := nil String, nRows := 2` (rendered '\\n\\n\\n', \"no header\"). All three satisfy Table's laws (table.lut:40-51). table_python.cert.json records RoundTrip passed over 200 cases. 05:453-454 lists generators that bypass the type as open.",
+    "severity": "high"
+   },
+   {
+    "id": "IT-67",
+    "impl_ref": "src/luthier/tables.py:116",
+    "behavior": "parse and render raise on an int cell of more than 4300 digits (Python's int-string limit) instead of reading or writing it",
+    "spec_ref": "docs/semantica/06-numbers.md:33,42-44; docs/semantica/07-characterizations.md:224-226",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "e20: `longInt : String := \"a:int\\n<5000 ones>\\n\"`; `luthier eval e20_longint.lut \"parseTable longInt\"` gives \"error: extern ... raised ValueError: Exceeds the limit (4300 digits) for integer string conversion\"; tables.render of a Table holding 10^5000 raises the same (tables.py:84). The grammar's IntCell (table.lut:166) accepts any digits and Int is unbounded (06:42), so ReadsTheFormat is false on this text.",
+    "severity": "medium"
+   },
+   {
+    "id": "IT-68",
+    "impl_ref": "src/luthier/tables.py:219-340",
+    "behavior": "table generators: gen_table (1 to 5 columns named c0.., 0 to min(size,8) rows, values with CSV-hostile strings and extreme floats), gen_perturbed (same content written differently), gen_broken (one defect: ragged, unknown type, repeated name, bad number, not finite)",
+    "spec_ref": "docs/semantica/05-static-semantics.md:204-207",
+    "status": "covered",
+    "test_refs": [
+     "src/luthier/lib/table_python.lut:11-13",
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "BrokenText values are checked against not WellFormed (generators.py:112-127). Perturbed is an alias of a record, so its Table component's laws are not checked (see IT-55).",
+    "severity": "low"
+   },
+   {
+    "id": "IT-69",
+    "impl_ref": "src/luthier/rational.py:11-34",
+    "behavior": "ratio is the exact Fraction, nearest is float(Fraction) (ties to even), gen_normal_double draws 0 with probability 0.02, else a sign, a mantissa in [1,2) and an exponent uniform in [-498, 497]",
+    "spec_ref": "docs/semantica/06-numbers.md:140-149",
+    "status": "covered",
+    "test_refs": [
+     "src/luthier/lib/rational.lut:106-115",
+     "src/luthier/lib/rational.cert.json"
+    ],
+    "evidence": "The generator's support is about [1.2e-150, 8.2e149), slightly inside NormalDouble's [1e-150, 1e150] (rational.lut:60), so magnitudes above 2^498 are never drawn. All rational.lut entries passed.",
+    "severity": "low"
+   },
+   {
+    "id": "IT-70",
+    "impl_ref": "src/luthier/text.py:4-5",
+    "behavior": "chars splits a string into its code points",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [
+     "src/luthier/lib/text.lut:141",
+     "src/luthier/lib/text.cert.json"
+    ],
+    "evidence": "text.lut is used by table.lut's grammar but is absent from the library table of 03-libraries.md:255-264.",
+    "severity": "low"
+   }
+  ],
+  "notes": "The specification does not faithfully reflect the implementation in my scope. Most of the CLI, certificate and testing machinery matches 03 and 05 §7, but seven behaviors contradict or go beyond what the spec says, with concrete reproductions: IT-07 (bound variable names enter the dependency cone, so an importer defining `eqB` makes seven algebra certificates stale; the README example triggers it), IT-11 (`test --name f` tests an imported `m.f` and writes its certificate), IT-36 (check -v lacks two reports 05 §6 states without a \"not implemented\" mark), IT-40 (exhaustive runs fail type obligations where sampled runs skip raising cases), IT-51 (laws over all models of a theory are drawn from constant functions and certified, where 05 §7 says they stay pending), and IT-66 (the csv codec's certified RoundTrip is false on three valid Tables the generator never reaches).\n\nRead with care: IT-34 (certify summary parser) was simulated in Python, since the rules forbid running certify. IT-15 (--imports writing into src/luthier/lib) comes from reading the code and was not run. Everything else was run on files under scratchpad/audit/impl-tools (e1 to e32). Nothing under the repository was modified. The scope files, docs/semantica, README and tests/spec are identical between b15f2a1 (the commit named in the task) and HEAD 49c6a0f.\n\nSpec status. 08-tests.md has no status line, only an order of work (§13), and the current code contradicts most of it: `gen T :=` still exists (G1 removes it; 04-kernel.md:48-49 still lists it), Float64 is drawn uniformly without bounds (G7), dimensions come from 1..8 (G8), functions of an infinite domain are constants (G9), subtypes are filtered in a box (G10), budgets are fixed (G12), and C1-C10 are absent. I treated all of 08 as decided and not implemented and reported gaps against it with that status. A status line in 08 would remove the ambiguity. Declared not implemented, so not reported as defects: 05 §6 item 4 and R10 (characterization report), R11 and refine (05:243-253, 463-465), and 05 §10 open items.\n\nInternal behaviors, listed only here: run_deep (a thread with a 512 MB stack and a recursion limit of 200000, cli.py:653-670); per-definition caches and the mtime-keyed file and directory hash caches in certify.py:58-158; Loader bookkeeping (cli.py:57-71) and qualify; derive_seed's sha256 (cli.py:50-54); Tarjan's algorithm (graph.py:374-407); the pending flag of declared types (graph.py:151-190); decide, applied_type and probe_annotated as speed paths (generators.py:259-314); int_interval (generators.py:520-569); PRELUDE alias (cli.py:23). Dead code that no .lut binds and no module calls: arrays.py from_list, to_list, length, rows, cols, at, entry, zeros, identity, from_rows, _dim, tabulate, tabulate_mat, row, stack, ones, head, last, append, concat, index; tables.py same, n_rows, n_cols, has_column, int_at, real_at, text_at, real_column, from_columns, read_file, write_file. Stale docstrings: cli.py:1 lists only check, test, eval; generators.py:5 names generators for N and R, which 06 §2 removed.\n\nOutside my scope, noticed while testing (for the checker and docs auditors): a one-component record type `{ f : Int -> Int }` has no named components (\"r : R has no named components, so .f means nothing\"), and as the base of a declared theory it fails with the unhelpful \"its body has type something else\" (scratch e32). pretty.py prints strings sometimes with Python single quotes ('a:b:int\\n') and sometimes with double quotes. README.md:73 says \"the rules R1 to R8\" while 05 has R1 to R11, and examples/z7ring.cert.json (no fingerprint) is permanently stale (IT-06)."
+ }
+}

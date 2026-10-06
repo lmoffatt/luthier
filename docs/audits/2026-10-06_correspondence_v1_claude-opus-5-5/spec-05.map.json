@@ -1,0 +1,1389 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-05",
+   "direction": "spec",
+   "files": "docs/semantica/05-static-semantics.md, every section (rules R1 to R11, reports, certification, presentations, open)"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a68d3747e1bc74f38",
+  "agent_label": "map spec-05",
+  "started_at": "2026-10-06T11:14:05+00:00",
+  "finished_at": "2026-10-06T11:48:34+00:00",
+  "tokens": 260053,
+  "tool_calls": 80,
+  "duration_ms": 2065961,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "docs/semantica/05-static-semantics.md §0 Notation (lines 16-39)",
+   "§1 One relation, three states (41-86)",
+   "§2 Reading a program (88-99)",
+   "§3 Objects are cycles, branches name them (101-118)",
+   "§4 Dependence (120-137)",
+   "§5 Well-formedness rules, intro and R1-R11 (139-253)",
+   "§6 Reports that do not reject (255-269)",
+   "§7 Certification, including 'As implemented' and 'Added 2026-10-06' (271-348)",
+   "§8 Example (350-372)",
+   "§9 Presentations and translations, including Checks (374-443)",
+   "§10 Open (445-465)"
+  ],
+  "claims": [
+   {
+    "id": "05#01",
+    "spec_ref": "docs/semantica/05-static-semantics.md:24",
+    "claim": "D(n) and B(n) are read after elaboration and after expanding aliases; constructors and labels stand for their type; a projection e.f counts the names in e.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/graph.py:39",
+     "src/luthier/graph.py:58",
+     "src/luthier/graph.py:89",
+     "src/luthier/graph.py:219"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:1"
+    ],
+    "evidence": "The graph is built from unelaborated source terms, and an alias is a node of its own (graph.py:58-63, 128-129), not expanded. Constructors and sum labels of aliases map to their type (89-101); Proj walks its term. The consequence is in 05#35 (spec-05/p19_alias_in_cycle.lut).",
+    "severity": "medium"
+   },
+   {
+    "id": "05#02",
+    "spec_ref": "docs/semantica/05-static-semantics.md:27",
+    "claim": "An occurrence is in type position when the occurring term has type U or is a type operator; every other occurrence is in term position.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:386",
+     "src/luthier/checker.py:411"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:1",
+     "tests/spec/r2_definition.reject.lut:1"
+    ],
+    "evidence": "R2 inspects only the names whose declared type ends in U (is_type_name), so a hole like sigma : Float64 counts as term position.",
+    "severity": "low"
+   },
+   {
+    "id": "05#03",
+    "spec_ref": "docs/semantica/05-static-semantics.md:31",
+    "claim": "The dependency graph has an edge n -> m when m is in D(n) or B(n); an object is a strongly connected component; a name on no cycle is an object of one.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/graph.py:124",
+     "src/luthier/graph.py:192",
+     "src/luthier/graph.py:374",
+     "src/luthier/checker.py:173"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:1",
+     "tests/test_kernel.py:137"
+    ],
+    "evidence": "Tarjan over the refs of each member. The objects are emitted in dependency order and loaded as blocks (load_object).",
+    "severity": "low"
+   },
+   {
+    "id": "05#04",
+    "spec_ref": "docs/semantica/05-static-semantics.md:48",
+    "claim": "A name is in one of three states: declared (its base), defined (its body, in the same file or another), certified (some laws passed test, each with a grade).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:370",
+     "src/luthier/cli.py:116",
+     "src/luthier/cli.py:262"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:183",
+     "tests/test_kernel.py:332",
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "Def with body None means declared; defined() at checker.py:370; certified is a dict filled from matching certificate entries. 'In another file' works only in the restricted case of 05#13.",
+    "severity": "low"
+   },
+   {
+    "id": "05#05",
+    "spec_ref": "docs/semantica/05-static-semantics.md:59",
+    "claim": "x : T := t with t : T defines x as the inhabitant t.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:580"
+    ],
+    "test_refs": [
+     "tests/spec/r6_predicate_body.accept.lut:4"
+    ],
+    "evidence": "The body is checked against the declared type, and an obligation is raised if T is a subtype.",
+    "severity": "low"
+   },
+   {
+    "id": "05#06",
+    "spec_ref": "docs/semantica/05-static-semantics.md:60",
+    "claim": "x : T := p, with p : T -> Bool or p a Law over T, defines x as the subtype { y : T | p y }, a type x : U.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:580",
+     "src/luthier/checker.py:609"
+    ],
+    "test_refs": [
+     "tests/spec/r6_predicate_body.accept.lut:1"
+    ],
+    "evidence": "The one-act form is rejected. spec-05/p01_one_act_predicate.lut `Even : Int := \\k { k mod 2 == 0 }` gives 'cannot infer the type of \\ k {...}'; with an annotated lambda (p01b) it gives 'has type (k : Int) -> Bool but Int was expected'. Only the two-act form (R6, README) works. The section 1 bullet writes one act, as it does for data and extern.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#07",
+    "spec_ref": "docs/semantica/05-static-semantics.md:62",
+    "claim": "x : U := data { ... } defines a recursive type.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:775"
+    ],
+    "test_refs": [
+     "tests/spec/r4_recursive_data.accept.lut:1"
+    ],
+    "evidence": "add_data registers the type and its constructors.",
+    "severity": "low"
+   },
+   {
+    "id": "05#08",
+    "spec_ref": "docs/semantica/05-static-semantics.md:63",
+    "claim": "x : T := extern \"...\" defines a value whose body the environment holds.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:652"
+    ],
+    "test_refs": [
+     "tests/spec/r5_extern_value.accept.lut:1"
+    ],
+    "evidence": "add_extern registers the Python target under the declared type.",
+    "severity": "low"
+   },
+   {
+    "id": "05#09",
+    "spec_ref": "docs/semantica/05-static-semantics.md:65",
+    "claim": "A declared type gives its base with its labels; its laws are written over it before it is defined (the Codec / RoundTrip / Codec := RoundTrip & Rejects pattern).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/graph.py:151",
+     "src/luthier/checker.py:233",
+     "src/luthier/checker.py:256"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:4",
+     "tests/test_kernel.py:183"
+    ],
+    "evidence": "A declared name used as a type is pending: it is the bare labeled base until define_pending turns its body into the subtype.",
+    "severity": "low"
+   },
+   {
+    "id": "05#10",
+    "spec_ref": "docs/semantica/05-static-semantics.md:75",
+    "claim": "A value of the object is a branch: csv : Codec := { parse := parseTable, render := renderTable } (Codec as declared at line 68, with eq).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:1370"
+    ],
+    "test_refs": [],
+    "evidence": "Codec at line 68 has three components, so this literal is rejected. spec-05/p18b.lut gives \"Codec literal: missing fields ['eq']\". The section 8 version, which includes eq, checks (p18_example.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "05#11",
+    "spec_ref": "docs/semantica/05-static-semantics.md:77",
+    "claim": "Concrete types and theories are told apart by the form of their definition, not by a marker; a theory has no constructors and its values are models given as values of the labeled base.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1370",
+     "src/luthier/checker.py:1443"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:183",
+     "tests/test_kernel.py:213"
+    ],
+    "evidence": "There is no marker syntax. A model is a record literal or tuple checked against the subtype, which raises the theory's laws as obligations.",
+    "severity": "low"
+   },
+   {
+    "id": "05#12",
+    "spec_ref": "docs/semantica/05-static-semantics.md:43",
+    "claim": "Everything is a type; a value is a type with one inhabitant; the type/value distinction stays on the surface. A body computes, a law only checks; uniqueness is never asked.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Framing, not a rule. On the surface a value cannot be used as a type: spec-05/p25.lut `x : 4 := 4` gives '4 has type Int but U was expected'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#13",
+    "spec_ref": "docs/semantica/05-static-semantics.md:90",
+    "claim": "The checker reads the whole program, imports included, before it checks any definition, and builds one dependency graph (so a type may be defined in another file than its declaration).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/cli.py:73",
+     "src/luthier/checker.py:159",
+     "src/luthier/graph.py:39"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:332"
+    ],
+    "evidence": "Each import is parsed and checked before the importer, and objects are computed per file. spec-05/xfile/theory.lut (Codec declared + RoundTrip) with model.lut (`Codec := RoundTrip`) gives 'in RoundTrip: Codec is used as a type but is only declared (05 R2)'. theory2/model2 gives 'Codec has type {...} but U was expected'. The same program in one file is accepted. Only a declared type with no laws in its own file works across files (test_kernel.py:332).",
+    "severity": "high"
+   },
+   {
+    "id": "05#14",
+    "spec_ref": "docs/semantica/05-static-semantics.md:94",
+    "claim": "Resolve names, build the dependency graph, compute the objects.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/graph.py:107",
+     "src/luthier/graph.py:192"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:1"
+    ],
+    "evidence": "Done per file (see 05#13).",
+    "severity": "low"
+   },
+   {
+    "id": "05#15",
+    "spec_ref": "docs/semantica/05-static-semantics.md:96",
+    "claim": "Objects are checked in dependency order, each as a block: first every declared type, then every law, then every other body.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:183",
+     "src/luthier/checker.py:199",
+     "src/luthier/checker.py:205"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:137"
+    ],
+    "evidence": "Order inside a block: aliases and operators, then declarations, then every body by line, then the heads (define_pending) last. The spec does not say whether the head's body comes before the other bodies. With the order the code uses, a value on the cycle is checked against the bare base (05#57).",
+    "severity": "medium"
+   },
+   {
+    "id": "05#16",
+    "spec_ref": "docs/semantica/05-static-semantics.md:99",
+    "claim": "Order in the file is not significant.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/graph.py:192"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:137"
+    ],
+    "evidence": "Forward references and mutual recursion load. A test directive placed before an alias also loads (spec-05/p14f.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "05#17",
+    "spec_ref": "docs/semantica/05-static-semantics.md:117",
+    "claim": "Every object defined by laws has a head; a law no type claims defines nothing, is a branch over the types it mentions, and R2 applies to it.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:395"
+    ],
+    "test_refs": [
+     "tests/spec/r2_unclaimed_laws.reject.lut:1"
+    ],
+    "evidence": "An unclaimed RoundTrip over a declared Codec is rejected by R2.",
+    "severity": "low"
+   },
+   {
+    "id": "05#18",
+    "spec_ref": "docs/semantica/05-static-semantics.md:122",
+    "claim": "In version 0 a law depends on a name when it occurs free in it, after elaboration and without unfolding definitions; a vacuous mention counts.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:342",
+     "src/luthier/checker.py:358",
+     "src/luthier/checker.py:2050"
+    ],
+    "test_refs": [
+     "tests/test_checker_rules.py:64",
+     "tests/test_checker_rules.py:74"
+    ],
+    "evidence": "R3 on declared types unfolds one named law to find projections. `P2 := Both pos` is accepted, but `P2 := PosBoth` with `PosBoth := Both pos` gives 'cannot tell which labels', an error the spec never mentions. Neither verdict follows from 'without unfolding'. A vacuous mention does count (spec-05/p07e.lut accepted).",
+    "severity": "medium"
+   },
+   {
+    "id": "05#19",
+    "spec_ref": "docs/semantica/05-static-semantics.md:126",
+    "claim": "Semantic dependence (f depends on y; P connects x and y) as existential laws a test checks for a witness, grade 'witnessed'.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Listed as open at line 447. Nothing in src implements a witness search.",
+    "severity": "low"
+   },
+   {
+    "id": "05#20",
+    "spec_ref": "docs/semantica/05-static-semantics.md:141",
+    "claim": "Each rule names its files under tests/spec/: one program to accept and one to reject with a '-- expect:' fragment.",
+    "status": "partial",
+    "impl_refs": [
+     "tests/test_spec.py:30"
+    ],
+    "test_refs": [
+     "tests/test_spec.py:30",
+     "tests/test_spec.py:35"
+    ],
+    "evidence": "R1-R9 have their files and all 37 spec files pass. R10 has none, R11 says 'to be written', and scripts/check_spec_tests.py reports 'R10 ... has no tests'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#21",
+    "spec_ref": "docs/semantica/05-static-semantics.md:145",
+    "claim": "R1: every name in D(n) of a declaration exists, declared or defined; a declaration may mention types that are only declared.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:903",
+     "src/luthier/checker.py:194"
+    ],
+    "test_refs": [
+     "tests/spec/r1_declaration.accept.lut:1",
+     "tests/spec/r1_declaration.reject.lut:1"
+    ],
+    "evidence": "An unknown name gives 'unbound name Row'. `csvLike : Codec` over a declared Codec is accepted.",
+    "severity": "low"
+   },
+   {
+    "id": "05#22",
+    "spec_ref": "docs/semantica/05-static-semantics.md:150",
+    "claim": "R2: in a definition, every name in type position in its declared type or body is defined, unless it belongs to n's own object; code over a declared-only type must take it as a parameter.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:370",
+     "src/luthier/checker.py:395"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:1",
+     "tests/spec/r2_definition.reject.lut:1",
+     "tests/spec/r2_unclaimed_laws.reject.lut:1",
+     "tests/spec/r5_extern_over_declared.reject.lut:1"
+    ],
+    "evidence": "check_defined_types uses _global_names filtered by is_type_name, exempting the object's own names and provisional externs. It also runs on aliases (spec-05/p14e.lut: `A = Foo * Int` over a declared Foo is rejected).",
+    "severity": "low"
+   },
+   {
+    "id": "05#23",
+    "spec_ref": "docs/semantica/05-static-semantics.md:152",
+    "claim": "R2: in term position a declared name is allowed: a hole of a defined type is a parameter set by run --set, and what depends on it does not reduce until it is filled.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:386",
+     "src/luthier/cli.py:434",
+     "src/luthier/cli.py:451"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.accept.lut:8",
+     "tests/test_bridge.py:107"
+    ],
+    "evidence": "spec-05/p05_hole_term.lut: eval of `scaled 2.0` gives 'depends on sigma without a value'; `run --set sigma=3` prints 6.0.",
+    "severity": "low"
+   },
+   {
+    "id": "05#24",
+    "spec_ref": "docs/semantica/05-static-semantics.md:157",
+    "claim": "R3: the body of a subtype over a labeled base must touch every label; a predicate that touches nothing defines nothing.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:327",
+     "src/luthier/checker.py:633"
+    ],
+    "test_refs": [
+     "tests/spec/r3_connected.accept.lut:1",
+     "tests/spec/r3_dangling_label.reject.lut:1",
+     "tests/spec/r3_true_predicate.reject.lut:1"
+    ],
+    "evidence": "_report_untouched raises 'label mul of Semi is touched by no law' and 'touches none of its labels'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#25",
+    "spec_ref": "docs/semantica/05-static-semantics.md:158",
+    "claim": "R3: over an unlabeled base the predicate must touch its parameter.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:335",
+     "src/luthier/checker.py:641"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p07_r3_unlabeled.lut `Pos : Int` + `Pos := \\ k { 1 == 1 }` gives 'the predicate of Pos does not mention its argument'; so do p07b and p07c (inline forms). No tests/spec file covers the unlabeled case.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#26",
+    "spec_ref": "docs/semantica/05-static-semantics.md:157",
+    "claim": "R3 applies to the body of a subtype over a labeled base (the text does not restrict it to named types).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:603",
+     "src/luthier/checker.py:627"
+    ],
+    "test_refs": [],
+    "evidence": "R3 runs only when a definition makes a named type. spec-05/p06_r3_inline.lut accepts `x : { a : Int, b : Int | a > 0 } := (1, 2)` (b untouched) and `y : { k : Int | true } := 4`. Whether anonymous subtypes in annotations fall under R3 is not stated.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#27",
+    "spec_ref": "docs/semantica/05-static-semantics.md:160",
+    "claim": "{ eq, add, mul | Associative A eq add } is rejected; the '| true' records of the first libraries disappear.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:340"
+    ],
+    "test_refs": [
+     "tests/spec/r3_dangling_label.reject.lut:1",
+     "tests/spec/r3_true_predicate.reject.lut:1"
+    ],
+    "evidence": "grep finds no '| true }' record in core.lut or lib/*.lut.",
+    "severity": "low"
+   },
+   {
+    "id": "05#28",
+    "spec_ref": "docs/semantica/05-static-semantics.md:165",
+    "claim": "R4: x : U := t makes a named type only if t is a subtype with a predicate or a recursive data; a structural body (product, sum, exponential, non-recursive data) is rejected.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:633",
+     "src/luthier/checker.py:803"
+    ],
+    "test_refs": [
+     "tests/spec/r4_product_inline.accept.lut:1",
+     "tests/spec/r4_recursive_data.accept.lut:1",
+     "tests/spec/r4_product_named.reject.lut:1",
+     "tests/spec/r4_data_nonrecursive.reject.lut:1"
+    ],
+    "evidence": "spec-05/p08.lut: a parameterized product, a function type, a sum and a parameterized non-recursive data are all rejected; `{ k : Int | k > 0 }` and a recursive data are accepted. core.lut is exempt.",
+    "severity": "low"
+   },
+   {
+    "id": "05#29",
+    "spec_ref": "docs/semantica/05-static-semantics.md:166",
+    "claim": "R4: only a subtype with laws or a recursive data makes a new named type (silent on a body that names an existing lawful or recursive type).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:639",
+     "src/luthier/checker.py:649"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p26.lut `P2 : U := Pos` and p26b `IntTree : U := Tree Int` are both rejected as 'names a structural type'. Pos is a subtype with laws, so the rule's wording admits either verdict, and the message mislabels the body.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#30",
+    "spec_ref": "docs/semantica/05-static-semantics.md:173",
+    "claim": "R5: an extern gives a value, never a type: x : T := extern is accepted when T is defined (R2 applies); x : U := extern is rejected.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:652",
+     "src/luthier/checker.py:658",
+     "src/luthier/checker.py:401"
+    ],
+    "test_refs": [
+     "tests/spec/r5_extern_value.accept.lut:1",
+     "tests/spec/r5_extern_type.reject.lut:1",
+     "tests/spec/r5_extern_over_declared.reject.lut:1"
+    ],
+    "evidence": "_ends_in_universe(ty) without provisional gives 'an extern gives a value, not a type'. Type operators are rejected too.",
+    "severity": "low"
+   },
+   {
+    "id": "05#31",
+    "spec_ref": "docs/semantica/05-static-semantics.md:175",
+    "claim": "extern provisional lifts both requirements; it is recorded in the certificate under 'provisional' with the names it builds on, listed by check -v, and never certified.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:658",
+     "src/luthier/checker.py:668",
+     "src/luthier/testing.py:369",
+     "src/luthier/cli.py:146",
+     "src/luthier/cli.py:258"
+    ],
+    "test_refs": [
+     "tests/spec/r5_extern_provisional.accept.lut:1",
+     "tests/test_kernel.py:406",
+     "tests/test_certificates.py:71"
+    ],
+    "evidence": "Accepted, listed ('provisional duration: builds on Signal') and never certified. The certificate records the provisional externs of the cone (['same']), not the undefined types each one builds on; that list lives only in checker.provisional.",
+    "severity": "low"
+   },
+   {
+    "id": "05#32",
+    "spec_ref": "docs/semantica/05-static-semantics.md:179",
+    "claim": "Every refinement in an extern's type is an obligation: subtype predicate, codomain over domain, record/pair components, array entries (dimensions owe nothing), sum payload as match v { just t -> L t ; _ -> true } with payload-dependent quantifiers moved to preconditions; deeper refinements and data types not entered.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:674",
+     "src/luthier/checker.py:714"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:123",
+     "tests/test_bridge.py:130",
+     "tests/test_bridge.py:138",
+     "tests/test_bridge.py:188",
+     "tests/test_bridge.py:256"
+    ],
+    "evidence": "spec-05/p20_extern_obl.lut: obligations exist for the codomain, pair, record, Maybe payload and array entries. List Pos and Maybe { a : Pos, ... } get none. The payload-dependent precondition (r : Fin t.nRows) has no test in tests/.",
+    "severity": "low"
+   },
+   {
+    "id": "05#33",
+    "spec_ref": "docs/semantica/05-static-semantics.md:188",
+    "claim": "run --checked tests every value an extern gives against the Bool laws of its type as it crosses (array entries and record components included); quantified laws are left to test; a returned function is tested when called.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/machine.py:446",
+     "src/luthier/machine.py:450",
+     "src/luthier/machine.py:483"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:197",
+     "tests/test_bridge.py:234"
+    ],
+    "evidence": "refined() never enters a sum. spec-05/p21_checked_sum.lut has `pick : Int -> Maybe Pos` give just -4: `run --checked` prints 1. `test` fails the same obligation `match pick x { just j -> j > 0 ; _ -> true }`. p21b (plain Pos) is caught by --checked.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#34",
+    "spec_ref": "docs/semantica/05-static-semantics.md:194",
+    "claim": "R6: the body of a declared name has type T, or T -> Bool, or is a Law over T; any other type is an error reported against the declaration.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:299",
+     "src/luthier/checker.py:609",
+     "src/luthier/checker.py:256"
+    ],
+    "test_refs": [
+     "tests/spec/r6_predicate_body.accept.lut:1",
+     "tests/spec/r6_body_type.reject.lut:1"
+    ],
+    "evidence": "Accepts and rejects as stated. The error names the declaration but has no line, and it is reported in the defining file, not the declaring one (spec-05/r6x/model.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "05#35",
+    "spec_ref": "docs/semantica/05-static-semantics.md:200",
+    "claim": "R7: an alias makes its name stand for the term everywhere; the checker expands it before anything else.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/graph.py:58",
+     "src/luthier/checker.py:186",
+     "src/luthier/checker.py:213"
+    ],
+    "test_refs": [
+     "tests/spec/r7_alias.accept.lut:1"
+    ],
+    "evidence": "An alias is a node that is elaborated first inside its object, before declare_pending. spec-05/p19_alias_in_cycle.lut (`CI = Codec * Int` on Codec's cycle) gives 'in CI: unbound name Codec'. The same program with Codec * Int written in place (p19b) is accepted.",
+    "severity": "high"
+   },
+   {
+    "id": "05#36",
+    "spec_ref": "docs/semantica/05-static-semantics.md:200",
+    "claim": "R7: an alias has no state: it is never declared, defined or certified.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:217",
+     "src/luthier/checker.py:225",
+     "src/luthier/checker.py:850"
+    ],
+    "test_refs": [],
+    "evidence": "Obligations raised in an alias body are recorded on the alias. spec-05/aliascert/lib.lut has `T = Fin (usePos k)` and app.lut has `k := 2`: `luthier test app.lut --imports` prints 'T: passed', and then check -v shows 'T: Pos [certified ...]'. The value alias in p27c.lut is certified the same way.",
+    "severity": "high"
+   },
+   {
+    "id": "05#37",
+    "spec_ref": "docs/semantica/05-static-semantics.md:201",
+    "claim": "A name that is an alias and is also declared or defined is an error.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:220",
+     "src/luthier/checker.py:525"
+    ],
+    "test_refs": [
+     "tests/spec/r7_alias_defined.reject.lut:1"
+    ],
+    "evidence": "The defined case is tested. The declared case works but no test covers it: spec-05/p14a.lut and p14b.lut give 'Stats is an alias and cannot be declared' in either order.",
+    "severity": "low"
+   },
+   {
+    "id": "05#38",
+    "spec_ref": "docs/semantica/05-static-semantics.md:202",
+    "claim": "A generator given to an alias is the generator of its type; two aliases of one type cannot both have one; a meaningful distribution is a type with a law and every generated value is checked against it, an error naming the generator.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:482",
+     "src/luthier/generators.py:112"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:145",
+     "tests/test_bridge.py:168",
+     "tests/test_bridge.py:176"
+    ],
+    "evidence": "generator_key unfolds aliases. A second gen on the same key gives 'already has a generator'. from_registered raises OutsideType naming the generator.",
+    "severity": "low"
+   },
+   {
+    "id": "05#39",
+    "spec_ref": "docs/semantica/05-static-semantics.md:210",
+    "claim": "R8: == exists on Int, Float64, String, Unit, Empty and on products, sums, recursive data and subtypes built from types that have it; not on exponentials nor anything containing one.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:1332",
+     "src/luthier/checker.py:1835"
+    ],
+    "test_refs": [
+     "tests/spec/r8_equality_function.reject.lut:1",
+     "tests/test_checker_rules.py:45",
+     "tests/test_checker_rules.py:50"
+    ],
+    "evidence": "contains_function answers False for a type variable and for U. spec-05/p03_eq_abstract.lut `Same (A : U) (x y : A) : Bool := x == y; t := Same (Int -> Int) idf idf` is accepted, and eval gives the stuck 'idf == idf : Bool'. p28.lut `Int == Float64` is accepted and stuck too.",
+    "severity": "high"
+   },
+   {
+    "id": "05#40",
+    "spec_ref": "docs/semantica/05-static-semantics.md:212",
+    "claim": "A law comparing values without structural equality takes the equality as a parameter or theory component; algebra.lut does so.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1332"
+    ],
+    "test_refs": [
+     "tests/spec/r8_equality_parameter.accept.lut:1"
+    ],
+    "evidence": "Accepted. The section 8 Codec with an eq component checks (spec-05/p18_example.lut).",
+    "severity": "low"
+   },
+   {
+    "id": "05#41",
+    "spec_ref": "docs/semantica/05-static-semantics.md:217",
+    "claim": "R9: A -> B passes where A' -> B' is expected when A' refines A and B refines B'.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1462",
+     "src/luthier/checker.py:1491"
+    ],
+    "test_refs": [
+     "tests/spec/r9_variance.accept.lut:1",
+     "tests/spec/r9_variance.reject.lut:1"
+    ],
+    "evidence": "It also holds with refinements: spec-05/p15a.lut (Int -> Pos for Int -> Int) and p15c (Int -> Int for Pos -> Int) are accepted, p15b (Pos -> Int for Int -> Int) is rejected.",
+    "severity": "low"
+   },
+   {
+    "id": "05#42",
+    "spec_ref": "docs/semantica/05-static-semantics.md:221",
+    "claim": "R10 (decided): a law characterizes, a second implementation is not a law; an object whose only laws compare implementations is reported 'consistent, not characterized'; check -v makes the difference visible.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Section 6 (line 265) marks the report decided, not implemented, and nothing in cli.py produces it. R10 itself says in the present tense that check -v makes the difference visible. There are no r10 files.",
+    "severity": "low"
+   },
+   {
+    "id": "05#43",
+    "spec_ref": "docs/semantica/05-static-semantics.md:236",
+    "claim": "A law has one name, written once in lib/algebra.lut; structures are built by inclusion; algebra is imported by every library that states a property.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:7",
+     "src/luthier/lib/random.lut:38"
+    ],
+    "test_refs": [],
+    "evidence": "This is an authoring rule the checker does not enforce. real.lut states AbsIsMagnitude and random.lut states Seed, and neither imports algebra (algebra imports real, so real cannot import it).",
+    "severity": "low"
+   },
+   {
+    "id": "05#44",
+    "spec_ref": "docs/semantica/05-static-semantics.md:243",
+    "claim": "R11 (decided, not implemented): a condition refines x in its branch, so the coercion owes nothing; another predicate owes q x -> p x; patterns refine likewise.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/checker.py:861",
+     "src/luthier/checker.py:865"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:304"
+    ],
+    "evidence": "Only textual discharge exists. spec-05/p16_r11.lut `f (x : Int) : Pos := if x > 1 then x else 1` owes 'match (x > 1) {...} > 0' on the whole if.",
+    "severity": "low"
+   },
+   {
+    "id": "05#45",
+    "spec_ref": "docs/semantica/05-static-semantics.md:257",
+    "claim": "check -v reports, without rejecting, the axioms and every provisional extern with what it builds on.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:255",
+     "src/luthier/cli.py:258"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:406",
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "Prints 'assumed realField: ...' and 'provisional duration: builds on Signal'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#46",
+    "spec_ref": "docs/semantica/05-static-semantics.md:260",
+    "claim": "check -v reports, for each concrete type with laws, the table of observers against constructors and the cells with no law (sufficient completeness).",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/cli.py:239"
+    ],
+    "test_refs": [],
+    "evidence": "No code builds the table (grep for observer or completeness in src finds nothing). On spec-05/p10_completeness.lut, check -v prints only the summary and one pending line.",
+    "severity": "high"
+   },
+   {
+    "id": "05#47",
+    "spec_ref": "docs/semantica/05-static-semantics.md:264",
+    "claim": "check -v reports the holes that the entry of luthier run depends on.",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/cli.py:239",
+     "src/luthier/cli.py:451"
+    ],
+    "test_refs": [],
+    "evidence": "cmd_check has no hole report. check -v on spec-05/p10_completeness.lut and p05_hole_term.lut says nothing about sigma; only `run` refuses ('main depends on holes without a value: sigma').",
+    "severity": "high"
+   },
+   {
+    "id": "05#48",
+    "spec_ref": "docs/semantica/05-static-semantics.md:265",
+    "claim": "(decided, not implemented) check -v reports for each operation with laws whether they characterize it or only compare implementations.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared as not implemented, and absent from cli.py.",
+    "severity": "low"
+   },
+   {
+    "id": "05#49",
+    "spec_ref": "docs/semantica/05-static-semantics.md:278",
+    "claim": "Grade 'point': one case evaluated.",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/testing.py:34",
+     "src/luthier/testing.py:286"
+    ],
+    "test_refs": [],
+    "evidence": "No mode produces 'point'. A closed law is evaluated n times and graded sampled: spec-05/p11_point.py on p11_copy.lut (hole k filled with 5) prints 'ok k > 0 [sampled, 100 cases]'. The same happens for aliascert/lib.lut (5 cases).",
+    "severity": "medium"
+   },
+   {
+    "id": "05#50",
+    "spec_ref": "docs/semantica/05-static-semantics.md:279",
+    "claim": "Grades 'sampled n' (size growing over the run), 'bounded' (Int in a box), 'exhaustive' (every case of a finite domain).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/testing.py:228",
+     "src/luthier/testing.py:286",
+     "src/luthier/generators.py:452"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59",
+     "tests/test_kernel.py:213",
+     "tests/test_kernel.py:271"
+    ],
+    "evidence": "Modes sampled, bounded and exhaustive. The size grows as 1 + i*size/n.",
+    "severity": "low"
+   },
+   {
+    "id": "05#51",
+    "spec_ref": "docs/semantica/05-static-semantics.md:282",
+    "claim": "Grade 'witnessed': an existential law, a case exhibited.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Tied to the section 4 tests, which line 447 lists as open. No such mode exists.",
+    "severity": "low"
+   },
+   {
+    "id": "05#52",
+    "spec_ref": "docs/semantica/05-static-semantics.md:283",
+    "claim": "Grade 'proved': universal, not in version 0.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "The text says it is not in version 0, and it is absent.",
+    "severity": "low"
+   },
+   {
+    "id": "05#53",
+    "spec_ref": "docs/semantica/05-static-semantics.md:284",
+    "claim": "Grade 'assumed': an axiom, laws stated and never tested.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:571",
+     "src/luthier/cli.py:532"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:517"
+    ],
+    "evidence": "Axioms are allowed only in core.lut and lib/, and are shown as 'assumed'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#54",
+    "spec_ref": "docs/semantica/05-static-semantics.md:286",
+    "claim": "A certificate entry records the law, the values, the grade with its n, the generators, the seed, the first cases and the hash of the dependency cone.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/certify.py:326"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:253",
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "Each entry holds hash, outcome, n, mode, seed, fingerprint, generators, provisional, generation, and per law its label, params, mode, cases, domains and sample_cases.",
+    "severity": "low"
+   },
+   {
+    "id": "05#55",
+    "spec_ref": "docs/semantica/05-static-semantics.md:287",
+    "claim": "The grade of a chain f (g x) is that of its weakest link.",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/cli.py:525"
+    ],
+    "test_refs": [],
+    "evidence": "No grade is combined over a chain. cone_states lists one state per name.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#56",
+    "spec_ref": "docs/semantica/05-static-semantics.md:288",
+    "claim": "'Certified' in check -v summarizes the entries of a name; it is not a state held once and for all.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/cli.py:262"
+    ],
+    "test_refs": [],
+    "evidence": "Status comes from the matching entry, and stale entries are shown with the reason. No test asserts the per-name -v lines.",
+    "severity": "low"
+   },
+   {
+    "id": "05#57",
+    "spec_ref": "docs/semantica/05-static-semantics.md:291",
+    "claim": "The obligations of a name are the laws its type states, applied to its body, quantified over the laws' parameters.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:194",
+     "src/luthier/checker.py:589",
+     "src/luthier/checker.py:205"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:183"
+    ],
+    "evidence": "A value on its theory's cycle owes nothing. In spec-05/p02_value_in_cycle.lut, `dflt : Codec` (used by law Agrees) gives 'dflt: no laws', while `other : Codec` with the same body FAILS RoundTrip (counterexample n = -1).",
+    "severity": "high"
+   },
+   {
+    "id": "05#58",
+    "spec_ref": "docs/semantica/05-static-semantics.md:292",
+    "claim": "test n runs the obligations of n and of every member of n's object.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/cli.py:316",
+     "src/luthier/checker.py:177"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p13_object_test.lut: `test --name RoundTrip` also runs helper's obligation. No test in tests/ covers it.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#59",
+    "spec_ref": "docs/semantica/05-static-semantics.md:293",
+    "claim": "An obligation raised in a branch of if c then a else b carries c (or not c) as a precondition.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:1693",
+     "src/luthier/checker.py:867"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:41"
+    ],
+    "evidence": "spec-05/p17_branch.lut: h owes 'x > 5 -> x > 0'. test_sugar.py:41 only asserts that the program loads, not what is owed.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#60",
+    "spec_ref": "docs/semantica/05-static-semantics.md:294",
+    "claim": "An obligation inside match e { x -> t } speaks of e; in match e { (x, y) -> t } x and y name the components of e.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1697",
+     "src/luthier/checker.py:855",
+     "src/luthier/checker.py:1970"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:285"
+    ],
+    "evidence": "spec-05/p17_branch.lut: m owes 'x + 1 > 0' and t owes '(x, x + 1).b > 0'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#61",
+    "spec_ref": "docs/semantica/05-static-semantics.md:297",
+    "claim": "An obligation is quantified only over the parameters it mentions, and those their types mention.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/testing.py:121"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p29_quantified.lut: the context has d (a dependent function) and x; the test draws only x and passes.",
+    "severity": "low"
+   },
+   {
+    "id": "05#62",
+    "spec_ref": "docs/semantica/05-static-semantics.md:300",
+    "claim": "A function is drawn as its table on Fin n; on an infinite domain as a constant, or an affine map on Float64 -> Float64; the certificate says it is a thin sample.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/generators.py:199",
+     "src/luthier/generators.py:219",
+     "src/luthier/generators.py:424"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:157"
+    ],
+    "evidence": "The table case is tested; constants and affine maps are not. A dependent arrow of infinite domain has no generator (generators.py:230).",
+    "severity": "low"
+   },
+   {
+    "id": "05#63",
+    "spec_ref": "docs/semantica/05-static-semantics.md:303",
+    "claim": "A case whose parameters cannot be drawn (empty dependent type) holds vacuously and is skipped; a law none of whose cases could be drawn is reported as an error, not as passed.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/testing.py:267",
+     "src/luthier/testing.py:324"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:295"
+    ],
+    "evidence": "The all-empty case is reported as 'not run', not as an error: this line says 'error' and line 317 says 'not run'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#64",
+    "spec_ref": "docs/semantica/05-static-semantics.md:306",
+    "claim": "A law quantified over all models of a theory has no generator of models and stays pending; it is certified per model.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/generators.py:188",
+     "src/luthier/generators.py:219"
+    ],
+    "test_refs": [],
+    "evidence": "Models are drawn by rejection from constant functions. In spec-05/p12_all_models.lut, thm over (m : Monoid) prints 'passed [sampled, 50 cases]'. --show-cases shows m = (\\ _ _ { true }, \\ _ _ { 1 }, 0), and an eq that is always true makes every law hold.",
+    "severity": "high"
+   },
+   {
+    "id": "05#65",
+    "spec_ref": "docs/semantica/05-static-semantics.md:308",
+    "claim": "run requires every name in the entry's cone to be defined, does not require certification, and records uncertified or provisional names in .run.json.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:451",
+     "src/luthier/cli.py:463",
+     "src/luthier/cli.py:472"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "spec-05/p23_eval_cone.lut: run refuses with 'main depends on holes without a value: sigma'.",
+    "severity": "low"
+   },
+   {
+    "id": "05#66",
+    "spec_ref": "docs/semantica/05-static-semantics.md:308",
+    "claim": "eval requires every name in the cone of the entry to be defined.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/cli.py:571"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p23_eval_cone.lut `main : Int := if 1 < 2 then 1 else sigma` with sigma a hole: `luthier eval ... main` prints '1 : Int'. eval fails only when evaluation reaches the hole.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#67",
+    "spec_ref": "docs/semantica/05-static-semantics.md:311",
+    "claim": "Importing a file accepts its certificate entries by hash, unchanged.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:116"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "An entry is accepted when its hash matches and becomes stale after an edit.",
+    "severity": "low"
+   },
+   {
+    "id": "05#68",
+    "spec_ref": "docs/semantica/05-static-semantics.md:315",
+    "claim": "A law is passed, failed (counterexample, evaluation error, generator outside its type) or not run (no generator, nothing drawn, out of fuel, blocked by a hole); a definition's outcome follows; only passed is certified.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/testing.py:197",
+     "src/luthier/testing.py:207",
+     "src/luthier/testing.py:67",
+     "src/luthier/cli.py:145"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:50",
+     "tests/test_bridge.py:145",
+     "tests/test_bridge.py:208"
+    ],
+    "evidence": "Matches the spec. The out-of-fuel path to 'not run' has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "05#69",
+    "spec_ref": "docs/semantica/05-static-semantics.md:320",
+    "claim": "The hash covers the code of the cone, the Python behind every extern and the interpreter; the entry records generators with fingerprints, case count and mode; trusted only when all match and the count reaches the directive; check -v says which part changed.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/certify.py:161",
+     "src/luthier/certify.py:173",
+     "src/luthier/certify.py:240",
+     "src/luthier/certify.py:260",
+     "src/luthier/cli.py:159"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:27",
+     "tests/test_certificates.py:84",
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "why_different names the interpreter, the code or the extern. _unacceptable checks the generators and the case count.",
+    "severity": "low"
+   },
+   {
+    "id": "05#70",
+    "spec_ref": "docs/semantica/05-static-semantics.md:325",
+    "claim": "Certificates are compared once the whole program is loaded with holes filled; an entry per filling (up to four); test --imports runs imported obligations with no entry and writes them to their files; vanished names are pruned.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:224",
+     "src/luthier/cli.py:305",
+     "src/luthier/certify.py:312",
+     "src/luthier/certify.py:326"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:41",
+     "tests/test_certificates.py:94"
+    ],
+    "evidence": "MAX_ENTRIES = 4, and that limit has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "05#71",
+    "spec_ref": "docs/semantica/05-static-semantics.md:329",
+    "claim": "A test whose cone has a provisional extern records it and is never certified.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/testing.py:369",
+     "src/luthier/cli.py:146"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:71"
+    ],
+    "evidence": "A passed entry with a provisional extern goes to known, not to certified.",
+    "severity": "low"
+   },
+   {
+    "id": "05#72",
+    "spec_ref": "docs/semantica/05-static-semantics.md:330",
+    "claim": "run prints the states of the names with laws in its cone, records them in .run.json with fingerprint and interpreter revision, and with --require-certified refuses unless every one is certified.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:455",
+     "src/luthier/cli.py:463",
+     "src/luthier/cli.py:472"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:105"
+    ],
+    "evidence": "Matches the spec.",
+    "severity": "low"
+   },
+   {
+    "id": "05#73",
+    "spec_ref": "docs/semantica/05-static-semantics.md:331",
+    "claim": "--require-certified refuses unless every name with laws in the cone is certified (silent on an axiom, whose grade is 'assumed').",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/cli.py:532",
+     "src/luthier/cli.py:463"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p22_axiom_run.lut gives '--require-certified: 1 names of the cone of main are not certified: realField: assumed (an axiom)'. Any cone that reaches an axiom can never run under the flag, and the grade table makes 'assumed' a grade.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#74",
+    "spec_ref": "docs/semantica/05-static-semantics.md:332",
+    "claim": "luthier certify f1 f2 ... tests several files at once, each in its own process.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/cli.py:495"
+    ],
+    "test_refs": [],
+    "evidence": "Spawns `luthier test` per file in a thread pool. Not run, per the audit rules.",
+    "severity": "low"
+   },
+   {
+    "id": "05#75",
+    "spec_ref": "docs/semantica/05-static-semantics.md:334",
+    "claim": "'bounded' when an enumeration took Int in a box; an Int refinement bounded on both sides by closed integers is enumerated over its interval, exhaustively.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/generators.py:471",
+     "src/luthier/generators.py:520"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:59"
+    ],
+    "evidence": "s is graded bounded and t over Z3 is graded exhaustive.",
+    "severity": "low"
+   },
+   {
+    "id": "05#76",
+    "spec_ref": "docs/semantica/05-static-semantics.md:339",
+    "claim": "Two kinds of obligation: for a type (coercion in a body, extern refinement) a raising case is skipped and counted and all-raising is not run; for a law an error is a failure.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:1562",
+     "src/luthier/testing.py:171",
+     "src/luthier/testing.py:300",
+     "src/luthier/testing.py:321"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p09_law_or_type.lut shows both kinds ('15 where the computation raised' versus FAILED). No test in tests/ covers skipping.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#77",
+    "spec_ref": "docs/semantica/05-static-semantics.md:340",
+    "claim": "A law is stated by a definition's declared type; the obligation of a type is a refinement of what an extern gives (an extern body with a declared refinement fits both).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:589",
+     "src/luthier/checker.py:1562",
+     "src/luthier/checker.py:672"
+    ],
+    "test_refs": [],
+    "evidence": "Same declared type, same Python, different verdicts. In spec-05/p09_law_or_type.lut, `direct : Sq := extern \"python:math.isqrt\"` passes (15 cases skipped), while `viaName : Sq := pyIsqrt` FAILS on the ValueError. The cause is that _declared is never set for extern bodies.",
+    "severity": "medium"
+   },
+   {
+    "id": "05#78",
+    "spec_ref": "docs/semantica/05-static-semantics.md:346",
+    "claim": "A refinement of a record bound by its pattern, whose laws quantify over more than the value, is one obligation per law over the law's own parameters.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1570"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:256"
+    ],
+    "evidence": "_quantified_conjuncts splits the laws, with payload-dependent domains turned into guards.",
+    "severity": "low"
+   },
+   {
+    "id": "05#79",
+    "spec_ref": "docs/semantica/05-static-semantics.md:348",
+    "claim": "Each law of an entry records how long it took.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/testing.py:42",
+     "src/luthier/testing.py:381"
+    ],
+    "test_refs": [],
+    "evidence": "LawResult.seconds is written into the certificate. No test checks it.",
+    "severity": "low"
+   },
+   {
+    "id": "05#80",
+    "spec_ref": "docs/semantica/05-static-semantics.md:352",
+    "claim": "The section 8 example (Table alias, Codec theory with eq, csv model from externs, test csv with 200) is a valid program.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:1389"
+    ],
+    "test_refs": [],
+    "evidence": "With BrokenText and sameTable supplied (the text leaves them undefined), spec-05/p18_example.lut checks and csv owes Codec twice. No example or test file contains it.",
+    "severity": "low"
+   },
+   {
+    "id": "05#81",
+    "spec_ref": "docs/semantica/05-static-semantics.md:379",
+    "claim": "A translation between presentations is expressible today; the laws of Q fall on each translated model as obligations and pass; certified per model.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:1443"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p24_demorgan.lut: `boolON := toOr Bool boolAN` passes exhaustively. The De Morgan check the text cites exists in no file of the repository.",
+    "severity": "low"
+   },
+   {
+    "id": "05#82",
+    "spec_ref": "docs/semantica/05-static-semantics.md:397",
+    "claim": "Kernel in lib/probability.lut is the head of the object, with sample, likelihood and transform as components and one law per side; certified on the tape-distance model with two negative controls.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:265",
+     "src/luthier/lib/probability.lut:271"
+    ],
+    "test_refs": [],
+    "evidence": "Kernel is an alias of KernelOn (components pair and pit; laws PitIsDensity & PitUniform, plus the density-pair laws inside DensityPairOn). The tape model is not in this repository.",
+    "severity": "low"
+   },
+   {
+    "id": "05#83",
+    "spec_ref": "docs/semantica/05-static-semantics.md:403",
+    "claim": "Checks (decided): Bool is primary, refine : T -> Maybe {x : T | p x} written once generically, made typable by R11; derived forms (reason, every failure, witness, statistical verdict, tolerance).",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared not implemented at line 463, and there is no refine in core.lut or lib. The generic refine already typechecks today through the textual discharge (spec-05/p16_r11.lut, no obligation recorded), so R11 is not what makes it typable now.",
+    "severity": "low"
+   },
+   {
+    "id": "05#84",
+    "spec_ref": "docs/semantica/05-static-semantics.md:442",
+    "claim": "run --checked is the one deliberate exception to checking once: it checks again every value that crosses from Python.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/machine.py:446"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:197"
+    ],
+    "evidence": "Implemented, with the gap under sum constructors described in 05#33.",
+    "severity": "low"
+   },
+   {
+    "id": "05#85",
+    "spec_ref": "docs/semantica/05-static-semantics.md:447",
+    "claim": "Open: syntax and place of the semantic-dependence tests.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Open, and nothing is implemented.",
+    "severity": "low"
+   },
+   {
+    "id": "05#86",
+    "spec_ref": "docs/semantica/05-static-semantics.md:449",
+    "claim": "Open: = as alias against = as identity type.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Open.",
+    "severity": "low"
+   },
+   {
+    "id": "05#87",
+    "spec_ref": "docs/semantica/05-static-semantics.md:450",
+    "claim": "Open: implicit arguments (pending since 2026-10-03).",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/checker.py:1155"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:66"
+    ],
+    "evidence": "Implicit type parameters {A : U} are implemented and specified in 02-grammar.md:133. Implicit model arguments, the case this bullet motivates, are not. There is no cross-reference.",
+    "severity": "low"
+   },
+   {
+    "id": "05#88",
+    "spec_ref": "docs/semantica/05-static-semantics.md:452",
+    "claim": "Open: whether a file importing a provisional definition may be certified or inherits the mark.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/testing.py:369"
+    ],
+    "test_refs": [],
+    "evidence": "Current behavior: it inherits the mark, since the provisional externs of the whole cone block certification.",
+    "severity": "low"
+   },
+   {
+    "id": "05#89",
+    "spec_ref": "docs/semantica/05-static-semantics.md:453",
+    "claim": "Open: generators from constructors for concrete types.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/generators.py:377",
+     "src/luthier/generators.py:188"
+    ],
+    "test_refs": [],
+    "evidence": "Data values are already drawn from their constructors. Subtypes are drawn by rejection, and that rejection is what yields the degenerate models in 05#64.",
+    "severity": "low"
+   },
+   {
+    "id": "05#90",
+    "spec_ref": "docs/semantica/05-static-semantics.md:455",
+    "claim": "Open: equality as a degree for samplers.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Open.",
+    "severity": "low"
+   },
+   {
+    "id": "05#91",
+    "spec_ref": "docs/semantica/05-static-semantics.md:457",
+    "claim": "Open: whether an alias may abbreviate a value.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/checker.py:225"
+    ],
+    "test_refs": [],
+    "evidence": "Current behavior: accepted. spec-05/p14d.lut `two = 1 + 1` gives four = 4. A value alias can also carry certified obligations (p27c.lut, see 05#36).",
+    "severity": "low"
+   },
+   {
+    "id": "05#92",
+    "spec_ref": "docs/semantica/05-static-semantics.md:458",
+    "claim": "Obligations under a constructor pattern should carry m == just x as a precondition (decided 2026-10-06 as part of R11).",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/checker.py:1970"
+    ],
+    "test_refs": [],
+    "evidence": "spec-05/p17_branch.lut: c owes 'y > 0' over (o, y) with no precondition. _tuple_lets returns [] for constructor patterns.",
+    "severity": "low"
+   },
+   {
+    "id": "05#93",
+    "spec_ref": "docs/semantica/05-static-semantics.md:463",
+    "claim": "Checks recorded in types (R11, refine and derived forms) decided and not implemented.",
+    "status": "not_implemented_declared",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared, and absent.",
+    "severity": "low"
+   }
+  ],
+  "notes": "Scope: docs/semantica/05-static-semantics.md, every section. Probe programs are under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/spec-05/ (pNN_*.lut, xfile/, aliascert/, r6x/, dump_obl.py prints a file's obligations, audit05ext.py supplies the externs for p21). tests/test_spec.py and tests/test_checker_rules.py pass (45 tests).\n\nHigh findings, each shown by a program:\n1. Values inside their theory's cycle owe nothing (05#57): p02 'dflt: no laws', while the same body as a branch FAILS.\n2. A law over all models of a theory gets certified from degenerate constant models (05#64): p12 passes with eq = \\_ _ {true}.\n3. == is accepted on a type variable and on U, and is then stuck at run time (05#39): p03, p28.\n4. Aliases are not expanded first. An alias on a cycle fails with 'unbound name' (05#35, p19), and an alias can carry obligations and be certified (05#36, aliascert/).\n5. Objects are computed per file, so a declared type's laws and its head cannot sit in different files (05#13, xfile/).\n6. check -v has neither the sufficient-completeness table nor the run-entry holes report, and neither is marked as not implemented (05#46, 05#47).\n\nMedium findings:\n- The one-act form `x : T := p` is rejected (05#06).\n- The law-versus-type kind of an extern body depends on spelling (05#77, p09).\n- run --checked skips refinements under sum constructors that test does check (05#33).\n- eval ignores the cone requirement (05#66).\n- 'point' is never given; closed laws are graded 'sampled n' (05#49).\n- There is no weakest-link grade for a chain (05#55).\n- R3 skips anonymous subtypes (05#26).\n- R4 rejects a renamed lawful type (05#29).\n- --require-certified rejects axioms (05#73).\n- Several rules are implemented but never asserted in tests: R3 on an unlabeled base, the if precondition, test running the object's members, skipping raised cases.\n\nOn Luciano's question about a script: scripts/check_spec_tests.py only checks that each **R<n>** paragraph of section 5 has r<n>_*.accept/.reject files under tests/spec. It reports R10 without tests and R11 not implemented. It does not check that those files exercise the rule's claims, and it covers nothing in sections 0-4 or 6-10. Every finding above passed it.\n\nSide notes:\n- README.md:69 says 'the rules R1 to R8'; the spec has R1 to R11.\n- The repository gained untracked files during the audit (prompts/audit_correspondence_*, scripts/audit_correspondence.py, tests/test_audit_correspondence.py), and docs/plan-mechanical-rules-2026-10-06.md went from untracked to absent from git status. None of this is mine.\n- Running luthier may have refreshed src/luthier/__pycache__, which git ignores. Nothing else was written under the repository."
+ }
+}

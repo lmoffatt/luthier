@@ -1,0 +1,368 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-05",
+   "direction": "spec",
+   "files": "docs/semantica/05-static-semantics.md, every section (rules R1 to R11, reports, certification, presentations, open)"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a8243e65d2d4f2975",
+  "agent_label": "verify spec-05",
+  "started_at": "2026-10-06T12:08:11+00:00",
+  "finished_at": "2026-10-06T12:20:28+00:00",
+  "tokens": 167069,
+  "tool_calls": 78,
+  "duration_ms": 736553,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "a2c0d4389f5951a1fa3b4fe56f0520b6471c544232d3498427d9bce403895899"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "05#01",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "graph.py:58-63 makes an alias a member of its own (kind 'alias'), and graph.py:128-129 takes refs from the unexpanded alias body. The graph is built from source terms before elaboration. Constructors of data and labels of sum aliases resolve to their type (graph.py:89-101, 112-115). A Proj walks its term (graph.py:280-282). One more gap: a nullary constructor in a pattern parses as PVar (match s { empty -> ... } gives branch (empty, 0)), and _pattern_refs ignores PVar (graph.py:306-308), so it does not stand for its type. The consequence of the alias node is 05#35: verify-spec-05/p19_alias_in_cycle.lut fails with 'in CI: unbound name Codec', and p19b.lut, with the alias written out, is accepted."
+   },
+   {
+    "id": "05#06",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "verify-spec-05/p01_one_act_predicate.lut `Even : Int := \\k { k mod 2 == 0 }` gives 'cannot infer the type of \\ k {...}'. p01b.lut, with an annotated lambda, gives 'has type (k : Int) -> Bool but Int was expected'. checker.py:580-583 tries the predicate reading only when a separate declaration already exists (existing.body is None). For a one-act definition, existing is None, so the body is checked against Int and fails. The spec states the one-act form plainly twice: 05:60 and 00-fundamental-elements.md:20 ('x : T := t, or x := t for a name declared before ... if t : T -> Bool ... x is the subtype'). Only R6 (05:194) and README:51 ('a later x := t') describe the two-act form. The implementation rejects what 05:60 and 00:20 accept, so the severity is high. If you treat R6 as restricting section 1, medium is defensible."
+   },
+   {
+    "id": "05#10",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "low",
+    "evidence": "Codec at 05:68 has the components parse, render and eq. verify-spec-05/p18b.lut writes the line 75 literal without eq and gets 'Codec literal: missing fields ['eq']'. The section 8 version includes eq (05:364-366) and checks. This is a typo in the spec text."
+   },
+   {
+    "id": "05#13",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "verify-spec-05/xfile: theory.lut (Codec declared, plus RoundTrip) with model.lut (`import \"theory\"; Codec := RoundTrip`) gives 'in RoundTrip: Codec is used as a type but is only declared (05 R2)', raised while theory.lut is checked alone. theory2/model2 gives 'Codec has type {...} but U was expected', because whether a name is pending is decided per file (graph.py:176-190). The checker runs file_objects per file (checker.py:159-168), so there is no single graph. Only a declared type with no laws in its own file can be defined across files (test_kernel.py:332). The spec says one graph, imports included (05:90-97), and 'in the same file or another' (05:53, 02-grammar:52). The history note at 05:10-11 ('holes filled by another file are gone') gives a weaker opposite reading."
+   },
+   {
+    "id": "05#15",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:183-207 checks aliases and operators first, then declarations (declare_pending or add_def of the type), then every non-pending body in line order (laws and values interleaved, members sorted by line at graph.py:195), then define_pending for the heads last. The spec (05:96-97) says laws come before other bodies, and it does not say where the head's body goes. With heads last, a value on the cycle is checked against the bare base (05#57)."
+   },
+   {
+    "id": "05#18",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "labels_touched_by (checker.py:342-356) unfolds one named law to read its projections. verify-spec-05/v18a.lut `P2 := Both pos` is accepted. v18c.lut `PosBoth : {..} -> Bool := Both pos; P2 := PosBoth` gives 'cannot tell which labels', an error 05 never names (it is asserted by test_checker_rules.py:64). Two eta-equivalent laws also get opposite verdicts: v18e.lut `P3 := OnlyA` (OnlyA projects only a) gives 'label b of P3 is touched by no law', and v18d.lut `P3 := \\ r { OnlyA r }` is accepted, because a bare use of the parameter counts as touching every label (checker.py:2068-2075). A vacuous mention does count (p07e.lut accepted)."
+   },
+   {
+    "id": "05#20",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "tests/spec has accept and reject files for R1-R9, and `pytest tests/test_spec.py` gives 37 passed. scripts/check_spec_tests.py prints '05-static-semantics.md:221: R10 ... has no tests' and 'R11 ... is marked not implemented'. R11 says 'Files: to be written with the implementation' (05:253)."
+   },
+   {
+    "id": "05#25",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "The checks are checker.py:335-337 ('does not mention its argument') and check_new_type at 641-644. verify-spec-05/p07_r3_unlabeled.lut, p07b.lut and p07c.lut are all rejected with 'the predicate of Pos does not mention its argument'. A grep of tests/ for 'mention its argument' finds nothing, and r3_true_predicate.reject.lut uses a two-label base ('touches none of its labels')."
+   },
+   {
+    "id": "05#26",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "R3 runs only in check_new_type (checker.py:633) and define_pending/_inhabitant_or_predicate, which is when a definition makes a named type. verify-spec-05/p06_r3_inline.lut accepts `x : { a : Int, b : Int | a > 0 } := (1, 2)`, `y : { k : Int | true } := 4` and `z : { k : Int | 1 == 1 } := 4`. The same predicate in `P : U := {...}` is rejected (p07d.lut). 05:157 says 'the body of a subtype' with no restriction to named types, while the rule's title speaks of defining, so there are two readings."
+   },
+   {
+    "id": "05#29",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "check_new_type (checker.py:636-650) inspects the elaborated body without unfolding names. verify-spec-05/p26.lut `P2 : U := Pos` and p26b.lut `IntTree : U := Tree Int` both give 'names a structural type and states no law'. Pos is a subtype with a predicate and Tree is a recursive data, so 05:166 admits either verdict, and the message mislabels the body. The alias form v29c.lut `P2 = Pos` is accepted."
+   },
+   {
+    "id": "05#31",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "The certificate gets 'provisional': r.provisional (certify.py:343). That list holds the provisional externs in the cone (testing.py:369), and test_certificates.py:79 asserts ['same']. It does not hold the names each extern builds on, which are kept only in checker.provisional (checker.py:669) and printed by check -v (cli.py:258-261, test_kernel.py:406). Accepted, listed and never certified, as the spec says."
+   },
+   {
+    "id": "05#33",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "machine.py:450-481 refined() handles Subtype and Sigma only, never Sum. With PYTHONPATH set to the scratch dir, `luthier run verify-spec-05/p21_checked_sum.lut --checked` (pick : Int -> Maybe Pos gives just -4) prints 1. p21b.lut (plain Pos) is stopped with 'gave a value outside Pos (run --checked): -4 does not satisfy k > 0'. `luthier test` on p21 fails 'match pick x { just j -> j > 0 ; _ -> true }'. The text at 05:188-190 lists arrays and records, not sums, but the paragraph just before it makes the payload law a Bool law, so there are two readings."
+   },
+   {
+    "id": "05#35",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "load_object calls add_alias first (checker.py:183-187), which elaborates the alias body (checker.py:225) before declare_pending. verify-spec-05/p19_alias_in_cycle.lut (`CI = Codec * Int` on Codec's cycle) gives 'in CI: unbound name Codec'. p19b.lut, identical with `Codec * Int` written in place, is accepted ('ok: 3 definitions'). 05:200 says the alias is expanded before anything else, so the implementation rejects a program the spec accepts."
+   },
+   {
+    "id": "05#36",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "add_alias sets current_def to the alias name (checker.py:218), so obligations raised in its body are recorded on the alias. verify-spec-05/p27c.lut (`Shift = \\ (x : Int) { usePos (x * x + 1) }`): check -v shows 'Shift: Pos [pending]', `luthier test` gives 'Shift: passed', and check -v then shows 'Shift: Pos [certified (...)]'. In aliascert/ (lib.lut `T = Fin (usePos k)`, app.lut `k := 2`), `test app.lut --imports` gives 'T: passed' and check -v gives 'T: Pos [certified ...]'. R7 (05:199-201) says an alias is never certified."
+   },
+   {
+    "id": "05#39",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "contains_function (checker.py:1835-1870) returns False for a type variable and for U. verify-spec-05/p03_eq_abstract.lut (`Same (A : U) (x y : A) : Bool := x == y; t := Same (Int -> Int) idf idf`) checks, and `luthier eval p03 t` prints the stuck 'idf == idf : Bool'. p28.lut `Int == Float64` and `(Int -> Int) == (Int -> Int)` check, and eval gives stuck terms. R8 (05:210-212) puts == only on the listed formers. The reject test r8_equality_function covers only a literal function type."
+   },
+   {
+    "id": "05#42",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:265 marks the R10 report '(decided, not implemented)', and cmd_check (cli.py:239-275) has no such output. R10 itself says in the present tense that check -v makes the difference visible (05:230-231), which is a wording issue. There are no r10_* files (check_spec_tests.py reports it)."
+   },
+   {
+    "id": "05#43",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "real.lut:7 states AbsIsMagnitude and random.lut:38 states Seed with a predicate. Neither imports algebra (grep '^import': random.lut imports only real, and real.lut imports nothing), and algebra.lut:16 imports real, so real cannot import algebra. This is an authoring rule with no checker enforcement."
+   },
+   {
+    "id": "05#44",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-05/dump_obl.py on p16_r11.lut: f owes 'match (x > 1) { true -> x ; false -> 1 } > 0' and g owes 'match (0 < x) {...} > 0', both over the whole if. That is no refinement in the branch, only textual discharge (test_bridge.py:304). Declared not implemented at 05:243-244."
+   },
+   {
+    "id": "05#46",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "high",
+    "evidence": "grep -i 'observer|completeness|Guttag' in src/ finds nothing, and cmd_check (cli.py:239-275) prints only the summary, the axioms, the provisional externs and per-name states. `luthier check -v verify-spec-05/p10_completeness.lut` (data Stack with top and size and laws) prints 'ok: 8 definitions ...' and one pending line. The bullet at 05:260 has no 'not implemented' mark, unlike the one at 05:265."
+   },
+   {
+    "id": "05#47",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "high",
+    "evidence": "`luthier check -v` on verify-spec-05/v47.lut (`sigma : Float64; main := sigma * 2.0`) prints only 'ok: 2 definitions, 0 with laws...', and p05_hole_term.lut does the same. Only `luthier run v47.lut` reports 'main depends on holes without a value: sigma' (cli.py:451-454). 05:264 is not marked as not implemented."
+   },
+   {
+    "id": "05#48",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:265 says '(decided, not implemented)', and cli.py has no such report."
+   },
+   {
+    "id": "05#49",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "medium",
+    "evidence": "LawResult.mode is only exhaustive, bounded or sampled (testing.py:34, 229-328). A closed law with no parameters is evaluated n times and graded sampled: aliascert `T` gives 'ok k > 0 [sampled, 100 cases]'. With exhaustive it would be 'exhaustive, 1 case' (rec with no params, testing.py:233-264). 'point' is never produced, so a deterministic closed law is reported as 100 sampled cases. 05:278 is not marked as not implemented."
+   },
+   {
+    "id": "05#51",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "No witnessed mode in testing.py. 05:135-136 ties it to the section 4 tests, which 05:447 lists as open."
+   },
+   {
+    "id": "05#52",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:283 says 'not in version 0', and the mode is absent from testing.py."
+   },
+   {
+    "id": "05#55",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "medium",
+    "evidence": "cone_states (cli.py:525-545) gives one state string per name and run counts them (cli.py:456-461). No grade is combined over a chain, and no command reports a chain's grade. --require-certified does act as a binary weakest link (any name not certified blocks the run), but sampled versus exhaustive is never combined."
+   },
+   {
+    "id": "05#56",
+    "verdict": "refuted",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "check -v reads its status from ck.certified, loader.known and loader.stale (cli.py:262-273), all filled from matching certificate entries. That 'certified' is not a permanent state is tested on exactly those structures: test_certificates.py:27-38 (editing the Python makes it stale, 'double' not in certified), 41-47 (certified per filling: certified in app, not in lib), and 84-91 (fewer cases than the directive makes it stale). Only the printed -v line format is untested."
+   },
+   {
+    "id": "05#57",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "verify-spec-05/p02_value_in_cycle.lut: dflt : Codec is used by the law Agrees, so it is on Codec's cycle. check -v lists only 'other: Codec, Codec', and `luthier test` reports 'other: FAILED RoundTrip ... counterexample n = 1', while dflt, with the same body, owes nothing. The cause is that bodies are checked (checker.py:199-204) before define_pending turns Codec into the subtype (checker.py:205-207). At that point dflt's declared type is the bare base and raises no obligation (checker.py:593 sees no Subtype). A decided rule (05:291) is silently not enforced."
+   },
+   {
+    "id": "05#58",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "cli.py:316-322 extends the directives with ck.object_of (set at checker.py:179). `luthier test verify-spec-05/p13_object_test.lut --name RoundTrip` prints 'RoundTrip: no laws' followed by 'helper: passed ok n * n + 1 > 0'. A grep of tests/ for object_of, or for a --name test on a member, finds nothing."
+   },
+   {
+    "id": "05#59",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "dump_obl on p17_branch.lut gives h owing 'x > 5 -> x > 0'. verify-spec-05/v59.lut h2 owes 'x > 5 -> x - 3 > 0' and passes, where without the precondition it would fail. The cited test_sugar.py:41 (`at`) owes nothing at all: the obligation equals the condition and is discharged textually (dump of v59.lut lists no obligation for at), so it does not exercise the precondition. No test in tests/ asserts a precondition."
+   },
+   {
+    "id": "05#61",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "flatten (testing.py:121-139) keeps only the parameters that are mentioned, plus those their types mention. verify-spec-05/p29_quantified.lut: the obligation context is [d : (n : Int) -> Fin (n*n+1) -> Int, x : Int], and the test draws only x ('ok x * x + 1 > 0 [sampled, 100 cases]'). No test in tests/ targets this."
+   },
+   {
+    "id": "05#64",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "generators.py:188-197 samples a subtype by rejection from its base, and generators.py:219-229 draws functions of infinite domain as constants. `luthier test verify-spec-05/p12_all_models.lut --show-cases` gives 'thm: passed ok IdTwice m x [sampled, 100 cases]', with every model of the form m = (\\ _ _ { true }, \\ _ _ { c }, z). An always-true eq satisfies every law, so the law is certified vacuously. 05:306 says such a law has no generator of models and stays pending."
+   },
+   {
+    "id": "05#66",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "cmd_eval (cli.py:571-583) infers and evaluates with no cone check. `luthier eval verify-spec-05/p23_eval_cone.lut main` (main := if 1 < 2 then 1 else sigma, sigma a hole) prints '1 : Int', while `luthier run` on the same file refuses with 'main depends on holes without a value: sigma'. eval fails only when evaluation reaches the hole (v47.lut: 'depends on sigma without a value')."
+   },
+   {
+    "id": "05#73",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "`luthier run verify-spec-05/p22_axiom_run.lut --require-certified` gives '1 names of the cone of main are not certified: realField: assumed (an axiom)' (cli.py:463-466, 532-533). The code follows the literal text (05:331-332: refuses unless every one is certified, and an axiom is never tested), so I would not call it partial. The issue is that the spec says nothing about axioms: the grade table (05:284) makes 'assumed' a grade, and under the literal reading no cone over Real can ever run with the flag. No test covers an axiom in the cone (test_certificates.py:105 covers a pending name only)."
+   },
+   {
+    "id": "05#74",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "cmd_certify (cli.py:495-521) runs `python -m luthier.cli test <file>` per file in a ThreadPoolExecutor. A grep of tests/ finds no use of the certify command. Not run, per the audit rules."
+   },
+   {
+    "id": "05#76",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "kind is set at checker.py:1562, and the cases where a type obligation raised are skipped at testing.py:300-305, with not-run when all raise at 321-323. `luthier test verify-spec-05/p09_law_or_type.lut` gives 'direct: passed ok NonNegOut direct [sampled, 55 cases, 45 where the computation raised]' and 'viaName: FAILED ... raised ValueError'. A grep of tests/ for 'skipped' or 'computation raised' finds nothing."
+   },
+   {
+    "id": "05#77",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "add_extern returns at checker.py:562-564, before _declared is set (checker.py:589), so every extern obligation is kind 'type' (dump: 'direct type ... NonNegOut direct' and 'viaName law ... NonNegOut pyIsqrt'). The same declared type Sq and the same Python give different verdicts: direct passes (raising cases skipped), viaName fails. The spec's law example (05:340, `:= pyStep`) matches viaName. An extern body with a declared refinement fits both definitions at 05:339-341, so there are two readings."
+   },
+   {
+    "id": "05#79",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "LawResult.seconds (testing.py:42) is written through asdict(l) into 'laws' (certify.py:345). A grep of tests/ for 'seconds' finds only an unrelated hit in test_audit_correspondence.py."
+   },
+   {
+    "id": "05#80",
+    "verdict": "refuted",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "With BrokenText and sameTable supplied, verify-spec-05/p18_example.lut checks (check -v: 'csv: Codec, Codec [pending]'). But `luthier test p18_example.lut --name csv --n 20` gives 'csv: FAILED ... RoundTrip ... error: extern \"python:luthier.tables.render\" raised AttributeError: 'Table' object has no attribute 'names''. The example's Table (columns, nRows, cell; 05:354) is not the shape luthier.tables expects, which is lib/table.lut:37 (nRows, names, kinds, cell). So the spec's model, built on the shipped externs, fails its own `test csv`. 'Valid, untested' understates this."
+   },
+   {
+    "id": "05#81",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "`luthier test verify-spec-05/p24_demorgan.lut`: boolON := toOr Bool boolAN passes both translated laws ('sampled, 100 cases'), and toOr itself, quantified over A : U, is NOT RUN ('no generator for U'), which is consistent with certification per model. p24 has only `to`, with no round trip. grep -ril morgan finds only 05-static-semantics.md, so the De Morgan check the text cites is not in the repository."
+   },
+   {
+    "id": "05#82",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "probability.lut:271 makes `Kernel` an alias of KernelOn (probability.lut:265). The components are pair (a DensityPairOn holding sample and lik) and pit, not three flat components. The laws are PitIsDensity and PitUniform, plus the density-pair laws inside DensityPairOn. grep for 'tape' or 'negative control' in lib and examples finds nothing, so the certified model is outside this repository."
+   },
+   {
+    "id": "05#83",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "Declared at 05:463-465, and there is no refine in core.lut or lib. verify-spec-05/p16_r11.lut defines the generic refine of 05:410: it checks, and dump_obl lists no obligation for it (textual discharge of `p x` against the branch condition). So 'R11 is what makes it typable' (05:408) is already false today."
+   },
+   {
+    "id": "05#92",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "dump_obl on p17_branch.lut: c owes 'y > 0' over [o : Maybe Int, y : Int] with no 'o == just y' precondition. m and t show that variable and tuple patterns do name the scrutinee ('x + 1 > 0', '(x, x + 1).b > 0'). Declared at 05:458-462."
+   },
+   {
+    "id": "05#93",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "05:463-465 declares it, and there is no refine or derived form in src/luthier/core.lut or lib/*.lut."
+   },
+   {
+    "id": "05#02",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "check_defined_types (checker.py:395-420) flags any global name whose declared type ends in U (is_type_name, 386-393) and is not defined, whatever its syntactic place. By 05:27 that is exactly a term of type U or a type operator. r2_definition.reject.lut (Foo : U in an annotation) and r2_definition.accept.lut (sigma : Float64 used in a body) exercise both sides, and both pass in test_spec."
+   },
+   {
+    "id": "05#03",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "graph.py:124-149 collects refs from the type and body, _tarjan (graph.py:374-407) emits components after their dependencies, and checker.py:167-168 loads each one as a block. Tested by test_kernel.py:137 (order in the file does not matter, mutual recursion) and r2_definition.accept.lut (the Codec/RoundTrip cycle)."
+   },
+   {
+    "id": "05#04",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "A Def with body None is declared, defined() is at checker.py:370-384, and ck.certified is filled from matching entries. Tests: test_kernel.py:183, test_kernel.py:332, test_certificates.py:27-47 and 105. 'In another file' works only in the restricted case of 05#13."
+   },
+   {
+    "id": "05#05",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "checker.py:587-596 checks the body against the declared type and adds the subtype obligation. r6_predicate_body.accept.lut:4 `four : Even := 4` passes in test_spec, and test_kernel.py:157-162 rejects `x : Z7 := 9`."
+   }
+  ],
+  "notes": "Scope: the 47 entries of mapper spec-05. I re-read docs/semantica/05-static-semantics.md (all of it), graph.py (all of it), checker.py:150-710, 1325-1345, 1835-1870 and 2050-2075, cli.py:236-583, testing.py:25-140 and 220-330, generators.py:175-235, machine.py:440-500, certify.py:325-351, lib/probability.lut:225-275, lib/table.lut and tables.py, plus the cited tests. src, docs/semantica and tests/spec are identical between b15f2a1 and the current HEAD (60fd7d8), and git status is unchanged.\n\nAll programs are under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-05/. I copied the mapper's programs and reran them, and wrote new ones: v18a-e (R3), v29c-d (R4), v47 (holes), v59 (branch preconditions). The p21 programs need PYTHONPATH set to that directory for audit05ext.py.\n\nChanges against the mapper:\n- 05#06: severity raised to high. 00:20 and 05:60 both state the one-act predicate form, and it is rejected.\n- 05#56: refuted, now implemented_tested. test_certificates.py:27-47 and 84-91 test that 'certified' derives from matching entries.\n- 05#73: status changed to implemented_untested, still medium. The code follows the literal text, and the gap is the spec's silence on axioms.\n- 05#80: refuted, now partial/medium. The section 8 example's `test csv` fails against the shipped extern: luthier.tables.render raises AttributeError 'names', because the example's Table shape differs from lib/table.lut:37.\n\nAdded evidence:\n- 05#18: two eta-equivalent laws get opposite R3 verdicts (v18d accepted, v18e rejected).\n- 05#01: a nullary constructor pattern parses as PVar and is not counted as an occurrence of its type.\n- 05#59: the cited test_sugar.py:41 owes nothing, by textual discharge, so it does not exercise the precondition.\n\nConfirmed as high: 05#13 (cross-file definition), 05#35 (alias on a cycle), 05#36 (aliases certified), 05#39 (== on a type variable or on U), 05#46 and 05#47 (check -v reports missing, undeclared), 05#57 (a value on its theory's cycle owes nothing), 05#64 (a law over all models certified on degenerate models whose eq is always true). I never ran luthier certify."
+ }
+}

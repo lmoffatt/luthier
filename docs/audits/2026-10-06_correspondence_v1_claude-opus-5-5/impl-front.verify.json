@@ -1,0 +1,298 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-front",
+   "direction": "impl",
+   "files": "src/luthier/lexer.py, parser.py, syntax.py, pretty.py, api.py, and src/luthier/core.lut"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a99351258c0b82690",
+  "agent_label": "verify impl-front",
+  "started_at": "2026-10-06T12:17:50+00:00",
+  "finished_at": "2026-10-06T12:30:14+00:00",
+  "tokens": 148187,
+  "tool_calls": 69,
+  "duration_ms": 744148,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "c002554249426ea807c442adcf907b9591cde006371ee82312571ee8bc06310c"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "LAY-1",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:26-28 says line breaks are ignored inside ( ), [ ], < > and the braces of match and lambda; the only other layout text in docs/semantica is the same line ('an act starts at column 0'). Every bracket parser decrements skip_newlines before expect(close) (parser.py:495-496, 579-580, 685-687, 702-703, 725-726, 327-328), and _skippable_newline (39-51) then keeps a newline whose next token is at col 0. Reran: lay1_lam.lut gives 'expected '}', got '\\n'', lay1_paren.lut ')' , lay1_list.lut ']', lay1_match.lut, lay1_data.lut, lay1_union.lut all fail; indented closers check ok; record type and record literal with '}' at col 0 check ok. The implementation follows neither reading consistently: content at column 0 inside brackets is accepted (`x : Int := (1 +\\n2)` evaluates to 3, `\\ x {\\nx + 1 }` gives f 2 = 3), only the closing token at column 0 fails. Probes under verify-impl-front/lay1_*.lut."
+   },
+   {
+    "id": "LAY-3",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:81 record value uses sep, and 02-grammar.md:91 sep ::= \",\" | \";\" | line break. parser.py:608 sets skip_newlines = saved + 1 before parse_term, so the value swallows the next line's field name as an argument; the `if self.at(\"name\"): continue` at 619 cannot fire because parse_app would already have consumed a name. lay3.lut (`{ a := 1\\n          b := 2 }`) and lay3b.lut (fields on separate indented lines) both give 'expected another field or '}' in a record literal (at ':=')'; lay3c.lut with a comma gives p.b = 2."
+   },
+   {
+    "id": "GRAM-2",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:36 is the only production for clauses and makes ':=' body mandatory before { clause }; 04-kernel.md:158 and 02-grammar.md:51 only say clauses are a match on the parameter tuple. parser.py:246-251 rejects body plus clauses. gram2_body.lut gives 'line 6, col 0: definition has both a body and clauses (at '')' (a 4-line file, reported past the end); gram2_eq.lut (`:=` then clauses, no body) gives 'expected a term (at '|')'; gram2_nobody.lut (no ':=') evaluates dbl (succ zero) to succ (succ zero). tests/test_kernel.py:96-104 uses the body-less form the grammar does not derive. The spec EBNF is what is wrong, but it is the only place clause syntax is given, so a reader following it gets a parse error."
+   },
+   {
+    "id": "GRAM-4",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:80 `\"{\" pattern \":\" term \"|\" term \"}\"`, and 02-grammar.md:93-94 pattern includes tuple patterns. parse_brace calls self.expect(\"name\") first (parser.py:628). gram4.lut `Ord2 : U := { (a, b) : Int * Int | a < b }` gives 'line 1, col 14: expected 'name', got '(''. The labeled form gram4c.lut `{ a b : Int | a < b }` checks. Only `_` passes as a 'pattern' because it lexes as a name."
+   },
+   {
+    "id": "GRAM-5",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:74-76 (A * B * C is A * (B * C)) and 02-grammar.md:62 (all but & and -> associate left) disagree on * and + over types. parser.py:579-581 returns the inner term of parentheses, and checker.py:1295-1325 flattens every nested BinOp '+' or '*' on types. gram5.lut `t : (Int * Bool) * String := ((1, true), \"a\")` gives 'type error: in t: (1, true) has type Int * Bool but Int was expected'; gram5b.lut `(Int + Bool) + String` rejects `left (left 3)`; gram5c.lut through the alias AB evaluates to ((1, true), 'a') : AB * String. Arithmetic: `24 / 4 / 2` = 3 and `10 - 3 - 2` = 5 (left)."
+   },
+   {
+    "id": "GRAM-6",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:82 lets any term be the type of an alternative; 02-grammar.md:98-99 only warns about '<' after a term. parser.py:354 refuses '>' and '|' as operators while in_angle > 0; parse_paren (515) resets no_brace only and parse_brace (598-602) resets neither. gram6.lut `< pos : { x : Int | x > 0 } | zero : Unit >` gives 'expected '}', got '>''; gram6b.lut with `(x > 0)` gives 'expected ')', got '>''; gram6c.lut `0 < x` and gram6d.lut `x >= 0` check ok."
+   },
+   {
+    "id": "GRAM-9",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:47 leaves op undefined; 02-grammar.md:65 and 04-kernel.md:49 speak of +, -, *, / and 'an infix operator'; 05-static-semantics.md:210-214 (R8) says == does not exist on anything containing an exponential. parser.py:149 accepts any symbol or keyword or 'mod'; checker.py:1328-1331 resolves a user operator before the R8 check at 1333. gram9b.lut `p == q` on { a : Int, f : Int -> Int } gives the R8 error; gram9.lut with `operator == := eqP` gives false : Bool, and gram9d.lut `operator < := lt` gives true : Bool. gram9c.lut `operator & / if / (` all pass check. gram9e.lut `operator and` is rejected ('expected an operator after 'operator''). tests/test_kernel.py:388-401 covers + and * only."
+   },
+   {
+    "id": "LEX-4",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "06-numbers.md:47-48 (infinities and NaN are not values of Float64), 06-numbers.md:114 (an overflow to an infinity is an error), core.lut:21-22. parser.py:408 builds Lit(float(text)) with no range check; the evaluator's finiteness check (evaluator.py:86-88) applies to arithmetic results only. lex4.lut: `big : Float64 := 1e400` passes check and `big` prints 'inf : Float64'; `big - big` gives 'NaN in inf - inf'; `1e-400` prints 0.0 (underflow is not addressed by the spec). tests/test_kernel.py:504-507 covers only `1e308 * 10.0`."
+   },
+   {
+    "id": "LEX-5",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "06-numbers.md:38 String : U := primitive \"unicode\"; 02-grammar.md:15 does not specify escapes. parser.py:411 decodes term literals with unicode_escape over UTF-8 bytes; parser.py:761 keeps pattern literals raw. lex5.lut: `s` prints 'cafÃ©' : String; `len \"café\"` via builtins.len = 5; `k \"café\"` (pattern \"café\") = 0; `k2 \"a\\nb\"` = 0; `k3 \"abc\"` = 1; `len e` for \"a\\nb\" = 3 (escape processed in terms). `s == \"café\"` is true because both sides are corrupted the same way. lib/table.lut:98 and 134 depend on escapes in terms."
+   },
+   {
+    "id": "API-3",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:173-176 (R5: an extern gives a value, never a type; R2 applies to externs) and 03-libraries.md:45-48 (the opaque carrier filled by a Python class is gone). api.py:80-94 checks only hole-ness and arity, then installs Extern(fill:q). verify-impl-front/api_probe.py: on `Session : U`, holes() == [] and holes(include_types=True) == ['Session'], fill('Session', list) succeeds with body Extern(target='fill:Session', type=U), eval('Session') then fails 'cannot marshal Python value [] into Luthier type U'. On `Signal : U` / `duration : Signal -> Int`, fill('duration', len) is accepted while tests/spec/r5_extern_over_declared.reject.lut rejects the same type with an extern body."
+   },
+   {
+    "id": "API-4",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:179-187 (dated 2026-10-05): every refinement in the type of an extern is an obligation, codomain of each arrow, each component, each entry. api.py:95-101 adds an obligation only when whnf(type) is a Subtype. api_probe.py: api4.lut `neg : Float64 -> NonNeg` filled with lambda x: -1.0 gives obligations() == [], eval('neg 2.0') == -1.0, test('neg') has laws=[]; api4_ext.lut with the extern in the file gives obligations() == ['neg']; api4_rec.lut `r : Int -> { a : NonNeg, b : Int }` filled to return a = -1.0 gives obligations() == [] and eval returns P2(a=-1.0, b=3). tests/test_kernel.py:419-433 covers a top-level subtype only."
+   },
+   {
+    "id": "CORE-2",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:68-71 says labels are binders and not part of a type's identity; 05-static-semantics.md:21 and 04-kernel.md:167 define Bool as the sum; tests/spec/k_bool_is_sum.accept.lut asserts a YesNo value is a Bool. checker.py:125-131 is_bool requires labels true/false (decided in docs/plan-2026-10-05.md:384-390, never written into 04 or 05). core2.lut: `b : Bool := y` with y : YesNo prints 'yes : Bool'; core2b.lut `if y then 1 else 2` rejected; core2c.lut a YesNo-valued law rejected. Worse than the mapper reported: core2d.lut with `Swapped = < false : Unit | true : Unit >`, `s : Swapped := true`, `b : Bool := s` prints 'true : Bool' but `if b then 1 else 0` = 0, `b == true` = false, `not b` = true: conversion is positional and printing uses the source label, so a value displayed as true behaves as false."
+   },
+   {
+    "id": "GRAM-1",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:39 and 85 make ';' optional, 02-grammar.md:27 ignores line breaks inside match braces, and `term ::= term atom` (02-grammar.md:68) lets the next pattern be an argument: the grammar is ambiguous. parser.py:320-326 and 718-724 take the greedy reading. gram1_match.lut gives 'type error: in f: 1 : Int is not a function, cannot apply it to false'; gram1_data.lut (one line) and gram1_data2.lut (constructors on separate lines) give 'expected 'name', got ':''; gram1_trail.lut with a trailing ';' evaluates f true = 1."
+   },
+   {
+    "id": "GRAM-3",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:51 (clauses are a match on the tuple of the parameters) and 02-grammar.md:133-140 (implicit parameters) do not say whether implicit ones are in the tuple. parser.py:272 collects names from every binder, implicit included. gram3.lut gives 'clause has 1 patterns but the header has 2 parameters'; gram3e.lut with `| _, nil := 0 | _, cons x xs := 1 + len xs` evaluates len ys = 3, same as the match form gram3f.lut."
+   },
+   {
+    "id": "GRAM-7",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:75-77 show two named positions; by 02-grammar.md:75 `(a : Int) * term` with term = `(b : Bool) * (c : String)` should give three labels. parser.py:538-563: the right operand parse_binop(6) re-enters parse_paren, which already builds a Sum or labeled product. gram7s.lut three-way named sum gives 'every alternative of a named sum is written `(label : Type)`'; gram7p.lut three-way named product checks but `p.a` gives 'p : P has no named components'; gram7p2.lut record literal rejected. Two positions work (gram7s2.lut `a 3 : S`, gram7p3.lut p.b = true). No test covers the + named form."
+   },
+   {
+    "id": "GRAM-8",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:78 names `{ name : term }` a labeled product; 05-static-semantics.md:38-39 makes its component names labels; 02-grammar.md:116 lets .field project them. parser.py:781-783 builds Subtype(PVar(a), Int, NoLaw()) for one component. gram8.lut `P = { a : Int }` then p.a gives 'p : P has no named components, so .a means nothing'; gram8b.lut `{ a := 3 }` gives 'a record literal needs a type with named components, not P'; gram8c.lut `P : U := { a : Int }` is rejected by R4 suggesting the same form. Kept medium: with labels as binders a one-label product is arguably just Int, so the spec admits both readings."
+   },
+   {
+    "id": "GRAM-11",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:14 number includes exponents, 02-grammar.md:94 patom number. parser.py:758 int() on any number without '.', parser.py:126 and 132 int() for with/size; cli.py:85-88 catches only ParseError and LexError. gram11.lut `match x { 1e3 -> 1 ; _ -> 0 }` makes `luthier check` print a traceback 'ValueError: invalid literal for int() with base 10: '1e3''; gram11b.lut with 1.0e3 works. gram11c.lut `test sq with 1.5` and gram11e.lut `size 2.5` also crash with tracebacks. gram11d.lut `-1` pattern gives 'expected a pattern' (not derivable, so not a defect). Raised to high: the 1e3 pattern is a spec-derivable program rejected, by a crash rather than a diagnostic."
+   },
+   {
+    "id": "GRAM-30",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "No line in docs/semantica describes `luthier eval` input (only 05-static-semantics.md:308 on its definedness requirement). parser.py:797-800 parse_term never checks for eof; cli.py:576 and api.py:131 use it. gram30.lut: `luthier eval gram30.lut \"1 + 2 ) junk\"` prints '3 : Int'; \"a ]\" prints '3 : Int'."
+   },
+   {
+    "id": "API-6",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:320-326: the hash covers the Python behind every extern, and the comparison happens once holes are filled. certify.py:240-246 fingerprints any non-module target as the constant \"filled\"; api.py:120-126 only removes mismatching entries. verify-impl-front/api6/api6.py on the mapper's api_refill.lut: fill math.sqrt, test passes and root is certified; refill with lambda x: 0.0: definition_hash unchanged, root still in checker.certified, stale == [], and test(deep=False) returns certified=True for the wrong function. New session: load then fill math.sqrt leaves root uncertified (certificate compared at load, before the fill). Raised to high: in one session a wrong Python filling keeps the certificate of the right one, a decided rule silently not enforced."
+   },
+   {
+    "id": "API-8",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "06-numbers.md:103 (a value is checked against its declared type when it crosses) does not say whether the refinement is included; 05-static-semantics.md:189-191 checks refinements of extern outputs only under --checked. api.py:143-160 marshals by from_python on the parameter type. verify-impl-front/api8.py: call('use', -3) = -30 with use (x : Pos), call('idx', 7) = 7 with Small = 0..2, eval('use 0') raises '0 does not satisfy Pos', call('g', 1, 2) raises 'g takes fewer than 2 arguments', call('g', 1.5) is rejected at the base level. No test calls Program.call (grep of tests/ finds none)."
+   },
+   {
+    "id": "API-2",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "docs/semantica has no description of the Python API (grep for luthier.load, fill, Program finds only 00-fundamental-elements.md:185, 'From Python, a surface that reads aloud'). verify-impl-front/api2.lut probe: holes() == ['k'], holes(include_types=True) == ['Session', 'k'], blocked_by('a') == {'holes': ['k'], 'types': []}, record('Pt')(1.0, 2.0) == Pt(x=1.0, y=2.0), record('Q') raises KeyError 'Q has no named components', resolve('zz') raises KeyError \"no definition 'zz'\". Tests touch only holes() (tests/test_kernel.py:428) and fill/eval/test; definitions, obligations, blocked_by, record, test_all and term are untested."
+   },
+   {
+    "id": "CORE-6",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "04-kernel.md:161 gives the translation `cons a (cons b (cons c nil))` without type arguments; no spec line says whether constructors of a parameterized data take the parameter. core.lut:36 `List (A : U) : U := data {...}` makes them explicit. core6.lut `cons 1 nil` gives '1 has type Int but U was expected'; core6b.lut `cons Int 1 (nil Int)` works and is how literals print. `luthier eval core6b.lut \"[1, 2]\"` gives 'a list literal needs an expected type or a first element' although it has one (checker.py:897-898 fires on __nil__/__cons__ whenever there is no expected type)."
+   },
+   {
+    "id": "LEX-1",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "02-grammar.md:13 name ::= letter {...} with letter undefined. lexer.py:18 allows a leading '_', a '#digits' suffix, ASCII letters only. lex1.lut: x#2 = 4, x#1 + x = 3; lex1b.lut 'unexpected character 'π''; lex1c.lut `_ : Int := 3` defines a name `_` and evaluates to 3. The '#' suffix is used nowhere else in src (fresh names use '~', subst.py:9-11)."
+   },
+   {
+    "id": "LEX-2",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "02-grammar.md:21-22 list of reserved words omits let, in (introduced by 02-grammar.md:127) and primitive, axiom (04-kernel.md:45). lexer.py:8-9 reserves them. lex2_{in,let,axiom,primitive}.lut each give 'expected 'name', got ...'; lex2_as.lut `as` and `size` as names evaluate to 4. Kept low: the spec itself introduces those words as syntax, so the list is out of date."
+   },
+   {
+    "id": "LEX-3",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "04-kernel.md:64 only gives 3 : Int and 3.0 : Float64; 02-grammar.md:14 admits exponents without typing them. parser.py:408. lex3.lut `x : Float64 := 1e3` = 1000.0; lex3b.lut `x : Int := 1e3` gives '1000.0 has type Float64 but Int was expected'. tests/test_kernel.py:507 uses 1e308 as a Float64."
+   },
+   {
+    "id": "LEX-6",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "No spec line on error format. lex6.lut 'line 1, col 13: unexpected character '@''; lex6b.lut (string with a raw newline on line 1-2, error on line 3) reports 'line 2, col 16' because lexer.py:49-58 counts lines only on newline tokens; lex6c.lut and lex6d.lut give 'expected a term (at '${')' and (at \"'{\"). Those two tokens probably anticipate quote and unquote, listed as open in 02-grammar.md:144."
+   },
+   {
+    "id": "GRAM-16",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:22-23 says and, or and mod are ordinary names written infix; core.lut:13-15 defines and/or/implies but no mod, and no spec line defines mod. lexer.py:10, parser.py:23, checker.py:1349, evaluator.py:451 treat mod as a primitive. g16.lut: 10 - 3 - 2 = 5, `and true false` = false, `mod 7 3` gives 'unbound name mod', `1 < 2 < 3` rejected by type; g16b.lut with `mod (a b : Int) : Int := 42`: `7 mod 3` = 1 while `mod 7 3` = 42. Raised to medium: under the spec's own statement `7 mod 3` would call the user's mod and give 42."
+   },
+   {
+    "id": "GRAM-23",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:87 makes `extern [provisional] string` an atom, and 02-grammar.md:68 `term atom` then derives `app extern \"...\" 3`. parser.py:387-399 starts_atom excludes extern. g23.lut extern as a record field value works (p.f (0 - 3) = 3); g23b.lut `app extern \"python:builtins.abs\" 3` gives 'unexpected 'extern' at end of definition'; g23c.lut with parentheses evaluates to 3. Raised from low: a spec-derivable program is rejected, though the workaround is trivial."
+   },
+   {
+    "id": "GRAM-29",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "No spec line on parse error format. g29a.lut (one line `x`) gives 'line 3, col 0: definition 'x' needs a type or a body (at '')'; g29b.lut 'unexpected ')' at end of definition'; g29c.lut gives the heuristic 'a closing bracket is probably missing above' (parser.py:502-512)."
+   },
+   {
+    "id": "PP-1",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "pp1.lut: \"abc\" prints 'abc' (Python repr), \"it's\" prints \"it's\"; `h := extern provisional \"python:builtins.abs\"` prints 'extern \"python:builtins.abs@Int -> Int\"' without provisional; `[a 1]` of List S prints 'cons < a : Int | b : Bool > (a 1) ...' without the parentheses 02-grammar.md:98-99 requires for a union argument; pp1r.lut `fromInt 3` prints '3/1 : Rational'. The x~1 fresh-name form is visible in gram5b.lut's message ('\\ x~1 { left x~1 } 3')."
+   },
+   {
+    "id": "API-1",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "api.py:36-39 delegates to cli.load, which raises SystemExit (cli.py:85-99). verify-impl-front/api15.py: luthier.load('api1.lut') with `x : Int := true` raises SystemExit '...api1.lut: type error: in x: true has type Bool but Int was expected'. No test of the error path."
+   },
+   {
+    "id": "API-5",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "api.py:82-83 and 105-118. api15.py: fill('a') on `a : Int := 3` raises 'a is not a hole'; fill('not') raises 'not is not a hole'; fill('f', lambda a: a) for Float64 -> Float64 -> Float64 raises 'f takes 2 argument(s) by its type, but <lambda>... takes 1'; fill('f', max) accepted (no signature); refilling h changes g 1 from 12 to 22."
+   },
+   {
+    "id": "API-9",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "03-libraries.md:66-67 (test does not rerun a certified definition unless --deep) is about `luthier test`; api.py:184-208 defaults deep=True and takes n from the directive else 100. verify-impl-front/api9: with `test sqs with 7`, test('sqs') ran 7 cases, n=5 ran 5, deep=False after a pass ran none and reported certified=True, and the default call reran 7 cases."
+   },
+   {
+    "id": "CORE-1",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "low",
+    "evidence": "04-kernel.md:60-61 lists Empty and Unit as kernel formers; 05-static-semantics.md:165-169 (R4) states no exemption. checker.py:805 `if not self.kernel and not recursive`. core1a.lut `MyUnit : U := data { mu : MyUnit }` gives 'MyUnit is not recursive; write MyUnit = < mu : Unit > (05 R4)'; core1b.lut `data { }` suggests `MyEmpty = <  >`, and core1c.lut shows that suggestion is a parse error ('expected 'name', got '>'')."
+   },
+   {
+    "id": "GRAM-10",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:45 and 04-kernel.md:48 match parser.py:120-134 (with|exhaustive, then size). The default of 100 (parser.py:123) is stated nowhere in docs/semantica (grep finds 100 only in 08-tests.md:114). The richer directive is decided and pending: 08-tests.md:340-343 and the order of work at 08-tests.md:354-365. g10a.lut `size 3 with 10` gives 'unexpected 'with''; g10b.lut `sampled linear` gives 'unexpected 'sampled''; g10c.lut `with 5 size 3` checks. `size` is used by libraries (lib/array_python.lut:75-79, lib/array.lut:368) but no pytest exercises it."
+   },
+   {
+    "id": "GRAM-20",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:84 requires at least one lparam, 02-grammar.md:92-93 make `_` the wildcard pattern and not a name; 04-kernel.md:169 gives the tuple translation. g20b.lut: `\\ (x, y, z) { x - y - z }` gives f (9, 2, 3) = 4; `\\ _ { _ }` gives g 7 = 7; `luthier eval g20b.lut \"\\ { 3 }\"` prints 3 : Int; g20.lut `match x { _ -> _ }` gives 'unbound name _'. Status changed to covered_differently: two forms the grammar does not derive are accepted. Kept medium because no spec-valid program changes meaning; no test or library uses the tuple-pattern parameter."
+   },
+   {
+    "id": "GRAM-22",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "02-grammar.md:88 gives the syntax; 04-kernel.md:85 says forget is implicit; neither says what it does on a non-subtype. parser.py:435-437. g22.lut: q = forget p + 1 = 4; `forget 3` gives 'forget applied to 3 : Int, which is not a subtype'. No test, library or example uses forget (grep)."
+   }
+  ],
+  "notes": "Covered all 37 entries of impl-front. Each one was re-run on my own probe files under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-impl-front/, and I grepped docs/semantica/ (00 to 08) for a line that would refute each one. The repo HEAD is 60fd7d8, but `git diff b15f2a1 HEAD` touches only tests/test_audit_correspondence.py, so src, docs/semantica and tests/spec are the same as at b15f2a1.\n\nNone of the 37 was refuted. I found no spec line that specifies any not_in_spec behavior. The nearest is LEX-6: the unused '{ and ${ tokens probably anticipate quote and unquote, which 02-grammar.md:144 lists as open.\n\nCorrections:\n- CORE-2 is worse than reported (core2d.lut). `Swapped = < false : Unit | true : Unit >` converts to Bool by position but prints with its own label, so a value shown as 'true : Bool' behaves as false: `if b then 1 else 0` gives 0 and `b == true` is false.\n- API-6 goes from medium to high. Refilling a hole with a wrong function in the same session leaves the definition certified, and test(deep=False) reports certified=True, because certify.py:246 fingerprints a filled extern as the constant \"filled\".\n- GRAM-11 goes from medium to high. A spec-derivable `1e3` pattern crashes `luthier check` with a Python traceback instead of a diagnostic.\n- GRAM-23 goes from low to medium: the grammar derives an unparenthesized extern argument and the parser rejects it.\n- GRAM-16 goes from low to medium: with a user-defined mod, infix `7 mod 3` ignores it and gives 1, where 02-grammar.md:22 implies 42.\n- GRAM-20 changes status from covered to covered_differently: `\\ { 3 }` and `\\ _ { _ }` are accepted though the grammar does not derive them.\n\nAll other statuses and severities stand.\n\nA pattern across LAY-1, GRAM-2, GRAM-5 and GRAM-8: the spec text (02 EBNF, 02:62 against 04:74) is internally inconsistent or wrong, as much as the implementation is. For GRAM-2 the fix is in the spec's EBNF, but I kept it high because it is the only clause syntax a reader has."
+ }
+}

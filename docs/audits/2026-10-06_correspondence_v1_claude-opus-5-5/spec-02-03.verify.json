@@ -1,0 +1,382 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-02-03",
+   "direction": "spec",
+   "files": "docs/semantica/02-grammar.md and docs/semantica/03-libraries.md (check the grammar against src/luthier/lexer.py, parser.py, syntax.py, and the libraries against src/luthier/lib/)"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "ae20ecaedf47ac4ce",
+  "agent_label": "verify spec-02-03",
+  "started_at": "2026-10-06T11:55:34+00:00",
+  "finished_at": "2026-10-06T12:08:47+00:00",
+  "tokens": 160386,
+  "tool_calls": 85,
+  "duration_ms": 792451,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "fc3a73e2827874f84232d92e5a36984f22ee32da95c59f8920e781cfeef853e7"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "spec-02-03#01",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:13 requires a leading letter; lexer.py:18 is [A-Za-z_][A-Za-z0-9_']*(...)*(\\#\\d+)?. verify-spec-02-03/v01.lut (`_x : Int := 3`, `y#2 : Int := 4`) loads and `luthier eval v01.lut '_x + y#2'` gives 7. The #N suffix is used nowhere else in src (grep). Raised to high under the rubric (the implementation accepts what the grammar rejects), and it is what makes the hash collision of #84 possible, since subst.py:209-216 names bound variables _0, _1, ..."
+   },
+   {
+    "id": "spec-02-03#03",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:411 decodes term strings with bytes(text,'utf-8').decode('unicode_escape'), which reads UTF-8 bytes as Latin-1. verify-spec-02-03/v03.lut (`s : String := \"é\"`, f matching \"é\"): `eval s` prints 'Ã©'; `f s` and `f \"é\"` both give 0. String is primitive \"unicode\" (core.lut:31, 06-numbers.md:38). No test or library uses a non-ASCII literal."
+   },
+   {
+    "id": "spec-02-03#04",
+    "verdict": "confirmed",
+    "corrected_status": "ambiguous (the grammar says nothing about escapes; the implementation decodes them in terms only)",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:411 decodes escapes in term literals; parser.py:761 builds PLit(t.text[1:-1]) raw for patterns; lexer.py:17 admits backslash escapes. verify-spec-02-03/v04.lut: s := \"a\\nb\", f matches \"a\\nb\"; `f s` gives 0. table.lut:97 and :134 depend on term escapes (\"\\n\", \"\\x0b\"). No test."
+   },
+   {
+    "id": "spec-02-03#07",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "The only capitalization test is parser.py:739, and it is dead since _is_con_name (parser.py:744-745) always returns False. verify-spec-02-03/v07.lut (lowercase type `myType : U`, capitalized value `X`, capitalized parameter `Y`) loads and `f 2` gives 5."
+   },
+   {
+    "id": "spec-02-03#08",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "lexer.py:8-9 KEYWORDS adds primitive, axiom, let, in to the list in 02-grammar.md:21-22. verify-spec-02-03/v08a `in : Int := 3` fails \"expected 'name', got 'in'\"; v08b `f (axiom : Int)` fails; v08c `let : Int` and v08d `primitive : Int` fail the same way. Contextual words `size` and `as` stay names (v08e loads)."
+   },
+   {
+    "id": "spec-02-03#09",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "core.lut:13-14 define and/or; lexer.py:10 INFIX_NAMES and parser.py:389-390 stop them from starting an argument. verify-spec-02-03/v09.lut `twice2 and true` is a type error; v09e `twice2 (and) true` loads and gives true. `mod` is no definition: v09c `mod 7 3` and v09d `g : Int -> Int -> Int := mod` both fail \"unbound name mod\", while `7 mod 3` gives 1 (a BinOp). test_kernel.py:225 uses `or` as a tuple element only. Kept medium because \"ordinary names written infix\" can be read as infix-only."
+   },
+   {
+    "id": "spec-02-03#11",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Closers at column 0 fail everywhere except in a record type: v11a (data, `}` at col 0) \"expected '}', got '\\n'\"; v11b (match) same; v11d (list, `]` at col 0) \"expected ']'\"; v11e (lambda) \"expected '}'\". v11c (record type with `}` at col 0) loads because parse_brace uses _skip_raw_newlines (parser.py:634). Indented closers load (v11f). The cause is that each bracket decrements skip_newlines before expect (parser.py:301-302, 327-328, 495-496, 702-703, 725-726), so _skippable_newline (parser.py:51) treats a col-0 token as a new act. The text says line breaks inside brackets are ignored and also that an act starts at column 0, so it does not decide this case."
+   },
+   {
+    "id": "spec-02-03#14",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "02-grammar.md:36 requires \":=\" body before clauses. parser.py:246-248 rejects body plus clauses and accepts clauses with no body. verify-spec-02-03/v14a (`f (b : Bool) : Bool := b` then `| true := false`) fails \"definition has both a body and clauses\" (reported at line 4 col 0, past the end); v14b (header, no :=, two clauses) loads and `f true` gives false; v14c (header ending in `:=` then clauses) fails \"expected a term (at '|')\". test_kernel.py:96-100 uses the no-`:=` form, which the grammar cannot produce."
+   },
+   {
+    "id": "spec-02-03#16",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "parser.py:225-230 accepts `primitive \"...\"` and `axiom \"...\"` bodies, absent from 02-grammar.md:38-40. They are specified in 04-kernel.md:45-46 and 06-numbers.md:33-59, and restricted by tests/spec/n3_primitive_outside_core.reject.lut and n4_axiom_outside_lib.reject.lut. Only 02's production is incomplete, with no cross-reference."
+   },
+   {
+    "id": "spec-02-03#17",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:320-326: the constructor type is parse_term, which keeps applying across names, and ';' is optional only after the last constructor. verify-spec-02-03/v17b `data { leaf : Tree node : Tree -> Tree }` (one line) and v17c `data { red : Color green : Color }` fail \"expected 'name', got ':'\"; v17a (newline-separated, closer indented) fails the same way; v17d with ';' loads. Every data body in core.lut, lib and tests/spec uses ';' (core.lut:36, r4_recursive_data.accept.lut), so nothing exercises the optional form."
+   },
+   {
+    "id": "spec-02-03#22",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:126 and :132 call int() on any number token. verify-spec-02-03/v22 `test one with 1.5` and v22b `test one with 1e3` crash with an uncaught Python ValueError traceback, not a ParseError. v22c `test one size 3` loads. `size` appears only in library directives (array.lut:368, array_python.lut:75-79, algebra_python.lut:52); no pytest parses a size directive."
+   },
+   {
+    "id": "spec-02-03#24",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:148-150 accepts any symbol or keyword as `op`. checker.py:1328-1331 consults registered operators before the R8 check at :1332. verify-spec-02-03/v24a (`operator == := eqF` on Int -> Int) loads and `idf == inc` evaluates to true; v24b without the directive is rejected \"no structural equality ... (05 R8)\". v24c registers `operator &`, `->`, `mod`, `if` without error; v24d shows `true & false` still means the law conjunction, so `operator &` is silently dead; v24e shows `operator mod` and `operator <` do apply on Bool. 02 l.65 limits operators to + - * /, while 04-kernel.md:49 says any infix operator. test_kernel.py:388 tests only + and *."
+   },
+   {
+    "id": "spec-02-03#27",
+    "verdict": "confirmed",
+    "corrected_status": "ambiguous (implicit parameters count in the clause tuple)",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:272 puts implicit binders into the tuple and :287-288 checks the count. verify-spec-02-03/v27a (`len {A : U} (l : List A) : Int` with `| nil := 0`) fails \"clause has 1 patterns but the header has 2 parameters\" with no line number; v27b with `| _, nil := 0` loads and `len xs` gives 3. 02 l.51 (a match on the tuple of the parameters) literally includes them, but 02 §7 presents implicit parameters as inferred at the call, so the text supports both readings. No test combines clauses with implicit parameters."
+   },
+   {
+    "id": "spec-02-03#32",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "The type of the left operand decides (checker.py:1295-1326). checker.py:1351-1353 adds a third meaning, String concatenation: verify-spec-02-03/v32 `\"ab\" + \"cd\"` gives 'abcd'; v32b `\"ab\" * \"cd\"` is rejected. grep finds no mention of String + in docs/semantica or README. text.lut:8 relies on it; it is reached by pytest only indirectly, through table.lut in test_bridge."
+   },
+   {
+    "id": "spec-02-03#36",
+    "verdict": "confirmed",
+    "corrected_status": "ambiguous",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-02-03/v36 (`D = (n : Nat) * Fin n`, `d.n`) fails \"d : D has no named components\"; v36b reaches it through `match d { (a, b) -> a }` and gives 3. parser.py:549-551 builds a bare Sigma, which projection does not treat as named. 04-kernel.md:58 lists projection e.x for the named product form; 02 §6 l.121-123 talks of d.m in \"a dependent product\" and is exercised only on the labeled form (test_kernel.py:369, `D = { n : Int, m : ... }`)."
+   },
+   {
+    "id": "spec-02-03#37",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Binary forms work: verify-spec-02-03/v37c (named product with .a and .b, named sum with match) loads and gives 0. Chains: v37a `(a : Int) * (b : Bool) * (c : String)` loads but `p3.a` fails \"no named components\" (the inner `(b : Bool) * (c : String)` is turned into a labeled product inside parse_paren, so the outer loop at parser.py:543 sees a Subtype, not a Sigma); v37b `(a : Int) + (b : Bool) + (c : String)` is a parse error \"every alternative of a named sum is written (label : Type)\". No pytest or tests/spec file writes a named sum `(a : A) + (b : B)`."
+   },
+   {
+    "id": "spec-02-03#38",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:781-783 turns a one-component labeled product into Subtype(PVar a, A, NoLaw), which the checker treats as a plain refinement. verify-spec-02-03/v38 (`R = { a : Int }`, `r : R := 3`, `r.a`) fails \"r : R has no named components\"; v38b `r : R := { a := 3 }` fails \"a record literal needs a type with named components, not R\". The grammar at 02 l.78 allows one component. No library or test has a one-component record."
+   },
+   {
+    "id": "spec-02-03#40",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parse_brace (parser.py:626-631) requires names before ':'. verify-spec-02-03/v40 `{ (a, b) : Int * Int | a < b }` fails \"line 1, col 17: expected 'name', got '('\". The labels form v40b `{ a b : Int | a < b }` loads. 04-kernel.md:62 and :82 write the binder as a name, so only 02 l.80 promises an arbitrary pattern."
+   },
+   {
+    "id": "spec-02-03#41",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:608 parses each field value with newlines skippable, so the next field's name becomes an application argument. verify-spec-02-03/v41a (`{ a := 1` newline `b := true }`) and v41b (fields on their own lines) fail \"expected another field or '}' in a record literal (at ':=')\"; v41c with ';' loads. The `if self.at(\"name\"): continue` at parser.py:619 is unreachable in practice. The cited tests (test_evaluators.py:30, test_kernel.py:190) use commas only."
+   },
+   {
+    "id": "spec-02-03#43",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:718-724: a branch body is parse_term with newlines skipped, so the next pattern becomes an argument. verify-spec-02-03/v43 (branches on separate lines, no ';') and v43b (one line, no ';') fail \"1 : Int is not a function, cannot apply it to false\"; v43c with ';' (a trailing one included) loads. In practice ';' is required between branches."
+   },
+   {
+    "id": "spec-02-03#44",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:758 is PLit(float(t) if '.' in t else int(t)), unlike the term case at :408. verify-spec-02-03/v44 `match x { 1e3 -> 1 ; _ -> 0 }` crashes with an uncaught \"ValueError: invalid literal for int() with base 10: '1e3'\"; v44b `1.0e3` loads and `f 1000.0` gives 1."
+   },
+   {
+    "id": "spec-02-03#45",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "parser.py:755 returns PWild for '_' as a pattern atom (`cons _ xs`, `(_, b)`). By 02 l.13, '_' is not a name, and patom (l.94) has no '_' alternative, so the grammar cannot derive these patterns, which the libraries use widely. Only the grammar text is narrow."
+   },
+   {
+    "id": "spec-02-03#47",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:438-445 parses extern as a term. verify-spec-02-03/v47 (`c : C := { f := extern \"python:builtins.abs\", g := inc }`) loads and `c.f (-5)` gives 5. grep over tests, src/luthier/lib and examples finds no extern inside a term: every extern there is a whole body after ':=' or a gen directive."
+   },
+   {
+    "id": "spec-02-03#48",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "checker.py:994-999. verify-spec-02-03/v48 `forget p` on Pos loads and gives 3; v48b `forget 3` fails \"forget applied to 3 : Int, which is not a subtype\". grep finds 'forget' in no test, library, example or README."
+   },
+   {
+    "id": "spec-02-03#50",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:478-489. verify-spec-02-03/v50 `sumPair : Int * Int -> Int := \\ (a, b) { a + b }` loads and `sumPair (2, 3)` gives 5. Every `\\ (` in tests, lib and examples is an annotated binder (`\\ (x : T)`); none is a tuple pattern."
+   },
+   {
+    "id": "spec-02-03#52",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-02-03/v52 `T = Id < a : Int | b : Bool >` fails \"unexpected ':' at end of definition\"; v52b with parentheses loads. starts_atom (parser.py:387-399) does not list '<'. No test covers either form."
+   },
+   {
+    "id": "spec-02-03#56",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts (the specification contradicts itself)",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-02-03/mods/m56 `m.f 2` gives 3; m56b `x := m` fails \"unbound name m\". 02-grammar.md:118-119 and 04-kernel.md:164 say a module is a record of its definitions; 03-libraries.md:16 says that in version 0 a module is not built as a value. The implementation follows 03."
+   },
+   {
+    "id": "spec-02-03#57",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested (qualified-first precedence over a local)",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-02-03/mods/m57: `import \"fm\" as m` (fm has k = 7) and `g (m : R) : Int := m.k`; `g (1, 2)` gives 7, the module's k, not the parameter's. This follows the rule as written (whole name first) but breaks lexical scope. The longest-prefix path is tested (test_kernel.py:353, q.inner.w) and qualified access too (:307), but no test has both readings available at once."
+   },
+   {
+    "id": "spec-02-03#59",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:429 accepts any pattern. verify-spec-02-03/v59 `let 0 = x in 5` loads, `f 0` gives 5, `f 7` fails at run time \"no branch of a match applies to its value\"; v59d `let \"a\" = x in 5` loads; v59b (constructor) is caught \"does not cover: nil\". Name and tuple work (v59c). The root is broader: a literal-only match `match x { 0 -> 5 }` (v59e) also loads, so literal patterns are never coverage-checked."
+   },
+   {
+    "id": "spec-02-03#61",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "parser.py:366-371. verify-spec-02-03/v61: `-sq 3` gives -9, `sq (-3)` gives 9, `sq -3` fails \"operator - expects Int ... got sq\" (it is sq - 3), `2 - sq 3` gives -7. test_sugar.py:48-49 covers -3 + 5, -(1.5*2.0), 2 * -3 and -x on a variable, but neither -f x nor f -x."
+   },
+   {
+    "id": "spec-02-03#64",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "unify (checker.py:1262-1266) matches application heads only when both are the same Var name, so a meta in head position is never solved. verify-spec-02-03/v64 `keep {F : U -> U} {A : U} (x : F A)` with `keep l` (l : List Int) fails \"cannot infer the implicit parameter(s) F, A\"; v64b `keep List Int l` loads. An implicit type operator is accepted (v64c loads) but can only be given explicitly. test_sugar.py:79-89 tests type implicits only."
+   },
+   {
+    "id": "spec-02-03#69",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "verify-spec-02-03/mods/m69d (`import \"colors\" as m`, where colors has `< red | green >`, plus a local `Light = < red : Unit | off : Unit >` and `u := red`) fails \"label red belongs to several sums\"; m69e (same without the import) loads. With a known expected type it resolves (m69 `u : Light := red` and m69g load), so the collision bites only where the label's type is inferred. Adding a qualified import can still break a valid file, against \"with no collisions\"."
+   },
+   {
+    "id": "spec-02-03#73",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "m.x-first holds: verify-spec-02-03/mods/m73 `m.useK` gives 1 (the module's k), not the root's 7. The fallback depends on import line order: m76a (`import \"fa\"` then `import \"fb\" as m`, where fb uses k without importing anything) loads and m.j gives 8; m76b (lines swapped) fails \"in m.j: unbound name k\". cli.py:88-90 loads each import, then checks it immediately against whatever is loaded unprefixed so far. No test."
+   },
+   {
+    "id": "spec-02-03#74",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-02-03/mods/m74: fc.lut uses r, which its importer defines; it fails \"in m.j2: unbound name r\", because imports are checked before the importer's acts (cli.py:88-98). No test states this."
+   },
+   {
+    "id": "spec-02-03#75",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "Constructors and data types are prefixed: verify-spec-02-03/mods/m75c `t : m.Tree := m.node m.leaf` loads, and m75d with a bare `leaf` fails unbound. Labels are not: m75a `m.pick m.red` fails \"unbound name m.red\"; m75b `m.pick red` and `b : m.Color := green` load, and `x` gives 1. 03-libraries.md:30-31 says the labels of sums named by an alias are prefixed like functions."
+   },
+   {
+    "id": "spec-02-03#76",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "Acts within a file are order-free (test_kernel.py:137), but import lines are not: mods/m76a loads and m76b (lines swapped) fails; m76c (`import \"fb\"` alone) and `luthier check fb.lut` fail \"unbound name k\". m76d (two flat imports, fa first) lets fb use k, which it never imported. 03-libraries.md:29-30 itself lets a module see \"what the root imported flat\", which conflicts with l.34 (\"a file sees what it imports\"); the dependence on line order contradicts both."
+   },
+   {
+    "id": "spec-02-03#81",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "real.lut:12 has the extern toFloat64 itself; real.lut:13-19 declares ulp, sqrt, cbrt, exp, log, erf, round with no law and no native definition; real_python.lut:5-14 binds them and tests only abs (sqrt is certified as float64Sqrt in rational.lut:88). table_python.lut:7-9 declares new externs (parseTable, renderTable, parseError) rather than filling holes of table.lut; the first two are certified through `csv : Codec` (l.15-17), and parseError has no law. array.lut:323-352 has laws but no *Def native for total, product, minimum, maximum, maxAbs, maxAbsMat, cond, solve, approxVec, approxMat (the Defs at array.lut:61-158 cover the others)."
+   },
+   {
+    "id": "spec-02-03#84",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "verify-spec-02-03/v84a (`_0 : Int := 5`, `f x y := x + _0 + 0 * _0`) and v84b (`f x y := x + x + 0 * _0`): `f 1 2` gives 6 and 2. verify-spec-02-03/h.py, using Loader and certify.definition_hash, prints the same hash abefd66522788c5b for both, with identical canonical text `\\ _0 _1 { (_0 + _0) + 0 * _0 }`, because alpha_normalize (subst.py:209-216) gives bound variables names a global can also have (lexer.py:18). So a certificate for one is accepted for the other. It takes a global named _N, which the grammar forbids but the lexer allows (#01)."
+   },
+   {
+    "id": "spec-02-03#87",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "cli.py:328-331 runs with deep=args.deep or is_top. verify-spec-02-03/certs: app1.lut imports lib1 as L with `thrice : { f | Fixed f } := L.inc`; `luthier test app1.lut` run twice reruns thrice each time, even with its certificate present. No pytest covers an importer law over an imported function (test_kernel.py:307 only checks that a definition with no laws is not certified)."
+   },
+   {
+    "id": "spec-02-03#88",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-02-03/certs: `luthier test app1.lut --name L.inc --deep --exhaustive` reran L.inc and printed \"certificate: .../lib1.cert.json\", writing into the imported file's certificate (the entry was replaced, so the count stayed at 1 because the hash matched). The --deep and --name flags appear in no pytest; tests call run_test(deep=True) directly."
+   },
+   {
+    "id": "spec-02-03#90",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "random.lut:8-33 matches the table (Gen, nextSeed/randBelow, genInt, genNat, genBool, genFloat64, genList; plus Seed and genSeed at :38-40). No pytest imports random or a library that imports it (probability, belief). verify-spec-02-03/libload/use_random.lut loads, but `check -v` reports 0 with laws, not the mapper's \"2 laws certified\", although random.cert.json has entries genNat and genSeed."
+   },
+   {
+    "id": "spec-02-03#91",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "detDef (array.lut:84) and eigenDef (array.lut:134) exist; ten operations have laws and no native definition (see #81). No pytest loads array or array_python (only real, real_python, table, table_python and algebra are imported). verify-spec-02-03/libload/use_array_python.lut loads with 1 pending law."
+   },
+   {
+    "id": "spec-02-03#92",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "algebra.lut defines Setoid (:29), Ring (:87), Field (:100), VectorSpace (:137), InnerProductSpace (:153), LinearMaps (:182). Instances: exactBool, exactInt, exactNonNegative, intRing, allOf, anyOf, largest (:196-215), rationalField (rational.lut:29), realField as an axiom (:132). None on Float64 and none of VectorSpace, InnerProductSpace or LinearMaps on vectors. algebra_python.lut:7-8 says it \"replaces the vector space, the Euclidean space and the linear maps over float64Field\"; the header algebra.lut:12-14 still promises Float64 and array instances."
+   },
+   {
+    "id": "spec-02-03#93",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "Header comments match the table: probability.lut:1-16 (sampler and likelihood as one kernel, ensemble diagnostics), belief.lut:17-19 and :59-61 (Discrete, Laplace), optimization.lut:1-8 (Levenberg-Marquardt with laws). No pytest imports any of the three. verify-spec-02-03/libload/use_probability, use_belief, use_optimization load with 52, 59 and 66 laws pending."
+   },
+   {
+    "id": "spec-02-03#95",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "src/luthier/lib holds text.lut, rational.lut and probability_python.lut, none of which is in the table at 03-libraries.md:79-88. rational.lut carries the certification of sqrt and the instance rationalField, which the table's algebra row does not mention."
+   },
+   {
+    "id": "spec-02-03#02",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "lexer.py:16 matches the production; parser.py:408 makes '.', 'e' or 'E' a float. The cited test_kernel.py:87-91 covers integers and a fraction (1.5) but no exponent; the exponent form is exercised by test_kernel.py:507 (`1e308 * 10.0`). Patterns differ (#44)."
+   },
+   {
+    "id": "spec-02-03#05",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "lexer.py:14 --[^\\n]* is skipped (lexer.py:47). tests/spec/k_sum.accept.lut opens with a comment line and is loaded by test_spec.py:30-31. The alternation tries comment only at '--', so '--' inside a string literal stays in the string."
+   },
+   {
+    "id": "spec-02-03#06",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "lexer.py:18 makes a.b.c one name token. test_kernel.py:342-347 checks pt.x and pt.y as projections (via infer on parse_term(\"pt.y\")); test_kernel.py:307-312 checks L.inc and L.Small as qualified names. Both readings are exercised."
+   },
+   {
+    "id": "spec-02-03#10",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "core.lut:5 Unit, :6 Empty, :10 Bool (alias), :27 Int, :29 Float64, :31 String, :33 Maybe (alias), :36 List, :43 Nat, :47 Fin. core also defines Real (:28), Rational (:30) and ExtendedReal (:40), which 02 l.23-24 does not list. test_kernel.py:121-130 exercises Maybe and Bool; the others are used throughout."
+   }
+  ],
+  "notes": "I checked all 44 entries and confirmed every one; I refuted none. The repository HEAD is 49c6a0f, not b15f2a1, but `git diff --stat b15f2a1 HEAD` touches only docs/decisions.md and a plan file, so src/ and docs/semantica are as audited. All programs are under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-02-03/: v*.lut for the grammar, mods/ for imports, certs/ for certificates (luthier test wrote .cert.json only there), libload/ for library loading, and h.py for the hash collision. Nothing under the repository was modified.\n\nCorrections to the mapper:\n- #01 raised from medium to high. The implementation accepts names the grammar rejects, and this is what enables the certificate hash collision of #84.\n- #04 and #27 relabeled as ambiguous: the text supports two readings that behave differently.\n- #59 relabeled partial. Literal patterns are never coverage-checked anywhere: `match x { 0 -> 5 }` loads. The problem is wider than let.\n- #69 narrowed: the collision happens only where a label's type is inferred. `u : Light := red` loads.\n- #76 nuance: 03-libraries.md:29-30 itself lets a module see \"what the root imported flat\". Part of the mapper's evidence is therefore sanctioned by the specification; the dependence on import line order is the real contradiction.\n- #90: `luthier check -v` on `import \"random\"` reports 0 laws, not the mapper's \"2 laws certified\", although random.cert.json lists genNat and genSeed.\n- #88 works as stated. In my run the entry was replaced in place, so there was no growth from 1 to 2 entries.\n- #02: the cited test line covers integers and fractions only. The exponent form is exercised by test_kernel.py:507.\n\nDefects found beyond the entries' wording:\n- Closers at column 0 also fail for lists, lambdas and parentheses. A closer at column 0 works only in a record type.\n- `operator <` and `operator mod` take effect, while `operator &` is accepted and silently dead.\n- `test x with 1e3` crashes with an uncaught Python ValueError.\n- The error for a definition with both a body and clauses reports a position past the end of the file."
+ }
+}

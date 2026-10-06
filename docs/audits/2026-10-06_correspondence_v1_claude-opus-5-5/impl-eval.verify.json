@@ -1,0 +1,221 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-eval",
+   "direction": "impl",
+   "files": "src/luthier/evaluator.py, machine.py, subst.py"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "aa0261af36101d3e1",
+  "agent_label": "verify impl-eval",
+  "started_at": "2026-10-06T12:25:10+00:00",
+  "finished_at": "2026-10-06T12:37:34+00:00",
+  "tokens": 147534,
+  "tool_calls": 77,
+  "duration_ms": 743894,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "eafe6a8da47093e9e7c59b2aa66cbfec95c06de565cbc7716cabebf9ae5d74c1"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "E03",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "Code: evaluator.py:451-454 and machine.py:383-387 use Python // and % (floored). Ran /tmp/.../verify-impl-eval/e03.lut (a : Int := 0 - 7): 'a / 2' -> -4, 'a mod 2' -> 1, '7 / (0 - 2)' -> -4, '7 mod (0 - 2)' -> -1, '(0.0 - 7.5) mod 2.0' -> 0.5. grep of docs/semantica for floor/truncat/division/quotient/remainder finds nothing; 02-grammar.md:22 and :60 only list mod as an infix name with its precedence; 04-kernel.md:64 and :140 say 'arithmetic'. Tests: test_kernel.py:90 uses '7 mod 3', test_evaluators.py:24 uses '17 / 5 + 17 mod 5', positive operands only. Floored versus truncated is a two-readings ambiguity, so medium."
+   },
+   {
+    "id": "E06",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "medium",
+    "evidence": "04-kernel.md:140 lists 'arithmetic and comparisons on literals of Int, Float64, String' as prim; 04-kernel.md:64 and :96-97 restrict arithmetic and comparisons to Int and Float64. Checker checker.py:1348-1356 allows '+' on String and rejects every other operator. Ran: '\"a\" + \"b\"' -> 'ab' : String; '\"a\" < \"b\"' -> 'error: operator < expects Int, Float64 or Rational, got 'a' : String'; '\"a\" - \"b\"' same error; '\"a\" == \"a\"' -> true. No line of docs/semantica mentions concatenation (grep concat/append). No test uses a string operator (grep of tests/). The spec contradicts itself on String comparisons, so medium."
+   },
+   {
+    "id": "E08",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:210-212 (R8): == only on types built from Int, Float64, String, Unit, Empty, products, sums, data, subtypes; never on anything containing an exponential. checker.py:1835-1870 contains_function returns False for a type variable and for any declared or extern type, so 'eqAny (A : U) (x y : A) : Bool := x == y' and 'direct : Bool := eqAny (Int -> Int) inc inc' pass 'luthier check' (e08.lut). 'luthier eval e08.lut \"eqAny (Int -> Int) inc inc\"' prints 'inc == inc : Bool', exit 0; with LUTHIER_TRACE_FALLBACK=1 the if-form prints '[machine fallback] Unsupported: == on these values' then 'match (inc == inc) { ... } : Int', exit 0. Direct 'inc == inc' is rejected with the R8 message. Arrays (e08b.lut, Arr : U := extern provisional numpy.ndarray): check accepts 'same : Bool := a == b'; eval gives 'error: == is not decidable on these values (arrays)'; evaluator.py:474-475 returns None (stuck) instead. Only reject test is tests/spec/r8_equality_function.reject.lut, a direct f == g."
+   },
+   {
+    "id": "E09",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:109-112: one branch per constructor or label, none repeated and none missing, unless a variable or _ catches the rest; 04-kernel.md:169: a lambda pattern is a match. checker.py:1714-1724 checks coverage only of top-level PInj/PCon patterns. Ran e09.lut: 'lit (n : Int) : Int := match n { 0 -> 10 ; 1 -> 11 }' and 'fromJust : Maybe Int -> Int := \\ (just x) { x }' pass check; 'lit 5' -> 'error: no branch of a match applies to its value' (machine.py:291); 'fromJust nothing' -> 'error: argument does not match the pattern of a lambda' (machine.py:251). The match form 'match x { just y -> y }' IS rejected ('does not cover: nothing'), so the lambda form accepts what its own translation rejects. Broader than the mapper said: nested patterns are not checked ('q (x : Int * Bool) := match x { (0, true) -> 1 ; (_, false) -> 2 }' passes, 'q (1, true)' fails at run time; 'match x { just 0 -> 1 ; nothing -> 0 }' passes, 'r (just 4)' fails), repeated branches are accepted ('match x { true -> 1 ; true -> 2 ; false -> 3 }' passes, against 'none repeated'), and no test anywhere exercises the 'does not cover' error (grep of tests/ is empty)."
+   },
+   {
+    "id": "E11",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "evaluator.py:402-406: the BinOp case of whnf calls prim with no fuel.tick(); beta at evaluator.py:322-333 substitutes the unevaluated argument, so 'slow (n - 1)' builds a growing chain re-evaluated on each 'n == 0' (quadratic, free of fuel). checker.py:1633-1644 decide_closed retries with whnf after the machine raises OutOfFuel (an EvalError subclass, evaluator.py:32) at the checker budget of 200,000 (evaluator.py:55). Ran e11_N.lut ('slow (n : Int) : Bool := if n == 0 then true else slow (n - 1)'; 'x : { k : Int | slow k } := N'): N = 20000 checks in 0.59 s; N = 25000 was killed by 'timeout 60' (exit 124). 04-kernel.md:114-115 promises a step budget but does not define a step, so the severity rests on the budget not stopping the checker."
+   },
+   {
+    "id": "E12",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "Ran e12.lut: 'tail (n : Int) (acc : Int) : Int := if n == 0 then acc else tail (n - 1) (acc + 1)'; 'luthier eval e12.lut \"tail 100000 0\"' ends in a Python traceback 'RecursionError: maximum recursion depth exceeded' (exit 1); 'count 100000' (non-tail) returns 100000. Thunk forcing recurses in Python (machine.py:161-165); cli.py:655-670 run_deep sets recursionlimit 200,000 and a 512 MB stack but catches nothing. docs/semantica names only the step budget (04-kernel.md:114-115; 05-static-semantics.md:317 lists 'ran out of fuel' as the only resource outcome)."
+   },
+   {
+    "id": "E16",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:308: 'run and eval require every name in the cone of the entry to be defined'. cli.py:449-452 (cmd_run) refuses on holes in the cone; cli.py:571-583 (cmd_eval) has no such check. Ran e16.lut (k : Int; lazy : Int := if true then 1 else k; main : same body): 'luthier eval e16.lut lazy' -> '1 : Int', exit 0; 'luthier run e16.lut --no-record' -> 'main depends on holes without a value: k; give them with --set name=value', exit 1; 'eval \"k + 1\"' errors only when forced. The value eval returns is right, so the practical damage is small, but the stated rule is not enforced on eval."
+   },
+   {
+    "id": "E18",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "evaluator.py:516-517 and machine.py:438-441 format 'extern \"<key>\" raised ...' with the registry key, which register_extern builds as target@type (checker.py:836); machine.py:447 strips '@' only for the --checked message. Ran e18.lut: 'boom 1' -> 'error: extern \"python:vmod.raises@Int -> Int\" raised ValueError: boom'. That the error stops the run is stated (05-static-semantics.md:342-345); the message format is not."
+   },
+   {
+    "id": "E19",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:142-143: an extern applied to as many closed arguments as its type has parameters calls the environment. evaluator.py:723-740 to_python knows only constructors true, false, zero, succ, nil, cons, unit, nothing, just and returns _OPAQUE otherwise; try_extern returns None (evaluator.py:512-513); machine.py:593 raises Unsupported and normalize falls back (machine.py:775-781). Ran e19.lut (Tree data; showT : Tree -> String extern; lenS : String -> Int extern; main := lenS (showT (node leaf leaf))): 'luthier run --no-record' prints '[machine fallback] Unsupported: a value the environment cannot receive' (with trace on) and then 'lenS (showT (node leaf leaf))', exit 0; eval prints it ': Int', exit 0; 'lenS (...) + 1' likewise. No spec line makes a stuck term an acceptable result."
+   },
+   {
+    "id": "E21",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "06-numbers.md:104-105: 'a Float64 is a float, or an int with an exact double, promoted'. evaluator.py:127 DOUBLE_EXACT = 2**53; :156-157 rejects any int above it; :203-204 likewise for integer arrays. Ran e21.lut: bigF from an extern returning 2**60 -> 'error: 1152921504606846976 from the environment has no exact double, so it is not a value of Float64'; python: float(2**60) == 2**60 is True. Vector { n : Nat, f : Fin n -> Float64 } from [2**60, 1] -> 'an integer array with entries beyond 2^53 cannot be a value of V'. The 2^53 bound belongs to toFloat64 (06-numbers.md:88-89), not to exactness. Edge case, but it rejects what 06 accepts and the message is false."
+   },
+   {
+    "id": "E22",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "evaluator.py:893-895 (_sum_from_python): 'if x is None and unit_alts: i = unit_alts[0]'. Ran e22.lut: noneB : Bool from an extern returning None -> 'true : Bool'; S3 = < a : Int | b : Unit | c : Unit > from None -> 'b : S3'; Maybe Int from None -> 'nothing'. 06-numbers.md:103-106 says a value is checked against its declared type when it crosses and that Unit (not Bool or an arbitrary sum) is None; no spec line maps None to a sum. Silently reading None as true contradicts the checked-crossing rule."
+   },
+   {
+    "id": "E24",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "evaluator.py:878-899: ExtendedReal from a number, bool for Bool, (label, payload) tuple, bare payload when exactly one alternative carries one, else 'cannot read X as a value of T: give (label, value)'. grep of docs/semantica and README for label/tuple/crossing conventions finds only 06-numbers.md:103-109 (scalars, Unit, arrays). tests/test_kernel.py:444-475 exercises ('circle', 1.5), bool and the Maybe payload."
+   },
+   {
+    "id": "E25",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "medium",
+    "evidence": "evaluator.py:859-875 (_inj_to_python): nothing -> None, just x -> x; from_python reads None back as nothing. Ran e25.lut with identity externs: 'echoMM (just nothing)' -> 'nothing : Maybe (Maybe Int)'; 'echoMU (just unit)' -> 'nothing : Maybe Unit'; 'echoMM (just (just 3))' -> 'just (just 3)'. No spec line states the Maybe convention; no test of nested Maybe or Maybe Unit."
+   },
+   {
+    "id": "E26",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "Ran e26.lut with an extern returning repr(x): { a := 1, b := 2 } -> 'R2(a=1, b=2)'; (1, 2, 3) -> '(1, 2, 3)'; a 3 -> \"('a', 3)\"; z (Unit payload) -> \"('z', None)\"; [1, 2] -> '[1, 2]'; true -> 'True'; unit -> 'None'. 06-numbers.md:103-106 fixes only scalars, Unit and arrays. One correction: there is no N in core.lut or lib/ (grep finds no zero/succ); the Peano conversion is by constructor name (evaluator.py:727-730: any constructor named zero or succ), not by a core type."
+   },
+   {
+    "id": "E28",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "evaluator.py:1037-1056 dispatches on the type's name: 'if tname == \"N\" and isinstance(x, int)' builds succ (... zero). Ran e28.lut (N : U := data { leaf : N ; node : N -> N -> N }; mkN : Int -> N extern identity): check passes; 'mkN 2' -> 'succ (succ zero) : N', constructors N does not have; 'size (mkN 2)' -> 'error: no branch of a match applies to its value'. This breaks the decided rule of 06-numbers.md:103 (a value is checked against its declared type when it crosses), so I raise it from medium to high. The special case serves no definition of the base library: no N with zero/succ exists in core.lut or lib/."
+   },
+   {
+    "id": "E30",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:196-197: 'The shape is checked when the value crosses: an array declared VecOf 3 must have shape (3,)'. evaluator.py:990-1000 compares only dims[0] with len(x); _array_for (evaluator.py:186-188) checks ndim, not the other extents. Ran e30.lut: rm : { tag : Int, f : Fin 2 -> Fin 3 -> Float64 } from (0, np.zeros((2, 5))); 'cols rm.f' (extern returning a.shape[1]) -> '5 : Int'. sm : { m : Nat, n : Nat, f : Fin m -> Fin n -> Float64 } from (2, 3, np.zeros((2, 5))) is accepted, 'sm.n' -> '3 : Nat'. Indexing past n is still caught by the Fin check ('rm.f 1 4' -> '4 does not satisfy Fin 3'), but any extern receiving the array sees the wrong shape."
+   },
+   {
+    "id": "E31",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "evaluator.py:179-180 (_array_for): element kind None or String returns x unchanged; index_foreign (evaluator.py:761-778) wraps any entry as Lit. Ran e31.lut: bl : { n : Nat, f : Fin n -> String } from ['a', 3]: 'bl.f 1' -> '3 : String'; 'bl.f 1 + \"x\"' falls back ('Unsupported: + on strings') and prints the stuck term '3 + 'x' : String'. rl : { n, f : Fin n -> { a : Int, b : Int } } from [(1, 2), (3, 4)]: 'rl.n' -> 2; '(rl.f 0).a' -> 'error: no branch matches <tuple> in (rl.f 0).a'; from np.array([[1, 2], [3, 4]]) -> 'no branch matches <ndarray (2,)>'. Contradicts 06-numbers.md:103-105 (checked at the crossing; a String is a str)."
+   },
+   {
+    "id": "E32",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:194-195 and 06-numbers.md:130-131: Fin n -> Float64 a float64 ndarray, Fin n -> Int int64, any other element type a list; 06-numbers.md:111-113: NaN is always an error and the interpreter never produces one. machine.py:640-646 and evaluator.py:837-841 try np.asarray(out, dtype=float) for every other element type. Ran e32.lut with an extern returning repr: Fin n -> Bool, (2, \\ k { k == 0 }) -> 'array([1., 0.])'; Fin n -> Maybe Float64, (2, \\ k { if k == 0 then nothing else just 1.5 }) -> 'array([nan, 1.5])'; Fin n -> Int * Int -> 'array([[0., 0.], [1., 1.]])'; Fin n -> String -> \"['s', 's']\" as specified. Of the cited tests, test_the_table_of_a_function_to_int_is_an_int64_array (test_bridge.py:157) samples a generator, not the materialization of a lambda; only Float64 vectors are covered (test_bridge.py:326)."
+   },
+   {
+    "id": "E37",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "05-static-semantics.md:179-190: every refinement in an extern's type is an obligation, the payload under a sum constructor included; run --checked tests every value an extern gives, each entry of an array and each component of a record included. machine.py:455-483 refined() answers False for a Sum and for a Pi component; :488-489 depth > 16; :491-493 swallows Unsupported. Ran: e37a (pick : Int -> Maybe (Fin 3) returning ('just', n); main := match pick 5 {...}) 'luthier run --checked --no-record' prints 5; e37b (IdxR = { tag : Int, f : Fin 3 -> Fin 2 } from (0, np.array([0, 5, 1]))) prints 5; control e37c with the same entries in a { n : Nat, f : Fin n -> Fin 2 } vector is caught ('5 does not satisfy 0 <= k and k < 2')."
+   },
+   {
+    "id": "E39",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "evaluator.py:1182-1190: conv has an eta case. The mapper's program does not need eta (T unfolds and beta makes both predicates 'h k > 0'), so I used a stronger one, e39d.lut: h : Int -> Int; q : (Int -> Int) -> Bool; T (g : Int -> Int) : U := { k : Int | q g and k > 0 }; useT (g : Int -> Int) (v : T g) : Int := v; etaOk (v : T h) : Int := useT (\\ z { h z }) v -> 'ok: 5 definitions, 0 with laws' (definitionally equal, no obligation), while the controls '\\ z { h (z + 0) }' and '\\ z { h 1 }' pass with '1 with laws, 1 pending test' (a coercion obligation). 04-kernel.md:23 defines definitional equality as reduction to the same normal form and 04-kernel.md:133-143 lists no eta rule; grep for eta/extensional in docs/semantica finds nothing relevant."
+   },
+   {
+    "id": "E40",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "machine.py:737-781 counts fallbacks and prints '[machine fallback] ...' under LUTHIER_TRACE_FALLBACK; cli.py:346 prints 'N evaluations fell back from the machine to the substitution evaluator'. Observed '[machine fallback] Unsupported: == on these values' (e08.lut) and 'Unsupported: a value the environment cannot receive' (e19.lut). docs/semantica mentions neither evaluator (only 'call by need' at 04-kernel.md:200)."
+   },
+   {
+    "id": "E41",
+    "verdict": "confirmed",
+    "corrected_status": "not_in_spec",
+    "corrected_severity": "low",
+    "evidence": "subst.py:9-11 fresh() appends '~k'. Ran 'luthier eval e03.lut \"\\\\ (y : Int) { (\\\\ (x : Int) { \\\\ (y : Int) { x + y } }) y }\"' -> '\\ y y~2 { y + y~2 } : (y : Int) -> (y~1 : Int) -> Int'; applied to 3 4 -> 7. 02-grammar.md:13 'name' does not allow '~'."
+   },
+   {
+    "id": "E42",
+    "verdict": "confirmed",
+    "corrected_status": "covered_differently",
+    "corrected_severity": "high",
+    "evidence": "subst.py:238-240 alpha_normalize sets every Inj label to \"\" and pretty.py:168-172 prints only the label, so the alternative's index never reaches canonical_text (certify.py:95-123). Worse than the mapper's example: canonical_text for 'flag : Bool := true' and 'flag : Bool := false' is the identical string 'flag : Bool := ' (and 'v : S := aa 3' vs 'cc 3' both 'v : S :=  3'), so every Bool literal in a body is invisible to the hash. End to end in /tmp/.../verify-impl-eval/e42/c.lut (flag : Bool := true; Ok (x : Int) : Bool := flag; c : { u : Unit | \\ (x : Int) { Ok x } } := unit): 'luthier test' passes and writes c.cert.json; after changing true to false, 'luthier check -v' still reports 'c ... [certified (2026-10-06T20:35:15); c.lut]', and a new 'luthier test' fails with counterexample x = 0. Contradicts 03-libraries.md:62-63 ('Changing a definition changes the hash of everything that uses it'). test_kernel.py:262-268 only changes a literal."
+   },
+   {
+    "id": "E01",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "low",
+    "evidence": "04-kernel.md:133-143 (beta, delta, iota, prim, extern). whnf at evaluator.py:312-406 and the machine at machine.py:215-310 implement them. Ran e02.lut: 'addN (succ zero) (succ (succ zero))' -> 'succ (succ (succ zero))'; 'f (aa 4)' on a labeled sum -> 4; 'match (1, 2) { (a, b) -> a + b }' -> 3. Cited tests exist (test_kernel.py:87, 96, 107; test_evaluators.py:83, 88)."
+   },
+   {
+    "id": "E02",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "04-kernel.md:145-146 matches try_unfold (evaluator.py:421-439) and the arity check at evaluator.py:340-341. Ran e02.lut: '\\ (m : N) { addN (succ zero) m }' -> '\\ m { addN (succ zero) m }' (folded); '\\ (m : N) { addN m (succ zero) }' -> '\\ m { succ m }'. No test asserts the folding (grep of tests/ for folded/neutral/stuck finds nothing)."
+   },
+   {
+    "id": "E04",
+    "verdict": "confirmed",
+    "corrected_status": "covered",
+    "corrected_severity": "medium",
+    "evidence": "evaluator.py:460-461 and machine.py:392-393 turn ZeroDivisionError into 'division by zero in x op y'. Ran: '7 / 0', '7 mod 0', '1.0 / 0.0', '0.0 / 0.0' each -> 'error: division by zero in ...'. 06-numbers.md:111-114 covers the Float64 cases (no NaN, no infinity); nothing in docs/semantica says what Int division or mod by zero does. tests/ has NaN and overflow tests (test_kernel.py:498-507, test_bridge.py:89) but no division-by-zero test."
+   }
+  ],
+  "notes": "I checked all 24 entries. I re-read the code at each cited line, grepped docs/semantica (00 to 08; 02-que-robar excluded) and README.md for each behavior, and ran a minimal program for each, under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-impl-eval/. The Python externs are in vmod.py there, loaded with PYTHONPATH. docs/semantica, src and tests (apart from one new test file) are identical between b15f2a1 and HEAD 60fd7d8, so I read the working tree. Nothing under the repository was modified. I never ran certify. 'luthier test' ran only on the scratch file e42/c.lut, and its certificate was written there.\n\nSections covered: 04-kernel.md in full; 05-static-semantics.md in full (R5, R8, §7 and §9 in detail); 06-numbers.md in full; 02-grammar.md §1-3; 03-libraries.md §4; 08-tests.md §0 and §7 (G12).\n\nEvery entry is confirmed. None is refuted.\n\nSeverity changes:\n- E28 goes from medium to high. Converting by the type name N builds values with constructors the type lacks, which breaks the decided rule 06-numbers.md:103 that a value is checked against its declared type when it crosses. Neither core.lut nor lib/ defines an N with zero/succ.\n\nCorrections and stronger evidence:\n- E42 is worse than reported. 'flag : Bool := true' and 'flag : Bool := false' have identical canonical text, so the certificate hash cannot see any Bool literal or sum alternative in a body.\n- E09 is broader than reported:\n  - repeated branches are accepted, against \"none repeated\";\n  - nested patterns are never checked for coverage;\n  - no test anywhere exercises the 'does not cover' error.\n- E39: the mapper's program needs only beta. A program where eta actually matters is in the evidence: the eta form raises no obligation, and the non-eta controls raise one.\n- E26: the \"core N\" does not exist. The Peano conversion is triggered by the constructor names zero and succ.\n- E32: the cited test_the_table_of_a_function_to_int_is_an_int64_array exercises a generator, not the materialization of a lambda.\n- E11: high depends on reading 04:114-115 as a promise that the budget stops evaluation. The spec does not define a step. Under the reading that a step means beta, delta or iota only, this would be medium.\n- E16: high follows the rubric, since 05:308 is explicit. The value eval returns is correct, so the practical harm is small."
+ }
+}

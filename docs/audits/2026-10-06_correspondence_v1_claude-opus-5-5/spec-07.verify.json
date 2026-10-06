@@ -1,0 +1,319 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-07",
+   "direction": "spec",
+   "files": "docs/semantica/07-characterizations.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a1b72cea4a2d7e364",
+  "agent_label": "verify spec-07",
+  "started_at": "2026-10-06T12:13:35+00:00",
+  "finished_at": "2026-10-06T12:27:35+00:00",
+  "tokens": 211575,
+  "tool_calls": 62,
+  "duration_ms": 839755,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "30c6101488dd711ea5f40c50caa87b22e92a370a8c365f46876213174a14dd8f"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "spec-07#01",
+    "verdict": "refuted",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "The principle is not fully followed. algebra.lut:97-98 Invertible inlines `eq (mul x (inv x)) one`, the body of RightInverse (algebra.lut:43), instead of using it. optimization.lut:23 (StepMatrixPositive) and probability.lut:146 (InfoIsPositive) each write the same law inline, `if symmetric 0.0 m then positiveSemidefinite m else false`, with no named law shared. Positivity has two formulations: PositiveForm (algebra.lut:148, on the form) and positiveSemidefinite (array.lut:170, by eigenvalues), while 07 l.135 states it as the form. The examples the mapper cites (ShiftByZero, ShiftComposes, TraceAdditive, symmetric) do go through LeftIdentity, Associative, Homomorphism and Symmetric. Nothing checks the rule mechanically."
+   },
+   {
+    "id": "spec-07#03",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "array.lut:22 is `Vec (A : U) = { n : Nat, f : Fin n -> A }`, a pair. scratchpad vecreal.lut `v : Vec Real 3 := ...` fails with 'Vec Real : U is not a function, cannot apply it to 3'. vecfun.lut `v : Vec Float64 := \\ (k : Fin 3) { 1.0 }` fails with '(k : Fin 3) -> Float64 but (n : Nat) * (Fin n -> Float64) was expected'. The README sentence is at README.md:68 (not 66): 'A vector is a function Fin n -> Float64', so the user documentation describes a form the checker rejects. I raise severity to medium for that reason. tests/spec/n5_arrays.accept.lut:4-5 builds vectors as pairs, consistent with the code, not with 07 l.30."
+   },
+   {
+    "id": "spec-07#04",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "algebra.lut:137-144 matches 07 l.34-35. grep finds no VectorSpace instance in src, tests or examples (only archive/). I checked that the structure works: scratchpad vs.lut, `q2 : VectorSpace Rational rationalField.field (Rational * Rational)`, passes all 10 laws over 100 cases; badQ2 (scale k (a, b) = (k a, k + b)) fails Associative, LeftIdentity, LeftDistrib and RightDistrib of scale."
+   },
+   {
+    "id": "spec-07#05",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "algebra.lut:153-160: Symmetric, RightDistrib, Homogeneous, PositiveForm. No instance in the repo. scratchpad ips.lut: ipQ2 (a c + b d on Q^2) passes; badIp (a c - b d) fails PositiveForm with a counterexample. So the laws are correct and enforceable, just never instantiated in the repo."
+   },
+   {
+    "id": "spec-07#06",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "algebra.lut:169-174 has only Orthonormal; the comment at 163-165 says the dimension is not stated. The spanning law of 07 l.37-38 is absent. scratchpad ips.lut: `line : Euclidean Rational rationalField (Rational * Rational) 1` with the single basis vector (1, 0) in a plane passes, so the theorem 07 l.40 relies on (inner x y == sum_i x_i y_i) does not follow from what Euclidean states. The gap is noted in the code comment, not in 07."
+   },
+   {
+    "id": "spec-07#07",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "grep: no vecSpace, euclidean or matrices outside archive/lib-2026-10-04. algebra_python.lut:7-8 says they were replaced by rounding laws; 06-numbers.md:153-158 and 07 l.153 declare the replacement, so 07 §8.2 l.182-184 and §1 l.43 are stale. array.lut:11-13, 215-216, 236-238 still point at the missing instances. One part of the mapper's evidence is wrong: the replacement certificates are not stale. I copied algebra_python.lut and its cert to scratchpad/apcopy and ran `luthier check -v`: addRounds, subRounds, scaleRounds, dotRounds, totalRounds and matVecRounds are all 'certified (2026-10-06)'. The cert files are tracked and unchanged since bd4bece, an ancestor of b15f2a1. I lowered severity to medium because the vector-space part of the replacement is declared in 06 §8. The undeclared remainder (matMul) is rated in #09."
+   },
+   {
+    "id": "spec-07#08",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "array.lut:239-242, 330: matVec carries MatVecTable (exact, approxVec 0.0 against column j) and MatVecAgrees. No LeftDistrib or CommutingActions is stated on any matVec. Without linearity, MatVecTable alone does not characterize it (07 l.59-60); MatVecAgrees and MatVecWithinGamma pin it within rounding. Correction: MatVecWithinGamma's certificate (matVecRounds) is certified, not stale (check -v on the copy). The rounding replacement is declared in 06 §8."
+   },
+   {
+    "id": "spec-07#09",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "high",
+    "evidence": "array.lut:243-244, 331: `matMul : { f | MatMulAgrees f }`. A grep of every lib .lut finds no `matVec (matMul` and no Associative applied to matMul. algebra_python has no rounding law for matMul. 07 §8.2 l.182-184 says its structural law is certified through `matrices`, which does not exist, and nothing in 06 or 07 §9 says it is missing. In practice MatMulAgrees still pins numpy's matMul to matMulDef, so a wrong matMul would fail; but the composition law is checked on neither matMul nor matMulDef."
+   },
+   {
+    "id": "spec-07#10",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "AdjointOfInner exists only inside LinearMaps (algebra.lut:179-180, 192), which has no instance. The leaf carries TransposePointwise (array.lut:200, 332), approxMat 0.0 against transposeDef, which is exact and stronger. array_python.cert.json: transpose passes 100 cases."
+   },
+   {
+    "id": "spec-07#11",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_undeclared",
+    "corrected_severity": "low",
+    "evidence": "identity is a native constructor (array.lut:49) with no law. LeftIdentity of the action appears only in LinearMaps (algebra.lut:189), which has no instance. MatVecTable uses `row (identity n) j` as the basis but does not state matVec (identity n) x == x."
+   },
+   {
+    "id": "spec-07#12",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "array.lut:247-252, 333: TraceAdditive is Homomorphism of madd into +; there is no homogeneity, so the law is additive rather than linear. TraceCyclic, TraceOfIdentity and TraceAgrees are also stated. array_python.cert.json: all 4 pass 100 cases (dims 1 to 8). 07 §8.2 l.177 says 'additive', matching the code; §2 l.66 says 'linear'."
+   },
+   {
+    "id": "spec-07#13",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "DetMultilinear (array.lut:256-258) checks only additivity in row i, with no scaling of a row. DetAlternating (259-260) checks only the swap sign. Equal rows giving 0 follows from that, so this part is a gap of form only. DetAgrees is `n > laplaceLimit or ...` with laplaceLimit = 4 (262-265). gen_dim draws 1 to min(size, 8) (arrays.py:305-306), so for n from 5 to 8 only additivity, swap and identity are checked. The cert shows det passing 30 cases. I could not construct a computable function that passes these and is not det, so the practical risk is small."
+   },
+   {
+    "id": "spec-07#16",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "medium",
+    "evidence": "No eigen leaf. eigvalsSym (array.lut:338) carries Ascending, sum = trace, product = det and EigvalsAgree against eigvalsDef. eigenDef (134-135) returns the vectors, but its obligations in array.cert.json are only shape checks: no A V == V diag(e) and no orthonormality. 07 §9 l.212-217 declares that the values alone are not characterized. It does not say eigenDef, which already returns the vectors, carries no law, even though §3 l.87 says returning them is what makes the law universal. That is why I keep medium."
+   },
+   {
+    "id": "spec-07#24",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "low",
+    "evidence": "grep: argmax appears only at 07 l.108. GreatestOf (array.lut:229) states attainment as existsBelow, a fold, as §8.2 l.180 and §9 l.213-214 say. §4 l.106-109 is stale."
+   },
+   {
+    "id": "spec-07#27",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "sameTable (table.lut:75-76) is the equality; `Table :=` (table.lut:51) has four other laws, and 07 §9 l.224 itself counts 'the four laws of Table', so §5's list mixes the equality in with the laws. I lowered severity: tested directly in scratchpad sametable.lut, `sameTableIsSetoid : Setoid Table := sameTable` passes Reflexive and Symmetric over 100 generated tables. That csv's certificate never checks it is the checker defect of #55."
+   },
+   {
+    "id": "spec-07#28",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "table.lut:65-70 types the column as `{ s : String | hasColumn t s \"int\" }` and so on. scratchpad table_access.lut: unguarded `realAt t \"a\" 0` fails `luthier test` with a counterexample table (columns c0..c3 of kind str); the version guarded by `if hasColumn t \"a\" \"float\"` passes 50 cases. grep: no use of intAt, realAt, textAt or hasColumn in tests/ or examples/."
+   },
+   {
+    "id": "spec-07#29",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "optimization.lut:21 calls IsGradient (array.lut:184-191), which compares the slope along g/|g| with |g|. That is equivalent to 07 l.133's directional derivative along g equal to |g|^2. scratchpad objective.lut: `good` (value x.x, grad 2x) passes 30 cases; halfGrad (grad x) fails GradIsGradient. No test or example in the repo uses optimization.lut."
+   },
+   {
+    "id": "spec-07#30",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "StepMatrixPositive (optimization.lut:22-23) requires `symmetric 0.0`, exact symmetry, on a computed matrix, against 07 §8.2 l.187-189 (within rounding for a computed matrix). scratchpad symexact.lut: `info := matMul (transpose jac) jac` for a fixed 40x5 jac gives `symmetric 0.0 info` false, `symmetric (tolOf 200) info` true, and `positiveSemidefinite (symmetricPart info)` true. A correct Gauss-Newton objective gn with stepMatrix = info passes GradIsGradient and FAILS StepMatrixPositive. In plain numpy, J.T.copy() @ J is not exactly symmetric in 199 of 200 random 40x5 cases (arrays.py:99 transpose copies, so numpy's syrk path is not taken). Raised to high: the implementation rejects what §8.2 accepts. This has the same root cause as #46."
+   },
+   {
+    "id": "spec-07#31",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "optimization.lut:16 declares Objective with dim, :24 defines it by GradIsGradient & StepMatrixPositive, and 82-99 hold StepRule, DescentDirection and Certified. optimization.lut has no test directive and nothing in tests/ or examples/ imports it. 07 §9 l.242-244 declares these laws pending in this repo. My objective.lut shows the type's laws run and catch a wrong gradient and a negative step matrix."
+   },
+   {
+    "id": "spec-07#34",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "All structures are present and built by inclusion (algebra.lut:29-192). Correction to the mapper's evidence: Field, OrderedField and TotalOrder are exercised by rationalField (rational.lut:29-36, `test rationalField with 100`); rational.cert.json passes all 18 laws including Invertible, Total, Antisymmetric, Transitive, AddMonotone and MulPositive. Untested in the repo: CompleteOrderedField (only the axiom realField), VectorSpace, InnerProductSpace, Euclidean and LinearMaps (no instance). My scratchpad instances (vs.lut, ips.lut) show these work. 07 §6b l.152 lists only intRing and realField as instances and omits rationalField."
+   },
+   {
+    "id": "spec-07#37",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "KernelOn (probability.lut:265-270) and Codec (table.lut:79, 244) carry laws in the type. BeliefFamily (belief.lut:32-37) is an alias with `=` and no laws. Exchangeable, EvidenceChains and Calibrated (48-57, 103-104) are free functions, so discreteFamily and gaussianFamily owe none of them; belief.lut:9-11 says an approximate family departs from them and they measure how much. probability.cert.json: gaussianKernel 'not run'. 07 §7 also lists Codec's laws as four, while table.lut:244 has seven."
+   },
+   {
+    "id": "spec-07#39",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "07 §8.1 l.171 says float64Field was moved into algebra. 07 §6b l.153-154 and 06-numbers.md:153-158 say it was removed. grep: float64Field exists only in a comment (algebra_python.lut:7) and in archive/. The code follows the removal, so the spec contradicts itself."
+   },
+   {
+    "id": "spec-07#40",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "`luthier eval` on scratchpad fold.lut: `foldWith Int (a - b) 0 3 (i + 1)` gives 2 = 1 - (2 - (3 - 0)), so the fold associates right. sumToInt, factorial, power, forallBelow and existsBelow go through `fold` of a monoid, and forallPairs through forallBelow (algebra.lut:225-239). sumTo is foldWith of a bare operation (algebra.lut:232), as 06 §8 says; 07 §8.1 says it is a monoid fold."
+   },
+   {
+    "id": "spec-07#46",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "invSqrtSym and pinvSqrtSym use a tolerance and read positivity on symmetricPart (array.lut:297, 311). StepMatrixPositive (optimization.lut:23) and InfoIsPositive (probability.lut:146) use `symmetric 0.0` on the raw matrix. scratchpad symexact.lut: J^T J for a 40x5 J is not exactly symmetric but is within tolOf 200. scratchpad info.lut: for `profiled (VecOf 5) model` with that J, `InfoIsPositive ... samp lik t0 1` evaluates to false, and `symmetric 0.0 (lik.info fixedData t0)` is false. A correct Fisher information therefore fails the law."
+   },
+   {
+    "id": "spec-07#47",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "Read only, outside the audited repo. In sonolocalizacion/prototipo-cero/luthier/distance_graph.lut:33-42, GraphWithColumns gates iOf, jOf, dOf, priorAt, sdAt and nameOf. experiment_zero.lut:195-197 does `if ValidGraph g then` before fitting. The sonolocalizacion certificates (distance_graph.cert.json, validate_graph.cert.json) show passes, but I did not check whether they are current. Nothing in luthier tests this."
+   },
+   {
+    "id": "spec-07#48",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Maximizer (belief.lut:122) is an alias with no laws. scratchpad maximizer.lut: `liar : Maximizer := \\ n f g m x0 { { x := x0, converged := true } }` gives `luthier check -v` no obligation for the file's own definitions, while `luthier eval` of `MaximizerStationary liar 2 fq gq mq (zeros 2)` is false. 07 §9 l.242-244 says 'the Maximizer type itself stay[s] pending', but there is no obligation to be pending."
+   },
+   {
+    "id": "spec-07#49",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "grep: the only gradient law is IsGradient (array.lut:184-191), used by ScoreIsGradient (probability.lut:137) and GradIsGradient (optimization.lut:21). pitSlope (probability.lut:255) is a separate central difference for the pit's density, not a gradient law. array.cert.json: IsGradient 'not run'. scratchpad info.lut: ScoreIsGradient is true for the profiled likelihood and false for a score with flipped sign. Nothing in the repo runs it."
+   },
+   {
+    "id": "spec-07#50",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "probability.lut:126-133 defines both through LeftIdentity and Associative, with equality read through loglik. scratchpad info.lut: ShiftByZero and ShiftComposes are true for the shift p + v; ShiftComposes is false for the shift p + v + v^2 (not an action), and ShiftByZero is false for p + v + 1. probability.cert.json: ShiftComposes and gaussianKernel 'not run'. No repo test."
+   },
+   {
+    "id": "spec-07#51",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "InfoIsPositive (probability.lut:145-146) requires exact symmetry. scratchpad info.lut: for `profiled` with a 40x5 Jacobian, whose info is `(n / rss) * (transpose j * j)` (probability.lut:313), `InfoIsPositive (VecOf 5) (Vec Float64) samp lik t0 1` is false. A correct Fisher information is rejected, against 07 §8.2 l.187-189. Raised to high; same root cause as #46."
+   },
+   {
+    "id": "spec-07#52",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "KernelOn (probability.lut:265-270) has `pair : DensityPairOn Theta (Vec Float64) D at e` and adds only PitIsDensity and PitUniform. gaussianKernel is 'not run' in probability.cert.json, and no repo test builds a Kernel."
+   },
+   {
+    "id": "spec-07#55",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "scratchpad setoid_component.lut has `R = { eq : Setoid Int, k : Int }` and notEq, a relation that is not reflexive. `rFun : R := { eq := notEq, k := 1 }`, with notEq in function form, reports 'no laws' under `luthier test` and is absent from `check -v`. The same relation in value form (rVal), as a lambda (rLam) or directly (`direct : Setoid Int := notEq`) all FAIL Reflexive. sameTable is in function form (table.lut:75), so csv's eq (table_python.lut:15) never owes the Setoid law: table_python.cert.json lists only the 7 Codec laws. The likely path is checker.py:1430-1433 (`if self.convertible(tty, ty): return term`). This is a general checker hole that silently drops a refinement obligation."
+   },
+   {
+    "id": "spec-07#56",
+    "verdict": "uncertain",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "Outside the audited repo, read only. positions.lut:23-71 has pairDistance, pairDistances, distanceJacobian, flatten, unflatten and `layout (n : Dim) : Iso (MatOf 3 n) (VecOf (3 * n))`. sonolocalizacion's positions.cert.json shows them passed (freshness not checked). The bit-for-bit reproduction of session A cannot be verified from luthier."
+   },
+   {
+    "id": "spec-07#60",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "checker.py:710-776 does add sum-payload obligations, and the docstring at 679-680 still says sums are not entered. The String fallback generator (generators.py:163-164) draws only from 'abcxyz', up to 6 characters, so it never produces a header with ':'. scratchpad vacuous_parse.lut, run with PYTHONPATH pointing at the scratchpad: `probe`, which asserts parseTable s is never just, passes 300 cases. `badParse` (scratchpad badparse_ext.py) returns a table with kind 'weird' for any text containing ':' (eval of `badParse \"x : int\"` gives just with kinds ['weird']), yet it passes all four Table laws over 200 cases. parseTable's certificate in table_python.cert.json is therefore vacuous. tests/test_bridge.py:188-194 uses a custom sum with Fin 3, not Maybe Table over String."
+   },
+   {
+    "id": "spec-07#61",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "machine.py:503-545 (_check_refinements) handles Subtype and Sigma only, with no Sum case. scratchpad maybe_checked.lut: `mkMaybe : Int -> Maybe Table` returning the kind-'weird' table runs under `luthier run --checked --no-record`, prints 1 and exits 0. bare_checked.lut, with the same extern typed `Int -> Table`, fails: 'gave a value outside Table (run --checked) ... does not satisfy KindsKnown'. parseTable returns Maybe Table (table_python.lut:7), so a parsed table is not checked at run time, against 07 §9 l.223-224. tests/test_bridge.py:197-207 tests only the bare Table case."
+   },
+   {
+    "id": "spec-07#63",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "Present as described: Ensemble (probability.lut:33-34, 100 <= draws and 3.0 <= zMax), Likelihood (114-119) and MeanModel (275-279) with dim and `shift : Theta -> VecOf dim -> Theta`, DensityPairOn and KernelOn with D and at (216, 265), PitResolution (251-252), GaussianBelief n and MaxResult n (belief.lut:110, 121), Maximizer over VecOf n (122), LMState n (optimization.lut:27). My info.lut builds a Likelihood over VecOf 5 and evaluates its laws; no repo test does."
+   },
+   {
+    "id": "spec-07#67",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "low",
+    "evidence": "README.md:56-58 shows `eq : Table -> Table -> Bool`, a RoundTrip that calls c.eq directly, and `Codec := RoundTrip & Canonical & Tolerant & Rejects`. table.lut:79 has `eq : Setoid Table`, sameParse (81-83), and seven laws (244), adding ReadsTheFormat, ReadsRenderings and ReadsMutations. 07 §7 l.163-164 also lists only the four."
+   },
+   {
+    "id": "spec-07#14",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "array.lut:268-270, 335: FrobOfTrace compares with sqrt (trace (matMul (transpose a) a)), and FrobAgrees with frobDef. array_python.lut:72 `test frob with 100`; the cert passes both laws over 100 cases. `check -v` through algebra_python shows array_python's certificates accepted, not stale. The test does exercise the claim."
+   },
+   {
+    "id": "spec-07#15",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "SolveInverts (array.lut:273-274) is quantified over SpdOf n (B^T B + I, arrays.py:344-347) with tolerance cond s * tolOf (n * n), and passes 100 cases. Only the SPD branch of 07 l.82-83 is exercised; a general nonsingular A is not. The leaf's argument is unrestricted, as §9 l.218-220 declares."
+   },
+   {
+    "id": "spec-07#17",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "InvSqrtInverts checks M A M == I within cond * tolOf; InvSqrtPositive checks symmetry within tolerance and min eigenvalue of symmetricPart > 0 (array.lut:294-297). array_python.lut:76 `test invSqrtSym with 50 size 5`; the cert passes 50 cases with dims 1 to 5. The test exercises the claim."
+   },
+   {
+    "id": "spec-07#18",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "MoorePenrose (array.lut:303-306) checks all four conditions, quantified over DeficientOf n with n >= 2. gen_deficient_of gives B^T B of rank below n (arrays.py:350-355), so only positive semidefinite, rank-deficient matrices are tested, not indefinite or full-rank symmetric ones. The cert passes 50 cases at size up to 5."
+   }
+  ],
+  "notes": "Covered: every entry above against docs/semantica/07-characterizations.md (sections 0 to 9), with the code in src/luthier/lib/algebra.lut, array.lut, algebra_python.lut, array_python.lut, rational.lut, probability.lut, belief.lut, optimization.lut, table.lut and table_python.lut, src/luthier/checker.py (667-776, 1363-1438), machine.py (440-545), generators.py (140-200), arrays.py, tables.py, cli.py, README.md:47-69, tests/test_bridge.py:175-250, tests/spec/n5_arrays.accept.lut, and the cert.json files. Between b15f2a1 and HEAD nothing changed under src, docs/semantica, README or tests except tests/test_audit_correspondence.py, so the working tree reflects b15f2a1.\n\nCorrections to the mapper:\n(1) The claim in #07 and #08 that the algebra_python replacement certificates are stale is wrong. `luthier check -v` on a copy of algebra_python.lut with its cert shows all six rounding certificates certified.\n(2) #34: rationalField does exercise Field, OrderedField and TotalOrder.\n(3) #03: the README line is 68, and since the user documentation describes a form the checker rejects, I raised severity to medium.\n(4) #30 and #51 raised to high. They share the root cause of #46: exact symmetry on computed matrices rejects a correct J^T J. I showed this with a Gauss-Newton Objective and with a profiled likelihood's InfoIsPositive.\n(5) #01 refuted: Invertible restates RightInverse inline, and the symmetric-PSD predicate is written twice.\n(6) #27 lowered to low: sameTable passes the Setoid laws when tested directly.\n\nConfirmed high findings, each with a runnable program: #55 (a record component given a function-form name drops its refinement obligation), #60 (parseTable's payload obligations are vacuous because the String generator never produces ':'), #61 (run --checked does not check a sum payload), #46, #30, #51 and #09.\n\nScratch programs are all under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-07/: vs.lut, ips.lut, setoid_component.lut, table_access.lut, objective.lut, symexact.lut, info.lut, maximizer.lut, vacuous_parse.lut, maybe_checked.lut, bare_checked.lut, badparse_ext.py, sametable.lut, fold.lut, vecfun.lut, vecreal.lut, apcopy/. Every `luthier test` ran with --no-cert; nothing under the repo was modified.\n\nSide observation, outside this entry list: importing belief together with array_python and optimization reports belief's certificates (weights, bayes, discreteFamily, rankOf, laplaceAt, drawGaussian, gaussianFamily) as stale."
+ }
+}

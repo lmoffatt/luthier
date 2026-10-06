@@ -1,0 +1,1037 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-07",
+   "direction": "spec",
+   "files": "docs/semantica/07-characterizations.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a7b44c6c9eb6d47e1",
+  "agent_label": "map spec-07",
+  "started_at": "2026-10-06T11:36:17+00:00",
+  "finished_at": "2026-10-06T11:55:24+00:00",
+  "tokens": 206626,
+  "tool_calls": 62,
+  "duration_ms": 1146671,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "docs/semantica/07-characterizations.md, all of it: header principle (l.8-10), §0 Notation, §1 Vectors, §2 Matrices, §3 Solving/spectrum/pseudo-inverse, §4 Reductions, §5 Tables, §6 Objectives, §6b Algebra, §7 Already characterized, §8 The rewrite (items 1-6), §9 Open",
+   "Implementation read: src/luthier/lib/algebra.lut, algebra_python.lut, array.lut, array_python.lut, table.lut, table_python.lut, optimization.lut, probability.lut, probability_python.lut, belief.lut, real.lut, rational.lut (grep), core.lut; src/luthier/checker.py (extern obligations, record/subtype checking), machine.py (run --checked), cli.py, generators.py (String fallback), tables.py, arrays.py (mat_mul, transpose)",
+   "Tests read: tests/test_bridge.py, tests/test_kernel.py:515-520, tests/test_spec.py, tests/spec/n5_arrays.accept.lut, and the committed certificates lib/*.cert.json (the library laws are exercised only by `test` directives and their certificates; pytest loads only array, algebra and table)",
+   "Cross-checked: docs/semantica/06-numbers.md:150-163 (the replacement of the float64Field instances), README.md:52-66; read-only grep of /home/lmoffatt/Projects/sonolocalizacion/prototipo-cero/luthier for the project claims of §8.3 and §8.6"
+  ],
+  "claims": [
+   {
+    "id": "spec-07#01",
+    "spec_ref": "docs/semantica/07-characterizations.md:8",
+    "claim": "Laws have one name each, written once in algebra in their most general form; structures are built by inclusion; nothing is declared twice under two names.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:19-58",
+     "src/luthier/lib/probability.lut:126-133",
+     "src/luthier/lib/array.lut:40-41",
+     "src/luthier/lib/array.lut:248"
+    ],
+    "test_refs": [],
+    "evidence": "Followed in the code: ShiftByZero, ShiftComposes, TraceAdditive and symmetric are defined through LeftIdentity, Associative, Homomorphism and Symmetric. Nothing checks the rule mechanically.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#02",
+    "spec_ref": "docs/semantica/07-characterizations.md:16",
+    "claim": "Notation: symbols, eq is approx on Float64 and arrays with the tolerance of 06 §8, 'characterizes' means the laws determine the operation up to eq.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:27",
+     "src/luthier/lib/real.lut:35-37"
+    ],
+    "test_refs": [],
+    "evidence": "Notation only. approx and the hand-written tolerances (roundingSlack) are in real.lut; 06 §8 itself says the ...Agrees tolerances are not derived yet.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#03",
+    "spec_ref": "docs/semantica/07-characterizations.md:30",
+    "claim": "The carrier of Euclidean n is Vec Real n = Fin n -> Real, so coordinates are application (and for matrices, Fin m -> Fin n -> Real with entry as application, l.54-55).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:22-23",
+     "README.md:66"
+    ],
+    "test_refs": [
+     "tests/spec/n5_arrays.accept.lut:4-5"
+    ],
+    "evidence": "Vec A = { n : Nat, f : Fin n -> A } and Mat A = { m, n, f }; coordinates are v.f k, over Float64, not Real. §8.2 (l.185-186) already says v.n, v.f k, (n, g); §1-2 and README.md:66 ('a vector is a function Fin n -> Float64') were not updated.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#04",
+    "spec_ref": "docs/semantica/07-characterizations.md:34",
+    "claim": "VectorSpace (in algebra): add associative and commutative with zero and neg; scale associative, unital, distributive over add and over +.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:137-144"
+    ],
+    "test_refs": [],
+    "evidence": "VectorSpace has AbelianGroup add plus Associative, LeftIdentity, LeftDistrib, RightDistrib of scale. No instance exists anywhere since the float64Field ones were removed (algebra_python.lut:7-8), so these laws are never run.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#05",
+    "spec_ref": "docs/semantica/07-characterizations.md:36",
+    "claim": "InnerProductSpace (in algebra): inner symmetric, bilinear, positive on nonzero vectors.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:148-160"
+    ],
+    "test_refs": [],
+    "evidence": "Symmetric, RightDistrib and Homogeneous in the first argument (bilinear by symmetry), PositiveForm. There's no instance in any library, so nothing tests it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#06",
+    "spec_ref": "docs/semantica/07-characterizations.md:37",
+    "claim": "Laws of the basis: inner (e i) (e j) == delta i j, and every vector is the combination of its coordinates, x == sum_i (x i) (e i).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:163-174"
+    ],
+    "test_refs": [],
+    "evidence": "Euclidean states only Orthonormal. The spanning law is absent, and the comment at algebra.lut:163-165 says the dimension of V is not stated. With no instance, nothing tests either part.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#07",
+    "spec_ref": "docs/semantica/07-characterizations.md:182",
+    "claim": "The structural laws of add, scale, dot, matVec, matMul, transpose are the instances vecSpace, euclidean (basis orthonormal) and matrices of algebra_python; numpy's dot is certified as a model of the characterization, with dotDef as a second model (l.40-43, l.47-49).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lib/algebra_python.lut:7-8",
+     "src/luthier/lib/algebra_python.lut:37-52",
+     "src/luthier/lib/array.lut:11-13",
+     "src/luthier/lib/array.lut:215-216",
+     "src/luthier/lib/array.lut:236-238",
+     "src/luthier/lib/array.lut:321",
+     "src/luthier/lib/array.lut:331",
+     "docs/semantica/06-numbers.md:158-159"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra_python.cert.json"
+    ],
+    "evidence": "No vecSpace, euclidean or matrices exists anywhere (grep). algebra_python says they were replaced by rounding laws (06 §8). dot's type carries only DotAgrees and matMul's only MatMulAgrees, which is the pre-rewrite state §1 calls 'a model of dotDef'. array.lut comments still point at the missing instances. `luthier check -v` reports the replacement certificates (dotRounds, totalRounds, matVecRounds) stale.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-07#08",
+    "spec_ref": "docs/semantica/07-characterizations.md:58",
+    "claim": "matVec is linear (LeftDistrib and CommutingActions with the scaling) and its table on the basis is the matrix: coord (matVec A (e j)) i == A i j.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:239-242",
+     "src/luthier/lib/array.lut:330",
+     "src/luthier/lib/algebra_python.lut:30-35"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:67",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "MatVecTable (exact, on row j of the identity) and MatVecAgrees are on the leaf and pass 100 cases. No LeftDistrib or CommutingActions law exists for matVec; only MatVecWithinGamma in algebra_python, whose certificate is stale.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#09",
+    "spec_ref": "docs/semantica/07-characterizations.md:61",
+    "claim": "matMul is characterized by matVec (matMul A B) x == matVec A (matVec B x), the Associative law of the action.",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:243-244",
+     "src/luthier/lib/array.lut:331"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:68"
+    ],
+    "evidence": "matMul : { f | MatMulAgrees f }: its only law is agreement with matMulDef. No composition law is stated on any matMul, and algebra_python gives it no rounding law either. 07 doesn't say this is missing.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-07#10",
+    "spec_ref": "docs/semantica/07-characterizations.md:63",
+    "claim": "transpose is characterized by AdjointOfInner: inner (matVec A x) y == inner x (matVec (transpose A) y).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:200",
+     "src/luthier/lib/array.lut:332",
+     "src/luthier/lib/algebra.lut:179-180"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:69"
+    ],
+    "evidence": "AdjointOfInner exists in algebra but is not applied to the leaf. The leaf carries TransposePointwise (exact, equal to transposeDef), which also determines it, so the law is different but the operation is still pinned down.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#11",
+    "spec_ref": "docs/semantica/07-characterizations.md:65",
+    "claim": "identity n satisfies matVec (identity n) x == x (LeftIdentity of the action).",
+    "status": "not_implemented_undeclared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:49",
+     "src/luthier/lib/algebra.lut:189"
+    ],
+    "test_refs": [],
+    "evidence": "identity is a native constructor. LeftIdentity appears only inside LinearMaps, which has no instance. MatVecTable together with MatVecAgrees implies it within rounding.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#12",
+    "spec_ref": "docs/semantica/07-characterizations.md:66",
+    "claim": "trace: linear in A, cyclic, tr (identity n) == n; this characterizes it.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:247-252",
+     "src/luthier/lib/array.lut:333"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:70",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "TraceAdditive (Homomorphism of madd into +), TraceCyclic and TraceOfIdentity all pass. Homogeneity isn't stated, so the law is additive, not linear. §8.2 l.177 says 'additive', consistent with the code.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#13",
+    "spec_ref": "docs/semantica/07-characterizations.md:69",
+    "claim": "det: multilinear in the rows, alternating (equal rows give 0, a swap changes the sign), det (identity n) == 1; the unique such function.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:256-265",
+     "src/luthier/lib/array.lut:334"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:71",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "DetMultilinear only checks additivity in row i (withRow a i (add u v)); no homogeneity. DetAlternating only checks swaps. DetAgrees is vacuous for n > laplaceLimit = 4, so for n >= 5 the uniqueness argument rests on additivity alone.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#14",
+    "spec_ref": "docs/semantica/07-characterizations.md:72",
+    "claim": "frob A == sqrt (tr (matMul (transpose A) A)), a definition.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:268-270",
+     "src/luthier/lib/array.lut:335"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:72",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "FrobOfTrace and FrobAgrees are on the leaf and pass 100 cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#15",
+    "spec_ref": "docs/semantica/07-characterizations.md:81",
+    "claim": "solve: matVec A (solve A b) == b (SolveInverts) on its domain, det A /= 0 or A symmetric positive definite.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:273-274",
+     "src/luthier/lib/array.lut:337"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:74",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "Quantified over SpdOf n only, with tolerance cond s * tolOf (n*n); passes 100 cases. The general nonsingular domain isn't covered. The leaf's argument isn't restricted, as §9 l.218 declares.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#16",
+    "spec_ref": "docs/semantica/07-characterizations.md:84",
+    "claim": "eigen A returns (e, V) with A V == V diag(e), transpose V V == I, e ascending; eigvalsSym is its first component.",
+    "status": "not_implemented_declared",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:134-135",
+     "src/luthier/lib/array.lut:276-286",
+     "src/luthier/lib/array.lut:338"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:75"
+    ],
+    "evidence": "There's no eigen leaf. eigvalsSym carries Ascending, sum = trace, product = det and agreement with Jacobi (eigenDef), and eigenDef itself has no A V == V diag(e) law. The gap is declared only indirectly: §8.2 leaves eigen out and §9 l.215-217 says the values alone are not characterized.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#17",
+    "spec_ref": "docs/semantica/07-characterizations.md:89",
+    "claim": "invSqrtSym A on SPD A: M symmetric positive definite with M A M == I.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:294-298",
+     "src/luthier/lib/array.lut:339"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:76",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "InvSqrtInverts and InvSqrtPositive (symmetric within rounding, positivity read on the symmetric part) pass 50 cases, size up to 5.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#18",
+    "spec_ref": "docs/semantica/07-characterizations.md:91",
+    "claim": "pinvSym A on symmetric A: Moore-Penrose (A P A == A, P A P == P, A P and P A symmetric).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:302-307",
+     "src/luthier/lib/array.lut:341"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:78",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "MoorePenrose, quantified over DeficientOf n with n >= 2, passes 50 cases, size up to 5.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#19",
+    "spec_ref": "docs/semantica/07-characterizations.md:93",
+    "claim": "retainedRank A == round (tr (matMul A (pinvSym A))).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:314-315",
+     "src/luthier/lib/array.lut:340"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:77",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "RankOfProjector and RankAgrees pass.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#20",
+    "spec_ref": "docs/semantica/07-characterizations.md:96",
+    "claim": "pinvSqrtSym A: M symmetric positive semidefinite with M A M == A P.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:309-312",
+     "src/luthier/lib/array.lut:342"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:79",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "PinvSqrtProjects passes.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#21",
+    "spec_ref": "docs/semantica/07-characterizations.md:103",
+    "claim": "total x == inner x (ones n).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:221-222",
+     "src/luthier/lib/array.lut:323"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:62"
+    ],
+    "evidence": "TotalOfInner is on the leaf and passes 100 cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#22",
+    "spec_ref": "docs/semantica/07-characterizations.md:104",
+    "claim": "product (append x a) == a * product x and product (zeros 0) == 1.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:224-226",
+     "src/luthier/lib/array.lut:324"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:63"
+    ],
+    "evidence": "ProductRecursion (n >= 1) and ProductOfNone (exact) pass.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#23",
+    "spec_ref": "docs/semantica/07-characterizations.md:106",
+    "claim": "maximum, minimum, maxAbs: an upper bound that is attained.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:229-234",
+     "src/luthier/lib/array.lut:325-327"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:64-65",
+     "src/luthier/lib/array_python.lut:84-85"
+    ],
+    "evidence": "GreatestOf states forallBelow for the bound and existsBelow for attainment, both folds over the indices; it passes.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#24",
+    "spec_ref": "docs/semantica/07-characterizations.md:108",
+    "claim": "Version 0 writes attainment as maximum x == x (argmax x), with argmax one more leaf, or leaves it noted.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:229"
+    ],
+    "test_refs": [],
+    "evidence": "There's no argmax. Attainment is existsBelow, a fold, as §8.2 l.180 and §9 l.213-214 say. The §4 sentence is stale.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#25",
+    "spec_ref": "docs/semantica/07-characterizations.md:116",
+    "claim": "Table is a declared type over its labeled base, defined by its schema laws (§8.3 l.190).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:37",
+     "src/luthier/lib/table.lut:51"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:197",
+     "src/luthier/lib/table_python.lut:17"
+    ],
+    "evidence": "Declared at table.lut:37 and defined at :51 as SchemaWellFormed & KindsKnown & CellsOfTheirKind & NoCellsOffSchema. Generator values are checked against it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#26",
+    "spec_ref": "docs/semantica/07-characterizations.md:117",
+    "claim": "Names distinct; cell c r is just exactly when c is a schema name, else nothing; a cell of an int/float/str column is int k / real x / text s.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:40-51",
+     "src/luthier/tables.py:50-55"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:197-207"
+    ],
+    "evidence": "Distinct names and equal lengths, known kinds, kindOf (cell n r) == kind per column (which makes the cell a just), and no cells off the schema. test_bridge rejects a table with kind 'weird' under run --checked.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#27",
+    "spec_ref": "docs/semantica/07-characterizations.md:122",
+    "claim": "Extensionality: two tables with the same schema and the same cells are the same (sameTable).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:73-76",
+     "src/luthier/lib/table_python.lut:15"
+    ],
+    "test_refs": [
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "sameTable is defined and is csv's eq. It's an equality, not a law of Table. Its Setoid laws are never tested (see spec-07#55).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#28",
+    "spec_ref": "docs/semantica/07-characterizations.md:124",
+    "claim": "intAt, realAt, textAt take the precondition hasColumn t c kind on their column argument (§8.3 l.191).",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:65-70"
+    ],
+    "test_refs": [],
+    "evidence": "Ran scratchpad/audit/spec-07/table_access.lut: call sites get the obligation { s | hasColumn t s 'int' }; `realAt t \"a\" r` fails `luthier test` with a counterexample table; an `if hasColumn` guard discharges it. No test in the repo exercises this.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#29",
+    "spec_ref": "docs/semantica/07-characterizations.md:133",
+    "claim": "GradIsGradient: the directional derivative of value along grad, by central difference, equals |grad|^2.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/optimization.lut:21",
+     "src/luthier/lib/array.lut:181-191"
+    ],
+    "test_refs": [],
+    "evidence": "The code compares the slope along the unit direction g/|g| with |g|, which is equivalent. Ran scratchpad/audit/spec-07/objective.lut: value |x|^2 with grad 2x passes 30 cases; with grad x it fails. Nothing in the repo tests it.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#30",
+    "spec_ref": "docs/semantica/07-characterizations.md:135",
+    "claim": "stepMatrix is symmetric and positive semidefinite: inner v (stepMatrix x v) >= 0.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/optimization.lut:22-23",
+     "src/luthier/lib/array.lut:170"
+    ],
+    "test_refs": [],
+    "evidence": "StepMatrixPositive requires symmetric 0.0 (exact), then eigenvalues >= -scaledTol. A step of -I fails as it should (objective.lut). Exact symmetry rejects matrices computed with rounding (spec-07#46).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#31",
+    "spec_ref": "docs/semantica/07-characterizations.md:137",
+    "claim": "Objective is a declared type defined by its laws, carries its dimension (l.194); the LM laws StepRule, DescentDirection, Certified stand on it.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/optimization.lut:16",
+     "src/luthier/lib/optimization.lut:24",
+     "src/luthier/lib/optimization.lut:82-99"
+    ],
+    "test_refs": [],
+    "evidence": "Objective has dim and is defined by GradIsGradient & StepMatrixPositive; the LM laws exist. optimization.lut has no test directive; they're certified only in sonolocalizacion (optimization_check.lut:41-43).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#32",
+    "spec_ref": "docs/semantica/07-characterizations.md:143",
+    "claim": "Laws of a relation: Reflexive, Symmetric, Antisymmetric, Transitive, Total. Symmetric takes any two-argument function of one type with an equality on its result (relation, operation, bilinear form, matrix entries).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:19-26",
+     "src/luthier/lib/algebra.lut:29",
+     "src/luthier/lib/algebra.lut:83",
+     "src/luthier/lib/algebra.lut:157",
+     "src/luthier/lib/array.lut:41"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra.cert.json"
+    ],
+    "evidence": "Symmetric (A B) eqB f is used in all four roles. exactBool, exactInt, exactNonNegative and intRing are certified. Antisymmetric, Transitive and Total appear only in TotalOrder, whose only instance is the axiom realField, so they're never run.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#33",
+    "spec_ref": "docs/semantica/07-characterizations.md:146",
+    "claim": "Laws of an action act : M -> X -> V: Associative, LeftIdentity, LeftDistrib, RightDistrib, CommutingActions, Homogeneous; the laws of a binary operation are the case M = X = V.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:38-58",
+     "src/luthier/lib/algebra.lut:75",
+     "src/luthier/lib/algebra.lut:92"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra.cert.json"
+    ],
+    "evidence": "All six exist. Monoid uses Associative A A eq op op; Ring uses LeftDistrib A A and RightDistrib A A A. intRing passes 12 laws. Wording: Associative, LeftIdentity and CommutingActions take act : M -> V -> V (no X).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#34",
+    "spec_ref": "docs/semantica/07-characterizations.md:148",
+    "claim": "Structures by inclusion: Setoid, TotalOrder, Monoid, Group, AbelianGroup, Ring, CommutativeRing, Field, OrderedField, CompleteOrderedField, VectorSpace K F V, InnerProductSpace K F V, LinearMaps.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:29-192"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra.cert.json"
+    ],
+    "evidence": "All are present and built by inclusion. Setoid through CommutativeRing are exercised by intRing. Field, OrderedField and CompleteOrderedField have only the axiom realField. VectorSpace, InnerProductSpace, Euclidean and LinearMaps have no instance.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#35",
+    "spec_ref": "docs/semantica/07-characterizations.md:152",
+    "claim": "Instances: intRing : CommutativeRing Int; realField : CompleteOrderedField Real (axiom); float64Field removed.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:132",
+     "src/luthier/lib/algebra.lut:201-210"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:515-520",
+     "src/luthier/lib/algebra_python.lut:46"
+    ],
+    "evidence": "intRing passes 12 laws; check -v reports 'assumed realField'; float64Field is gone.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#36",
+    "spec_ref": "docs/semantica/07-characterizations.md:156",
+    "claim": "A symmetric matrix is Symmetric over its indices, finite and checked exhaustively.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:40-42"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array.cert.json"
+    ],
+    "evidence": "symmetric tol a = forallPairs a.m (Symmetric ... (approx tol) entries), exhaustive over the indices. The SymmetricSquare generator values are checked against it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#37",
+    "spec_ref": "docs/semantica/07-characterizations.md:163",
+    "claim": "Kernel, BeliefFamily, Codec and the algebra structures are already characterized: the pattern (laws as the invariant of the type) the rest follows.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:265-271",
+     "src/luthier/lib/belief.lut:32-37",
+     "src/luthier/lib/belief.lut:48-57",
+     "src/luthier/lib/belief.lut:103-104",
+     "src/luthier/lib/table.lut:244"
+    ],
+    "test_refs": [
+     "src/luthier/lib/table_python.lut:17"
+    ],
+    "evidence": "Kernel and Codec carry their laws in the type. BeliefFamily is an alias with no laws ('='); Exchangeable, EvidenceChains and Calibrated are free functions, so a BeliefFamily value need not satisfy them. gaussianKernel's 8 laws are 'not run' (no generator for U).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#38",
+    "spec_ref": "docs/semantica/07-characterizations.md:169",
+    "claim": "§8.1: Homomorphism, with both distributive laws defined through it; Orthonormal and Euclidean K F V n; the exact setoids.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:45-52",
+     "src/luthier/lib/algebra.lut:166-174",
+     "src/luthier/lib/algebra.lut:196-198"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra.cert.json"
+    ],
+    "evidence": "As stated. The exact setoids pass 2 laws each. Euclidean has no instance.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#39",
+    "spec_ref": "docs/semantica/07-characterizations.md:171",
+    "claim": "§8.1: float64Field was moved into algebra from algebra_python.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:206-210",
+     "docs/semantica/06-numbers.md:154"
+    ],
+    "test_refs": [],
+    "evidence": "float64Field exists nowhere. §6b l.153 and 06 §8 say it was removed, and the code follows them. The spec contradicts itself.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#40",
+    "spec_ref": "docs/semantica/07-characterizations.md:171",
+    "claim": "Folds over the indices: fold of a monoid, associated to the right, with sumTo, sumToInt, factorial, power, forallBelow, existsBelow, forallPairs defined through it.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:222-239"
+    ],
+    "test_refs": [
+     "src/luthier/lib/algebra.cert.json"
+    ],
+    "evidence": "Right association checked with `luthier eval`: foldWith Int (a-b) 0 3 (i+1) gives 2 = 1-(2-(3-0)). sumTo is foldWith of a bare operation, not a monoid fold (algebra.lut:232), which matches 06 §8 but not this sentence.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#41",
+    "spec_ref": "docs/semantica/07-characterizations.md:174",
+    "claim": "Each array leaf is declared with its laws in its type; array_python fills it by extern and certifies the leaf itself; the 24 copies are gone.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:318-352",
+     "src/luthier/lib/array_python.lut:11-41"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:57-87",
+     "src/luthier/lib/array_python.cert.json"
+    ],
+    "evidence": "Every leaf is a refined declaration bound by extern, with no restated laws. All array_python certificates pass and are current.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#42",
+    "spec_ref": "docs/semantica/07-characterizations.md:175",
+    "claim": "Pointwise operations carry their coordinate law.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:196-204"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:57-59",
+     "src/luthier/lib/array_python.lut:66",
+     "src/luthier/lib/array_python.lut:80-83"
+    ],
+    "evidence": "Add, Sub, Scale, Outer, Transpose, Madd, Msub, Mscale and Hadamard Pointwise, exact (approx 0.0); all pass.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#43",
+    "spec_ref": "docs/semantica/07-characterizations.md:181",
+    "claim": "invSqrtSym, pinvSym, pinvSqrtSym, retainedRank, cond as in §3.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:288-289",
+     "src/luthier/lib/array.lut:336"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:73"
+    ],
+    "evidence": "All implemented and passing. §3 says nothing about cond; its law, CondOfSpectrum, has no counterpart in §3, so the cross-reference is wrong for cond.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#44",
+    "spec_ref": "docs/semantica/07-characterizations.md:181",
+    "claim": "approxVec and approxMat are approx entry by entry.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:208-213",
+     "src/luthier/lib/array.lut:351-352"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:86-87"
+    ],
+    "evidence": "Pointwise laws, plus false on a shape mismatch; both pass.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#45",
+    "spec_ref": "docs/semantica/07-characterizations.md:185",
+    "claim": "The second names of the projections (length, at, entry, rows, cols, tabulate) are gone; v.n, v.f k, (n, g).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:22-23"
+    ],
+    "test_refs": [
+     "tests/spec/n5_arrays.accept.lut:4-5"
+    ],
+    "evidence": "grep over lib/*.lut finds none defined (only local parameter names such as `at` and `rows`).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#46",
+    "spec_ref": "docs/semantica/07-characterizations.md:187",
+    "claim": "symmetric tol a: exact for SymmetricSquare, within rounding for a computed matrix, whose positivity is read on its symmetric part.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:297",
+     "src/luthier/lib/array.lut:311",
+     "src/luthier/lib/optimization.lut:23",
+     "src/luthier/lib/probability.lut:146",
+     "src/luthier/lib/probability.lut:301",
+     "src/luthier/lib/probability.lut:313",
+     "src/luthier/arrays.py:102-107"
+    ],
+    "test_refs": [],
+    "evidence": "Done for invSqrtSym and pinvSqrtSym, but StepMatrixPositive and InfoIsPositive use symmetric 0.0 on the raw matrix. scratchpad/audit/spec-07/symexact.lut: matMul (transpose j) j (the form of gaussian/profiled info) for j of 40x5 gives `symmetric 0.0` false and `symmetric (tolOf 200)` true. So a correct Fisher information fails InfoIsPositive.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-07#47",
+    "spec_ref": "docs/semantica/07-characterizations.md:191",
+    "claim": "In distance_graph the schema is checked first (ValidGraph reads rows only on a GraphWithColumns), and experiment_zero validates the graph before fitting.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "/home/lmoffatt/Projects/sonolocalizacion/prototipo-cero/luthier/distance_graph.lut:33-49",
+     "/home/lmoffatt/Projects/sonolocalizacion/prototipo-cero/luthier/experiment_zero.lut:195"
+    ],
+    "test_refs": [],
+    "evidence": "Outside the audited repository; only read-only grep. GraphWithColumns gates the accessors there. Nothing in luthier can verify the claim.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#48",
+    "spec_ref": "docs/semantica/07-characterizations.md:195",
+    "claim": "MaximizerAscends and MaximizerStationary are what any maximizer satisfies.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/optimization.lut:119-122",
+     "src/luthier/lib/belief.lut:121-122"
+    ],
+    "test_refs": [],
+    "evidence": "The laws exist, but Maximizer is an alias with no laws, so neither lmMaximizer nor any other value of the type owes them. They're applied by hand through law-lambdas in sonolocalizacion (optimization_check.lut:48).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#49",
+    "spec_ref": "docs/semantica/07-characterizations.md:196",
+    "claim": "IsGradient (in array) is the one gradient law, used by the score and the objective.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:184-191",
+     "src/luthier/lib/probability.lut:136-137",
+     "src/luthier/lib/optimization.lut:21"
+    ],
+    "test_refs": [],
+    "evidence": "grep finds no other gradient law. IsGradient's own obligations are 'not run' in array.cert.json and ScoreIsGradient is never run in this repo; only GradIsGradient, through scratchpad objective.lut.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#50",
+    "spec_ref": "docs/semantica/07-characterizations.md:197",
+    "claim": "The shift is an action of the vectors on Theta: ShiftByZero is LeftIdentity, ShiftComposes is Associative.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:126-133"
+    ],
+    "test_refs": [],
+    "evidence": "Defined through LeftIdentity and Associative, with Theta's equality read through loglik. Never run in this repo (gaussianKernel and ShiftComposes are 'not run').",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#51",
+    "spec_ref": "docs/semantica/07-characterizations.md:198",
+    "claim": "The information is symmetric positive semidefinite (InfoIsPositive).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:145-146"
+    ],
+    "test_refs": [],
+    "evidence": "It requires exact symmetry (symmetric 0.0), which rejects the J^T J information as computed (spec-07#46). Never run in this repo.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#52",
+    "spec_ref": "docs/semantica/07-characterizations.md:199",
+    "claim": "Kernel contains a DensityPair instead of restating its laws.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:216-226",
+     "src/luthier/lib/probability.lut:265-271"
+    ],
+    "test_refs": [],
+    "evidence": "KernelOn has pair : DensityPairOn and adds only PitIsDensity and PitUniform. Its laws are 'not run' in probability.cert.json.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#53",
+    "spec_ref": "docs/semantica/07-characterizations.md:200",
+    "claim": "Uniformity is one law, UniformDraws, used by the kernel, both belief calibrations and normalVec; normalVec is declared in probability with its law and bound in probability_python.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:90-101",
+     "src/luthier/lib/probability.lut:262-263",
+     "src/luthier/lib/belief.lut:103-104",
+     "src/luthier/lib/belief.lut:215-216",
+     "src/luthier/lib/probability_python.lut:10"
+    ],
+    "test_refs": [
+     "src/luthier/lib/probability_python.lut:13",
+     "src/luthier/lib/probability_python.cert.json"
+    ],
+    "evidence": "All four uses go through UniformDraws. normalVec's NormalLength and NormalDraws pass (20 cases). The kernel and calibration uses aren't run in this repo.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#54",
+    "spec_ref": "docs/semantica/07-characterizations.md:202",
+    "claim": "BeliefFamily's same is a Setoid, and typing it fixed the asymmetric Gaussian one.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/belief.lut:36",
+     "src/luthier/lib/belief.lut:156-162"
+    ],
+    "test_refs": [
+     "src/luthier/lib/belief.cert.json"
+    ],
+    "evidence": "gaussianFamily's same uses meanGap both ways; Reflexive (100 cases) and Symmetric (34 cases) pass. discreteFamily's Setoid laws are 'not run' (no generator for U).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#55",
+    "spec_ref": "docs/semantica/07-characterizations.md:203",
+    "claim": "Codec's eq is a Setoid, so the codec's equality owes reflexivity and symmetry.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:79",
+     "src/luthier/lib/table_python.lut:15",
+     "src/luthier/checker.py:1370-1389",
+     "src/luthier/checker.py:1446-1453"
+    ],
+    "test_refs": [
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "csv's eq := sameTable never gets the Setoid obligation (its certificate lists only the 7 Codec laws). scratchpad named_component.lut: `r1 : R := { f := neg, k := 1 }` with Pos-refined f and function-form neg reports 'no laws', while `p1 : Pos := neg` fails. A lambda or a value-form name in the same place does get the obligation.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-07#56",
+    "spec_ref": "docs/semantica/07-characterizations.md:205",
+    "claim": "Project: positions.lut writes once the pair distances, their Jacobian and the layout Iso; experiment_zero reproduces session A bit for bit.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "/home/lmoffatt/Projects/sonolocalizacion/prototipo-cero/luthier/positions.lut:23-71",
+     "src/luthier/lib/algebra.lut:62-68"
+    ],
+    "test_refs": [],
+    "evidence": "Outside the audited repository. pairDistance, pairDistances, distanceJacobian and layout : Iso exist there. Bit-for-bit reproduction can't be checked from luthier.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#57",
+    "spec_ref": "docs/semantica/07-characterizations.md:212",
+    "claim": "Existential laws are open; over the finite indices the existential is a fold and is tested (GreatestOf).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:229",
+     "src/luthier/lib/algebra.lut:238"
+    ],
+    "test_refs": [
+     "src/luthier/lib/array_python.lut:64-65"
+    ],
+    "evidence": "The finite case is done and passes. The continuous case is declared open.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#58",
+    "spec_ref": "docs/semantica/07-characterizations.md:215",
+    "claim": "eigvalsSym alone is not characterized; power sums would do it; not done.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:276-286"
+    ],
+    "test_refs": [],
+    "evidence": "Matches the code: there's no power-sum law, and agreement with Jacobi stands in.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#59",
+    "spec_ref": "docs/semantica/07-characterizations.md:218",
+    "claim": "The leaves don't carry their shapes in their types; the laws quantify over shaped values instead.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:318-352",
+     "src/luthier/lib/array.lut:196-315"
+    ],
+    "test_refs": [],
+    "evidence": "Matches the code: leaf types are Mat Float64 -> ..., and the laws take (n : Dim) (x : VecOf n).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#60",
+    "spec_ref": "docs/semantica/07-characterizations.md:223",
+    "claim": "The laws of the payload of a sum an extern returns are obligations: parseTable owes the four laws of Table on what it parses.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:710-776",
+     "src/luthier/checker.py:679-680",
+     "src/luthier/generators.py:163-164"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:188-194",
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "The obligations exist, but the fallback String generator draws only from 'abcxyz', which never contains ':', so parseTable never returns just and all 100 cases pass vacuously. scratchpad vacuous_parse.lut: badParse, which returns a table of kind 'weird' for any text with ':', passes all four. The docstring at checker.py:679-680 still says sums aren't entered.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-07#61",
+    "spec_ref": "docs/semantica/07-characterizations.md:224",
+    "claim": "run --checked tests what crosses from the environment, so a parsed table's laws are checked at run time.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/machine.py:446-447",
+     "src/luthier/machine.py:489-545"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:197-207",
+     "tests/test_bridge.py:234-245"
+    ],
+    "evidence": "_check_refinements handles Subtype and Sigma, not a sum. scratchpad maybe_checked.lut: an extern Int -> Maybe Table returning a kind-'weird' table runs under --checked and prints 1; the same value as a bare Table is rejected ('does not satisfy KindsKnown'). parseTable returns Maybe Table.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-07#62",
+    "spec_ref": "docs/semantica/07-characterizations.md:225",
+    "claim": "The table format is a grammar in table.lut (WellFormed) that tables.py implements, and the codec's laws certify it (ReadsTheFormat, ReadsMutations).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:85-244"
+    ],
+    "test_refs": [
+     "src/luthier/lib/table_python.lut:17",
+     "src/luthier/lib/table_python.cert.json"
+    ],
+    "evidence": "7 Codec laws pass 200 cases each, but coverage is thin. ReadsTheFormat's domain is 'abcxyz' strings, none well-formed or parsing. ReadsMutations' i, j come from Int [0,16], so only the first 17 characters of a rendering get mutated, usually inside the header.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-07#63",
+    "spec_ref": "docs/semantica/07-characterizations.md:232",
+    "claim": "Likelihood and MeanModel carry dim : Nat and shift takes VecOf dim; DensityPairOn/KernelOn take a domain; GaussianBelief n, MaxResult n, LMState n, Maximizer over VecOf n; Ensemble and PitResolution say how statistical laws are measured.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:33-34",
+     "src/luthier/lib/probability.lut:114-119",
+     "src/luthier/lib/probability.lut:216-226",
+     "src/luthier/lib/probability.lut:251-252",
+     "src/luthier/lib/probability.lut:275-279",
+     "src/luthier/lib/belief.lut:110",
+     "src/luthier/lib/belief.lut:121-122",
+     "src/luthier/lib/optimization.lut:27"
+    ],
+    "test_refs": [],
+    "evidence": "All present as described; Ensemble's bounds are 100 <= draws and 3.0 <= zMax. Nothing in this repo instantiates them under test.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#64",
+    "spec_ref": "docs/semantica/07-characterizations.md:242",
+    "claim": "Maximizer and the objective built by negate stay pending; negate's obligation is false as stated (open).",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/optimization.lut:107-112",
+     "src/luthier/lib/belief.lut:122"
+    ],
+    "test_refs": [],
+    "evidence": "check -v lists negate as pending, which matches. But 'the Maximizer type itself stays pending' doesn't fit the code: Maximizer has no laws, so it has nothing to be pending on (spec-07#48).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#65",
+    "spec_ref": "docs/semantica/07-characterizations.md:248",
+    "claim": "Rank is defined numerically through the pseudo-inverse's threshold (open).",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:151-158"
+    ],
+    "test_refs": [],
+    "evidence": "Matches the code: retainedFloor is n eps times the largest |eigenvalue|.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#66",
+    "spec_ref": "docs/semantica/07-characterizations.md:250",
+    "claim": "Tolerances are written by hand (roundingSlack); 06 §8 makes them consequences of the rounding law (open).",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:35-37"
+    ],
+    "test_refs": [],
+    "evidence": "Matches the code: roundingSlack = 8.0, with tolOf and scaledTol built on it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-07#67",
+    "spec_ref": "docs/semantica/07-characterizations.md:163",
+    "claim": "Codec: round trip, canonical, tolerant, rejects, with eq a Setoid (l.203), as the user documentation shows it.",
+    "status": "contradicts",
+    "impl_refs": [
+     "README.md:56-60",
+     "src/luthier/lib/table.lut:79",
+     "src/luthier/lib/table.lut:244"
+    ],
+    "test_refs": [],
+    "evidence": "README shows eq : Table -> Table -> Bool, four laws and a RoundTrip that calls c.eq directly. The library has eq : Setoid Table, sameParse, and seven laws (adds ReadsTheFormat, ReadsRenderings, ReadsMutations).",
+    "severity": "low"
+   }
+  ],
+  "notes": "No, the spec is not a faithful reflection of the code yet, and there's no script that checks this: 07 is checked only by reading it against the code. Below are the main gaps for Luciano's question, with programs I ran under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/spec-07/. I modified nothing in the repo.\n\n1. §1, §2 and §8.2 (l.40-49, 58-65, 182-185) say the structural laws of the leaves are certified through instances vecSpace, euclidean and matrices in algebra_python. Those instances don't exist: 06 §8 and algebra_python.lut:7-8 removed them. So dot carries only DotAgrees and matMul only MatMulAgrees, which is the pre-rewrite state 07 says it left behind. matMul's composition law, matVec's linearity and identity's LeftIdentity are stated on no leaf. array.lut's header comments (l.11-13, 215-216, 236-238) still point at the missing instances, and the rounding-law replacement (dotRounds, totalRounds, matVecRounds) has stale certificates. §8.1 l.171 also says float64Field was moved into algebra, which contradicts §6b and the code.\n\n2. Exact symmetry (§8.2 l.187-189). StepMatrixPositive (optimization.lut:23) and InfoIsPositive (probability.lut:146) demand symmetric 0.0. symexact.lut: matMul (transpose j) j, the form gaussian and profiled use for info, isn't exactly symmetric for a 40x5 j, so a correct Fisher information would fail InfoIsPositive.\n\n3. Extern payload (§9 l.221-226). parseTable's four obligations pass vacuously: the fallback String generator only produces letters from 'abcxyz', so no input contains ':' and none parses. vacuous_parse.lut shows a parser that returns a kind-'weird' table passing all four. `run --checked` doesn't enter sums (maybe_checked.lut), so a Maybe Table from an extern isn't checked at run time either. ReadsMutations only mutates the first 17 characters of each rendering.\n\n4. A checker gap bearing on §8.5 'Codec's eq is a Setoid'. A function-form definition used as a component of a record or pair literal escapes its component type's refinement obligation. named_component.lut and named_component2.lut show it; csv's eq := sameTable is never tested as a Setoid. The root cause is in 05/checker territory and isn't isolated. Worth having the spec-05 auditor confirm it.\n\nOther partials:\n- det's multilinearity is additivity only, and DetAgrees is vacuous for n > 4.\n- eigen (A V = V diag e) isn't implemented; this is declared only indirectly.\n- Euclidean lacks the spanning law.\n- BeliefFamily and Maximizer don't carry their laws in their types.\n\nCoverage: pytest loads only array, algebra and table. The 07 laws are exercised through `test` directives and the committed lib/*.cert.json. optimization, belief and the kernel structures have no runnable test in this repo; their certification lives in sonolocalizacion.\n\n§8.3 (part) and §8.6 refer to sonolocalizacion. I only grepped them read-only and marked them low."
+ }
+}

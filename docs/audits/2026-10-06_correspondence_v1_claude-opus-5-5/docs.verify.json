@@ -1,0 +1,172 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "docs",
+   "direction": "docs",
+   "files": "README.md and examples/ (and docs/semantica/README if any)"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "acb9366e3ca7b870d",
+  "agent_label": "verify docs",
+  "started_at": "2026-10-06T11:55:30+00:00",
+  "finished_at": "2026-10-06T12:02:37+00:00",
+  "tokens": 117524,
+  "tool_calls": 49,
+  "duration_ms": 426594,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "1457dc6dd96d5ce33450cc85e4f97953b454a6446577ad24b569f73ba212bfd4"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "docs#03",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "README.md:7-21 copied verbatim to verify-docs/readme/snippet1.lut; `luthier test snippet1.lut` prints `ringZ7: passed` with 12 ok laws (343/7/49 cases, all exhaustive), exit 0. No pytest touches the README or examples/: grep for z7ring/examples/README/Z7/CommutativeRing in tests/*.py finds only an unrelated Z7 in test_kernel.py:161-175. src is identical between b15f2a1 and HEAD (git diff --stat touches only docs/)."
+   },
+   {
+    "id": "docs#04",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "On a copy (verify-docs/ex2), `luthier test z7ring.lut` prints the four README lines (26, 27, 28, 30) byte for byte, then `badRing: FAILED` with FAIL LeftInverse and FAIL RightInverse, then `imported, stale certificate: exactBool, exactInt, exactNonNegative, intRing, allOf, anyOf, largest` and `certificate: ...`; exit 1. The exit 1 comes from badRing failing (cli.py:335 `ok = ok and r.passed`), which is intended. The stale-import line is the docs#32 bug: snippet1.lut (no eqB) prints no such line. No test runs the example."
+   },
+   {
+    "id": "docs#06",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "04-kernel.md:82-85: a term of T used where { x : T | p } is expected creates an obligation. checker.py:1442-1447 returns the term with no obligation when convertible(tty, ty); convertible (1462-1476) falls through to function_passes (1491-1502), which compares base_type(want), the refinement stripped. Ran verify-docs/hole/a.lut (`PosFn : U := { f : Int -> Int | \\ (x : Int) { f x > 0 } }`, `minusOne (x : Int) : Int := 0 - 1`, `Holder = { f : PosFn, n : Int }`, `held : Holder := { f := minusOne, n := 3 }`): check -v says `0 with laws`, `luthier test` runs nothing, exit 0, `eval held.f 5` gives `-1 : Int`. Same with a lambda (b.lut) owes PosFn and fails; at top level (c.lut `top : PosFn := minusOne`) it owes and fails, thanks to checker.py:588-596. ringle.lut (eq := leZ7, a <= b) certified as CommutativeRing Z7, exit 0; the same file with `eq := \\ a b { a <= b }` lists `Setoid Z7` first and fails Symmetric with x = 0, y = 1. check -v of ringZ7 lists no Setoid Z7. table_python.cert.json: csv's laws are RoundTrip..ReadsMutations, no Reflexive/Symmetric although table.lut:79 declares eq : Setoid Table. grep Setoid in tests/ finds nothing."
+   },
+   {
+    "id": "docs#16",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-docs/vec with npmod.py: a.lut `Vec = { n : Nat, f : Fin n -> Float64 }`, `mkv : Int -> Vec := extern` returning np.array([1.,2.,3.]): `(mkv 0).n` = 3, `(mkv 0).f 2` = 3.0, `(mkv 0).f 3` rejected ('3 does not satisfy Fin (mkv 0).n', a checker error rather than the mapper's evaluator message, same effect). b.lut `mk : Int -> (Fin 3 -> Float64)`: `mk 0 1` raises 'mk() takes 1 positional argument but 2 were given'. c.lut `arr : Fin 3 -> Float64 := extern \"python:npmod.ARR\"`: `arr 1` raises \"'numpy.ndarray' object is not callable\". Arity is pi_arity of the whole chain (checker.py:838). 04-kernel.md:142-143 (call with as many arguments as parameters) and 04-kernel.md:184-186 (rule 1, v i is v[i]) give different behavior here, so medium as an ambiguity. 04-kernel.md:178-179 says VecOf n is natively Fin n -> Float64; array.lut:28 makes it { v : Vec Float64 | v.n == k } with Vec a record (06 §7). The cited bridge tests (test_bridge.py:72, 130, 157) only exercise arrays inside a record or a drawn table."
+   },
+   {
+    "id": "docs#17",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "05-static-semantics.md:217 (R9), :221 (R10), :243 (R11, decided, not implemented); README.md:73 says R1 to R8. 06-numbers.md:6-8 says it changes 04 and 05; README.md:71-74 does not mention 06, 07 or 08. README's description of 00 as 'the reading guide' does match 00-fundamental-elements.md:5."
+   },
+   {
+    "id": "docs#18",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "pyproject.toml declares `luthier = \"luthier.cli:main\"`; the installed package resolves to src/luthier (luthier.__file__). Not run. An addition: pyproject.toml has `dependencies = []` while arrays.py:12 imports numpy at top level (and lib/array_python.lut:11-20 binds luthier.arrays.*, tests/test_bridge.py:9 imports numpy), and README.md:86 runs `pytest`, which `pip install -e .` does not install (it is in the `dev` extra). 03-libraries.md:92 lists 'The Python packages a file's externs depend on are declared nowhere' as open, so low."
+   },
+   {
+    "id": "docs#22",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-docs/seed/file.lut with `test f with 100`, `test g with 10`: `luthier test file.lut --name f --n 500 --seed 1` runs only f, 500 cases (cli.py:286-293 lets --n override the directive), two runs with --no-cert give identical output; the certificate records derived seed 1636828133 and the same five sample cases both times. Tests call main([\"test\", ...]) only with --imports (test_certificates.py:45) and --exhaustive (test_kernel.py:313); --name, --n and --seed through the CLI are never exercised (seed repeat is tested via run_test at test_kernel.py:253)."
+   },
+   {
+    "id": "docs#23",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "On the copy verify-docs/ex: `luthier eval z7ring.lut \"addMod7 3 5\"` prints `1 : Z7`, exit 0; `addMod7 3 9` prints 'error: 9 does not satisfy Z7', exit 1 (cli.py:571-584). grep for 'eval' subcommand in tests/*.py finds no call to main([\"eval\", ...])."
+   },
+   {
+    "id": "docs#26",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "core.lut:12-15 (not, and, or, implies), :28 Real, :30 Rational, :40 ExtendedReal are defined but absent from README.md:94-95. Modules lexer, syntax, subst, pretty, arrays, tables, rational, text exist in src/luthier and are not in README.md:91-93. Correction to the mapper's cross-reference: the matching list in the grammar is 02-grammar.md:23-24, not :141-142 (those lines are §8 Open)."
+   },
+   {
+    "id": "docs#27",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "03-libraries.md:79-88 lists real, random, array, algebra, probability, belief, optimization, table and their _python pairs; src/luthier/lib also has rational.lut, text.lut and probability_python.lut, none mentioned anywhere in 03-libraries.md (grep empty)."
+   },
+   {
+    "id": "docs#28",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "tests/spec has accept and reject files for r1..r9; R10 is not a checker rule (05:230-231), R11 'Files: to be written with the implementation' (05:253). n1..n5 files exist and run (test_spec.py globs *.accept.lut / *.reject.lut) but tests/spec/README.md and README.md:97-98 mention only r* and k* files. Several rules have more than one file each (R2, R3, R4, R5), which the 'one ... and one' wording understates; harmless."
+   },
+   {
+    "id": "docs#32",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "certify.py:26-33 names_in collects every Var name via map_names, which (subst.py:161-166, docstring 'renaming them too is harmless') also visits bound variables; cone (certify.py:36-55) adds any name found in env.defs. verify-docs/cone: `import \"algebra\"` + `x : Int := 3` gives 'ok: 1 definitions, 7 with laws, 0 certified' and exactBool, exactInt, ... 'stale certificate: the code of its cone changed'; with `foo` instead of `x`, nothing is stale; with `eqB : Int := 3`, stale again; import alone, nothing stale. The README example's eqB (examples/z7ring.lut:19) triggers it (bound in algebra.lut:23,45). 03-libraries.md:61-62 says the cone is what the definition refers to with bound variables renamed canonically, and README.md:107-109 promises certified libraries are not rerun. The failure is conservative (stale, never wrongly certified) but the documented behavior does not happen for ordinary names like x."
+   },
+   {
+    "id": "docs#35",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-docs/fns/fns.lut with laws over f : Fin 3 -> Int, f : Float64 -> Float64, f : Int -> Int: show-cases gives ndarray (3,) tables, a mix of `\\ x { a * x + b }` and `\\ _ { c }` on Float64, constants only on Int (generators.py:218-229). Certificate domains read 'Fin 3 -> Int: drawn as its table' and 'constant functions (affine on R -> R), a thin sample' for both infinite cases (generators.py:425), using the name R that 06-numbers.md:38 removed ('`R` disappears'). test_bridge.py:157 covers only the int64 table; grep for constant/affine/thin sample in tests finds nothing. 08-tests.md:186-190 G9 decides to replace this with a census (not implemented)."
+   },
+   {
+    "id": "docs#37",
+    "verdict": "refuted",
+    "corrected_status": "not_in_repository",
+    "corrected_severity": "low",
+    "evidence": "examples/z7ring.cert.json is not tracked: `git ls-files examples` lists only z7ring.lut, and `git check-ignore -v` gives `.gitignore:4:*.cert.json`. It is a leftover of a local run on 2026-10-05 in the author's working tree, not something examples/ ships, and the README never says it does. The facts the mapper reports about it (old dict format, no fingerprint, check -v says 'certified before fingerprints were recorded') are correct but describe a local artifact. Only src/luthier/lib/*.cert.json are shipped (.gitignore exception)."
+   },
+   {
+    "id": "docs#38",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "After `luthier test z7ring.lut` on the copy, check -v: ringZ7 certified with Monoid, Group, AbelianGroup, Monoid, Ring, CommutativeRing (no Setoid Z7, by docs#06), addMod7: Z7, mulMod7: Z7, negMod7: Z7 still pending; `--name addMod7 --exhaustive` passes 49 cases. The pending closure obligations are not a spec violation (05 §7 runs members of n's object, and addMod7 is not in ringZ7's cycle); the unchecked Setoid laws of Ring's eq (algebra.lut:29, :88) contradict the example's comment 'the laws of Ring ... checked on every case'. Same root cause as docs#06."
+   },
+   {
+    "id": "docs#01",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "verify-docs/prog/nodirective.lut: no directive, `luthier test` runs sq's obligation, 100 cases, passed (cli.py:296-304). test_kernel.py:168 asserts the obligation is recorded, :183 runs it and fails a bad Codec; the no-directive CLI path is also exercised by test_certificates.py:53 (blocked.lut, no directive). Exception to the tagline: docs#06, where a named function in a record component does not carry its type's laws."
+   },
+   {
+    "id": "docs#02",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "testing.py:34 modes are exhaustive, bounded, sampled, certified; grep for 'proved' in src/luthier/*.py finds nothing. 05-static-semantics.md:283 marks proved 'not in version 0'. test_kernel.py:213 checks exhaustive mode; a negative claim like 'does not prove' has no meaningful test beyond this."
+   },
+   {
+    "id": "docs#05",
+    "verdict": "refuted",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "The description matches algebra.lut:71-94 exactly (Ring = { eq : Setoid A, add : AbelianGroup A eq, mul : Monoid A eq | LeftDistrib & RightDistrib }, CommutativeRing = { r : Ring A | Symmetric A A r.eq r.mul.op }). But the cited test is algebra.cert.json, a certificate, not a test: no pytest loads Ring or CommutativeRing (the only import of algebra in tests is test_kernel.py:520, which checks that realField is listed as assumed). The certificate is current: importing algebra alone shows no stale entries, and intRing's entry has 12 passed laws. So the status is implemented and certified, untested by the suite; the claim is structural and holds, hence low."
+   },
+   {
+    "id": "docs#07",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "Actual output on the copy: `FAIL LeftInverse Bool eqB (or, false).op (or, false).unit not   [exhaustive, 1 cases]` / `counterexample: x = true`, matching README.md:43-44. The README block mixes code and output, uses eqB undefined there (defined at examples/z7ring.lut:19), omits `badRing: FAILED` and the RightInverse failure. test_kernel.py:213 exercises the counterexample mechanism on a different fixture (badGroup, RightInverse only, LAWS at test_kernel.py:49-56), not on badRing; acceptable as a mechanism test."
+   }
+  ],
+  "notes": "All checks ran under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-docs/ (readme/, ex/, ex2/, cone/, hole/, vec/, seed/, fns/, prog/). Nothing in the repository was modified and luthier certify was never run. HEAD is 49c6a0f, but `git diff --stat b15f2a1 HEAD` touches only docs/decisions.md and a plan file, so src/ and tests/ are the b15f2a1 code. The two high findings hold up. docs#06: a named function placed in a record component whose type refines a function type owes nothing; ringLe with eq := leZ7 gets certified as CommutativeRing Z7, while the same eq written as a lambda fails Symmetric. docs#32: an importer's global that shares a bound-variable name with a library makes the library's certificates stale; this is conservative, never a false certification. Two status corrections: docs#37 is refuted because examples/z7ring.cert.json is gitignored (.gitignore:4) and untracked, so it's a local leftover and examples/ does not ship it; docs#05 cites a certificate as its test, but no pytest exercises Ring or CommutativeRing, so I changed it to implemented_untested (low, since the structural claim matches algebra.lut verbatim). One new side observation under docs#18: numpy is imported at top level by arrays.py:12 but pyproject declares no dependencies, and pytest sits in the dev extra, which the README's install line doesn't install. Spec 03 §6 already lists undeclared Python packages as open. Minor correction under docs#26: the grammar's list of core.lut names is at 02-grammar.md:23-24, not 141-142."
+ }
+}

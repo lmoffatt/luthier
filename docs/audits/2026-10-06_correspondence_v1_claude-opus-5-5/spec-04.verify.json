@@ -1,0 +1,284 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "verify",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-04",
+   "direction": "spec",
+   "files": "docs/semantica/04-kernel.md"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a65aa20dac04ab003",
+  "agent_label": "verify spec-04",
+  "started_at": "2026-10-06T12:01:44+00:00",
+  "finished_at": "2026-10-06T12:13:32+00:00",
+  "tokens": 129647,
+  "tool_calls": 72,
+  "duration_ms": 707915,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06",
+  "map_sha256": "3333a6ed633767ca6ce8b37557ecb83cde58a1c1c872dbcb2d7d10547efbf5aa"
+ },
+ "output": {
+  "verdicts": [
+   {
+    "id": "spec-04#02",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Re-ran verify-spec-04/nominal.lut (Meters and Seconds both `{ x : Float64 | x >= 0.0 }`, `asSeconds (m : Meters) : Seconds := m`): `check -v` says ok, 0 with laws, 0 pending, so no obligation and no error. nominal_laws.lut (Meters to Pos) does create a pending obligation, so law types are compared by unfolding (evaluator.py conv, delta fallback at the end of conv). Data is nominal: nominal_data.lut with two isomorphic recursive data A, B and `f (x : A) : B := x` fails 'x has type A but B was expected'. 04:29 defines 'nominal' but never says which formers are; 05-static-semantics.md:165-166 (R4) says a law subtype gets 'a name of its own'. Two readings, two behaviors. No test covers either side."
+   },
+   {
+    "id": "spec-04#06",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "checker.py:213-230 add_alias elaborates the body once with current_def = the alias and stores Def(alias=True); parser.py:198-206 only marks it. Reproduced alias_oblig.lut: `check -v` lists `a: Pos [pending]`, `luthier test` reports `a: NOT RUN`. Stronger case, verify-spec-04/alias_param.lut: `Pos : U := { x : Int | x > 0 }`, `usePos (p : Pos) : Int := p`, `a (n : Int) = usePos n`, `b : Int := a 5`. `luthier test` reports `a: FAILED ... counterexample: n = 0`. The hand-expanded program (alias_param_expanded.lut, `b : Int := usePos 5`) has 0 obligations and passes. So an alias has states, and a correct program fails its test because the alias is checked once over all n rather than expanded at the use. That is a decided rule (04:41, 05 R7) not enforced, and the implementation reports a failure the specification says does not exist, so I raised it to high."
+   },
+   {
+    "id": "spec-04#11",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/named_prod3c.lut `P3 = (a : Int) * (b : Bool) * (c : String)`, `x : P3 := (1, true, \"s\")`, `h : Int := x.a` fails 'x : P3 has no named components, so .a means nothing'; `.c` fails the same way (named_prod3b.lut). The binary form works (named_prod2.lut). Cause: parser.py:538-551 parses the right operand with parse_binop(6), which returns labeled_product (a Subtype with NoLaw), not a Sigma or Named, so the loop never collects the inner names. duplab.lut `{ a : Int, a : Bool }` is accepted and `x.a` evaluates to `true : Bool` (the last one wins silently), while dupsum.lut `< a : Int | a : Bool >` is rejected 'label a appears twice in a sum'. The cited tests (k_named_product, k_dependent_product) are binary only."
+   },
+   {
+    "id": "spec-04#12",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/named_sum.lut `S = (a : Int) + (b : Bool)` works (`f s` gives 3). named_sum3.lut with three `(l : T) +` alternatives gives a parse error 'every alternative of a named sum is written `(label : Type)`' (parser.py:552-563: the inner `(b : Bool)` sees `+` and returns a Sum, not a Named). The n-ary `< >` form and anonymous `Int + Bool + String` work. A grep of tests/ for the `(x : A) + (y : B)` syntax finds nothing: the named binary sum form in the 04:59 table has no test (k_sum and k_union use `A + B` and `< >`). I raised it to medium because the rubric puts an implemented but untested form there."
+   },
+   {
+    "id": "spec-04#13",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-04/empty_infer2.lut `g := \\ (e : Empty) { match e { } }`, `h (e : Empty) : Int := g e + 1`: `luthier check` dies with a Python traceback ending in subst.py:132 `TypeError: subst: unknown term None`. empty_infer1.lut (g alone) is accepted, and empty_check.lut (`g (e : Empty) : Int := match e { }`) works. tests/spec/k_empty_unit.accept.lut covers only checking mode. A program arguably ill-typed (nothing gives the match a type) crashes instead of failing with a type error."
+   },
+   {
+    "id": "spec-04#18",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "parser.py:411 `Lit(bytes(t.text[1:-1], \"utf-8\").decode(\"unicode_escape\"))`. verify-spec-04/strlit.lut: `luthier eval` of `s : String := \"é\"` gives `'Ã©'` and \"日本\" gives `'æ\\x97¥æ\\x9c¬'`. strlen.lut with `len : String -> Int := extern \"python:builtins.len\"` gives `len s` = 2. ASCII escapes such as \\n decode correctly. core.lut:31 says `String : U := primitive \"unicode\"` and 04:95 says String is text. No test uses a non-ASCII literal."
+   },
+   {
+    "id": "spec-04#19",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "conv (evaluator.py, Sum case) compares sums positionally and ignores labels. checker.py:125-131 is_bool and evaluator.py:232-240 as_bool decide Bool by the labels true/false. Reproduced verify-spec-04/verdict.lut: `p : Int -> Bool := alwaysWrong` (Verdict = < wrong : Unit | right : Unit >) is accepted. `eval 'p 3'` gives `wrong : Bool`, `if p 3 then 1 else 2` gives 1, `p 3 == true` gives true, `not (p 3)` gives false. Yet `three : { x : Int | p x } := 3` FAILS under `luthier test` with 'did not reduce to a Bool on (): wrong'. tests/spec/k_bool_is_sum.accept.lut asserts the structural reading (YesNo is a Bool), while test_checker_rules.py:24-37 asserts the label reading (a Verdict-valued predicate and a Verdict condition are rejected). The implementation holds both readings, and under 04:68 the law holds but the test fails."
+   },
+   {
+    "id": "spec-04#20",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "checker.py:1295-1326 flattens nested `+` and `*` BinOps without regard to parentheses (the parser keeps no paren node). Reproduced: assoc_prod.lut `p : (Int * Int) * Int := ((1, 2), 3)` is rejected '(1, 2) has type Int * Int but Int was expected'. assoc_prod4.lut `fst3 (p : (Int * Int) * Int) : Int * Int := match p { (a, b) -> a }` is rejected 'a has type Int but Int * Int was expected'. assoc_sum.lut `s : (Int + Bool) + String := left (left 3)` is rejected. The alias detour assoc_alias.lut (`AB = Int * Int`, `AB * Int`) works and gives 6. Right association itself is correct (assoc_right.lut: `Int * Int * Int` is `Int * (Int * Int)`), and grep finds no 3-operand type in tests/."
+   },
+   {
+    "id": "spec-04#21",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-04/unit_label.lut: `a : Bool := true unit`, `b : Bool := true`, `a == b` gives true, and `m : Maybe Int := nothing unit` gives `nothing`. A grep for `(true|false|nothing|unit) unit` in tests/, core.lut, lib/ and examples/ finds nothing. The bare-label injection, the core of the claim, is used throughout the tests, so I kept it at low."
+   },
+   {
+    "id": "spec-04#28",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "All accepted by `luthier check` in verify-spec-04/: match_dup.lut (`true -> 1 ; true -> 2 ; false -> 3`), match_tuple.lut and match_clauses.lut (no `(false, false)`), match_nested.lut (`zero -> 0 ; succ zero -> 1`), match_lit.lut (`0 -> 1 ; 1 -> 2` on Int, no catch-all), empty5.lut (`match n { }` on Int). At run time, `f false false`, `f (succ (succ zero))`, `f 5` and the empty match each give 'no branch of a match applies to its value'. Only top-level missing labels are caught (match_missing.lut: 'does not cover: false'), and that is all test_kernel.py:155 tests."
+   },
+   {
+    "id": "spec-04#29",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "high",
+    "evidence": "parser.py:757-761 builds PLit from the raw token: `float` only if it contains '.', so `1e3` reaches int() and crashes; strings are taken undecoded (`t.text[1:-1]`), unlike terms at parser.py:411. Reproduced: litpat2.lut (`\"zero\"` pattern on Int) is accepted and `f 3` gives 30. In strpat.lut, `f \"é\"` gives 2 and `g \"a\\nb\"` gives 2 (no match), while `h \"ab\"` gives 1. fltpat.lut `match x { 1e3 -> 1 ; _ -> 2 }` crashes with `ValueError: invalid literal for int() with base 10: '1e3'`. Integer patterns work (intpat.lut `f 1` gives 2). No literal pattern appears in tests/, lib/ or examples/; the cited test_kernel.py:96 and :107 cover constructor and label patterns only."
+   },
+   {
+    "id": "spec-04#31",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/rec1.lut `loop (n : Int) : Int := loop (n + 1)` is accepted by check. `luthier eval rec1.lut 'loop 0' --fuel 10000` gives 'error: out of fuel: the reduction did not finish'. A grep of tests/*.py for OutOfFuel or 'out of fuel' finds nothing; the only fuel mention is test_evaluators.py:73, which passes a budget."
+   },
+   {
+    "id": "spec-04#32",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "A grep of core.lut and lib/*.lut finds no `foldr`, no recursor of N or List, and no fold over a data type. The only `fold` is algebra.lut:225, a fold over Fin n indices, not over a data type. tests/spec/k_recursor.accept.lut shows that recN can be written in user code, which supports 'written with match and recursion', but 'it is the fold of the type (foldr for List)' as a library definition does not exist."
+   },
+   {
+    "id": "spec-04#37",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-04/alias_eval.py loads `a = 41`, `b : Int := a + 1` and prints b's elaborated body as `a + 1` with defs['a'].alias True: the alias name stays in checked terms. machine.py:168-201 global_value evaluates d.body with no alias case, and whnf (evaluator.py:359-380) unfolds it like any constant. Delta itself holds. The visible consequence is #06."
+   },
+   {
+    "id": "spec-04#39",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "04:64 (table) and 04:96 say arithmetic and comparisons on Int and Float64; 04:140 adds String. verify-spec-04/prim_str.lut `\"ab\" + \"cd\"` gives 'abcd'. prim_str2.lut `\"a\" < \"b\"` fails 'operator < expects Int, Float64 or Rational, got 'a' : String'. prim_str3.lut `\"a\" == \"b\"` gives false (R8 allows it). A grep finds no test of String `+` or String comparison. The specification contradicts itself, and the implementation follows neither text fully: it concatenates, which neither section mentions."
+   },
+   {
+    "id": "spec-04#41",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/fold.py elaborates with ck.infer in a context m, k : N, then calls whnf. `addN m k` stays `addN m k`, `addN m (succ k)` becomes `succ (addN m k)`, and `addN m zero` becomes `m`. Same through checker.whnf. On raw parse_term output (succ not yet a Con), nothing reduces, so the check needs elaboration. A grep of tests/ for 'folded' or a neutral-argument assertion finds none. I raised it to medium because the rubric puts an untested implemented rule there."
+   },
+   {
+    "id": "spec-04#43",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "evaluator.py:1123-1127 `evaluate` is `from .machine import normalize; return normalize(...)`. tests/test_evaluators.py:14-15 imports both and compare() (lines 69 and 73) calls evaluate and normalize, so both sides run machine.normalize. The substitution evaluator's normalizer (evaluator.nf) is never compared. The docstring at lines 1-5 claims the two evaluators agree. The test passes vacuously."
+   },
+   {
+    "id": "spec-04#44",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "The 04:154-169 table omits `let p = e in body`, unary `-x` and implicit `{A : U}`, all documented in 02-grammar.md:125-138 (§7, added 2026-10-05) and tested in test_sugar.py (lines 34, 48, 58 of the file region read). Explicit `forget` is a keyword (lexer.py:8, parser.py:435, checker.py:998) in the 02-grammar.md:88 grammar; 04:85 mentions only that it is implicit. 04 has no cross-reference to 02 §7."
+   },
+   {
+    "id": "spec-04#57",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/lam_tuple.lut: `swap : Int * Bool -> Bool * Int := \\ (x, y) { (y, x) }` gives `(true, 3)`, and `\\ (a, b, c) { a + b + c }` on (1, 2, 3) gives 6. A grep of tests/, lib/, core.lut and examples/ for a lambda with an untyped tuple parameter finds only typed multi-binders (`\\ (a b : Int)`). The implementation keeps a Lam with a PPair parameter instead of the match translation in 04:169; the behavior agrees."
+   },
+   {
+    "id": "spec-04#58",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "core.lut:27-31 declares Int, Real, Float64, Rational and String as `primitive`. 04:64 lists Int, Real, Float64, String; 04:175 lists Int, Float64, String; 04 never mentions Rational. 06-numbers.md:140 covers Rational as a core primitive, so 04 §6 and §2 are the stale parts."
+   },
+   {
+    "id": "spec-04#59",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "medium",
+    "evidence": "lib/array.lut:22 `Vec (A : U) = { n : Nat, f : Fin n -> A }` and :28 `VecOf (k : Int) : U := { v : Vec Float64 | v.n == k }`, a refined record, against 04:179 'VecOf n is natively the function type Fin n -> Float64'. 06-numbers.md:125 has the library's Vec, so 04 §6 is stale. Behavior differs: verify-spec-04/vecof.lut `v : VecOf 3 := \\ k { 1.0 }` is rejected ('cannot infer the type of \\ k { 1.0 }'). core.lut:47 Fin matches the text."
+   },
+   {
+    "id": "spec-04#60",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/rule1b.lut (record `{ a : Int, v : Fin 3 -> Float64 }` from extern vext.rec): `r.v 2` gives 30.0, `get (0 - 1)` gives 'index -1 is outside Fin 3', and `get 3` gives 'index 3 is outside Fin 3'. rule1.lut `v : Fin 3 -> Float64 := extern \"python:vext.arr3\"` is called as a function: 'arr3() takes 0 positional arguments but 1 was given'. A grep of tests/*.py for 'outside Fin' finds no test of the index range check; test_bridge.py:194 is a law about a function result. Whether a top-level extern of arrow type 'came from Python' as an array or as a function is a matter of reading."
+   },
+   {
+    "id": "spec-04#61",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "evaluator.py:781-786 fin_bound and machine.py:98-100 _is_fin match the head name `Fin` 'as written (before unfolding)'. verify-spec-04/rule2_alias.lut `Idx (k : Int) = Fin k`, `kindA : (Idx 3 -> Float64) -> String` returns 'other function': Python gets a callable, not an array. With `Fin 3`, rule2.lut gives an ndarray. Caching: rule24.lut `kindA h + kindA h` makes 3 cnt calls in total, so it works, but no test counts calls. test_bridge.py:326 exercises materialization of vectors in a list, not caching."
+   },
+   {
+    "id": "spec-04#62",
+    "verdict": "confirmed",
+    "corrected_status": "contradicts",
+    "corrected_severity": "high",
+    "evidence": "machine.py:637-650 materialize tries `np.asarray(out, dtype=float)` for anything that is not Rational or Int, and Python bools convert. verify-spec-04/rule2.lut: Fin 3 -> Float64 gives 'ndarray float64 (3,)'; Fin 2 -> Fin 3 -> Float64 gives (2, 3); Fin 3 -> String gives a list; Fin 3 -> Int gives int64. But `kindB : (Fin 3 -> Bool) -> String` on `\\ k { k == 1 }` gives 'ndarray float64 (3,) [0.0, 1.0, 0.0]', against 04:195 (non-numeric A gives a list). The cited test_bridge.py:72/77/83 test Python-to-Luthier vectors and :157 tests a generator's int64 table; none covers Luthier-to-Python for a non-numeric codomain."
+   },
+   {
+    "id": "spec-04#63",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/rule3b.lut (an extern returning a record with a length-2 array for `Fin 3 -> Float64`) gives 'an array of length 2 cannot be a value of Fin 3 -> Float64'. rule3_val.lut (closed `v : VecOf 3 := extern` returning 2 entries) is rejected at check: 'v does not satisfy VecOf 3'. rule3_fn.lut `short : (n : Nat) -> VecOf n` returning 2 entries: `luthier run` prints 2 (with 'pending 1'), and only `--checked` rejects it ('gave a value outside VecOf 3'). test_bridge.py:234-244 asserts exactly that split. 04:196-197 states the check unconditionally; 05 R5 makes it an obligation."
+   },
+   {
+    "id": "spec-04#64",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "verify-spec-04/rule24.lut `reads := h 0 + h 0 + h 1 + h 1 + h 2` with `h : Fin 3 -> Float64 := \\ k { cnt k }` makes 3 extern calls, and so does an unannotated lambda passed to a `Fin 3 ->` parameter (rule4_lam.lut). rule4_alias.lut with `h : Idx 3 -> Float64` (`Idx (k : Int) = Fin k`) makes 5 calls: no memo through an alias of Fin (machine.py:98-100 _is_fin is syntactic). A grep of tests/ for call counting or memoization finds nothing."
+   },
+   {
+    "id": "spec-04#65",
+    "verdict": "refuted",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "`==` on function values is rejected (feq.lut and feq3.lut give 'no structural equality on Fin 3 -> Float64 ... (05 R8)'), but 04:205-206 cites 05 R8, which forbids `==` on exponentials and says comparisons use the observational equality given as a parameter or component. The library provides it: lib/array.lut:351 `approxVec` is declared with law ApproxVecPointwise (array.lut:208-209: `av tol x y == forallBelow x.n (\\ k { approx tol (x.f k) (y.f k) })`), extern in array_python.lut:40, certified passed (array_python.cert.json entry approxVec, n=100). verify-spec-04/feq_lib.lut compares an array from Python with a lambda: `approxVec 0.0 (3, r.v) (3, \\ k {...})` gives true on equal entries and false on different ones. The claim holds under the R8 reading. What's left is wording: 04 does not name approxVec or say that `==` is not the comparison."
+   },
+   {
+    "id": "spec-04#66",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_untested",
+    "corrected_severity": "medium",
+    "evidence": "lib/algebra.lut:222-232 sumTo is `foldWith Float64 (\\ (a b : Float64) { a + b }) 0.0 n f` with foldWithFrom right-nested (`op (f lo) (rest)`). verify-spec-04/sumto.lut over [1.0, 1e16, -1e16] gives 1.0, the right-associated result. It uses foldWith (no monoid, no laws), not `fold` over a Monoid as 04:209-210 says (Float64 addition is not associative, so it could not be a Monoid with exact eq). A grep of tests/ for sumTo finds nothing. rational.lut's sumToRounds law bounds the error but does not pin the order. I raised it to medium per the rubric, since 04:211-213 makes the order load-bearing."
+   },
+   {
+    "id": "spec-04#67",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "low",
+    "evidence": "lib/array.lut:196 `AddPointwise (ad : Vec Float64 -> Vec Float64 -> Vec Float64) (n : Dim) (x y : VecOf n) : Bool := approxVec 0.0 (ad x y) (addDef x y)` is the law 04:220 calls `AddAgrees (ad : Vec -> Vec -> Vec)`. Vec takes a parameter in the library (array.lut:22). Other leaves use `...Agrees` (DotAgrees :217, MatVecAgrees :241, TraceAgrees :252, DetAgrees :264, and others). Naming drift only."
+   },
+   {
+    "id": "spec-04#68",
+    "verdict": "confirmed",
+    "corrected_status": "partial",
+    "corrected_severity": "medium",
+    "evidence": "Ran `python -m pytest -p no:cacheprovider --basetemp=<scratch>` on tests/test_spec.py, test_kernel.py, test_sugar.py and test_checker_rules.py: 94 passed. So the 'tests pass' half of 04:228-230 holds. The 'every former and term ... implemented' half is overstated, by the defects confirmed here: #06 alias states, #11 chained named products, #19 Bool by label, #20 left-nested products and sums, #28 match repetition and nested coverage, #29 literal patterns, #61 and #64 Fin through aliases, #62 Bool arrays."
+   },
+   {
+    "id": "spec-04#69",
+    "verdict": "confirmed",
+    "corrected_status": "not_implemented_declared",
+    "corrected_severity": "low",
+    "evidence": "verify-spec-04/quote.lut `q := '{ 1 + 2 }` gives a parse error. union_arg.lut `List < a : Int | b : Bool >` gives a parse error, while union_arg2.lut `List (< ... >)` parses. block.lut `y : Int := { x := 3 ; x + 1 }` gives a parse error. I refute the mapper's remark that the status line is stale: 02-grammar.md:145 (§8 Open) defines 'Local definitions in a block' as `{ x := t ; u }`, a different form from `let p = e in body` (02 §7), and it is still unimplemented. The declared status is accurate. The only defect is that 04:232 does not show the block syntax it means."
+   },
+   {
+    "id": "spec-04#01",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "conv (evaluator.py:1132-1197) strips NoLaw subtypes (the record labels), compares Sum positionally, and alpha-renames Pi, Sigma and Lam binders. tests/spec/r4_product_inline.accept.lut (`asPair`: record to Float64 * Float64) and k_named_product.accept.lut exercise label-insensitivity for products, and k_bool_is_sum for sums. verify-spec-04/alpha.lut (`(x : Int) -> Fin (x + 1)` against `(y : Int) -> Fin (y + 1)`) is accepted with no extra obligation; Pi alpha has no dedicated test. The Bool exception to label-insensitivity is #19."
+   },
+   {
+    "id": "spec-04#03",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "tests/test_kernel.py:137-145 test_order_in_the_file_does_not_matter uses `b : Int := a + 1` before `a : Int := 41` and mutual recursion isEven/isOdd, asserting 42 and true. It is part of the 94 passing tests."
+   },
+   {
+    "id": "spec-04#04",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "tests/spec/r1_declaration.accept.lut declares Codec and csvLike with no body. tests/test_bridge.py:208-212 (`k : Int` used in a law) asserts the outcome 'not run' with k named, so the hole does not reduce. test_kernel.py:296 fills a declared `f : Int -> Int` from another file."
+   },
+   {
+    "id": "spec-04#05",
+    "verdict": "confirmed",
+    "corrected_status": "implemented_tested",
+    "corrected_severity": "low",
+    "evidence": "test_kernel.py:296-304 covers a cross-file fill and its disagreement ('declared with type'). tests/spec/r6_predicate_body.accept.lut (`Even : Int`, `Even := ...`) and r2_definition.accept.lut (`Codec := RoundTrip`) cover same-file fills. verify-spec-04/fill_bad.lut gives 'n was declared with type Int, but is defined with Bool', fill_twice.lut gives 'n is defined twice', and fill_same.lut (with an annotated lambda) evaluates m to 4. The mapper's fill_same with an unannotated `\\ x` fails 'cannot infer'. Aside: `k := 5` with no earlier declaration is also accepted (undeclared.lut), a form 04:40 does not list."
+   }
+  ],
+  "notes": "I wrote all programs to /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/verify-spec-04/ (written verify-spec-04/ above), with a Python extern module vext.py there and PYTHONPATH set to that directory. The working tree is at 49c6a0f, but `git diff --stat b15f2a1 HEAD` is empty for src, tests, docs/semantica, examples and README.md, so the audited commit and the checked-out code agree. I did not modify the repository. pytest ran with -p no:cacheprovider and --basetemp in the scratchpad, and `luthier test` wrote its .cert.json files next to the scratch programs only.\n\nChanges to the mapper's findings:\n- #06 alias goes from medium to high. A parameterized alias used only at a valid argument (`a (n : Int) = usePos n`, `b := a 5`) fails `luthier test` with counterexample n = 0, while the hand-expanded program has no obligation.\n- #12, #41 and #66 go to medium under the rubric (implemented but untested): the named binary sum syntax, the stays-folded rule, and the right-associated order of sumTo.\n- #65 is refuted. The library's approxVec, characterized pointwise by ApproxVecPointwise and certified, compares an array and a lambda point by point, which is the 05 R8 reading the sentence cites. Only the wording is loose.\n- #69 keeps its status but drops the \"stale\" remark. 02-grammar.md:145 defines \"local definitions in a block\" as `{ x := t ; u }`, which is still unimplemented, and `let` is a different form.\n- #05: the mapper's fill_same.lut does not reproduce as written, since an unannotated lambda fails to infer. With an annotation it gives 4.\n\nAll other entries were reproduced as the mapper described. The high-severity defects I confirmed:\n- #06: an alias carries states.\n- #18: non-ASCII string literals are mangled.\n- #19: Bool is decided both by label and by structure.\n- #20: left-nested products and sums cannot be written.\n- #28: match repetition is not checked, nor coverage below the top level.\n- #29: literal patterns are not type-checked, are not decoded like term literals, and `1e3` crashes the parser.\n- #62: a `Fin n -> Bool` lambda reaches Python as a float64 array.\n\nThe vacuous evaluator-agreement test (#43) is worth flagging separately. tests/test_evaluators.py compares machine.normalize with itself, because evaluator.evaluate is machine.normalize."
+ }
+}

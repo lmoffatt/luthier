@@ -1,0 +1,743 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "impl-front",
+   "direction": "impl",
+   "files": "src/luthier/lexer.py, parser.py, syntax.py, pretty.py, api.py, and src/luthier/core.lut"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "a5463da165b520ad9",
+  "agent_label": "map impl-front",
+  "started_at": "2026-10-06T11:45:32+00:00",
+  "finished_at": "2026-10-06T12:08:08+00:00",
+  "tokens": 270082,
+  "tool_calls": 86,
+  "duration_ms": 1355998,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "src/luthier/lexer.py (all 61 lines)",
+   "src/luthier/parser.py (all 800 lines)",
+   "src/luthier/syntax.py (all 327 lines; AST nodes, mostly internal)",
+   "src/luthier/pretty.py (all 192 lines)",
+   "src/luthier/api.py (all 226 lines)",
+   "src/luthier/core.lut (all 47 lines)",
+   "spec read against them: docs/semantica/02-grammar.md sections 1-8; 04-kernel.md sections 0-7; 05-static-semantics.md sections 0-7 (R1-R11), 9, 10; 06-numbers.md sections 2, 5, 6, 8; 03-libraries.md sections 2-4; 08-tests.md sections 0, 1, 3, 12, 13; 00-fundamental-elements.md sections 3-4",
+   "documentation: README.md (syntax, core.lut list, CLI lines 78-86) and a copy of examples/z7ring.lut (checks and evaluates as documented)",
+   "tests mapped: tests/spec/*.lut via tests/test_spec.py, tests/test_kernel.py, test_sugar.py, test_bridge.py, test_checker_rules.py, test_certificates.py, test_evaluators.py"
+  ],
+  "behaviors": [
+   {
+    "id": "LAY-1",
+    "impl_ref": "src/luthier/parser.py:39",
+    "behavior": "A closing ), ], >, or the } of a lambda, match or data, placed at column 0 on its own line is a parse error; it works only when indented. Record braces are the exception (parser.py:612, 655).",
+    "spec_ref": "02-grammar.md:26-28 (inside ( ), [ ], < > and the braces of match and of a lambda, line breaks are ignored)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Each bracket parser decrements skip_newlines before expect(close): parser.py:495-496 (lambda), 725-726 (match), 685-687 (union), 702-703 (list), 579-580 (paren), 327-328 (data); _skippable_newline (39-51) then skips the newline only if the next token has col > 0. Program `f : Int -> Int := \\ x {\\n  x + 1\\n}` gives `parse error: line 2, col 7: expected '}', got '\\n'`; with the brace indented it evaluates `f 2` to 3. Same failure for `(1 +\\n2\\n)`, `[1,\\n2\\n]`, `match b {...\\n}`, `data {...\\n}`, `S = <\\n  a : Int\\n  | b : Bool\\n>`. Probe files: scratchpad/audit/impl-front/close_col0_*.lut.",
+    "severity": "high"
+   },
+   {
+    "id": "LAY-3",
+    "impl_ref": "src/luthier/parser.py:608",
+    "behavior": "A line break never separates the fields of a record value: the value is parsed with newlines skipped, so the next field name becomes an argument of the previous value.",
+    "spec_ref": "02-grammar.md:81 and 02-grammar.md:91 (sep ::= \",\" | \";\" | line break)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "parser.py:608 sets skip_newlines = saved + 1 before parse_term, so `1` then `b` parse as application; the branch `if self.at(\"name\"): continue` at parser.py:619 is unreachable. `P = { a : Int, b : Int }\\np : P := { a := 1\\n          b := 2 }` gives `parse error: line 3, col 12: expected another field or '}' in a record literal (at ':=')`; with a comma it evaluates `p.b` to 2. Record types do accept the line break (parser.py:632-648).",
+    "severity": "high"
+   },
+   {
+    "id": "GRAM-2",
+    "impl_ref": "src/luthier/parser.py:233",
+    "behavior": "Clauses are accepted only when the header has no := body; a body plus clauses is rejected ('definition has both a body and clauses'); clauses need parameters ('clauses need parameters in the header') and one pattern per parameter ('clause has N patterns but the header has M parameters', with no position).",
+    "spec_ref": "02-grammar.md:36 (definition ::= name { binder } [ \":\" term ] \":=\" body { clause })",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py:96-104"
+    ],
+    "evidence": "parser.py:246-251 and 287-288. The grammar requires ':=' body before clauses; the parser requires its absence. `dbl (n : N) : N := zero\\n  | zero := zero ...` gives `parse error: line 6, col 0: definition has both a body and clauses (at '')` (reported at end of file); `dbl (n : N) : N\\n  | zero := zero\\n  | succ k := succ (succ (dbl k))`, which the grammar does not derive, evaluates `dbl (succ zero)` to `succ (succ zero)`. The test uses the body-less form.",
+    "severity": "high"
+   },
+   {
+    "id": "GRAM-4",
+    "impl_ref": "src/luthier/parser.py:628",
+    "behavior": "A subtype whose binder is a pattern, `{ (a, b) : Int * Int | a < b }`, is a parse error: only names are accepted before ':' in braces.",
+    "spec_ref": "02-grammar.md:80 (\"{\" pattern \":\" term \"|\" term \"}\" -- subtype)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "parse_brace starts with self.expect(\"name\") (parser.py:628). `Ord2 : U := { (a, b) : Int * Int | a < b }` gives `parse error: line 1, col 14: expected 'name', got '('`. The labeled form `{ a b : Int | a < b }` is the only way to bind several components.",
+    "severity": "high"
+   },
+   {
+    "id": "GRAM-5",
+    "impl_ref": "src/luthier/parser.py:579",
+    "behavior": "Explicit parentheses are not kept in the syntax tree, so the checker flattens `(A * B) * C` to `A * (B * C)` and `(A + B) + C` to `A + (B + C)`; a left-nested product or sum type cannot be written with * or +. Arithmetic stays left-associative.",
+    "spec_ref": "04-kernel.md:74-76 (A * B * C is A * (B * C)); 02-grammar.md:62 (& and -> to the right, the others to the left)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "parser.py:579-581 returns the inner term; checker.py:1299-1305 and 1315-1321 flatten every nested BinOp '+' or '*'. `t : (Int * Bool) * String := ((1, true), \"a\")` gives `type error: in t: (1, true) has type Int * Bool but Int was expected`; `S = (Int + Bool) + String` then `s : S := left (left 3)` is rejected. Through an alias it works: `AB = Int * Bool`, `t : AB * String := ((1, true), \"a\")` evaluates. `24 / 4 / 2` is 3 (left). The two spec lines also disagree on * and + over types.",
+    "severity": "high"
+   },
+   {
+    "id": "GRAM-6",
+    "impl_ref": "src/luthier/parser.py:354",
+    "behavior": "Inside `< ... >`, a '>' always closes the union, even inside a nested subtype or parentheses, so an alternative whose type contains a '>' comparison cannot be written.",
+    "spec_ref": "02-grammar.md:82 (\"<\" name \":\" term { \"|\" name \":\" term } \">\")",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "_at_op refuses '>' and '|' while in_angle > 0 (parser.py:354); parse_paren resets no_brace but not in_angle (515), parse_brace resets neither (598-602). `T = < pos : { x : Int | x > 0 } | zero : Unit >` gives `parse error: line 1, col 26: expected '}', got '>'`; with `(x > 0)` it gives `expected ')', got '>'`; `0 < x` works.",
+    "severity": "high"
+   },
+   {
+    "id": "GRAM-9",
+    "impl_ref": "src/luthier/parser.py:149",
+    "behavior": "`operator op := f` accepts any symbol or keyword and `mod` (not `and`/`or`). `==`, `<`, `mod` then take effect, so `operator ==` gives == to a type that holds a function; `operator &`, `operator if`, `operator (` are accepted and do nothing.",
+    "spec_ref": "02-grammar.md:47 (`op` is never defined); 02-grammar.md:65 (gives +, -, *, / a meaning); 05-static-semantics.md:210-214 (R8)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py:388-401"
+    ],
+    "evidence": "parser.py:149 only rejects tokens that are neither symbol nor keyword. With `P = { a : Int, f : Int -> Int }`, p and q of type P, `luthier eval f.lut \"p == q\"` gives `error: no structural equality on (a : Int) * (Int -> Int) ... (05 R8)`; adding `eqP (u v : P) : Bool := u.a == v.a` and `operator == := eqP` makes it `false : Bool`. `operator & := f`, `operator if := f`, `operator ( := f` all pass `luthier check`; `p & q` still says `left side of '&' is not a law`. The test covers + and * only.",
+    "severity": "high"
+   },
+   {
+    "id": "LEX-4",
+    "impl_ref": "src/luthier/parser.py:408",
+    "behavior": "A float literal beyond the doubles becomes infinity and is accepted as a value of Float64 (`1e400` is `inf : Float64`); a literal below the smallest double silently becomes 0.0.",
+    "spec_ref": "06-numbers.md:47-48 (infinities and NaN are not values of Float64); 08-tests.md:162; core.lut:21-22",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "Lit(float(t.text)) with no range check. `big : Float64 := 1e400` passes `luthier check` and `luthier eval f.lut \"big\"` prints `inf : Float64`; `1e400 - 1e400` then fails with `NaN in inf - inf`; `1e-400` prints `0.0 : Float64`. tests/test_kernel.py:504 covers overflow from arithmetic only.",
+    "severity": "high"
+   },
+   {
+    "id": "LEX-5",
+    "impl_ref": "src/luthier/parser.py:411",
+    "behavior": "A string literal in a term is decoded with Python's unicode_escape over its UTF-8 bytes, which corrupts non-ASCII text and processes backslash escapes; a string literal in a pattern is taken raw (parser.py:761). A pattern never matches the same literal written as a term when it has a non-ASCII character or an escape.",
+    "spec_ref": "06-numbers.md:38 (String : U := primitive \"unicode\"); 02-grammar.md:15 (string, escapes unspecified); 02-grammar.md:94 (patom string)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "`s : String := \"café\"` evaluates to `'cafÃ©' : String`; `len : String -> Int := extern \"python:builtins.len\"` gives `len \"café\"` = 5. `k (s : String) : Int := match s { \"café\" -> 1 ; _ -> 0 }` gives `k \"café\"` = 0, and with `\"a\\nb\"` also 0, while `\"abc\"` gives 1. Same through luthier.load(...).eval. lib/table.lut:98,134 relies on escapes in terms.",
+    "severity": "high"
+   },
+   {
+    "id": "API-3",
+    "impl_ref": "src/luthier/api.py:76",
+    "behavior": "Program.fill does not apply R5 or R2 to the hole's type: it fills a type hole (`Session : U`) with a Python object, and a hole over a type that is only declared.",
+    "spec_ref": "05-static-semantics.md:173-178 (R5: an extern gives a value, never a type; R2 applies to externs); 05-static-semantics.md:150-154 (R2)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "api.py:80-94 checks only 'is a hole' and arity. `Session : U` loaded, `P.fill(\"Session\", list)` succeeds and the body becomes `Extern(target='fill:Session', type=U)`; `P.eval(\"Session\")` then fails `cannot marshal Python value [] into Luthier type U`. `Signal : U\\nduration : Signal -> Int`, then `P.fill(\"duration\", len)` is accepted, while the same body in a file, tests/spec/r5_extern_over_declared.reject.lut, is rejected with 'Signal is used as a type but is only declared'. Probe: scratchpad/audit/impl-front/api_probe.py.",
+    "severity": "high"
+   },
+   {
+    "id": "API-4",
+    "impl_ref": "src/luthier/api.py:95",
+    "behavior": "Program.fill adds an obligation only when the hole's type is itself a subtype. A refined codomain, a record component or an array entry owes nothing, so a wrong Python filling cannot fail `test`.",
+    "spec_ref": "05-static-semantics.md:179-187 (every refinement in the type of an extern is an obligation: codomain of each arrow, each component, each entry)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py:419-433"
+    ],
+    "evidence": "api.py:95-101 calls subtype_obligation only if whnf(type) is a Subtype. `NonNeg : U := { x : Float64 | x >= 0.0 }\\nneg : Float64 -> NonNeg`, `P.fill(\"neg\", lambda x: -1.0)`: P.obligations() is [], P.eval(\"neg 2.0\") returns -1.0, P.test(\"neg\") reports 'neg: no laws'. The same type with `:= extern \"python:operator.neg\"` in the file gives P.obligations() == ['neg']. The test covers a top-level subtype (Sqrt) only.",
+    "severity": "high"
+   },
+   {
+    "id": "CORE-2",
+    "impl_ref": "src/luthier/core.lut:10",
+    "behavior": "Bool is the alias `< true : Unit | false : Unit >`. A sum of two units with other labels converts to Bool, but `if` and laws require the labels true and false. A converted value prints with its own label (`yes : Bool`).",
+    "spec_ref": "04-kernel.md:27-28 and 68-73 (labels are binders, not part of the type's identity); 05-static-semantics.md:21",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/spec/k_bool_is_sum.accept.lut",
+     "tests/test_checker_rules.py:359-377"
+    ],
+    "evidence": "checker.py:125-131 (is_bool by labels), 1926-1931, 1009. `YesNo = < yes : Unit | no : Unit >\\ny : YesNo := yes\\nb : Bool := y` evaluates `b` to `yes : Bool`; `x : Int := if y then 1 else 2` gives `true is a label of Bool, and the value matched is of type < yes : Unit | no : Unit >: the condition of an if ... need a Bool`; `L (x : Int) : YesNo := yes`, `t : { x : Int | L x } := 3` gives `must be Bool-valued or a law`. The label rule was decided in docs/plan-2026-10-05.md:384 and never written into 04 or 05; test_checker_rules.py cites '(04)' for it.",
+    "severity": "high"
+   },
+   {
+    "id": "GRAM-1",
+    "impl_ref": "src/luthier/parser.py:325",
+    "behavior": "Between the constructors of a data and between the branches of a match, ';' is required except after the last. Without it the next constructor or pattern is parsed as an argument.",
+    "spec_ref": "02-grammar.md:39 and 02-grammar.md:85 (`[ \";\" ]`), with 02-grammar.md:27 (line breaks ignored inside match braces)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "parser.py:320-326 and 718-724. `f (b : Bool) : Int := match b {\\n  true -> 1\\n  false -> 0 }` gives `type error: in f: 1 : Int is not a function, cannot apply it to false`; `T : U := data { leaf : T node : T -> T -> T }` gives `expected 'name', got ':'`. A trailing ';' is accepted. The EBNF admits a derivation where ';' is optional, but the greedy application the precedence table implies does not, so the grammar is ambiguous on this point.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-3",
+    "impl_ref": "src/luthier/parser.py:272",
+    "behavior": "Implicit parameters `{A : U}` count as positions of the clause tuple, so every clause must write a pattern for them.",
+    "spec_ref": "02-grammar.md:51 (clauses are a match on the tuple of the parameters); 02-grammar.md:133-140 (implicit parameters)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "clauses_to_match collects names from all binders, implicit included. `len {A : U} (l : List A) : Int\\n  | nil := 0\\n  | cons x xs := 1 + len xs` gives `parse error: clause has 1 patterns but the header has 2 parameters`; it must be written `| _, nil := 0`. The spec does not say whether implicit parameters are in the tuple.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-7",
+    "impl_ref": "src/luthier/parser.py:538",
+    "behavior": "Named products and sums written with * or + work with two positions only. With three, `(a : A) + (b : B) + (c : C)` is rejected with a wrong message, and `(a : A) * (b : B) * (c : C)` is accepted but loses its labels.",
+    "spec_ref": "02-grammar.md:76-77 (two positions shown); 04-kernel.md:58-59",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/spec/k_named_product.accept.lut"
+    ],
+    "evidence": "parser.py:552-563: the right operand parse_binop(6) already returns a Sum or labeled product, not a Named. `S = (a : Int) + (b : Bool) + (c : String)` gives `every alternative of a named sum is written (label : Type)` (they all are). `P = (a : Int) * (b : Bool) * (c : String)` checks, but `p.a` gives `p : P has no named components` and `{ a := 1, b := true, c := \"s\" }` is rejected. Two positions work for both. No test covers the + form.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-8",
+    "impl_ref": "src/luthier/parser.py:781",
+    "behavior": "A one-component labeled product `{ a : Int }` is built in the same form as a refinement, so it has no named component: projection, record literal and Program.record all fail.",
+    "spec_ref": "02-grammar.md:78 (labeled product with one or more groups); 05-static-semantics.md:38-39 (labeled base); 02-grammar.md:117-118 (a refinement has the components of its base)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "labeled_product returns Subtype(PVar(n), t, NoLaw()) for one component (parser.py:781-783); checker.py:1107 walks through any subtype whose pattern is a single variable. `P = { a : Int }\\np : P := 3` gives `p.a`: `p : P has no named components, so .a means nothing`; `p : P := { a := 3 }`: `a record literal needs a type with named components, not P`; luthier.load(...).record(\"one\") raises KeyError. The spec is ambiguous between the two readings.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-11",
+    "impl_ref": "src/luthier/parser.py:758",
+    "behavior": "Some number tokens the lexer accepts crash the parser with a Python traceback: a pattern `1e3` (int() on an exponent), and a test count or size that is not an integer (`with 1.5`, `with 1e2`). A negative literal pattern `-1` is a parse error.",
+    "spec_ref": "02-grammar.md:14 (number includes decimals and exponents); 02-grammar.md:45 (\"with\" number); 02-grammar.md:94 (patom number)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "parser.py:758 `PLit(float(t.text) if \".\" in t.text else int(t.text))`; parser.py:126 and 132 `int(...)`. `k (x : Float64) : Int := match x { 1e3 -> 1 ; _ -> 0 }` makes `luthier check` print `Traceback ... ValueError: invalid literal for int() with base 10: '1e3'` (`1.0e3` works). `test sq with 1.5` gives `ValueError: invalid literal for int() with base 10: '1.5'`. The loader catches only ParseError and LexError (cli.py:85-88).",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-10",
+    "impl_ref": "src/luthier/parser.py:120",
+    "behavior": "`test name [with n | exhaustive] [size k]` in that order; 100 cases when `with` is absent; `as`-style contextual word `size`. The richer directive of 08 (sampled, under, where, profile) is not parsed.",
+    "spec_ref": "02-grammar.md:45; 08-tests.md:340-343 and 354-365 (new grammar and removal of gen: decided, listed as order of work, not implemented)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_certificates.py:32",
+     "tests/test_certificates.py:64",
+     "tests/test_certificates.py:76"
+    ],
+    "evidence": "Default n=100 at parser.py:123 and syntax.py:282 is not stated anywhere in the spec. `test sq size 3 with 10` gives `unexpected 'with' at end of definition`; `test sq with 10 sampled linear` gives `unexpected 'sampled'`; `profile tape := {...}` gives `unexpected 'tape'` (08 status: decided, pending). `test sq with 5 size 3` checks; no test exercises `size`.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-30",
+    "impl_ref": "src/luthier/parser.py:797",
+    "behavior": "parse_term stops after the first complete term and ignores the rest, so `luthier eval` and Program.eval/term silently drop trailing tokens.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "parse_term never checks for eof; used by cli.py:576 and api.py:131. `luthier eval api_eval.lut \"1 + 2 ) junk\"` prints `3 : Int`; P.eval(\"a ]\") returns 3.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-20",
+    "impl_ref": "src/luthier/parser.py:458",
+    "behavior": "Lambda `\\ p1 p2 { t }` with parameters a name, `(x y : T)` or a tuple pattern `(p, q)`; zero parameters are accepted (`\\ { 3 }` is 3); `_` as a lambda parameter is an ordinary variable the body can use.",
+    "spec_ref": "02-grammar.md:84 and 92; 04-kernel.md:169 (tuple parameter translation)",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_recursor.accept.lut",
+     "tests/spec/r6_predicate_body.accept.lut",
+     "tests/test_kernel.py:207"
+    ],
+    "evidence": "`f : Int * Int * Int -> Int := \\ (x, y, z) { x - y - z }` gives `f (9, 2, 3)` = 4; `luthier eval f.lut \"\\ { 3 }\"` prints `3 : Int` though the grammar needs one lparam; `f : Int -> Int := \\ _ { _ }` gives `f 7` = 7 while `match x { _ -> _ }` is `unbound name _`. No test or library uses the tuple-pattern parameter.",
+    "severity": "medium"
+   },
+   {
+    "id": "GRAM-22",
+    "impl_ref": "src/luthier/parser.py:435",
+    "behavior": "`forget atom` gives the base value of a subtype; on a non-subtype it is an error.",
+    "spec_ref": "02-grammar.md:88",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "`Pos : U := { x : Int | x > 0 }\\np : Pos := 3\\nq : Int := forget p + 1` gives q = 4; `forget 3` gives `forget applied to 3 : Int, which is not a subtype`. No test and no library uses forget.",
+    "severity": "medium"
+   },
+   {
+    "id": "API-6",
+    "impl_ref": "src/luthier/api.py:91",
+    "behavior": "A hole filled from Python is an extern whose fingerprint is the constant \"filled\", so refilling it with another function keeps it certified in the session; across sessions certificates are compared at load, before any fill, so a Python-filled hole is never accepted from its certificate.",
+    "spec_ref": "05-static-semantics.md:320-326 (the hash covers the Python behind every extern; the comparison happens once holes are filled; one entry per filling); 03-libraries.md:241-244",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "certify.py:246 maps non-python targets to \"filled\"; api.py:120-126 only removes entries. Probe api_refill.lut (root : Sqrt): fill math.sqrt, test passes; fill `lambda x: 0.0`: definition_hash unchanged, 'root' still in checker.certified, loader.stale == []. New session: load, fill math.sqrt, 'root' not certified and test(deep=False) reruns.",
+    "severity": "medium"
+   },
+   {
+    "id": "API-7",
+    "impl_ref": "src/luthier/api.py:135",
+    "behavior": "Program.eval types the term silently, still checks closed coercions, and raises HoleBlocked when the term needs a hole without a value (the docstring says a stuck term comes back).",
+    "spec_ref": "05-static-semantics.md:308-310 (run and eval require every name in the cone to be defined)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:430",
+     "tests/test_kernel.py:463-475"
+    ],
+    "evidence": "`h : Int\\ng (x : Int) : Int := x + h`: P.eval(\"g 1\") raises `HoleBlocked: depends on h without a value`, as does `luthier eval ... \"g 1\"`. `use (x : Pos)`: P.eval(\"use 0\") raises `TypeCheckError: 0 does not satisfy Pos`. No test covers an eval blocked by a hole.",
+    "severity": "medium"
+   },
+   {
+    "id": "API-8",
+    "impl_ref": "src/luthier/api.py:143",
+    "behavior": "Program.call converts each Python argument by the base of its parameter's declared type and does not check its refinement. Too many arguments raise 'takes fewer than N arguments'.",
+    "spec_ref": "06-numbers.md:103 (a value is checked against its declared type when it crosses)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "`Pos : U := { x : Int | x > 0 }\\nuse (x : Pos) : Int := x * 10`: P.call(\"use\", -3) returns -30 and `idx (k : Small)` with Small = 0..2 gives P.call(\"idx\", 7) = 7, while P.eval(\"use 0\") raises `0 does not satisfy Pos`. P.call(\"g\", 1, 2) raises `EvalError: g takes fewer than 2 arguments`. call has no test.",
+    "severity": "medium"
+   },
+   {
+    "id": "API-2",
+    "impl_ref": "src/luthier/api.py:64",
+    "behavior": "The rest of the Python API: holes() lists bodiless non-core definitions, type holes only with include_types; definitions(), obligations() (top files first), blocked_by() (holes in the cone, type parameters), record() (dataclass of a type with named components, KeyError otherwise), test_all(), term(), resolve() (KeyError 'no definition').",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py:428",
+     "tests/test_kernel.py:464"
+    ],
+    "evidence": "Probes: holes() == [] and holes(include_types=True) == ['Session']; blocked_by(\"a\") == {'holes': ['k'], 'types': []}; record(\"Pt\")(1.0, 2.0) == Pt(x=1.0, y=2.0); record(\"Q\") on Float64 * Float64 raises KeyError 'Q has no named components'. Only holes() and the dataclass crossing are tested; definitions, obligations, blocked_by, record, test_all and term have no test.",
+    "severity": "medium"
+   },
+   {
+    "id": "CORE-6",
+    "impl_ref": "src/luthier/core.lut:36",
+    "behavior": "List constructors take the element type as an explicit first argument (`cons Int 1 (nil Int)`); the implicit-parameter inference does not apply to them. A list literal without an expected type is rejected with a message that says a first element would do.",
+    "spec_ref": "04-kernel.md:161 (`[a, b, c]` is `cons a (cons b (cons c nil))`, element type from the expected type)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_sugar.py:109",
+     "tests/test_bridge.py:332"
+    ],
+    "evidence": "`xs : List Int := cons 1 nil` gives `type error: in xs: 1 has type Int but U was expected`; `cons Int 1 (nil Int)` works and is how literals print. `luthier eval f.lut \"[1, 2]\"` gives `error: a list literal needs an expected type or a first element`, though it has a first element.",
+    "severity": "medium"
+   },
+   {
+    "id": "CORE-7",
+    "impl_ref": "src/luthier/core.lut:40",
+    "behavior": "ExtendedReal = < finite : Float64 | negInf : Unit | posInf : Unit >.",
+    "spec_ref": "06-numbers.md:115-118",
+    "status": "covered",
+    "test_refs": [],
+    "evidence": "`e : ExtendedReal := negInf` evaluates to `negInf : ExtendedReal`. No test and no library under src/luthier/lib uses it.",
+    "severity": "medium"
+   },
+   {
+    "id": "LEX-1",
+    "impl_ref": "src/luthier/lexer.py:18",
+    "behavior": "A name may start with '_', may end in '#digits' (x#1 is a name distinct from x), '_' alone is a name token, and only ASCII letters are allowed.",
+    "spec_ref": "02-grammar.md:13 (name ::= letter { letter | digit | \"_\" | \"'\" } ...)",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "`_hidden : Int := 3\\nx#2 : Int := _hidden + 1` evaluates `x#2` to 4; `x#1 : Int := 1\\nx : Int := 2` evaluates `x#1 + x` to 3. The '#digits' suffix is used nowhere else in src. `π : Float64 := 3.14` gives `unexpected character 'π'`.",
+    "severity": "low"
+   },
+   {
+    "id": "LEX-2",
+    "impl_ref": "src/luthier/lexer.py:8",
+    "behavior": "`let`, `in`, `primitive` and `axiom` are reserved, though 02 §1 does not list them; `as` and `size` are contextual and usable as names.",
+    "spec_ref": "02-grammar.md:21-22",
+    "status": "covered_differently",
+    "test_refs": [],
+    "evidence": "`in : Int := 3` gives `parse error: line 1, col 0: expected 'name', got 'in'`; same for let, axiom, primitive. `as : Int := 3\\nsize : Int := as + 1` evaluates to 4. 02 §7 added let/in and 04 §1:45 added primitive/axiom without updating the list.",
+    "severity": "low"
+   },
+   {
+    "id": "LEX-3",
+    "impl_ref": "src/luthier/parser.py:408",
+    "behavior": "A number with '.' or an exponent is a Float64 literal, otherwise an unbounded Int (`1e3` is 1000.0 : Float64, rejected where Int is expected).",
+    "spec_ref": "04-kernel.md:64 (literals 3 Int, 3.0 Float64); 02-grammar.md:14",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py:507"
+    ],
+    "evidence": "`x : Float64 := 1e3` evaluates to `1000.0 : Float64`; `x : Int := 1e3` gives `1000.0 has type Float64 but Int was expected`. The spec does not say how an exponent literal is typed.",
+    "severity": "low"
+   },
+   {
+    "id": "LEX-6",
+    "impl_ref": "src/luthier/lexer.py:44",
+    "behavior": "An unknown character is `parse error: line L, col C: unexpected character 'X'` with columns from 0; after a string literal that spans a line break, reported lines are one too low; the tokens '{ and ${ exist and no rule uses them.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [],
+    "evidence": "`x : Int := 3 @ 4` gives `line 1, col 13: unexpected character '@'`. `s : String := \"a\\nb\"` (raw newline) followed by `x : Int := (1 + )` on line 3 reports `line 2, col 16`: lines advance only on newline tokens (lexer.py:49-58). `x : Int := ${ 3 }` gives `expected a term (at '${')`.",
+    "severity": "low"
+   },
+   {
+    "id": "LEX-7",
+    "impl_ref": "src/luthier/lexer.py:14",
+    "behavior": "`--` starts a comment to the end of the line, also right after a token (`x --2` is `x`).",
+    "spec_ref": "02-grammar.md:16",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_spec.py:20-26"
+    ],
+    "evidence": "`y : Int := x --2` evaluates to the value of x. Every tests/spec file begins with comment lines and its `-- expect:` comment.",
+    "severity": "low"
+   },
+   {
+    "id": "LAY-2",
+    "impl_ref": "src/luthier/parser.py:169",
+    "behavior": "An act starts at column 0 and an indented line continues it; a clause line must be indented; inside record type braces a line break ends a component, so a component type spans lines only inside parentheses.",
+    "spec_ref": "02-grammar.md:26-28",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:96-104",
+     "tests/spec/r3_connected.accept.lut"
+    ],
+    "evidence": "`x : Int :=\\n  1 +\\n  2` gives 3; `x : Int :=\\n1 + 2` gives `expected a term (at '\\n')`; a clause `| zero := zero` at column 0 gives `expected 'name', got '|'`; `P = { f : Int ->\\n  Int, b : Bool }` fails, `{ f : (Int ->\\n  Int), b : Bool }` checks.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-12",
+    "impl_ref": "src/luthier/parser.py:156",
+    "behavior": "`gen T := term` or `gen T := extern \"...\"`; `extern provisional` is rejected in this position though it is a term elsewhere.",
+    "spec_ref": "02-grammar.md:46; 08-tests.md:68 and 365 (gen removed: decided, not implemented)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py:145-183"
+    ],
+    "evidence": "`gen P := extern provisional \"python:x.y\"` gives `expected 'string', got 'provisional'`. The act is still parsed, as 08 §13 lists its removal as work to do.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-13",
+    "impl_ref": "src/luthier/parser.py:136",
+    "behavior": "`import \"path\" [as name]`; the path must be a string; a dotted alias (`as a.b`) is accepted.",
+    "spec_ref": "02-grammar.md:44; 03-libraries.md:196-203",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:283-329"
+    ],
+    "evidence": "`import real` gives `expected 'string', got 'real'`; `import \"real\" as a.b` checks; `import \"nope_such_file\"` gives `cannot find import 'nope_such_file'`.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-14",
+    "impl_ref": "src/luthier/parser.py:186",
+    "behavior": "Declaration, definition and alias; binders `(x y : A)` wrap the type in Pi and the body in lambdas; the type is optional (`x := 4` with no declaration is accepted); bodies may be data, extern [provisional], primitive or axiom; a bare name is 'definition 'x' needs a type or a body'.",
+    "spec_ref": "02-grammar.md:35-41 and 49-54; 04-kernel.md:37-46 and 156-157",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:61-71",
+     "tests/spec/n3_primitive_outside_core.reject.lut",
+     "tests/spec/n4_axiom_outside_lib.reject.lut"
+    ],
+    "evidence": "`f (x y : Int) (z : Int) : Int := x + y + z` gives f 1 2 3 = 6; `x := 4` evaluates to 4. The `body` rule of 02 §2 omits primitive and axiom, which 04 §1:45 and parser.py:225-230 have.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-15",
+    "impl_ref": "src/luthier/parser.py:191",
+    "behavior": "Implicit binders `{A B : U}` only before the explicit ones; on an alias the braces are accepted and the parameter is simply explicit.",
+    "spec_ref": "02-grammar.md:133-140",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_sugar.py:97-125"
+    ],
+    "evidence": "`f (x : Int) {A : U} : Int := x` gives `unexpected '{' at end of definition`; `Pair2 {A : U} = A * A` checks with no implicit effect (parser.py:198-206 ignores the count). parser.py:305 defines _binder_ahead and parser.py:583 redefines it; the first is dead.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-16",
+    "impl_ref": "src/luthier/parser.py:16",
+    "behavior": "Precedence & -> or and comparisons + - * / mod application; & and -> to the right, the others to the left. `and` and `or` are core functions usable prefix; `mod` is a primitive operator, not a name: `mod 7 3` is unbound and a user definition named mod is ignored by infix mod.",
+    "spec_ref": "02-grammar.md:58-65; 02-grammar.md:22-23 (and, or and mod are ordinary names written infix)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py:74-76",
+     "tests/test_kernel.py:87-93"
+    ],
+    "evidence": "`10 - 3 - 2` = 5; `and true false` = false; `luthier eval f.lut \"mod 7 3\"` gives `unbound name mod`; with `mod (a b : Int) : Int := 42`, `7 mod 3` is still 1. `1 < 2 < 3` is rejected by type.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-17",
+    "impl_ref": "src/luthier/parser.py:365",
+    "behavior": "Unary minus binds looser than application: `-f 3` is -(f 3); `f -3` is f - 3; the checker makes it 0 - x or 0.0 - x.",
+    "spec_ref": "02-grammar.md:130-132",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_sugar.py:87-94"
+    ],
+    "evidence": "`-f 3` = -4 with f x = x + 1; `f -3` gives `operator - expects Int, Float64 or Rational, got f`; `- -3` = 3; a user `__negate__` definition does not change `-3`.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-18",
+    "impl_ref": "src/luthier/parser.py:425",
+    "behavior": "`let p = e in body` is a one-branch match; any pattern parses, a refutable one is rejected by the checker.",
+    "spec_ref": "02-grammar.md:127-129",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_sugar.py:73-84"
+    ],
+    "evidence": "`let (p, q) = (2, 3) in p * q` = 6; `let just y = m in y` gives `match on m does not cover: nothing`.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-19",
+    "impl_ref": "src/luthier/parser.py:417",
+    "behavior": "`if c then a else b` is a match on the labels true and false.",
+    "spec_ref": "04-kernel.md:159",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:93",
+     "tests/test_checker_rules.py:367-377"
+    ],
+    "evidence": "`if 2 < 3 then 1 else 0` = 1; `f if true then 1 else 2` parses as an argument. See CORE-2 for the condition's type.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-21",
+    "impl_ref": "src/luthier/parser.py:694",
+    "behavior": "`[a, b]` becomes a cons/nil chain elaborated by the checker; a trailing comma is accepted; without commas `[1 2]` is the one-element list `[(1 2)]`.",
+    "spec_ref": "02-grammar.md:83; 04-kernel.md:161",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:474-475"
+    ],
+    "evidence": "`xs : List Int := [1, 2,]` evaluates to `cons Int 1 (cons Int 2 (nil Int))`; `[1 2]` gives `1 : Int is not a function, cannot apply it to 2`. User definitions named __nil__ or __cons__ do not change literals.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-23",
+    "impl_ref": "src/luthier/parser.py:438",
+    "behavior": "`extern [provisional] \"target\"` is a term, typed by context, but it cannot be an unparenthesized argument.",
+    "spec_ref": "02-grammar.md:87 and 69 (term atom)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/spec/r5_extern_value.accept.lut",
+     "tests/spec/r5_extern_provisional.accept.lut"
+    ],
+    "evidence": "`p : P := { f := extern \"python:builtins.abs\", g := 2 }` works; `y : Int := app extern \"python:builtins.abs\" 3` gives `unexpected 'extern' at end of definition` (starts_atom, parser.py:387-399, excludes extern).",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-24",
+    "impl_ref": "src/luthier/parser.py:521",
+    "behavior": "`(x y : A) -> B`, `(x y : A) * B`, tuples `(a, b, c)` nested to the right; `(x : A)` alone is an error from the checker, `(a b : Int)` alone a parse error.",
+    "spec_ref": "02-grammar.md:72-75",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_dependent_product.accept.lut",
+     "tests/spec/k_named_product.accept.lut"
+    ],
+    "evidence": "`P = (x y : Int) * { k : Int | x < k and k < y }\\np : P := (1, 5, 3)` checks; `P = (a b : Int)` gives `expected '->', '*' or '+' after a dependent binder`; `P = (a : Int)` gives `(a : Int) names a position of a product or a sum`.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-25",
+    "impl_ref": "src/luthier/parser.py:626",
+    "behavior": "`{ a b : A, c : B }` is a labeled product and `{ ... | p }` a subtype over the dependent product of its components; groups are separated by ',', ';' or a line break.",
+    "spec_ref": "02-grammar.md:78-79; 04-kernel.md:165",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/r3_connected.accept.lut",
+     "tests/spec/r4_product_inline.accept.lut",
+     "tests/spec/k_label_order.reject.lut"
+    ],
+    "evidence": "`P = { a : Int\\n b : Int }` then `p.b` = 2; `Pos : U := { k : Int |\\n  0 < k\\n  and k < 10 }` checks (predicate may span lines).",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-26",
+    "impl_ref": "src/luthier/parser.py:670",
+    "behavior": "`< a : A | b : B >` is an n-ary sum; as an argument it needs parentheses; the empty sum `< >` cannot be written.",
+    "spec_ref": "02-grammar.md:82 and 98-99; 04-kernel.md:232-234",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_union.accept.lut"
+    ],
+    "evidence": "`T = List < a : Int | b : Bool >` gives `unexpected ':' at end of definition`; `List (< ... >)` works; `E = < >` gives `expected 'name', got '>'`.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-27",
+    "impl_ref": "src/luthier/parser.py:710",
+    "behavior": "`match t { p -> u ; ... }` including `match e { }`; patterns `_`, a name with arguments, literals, tuples; a bare name is resolved later as constructor, label or variable.",
+    "spec_ref": "02-grammar.md:85 and 93-99",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/k_empty_unit.accept.lut",
+     "tests/spec/k_sum.accept.lut",
+     "tests/test_kernel.py:107-118"
+    ],
+    "evidence": "`absurd (e : Empty) : Int := match e { }` checks; `match x { true -> 1 }` on Int binds true as a variable (02 §3 rule); `match x { nothing -> 1 }` on Int gives 1.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-28",
+    "impl_ref": "src/luthier/parser.py:378",
+    "behavior": "A dotted name is one token resolved by the checker; `(t).a.b` is projection after a bracket.",
+    "spec_ref": "02-grammar.md:18-19, 89 and 116-123",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:342-383"
+    ],
+    "evidence": "`P = { a : { b : Int, c : Int }, d : Int }\\np : P := ((1, 2), 3)` gives `(p).a.c` = 2.",
+    "severity": "low"
+   },
+   {
+    "id": "GRAM-29",
+    "impl_ref": "src/luthier/parser.py:87",
+    "behavior": "Parse errors read 'path: parse error: line L, col C: ...' with 0-based columns; some are reported at the end of the file or without a position; a missing closing bracket is detected by a heuristic message.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py:79-82"
+    ],
+    "evidence": "A bare `x` gives `line 3, col 0: definition 'x' needs a type or a body (at '')` for a 1-line file; `x : Int := 3 )` gives `unexpected ')' at end of definition`; `f (x : Int) : Int := (x + 1\\ng (y : Int) : Int := y` gives `'g' at the start of a line reads as a new definition, but the previous definition is still open: a closing bracket is probably missing above` (parser.py:502-512).",
+    "severity": "low"
+   },
+   {
+    "id": "PP-1",
+    "impl_ref": "src/luthier/pretty.py:102",
+    "behavior": "What `luthier eval` and the messages print is not always Luthier source: strings in Python repr, a Rational as n/d, an extern with its internal '@type' target and without 'provisional', a union argument without parentheses, fresh names such as x~1.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py:74-76",
+     "tests/test_kernel.py:350",
+     "tests/test_kernel.py:377"
+    ],
+    "evidence": "`\"abc\"` prints `'abc'`, `\"it's\"` prints `\"it's\"`; `fromInt 3` prints `3/1 : Rational` (reads back as Int division); `g : Int -> Int := extern provisional \"python:builtins.abs\"` prints `extern \"python:builtins.abs@Int -> Int\"`; `[a 1]` of `List (< a : Int | b : Bool >)` prints `cons < a : Int | b : Bool > (a 1) ...`; a checker message shows `\\ x~1 { left x~1 } 3`.",
+    "severity": "low"
+   },
+   {
+    "id": "API-1",
+    "impl_ref": "src/luthier/api.py:36",
+    "behavior": "luthier.load parses and checks files with core and imports; parse and type errors raise SystemExit with the CLI's message.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py:427"
+    ],
+    "evidence": "luthier.load on `x : Int := true` raises `SystemExit: api_type_error.lut: type error: in x: true has type Bool but Int was expected`. The error path has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "API-5",
+    "impl_ref": "src/luthier/api.py:105",
+    "behavior": "fill raises FillError 'q is not a hole' for a defined, data or core name, allows refilling a filled hole, and checks the Python arity against the type's arrows except for *args or builtins without a signature.",
+    "spec_ref": "none",
+    "status": "not_in_spec",
+    "test_refs": [
+     "tests/test_kernel.py:436-441"
+    ],
+    "evidence": "fill(\"a\") on `a : Int := 3` gives `FillError: a is not a hole`; fill(\"not\") gives `not is not a hole`; fill(\"f\", lambda a: a) for `f : Float64 -> Float64 -> Float64` gives `f takes 2 argument(s) by its type, but <lambda>... takes 1`; fill(\"f\", max) is accepted; filling h twice changes `g 1` from 11 to 21.",
+    "severity": "low"
+   },
+   {
+    "id": "API-9",
+    "impl_ref": "src/luthier/api.py:184",
+    "behavior": "Program.test takes n from the file's directive, else 100, reruns by default (deep=True), draws a seed in [0, 2^31), and writes the certificate next to the definition's own file.",
+    "spec_ref": "03-libraries.md:66-67 (test does not run a certified definition again unless --deep); 08-tests.md:37; 03-libraries.md:246-249",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/test_kernel.py:431-433"
+    ],
+    "evidence": "With `test sq with 7`, P.test(\"sq\") runs 7 cases and P.test(\"sq\", n=5) runs 5. The default deep=True differs from `luthier test`, where an accepted certificate is not rerun.",
+    "severity": "low"
+   },
+   {
+    "id": "CORE-1",
+    "impl_ref": "src/luthier/core.lut:5",
+    "behavior": "Unit and Empty are non-recursive data definitions accepted only because core.lut is exempt from R4; the same in a user file is rejected, and for an empty data the suggested alias is unparseable.",
+    "spec_ref": "04-kernel.md:60-61; 05-static-semantics.md:165-169 (R4, no exemption stated)",
+    "status": "covered_differently",
+    "test_refs": [
+     "tests/spec/k_empty_unit.accept.lut"
+    ],
+    "evidence": "checker.py:805 `if not self.kernel and not recursive`. `MyUnit : U := data { mu : MyUnit }` gives `MyUnit is not recursive; write MyUnit = < mu : Unit > (05 R4)`; `MyEmpty : U := data { }` suggests `write MyEmpty = <  >`, which gives `expected 'name', got '>'`.",
+    "severity": "low"
+   },
+   {
+    "id": "CORE-3",
+    "impl_ref": "src/luthier/core.lut:12",
+    "behavior": "not, and, or, implies are core functions; `a and b`, `a or b` and `p -> q` on Bools elaborate to them.",
+    "spec_ref": "04-kernel.md:160",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:91",
+     "tests/test_kernel.py:178-180"
+    ],
+    "evidence": "`false -> (1 == 2)` = true; `not true` = false.",
+    "severity": "low"
+   },
+   {
+    "id": "CORE-4",
+    "impl_ref": "src/luthier/core.lut:27",
+    "behavior": "Int, Real, Float64 : Real, Rational : Real and String are primitives; a double is accepted as a Real, Real arithmetic is refused, Rational has no literal.",
+    "spec_ref": "06-numbers.md:31-50 and 140-143; 04-kernel.md:64 and 92-98",
+    "status": "covered",
+    "test_refs": [
+     "tests/spec/n1_numbers.accept.lut",
+     "tests/spec/n2_r_gone.reject.lut",
+     "tests/spec/r9_variance.accept.lut",
+     "tests/test_bridge.py:217-229"
+    ],
+    "evidence": "`r : Real := 1.5` evaluates to `1.5 : Real`; `r + r` gives `the operations of Real are not computed (06 §2)`; `q : Rational := 3` is rejected. The core.lut lists in 02-grammar.md:23-24 and README.md:94-95 omit Real, Rational and ExtendedReal.",
+    "severity": "low"
+   },
+   {
+    "id": "CORE-5",
+    "impl_ref": "src/luthier/core.lut:33",
+    "behavior": "Maybe (A : U) = < nothing : Unit | just : A >.",
+    "spec_ref": "04-kernel.md:168",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_kernel.py:121-129"
+    ],
+    "evidence": "`m : Maybe Int := just 3` evaluates to `just 3 : Maybe Int`.",
+    "severity": "low"
+   },
+   {
+    "id": "CORE-8",
+    "impl_ref": "src/luthier/core.lut:43",
+    "behavior": "Nat is { k : Int | 0 <= k } and Fin (n : Int) is { k : Int | 0 <= k and k < n }, both definitions with a predicate.",
+    "spec_ref": "06-numbers.md:34-35; 04-kernel.md:178 (writes Fin as an alias, `Fin n = ...`)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_bridge.py:22-26",
+     "tests/test_sugar.py:82"
+    ],
+    "evidence": "`n : Nat := 0 - 1` gives `0 - 1 does not satisfy Nat`; `k : Fin 3 := 3` gives `3 does not satisfy Fin 3`; `k : Fin 3 := 2` evaluates to `2 : Fin 3`.",
+    "severity": "low"
+   },
+   {
+    "id": "CORE-9",
+    "impl_ref": "src/luthier/core.lut:1",
+    "behavior": "core.lut is loaded before every program (cli.py:228); `--no-core` turns it off.",
+    "spec_ref": "03-libraries.md:203 (core.lut is imported implicitly)",
+    "status": "covered",
+    "test_refs": [
+     "tests/test_spec.py:30-39"
+    ],
+    "evidence": "Every probe used Bool, Int, List without importing anything. --no-core is not in the specification.",
+    "severity": "low"
+   }
+  ],
+  "notes": "Answer to Luciano for this slice (front end: lexer, parser, syntax tree, printer, Python API, core.lut). The grammar in 02 is close to the parser but not faithful: 12 behaviors are high. Nine are in the grammar and core: a closing bracket at column 0 is rejected (LAY-1), a line break between record-value fields fails (LAY-3), the clause form contradicts the definition rule (GRAM-2), `{ pattern : T | p }` is not parsed (GRAM-4), parentheses around * and + types are lost (GRAM-5), a union cannot contain '>' (GRAM-6), `operator` accepts any symbol and lets == bypass R8 (GRAM-9), Bool is told by labels contrary to 04 (CORE-2), and `1e400` is accepted as an infinite Float64 (LEX-4). One is in the lexer and parser: non-ASCII string literals are corrupted, and pattern strings are decoded differently from term strings (LEX-5). Two are in the Python API, which no spec section describes: fill does not apply R5 or R2 (API-3), and does not raise R5's codomain or component obligations (API-4). No test exercises any of them. The README example (copied to scratch) checks and evaluates as documented.\n\nCommit: HEAD is 58dd490, one commit after b15f2a1; `git diff b15f2a1 HEAD` is empty for src, docs/semantica, tests, README.md and examples, so the findings hold for b15f2a1.\n\nMethod: every probe is a small program under /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/impl-front/ (probe.py runs `luthier check` or `luthier eval` on each case; api_probe.py, api_refill.lut and capture.lut exercise the API and the printer). Nothing in the repository was modified and luthier certify was not run.\n\nDeclared statuses respected: 08 §12-13 (test directive with sampled/under/where, `profile` act, removal of `gen`) are decided and listed as work to do, so the parser still having the old forms is reported as that status (GRAM-10, GRAM-12). 02 §8 open items (quote and unquote, local `{ x := t ; u }` blocks, saved evaluation) are not parsed, which is consistent. R11 is declared not implemented and is outside this scope.\n\nInternal behaviors, listed only here: syntax.py dataclasses and fields (Def.doc is always empty, Def.pending, Program.find); parser placeholders __negate__, __cons__, __nil__ (user definitions with those names do not hijack them); _is_con_name always returns False; the duplicate _binder_ahead (parser.py:305 shadowed by 583); no_brace for match scrutinees; pretty.py helpers (_labeled_components, _projected_name, over-parenthesized left operands of left-associative operators); api.py _from_core, _refresh_certificates, the `filled` dict.\n\nObserved outside this scope, for the other auditors: (1) evaluator: printing the normal form of an unapplied function substitutes a global for a pattern variable of the same name. With `a : Int := 1`, `luthier eval capture.lut \\\"\\\\ (p : Int * Int) { match p { (a, _) -> a } }\\\"` prints `match p { (a, _) -> 1 }`, though applying it gives 5. (2) checker: `\\\"a\\\" + \\\"b\\\"` concatenates Strings and `\\\"a\\\" < \\\"b\\\"` is rejected, while 04 §4 lists comparisons on String literals; Int `/` floors (`(-7) / 2` = -4) and `mod` follows Python's sign, neither specified. (3) checker: with `operator + := addP` over a one-component record, `+` on Int inside addP resolves to addP and the error reads 'its body has type something else'. (4) README.md:73 says rules R1 to R8; 05 has R1 to R11.\n\nSeverity notes: GRAM-1 is medium, not high, because the EBNF with `[ \\\";\\\" ]` is ambiguous under greedy application, so it does not plainly accept the program. GRAM-7 and GRAM-8 are medium because the spec shows only two positions, and its refinement rule (02 §6) collides with a one-component record."
+ }
+}

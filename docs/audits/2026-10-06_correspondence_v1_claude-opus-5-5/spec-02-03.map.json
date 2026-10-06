@@ -1,0 +1,1466 @@
+{
+ "meta": {
+  "audit": "correspondence",
+  "version": "v1",
+  "stage": "map",
+  "commit": "b15f2a11abaf6486dafd9847ce922a0a43c803ed",
+  "model": "claude-opus-5-5",
+  "unit": {
+   "label": "spec-02-03",
+   "direction": "spec",
+   "files": "docs/semantica/02-grammar.md and docs/semantica/03-libraries.md (check the grammar against src/luthier/lexer.py, parser.py, syntax.py, and the libraries against src/luthier/lib/)"
+  },
+  "run": "claude-code-workflow",
+  "run_id": "wf_88f6e353-315",
+  "session": "8d5ce152-b54e-48c4-a388-e7a9ccb80792",
+  "agent_id": "ad6dcd2884b84b97b",
+  "agent_label": "map spec-02-03",
+  "started_at": "2026-10-06T11:14:05+00:00",
+  "finished_at": "2026-10-06T11:39:24+00:00",
+  "tokens": 256757,
+  "tool_calls": 86,
+  "duration_ms": 1516431,
+  "prompts": {
+   "workflow.js": "c90b3993ad50eef4729b09a9df88f23076fe64d367a726cf0a9f9d861900b870"
+  },
+  "journal_sha256": "119fda2aceb82c7e4d681dcf95029a2f0e9f1677ad79920791ac9f1a05fdecb8",
+  "units_file": "prompts/audit_correspondence_units_v1.json",
+  "units_sha256": "bd4ccb5a628f787be607079ef370122a3f4587b4a937e327090c08463738c702",
+  "adapter": "scripts/audit_correspondence_journal.py",
+  "adapter_sha256": "dd778f4f06d094d17ccf0b0b2da78ad4b205d88491544fedd61ab84c9a26ea13",
+  "date": "2026-10-06"
+ },
+ "output": {
+  "sections": [
+   "docs/semantica/02-grammar.md: header (l.1-9), §1 Lexical (l.11-28), §2 Acts (l.30-54), §3 Terms (l.56-99), §4 Translations (l.101-106), §5 What the parser leaves to the checker (l.108-112), §6 Dotted names (l.114-123), §7 Added 2026-10-05 (l.125-140), §8 Open (l.142-146)",
+   "docs/semantica/03-libraries.md: header (l.1-5), §1 A file is a structure (l.7-18), §2 Import (l.20-34), §3 Declaration in one file, definition in another (l.36-55), §4 Certificate with its hash (l.57-73), §5 The libraries table (l.75-88), §6 Open (l.90-96)",
+   "Implementation checked: src/luthier/lexer.py (all), src/luthier/parser.py (all), src/luthier/syntax.py (all), src/luthier/checker.py (resolve, add_operator/resolve_operator, infer, infer_dotted/project, infer_app/implicit/unify, infer_negation, infer_binop, check, check_match, _type_operand, register_labels/label_value, bind_pattern), src/luthier/cli.py (all), src/luthier/certify.py (all), src/luthier/subst.py alpha_normalize, src/luthier/core.lut, every file of src/luthier/lib/*.lut (top-level acts)",
+   "Tests checked: tests/test_kernel.py, tests/test_sugar.py, tests/test_certificates.py, tests/test_spec.py with tests/spec/*.lut, tests/test_bridge.py and tests/test_evaluators.py (by grep for the forms in scope)"
+  ],
+  "claims": [
+   {
+    "id": "spec-02-03#01",
+    "spec_ref": "docs/semantica/02-grammar.md:13",
+    "claim": "A name starts with a letter: name ::= letter { letter | digit | _ | ' } { . letter ... }.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lexer.py:18"
+    ],
+    "test_refs": [],
+    "evidence": "The lexer regex is [A-Za-z_][A-Za-z0-9_']*(\\.[A-Za-z_]...)*(\\#\\d+)?, so it also accepts names starting with '_' and a '#N' suffix. Program g09_underscore_name.lut: `_x : Int := 3` and `y#2 : Int := 4` load, and `luthier eval ... '_x + y#2'` gives 7. This is the root of the hash collision in #57.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#02",
+    "spec_ref": "docs/semantica/02-grammar.md:14",
+    "claim": "Number literals: digits, optional fraction, optional exponent.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lexer.py:16",
+     "src/luthier/parser.py:406-408"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:87"
+    ],
+    "evidence": "Regex \\d+(\\.\\d+)?([eE][+-]?\\d+)? matches the rule; a term literal with '.', 'e' or 'E' becomes a float, else an int. Patterns are another matter, see #44.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#03",
+    "spec_ref": "docs/semantica/02-grammar.md:15",
+    "claim": "A string literal is '\"' { character } '\"' (and String is primitive \"unicode\", core.lut:31).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:411",
+     "src/luthier/parser.py:761"
+    ],
+    "test_refs": [],
+    "evidence": "Term literals are decoded with bytes(text,'utf-8').decode('unicode_escape'), which reads UTF-8 bytes as Latin-1. g06_unicode_string.lut: `s : String := \"é\"`; `luthier eval ... s` prints 'Ã©'; a match `{ \"é\" -> 1 ; _ -> 0 }` returns 0 both on s and on the literal \"é\". Any non-ASCII string literal is silently a different value.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#04",
+    "spec_ref": "docs/semantica/02-grammar.md:15",
+    "claim": "String literals have one meaning wherever they are written (the grammar defines no escapes, and has one string production used by terms and patterns).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:411",
+     "src/luthier/parser.py:759-761",
+     "src/luthier/lib/table.lut:98",
+     "src/luthier/lib/table.lut:134"
+    ],
+    "test_refs": [],
+    "evidence": "Escapes are undocumented but decoded in terms (Python unicode_escape) and not decoded in patterns (PLit(t.text[1:-1])). g05_string_escape.lut: s := \"a\\nb\"; f x := match x { \"a\\nb\" -> 1 ; _ -> 0 }; `f s` gives 0. table.lut relies on \"\\n\", \"\\x0b\" in terms.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#05",
+    "spec_ref": "docs/semantica/02-grammar.md:16",
+    "claim": "A comment is \"--\" up to the end of the line.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lexer.py:14"
+    ],
+    "test_refs": [
+     "tests/spec/k_sum.accept.lut"
+    ],
+    "evidence": "Comment group --[^\\n]* is skipped; every spec test file opens with comments and loads.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#06",
+    "spec_ref": "docs/semantica/02-grammar.md:18-19",
+    "claim": "A dotted name m.f is one token, resolved by the checker as a qualified name or a projection.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lexer.py:18",
+     "src/luthier/checker.py:893-903",
+     "src/luthier/checker.py:1077-1101"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:342",
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "One name token with dots; infer tries resolve(whole name), then infer_dotted.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#07",
+    "spec_ref": "docs/semantica/02-grammar.md:19",
+    "claim": "Capitalized names are types and laws by convention, not by rule.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/parser.py:739-745"
+    ],
+    "test_refs": [],
+    "evidence": "No code depends on capitalization; the only isupper() test is dead (_is_con_name always returns False). Nothing to test beyond absence of a rule.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#08",
+    "spec_ref": "docs/semantica/02-grammar.md:21-22",
+    "claim": "Reserved words are exactly data, match, extern, provisional, test, with, exhaustive, gen, import, forget, U, operator, if, then, else.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lexer.py:8-9"
+    ],
+    "test_refs": [],
+    "evidence": "KEYWORDS also has primitive, axiom, let, in. g07_in_as_name.lut `in : Int := 3` fails \"expected 'name', got 'in'\"; g08_axiom_as_name.lut `f (axiom : Int) ...` fails. let/in come from §7 and primitive/axiom from 04 §1 and 06, but the list in §1 was not updated, so the spec accepts programs the parser rejects.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#09",
+    "spec_ref": "docs/semantica/02-grammar.md:22-23",
+    "claim": "and, or and mod are ordinary names written infix.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lexer.py:10",
+     "src/luthier/parser.py:387-390",
+     "src/luthier/core.lut:13-14",
+     "src/luthier/checker.py:1346-1350"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:213"
+    ],
+    "evidence": "and/or are core.lut definitions, usable as values at the start of a term (`(eqB, or, false, not)`), but starts_atom refuses them as arguments: g11_and_as_argument.lut `twice2 and true` is a type error, while `twice2 (and) true` loads. mod is no definition at all: g10_mod_as_name.lut `mod 7 3` is \"unbound name mod\"; `a mod b` is a built-in BinOp.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#10",
+    "spec_ref": "docs/semantica/02-grammar.md:23-24",
+    "claim": "Bool, Int, Float64, String, Unit, Empty, Maybe, List, Nat, Fin are definitions of core.lut.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/core.lut:5-47"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:121"
+    ],
+    "evidence": "All ten are in core.lut (Bool and Maybe as aliases); core also holds Real, Rational, ExtendedReal, not, and, or, implies, unlisted.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#11",
+    "spec_ref": "docs/semantica/02-grammar.md:26-28",
+    "claim": "Layout: an act starts at column 0, an indented line continues it; inside ( ), [ ], < > and the braces of match and lambda line breaks are ignored; inside a record type a line break separates components.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:39-51",
+     "src/luthier/parser.py:327-328",
+     "src/luthier/parser.py:725-726",
+     "src/luthier/parser.py:599-602"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:96",
+     "tests/test_kernel.py:213"
+    ],
+    "evidence": "Indented continuation, newlines inside brackets and record-type separation work (g22, g24 load). But each bracket decrements its newline counter before expecting the closer, so a closing brace at column 0 fails: g32c_data_brace_col0.lut gives \"expected '}', got '\\n'\". Whether a column-0 closer is a new act or an ignored line break inside braces is not decided by the text.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#12",
+    "spec_ref": "docs/semantica/02-grammar.md:32-33",
+    "claim": "A program is a sequence of acts: declaration, definition, alias or directive.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:103-118"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:61"
+    ],
+    "evidence": "parse_program dispatches on test/gen/operator/import, else parse_def.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#13",
+    "spec_ref": "docs/semantica/02-grammar.md:35",
+    "claim": "declaration ::= name { binder } \":\" term.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:207-210",
+     "src/luthier/parser.py:255-263"
+    ],
+    "test_refs": [
+     "tests/spec/r1_declaration.accept.lut",
+     "tests/test_kernel.py:61"
+    ],
+    "evidence": "A def with a type and no body is a hole; binders become a Pi chain.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#14",
+    "spec_ref": "docs/semantica/02-grammar.md:36",
+    "claim": "definition ::= name { binder } [ \":\" term ] \":=\" body { clause }.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:211-251"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:96"
+    ],
+    "evidence": "The parser rejects a body followed by clauses and accepts clauses with no \":=\" body, the reverse of the production. g01_body_and_clauses.lut (`f (b : Bool) : Bool := b` then `| true := false`) fails \"definition has both a body and clauses\"; g02_clauses_without_body.lut (header, no :=, then clauses) loads, and is the form tests and libraries use.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#15",
+    "spec_ref": "docs/semantica/02-grammar.md:37",
+    "claim": "alias ::= name { binder } \"=\" term.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:198-206",
+     "src/luthier/checker.py:213-230"
+    ],
+    "test_refs": [
+     "tests/spec/r7_alias.accept.lut",
+     "tests/spec/r7_alias_defined.reject.lut"
+    ],
+    "evidence": "Alias parsed with binders as annotated lambdas; checker unfolds it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#16",
+    "spec_ref": "docs/semantica/02-grammar.md:38-40",
+    "claim": "body ::= term | data {...} | extern [provisional] string (no other bodies).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:225-230",
+     "src/luthier/core.lut:27-31",
+     "src/luthier/lib/algebra.lut:132"
+    ],
+    "test_refs": [
+     "tests/spec/n3_primitive_outside_core.reject.lut",
+     "tests/spec/n4_axiom_outside_lib.reject.lut"
+    ],
+    "evidence": "The parser also accepts primitive \"...\" and axiom \"...\" as bodies. They are documented in 04 §1 and 06, but 02's grammar, which says it is the syntax the parser accepts, omits them; no cross-reference.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#17",
+    "spec_ref": "docs/semantica/02-grammar.md:39",
+    "claim": "data body: \"data\" \"{\" { name \":\" term [ \";\" ] } \"}\", the ';' optional.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:315-330"
+    ],
+    "test_refs": [
+     "tests/spec/r4_recursive_data.accept.lut"
+    ],
+    "evidence": "Without ';' the next constructor's name is parsed as an application argument of the previous type. g32_data_no_semicolon.lut (`leaf : Tree` newline `node : Tree -> Tree`, closer indented) fails \"expected 'name', got ':'\"; with ';' (g32b) it loads. The ';' is required between constructors.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#18",
+    "spec_ref": "docs/semantica/02-grammar.md:40",
+    "claim": "A body may be extern [provisional] string.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:217-224",
+     "src/luthier/syntax.py:141-147"
+    ],
+    "test_refs": [
+     "tests/spec/r5_extern_value.accept.lut",
+     "tests/spec/r5_extern_provisional.accept.lut",
+     "tests/test_kernel.py:132"
+    ],
+    "evidence": "Extern(target, provisional) built from the body.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#19",
+    "spec_ref": "docs/semantica/02-grammar.md:41",
+    "claim": "binder ::= \"(\" name { name } \":\" term \")\".",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:292-303"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:44-47"
+    ],
+    "evidence": "parse_binder collects several names before ':'; `addN (m n : N)` in PEANO.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#20",
+    "spec_ref": "docs/semantica/02-grammar.md:42",
+    "claim": "clause ::= \"|\" pattern { \",\" pattern } \":=\" term.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:233-251"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:96"
+    ],
+    "evidence": "Clauses on indented lines starting with '|'. Coverage is checked for one parameter (g27b rejected) but not for several (g27_clauses_two_params_incomplete.lut loads and `f false true` fails at run time: \"no branch of a match applies\"); the spec states no coverage rule, so this is reported as information only.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#21",
+    "spec_ref": "docs/semantica/02-grammar.md:44",
+    "claim": "directive import string [ as name ].",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:136-144"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:283",
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "'as' read as a contextual name.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#22",
+    "spec_ref": "docs/semantica/02-grammar.md:45",
+    "claim": "directive test name [ with number | exhaustive ] [ size number ].",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:120-134",
+     "src/luthier/syntax.py:279-284"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:32",
+     "tests/test_certificates.py:64"
+    ],
+    "evidence": "Works for integers; 'size' is used only by lib files (array.lut:368), no pytest. `number` admits decimals, and g30_test_with_float.lut `test one with 1.5` crashes with an uncaught Python ValueError (int('1.5')) instead of a parse error.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#23",
+    "spec_ref": "docs/semantica/02-grammar.md:46",
+    "claim": "directive gen name := ( term | extern string ).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:156-167",
+     "src/luthier/checker.py:482-514"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:146",
+     "tests/test_bridge.py:170"
+    ],
+    "evidence": "Both forms parsed; Luthier generator checked against Gen T.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#24",
+    "spec_ref": "docs/semantica/02-grammar.md:47",
+    "claim": "operator op := term, and (l.65) an operator directive gives +, -, *, / a meaning on the argument types of a function.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:146-154",
+     "src/luthier/checker.py:422-435",
+     "src/luthier/checker.py:1328-1331",
+     "src/luthier/checker.py:984-993"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:388"
+    ],
+    "evidence": "`op` is undefined in the grammar and the parser accepts any symbol or keyword. g13: `operator &`, `operator ->`, `operator mod`, `operator ==` all load (& and -> are then silently never used). Operators are consulted before R8: g16_operator_eq_on_functions.lut registers `operator == := eqF` on Int -> Int, and `idf == inc` loads and evaluates to true, while g16b without the directive is rejected \"no structural equality ... (05 R8)\". `-` and `/` work (g15) but only + and * are tested.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#25",
+    "spec_ref": "docs/semantica/02-grammar.md:49-50",
+    "claim": "f (x : A) (y : B) : C := t is f : (x : A) -> (y : B) -> C := \\ x { \\ y { t } }, and (x y : A) is (x : A) (y : A).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:254-260"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:61",
+     "tests/test_kernel.py:96"
+    ],
+    "evidence": "Binders wrapped into Pi for the type and Lam for the body.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#26",
+    "spec_ref": "docs/semantica/02-grammar.md:51",
+    "claim": "Clauses under a header with parameters are a match on the tuple of the parameters.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:271-290"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:96"
+    ],
+    "evidence": "clauses_to_match builds Match(tuple of params, tuple patterns); the pattern count must equal the parameter count.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#27",
+    "spec_ref": "docs/semantica/02-grammar.md:51",
+    "claim": "Clauses match the parameters, read together with §7 (l.133) where implicit parameters are inferred where the definition is applied.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:272",
+     "src/luthier/parser.py:287-288"
+    ],
+    "test_refs": [],
+    "evidence": "Implicit parameters count among the tuple. g36_implicit_with_clauses.lut (`len {A : U} (l : List A) : Int` with `| nil := 0`) fails \"clause has 1 patterns but the header has 2 parameters\" (no line number); g36b, with `| _, nil := 0`, loads. The text doesn't say whether a clause matches the implicit type.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#28",
+    "spec_ref": "docs/semantica/02-grammar.md:51-53",
+    "claim": "A name may be declared in one act and defined in another, in the same file or another.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:173-211",
+     "src/luthier/graph.py"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:183",
+     "tests/test_kernel.py:296",
+     "tests/spec/r2_definition.accept.lut"
+    ],
+    "evidence": "Entries grouped by name in objects; declared type checked against the definition.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#29",
+    "spec_ref": "docs/semantica/02-grammar.md:53-54",
+    "claim": "An alias with binders is a function on types (Maybe (A : U) = < nothing : Unit | just : A >).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:198-206",
+     "src/luthier/core.lut:33"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:121"
+    ],
+    "evidence": "Alias body wrapped in annotated lambdas.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#30",
+    "spec_ref": "docs/semantica/02-grammar.md:58-62",
+    "claim": "Precedence & < -> < or < and < comparisons < + - < * / mod < application < .field; & and -> associate right, others left.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:16-25",
+     "src/luthier/parser.py:336-350",
+     "src/luthier/parser.py:378-385"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:74"
+    ],
+    "evidence": "parse_term('a & b -> c') = And(a, Arrow(b,c)); 'a -> b -> c' right; 'a - b - c' and 'a == b == c' left.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#31",
+    "spec_ref": "docs/semantica/02-grammar.md:62-63",
+    "claim": "-> is the function type when its left side is a type and implication when it is a Bool.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:975-983"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:178"
+    ],
+    "evidence": "Arrow: Pi if lhs : U, implies if Bool, else error.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#32",
+    "spec_ref": "docs/semantica/02-grammar.md:63-64",
+    "claim": "* is the product type or multiplication, + the sum type or addition, by the type of the left operand.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:1295-1326",
+     "src/luthier/checker.py:1728-1749",
+     "src/luthier/checker.py:1351-1353"
+    ],
+    "test_refs": [
+     "tests/spec/k_sum.accept.lut",
+     "tests/test_kernel.py:87"
+    ],
+    "evidence": "Decided by the leftmost operand as stated. Also, + on String is concatenation (checker.py:1351), stated nowhere in docs/semantica; text.lut:8 and table.lut rely on it.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#33",
+    "spec_ref": "docs/semantica/02-grammar.md:64",
+    "claim": "& is the conjunction of laws.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:986-993"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:213"
+    ],
+    "evidence": "And requires both sides to be laws.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#34",
+    "spec_ref": "docs/semantica/02-grammar.md:71-73",
+    "claim": "Atoms name, number, string, U, parenthesized term, and tuples associating to the right.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:401-414",
+     "src/luthier/parser.py:567-581"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:213",
+     "tests/spec/k_named_product.accept.lut"
+    ],
+    "evidence": "(1, true, \"x\") is Pair(1, Pair(true, \"x\")); g25 p3b checks against a 3-component type.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#35",
+    "spec_ref": "docs/semantica/02-grammar.md:74",
+    "claim": "Dependent function \"(\" name { name } \":\" term \")\" \"->\" term.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:532-537"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:235-240"
+    ],
+    "evidence": "Several names give nested Pi. g25 `F = (x y : Int) -> Int` loads, `add 1 2` = 3.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#36",
+    "spec_ref": "docs/semantica/02-grammar.md:75",
+    "claim": "Dependent product \"(\" name {name} \":\" term \")\" \"*\" term (and §6 l.121-123, projections of a dependent product).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:538-551",
+     "src/luthier/checker.py:1103-1110"
+    ],
+    "test_refs": [
+     "tests/spec/k_dependent_product.accept.lut"
+    ],
+    "evidence": "Parses to Sigma and checks. Its named first position is not a component for '.': g25 `D = (n : Int) * Fin n`, `d.n` errors \"d : D has no named components\"; project only reads Subtype patterns. 04 §2 lists projection e.x for the product with names, so the two readings differ.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#37",
+    "spec_ref": "docs/semantica/02-grammar.md:76-77",
+    "claim": "Product with both positions named and sum with named alternatives, (a : A) * (b : B) and (a : A) + (b : B), binary in the grammar.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:538-563"
+    ],
+    "test_refs": [
+     "tests/spec/k_named_product.accept.lut"
+    ],
+    "evidence": "Binary forms work (named sum untested in pytest, g25 s3 works). Chains are what users write and the code tries to support them (loops at parser.py:543, 557), but: (a : Int) * (b : Bool) * (c : String) parses as Sigma(a, Int, {b, c}) and `p3.a` errors \"no named components\"; (a : Int) + (b : Bool) + (c : String) is a parse error \"every alternative of a named sum is written (label : Type)\". The spec doesn't say what a chain means.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#38",
+    "spec_ref": "docs/semantica/02-grammar.md:78",
+    "claim": "Labeled product \"{\" name {name} \":\" term { sep ... } \"}\", with one or more components, whose components are reached by .field (§6 l.116).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:778-790",
+     "src/luthier/checker.py:1106-1110"
+    ],
+    "test_refs": [
+     "tests/spec/r7_alias.accept.lut",
+     "tests/test_kernel.py:342"
+    ],
+    "evidence": "Two or more components work. A one-component record is Subtype(PVar a, A, NoLaw), which project strips as a refinement: g26_one_component_record.lut `R = { a : Int }`, `r : R := 3`, `x : Int := r.a` fails \"r : R has no named components\".",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#39",
+    "spec_ref": "docs/semantica/02-grammar.md:79",
+    "claim": "Subtype with labels \"{\" name {name} \":\" term { sep ... } \"|\" term \"}\".",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:626-668"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:54-55",
+     "tests/test_kernel.py:213",
+     "tests/test_kernel.py:353"
+    ],
+    "evidence": "Groups of names build a Sigma base and a tuple pattern.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#40",
+    "spec_ref": "docs/semantica/02-grammar.md:80",
+    "claim": "Subtype \"{\" pattern \":\" term \"|\" term \"}\" with any pattern as binder.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:626-631"
+    ],
+    "test_refs": [],
+    "evidence": "parse_brace requires a name. g03_subtype_tuple_binder.lut `Ordered : U := { (a, b) : Int * Int | a < b }` fails \"parse error: line 2, col 17: expected 'name', got '('\". Only names work (the labels form of l.79 covers the tuple case).",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#41",
+    "spec_ref": "docs/semantica/02-grammar.md:81",
+    "claim": "Record value \"{\" name \":=\" term { sep name \":=\" term } \"}\" with sep ::= \",\" | \";\" | line break (l.91).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:603-625",
+     "src/luthier/parser.py:608"
+    ],
+    "test_refs": [
+     "tests/test_evaluators.py:30",
+     "tests/test_kernel.py:190"
+    ],
+    "evidence": "The value is parsed with newlines skipped, so the next field name becomes an argument. g23_record_value_newline.lut `r : R := { a := 1` newline `b := true }` fails \"expected another field or '}' in a record literal (at ':=')\"; with a comma (g23b) it loads. Line break as a separator works for record types (g22) but not for record values.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#42",
+    "spec_ref": "docs/semantica/02-grammar.md:82-84",
+    "claim": "n-ary sum < a : A | ... >, list [ ... ], lambda \\ lparam {lparam} { term }.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:670-688",
+     "src/luthier/parser.py:694-708",
+     "src/luthier/parser.py:458-499"
+    ],
+    "test_refs": [
+     "tests/spec/k_union.accept.lut",
+     "tests/test_kernel.py:107",
+     "tests/test_kernel.py:207"
+    ],
+    "evidence": "All three parse as described; list literals become __cons__/__nil__ for the checker.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#43",
+    "spec_ref": "docs/semantica/02-grammar.md:85",
+    "claim": "match term { { pattern -> term [ \";\" ] } }, the ';' optional.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:710-727"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:107"
+    ],
+    "evidence": "Without ';' the next pattern's name is parsed as an argument of the previous branch body. g33_match_no_semicolon.lut (`true -> 1` newline `false -> 0`) fails \"1 : Int is not a function, cannot apply it to false\"; with ';' (g33b) it loads.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#44",
+    "spec_ref": "docs/semantica/02-grammar.md:94",
+    "claim": "patom ::= name | number | string | ( pattern {, pattern} ), with number as in §1 (exponent allowed).",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:756-758"
+    ],
+    "test_refs": [],
+    "evidence": "A number pattern with an exponent crashes the parser: PLit(float(t) if '.' in t else int(t)). g04_pattern_exponent.lut `match x { 1e3 -> 1 ; _ -> 0 }` raises an uncaught Python \"ValueError: invalid literal for int() with base 10: '1e3'\".",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#45",
+    "spec_ref": "docs/semantica/02-grammar.md:93-94",
+    "claim": "pattern ::= \"_\" | name {patom} | patom (\"_\" only at the top of a pattern).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/parser.py:730-775"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:117"
+    ],
+    "evidence": "The parser also accepts '_' as a patom (`cons _ xs`, `(_, b)`), which the grammar can't produce since '_' isn't a name per §1. The grammar is narrower than the parser.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#46",
+    "spec_ref": "docs/semantica/02-grammar.md:86",
+    "claim": "if term then term else term.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:417-424",
+     "src/luthier/checker.py:1927-1931"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:87"
+    ],
+    "evidence": "Becomes match on true/false; a non-Bool condition is an error.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#47",
+    "spec_ref": "docs/semantica/02-grammar.md:87",
+    "claim": "extern [provisional] string as a term, typed by its context.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/parser.py:438-445",
+     "src/luthier/checker.py:1389-1395"
+    ],
+    "test_refs": [],
+    "evidence": "g34_extern_term.lut: `c : C := { f := extern \"python:builtins.abs\", g := ... }`, `c.f (-5)` gives 5. No test writes an extern inside a term.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#48",
+    "spec_ref": "docs/semantica/02-grammar.md:88",
+    "claim": "forget atom: the value of a subtype seen in its base.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/parser.py:435-437",
+     "src/luthier/checker.py:994-999"
+    ],
+    "test_refs": [],
+    "evidence": "g35_forget.lut: `forget p` on Pos loads, `forget 3` is \"forget applied to 3 : Int, which is not a subtype\". No test or library uses forget.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#49",
+    "spec_ref": "docs/semantica/02-grammar.md:89",
+    "claim": "atom \".\" name: projection after an atom.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:378-385"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:353"
+    ],
+    "evidence": "(mk 4.0).k evaluates to 4.0 in the test.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#50",
+    "spec_ref": "docs/semantica/02-grammar.md:92",
+    "claim": "lparam ::= name | ( names : term ) | ( pattern {, pattern} ): a lambda takes tuple patterns.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/parser.py:462-489"
+    ],
+    "test_refs": [],
+    "evidence": "g25 `sumPair : Int * Int -> Int := \\ (a, b) { a + b }`, `sumPair (2, 3)` = 5. No test, library, example or README uses a tuple-pattern lambda.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#51",
+    "spec_ref": "docs/semantica/02-grammar.md:96-98",
+    "claim": "A pattern name is a constructor of the scrutinee's data type or a label of its sum if it names one, a variable otherwise; a label is an injection (circle 2.0, true against Bool).",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1891-1899",
+     "src/luthier/checker.py:1919-1959",
+     "src/luthier/checker.py:1780-1794"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:107",
+     "tests/spec/k_union.accept.lut",
+     "tests/test_kernel.py:155"
+    ],
+    "evidence": "bind_pattern resolves labels and constructors against the scrutinee type; try_injection builds Inj.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#52",
+    "spec_ref": "docs/semantica/02-grammar.md:98-99",
+    "claim": "A union < ... > as the argument of an application needs parentheses.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/parser.py:387-399"
+    ],
+    "test_refs": [],
+    "evidence": "g20_union_argument.lut `T = Id < a : Int | b : Bool >` fails to parse; g20b with parentheses loads. Not tested.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#53",
+    "spec_ref": "docs/semantica/02-grammar.md:103-106",
+    "claim": "The surface forms translate into kernel terms per the table of 04 §5.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:254-260",
+     "src/luthier/parser.py:271-290",
+     "src/luthier/checker.py:1289-1294",
+     "src/luthier/checker.py:1103-1134"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:87",
+     "tests/test_kernel.py:342"
+    ],
+    "evidence": "The list in 02 §4 matches the rows of 04 §5 (04-kernel.md:153-169). The row for m.f there says a module is a record (see #56).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#54",
+    "spec_ref": "docs/semantica/02-grammar.md:110-112",
+    "claim": "The parser leaves ->, *, + and pattern names to the checker, and the checker reads the whole file before checking any act.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/syntax.py:118-130",
+     "src/luthier/checker.py:159-170"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:137"
+    ],
+    "evidence": "Arrow and BinOp nodes are kept; Checker.load builds objects from the whole file. The parser does desugar binders, clauses, if, let and list literals, so 'acts as written' is loose wording.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#55",
+    "spec_ref": "docs/semantica/02-grammar.md:116-118",
+    "claim": "e.position elaborates to a one-branch match on the type's component pattern, works after a parenthesis and through refinements.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1103-1134"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:342",
+     "tests/test_kernel.py:353",
+     "tests/test_kernel.py:380"
+    ],
+    "evidence": "project strips refinements and returns Match(term, keep_only pattern).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#56",
+    "spec_ref": "docs/semantica/02-grammar.md:118-119",
+    "claim": "A module imported as m is a record whose components are its definitions, so m.f is the same dot.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/cli.py:88-90",
+     "src/luthier/checker.py:94-102"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "m.f works by name prefixing; m is no value: mods/m04_module_value.lut `x := m` fails \"unbound name m\". 03 §1 (l.16) says that in version 0 a module is not built as a value, so 02 §6 and 04 §5 contradict 03 §1.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#57",
+    "spec_ref": "docs/semantica/02-grammar.md:119-121",
+    "claim": "Resolution: the whole name as a qualified name first; otherwise the longest prefix that is a variable or definition, then one projection per segment.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/checker.py:888-903",
+     "src/luthier/checker.py:1077-1101"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:353"
+    ],
+    "evidence": "As written; consequence untested: a module name hides a local of the same name. mods/m14_dotted_shadow.lut: import \"fa\" as m; `f (m : R) : Int := m.k`; `f (1, 2)` gives 7 (the module's k), not 1.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#58",
+    "spec_ref": "docs/semantica/02-grammar.md:121-123",
+    "claim": "In a dependent product a later component's type may mention earlier ones, and the type of d.m replaces them by projections of d.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1130-1134"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:369"
+    ],
+    "evidence": "Test asserts d.m : { k : Int | k <= d.n }.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#59",
+    "spec_ref": "docs/semantica/02-grammar.md:127-128",
+    "claim": "let p = e in body is match e { p -> body }, the pattern a name or a tuple.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/parser.py:425-434",
+     "src/luthier/checker.py:1714-1724"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:34",
+     "tests/test_sugar.py:41"
+    ],
+    "evidence": "Any pattern is parsed. A constructor pattern is caught by coverage (g19b \"does not cover: nil\"), a literal is not: g19_let_literal.lut `f (x : Int) : Int := let 0 = x in 5` loads, and `f 7` fails at run time \"no branch of a match applies to its value\".",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#60",
+    "spec_ref": "docs/semantica/02-grammar.md:130",
+    "claim": "-x is 0 - x on Int, 0.0 - x on Float64, an error on any other type.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:366-371",
+     "src/luthier/checker.py:1277-1287"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:48",
+     "tests/test_sugar.py:53"
+    ],
+    "evidence": "Also an error on Rational (g17b), as the text says.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#61",
+    "spec_ref": "docs/semantica/02-grammar.md:131-132",
+    "claim": "-x binds looser than application (-f x is -(f x)); f -x is f - x.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/parser.py:365-371"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:48"
+    ],
+    "evidence": "g17c: `-sq 3` = -9, `sq (-3)` = 9; g17 `sq -3` is a type error on '-'. The tests cover -3, -(..) and 2 * -3 but neither -f x nor f -x.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#62",
+    "spec_ref": "docs/semantica/02-grammar.md:133-136",
+    "claim": "{A B : U} before the other parameters makes them implicit, inferred by first-order matching through aliases and refinements; an unannotated lambda is checked after the others.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/parser.py:190-195",
+     "src/luthier/checker.py:1155-1275"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:66"
+    ],
+    "evidence": "Tests cover products, functions, lambdas and List. Through an alias and a refinement it works but is untested: g28 `fstOf {A : U} (p : Pair2 A)` on `Pair2 Int`, `idOf` on Pos, both load. Implicit after explicit is a parse error (g18), consistent with 'before'.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#63",
+    "spec_ref": "docs/semantica/02-grammar.md:136-138",
+    "claim": "When the first argument is a type, the implicit parameters are taken as given explicitly.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1162-1168"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:74"
+    ],
+    "evidence": "first Int String (4, \"y\") evaluates to 4.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#64",
+    "spec_ref": "docs/semantica/02-grammar.md:138-140",
+    "claim": "An implicit parameter is a type or a type operator; one that no argument determines is an error asking for it explicitly.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:544-551",
+     "src/luthier/checker.py:1196-1200",
+     "src/luthier/checker.py:1262-1267"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:79",
+     "tests/test_sugar.py:84"
+    ],
+    "evidence": "An implicit type operator is accepted but never solved from F A: unify matches application heads by name only. g29_implicit_type_operator.lut `keep {F : U -> U} {A : U} (x : F A)` with `keep l`, l : List Int, fails \"cannot infer the implicit parameter(s) F, A\" even though the argument determines both; explicit `keep List Int l` (g29b) loads.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#65",
+    "spec_ref": "docs/semantica/02-grammar.md:144-146",
+    "claim": "Open: quote/unquote, local definitions in a block, saved evaluation.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/lexer.py:6",
+     "src/luthier/syntax.py:3-4"
+    ],
+    "test_refs": [],
+    "evidence": "Not implemented, declared open. The lexer already tokenizes '{ and ${ (lexer.py:6,19), which no parser rule uses.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#66",
+    "spec_ref": "docs/semantica/03-libraries.md:9-14",
+    "claim": "A file denotes a value of a dependent record type; a library with holes is a function of its holes.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [
+     "src/luthier/cli.py:57-114"
+    ],
+    "test_refs": [],
+    "evidence": "Reading, not behavior; l.16 says version 0 doesn't build modules as values.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#67",
+    "spec_ref": "docs/semantica/03-libraries.md:16-18",
+    "claim": "In version 0 a module is implemented by prefixing names; an implementation of a theory is a value passed like any other.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:46-47",
+     "src/luthier/cli.py:88-93",
+     "src/luthier/lib/table_python.lut:15"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307",
+     "tests/test_kernel.py:213"
+    ],
+    "evidence": "Loader qualifies names by prefix; models like csv : Codec and z3 : Group Z3 are ordinary values.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#68",
+    "spec_ref": "docs/semantica/03-libraries.md:22",
+    "claim": "import \"x.lut\" flat: the definitions enter the importer's namespace.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:88-90"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:283"
+    ],
+    "evidence": "A flat import loads under the importer's prefix.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#69",
+    "spec_ref": "docs/semantica/03-libraries.md:23",
+    "claim": "import \"x.lut\" as m: reached as m.f, with no collisions.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:1796-1811",
+     "src/luthier/checker.py:1813-1816"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "The labels of a qualified module land unprefixed in one global table and collide with the importer's. mods/m05c: import \"colors\" as m (Color = < red | green >) plus a local Light = < red | off >; `u := red` fails \"label red belongs to several sums\", while m05b (same file without the import) loads.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#70",
+    "spec_ref": "docs/semantica/03-libraries.md:25-26",
+    "claim": "Search next to the importing file, then LUTHIER_PATH, then the package's lib/; .lut is optional.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:26-43"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:322",
+     "tests/test_kernel.py:283"
+    ],
+    "evidence": "mods/m11_search_order.lut gives 13 = 7 (local fa over LUTHIER_PATH fa) + 5 (LUTHIER_PATH) + 1 (local random.lut over lib/random). The order itself is not tested. Also searches PACKAGE_DIR fourth, which the text omits.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#71",
+    "spec_ref": "docs/semantica/03-libraries.md:26-27",
+    "claim": "Importing twice under one prefix does nothing; the same file may be loaded under two prefixes.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:73-77",
+     "src/luthier/cli.py:113"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:283"
+    ],
+    "evidence": "Keyed by (path, prefix). The two-prefix case is untested: mods/m10_two_prefixes.lut `p.k + q.k` = 14.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#72",
+    "spec_ref": "docs/semantica/03-libraries.md:27",
+    "claim": "A cycle of imports is an error; core.lut is imported implicitly.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:78-80",
+     "src/luthier/cli.py:224-232"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:283"
+    ],
+    "evidence": "m12 self-import gives \"import cycle\"; --no-core removes Int (m13).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#73",
+    "spec_ref": "docs/semantica/03-libraries.md:29-30",
+    "claim": "Inside a module m a name resolves as m.x first, then x (core and what the root imported flat).",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/checker.py:97-102",
+     "src/luthier/cli.py:88-98"
+    ],
+    "test_refs": [],
+    "evidence": "m.x first holds (mods/m15: m.useK = 1, not the root's k = 7). The fallback is whatever is loaded unprefixed so far, which depends on import line order: m06 (import \"fa\" then import \"fb\" as m, fb using k) loads, m07 (the two lines swapped) fails \"in m.j: unbound name k\".",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#74",
+    "spec_ref": "docs/semantica/03-libraries.md:30",
+    "claim": "A module does not see the definitions of the file that imports it.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/cli.py:88-98"
+    ],
+    "test_refs": [],
+    "evidence": "Imports load before the importer's acts. mods/m08: fc uses r defined by its importer and fails \"in m.j2: unbound name r\". No test.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#75",
+    "spec_ref": "docs/semantica/03-libraries.md:30-31",
+    "claim": "Constructors, data types and the labels of sums named by an alias are prefixed like functions.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/checker.py:1796-1811",
+     "src/luthier/checker.py:775-812"
+    ],
+    "test_refs": [],
+    "evidence": "Constructors and data types are prefixed (m03: m.leaf, m.node work; m03b bare `leaf` unbound). Labels are not: mods/m01_label_prefixed.lut `m.pick m.red` fails \"unbound name m.red\"; m02 `m.pick red` and `b : m.Color := green` load.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#76",
+    "spec_ref": "docs/semantica/03-libraries.md:33-34",
+    "claim": "Within a file order does not matter; between files a file sees what it imports.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/graph.py",
+     "src/luthier/cli.py:88-98"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:137"
+    ],
+    "evidence": "Acts are order-free (tested). But a file sees names it never imported and the order of import lines matters: mods/fb.lut has no import and uses k; m06 loads it (k from fa, imported earlier by the root), m07 swaps the lines and fails; m09 (import \"fb\" alone) fails.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#77",
+    "spec_ref": "docs/semantica/03-libraries.md:38-40",
+    "claim": "A file may declare a value with its laws and another give it a body; a written type must agree with the declaration, an omitted one is inherited.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:173-211"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:296",
+     "tests/test_certificates.py:41"
+    ],
+    "evidence": "mods/sq_impl.lut fills sq_spec's sqrt : SquareRoot; sq_impl_typed_wrong.lut fails \"declared with type SquareRoot, but is defined with Float64 -> Float64\".",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#78",
+    "spec_ref": "docs/semantica/03-libraries.md:40-42",
+    "claim": "The laws of the declared type become obligations of the definition in the other file.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:850-877"
+    ],
+    "test_refs": [
+     "tests/test_certificates.py:41",
+     "tests/test_kernel.py:183"
+    ],
+    "evidence": "`luthier check -v sq_impl.lut` lists \"sqrt: SquareRoot [pending; sq_impl.lut]\"; `luthier test --no-cert` runs and passes it.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#79",
+    "spec_ref": "docs/semantica/03-libraries.md:45",
+    "claim": "A declared type may be defined by its laws in another file.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:1988-1999"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:332"
+    ],
+    "evidence": "Even : Int declared in theory.lut, defined by a predicate in model.lut.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#80",
+    "spec_ref": "docs/semantica/03-libraries.md:45-48",
+    "claim": "A definition may not use a type no file has defined (05 R2), nor an extern give a type (05 R5); the opaque-carrier pattern is gone.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/checker.py:395-420",
+     "src/luthier/checker.py:652-672"
+    ],
+    "test_refs": [
+     "tests/spec/r2_definition.reject.lut",
+     "tests/spec/r5_extern_type.reject.lut",
+     "tests/spec/r5_extern_over_declared.reject.lut"
+    ],
+    "evidence": "Both rejections work. 03 omits that `extern provisional` keeps the opaque carrier (r5_extern_provisional.accept.lut, decided in 05 R5); missing cross-reference.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#81",
+    "spec_ref": "docs/semantica/03-libraries.md:48-55",
+    "claim": "Libraries follow one pattern: the pure file has native types, a native definition of each operation, holes for the faster ones and the laws; the _python file fills the holes with externs, gives generators, and certifies each extern against its native definition or the laws of its theory.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:12-19",
+     "src/luthier/lib/real_python.lut:5-14",
+     "src/luthier/lib/table_python.lut:7-9",
+     "src/luthier/lib/array.lut:323-352"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:200"
+    ],
+    "evidence": "array/array_python follow it. Exceptions: real_python binds exp, log, erf, cbrt, ulp, round to Python with no law anywhere (only abs is tested; sqrt is certified via rational.lut float64Sqrt); real.lut itself holds the extern toFloat64; table_python adds new externs parseTable, renderTable, parseError instead of filling holes of table.lut, and parseError has no law; array.lut has no native definition for total, product, minimum, maximum, maxAbs, maxAbsMat, cond, solve, approxVec, approxMat (laws only).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#82",
+    "spec_ref": "docs/semantica/03-libraries.md:59-61",
+    "claim": "luthier test x.lut writes x.cert.json recording, per definition, each law with mode, cases, result, generators per variable, seed and first cases.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:360-374",
+     "src/luthier/certify.py:326-351"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:253",
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "certs/lib1.cert.json: entry keys hash, mode, n, seed, run_seed, generators, laws; each law has mode, cases, passed, domains, sample_cases.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#83",
+    "spec_ref": "docs/semantica/03-libraries.md:61-63",
+    "claim": "The hash covers the definition's dependency cone, transitively, with the module prefix removed and bound variables renamed canonically.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/certify.py:36-55",
+     "src/luthier/certify.py:95-124",
+     "src/luthier/certify.py:240-249"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:262",
+     "tests/test_kernel.py:307"
+    ],
+    "evidence": "canonical_text strips the prefix and alpha-normalizes. The hash also covers the Python of externs and the interpreter's sources, documented in 05 §7 but not here.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#84",
+    "spec_ref": "docs/semantica/03-libraries.md:63",
+    "claim": "Changing a definition changes the hash of everything that uses it.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/subst.py:213-216",
+     "src/luthier/lexer.py:18",
+     "src/luthier/certify.py:95-124"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:262"
+    ],
+    "evidence": "Canonical bound names are _0, _1, ..., and the lexer accepts a global named _0 (#1). With `_0 : Int := 5`, f x y := x + _0 + 0 * _0 and f x y := x + x + 0 * _0 render to the same canonical text and the same definition_hash (checked in Python), while `f 1 2` evaluates to 6 and 2. A certificate of one is accepted for the other.",
+    "severity": "high"
+   },
+   {
+    "id": "spec-02-03#85",
+    "spec_ref": "docs/semantica/03-libraries.md:65-67",
+    "claim": "On import a certificate entry is accepted if it passed and its hash matches; the definition is certified and test does not run it again unless --deep.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:116-152",
+     "src/luthier/cli.py:333-334",
+     "src/luthier/testing.py:352-359"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307",
+     "tests/test_certificates.py:84"
+    ],
+    "evidence": "certs/: `test app1.lut --name L.inc` prints \"certified ..., not rerun\". Acceptance also requires unchanged generators and the directive's case count (05 §7), and the top file's own definitions are always rerun (deep or is_top). The not-rerun path has no test.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#86",
+    "spec_ref": "docs/semantica/03-libraries.md:67-68",
+    "claim": "A mismatched hash makes the entry stale and the obligation pending; check -v shows the state of each and lists provisional externs.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/cli.py:137-144",
+     "src/luthier/cli.py:239-275"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:307",
+     "tests/test_kernel.py:406",
+     "tests/test_certificates.py:27"
+    ],
+    "evidence": "After editing lib1.lut, check -v prints \"stale certificate: the code of its cone changed; needs test\".",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#87",
+    "spec_ref": "docs/semantica/03-libraries.md:70-71",
+    "claim": "Laws of the importer that mention imported functions are obligations of the importer and always run.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/cli.py:296-298",
+     "src/luthier/cli.py:330-334"
+    ],
+    "test_refs": [],
+    "evidence": "Top-file obligations always run with deep=True (is_top). No test states this case.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#88",
+    "spec_ref": "docs/semantica/03-libraries.md:71-73",
+    "claim": "--name m.f --deep runs an imported definition and writes into the certificate of its own file.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/cli.py:286-295",
+     "src/luthier/cli.py:365-374"
+    ],
+    "test_refs": [],
+    "evidence": "certs/: `luthier test app1.lut --name L.inc --deep` added a second entry to lib1.cert.json (1 to 2 entries); check -v then shows L.inc certified. No test.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#89",
+    "spec_ref": "docs/semantica/03-libraries.md:81",
+    "claim": "real, real_python: Float64 functions declared and bound to Python's math, approx, NonNegative, the tolerances of laws.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/real.lut:7-37",
+     "src/luthier/lib/real_python.lut:5-14"
+    ],
+    "test_refs": [
+     "tests/test_sugar.py:19-25",
+     "tests/test_bridge.py:200"
+    ],
+    "evidence": "Matches; toFloat64 is bound in real.lut itself. Loaded by test_sugar and test_bridge.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#90",
+    "spec_ref": "docs/semantica/03-libraries.md:82",
+    "claim": "random: Gen A = Nat -> Int -> A * Int, a congruential generator, generators for Int, Nat, Bool, Float64, lists.",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/random.lut:8-33"
+    ],
+    "test_refs": [],
+    "evidence": "Content matches (plus Seed). No pytest imports \"random\"; libload/use_random.lut loads, 2 laws certified.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#91",
+    "spec_ref": "docs/semantica/03-libraries.md:83",
+    "claim": "array, array_python: Vec, Mat, shapes, native definitions of every operation including determinant and Jacobi's spectrum, numpy leaves certified against them.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/array.lut:22-33",
+     "src/luthier/lib/array.lut:61-158",
+     "src/luthier/lib/array.lut:318-352",
+     "src/luthier/lib/array_python.lut:11-87"
+    ],
+    "test_refs": [],
+    "evidence": "detDef and Jacobi eigenDef exist; 10 operations have laws but no native definition (see #81). No pytest loads array or array_python; libload/use_array_python.lut loads with 1 law not run (IsGradient).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#92",
+    "spec_ref": "docs/semantica/03-libraries.md:84",
+    "claim": "algebra, algebra_python: setoids, rings, fields, vector and inner product spaces, linear maps; instances on Int, Float64, vectors.",
+    "status": "contradicts",
+    "impl_refs": [
+     "src/luthier/lib/algebra.lut:196-215",
+     "src/luthier/lib/algebra_python.lut:1-8",
+     "src/luthier/lib/algebra_python.lut:37-44"
+    ],
+    "test_refs": [
+     "tests/test_kernel.py:517-521"
+    ],
+    "evidence": "The structures are there. Instances are only on Int (intRing), Bool (allOf, anyOf), NonNegative (largest) and Rational (rational.lut). None on Float64, no VectorSpace, InnerProductSpace or LinearMaps instance on vectors: algebra_python.lut:7-8 says it \"replaces the vector space, the Euclidean space and the linear maps over float64Field\". algebra.lut:12-15 comments also still promise them.",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#93",
+    "spec_ref": "docs/semantica/03-libraries.md:85-87",
+    "claim": "probability (samplers, likelihoods, kernel with three presentations, Gaussian and profile, ensemble diagnostics), belief (discrete and Laplace beliefs, laws), optimization (Levenberg-Marquardt in pieces, each with its law).",
+    "status": "implemented_untested",
+    "impl_refs": [
+     "src/luthier/lib/probability.lut:104-327",
+     "src/luthier/lib/belief.lut:29-216",
+     "src/luthier/lib/optimization.lut:16-122"
+    ],
+    "test_refs": [],
+    "evidence": "Content matches the table. No pytest loads any of the three; libload/use_*.lut all load (52, 59, 66 laws pending without the _python fillings).",
+    "severity": "medium"
+   },
+   {
+    "id": "spec-02-03#94",
+    "spec_ref": "docs/semantica/03-libraries.md:88",
+    "claim": "table, table_python: native tables, the CSV codec as a theory and its model.",
+    "status": "implemented_tested",
+    "impl_refs": [
+     "src/luthier/lib/table.lut:37-51",
+     "src/luthier/lib/table.lut:79-244",
+     "src/luthier/lib/table_python.lut:15"
+    ],
+    "test_refs": [
+     "tests/test_bridge.py:200"
+    ],
+    "evidence": "Table by laws, Codec with seven laws, csv : Codec certified (libload use_table_python: 0 pending).",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#95",
+    "spec_ref": "docs/semantica/03-libraries.md:79-88",
+    "claim": "The table lists the libraries of src/luthier/lib/.",
+    "status": "partial",
+    "impl_refs": [
+     "src/luthier/lib/text.lut",
+     "src/luthier/lib/rational.lut",
+     "src/luthier/lib/probability_python.lut"
+    ],
+    "test_refs": [],
+    "evidence": "text.lut, rational.lut and probability_python.lut exist and are absent from the table.",
+    "severity": "low"
+   },
+   {
+    "id": "spec-02-03#96",
+    "spec_ref": "docs/semantica/03-libraries.md:92-96",
+    "claim": "Open: modules as values and functors; visibility; Python package declarations; certifying over provisional imports; minimum grade required by an importer.",
+    "status": "spec_open_or_nonnormative",
+    "impl_refs": [],
+    "test_refs": [],
+    "evidence": "Declared open; none implemented, as expected.",
+    "severity": "low"
+   }
+  ],
+  "notes": "I checked every normative sentence of 02-grammar.md and 03-libraries.md against lexer.py, parser.py, syntax.py, checker.py, cli.py and certify.py, and against every library file. The minimal programs are in /tmp/claude-1000/-home-lmoffatt-Projects-luthier/8d5ce152-b54e-48c4-a388-e7a9ccb80792/scratchpad/audit/spec-02-03/: g*.lut for grammar, mods/ for imports, certs/ for certificates (written there by `luthier test`), libload/ for loading each library from the package lib/. Nothing under the repository was modified. I never ran `luthier certify`.\n\nThe short answer for the grammar: 02 says (l.4) that it is the syntax the parser accepts, and it isn't quite. Ten divergences are confirmed with programs.\n\n1. The definition production puts clauses after a \":=\" body, but the parser does the reverse (#14).\n2. The \";\" in data and match is marked optional but is required (#17, #43).\n3. A line break doesn't separate record-value fields (#41).\n4. A subtype binder can't be a tuple pattern (#40).\n5. A one-component record has no .field (#38).\n6. The reserved-word list is stale: let, in, primitive and axiom are also reserved (#8).\n7. A number pattern with an exponent crashes with a Python ValueError (#44).\n8. Non-ASCII string literals are decoded as Latin-1, so \"é\" becomes \"Ã©\" (#3).\n9. An operator directive accepts any operator. In particular `operator ==` overrides structural equality and bypasses 05 R8 on functions (#24).\n10. The lexer accepts names starting with '_' (#1). Because canonical bound names are _0, _1, ..., two different definitions can get the same certificate hash (#84). That hits 03 §4's promise that changing a definition changes the hash.\n\nFor 03, the import model diverges in three places:\n- Labels of sums named by an alias are not prefixed (#75) and collide across qualified imports (#69).\n- A module falls back to whatever is already loaded unprefixed, so it sees names it never imported, and the order of import lines changes whether a program loads (#73, #76).\n- 02 §6 and 04 §5 call an imported module a record value, while 03 §1 says version 0 doesn't build one; the code follows 03 (#56).\n\nThe library table is stale for algebra: there are no instances on Float64 or vectors (#92). The one-pattern rule for _python files has exceptions (#81).\n\nCoverage: no pytest loads random, array, array_python, algebra_python, rational, probability, probability_python, belief or optimization. I checked that all of them load today. These forms have no test: forget, tuple-pattern lambdas, extern used as a term, binary named sums, `--name m.f --deep`, and a module not seeing its importer.\n\nOutside my scope, but noticed: a match over a tuple (including clauses with two or more parameters) has no coverage check, so a missing case fails at run time (g27). The spec states no coverage rule. tests/test_audit_correspondence.py and scripts/audit_correspondence.py appeared untracked in the working tree during the audit. They weren't written by me."
+ }
+}
