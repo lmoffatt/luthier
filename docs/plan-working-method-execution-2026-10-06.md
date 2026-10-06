@@ -1,6 +1,6 @@
 # Execution plan: putting the working method into practice, 2026-10-06
 
-Draft 1, 2026-10-06. Status: phase 0 is done; the rest is to do, in the order of the table below.
+Draft 1, 2026-10-06. Status: as in the table below.
 
 Written for the sessions that carry out the plan. It assumes no memory of the conversations that
 produced it; everything needed is here or in the files named.
@@ -55,24 +55,24 @@ Sonolocalización tracks 234 files under `prototipo-cero/2026-09-07/derived/` an
 
 ## Order
 
-| Step | What | Waits for | Runs |
-|---|---|---|---|
-| 2.3a | git for the model's memory | nothing | the model |
-| 2.3b | git for the oral transcriptions | nothing | the model |
-| 3.1 | manifests of the data of sonolocalización | nothing | the model |
-| 4.2 | specification against tests | nothing | the model |
-| 1.1 | `scripts/export_chat.py` | nothing to write it; bite 1 to commit an export | written by the model, run by Luciano |
-| 1.2 | `docs/principles.md` | nothing | the model |
-| 1.3 | `docs/decisions.md` | nothing | the model |
-| 4.3 | header check | nothing | the model |
-| 1.4 | the record in sonolocalización | 1.2, 1.3 | the model |
-| 4.1 | check of quotes | 1.3, bite 2 | the model |
-| 2.1 | `CLAUDE.md` in both repositories | bite 3 | the model |
-| 2.2 | reminder of commits with no decision | 1.3, bite 2 | the model |
-| 5.1 | fidelity audit | an export of session `7217f251` (1.1) | written by the model, run by Luciano |
-| 5.2 | principles audit | 1.2, 1.3; bite 4 for its hook | written by the model, run by Luciano |
-| 5.3 | correspondence audit, the part that needs a model | 4.2 | written by the model, run by Luciano |
-| 6 | the list of working method §12 | per item | per item |
+| Step | What | Status |
+|---|---|---|
+| 1.1 | `scripts/export_chat.py` | done, `6603948`; an export is committed after Luciano skims it |
+| 1.2 | `docs/principles.md` | done, `f3cc031` |
+| 1.3 | `docs/decisions.md` | done, `f3cc031`, entries added as decisions are taken |
+| 1.4 | the record in sonolocalización | done, `sonolocalizacion@ede219f` |
+| 2.1 | `CLAUDE.md` in both repositories | done, `fea45bf` and `sonolocalizacion@e4d5658` |
+| 2.2 | reminder of commits with no decision | dropped, D-2026-10-06-s |
+| 2.3a | git for the model's memory | done; a Stop hook in `~/.claude/settings.json` commits it |
+| 2.3b | git for the oral transcriptions | done, `139f059` in that folder |
+| 3.1 | manifests of the raw data of sonolocalización | done, `sonolocalizacion@3107f50`; `derived/` left out |
+| 4.1 | `scripts/check_quotes.py` | done, `0185d22`; the record passes |
+| 4.2 | `scripts/check_spec_tests.py` | done, `f079e0d` |
+| 4.3 | header check | dropped, D-2026-10-06-s |
+| 5.1 | fidelity audit | to do; needs an export of `7217f251` |
+| 5.2 | principles audit | to do; run by hand before a push |
+| 5.3 | correspondence audit | first run by workflow on `f079e0d`, D-2026-10-06-x |
+| 6 | the list of working method §12 | items 1, 4, 5, 10, 11, 12 done |
 
 The git for large derived data is deferred (decision D-2026-10-06-i) until a derived file exists that
 is expensive to produce again and changes between runs. It has no step.
