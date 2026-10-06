@@ -88,14 +88,28 @@ Assumption: what can't be understood can at least be located.
 Status:     current since 2026-10-06; how to contain it is open
 
 P10 The mathematical object that best represents a concept is the invariant of its type.
-Source:     luthier@61a7487:docs/semantica/07-characterizations.md:8
-Status:     current since 2026-10-05; source to pin: a document of the model citing him, his
-            words are in a session of 2026-10-05
+Quote:      "La idea en realidad es buscar el objeto matematico que mejor lo represente y
+            decirlo."
+            "mas que decirlo, ponerlo como invariante"
+Source:     chat:52d3e68e:2760
+            chat:52d3e68e:2772
+Assumption: a concept has one mathematical object that represents it best, and stating it as the
+            invariant costs less than the ad hoc laws that reproduce an implementation.
+Status:     current since 2026-10-05; the two turns are in a session of sonolocalización, sent
+            while the model wrote 07-characterizations.md, whose line 8
+            (luthier@61a7487:docs/semantica/07-characterizations.md:8) states it as his
 
 P11 Every criterion is a parameter, never a constant in the code.
-Source:     /home/lmoffatt/.claude/projects/-home-lmoffatt-Projects-sonolocalizacion/memory/nunca-hardcodear.md:9
-Status:     current since 2026-09-11; source to pin: a memory file of the model, which says he
-            said it on 2026-09-11 after finding TRACE_MS = 5.0 in 02_fine_peaks.py
+Quote:      "o sea, el script debe tener como argumento el ancho de la ventana, si es un numero
+            arbitrario..."
+            "NUNCA HARDCORDED ARGUMENTS EVER, ponelo en tu memoria"
+Source:     chat:6878a98d:1148
+            chat:6878a98d:1175
+Assumption: a criterion fixed in the code is wrong for some case and nobody sees it; passing it
+            as an argument costs little.
+Status:     current since 2026-09-10 (the two turns are of 2026-09-10 in UTC and in Buenos
+            Aires; the memory file nunca-hardcodear.md of sonolocalización says 2026-09-11), said
+            after the model picked a window of 5 ms in 02_fine_peaks.py without a reason
 
 P12 Luciano's attention is the scarce resource; what reaches him is synthesized according to the
                 objectives of the project.
