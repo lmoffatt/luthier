@@ -72,7 +72,7 @@ Sonolocalización tracks 234 files under `prototipo-cero/2026-09-07/derived/` an
 | 5.1 | fidelity audit | to do; needs an export of `7217f251` |
 | 5.2 | principles audit | to do; run by hand before a push |
 | 5.3 | correspondence audit | first run by workflow on `f079e0d`, D-2026-10-06-x |
-| 6 | the list of working method §12 | items 1, 4, 5, 10, 11, 12 done |
+| 6 | the list of working method §12 | items 1, 3, 4, 5, 10, 11, 12 done |
 
 The git for large derived data is deferred (decision D-2026-10-06-i) until a derived file exists that
 is expensive to produce again and changes between runs. It has no step.
@@ -319,7 +319,7 @@ Each item is a logged decision with its own commit. Working method §12 names th
 |---|---|---|
 | 1 | Commit `Lucianos feedbacks/` and `funcion de los tipos en Luthier.txt` in sonolocalización | bite 11 |
 | 2 | Add the commit to the citations of item 1 | the model, after item 1 |
-| 3 | The certification logs of 2026-10-05/06 | the model: a note in `plan-2026-10-06.md` saying they are gone, unless Luciano has them |
+| 3 | The certification logs of 2026-10-05/06 | done: found in the scratchpad of session c7437496, committed at `sonolocalizacion@81ba456`, and `plan-2026-10-06.md` says where each figure is |
 | 4 | Decision log and principles | phase 1 |
 | 5 | The notes at the end of `lib/random.lut` | done, `d41026e` |
 | 6 to 8 | Moving the surveys of prior art and the answers of other models | the model, one commit each, references updated in the same commit |

@@ -509,7 +509,9 @@ harm. Each item ends with its state at draft 2, from the table of
 3. The certification logs of 2026-10-05/06, cited by `plan-2026-10-06.md`, are stored nowhere.
    Recover them, or say in the plan that they are gone.
 
-   State: pending. Unless Luciano has them, a note in `plan-2026-10-06.md` will say they are gone.
+   State: done. They were in the scratchpad of session c7437496, a tmpfs; they are committed at
+   `sonolocalizacion@81ba456:prototipo-cero/luthier/certification-logs-2026-10-05-06/`, and
+   `plan-2026-10-06.md` says where each figure it cites is.
 4. No decision log and no list of principles in either repository.
 
    State: done, `f3cc031` here and `sonolocalizacion@ede219f`, by D-2026-10-06-b (one decision log
