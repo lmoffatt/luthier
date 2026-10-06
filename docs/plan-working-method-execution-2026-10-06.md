@@ -12,7 +12,7 @@ Sources:
   for a bite there doesn't start until the bite has his answer. His answer is a line under the bite
   that `git diff <commit of draft 2> -- docs/plan-working-method-2026-10-06.md` shows as added.
 - The working method, `docs/working-method.md`, cited by section number and title.
-- `docs/plan-mechanical-rules-2026-10-06.md` (untracked on 2026-10-06), cited as
+- `sonolocalizacion@3023967:docs/plan-mechanical-rules-2026-10-06.md`, cited as
   `plan-mechanical-rules`: the lints and hooks of sonolocalización. Several steps here meet it.
 - Draft 1 of the plan, `32f82a7`, which held both documents in one.
 
