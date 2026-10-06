@@ -1,0 +1,42 @@
+{
+  "about": "Units of the correspondence audit of Luthier, read by scripts/audit_correspondence.py. Each unit is one model call that maps one direction over its files, then one skeptic call that tries to refute what the first found. direction: spec (specification to implementation), impl (implementation to specification), docs (documentation to specification and implementation). files is text for the prompt. verify says which entries of a map go to its skeptic: every entry whose status is not in exclude_statuses, plus the first spot_checks entries whose status is spot_check_status. audited_paths are the paths the script warns about when they have uncommitted changes, since the audit reads the commit.",
+  "audited_paths": ["src", "docs/semantica", "tests", "README.md", "examples"],
+  "verify": {
+    "claims": {
+      "exclude_statuses": ["implemented_tested", "spec_open_or_nonnormative"],
+      "spot_check_status": "implemented_tested",
+      "spot_checks": 4
+    },
+    "behaviors": {
+      "exclude_statuses": ["covered"],
+      "spot_check_status": "covered",
+      "spot_checks": 3
+    }
+  },
+  "units": [
+    {"label": "spec-00-01", "direction": "spec",
+     "files": "docs/semantica/00-fundamental-elements.md and docs/semantica/01-construction-pattern.md"},
+    {"label": "spec-02-03", "direction": "spec",
+     "files": "docs/semantica/02-grammar.md and docs/semantica/03-libraries.md (check the grammar against src/luthier/lexer.py, parser.py, syntax.py, and the libraries against src/luthier/lib/)"},
+    {"label": "spec-04", "direction": "spec",
+     "files": "docs/semantica/04-kernel.md"},
+    {"label": "spec-05", "direction": "spec",
+     "files": "docs/semantica/05-static-semantics.md, every section (rules R1 to R11, reports, certification, presentations, open)"},
+    {"label": "spec-06", "direction": "spec",
+     "files": "docs/semantica/06-numbers.md"},
+    {"label": "spec-07", "direction": "spec",
+     "files": "docs/semantica/07-characterizations.md"},
+    {"label": "spec-08", "direction": "spec",
+     "files": "docs/semantica/08-tests.md"},
+    {"label": "impl-checker", "direction": "impl",
+     "files": "src/luthier/checker.py"},
+    {"label": "impl-eval", "direction": "impl",
+     "files": "src/luthier/evaluator.py, machine.py, subst.py"},
+    {"label": "impl-front", "direction": "impl",
+     "files": "src/luthier/lexer.py, parser.py, syntax.py, pretty.py, api.py, and src/luthier/core.lut"},
+    {"label": "impl-tools", "direction": "impl",
+     "files": "src/luthier/cli.py, certify.py, testing.py, generators.py, graph.py, arrays.py, tables.py, rational.py, text.py"},
+    {"label": "docs", "direction": "docs",
+     "files": "README.md and examples/ (and docs/semantica/README if any)"}
+  ]
+}

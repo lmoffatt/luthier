@@ -289,22 +289,27 @@ reminder hook before a push was dropped by D-2026-10-06-s.
 
 Done when: the calibration run ends with its comparison against the list above.
 
-### 5.3 The correspondence audit, the part that needs a model
+### 5.3 The correspondence audit
 
 Deferred by D-2026-10-06-s, then reinstated by D-2026-10-06-x: it is what matters most to Luciano.
-The first run is a workflow over the whole specification, both directions, at `f079e0d`; its
-report goes to `docs/audits/`. The design below is what a script will repeat at each round of the
-interpreter.
 
-`prompts/audit_correspondence_v1.md`, `scripts/audit_correspondence.py`. Inputs:
-`docs/semantica/05-static-semantics.md` §5, `tests/spec/`, `src/luthier/checker.py`. Output: for each
-rule, where its text and its tests disagree; and what `checker.py` rejects or accepts that no rule
-names. Step 4.2 is the mechanical half of the same audit.
+Both directions over the whole specification: each document of `docs/semantica/` against the code and
+the tests, each group of modules against the specification, and `README.md` and `examples/` against
+both; a skeptic per unit tries to refute each finding; one report for Luciano (a screen of summary,
+bites, tables). The first run was a workflow at `b15f2a1`.
 
-Calibration: on a scratch copy of `checker.py` with the check of one rule removed (R8, `==` exists
-only where equality is structural), the audit names R8.
+`scripts/audit_correspondence.py`, with `prompts/audit_correspondence_*_v1.md` and the units in
+`prompts/audit_correspondence_units_v1.json`. It pins a commit in a throwaway worktree, runs the
+calls there, resumes where a run stopped, and writes `docs/audits/<date>_correspondence_v1_<model>/`
+and the report. The permission rules of the calls are not a sandbox; the script compares Luciano's
+tree before and after and says so in the report if it changed. Start small:
+`python3 scripts/audit_correspondence.py --only spec-08 --model sonnet --no-report`.
 
-Done when: the calibration passes.
+Calibration: the first run of the script agrees with the workflow's run on the same commit, unit by
+unit, or each disagreement is settled by reading the source.
+
+Done when: the calibration passes. Step 4.2 is the mechanical half of the same audit; the check of
+traceability of D-2026-10-06-y will be the rest.
 
 ## Phase 6. The list of working method §12 (what is out of place today)
 
