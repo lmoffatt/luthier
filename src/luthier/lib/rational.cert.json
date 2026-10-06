@@ -1,0 +1,4860 @@
+{
+  "rationalField": [
+    {
+      "hash": "7bc7cb97557d5635",
+      "when": "2026-10-06T05:59:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 163603264,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "436531b93312dc48",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a + b } \\ a b { a + b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 697279/204725, b = 860493/920243, x = 412031/468608",
+            "a = 1468/635, b = 925153/465687, x = 246187/137540",
+            "a = -14684/14457, b = -211653/462926, x = 915527/231329",
+            "a = -493732/616911, b = -260125/137789, x = 149141/154991",
+            "a = 465494/622483, b = 128957/634093, x = 253184/992859"
+          ],
+          "outcome": "passed",
+          "seconds": 0.025,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 299107/13097",
+            "x = 35377/34161",
+            "x = 918205/877096",
+            "x = 550937/667905",
+            "x = -720916/141913"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 867127/360347",
+            "x = 80394/220415",
+            "x = -652669/838080",
+            "x = 609791/173230",
+            "x = 639867/348454"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "LeftInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -541742/759913",
+            "x = 66593/71731",
+            "x = -372182/489907",
+            "x = -211189/515775",
+            "x = -580476/310027"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "RightInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 380592/792781",
+            "x = 241959/229768",
+            "x = 37311/599578",
+            "x = -59611/481103",
+            "x = -882933/475543"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -583959/719608, y = 29867/114488",
+            "x = 949441/47247, y = -913879/676031",
+            "x = 249676/278053, y = -49200/37007",
+            "x = -252408/76831, y = 237178/141475",
+            "x = -965/81092, y = -667454/101903"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        },
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a * b } \\ a b { a * b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -142626/74737, b = 689140/769657, x = 829056/597745",
+            "a = -64627/161103, b = 440108/147743, x = -20364/110797",
+            "a = 203492/125575, b = -742357/538840, x = -194301/312859",
+            "a = -313917/773234, b = 175961/151649, x = -835013/574914",
+            "a = -293025/21356, b = -36238/41571, x = 236958/163135"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 122033/112293",
+            "x = 169786/830821",
+            "x = -130321/936879",
+            "x = -218059/73104",
+            "x = -448456/241291"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -1168/13237",
+            "x = -220319/492933",
+            "x = 266361/276320",
+            "x = -156754/23957",
+            "x = 83747/40602"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "LeftDistrib Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 576842/800479, x = 4435/328413, y = 422613/769991",
+            "a = 788712/324487, x = 179473/205650, y = -684553/313733",
+            "a = 182489/788015, x = -550460/406727, y = 211513/337101",
+            "a = 382922/349299, x = -64432/291337, y = -76162/121193",
+            "a = 167203/719508, x = -183085/425356, y = 238889/232402"
+          ],
+          "outcome": "passed",
+          "seconds": 0.022,
+          "skipped": 0
+        },
+        {
+          "label": "RightDistrib Rational Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -950027/215154, b = 120918/266629, x = -16733/969274",
+            "a = -580041/872288, b = -358040/727907, x = -200093/444375",
+            "a = -290596/333051, b = 751233/125672, x = -49467/18167",
+            "a = 490629/67373, b = 141451/56190, x = -848322/645409",
+            "a = 67682/22377, b = 115853/409467, x = 31493/68767"
+          ],
+          "outcome": "passed",
+          "seconds": 0.028,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -625419/355843, y = -318076/767555",
+            "x = -232924/248345, y = -593534/882291",
+            "x = 197957/48574, y = -675637/238364",
+            "x = -665233/122443, y = 352014/35981",
+            "x = -569944/370613, y = 292960/990649"
+          ],
+          "outcome": "passed",
+          "seconds": 0.014,
+          "skipped": 0
+        },
+        {
+          "label": "Invertible Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).add.monoid.unit (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.unit \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 76822/105869",
+            "x = 8236/230215",
+            "x = 129659/52222",
+            "x = -91790/797351",
+            "x = 4/63"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "Total Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 45207/661495, y = -186013/58329",
+            "x = -50651/222892, y = 137005/386977",
+            "x = 115223/446490, y = 357889/316663",
+            "x = -248461/231909, y = -79213/294076",
+            "x = 255504/384733, y = -657019/823752"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "Antisymmetric Rational ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.eq \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 15595/3689, y = -1581/38800",
+            "x = 114706/753595, y = 857135/142632",
+            "x = -612187/407109, y = -274615/249948",
+            "x = -98963/189133, y = 798514/391555",
+            "x = -155308/508995, y = -36337/288286"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "Transitive Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -801313/893868, y = -423303/19304, z = -627023/691232",
+            "x = 85261/801254, y = 764987/180858, z = -384249/68003",
+            "x = -864997/905963, y = 52726/887635, z = 464876/848561",
+            "x = -406123/109048, y = 468215/864562, z = -628145/581794",
+            "x = 334555/534358, y = 242338/607675, z = 264935/215738"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "AddMonotone Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 106978/923159, y = -993344/710665, z = -27164/8991",
+            "x = 51733/840970, y = 577560/844201, z = -511361/384846",
+            "x = 45061/165002, y = 63001/116040, z = -281649/369209",
+            "x = -767734/581345, y = -378709/766842, z = 73954/281953",
+            "x = 326761/713361, y = -622511/643307, z = -201671/566019"
+          ],
+          "outcome": "passed",
+          "seconds": 0.015,
+          "skipped": 0
+        },
+        {
+          "label": "MulPositive Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.mul.op ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.unit",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 845659/60569, y = 56378/48255",
+            "x = 79961/40886, y = -247342/137551",
+            "x = -796145/240612, y = 103406/2175",
+            "x = -47141/99599, y = -385137/335012",
+            "x = -892163/767029, y = 321976/524053"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "9751b58937878d6c",
+      "when": "2026-10-06T05:56:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 163603264,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "710a88968181942d",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a + b } \\ a b { a + b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 697279/204725, b = 860493/920243, x = 412031/468608",
+            "a = 1468/635, b = 925153/465687, x = 246187/137540",
+            "a = -14684/14457, b = -211653/462926, x = 915527/231329",
+            "a = -493732/616911, b = -260125/137789, x = 149141/154991",
+            "a = 465494/622483, b = 128957/634093, x = 253184/992859"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 299107/13097",
+            "x = 35377/34161",
+            "x = 918205/877096",
+            "x = 550937/667905",
+            "x = -720916/141913"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 867127/360347",
+            "x = 80394/220415",
+            "x = -652669/838080",
+            "x = 609791/173230",
+            "x = 639867/348454"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "LeftInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -541742/759913",
+            "x = 66593/71731",
+            "x = -372182/489907",
+            "x = -211189/515775",
+            "x = -580476/310027"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "RightInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 380592/792781",
+            "x = 241959/229768",
+            "x = 37311/599578",
+            "x = -59611/481103",
+            "x = -882933/475543"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -583959/719608, y = 29867/114488",
+            "x = 949441/47247, y = -913879/676031",
+            "x = 249676/278053, y = -49200/37007",
+            "x = -252408/76831, y = 237178/141475",
+            "x = -965/81092, y = -667454/101903"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        },
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a * b } \\ a b { a * b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -142626/74737, b = 689140/769657, x = 829056/597745",
+            "a = -64627/161103, b = 440108/147743, x = -20364/110797",
+            "a = 203492/125575, b = -742357/538840, x = -194301/312859",
+            "a = -313917/773234, b = 175961/151649, x = -835013/574914",
+            "a = -293025/21356, b = -36238/41571, x = 236958/163135"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 122033/112293",
+            "x = 169786/830821",
+            "x = -130321/936879",
+            "x = -218059/73104",
+            "x = -448456/241291"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -1168/13237",
+            "x = -220319/492933",
+            "x = 266361/276320",
+            "x = -156754/23957",
+            "x = 83747/40602"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "LeftDistrib Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 576842/800479, x = 4435/328413, y = 422613/769991",
+            "a = 788712/324487, x = 179473/205650, y = -684553/313733",
+            "a = 182489/788015, x = -550460/406727, y = 211513/337101",
+            "a = 382922/349299, x = -64432/291337, y = -76162/121193",
+            "a = 167203/719508, x = -183085/425356, y = 238889/232402"
+          ],
+          "outcome": "passed",
+          "seconds": 0.025,
+          "skipped": 0
+        },
+        {
+          "label": "RightDistrib Rational Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -950027/215154, b = 120918/266629, x = -16733/969274",
+            "a = -580041/872288, b = -358040/727907, x = -200093/444375",
+            "a = -290596/333051, b = 751233/125672, x = -49467/18167",
+            "a = 490629/67373, b = 141451/56190, x = -848322/645409",
+            "a = 67682/22377, b = 115853/409467, x = 31493/68767"
+          ],
+          "outcome": "passed",
+          "seconds": 0.025,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -625419/355843, y = -318076/767555",
+            "x = -232924/248345, y = -593534/882291",
+            "x = 197957/48574, y = -675637/238364",
+            "x = -665233/122443, y = 352014/35981",
+            "x = -569944/370613, y = 292960/990649"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        },
+        {
+          "label": "Invertible Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).add.monoid.unit (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.unit \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 76822/105869",
+            "x = 8236/230215",
+            "x = 129659/52222",
+            "x = -91790/797351",
+            "x = 4/63"
+          ],
+          "outcome": "passed",
+          "seconds": 0.019,
+          "skipped": 0
+        },
+        {
+          "label": "Total Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 45207/661495, y = -186013/58329",
+            "x = -50651/222892, y = 137005/386977",
+            "x = 115223/446490, y = 357889/316663",
+            "x = -248461/231909, y = -79213/294076",
+            "x = 255504/384733, y = -657019/823752"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "Antisymmetric Rational ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.eq \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 15595/3689, y = -1581/38800",
+            "x = 114706/753595, y = 857135/142632",
+            "x = -612187/407109, y = -274615/249948",
+            "x = -98963/189133, y = 798514/391555",
+            "x = -155308/508995, y = -36337/288286"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "Transitive Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -801313/893868, y = -423303/19304, z = -627023/691232",
+            "x = 85261/801254, y = 764987/180858, z = -384249/68003",
+            "x = -864997/905963, y = 52726/887635, z = 464876/848561",
+            "x = -406123/109048, y = 468215/864562, z = -628145/581794",
+            "x = 334555/534358, y = 242338/607675, z = 264935/215738"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "AddMonotone Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 106978/923159, y = -993344/710665, z = -27164/8991",
+            "x = 51733/840970, y = 577560/844201, z = -511361/384846",
+            "x = 45061/165002, y = 63001/116040, z = -281649/369209",
+            "x = -767734/581345, y = -378709/766842, z = 73954/281953",
+            "x = 326761/713361, y = -622511/643307, z = -201671/566019"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        },
+        {
+          "label": "MulPositive Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.mul.op ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.unit",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 845659/60569, y = 56378/48255",
+            "x = 79961/40886, y = -247342/137551",
+            "x = -796145/240612, y = 103406/2175",
+            "x = -47141/99599, y = -385137/335012",
+            "x = -892163/767029, y = 321976/524053"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "3b35a4de88b43381",
+      "when": "2026-10-06T04:15:24",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 163603264,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "436531b93312dc48",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a + b } \\ a b { a + b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 697279/204725, b = 860493/920243, x = 412031/468608",
+            "a = 1468/635, b = 925153/465687, x = 246187/137540",
+            "a = -14684/14457, b = -211653/462926, x = 915527/231329",
+            "a = -493732/616911, b = -260125/137789, x = 149141/154991",
+            "a = 465494/622483, b = 128957/634093, x = 253184/992859"
+          ],
+          "outcome": "passed",
+          "seconds": 0.019,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 299107/13097",
+            "x = 35377/34161",
+            "x = 918205/877096",
+            "x = 550937/667905",
+            "x = -720916/141913"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 867127/360347",
+            "x = 80394/220415",
+            "x = -652669/838080",
+            "x = 609791/173230",
+            "x = 639867/348454"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "LeftInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -541742/759913",
+            "x = 66593/71731",
+            "x = -372182/489907",
+            "x = -211189/515775",
+            "x = -580476/310027"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "RightInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 380592/792781",
+            "x = 241959/229768",
+            "x = 37311/599578",
+            "x = -59611/481103",
+            "x = -882933/475543"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -583959/719608, y = 29867/114488",
+            "x = 949441/47247, y = -913879/676031",
+            "x = 249676/278053, y = -49200/37007",
+            "x = -252408/76831, y = 237178/141475",
+            "x = -965/81092, y = -667454/101903"
+          ],
+          "outcome": "passed",
+          "seconds": 0.02,
+          "skipped": 0
+        },
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a * b } \\ a b { a * b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -142626/74737, b = 689140/769657, x = 829056/597745",
+            "a = -64627/161103, b = 440108/147743, x = -20364/110797",
+            "a = 203492/125575, b = -742357/538840, x = -194301/312859",
+            "a = -313917/773234, b = 175961/151649, x = -835013/574914",
+            "a = -293025/21356, b = -36238/41571, x = 236958/163135"
+          ],
+          "outcome": "passed",
+          "seconds": 0.025,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 122033/112293",
+            "x = 169786/830821",
+            "x = -130321/936879",
+            "x = -218059/73104",
+            "x = -448456/241291"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -1168/13237",
+            "x = -220319/492933",
+            "x = 266361/276320",
+            "x = -156754/23957",
+            "x = 83747/40602"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "LeftDistrib Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 576842/800479, x = 4435/328413, y = 422613/769991",
+            "a = 788712/324487, x = 179473/205650, y = -684553/313733",
+            "a = 182489/788015, x = -550460/406727, y = 211513/337101",
+            "a = 382922/349299, x = -64432/291337, y = -76162/121193",
+            "a = 167203/719508, x = -183085/425356, y = 238889/232402"
+          ],
+          "outcome": "passed",
+          "seconds": 0.037,
+          "skipped": 0
+        },
+        {
+          "label": "RightDistrib Rational Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -950027/215154, b = 120918/266629, x = -16733/969274",
+            "a = -580041/872288, b = -358040/727907, x = -200093/444375",
+            "a = -290596/333051, b = 751233/125672, x = -49467/18167",
+            "a = 490629/67373, b = 141451/56190, x = -848322/645409",
+            "a = 67682/22377, b = 115853/409467, x = 31493/68767"
+          ],
+          "outcome": "passed",
+          "seconds": 0.043,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -625419/355843, y = -318076/767555",
+            "x = -232924/248345, y = -593534/882291",
+            "x = 197957/48574, y = -675637/238364",
+            "x = -665233/122443, y = 352014/35981",
+            "x = -569944/370613, y = 292960/990649"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "Invertible Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).add.monoid.unit (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.unit \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 76822/105869",
+            "x = 8236/230215",
+            "x = 129659/52222",
+            "x = -91790/797351",
+            "x = 4/63"
+          ],
+          "outcome": "passed",
+          "seconds": 0.022,
+          "skipped": 0
+        },
+        {
+          "label": "Total Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 45207/661495, y = -186013/58329",
+            "x = -50651/222892, y = 137005/386977",
+            "x = 115223/446490, y = 357889/316663",
+            "x = -248461/231909, y = -79213/294076",
+            "x = 255504/384733, y = -657019/823752"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "Antisymmetric Rational ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.eq \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 15595/3689, y = -1581/38800",
+            "x = 114706/753595, y = 857135/142632",
+            "x = -612187/407109, y = -274615/249948",
+            "x = -98963/189133, y = 798514/391555",
+            "x = -155308/508995, y = -36337/288286"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "Transitive Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -801313/893868, y = -423303/19304, z = -627023/691232",
+            "x = 85261/801254, y = 764987/180858, z = -384249/68003",
+            "x = -864997/905963, y = 52726/887635, z = 464876/848561",
+            "x = -406123/109048, y = 468215/864562, z = -628145/581794",
+            "x = 334555/534358, y = 242338/607675, z = 264935/215738"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "AddMonotone Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 106978/923159, y = -993344/710665, z = -27164/8991",
+            "x = 51733/840970, y = 577560/844201, z = -511361/384846",
+            "x = 45061/165002, y = 63001/116040, z = -281649/369209",
+            "x = -767734/581345, y = -378709/766842, z = 73954/281953",
+            "x = 326761/713361, y = -622511/643307, z = -201671/566019"
+          ],
+          "outcome": "passed",
+          "seconds": 0.015,
+          "skipped": 0
+        },
+        {
+          "label": "MulPositive Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.mul.op ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.unit",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 845659/60569, y = 56378/48255",
+            "x = 79961/40886, y = -247342/137551",
+            "x = -796145/240612, y = 103406/2175",
+            "x = -47141/99599, y = -385137/335012",
+            "x = -892163/767029, y = 321976/524053"
+          ],
+          "outcome": "passed",
+          "seconds": 0.015,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "a274b742943185f9",
+      "when": "2026-10-06T04:08:08",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 163603264,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "710a88968181942d",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a + b } \\ a b { a + b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 697279/204725, b = 860493/920243, x = 412031/468608",
+            "a = 1468/635, b = 925153/465687, x = 246187/137540",
+            "a = -14684/14457, b = -211653/462926, x = 915527/231329",
+            "a = -493732/616911, b = -260125/137789, x = 149141/154991",
+            "a = 465494/622483, b = 128957/634093, x = 253184/992859"
+          ],
+          "outcome": "passed",
+          "seconds": 0.019,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 299107/13097",
+            "x = 35377/34161",
+            "x = 918205/877096",
+            "x = 550937/667905",
+            "x = -720916/141913"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a + b } zeroQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 867127/360347",
+            "x = 80394/220415",
+            "x = -652669/838080",
+            "x = 609791/173230",
+            "x = 639867/348454"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "LeftInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -541742/759913",
+            "x = 66593/71731",
+            "x = -372182/489907",
+            "x = -211189/515775",
+            "x = -580476/310027"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "RightInverse Rational exactRational (\\ a b { a + b }, zeroQ).op (\\ a b { a + b }, zeroQ).unit \\ a { zeroQ - a }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 380592/792781",
+            "x = 241959/229768",
+            "x = 37311/599578",
+            "x = -59611/481103",
+            "x = -882933/475543"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -583959/719608, y = 29867/114488",
+            "x = 949441/47247, y = -913879/676031",
+            "x = 249676/278053, y = -49200/37007",
+            "x = -252408/76831, y = 237178/141475",
+            "x = -965/81092, y = -667454/101903"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        },
+        {
+          "label": "Associative Rational Rational exactRational \\ a b { a * b } \\ a b { a * b }",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -142626/74737, b = 689140/769657, x = 829056/597745",
+            "a = -64627/161103, b = 440108/147743, x = -20364/110797",
+            "a = 203492/125575, b = -742357/538840, x = -194301/312859",
+            "a = -313917/773234, b = 175961/151649, x = -835013/574914",
+            "a = -293025/21356, b = -36238/41571, x = 236958/163135"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Rational Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 122033/112293",
+            "x = 169786/830821",
+            "x = -130321/936879",
+            "x = -218059/73104",
+            "x = -448456/241291"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Rational exactRational \\ a b { a * b } oneQ",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -1168/13237",
+            "x = -220319/492933",
+            "x = 266361/276320",
+            "x = -156754/23957",
+            "x = 83747/40602"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "LeftDistrib Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = 576842/800479, x = 4435/328413, y = 422613/769991",
+            "a = 788712/324487, x = 179473/205650, y = -684553/313733",
+            "a = 182489/788015, x = -550460/406727, y = 211513/337101",
+            "a = 382922/349299, x = -64432/291337, y = -76162/121193",
+            "a = 167203/719508, x = -183085/425356, y = 238889/232402"
+          ],
+          "outcome": "passed",
+          "seconds": 0.021,
+          "skipped": 0
+        },
+        {
+          "label": "RightDistrib Rational Rational Rational exactRational ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }).monoid.op (\\ a b { a * b }, oneQ).op",
+          "params": [
+            "a : Rational",
+            "b : Rational",
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "a = -950027/215154, b = 120918/266629, x = -16733/969274",
+            "a = -580041/872288, b = -358040/727907, x = -200093/444375",
+            "a = -290596/333051, b = 751233/125672, x = -49467/18167",
+            "a = 490629/67373, b = 141451/56190, x = -848322/645409",
+            "a = 67682/22377, b = 115853/409467, x = 31493/68767"
+          ],
+          "outcome": "passed",
+          "seconds": 0.029,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -625419/355843, y = -318076/767555",
+            "x = -232924/248345, y = -593534/882291",
+            "x = 197957/48574, y = -675637/238364",
+            "x = -665233/122443, y = 352014/35981",
+            "x = -569944/370613, y = 292960/990649"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        },
+        {
+          "label": "Invertible Rational (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).eq (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.op (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).add.monoid.unit (exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ).mul.unit \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 76822/105869",
+            "x = 8236/230215",
+            "x = 129659/52222",
+            "x = -91790/797351",
+            "x = 4/63"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "Total Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 45207/661495, y = -186013/58329",
+            "x = -50651/222892, y = 137005/386977",
+            "x = 115223/446490, y = 357889/316663",
+            "x = -248461/231909, y = -79213/294076",
+            "x = 255504/384733, y = -657019/823752"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "Antisymmetric Rational ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.eq \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 15595/3689, y = -1581/38800",
+            "x = 114706/753595, y = 857135/142632",
+            "x = -612187/407109, y = -274615/249948",
+            "x = -98963/189133, y = 798514/391555",
+            "x = -155308/508995, y = -36337/288286"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "Transitive Rational \\ a b { a <= b }",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -801313/893868, y = -423303/19304, z = -627023/691232",
+            "x = 85261/801254, y = 764987/180858, z = -384249/68003",
+            "x = -864997/905963, y = 52726/887635, z = 464876/848561",
+            "x = -406123/109048, y = 468215/864562, z = -628145/581794",
+            "x = 334555/534358, y = 242338/607675, z = 264935/215738"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "AddMonotone Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.op",
+          "params": [
+            "x : Rational",
+            "y : Rational",
+            "z : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 106978/923159, y = -993344/710665, z = -27164/8991",
+            "x = 51733/840970, y = 577560/844201, z = -511361/384846",
+            "x = 45061/165002, y = 63001/116040, z = -281649/369209",
+            "x = -767734/581345, y = -378709/766842, z = 73954/281953",
+            "x = 326761/713361, y = -622511/643307, z = -201671/566019"
+          ],
+          "outcome": "passed",
+          "seconds": 0.014,
+          "skipped": 0
+        },
+        {
+          "label": "MulPositive Rational \\ a b { a <= b } ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.mul.op ((exactRational, ((\\ a b { a + b }, zeroQ), \\ a { zeroQ - a }), \\ a b { a * b }, oneQ), \\ x { match (x == zeroQ) { true -> zeroQ ; false -> oneQ / x } }).ring.add.monoid.unit",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 845659/60569, y = 56378/48255",
+            "x = 79961/40886, y = -247342/137551",
+            "x = -796145/240612, y = 103406/2175",
+            "x = -47141/99599, y = -385137/335012",
+            "x = -892163/767029, y = 321976/524053"
+          ],
+          "outcome": "passed",
+          "seconds": 0.021,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "toQ": [
+    {
+      "hash": "7e1575529ba0640f",
+      "when": "2026-10-06T05:56:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 1258349574,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "b14858cb057dec86",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "ToQExact toQ",
+          "params": [
+            "x : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.425695407085636",
+            "x = 0.8363970008260626",
+            "x = 0.5767477973932891",
+            "x = -0.3084814525210924",
+            "x = 0.9702305672610574"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        },
+        {
+          "label": "ToQKeepsOrder toQ",
+          "params": [
+            "x : Float64",
+            "y : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.5258620827761173, y = -0.7273853769177432",
+            "x = -0.3919944160950892, y = 0.18409025854658512",
+            "x = -0.3446158658038534, y = 0.9665111159424336",
+            "x = -0.6783656922775514, y = 0.26257114208699117",
+            "x = 0.606090582438604, y = 0.2756053902674145"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "fc072cdcbe13e8ee",
+      "when": "2026-10-06T04:08:08",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 1258349574,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "b14858cb057dec86",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "ToQExact toQ",
+          "params": [
+            "x : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.425695407085636",
+            "x = 0.8363970008260626",
+            "x = 0.5767477973932891",
+            "x = -0.3084814525210924",
+            "x = 0.9702305672610574"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        },
+        {
+          "label": "ToQKeepsOrder toQ",
+          "params": [
+            "x : Float64",
+            "y : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.5258620827761173, y = -0.7273853769177432",
+            "x = -0.3919944160950892, y = 0.18409025854658512",
+            "x = -0.3446158658038534, y = 0.9665111159424336",
+            "x = -0.6783656922775514, y = 0.26257114208699117",
+            "x = 0.606090582438604, y = 0.2756053902674145"
+          ],
+          "outcome": "passed",
+          "seconds": 0.018,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "bb5f116822b6c9dd",
+      "when": "2026-10-06T01:05:08",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 1258349574,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "b14858cb057dec86",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "ToQExact toQ",
+          "params": [
+            "x : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.425695407085636",
+            "x = 0.8363970008260626",
+            "x = 0.5767477973932891",
+            "x = -0.3084814525210924",
+            "x = 0.9702305672610574"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        },
+        {
+          "label": "ToQKeepsOrder toQ",
+          "params": [
+            "x : Float64",
+            "y : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.5258620827761173, y = -0.7273853769177432",
+            "x = -0.3919944160950892, y = 0.18409025854658512",
+            "x = -0.3446158658038534, y = 0.9665111159424336",
+            "x = -0.6783656922775514, y = 0.26257114208699117",
+            "x = 0.606090582438604, y = 0.2756053902674145"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "50f456c0ac346239",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 1258349574,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "b14858cb057dec86",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "ToQExact toQ",
+          "params": [
+            "x : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.425695407085636",
+            "x = 0.8363970008260626",
+            "x = 0.5767477973932891",
+            "x = -0.3084814525210924",
+            "x = 0.9702305672610574"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "ToQKeepsOrder toQ",
+          "params": [
+            "x : Float64",
+            "y : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)"
+          ],
+          "sample_cases": [
+            "x = -0.5258620827761173, y = -0.7273853769177432",
+            "x = -0.3919944160950892, y = 0.18409025854658512",
+            "x = -0.3446158658038534, y = 0.9665111159424336",
+            "x = -0.6783656922775514, y = 0.26257114208699117",
+            "x = 0.606090582438604, y = 0.2756053902674145"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "float64Add": [
+    {
+      "hash": "764247029f903c26",
+      "when": "2026-10-06T05:56:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1424224715,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "35ba764a3cd45f8e",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a + b } \\ a b { a + b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 2.5240250724544663e-52, y = 4.709858711097077e-96",
+            "x = -2.434619249535777e-51, y = -2.258266305208884e+86",
+            "x = -1.2272007876358432e-51, y = -1.5075847845310254e-55",
+            "x = 7.402369823442662e-77, y = 6.214896274834423e-94",
+            "x = 2.531343667372562e-36, y = 5.0705146744814785e+94"
+          ],
+          "outcome": "passed",
+          "seconds": 0.132,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "2d34ecda94f94b88",
+      "when": "2026-10-06T04:08:08",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1424224715,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "35ba764a3cd45f8e",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a + b } \\ a b { a + b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 2.5240250724544663e-52, y = 4.709858711097077e-96",
+            "x = -2.434619249535777e-51, y = -2.258266305208884e+86",
+            "x = -1.2272007876358432e-51, y = -1.5075847845310254e-55",
+            "x = 7.402369823442662e-77, y = 6.214896274834423e-94",
+            "x = 2.531343667372562e-36, y = 5.0705146744814785e+94"
+          ],
+          "outcome": "passed",
+          "seconds": 0.127,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "ec9917c9a47b62e4",
+      "when": "2026-10-06T01:05:08",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1424224715,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "35ba764a3cd45f8e",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a + b } \\ a b { a + b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 2.5240250724544663e-52, y = 4.709858711097077e-96",
+            "x = -2.434619249535777e-51, y = -2.258266305208884e+86",
+            "x = -1.2272007876358432e-51, y = -1.5075847845310254e-55",
+            "x = 7.402369823442662e-77, y = 6.214896274834423e-94",
+            "x = 2.531343667372562e-36, y = 5.0705146744814785e+94"
+          ],
+          "outcome": "passed",
+          "seconds": 0.129,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "ed907647c0b8a5df",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1424224715,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "35ba764a3cd45f8e",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6",
+          "python:luthier.rational.ratio": "source bebffea8f998ccf6"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {
+        "NormalDouble": "source bebffea8f998ccf6"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a + b } \\ a b { a + b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 2.5240250724544663e-52, y = 4.709858711097077e-96",
+            "x = -2.434619249535777e-51, y = -2.258266305208884e+86",
+            "x = -1.2272007876358432e-51, y = -1.5075847845310254e-55",
+            "x = 7.402369823442662e-77, y = 6.214896274834423e-94",
+            "x = 2.531343667372562e-36, y = 5.0705146744814785e+94"
+          ],
+          "outcome": "passed",
+          "seconds": 0.13,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "float64Sub": [
+    {
+      "hash": "6afce6aea2d7dd72",
+      "when": "2026-10-06T05:56:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1165185683,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c9625e656da19d0d",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a - b } \\ a b { a - b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -9.84466088445641e-45, y = 3.531747036718752e+24",
+            "x = 2.5727039950525508e-37, y = 0.0007324316370284386",
+            "x = 1.0598720081419709e+24, y = 4.257763519668485e-99",
+            "x = 2.363531179282569e+106, y = -1.2467137650139016e-08",
+            "x = -5.515368657032137e+49, y = 1.5766057680150797e+112"
+          ],
+          "outcome": "passed",
+          "seconds": 0.128,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "ab2cb68fff27cad3",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1165185683,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c9625e656da19d0d",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a - b } \\ a b { a - b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -9.84466088445641e-45, y = 3.531747036718752e+24",
+            "x = 2.5727039950525508e-37, y = 0.0007324316370284386",
+            "x = 1.0598720081419709e+24, y = 4.257763519668485e-99",
+            "x = 2.363531179282569e+106, y = -1.2467137650139016e-08",
+            "x = -5.515368657032137e+49, y = 1.5766057680150797e+112"
+          ],
+          "outcome": "passed",
+          "seconds": 0.122,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "6ca59cfecbd89c4f",
+      "when": "2026-10-06T01:05:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1165185683,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c9625e656da19d0d",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a - b } \\ a b { a - b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -9.84466088445641e-45, y = 3.531747036718752e+24",
+            "x = 2.5727039950525508e-37, y = 0.0007324316370284386",
+            "x = 1.0598720081419709e+24, y = 4.257763519668485e-99",
+            "x = 2.363531179282569e+106, y = -1.2467137650139016e-08",
+            "x = -5.515368657032137e+49, y = 1.5766057680150797e+112"
+          ],
+          "outcome": "passed",
+          "seconds": 0.135,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "9b8aad84b9a839ed",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1165185683,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c9625e656da19d0d",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6",
+          "python:luthier.rational.ratio": "source bebffea8f998ccf6"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {
+        "NormalDouble": "source bebffea8f998ccf6"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a - b } \\ a b { a - b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -9.84466088445641e-45, y = 3.531747036718752e+24",
+            "x = 2.5727039950525508e-37, y = 0.0007324316370284386",
+            "x = 1.0598720081419709e+24, y = 4.257763519668485e-99",
+            "x = 2.363531179282569e+106, y = -1.2467137650139016e-08",
+            "x = -5.515368657032137e+49, y = 1.5766057680150797e+112"
+          ],
+          "outcome": "passed",
+          "seconds": 0.127,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "float64Mul": [
+    {
+      "hash": "0dba74741fd64106",
+      "when": "2026-10-06T05:56:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1103951153,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "bc3c67f094541f31",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a * b } \\ a b { a * b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -1.8254842354013986e+52, y = -22505853852.928345",
+            "x = -2.45881704067625e+35, y = 8.847674888141466e-35",
+            "x = 4.473073562658731e+104, y = -3.595819054000234e+103",
+            "x = 2.7183046030905295e-137, y = 0.0",
+            "x = 1.4282207267747815e-144, y = 0.0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.129,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "d5e82459aa0d2499",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1103951153,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "bc3c67f094541f31",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a * b } \\ a b { a * b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -1.8254842354013986e+52, y = -22505853852.928345",
+            "x = -2.45881704067625e+35, y = 8.847674888141466e-35",
+            "x = 4.473073562658731e+104, y = -3.595819054000234e+103",
+            "x = 2.7183046030905295e-137, y = 0.0",
+            "x = 1.4282207267747815e-144, y = 0.0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.132,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "48a865bd8898dcda",
+      "when": "2026-10-06T01:05:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1103951153,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "bc3c67f094541f31",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a * b } \\ a b { a * b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -1.8254842354013986e+52, y = -22505853852.928345",
+            "x = -2.45881704067625e+35, y = 8.847674888141466e-35",
+            "x = 4.473073562658731e+104, y = -3.595819054000234e+103",
+            "x = 2.7183046030905295e-137, y = 0.0",
+            "x = 1.4282207267747815e-144, y = 0.0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.133,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "9345cff92e8a5c73",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1103951153,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "bc3c67f094541f31",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6",
+          "python:luthier.rational.ratio": "source bebffea8f998ccf6"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {
+        "NormalDouble": "source bebffea8f998ccf6"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a * b } \\ a b { a * b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = -1.8254842354013986e+52, y = -22505853852.928345",
+            "x = -2.45881704067625e+35, y = 8.847674888141466e-35",
+            "x = 4.473073562658731e+104, y = -3.595819054000234e+103",
+            "x = 2.7183046030905295e-137, y = 0.0",
+            "x = 1.4282207267747815e-144, y = 0.0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.125,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "float64Div": [
+    {
+      "hash": "c7b23b5af3fb1960",
+      "when": "2026-10-06T05:56:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1250653074,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5925d27ba86749e0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 606,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a / b } \\ a b { a / b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NonZeroDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16 where x /= 0.0"
+          ],
+          "sample_cases": [
+            "x = 5.974567235227659e+82, y = 6.313509097319782e+36",
+            "x = -1.466518352144335e+36, y = 3.7846082855259756e+114",
+            "x = -1.8078920910422074e+46, y = 2.393321721346788e+75",
+            "x = 8.500165233370428e-29, y = 2.8038007856044576e-70",
+            "x = 6.411242336208592e-105, y = 7.211635121020792e+24"
+          ],
+          "outcome": "passed",
+          "seconds": 0.148,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "a801b94b40809630",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1250653074,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5925d27ba86749e0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 606,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a / b } \\ a b { a / b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NonZeroDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16 where x /= 0.0"
+          ],
+          "sample_cases": [
+            "x = 5.974567235227659e+82, y = 6.313509097319782e+36",
+            "x = -1.466518352144335e+36, y = 3.7846082855259756e+114",
+            "x = -1.8078920910422074e+46, y = 2.393321721346788e+75",
+            "x = 8.500165233370428e-29, y = 2.8038007856044576e-70",
+            "x = 6.411242336208592e-105, y = 7.211635121020792e+24"
+          ],
+          "outcome": "passed",
+          "seconds": 0.153,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "16108fa866e9f371",
+      "when": "2026-10-06T01:05:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1250653074,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5925d27ba86749e0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 606,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a / b } \\ a b { a / b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NonZeroDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16 where x /= 0.0"
+          ],
+          "sample_cases": [
+            "x = 5.974567235227659e+82, y = 6.313509097319782e+36",
+            "x = -1.466518352144335e+36, y = 3.7846082855259756e+114",
+            "x = -1.8078920910422074e+46, y = 2.393321721346788e+75",
+            "x = 8.500165233370428e-29, y = 2.8038007856044576e-70",
+            "x = 6.411242336208592e-105, y = 7.211635121020792e+24"
+          ],
+          "outcome": "passed",
+          "seconds": 0.143,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "f2d187bd413e4c99",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1250653074,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5925d27ba86749e0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6",
+          "python:luthier.rational.ratio": "source bebffea8f998ccf6"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {
+        "NormalDouble": "source bebffea8f998ccf6"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 606,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Rounds \\ a b { a / b } \\ a b { a / b } x y",
+          "params": [
+            "x : NormalDouble",
+            "y : NonZeroDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16 where x /= 0.0"
+          ],
+          "sample_cases": [
+            "x = 5.974567235227659e+82, y = 6.313509097319782e+36",
+            "x = -1.466518352144335e+36, y = 3.7846082855259756e+114",
+            "x = -1.8078920910422074e+46, y = 2.393321721346788e+75",
+            "x = 8.500165233370428e-29, y = 2.8038007856044576e-70",
+            "x = 6.411242336208592e-105, y = 7.211635121020792e+24"
+          ],
+          "outcome": "passed",
+          "seconds": 0.135,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "offByThree": [
+    {
+      "hash": "84b1b40cc479c6b2",
+      "when": "2026-10-06T05:56:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 485497203,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ffbd7b9348e798a0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "x + y == 0.0 or not (Rounds \\ a b { (a + b) * 1.0000000000000007 } \\ a b { a + b } x y)",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 444.44121265334536, y = 3166916552347465.5",
+            "x = 2.0851006339919317e+130, y = 1.4421288678783187e-84",
+            "x = 2.0827876450940468e+102, y = 4.96480491299385e-100",
+            "x = -5.3589426889538725e-55, y = 4.603678210046268e+132",
+            "x = 5.18551251412889e-15, y = 1.507361162767208e+31"
+          ],
+          "outcome": "passed",
+          "seconds": 0.134,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "5930804d74c733df",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 485497203,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ffbd7b9348e798a0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "x + y == 0.0 or not (Rounds \\ a b { (a + b) * 1.0000000000000007 } \\ a b { a + b } x y)",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 444.44121265334536, y = 3166916552347465.5",
+            "x = 2.0851006339919317e+130, y = 1.4421288678783187e-84",
+            "x = 2.0827876450940468e+102, y = 4.96480491299385e-100",
+            "x = -5.3589426889538725e-55, y = 4.603678210046268e+132",
+            "x = 5.18551251412889e-15, y = 1.507361162767208e+31"
+          ],
+          "outcome": "passed",
+          "seconds": 0.161,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "d7025ac957f27ff1",
+      "when": "2026-10-06T01:05:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 485497203,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ffbd7b9348e798a0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "x + y == 0.0 or not (Rounds \\ a b { (a + b) * 1.0000000000000007 } \\ a b { a + b } x y)",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 444.44121265334536, y = 3166916552347465.5",
+            "x = 2.0851006339919317e+130, y = 1.4421288678783187e-84",
+            "x = 2.0827876450940468e+102, y = 4.96480491299385e-100",
+            "x = -5.3589426889538725e-55, y = 4.603678210046268e+132",
+            "x = 5.18551251412889e-15, y = 1.507361162767208e+31"
+          ],
+          "outcome": "passed",
+          "seconds": 0.14,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "9026068e3c6d4a6b",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 485497203,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ffbd7b9348e798a0",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6",
+          "python:luthier.rational.ratio": "source bebffea8f998ccf6"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {
+        "NormalDouble": "source bebffea8f998ccf6"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "x + y == 0.0 or not (Rounds \\ a b { (a + b) * 1.0000000000000007 } \\ a b { a + b } x y)",
+          "params": [
+            "x : NormalDouble",
+            "y : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16",
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 444.44121265334536, y = 3166916552347465.5",
+            "x = 2.0851006339919317e+130, y = 1.4421288678783187e-84",
+            "x = 2.0827876450940468e+102, y = 4.96480491299385e-100",
+            "x = -5.3589426889538725e-55, y = 4.603678210046268e+132",
+            "x = 5.18551251412889e-15, y = 1.507361162767208e+31"
+          ],
+          "outcome": "passed",
+          "seconds": 0.14,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "float64Sqrt": [
+    {
+      "hash": "fd63ddcccad759a4",
+      "when": "2026-10-06T05:56:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1149074431,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a8f1d10fda6b2e8",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f",
+          "python:math.sqrt": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 300,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "RootRounds sqrt",
+          "params": [
+            "x : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 7.497153870050298e+69",
+            "x = -0.05442917653137159",
+            "x = 3.33478635012998e-33",
+            "x = 1.266542323797366e+94",
+            "x = 8.195084106942875e-91"
+          ],
+          "outcome": "passed",
+          "seconds": 0.069,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "cbcb403cacb530bb",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1149074431,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a8f1d10fda6b2e8",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3",
+          "python:math.sqrt": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 300,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "RootRounds sqrt",
+          "params": [
+            "x : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 7.497153870050298e+69",
+            "x = -0.05442917653137159",
+            "x = 3.33478635012998e-33",
+            "x = 1.266542323797366e+94",
+            "x = 8.195084106942875e-91"
+          ],
+          "outcome": "passed",
+          "seconds": 0.064,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "dbb6248e2281e410",
+      "when": "2026-10-06T01:05:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1149074431,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a8f1d10fda6b2e8",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05",
+          "python:math.sqrt": "python 3.13.2"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 300,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "RootRounds sqrt",
+          "params": [
+            "x : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 7.497153870050298e+69",
+            "x = -0.05442917653137159",
+            "x = 3.33478635012998e-33",
+            "x = 1.266542323797366e+94",
+            "x = 8.195084106942875e-91"
+          ],
+          "outcome": "passed",
+          "seconds": 0.065,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "b2b04508cb2e3656",
+      "when": "2026-10-06T00:53:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 300,
+      "mode": "sampled",
+      "seed": 1149074431,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a8f1d10fda6b2e8",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source bebffea8f998ccf6",
+          "python:luthier.rational.ratio": "source bebffea8f998ccf6",
+          "python:math.sqrt": "python 3.13.2"
+        },
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {
+        "NormalDouble": "source bebffea8f998ccf6"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 300,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "RootRounds sqrt",
+          "params": [
+            "x : NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 300,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "NormalDouble: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "x = 7.497153870050298e+69",
+            "x = -0.05442917653137159",
+            "x = 3.33478635012998e-33",
+            "x = 1.266542323797366e+94",
+            "x = 8.195084106942875e-91"
+          ],
+          "outcome": "passed",
+          "seconds": 0.065,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "sumToRounds": [
+    {
+      "hash": "24e372186c022e1d",
+      "when": "2026-10-06T05:59:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1589417141,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "399046631b141501",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 418,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma sumTo",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.204,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "7635e2fdc9473f40",
+      "when": "2026-10-06T05:56:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1589417141,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "a22dc274466aab2f",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 418,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma sumTo",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.313,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "60ba1ccc01f60744",
+      "when": "2026-10-06T04:15:24",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1589417141,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "399046631b141501",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 418,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma sumTo",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.258,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "786c563cc4b0bf38",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1589417141,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "a22dc274466aab2f",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 418,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma sumTo",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.27,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "innerRounds": [
+    {
+      "hash": "d0f336ca39cde2e7",
+      "when": "2026-10-06T05:59:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1467183189,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "d98daa225beab599",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 776,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "InnerWithinGamma innerOf",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.285,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "b58f69f01ed4ddb9",
+      "when": "2026-10-06T05:56:41",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1467183189,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "0e8aea3472913b71",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 776,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "InnerWithinGamma innerOf",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.276,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "f792fb02d214b088",
+      "when": "2026-10-06T04:15:25",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1467183189,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "d98daa225beab599",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 776,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "InnerWithinGamma innerOf",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.306,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "dde3bccf452f6ff9",
+      "when": "2026-10-06T04:08:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1467183189,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "0e8aea3472913b71",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 776,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "InnerWithinGamma innerOf",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.257,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "exactRational": [
+    {
+      "hash": "8010cc75d6b10a76",
+      "when": "2026-10-06T05:56:41",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2019138123,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "dd03dc2e8e3984d4",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Reflexive Rational \\ a b { a == b }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 804613/604522",
+            "x = 6999/7570",
+            "x = -48819/33334",
+            "x = 170579/462600",
+            "x = 177551/114580"
+          ],
+          "outcome": "passed",
+          "seconds": 0.006,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Bool \\ p q { p == q } \\ a b { a == b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -245983/43562, y = 882278/195211",
+            "x = -69781/39399, y = -5999/40196",
+            "x = 220679/832268, y = 148364/582811",
+            "x = 141179/512162, y = 545303/325907",
+            "x = -6632/16073, y = 129032/239639"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "517a1c71ef4f546b",
+      "when": "2026-10-06T04:08:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2019138123,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "dd03dc2e8e3984d4",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Reflexive Rational \\ a b { a == b }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 804613/604522",
+            "x = 6999/7570",
+            "x = -48819/33334",
+            "x = 170579/462600",
+            "x = 177551/114580"
+          ],
+          "outcome": "passed",
+          "seconds": 0.004,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Bool \\ p q { p == q } \\ a b { a == b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -245983/43562, y = 882278/195211",
+            "x = -69781/39399, y = -5999/40196",
+            "x = 220679/832268, y = 148364/582811",
+            "x = 141179/512162, y = 545303/325907",
+            "x = -6632/16073, y = 129032/239639"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "949a5a8679967d81",
+      "when": "2026-10-06T01:05:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2019138123,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "dd03dc2e8e3984d4",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Reflexive Rational \\ a b { a == b }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 804613/604522",
+            "x = 6999/7570",
+            "x = -48819/33334",
+            "x = 170579/462600",
+            "x = 177551/114580"
+          ],
+          "outcome": "passed",
+          "seconds": 0.004,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Bool \\ p q { p == q } \\ a b { a == b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -245983/43562, y = 882278/195211",
+            "x = -69781/39399, y = -5999/40196",
+            "x = 220679/832268, y = 148364/582811",
+            "x = 141179/512162, y = 545303/325907",
+            "x = -6632/16073, y = 129032/239639"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "bfd390c8a2cf0ba7",
+      "when": "2026-10-06T00:53:07",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2019138123,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "dd03dc2e8e3984d4",
+        "externs": {},
+        "interpreter": "c2e1f73fa5899d76"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Reflexive Rational \\ a b { a == b }",
+          "params": [
+            "x : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = 804613/604522",
+            "x = 6999/7570",
+            "x = -48819/33334",
+            "x = 170579/462600",
+            "x = 177551/114580"
+          ],
+          "outcome": "passed",
+          "seconds": 0.006,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Rational Bool \\ p q { p == q } \\ a b { a == b }",
+          "params": [
+            "x : Rational",
+            "y : Rational"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Rational",
+            "Rational"
+          ],
+          "sample_cases": [
+            "x = -245983/43562, y = 882278/195211",
+            "x = -69781/39399, y = -5999/40196",
+            "x = 220679/832268, y = 148364/582811",
+            "x = 141179/512162, y = 545303/325907",
+            "x = -6632/16073, y = 129032/239639"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,77 +1,712 @@
 {
-  "normalVec": {
-    "hash": "664dd035c34385c1",
-    "when": "2026-10-05T14:58:36",
-    "passed": true,
-    "seed": 404955008,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {
-        "Bool": "genBool",
-        "Float64": "genFloat64",
-        "Int": "genInt",
-        "Nat": "genNat"
+  "normalVec": [
+    {
+      "hash": "9056de95cd798670",
+      "when": "2026-10-06T06:00:15",
+      "passed": true,
+      "outcome": "passed",
+      "n": 20,
+      "mode": "sampled",
+      "seed": 204413370,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "11a80b4e3aa329ad",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.cond": "source fa7d63f723173c6f",
+          "python:luthier.arrays.det": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.eigvals_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.frob": "source fa7d63f723173c6f",
+          "python:luthier.arrays.kolmogorov_distance": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_mul": "source fa7d63f723173c6f",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.minimum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.normal_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.product": "source fa7d63f723173c6f",
+          "python:luthier.arrays.total": "source fa7d63f723173c6f",
+          "python:luthier.arrays.trace": "source fa7d63f723173c6f",
+          "python:luthier.arrays.transpose": "source fa7d63f723173c6f",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
       },
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+      "generators": {
+        "Dim": "source fa7d63f723173c6f",
+        "Seed": "635d656d67498094"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Dim": {
+            "drawn": 40,
+            "outside_type": 0
+          },
+          "Seed": {
+            "drawn": 40,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "NormalLength normalVec",
+          "params": [
+            "n : Dim",
+            "seed : Seed"
+          ],
+          "mode": "sampled",
+          "cases": 20,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Dim: registered Python generator, size up to 16",
+            "Seed: genSeed, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 1, seed = 1859119178",
+            "n = 1, seed = 389897567",
+            "n = 1, seed = 1119455341",
+            "n = 1, seed = 430954535",
+            "n = 3, seed = 1887438469"
+          ],
+          "outcome": "passed",
+          "seconds": 0.019,
+          "skipped": 0
+        },
+        {
+          "label": "NormalDraws normalVec",
+          "params": [
+            "n : Dim",
+            "seed : Seed"
+          ],
+          "mode": "sampled",
+          "cases": 20,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Dim: registered Python generator, size up to 16",
+            "Seed: genSeed, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 1, seed = 1384640996",
+            "n = 1, seed = 1350321918",
+            "n = 2, seed = 1500736463",
+            "n = 3, seed = 1160796885",
+            "n = 3, seed = 917728266"
+          ],
+          "outcome": "passed",
+          "seconds": 8.042,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "NormalLength normalVec",
-        "params": [
-          "n : Dim",
-          "seed : Int"
-        ],
-        "mode": "sampled",
-        "cases": 20,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Int: genInt, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, seed = 0",
-          "n = 1, seed = -1",
-          "n = 1, seed = -2",
-          "n = 3, seed = -3",
-          "n = 1, seed = 2"
-        ]
+    {
+      "hash": "22cc67545630b619",
+      "when": "2026-10-06T04:15:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 20,
+      "mode": "sampled",
+      "seed": 204413370,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "11a80b4e3aa329ad",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.cond": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.det": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.eigvals_sym": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.frob": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.kolmogorov_distance": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.madd": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_mul": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.minimum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.normal_vec": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.product": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.total": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.trace": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.transpose": "source 24a5e06a053ff3c3",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
       },
-      {
-        "label": "NormalDraws normalVec",
-        "params": [
-          "n : Dim",
-          "seed : Int"
+      "generators": {
+        "Dim": "source 24a5e06a053ff3c3",
+        "Seed": "635d656d67498094"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 20,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Int: genInt, size up to 16"
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Dim": {
+            "drawn": 40,
+            "outside_type": 0
+          },
+          "Seed": {
+            "drawn": 40,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "NormalLength normalVec",
+          "params": [
+            "n : Dim",
+            "seed : Seed"
+          ],
+          "mode": "sampled",
+          "cases": 20,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Dim: registered Python generator, size up to 16",
+            "Seed: genSeed, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 1, seed = 1859119178",
+            "n = 1, seed = 389897567",
+            "n = 1, seed = 1119455341",
+            "n = 1, seed = 430954535",
+            "n = 3, seed = 1887438469"
+          ],
+          "outcome": "passed",
+          "seconds": 0.022,
+          "skipped": 0
+        },
+        {
+          "label": "NormalDraws normalVec",
+          "params": [
+            "n : Dim",
+            "seed : Seed"
+          ],
+          "mode": "sampled",
+          "cases": 20,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Dim: registered Python generator, size up to 16",
+            "Seed: genSeed, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 1, seed = 1384640996",
+            "n = 1, seed = 1350321918",
+            "n = 2, seed = 1500736463",
+            "n = 3, seed = 1160796885",
+            "n = 3, seed = 917728266"
+          ],
+          "outcome": "passed",
+          "seconds": 12.581,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "0c0aa7317ee93f26",
+      "when": "2026-10-06T02:53:57",
+      "passed": true,
+      "outcome": "passed",
+      "n": 20,
+      "mode": "sampled",
+      "seed": 204413370,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "11a80b4e3aa329ad",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.cond": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.det": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.dot": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.eigvals_sym": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.frob": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.kolmogorov_distance": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.madd": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.mat_mul": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.maximum": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.minimum": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.norm": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.normal_vec": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.product": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.total": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.trace": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.transpose": "source ba70ad4895b6bc05",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "Dim": "source ba70ad4895b6bc05",
+        "Seed": "635d656d67498094"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "sample_cases": [
-          "n = 1, seed = -1",
-          "n = 1, seed = 0",
-          "n = 2, seed = -2",
-          "n = 3, seed = 0",
-          "n = 1, seed = 4"
-        ]
-      }
-    ]
-  }
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Dim": {
+            "drawn": 40,
+            "outside_type": 0
+          },
+          "Seed": {
+            "drawn": 40,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "NormalLength normalVec",
+          "params": [
+            "n : Dim",
+            "seed : Seed"
+          ],
+          "mode": "sampled",
+          "cases": 20,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Dim: registered Python generator, size up to 16",
+            "Seed: genSeed, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 1, seed = 1859119178",
+            "n = 1, seed = 389897567",
+            "n = 1, seed = 1119455341",
+            "n = 1, seed = 430954535",
+            "n = 3, seed = 1887438469"
+          ],
+          "outcome": "passed",
+          "seconds": 0.026,
+          "skipped": 0
+        },
+        {
+          "label": "NormalDraws normalVec",
+          "params": [
+            "n : Dim",
+            "seed : Seed"
+          ],
+          "mode": "sampled",
+          "cases": 20,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Dim: registered Python generator, size up to 16",
+            "Seed: genSeed, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 1, seed = 1384640996",
+            "n = 1, seed = 1350321918",
+            "n = 2, seed = 1500736463",
+            "n = 3, seed = 1160796885",
+            "n = 3, seed = 917728266"
+          ],
+          "outcome": "passed",
+          "seconds": 13.207,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "kolmogorovDistance": [
+    {
+      "hash": "c45cb2dcb8380676",
+      "when": "2026-10-06T06:00:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 76107417,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "11bb03e459f61319",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.cond": "source fa7d63f723173c6f",
+          "python:luthier.arrays.det": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.eigvals_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.frob": "source fa7d63f723173c6f",
+          "python:luthier.arrays.kolmogorov_distance": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_mul": "source fa7d63f723173c6f",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.minimum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.product": "source fa7d63f723173c6f",
+          "python:luthier.arrays.total": "source fa7d63f723173c6f",
+          "python:luthier.arrays.trace": "source fa7d63f723173c6f",
+          "python:luthier.arrays.transpose": "source fa7d63f723173c6f",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 4564,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 885,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "KolmogorovDistance kolmogorovDistance",
+          "params": [
+            "vs : List (Vec Float64)"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "List (Vec Float64): derived from its constructors, nesting up to 16"
+          ],
+          "sample_cases": [
+            "vs = nil (Vec Float64)",
+            "vs = cons (Vec Float64) (0, <ndarray (0,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (1, <ndarray (1,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (0, <ndarray (0,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (1, <ndarray (1,)>) (nil (Vec Float64))"
+          ],
+          "outcome": "passed",
+          "seconds": 4.313,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "39bb50b92c3a318a",
+      "when": "2026-10-06T04:15:35",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 76107417,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "11bb03e459f61319",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.cond": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.det": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.eigvals_sym": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.frob": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.kolmogorov_distance": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.madd": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_mul": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.minimum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.product": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.total": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.trace": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.transpose": "source 24a5e06a053ff3c3",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 4564,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 885,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "KolmogorovDistance kolmogorovDistance",
+          "params": [
+            "vs : List (Vec Float64)"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "List (Vec Float64): derived from its constructors, nesting up to 16"
+          ],
+          "sample_cases": [
+            "vs = nil (Vec Float64)",
+            "vs = cons (Vec Float64) (0, <ndarray (0,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (1, <ndarray (1,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (0, <ndarray (0,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (1, <ndarray (1,)>) (nil (Vec Float64))"
+          ],
+          "outcome": "passed",
+          "seconds": 4.259,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "866e7b585a2c0aeb",
+      "when": "2026-10-06T02:54:11",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 76107417,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "11bb03e459f61319",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.cond": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.det": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.dot": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.eigvals_sym": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.frob": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.kolmogorov_distance": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.madd": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.mat_mul": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.maximum": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.minimum": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.norm": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.product": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.total": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.trace": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.transpose": "source ba70ad4895b6bc05",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 4564,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 885,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "KolmogorovDistance kolmogorovDistance",
+          "params": [
+            "vs : List (Vec Float64)"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "List (Vec Float64): derived from its constructors, nesting up to 16"
+          ],
+          "sample_cases": [
+            "vs = nil (Vec Float64)",
+            "vs = cons (Vec Float64) (0, <ndarray (0,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (1, <ndarray (1,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (0, <ndarray (0,)>) (nil (Vec Float64))",
+            "vs = cons (Vec Float64) (1, <ndarray (1,)>) (nil (Vec Float64))"
+          ],
+          "outcome": "passed",
+          "seconds": 4.002,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
 }

@@ -1,0 +1,1895 @@
+{
+  "weights": [
+    {
+      "hash": "1a134f93b09fc4e7",
+      "when": "2026-10-06T06:57:41",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1192253582,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2c91205f156dff7c",
+        "externs": {
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= b.size",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.003,
+          "skipped": 0
+        },
+        {
+          "label": "0 <= k and k < b.logw.n",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta",
+            "k : Fin b.size"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16 where 0 <= k and k < b.size"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.004,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "80ec668ac80f98e7",
+      "when": "2026-10-06T04:24:09",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1192253582,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2c91205f156dff7c",
+        "externs": {
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= b.size",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "0 <= k and k < b.logw.n",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta",
+            "k : Fin b.size"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16 where 0 <= k and k < b.size"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "bayes": [
+    {
+      "hash": "5ab031775548c57e",
+      "when": "2026-10-06T06:57:41",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1869538425,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "70cdce64a371bd9e",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= b.size",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "0 <= k and k < b.logw.n",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta",
+            "k : Fin b.size"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16 where 0 <= k and k < b.size"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "064b530cb13b8654",
+      "when": "2026-10-06T04:24:09",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1869538425,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "70cdce64a371bd9e",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= b.size",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "0 <= k and k < b.logw.n",
+          "params": [
+            "Theta : U",
+            "b : Discrete Theta",
+            "k : Fin b.size"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16 where 0 <= k and k < b.size"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "indexAt": [
+    {
+      "hash": "8dbbf302db045615",
+      "when": "2026-10-06T06:17:51",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 283932867,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "702897b90297f548",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 1616,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "not (k >= w.n - 1) -> 0 <= k and k < w.n",
+          "params": [
+            "w : Vec Float64",
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+            "Nat: genNat, size up to 16"
+          ],
+          "sample_cases": [
+            "w = (0, <ndarray (0,)>), k = 0",
+            "w = (0, <ndarray (0,)>), k = 1",
+            "w = (0, <ndarray (0,)>), k = 0",
+            "w = (1, <ndarray (1,)>), k = 0",
+            "w = (1, <ndarray (1,)>), k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.116,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= w.n - 1) -> not (acc + w.f k > u) -> 0 <= k + 1",
+          "params": [
+            "w : Vec Float64",
+            "u : Float64",
+            "k : Nat",
+            "acc : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+            "Float64: genFloat64, size up to 16",
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16"
+          ],
+          "sample_cases": [
+            "w = (0, <ndarray (0,)>), u = 0.415062, k = 1, acc = 0.430475",
+            "w = (1, <ndarray (1,)>), u = 0.290792, k = 1, acc = 0.834606",
+            "w = (0, <ndarray (0,)>), u = -0.617932, k = 0, acc = -0.858222",
+            "w = (0, <ndarray (0,)>), u = -0.020606, k = 0, acc = -0.278564",
+            "w = (0, <ndarray (0,)>), u = -0.937767, k = 0, acc = 0.669227"
+          ],
+          "outcome": "passed",
+          "seconds": 0.129,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= w.n - 1) -> not (acc + w.f k > u) -> 0 <= k and k < w.n",
+          "params": [
+            "w : Vec Float64",
+            "u : Float64",
+            "k : Nat",
+            "acc : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+            "Float64: genFloat64, size up to 16",
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16"
+          ],
+          "sample_cases": [
+            "w = (1, <ndarray (1,)>), u = -0.49937, k = 1, acc = 0.561447",
+            "w = (0, <ndarray (0,)>), u = -0.070593, k = 0, acc = 0.791755",
+            "w = (0, <ndarray (0,)>), u = -0.737746, k = 0, acc = 0.329776",
+            "w = (1, <ndarray (1,)>), u = 0.376145, k = 1, acc = 0.735442",
+            "w = (0, <ndarray (0,)>), u = 0.573807, k = 0, acc = -0.626563"
+          ],
+          "outcome": "passed",
+          "seconds": 0.122,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "8d9bfa87e3ec3880",
+      "when": "2026-10-06T04:24:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 283932867,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "702897b90297f548",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 1616,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 600,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "not (k >= w.n - 1) -> 0 <= k and k < w.n",
+          "params": [
+            "w : Vec Float64",
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+            "Nat: genNat, size up to 16"
+          ],
+          "sample_cases": [
+            "w = (0, <ndarray (0,)>), k = 0",
+            "w = (0, <ndarray (0,)>), k = 1",
+            "w = (0, <ndarray (0,)>), k = 0",
+            "w = (1, <ndarray (1,)>), k = 0",
+            "w = (1, <ndarray (1,)>), k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.11,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= w.n - 1) -> not (acc + w.f k > u) -> 0 <= k + 1",
+          "params": [
+            "w : Vec Float64",
+            "u : Float64",
+            "k : Nat",
+            "acc : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+            "Float64: genFloat64, size up to 16",
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16"
+          ],
+          "sample_cases": [
+            "w = (0, <ndarray (0,)>), u = 0.415062, k = 1, acc = 0.430475",
+            "w = (1, <ndarray (1,)>), u = 0.290792, k = 1, acc = 0.834606",
+            "w = (0, <ndarray (0,)>), u = -0.617932, k = 0, acc = -0.858222",
+            "w = (0, <ndarray (0,)>), u = -0.020606, k = 0, acc = -0.278564",
+            "w = (0, <ndarray (0,)>), u = -0.937767, k = 0, acc = 0.669227"
+          ],
+          "outcome": "passed",
+          "seconds": 0.129,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= w.n - 1) -> not (acc + w.f k > u) -> 0 <= k and k < w.n",
+          "params": [
+            "w : Vec Float64",
+            "u : Float64",
+            "k : Nat",
+            "acc : Float64"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)",
+            "Float64: genFloat64, size up to 16",
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16"
+          ],
+          "sample_cases": [
+            "w = (1, <ndarray (1,)>), u = -0.49937, k = 1, acc = 0.561447",
+            "w = (0, <ndarray (0,)>), u = -0.070593, k = 0, acc = 0.791755",
+            "w = (0, <ndarray (0,)>), u = -0.737746, k = 0, acc = 0.329776",
+            "w = (1, <ndarray (1,)>), u = 0.376145, k = 1, acc = 0.735442",
+            "w = (0, <ndarray (0,)>), u = 0.573807, k = 0, acc = -0.626563"
+          ],
+          "outcome": "passed",
+          "seconds": 0.138,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "discreteFamily": [
+    {
+      "hash": "c79d0b31934d87c1",
+      "when": "2026-10-06T06:57:41",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1990003581,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "8f67469227788f10",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Reflexive (Discrete Theta) \\ b c { approxVec (tolOf b.size) (weights Theta b) (weights Theta c) }",
+          "params": [
+            "Theta : U",
+            "x : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric (Discrete Theta) Bool \\ p q { p == q } \\ b c { approxVec (tolOf b.size) (weights Theta b) (weights Theta c) }",
+          "params": [
+            "Theta : U",
+            "x : Discrete Theta",
+            "y : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "11e6c20fd7c31f99",
+      "when": "2026-10-06T04:24:10",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1990003581,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "8f67469227788f10",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Reflexive (Discrete Theta) \\ b c { approxVec (tolOf b.size) (weights Theta b) (weights Theta c) }",
+          "params": [
+            "Theta : U",
+            "x : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric (Discrete Theta) Bool \\ p q { p == q } \\ b c { approxVec (tolOf b.size) (weights Theta b) (weights Theta c) }",
+          "params": [
+            "Theta : U",
+            "x : Discrete Theta",
+            "y : Discrete Theta"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.002,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "rankOf": [
+    {
+      "hash": "1409fe45e24f3226",
+      "when": "2026-10-06T06:57:41",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1781063342,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "96b878a6137b5c64",
+        "externs": {
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= j and j < (weights Theta (bayes Theta Y l b (s (b.point (drawIndex Theta b seed).k) (drawIndex Theta b seed).s1).y)).n",
+          "params": [
+            "Theta : U",
+            "Y : U",
+            "l : LogLik Theta Y",
+            "s : Sampler Theta Y",
+            "b : Discrete Theta",
+            "seed : Int",
+            "j : Fin (drawIndex Theta b seed).k"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "U",
+            "Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample",
+            "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16",
+            "Int: genInt, size up to 16 where 0 <= k and k < (drawIndex Theta b seed).k"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.034,
+          "skipped": 0
+        },
+        {
+          "label": "0 <= (drawIndex Theta b seed).k and (drawIndex Theta b seed).k < (weights Theta (bayes Theta Y l b (s (b.point (drawIndex Theta b seed).k) (drawIndex Theta b seed).s1).y)).n",
+          "params": [
+            "Theta : U",
+            "Y : U",
+            "l : LogLik Theta Y",
+            "s : Sampler Theta Y",
+            "b : Discrete Theta",
+            "seed : Int"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "U",
+            "Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample",
+            "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.003,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "1ebeea2e55530a61",
+      "when": "2026-10-06T04:24:10",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1781063342,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "96b878a6137b5c64",
+        "externs": {
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= j and j < (weights Theta (bayes Theta Y l b (s (b.point (drawIndex Theta b seed).k) (drawIndex Theta b seed).s1).y)).n",
+          "params": [
+            "Theta : U",
+            "Y : U",
+            "l : LogLik Theta Y",
+            "s : Sampler Theta Y",
+            "b : Discrete Theta",
+            "seed : Int",
+            "j : Fin (drawIndex Theta b seed).k"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "U",
+            "Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample",
+            "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16",
+            "Int: genInt, size up to 16 where 0 <= k and k < (drawIndex Theta b seed).k"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.029,
+          "skipped": 0
+        },
+        {
+          "label": "0 <= (drawIndex Theta b seed).k and (drawIndex Theta b seed).k < (weights Theta (bayes Theta Y l b (s (b.point (drawIndex Theta b seed).k) (drawIndex Theta b seed).s1).y)).n",
+          "params": [
+            "Theta : U",
+            "Y : U",
+            "l : LogLik Theta Y",
+            "s : Sampler Theta Y",
+            "b : Discrete Theta",
+            "seed : Int"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no generator for U",
+          "domains": [
+            "U",
+            "U",
+            "Y -> Theta -> Float64: constant functions (affine on R -> R), a thin sample",
+            "Theta -> Draw Y: constant functions (affine on R -> R), a thin sample",
+            "(Int: genInt, size up to 16) * ((Int -> Theta: constant functions (affine on R -> R), a thin sample) * ((Nat: genNat, size up to 16) * (Fin n -> Float64: drawn as its table)))",
+            "Int: genInt, size up to 16"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.003,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "laplaceAt": [
+    {
+      "hash": "04864945361942ec",
+      "when": "2026-10-06T06:57:41",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1816693518,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "69537ff6bc1a4362",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Nat": {
+            "drawn": 5000,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(madd b.precision (l.info y m)).m == n and (madd b.precision (l.info y m)).n == n",
+          "params": [
+            "n : Nat",
+            "Y : U",
+            "l : Likelihood (VecOf n) Y",
+            "b : GaussianBelief n",
+            "y : Y",
+            "m : VecOf n"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no case could be drawn: every draw met an empty domain",
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "U",
+            "(Nat: genNat, size up to 16) * ((VecOf n -> VecOf dim -> VecOf n: constant functions (affine on R -> R), a thin sample) * ((Y -> VecOf n -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> VecOf n -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> VecOf n -> Mat Float64: constant functions (affine on R -> R), a thin sample))))",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "Y",
+            "VecOf: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.993,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "d4bb13a49cbc8850",
+      "when": "2026-10-06T04:24:10",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1816693518,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "69537ff6bc1a4362",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.madd": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Nat": "8e5466f7d1113a38"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Nat": {
+            "drawn": 5000,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(madd b.precision (l.info y m)).m == n and (madd b.precision (l.info y m)).n == n",
+          "params": [
+            "n : Nat",
+            "Y : U",
+            "l : Likelihood (VecOf n) Y",
+            "b : GaussianBelief n",
+            "y : Y",
+            "m : VecOf n"
+          ],
+          "mode": "sampled",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "no case could be drawn: every draw met an empty domain",
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "U",
+            "(Nat: genNat, size up to 16) * ((VecOf n -> VecOf dim -> VecOf n: constant functions (affine on R -> R), a thin sample) * ((Y -> VecOf n -> Float64: constant functions (affine on R -> R), a thin sample) * ((Y -> VecOf n -> Vec Float64: constant functions (affine on R -> R), a thin sample) * (Y -> VecOf n -> Mat Float64: constant functions (affine on R -> R), a thin sample))))",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "Y",
+            "VecOf: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.674,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "drawGaussian": [
+    {
+      "hash": "62e271b286389acb",
+      "when": "2026-10-06T06:17:52",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1143403906,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "165971c8a286bdf5",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.cond": "source fa7d63f723173c6f",
+          "python:luthier.arrays.det": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.eigvals_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.frob": "source fa7d63f723173c6f",
+          "python:luthier.arrays.inv_sqrt_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.kolmogorov_distance": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_mul": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.minimum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.normal_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.product": "source fa7d63f723173c6f",
+          "python:luthier.arrays.total": "source fa7d63f723173c6f",
+          "python:luthier.arrays.trace": "source fa7d63f723173c6f",
+          "python:luthier.arrays.transpose": "source fa7d63f723173c6f",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Int": "fe6905eaacab5698",
+        "MatOf": "source fa7d63f723173c6f",
+        "Nat": "8e5466f7d1113a38",
+        "VecOf": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Int": {
+            "drawn": 100,
+            "outside_type": 0
+          },
+          "MatOf": {
+            "drawn": 100,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 100,
+            "outside_type": 0
+          },
+          "VecOf": {
+            "drawn": 100,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(add b.mean (matVec (invSqrtSym b.precision) (normalVec n seed).z)).n == n",
+          "params": [
+            "n : Nat",
+            "b : GaussianBelief n",
+            "seed : Int"
+          ],
+          "mode": "sampled",
+          "cases": 24,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "Int: genInt, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 0, b = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), seed = -1",
+            "n = 1, b = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), seed = 1",
+            "n = 1, b = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), seed = -1",
+            "n = 0, b = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), seed = -1",
+            "n = 1, b = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), seed = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.171,
+          "skipped": 76
+        }
+      ]
+    },
+    {
+      "hash": "04cb0f136d35808d",
+      "when": "2026-10-06T04:24:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1143403906,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "165971c8a286bdf5",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.cond": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.det": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.eigvals_sym": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.frob": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.inv_sqrt_sym": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.kolmogorov_distance": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.madd": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_mul": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_vec": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.minimum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.normal_vec": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.product": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.total": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.trace": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.transpose": "source 24a5e06a053ff3c3",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Int": "fe6905eaacab5698",
+        "MatOf": "source 24a5e06a053ff3c3",
+        "Nat": "8e5466f7d1113a38",
+        "VecOf": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Int": {
+            "drawn": 100,
+            "outside_type": 0
+          },
+          "MatOf": {
+            "drawn": 100,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 100,
+            "outside_type": 0
+          },
+          "VecOf": {
+            "drawn": 100,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(add b.mean (matVec (invSqrtSym b.precision) (normalVec n seed).z)).n == n",
+          "params": [
+            "n : Nat",
+            "b : GaussianBelief n",
+            "seed : Int"
+          ],
+          "mode": "sampled",
+          "cases": 24,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "Int: genInt, size up to 16"
+          ],
+          "sample_cases": [
+            "n = 0, b = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), seed = -1",
+            "n = 1, b = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), seed = 1",
+            "n = 1, b = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), seed = -1",
+            "n = 0, b = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), seed = -1",
+            "n = 1, b = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), seed = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.176,
+          "skipped": 76
+        }
+      ]
+    }
+  ],
+  "gaussianFamily": [
+    {
+      "hash": "c1052291f603ded0",
+      "when": "2026-10-06T06:57:42",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1679212855,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ff64f844306dfb02",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.cond": "source fa7d63f723173c6f",
+          "python:luthier.arrays.det": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.eigvals_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.frob": "source fa7d63f723173c6f",
+          "python:luthier.arrays.inv_sqrt_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.kolmogorov_distance": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_mul": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.minimum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.normal_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.product": "source fa7d63f723173c6f",
+          "python:luthier.arrays.sub": "source fa7d63f723173c6f",
+          "python:luthier.arrays.total": "source fa7d63f723173c6f",
+          "python:luthier.arrays.trace": "source fa7d63f723173c6f",
+          "python:luthier.arrays.transpose": "source fa7d63f723173c6f",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "MatOf": "source fa7d63f723173c6f",
+        "Nat": "8e5466f7d1113a38",
+        "VecOf": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 402,
+            "outside_type": 0
+          },
+          "MatOf": {
+            "drawn": 300,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 200,
+            "outside_type": 0
+          },
+          "VecOf": {
+            "drawn": 300,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Reflexive (GaussianBelief n) \\ a c { (meanGap n a c < tol and meanGap n c a < tol) and approxMat tol a.precision c.precision }",
+          "params": [
+            "n : Nat",
+            "tol : { t : Float64 | 0.0 < t }",
+            "x : GaussianBelief n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16 where 0.0 < t",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)"
+          ],
+          "sample_cases": [
+            "n = 1, tol = 0.06824, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)",
+            "n = 0, tol = 0.201232, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = 0.563744, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 1, tol = 0.47557, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)",
+            "n = 0, tol = 0.40864, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)"
+          ],
+          "outcome": "passed",
+          "seconds": 0.337,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric (GaussianBelief n) Bool \\ p q { p == q } \\ a c { (meanGap n a c < tol and meanGap n c a < tol) and approxMat tol a.precision c.precision }",
+          "params": [
+            "n : Nat",
+            "tol : { t : Float64 | 0.0 < t }",
+            "x : GaussianBelief n",
+            "y : GaussianBelief n"
+          ],
+          "mode": "sampled",
+          "cases": 34,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16 where 0.0 < t",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)"
+          ],
+          "sample_cases": [
+            "n = 0, tol = 0.717346, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = 0.625767, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = 0.447258, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = 0.363578, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 1, tol = 0.168168, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), y = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)"
+          ],
+          "outcome": "passed",
+          "seconds": 0.401,
+          "skipped": 66
+        }
+      ]
+    },
+    {
+      "hash": "9a0116ba9f9dd468",
+      "when": "2026-10-06T06:17:52",
+      "passed": false,
+      "outcome": "failed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1679212855,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "e8b8c2606442417c",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.cond": "source fa7d63f723173c6f",
+          "python:luthier.arrays.det": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.eigvals_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.frob": "source fa7d63f723173c6f",
+          "python:luthier.arrays.inv_sqrt_sym": "source fa7d63f723173c6f",
+          "python:luthier.arrays.kolmogorov_distance": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_mul": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.maximum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.minimum": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.normal_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.product": "source fa7d63f723173c6f",
+          "python:luthier.arrays.sub": "source fa7d63f723173c6f",
+          "python:luthier.arrays.total": "source fa7d63f723173c6f",
+          "python:luthier.arrays.trace": "source fa7d63f723173c6f",
+          "python:luthier.arrays.transpose": "source fa7d63f723173c6f",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "MatOf": "source fa7d63f723173c6f",
+        "Nat": "8e5466f7d1113a38",
+        "VecOf": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 102,
+            "outside_type": 0
+          },
+          "MatOf": {
+            "drawn": 202,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 102,
+            "outside_type": 0
+          },
+          "VecOf": {
+            "drawn": 202,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Reflexive (GaussianBelief n) \\ a c { (meanGap n a c < tol and meanGap n c a < tol) and approxMat tol a.precision c.precision }",
+          "params": [
+            "n : Nat",
+            "tol : Float64",
+            "x : GaussianBelief n"
+          ],
+          "mode": "sampled",
+          "cases": 2,
+          "passed": false,
+          "failure": "n = 0, tol = -0.811623, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)"
+          ],
+          "sample_cases": [
+            "n = 1, tol = 0.06824, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)",
+            "n = 0, tol = -0.811623, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)"
+          ],
+          "outcome": "failed",
+          "seconds": 0.006,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric (GaussianBelief n) Bool \\ p q { p == q } \\ a c { (meanGap n a c < tol and meanGap n c a < tol) and approxMat tol a.precision c.precision }",
+          "params": [
+            "n : Nat",
+            "tol : Float64",
+            "x : GaussianBelief n",
+            "y : GaussianBelief n"
+          ],
+          "mode": "sampled",
+          "cases": 33,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)"
+          ],
+          "sample_cases": [
+            "n = 0, tol = -0.726773, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 1, tol = 0.969466, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), y = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)",
+            "n = 0, tol = -0.972748, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = -1.714926, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = 0.583574, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)"
+          ],
+          "outcome": "passed",
+          "seconds": 0.312,
+          "skipped": 67
+        }
+      ]
+    },
+    {
+      "hash": "d2497fced96255f3",
+      "when": "2026-10-06T04:24:11",
+      "passed": false,
+      "outcome": "failed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1679212855,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "e8b8c2606442417c",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.cond": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.det": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.eigvals_sym": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.frob": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.inv_sqrt_sym": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.kolmogorov_distance": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.madd": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_mul": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_vec": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.maximum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.minimum": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.normal_vec": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.product": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.sub": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.total": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.trace": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.transpose": "source 24a5e06a053ff3c3",
+          "python:math.erf": "python 3.13.2",
+          "python:math.exp": "python 3.13.2",
+          "python:math.log": "python 3.13.2",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Float64": "4f64a40b7e0eef49",
+        "MatOf": "source 24a5e06a053ff3c3",
+        "Nat": "8e5466f7d1113a38",
+        "VecOf": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {
+          "< true : Unit | false : Unit >": "genBool",
+          "Float64": "genFloat64",
+          "Int": "genInt",
+          "Nat": "genNat",
+          "Seed": "genSeed"
+        },
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Float64": {
+            "drawn": 102,
+            "outside_type": 0
+          },
+          "MatOf": {
+            "drawn": 202,
+            "outside_type": 0
+          },
+          "Nat": {
+            "drawn": 102,
+            "outside_type": 0
+          },
+          "VecOf": {
+            "drawn": 202,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "Reflexive (GaussianBelief n) \\ a c { (meanGap n a c < tol and meanGap n c a < tol) and approxMat tol a.precision c.precision }",
+          "params": [
+            "n : Nat",
+            "tol : Float64",
+            "x : GaussianBelief n"
+          ],
+          "mode": "sampled",
+          "cases": 2,
+          "passed": false,
+          "failure": "n = 0, tol = -0.811623, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)"
+          ],
+          "sample_cases": [
+            "n = 1, tol = 0.06824, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)",
+            "n = 0, tol = -0.811623, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)"
+          ],
+          "outcome": "failed",
+          "seconds": 0.006,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric (GaussianBelief n) Bool \\ p q { p == q } \\ a c { (meanGap n a c < tol and meanGap n c a < tol) and approxMat tol a.precision c.precision }",
+          "params": [
+            "n : Nat",
+            "tol : Float64",
+            "x : GaussianBelief n",
+            "y : GaussianBelief n"
+          ],
+          "mode": "sampled",
+          "cases": 33,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Nat: genNat, size up to 16",
+            "Float64: genFloat64, size up to 16",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)",
+            "(VecOf: registered Python generator, size up to 16) * (MatOf: registered Python generator, size up to 16)"
+          ],
+          "sample_cases": [
+            "n = 0, tol = -0.726773, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 1, tol = 0.969466, x = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>), y = ((1, <ndarray (1,)>), 1, 1, <ndarray (1, 1)>)",
+            "n = 0, tol = -0.972748, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = -1.714926, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)",
+            "n = 0, tol = 0.583574, x = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>), y = ((0, <ndarray (0,)>), 0, 0, <ndarray (0, 0)>)"
+          ],
+          "outcome": "passed",
+          "seconds": 0.312,
+          "skipped": 67
+        }
+      ]
+    }
+  ]
+}

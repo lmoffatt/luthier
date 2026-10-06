@@ -1,1645 +1,2267 @@
 {
-  "vec5": {
-    "hash": "041cb7b44caa115d",
-    "when": "2026-10-05T14:50:11",
-    "passed": true,
-    "seed": 1659134107,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+  "addRounds": [
+    {
+      "hash": "4512d0903417369b",
+      "when": "2026-10-06T05:59:37",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 835013928,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "a89772ebaad29047",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 848,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "VecRounds add \\ a b { a + b }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.256,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "Associative Float64 (VecOf lawDim) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) float64Field.field.ring.mul.op \\ c a { scale c a }",
-        "params": [
-          "a : Float64",
-          "b : Float64",
-          "x : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = 0.5072647098297023, b = -0.9543550338530831, x = (5, <ndarray (5,)>)",
-          "a = -0.4738659717122242, b = 0.4936809745699018, x = (5, <ndarray (5,)>)",
-          "a = 0.12127225305183531, b = 0.04562271509765914, x = (5, <ndarray (5,)>)",
-          "a = -0.002344648633988644, b = 0.9777103578909923, x = (5, <ndarray (5,)>)",
-          "a = -1.2628461034055944, b = 0.13794068469228415, x = (5, <ndarray (5,)>)"
-        ]
+    {
+      "hash": "f10e4ee1c5cd948c",
+      "when": "2026-10-06T04:15:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 835013928,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "a89772ebaad29047",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
       },
-      {
-        "label": "LeftIdentity Float64 (VecOf lawDim) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) \\ c a { scale c a } float64Field.field.ring.mul.unit",
-        "params": [
-          "x : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)"
-        ]
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
       },
-      {
-        "label": "LeftDistrib Float64 (VecOf lawDim) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) ((\\ a b { add a b }, zeros lawDim), \\ a { scale (0.0 - 1.0) a }).monoid.op \\ c a { scale c a }",
-        "params": [
-          "a : Float64",
-          "x : VecOf lawDim",
-          "y : VecOf lawDim"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = 0.7773646490647845, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = 0.694634156712987, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = -0.18678681159952126, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = 0.6806958892953601, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = -1.4989843636922933, x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 848,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "RightDistrib Float64 (VecOf lawDim) (VecOf lawDim) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) float64Field.field.ring.add.monoid.op ((\\ a b { add a b }, zeros lawDim), \\ a { scale (0.0 - 1.0) a }).monoid.op \\ c a { scale c a }",
-        "params": [
-          "a : Float64",
-          "b : Float64",
-          "x : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = 0.15797940117674036, b = 0.4258272211115388, x = (5, <ndarray (5,)>)",
-          "a = -0.3153378009248371, b = -0.49191710432918057, x = (5, <ndarray (5,)>)",
-          "a = 0.39925989250141747, b = -0.5699085704527531, x = (5, <ndarray (5,)>)",
-          "a = -0.20501733757975016, b = -0.5809353197285394, x = (5, <ndarray (5,)>)",
-          "a = -1.398331453105254, b = -1.4858747213682086, x = (5, <ndarray (5,)>)"
-        ]
-      }
-    ]
-  },
-  "euclid5": {
-    "hash": "d9898e9c17eb8988",
-    "when": "2026-10-05T14:50:12",
-    "passed": true,
-    "seed": 1942300396,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+      "laws": [
+        {
+          "label": "VecRounds add \\ a b { a + b }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.247,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "\\ (space, basis) { Orthonormal (Fin lawDim) (VecOf lawDim) Float64 float64Field.field.ring.eq space.inner basis \\ i j { match (i == j) { true -> float64Field.field.ring.mul.unit ; false -> float64Field.field.ring.add.monoid.unit } } } (euclidean lawDim)",
-        "params": [
-          "i : Fin lawDim",
-          "j : Fin lawDim"
+    {
+      "hash": "4c6b02062255ca6a",
+      "when": "2026-10-06T02:53:57",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 835013928,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "a89772ebaad29047",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < lawDim",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < lawDim"
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 848,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "VecRounds add \\ a b { a + b }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.26,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "subRounds": [
+    {
+      "hash": "4f3d26da4372280c",
+      "when": "2026-10-06T05:59:37",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 911480489,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "098fe4ac1781ecb2",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.sub": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "sample_cases": [
-          "i = 2, j = 0",
-          "i = 4, j = 3",
-          "i = 2, j = 3",
-          "i = 3, j = 0",
-          "i = 4, j = 2"
-        ]
-      }
-    ]
-  },
-  "matrices5": {
-    "hash": "00889d27addfb695",
-    "when": "2026-10-05T14:50:12",
-    "passed": true,
-    "seed": 930129318,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 842,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "VecRounds sub \\ a b { a - b }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.255,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "Associative (MatOf lawDim lawDim) (VecOf lawDim) (euclidean lawDim).space.space.eq \\ a b { matMul a b } \\ a x { matVec a x }",
-        "params": [
-          "a : MatOf lawDim lawDim",
-          "b : MatOf lawDim lawDim",
-          "x : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "MatOf: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), b = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>)"
-        ]
+    {
+      "hash": "a5e246d4c48a5ba5",
+      "when": "2026-10-06T04:15:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 911480489,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "098fe4ac1781ecb2",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.sub": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
       },
-      {
-        "label": "LeftIdentity (MatOf lawDim lawDim) (VecOf lawDim) (euclidean lawDim).space.space.eq \\ a x { matVec a x } (identity lawDim)",
-        "params": [
-          "x : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)",
-          "x = (5, <ndarray (5,)>)"
-        ]
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
       },
-      {
-        "label": "LeftDistrib (MatOf lawDim lawDim) (VecOf lawDim) (euclidean lawDim).space.space.eq (euclidean lawDim).space.space.add.monoid.op \\ a x { matVec a x }",
-        "params": [
-          "a : MatOf lawDim lawDim",
-          "x : VecOf lawDim",
-          "y : VecOf lawDim"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 842,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "CommutingActions (MatOf lawDim lawDim) Float64 (VecOf lawDim) (euclidean lawDim).space.space.eq \\ a x { matVec a x } (euclidean lawDim).space.space.scale",
-        "params": [
-          "a : MatOf lawDim lawDim",
-          "c : Float64",
-          "x : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "MatOf: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = (5, 5, <ndarray (5, 5)>), c = -0.8775340083433358, x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), c = -0.19988854914369214, x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), c = 0.3728008531623681, x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), c = 0.6908346336292321, x = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), c = 0.9400613845750421, x = (5, <ndarray (5,)>)"
-        ]
-      },
-      {
-        "label": "AdjointOfInner Float64 (VecOf lawDim) (MatOf lawDim lawDim) float64Field.field.ring.eq (euclidean lawDim).space.inner \\ a x { matVec a x } \\ a { transpose a }",
-        "params": [
-          "a : MatOf lawDim lawDim",
-          "x : VecOf lawDim",
-          "y : VecOf lawDim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)",
-          "a = (5, 5, <ndarray (5, 5)>), x = (5, <ndarray (5,)>), y = (5, <ndarray (5,)>)"
-        ]
-      }
-    ]
-  },
-  "float64Field": {
-    "hash": "e2b2d4bcd65b40a8",
-    "when": "2026-10-05T12:01:40",
-    "passed": true,
-    "seed": 1684102995,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+      "laws": [
+        {
+          "label": "VecRounds sub \\ a b { a - b }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.243,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "Reflexive Float64 eqR",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.8805229440890605",
-          "x = 0.04644935887807211",
-          "x = -0.44064231543793686",
-          "x = 0.7462128933339838",
-          "x = 0.01421293985824268"
-        ]
+    {
+      "hash": "e448132801f68250",
+      "when": "2026-10-06T02:53:57",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 911480489,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "098fe4ac1781ecb2",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.sub": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
       },
-      {
-        "label": "Symmetric Float64 Bool \\ p q { p == q } eqR",
-        "params": [
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.12438521122451163, y = 0.04771226714705534",
-          "x = -0.7581124662737686, y = 0.5526910042595645",
-          "x = 0.12403708132036195, y = 0.10599512071519879",
-          "x = -0.48123531228323735, y = 0.18774525055156932",
-          "x = -0.38598931741118725, y = -0.9894608001198164"
-        ]
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
       },
-      {
-        "label": "Associative Float64 Float64 eqR \\ a b { a + b } \\ a b { a + b }",
-        "params": [
-          "a : Float64",
-          "b : Float64",
-          "x : Float64"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "a = 0.41471296107812927, b = -0.17710454968100842, x = -0.445793686562729",
-          "a = -0.9373086068811005, b = 0.7065448849557676, x = -0.5101106730405061",
-          "a = 0.009780062490189145, b = -0.29134190707401486, x = -0.7065766279753634",
-          "a = 0.4659217056215639, b = -0.6404099964068826, x = 0.7733188604027472",
-          "a = -0.3365971477805212, b = -0.1949432263444142, x = 0.10445931103546124"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 842,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "LeftIdentity Float64 Float64 eqR \\ a b { a + b } 0.0",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.9735779409089724",
-          "x = 0.17060762153257425",
-          "x = -0.06911576586342894",
-          "x = 0.03168860337636259",
-          "x = -0.11237628184582538"
-        ]
+      "laws": [
+        {
+          "label": "VecRounds sub \\ a b { a - b }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.242,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "scaleRounds": [
+    {
+      "hash": "982989910d9f4d4e",
+      "when": "2026-10-06T05:59:38",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1521073659,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "d5287fb3a1709ba2",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.scale": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
       },
-      {
-        "label": "RightIdentity Float64 eqR \\ a b { a + b } 0.0",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.15177472757048038",
-          "x = -0.6464503441703386",
-          "x = 0.9259548339713626",
-          "x = -0.12082436216027204",
-          "x = 0.43679558930245177"
-        ]
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
       },
-      {
-        "label": "LeftInverse Float64 eqR (\\ a b { a + b }, 0.0).op (\\ a b { a + b }, 0.0).unit \\ a { 0.0 - a }",
-        "params": [
-          "x : Float64"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.2093725138877529",
-          "x = 0.21443805310844866",
-          "x = -0.22199640651332042",
-          "x = 0.42567692010774905",
-          "x = 0.1816183702968297"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 536,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "RightInverse Float64 eqR (\\ a b { a + b }, 0.0).op (\\ a b { a + b }, 0.0).unit \\ a { 0.0 - a }",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.5215207052213338",
-          "x = -0.017013714043402572",
-          "x = 0.929893167740186",
-          "x = -0.663203530501298",
-          "x = 0.09967990551790562"
-        ]
-      },
-      {
-        "label": "Symmetric Float64 Float64 eqR ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }).monoid.op",
-        "params": [
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.40224601014929284, y = 0.7638856222868153",
-          "x = -0.9147621915607029, y = 0.053547787943730496",
-          "x = 0.4966178125604581, y = -0.6149570995376037",
-          "x = 0.4418690265393719, y = -0.9368858972572702",
-          "x = -0.49245440550314123, y = -0.18053126970348177"
-        ]
-      },
-      {
-        "label": "Associative Float64 Float64 eqR \\ a b { a * b } \\ a b { a * b }",
-        "params": [
-          "a : Float64",
-          "b : Float64",
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "a = 0.6408959025227186, b = 0.5323467427402, x = -0.7426195876150072",
-          "a = 0.8072895498598558, b = 0.9734508760477005, x = -0.5025500080609457",
-          "a = 0.12140424311478948, b = -0.5704214011673603, x = 0.9992549785390576",
-          "a = -0.44291031979624207, b = 0.8164416839458504, x = -0.6058861777112479",
-          "a = -0.9883812056587364, b = -0.9568461733693276, x = -0.7107507698960844"
-        ]
-      },
-      {
-        "label": "LeftIdentity Float64 Float64 eqR \\ a b { a * b } 1.0",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.8490059612807788",
-          "x = -0.9111952570382877",
-          "x = 0.9471168071442246",
-          "x = 0.7568953045874875",
-          "x = -0.6458941536959495"
-        ]
-      },
-      {
-        "label": "RightIdentity Float64 eqR \\ a b { a * b } 1.0",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.031293818648838956",
-          "x = 0.3584449446969076",
-          "x = 0.920920356842569",
-          "x = 0.10416551978306487",
-          "x = -0.6442055939400748"
-        ]
-      },
-      {
-        "label": "LeftDistrib Float64 Float64 eqR ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }).monoid.op (\\ a b { a * b }, 1.0).op",
-        "params": [
-          "a : Float64",
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "a = 0.7270858089930663, x = 0.3226434204080495, y = -0.24791929335047702",
-          "a = 0.4167626357211438, x = -0.4498643248380283, y = 0.45309723075852637",
-          "a = 0.20060150420665224, x = 0.09176938489678088, y = -0.9362360530423326",
-          "a = 0.5459713041063201, x = 0.8158405898386507, y = -0.9266028701274689",
-          "a = 0.934363994372992, x = 0.9223624416384277, y = -0.13345997333074"
-        ]
-      },
-      {
-        "label": "RightDistrib Float64 Float64 Float64 eqR ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }).monoid.op ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }).monoid.op (\\ a b { a * b }, 1.0).op",
-        "params": [
-          "a : Float64",
-          "b : Float64",
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "a = -0.7944501005406379, b = 0.33103261096611947, x = -0.7663646195699862",
-          "a = -0.018665711052438416, b = -0.9393476869749449, x = -0.05281545358937145",
-          "a = 0.5294669240341738, b = 0.0404144983371606, x = -0.019873900099614428",
-          "a = 0.6890051154409675, b = -0.9599475238014097, x = -0.2484163885070283",
-          "a = -0.054158906077202085, b = -0.3033165563204345, x = 0.8541782112797729"
-        ]
-      },
-      {
-        "label": "Symmetric Float64 Float64 (eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0).eq (eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0).mul.op",
-        "params": [
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.308555394906036, y = -0.3924878726675267",
-          "x = 0.5780787374464438, y = -0.47547926339487745",
-          "x = 0.14809090853043272, y = -0.9717401645694141",
-          "x = -0.9368912307945161, y = 0.4458947728844711",
-          "x = 0.5782613333769688, y = 0.45387763377206225"
-        ]
-      },
-      {
-        "label": "Invertible Float64 (eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0).eq (eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0).mul.op (eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0).add.monoid.unit (eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0).mul.unit invR",
-        "params": [
-          "x : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.9657475955957024",
-          "x = 0.4328987618029796",
-          "x = 0.39205798864022734",
-          "x = -0.8725724612343126",
-          "x = 0.07274046516590493"
-        ]
-      },
-      {
-        "label": "Total Float64 \\ a b { a <= b }",
-        "params": [
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.8361267312441354, y = -0.6150436899718348",
-          "x = -0.9670013576231684, y = 0.09318610137447836",
-          "x = 0.31135148138403723, y = -0.19304442608126204",
-          "x = 0.7657817350535272, y = 0.03800333328054273",
-          "x = -0.42364589770896965, y = 0.5295891147936178"
-        ]
-      },
-      {
-        "label": "Antisymmetric Float64 ((eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0), invR).ring.eq \\ a b { a <= b }",
-        "params": [
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.07378724174913232, y = 0.2312397675755986",
-          "x = 0.3021246782109295, y = -0.6828982934023844",
-          "x = 0.028653365526466246, y = 0.26803589300586705",
-          "x = -0.9579478909171151, y = 0.756741402924771",
-          "x = 0.12223811283371844, y = -0.9188325652913094"
-        ]
-      },
-      {
-        "label": "Transitive Float64 \\ a b { a <= b }",
-        "params": [
-          "x : Float64",
-          "y : Float64",
-          "z : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = 0.24581328795250101, y = -0.7783375174479734, z = 0.9964265405871098",
-          "x = -0.29607305250378646, y = 0.12513008267070358, z = -0.6333135986587219",
-          "x = 0.0996207519724932, y = -0.6657315103328052, z = 0.9865938719315583",
-          "x = 0.8659021414273234, y = 0.7109645949641217, z = -0.829500948513735",
-          "x = 0.6609534134160728, y = -0.1933024362381035, z = -0.6378158771876208"
-        ]
-      },
-      {
-        "label": "AddMonotone Float64 \\ a b { a <= b } ((eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0), invR).ring.add.monoid.op",
-        "params": [
-          "x : Float64",
-          "y : Float64",
-          "z : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.8367882042041894, y = -0.5860764352558294, z = 0.31659354426283937",
-          "x = -0.32688251604920704, y = -0.20730052938062626, z = 0.9596362083190868",
-          "x = -0.33278962419277835, y = -0.3669835803356116, z = 0.34140648772012594",
-          "x = 0.24704749458180442, y = 0.5761772761430617, z = -0.9520347829912434",
-          "x = 0.92195685543906, y = -0.8133264570526761, z = 0.7866061756985137"
-        ]
-      },
-      {
-        "label": "MulPositive Float64 \\ a b { a <= b } ((eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0), invR).ring.mul.op ((eqR, ((\\ a b { a + b }, 0.0), \\ a { 0.0 - a }), \\ a b { a * b }, 1.0), invR).ring.add.monoid.unit",
-        "params": [
-          "x : Float64",
-          "y : Float64"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
-        ],
-        "sample_cases": [
-          "x = -0.4135984825107344, y = 0.9863524117899265",
-          "x = 0.5672951187695119, y = 0.36292925605271664",
-          "x = -0.30336409131960895, y = 0.7693961218141303",
-          "x = 0.8705870985130051, y = -0.2081122425752493",
-          "x = 0.2413682896984346, y = -0.42696120779055313"
-        ]
-      }
-    ]
-  },
-  "vecSpace": {
-    "hash": "4e37ff16c6913b82",
-    "when": "2026-10-05T14:50:12",
-    "passed": true,
-    "seed": 129233284,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+      "laws": [
+        {
+          "label": "ScaleRounds scale",
+          "params": [
+            "n : Nat",
+            "c : NormalDouble",
+            "x : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "NormalDouble: registered Python generator, size up to 16",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, c = 3.6325561302518677e+22, x = <ndarray (0,)>",
+            "n = 0, c = -4.434248266263253e-17, x = <ndarray (0,)>",
+            "n = 1, c = 1.615904699791048e-128, x = <ndarray (1,)>",
+            "n = 0, c = -1.471873794639621e-44, x = <ndarray (0,)>",
+            "n = 0, c = 1.4951178568314437e-117, x = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.213,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "(add a b).n == n",
-        "params": [
-          "n : Dim",
-          "a : VecOf n",
-          "b : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>)"
-        ]
+    {
+      "hash": "27058ca715a6bd86",
+      "when": "2026-10-06T04:15:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1521073659,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "d5287fb3a1709ba2",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.scale": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
       },
-      {
-        "label": "0 <= n",
-        "params": [
-          "n : Dim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1"
-        ]
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
       },
-      {
-        "label": "(zeros n).n == n",
-        "params": [
-          "n : Dim"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 2"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 536,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "Associative (VecOf n) (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) \\ a b { add a b } \\ a b { add a b }",
-        "params": [
-          "n : Dim",
-          "a : VecOf n",
-          "b : VecOf n",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)"
-        ]
-      },
-      {
-        "label": "LeftIdentity (VecOf n) (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) \\ a b { add a b } (zeros n)",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 2, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "RightIdentity (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) \\ a b { add a b } (zeros n)",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 2, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "(scale (0.0 - 1.0) a).n == n",
-        "params": [
-          "n : Dim",
-          "a : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>)"
-        ]
-      },
-      {
-        "label": "LeftInverse (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) (\\ a b { add a b }, zeros n).op (\\ a b { add a b }, zeros n).unit \\ a { scale (0.0 - 1.0) a }",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)"
-        ]
-      },
-      {
-        "label": "RightInverse (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) (\\ a b { add a b }, zeros n).op (\\ a b { add a b }, zeros n).unit \\ a { scale (0.0 - 1.0) a }",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 2, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "Symmetric (VecOf n) (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) ((\\ a b { add a b }, zeros n), \\ a { scale (0.0 - 1.0) a }).monoid.op",
-        "params": [
-          "n : Dim",
-          "x : VecOf n",
-          "y : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
-        ]
-      },
-      {
-        "label": "(scale c a).n == n",
-        "params": [
-          "n : Dim",
-          "c : Float64",
-          "a : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, c = 0.06054859444983274, a = (1, <ndarray (1,)>)",
-          "n = 1, c = 0.005422209875453277, a = (1, <ndarray (1,)>)",
-          "n = 1, c = 0.43050743084174936, a = (1, <ndarray (1,)>)",
-          "n = 1, c = 0.4288087719419149, a = (1, <ndarray (1,)>)",
-          "n = 2, c = 1.8076571492024556, a = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "Associative Float64 (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) float64Field.field.ring.mul.op \\ c a { scale c a }",
-        "params": [
-          "n : Dim",
-          "a : Float64",
-          "b : Float64",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = 0.07190992099563154, b = -0.7863430232751416, x = (1, <ndarray (1,)>)",
-          "n = 1, a = -0.2235542046594372, b = 0.7282396094939501, x = (1, <ndarray (1,)>)",
-          "n = 1, a = -0.9151513295617459, b = 0.32859960461057525, x = (1, <ndarray (1,)>)",
-          "n = 1, a = 0.8591969036277878, b = 0.5201206515906425, x = (1, <ndarray (1,)>)",
-          "n = 2, a = 0.07928585943529454, b = -1.3929364700293383, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "LeftIdentity Float64 (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) \\ c a { scale c a } float64Field.field.ring.mul.unit",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 2, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "LeftDistrib Float64 (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) ((\\ a b { add a b }, zeros n), \\ a { scale (0.0 - 1.0) a }).monoid.op \\ c a { scale c a }",
-        "params": [
-          "n : Dim",
-          "a : Float64",
-          "x : VecOf n",
-          "y : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = 0.17246637840328627, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = 0.9734314136197357, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = -0.9327727801817163, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = 0.8611187846508752, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 2, a = -1.9149695904437336, x = (2, <ndarray (2,)>), y = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "RightDistrib Float64 (VecOf n) (VecOf n) (approxVec (((roundingSlack * lawMagnitude) * lawMagnitude) * eps)) float64Field.field.ring.add.monoid.op ((\\ a b { add a b }, zeros n), \\ a { scale (0.0 - 1.0) a }).monoid.op \\ c a { scale c a }",
-        "params": [
-          "n : Dim",
-          "a : Float64",
-          "b : Float64",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = -0.3440849409102873, b = -0.9638819323832037, x = (1, <ndarray (1,)>)",
-          "n = 1, a = 0.20417418370096918, b = -0.6019669764224185, x = (1, <ndarray (1,)>)",
-          "n = 1, a = 0.7144675269664245, b = -0.2015415541422545, x = (1, <ndarray (1,)>)",
-          "n = 1, a = -0.6849229006112703, b = -0.23143857746089402, x = (1, <ndarray (1,)>)",
-          "n = 1, a = -1.1561903905170152, b = 0.9079586361330652, x = (1, <ndarray (1,)>)"
-        ]
-      }
-    ]
-  },
-  "matrices": {
-    "hash": "4bfb0f836479dd20",
-    "when": "2026-10-05T14:50:13",
-    "passed": true,
-    "seed": 158319010,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+      "laws": [
+        {
+          "label": "ScaleRounds scale",
+          "params": [
+            "n : Nat",
+            "c : NormalDouble",
+            "x : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "NormalDouble: registered Python generator, size up to 16",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, c = 3.6325561302518677e+22, x = <ndarray (0,)>",
+            "n = 0, c = -4.434248266263253e-17, x = <ndarray (0,)>",
+            "n = 1, c = 1.615904699791048e-128, x = <ndarray (1,)>",
+            "n = 0, c = -1.471873794639621e-44, x = <ndarray (0,)>",
+            "n = 0, c = 1.4951178568314437e-117, x = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.241,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "(matVec a x).n == n",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 2, a = (2, 2, <ndarray (2, 2)>), x = (2, <ndarray (2,)>)"
-        ]
+    {
+      "hash": "4902671f857f3de8",
+      "when": "2026-10-06T02:53:58",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1521073659,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "d5287fb3a1709ba2",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.scale": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
       },
-      {
-        "label": "(matMul a b).m == n and (matMul a b).n == n",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n",
-          "b : MatOf n n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>)",
-          "n = 2, a = (2, 2, <ndarray (2, 2)>), b = (2, 2, <ndarray (2, 2)>)"
-        ]
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
       },
-      {
-        "label": "0 <= n",
-        "params": [
-          "n : Dim"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 536,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "(identity n).m == n and (identity n).n == n",
-        "params": [
-          "n : Dim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1"
-        ]
+      "laws": [
+        {
+          "label": "ScaleRounds scale",
+          "params": [
+            "n : Nat",
+            "c : NormalDouble",
+            "x : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "NormalDouble: registered Python generator, size up to 16",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, c = 3.6325561302518677e+22, x = <ndarray (0,)>",
+            "n = 0, c = -4.434248266263253e-17, x = <ndarray (0,)>",
+            "n = 1, c = 1.615904699791048e-128, x = <ndarray (1,)>",
+            "n = 0, c = -1.471873794639621e-44, x = <ndarray (0,)>",
+            "n = 0, c = 1.4951178568314437e-117, x = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.206,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "dotRounds": [
+    {
+      "hash": "96ff5697be9b8564",
+      "when": "2026-10-06T05:59:38",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1017538229,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9cc27607256328fb",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
       },
-      {
-        "label": "(transpose a).m == n and (transpose a).n == n",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>)"
-        ]
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
       },
-      {
-        "label": "Associative (MatOf n n) (VecOf n) (euclidean n).space.space.eq \\ a b { matMul a b } \\ a x { matVec a x }",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n",
-          "b : MatOf n n",
-          "x : VecOf n"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), b = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>)",
-          "n = 2, a = (2, 2, <ndarray (2, 2)>), b = (2, 2, <ndarray (2, 2)>), x = (2, <ndarray (2,)>)"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 908,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "LeftIdentity (MatOf n n) (VecOf n) (euclidean n).space.space.eq \\ a x { matVec a x } (identity n)",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 2, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "LeftDistrib (MatOf n n) (VecOf n) (euclidean n).space.space.eq (euclidean n).space.space.add.monoid.op \\ a x { matVec a x }",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n",
-          "x : VecOf n",
-          "y : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
-        ]
-      },
-      {
-        "label": "CommutingActions (MatOf n n) Float64 (VecOf n) (euclidean n).space.space.eq \\ a x { matVec a x } (euclidean n).space.space.scale",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n",
-          "c : Float64",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = -0.7078850911714396, x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = 0.07942013151489835, x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = 0.8161522705674642, x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), c = -0.7777124915726312, x = (1, <ndarray (1,)>)",
-          "n = 2, a = (2, 2, <ndarray (2, 2)>), c = 1.3738884897582508, x = (2, <ndarray (2,)>)"
-        ]
-      },
-      {
-        "label": "AdjointOfInner Float64 (VecOf n) (MatOf n n) float64Field.field.ring.eq (euclidean n).space.inner \\ a x { matVec a x } \\ a { transpose a }",
-        "params": [
-          "n : Dim",
-          "a : MatOf n n",
-          "x : VecOf n",
-          "y : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "MatOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, 1, <ndarray (1, 1)>), x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
-        ]
-      }
-    ]
-  },
-  "euclidean": {
-    "hash": "79da9a4cc1377851",
-    "when": "2026-10-05T14:50:13",
-    "passed": true,
-    "seed": 1784426518,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "DeficientOf",
-        "Dim",
-        "Dim2",
-        "MatOf",
-        "MatRows",
-        "SpdOf",
-        "SymmetricSquare",
-        "VecOf"
+      "laws": [
+        {
+          "label": "InnerWithinGamma \\ n x y { dot (n, x) (n, y) }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.297,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "Symmetric (VecOf n) Float64 float64Field.field.ring.eq dot",
-        "params": [
-          "n : Dim",
-          "x : VecOf n",
-          "y : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)"
-        ]
+    {
+      "hash": "3dcf8e6eaaf6246a",
+      "when": "2026-10-06T04:15:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1017538229,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9cc27607256328fb",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
       },
-      {
-        "label": "RightDistrib (VecOf n) (VecOf n) Float64 float64Field.field.ring.eq (vecSpace n).add.monoid.op float64Field.field.ring.add.monoid.op dot",
-        "params": [
-          "n : Dim",
-          "a : VecOf n",
-          "b : VecOf n",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 1, a = (1, <ndarray (1,)>), b = (1, <ndarray (1,)>), x = (1, <ndarray (1,)>)",
-          "n = 2, a = (2, <ndarray (2,)>), b = (2, <ndarray (2,)>), x = (2, <ndarray (2,)>)"
-        ]
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
       },
-      {
-        "label": "Homogeneous Float64 (VecOf n) Float64 float64Field.field.ring.eq (vecSpace n).scale float64Field.field.ring.mul.op dot",
-        "params": [
-          "n : Dim",
-          "c : Float64",
-          "x : VecOf n",
-          "y : VecOf n"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
-          "VecOf: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, c = 0.45297816070942964, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, c = 0.16713615093941092, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, c = -0.39237769626523655, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 1, c = 0.9798640504731768, x = (1, <ndarray (1,)>), y = (1, <ndarray (1,)>)",
-          "n = 2, c = -1.0857703768968232, x = (2, <ndarray (2,)>), y = (2, <ndarray (2,)>)"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 908,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "PositiveForm Float64 (VecOf n) float64Field.le float64Field.field.ring.add.monoid.unit (vecSpace n).eq (vecSpace n).add.monoid.unit dot",
-        "params": [
-          "n : Dim",
-          "x : VecOf n"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "VecOf: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)",
-          "n = 1, x = (1, <ndarray (1,)>)"
-        ]
+      "laws": [
+        {
+          "label": "InnerWithinGamma \\ n x y { dot (n, x) (n, y) }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.314,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "c2cf5f4fc8a23077",
+      "when": "2026-10-06T02:53:58",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1017538229,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9cc27607256328fb",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.dot": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.norm": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
       },
-      {
-        "label": "0 <= n",
-        "params": [
-          "n : Dim"
-        ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16"
-        ],
-        "sample_cases": [
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1",
-          "n = 1"
-        ]
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
       },
-      {
-        "label": "(row (identity n) i).n == n",
-        "params": [
-          "n : Dim",
-          "i : Fin n"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
-        ],
-        "sample_cases": [
-          "n = 1, i = 0",
-          "n = 1, i = 0",
-          "n = 1, i = 0",
-          "n = 1, i = 0",
-          "n = 2, i = 0"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 908,
+            "outside_type": 0
+          }
+        }
       },
-      {
-        "label": "Orthonormal (Fin n) (VecOf n) Float64 float64Field.field.ring.eq (vecSpace n, dot).inner \\ i { row (identity n) i } \\ i j { match (i == j) { true -> float64Field.field.ring.mul.unit ; false -> float64Field.field.ring.add.monoid.unit } }",
-        "params": [
-          "n : Dim",
-          "i : Fin n",
-          "j : Fin n"
+      "laws": [
+        {
+          "label": "InnerWithinGamma \\ n x y { dot (n, x) (n, y) }",
+          "params": [
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>",
+            "n = 0, x = <ndarray (0,)>, y = <ndarray (0,)>",
+            "n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.302,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "totalRounds": [
+    {
+      "hash": "fb2097380230094f",
+      "when": "2026-10-06T05:59:38",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1711270546,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "99e6c03d0a1c3c39",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.total": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "mode": "sampled",
-        "cases": 50,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Dim: registered Python generator, size up to 16",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 422,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma \\ n f { total (n, f) }",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.187,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "8b7ee0a357e2acd7",
+      "when": "2026-10-06T04:15:24",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1711270546,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "99e6c03d0a1c3c39",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.total": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
         ],
-        "sample_cases": [
-          "n = 1, i = 0, j = 0",
-          "n = 1, i = 0, j = 0",
-          "n = 1, i = 0, j = 0",
-          "n = 1, i = 0, j = 0",
-          "n = 2, i = 1, j = 1"
-        ]
-      }
-    ]
-  }
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 422,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma \\ n f { total (n, f) }",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.182,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "971ba4b16d3b2835",
+      "when": "2026-10-06T02:53:58",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1711270546,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "99e6c03d0a1c3c39",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.dot": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.norm": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.total": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 422,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "SumWithinGamma \\ n f { total (n, f) }",
+          "params": [
+            "n : Nat",
+            "f : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "n = 1, f = <ndarray (1,)>",
+            "n = 1, f = <ndarray (1,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>",
+            "n = 0, f = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.181,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "matVecRounds": [
+    {
+      "hash": "389f88844ddd9e1c",
+      "when": "2026-10-06T05:59:38",
+      "passed": true,
+      "outcome": "passed",
+      "n": 50,
+      "mode": "sampled",
+      "seed": 2066186138,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2b9e35349f20d674",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.arrays.dot": "source fa7d63f723173c6f",
+          "python:luthier.arrays.frob": "source fa7d63f723173c6f",
+          "python:luthier.arrays.madd": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_mul": "source fa7d63f723173c6f",
+          "python:luthier.arrays.mat_vec": "source fa7d63f723173c6f",
+          "python:luthier.arrays.norm": "source fa7d63f723173c6f",
+          "python:luthier.arrays.trace": "source fa7d63f723173c6f",
+          "python:luthier.arrays.transpose": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 8,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 472,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "MatVecWithinGamma matVec",
+          "params": [
+            "m : Nat",
+            "n : Nat",
+            "a : Fin m -> Fin n -> NormalDouble",
+            "x : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 50,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-8, 8] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-8, 8] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin m -> Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "m = 0, n = 0, a = <ndarray (0,)>, x = <ndarray (0,)>",
+            "m = 0, n = 1, a = <ndarray (0,)>, x = <ndarray (1,)>",
+            "m = 0, n = 1, a = <ndarray (0,)>, x = <ndarray (1,)>",
+            "m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>",
+            "m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.219,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "d34717e491118a11",
+      "when": "2026-10-06T04:15:24",
+      "passed": true,
+      "outcome": "passed",
+      "n": 50,
+      "mode": "sampled",
+      "seed": 2066186138,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2b9e35349f20d674",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.dot": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.frob": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.madd": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_mul": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.mat_vec": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.norm": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.trace": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.transpose": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 8,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 472,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "MatVecWithinGamma matVec",
+          "params": [
+            "m : Nat",
+            "n : Nat",
+            "a : Fin m -> Fin n -> NormalDouble",
+            "x : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 50,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-8, 8] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-8, 8] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin m -> Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "m = 0, n = 0, a = <ndarray (0,)>, x = <ndarray (0,)>",
+            "m = 0, n = 1, a = <ndarray (0,)>, x = <ndarray (1,)>",
+            "m = 0, n = 1, a = <ndarray (0,)>, x = <ndarray (1,)>",
+            "m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>",
+            "m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.254,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "282c9ad1c6fbe485",
+      "when": "2026-10-06T02:53:58",
+      "passed": true,
+      "outcome": "passed",
+      "n": 50,
+      "mode": "sampled",
+      "seed": 2066186138,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2b9e35349f20d674",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:builtins.float": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.dot": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.frob": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.madd": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.mat_mul": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.mat_vec": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.norm": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.trace": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.transpose": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05",
+          "python:math.sqrt": "python 3.13.2",
+          "python:math.ulp": "python 3.13.2"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 8,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 472,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "MatVecWithinGamma matVec",
+          "params": [
+            "m : Nat",
+            "n : Nat",
+            "a : Fin m -> Fin n -> NormalDouble",
+            "x : Fin n -> NormalDouble"
+          ],
+          "mode": "sampled",
+          "cases": 50,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-8, 8] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-8, 8] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin m -> Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table"
+          ],
+          "sample_cases": [
+            "m = 0, n = 0, a = <ndarray (0,)>, x = <ndarray (0,)>",
+            "m = 0, n = 1, a = <ndarray (0,)>, x = <ndarray (1,)>",
+            "m = 0, n = 1, a = <ndarray (0,)>, x = <ndarray (1,)>",
+            "m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>",
+            "m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.223,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "VecRounds": [
+    {
+      "hash": "f8bb97e3db0f798a",
+      "when": "2026-10-06T05:59:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1839258229,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c94cb83edf84d4bb",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 952,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(op (n, x) (n, y)).n == n -> 0 <= k and k < (op (n, x) (n, y)).n",
+          "params": [
+            "op : Vec Float64 -> Vec Float64 -> Vec Float64",
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble",
+            "k : Fin n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Vec Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+          ],
+          "sample_cases": [
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.169,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "5a49f942b1e2c993",
+      "when": "2026-10-06T04:15:25",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1839258229,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c94cb83edf84d4bb",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 952,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(op (n, x) (n, y)).n == n -> 0 <= k and k < (op (n, x) (n, y)).n",
+          "params": [
+            "op : Vec Float64 -> Vec Float64 -> Vec Float64",
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble",
+            "k : Fin n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Vec Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+          ],
+          "sample_cases": [
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.191,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "8f9a443951a4d91d",
+      "when": "2026-10-06T02:53:59",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1839258229,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "c94cb83edf84d4bb",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 952,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(op (n, x) (n, y)).n == n -> 0 <= k and k < (op (n, x) (n, y)).n",
+          "params": [
+            "op : Vec Float64 -> Vec Float64 -> Vec Float64",
+            "n : Nat",
+            "x : Fin n -> NormalDouble",
+            "y : Fin n -> NormalDouble",
+            "k : Fin n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Vec Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+          ],
+          "sample_cases": [
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0",
+            "op = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, x = <ndarray (1,)>, y = <ndarray (1,)>, k = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.162,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "ScaleRounds": [
+    {
+      "hash": "6b5b3de84536aba1",
+      "when": "2026-10-06T05:59:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 475035634,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2515ecfa047a5b1c",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 624,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(s c (n, x)).n == n -> 0 <= k and k < (s c (n, x)).n",
+          "params": [
+            "s : Float64 -> Vec Float64 -> Vec Float64",
+            "n : Nat",
+            "c : NormalDouble",
+            "x : Fin n -> NormalDouble",
+            "k : Fin n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "NormalDouble: registered Python generator, size up to 16",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+          ],
+          "sample_cases": [
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -1.3956898102982245e-26, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -3.1363160154907728e+106, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, c = -9.521969321978643e-102, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, c = -2.5650855869970817e+71, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -4.935305114832708e+57, x = <ndarray (1,)>, k = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.135,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "70f2925afab1a3b4",
+      "when": "2026-10-06T04:15:25",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 475035634,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2515ecfa047a5b1c",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 624,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(s c (n, x)).n == n -> 0 <= k and k < (s c (n, x)).n",
+          "params": [
+            "s : Float64 -> Vec Float64 -> Vec Float64",
+            "n : Nat",
+            "c : NormalDouble",
+            "x : Fin n -> NormalDouble",
+            "k : Fin n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "NormalDouble: registered Python generator, size up to 16",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+          ],
+          "sample_cases": [
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -1.3956898102982245e-26, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -3.1363160154907728e+106, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, c = -9.521969321978643e-102, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, c = -2.5650855869970817e+71, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -4.935305114832708e+57, x = <ndarray (1,)>, k = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.143,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "51ad9ff3d384a17e",
+      "when": "2026-10-06T02:54:00",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 475035634,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "2515ecfa047a5b1c",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 624,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(s c (n, x)).n == n -> 0 <= k and k < (s c (n, x)).n",
+          "params": [
+            "s : Float64 -> Vec Float64 -> Vec Float64",
+            "n : Nat",
+            "c : NormalDouble",
+            "x : Fin n -> NormalDouble",
+            "k : Fin n"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "NormalDouble: registered Python generator, size up to 16",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n"
+          ],
+          "sample_cases": [
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -1.3956898102982245e-26, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -3.1363160154907728e+106, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, c = -9.521969321978643e-102, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (0, <ndarray (0,)>) }, n = 1, c = -2.5650855869970817e+71, x = <ndarray (1,)>, k = 0",
+            "s = \\ _ _ { (1, <ndarray (1,)>) }, n = 1, c = -4.935305114832708e+57, x = <ndarray (1,)>, k = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.119,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "MatVecWithinGamma": [
+    {
+      "hash": "48db0730b1b7052a",
+      "when": "2026-10-06T05:59:40",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 836602672,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ed07e82175b16faf",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source fa7d63f723173c6f",
+          "python:luthier.arrays.approx": "source fa7d63f723173c6f",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "NormalDouble": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "Square",
+          "SquareOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 3203,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(mv (m, n, a) (n, x)).n == m -> 0 <= i and i < (mv (m, n, a) (n, x)).n",
+          "params": [
+            "mv : Mat Float64 -> Vec Float64 -> Vec Float64",
+            "m : Nat",
+            "n : Nat",
+            "a : Fin m -> Fin n -> NormalDouble",
+            "x : Fin n -> NormalDouble",
+            "i : Fin m"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Mat Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin m -> Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < m"
+          ],
+          "sample_cases": [
+            "mv = \\ _ _ { (0, <ndarray (0,)>) }, m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>, i = 0",
+            "mv = \\ _ _ { (0, <ndarray (0,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.437,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "8e1b228a975ab1a4",
+      "when": "2026-10-06T04:15:25",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 836602672,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ed07e82175b16faf",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source 24a5e06a053ff3c3",
+          "python:luthier.arrays.approx": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.nearest": "source 24a5e06a053ff3c3",
+          "python:luthier.rational.ratio": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "NormalDouble": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 3203,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(mv (m, n, a) (n, x)).n == m -> 0 <= i and i < (mv (m, n, a) (n, x)).n",
+          "params": [
+            "mv : Mat Float64 -> Vec Float64 -> Vec Float64",
+            "m : Nat",
+            "n : Nat",
+            "a : Fin m -> Fin n -> NormalDouble",
+            "x : Fin n -> NormalDouble",
+            "i : Fin m"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Mat Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin m -> Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < m"
+          ],
+          "sample_cases": [
+            "mv = \\ _ _ { (0, <ndarray (0,)>) }, m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>, i = 0",
+            "mv = \\ _ _ { (0, <ndarray (0,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.44,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "f535cfee115f91de",
+      "when": "2026-10-06T02:54:00",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 836602672,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "ed07e82175b16faf",
+        "externs": {
+          "python:builtins.abs": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.arrays.add": "source ba70ad4895b6bc05",
+          "python:luthier.arrays.approx": "source ba70ad4895b6bc05",
+          "python:luthier.rational.nearest": "source ba70ad4895b6bc05",
+          "python:luthier.rational.ratio": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "NormalDouble": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "DeficientOf",
+          "Dim",
+          "Dim2",
+          "MatOf",
+          "MatRows",
+          "NormalDouble",
+          "SpdOf",
+          "SymmetricSquare",
+          "VecOf"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "NormalDouble": {
+            "drawn": 3203,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "(mv (m, n, a) (n, x)).n == m -> 0 <= i and i < (mv (m, n, a) (n, x)).n",
+          "params": [
+            "mv : Mat Float64 -> Vec Float64 -> Vec Float64",
+            "m : Nat",
+            "n : Nat",
+            "a : Fin m -> Fin n -> NormalDouble",
+            "x : Fin n -> NormalDouble",
+            "i : Fin m"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Mat Float64 -> Vec Float64 -> Vec Float64: constant functions (affine on R -> R), a thin sample",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Fin m -> Fin n -> NormalDouble: drawn as its table",
+            "Fin n -> NormalDouble: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < m"
+          ],
+          "sample_cases": [
+            "mv = \\ _ _ { (0, <ndarray (0,)>) }, m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0",
+            "mv = \\ _ _ { (1, <ndarray (1,)>) }, m = 1, n = 0, a = <ndarray (1, 0)>, x = <ndarray (0,)>, i = 0",
+            "mv = \\ _ _ { (0, <ndarray (0,)>) }, m = 1, n = 1, a = <ndarray (1, 1)>, x = <ndarray (1,)>, i = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.416,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
 }

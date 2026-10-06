@@ -1,221 +1,1574 @@
 {
-  "forallBelow": {
-    "hash": "86a9b6e5eab4f711",
-    "when": "2026-10-04T20:06:44",
-    "passed": true,
-    "seed": 774858452,
-    "run_seed": 1,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": []
-    },
-    "laws": [
-      {
-        "label": "not (n <= 0) -> 0 <= k and k < n",
-        "params": [
-          "n : Int",
-          "p : Fin n -> Bool",
-          "k : Fin (n - 1)"
-        ],
-        "mode": "sampled",
-        "cases": 93,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-          "Fin n -> Bool",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < n - 1"
-        ],
-        "sample_cases": [
-          "n = 2, p = \\ i { match i { 0 -> false ; 1 -> false } }, k = 0",
-          "n = 2, p = \\ i { match i { 0 -> false ; 1 -> true } }, k = 0",
-          "n = 2, p = \\ i { match i { 0 -> true ; 1 -> true } }, k = 0",
-          "n = 2, p = \\ i { match i { 0 -> false ; 1 -> true } }, k = 0",
-          "n = 2, p = \\ i { match i { 0 -> true ; 1 -> false } }, k = 0"
-        ]
+  "firstFailing": [
+    {
+      "hash": "1245a460130391eb",
+      "when": "2026-10-06T06:00:05",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2073537495,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5bcdc10058dca97f",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
       },
-      {
-        "label": "not (n <= 0) -> 0 <= n - 1 and n - 1 < n",
-        "params": [
-          "n : Int",
-          "p : Fin n -> Bool"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-          "Fin n -> Bool"
-        ],
-        "sample_cases": [
-          "n = 1, p = \\ i { match i { 0 -> false } }",
-          "n = 1, p = \\ i { match i { 0 -> false } }",
-          "n = 1, p = \\ i { match i { 0 -> false } }",
-          "n = -1, p = <ndarray (0,)>",
-          "n = 0, p = <ndarray (0,)>"
-        ]
-      }
-    ]
-  },
-  "firstFailing": {
-    "hash": "5bcdc10058dca97f",
-    "when": "2026-10-05T13:13:04",
-    "passed": true,
-    "seed": 343385702,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
       "generators": {},
-      "python_generators": [
-        "BrokenText",
-        "Perturbed",
-        "Table",
-        "TableText"
-      ]
-    },
-    "laws": [
-      {
-        "label": "not (k >= n) -> 0 <= k and k < n",
-        "params": [
-          "k : Nat",
-          "n : Int"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
         ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-        ],
-        "sample_cases": [
-          "k = 1, n = -1",
-          "k = 0, n = 1",
-          "k = 1, n = -1",
-          "k = 1, n = 1",
-          "k = 1, n = 0"
-        ]
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
-      {
-        "label": "not (k >= n) -> p k -> 0 <= k + 1",
-        "params": [
-          "k : Nat",
-          "n : Int",
-          "p : Fin n -> Bool"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-          "Fin n -> Bool: drawn as its table"
-        ],
-        "sample_cases": [
-          "k = 0, n = 0, p = <ndarray (0,)>",
-          "k = 1, n = 1, p = \\ i { match i { 0 -> false } }",
-          "k = 0, n = 0, p = <ndarray (0,)>",
-          "k = 1, n = -1, p = <ndarray (0,)>",
-          "k = 1, n = 0, p = <ndarray (0,)>"
-        ]
-      }
-    ]
-  },
-  "sameCells": {
-    "hash": "a318a347ad2a8c3b",
-    "when": "2026-10-05T13:13:04",
-    "passed": true,
-    "seed": 1758373365,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
-      "generators": {},
-      "python_generators": [
-        "BrokenText",
-        "Perturbed",
-        "Table",
-        "TableText"
+      "laws": [
+        {
+          "label": "not (k >= n) -> 0 <= k and k < n",
+          "params": [
+            "k : Nat",
+            "n : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "k = 0, n = -1",
+            "k = 0, n = 1",
+            "k = 1, n = 1",
+            "k = 1, n = -1",
+            "k = 1, n = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.012,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= n) -> p k -> 0 <= k + 1",
+          "params": [
+            "k : Nat",
+            "n : Int",
+            "p : Fin n -> Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Fin n -> Bool: drawn as its table"
+          ],
+          "sample_cases": [
+            "k = 1, n = -1, p = <ndarray (0,)>",
+            "k = 0, n = 0, p = <ndarray (0,)>",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> false } }",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> true } }",
+            "k = 0, n = 0, p = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.115,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "0 <= r and r < u.nRows",
-        "params": [
-          "t : Table",
-          "u : { v : Table | v.nRows == t.nRows }",
-          "r : Fin t.nRows"
-        ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Table: registered Python generator, size up to 16",
-          "Table: registered Python generator, size up to 16 where v.nRows == t.nRows",
-          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < t.nRows"
-        ],
-        "sample_cases": [
-          "t = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140173461099072\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#140173461100160\"), r = 0",
-          "t = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140173461103936\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140173460874816\"), r = 0",
-          "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140173460959488\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140173460960960\"), r = 0",
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'int' (cons String 'str' (cons String 'int' (nil String))), extern \"python:luthier.tables.Table.cell#140173460959616\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140173460957760\"), r = 0",
-          "t = (1, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#140173460957440\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140173460948032\"), r = 0"
-        ]
-      }
-    ]
-  },
-  "sameTable": {
-    "hash": "62cf8cdd6550762d",
-    "when": "2026-10-05T13:13:05",
-    "passed": true,
-    "seed": 1342100913,
-    "run_seed": 3,
-    "generation": {
-      "size": 16,
-      "growth": "1 to size over a sampled run",
+    {
+      "hash": "0e154aaf65609254",
+      "when": "2026-10-06T04:15:43",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2073537495,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5bcdc10058dca97f",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
       "generators": {},
-      "python_generators": [
-        "BrokenText",
-        "Perturbed",
-        "Table",
-        "TableText"
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k >= n) -> 0 <= k and k < n",
+          "params": [
+            "k : Nat",
+            "n : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "k = 0, n = -1",
+            "k = 0, n = 1",
+            "k = 1, n = 1",
+            "k = 1, n = -1",
+            "k = 1, n = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= n) -> p k -> 0 <= k + 1",
+          "params": [
+            "k : Nat",
+            "n : Int",
+            "p : Fin n -> Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Fin n -> Bool: drawn as its table"
+          ],
+          "sample_cases": [
+            "k = 1, n = -1, p = <ndarray (0,)>",
+            "k = 0, n = 0, p = <ndarray (0,)>",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> false } }",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> true } }",
+            "k = 0, n = 0, p = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.125,
+          "skipped": 0
+        }
       ]
     },
-    "laws": [
-      {
-        "label": "t.nRows == u.nRows -> u.nRows == t.nRows",
-        "params": [
-          "t : Table",
-          "u : Table"
+    {
+      "hash": "d81ec7cf64188203",
+      "when": "2026-10-06T02:54:18",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2073537495,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5bcdc10058dca97f",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
         ],
-        "mode": "sampled",
-        "cases": 100,
-        "passed": true,
-        "failure": null,
-        "error": null,
-        "domains": [
-          "Table: registered Python generator, size up to 16",
-          "Table: registered Python generator, size up to 16"
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k >= n) -> 0 <= k and k < n",
+          "params": [
+            "k : Nat",
+            "n : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "k = 0, n = -1",
+            "k = 0, n = 1",
+            "k = 1, n = 1",
+            "k = 1, n = -1",
+            "k = 1, n = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "not (k >= n) -> p k -> 0 <= k + 1",
+          "params": [
+            "k : Nat",
+            "n : Int",
+            "p : Fin n -> Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Fin n -> Bool: drawn as its table"
+          ],
+          "sample_cases": [
+            "k = 1, n = -1, p = <ndarray (0,)>",
+            "k = 0, n = 0, p = <ndarray (0,)>",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> false } }",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> true } }",
+            "k = 0, n = 0, p = <ndarray (0,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.117,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "edfcfc9274002ebf",
+      "when": "2026-10-05T18:54:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2073537495,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "5bcdc10058dca97f",
+        "externs": {},
+        "interpreter": "cb4ec0d68bb54293"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k >= n) -> 0 <= k and k < n",
+          "params": [
+            "k : Nat",
+            "n : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "k = 0, n = -1",
+            "k = 0, n = 1",
+            "k = 1, n = 1",
+            "k = 1, n = -1",
+            "k = 1, n = 0"
+          ],
+          "outcome": "passed"
+        },
+        {
+          "label": "not (k >= n) -> p k -> 0 <= k + 1",
+          "params": [
+            "k : Nat",
+            "n : Int",
+            "p : Fin n -> Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Fin n -> Bool: drawn as its table"
+          ],
+          "sample_cases": [
+            "k = 1, n = -1, p = <ndarray (0,)>",
+            "k = 0, n = 0, p = <ndarray (0,)>",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> false } }",
+            "k = 0, n = 1, p = \\ i { match i { 0 -> true } }",
+            "k = 0, n = 0, p = <ndarray (0,)>"
+          ],
+          "outcome": "passed"
+        }
+      ]
+    }
+  ],
+  "sameCells": [
+    {
+      "hash": "854405da8705b76f",
+      "when": "2026-10-06T06:00:05",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 389576290,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9e744c80a0dc8188",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Table": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
         ],
-        "sample_cases": [
-          "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'str' (cons String 'float' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#139678738538304\"), u = (0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#139678738538048\")",
-          "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#139678738540096\"), u = (0, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#139678738539584\")",
-          "t = (0, cons String 'c0' (nil String), cons String 'float' (nil String), extern \"python:luthier.tables.Table.cell#139678738539712\"), u = (1, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139678738539648\")",
-          "t = (0, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#139678738539904\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'int' (cons String 'int' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#139678738539840\")",
-          "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#139678738539200\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'int' (cons String 'int' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#139678738539456\")"
-        ]
-      }
-    ]
-  }
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Table": {
+            "drawn": 889,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "0 <= r and r < u.nRows",
+          "params": [
+            "t : Table",
+            "u : { v : Table | v.nRows == t.nRows }",
+            "r : Fin t.nRows"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Table: registered Python generator, size up to 16",
+            "Table: registered Python generator, size up to 16 where v.nRows == t.nRows",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < t.nRows"
+          ],
+          "sample_cases": [
+            "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#140309278283264\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'str' (cons String 'int' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#140309278287424\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'int' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140309278283840\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140309278293952\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'int' (cons String 'str' (cons String 'int' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#140309278356544\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#140309278359104\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'str' (cons String 'float' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#140309278354176\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'str' (cons String 'str' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#140309278352832\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'str' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#140309278354240\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'int' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#140309278345280\"), r = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 3.77,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "b5d5c753e8c30df4",
+      "when": "2026-10-06T04:15:44",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 389576290,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9e744c80a0dc8188",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Table": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Table": {
+            "drawn": 889,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "0 <= r and r < u.nRows",
+          "params": [
+            "t : Table",
+            "u : { v : Table | v.nRows == t.nRows }",
+            "r : Fin t.nRows"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Table: registered Python generator, size up to 16",
+            "Table: registered Python generator, size up to 16 where v.nRows == t.nRows",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < t.nRows"
+          ],
+          "sample_cases": [
+            "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#139982512643136\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'str' (cons String 'int' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139982512646592\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'int' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#139982512645440\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#139982512650240\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'int' (cons String 'str' (cons String 'int' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#139982512702336\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#139982512716416\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'str' (cons String 'float' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#139982512710080\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'str' (cons String 'str' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#139982512710144\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'str' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139982512705408\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'int' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139982512708352\"), r = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 3.73,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "7fd1bcdb6a9a24fa",
+      "when": "2026-10-06T02:54:18",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 389576290,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9e744c80a0dc8188",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "Table": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Table": {
+            "drawn": 889,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "0 <= r and r < u.nRows",
+          "params": [
+            "t : Table",
+            "u : { v : Table | v.nRows == t.nRows }",
+            "r : Fin t.nRows"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Table: registered Python generator, size up to 16",
+            "Table: registered Python generator, size up to 16 where v.nRows == t.nRows",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < t.nRows"
+          ],
+          "sample_cases": [
+            "t = (1, cons String 'c0' (nil String), cons String 'int' (nil String), extern \"python:luthier.tables.Table.cell#139835353427520\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'str' (cons String 'int' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139835353428672\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'int' (cons String 'int' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#139835353428096\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'float' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#139835353484416\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'int' (cons String 'str' (cons String 'int' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#139835353489856\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'str' (cons String 'float' (nil String)), extern \"python:luthier.tables.Table.cell#139835353496448\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'float' (cons String 'str' (cons String 'float' (cons String 'int' (nil String)))), extern \"python:luthier.tables.Table.cell#139835353488448\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (nil String)))), cons String 'str' (cons String 'str' (cons String 'int' (cons String 'float' (nil String)))), extern \"python:luthier.tables.Table.cell#139835353494656\"), r = 0",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'int' (cons String 'str' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139835353493760\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'int' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139835353538880\"), r = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 3.705,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "8f7fae1151f3f60f",
+      "when": "2026-10-05T18:54:24",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 389576290,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "a318a347ad2a8c3b",
+        "externs": {},
+        "interpreter": "cb4ec0d68bb54293"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "0 <= r and r < u.nRows",
+          "params": [
+            "t : Table",
+            "u : { v : Table | v.nRows == t.nRows }",
+            "r : Fin t.nRows"
+          ],
+          "mode": "sampled",
+          "cases": 95,
+          "passed": false,
+          "failure": null,
+          "error": "could not find a value of { nRows : Nat, names : List String, kinds : List String, cell : String -> Fin nRows -> Maybe Cell | SchemaWellFormed (nRows, names, kinds, cell) & KindsKnown (nRows, names, kinds, cell) & CellsOfTheirKind (nRows, names, kinds, cell) & NoCellsOffSchema (nRows, names, kinds, cell) } in 2000 tries (rejected, for example: (14, cons String 'ccxxa' (cons String 'y' (cons String 'x' (cons String '' (cons String 'zaxxb' (cons String '' (cons String '' (cons String 'xb' (cons String 'yy' (nil String))))))))), cons String 'zb' (cons String 'a' (cons String 'ccba' (cons String 'yb' (cons String 'cazz' (cons String 'a' (cons String 'zzxaa' (cons String 'xab' (cons String 'abbc' (nil String))))))))), \\ _ i { match i { 0 -> nothing ; 1 -> just (real -8.305200017196167) ; 2 -> nothing ; 3 -> nothing ; 4 -> just (int -8) ; 5 -> nothing ; 6 -> just (int -6) ; 7 -> nothing ; 8 -> nothing ; 9 -> just (int 11) ; 10 -> just (text '') ; 11 -> just (text 'aab') ; 12 -> nothing ; 13 -> nothing } }), (10, cons String 'ya' (cons String 'y' (cons String 'byy' (cons String 'zcaa' (cons String '' (cons String 'x' (cons String 'aaa' (cons String 'bay' (cons String '' (cons String 'zcbzx' (cons String 'zbzxy' (cons String 'ybycyc' (nil String)))))))))))), cons String '' (cons String 'aazxcy' (cons String 'y' (cons String 'zxcyyc' (cons String 'z' (cons String 'bayxb' (cons String 'cbcx' (cons String 'xzyyb' (cons String 'bcazz' (cons String 'caxcy' (cons String 'xb' (cons String 'zzyb' (cons String 'zbx' (cons String 'zcz' (cons String 'ayca' (cons String 'xa' (nil String)))))))))))))))), \\ _ i { match i { 0 -> nothing ; 1 -> nothing ; 2 -> nothing ; 3 -> nothing ; 4 -> nothing ; 5 -> just (text 'xzzbb') ; 6 -> just (int 6) ; 7 -> just (real 4.633240880242578) ; 8 -> nothing ; 9 -> nothing } }), (10, nil String, cons String '' (cons String 'yxxy' (cons String 'x' (cons String 'ab' (cons String 'cxxxb' (cons String 'xyb' (cons String 'xaxxzx' (cons String 'c' (cons String 'abz' (cons String 'ybyxa' (cons String 'zac' (nil String))))))))))), \\ _ i { match i { 0 -> just (text 'zzb') ; 1 -> nothing ; 2 -> nothing ; 3 -> nothing ; 4 -> nothing ; 5 -> nothing ; 6 -> nothing ; 7 -> nothing ; 8 -> just (text 'zcz') ; 9 -> nothing } }), (3, cons String 'xa' (cons String '' (cons String 'z' (cons String 'acyca' (cons String 'cb' (cons String '' (cons String 'xz' (cons String 'yxzzcz' (cons String 'bbyzy' (cons String 'c' (cons String 'cxbxcx' (cons String 'zbz' (cons String 'zxycx' (cons String 'yya' (cons String 'zxxaa' (cons String 'yxyz' (nil String)))))))))))))))), cons String 'xbzb' (cons String 'xycy' (cons String 'x' (cons String '' (cons String 'cyb' (cons String 'bz' (cons String '' (cons String 'zbzcza' (cons String 'zx' (cons String 'xzz' (cons String 'ccc' (cons String 'bbbc' (cons String 'yyzyzz' (cons String 'cazyy' (cons String 'abyza' (nil String))))))))))))))), \\ _ i { match i { 0 -> just (int 6) ; 1 -> nothing ; 2 -> just (real -14.14543671561686) } }), (11, cons String 'zcybxc' (cons String 'yzxac' (cons String 'axb' (cons String 'b' (cons String 'ccaz' (cons String 'bbyzyz' (nil String)))))), cons String '' (cons String 'z' (cons String 'axxzbc' (cons String 'xyxcaz' (cons String '' (cons String 'bccx' (cons String 'xbxxc' (cons String '' (cons String '' (cons String 'azbbxb' (cons String 'a' (cons String '' (cons String 'aac' (nil String))))))))))))), \\ _ i { match i { 0 -> just (real -2.5253397230139285) ; 1 -> just (text 'ccxyba') ; 2 -> nothing ; 3 -> nothing ; 4 -> just (real -5.827241770492673) ; 5 -> nothing ; 6 -> nothing ; 7 -> nothing ; 8 -> just (text 'a') ; 9 -> nothing ; 10 -> nothing } })); give it a `gen`",
+          "domains": [
+            "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((List String: derived from its constructors, nesting up to 16) * ((List String: derived from its constructors, nesting up to 16) * (String -> Fin nRows -> Maybe Cell: constant functions (affine on R -> R), a thin sample))) where SchemaWellFormed (nRows, names, kinds, cell) & KindsKnown (nRows, names, kinds, cell) & CellsOfTheirKind (nRows, names, kinds, cell) & NoCellsOffSchema (nRows, names, kinds, cell)",
+            "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((List String: derived from its constructors, nesting up to 16) * ((List String: derived from its constructors, nesting up to 16) * (String -> Fin nRows -> Maybe Cell: constant functions (affine on R -> R), a thin sample))) where SchemaWellFormed (nRows, names, kinds, cell) & KindsKnown (nRows, names, kinds, cell) & CellsOfTheirKind (nRows, names, kinds, cell) & NoCellsOffSchema (nRows, names, kinds, cell) where v.nRows == t.nRows",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < t.nRows"
+          ],
+          "sample_cases": [
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), r = 0",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), r = 0",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), r = 0",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), r = 0",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), r = 0"
+          ],
+          "outcome": "not run"
+        }
+      ]
+    }
+  ],
+  "sameTable": [
+    {
+      "hash": "06744b6deb9ac49d",
+      "when": "2026-10-06T06:00:09",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 761100775,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "fc583e2f49e4a06e",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {
+        "Table": "source fa7d63f723173c6f"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Table": {
+            "drawn": 200,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "t.nRows == u.nRows -> u.nRows == t.nRows",
+          "params": [
+            "t : Table",
+            "u : Table"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Table: registered Python generator, size up to 16",
+            "Table: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#140309274734336\"), u = (0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140309274727872\")",
+            "t = (0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#140309274787328\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'float' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#140309274784896\")",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'float' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#140309274783232\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#140309274771584\")",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'int' (cons String 'str' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#140309274779648\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#140309274777984\")",
+            "t = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'str' (cons String 'str' (cons String 'float' (cons String 'str' (cons String 'str' (nil String))))), extern \"python:luthier.tables.Table.cell#140309274773696\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'float' (cons String 'float' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#140309274776576\")"
+          ],
+          "outcome": "passed",
+          "seconds": 0.806,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "8956b3ea66668b74",
+      "when": "2026-10-06T04:15:47",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 761100775,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "fc583e2f49e4a06e",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {
+        "Table": "source 24a5e06a053ff3c3"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Table": {
+            "drawn": 200,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "t.nRows == u.nRows -> u.nRows == t.nRows",
+          "params": [
+            "t : Table",
+            "u : Table"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Table: registered Python generator, size up to 16",
+            "Table: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#139982509094720\"), u = (0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139982509085184\")",
+            "t = (0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139982509095168\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'float' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139982509133824\")",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'float' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139982509145664\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139982509130176\")",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'int' (cons String 'str' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#139982509143488\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#139982509136128\")",
+            "t = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'str' (cons String 'str' (cons String 'float' (cons String 'str' (cons String 'str' (nil String))))), extern \"python:luthier.tables.Table.cell#139982509143936\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'float' (cons String 'float' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139982509141696\")"
+          ],
+          "outcome": "passed",
+          "seconds": 0.838,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "0706ab71b89ed3d1",
+      "when": "2026-10-06T02:54:22",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 761100775,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "fc583e2f49e4a06e",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {
+        "Table": "source ba70ad4895b6bc05"
+      },
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error",
+        "registered_values": {
+          "Table": {
+            "drawn": 200,
+            "outside_type": 0
+          }
+        }
+      },
+      "laws": [
+        {
+          "label": "t.nRows == u.nRows -> u.nRows == t.nRows",
+          "params": [
+            "t : Table",
+            "u : Table"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Table: registered Python generator, size up to 16",
+            "Table: registered Python generator, size up to 16"
+          ],
+          "sample_cases": [
+            "t = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'str' (nil String)), extern \"python:luthier.tables.Table.cell#139835349912128\"), u = (0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139835349854976\")",
+            "t = (0, cons String 'c0' (nil String), cons String 'str' (nil String), extern \"python:luthier.tables.Table.cell#139835349915776\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'float' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139835349910848\")",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'float' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139835349921920\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (nil String))), cons String 'str' (cons String 'int' (cons String 'float' (nil String))), extern \"python:luthier.tables.Table.cell#139835349914432\")",
+            "t = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'int' (cons String 'str' (cons String 'int' (cons String 'int' (nil String))))), extern \"python:luthier.tables.Table.cell#139835349917440\"), u = (1, cons String 'c0' (cons String 'c1' (nil String)), cons String 'int' (cons String 'int' (nil String)), extern \"python:luthier.tables.Table.cell#139835349918656\")",
+            "t = (0, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'str' (cons String 'str' (cons String 'float' (cons String 'str' (cons String 'str' (nil String))))), extern \"python:luthier.tables.Table.cell#139835349911168\"), u = (1, cons String 'c0' (cons String 'c1' (cons String 'c2' (cons String 'c3' (cons String 'c4' (nil String))))), cons String 'float' (cons String 'float' (cons String 'float' (cons String 'float' (cons String 'float' (nil String))))), extern \"python:luthier.tables.Table.cell#139835349912000\")"
+          ],
+          "outcome": "passed",
+          "seconds": 0.779,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "d73f0038a6bd5e64",
+      "when": "2026-10-05T19:41:22",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 761100775,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "62cf8cdd6550762d",
+        "externs": {},
+        "interpreter": "cb4ec0d68bb54293"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "t.nRows == u.nRows -> u.nRows == t.nRows",
+          "params": [
+            "t : Table",
+            "u : Table"
+          ],
+          "mode": "sampled",
+          "cases": 98,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((List String: derived from its constructors, nesting up to 16) * ((List String: derived from its constructors, nesting up to 16) * (String -> Fin nRows -> Maybe Cell: constant functions (affine on R -> R), a thin sample))) where SchemaWellFormed (nRows, names, kinds, cell) & KindsKnown (nRows, names, kinds, cell) & CellsOfTheirKind (nRows, names, kinds, cell) & NoCellsOffSchema (nRows, names, kinds, cell)",
+            "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k) * ((List String: derived from its constructors, nesting up to 16) * ((List String: derived from its constructors, nesting up to 16) * (String -> Fin nRows -> Maybe Cell: constant functions (affine on R -> R), a thin sample))) where SchemaWellFormed (nRows, names, kinds, cell) & KindsKnown (nRows, names, kinds, cell) & CellsOfTheirKind (nRows, names, kinds, cell) & NoCellsOffSchema (nRows, names, kinds, cell)"
+          ],
+          "sample_cases": [
+            "t = (0, nil String, nil String, \\ _ { <ndarray (0,)> }), u = (0, nil String, nil String, \\ _ { <ndarray (0,)> })",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (0, nil String, nil String, \\ _ { <ndarray (0,)> })",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (0, nil String, nil String, \\ _ { <ndarray (0,)> })",
+            "t = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } }), u = (0, nil String, nil String, \\ _ { <ndarray (0,)> })",
+            "t = (0, nil String, nil String, \\ _ { <ndarray (0,)> }), u = (1, nil String, nil String, \\ _ i { match i { 0 -> nothing } })"
+          ],
+          "outcome": "passed"
+        }
+      ]
+    }
+  ],
+  "power2": [
+    {
+      "hash": "96e4d30aaa794ac0",
+      "when": "2026-10-06T06:00:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 680776412,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "3b15c0707152f9ea",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k <= 0) -> 0 <= k - 1",
+          "params": [
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "k = 0",
+            "k = 1",
+            "k = 0",
+            "k = 0",
+            "k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "67004782def4ef0b",
+      "when": "2026-10-06T04:15:48",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 680776412,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "3b15c0707152f9ea",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k <= 0) -> 0 <= k - 1",
+          "params": [
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "k = 0",
+            "k = 1",
+            "k = 0",
+            "k = 0",
+            "k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.01,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "aadeac223454909f",
+      "when": "2026-10-06T02:54:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 680776412,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "3b15c0707152f9ea",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k <= 0) -> 0 <= k - 1",
+          "params": [
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "k = 0",
+            "k = 1",
+            "k = 0",
+            "k = 0",
+            "k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "power10": [
+    {
+      "hash": "954a42128a5e3d11",
+      "when": "2026-10-06T06:00:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 180405318,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "0de2d77f2f5ac3b2",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k <= 0) -> 0 <= k - 1",
+          "params": [
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "k = 1",
+            "k = 0",
+            "k = 0",
+            "k = 0",
+            "k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "2d5b1c900c1d51db",
+      "when": "2026-10-06T04:15:48",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 180405318,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "0de2d77f2f5ac3b2",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k <= 0) -> 0 <= k - 1",
+          "params": [
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "k = 1",
+            "k = 0",
+            "k = 0",
+            "k = 0",
+            "k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "04640af361228778",
+      "when": "2026-10-06T02:54:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 180405318,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "0de2d77f2f5ac3b2",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (k <= 0) -> 0 <= k - 1",
+          "params": [
+            "k : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "k = 1",
+            "k = 0",
+            "k = 0",
+            "k = 0",
+            "k = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "finiteDecimal": [
+    {
+      "hash": "0a6c30aed0b7f60e",
+      "when": "2026-10-06T06:00:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2065087847,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a2b98abc5bc2d8a",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (m == 0) -> not (digitCount m + e > 400) -> not (digitCount m + e < 0 - 400) -> e >= 0 -> 0 <= e",
+          "params": [
+            "m : Nat",
+            "e : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "m = 1, e = 1",
+            "m = 1, e = 1",
+            "m = 1, e = 0",
+            "m = 0, e = 1",
+            "m = 1, e = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "not (m == 0) -> not (digitCount m + e > 400) -> not (digitCount m + e < 0 - 400) -> not (e >= 0) -> 0 <= 0 - e",
+          "params": [
+            "m : Nat",
+            "e : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "m = 1, e = 0",
+            "m = 0, e = 0",
+            "m = 0, e = 1",
+            "m = 1, e = 1",
+            "m = 1, e = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.019,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "3ae46334b692dede",
+      "when": "2026-10-06T04:15:48",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2065087847,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a2b98abc5bc2d8a",
+        "externs": {},
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (m == 0) -> not (digitCount m + e > 400) -> not (digitCount m + e < 0 - 400) -> e >= 0 -> 0 <= e",
+          "params": [
+            "m : Nat",
+            "e : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "m = 1, e = 1",
+            "m = 1, e = 1",
+            "m = 1, e = 0",
+            "m = 0, e = 1",
+            "m = 1, e = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        },
+        {
+          "label": "not (m == 0) -> not (digitCount m + e > 400) -> not (digitCount m + e < 0 - 400) -> not (e >= 0) -> 0 <= 0 - e",
+          "params": [
+            "m : Nat",
+            "e : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "m = 1, e = 0",
+            "m = 0, e = 0",
+            "m = 0, e = 1",
+            "m = 1, e = 1",
+            "m = 1, e = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.017,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "59641de2d0fcc0c4",
+      "when": "2026-10-06T02:54:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 2065087847,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "9a2b98abc5bc2d8a",
+        "externs": {},
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "not (m == 0) -> not (digitCount m + e > 400) -> not (digitCount m + e < 0 - 400) -> e >= 0 -> 0 <= e",
+          "params": [
+            "m : Nat",
+            "e : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "m = 1, e = 1",
+            "m = 1, e = 1",
+            "m = 1, e = 0",
+            "m = 0, e = 1",
+            "m = 1, e = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "not (m == 0) -> not (digitCount m + e > 400) -> not (digitCount m + e < 0 - 400) -> not (e >= 0) -> 0 <= 0 - e",
+          "params": [
+            "m : Nat",
+            "e : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "m = 1, e = 0",
+            "m = 0, e = 0",
+            "m = 0, e = 1",
+            "m = 1, e = 1",
+            "m = 1, e = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "FloatCell": [
+    {
+      "hash": "e93f8f00c769c6c3",
+      "when": "2026-10-06T06:00:10",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1669702732,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "94e0f991bee83ce2",
+        "externs": {
+          "python:luthier.text.chars": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "match (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).frac { nothing -> someDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole ; just f -> (allDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole and allDigits f) and (someDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole or someDigits f) } and match (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).ex { nothing -> true ; just x -> someDigits (unsigned x) } -> 0 <= digitsValue (concatChars (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole (match (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).frac { nothing -> nil String ; just f -> f })) 0",
+          "params": [
+            "cell : String"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "String: short random strings (fallback)"
+          ],
+          "sample_cases": [
+            "cell = ''",
+            "cell = 'b'",
+            "cell = ''",
+            "cell = 'x'",
+            "cell = ''"
+          ],
+          "outcome": "passed",
+          "seconds": 0.183,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "c8025e3e428bcc82",
+      "when": "2026-10-06T04:15:48",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1669702732,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "94e0f991bee83ce2",
+        "externs": {
+          "python:luthier.text.chars": "source 24a5e06a053ff3c3"
+        },
+        "interpreter": "655f03d2b7a2df97"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "match (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).frac { nothing -> someDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole ; just f -> (allDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole and allDigits f) and (someDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole or someDigits f) } and match (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).ex { nothing -> true ; just x -> someDigits (unsigned x) } -> 0 <= digitsValue (concatChars (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole (match (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).frac { nothing -> nil String ; just f -> f })) 0",
+          "params": [
+            "cell : String"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "String: short random strings (fallback)"
+          ],
+          "sample_cases": [
+            "cell = ''",
+            "cell = 'b'",
+            "cell = ''",
+            "cell = 'x'",
+            "cell = ''"
+          ],
+          "outcome": "passed",
+          "seconds": 0.151,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "3b5a1e9e94fa74ed",
+      "when": "2026-10-06T02:54:23",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1669702732,
+      "run_seed": 20261005,
+      "fingerprint": {
+        "code": "94e0f991bee83ce2",
+        "externs": {
+          "python:luthier.text.chars": "source ba70ad4895b6bc05"
+        },
+        "interpreter": "3ec05c3a1d461c8f"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "BrokenText",
+          "Table",
+          "{ table : Table, text : String }"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "match (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).frac { nothing -> someDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole ; just f -> (allDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole and allDigits f) and (someDigits (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole or someDigits f) } and match (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).ex { nothing -> true ; just x -> someDigits (unsigned x) } -> 0 <= digitsValue (concatChars (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).whole (match (splitAt \\ c { c == '.' } (splitAt \\ c { c == 'e' or c == 'E' } (unsigned (stripped (chars cell))) (nil String)).mant (nil String)).frac { nothing -> nil String ; just f -> f })) 0",
+          "params": [
+            "cell : String"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "String: short random strings (fallback)"
+          ],
+          "sample_cases": [
+            "cell = ''",
+            "cell = 'b'",
+            "cell = ''",
+            "cell = 'x'",
+            "cell = ''"
+          ],
+          "outcome": "passed",
+          "seconds": 0.163,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
 }
