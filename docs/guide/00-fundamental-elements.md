@@ -8,44 +8,57 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
 
 ## The elements, in the order to think them
 
-- **Type.** A collection of values and, at the same time, a claim about them: `Int`, `Bool`,
-  `Int -> Bool`.
-- **Value.** A type with exactly one inhabitant: `4` is `{ n : Int | n == 4 }`. So `x : T` reads
-  "x refines T", and type and value differ in how far a name is determined, not in kind
-  (voice note 2026-10-04 10:28).
-- **Function.** A value of an exponential type `A -> B`, with no separate category: it can be an
-  argument and a result.
-- **Declaration.** `x : T`, a name with its base and no body: a hole. A hypothesis, an input, a
-  forward declaration, an operation an implementation will provide.
-- **Definition.** `x : T := t`, or `x := t` for a name declared before. If `t : T` it is the
-  inhabitant; if `t : T -> Bool`, or a law over `T`, `x` is the subtype of `T` that `t` cuts out.
-  The type of the body says which, so no extra symbol is needed.
+A type is a concept. It is declared, then defined, and only then inhabited: a value is written at a
+type that is defined, never at a bare base. An exponential `A -> B` is a base, as a lawless product
+is (`05` R4), so there are no loose functions: a function is a value of a defined function type
+(Luciano, 2026-10-07; `05` R2). The list follows that order.
+
+- **Type.** A collection of values and, at the same time, a claim about them: `Nat`, `Bool`,
+  `Exp`. The structural types `Int -> Bool`, `A * B`, `A + B` are bases: what a type is built on,
+  not what a value is written at.
+- **Value.** A type with exactly one inhabitant, up to the equality of the presentation: `4` is
+  `{ n : Int | n == 4 }`. So `x : T` reads "x refines T", and type and value differ in how far a
+  name is determined, not in kind (voice note 2026-10-04 10:28).
+- **Declaration.** `x : T`, a name with its base and no body: a hole. A concept named before it is
+  defined, a hypothesis, an input, an operation another file will provide, or an ideal nothing
+  fills (`Real`).
+- **Law.** A function into `Bool` with its parameters quantified, `Homomorphic R m f x y`, or a
+  conjunction `p & q`, of type `Law`. It is written over the base of the type it will define, and
+  it is what `test` runs.
+- **Subtype, theory and model.** `{ x : T | p }`: the values of `T` that satisfy the law `p`. With
+  laws over a base it is Hilbert's implicit definition made a type: the type is the theory, a
+  value of it a model. `Exp (R : U) (m : NumberModel R) : U := { f : R -> R | Homomorphic R m f
+  & AtZero R m f }` is a theory of one operation over a model of `NumberModel`, as a vector space
+  is over a field; `Ring A` has three operations. This is what makes Luthier.
+- **Function type.** A function is a value of a defined function type, a theory, never of the bare
+  exponential. `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"` is a model of
+  `Exp`, a Taylor sum another, each certified against the same laws; a program writes against
+  `Exp` and picks a model by name, or declares `exp : Exp ...` for another file to fill (`03 §3`;
+  `examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26]).
+- **Definition.** `x : T := t`, or `x := t` for a name declared before. If `t : T` it is an
+  inhabitant, a model; if `t : T -> Bool`, or a law over `T`, `x` is the subtype of `T` that `t`
+  cuts out: the concept, defined. The type of the body says which, so no extra symbol is needed.
 - **Alias.** `x = t`, an abbreviation, expanded wherever it is used. It claims nothing and has no
   states (voice note 2026-10-04 12:17).
-- **Dependent function.** `(x : A) -> B`, where `B` may mention `x`: the "for all".
+- **Dependent function.** `(x : A) -> B`, where `B` may mention `x`: the "for all", the base of
+  every law and of a function whose result type depends on its argument.
 - **Product and sum.** `A * B` and `A + B`, primitive and structural, with names for their
-  positions when wanted: `{ a : A, b : B }`, `< a : A | b : B >`. A lawless product or sum is
-  not a new type; it is named with an alias.
+  positions when wanted: `{ a : A, b : B }`, `< a : A | b : B >`. Bases: a lawless product or sum
+  is not a new type, it is named with an alias, and a theory of several operations is a subtype
+  of a labeled product.
 - **Recursive data.** `data { zero : N ; succ : N -> N }`: a type generated freely by its
-  constructors, used only where the type is defined in terms of itself.
-- **Subtype.** `{ x : T | p }`: the values of `T` that satisfy the law `p`. Laws over functions
-  are laws like any other; satisfying them is checked by `test` and recorded. This is what makes
-  Luthier.
-- **Theory and model.** Hilbert's implicit definition made a type: the type is the theory, the
-  laws an object must satisfy, and a value of it is a model, something that satisfies them.
-  `Exp (R : U) (m : NumberModel R) : U := { f : R -> R | Homomorphic R m f & AtZero R m f }` is the
-  theory of one operation; `Ring A` is the same with three. An implementation is a model,
-  `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"`, a Taylor sum another, each
-  certified against the same laws; a program writes against the theory and picks a model by name
-  (`examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26]; Luciano, 2026-10-07).
-- **Apply and reduce.** `f a`, and replacing the argument in the body until nothing is left to
-  do. Executing by hand is this.
+  constructors, used only where the type is defined in terms of itself; the one concept whose
+  definition is its constructors and not laws.
+- **Apply and reduce.** `f a`, and replacing the argument in the body until a datum, a procedure
+  or a hole is reached (*Declared, defined, computable*, below). Executing by hand is this.
 
-`U` is the type of types; it appears when a function returns a type. Against C++: statements are
-definitions, expressions are values (functions included), and types are types, plus the dependent
-ones and the subtype with laws. There are no mutable variables, sequence, pointers or inheritance.
-Against categories: types are objects, functions arrows, the product, sum and exponential are the
-structure of a bicartesian closed category, and the subtype is a mono with a certificate.
+`U` is the type of types; it appears when a function returns a type (`U : U` is inconsistent and
+bites only with proofs, section 9). Against C++: statements are definitions, expressions are
+values (functions included), and types are types, plus the dependent ones and the subtype with
+laws. There are no mutable variables, sequence, pointers or inheritance. Against categories: types
+are objects, functions arrows, the product, sum and exponential are the structure of a bicartesian
+closed category, a theory is a subobject of a product of exponentials cut out by its laws, a model
+a global element of it, and the subtype in general is a mono with a certificate.
 
 ## What types are for: a check is made once
 
