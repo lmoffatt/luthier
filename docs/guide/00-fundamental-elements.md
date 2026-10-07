@@ -145,8 +145,9 @@ of cycle be recognized as candidates for an isomorphism.
 
 A name passes through three states: declared (its base is known), defined (it has a body), and
 certified (some of its laws passed `test`, each with a grade: a point, `n` sampled cases, every
-case of a finite domain). A definition may use only types that are defined, except those of its
-own object (`05` R2); that is what makes "this is a Table" guarantee something. A hole of a defined
+case of a finite domain). The body of a defined name is, besides, a datum or a procedure
+(*Declared, defined, computable*, above): a classification of bodies, not a fourth state. A
+definition may use only types that are defined, except those of its own object (`05` R2); that is what makes "this is a Table" guarantee something. A hole of a defined
 type is a parameter: `sigma : Float64` can be used, and what depends on it does not reduce until it is
 given a value. This is the principle "you do not execute code until it is defined" of the voice
 note 2026-05-30 18.09.57 [00:53].
