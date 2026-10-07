@@ -382,3 +382,20 @@ Source:     chat:d3b76232:386
             chat:d3b76232:445
 Kind:       principle. For P14 (proposed), P10, P12
 Status:     current. The transcript of d3b76232 is under ~/.claude-databaum/projects/.
+
+D-2026-10-07-g  GPT's reading of the list of elements is answered point by point in record/IA; the
+                guide is corrected on eleven points and says what the specification answers on
+                four; point 2 is declined on P14, with the reading that an explicit definition is
+                the model of the singleton theory whose law is its formula, so a function without
+                laws of its own is an expression, an alias, or that model. A mirror of the list,
+                with why each thing is said, is record/elements-rationale-2026-10-07.md.
+Author:     Luciano for the reply, the corrections and the mirror, and for the singleton reading;
+            the model for the verdict on each point and the wording
+Quote:      "y de alguna forma zafar y decir lo que queremos decir"
+            "escribi un documento contestando las correccione de GPT en el mismo directorio y luego corregi el fundamental-elements"
+            "un documento espejo en record donde seas mas explicito en porque decimos que cosa"
+Source:     chat:d3b76232:534
+            chat:d3b76232:553
+            chat:d3b76232:553
+Kind:       principle. For P14 (proposed), P1, P3; P12 in the form of the reply, a screen per point
+Status:     current. Transcript under ~/.claude-databaum/projects/.
