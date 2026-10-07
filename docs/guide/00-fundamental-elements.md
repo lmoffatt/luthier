@@ -145,7 +145,7 @@ of cycle be recognized as candidates for an isomorphism.
 
 A name passes through three states: declared (its base is known), defined (it has a body), and
 certified (some of its laws passed `test`, each with a grade: a point, `n` sampled cases, every
-case of a finite domain). The body of a defined name is, besides, a datum or a procedure
+case of a box or of a finite domain, a witness, a proof, or assumed as an axiom; `05 §7`). The body of a defined name is, besides, a datum or a procedure
 (*Declared, defined, computable*, above): a classification of bodies, not a fourth state. A
 definition may use only types that are defined, except those of its own object (`05` R2); that is what makes "this is a Table" guarantee something. A hole of a defined
 type is a parameter: `sigma : Float64` can be used, and what depends on it does not reduce until it is
