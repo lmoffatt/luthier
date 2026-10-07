@@ -31,18 +31,13 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
 - **Subtype.** `{ x : T | p }`: the values of `T` that satisfy the law `p`. Laws over functions
   are laws like any other; satisfying them is checked by `test` and recorded. This is what makes
   Luthier.
-- **A function as a type.** `Exp (R : U) (m : NumberModel R) : U := { f : R -> R | Homomorphic R m f
-  & AtZero R m f }`: the functions that satisfy the laws of the exponential, written once over a
-  number model. `Exp Real realModel` is the ideal, a statement, since nothing computes the reals;
-  `Exp Float64 (float64Model tol)` runs, and an implementation is a value of it, `expPy := extern
-  "python:math.exp"`, a Taylor sum another, each certified against the same laws. A program writes
-  against the type and picks an implementation by name. From the ideal to the doubles the arrow is
-  `realize f x = round (f x)`, and `g` realizes `f` when `g x` stays within tolerance of it; it is
-  stated today and runs with a `Real` that computes (`06 §4`, the ideal and its realizations;
-  `examples/cauchy.lut`, the reals as Cauchy sequences of rationals, defined without a decidable
-  equality). The other direction, a function on the doubles as a function on the reals, is false,
-  and `05` R9 (contravariant domain) rejects it (`examples/exp.lut`; voice note 2026-05-26 12.32.24
-  [01:26]; Luciano, 2026-10-07).
+- **Theory and model.** Hilbert's implicit definition made a type: the type is the theory, the
+  laws an object must satisfy, and a value of it is a model, something that satisfies them.
+  `Exp (R : U) (m : NumberModel R) : U := { f : R -> R | Homomorphic R m f & AtZero R m f }` is the
+  theory of one operation; `Ring A` is the same with three. An implementation is a model,
+  `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"`, a Taylor sum another, each
+  certified against the same laws; a program writes against the theory and picks a model by name
+  (`examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26]; Luciano, 2026-10-07).
 - **Apply and reduce.** `f a`, and replacing the argument in the body until nothing is left to
   do. Executing by hand is this.
 
