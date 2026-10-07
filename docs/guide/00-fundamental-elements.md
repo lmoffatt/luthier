@@ -59,14 +59,17 @@ then what the law defines.
   is a model of it, so functors are not an element of their own. Categorically, the pullback of
   `true` along `p`: a mono with a certificate. This is what makes Luthier.
 - **Value, the model.** `x : T := t`, or `x := t` for a name declared before: a name with a body,
-  whose claim is its type. The way to define a value, and a value is a model of the theory it is
-  written at: `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"`, a Taylor sum
-  another, each certified against the same laws; a program writes against `Exp` and picks a model
-  by name, or declares `exp : Exp ...` for another file to fill (`03 §3`; `examples/exp.lut`;
-  voice note 2026-05-26 12.32.24 [01:26]). Read as a type, a value is the one with a single
-  inhabitant, `4` as `{ n : Int | n == 4 }`, up to the equality its presentation has: `==` for a
-  datum, observations for a procedure (*Declared, defined, computable*, below). If the body is a
-  law, the act defines the type instead; the type of the body says which (`05` R6).
+  whose claim is its type. The way to define a value. A value inhabits its type; an inhabitant of
+  a theory is a model of it: `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"`,
+  a Taylor sum another, each certified against the same laws; a program writes against `Exp` and
+  picks a model by name, or declares `exp : Exp ...` for another file to fill (`03 §3`;
+  `examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26]). A function given by a formula is
+  the model of the singleton theory whose law is that formula, `sqr : Sqr := \ x { x * x }`: the
+  body satisfies the law by its own reduction, and any other model, `numpy.square`, is checked
+  against it. Read as a type, a value is the one with a single inhabitant, `4` as `{ n : Int |
+  n == 4 }`: exactly one, because `==` is structural there (`05` R8) and the certificate is outside
+  the term; for a procedure, one up to observations (*Declared, defined, computable*, below). If
+  the body is a law, the act defines the type instead; the type of the body says which (`05` R6).
 - **Declaration, the hole.** `x : T`: a name with its base and no body. Either half without the
   other: a concept named before its laws, `Exp : R -> R`; a theory without a model, `expIdeal :
   Exp Real realModel`, the ideal nothing fills; a hypothesis, an input, `sigma : Float64`; an
