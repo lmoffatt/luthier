@@ -9,56 +9,72 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
 ## The elements, in the order to think them
 
 A type is a concept. It is declared, then defined, and only then inhabited: a value is written at a
-type that is defined, never at a bare base. An exponential `A -> B` is a base, as a lawless product
-is (`05` R4), so there are no loose functions: a function is a value of a defined function type
-(Luciano, 2026-10-07; `05` R2). The list follows that order.
+type that is defined, never at a bare base (P14, proposed). A new name is made in two ways only, by
+laws or by recursion (`05` R4, only laws or recursion make a new type); what has neither is a base,
+and a base gets a name only by an alias. So there are no loose functions: a function is a value of
+a defined function type, and a function without laws is an alias (Luciano, 2026-10-07; `05` R2).
+The list follows that order: the bases, then the law, then what the law defines.
 
 - **Type.** A collection of values and, at the same time, a claim about them: `Nat`, `Bool`,
-  `Exp`. The structural types `Int -> Bool`, `A * B`, `A + B` are bases: what a type is built on,
-  not what a value is written at.
-- **Value.** A type with exactly one inhabitant, up to the equality of the presentation: `4` is
-  `{ n : Int | n == 4 }`. So `x : T` reads "x refines T", and type and value differ in how far a
-  name is determined, not in kind (voice note 2026-10-04 10:28).
-- **Declaration.** `x : T`, a name with its base and no body: a hole. A concept named before it is
-  defined, a hypothesis, an input, an operation another file will provide, or an ideal nothing
-  fills (`Real`).
+  `Exp`. `U` is the type of types. The bases are given, not defined: the primitives `Int`,
+  `Rational`, `Real`, `Float64` and `String` (`06 §2`), and what the formers below build from
+  them. A base claims nothing beyond its shape, so it is named only by an **alias**, `x = t`, an
+  abbreviation expanded wherever it is used, with no states (voice note 2026-10-04 12:17):
+  `Maybe (A : U) = < nothing : Unit | just : A >`, `sq = \ (x : Float64) { x * x }`.
+- **Product, sum, exponential.** `A * B`, `A + B`, `A -> B`, with `Unit` and `Empty` as the
+  product and the sum of nothing, and names for positions when wanted: `{ a : A, b : B }`,
+  `< a : A | b : B >`. The structure of a bicartesian closed category, and the bases a type is
+  built on. A function is a value of an exponential, with no separate category: it can be an
+  argument and a result. A theory of several operations is a subtype of a labeled product.
+- **Dependent type.** `(x : A) -> B` and `(x : A) * B`, where `B` may mention `x`: the "for all"
+  and the "there is". A type that depends on a value or on a type: a vector of length `n` is
+  `Fin n -> Float64`; a theory over a parameter, `Exp (R : U) (m : NumberModel R)`, is a function
+  into `U`; a record whose later fields mention earlier ones, `{ nRows : Nat, cell : Fin nRows ->
+  Maybe Cell }`, is a dependent pair. Every law is written at a dependent function, and the
+  subtype below is a dependent pair whose second component is the certificate (Luciano,
+  2026-10-07).
 - **Law.** A function into `Bool` with its parameters quantified, `Homomorphic R m f x y`, or a
-  conjunction `p & q`, of type `Law`. It is written over the base of the type it will define, and
-  it is what `test` runs.
-- **Subtype, theory and model.** `{ x : T | p }`: the values of `T` that satisfy the law `p`. With
-  laws over a base it is Hilbert's implicit definition made a type: the type is the theory, a
-  value of it a model. `Exp (R : U) (m : NumberModel R) : U := { f : R -> R | Homomorphic R m f
-  & AtZero R m f }` is a theory of one operation over a model of `NumberModel`, as a vector space
-  is over a field; `Ring A` has three operations. This is what makes Luthier.
-- **Function type.** A function is a value of a defined function type, a theory, never of the bare
-  exponential. `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"` is a model of
-  `Exp`, a Taylor sum another, each certified against the same laws; a program writes against
-  `Exp` and picks a model by name, or declares `exp : Exp ...` for another file to fill (`03 §3`;
-  `examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26]).
-- **Definition.** `x : T := t`, or `x := t` for a name declared before. If `t : T` it is an
-  inhabitant, a model; if `t : T -> Bool`, or a law over `T`, `x` is the subtype of `T` that `t`
-  cuts out: the concept, defined. The type of the body says which, so no extra symbol is needed.
-- **Alias.** `x = t`, an abbreviation, expanded wherever it is used. It claims nothing and has no
-  states (voice note 2026-10-04 12:17).
-- **Dependent function.** `(x : A) -> B`, where `B` may mention `x`: the "for all", the base of
-  every law and of a function whose result type depends on its argument.
-- **Product and sum.** `A * B` and `A + B`, primitive and structural, with names for their
-  positions when wanted: `{ a : A, b : B }`, `< a : A | b : B >`. Bases: a lawless product or sum
-  is not a new type, it is named with an alias, and a theory of several operations is a subtype
-  of a labeled product.
-- **Recursive data.** `data { zero : N ; succ : N -> N }`: a type generated freely by its
-  constructors, used only where the type is defined in terms of itself; the one concept whose
-  definition is its constructors and not laws.
+  conjunction `p & q`, of type `Law` (`04 §3`). It is written over the base of the type it will
+  define, and it is the one place where a base is used bare: a law is the formula of a theory,
+  not an object of it. `test` runs it, on drawn cases or on every case, and the certificate
+  records the grade (`05 §7`).
+- **Subtype by law, the theory.** `{ x : T | p }`: the values of the base `T` that satisfy the
+  law `p`. The way to define a type. Declared then defined, `Exp : R -> R`, `Exp := Homomorphic &
+  AtZero`, it is Hilbert's implicit definition made a type: the type is the theory, the laws an
+  object must satisfy. `Exp (R : U) (m : NumberModel R)` is a theory of one operation over a
+  model of `NumberModel`, as a vector space is over a field; `Ring A` has three operations;
+  `Functor` is one over `U`, an object map, an arrow map and two laws, so a functor is a theory
+  and not an element of its own. Categorically, the pullback of `true` along `p`: a mono with a
+  certificate. This is what makes Luthier.
+- **Value, the model.** `x : T := t`, or `x := t` for a name declared before: a name with a body,
+  whose claim is its type. The way to define a value, and a value is a model of the theory it is
+  written at: `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"`, a Taylor sum
+  another, each certified against the same laws; a program writes against `Exp` and picks a model
+  by name, or declares `exp : Exp ...` for another file to fill (`03 §3`; `examples/exp.lut`;
+  voice note 2026-05-26 12.32.24 [01:26]). Read as a type, a value is the one with a single
+  inhabitant, `4` as `{ n : Int | n == 4 }`, up to the equality its presentation has: `==` for a
+  datum, observations for a procedure (*Declared, defined, computable*, below). If the body is a
+  law, the act defines the type instead; the type of the body says which (`05` R6).
+- **Declaration, the hole.** `x : T`: a name with its base and no body. Either half without the
+  other: a concept named before its laws, `Exp : R -> R`; a theory without a model, `expIdeal :
+  Exp Real realModel`, the ideal nothing fills; a hypothesis, an input, `sigma : Float64`; an
+  operation another file will provide. What depends on it does not reduce until it is given a
+  value.
+- **Recursion.** The second way to make a new name: a definition that mentions itself, `data
+  { zero : N ; succ : N -> N }`, a type generated freely by its constructors, or a recursive
+  function. Neither is a subtype of something earlier nor an alias, which would expand without
+  end; its law, freeness, quantifies over every type and has no generator (`05 §7`), so the
+  recursion itself is taken as the definition: an initial algebra.
 - **Apply and reduce.** `f a`, and replacing the argument in the body until a datum, a procedure
   or a hole is reached (*Declared, defined, computable*, below). Executing by hand is this.
 
-`U` is the type of types; it appears when a function returns a type (`U : U` is inconsistent and
-bites only with proofs, section 9). Against C++: statements are definitions, expressions are
-values (functions included), and types are types, plus the dependent ones and the subtype with
-laws. There are no mutable variables, sequence, pointers or inheritance. Against categories: types
-are objects, functions arrows, the product, sum and exponential are the structure of a bicartesian
-closed category, a theory is a subobject of a product of exponentials cut out by its laws, a model
-a global element of it, and the subtype in general is a mono with a certificate.
+`U` is the type of types; it appears when a function returns a type. Against C++: statements
+are definitions, expressions are values (functions included), and types are types, plus the
+dependent ones and the subtype with laws. There are no mutable variables, sequence, pointers or
+inheritance. Against categories: types are objects, functions arrows; product, sum and exponential,
+with their dependent forms, are the structure of a bicartesian closed category, locally so; a
+theory is a subobject of a product of exponentials cut out by its laws, a model a global element of
+it, `data` an initial algebra, and a functor a model of a theory over `U`.
 
 ## What types are for: a check is made once
 
