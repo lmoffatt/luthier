@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that every well-formedness rule of the static semantics has its tests.
 
-The rules are the paragraphs of section 5 of `docs/semantica/05-static-semantics.md` that start
+The rules are the paragraphs of section 5 of `docs/spec/05-static-semantics.md` that start
 with `**R<n>.`. A rule's paragraph runs until the next rule or the next heading. Each rule needs
 at least one test the checker must accept and one it must reject in `tests/spec/`, named
 `r<n>_<name>.accept.lut` and `r<n>_<name>.reject.lut`. A rule whose paragraph says "not
@@ -24,7 +24,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_SPEC = REPO_ROOT / "docs" / "semantica" / "05-static-semantics.md"
+DEFAULT_SPEC = REPO_ROOT / "docs" / "spec" / "05-static-semantics.md"
 DEFAULT_TESTS = REPO_ROOT / "tests" / "spec"
 
 SECTION_RE = re.compile(r"^##\s+5\.\s")

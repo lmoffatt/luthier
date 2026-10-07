@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Correspondence audit of Luthier: is the specification (docs/semantica/) a faithful reflection of
+"""Correspondence audit of Luthier: is the specification (docs/spec/) a faithful reflection of
 the implementation (src/luthier/) and of the documentation (README.md, examples/)?
 
 Step 5.3 of record/plan-working-method-execution-2026-10-06.md. Luciano runs it; each unit costs
@@ -420,7 +420,7 @@ def load_units(path: Path) -> dict:
         if unknown:
             raise UsageError(f"{path}: verify.{kind}: unknown status(es) {', '.join(map(repr, unknown))}; "
                              f"the statuses are {', '.join(statuses(kind))}")
-    audited = cfg.setdefault("audited_paths", ["src", "docs/semantica"])
+    audited = cfg.setdefault("audited_paths", ["src", "docs/spec"])
     if not (isinstance(audited, list) and audited and all(isinstance(a, str) and a for a in audited)):
         raise UsageError(f"{path}: audited_paths must be a list of paths")
     cfg["_sha256"] = sha256_bytes(path.read_bytes())
@@ -905,7 +905,7 @@ def report_header(ctx: Ctx, results: list[dict], failed: list[str], not_run: lis
         "# Correspondence audit of Luthier",
         "",
         f"Draft 0, {ctx.date}. Status: for Luciano; the bites need his answer.",
-        "Written for Luciano: is the specification (docs/semantica/) a faithful reflection of the "
+        "Written for Luciano: is the specification (docs/spec/) a faithful reflection of the "
         "implementation (src/luthier/) and of the documentation (README.md, examples/)?",
         f"Sources: the repository at `{ctx.sha[:7]}`; for each unit one model call mapped one direction and "
         "a second call, a skeptic, tried to refute each finding. This header is written by "

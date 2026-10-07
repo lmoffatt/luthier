@@ -68,8 +68,8 @@ the environment (Python) gives values, never types. Products, sums and functions
 structural; `data` is for recursive types. A vector is a function `Fin n -> Float64`, and a numpy array
 is a value of that type as it is.
 
-The specification: `docs/semantica/04-kernel.md` (the kernel: type formers, terms, reduction, the
-surface forms and their translation) and `docs/semantica/05-static-semantics.md` (states of a name,
+The specification: `docs/spec/04-kernel.md` (the kernel: type formers, terms, reduction, the
+surface forms and their translation) and `docs/spec/05-static-semantics.md` (states of a name,
 objects, the rules R1 to R8, certification). `00` to `03` are the reading guide, the construction
 pattern, the grammar and the libraries.
 
@@ -93,10 +93,10 @@ pytest
   `generators.py`, `testing.py`, `certify.py`, `cli.py`, `api.py` (loading a program from Python).
 - `src/luthier/core.lut`: the kernel's own definitions, loaded implicitly: `Unit`, `Empty`, `Bool`,
   `Int`, `Float64`, `String`, `Maybe`, `List`, `Nat`, `Fin`.
-- `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/semantica/03-libraries.md`).
+- `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/spec/03-libraries.md`).
 - `tests/spec/`: one program the checker must accept and one it must reject per rule of 05, and the
   kernel's type formers. `tests/test_kernel.py`: the mechanisms.
-- `examples/`, `docs/semantica/`.
+- `examples/`, `docs/spec/`.
 - `record/`: the development record: the voice notes the design comes from (`record/audios/`),
   Luciano's notes, plans, decisions, audits, and what preceded the specification of 2026-10-04
   (`record/archive/`).

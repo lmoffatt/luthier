@@ -3,7 +3,7 @@
 Note, 2026-10-07: the development record moved from `docs/` to `record/` (D-2026-10-07-a, Luthier
 proper separated from the record of its development). A path `docs/<x>` named below for a plan, the
 decision log, the principles, an audit, the voice notes or Luciano's notes now reads `record/<x>`;
-`docs/semantica/` is unchanged by that pass. The text below is kept as written.
+`docs/semantica/` became `docs/spec/` in the second pass, with the same file names. The text below is kept as written.
 
 Draft 1, 2026-10-06. Status: as in the table below.
 

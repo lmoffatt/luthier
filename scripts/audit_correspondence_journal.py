@@ -64,7 +64,7 @@ DEFAULT_OUT_DIR = REPO_ROOT / "record" / "audits"
 LIST_OF = {"spec": "claims", "impl": "behaviors", "docs": "claims"}
 
 # Prefixes dropped from file references in the appendix tables, to keep the rows readable.
-PREFIXES = ("src/luthier/", "docs/semantica/")
+PREFIXES = ("src/luthier/", "docs/spec/", "docs/semantica/")
 
 
 def sha256_bytes(data: bytes) -> str:

@@ -1,4 +1,4 @@
-"""The specification suite of docs/semantica/04-kernel.md and 05-static-semantics.md.
+"""The specification suite of docs/spec/04-kernel.md and 05-static-semantics.md.
 
 Every `*.accept.lut` under tests/spec must load without error; every `*.reject.lut` must fail
 with a message containing the fragment of its `-- expect:` comment.
