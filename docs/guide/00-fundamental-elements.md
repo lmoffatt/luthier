@@ -31,13 +31,17 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
 - **Subtype.** `{ x : T | p }`: the values of `T` that satisfy the law `p`. Laws over functions
   are laws like any other; satisfying them is checked by `test` and recorded. This is what makes
   Luthier.
-- **A function as a type.** `Exp : Float64 -> Float64` declared, then `Exp := Homomorphic &
-  AtZero` defined: the functions that satisfy the laws of the exponential, whatever computes
-  them. An implementation is a value of it, `expPy : Exp := extern "python:math.exp"`; a Taylor
-  sum is another, each certified against the same laws. A program writes against the type and
-  picks an implementation by name (`examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26];
-  Luciano, 2026-10-07). The ideal is over `Real`, where nothing computes (`06 §4`, the ideal and
-  its realizations).
+- **A function as a type.** `Exp (R : U) (m : NumberModel R) : U := { f : R -> R | Homomorphic R m f
+  & AtZero R m f }`: the functions that satisfy the laws of the exponential, written once over a
+  number model. `Exp Real realModel` is the ideal, a statement, since nothing computes the reals;
+  `Exp Float64 (float64Model tol)` runs, and an implementation is a value of it, `expPy := extern
+  "python:math.exp"`, a Taylor sum another, each certified against the same laws. A program writes
+  against the type and picks an implementation by name. From the ideal to the doubles the arrow is
+  `realize f x = round (f x)`, and `g` realizes `f` when `g x` stays within tolerance of it; it is
+  stated today and runs once a `Real` computes (`06 §4`, the ideal and its realizations; `06 §9`,
+  intervals). The other direction, a function on the doubles as a function on the reals, is false,
+  and `05` R9 (contravariant domain) rejects it (`examples/exp.lut`; voice note 2026-05-26 12.32.24
+  [01:26]; Luciano, 2026-10-07).
 - **Apply and reduce.** `f a`, and replacing the argument in the body until nothing is left to
   do. Executing by hand is this.
 
