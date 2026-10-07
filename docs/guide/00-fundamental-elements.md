@@ -145,12 +145,13 @@ of cycle be recognized as candidates for an isomorphism.
 
 A name passes through three states: declared (its base is known), defined (it has a body), and
 certified (some of its laws passed `test`, each with a grade: a point, `n` sampled cases, every
-case of a box or of a finite domain, a witness, a proof, or assumed as an axiom; `05 §7`). The body of a defined name is, besides, a datum or a procedure
-(*Declared, defined, computable*, above): a classification of bodies, not a fourth state. A
-definition may use only types that are defined, except those of its own object (`05` R2); that is what makes "this is a Table" guarantee something. A hole of a defined
-type is a parameter: `sigma : Float64` can be used, and what depends on it does not reduce until it is
-given a value. This is the principle "you do not execute code until it is defined" of the voice
-note 2026-05-30 18.09.57 [00:53].
+case of a box or of a finite domain, a witness, a proof, or assumed as an axiom; `05 §7`). The
+body of a defined name is, besides, a datum or a procedure (*Declared, defined, computable*,
+above): a classification of bodies, not a fourth state. A definition may use only types that are
+defined, except those of its own object (`05` R2); that is what makes "this is a Table" guarantee
+something. A hole of a defined type is a parameter: `sigma : Float64` can be used, and what
+depends on it does not reduce until it is given a value. This is the principle "you do not execute
+code until it is defined" of the voice note 2026-05-30 18.09.57 [00:53].
 
 The type is the proposition the name claims, and the body is its evidence; for a function, its
 implementation (voice notes 2026-05-26 12.32.24 [00:51], 2026-08-31 19.48.17 [01:02]). This covers
