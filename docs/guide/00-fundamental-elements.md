@@ -201,6 +201,9 @@ top: an isomorphism is two functions and two laws that say they undo each other;
 equality with a tolerance is where probability enters; equality in distribution is a test that
 does not separate two samplers. In version 0 the equality a law uses is decidable `==` only where
 equality is structural; on functions it is a parameter or a component of the theory (`05` R8).
+That is the line between a datum and a procedure (*Declared, defined, computable*): on a procedure
+equality is a law tested by observations, at sampled arguments and, for the reals, sampled
+precisions.
 
 ## 5. The program as data
 
