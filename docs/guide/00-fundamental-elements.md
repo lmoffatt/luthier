@@ -31,6 +31,12 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
 - **Subtype.** `{ x : T | p }`: the values of `T` that satisfy the law `p`. Laws over functions
   are laws like any other; satisfying them is checked by `test` and recorded. This is what makes
   Luthier.
+- **A function as a type.** `Exp : Float64 -> Float64` declared, then `Exp := Homomorphic &
+  AtZero` defined: the functions that satisfy the laws of the exponential, whatever computes
+  them. An implementation is a value of it, `expPy : Exp := extern "python:math.exp"`; a Taylor
+  sum is another, each certified against the same laws. A program writes against the type and
+  picks an implementation by name (`examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26];
+  Luciano, 2026-10-07). The ideal is over `Real`, where nothing computes (`06 §4`).
 - **Apply and reduce.** `f a`, and replacing the argument in the body until nothing is left to
   do. Executing by hand is this.
 
@@ -194,8 +200,13 @@ Not in version 0.
     doubleA (n : N) : N := add n n
     doubleB (n : N) : N := match n { zero -> zero ; succ k -> succ (succ (doubleB k)) }
 
-    SameDouble : U := { f : N -> N | \ (n : N) { f n == doubleA n } }
-    doubleB' : SameDouble := doubleB
+    Double : N -> N
+    DoubleZero (f : Double) : Bool := f zero == zero
+    DoubleSucc (f : Double) (n : N) : Bool := f (succ n) == succ (succ (f n))
+    Double := DoubleZero & DoubleSucc
+
+    doubleA' : Double := doubleA
+    doubleB' : Double := doubleB
 
 Abbreviations for the run: `1 = succ zero`, `2 = succ 1`.
 
@@ -212,10 +223,16 @@ Abbreviations for the run: `1 = succ zero`, `2 = succ 1`.
     ≡ succ (succ (succ (succ zero)))
     = 4
 
-`doubleB'` claims that `doubleB` agrees with `doubleA` on every `n`. The checker records the
-obligation; `test doubleB'` draws values of `N` and reduces both sides on each, which is the same
-reduction as above, and writes the certificate with the number of cases. Proving it for every `n`
-needs induction and is the proof layer's job.
+`Double` is the doubling as a type: the functions that send `zero` to `zero` and a successor to
+the successor of the successor of their value. `doubleA'` and `doubleB'` each claim that a double
+is one; `doubleB` satisfies `DoubleSucc` by its own reduction, `doubleA` by the laws of `add`. The
+checker records the obligations; `test doubleA'` draws values of `N` and reduces both sides of
+each law on each, which is the same reduction as above, and writes the certificate with the
+number of cases. That the two doubles agree, `doubleA n == doubleB n`, follows from the laws and
+is a corollary, not a law (`05` R10, a law characterizes; a second implementation is not a law).
+Proving the laws for every `n` needs induction and is the proof layer's job. `examples/exp.lut`
+does the same with the exponential on the doubles: a Taylor sum and the environment's `exp`, two
+values of `Exp`, certified against `Homomorphic` and `AtZero`.
 
 ## 9. Open
 
