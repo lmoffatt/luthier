@@ -399,3 +399,13 @@ Source:     chat:d3b76232:534
             chat:d3b76232:553
 Kind:       principle. For P14 (proposed), P1, P3; P12 in the form of the reply, a screen per point
 Status:     current. Transcript under ~/.claude-databaum/projects/.
+
+D-2026-10-07-h  Program is an element of the guide, the last of the list: the theories a program
+                states, the models it gives them, and the compositions of models by application,
+                certified as a chain graded by its weakest link (05 §7); taken from the closing
+                hierarchy of GPT's reading.
+Author:     Luciano; the model for the wording and the place
+Quote:      "Program como la composicion de Theorias y Modelos suena una buena idea que habria que incluir."
+Source:     chat:d3b76232:593
+Kind:       principle. For P14 (proposed), P12
+Status:     current. Transcript under ~/.claude-databaum/projects/.
