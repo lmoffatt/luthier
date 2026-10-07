@@ -75,11 +75,12 @@ then what the law defines.
   Exp Real realModel`, the ideal nothing fills; a hypothesis, an input, `sigma : Float64`; an
   operation another file will provide. What depends on it does not reduce until it is given a
   value.
-- **Recursion.** The second way to make a new name: a definition that mentions itself, `data
-  { zero : N ; succ : N -> N }`, a type generated freely by its constructors, or a recursive
-  function. Neither is a subtype of something earlier nor an alias, which would expand without
-  end; its law, freeness, quantifies over every type and has no generator (`05 §7`), so the
-  recursion itself is taken as the definition: an initial algebra.
+- **Recursion.** The second way to make a new type, and a new function: a definition that
+  mentions itself, `data { zero : N ; succ : N -> N }`, a type generated freely by its
+  constructors, or a recursive function. Laws restrict a space that exists; recursion generates
+  one. Neither is a subtype of something earlier nor an alias, which would expand without end;
+  its law, freeness, quantifies over every type and has no generator (`05 §7`), so the recursion
+  itself is taken as the definition: an initial algebra.
 - **Apply and reduce.** `f a`, and replacing the argument in the body until a datum, a procedure
   or a hole is reached (*Declared, defined, computable*, below). Executing by hand is this.
 
