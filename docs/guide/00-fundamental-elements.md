@@ -75,6 +75,44 @@ optimum of `f` and `x`, or an optimum of `f` and `x` from `b0`; since finding it
 local optimum depends on its start, the last is the right one, a type indexed by every input of the
 computation. A cheap result carries its bound; an expensive one carries its inputs and its witness.
 
+## Declared, defined, computable
+
+Luciano, 2026-10-07 (chat 182f2465): the sum of two reals cannot be computed, but it can be
+defined. The body of a name, once it has one, is of one of two shapes, and with the hole that makes
+three kinds of value.
+
+- A *hole*: a declaration, the claim with no body. `Real`, the ideal, which no interpreter fills,
+  and `expIdeal : Exp Real realModel`, the exponential on it. Nothing reduces; the laws are stated.
+- A *procedure*: a body whose normal form is a function over an infinite domain. It answers every
+  finite question, and reduces when asked one. A real as a Cauchy sequence of rationals,
+  `Cauchy : U := { s : Int -> Rational | Modulus s }`, applied to a precision gives a rational, and
+  the sum of two such reals, `\ n { x (n + 1) + y (n + 1) }`, is defined and reduces at any
+  precision (`examples/cauchy.lut`). What never computes is its equality: two sequences with the
+  same limit are equal by a law that no finite observation decides (`05` R8, `==` only where
+  equality is structural).
+- A *datum*: a body whose normal form is a literal or a constructor, with `==`: `Int`, `Rational`,
+  `Float64`, a `data`, and a function from a finite domain, which is a table (`04 §6`).
+
+The line is not whether the type is infinite but how many observations an answer needs. `Int` is
+infinite and every value of it is a datum, with its equality decided; what does not compute over
+`Int` is the "for every n", which is induction, the proof layer's job, and version 0 samples it.
+`Bool` and `Fin n` are finite, and over them everything computes, equality of functions included,
+and a law is certified exhaustively. Over procedures a law is tested by observations, at sampled
+arguments and, for the reals, sampled precisions. A definition over a generic `A : U` computes on
+each instance; what has no generator and no test is the quantification over every `A` (`05 §7`,
+laws over all models).
+
+This is the axis of the three states of a name (section 1) seen from the body: declared is defined
+implicitly, by its properties; defined is defined explicitly, by a body; computable is that the
+body reduces to a datum.
+
+Between the ideal and what runs the arrow goes one way. `Float64 : Real` as values, so the ideal
+applies to a double, and `realize f x = round (f x)` brings the result back; `g` realizes `f` when
+`g x` stays within tolerance of it, and this runs with a `Real` that computes, the construction
+above. The other direction, a function on the doubles as a function on the reals, is false: the
+domain goes against the refinement (`05` R9, contravariant domain), and the approximate law with
+the rounded sum is not the exact law with the sum.
+
 ## 0. Notation
 
 Every symbol used in this document.
