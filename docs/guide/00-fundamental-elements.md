@@ -175,7 +175,8 @@ left; each step is a definitional equality. Mathematics does not execute, it che
 
 The kernel chosen to start with (`04 §2`): `U`; the exponential, with its dependent form; the
 product, with its dependent form; the sum; `Empty` and `Unit`; the subtype; `data` for recursive
-types; and `Int`, `Float64` and `String`, the only primitive types, filled by the interpreter. `Bool` is
+types; and the primitive types `Int`, `Rational`, `Real`, `Float64` and `String` (`06 §2`), of which
+the interpreter fills all but `Real`, the ideal, which stays in effect declared. `Bool` is
 `< true : Unit | false : Unit >`, `Maybe A` is `< nothing : Unit | just : A >`, and `Fin n`, the
 type of the n indices `{ k : Int | 0 <= k and k < n }`, is in the core because a vector of length
 n is a function `Fin n -> Float64`.
