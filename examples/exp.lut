@@ -1,0 +1,31 @@
+-- The exponential as a type: the functions on the doubles that satisfy the laws of the
+-- exponential, whatever computes them. Two models, one summed here term by term and one the
+-- environment gives, are certified against the same laws; a program writes against `Exp` and
+-- picks a model by name (guide 00, "A function as a type"; Luciano, 2026-10-07).
+
+import "real"
+import "real_python"
+import "random"
+
+Exp : Float64 -> Float64
+
+-- The laws: a homomorphism from addition to multiplication, normalized at zero. The ideal states
+-- them over Real with exact equality (06 §4); on the doubles they hold within a tolerance, which
+-- is a parameter and not a constant of the law.
+expTol : Float64 := 1.0e-9
+Homomorphic (f : Exp) (x y : Float64) : Bool := approx expTol (f (x + y)) (f x * f y)
+AtZero (f : Exp) : Bool := f 0.0 == 1.0
+
+Exp := Homomorphic & AtZero
+
+-- model 1: the Taylor series, summed from the term where it no longer changes the sum back to
+-- the first, so the small terms are added first
+taylorFrom (x : Float64) (k : Int) (term : Float64) : Float64 :=
+  if abs term <= 1.0e-18 then 0.0 else term + taylorFrom x (k + 1) (term * x / toFloat64 (k + 1))
+expTaylor : Exp := \ x { taylorFrom x 0 1.0 }
+
+-- model 2: the machine's
+expPy : Exp := extern "python:math.exp"
+
+test expTaylor with 200 size 3
+test expPy with 200 size 3
