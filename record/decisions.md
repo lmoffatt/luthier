@@ -350,3 +350,18 @@ Source:     chat:182f2465:508
             chat:182f2465:515
 Kind:       principle. For P12, P1; the principle of 07 (one name for each concept)
 Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/.
+
+D-2026-10-07-e  No loose functions: a value is defined only at a defined type, and an exponential
+                without laws is a base, as a lawless product is (R4); a function is a value of a
+                defined function type, a theory. The guide's list is reordered around it (Type,
+                Value, Declaration, Law, Subtype/theory, Function type, Definition, ...), 05 R2
+                and R4 carry the rule as decided and not implemented, and P14 is proposed in his
+                words. The libraries do not comply (exp in real.lut, the helpers); check -v is to
+                report loose functions first.
+Author:     Luciano
+Quote:      "Las funciones como valor son de un tipo de una funcion definida."
+            "Pero para habitarlo primero lo tenemos que definir."
+Source:     chat:182f2465:568
+            chat:182f2465:575
+Kind:       principle. For P10, P4; P8 is met, the real case is exp without laws in real.lut
+Status:     current; not implemented. The transcript of 182f2465 is under ~/.claude-databaum/projects/.

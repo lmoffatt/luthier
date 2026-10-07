@@ -133,4 +133,15 @@ Source:     luthier@daa5b95:docs/plan-working-method-2026-10-06.md:117
 Assumption: the use of a principle can be read from the record of decisions ("Si, es cierta la
             assumption", same line).
 Status:     current since 2026-10-06; the second quote extended the statement
+
+P14 A type is a concept: declared, then defined, and only then inhabited; a function is a
+    value of a defined function type, never of a bare exponential.
+Quote:      "El problema es que mi idea es que no uso funciones sueltas nunca."
+            "Esa es lo que quiero imponer como disciplina: un tipo es un concepto."
+Source:     chat:182f2465:568
+            chat:182f2465:575
+Assumption: a function written without its laws is one nobody can trust or replace; the cost is
+            a law or a local definition per helper, and local definitions (02 §8) do not exist yet.
+Status:     proposed 2026-10-07, for Luciano to mark; stated in the guide, and in 05 R2 and R4 as
+            decided and not implemented (D-2026-10-07-e)
 ```
