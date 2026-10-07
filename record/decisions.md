@@ -296,19 +296,27 @@ Status:     current. The transcript of c15e8d85 is under ~/.claude-databaum/proj
             ~/.claude/projects/: check_quotes needs --transcripts for it.
 ```
 
-D-2026-10-07-b  A function defined by its laws is an element of the guide: a type declared over
-                an exponential and defined by the laws of the function (`Exp : Float64 ->
-                Float64`, `Exp := Homomorphic & AtZero`), whose values are its implementations,
-                each certified against the same laws. examples/exp.lut holds it with two models,
-                a Taylor sum and math.exp; section 8 of the guide replaces the agreement law
+D-2026-10-07-b  A function defined by its laws is an element of the guide: a type over an
+                exponential defined by the laws of the function, whose values are its
+                implementations, each certified against the same laws. Written once over a
+                number model, `Exp (R : U) (m : NumberModel R)`: `Exp Real realModel` is the
+                ideal, declared and never run; `Exp Float64 (float64Model tol)` runs. The arrow
+                between them goes from the ideal to the doubles, `realize f x = round (f x)`, and
+                a machine exp realizes the ideal when it stays within tolerance of that; stated,
+                not run, until a Real computes (06 §9). The other direction, `Exp Float64 : Exp
+                Real`, is false and R9 rejects it. examples/exp.lut holds it with two models, a
+                Taylor sum and math.exp; section 8 of the guide replaces the agreement law
                 `SameDouble`, which R10 does not count as a law, by `Double` defined by its
                 recursion.
-Author:     Luciano for the element and its example; the model for the writing, and for Float64
-            with a tolerance as a parameter in place of Real, which nothing computes (06 §4)
+Author:     Luciano for the element, its example and the generic form; the model for the writing,
+            for the number model as the parameter, and for the direction of the arrow
 Quote:      "Hay un tema: Funcion Type es un concepto importante"
             "Lo de serie de Taylor fue lo unico que se me ocurrio como una distinta implementacion de exp"
+            "Exp (R: U) : R->R := {Homeomorf R & Atzero R}"
 Source:     chat:182f2465:3
             chat:182f2465:176
-Kind:       principle. For P10, P1; P11 for the tolerance
+            chat:182f2465:270
+Kind:       principle. For P10, P1; P11 for the tolerance. The model as a parameter is the
+            generic definition of 06 §4 and the number model of 06 §7
 Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/, not
             ~/.claude/projects/: check_quotes needs --transcripts for it.
