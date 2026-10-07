@@ -1,4 +1,4 @@
-"""The syntax phase 6 of docs/plan-2026-10-05.md added (06 §6.1): `let p = e in body`, the unary minus,
+"""The syntax phase 6 of record/plan-2026-10-05.md added (06 §6.1): `let p = e in body`, the unary minus,
 and implicit parameters `{A : U}` inferred where a definition is applied. Self-contained: core.lut
 and real.lut only."""
 import sys

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check that every quote of the record is found, verbatim, at the line its source names.
 
-The record is `docs/decisions.md` and `docs/principles.md`. An entry starts at column 0 with its
+The record is `record/decisions.md` and `record/principles.md`. An entry starts at column 0 with its
 id (`P<n>` or `D-YYYY-MM-DD-<letters>`), then spaces and its statement, which may continue on
 indented lines. Its fields follow, one per `Name:` at column 0, each continued on indented lines.
 Blank lines separate entries; fence lines (``` or ~~~ indented by at most three spaces, as in
@@ -45,7 +45,7 @@ Rules:
 Failures go to stdout as `<record>:<entry line>: quote: <message>`, warnings to stderr as
 `<record>:<entry line>: warning: <message>`. Exit status: 1 with failures, else 0.
 
-Step 4.1 of docs/plan-working-method-execution-2026-10-06.md.
+Step 4.1 of record/plan-working-method-execution-2026-10-06.md.
 """
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ DEFAULT_ROOTS = {
     "luthier": REPO_ROOT,
     "sonolocalizacion": REPO_ROOT.parent / "sonolocalizacion",
 }
-DEFAULT_RECORDS = ("docs/decisions.md", "docs/principles.md")
+DEFAULT_RECORDS = ("record/decisions.md", "record/principles.md")
 DEFAULT_TRANSCRIPTS = Path.home() / ".claude" / "projects"
 DEFAULT_CONTEXT = 30
 SOURCE_TO_PIN = "source to pin"
@@ -508,7 +508,7 @@ def repo_root(value: str) -> tuple[str, Path]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("records", nargs="*", type=Path,
-                        help="record files (default: docs/decisions.md and docs/principles.md "
+                        help="record files (default: record/decisions.md and record/principles.md "
                              "of --repo)")
     parser.add_argument("--repo", type=Path, default=REPO_ROOT,
                         help="the repository whose record is checked by default "

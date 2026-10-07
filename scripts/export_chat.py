@@ -4,7 +4,7 @@
 Input: a transcript `.jsonl` (one JSON object per line), as Claude Code writes
 it under `~/.claude/projects/<project>/<session id>.jsonl`.
 
-Output: `docs/chat/<date>_<session8>.md` at the root of this repository, or the
+Output: `record/chat/<date>_<session8>.md` at the root of this repository, or the
 path given with --out. `<date>` is the UTC date (YYYY-MM-DD) of the first
 exported turn and `<session8>` the first 8 characters of the session id.
 
@@ -56,7 +56,7 @@ from pathlib import Path
 SCRIPT_VERSION = "1"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_OUT_DIR = REPO_ROOT / "docs" / "chat"
+DEFAULT_OUT_DIR = REPO_ROOT / "record" / "chat"
 PRIVATE_WORDS_FILE = Path(__file__).resolve().parent / "export_chat.private"
 
 SUMMARY_LINE = "[summary inserted by the harness]"
@@ -612,7 +612,7 @@ def default_out(export: Export) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("transcript", type=Path, help="a Claude Code transcript (.jsonl)")
-    parser.add_argument("--out", type=Path, help="output path (default: docs/chat/<date>_<session8>.md)")
+    parser.add_argument("--out", type=Path, help="output path (default: record/chat/<date>_<session8>.md)")
     args = parser.parse_args(argv)
 
     try:
@@ -620,10 +620,10 @@ def main(argv: list[str] | None = None) -> int:
     except OSError as e:
         print(f"{args.transcript}: {e.strerror}", file=sys.stderr)
         return 2
-    # luthier is public: only a luthier session may land in its docs/chat/ without saying so.
+    # luthier is public: only a luthier session may land in its record/chat/ without saying so.
     if args.out is None and not args.transcript.resolve().parent.name.endswith("-luthier"):
         print(f"{args.transcript}: not a session of the luthier project; pass --out "
-              "(a session of sonolocalizacion goes to that repository's docs/chat/)", file=sys.stderr)
+              "(a session of sonolocalizacion goes to that repository's record/chat/)", file=sys.stderr)
         return 2
     sha256 = hashlib.sha256(data).hexdigest()
     try:

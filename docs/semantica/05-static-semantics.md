@@ -310,7 +310,7 @@ name; it is not a state the name has once and for all.
   `.run.json`.
 - Importing a file accepts its certificate entries by hash, unchanged.
 
-As implemented (2026-10-05, phase 2 of `docs/plan-2026-10-05.md`):
+As implemented (2026-10-05, phase 2 of `record/plan-2026-10-05.md`):
 
 - A law has one of three outcomes: *passed*; *failed*, by a counterexample, an evaluation error on a
   case, or a registered generator whose value is outside its type; *not run*, when a parameter has no

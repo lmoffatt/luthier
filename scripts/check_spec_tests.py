@@ -11,7 +11,7 @@ Each finding is printed as `path:line: spec-tests: message`, where path and line
 in the specification. Exit status: 0 with no findings, 1 with findings, 2 when the specification
 cannot be read or has no rules in section 5.
 
-Step 4.2 of docs/plan-working-method-execution-2026-10-06.md.
+Step 4.2 of record/plan-working-method-execution-2026-10-06.md.
 """
 from __future__ import annotations
 

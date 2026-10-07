@@ -1,5 +1,5 @@
 """scripts/check_quotes.py on records, a git repository and a transcript of its own (step 4.1 of
-docs/plan-working-method-execution-2026-10-06.md)."""
+record/plan-working-method-execution-2026-10-06.md)."""
 import json
 import subprocess
 import sys

@@ -2,7 +2,7 @@
 """Correspondence audit of Luthier: is the specification (docs/semantica/) a faithful reflection of
 the implementation (src/luthier/) and of the documentation (README.md, examples/)?
 
-Step 5.3 of docs/plan-working-method-execution-2026-10-06.md. Luciano runs it; each unit costs
+Step 5.3 of record/plan-working-method-execution-2026-10-06.md. Luciano runs it; each unit costs
 model calls.
 
 For each unit of prompts/audit_correspondence_units_v1.json, one call of the `claude` (or `codex`)
@@ -32,7 +32,7 @@ the scratch folder), and that the audit reads a disposable worktree. The codex c
 codex's workspace-write sandbox: they can write in the worktree and the temporary directory, not in
 Luciano's tree.
 
-Outputs, under docs/audits/:
+Outputs, under record/audits/:
   <date>_correspondence_v1_<model>/<unit>.map.json, <unit>.verify.json   {"meta", "output"}
   <date>_correspondence_v1_<model>/<unit>.<stage>.error.txt              a call that failed twice
   <date>_correspondence_v1_<model>.md                                    the report
@@ -72,7 +72,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = Path(__file__).resolve()
 PROMPTS_DIR = REPO_ROOT / "prompts"
-DEFAULT_OUT_DIR = REPO_ROOT / "docs" / "audits"
+DEFAULT_OUT_DIR = REPO_ROOT / "record" / "audits"
 AUDIT = "correspondence"
 DEFAULT_VERSION = "v1"
 

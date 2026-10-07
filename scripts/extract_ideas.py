@@ -26,8 +26,8 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_INPUT = REPO_ROOT / "docs" / "audios"
-DEFAULT_OUTPUT = REPO_ROOT / "docs" / "ideas"
+DEFAULT_INPUT = REPO_ROOT / "record" / "audios"
+DEFAULT_OUTPUT = REPO_ROOT / "record" / "ideas"
 DEFAULT_PROMPT = REPO_ROOT / "prompts" / "extract_ideas_v1.md"
 PLACEHOLDER = "<<<TRANSCRIPCION>>>"
 MODO = "editor"

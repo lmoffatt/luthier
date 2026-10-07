@@ -22,7 +22,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_IDEAS_DIR = REPO_ROOT / "docs" / "ideas"
+DEFAULT_IDEAS_DIR = REPO_ROOT / "record" / "ideas"
 DEFAULT_PROMPT = REPO_ROOT / "prompts" / "consolidate_ideas_v1.md"
 PLACEHOLDER = "<<<INPUT>>>"
 MODO = "editor"

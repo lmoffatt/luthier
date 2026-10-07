@@ -1,8 +1,10 @@
 # Working rules
 
+- `docs/`, `src/`, `examples/` and `tests/` present Luthier; `record/` holds the record of its
+  development: his sources, plans, decisions, audits, what preceded the specification.
 - Luciano's notes, transcripts, annotations and observations are never edited. A correction keeps
   the original in git and puts the corrected version in front, with a note at its top.
-- His observations on code are in `docs/Lucianos observations/` here and in `Lucianos feedbacks/`
+- His observations on code are in `record/Lucianos observations/` here and in `Lucianos feedbacks/`
   in sonolocalización. Read the ones on a file before changing it.
 - In a document you write, mark what comes from a source (cite it) and what you propose.
 - Everything derived records its inputs (by commit or hash), the script or prompt with its
@@ -15,13 +17,13 @@
   direction, and what it assumes.
 - Raise a latent conflict between principles when what it could cost is worth his attention; don't
   nitpick.
-- Log each decision that isn't yours in `docs/decisions.md` when it is taken. A reversed decision
+- Log each decision that isn't yours in `record/decisions.md` when it is taken. A reversed decision
   keeps its entry, marked reversed.
 - At the end of each task, list the decisions you took on your own.
 - Commit a document before Luciano annotates it, then commit his annotations verbatim.
 - A plan comes in two documents: the decisions for Luciano, the execution for the sessions.
 - In anything Luciano reads, a numbered reference carries its statement: "P6 (every change can be
-  undone)". Records (`docs/decisions.md`, `docs/principles.md`) may be terse.
+  undone)". Records (`record/decisions.md`, `record/principles.md`) may be terse.
 - A mechanism with a recurring cost (per commit, per session, or on Luciano's attention) is added
   only after a real case it would have caught.
 - Push only tagged milestones.

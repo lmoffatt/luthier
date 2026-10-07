@@ -4,7 +4,7 @@ Rewritten on 2026-10-04 from the Spanish draft of 2026-09-29 (`00-elementos-fund
 in the history), against the specification of `04-kernel.md` and `05-static-semantics.md`. This
 document is the reading guide: the few ideas a program is made of, in the order to think them,
 and a program executed by hand. The rules are in 04 and 05; where this text and those differ,
-they hold. Ideas that come from the voice notes cite the note (`docs/audios/`).
+they hold. Ideas that come from the voice notes cite the note (`record/audios/`).
 
 ## The elements, in the order to think them
 

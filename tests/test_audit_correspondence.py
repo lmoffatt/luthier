@@ -1,5 +1,5 @@
 """scripts/audit_correspondence.py with a stub in place of the claude and codex command lines (step
-5.3 of docs/plan-working-method-execution-2026-10-06.md). No model is called: the stub is first on
+5.3 of record/plan-working-method-execution-2026-10-06.md). No model is called: the stub is first on
 the PATH, answers each stage with canned JSON, and records where and how it was run."""
 import hashlib
 import importlib.util
@@ -18,8 +18,8 @@ PROMPT_FILES = [ROOT / "prompts" / f"audit_correspondence_{n}_v1.md"
                 for n in ("common", "map_spec", "map_impl", "map_docs", "verify", "report")]
 REAL_UNITS = ROOT / "prompts" / "audit_correspondence_units_v1.json"
 DATE = "2026-01-02"
-OUT = Path("docs/audits") / f"{DATE}_correspondence_v1_opus"
-REPORT = Path("docs/audits") / f"{DATE}_correspondence_v1_opus.md"
+OUT = Path("record/audits") / f"{DATE}_correspondence_v1_opus"
+REPORT = Path("record/audits") / f"{DATE}_correspondence_v1_opus.md"
 
 STUB = r'''#!PYTHON
 import json, os, re, subprocess, sys, time
@@ -362,7 +362,7 @@ def test_dry_run_calls_nothing(tmp_path):
     proc = run(tmp_path, "--date", DATE, "--dry-run")
     assert proc.returncode == 0, proc.stderr
     assert not (tmp_path / "calls.jsonl").exists()      # not even --version
-    assert not (repo / "docs" / "audits").exists()
+    assert not (repo / "record" / "audits").exists()
     assert len([l for l in proc.stdout.splitlines() if l.startswith("[dry] map ")]) == 3
     assert len(worktrees(repo)) == 1
 
@@ -402,7 +402,7 @@ def test_codex_is_the_alternative(tmp_path):
     assert len(cs) == 7 and {c["cli"] for c in cs} == {"codex"} and {c["head"] for c in cs} == {sha}
     wt = cs[0]["cwd"]
     assert all(c["argv"][c["argv"].index("-C") + 1] == wt for c in cs)
-    assert (repo / "docs" / "audits" / f"{DATE}_correspondence_v1_gpt-5-4.md").exists()
+    assert (repo / "record" / "audits" / f"{DATE}_correspondence_v1_gpt-5-4.md").exists()
 
 
 def test_ctrl_c_removes_the_worktree_and_stops_the_calls(tmp_path):

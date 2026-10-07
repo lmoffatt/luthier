@@ -34,7 +34,7 @@ writes them from the same files, and the report says which.
 Usage:
 
   python3 scripts/audit_correspondence_journal.py <journal.jsonl> --run <run.json> \\
-      --date 2026-10-06 [--commit <sha>] [--model <name>] [--out-dir docs/audits] \\
+      --date 2026-10-06 [--commit <sha>] [--model <name>] [--out-dir record/audits] \\
       [--units prompts/audit_correspondence_units_v1.json] [--appendices <file.md>]
 
 <run.json> is the workflow's record in ~/.claude/projects/<project>/<session>/workflows/, which
@@ -58,7 +58,7 @@ SCRIPT = Path(__file__).resolve()
 AUDIT = "correspondence"
 DEFAULT_VERSION = "v1"
 DEFAULT_UNITS = REPO_ROOT / "prompts" / "audit_correspondence_units_v1.json"
-DEFAULT_OUT_DIR = REPO_ROOT / "docs" / "audits"
+DEFAULT_OUT_DIR = REPO_ROOT / "record" / "audits"
 
 # direction -> name of the list in the map's output, as in scripts/audit_correspondence.py
 LIST_OF = {"spec": "claims", "impl": "behaviors", "docs": "claims"}

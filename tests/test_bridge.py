@@ -1,4 +1,4 @@
-"""The bridge with Python (06 §6) and the generators, as phase 1 of docs/plan-2026-10-05.md fixed
+"""The bridge with Python (06 §6) and the generators, as phase 1 of record/plan-2026-10-05.md fixed
 them: a value of the environment is checked against its declared type at the crossing; every
 refinement in the type of an extern is an obligation on it; a registered generator's values are
 checked against their type; the table of a function to Int is an int64 array; a generator given

@@ -21,7 +21,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_IDEAS_DIR = REPO_ROOT / "docs" / "ideas"
+DEFAULT_IDEAS_DIR = REPO_ROOT / "record" / "ideas"
 DEFAULT_PROMPT = REPO_ROOT / "prompts" / "mentor_disenio_v1.md"
 PLACEHOLDER = "<<<INPUT>>>"
 MODO = "mentor"
@@ -37,11 +37,11 @@ FENCE_CLOSE_RE = re.compile(r"\n```\s*\Z")
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("input", type=Path, nargs="?", default=None,
-                   help="Archivo consolidado de ideas. Default: el _luthier_ideas_*.md más reciente en docs/ideas.")
+                   help="Archivo consolidado de ideas. Default: el _luthier_ideas_*.md más reciente en record/ideas.")
     p.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT,
                    help=f"Archivo del prompt (debe contener {PLACEHOLDER}).")
     p.add_argument("--output", type=Path, default=None,
-                   help="Archivo de salida. Default: docs/ideas/_mentor_<tag>.md")
+                   help="Archivo de salida. Default: record/ideas/_mentor_<tag>.md")
     p.add_argument("--cli", choices=("auto", "claude", "codex"), default="auto",
                    help="CLI a usar. 'auto' prioriza claude y usa codex de fallback.")
     p.add_argument("--model", default=None, help="Modelo. Default según el CLI.")

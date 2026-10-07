@@ -1,4 +1,4 @@
-"""Rules of the checker as phase 3 of docs/plan-2026-10-05.md fixed them: Bool is told by its labels,
+"""Rules of the checker as phase 3 of record/plan-2026-10-05.md fixed them: Bool is told by its labels,
 not by position (04); `==` exists only where equality is structural, which excludes Real and a data
 type with a function inside (05 R8); a law whose labels cannot be read is an error, not a pass
 (05 R3). Self-contained: core.lut only."""

@@ -96,8 +96,10 @@ pytest
 - `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/semantica/03-libraries.md`).
 - `tests/spec/`: one program the checker must accept and one it must reject per rule of 05, and the
   kernel's type formers. `tests/test_kernel.py`: the mechanisms.
-- `examples/`, `docs/semantica/`, `docs/audios/` (the voice notes the design comes from),
-  `archive/` (what preceded the specification of 2026-10-04).
+- `examples/`, `docs/semantica/`.
+- `record/`: the development record: the voice notes the design comes from (`record/audios/`),
+  Luciano's notes, plans, decisions, audits, and what preceded the specification of 2026-10-04
+  (`record/archive/`).
 
 ## Libraries and certificates
 

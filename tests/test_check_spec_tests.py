@@ -1,5 +1,5 @@
 """scripts/check_spec_tests.py on a small specification and test folder of its own (step 4.2 of
-docs/plan-working-method-execution-2026-10-06.md)."""
+record/plan-working-method-execution-2026-10-06.md)."""
 import subprocess
 import sys
 from pathlib import Path

@@ -278,4 +278,20 @@ Source:     luthier@d41026e:docs/Lucianos observations/random.lut.observations.t
             chat:8d5ce152:675
 Kind:       principle. For P10, P4; changes the order of A-9 in plan-2026-10-06
 Status:     current; starts when the correspondence audit, which reads the tree, is done
+
+D-2026-10-07-a  Luthier proper is separated from the record of its development: README, docs/,
+                src/, examples/ and tests/ present Luthier; record/ holds how it came to be.
+                scripts/ and prompts/ stay at the root. Three passes: the record moves, then
+                docs/semantica becomes docs/spec, then guide/ and rationale/ are split from it.
+Author:     Luciano for the separation and what proper contains; the model for the layout and
+            the passes
+Quote:      "Luthier proper serian los elementos  minimos para presentar Luthier a la comunidad:
+            documentos explicativos, documentos tecnicos, codigo y ejemplos."
+            "si, scripts y prompts quedan en la raiz. Y acepto 1-3"
+Source:     chat:c15e8d85:196
+            chat:c15e8d85:284
+Kind:       principle. For P12, P1; P7 kept (one repository; the record can be split off later
+            without losing history)
+Status:     current. The transcript of c15e8d85 is under ~/.claude-databaum/projects/, not
+            ~/.claude/projects/: check_quotes needs --transcripts for it.
 ```

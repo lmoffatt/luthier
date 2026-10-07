@@ -1,4 +1,4 @@
-"""Certificates as phase 2 of docs/plan-2026-10-05.md made them (05 §7): what an entry's hash covers
+"""Certificates as phase 2 of record/plan-2026-10-05.md made them (05 §7): what an entry's hash covers
 (the code of the cone, the Python behind its externs, the interpreter), when it is compared (after
 the whole program is loaded and its holes filled), the three outcomes of a law, the grade of an
 enumeration, provisional externs, the case count a directive asks for, pruning, and the record of

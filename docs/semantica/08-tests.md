@@ -2,7 +2,7 @@
 
 Draft 1, 2026-10-06. How `luthier test` draws the cases of a law, how a test says what it drew them
 from, what a certificate records, and what `luthier run` asks of certificates. It turns the analysis
-in `docs/generators-2026-10-06.md` into rules, with the decisions Luciano took on it the same day
+in `record/generators-2026-10-06.md` into rules, with the decisions Luciano took on it the same day
 (`sonolocalizacion/Lucianos feedbacks/oct 6 0703.txt` and `oct 6 0734.txt`). Section 12 lists what it
 changes in `02`, `03` and `05`.
 
