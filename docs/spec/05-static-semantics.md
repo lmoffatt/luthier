@@ -153,6 +153,15 @@ term position a declared name is allowed: a hole of a defined type is a paramete
 set by `luthier run --set`), and what depends on it does not reduce until it is filled. Code over
 a type that is only declared, outside that type's object, must take the type as a parameter.
 Files: `r2_definition.accept.lut`, `r2_definition.reject.lut`, `r2_unclaimed_laws.reject.lut`.
+Added 2026-10-07 (D-2026-10-07-e; decided, not implemented): a structural type with no laws, an
+exponential `A -> B`, a product or a sum, is a *base* and not a defined type for this rule. A value
+is defined at a type that has a name and laws, at a `data` or at a primitive; a top-level definition
+at a bare exponential is a loose function, and there are none: a function is a value of a defined
+function type, a theory (`00`, *Function type*). A helper either gets its recursion as its laws or
+waits for local definitions (`02 §8`). The libraries do not comply yet (`exp : Float64 -> Float64`
+in `real.lut`, the helpers of `array.lut`): `check -v` is to report loose functions first, as it
+reports *consistent, not characterized*, and the rule rejects once local definitions exist and the
+certificates are reissued. Files: to be written with the implementation.
 
 **R3. A predicate defines only what it touches.** The body of a subtype over a labeled base must
 touch every label; over an unlabeled base it must touch its parameter. A predicate that touches
@@ -169,6 +178,8 @@ that claims nothing and is rejected: write `x = t` (an alias, R7), or write the 
 used, or declare `x : t` and owe it laws.
 Files: `r4_product_inline.accept.lut`, `r4_recursive_data.accept.lut`,
 `r4_product_named.reject.lut`, `r4_data_nonrecursive.reject.lut`.
+The same holds for an exponential (2026-10-07, D-2026-10-07-e): a lawless `A -> B` is a base, not a
+type a value is written at; see R2.
 
 **R5. An extern gives a value, never a type.** Types are defined natively. `x : T := extern
 "..."` is accepted when `T` is defined (R2 applies to externs as to any body); `x : U := extern
