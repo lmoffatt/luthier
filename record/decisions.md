@@ -334,3 +334,19 @@ Quote:      "a, por supuesto."
 Source:     chat:182f2465:462
 Kind:       principle. For P10, P6 (nothing in the kernel changes), P8
 Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/.
+
+D-2026-10-07-d  The element of the guide for a function defined by its laws is named "Theory and
+                model": Hilbert's implicit definition made a type, the type the theory and a value
+                a model, so `Exp` and `Ring` are one element. The guide gains the section
+                "Declared, defined, computable": a value is a hole, a procedure or a datum, and the
+                line is how many observations an answer needs; declared is defined implicitly,
+                defined explicitly, computable reduces to a datum. Eight changes, one commit each
+                (33d3f87..7c2f86f).
+Author:     Luciano for the question and the choice; the model for the name, taken from 05 §1 and
+            01 §2, and for the eight changes
+Quote:      "Function definition by Properties as a type ? Podria ser by postconditions, pero buscamos algo mas generico mas matematico no?"
+            "Si, hacelo. QUiero ver como queda"
+Source:     chat:182f2465:508
+            chat:182f2465:515
+Kind:       principle. For P12, P1; the principle of 07 (one name for each concept)
+Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/.
