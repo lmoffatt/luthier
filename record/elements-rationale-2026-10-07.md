@@ -217,6 +217,24 @@ Why. The rules of reduction are `04 §4`; executing by hand is guide §2 and Knu
 only when asked a question (a Cauchy real asked for a precision), and for a hole, where reduction
 stops. Corrected on 2026-10-07 after the section *Declared, defined, computable*.
 
+## Program
+
+Says. A finite set of acts, read as the theories it states, the models it gives them, here or in
+the files that fill its holes, and the compositions of models by application. What it computes is
+a chain of applications of models; its certificate is the chain of theirs, graded by the weakest
+link. It never checks what a type already certifies. Its text as data is a later layer.
+
+Why. The set of acts is `05 §2`; filling from other files is `03 §3`; the chain and its grade are
+`05 §7` (the grade of a chain `f (g x)` is that of its weakest link). The reading "a program is a
+composition of theories and models" is Luciano's, taken from the last line of GPT's closing
+hierarchy ("Program = composition of models/values") on 2026-10-07 ("Program como la composicion
+de Theorias y Modelos suena una buena idea que habria que incluir"). It closes the list where the
+section *What types are for* begins: the program consumes theories and composes models, so a check
+is made once, at the model, and never again downstream. The program as data is guide §5, not in
+version 0.
+
+From. Luciano, chat d3b76232; GPT's closing hierarchy; `03 §3`, `05 §2`, `05 §7`.
+
 ## The closing paragraph
 
 Says. `U` is the type of types. Against C++ and against categories: the non-dependent fragment is

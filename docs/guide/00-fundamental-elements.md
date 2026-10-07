@@ -83,6 +83,14 @@ then what the law defines.
   itself is taken as the definition: an initial algebra.
 - **Apply and reduce.** `f a`, and replacing the argument in the body until a datum, a procedure
   or a hole is reached (*Declared, defined, computable*, below). Executing by hand is this.
+- **Program.** A finite set of acts (`05 §2`), read as what it states and what it supplies: the
+  theories, built over one another as `Exp` is over `NumberModel`; the models given for them, in
+  this file or in the files that fill its holes (`03 §3`); and the compositions of models by
+  application, `realize f x = round (f x)`. What a program computes is a chain of applications of
+  models, and its certificate is the chain of theirs, graded by the weakest link (`05 §7`). It
+  never checks what a type already certifies (*What types are for*, below). Its text as a value
+  of a type `Program` is a later layer (section 5) (Luciano, 2026-10-07, from the closing
+  hierarchy of GPT's reading in `record/IA/`).
 
 `U` is the type of types; it appears when a function returns a type. Against C++: statements
 are definitions, expressions are values (functions included), and types are types, plus the
