@@ -87,10 +87,11 @@ then what the law defines.
 `U` is the type of types; it appears when a function returns a type. Against C++: statements
 are definitions, expressions are values (functions included), and types are types, plus the
 dependent ones and the subtype with laws. There are no mutable variables, sequence, pointers or
-inheritance. Against categories: types are objects, functions arrows; product, sum and exponential,
-with their dependent forms, are the structure of a bicartesian closed category, locally so; a
-theory is a subobject of a product of exponentials cut out by its laws, a model a global element of
-it, `data` an initial algebra, and a functor a model of a theory over `U`.
+inheritance. Against categories: types are objects, functions arrows; product, sum and exponential
+give the non-dependent fragment the structure of a bicartesian closed category, and the dependent
+forms extend it to what dependent types need, a locally cartesian closed one; a theory is a
+subobject of a product of exponentials cut out by its laws, a model a global element of it, `data`
+an initial algebra, and a functor a model of a theory over `U`.
 
 ## What types are for: a check is made once
 
