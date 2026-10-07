@@ -9,11 +9,15 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
 ## The elements, in the order to think them
 
 A type is a concept. It is declared, then defined, and only then inhabited: a value is written at a
-type that is defined, never at a bare base (P14, proposed). A new name is made in two ways only, by
-laws or by recursion (`05` R4, only laws or recursion make a new type); what has neither is a base,
-and a base gets a name only by an alias. So there are no loose functions: a function is a value of
-a defined function type, and a function without laws is an alias (Luciano, 2026-10-07; `05` R2).
-The list follows that order: the bases, then the law, then what the law defines.
+type that is defined, never at a bare base (P14, proposed). A type has two origins, construction
+and constraint: the formers build type expressions, and a type with a name of its own is made by
+laws or by recursion (`05` R4, only laws or recursion make a new type). A primitive is named by the
+language; any other base claims nothing and is named, if at all, by an alias. So there are no
+loose functions: a function is a value of a defined function type, and a function without laws of
+its own is written as the expression itself, as an alias, or as the model of the theory whose law
+is its formula, `Sqr = { f : R -> R | ∀x. f x = x·x }` (Luciano, 2026-10-07; `05` R2; the reply to
+GPT of 2026-10-07 in `record/IA/`, point 2). The list follows that order: the bases, then the law,
+then what the law defines.
 
 - **Type.** A collection of values and, at the same time, a claim about them: `Nat`, `Bool`,
   `Exp`. `U` is the type of types. The bases are given, not defined: the primitives `Int`,
