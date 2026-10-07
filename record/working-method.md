@@ -3,7 +3,8 @@
 Note, 2026-10-07: the development record moved from `docs/` to `record/` (D-2026-10-07-a, Luthier
 proper separated from the record of its development). A path `docs/<x>` named below for a plan, the
 decision log, the principles, an audit, the voice notes or Luciano's notes now reads `record/<x>`;
-`docs/semantica/` became `docs/spec/` in the second pass, with the same file names. The text below is kept as written.
+`docs/semantica/` became `docs/spec/` in the second pass, with the same file names; the third moved `00`
+to `docs/guide/` and `01`, `07` and the prior-art survey to `docs/rationale/`. The text below is kept as written.
 
 Draft 2, 2026-10-06. Written for Luciano and for every session, of any model, that works in
 `~/Projects/luthier` or `~/Projects/sonolocalizacion`. It assumes no memory of the conversations that

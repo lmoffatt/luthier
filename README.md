@@ -70,8 +70,10 @@ is a value of that type as it is.
 
 The specification: `docs/spec/04-kernel.md` (the kernel: type formers, terms, reduction, the
 surface forms and their translation) and `docs/spec/05-static-semantics.md` (states of a name,
-objects, the rules R1 to R8, certification). `00` to `03` are the reading guide, the construction
-pattern, the grammar and the libraries.
+objects, the rules R1 to R8, certification). `docs/spec/` also holds the grammar (`02`), the
+libraries (`03`), the numbers (`06`) and the tests (`08`). `docs/guide/00-fundamental-elements.md`
+is the reading guide, with a program executed by hand. `docs/rationale/` holds the construction
+pattern (`01`), the characterizations of the key objects (`07`) and a survey of prior art.
 
 ## Install and run
 
@@ -96,7 +98,7 @@ pytest
 - `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/spec/03-libraries.md`).
 - `tests/spec/`: one program the checker must accept and one it must reject per rule of 05, and the
   kernel's type formers. `tests/test_kernel.py`: the mechanisms.
-- `examples/`, `docs/spec/`.
+- `examples/`, `docs/guide/`, `docs/spec/`, `docs/rationale/`.
 - `record/`: the development record: the voice notes the design comes from (`record/audios/`),
   Luciano's notes, plans, decisions, audits, and what preceded the specification of 2026-10-04
   (`record/archive/`).
