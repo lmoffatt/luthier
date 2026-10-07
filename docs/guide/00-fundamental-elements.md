@@ -21,10 +21,11 @@ then what the law defines.
 
 - **Type.** A collection of values and, at the same time, a claim about them: `Nat`, `Bool`,
   `Exp`. `U` is the type of types. The bases are given, not defined: the primitives `Int`,
-  `Rational`, `Real`, `Float64` and `String` (`06 §2`), and what the formers below build from
-  them. A base claims nothing beyond its shape, so it is named only by an **alias**, `x = t`, an
-  abbreviation expanded wherever it is used, with no states (voice note 2026-10-04 12:17):
-  `Maybe (A : U) = < nothing : Unit | just : A >`, `sq = \ (x : Float64) { x * x }`.
+  `Rational`, `Real`, `Float64` and `String`, named by the language (`04 §1`, `06 §2`), and the
+  type expressions the formers below build from them. Such an expression claims nothing beyond
+  its shape, so it gets a name, if at all, by an **alias**, `x = t`, an abbreviation expanded
+  wherever it is used, with no states (`05` R7; voice note 2026-10-04 12:17): `Maybe (A : U) =
+  < nothing : Unit | just : A >`, `sq = \ (x : Float64) { x * x }`.
 - **Product, sum, exponential.** `A * B`, `A + B`, `A -> B`, with `Unit` and `Empty` as the
   product and the sum of nothing, and names for positions when wanted: `{ a : A, b : B }`,
   `< a : A | b : B >`. The structure of a bicartesian closed category, and the bases a type is
