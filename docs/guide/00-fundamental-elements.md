@@ -47,13 +47,17 @@ then what the law defines.
   case, and that is evidence and not a proof: the certificate records the grade, from a point to
   proved or assumed (`05 §7`).
 - **Subtype by law, the theory.** `{ x : T | p }`: the values of the base `T` that satisfy the
-  law `p`. The way to define a type. Declared then defined, `Exp : R -> R`, `Exp := Homomorphic &
-  AtZero`, it is Hilbert's implicit definition made a type: the type is the theory, the laws an
-  object must satisfy. `Exp (R : U) (m : NumberModel R)` is a theory of one operation over a
-  model of `NumberModel`, as a vector space is over a field; `Ring A` has three operations;
-  `Functor` is one over `U`, an object map, an arrow map and two laws, so a functor is a theory
-  and not an element of its own. Categorically, the pullback of `true` along `p`: a mono with a
-  certificate. This is what makes Luthier.
+  law `p`. The way to define a type, in two acts or in one: declared at its base and then defined
+  by its laws, `Exp : Float64 -> Float64`, `Exp := Homomorphic & AtZero` (`05` R6, the body of a
+  declared name is an inhabitant or a predicate); or parameterized, `Exp (R : U) (m : NumberModel
+  R) : U := { f : R -> R | Homomorphic R m f & AtZero R m f }`. It is Hilbert's implicit
+  definition made a type: the type is the theory, the laws an object must satisfy. The general
+  shape is one equation: a signature, the labeled product of the operations; a law, a predicate
+  over it; the theory, the subtype the law cuts; a model, an inhabitant. `Exp R m` is a theory of
+  one operation over a model of `NumberModel`, as a vector space is over a field; `Ring A` has
+  three; `Functor` is a theory over `U`, an object map, an arrow map and two laws, and a functor
+  is a model of it, so functors are not an element of their own. Categorically, the pullback of
+  `true` along `p`: a mono with a certificate. This is what makes Luthier.
 - **Value, the model.** `x : T := t`, or `x := t` for a name declared before: a name with a body,
   whose claim is its type. The way to define a value, and a value is a model of the theory it is
   written at: `expPy : Exp Float64 (float64Model tol) := extern "python:math.exp"`, a Taylor sum
