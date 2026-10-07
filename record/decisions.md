@@ -295,3 +295,20 @@ Kind:       principle. For P12, P1; P7 kept (one repository; the record can be s
 Status:     current. The transcript of c15e8d85 is under ~/.claude-databaum/projects/, not
             ~/.claude/projects/: check_quotes needs --transcripts for it.
 ```
+
+D-2026-10-07-b  A function defined by its laws is an element of the guide: a type declared over
+                an exponential and defined by the laws of the function (`Exp : Float64 ->
+                Float64`, `Exp := Homomorphic & AtZero`), whose values are its implementations,
+                each certified against the same laws. examples/exp.lut holds it with two models,
+                a Taylor sum and math.exp; section 8 of the guide replaces the agreement law
+                `SameDouble`, which R10 does not count as a law, by `Double` defined by its
+                recursion.
+Author:     Luciano for the element and its example; the model for the writing, and for Float64
+            with a tolerance as a parameter in place of Real, which nothing computes (06 §4)
+Quote:      "Hay un tema: Funcion Type es un concepto importante"
+            "Lo de serie de Taylor fue lo unico que se me ocurrio como una distinta implementacion de exp"
+Source:     chat:182f2465:3
+            chat:182f2465:176
+Kind:       principle. For P10, P1; P11 for the tolerance
+Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/, not
+            ~/.claude/projects/: check_quotes needs --transcripts for it.
