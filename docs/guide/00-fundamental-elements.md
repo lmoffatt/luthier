@@ -36,7 +36,8 @@ they hold. Ideas that come from the voice notes cite the note (`record/audios/`)
   them. An implementation is a value of it, `expPy : Exp := extern "python:math.exp"`; a Taylor
   sum is another, each certified against the same laws. A program writes against the type and
   picks an implementation by name (`examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26];
-  Luciano, 2026-10-07). The ideal is over `Real`, where nothing computes (`06 §4`).
+  Luciano, 2026-10-07). The ideal is over `Real`, where nothing computes (`06 §4`, the ideal and
+  its realizations).
 - **Apply and reduce.** `f a`, and replacing the argument in the body until nothing is left to
   do. Executing by hand is this.
 
