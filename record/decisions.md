@@ -365,3 +365,20 @@ Source:     chat:182f2465:568
             chat:182f2465:575
 Kind:       principle. For P10, P4; P8 is met, the real case is exp without laws in real.lut
 Status:     current; not implemented. The transcript of 182f2465 is under ~/.claude-databaum/projects/.
+
+D-2026-10-07-f  The elements of the guide follow Luciano's scheme: Type with its bases, named by
+                alias; the formers of a bicartesian closed category; the dependent type, an
+                element of its own; Law; subtype by law as the theory, the way to define a type;
+                value as the model, the way to define a value; declaration; recursion as the
+                second way (R4); apply and reduce. A functor is a theory over U, not an element;
+                a lawless function is an alias; Function type folds into the theory, Value and
+                Definition into the model (amends the list of D-2026-10-07-e, not its rule).
+Author:     Luciano for the scheme, the dependent type, and functors as an alias of their object
+            map; the model for Law and Recursion as elements, for the alias of a lawless
+            function, and for folding Function type, Value and Definition
+Quote:      "SubType por Ley --> unica forma de definir nuevos nombres?"
+            "Otro tipo elemental que falta es el dependent type."
+Source:     chat:d3b76232:386
+            chat:d3b76232:445
+Kind:       principle. For P14 (proposed), P10, P12
+Status:     current. The transcript of d3b76232 is under ~/.claude-databaum/projects/.
