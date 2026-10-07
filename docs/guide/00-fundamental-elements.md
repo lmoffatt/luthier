@@ -277,8 +277,10 @@ each law on each, which is the same reduction as above, and writes the certifica
 number of cases. That the two doubles agree, `doubleA n == doubleB n`, follows from the laws and
 is a corollary, not a law (`05` R10, a law characterizes; a second implementation is not a law).
 Proving the laws for every `n` needs induction and is the proof layer's job. `examples/exp.lut`
-does the same with the exponential on the doubles: a Taylor sum and the environment's `exp`, two
-values of `Exp`, certified against `Homomorphic` and `AtZero`.
+does the same with the exponential: a Taylor sum and the environment's `exp`, two models of
+`Exp Float64 (float64Model tol)`, certified against `Homomorphic` and `AtZero`; and
+`examples/cauchy.lut` gives the exponential on the reals a body, `expC`, with the terms the
+precision asks.
 
 ## 9. Open
 
