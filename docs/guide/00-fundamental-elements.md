@@ -38,11 +38,14 @@ then what the law defines.
   Maybe Cell }`, is a dependent pair. A quantified law is a dependent function, and the subtype
   below is a dependent pair whose second component is erased from the term: the certificate lives
   outside the program, with its grade (`05 §7`; Luciano, 2026-10-07).
-- **Law.** A function into `Bool` with its parameters quantified, `Homomorphic R m f x y`, or a
-  conjunction `p & q`, of type `Law` (`04 §3`). It is written over the base of the type it will
-  define, and it is the one place where a base is used bare: a law is the formula of a theory,
-  not an object of it. `test` runs it, on drawn cases or on every case, and the certificate
-  records the grade (`05 §7`).
+- **Law.** A term of type `Bool`, or a function into `Bool` over the parameters it quantifies,
+  `Homomorphic R m f x y`, or a conjunction `p & q`, of type `Law` (`04 §3`). It is written over
+  the base of the type it will define, and it is the one place where a base is used bare: a law
+  is the formula of a theory, not an object of it. In version 0 a law is an executable predicate,
+  and `05` R8 (`==` exists only where equality is structural) is what keeps it so; propositional
+  equality and proofs are the layer after (section 4). `test` runs it, on drawn cases or on every
+  case, and that is evidence and not a proof: the certificate records the grade, from a point to
+  proved or assumed (`05 §7`).
 - **Subtype by law, the theory.** `{ x : T | p }`: the values of the base `T` that satisfy the
   law `p`. The way to define a type. Declared then defined, `Exp : R -> R`, `Exp := Homomorphic &
   AtZero`, it is Hilbert's implicit definition made a type: the type is the theory, the laws an
