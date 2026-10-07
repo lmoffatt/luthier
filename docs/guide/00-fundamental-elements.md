@@ -216,8 +216,10 @@ Not in version 0.
 
 ## 6. What stays outside the kernel
 
-- Numbers beyond `Int` and `Float64`, vectors and matrices: native types built from the kernel; numpy is
-  their representation.
+- Numbers beyond the primitives, vectors and matrices: native types built from the kernel; numpy
+  is their representation. The reals by construction (`examples/cauchy.lut`) are a library too, a
+  realization of `Real` beside `Float64` and not its definition (D-2026-10-07-c, `Real` stays the
+  ideal).
 - What the environment computes: values given by `extern`, never types (`05` R5). `extern
   provisional` is the escape hatch for working in a hurry, recorded as debt.
 - Probability, beliefs, optimization: libraries.
