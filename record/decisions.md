@@ -320,3 +320,17 @@ Kind:       principle. For P10, P1; P11 for the tolerance. The model as a parame
             generic definition of 06 §4 and the number model of 06 §7
 Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/, not
             ~/.claude/projects/: check_quotes needs --transcripts for it.
+
+D-2026-10-07-c  `Real` stays the ideal, declared and never run, and the reals by construction
+                (Cauchy sequences of rationals with a modulus, `examples/cauchy.lut`) are one more
+                realization of it beside `Float64`, not its definition. The alternative, defining
+                `Real` as `Cauchy`, would make `Float64 : Real` an embedding instead of a subset
+                and touch R9's free passage of a double where a real is expected and 06 §2.
+                With this realization the arrow of examples/exp.lut, from the ideal to the
+                doubles, can be run: `roundC (f (fromDouble x))`.
+Author:     Luciano, choosing between the two options the model stated
+Quote:      "a, por supuesto."
+            "Pasemoslo a examples por ahora."
+Source:     chat:182f2465:462
+Kind:       principle. For P10, P6 (nothing in the kernel changes), P8
+Status:     current. The transcript of 182f2465 is under ~/.claude-databaum/projects/.
