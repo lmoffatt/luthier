@@ -426,3 +426,44 @@ Source:     chat:893831f1:94
 Kind:       principle. For P4, P10; bears on D-2026-10-06-z, whose "statistical tests at a level"
             are open to restatement in this frame
 Status:     current. Not yet in 05 §7 nor in docs/rationale/09-extern-and-the-world.md.
+
+D-2026-10-08-b  The elements of the guide are framed by Luthier's view of computation: a timeless
+                part, the plan, equivalence of expressions, and a temporal part, the execution of
+                actions, tied both ways (the properties of actions and the strategies of their
+                composition are values of types under the timeless rules; the equivalences are
+                computed by executing actions), with knowledge between them read as Bayesian
+                (D-2026-10-08-a). The list is grouped in three: the plan, the execution (action and
+                reading, extern, world and pointer, execution and trace, realization), and what is
+                known (certificate). The elements of the guide are fixed before the notes that
+                argue them (09) are reviewed.
+Author:     Luciano for the view and for fixing the elements first; the model for the grouping,
+            the elements of the execution and of what is known, and the wording, to be reviewed
+Quote:      "con partes atemporales (basicamente equivalencia de expresiones) y partes temporales (ejecucion de acciones)"
+            "1-> las propiedades de las acciones y las estrategias de su composicion pueden ser vistos como elementos de tipos sujetos a las reglas atemporales de equivalencia."
+            "2-> el calculo de las reglas de equivalencia se hace a traves de la ejecucion de acciones."
+            "Lo importante para mi es fijar los elementos de Luthier de una vez"
+            "si agrega lo que te parezca cuando llegue lo reviso."
+Source:     chat:893831f1:131
+            chat:893831f1:131
+            chat:893831f1:131
+            chat:893831f1:152
+            chat:893831f1:152
+Kind:       principle. For P12, P4; the execution group takes the four bullets of 09 §11 plus
+            action and reading, ahead of the five decisions 09 leaves to Luciano
+Status:     current, in docs/guide/00-fundamental-elements.md at 8863420; to be reviewed by
+            Luciano.
+
+D-2026-10-08-c  The list of elements is written for one use: to state the interpreter of Luthier in
+                Luthier, with the executable kernel reduced to what a host must do (reduce terms
+                given as data, the operations of the primitive types, call an extern and read and
+                write a File); the parser, checker, tester and certificates would be Luthier
+                definitions over Program, and the first Luthier interpreter is certified against
+                the Python one.
+Author:     Luciano for the aim and the minimal kernel; the model for the list of three and the
+            certification against the Python host
+Quote:      "la idea es escribir la especificacion del interprete / compilador lo que sea de Luthier en luthier."
+            "Tengo la idea de que si reducimos el nucleo ejecutable de luthier al minimo  es posible ejecutar en luthier."
+Source:     chat:893831f1:158
+Kind:       objective. For P7, P10; moves section 5 of the guide, the program as data, from a
+            later layer to the aim the list is written for (still not in version 0)
+Status:     current, in docs/guide/00-fundamental-elements.md at 8863420.
