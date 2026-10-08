@@ -467,3 +467,15 @@ Source:     chat:893831f1:158
 Kind:       objective. For P7, P10; moves section 5 of the guide, the program as data, from a
             later layer to the aim the list is written for (still not in version 0)
 Status:     current, in docs/guide/00-fundamental-elements.md at 8863420.
+
+D-2026-10-09-a  The bibliography holds pointers, not copies: no PDF or book enters git, and each
+                source is linked by its DOI (the publisher's or the author's page where it has
+                none). The copies read stay in record/bibliography/pdf/, outside git, each pinned
+                by its SHA-256 in record/bibliography/README.md.
+Author:     Luciano; the model for keeping the hash of the copy read
+Quote:      "si no commiteemos pdfs ni libros. Tomemos el doi como link."
+            "como puntero quiero decir"
+Source:     chat:b377c2a0
+Kind:       rule. For P2 (the hash says which copy was read); P7 (each repository is
+            self-contained) gives way for sources, which are pointed at as a File is in 09 §5
+Status:     current, in record/bibliography/ and .gitignore.
