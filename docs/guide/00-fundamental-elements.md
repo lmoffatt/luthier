@@ -4,9 +4,35 @@ Rewritten on 2026-10-04 from the Spanish draft of 2026-09-29 (`00-elementos-fund
 in the history), against the specification of `04-kernel.md` and `05-static-semantics.md`. This
 document is the reading guide: the few ideas a program is made of, in the order to think them,
 and a program executed by hand. The rules are in 04 and 05; where this text and those differ,
-they hold. Ideas that come from the voice notes cite the note (`record/audios/`).
+they hold. Ideas that come from the voice notes cite the note (`record/audios/`). On 2026-10-08 the
+list was framed by Luthier's view of computation and grouped in three: the plan, the execution,
+and what is known.
 
 ## The elements, in the order to think them
+
+Luthier sees a computation in two parts (Luciano, 2026-10-07 and 2026-10-08, chat:182f2465:750,
+chat:893831f1:131). The *plan* is
+timeless: definitions, laws, and the equivalence of expressions; nothing in it happens, so nothing
+in it has to be undone. The *execution* is temporal: actions on components and readings of them,
+in an order, leaving a trace that only grows and cannot go back. The two are tied both ways. The
+properties of actions, and the strategies by which actions compose, are values of types, subject
+to the timeless rules of equivalence like any other value. And every equivalence is established by
+executing actions: reducing a term, running a test, reading a file. What ties them is knowledge.
+The program holds propositions, that a function satisfies its laws or that a file was written, and
+updates them by what it executes. The reading is Bayesian: an observer updating what it knows of
+the world by what it observes, in its logical limit, probabilities 0 and 1, while the laws are
+exact or assumed, and with probabilities once the evidence is sampled (D-2026-10-08-a).
+
+The list is written for one use: to state the interpreter of Luthier in Luthier (Luciano,
+2026-10-08, chat:893831f1:158). The rules of reduction, the checker and the tester would be
+definitions of the plan over a type `Program`, and a small host would run them; the host is then
+a realization of those rules, certified against them like any other model (*Realization*, below).
+So each element is one that the interpreter written in Luthier has to state, and *The executable
+kernel*, at the end of this section, is what the host has to do. *Proposed*: the grouping, the
+elements of the execution and of what is known, and the kernel; the timeless elements are those of
+the specification.
+
+### The plan
 
 A type is a concept. It is declared, then defined, and only then inhabited: a value is written at a
 type that is defined, never at a bare base (P14, proposed). A type has two origins, construction
@@ -81,25 +107,103 @@ then what the law defines.
   one. Neither is a subtype of something earlier nor an alias, which would expand without end;
   its law, freeness, quantifies over every type and has no generator (`05 §7`), so the recursion
   itself is taken as the definition: an initial algebra.
-- **Apply and reduce.** `f a`, and replacing the argument in the body until a datum, a procedure
-  or a hole is reached (*Declared, defined, computable*, below). Executing by hand is this.
+- **Apply and reduce.** `f a`, and the rule that replaces the argument in the body,
+  `(\ x { t }) a ≡ t[a/x]`, with the unfolding of a name to its body and the choice of a `match`
+  branch (section 2). As a rule it is an equivalence of terms and belongs to the plan; carrying it
+  out is an action of the evaluator, the first element of the execution. A term is reduced until
+  a datum, a procedure or a hole is reached (*Declared, defined, computable*, below). Executing by
+  hand is carrying it out with a pencil.
 - **Program.** A finite set of acts (`05 §2`), read as what it states and what it supplies: the
   theories, built over one another as `Exp` is over `NumberModel`; the models given for them, in
   this file or in the files that fill its holes (`03 §3`); and the compositions of models by
   application, `realize f x = round (f x)`. What a program computes is a chain of applications of
   models, and its certificate is the chain of theirs, graded by the weakest link (`05 §7`). It
   never checks what a type already certifies (*What types are for*, below). Its text as a value
-  of a type `Program` is a later layer (section 5) (Luciano, 2026-10-07, from the closing
-  hierarchy of GPT's reading in `record/IA/`).
+  of a type `Program` is what lets the interpreter be written in Luthier, and is not in version 0
+  (section 5) (Luciano, 2026-10-07, from the closing hierarchy of GPT's reading in `record/IA/`).
 
 `U` is the type of types; it appears when a function returns a type. Against C++: statements
 are definitions, expressions are values (functions included), and types are types, plus the
-dependent ones and the subtype with laws. There are no mutable variables, sequence, pointers or
-inheritance. Against categories: types are objects, functions arrows; product, sum and exponential
+dependent ones and the subtype with laws. In the plan there are no mutable variables, sequence,
+pointers or inheritance; the execution has pointers and updates, as values externs give and as
+realizations (below), and still no inheritance. Against categories: types are objects, functions arrows; product, sum and exponential
 give the non-dependent fragment the structure of a bicartesian closed category, and the dependent
 forms extend it to what dependent types need, a locally cartesian closed one; a theory is a
 subobject of a product of exponentials cut out by its laws, a model a global element of it, `data`
 an initial algebra, and a functor a model of a theory over `U`.
+
+### The execution
+
+What happens when a program runs, in the order to think it. Each element is stated in the plan, as
+a type with its laws, and occurs in the execution, as an entry of the trace.
+
+- **Action and reading.** An operation of the execution: a step of reduction, a call to an
+  extern, a write to a file. An action has a law that says what it changes. A reading is an
+  action whose law says it leaves the world as it was, so it changes only what the program knows;
+  that law belongs to the theory of the thing read, tested or assumed, since a `pop` from a queue
+  reads and acts. An action can leave the consequence unchanged and still cost, as a `sync` does.
+  The evaluator's actions all leave the consequence unchanged, because the rules of reduction fix
+  the result whatever the order: that is purity, and the reason the order of evaluation is free.
+  As values, actions are terms of the plan and compose by its rules, as Haskell's `IO a` is a
+  value whose composition obeys laws while nothing runs; as occurrences, they are dated entries of
+  the trace (chat:182f2465:739).
+- **Extern.** A body the environment holds: `x : T := extern "python:math.exp"`. A model given
+  from outside, at a defined type and never a type (`05` R5), and opaque: a procedure one applies
+  and does not read. What its type claims becomes obligations tested when the value crosses;
+  provisional when nobody described its type, which is debt. It is how Luthier verifies and
+  orchestrates other programs (chat:182f2465:640).
+- **World and pointer.** A type that exists and that nothing in the program constructs, like
+  `Real`, with no `==`: its values are pointers that externs give, threaded through the actions
+  so that their order is in the graph of definitions. There are many worlds, one per pointer, and
+  no order between them. What is known of a pointer is a theory, its actions and readings and the
+  laws that relate them, tested by running on the world, with the laws that cannot be tested
+  marked assumed. `File` is the first: the interpreter reads the program from one, and the hash
+  pins what was read (chat:182f2465:640, 650, 657).
+- **Execution and trace.** `run`: fill the holes of the entry with what the world gives, reduce,
+  and leave a trace, the partial order of the actions with their results and their costs. Two
+  traces compare in two ways. By consequence, an equivalence: no observation the theories name
+  distinguishes them. By cost, time and memory and the resources used, a partial order measured
+  with its variance; where the world has no hash it has a class, a GPU model with its driver, and
+  the laws of the class are statistics over its instances (chat:182f2465:674, 684, 691).
+- **Realization.** The ideal and what runs it, related by a law and a cost: a real realized by a
+  double within a tolerance; a pure value realized by an update in place when nobody holds the old
+  one; a value destroyed at its last use, which the graph knows. Mutation and destruction are
+  here, as optimizations that keep the consequence. The host that runs Luthier is one: a
+  realization of the rules of reduction stated in Luthier, checked by running both on the same
+  programs. Between two realizations of the same thing, the measured costs choose
+  (chat:182f2465:667).
+
+### What is known
+
+- **Certificate.** A proposition with its evidence: a law applied to particular values, by a
+  mode, with the grade, the generators, the seed, and the hash under which it holds (`05 §7`).
+  Propositions are of three kinds. A law is timeless: its truth does not change, only what is
+  known of it. An entry of the trace is a fact, a file was written, and since the trace only grows
+  it is not revised. A statement about the world now, the file contains this, ages: it holds until
+  an action of someone else changes it, unless a law assumed says nobody else writes there. The
+  grades are degrees of evidence, and all are produced by executions, a proof checker's included.
+  Every chain of evidence ends in laws assumed, the base of trust: the processor conforms to IEEE
+  754, the host realizes the rules of reduction. Read as knowledge, a sampled certificate updates a
+  prior that the law holds, and the prior is a parameter (P11, every criterion is a parameter,
+  never a constant in the code). That reading is proposed; `05 §7` does not state it yet
+  (D-2026-10-08-a).
+
+### The executable kernel
+
+*Proposed.* If the interpreter is written in Luthier, the host has to do three things.
+
+- Reduce: substitution, the unfolding of names, and the choice of a `match` branch, on terms given
+  as data of type `Term`.
+- The operations of the primitive types, `Int`, `Rational`, `Float64` and `String`. They are
+  externs for speed; `Int` and `Rational` could be `data` (section 3).
+- Call an extern, and read and write a `File`.
+
+The parser, the checker, the tester, the writer of certificates and the comparison of traces would
+be Luthier definitions over `Program`. The tester draws its cases from a source of randomness,
+which is an extern (D-2026-10-06-z). Today the host is the Python of `src/luthier` and does all of
+it; the aim is to move each piece into Luthier and keep the host to this list. The first Luthier
+interpreter is then certified against the Python one, by running both on the same programs, and
+the agreement that a value of `Program` is a program is the one thing taken on trust (section 5).
 
 ## What types are for: a check is made once
 
@@ -262,7 +366,8 @@ precisions.
 
 ## 5. The program as data
 
-A later layer: `Program` and `Term` as data types defined in Luthier, so that checking, combining
+The aim the list of elements is written for (Luciano, 2026-10-08, chat:893831f1:158): `Program`
+and `Term` as data types defined in Luthier, so that checking, combining
 programs and evaluating are ordinary functions on that data, as in Lisp's metacircular evaluator.
 The only primitive would be the bootstrap agreement, the implementation accepting a value of
 `Program` as a program. "Code is the first element" (voice note 2026-05-29 14.36.03 [02:38]) and
@@ -278,8 +383,10 @@ Not in version 0.
 - What the environment computes: values given by `extern`, never types (`05` R5). `extern
   provisional` is the escape hatch for working in a hurry, recorded as debt.
 - Probability, beliefs, optimization: libraries.
-- Pointers, mutation, sequence, classes, inheritance, control flow: they do not exist. `if` is a
-  `match` on `Bool`, a loop is recursion, a sequence is a dependency.
+- Pointers, mutation, sequence, classes, inheritance, control flow: they are not term formers.
+  `if` is a `match` on `Bool`, a loop is recursion, a sequence is a dependency. Pointers are values
+  externs give (*World and pointer*), mutation and destruction are realizations (*Realization*),
+  and inheritance does not exist.
 
 ## 7. Where each piece comes from
 
@@ -287,6 +394,7 @@ Not in version 0.
 - From Lisp, the program as data (section 5).
 - From C++, the separation of declaration and definition, here the hole; and templates, here
   functions over `U`.
+- From Haskell, actions as values that compose by laws while nothing runs (`IO`).
 - From Martin-Löf type theory, the kernel: dependent functions and pairs, sums, empty and unit
   types, inductive types, the universe.
 - From Python, a surface that reads aloud and lets a type be inferred.
@@ -342,5 +450,7 @@ precision asks.
 - The proof layer: a recursor that guarantees termination, propositional equality, and a verdict
   "proved" beside "sampled".
 - A hierarchy of universes (`U : U` is inconsistent; it bites only when there are proofs).
-- `Program` and `Term` as data.
+- `Program` and `Term` as data, and with them the interpreter written in Luthier.
+- Which operations of the primitive types stay in the host (*The executable kernel*).
+- The reading of the grades of `05 §7` as degrees of knowledge, and the priors it needs.
 - Whether a definition carries a text field, so a program reads as a document.
