@@ -409,3 +409,20 @@ Quote:      "Program como la composicion de Theorias y Modelos suena una buena i
 Source:     chat:d3b76232:593
 Kind:       principle. For P14 (proposed), P12
 Status:     current. Transcript under ~/.claude-databaum/projects/.
+
+D-2026-10-08-a  The program's relation with the world, and its certificates, are read in a Bayesian
+                frame: the program is an observer that updates its knowledge of the world by what
+                it reads. With exact laws and assumed hypotheses the frame works in its logical
+                limit, probabilities 0 and 1 (Cox's theorem, as Jaynes uses it, makes graded
+                knowledge probability). Probabilities enter with the classes of 09 §9 and with the
+                grade sampled, whose n cases from a declared generator are evidence on a law.
+Author:     Luciano; the model for the logical-limit reading and the wording
+Quote:      "pero una vez que ponemos probabilidades si, se vuelve bayesiano."
+            "Bayes es observador <->Universo actualizando su conocimiento de acuerdo a lo que observa."
+            "Bueno, si tomamos el grado sampled de los certificados estamos en pleno universo bayesiano."
+Source:     chat:893831f1:94
+            chat:893831f1:94
+            chat:893831f1:102
+Kind:       principle. For P4, P10; bears on D-2026-10-06-z, whose "statistical tests at a level"
+            are open to restatement in this frame
+Status:     current. Not yet in 05 §7 nor in docs/rationale/09-extern-and-the-world.md.
