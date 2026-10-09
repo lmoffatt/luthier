@@ -70,6 +70,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--window-chars", type=int, default=60000, help="largest block of rows sent in one call")
     p.add_argument("--max-output-tokens", type=int, default=0,
                    help="passed to claude as CLAUDE_CODE_MAX_OUTPUT_TOKENS (0: the CLI's default)")
+    p.add_argument("--max-thinking-tokens", type=int, default=0,
+                   help="passed to claude as MAX_THINKING_TOKENS, a cap on the model's reasoning (0: the CLI's default)")
     p.add_argument("--quote-chars", type=int, default=200, help="each row's quote is cut to this length in the prompt")
     p.add_argument("--max-calls", type=int, default=0, help="stop after this many calls (0: no limit)")
     p.add_argument("--retries", type=int, default=2, help="asks again when an answer fails the checks")
@@ -103,16 +105,21 @@ class OutputLimit(RuntimeError):
     """The CLI cut the answer at its output token limit; it says so in plain text, exit 0."""
 
 
-def call(cli: str, prompt_text: str, model: str, effort: str, timeout: float, max_output_tokens: int = 0) -> str:
+def call(cli: str, prompt_text: str, model: str, effort: str, timeout: float, max_output_tokens: int = 0,
+         max_thinking_tokens: int = 0) -> str:
     if cli == "claude":
         cmd = ["claude", "-p", "--model", model, "--effort", effort, "--output-format", "text",
                "--no-session-persistence", "--tools", ""]
     else:
         cmd = ["codex", "exec", "--skip-git-repo-check", "--color", "never", "--sandbox", "read-only", "-m", model, "-"]
     env = None
-    if max_output_tokens:
+    if max_output_tokens or max_thinking_tokens:
         import os
-        env = {**os.environ, "CLAUDE_CODE_MAX_OUTPUT_TOKENS": str(max_output_tokens)}
+        env = dict(os.environ)
+        if max_output_tokens:
+            env["CLAUDE_CODE_MAX_OUTPUT_TOKENS"] = str(max_output_tokens)
+        if max_thinking_tokens:
+            env["MAX_THINKING_TOKENS"] = str(max_thinking_tokens)
     proc = subprocess.run(cmd, input=prompt_text, capture_output=True, text=True, timeout=timeout, env=env)
     text = (proc.stdout or "") + (proc.stderr or "")
     if TOKEN_LIMIT_MARK in text and "{" not in proc.stdout:
@@ -385,6 +392,11 @@ def main(argv: list[str]) -> int:
 
     rows = sorted(load_timeline(args.timeline), key=lambda r: (r.get("time_utc", "") or "~", r["id"]))
     by_id = {r["id"]: r for r in rows}
+    if len(by_id) != len(rows):
+        dup = [i for i, n in Counter(r["id"] for r in rows).items() if n > 1]
+        print(f"ERROR: the timeline repeats {len(dup)} row ids ({', '.join(dup[:3])}); regenerate it with ideas_timeline.py",
+              file=sys.stderr)
+        return 2
     if state_path.exists() and not args.force:
         state = json.loads(state_path.read_text(encoding="utf-8"))
         if state["prompt_sha256"] != prompt_sha or state["model"] != model:
@@ -398,6 +410,7 @@ def main(argv: list[str]) -> int:
             timeline_rel = str(args.timeline)
         state = {"version": VERSION, "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
                  "effort": args.effort, "cli_version": cli_version(cli) if cli else "", "window_chars": args.window_chars,
+                 "max_thinking_tokens": args.max_thinking_tokens,
                  "quote_chars": args.quote_chars, "timeline_path": timeline_rel,
                  "lineages": {}, "assign": {}, "unplaced": {}, "calls": []}
     if args.report_only:
@@ -432,7 +445,7 @@ def main(argv: list[str]) -> int:
         for attempt in range(args.retries + 1):
             t0 = time.time()
             try:
-                raw = call(cli, prompt_text, model, args.effort, args.timeout, args.max_output_tokens)
+                raw = call(cli, prompt_text, model, args.effort, args.timeout, args.max_output_tokens, args.max_thinking_tokens)
             except OutputLimit as exc:
                 attempts.append({"error": f"output limit: {exc}", "seconds": round(time.time() - t0)})
                 split = len(win) > 1

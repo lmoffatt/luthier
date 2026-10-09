@@ -202,7 +202,8 @@ def build(input_dir: Path, prompts: tuple[str, ...], tz: ZoneInfo) -> tuple[list
             elif extractor == "day":
                 key = front.get("date", path.name[:10])
             elif extractor == "written":
-                key = front.get("created", path.name)[:10]
+                # date and the note's own name: two copies of a note on one day are two sources
+                key = path.name.split("_extract_ideas_note_v1")[0]
             else:
                 ident = (front.get("key") or path.name).split(":")[-1]
                 key = ident[:8] if "-" in ident else ident  # a uuid is cut to its first block; a date id stays whole
@@ -220,6 +221,13 @@ def build(input_dir: Path, prompts: tuple[str, ...], tz: ZoneInfo) -> tuple[list
             r["also_by_day"] = d in day_dates
         elif r["extractor"] == "day":
             r["also_by_note"] = d in note_dates
+    seen: dict[str, int] = {}
+    for r in rows:  # an id repeated inside one extraction (a slug used twice) gets a suffix
+        n = seen.get(r["id"], 0)
+        seen[r["id"]] = n + 1
+        if n:
+            problems.append(f"{r['extraction']}: id {r['id']} repeated, suffixed -{n + 1}")
+            r["id"] = f"{r['id']}-{n + 1}"
     rows.sort(key=lambda r: (r["time"] or datetime.max.replace(tzinfo=timezone.utc), r["extraction"], r["slug"]))
     for r in rows:
         if r["time"]:

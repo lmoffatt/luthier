@@ -232,3 +232,30 @@ def test_ledger_history_reads_the_git_log(tmp_path):
     assert [h["subject"] for h in hist] == ["first", "P3 status dated"]
     assert [c[1] for c in hist[0]["changes"]] == ["added", "added", "added"]
     assert hist[1]["changes"] == [("P3", "status changed", "proposed 2026-10-07")]
+
+
+
+WRITTEN = """---
+note: {note}
+created: 2025-06-17
+generated_by: extract_ideas_note_v1
+---
+
+## Ideas
+
+### energetic-couplings-as-types
+- **Who**: Luciano
+- **What**: x
+- **Quote**: "y"
+"""
+
+
+def test_two_copies_of_a_written_note_on_one_day_get_distinct_ids(tmp_path):
+    d = tmp_path / "ideas"
+    d.mkdir()
+    for name in ("2025-06-17_hottification-program", "2025-06-17_program-hott-dsl"):
+        (d / f"{name}_extract_ideas_note_v1_claude-code_opus_ideas.md").write_text(WRITTEN.format(note=name), encoding="utf-8")
+    r = subprocess.run([sys.executable, str(TIMELINE), str(d)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    ids = [json.loads(l)["id"] for l in (d / "timeline.jsonl").read_text().splitlines()]
+    assert len(ids) == len(set(ids)) == 2

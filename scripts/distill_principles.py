@@ -86,6 +86,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--timeout", type=float, default=1800.0)
     p.add_argument("--max-output-tokens", type=int, default=0,
                    help="passed to claude as CLAUDE_CODE_MAX_OUTPUT_TOKENS (0: the CLI's default)")
+    p.add_argument("--max-thinking-tokens", type=int, default=0,
+                   help="passed to claude as MAX_THINKING_TOKENS, a cap on the model's reasoning (0: the CLI's default)")
     p.add_argument("--date", default=date.today().isoformat())
     p.add_argument("--force", action="store_true", help="redo a run of this date that exists")
     p.add_argument("--dry-run", action="store_true", help="assemble and measure the input; call no model")
@@ -411,7 +413,7 @@ def main(argv: list[str]) -> int:
             return str(p)
     run = {"version": VERSION, "date": args.date, "prompt": PROMPT_ID, "prompt_sha256": sha256_bytes(args.prompt.read_bytes()),
            "model": model, "agent": agent, "effort": args.effort, "cli_version": link_ideas.cli_version(cli),
-           "max_candidates": args.max_candidates, "quotes_per_lineage": args.quotes_per_lineage, "quote_chars": args.quote_chars,
+           "max_candidates": args.max_candidates, "max_thinking_tokens": args.max_thinking_tokens, "quotes_per_lineage": args.quotes_per_lineage, "quote_chars": args.quote_chars,
            "inputs": {rel(p): {"sha256": sha256_bytes(p.read_bytes())} for k, p in paths.items() if k != "prompt"},
            "ledger_sha256": sha256_bytes(ledger_text.encode()), "input_sha256": sha256_bytes(prompt_text.encode()),
            "lineage_labels": llabels, "quote_labels": qlabels,
@@ -420,7 +422,7 @@ def main(argv: list[str]) -> int:
     for attempt in range(args.retries + 1):
         t0 = time.time()
         try:
-            raw = link_ideas.call(cli, text, model, args.effort, args.timeout, args.max_output_tokens)
+            raw = link_ideas.call(cli, text, model, args.effort, args.timeout, args.max_output_tokens, args.max_thinking_tokens)
         except link_ideas.OutputLimit as exc:
             run["attempts"].append({"error": f"output limit: {exc}", "seconds": round(time.time() - t0)})
             print("the answer hit the output token limit; raise it with --max-output-tokens", file=sys.stderr)

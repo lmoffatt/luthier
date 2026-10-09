@@ -20,7 +20,7 @@ if "--version" in sys.argv:
 prompt = sys.stdin.read()
 log = Path(os.environ["STUB_LOG"])
 with log.open("a", encoding="utf-8") as f:
-    f.write(json.dumps({"argv": sys.argv[1:], "prompt": prompt}) + "\n")
+    f.write(json.dumps({"argv": sys.argv[1:], "prompt": prompt, "thinking": os.environ.get("MAX_THINKING_TOKENS", "")}) + "\n")
 bad_marker = Path(os.environ["STUB_LOG"] + ".bad")
 bad = os.environ.get("STUB_BAD_ONCE") and not bad_marker.exists()
 if bad:
@@ -257,3 +257,13 @@ def test_link_splits_a_window_whose_answer_hits_the_output_limit(tmp_path):
     splits = [c for c in state["calls"] if c["split"]]
     assert splits and all("output limit" in c["attempts"][0]["error"] for c in splits)
     assert all(c["rows"] <= 2 for c in state["calls"] if c["accepted"])
+
+
+def test_link_refuses_a_timeline_with_repeated_ids_and_passes_the_thinking_cap(tmp_path):
+    rows = rows_fixture()
+    tl, env = setup(tmp_path, rows + [dict(rows[1])])
+    r = link(tmp_path, env)
+    assert r.returncode == 2 and "repeats 1 row ids" in r.stderr and calls(tmp_path) == []
+    tl.write_text("".join(json.dumps(x) + "\n" for x in rows), encoding="utf-8")
+    r = link(tmp_path, env, "--max-thinking-tokens", "2000")
+    assert r.returncode == 0 and {c["thinking"] for c in calls(tmp_path)} == {"2000"}
