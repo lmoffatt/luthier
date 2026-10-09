@@ -85,3 +85,7 @@ committed for Luciano. The night stops here: the review, and the scoring after i
 Each step, when done, gets a line: step, commit, what came out, anything that went wrong.
 - A0 done: transcripts pinned (both accounts, one new file); the units were already committed by Luciano at 656a754 (337 units, 100 with a commit, 29 reversals, 22 withheld). He is marking principle_dates.md: not touched.
 - A3 done, e3ecacd: 100 rules (58 of the specification, 42 decisions), 87 traced to at least one idea. A lineage named with a private word by the linking model was scrubbed (170b25e; scripts/scrub_private.py, 64d0a5f). Part B prepared (9ea1806). A1 and A2 running; their first calls lost the connection and were retried.
+- A1 done, 57958e3: 725 ideas in 33 themes; 226 seedlings, 486 latent seeds, 13 open tensions.
+- A2 done, b2bdc62 and 4b88aab: 10 candidates found blind; against P1 to P14, 9 new, 1 extends P10 (the mathematical object as invariant).
+- A4 done, eb7984e: record/synthesis/2026-10-09_synthesis.md (557 lines, summary first). Part A complete.
+- B1 running: lineages of the 1,020 rows before 2026-09-30 with link_ideas_v2 (the prompt that does not describe Luthier; v1 states one of the candidates as a fact), in record/validation/cutoff.
