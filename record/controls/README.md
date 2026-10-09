@@ -133,3 +133,38 @@ Read, decided before running, as numbers and without thresholds (D-2026-10-09-d)
 hits of naive against hits of find v2 (as is and redacted) and against memory, and which reference
 items naive hits that memory did not; whether any naive candidate states a process item (Python
 G1, G3 to G7; Haskell H4 to H7).
+
+### Results of the naive run, 2026-10-10
+
+| run | Python: hits | Python: leaks | Haskell: hits | Haskell: leaks |
+|---|---|---|---|---|
+| memory, no corpus (`--recall`) | 4/7 | 0 | 5/7 | 0 |
+| find v2, as is | 4/7 | 0 | 4/7 | 0 |
+| find v2, "redacted" (names left in the prompt's first line) | 3/7 | 0 | 4/7 | 0 |
+| naive, as is | 6/7 | 0 | 5/7 | 0 |
+| naive, redacted (names out of the first line too) | 5/7 | 0 | 4/7 | 1 |
+
+Each naive run was one call, accepted at the first attempt, in about four minutes.
+
+Read (the model's, for Luciano to weigh):
+
+- The naive run hits more on both controls and covers more of the reference: on Python 13 items
+  as is and 13 redacted, against 7 for find v2; on Haskell 7 against 3.
+- It finds principles about the process, which no earlier run found: on Python G6 and G7 (good
+  enough, cut corners) and A4 (an evolutionary path with the users) as is, and also G1 (borrow
+  ideas) and G4 (don't fret about performance) redacted; on Haskell H5 (a committee language) and
+  H7 (stability against research) in both runs. The blind spot of find v1 and v2 came from their
+  prompt (infectability, "a fact or a single decision is not a principle"), not from the corpora.
+- The one leak (Haskell redacted, C5: algebraic data types and pattern matching are fundamental)
+  is a design fact of Haskell that the reference does not list; the judge set it on F12 (`data`
+  as initial algebras). It brings nothing of Luthier's.
+- The naive candidates mix rules and design facts (Python: dynamic typing, indentation), what
+  find v2 was written to avoid; the judge counts them as hits when the reference states them.
+- On Luthier (`record/distillation/naive/`), 8 of the 10 naive candidates state a candidate of the
+  pipeline, which covers 7 of the pipeline's 10. It misses S3 (the certified subtype from a
+  predicate), S4 (the mathematical object as the type's invariant, which extends P10) and S7 (to
+  express the invariances of the disciplines). It adds certificates by hash with a grade
+  (C3), the forgetful functor that defines the language (C8, a candidate of the cutoff run of
+  2026-10-09), groups of functions defined by coupled laws (C9), and Luthier as an orchestrator
+  of other languages (C10). None states P1 to P13: the question asks for the principles of the
+  language, and P1 to P13 are about how it is made.
