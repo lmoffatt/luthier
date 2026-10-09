@@ -56,8 +56,12 @@ DEFAULT_CODEX_MODEL = "gpt-5"
 DEFAULT_EFFORT = "low"
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 PLACEHOLDER = "<<<INPUT>>>"
-VERDICTS = ("covered", "extends", "candidate", "not_principle")
+VERDICTS = ("covered", "extends", "candidate", "considered", "not_principle")
 AXES = ("aesthetic", "ethical", "emotive", "conceptual")
+CONSUMERS = ("reader", "computation")
+HARMED = ("reader", "computation", "writer")
+CONSUMER_NAMES = {"reader": "the person who uses and reads it", "computation": "the computation",
+                  "writer": "the model that writes it"}
 SCOPES = ("language", "method")
 ELLIPSIS_RE = re.compile(r"\s*(?:\.\.\.|…|\[\.\.\.\]|\[…\])\s*")
 
@@ -117,8 +121,7 @@ def pick_quotes(members: list[dict], n: int) -> list[dict]:
 
 
 def lineage_block(d: dict, n_quotes: int, quote_chars: int, label: str, qlabels: dict) -> str:
-    head = (f"scope: {d['scope']} | origin: {d['origin']} | first seen: {d['first'].get('time_local', '')[:10]} | "
-            f"rows: {d['rows']} | witnesses: {d['witnesses']} | days: {d['days']} | last: {d['last']}")
+    head = f"scope: {d['scope']} | origin: {d['origin']} | first seen: {d['first'].get('time_local', '')[:10]}"
     if d["adopted_by_luciano"]:
         head += f" | taken up by Luciano: {d['adopted_by_luciano'].get('time_local', '')[:10]}"
     lines = [f"### {label} {d['id']}", head, f"statement: {d['statement']}", "quotes:"]
@@ -192,6 +195,8 @@ def expand(ans: dict, llabels: dict[str, str], qlabels: dict[str, str]) -> tuple
         c["quote_row"] = qlabels.get(q, f"?{q}")
         c["quote_label"] = q
         c["quote"] = c.pop("quote_text", "")
+        if isinstance(c.get("beats"), dict):
+            c["beats"] = {**c["beats"], "lineage": lid(c["beats"].get("lineage"))}
         cands.append(c)
     against = []
     for a in ans.get("against", []) or []:
@@ -226,6 +231,7 @@ def check_answer(ans: dict, der: dict, principles: dict, decisions: dict, max_ca
             errors.append(f"{lid}: {v} names principle {c.get('principle')!r}, which is not in force")
         if v == "candidate" and c.get("candidate") not in cand_ids:
             errors.append(f"{lid}: candidate {c.get('candidate')!r} is not among the candidates")
+    verdict_of = {c.get("lineage"): c.get("verdict") for c in ans.get("classification", []) or []}
     missing = [l for l in der if seen[l] == 0]
     twice = [l for l in der if seen[l] > 1]
     if missing:
@@ -255,10 +261,30 @@ def check_answer(ans: dict, der: dict, principles: dict, decisions: dict, max_ca
         for field in ("statement", "assumption"):
             if not str(c.get(field, "")).strip():
                 errors.append(f"{cid}: empty {field}")
-        inf = c.get("infectability") or {}
-        axes = inf.get("axes", []) if isinstance(inf, dict) else []
-        if not axes or any(a not in AXES for a in axes) or not str(inf.get("why", "")).strip():
-            errors.append(f"{cid}: infectability needs axes among {AXES} and a why")
+        st = c.get("strongest") or {}
+        if not isinstance(st, dict) or st.get("consumer") not in CONSUMERS or st.get("axis") not in AXES \
+                or not str(st.get("why", "")).strip():
+            errors.append(f"{cid}: strongest needs a consumer among {CONSUMERS}, an axis among {AXES} and a why")
+        also = c.get("also") or []
+        if not isinstance(also, list) or len(also) > 2:
+            errors.append(f"{cid}: also is a list of at most 2 pairs")
+        for e in also if isinstance(also, list) else []:
+            if not isinstance(e, dict) or e.get("consumer") not in CONSUMERS or e.get("axis") not in AXES \
+                    or not str(e.get("why", "")).strip():
+                errors.append(f"{cid}: each pair of also needs a consumer, an axis and a why")
+        harms = c.get("harms")
+        if not isinstance(harms, list):
+            errors.append(f"{cid}: harms must be a list, empty if you looked and found none")
+        for e in harms if isinstance(harms, list) else []:
+            if not isinstance(e, dict) or e.get("consumer") not in HARMED or not str(e.get("how", "")).strip():
+                errors.append(f"{cid}: each harm needs a consumer among {HARMED} and how")
+        b = c.get("beats") or {}
+        bl = b.get("lineage") if isinstance(b, dict) else None
+        if bl not in der or bl in lins or verdict_of.get(bl) != "considered" or not str(b.get("why", "")).strip():
+            errors.append(f"{cid}: beats must name a lineage classified considered, outside the candidate, with a why")
+    for c in cands[:-1]:
+        if not str(c.get("above_next", "")).strip():
+            errors.append(f"{c.get('id')}: above_next is missing; every candidate but the last says why it ranks above the next")
     for a in ans.get("against", []) or []:
         if a.get("principle") not in principles:
             errors.append(f"against: {a.get('principle')!r} is not in force")
@@ -266,6 +292,29 @@ def check_answer(ans: dict, der: dict, principles: dict, decisions: dict, max_ca
             if e not in der and e not in decisions:
                 errors.append(f"against {a.get('principle')}: evidence {e!r} is neither a lineage nor a decision")
     return errors
+
+
+def run_warnings(ans: dict, template: str) -> list[str]:
+    """Signs the rubric did not discriminate; printed and shown, not grounds for rejection."""
+    out = []
+    cands = ans.get("candidates", [])
+    if len(cands) > 2:
+        if len({c["strongest"]["axis"] for c in cands}) == 1:
+            out.append(f"every candidate's strongest axis is {cands[0]['strongest']['axis']}.")
+        if len({c["strongest"]["consumer"] for c in cands}) == 1:
+            out.append(f"every candidate's strongest consumer is {cands[0]['strongest']['consumer']}.")
+        if all(not c.get("harms") for c in cands):
+            out.append("no candidate names a harm.")
+    table = " ".join(l for l in template.splitlines() if l.startswith("| "))
+    tw = words(table).split()
+    grams = {" ".join(tw[k:k + 8]) for k in range(len(tw) - 7)}
+    for c in cands:
+        for e in [c["strongest"], *c.get("also", [])]:
+            ww = words(e["why"]).split()
+            if any(" ".join(ww[k:k + 8]) in grams for k in range(len(ww) - 7)):
+                out.append(f"{c['id']}: a why repeats eight words of the table.")
+                break
+    return out
 
 
 # --- the report -----------------------------------------------------------------------------------
@@ -294,10 +343,12 @@ def write_report(md: Path, run: dict, ans: dict, der: dict, principles: dict) ->
          f"Written by `scripts/distill_principles.py` ({VERSION}) for Luciano to mark. Prompt `{PROMPT_ID}` (sha256",
          f"{run['prompt_sha256'][:12]}), model {run['model']} at effort {run['effort']} via {run['agent']} ({run['cli_version']}).",
          "Inputs, each by sha256: " + "; ".join(f"`{k}` {v['sha256'][:12]}" for k, v in run["inputs"].items()) + ".",
-         "The candidates are the model's drafts, chosen and ordered by infectability, Luciano's criterion for finding",
-         "principles; whether one stays is judged later by P13, from the decisions it guides once applied (D-2026-10-09-b).",
-         "Whose words each quote is, its source and how often its lineages recur were filled in from the rows by the",
-         "script. Under each candidate, a Mark: line for ok, no, or a correction.", "",
+         "The candidates are the model's drafts, chosen and ordered by the model's reading of infectability, Luciano's",
+         "criterion for finding principles; whether one stays is judged later by P13, from the decisions it guides once",
+         "applied (D-2026-10-09-b). Each candidate shows apart what the script took from the rows (the quote, whose words,",
+         "the source, how often its lineages recur) and what is the model's reading. Under each, a Mark: line for ok, no,",
+         "or a correction.", "",
+         *([f"Warnings on the run: " + " ".join(run["warnings"]), ""] if run.get("warnings") else []),
          f"Lineages: {len(der)}. " + ", ".join(f"{v} {by_verdict.get(v, 0)}" for v in VERDICTS) + ".", "",
          "| principle | lineages it covers | lineages that extend it |", "|---|---|---|"]
     for pid in sorted(principles, key=lambda p: int(p[1:])):
@@ -314,8 +365,10 @@ def write_report(md: Path, run: dict, ans: dict, der: dict, principles: dict) ->
         q = rows.get(c["quote_row"], {})
         first = min((der[l]["first"] for l in lins), key=lambda m: m.get("time_utc", ""))
         origins = Counter(der[l]["origin"] for l in lins)
+        pair = lambda e: f"{CONSUMER_NAMES[e['consumer']]}, {e['axis']}. {e['why']}"
         L += [f"{c['id']}  {wrap(c['statement'], indent='    ')}",
               f"Scope:      {c['scope']}",
+              "-- from the rows, by the script",
               f"Quote:      \"{wrap(c['quote'])}\"",
               f"Said by:    {q.get('who', '?')}, {q.get('time_local', '')[:16]}",
               f"Source:     {wrap(q.get('source', ''))} (row {c['quote_row']})",
@@ -323,7 +376,13 @@ def write_report(md: Path, run: dict, ans: dict, der: dict, principles: dict) ->
               f"Witnesses:  first {first.get('time_local', '')[:10]} by {first.get('who', '?')}; "
               f"{sum(der[l]['witnesses'] for l in lins)} witnesses over {len({m.get('time_local', '')[:10] for l in lins for m in der[l]['members']})} days; "
               f"lineages begun by " + ", ".join(f"{o} {n}" for o, n in origins.items()),
-              f"Infectious: {wrap(', '.join(c['infectability']['axes']) + '. ' + c['infectability']['why'])}",
+              f"-- the model's reading ({run['model']}, effort {run['effort']})",
+              f"Strongest:  {wrap(pair(c['strongest']))}",
+              *[f"Also:       {wrap(pair(e))}" for e in c.get("also", [])],
+              *([f"Harms:      {wrap(CONSUMER_NAMES[e['consumer']] + '. ' + e['how'])}" for e in c["harms"]]
+                or ["Harms:      none found"]),
+              f"Beats:      {wrap(c['beats']['lineage'] + ' (' + der[c['beats']['lineage']]['statement'] + '). ' + c['beats']['why'])}",
+              *([f"Above next: {wrap(c['above_next'])}"] if c.get("above_next") else []),
               f"Assumption: {wrap(c['assumption'])}",
               f"Would have guided (for P13, later): {', '.join(c.get('guides', [])) or 'no decision in the log'}",
               f"Conflicts:  {wrap('; '.join(k['principle'] + ': ' + k['how'] for k in c.get('conflicts', [])) or 'none named')}",
@@ -338,6 +397,13 @@ def write_report(md: Path, run: dict, ans: dict, der: dict, principles: dict) ->
                 d = der[c["lineage"]]
                 L.append(f"  - `{d['id']}` ({d['origin']}, {d['rows']} rows): {d['statement']} *{c.get('note', '')}*")
     if not ext:
+        L.append("none")
+    L += ["", "## Considered and left out", ""]
+    cons = [c for c in cls if c["verdict"] == "considered"]
+    for c in cons:
+        d = der[c["lineage"]]
+        L.append(f"- `{d['id']}` ({d['origin']}, {d['rows']} rows): {d['statement']} *{c.get('note', '')}*")
+    if not cons:
         L.append("none")
     L += ["", "## Principles in force the ideas argue against", ""]
     for a in ans.get("against", []) or []:
@@ -453,6 +519,9 @@ def main(argv: list[str]) -> int:
         text = (prompt_text + "\n\n## Your previous answer was rejected\n\n" + "\n".join(f"- {e}" for e in errors)
                 + "\n\nAnswer again, the whole JSON object.\n")
     run["answer"] = ans
+    run["warnings"] = run_warnings(ans, template) if ans else []
+    for w in run["warnings"]:
+        print(f"warning: {w}", file=sys.stderr)
     out_json.write_text(json.dumps(run, ensure_ascii=False, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     if ans is None:
         print(f"no answer passed the checks after {len(run['attempts'])} attempts; the attempts are in {out_json}", file=sys.stderr)

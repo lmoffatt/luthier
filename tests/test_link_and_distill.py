@@ -37,9 +37,13 @@ if prompt.startswith("# Prompt: link_ideas_v1"):
     target = existing[0] if existing else "L-types-are-concepts"
     if not existing:
         new.append({"id": target, "scope": "language", "statement": "Types are concepts."})
+    if any("OTHER" in r[4] for r in rows) and "L-costs-explicit" not in existing:
+        new.append({"id": "L-costs-explicit", "scope": "language", "statement": "Costs are explicit."})
     for r in rows:
         if "UNPLACE" in r[4]:
             unplaced.append([r[0], "not about Luthier"])
+        elif "OTHER" in r[4]:
+            assign.append([r[0], "L-costs-explicit", "states"])
         else:
             rel = "proposes" if r[2] == "model" else ("confirms" if "confirm" in r[3] else "restates")
             assign.append([r[0], target, rel])
@@ -49,23 +53,24 @@ if prompt.startswith("# Prompt: link_ideas_v1"):
 elif prompt.startswith("# Prompt: distill_principles_v1"):
     blocks = prompt.split("## Lineages")[1].split("\n### ")[1:]
     cls, labels, quote, text = [], [], None, None
-    for b in blocks:
+    for k, b in enumerate(blocks):
         lab = b.splitlines()[0].split()[0]
         labels.append(lab)
-        cls.append([lab, "candidate", "C1", "recurs"])
+        cls.append([lab, "candidate", "C1", "recurs"] if k == 0 else [lab, "considered", "", "a smaller idea"])
         for l in b.splitlines():
             m = re.match(r'- (q\d+) \| [^|]+ \| (\w+) \| \w+ \| "(.*)"$', l)
-            if m and quote is None and m.group(2) == "Luciano":
+            if k == 0 and m and quote is None and m.group(2) == "Luciano":
                 quote, text = m.group(1), m.group(3)
     if bad:
         text = "words he never said"
-    print(json.dumps({"classification": cls,
-                      "candidates": [{"id": "C1", "statement": "A type is a concept.", "scope": "language",
-                                      "lineages": labels, "quote": quote, "quote_text": text,
-                                      "infectability": {"axes": ["conceptual"], "why": "reframes what a type is"},
+    print(json.dumps({"candidates": [{"id": "C1", "harms": [{"consumer": "computation", "how": "a larger kernel"}],
+                                      "strongest": {"consumer": "reader", "axis": "conceptual", "why": "reframes what a type is"},
+                                      "also": [], "beats": {"lineage": labels[1], "why": "narrower"},
+                                      "statement": "A type is a concept.", "scope": "language",
+                                      "lineages": labels[:1], "quote": quote, "quote_text": text,
                                       "assumption": "concepts are what a scientist reasons with",
                                       "guides": ["D-2026-10-06-a"], "conflicts": [{"principle": "P2", "how": "x"}]}],
-                      "against": []}))
+                      "classification": cls, "against": []}))
 else:
     print("?")
 '''
@@ -85,6 +90,9 @@ def rows_fixture():
         {"id": "dialogue:aaaa:ok", "time_utc": "2026-05-29T17:10:00Z", "time_local": "2026-05-29 14:10:00",
          "who": "Luciano", "kind": "confirmation of turn 2", "what": "He accepts the paths.", "quote": "dale, eso",
          "source": "t.md turn 3", "extractor": "dialogue"},
+        {"id": "note:2026-05-30T10.00.00:costs", "time_utc": "2026-05-30T13:00:00Z", "time_local": "2026-05-30 10:00:00",
+         "who": "Luciano", "kind": "idea", "what": "OTHER: every cost is explicit.", "quote": "los costos tienen que ser explicitos",
+         "source": "c.md [00:05]", "extractor": "note"},
         {"id": "dialogue:aaaa:weather", "time_utc": "2026-06-01T10:00:00Z", "time_local": "2026-06-01 07:00:00",
          "who": "Luciano", "kind": "idea", "what": "UNPLACE the weather today.", "quote": "va a llover",
          "source": "t.md turn 9", "extractor": "dialogue"},
@@ -123,7 +131,7 @@ def test_link_places_every_row_in_windows_and_computes_who_said_it_first(tmp_pat
     state = json.loads((tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.json").read_text())
     assert set(state["assign"]) | set(state["unplaced"]) == {x["id"] for x in rows_fixture()}
     assert state["unplaced"]["dialogue:aaaa:weather"]["reason"] == "not about Luthier"
-    assert list(state["lineages"]) == ["L-types-are-concepts"]
+    assert sorted(state["lineages"]) == ["L-costs-explicit", "L-types-are-concepts"]
     cs = calls(tmp_path)
     assert len(cs) == len(state["calls"]) >= 2
     assert all(c["argv"][c["argv"].index("--tools") + 1] == "" and "--no-session-persistence" in c["argv"] for c in cs)
@@ -166,7 +174,7 @@ def test_link_rejects_a_bad_answer_and_asks_again_with_the_errors(tmp_path):
     att = state["calls"][0]["attempts"]
     assert len(att) == 2 and "rows of the window not placed" in att[0]["errors"][0] and att[1]["errors"] == []
     assert "## Your previous answer was rejected" in calls(tmp_path)[1]["prompt"]
-    assert len(state["assign"]) + len(state["unplaced"]) == 5
+    assert len(state["assign"]) + len(state["unplaced"]) == 6
 
 
 PRINCIPLES = """# Principles
@@ -218,13 +226,19 @@ def test_distill_drafts_candidates_with_the_quote_and_its_author_filled_in(tmp_p
     prompt = calls(tmp_path)[0]["prompt"]
     assert "at most 7" in prompt and "## Ledger" in prompt and "### l1 L-types-are-concepts" in prompt
     assert "- q1 | 2026-05-29 14:00 | model | proposes" in prompt
-    assert run["quote_labels"]["q2"] == "day:2026-05-29:tipos" and run["lineage_labels"] == {"l1": "L-types-are-concepts"}
+    assert run["quote_labels"]["q2"] == "day:2026-05-29:tipos"
+    assert run["lineage_labels"] == {"l1": "L-types-are-concepts", "l2": "L-costs-explicit"}
+    assert "rows:" not in prompt.split("## Lineages")[1]  # the counts are not shown to the model
     md = (tmp_path / "dist" / "2026-01-02_distill_principles_v1_claude-code_opus.md").read_text()
     assert "C1  A type is a concept." in md and "Said by:    Luciano, 2026-05-29 14:03" in md
     assert "Source:     n.md [00:15] (row day:2026-05-29:tipos)" in md and "Mark:" in md
     assert "lineages begun by model 1" in md
-    assert "Infectious: conceptual. reframes what a type is" in md and "Would have guided (for P13, later): D-2026-10-06-a" in md
-    assert "Finding: infectability" in prompt and "do not rank by it" in prompt
+    assert "-- from the rows, by the script" in md and "-- the model's reading (opus, effort low)" in md
+    assert "Strongest:  the person who uses and reads it, conceptual. reframes what a type is" in md
+    assert "Harms:      the computation. a larger kernel" in md
+    assert "Beats:      L-costs-explicit (Costs are explicit.). narrower" in md
+    assert "## Considered and left out" in md and "`L-costs-explicit`" in md and "Would have guided (for P13, later): D-2026-10-06-a" in md
+    assert "Finding: infectability" in prompt and "do not choose or\nrank by them" in prompt and "Two kinds of idea" in prompt
     r = distill(tmp_path, env)
     assert r.returncode == 2 and "--force redoes it" in r.stderr
 
@@ -232,24 +246,39 @@ def test_distill_drafts_candidates_with_the_quote_and_its_author_filled_in(tmp_p
 def test_distill_checks(tmp_path):
     sys.path.insert(0, str(ROOT / "scripts"))
     import distill_principles as dp
-    der = {"L-a": {"members": [{"id": "r1", "quote": "los tipos tienen que ser conceptos", "who": "Luciano"}]}}
+    der = {"L-a": {"members": [{"id": "r1", "quote": "los tipos tienen que ser conceptos", "who": "Luciano"}]},
+           "L-b": {"members": [{"id": "r2", "quote": "otra cosa", "who": "Luciano"}]}}
     principles = {"P1": {}}
     decisions = {"D-2026-10-06-a": {}}
-    good = {"classification": [{"lineage": "L-a", "verdict": "candidate", "candidate": "C1"}],
-            "candidates": [{"id": "C1", "statement": "s", "assumption": "a", "scope": "language", "lineages": ["L-a"],
-                            "infectability": {"axes": ["ethical"], "why": "w"},
-                            "quote_row": "r1", "quote": "los tipos ... conceptos", "guides": ["D-2026-10-06-a"]}]}
+    cand = {"id": "C1", "statement": "s", "assumption": "a", "scope": "language", "lineages": ["L-a"],
+            "harms": [], "strongest": {"consumer": "computation", "axis": "emotive", "why": "w"}, "also": [],
+            "beats": {"lineage": "L-b", "why": "narrower"},
+            "quote_row": "r1", "quote": "los tipos ... conceptos", "guides": ["D-2026-10-06-a"]}
+    good = {"classification": [{"lineage": "L-a", "verdict": "candidate", "candidate": "C1"},
+                               {"lineage": "L-b", "verdict": "considered"}],
+            "candidates": [cand]}
     assert dp.check_answer(good, der, principles, decisions, 7) == []
+    two = json.loads(json.dumps(good))
+    two["candidates"].append({**cand, "id": "C2"})
+    two["classification"][0] = {"lineage": "L-a", "verdict": "candidate", "candidate": "C1"}
+    assert any("C1: above_next is missing" in e for e in dp.check_answer(two, der, principles, decisions, 7))
     bad = json.loads(json.dumps(good))
-    bad["classification"] = [{"lineage": "L-b", "verdict": "covered", "principle": "P9"}]
-    bad["candidates"][0]["quote"] = "conceptos ... los tipos"
-    bad["candidates"][0]["guides"] = ["D-x"]
-    bad["candidates"][0]["infectability"] = {"axes": ["popular"], "why": ""}
+    bad["classification"] = [{"lineage": "L-x", "verdict": "covered", "principle": "P9"}]
+    c = bad["candidates"][0]
+    c.update(quote="conceptos ... los tipos", guides=["D-x"], harms=None, also=[{}, {}, {}],
+             strongest={"consumer": "writer", "axis": "popular", "why": ""}, beats={"lineage": "L-a", "why": "x"})
     errs = "\n".join(dp.check_answer(bad, der, principles, decisions, 0))
-    for e in ("1 candidates; at most 0", "unknown lineage 'L-b'", "principle 'P9'", "lineages not classified: L-a",
-              "the quote is not in row r1", "guides 'D-x'", "infectability needs axes"):
+    for e in ("1 candidates; at most 0", "unknown lineage 'L-x'", "principle 'P9'", "lineages not classified: L-a",
+              "the quote is not in row r1", "guides 'D-x'", "strongest needs", "also is a list of at most 2",
+              "harms must be a list", "beats must name a lineage classified considered"):
         assert e in errs, e
-
+    w = dp.run_warnings({"candidates": [cand, {**cand, "id": "C2"}, {**cand, "id": "C3"}]},
+                        "| a | few primitives, the rest derived; one kind of thing where there were several |")
+    assert any("strongest axis is emotive" in x for x in w) and any("no candidate names a harm" in x for x in w)
+    copy = {**cand, "strongest": {"consumer": "computation", "axis": "aesthetic",
+                                  "why": "few primitives, the rest derived; one kind of thing where there were"}}
+    assert any("repeats eight words of the table" in x for x in dp.run_warnings({"candidates": [copy]},
+               "| a | few primitives, the rest derived; one kind of thing where there were several |"))
 
 def test_link_splits_a_window_whose_answer_hits_the_output_limit(tmp_path):
     tl, env = setup(tmp_path)
@@ -258,7 +287,7 @@ def test_link_splits_a_window_whose_answer_hits_the_output_limit(tmp_path):
     assert r.returncode == 0, r.stderr
     assert "the window is split in two" in r.stderr
     state = json.loads((tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.json").read_text())
-    assert len(state["assign"]) + len(state["unplaced"]) == 5
+    assert len(state["assign"]) + len(state["unplaced"]) == 6
     splits = [c for c in state["calls"] if c["split"]]
     assert splits and all("output limit" in c["attempts"][0]["error"] for c in splits)
     assert all(c["rows"] <= 2 for c in state["calls"] if c["accepted"])
