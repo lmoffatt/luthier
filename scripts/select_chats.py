@@ -6,8 +6,10 @@ command, `iachat fetch --dry-run`, so the same privacy rules apply: a thread the
 withhold is still judged here, and reported as withheld, so that Luciano knows what stays out.
 A model reads each candidate (Luciano's turns complete, the model's turns shortened) with
 `prompts/select_chats_v1.md` and answers yes, partial or no, with its reason and the turns that
-are about Luthier. A thread whose cwd is this repository is taken without asking a model
-(--cwd-is-yes; --no-cwd-rule sends it to the model too).
+are about Luthier. Two rules spare the model: a thread whose cwd is this repository is yes (--cwd-is-yes;
+--no-cwd-rule sends it to the model too), and a thread where Luciano's own turns never say the
+query is no (--min-mentions, default 1; the query matched a model's or a tool's turn, as when a
+CLAUDE.md names luthier). Every verdict carries its reason, printed as it is made.
 
 Output, in --output-dir (default record/IA/selection):
   <date>_select_chats_v1_<agent>_<model>.jsonl   one line per candidate, with everything used
@@ -63,6 +65,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--cwd-is-yes", dest="cwd_rule", action="store_true", default=True,
                    help="a thread whose cwd is this repository is yes without a model (default)")
     p.add_argument("--no-cwd-rule", dest="cwd_rule", action="store_false")
+    p.add_argument("--min-mentions", type=int, default=1,
+                   help="Luciano's turns that must say the query for a thread to reach the model; fewer is no by rule (0 disables)")
     p.add_argument("--take", default="yes,partial", help="verdicts that go into the fetch command")
     p.add_argument("--force", action="store_true", help="judge again the keys already in the output")
     p.add_argument("--dry-run", action="store_true", help="list the candidates and call no model")
@@ -153,6 +157,16 @@ def luciano_turns(text: str) -> list[int]:
     return [t["n"] for t in parse_thread(text)[1] if t["author"] == "Luciano"]
 
 
+def mentions(text: str, query: str) -> list[int]:
+    """Luciano's turns whose text says the query (each word of it, case-insensitive)."""
+    words = [w for w in re.split(r"\s+", query.strip()) if w]
+    out = []
+    for t in parse_thread(text)[1]:
+        if t["author"] == "Luciano" and all(re.search(re.escape(w), t["body"], re.IGNORECASE) for w in words):
+            out.append(t["n"])
+    return out
+
+
 def cwd_is_repo(front: dict, repo: Path) -> bool:
     cwd = front.get("cwd", "")
     return bool(cwd) and cwd == "-" + str(repo).replace("/", "-").lstrip("-")
@@ -236,7 +250,8 @@ def write_summary(md: Path, rows: list[dict], args: argparse.Namespace, prompt_s
              f"model {model} via {agent}; candidates from `iachat fetch --dry-run --query {args.query}"
              f"{' --since ' + args.since if args.since else ''}{' --until ' + args.until if args.until else ''}"
              f"{' --source ' + args.source if args.source else ''}` at `{args.iachat}`; a thread whose cwd is this",
-             f"repository is yes by rule ({'on' if args.cwd_rule else 'off'}); the model's turns were cut to "
+             f"repository is yes by rule ({'on' if args.cwd_rule else 'off'}); a thread where Luciano's turns say the "
+             f"query fewer than {args.min_mentions} times is no by rule; the model's turns were cut to "
              f"{args.max_model_chars} characters. Verdicts taken: {', '.join(take)}.", "",
              f"Candidates: {len(rows)}. Taken: {len(taken)}. Withheld by the archive's privacy rules but "
              f"judged {', '.join(take)}: {len(lost)}. Errors: {len(errors)}.", "",
@@ -317,9 +332,14 @@ def main(argv: list[str]) -> int:
                        "thread_path": str(path), "thread_sha256": _sha(path),
                        "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
                        "max_model_chars": args.max_model_chars, "date": args.date}
+                said = mentions(text, args.query)
                 if args.cwd_rule and cwd_is_repo(front, REPO_ROOT):
                     row.update(verdict="yes", reason="cwd is this repository", turns=luciano_turns(text),
                                topics=[], judged_by="rule")
+                elif args.min_mentions and len(said) < args.min_mentions:
+                    row.update(verdict="no", reason=f"Luciano's turns say {args.query!r} {len(said)} times "
+                               f"(fewer than {args.min_mentions}); the query matched a model's or a tool's turn",
+                               turns=[], topics=[], judged_by="rule")
                 else:
                     row.update(judge(cli, template, text, model, args.timeout, args.max_model_chars,
                                      args.retries), judged_by=model)
@@ -333,7 +353,8 @@ def main(argv: list[str]) -> int:
             fh.flush()
             rows.append(row)
             print(f"[{i}/{len(cands)}] {row['verdict']:7s} {row['judged_by']:8s} {c['key']}  {c['title'][:40]}"
-                  + ("  (withheld)" if c["withheld"] else ""))
+                  + ("  (withheld)" if c["withheld"] else "") + f"\n    {row['reason']}", flush=True)
+            write_summary(md, rows, args, prompt_sha, model, agent, errors)
     write_summary(md, rows, args, prompt_sha, model, agent, errors)
     print(f"written: {jsonl}\n         {md}")
     return 1 if errors else 0
