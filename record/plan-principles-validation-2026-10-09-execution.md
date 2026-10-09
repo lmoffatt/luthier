@@ -1,7 +1,8 @@
 # Validating Luthier's principles against real decisions: the execution
 
-Draft 0, 2026-10-09. Written for the sessions that carry it out and for GPT and Luciano to review.
-The choices it rests on are in `plan-principles-validation-2026-10-09-decisions.md` (D1 to D12);
+Draft 1, 2026-10-09, after GPT's review of draft 0 (`record/IA/handoff de gpt para claude 3.md`).
+Written for the sessions that carry it out and for GPT and Luciano to review.
+The choices it rests on are in `plan-principles-validation-2026-10-09-decisions.md` (D1 to D14);
 where a step depends on one, it says which and what it assumes until Luciano answers.
 
 ## Rules for every step
@@ -51,46 +52,42 @@ hand.
 
 ## Step 2. The dates of each principle
 
-Writes `record/validation/principle_dates.json`, one entry per principle P1 to P14:
+Writes `record/validation/principle_dates.json`, one entry per principle P1 to P14 (D1: no
+emergence in v1):
 
 ```json
-{"P11": {"emergence": {"time": "2026-09-10T..Z", "resolution": "minute", "source": "chat:6878a98d:1148"},
-         "explicit":  {"time": "...", "resolution": "...", "source": "..."},
-         "operative": {"luthier":           {"time": "2026-10-06T08:18Z", "source": "luthier@fea45bf:CLAUDE.md"},
-                       "sonolocalizacion":  {"time": "2026-09-11T12:53Z", "source": "memory nunca-hardcodear.md, written in session ..."}},
-         "statement": "...", "quote": "...", "status": "proposed"}}
+{"P11": {"explicit":  {"time": "2026-09-10T..Z", "resolution": "minute", "source": "chat:6878a98d:1148"},
+         "operative": {"luthier":          {"time": "2026-10-06T08:18Z", "source": "luthier@fea45bf:CLAUDE.md"},
+                       "sonolocalizacion": {"time": "2026-09-11T12:53Z", "source": "memory nunca-hardcodear.md, written in session ..."}},
+         "statement": "...", "quote": "...", "status": "current"}}
 ```
 
-How each date is found:
-- explicit: the `Quote:` and `Source:` of the principle in `record/principles.md`, the formulation
-  Luciano marked; its time from the transcript line or the commit.
-- emergence: the earliest row of `record/ideas/timeline.jsonl`, by Luciano, that states the idea. A
-  model proposes up to three rows per principle from the timeline (one call per principle, prompt
-  `date_principle_v1`), each with its quote; the script checks the quotes; Luciano picks one or none.
-- operative, per repository (D2): the commit that put the principle in that repository's
-  `CLAUDE.md`; the commit that put it in `~/.claude/CLAUDE.md` (outside git: the transcript that
-  wrote it); the transcript event that wrote a memory note stating it, per project folder. Found
-  mechanically, by searching the transcripts for writes to those files and matching the principle's
-  statement.
+- explicit: the `Quote:` and `Source:` of the principle in `record/principles.md`; its time from the
+  transcript line or the commit.
+- operative, per repository (D2, i to iii): the commit that put the principle in that repository's
+  `CLAUDE.md`; the transcript event that wrote it in `~/.claude/CLAUDE.md`; the transcript event that
+  wrote a memory note stating it, per project folder. Found mechanically, by searching the
+  transcripts for writes to those files; which note states which principle is proposed by the
+  script from the text and checked by hand.
 
-Done when every principle has explicit and operative dates with sources, emergence is proposed, and
-Luciano has marked the file (one screen). Until he marks it, nothing downstream is scored.
+No model call. Done when every principle has both dates with sources and Luciano has marked the file
+(one screen). Until then nothing downstream is scored.
 
-## Step 3. Eligibility (mechanical)
+## Step 3. Temporal eligibility (mechanical)
 
-A script, `scripts/eligible_cases.py`, crosses the units with the dates. A pair (unit, principle) is
-eligible when:
-- the unit's time is after the principle's explicit date (D1, assumed (a));
-- and before its operative date in the unit's repository (D2);
-- and the principle is not stated earlier in the unit's session (D3): the overlap of the session's
-  earlier text with the principle's quote and statement stays under a threshold (a parameter,
-  default chosen on a fixture and recorded).
+`scripts/eligible_cases.py` crosses the units with the dates. A pair (unit, principle) is temporally
+eligible when the unit's time is after the principle's explicit date and before its operative date
+in the unit's repository. A unit exactly at a boundary is not eligible.
 
-Writes `record/validation/eligibility.jsonl`: every pair with its verdict and the reason, including
-the excluded ones. The units that are eligible for at least one principle, plus every reversal, are
-the candidates for drafting.
+The lexical overlap of the session's earlier turns with the principle's quote and statement is
+computed and stored as a flag (`lexical_exposure`, with the turns it points at); it decides nothing
+(D3).
 
-Done when the tests cover each exclusion and a unit exactly at a boundary is excluded.
+Writes `record/validation/eligibility.jsonl`: every pair with its verdict and the reason, the
+excluded ones included. The units eligible for at least one principle, plus every reversal, are the
+candidates for drafting.
+
+Done when the tests cover each exclusion, the boundary, and the flag.
 
 ## Step 4. Draft the cases
 
@@ -124,50 +121,60 @@ for the two options in parallel wording (GPT). The script then:
 Done when the tests pass on a stub (malformed answer, a quote not in its source, the draw, the
 skipping), and a dry run lists the units it would send.
 
-## Step 5. Luciano's review
+## Step 5. The sample, its exposure, and Luciano's review
 
-A script draws the sample (D9: about 30, stratified by area, by `decided_by`, by repository, with
-every reversal) with a recorded seed, and writes `record/validation/review_<date>.md`: per case, the
-question, A and B, which was chosen, the evidence quotes, the source turn and commit, and a line
-`Mark:` for `ok`, `no`, or a correction.
-
-The review document is committed before he marks it; his marks are committed verbatim; then
-`scripts/apply_review.py` sets `approved: true` on the cases marked `ok`, and records the review
-commit in each. A correction makes a new case, with his text, approved.
+1. `scripts/draw_sample.py` draws forty drafted cases, stratified (D9), with a recorded seed, and
+   freezes the list in `record/validation/sample_<date>.json`, committed before anyone reads the
+   cases. Rejected cases are never replaced.
+2. The exposure judge (D3), prompt `prompts/judge_exposure_v1.md`, one call per sampled case: it
+   reads the session up to the decision and the case's temporally eligible principles, and answers
+   per principle `none`, `possible` or `explicit`, with the quote of the turn. It never sees the
+   outcome as such (only the turns up to Luciano's), and is not the drafter or the scorer. The
+   script checks its quotes.
+3. `scripts/write_review.py` writes `record/validation/review_<date>.md`: per case, the question, A
+   and B, which was chosen, the evidence quotes, the source turn and commit, the exposure answers
+   that are not `none` with their quotes, a line for a known tradeoff in his words (optional, no
+   principle named), and a line `Mark:` for `ok`, `no`, or a correction.
+4. The review document is committed before he marks it; his marks are committed verbatim; then
+   `scripts/apply_review.py` sets `approved: true` on the cases marked `ok`, records the review
+   commit, and records his verdict on each exposure answer. A correction makes a new case, with his
+   text.
 
 ## Step 6. Score
 
 `scripts/validate_principles_temporal.py`, prompts `apply_principle_blind_v1.md` and
-`apply_baseline_blind_v1.md`. Refuses any case not approved, any pair not eligible, and any prompt
-with an unfilled field.
+`apply_baseline_blind_v1.md`. Refuses any case not approved, any pair not temporally eligible or
+with an exposure other than `none` for the main run (D3), and any prompt with an unfilled field.
 
-- The principle's call receives only: the principle's statement and, when it has one, the road it
-  rejects; and the eligible approved cases, each as its number, question, A and B. Nothing else: no
-  id, date, source, outcome, status, other principle, or document name. The payload is built from
-  these fields only, and a test checks it.
-- Each principle runs twice, the options in the original order and swapped (D10, one call per
-  principle per order); the cases are shuffled with a recorded seed. A case whose answer changes
-  meaning with the order is position-unstable and does not count as evidence.
-- The answer per case: `A`, `B` or `NEITHER`, a confidence, a short reason.
-- The baseline runs the same cases with no principle: "Which option is better supported by the
-  information given? If it does not discriminate, answer NEITHER."
-- The subset check of D10: ten cases drawn with a recorded seed, run one case per call; the
-  agreement with the batched answers is reported.
+- The principle's call receives only the principle's statement and, when it has one, the road it
+  rejects, and the eligible approved cases, each as its number, question, A and B. No id, date,
+  source, outcome, status, other principle, or document name. The payload is built from these
+  fields only, and a test checks it.
+- Each principle runs twice, the options in the original order and swapped; the cases are shuffled
+  with a recorded seed. A case whose answer changes meaning with the order is position-unstable and
+  is not evidence.
+- D10 first: ten cases drawn with a recorded seed, run one per call, compared with the batched
+  answers before any outcome is looked at; at least 90% agreement, or everything is rerun one case
+  per call.
+- Baselines (D13): B0 without a principle; B1 each case with a principle drawn among those not
+  eligible for it; B2 the whole run with the statements permuted among the ids.
+- Per case and principle (D14): picked the chosen option; picked the other while another principle
+  picked the chosen one (lost a conflict); picked the other and no principle picked the chosen one;
+  NEITHER.
 
-Metrics per principle (GPT's list): eligible, applicable (A or B), neither, coverage, correct,
-incorrect, accuracy, position-stable and unstable, stable accuracy with a Wilson interval, the
-baseline's accuracy on the same cases, and the gain. A denominator of zero gives null, said so.
-Added: the conflict matrix, the pairs of principles that choose opposite options on the same case,
-with the cases; and, for reversals, whether the principle predicted the first choice, the final one,
-or neither.
+Report per principle: n and its label (D4: anecdotal under 5, exploratory 5 to 9, scored from 10);
+coverage; the four outcomes of D14; stable accuracy with a Wilson interval, only for scored
+principles; the same for B1 and B2 on the same cases, and the difference; the conflict matrix with
+its cases; reversals one by one. A denominator of zero gives null, said so.
 
 Writes `record/validation/runs/<UTC timestamp>_temporal_principles_<model>.json` (every payload,
-raw answer, parsed answer, retry) and `.md`: one screen of results first, then the errors, the
-unstable cases, the reversals, the cases the baseline got without a principle, and the conflicts.
-A run never overwrites another.
+raw answer, parsed answer, retry) and `.md`: one screen of results, then the errors, the unstable
+cases, the conflicts, the reversals, the cases the baselines got without the principle. A run never
+overwrites another.
 
-Done when GPT's thirteen tests pass, plus: the conflict matrix on a fixture, the order mapping of a
-batched answer, the subset check. No run on a real model before step 5.
+Done when GPT's thirteen tests pass, plus: the conflict matrix and the D14 outcomes on a fixture,
+the order mapping of a batched answer, the D10 rule, B1's draw and B2's permutation. No run on a
+real model before step 5 ends.
 
 ## Step 7. What comes later, not now
 
@@ -182,8 +189,8 @@ prompts get a version that keeps the normative force of what was said ("it must 
 |---|---|---|
 | 0 pin | Luciano | nothing |
 | 1 mine (rerun, reversals) | model writes; runs mechanically | 0 |
-| 2 dates | model proposes; Luciano marks | 0 |
+| 2 dates | model writes; mechanical; Luciano marks | 0 |
 | 3 eligibility | model writes; mechanical | 1, 2 |
 | 4 draft | model writes; runs as D11 says | 3 |
-| 5 review | Luciano | 4 |
+| 5 sample, exposure, review | model draws and runs the judge; Luciano reviews | 4 |
 | 6 score | model writes; Luciano runs | 5 |
