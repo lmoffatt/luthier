@@ -61,6 +61,15 @@ def transcript(s8: str, accounts: list[Path]) -> Path | None:
     return None
 
 
+def account_label(path: Path, accounts: list[Path]) -> str:
+    """Which account a transcript is in, by its position in --accounts, not by its folder's name
+    (a folder's name may carry a private word)."""
+    for i, a in enumerate(accounts, 1):
+        if str(path).startswith(str(a)):
+            return f"account {i}, {path.parent.name}/{path.name}"
+    return path.name
+
+
 def chat_time(ref: str, accounts: list[Path]) -> tuple[str, str]:
     _, s8, line = ref.split(":")
     n = int(line.split("-")[0])
@@ -71,7 +80,7 @@ def chat_time(ref: str, accounts: list[Path]) -> tuple[str, str]:
         for i, l in enumerate(fh, 1):
             if i == n:
                 try:
-                    return utc(json.loads(l).get("timestamp", "")), str(f)
+                    return utc(json.loads(l).get("timestamp", "")), account_label(f, accounts)
                 except (ValueError, json.JSONDecodeError):
                     return "", f"line {n} of {f.name} has no time"
     return "", f"{f.name} has no line {n}"
