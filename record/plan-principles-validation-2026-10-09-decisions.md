@@ -47,6 +47,8 @@ marked in `record/principles.md`, until it became operative for the agent (D2).
 - Changed (GPT): the earliest vague trace of the idea (emergence) is left out of v1. Finding it
   costs model annotation and Luciano's judgment before there is any signal; it can be reconstructed
   later as history if the result calls for it.
+  explicit formulation, if its logical structure is enough to make decisions
+
 
 **D2. What makes a principle operative for the agent?** The earliest of: (i) the `CLAUDE.md` of the
 repository the session ran in (luthier and sonolocalización: 2026-10-06); (ii) `~/.claude/CLAUDE.md`
@@ -55,6 +57,8 @@ sonolocalización's note on hardcoding, which states P11, existed by 2026-09-11;
 never stated it); (iv) the principle in the agent's context earlier in the same session (D3).
 - Recommended: all four. A principle can then be operative in one repository and not in the other
   on the same day, which gives cases of a natural experiment.
+    OK
+
 
 **D3. How is exposure in the session found?** (GPT, problem 2: a lexical overlap is too fragile to
 decide the main dataset; a principle can be conveyed without its words, and words can recur without
@@ -67,21 +71,37 @@ it.)
 - Luciano checks the `possible` and `explicit` answers in his review (D9).
 - Main result: `none` only. `possible` goes to a sensitivity analysis.
 
+ok
+
+
 **D4. When is a principle scored?** (Changed, GPT, problem 7.) By its number of approved independent
 cases, n: n < 5 is reported as anecdotal, 5 to 9 as exploratory, 10 or more as scored. All are shown
 with their n; only the last kind gets a percentage in the summary table. The thresholds are
 parameters, fixed now.
+      porque vestir un numero entendible con umbrales arbitrarios? Dejemos el numero y listo. 
+
+
 
 **D5. Kinds of decision.** `luciano_choice` and `luciano_confirmation` in the main result, reported
 apart from each other; `model_margin` apart.
+   ok
+ 
 
 **D6. Units with private words.** Twelve of the 409 units mined so far; their texts are withheld from
 the repository. Recommended: leave them out now; a local-only run later if the counts are too small.
+   ok
+
+
 
 **D7. The drafter sees the diff**, as evidence stored with the case; the options sent to the scorer
 are a separate abstraction, which Luciano's approval checks (GPT).
 
+                 ok
+
 **D8. Constructed alternatives** leave the main result (GPT).
+  ok
+
+
 
 **D9. The sample Luciano reviews.** (Changed, GPT, problem 4.) Forty cases drawn with a recorded
 seed, stratified (language and method, choice and confirmation, both repositories, every reversal),
@@ -90,18 +110,27 @@ the experiment: no replacement of rejected cases, by any rule. If 21 survive, n 
 - His marks are committed verbatim; a script turns `ok` into `approved: true`; nothing else sets
   it. A correction creates a new case with his text, which enters as his.
 - Cost: about forty minutes of his reading, once.
+  ok
+
+
 
 **D10. Batched calls, with the rule fixed now.** (Changed, GPT, problem 8.) Each principle runs on all
 its eligible cases in one call. Before any answer is compared with an outcome, ten cases drawn with
 a recorded seed are run one per call, and the answers alone (not the outcomes) are compared. If they
 agree on at least 90% of the cases, the batched run stands; if not, it is discarded and everything
 runs one case per call.
+ok
+
 
 **D11. Who runs it.** Recommended: Luciano authorizes the model to run the drafting and the exposure
 judge (long, mechanical to follow); Luciano runs the scoring, after his review.
+ok
+
 
 **D12. Which sessions.** Luthier and sonolocalización now; macro_dr's DSL and macroir later, if the
 counts call for them.
+ok
+
 
 **D13. Baselines that a principle has to beat.** (New, GPT, problem 5: a model given any rule may do
 better than one given none.)
@@ -112,12 +141,16 @@ better than one given none.)
 - B2, shuffled: the statements of the principles are permuted among their ids, and the whole scoring
   is run again; this gives how much any normative sentence "predicts".
 - The comparison that counts is the target principle against B1 and B2. B0 is reported for scale.
+ok
+
+
 
 **D14. How a case is read after scoring.** (New, GPT, problem 6.) Per case and principle: the target
 picked the option chosen; it picked the other option while another principle picked the one chosen
 (it lost a conflict); it picked the other option and no principle picked the one chosen; it answered
 NEITHER. Luciano's review may add, per case, a known tradeoff in his words, without naming a
 principle. The report is a table of these four outcomes per principle, with the conflicts named.
+ok
 
 ## What it will cost
 
