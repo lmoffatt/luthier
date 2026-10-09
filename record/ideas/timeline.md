@@ -5,24 +5,24 @@ One row per idea as the extractors found it, in time order; the local times are 
 time is its UTC converted. A note extracted both per note and by day gives two rows, each marked, so a
 restatement across notes is told from the same note read twice. Nothing here was judged or merged.
 
-Rows: 1386 (day 144, dialogue 694, note 301, written 247). Inputs: 96 files, listed at the end with their sha256.
+Rows: 1516 (day 144, dialogue 824, note 301, written 247). Inputs: 97 files, listed at the end with their sha256.
 
 Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: no time for 'material-esconde-lo-importante'
 
-| month | Luciano | model | total |
-|---|---|---|---|
-| 2022-06 | 26 | 0 | 26 |
-| 2022-07 | 11 | 0 | 11 |
-| 2022-08 | 30 | 0 | 30 |
-| 2023-02 | 17 | 0 | 17 |
-| 2023-03 | 23 | 0 | 23 |
-| 2025-06 | 0 | 140 | 140 |
-| 2026-05 | 267 | 8 | 275 |
-| 2026-06 | 28 | 0 | 28 |
-| 2026-08 | 50 | 30 | 80 |
-| 2026-09 | 149 | 270 | 419 |
-| 2026-10 | 186 | 150 | 336 |
-| undated | 1 | 0 | 1 |
+| month | Luciano | model | pasted | total |
+|---|---|---|---|---|
+| 2022-06 | 26 | 0 | 0 | 26 |
+| 2022-07 | 11 | 0 | 0 | 11 |
+| 2022-08 | 30 | 0 | 0 | 30 |
+| 2023-02 | 17 | 0 | 0 | 17 |
+| 2023-03 | 23 | 0 | 0 | 23 |
+| 2025-06 | 0 | 140 | 0 | 140 |
+| 2026-05 | 267 | 8 | 0 | 275 |
+| 2026-06 | 28 | 0 | 0 | 28 |
+| 2026-08 | 50 | 30 | 0 | 80 |
+| 2026-09 | 149 | 270 | 0 | 419 |
+| 2026-10 | 199 | 260 | 7 | 466 |
+| undated | 1 | 0 | 0 | 1 |
 
 ## Ideas, by day
 
@@ -5166,6 +5166,142 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
   `shift` is an action of the tangent space on `Theta` (an affine space); `ShiftByZero` is its `LeftIdentity` and its `Associative` is missing, and `MeanModel`/`Likelihood` should carry that action as invariant.
   > `shift` es una acción del espacio tangente sobre Theta (un espacio afín). `ShiftByZero` es exactamente `LeftIdentity` de esa acción, y falta su `Associative` ... El tipo `MeanModel`/`Likelihood` debería llevar esa acción como invariante.
 
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:acustico-externs-de-punta-a-punta`
+  Given the speed, the dome and GCC-PHAT with thousands of samples can't be native; they will be externs end to end.
+  > Van a ser externs de punta a punta.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:arreglar-certificacion-antes-de-reescribir-librerias`
+  The problem is in the certification implementation, not the spec, and should be fixed before the next library rewrite so certs can be trusted.
+  > El problema está en la implementación de la certificación ... conviene arreglarlo antes de la próxima reescritura de librerías.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:bool-leido-por-posicion`
+  Bool is read by position, so any sum of two Unit counts as Bool and the first alternative is true; a predicate always returning "wrong" passes.
+  > `Bool` se lee por posición ... Cualquier suma de dos `Unit` cuenta como `Bool`, y la primera alternativa es `true`.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:carga-lenta-por-reinferencia`
+  Loading anything importing array.lut takes ~17-19s because each nested + or * re-infers the left operand's type.
+  > cada `+` o `*` anidado vuelve a inferir el tipo del operando izquierdo
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:certificacion-no-hace-lo-que-dice-la-05`
+  Today's certification doesn't do what spec 05 promises: there are failing certs, old uncleaned ones, generators that ignore refinements, and what experiment_zero runs isn't what was certified.
+  > la certificación hoy no hace lo que dice la 05: hay certificados que fallan, otros viejos que nadie borró, generadores que no respetan los refinamientos, y lo que corre experiment_zero no es lo que se certificó.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:certificados-por-huecos-viejos-para-siempre`
+  Certs depending on holes never match because on import the hash is compared before the parent fills the holes, while certification computed it after.
+  > Al importar se compara el hash antes de que el archivo padre llene los huecos ... y al certificar se calculó después.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:certificados-sobre-coherencia-interna-no-sobre-la-cinta`
+  Nothing is applied to the real data; the certificates speak of internal coherence, not of whether the model describes the measurements.
+  > Los certificados hablan de coherencia interna, no de si el modelo describe la cinta.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:certificados-solo-acumulan`
+  Old certificate entries are never pruned, so reading the file one can't tell current from obsolete without recomputing hashes.
+  > Leyendo el archivo no se distingue lo vigente de lo obsoleto sin recalcular los hashes.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:codominio-refinado-de-extern-sin-ley`
+  A refined codomain of an extern produces no obligation; neg : Float64 -> NonNeg returns -2.0 : NonNeg unchecked.
+  > Un extern `neg : Float64 -> NonNeg` devuelve `-2.0 : NonNeg` sin ninguna obligación
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:constantes-del-proyecto-en-la-libreria`
+  Project-specific constants (pitTol calibrated for the tape, ensembleSize, zMax, fdStep) leak into the generic library.
+  > Ahí el proyecto se filtra a la librería genérica
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:costo-es-la-verosimilitud-interpretada`
+  3 minutes for a 30-parameter fit; the cost is the interpreted likelihood.
+  > 3 minutos para un ajuste de 30 parámetros con el LM en Python: el costo es la verosimilitud interpretada.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:dos-evaluadores-caida-silenciosa`
+  There are two evaluators that differ in edge cases, and the machine silently falls back to the substitution one.
+  > Hay dos evaluadores ... que difieren en casos borde. La máquina cae al otro en silencio
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:ergonomia-sin-let`
+  Ergonomics cost: no let (fit and diagnose end in ten closing braces) and no unary minus.
+  > No hay `let`. `fit` y `diagnose` terminan en diez llaves seguidas, `} } } } } } } } } }`. Tampoco hay menos unario
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:exhaustivo-sobre-int-es-rango-acotado`
+  "Exhaustive" over Int means the range -16 to 16, so x*x < 1000 is certified exhaustive with 33 cases.
+  > "Exhaustivo" sobre `Int` significa el rango de -16 a 16
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:float64field-solo-dentro-de-la-caja`
+  The field laws of float64Field pass because lawMagnitude is tuned to the generator's range; associativity fails at (1e8, -1e8, 3e-9).
+  > Las leyes de cuerpo de `float64Field` pasan porque `lawMagnitude = 16.0` está ajustado al rango del generador
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:garantias-en-comentarios-no-en-tipos`
+  Guarantees live in comments instead of types; e.g. meanModel's comment about nodes while MapInput carries Vec Int unrelated to Node.
+  > `meanModel` dice "which are nodes of theta when the graph is valid", pero `MapInput` lleva `Vec Int` sin ninguna relación con `Node`.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:grados-prometidos-no-implementados`
+  Grades 05 promises (point, witnessed, assumed, the weakest link of a chain) are not implemented.
+  > Los grados point, witnessed, assumed y "el eslabón más débil" de una cadena.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:hash-no-ve-el-python`
+  The certificate hash doesn't see the Python; changing lm.py leaves the certificate "current", and generator, case count and interpreter version aren't hashed either.
+  > Si cambiás `lm.py`, el certificado sigue "vigente".
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:lo-que-corre-no-es-lo-certificado`
+  The Kernel was certified over a 7-node model but experiment_zero runs a 10-node one; the transfer is an informal argument no law states and the checker doesn't know.
+  > esa transferencia es un argumento tuyo o mío; ninguna ley la enuncia y el checker no la conoce.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:obligacion-cuantificada-sobre-la-base-no-el-tipo-refinado`
+  The generator doesn't respect dependent refinements, producing false failures because the obligation was quantified over the base type, not the refined one.
+  > muestran que la obligación se cuantificó sobre la base y no sobre el tipo refinado.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:pendiente-registrado-como-falla`
+  A law pending over all models of a theory, which 05 §7 says stays pending, is recorded as FAIL mixed with real failures.
+  > La 05 §7 dice que una ley sobre todos los modelos de una teoría "stays pending". Acá queda como FAIL, mezclada con las fallas reales.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:provisional-certificado-igual`
+  Provisional externs are certified anyway, which R5 says never, and the certificate carries no provisional field.
+  > Los externs `provisional` se certifican igual, cuando R5 dice que nunca.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:pruebas-estadisticas-poca-potencia`
+  The statistical tests have low power: few cases, two moments with z=5, and controls that break the model at double sigma, the easiest case to detect.
+  > Los controles rompen el modelo al doble de sigma, el caso más fácil de detectar.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:puente-no-valida-contra-el-tipo`
+  The Python bridge converts any int, float or str into a literal regardless of declared type, and division follows the Python type, so an Int disguised as Float64 gives integer division.
+  > convierte cualquier `int`, `float` o `str` de Python en un literal, sea cual sea el tipo declarado.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:r8-agujeros`
+  R8 has holes: == accepted over data containing functions, over Real as float equality, and not checked past depth 20.
+  > Se acepta `==` sobre un `data` que tiene funciones adentro
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:real-nominal-sin-representacion`
+  Real has no representation or generator and arithmetic over it is rejected; its distinction from Float64 exists only at type-checking, never at execution.
+  > no tiene representación ni generador, y la aritmética sobre él se rechaza. La distinción con `Float64` existe solo al chequear tipos, nunca al ejecutar.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:real-todavia-una-etiqueta`
+  Real is still just a label: libraries are Float64 throughout and the distinction gives nothing today.
+  > La 06 lo marca como pendiente, pero hoy la distinción no da nada.
+
+- **04:23** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:recomendacion-congelar-y-que-empuje-lo-acustico`
+  Freeze v0 and commit, fix certification as a gate, and let the acoustic stage push what comes next in Luthier rather than algebra cleanup.
+  > Que lo próximo de Luthier lo empuje la etapa acústica, la verosimilitud del GCC, y no la limpieza del álgebra.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:setoid-encontro-un-bug-real`
+  Typing same as a Setoid found a real bug (the Gaussian belief was not symmetric), the best evidence the method catches errors.
+  > Tipar `same` como `Setoid` encontró un bug real: la belief gaussiana no era simétrica. Es la mejor evidencia de que el método atrapa errores.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:tablas-fin-int-como-float`
+  Fin n -> Int tables are generated as float64, against 06 §7, so integer laws over indices run with floating-point division.
+  > Las tablas `Fin n -> Int` se generan como float64 ... contra la 06 §7.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:test-n-no-corre-el-objeto`
+  test n over the whole object isn't done: it runs only the name's obligations.
+  > `test n` sobre todo el objeto: hoy corre solo las obligaciones del nombre
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:triangulo-del-kernel-con-controles`
+  The Kernel triangle with two controls, each breaking a different side, is among what works.
+  > El triángulo del Kernel con dos controles, cada uno rompiendo un lado distinto.
+
+- **04:23** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 4] `dialogue:aa680014:un-solo-nombre-roto-a-traves-del-puente`
+  The gauge's fixed nodes are written twice, in the .lut and in Python, breaking one-name-per-thing across the bridge and "never hardcode".
+  > Es el principio de un solo nombre por cosa roto a través del puente, y también "nunca hardcodear".
+
+- **04:25** model correction of turn 4 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 6] `dialogue:aa680014:correccion-no-hay-outlier`
+  Model retracts its earlier claim of an outlier; sigma=25.7cm comes from the whole fit (wide priors, few dof, nu=7.8), a question about the tape model, not Luthier.
+  > No hay outlier ... El sigma de 25,7 cm no viene de un dato malo sino del ajuste entero ... Eso es una pregunta sobre el modelo de la cinta, no sobre Luthier
+
 - **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:acoplamiento-sin-version`
   Sonolocalización depends on Luthier's working tree with uncommitted changes, so its results are not reproducible from a Luthier commit; the fix is to tag a version.
   > Sonolocalización depende del working tree de `~/Projects/luthier` ... que hoy tiene cambios sin commitear. Los resultados de sonolocalización no se pueden reproducir a partir de un commit de Luthier.
@@ -5201,6 +5337,86 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 - **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:trato-invertido-en-sonolocalizacion`
   The handoff deal (Luthier only describes, nothing non-trivial goes in Luthier) got inverted; now gauge, jacobian, model and native solvers live in Luthier and Python must match it bit for bit.
   > La nota de traspaso decía que Luthier solo describe (tipos, leyes, `extern` a Python, `test`) y que nada con cuerpo no trivial va en Luthier. Hoy `experiment_zero.lut` tiene el gauge, la jacobiana, el modelo, el `main`, Jacobi nativo para `pinvSym` y un LM nativo duplicado.
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:agrees-exactos-certifican-transliteracion`
+  MaximizerAgrees and StepAgrees with approxVec 0.0 prove lm.py and optimization.lut do the same float ops in the same order, which by R10 is consistency, not characterization, and is fragile.
+  > Por tu propia R10 eso es "consistente, no caracterizado".
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:aportes-propios-que-valen`
+  Three own contributions worth it: the certificate with the dependency-cone hash, R10 (characterize instead of reimplement), and the object as a strongly connected component; R10 the most valuable of the week.
+  > Hay tres aportes propios que valen: el certificado con el hash del cono de dependencias, la R10 (caracterizar en lugar de reimplementar) y el objeto como componente fuertemente conexa. La R10 es lo más valioso que salió de esta semana.
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:certificado-promete-mas-de-lo-que-hay`
+  "Certificate" promises more than there is: it neither enables nor blocks anything, it's a record, so the word "certificate" is excessive.
+  > El certificado no habilita ni bloquea nada; es un registro. Está bien que lo sea, pero entonces la palabra "certificado" sobra.
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:distribucion-es-del-test-no-del-tipo`
+  Aliases carrying a generator means a parameter's type carries a distribution the type system says doesn't exist; the case distribution belongs in the test directive, not the type.
+  > el tipo de un parámetro lleva una distribución que el sistema de tipos dice que no existe. La distribución de los casos es parte del test, no del tipo
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:el-trato-se-invirtio`
+  The handoff deal inverted: Luthier was to only describe, but now experiment_zero.lut holds gauge, jacobian, model, main and a native LM, while Python became the fast side that must match bit for bit.
+  > El trato se invirtió.
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:especificacion-se-mueve-mas-rapido-que-el-uso`
+  The specification moves faster than any use, so no program using Luthier can stabilize.
+  > La especificación se mueve más rápido que cualquier uso.
+
+- **04:30** pasted [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 7] `dialogue:aa680014:ninguna-ley-necesitaba-el-lenguaje`
+  The four laws that paid off are well chosen but none needed the language; they'd come out the same with pytest + hypothesis.
+  > Pero ninguna necesitaba el lenguaje: salen igual con pytest + hypothesis
+
+- **04:31** model confirmation of turn 7 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 8] `dialogue:aa680014:alias-con-generador-contra-r7`
+  Confirms the alias generator finding: the code looks up the generator on the type as written before unfolding, so the alias name carries a distribution against R7.
+  > el nombre del alias sí carga una distribución, contra R7. La observación es buena.
+
+- **04:31** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 8] `dialogue:aa680014:hypothesis-alternativa-por-construir`
+  The "hypothesis instead of Luthier" alternative must be evaluated as something to build, not something already there; today the only law layer in the project is Luthier.
+  > la alternativa "hypothesis en vez de Luthier" hay que evaluarla como algo por construir, no como algo que ya tenés
+
+- **04:31** model rejection of turn 7 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 8] `dialogue:aa680014:hypothesis-no-esta-en-el-proyecto`
+  The claim that pytest+hypothesis is already in sonolik is false; there's no import of the hypothesis library, so the "no language needed" argument loses its premise.
+  > En todo el repo no hay un solo `import hypothesis`; la librería ni siquiera está instalada.
+
+- **04:31** model correction of turn 7 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 8] `dialogue:aa680014:maximizador-es-extern-no-nativo`
+  Contrary to the report, the maximizer runs as extern python:lm.maximize and pinvSym is numpy; native LM/algebra are oracles outside run, so point 2 is already met for LM and algebra.
+  > para el LM y el álgebra ya se cumple lo que el informe pide en su punto 2.
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:arreglos-por-capas-el-puente-condiciona-todo`
+  Fixes go by layers and the bottom (the Python bridge) conditions all the rest, because while an extern can return anything no certificate says anything; problems marked [int], [spec], [proy].
+  > la capa de abajo (el puente con Python) condiciona a todas las demás, porque mientras un extern pueda devolver cualquier cosa, ningún certificado dice nada.
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:gen-solo-sobre-tipos-definidos`
+  gen only over defined types with a predicate; BrokenGraph becomes a subtype predicate, so the generator is verified against the predicate and the distribution sits where it belongs.
+  > `gen` solo sobre tipos definidos (con predicado). `BrokenGraph : U := { g : DistanceGraph | not (ValidGraph g) }`
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:let-y-menos-unario-como-azucar`
+  let as sugar for match, unary minus as sugar for 0 - x, and implicit arguments by simple unification.
+  > `let x = e in body` como azúcar de `match e { x -> body }`
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:ley-de-redondeo-con-rational`
+  Deep fix for float laws (06 §8): a rounding law verifiable exactly with Rational, from which the tolerance of a sum of n terms is deduced instead of assumed.
+  > la ley de redondeo `|toQ (x ⊕ y) − (toQ x + toQ y)| ≤ u |toQ x + toQ y|`, verificable exactamente con `Rational`
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:libreria-como-estructura-con-parametros`
+  Compare hashes at end of load with holes filled, accepting that a library with holes is a structure with parameters whose laws are certified by instantiation (03 §1).
+  > una librería con huecos es una estructura con parámetros, y sus leyes se certifican por instanciación.
+
+- **04:42** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:limite-al-kernel-sin-uso-acustico`
+  Each extra week of kernel without an acoustic use is a week the spec changes without a real problem's pressure, which is what produced the untrustworthy certificates.
+  > Cada semana más de kernel sin un uso acústico es una semana en la que la especificación cambia sin presión de un problema real, y eso es lo que produjo los certificados en los que hoy no se puede confiar.
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:suite-de-regresion-de-soundness`
+  A tests/soundness/ suite with today's reproducible failures as regression (bridge, extern codomain, exhaustive over Int, Bool by position, provisional, hash after editing Python, stale by holes).
+  > una suite `tests/soundness/` con los programas de ayer como regresión
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:tres-resultados-passed-failed-not-run`
+  Three distinct certificate results: passed, failed (with counterexample) and not run (with reason), so only failed is a failure.
+  > tres resultados distintos en el certificado: `passed`, `failed` (con contraejemplo) y `not run` (con la razón: sin generador, sin casos extraíbles, sin fuel). Solo `failed` es falla
+
+- **04:42** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 10] `dialogue:aa680014:un-solo-positionsmodel`
+  A single positionsModel used by both files, with Kernel certified over it from valid graphs, so the model that runs is the model certified.
+  > Entonces el modelo que corre es el modelo certificado
 
 - **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:cache-materializacion-incorrecta`
   The materialization cache, keyed only by `id(f)`, returns incorrect results; it is a correctness bug, not a performance one.
@@ -5245,6 +5461,310 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 - **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:tolerancia-de-otra-hoja-bajo-prueba`
   The tolerance is drawn from another sheet that is itself under test, so a `solve` returning zeros passes 50/50 when `cond` returns 1e30.
   > `SolveInverts` escala la tolerancia por `cond`. Un `solve` que siempre devuelve ceros pasa 50/50 si `cond` devuelve 1e30.
+
+- **05:42** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 18] `dialogue:aa680014:alias-transparentes-en-generadores`
+  A generator written over an alias is the generator of the type the alias names, and two generators for the same type are an error.
+  > un generador sobre un alias es el generador del tipo que el alias nombra, y dos sobre el mismo tipo son error.
+
+- **05:42** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 18] `dialogue:aa680014:codominio-de-un-extern-es-obligacion`
+  Every refinement in an extern's declared codomain becomes a proof obligation checked at `test`.
+  > cada refinamiento del tipo es una obligación.
+
+- **05:42** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 18] `dialogue:aa680014:generadores-verificados-contra-su-tipo`
+  Each value a registered generator produces is checked against its type, and a value outside the type is an error rather than being silently discarded; the model departed from the plan here.
+  > cada valor se verifica contra su tipo, y uno afuera es error. Me aparté del plan, que proponía descartarlo y contarlo
+
+- **05:42** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 18] `dialogue:aa680014:puente-valida-contra-el-tipo-declarado`
+  The Python bridge validates each incoming value against the declared type of the hole: a scalar of the wrong type is an error, an int promotes to float, arrays receive dtype and number of dimensions.
+  > valida contra el tipo declarado. Un `str` donde va `Float64` es error; un `int` se promueve, así que `f 3 / f 2` da `1.5`; los arrays reciben el dtype y la cantidad de dimensiones que dice su tipo
+
+- **05:51** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 22] `dialogue:aa680014:subtipo-por-predicado-en-vez-de-alias`
+  Changing a type from a bare alias (where the generator alone made a value "broken") to a predicate subtype puts the law in the type, so generated values are then verified against that predicate.
+  > Lo cambié a `{ g : DistanceGraph | not (ValidGraph g) }`.
+
+- **05:54** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 24] `dialogue:aa680014:costo-de-las-leyes-cuantificadas`
+  For quantified laws the law's type should be inferred once per type, not once per generated value, and the tests run on the machine.
+  > calcular el tipo de la ley una vez por tipo, no una vez por valor, y hacer las pruebas en la máquina.
+
+- **05:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 24] `dialogue:aa680014:gen-trusted`
+  If a generator stays expensive, the escape is a `gen T trusted`, recorded in the certificate as declared trust.
+  > queda la salida del plan: `gen T trusted`, registrado en el certificado como confianza declarada.
+
+- **05:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 24] `dialogue:aa680014:predicados-bool-decididos-en-la-maquina`
+  Predicates that are `Bool` are decided in the fast machine evaluator instead of the slow substitution evaluator of the checker.
+  > Ahora los predicados que son `Bool` se deciden en la máquina.
+
+- **05:57** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 26] `dialogue:aa680014:extern-provisional-nunca-certificado`
+  A test whose cone passes through a `provisional` extern is recorded with that mark and never counts as certified.
+  > un test cuyo cono pasa por un extern `provisional` queda registrado con esa marca y nunca cuenta como certificado.
+
+- **05:57** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 26] `dialogue:aa680014:fallas-son-estados-mal-informados`
+  The preexisting failures are not false laws but misinformed states, exactly what the certificate work corrects.
+  > las dos tandas de fallas preexistentes no son leyes falsas, son estados mal informados
+
+- **06:21** Luciano [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 27] `dialogue:aa680014:python-del-proyecto-solo-externs`
+  Luthier's intent is that Luciano not have to write project-dedicated Python scripts, only the functions called through extern, and he asks whether patches are creeping in.
+  > la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern
+
+- **06:31** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 28] `dialogue:aa680014:generadores-derivados-de-los-constructores`
+  The deep fix for weak generators and interpreter heuristics is generators derived from a type's constructors, so Luthier generates a valid value without a hand-written Python generator.
+  > generadores derivados de los constructores del tipo, de modo que Luthier genere un grafo válido sin un `gen_good_graph` en Python.
+
+- **06:31** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 28] `dialogue:aa680014:likelihood-sin-dimension`
+  A root cause behind the density-pair patch is that `Likelihood` does not carry the dimension of its tangent space.
+  > `Likelihood` no lleva la dimensión de su espacio tangente
+
+- **06:31** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 28] `dialogue:aa680014:tres-parches-reconocidos`
+  There are three patches in the work so far, worth naming as such and noting in the plan.
+  > hay tres parches, y conviene llamarlos así y anotarlos en el plan.
+
+- **06:34** Luciano decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 29] `dialogue:aa680014:condiciones-en-lut-implementacion-en-python`
+  The validation conditions are expressed in `.lut`, with the implementation in Python through extern.
+  > validate_distance_graph tiene que estar expresado en lut en cuanto a las condiciones y ser implementado en python con extern
+
+- **06:34** Luciano decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 29] `dialogue:aa680014:lm-controls-excluido-a-proposito`
+  The Levenberg-Marquardt controls were excluded on purpose as something for this particular case.
+  > este caso lo exclui a proposito ya que seria para este caso particular.
+
+- **06:34** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 30] `dialogue:aa680014:certificacion-por-llenado-de-huecos`
+  Hashes are compared with the whole program loaded and the holes filled, and each name keeps one entry per way of filling them.
+  > los hashes se comparan con el programa entero cargado y los huecos llenos, y cada nombre guarda una entrada por cada forma de llenarlos.
+
+- **06:34** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 30] `dialogue:aa680014:grados-bounded-vs-exhaustive`
+  A verification is "bounded" when a box of Int was traversed, "exhaustive" only over genuinely finite domains.
+  > \"bounded\" cuando se recorrió una caja de `Int`, \"exhaustive\" solo sobre dominios finitos de verdad.
+
+- **06:34** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 30] `dialogue:aa680014:hash-del-certificado-cubre-cono-python-interprete`
+  The certificate hash covers the cone's code, the Python of each extern, and the interpreter, so editing any of them invalidates the dependent certificates.
+  > cubre el código del cono, el Python de cada extern y el intérprete.
+
+- **06:34** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 30] `dialogue:aa680014:run-registra-el-cono-y-require-certified`
+  `run` shows and saves the state of the cone, and `--require-certified` refuses to run if anything in the cone is not certified.
+  > `run` muestra y guarda el estado del cono, y `--require-certified` se niega a correr si algo no está certificado.
+
+- **06:34** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 30] `dialogue:aa680014:test-n-sobre-el-objeto-entero`
+  `test n` runs the whole strongly-connected object that contains `n`.
+  > `test n` corre todo el objeto de `n`.
+
+- **06:34** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 30] `dialogue:aa680014:tres-resultados-de-una-ley`
+  A law has one of three results: passed, failed, or not run (e.g. depends on unfilled holes).
+  > tres posibles, `passed`, `failed` y `not run`.
+
+- **06:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 32] `dialogue:aa680014:bool-por-etiquetas-no-por-posicion`
+  Today any sum of two Units counts as Bool with the first alternative read as true; Bool should be recognized by its labels true and false, never by position.
+  > El arreglo es reconocer `Bool` por sus etiquetas `true` y `false`, nunca por posición.
+
+- **06:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 32] `dialogue:aa680014:costo-de-la-huella-del-interprete`
+  A cost of including the interpreter's fingerprint in the hash is that every batch of interpreter changes forces recertifying everything, so it must be done in batches, not after each change.
+  > Esto muestra además un costo del 2.1: después de cada tanda de cambios al intérprete hay que recertificar todo
+
+- **06:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 32] `dialogue:aa680014:float64field-vale-solo-en-una-caja`
+  `float64Field` associativity fails outside a magnitude box while the type claims `OrderedField Float64` with no bound; the short fix is a carrier that states the box, the deep one a rounding law with exact Rational from which tolerances follow.
+  > La asociatividad falla en (1e8, -1e8, 3e-9), y el tipo dice `OrderedField Float64` sin límite.
+
+- **06:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 32] `dialogue:aa680014:igualdad-donde-no-deberia-existir`
+  `==` is wrongly accepted over Real (no computable equality), over a data with functions inside, and is not checked past depth 20.
+  > Se acepta `==` sobre `Real`, que no tiene igualdad computable, sobre un `data` con funciones adentro
+
+- **06:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 32] `dialogue:aa680014:r2-r3-reportar-no-decidible`
+  R2 and R3 should follow the definition and report "not decidable" instead of approximating the type position or counting all labels as touched.
+  > El arreglo es seguir la definición de 05 §0 y reportar \"no decidible\" en vez de aceptar.
+
+- **06:54** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 32] `dialogue:aa680014:tofloat64-corregir-spec-no-renombrar`
+  Spec says `Real -> Float64` but code has `Int -> Float64` with 37 uses; the model departs from the plan to fix the spec and the message rather than rename the uses, since Real is not computed.
+  > Me aparto del plan: corregir la especificación y el mensaje, no renombrar 37 usos.
+
+- **07:17** model correction of turn 32 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 39] `dialogue:aa680014:caja-no-funciona-porque-la-suma-se-escapa`
+  Restricting float64Field to the [-16, 16] box does not work because a sum does not stay inside the box, and vector spaces are built on it; it is left for its own phase with the rounding law.
+  > Restringir `float64Field` a la caja [-16, 16] no funciona porque la suma no queda dentro de la caja
+
+- **07:17** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 39] `dialogue:aa680014:if-sobre-suma-no-bool-tomaba-la-primera-rama`
+  A real error surfaced: an `if` over a sum that is not Bool silently took the first branch because `true` was read as a variable; it is now an error.
+  > el `if` sobre una suma que no es `Bool` tomaba siempre la primera rama sin avisar, porque `true` se leía como una variable. Ahora es error.
+
+- **07:17** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 39] `dialogue:aa680014:jacobiana-en-luthier-no-en-python`
+  The performance fix for experiment_zero was computing each jacobian row's distance once in Luthier, with no Python, contrary to the plan's proposal to move the likelihood to Python.
+  > El plan proponía pasar la verosimilitud a Python y no hizo falta.
+
+- **10:33** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 46] `dialogue:aa680014:argumentos-implicitos-con-unificacion`
+  Implicit type parameters are added: the checker records how many a definition has, verifies they are types, and elaborates the application by unification.
+  > la elaboración de la aplicación con unificación.
+
+- **10:33** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 46] `dialogue:aa680014:brokentext-necesita-gramatica-en-luthier`
+  Giving BrokenText an honest predicate ("this text is not a CSV of the format") requires the format's grammar written in Luthier, which only the Python parser had.
+  > necesito la gramática del formato en Luthier.
+
+- **10:33** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 46] `dialogue:aa680014:densitypair-como-caso-del-espacio-entero`
+  `DensityPairOn`/`KernelOn` are written over a domain, with `DensityPair`/`Kernel` as the case where the domain is the whole space.
+  > con `DensityPair` y `Kernel` como el caso en que el dominio es el espacio entero.
+
+- **10:33** model correction of turn 44 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 46] `dialogue:aa680014:indexat-tipo-honesto-nat`
+  `indexAt` failed with k = -1 because its parameter's type was Int, which admits negatives; the honest type is Nat.
+  > El tipo honesto es `Nat`.
+
+- **10:33** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 46] `dialogue:aa680014:let-y-menos-unario`
+  `let`/`in` and a unary minus are added to the language.
+  > paso a `let` y al menos unario.
+
+- **10:33** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 46] `dialogue:aa680014:refinamientos-dentro-de-sumas-y-checked`
+  Refinements inside sums and the `--checked` flag are added and recorded in the specification.
+  > Anoto en la especificación los refinamientos dentro de sumas y `--checked`
+
+- **17:42** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 51] `dialogue:aa680014:cada-arreglo-del-interprete-invalida-certificados`
+  Any interpreter fix invalidates every certificate, so the regeneration had to restart.
+  > Cada arreglo del intérprete invalida todos los certificados, y por eso la regeneración se reinició varias veces durante la noche.
+
+- **17:42** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 51] `dialogue:aa680014:dimension-en-los-tipos-del-modelo`
+  To put the position model's guarantees into the types, the dimension had to enter the types of probability, belief and optimization, so Theta is `VecOf n` throughout; with `Vec Float64` the model's obligations were false.
+  > hubo que meter la dimensión en los tipos de probability, belief y optimization: ahora Theta es `VecOf n` en todo el proyecto. Con `Vec Float64` las obligaciones del modelo eran falsas.
+
+- **17:42** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 51] `dialogue:aa680014:obligacion-de-tipo-vs-ley-ante-excepcion`
+  A type obligation speaks of the values a computation produces, so if it raises an exception there is no value and that case is skipped; a law stated in a definition's type keeps failing on an exception.
+  > una obligación de tipo habla de los valores que produce un cómputo. Si el cómputo levanta una excepción no hay valor, y ese caso se salta. Una ley enunciada en el tipo de una definición, en cambio, sigue fallando ante una excepción.
+
+- **17:42** model question [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 51] `dialogue:aa680014:obligaciones-genericas-no-corren`
+  Generic obligations never run because there is no generator of U to choose Theta; Luciano asks whether that is in fact the intended behaviour.
+  > Las obligaciones genéricas nunca corren.
+
+- **17:47** Luciano confirmation of turn 51 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 52] `dialogue:aa680014:lmmaxiter-como-parametro`
+  Confirms the model's raising that `lmMaxIter`, now a constant, must be a parameter.
+  > si, obvio tiene que ser parametro
+
+- **17:49** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 53] `dialogue:aa680014:agujero-sin-default-vs-argparse`
+  In Luthier a hole has no default, so each run must supply `--set` for every parameter; a real default would be a new language feature, a parameter with a value `--set` replaces and the run records.
+  > en Luthier un agujero no tiene default, así que cada corrida tendrá que dar `--set lmTol=… --set lmMaxIter=…`... Si querés defaults de verdad, es una característica nueva del lenguaje
+
+- **17:49** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 53] `dialogue:aa680014:dos-evaluadores`
+  The interpreter has two implementations of the same semantics, a call-by-need machine and a substitution evaluator used by the checker; they can diverge, a law can evaluate half in each, and each fix is done twice. The plan is to keep only the machine.
+  > El intérprete tiene dos implementaciones de la misma semántica
+
+- **17:49** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 53] `dialogue:aa680014:leyes-estadisticas-tasa-de-falsa-falla`
+  A statistical law fails by chance even with a correct model; its false-fail rate should be recorded in the certificate, and a single failure should be repeated with another seed before being called a counterexample; the interpreter could recognize statistical laws because they receive an `Ensemble`.
+  > Una ley estadística falla por azar con un modelo correcto... Ese número sale del `Ensemble` y de la ley, y debería quedar en el certificado para pesar una falla.
+
+- **17:49** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 53] `dialogue:aa680014:match-contra-tipo-refinado-no-se-chequea-por-rama`
+  When the expected type has laws, the checker does not inspect each branch of an `if`/`match`; it infers the type of the whole, loses the laws and raises an obligation over the whole `if`. The reason for this rule in `check` was not recorded.
+  > Cuando el tipo esperado tiene leyes, el checker no mira cada rama de un `if` o `match`: infiere el tipo del todo, pierde las leyes y genera una obligación sobre el `if` entero.
+
+- **17:49** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 53] `dialogue:aa680014:negate-obligacion-falsa-separar-problem-objective`
+  `negate` promises to return an objective with laws out of arbitrary functions, an obligation that is false; the fix is to split `Problem` (what the algorithm runs, no laws) from `Objective` (a `Problem` with laws), so `negate` returns a `Problem`.
+  > `negate` promete devolver un objetivo con leyes a partir de tres funciones cualesquiera, y esa promesa sólo vale si quien lo llama le pasa un gradiente verdadero; el tipo no lo exige.
+
+- **17:49** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 53] `dialogue:aa680014:square-por-rechazo`
+  `Square` has no registered generator, so a square matrix is drawn by rejection (one in seventeen), which the laws over `Square` pay per case; the fix needs touching arrays.py and thus a full regeneration.
+  > `Square` es `{ a : Mat Float64 | a.m == a.n }` y no tiene generador registrado.
+
+- **17:54** Luciano question [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 54] `dialogue:aa680014:generacion-de-valores-de-tests-interna`
+  Asks whether the generation of values for the types involved in tests is done internally.
+  > hay una cuestion importante con los tests y es como se generan los valores de los tipos involucrados. Entiendo que eso se hace internamente no?
+
+- **17:56** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 55] `dialogue:aa680014:generacion-parte-del-significado-del-certificado`
+  Unless a `gen` is declared, the tester builds values from the structure of the type, and that construction is part of what each certificate means; where generation decides what gets tested (numeric range, refinements by rejection, functions over infinite domains as constants, type parameters, generator coverage never verified).
+  > Salvo que el programa declare un `gen` para un tipo, el tester construye los valores él solo, mirando la estructura del tipo. Esa construcción es parte de lo que significa cada certificado
+
+- **18:04** Luciano decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 56] `dialogue:aa680014:generador-explicito-por-tipo`
+  Wants tests to require an explicit generator for each type involved, even if it is just a typical value, so it is made explicit; function values by a census over registered values, numbers with fixed limits and linear or log scale, vectors with several generators for different cases. Asks for a document toward a specification.
+  > yo quisiera que los tests pidan un generador explicito para cada tipo involucrado. El generador puede ser simplemente un valor tipico, pero la idea es que quede explicitado.
+
+- **19:00** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 62] `dialogue:aa680014:chequeo-devuelve-valor-tipado-no-bool`
+  Restating Luciano's own document: checking a value should not yield a Bool thrown away but the same value with a finer type, so nobody checks it again; the granularity of a result's type is chosen by the cost of redoing the computation. The model names its literature (parse-don't-validate, occurrence typing, dependent types) and points to three places in the model's own night-code that violate it.
+  > si chequeás un valor, el resultado no debería ser un Bool que se tira, sino el mismo valor con un tipo más fino, para que nadie lo vuelva a chequear.
+
+- **19:05** Luciano [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 63] `dialogue:aa680014:bounded-real-y-aritmetica-de-intervalos`
+  A bounded Real is a possible type, extendable through many (not all) functions, that at some cost carried across a computation would give a bound for the values of a complex function; an almost experimental application.
+  > un bounded Real es un tipo posible que se puede extender con muchas funciones (no todas) y con un costo importante pasarlo de un lado al otro te permitiria obtener un bound para los valores de una funcion compleja.
+
+- **19:05** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 64] `dialogue:aa680014:intervalos-ley-de-inclusion-en-luthier`
+  Interval arithmetic fits Luthier because its correctness is a single law (inclusion) that Luthier can already certify; a bounded real is a certificate `{ y | lo <= y and y <= hi }`, composition comes free, and the law is provable without tolerances via the rationals. Not all functions extend (monotone vs piecewise, the dependency problem), remedied by the mean-value form using the certified gradient. Three applications for sonolocalización: certify separation over a region, compute tolerances instead of hand-writing them, certify global optimum by branch-and-bound.
+  > Encaja en Luthier mejor que en casi cualquier lenguaje porque su corrección es una sola ley, y esa ley Luthier ya sabe certificarla.
+
+- **19:14** Luciano decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 65] `dialogue:aa680014:nota-de-intervalos-en-docs-ideas`
+  Leave the interval-bounds idea as a note in docs/ideas, and check whether the principle his document implies is explicit in the documents and specifications.
+  > 1) dejalo como nota en doc ideas 2) veamos si el principio que implica mi documento esta explicito en los documentos y especificaciones
+
+- **19:16** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 66] `dialogue:aa680014:principio-a-medias-en-la-especificacion`
+  Luciano's principle is only half in the spec: the static half (a type with laws is a certificate, a certified law is not re-proven) is there, but the half his note puts first, that a check done on a value changes that value's type so nobody repeats it, is absent; the "no checking twice" rule, a check returning the refined value, how much a result's type should name, and `run --checked` as the deliberate exception are missing.
+  > Falta la mitad que tu nota pone primero: que un chequeo hecho sobre un valor cambie el tipo de ese valor, para que nadie lo repita.
+
+- **19:20** Luciano [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 67] `dialogue:aa680014:chequeo-bool-y-chequeo-refinado-dos-presentaciones`
+  A principle of simplicity makes a check return a Bool, but a monad applied over the check can make it return a checked type; both functions are valid and the context decides which to use.
+  > Hay un principio de simplicidad que hace que un chequeo devuelva un bool. Pero con un monada aplicada sobre el chequeo podes hacer que devuelva un tipo chequeado. quiero decir, ambas funciones son validas, el contexto indica cual usar quizas.
+
+- **19:21** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 68] `dialogue:aa680014:bool-y-refine-derivable-regla-de-rama`
+  The two presentations are the characteristic function and the partial inverse of inclusion; each derives from the other with one combinator (`refine p x = if p x then just x else nothing`), so the check is written once as Bool and the refined version is derived, provided the checker knows that in the `then` branch `p x` holds. The context that decides is whether the evidence must survive outside the branch; a branch condition different from the predicate turns the refinement into an obligation that is itself a certified law.
+  > Se escribe `p` una vez, como Bool, porque es la ley y porque los Bool se componen solos (`and`, `or`, `not`); la versión refinada se deriva.
+
+- **19:25** Luciano confirmation of turn 68 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 69] `dialogue:aa680014:cierra-la-propuesta-de-refine`
+  Accepts the model's proposal (Bool checks, branch-refinement rule, derived `refine`, refine at the borders), asking it to check for contexts that would ask otherwise.
+  > Me cierra asi, pero por las dudas fijate si hay contextos que pidan otra cosa, no pierdas mas de 5 minutos.
+
+- **19:25** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 70] `dialogue:aa680014:bool-primary-refine-by-branch`
+  Bool as the primary form of a check and refinement by branch as the rule, with three derived forms (verdict with level, pair with witness, list of errors) and the principle that a check on the world refines the reading, not the reference.
+  > Bool como forma primaria y el refinamiento por rama como regla, más tres formas derivadas para estos contextos (veredicto con nivel, par con testigo, lista de errores) y el principio de que un chequeo sobre el mundo refina lo leído, no la referencia.
+
+- **19:25** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 70] `dialogue:aa680014:certifying-algorithm-value-with-witness`
+  A check often computes something worth more than yes/no; the certifying-algorithm pattern returns the result plus a witness a simple checker verifies, with the refined value as the special case where the witness is the value itself, giving in general a dependent pair with a law.
+  > En la literatura se llama algoritmo certificador (McConnell, Mehlhorn, Näher y Schweitzer, 2011): el algoritmo devuelve su resultado y un testigo que un chequeador simple verifica. El valor refinado es el caso particular en que el testigo es el valor mismo. En general el resultado es un par dependiente `(x, w)` con una ley que dice que `w` atestigua `p x`.
+
+- **19:25** model correction of turn (GraphDir, model's own) [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 70] `dialogue:aa680014:check-on-the-world-refines-the-reading`
+  When the checked fact is external, refining the value gives a guarantee that can expire (time-of-check to time-of-use); the principle should refine what was read, not the path, and check and use must be the same operation.
+  > Si el hecho chequeado es externo, refinar el valor da una garantía que puede vencer. ... Tu principio, bien aplicado, pide refinar lo leído, no la ruta: `readGraph : String -> < graph : DistanceGraph | unreadable : String >`, y validar el contenido. El chequeo y el uso tienen que ser la misma operación.
+
+- **19:25** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 70] `dialogue:aa680014:statistical-verdict-with-its-level`
+  Statistical checks don't establish a fact about the value; they report that a test with some false-failure rate didn't distinguish it from expected, so they need a third presentation, a verdict carrying its level and statistic.
+  > `UniformDraws`, `IsDensityOf` o el PIT de los residuos no establecen un hecho sobre el valor. Dicen que una prueba con cierta tasa de falsa falla no lo distinguió de lo esperado. ... Esto pide una tercera presentación, un veredicto con su nivel.
+
+- **19:25** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 70] `dialogue:aa680014:tolerance-must-live-in-the-type`
+  Checks with tolerance don't compose, because "a near b" and "b near c" don't give "a near c" at the same tolerance, so if used to refine the tolerance must go in the type.
+  > los chequeos con tolerancia (`approx tol`) no se componen, porque \"a cerca de b\" y \"b cerca de c\" no dan \"a cerca de c\" con la misma tolerancia. Si se refina con ellos, la tolerancia tiene que ir en el tipo.
+
+- **19:25** model proposal [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 70] `dialogue:aa680014:validation-applicative-all-errors`
+  A monad stops at the first failure, fit for a pipeline, but validating a graph by hand wants the full list of violations, which is an applicative that accumulates errors; the context decides between the two.
+  > para validar un grafo a mano querés la lista completa de violaciones. Eso no es una mónada sino un aplicativo que acumula errores (la \"Validation\" de Haskell). ... y el contexto decide entre las dos.
+
+- **19:29** Luciano confirmation of turn 70 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 71] `dialogue:aa680014:add-all-of-it`
+  Luciano accepts adding all of the above to the specification.
+  > Si, suma todo eso.
+
+- **19:30** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 72] `dialogue:aa680014:check-made-once`
+  A check is made once per fact, acting at three moments (certifying, running, the program's edge with the world), with a granularity criterion: a cheap result carries its bound, a costly one carries its inputs and its witness.
+  > un chequeo por cada hecho. Explica cómo actúa en tres momentos (al certificar, al correr y en el borde del programa con el mundo) e incluye el criterio de granularidad con tus dos ejemplos. Un resultado barato lleva su cota (`sin x` en [−1, 1]); uno caro lleva sus entradas y su testigo (el óptimo de f y x desde b0).
+
+- **19:30** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 72] `dialogue:aa680014:commit-separate-from-other-session`
+  Working method: with another session committing in the same repo, changes stay uncommitted and the model first looks at what the other session touched so its changes aren't swept into a commit with a different message.
+  > Todo queda sin commitear, porque la otra sesión sigue commiteando en el mismo repo. Antes de commitear miro qué tocó ella, para que mis cambios no queden dentro de un commit suyo con otro mensaje.
+
+- **19:30** model decision [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 72] `dialogue:aa680014:r11-condition-refines-in-its-branch`
+  Rule R11: inside `if p x`, `x` has the refined type and the coercion owes nothing; under another condition `q x` one owes `q x -> p x`; it also holds for `match` and replaces last night's textual discard.
+  > Dentro de `if p x`, `x` tiene el tipo refinado y la coerción no debe nada. Bajo otra condición `q x` se debe `q x -> p x`, que suele ser una ley que ya existe, como `ReportsValidity`. Vale igual para `match m { just y -> … }`, y reemplaza el descarte textual de anoche.
+
+- **19:48** Luciano confirmation of turn 72 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 73] `dialogue:aa680014:commit-it`
+  Luciano tells the model to commit the specification changes.
+  > commitea si
+
+- **19:51** Luciano question [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 75] `dialogue:aa680014:reals-modeled-with-rationals-worry`
+  Luciano is uneasy that reals seem modeled with rationals; fine for specific cases but as a general strategy it looks suicidal in terms of time, and he asks what it is about.
+  > hay algo que me pone nervioso y es que modelamos los reales con racionales. Eso esta bien para algunos casos puntuales pero como estrategia general me parece sucida en cuanto a los tiempos, me podes contar de que se trata eso?
+
+- **19:51** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 76] `dialogue:aa680014:protection-against-suicidal-strategy-in-spec`
+  The specification (06) protects against the suicidal strategy: running code is written over `Float64`, or generic in its numeric type, and `Rational` is reserved for stating and certifying laws.
+  > código que corre se escribe sobre `Float64`, o genérico en su tipo numérico, y `Rational` se reserva para enunciar y certificar leyes.
+
+- **19:51** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 76] `dialogue:aa680014:rationals-decide-rounding-law-exactly`
+  Every finite double is exactly a rational, so the exact result of an operation between doubles is rational and the machine's double can be compared against it with no tolerance, deciding the rounding law exactly; before, these laws used eyeballed tolerances and the doubles' field law was false.
+  > Todo double finito es exactamente un racional ... la ley de redondeo, `|fl(x op y) − (x op y)| ≤ u·|x op y|` con u = 2⁻⁵³, queda decidida exactamente. Antes esas leyes se escribían con tolerancias a ojo, y la ley de cuerpo de los doubles era directamente falsa.
+
+- **19:51** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 76] `dialogue:aa680014:rationals-limit-irrationals-need-balls`
+  Rationals don't reach the irrational: square root is verified with a trick that stays in the rationals, but exp, log or sin have no exact rational value and would need ball or interval arithmetic (Arb) to verify.
+  > no alcanzan para lo irracional. ... `exp`, `log` o `sin` no tienen valor exacto racional, y para verificarlas haría falta aritmética de bolas o intervalos (Arb), como en la nota de anoche.
+
+- **19:51** model confirmation of turn 75 [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 76] `dialogue:aa680014:rationals-worry-correct-usage-bounded`
+  The model confirms Luciano's worry holds in general (denominators grow without control in long chains) and that rationals are therefore used only for one operation or a sum of up to 16 terms against its exact value, never inside a calculation.
+  > **Tu miedo es correcto en general.** En cadenas largas los denominadores crecen sin control, y la aritmética racional se vuelve inutilizable. Por eso se los usa sólo para una operación o una suma de hasta 16 términos contra su valor exacto, y nunca dentro de un cálculo.
+
+- **19:51** model [chat: 2026-10-05_aa680014_analsis-critico-de-como-esta-la-implemen.md turn 76] `dialogue:aa680014:three-numeric-types-roles`
+  Three numeric types with distinct roles: `Real` is the mathematical ideal nothing computes on, `Float64` is what all running code uses, `Rational` serves only to verify that each double operation rounds well.
+  > **`Real`** es el ideal matemático. Nada lo calcula ... **`Float64`** son los doubles de IEEE. Todo lo que corre corre con ellos ... **`Rational`** son fracciones exactas de enteros. Sirven para una sola cosa: verificar que cada operación de los doubles redondea bien.
 
 ### 2026-10-07
 
@@ -5731,4 +6251,5 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | claude-code_2026-09-30_ac750929_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 29 | 29/29 | 0dacdc63fae2 |
 | claude-code_2026-10-04_88936d99_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 184 | 181/184 | a2301adab311 |
 | claude-code_2026-10-05_0602f3b5_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 20 | 20/20 | 8ad2fa22e647 |
+| claude-code_2026-10-05_aa680014_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 130 | 130/130 | 96a34b238c1d |
 | gemini_2026-05-29_20260529_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 62 | 61/62 | 6ca4846f5f3a |
