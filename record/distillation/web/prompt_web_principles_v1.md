@@ -12,9 +12,9 @@ order. Each line is `r<n> | date | who | the idea`; "model" means an AI said it.
 
 Read the whole file before answering.
 
-1. What are the rules and principles of this language? Give at most 10, the most important first.
+1. What are the rules and principles of this language? Give at most 20, the most important first.
 2. What are the rules and principles of how this language is being built (the way of working)?
-   Give at most 10, the most important first.
+   Give at most 20, the most important first.
 
 For each one, a single line in exactly this form:
 
