@@ -79,3 +79,32 @@ running; it reads the texts and does not judge principles):
   verification or code written by models). If one is found, it gets the same protocol.
 
 Leakage keeps its reading: a Luthier item a candidate states with no reference item behind it.
+
+## Results, 2026-10-09
+
+All runs with Claude Opus 5.5 at low effort; the files are under each control's folder.
+
+| run | Python: hits | Python: leaks | Haskell: hits | Haskell: leaks |
+|---|---|---|---|---|
+| memory, no corpus (`--recall`) | 4/7 | 0 | 5/7 | 0 |
+| find v1, as is | 2/7 | 0 | 3/7 | 0 |
+| find v1, redacted | 3/7 | 0 | 3/7 | 0 |
+| find v2, as is | 4/7 | 0 | 4/7 | 0 |
+| find v2, redacted | 3/7 | 0 | 4/7 | 0 |
+
+Read (the model's, for Luciano to weigh):
+
+- No run brought Luthier's ideas: no candidate stated a Luthier item without a reference item.
+- On Python the filter reads the corpus: its hits (G2, G9, G13, G14, Z8, Z10, Z12) are Guido's
+  guidelines, which the memory baseline did not produce (it gave Z2, Z3, Z7, Z9, Z13). On Haskell
+  every hit is also in memory (lazy, pure, type classes, consensus), so it tells nothing about the
+  corpus.
+- v1 returned single design decisions as principles (indentation, zero-based indexes, explicit
+  self); v2, which asks for the road not taken, returns rules. Most of v2's misses are principles
+  the designers state elsewhere and the references leave out (first-class everything, a value
+  prints as an expression that reads back, effects as first-class values, notation that follows
+  mathematics), so the hit rate understates the filter.
+- Blind spot in every run: principles about the process and its tensions (Python's timesaving
+  rules G1, G3 to G7: borrow ideas, don't fret about performance, good enough; Haskell's H4 to H7:
+  a committee language, beauty against utility, evolution against stability) never came out. The
+  filter finds principles about the artifact, not about how it is made.

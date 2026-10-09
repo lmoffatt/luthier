@@ -1,0 +1,196 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "G13",
+      "why": "errors not silent, raise instead"
+     },
+     {
+      "item": "G14",
+      "why": "no undefined behavior/result"
+     },
+     {
+      "item": "Z10",
+      "why": "errors never pass silently"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "G9",
+      "why": "don't bother users with machine-handled details"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [
+     {
+      "item": "Z8",
+      "why": "no special cases, uniform rules"
+     }
+    ],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [
+     {
+      "item": "G2",
+      "why": "as simple as possible, minimal"
+     },
+     {
+      "item": "Z3",
+      "why": "simple better than complex"
+     }
+    ],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [], \"B\": []}, {\"candidate\": \"C2\", \"A\": [{\"item\": \"G13\", \"why\": \"errors not silent, raise instead\"}, {\"item\": \"G14\", \"why\": \"no undefined behavior/result\"}, {\"item\": \"Z10\", \"why\": \"errors never pass silently\"}], \"B\": []}, {\"candidate\": \"C3\", \"A\": [{\"item\": \"G9\", \"why\": \"don't bother users with machine-handled details\"}], \"B\": []}, {\"candidate\": \"C4\", \"A\": [{\"item\": \"Z8\", \"why\": \"no special cases, uniform rules\"}], \"B\": []}, {\"candidate\": \"C5\", \"A\": [{\"item\": \"G2\", \"why\": \"as simple as possible, minimal\"}, {\"item\": \"Z3\", \"why\": \"simple better than complex\"}], \"B\": []}, {\"candidate\": \"C6\", \"A\": [], \"B\": []}, {\"candidate\": \"C7\", \"A\": [], \"B\": []}]}\n",
+   "answer_sha256": "d64236154523d7d179c72103e8956eba2f9d50251d99f18db61f90822fd36d97",
+   "date": "2026-10-09T11:41:07Z",
+   "errors": [],
+   "seconds": 30
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "One of my goals for Python was to make it so that all objects were \"first class.\" By this, I meant that I wanted all objects that could be named in the language ... to have equal status.",
+   "statement": "Make every object that can be named a first-class citizen with equal status: assignable, passable, storable, callable. (instead of: reserving special status for functions, classes or types so some things can be named but not handled like the rest)"
+  },
+  "C2": {
+   "quote": "I decided that there should be no undefined result values in Python – instead, exceptions should always be raised when no correct return value can be computed.",
+   "statement": "Never return an undefined or silently wrong value; raise an exception whenever no correct result can be computed. (instead of: returning sentinels, undefined values or silently wrapped results that let an error pass unnoticed)"
+  },
+  "C3": {
+   "quote": "This is one area where Python violated the ABC-inspired philosophy of not requiring users to care about a uninteresting implementation details.",
+   "statement": "Don't make users care about uninteresting implementation details. (instead of: requiring markers, suffixes or declarations that exist only to serve the implementation)"
+  },
+  "C4": {
+   "quote": "I decided to generalize these to a common concept, the sequence. This generalization made it so certain core operations such as getting the length (len(s)), indexing (s[i]), slicing (s[i:j]), and iteration (for i in s) worked the same on any sequence type.",
+   "statement": "When several types share operations, generalize them to one common concept so the same operations work the same on all. (instead of: giving each type its own separate operations with their own names and behavior)"
+  },
+  "C5": {
+   "quote": "A major design constraint was that I didn't want to add syntax for methods that differed from the syntax for functions. Refactoring the grammar and the byte code generator to handle such similar cases differently felt like a huge task.",
+   "statement": "Prefer the minimal solution that reuses existing constructs; don't add new syntax when an existing one will do. (instead of: inventing dedicated syntax for each new feature (a method keyword, operator declarations, a metaclass clause))"
+  },
+  "C6": {
+   "quote": "One of the rules I took from ABC was that every data type, when printed or converted to a string, should be represented by an expression that was a valid input to the language's parser.",
+   "statement": "Make a value's printed representation an expression that is valid input to the parser. (instead of: printing values in an ad-hoc display form that can't be read back as code)"
+  },
+  "C7": {
+   "quote": "the invariant that when two / slices are adjacent, the first slice's end index is the second slice's / start index is just too beautiful to ignore.",
+   "statement": "Choose the convention whose invariant makes the common cases come out clean, without +1/-1 corrections. (instead of: 1-based indexing with closed intervals that force awkward +1/-1 compensation on everyday slicing)"
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "088bbef410bcdb85888858c56931ee27d42c8bb3a33832730adc900134d65b32",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/python/find_v2/2026-10-09_find_principles_v2_claude-code_opus.json": {
+   "sha256": "726297f502ed98279905931cf73d6b9493ac169aee4c503044da8342d2a5ef2a"
+  },
+  "record/controls/python/reference.md": {
+   "sha256": "0d6a91875bf553365da9db959e7b62a9424b079946b0a95d57583b9783833ea9"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 4,
+  "leaks": 0,
+  "neither": 3,
+  "passes": true,
+  "rows": [
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G13",
+     "G14",
+     "Z10"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "G9"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "Z8"
+    ],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "G2",
+     "Z3"
+    ],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "neither"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}

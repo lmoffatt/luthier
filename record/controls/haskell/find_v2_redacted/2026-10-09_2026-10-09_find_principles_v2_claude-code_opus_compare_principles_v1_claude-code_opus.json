@@ -1,0 +1,181 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "keeping the language pure"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "H1",
+      "why": "lazy by default"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "referential transparency is purity"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [
+     {
+      "item": "H3",
+      "why": "type classes for overloading"
+     }
+    ],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\":[{\"candidate\":\"C1\",\"A\":[{\"item\":\"H2\",\"why\":\"keeping the language pure\"}],\"B\":[]},{\"candidate\":\"C2\",\"A\":[{\"item\":\"H1\",\"why\":\"lazy by default\"}],\"B\":[]},{\"candidate\":\"C3\",\"A\":[{\"item\":\"H2\",\"why\":\"referential transparency is purity\"}],\"B\":[]},{\"candidate\":\"C4\",\"A\":[{\"item\":\"H3\",\"why\":\"type classes for overloading\"}],\"B\":[]},{\"candidate\":\"C5\",\"A\":[],\"B\":[]},{\"candidate\":\"C6\",\"A\":[],\"B\":[]},{\"candidate\":\"C7\",\"A\":[],\"B\":[]}]}\n",
+   "answer_sha256": "7d08f514c54caa3e90deb876333fbcef7d8b7224e14a279dae838808837f3053",
+   "date": "2026-10-09T11:53:05Z",
+   "errors": [],
+   "seconds": 15
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "Underlying all these developments is the realisation that being explicit about effects is extremely useful, and this is something that we believe may ultimately be seen as one of L’s main impacts on mainstream programming",
+   "statement": "Keep the language pure and make every effect explicit in the types, rather than allowing effects by default. (instead of: effects-by-default)"
+  },
+  "C2": {
+   "quote": "Lazy evaluation—with its direct connection to the pure, call-by-name lambda calculus, the remarkable possibility of representing and manipulating infinite data structures, and addictively simple and beautiful implementation techniques—was like a drug.",
+   "statement": "Evaluate lazily by default, so values are computed only when needed and infinite structures and new abstractions become ordinary. (instead of: strict, call-by-value evaluation)"
+  },
+  "C3": {
+   "quote": "Because of referential transparency, L programs can be viewed as executable mathematics, as equations over the category of complete partial orders. In principle, at least, the specification becomes the program.",
+   "statement": "Preserve referential transparency so programs read as equations, as executable mathematics where the specification can become the program. (instead of: programs as sequences of state-changing commands)"
+  },
+  "C4": {
+   "quote": "Aside from laziness, type classes are undoubtedly L's most distinctive feature.",
+   "statement": "Solve overloading with a principled, type-directed abstraction of classes and instances, not ad hoc special-casing. (instead of: ad hoc operator overloading)"
+  },
+  "C5": {
+   "quote": "the big advantage is conceptual. It is much easier to think abstractly in terms of computations than concretely in terms of the details of failure and success continuations.",
+   "statement": "Model effects and other notions of computation as first-class values, reasoning about computations abstractly rather than wiring their details by hand. (instead of: built-in, hard-wired notions of sequencing and effects)"
+  },
+  "C6": {
+   "quote": "Another productive way to think of a combinator library is as a domain-specific language (DSL) for describing values of a particular type",
+   "statement": "Build abstractions as combinator libraries that turn the language itself into a domain-specific language, instead of inventing a new language and tooling each time. (instead of: writing a standalone parser, type checker and interpreter per domain)"
+  },
+  "C7": {
+   "quote": "solutions that feel like minimal surfaces: simple expressions that comprise significant complexity, with forms that seem natural, recurring in problem after problem",
+   "statement": "Prefer solutions that are minimal surfaces: simple expressions carrying significant complexity, in forms that feel natural and recur across problems. (instead of: accidental complexity and one-off special forms)"
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "0366902f5e9e4973938b6f8e4e55fb9f18054b65310c0d702ed0da3ca6fd55d9",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/haskell/find_v2_redacted/2026-10-09_find_principles_v2_claude-code_opus.json": {
+   "sha256": "531ea66cce0fb59324c5c69b1ddf2f3c8635551119c9befa49f9d9031a11f1c1"
+  },
+  "record/controls/haskell/reference.md": {
+   "sha256": "fbfb3d4594fb31de6facc0d0930f3c87100b5f869a835ab8e2c2a3d8453d8721"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 4,
+  "leaks": 0,
+  "neither": 3,
+  "passes": true,
+  "rows": [
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H1"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H3"
+    ],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "neither"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}

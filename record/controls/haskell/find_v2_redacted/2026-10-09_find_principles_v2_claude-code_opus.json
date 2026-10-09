@@ -1,0 +1,3237 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "candidates": [
+   {
+    "above_next": "purity is the ethical commitment the whole language is organized around; laziness is one of its consequences.",
+    "also": [
+     {
+      "axis": "conceptual",
+      "why": "typing effects reorganizes a program around what may happen, not only what is computed."
+     }
+    ],
+    "beats": {
+     "lineage": "L-effects-convergence",
+     "why": "the convergence is an observation about where languages are heading, not the rule that chose purity in the first place."
+    },
+    "harms": [
+     "makes I/O and arrays awkward (l10)",
+     "a steep barrier before a program can do anything useful",
+     "forbids convenient in-place update"
+    ],
+    "id": "C1",
+    "instead_of": "effects-by-default",
+    "lineages": [
+     "L-effects-bet",
+     "L-explicit-effects",
+     "L-haskell-overcame-impractical",
+     "L-purity-io-problem"
+    ],
+    "quote": "Underlying all these developments is the realisation that being explicit about effects is extremely useful, and this is something that we believe may ultimately be seen as one of L’s main impacts on mainstream programming",
+    "quote_label": "q84",
+    "quote_row": "written:2007-06-09_07-monads-and-input-output:being-explicit-about-effects",
+    "scope": "language",
+    "statement": "Keep the language pure and make every effect explicit in the types, rather than allowing effects by default.",
+    "strongest": {
+     "axis": "ethical",
+     "why": "it is a stance on how one should program: effects are not a default convenience but something to be controlled and declared."
+    }
+   },
+   {
+    "above_next": "laziness rewrites the mental model of computation; executable mathematics is a reading that laziness and purity make possible.",
+    "also": [
+     {
+      "axis": "emotive",
+      "why": "the authors describe lazy evaluation as \"like a drug\", contact with what moved them."
+     },
+     {
+      "axis": "aesthetic",
+      "why": "infinite data structures and simple implementation techniques are beautiful, economical constructions."
+     }
+    ],
+    "beats": {
+     "lineage": "L-listcomp-lazy-popular",
+     "why": "list comprehensions suiting lazy languages is one pleasant consequence, not the evaluation discipline itself."
+    },
+    "harms": [
+     "unpredictable space use and space leaks (l149,l267)",
+     "hard to profile and debug (l154)",
+     "operational cost hidden from the source"
+    ],
+    "id": "C2",
+    "instead_of": "strict, call-by-value evaluation",
+    "lineages": [
+     "L-laziness-combinators",
+     "L-laziness-macros",
+     "L-lazy-appeal",
+     "L-lazy-enables-stream",
+     "L-non-strict-pure",
+     "L-turner-lazy-lists"
+    ],
+    "quote": "Lazy evaluation—with its direct connection to the pure, call-by-name lambda calculus, the remarkable possibility of representing and manipulating infinite data structures, and addictively simple and beautiful implementation techniques—was like a drug.",
+    "quote_label": "q182",
+    "quote_row": "written:2007-06-09_02-the-genesis-of-haskell:laziness-as-a-drug",
+    "scope": "language",
+    "statement": "Evaluate lazily by default, so values are computed only when needed and infinite structures and new abstractions become ordinary.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "abstracting from evaluation order admits infinite structures and new control abstractions, changing what a value even is."
+    }
+   },
+   {
+    "above_next": "the equational frame is broader than any one mechanism; type classes are the distinctive device that serves it.",
+    "also": [
+     {
+      "axis": "aesthetic",
+      "why": "expressions that look like mathematics have an economy and beauty the authors sought from day one."
+     }
+    ],
+    "beats": {
+     "lineage": "L-math-look-teaching",
+     "why": "the mathematical look aiding teaching is a use of the frame, not the commitment to referential transparency that creates it."
+    },
+    "harms": [
+     "the \"specification becomes the program\" gap holds only in principle",
+     "the CPO/denotational framing intimidates newcomers",
+     "seq and effects break the equational reading"
+    ],
+    "id": "C3",
+    "instead_of": "programs as sequences of state-changing commands",
+    "lineages": [
+     "L-executable-mathematics",
+     "L-infix-from-day-one"
+    ],
+    "quote": "Because of referential transparency, L programs can be viewed as executable mathematics, as equations over the category of complete partial orders. In principle, at least, the specification becomes the program.",
+    "quote_label": "q81",
+    "quote_row": "written:2007-06-09_12-the-impact-of-haskell:referential-transparency-executable-mathematics",
+    "scope": "language",
+    "statement": "Preserve referential transparency so programs read as equations, as executable mathematics where the specification can become the program.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "reading a program as equations, as mathematics one can reason about, reframes what programming is."
+    }
+   },
+   {
+    "above_next": "type classes are the distinctive feature that even made monads usable, so they rank above the monadic abstraction they carry.",
+    "also": [
+     {
+      "axis": "aesthetic",
+      "why": "a single principled construct replaced a tangle of special cases, with an elegant bounded-quantification reading."
+     }
+    ],
+    "beats": {
+     "lineage": "L-qualified-types",
+     "why": "qualified types generalise the idea further but it is type classes that caught the imagination and spread."
+    },
+    "harms": [
+     "ambiguity and puzzling error messages (l25,l288)",
+     "dynamic semantics depends on type resolution (l58)",
+     "the design space grew chaotic (l291)"
+    ],
+    "id": "C4",
+    "instead_of": "ad hoc operator overloading",
+    "lineages": [
+     "L-class-bounded-quantification",
+     "L-type-class-origin",
+     "L-type-class-serendipity",
+     "L-type-classes-distinctive"
+    ],
+    "quote": "Aside from laziness, type classes are undoubtedly L's most distinctive feature.",
+    "quote_label": "q357",
+    "quote_row": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-as-distinctive-feature",
+    "scope": "language",
+    "statement": "Solve overloading with a principled, type-directed abstraction of classes and instances, not ad hoc special-casing.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "overloading becomes a type-directed abstraction (classes, instances, dictionaries) that reorganizes how generic code is written."
+    }
+   },
+   {
+    "above_next": "monads reorganize how effects are thought; combinator libraries are a building technique that benefits from them.",
+    "also": [
+     {
+      "axis": "aesthetic",
+      "why": "one small interface (return and bind) captures state, exceptions, parsing, continuations and more."
+     }
+    ],
+    "beats": {
+     "lineage": "L-arrows",
+     "why": "arrows are the same flavour in a more general setting but reached far fewer minds than monads."
+    },
+    "harms": [
+     "monads do not compose modularly (l185)",
+     "do-notation blurs pure and imperative code (l52)",
+     "a steep conceptual barrier for learners"
+    ],
+    "id": "C5",
+    "instead_of": "built-in, hard-wired notions of sequencing and effects",
+    "lineages": [
+     "L-io-a-computation",
+     "L-monad-as-typeclass",
+     "L-monad-definition",
+     "L-monadic-advantage"
+    ],
+    "quote": "the big advantage is conceptual. It is much easier to think abstractly in terms of computations than concretely in terms of the details of failure and success continuations.",
+    "quote_label": "q227",
+    "quote_row": "written:2007-06-09_07-monads-and-input-output:monad-abstraction-conceptual-advantage",
+    "scope": "language",
+    "statement": "Model effects and other notions of computation as first-class values, reasoning about computations abstractly rather than wiring their details by hand.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "treating a computation as a first-class value, reasoned about abstractly, is a new frame for effects and sequencing."
+    }
+   },
+   {
+    "above_next": "embedding DSLs opens a new frame of use; minimal surfaces is the aesthetic sense that pervades it but guides less concretely.",
+    "also": [
+     {
+      "axis": "aesthetic",
+      "why": "new domain abstractions are composed from existing functions, an economical reuse of the whole host language."
+     }
+    ],
+    "beats": {
+     "lineage": "L-parser-bnf",
+     "why": "parser combinators are one striking instance of the idea, less than the general stance of embedding any DSL."
+    },
+    "harms": [
+     "embodies nothing fundamentally new (l30)",
+     "host-language error messages leak into the DSL",
+     "blurs the library/language boundary"
+    ],
+    "id": "C6",
+    "instead_of": "writing a standalone parser, type checker and interpreter per domain",
+    "lineages": [
+     "L-combinator-definition",
+     "L-combinator-dsel-same",
+     "L-combinator-influential",
+     "L-dsel-definition",
+     "L-dsel-host"
+    ],
+    "quote": "Another productive way to think of a combinator library is as a domain-specific language (DSL) for describing values of a particular type",
+    "quote_label": "q35",
+    "quote_row": "written:2007-06-09_11-applications:combinator-library-as-dsl",
+    "scope": "language",
+    "statement": "Build abstractions as combinator libraries that turn the language itself into a domain-specific language, instead of inventing a new language and tooling each time.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "a library becomes a language: you design notation and meaning for a domain without building a compiler for it."
+    }
+   },
+   {
+    "also": [
+     {
+      "axis": "conceptual",
+      "why": "many ways to do a thing that still fit together coherently reshapes what a well-formed design looks like."
+     }
+    ],
+    "beats": {
+     "lineage": "L-linspire-uniformity",
+     "why": "greater uniformity than scripting languages is one comparative virtue, not the aesthetic ideal of minimal surfaces itself."
+    },
+    "harms": [
+     "\"natural form\" is subjective",
+     "elegance can hide real cost"
+    ],
+    "id": "C7",
+    "instead_of": "accidental complexity and one-off special forms",
+    "lineages": [
+     "L-high-level-succinct",
+     "L-many-ways-fit",
+     "L-minimal-surfaces"
+    ],
+    "quote": "solutions that feel like minimal surfaces: simple expressions that comprise significant complexity, with forms that seem natural, recurring in problem after problem",
+    "quote_label": "q208",
+    "quote_row": "written:2007-06-09_12-the-impact-of-haskell:minimal-surfaces",
+    "scope": "language",
+    "statement": "Prefer solutions that are minimal surfaces: simple expressions carrying significant complexity, in forms that feel natural and recur across problems.",
+    "strongest": {
+     "axis": "aesthetic",
+     "why": "the ideal of a simple surface holding significant complexity, recurring form after form, is a standard of beauty for solutions."
+    }
+   }
+  ],
+  "classification": [
+   {
+    "candidate": null,
+    "label": "l1",
+    "lineage": "L-account-biased",
+    "note": "disclaimer about the account",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l2",
+    "lineage": "L-adt-extended",
+    "note": "design fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l3",
+    "lineage": "L-adt-fundamental",
+    "note": "fact about functional languages",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l4",
+    "lineage": "L-adt-via-modules",
+    "note": "single design decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l5",
+    "lineage": "L-aetion-static-types",
+    "note": "user's adoption story",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l6",
+    "lineage": "L-algebraic-types-easy",
+    "note": "fact about what was straightforward",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l7",
+    "lineage": "L-algebraic-types-origin",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l8",
+    "lineage": "L-algorithmic-debugging",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l9",
+    "lineage": "L-application-juxtaposition",
+    "note": "design fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l10",
+    "lineage": "L-array-inplace-messier",
+    "note": "limitation fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l11",
+    "lineage": "L-arrows",
+    "note": "arrows as an abstract view of computation",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l12",
+    "lineage": "L-at-patterns-tight",
+    "note": "design wart",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l13",
+    "lineage": "L-avoid-semicolon",
+    "note": "single decision following purity",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l14",
+    "lineage": "L-backquote-infix",
+    "note": "design fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l15",
+    "lineage": "L-backus-lecture",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l16",
+    "lineage": "L-bind-vs-ml",
+    "note": "comparison fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l17",
+    "lineage": "L-blessed-addenda",
+    "note": "method/addenda fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l18",
+    "lineage": "L-bluespec-two-level",
+    "note": "two-level language fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l19",
+    "lineage": "L-bottom-every-type",
+    "note": "semantics fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l20",
+    "lineage": "L-bottom-tuple-distinct",
+    "note": "semantics question",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l21",
+    "lineage": "L-bytestring-fusion",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l22",
+    "lineage": "L-cabal-hackage",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l23",
+    "lineage": "L-cbv-recursive-combinators",
+    "note": "comparison fact about call-by-value",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C4",
+    "label": "l24",
+    "lineage": "L-class-bounded-quantification",
+    "note": "bounded quantification reading of classes",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l25",
+    "lineage": "L-class-irritations",
+    "note": "irritation fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l26",
+    "lineage": "L-classes-monads-symbiosis",
+    "note": "symbiosis fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l27",
+    "lineage": "L-clean-gui",
+    "note": "comparison",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C6",
+    "label": "l28",
+    "lineage": "L-combinator-definition",
+    "note": "combinator library definition",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C6",
+    "label": "l29",
+    "lineage": "L-combinator-dsel-same",
+    "note": "combinator library as DSL",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C6",
+    "label": "l30",
+    "lineage": "L-combinator-influential",
+    "note": "combinator libraries influential",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l31",
+    "lineage": "L-committee-design",
+    "note": "committee decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l32",
+    "lineage": "L-common-libraries",
+    "note": "library fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l33",
+    "lineage": "L-community-success",
+    "note": "community fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l34",
+    "lineage": "L-concurrent-haskell",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l35",
+    "lineage": "L-cons-not-evaluate",
+    "note": "historical slogan",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l36",
+    "lineage": "L-conservative-language",
+    "note": "conservatism: embody consensus, not break ground",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l37",
+    "lineage": "L-constructors-capitalised",
+    "note": "naming convention decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l38",
+    "lineage": "L-constructors-pattern-expr",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l39",
+    "lineage": "L-continuation-io",
+    "note": "community fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l40",
+    "lineage": "L-core-lint",
+    "note": "tooling fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l41",
+    "lineage": "L-core-pipeline",
+    "note": "compiler pipeline fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l42",
+    "lineage": "L-core-systemf",
+    "note": "compiler history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l43",
+    "lineage": "L-cost-centres",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l44",
+    "lineage": "L-cost-higherorder",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l45",
+    "lineage": "L-curried-uncurried",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l46",
+    "lineage": "L-currying-history",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l47",
+    "lineage": "L-debt-to-miranda",
+    "note": "debt fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l48",
+    "lineage": "L-defaulting-rule",
+    "note": "design decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l49",
+    "lineage": "L-design-slow",
+    "note": "observation",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l50",
+    "lineage": "L-dictionary-passing",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l51",
+    "lineage": "L-distribution-maturity",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l52",
+    "lineage": "L-do-notation",
+    "note": "fact about do-notation",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l53",
+    "lineage": "L-dozen-languages",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C6",
+    "label": "l54",
+    "lineage": "L-dsel-definition",
+    "note": "DSEL turns host into a domain language",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C6",
+    "label": "l55",
+    "lineage": "L-dsel-host",
+    "note": "features making a friendly DSEL host",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l56",
+    "lineage": "L-dsel-structure",
+    "note": "DSEL structure fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l57",
+    "lineage": "L-dsl-nonembedded",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l58",
+    "lineage": "L-dynamic-semantics-overloading",
+    "note": "drawback fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l59",
+    "lineage": "L-eager-evaluation",
+    "note": "research",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l60",
+    "lineage": "L-early-impractical",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l61",
+    "lineage": "L-edison",
+    "note": "library",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C1",
+    "label": "l62",
+    "lineage": "L-effects-bet",
+    "note": "long-term bet on principled control of effects",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l63",
+    "lineage": "L-effects-convergence",
+    "note": "convergence toward taming effects",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l64",
+    "lineage": "L-empty-type",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l65",
+    "lineage": "L-equations-burstall",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C3",
+    "label": "l66",
+    "lineage": "L-executable-mathematics",
+    "note": "programs as executable mathematics",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l67",
+    "lineage": "L-existential-types",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l68",
+    "lineage": "L-explicit-braces",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C1",
+    "label": "l69",
+    "lineage": "L-explicit-effects",
+    "note": "being explicit about effects",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l70",
+    "lineage": "L-ffi-adhoc",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l71",
+    "lineage": "L-ffi-c",
+    "note": "FFI decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l72",
+    "lineage": "L-ffi-need",
+    "note": "need",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l73",
+    "lineage": "L-ffi-process",
+    "note": "method fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l74",
+    "lineage": "L-ffi-tools",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l75",
+    "lineage": "L-first-class-infix",
+    "note": "all values first class, especially functions",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l76",
+    "lineage": "L-fix-leaks",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l77",
+    "lineage": "L-flat-namespace",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l78",
+    "lineage": "L-fp-compilers-productivity",
+    "note": "productivity fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l79",
+    "lineage": "L-fran-behaviour",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l80",
+    "lineage": "L-fran-events",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l81",
+    "lineage": "L-fran-numeric",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l82",
+    "lineage": "L-functional-dependencies",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l83",
+    "lineage": "L-gadts",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l84",
+    "lineage": "L-generic-programming",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l85",
+    "lineage": "L-gf-app",
+    "note": "application",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l86",
+    "lineage": "L-ghc-complexity",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l87",
+    "lineage": "L-ghc-extensions-early",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l88",
+    "lineage": "L-ghc-frontend-fullsyntax",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l89",
+    "lineage": "L-ghc-in-haskell",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l90",
+    "lineage": "L-ghc-origin",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l91",
+    "lineage": "L-gmachine",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l92",
+    "lineage": "L-goals-not-met",
+    "note": "goals not met",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l93",
+    "lineage": "L-gofer-firsts",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l94",
+    "lineage": "L-gofer-small-interpreter",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l95",
+    "lineage": "L-gofer-to-hugs",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l96",
+    "lineage": "L-graph-reduction",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l97",
+    "lineage": "L-guards-left",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l98",
+    "lineage": "L-gui-bindings-ffi",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l99",
+    "lineage": "L-gui-idealists-pragmatists",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l100",
+    "lineage": "L-gui-no-standard",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l101",
+    "lineage": "L-haggis-concurrent",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l102",
+    "lineage": "L-hardware-fp",
+    "note": "application fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l103",
+    "lineage": "L-haskell-big-implementations",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C1",
+    "label": "l104",
+    "lineage": "L-haskell-overcame-impractical",
+    "note": "remorseless discipline of purity",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l105",
+    "lineage": "L-haskell-pretty",
+    "note": "pretty fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l106",
+    "lineage": "L-haskell98-stability",
+    "note": "commit to long-term stability",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l107",
+    "lineage": "L-haskore",
+    "note": "application",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l108",
+    "lineage": "L-hat-project",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l109",
+    "lineage": "L-haxml",
+    "note": "library",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l110",
+    "lineage": "L-hbc-doomed",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l111",
+    "lineage": "L-hbc-origin",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l112",
+    "lineage": "L-hbc-stumbling",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l113",
+    "lineage": "L-heap-profiler",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l114",
+    "lineage": "L-helium",
+    "note": "compiler",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l115",
+    "lineage": "L-hierarchical-modules",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C7",
+    "label": "l116",
+    "lineage": "L-high-level-succinct",
+    "note": "succinct readable high-level code",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l117",
+    "lineage": "L-higher-kind-unification",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l118",
+    "lineage": "L-higher-kinds",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l119",
+    "lineage": "L-higher-rank-types",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l120",
+    "lineage": "L-hood",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l121",
+    "lineage": "L-house-os",
+    "note": "application",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l122",
+    "lineage": "L-hugs-merged",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l123",
+    "lineage": "L-hugs-slowed",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l124",
+    "lineage": "L-hugs-typechecker",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l125",
+    "lineage": "L-hunit",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l126",
+    "lineage": "L-imperative-fp-name",
+    "note": "naming",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l127",
+    "lineage": "L-implicit-parameters",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l128",
+    "lineage": "L-industrial-haskell",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l129",
+    "lineage": "L-infix-binds-less",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C3",
+    "label": "l130",
+    "lineage": "L-infix-from-day-one",
+    "note": "expressions look like mathematics",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l131",
+    "lineage": "L-influence-csharp",
+    "note": "influence",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C5",
+    "label": "l132",
+    "lineage": "L-io-a-computation",
+    "note": "IO a as a computation",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l133",
+    "lineage": "L-io-exceptions",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l134",
+    "lineage": "L-io-implementation",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l135",
+    "lineage": "L-io-textbooks",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l136",
+    "lineage": "L-ioref",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l137",
+    "lineage": "L-isabelle-class-laws",
+    "note": "other language",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l138",
+    "lineage": "L-jhc",
+    "note": "compiler",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l139",
+    "lineage": "L-keywords-low",
+    "note": "keywords decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l140",
+    "lineage": "L-kinds-classify",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l141",
+    "lineage": "L-lambda-backslash",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l142",
+    "lineage": "L-lambda-calculus-model",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l143",
+    "lineage": "L-lambda-precedence-change",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l144",
+    "lineage": "L-lava-classes",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l145",
+    "lineage": "L-lava-sharing",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l146",
+    "lineage": "L-layout-complex-spec",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l147",
+    "lineage": "L-layout-rule-design",
+    "note": "exploit layout to avoid syntactic clutter",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C2",
+    "label": "l148",
+    "lineage": "L-laziness-combinators",
+    "note": "laziness natural for combinators",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l149",
+    "lineage": "L-laziness-lifetimes",
+    "note": "fact about space leaks",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C2",
+    "label": "l150",
+    "lineage": "L-laziness-macros",
+    "note": "laziness gives macro power",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C2",
+    "label": "l151",
+    "lineage": "L-lazy-appeal",
+    "note": "lazy evaluation's appeal",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C2",
+    "label": "l152",
+    "lineage": "L-lazy-enables-stream",
+    "note": "laziness enables stream I/O",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l153",
+    "lineage": "L-lazy-three-times",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l154",
+    "lineage": "L-lazy-unpredictable",
+    "note": "drawback",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l155",
+    "lineage": "L-legacy-influence",
+    "note": "motive about legacy",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l156",
+    "lineage": "L-let-and-where",
+    "note": "decision on let/where",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l157",
+    "lineage": "L-letwhere-lazy-wart",
+    "note": "wart",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l158",
+    "lineage": "L-libraries-modest-evolution",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l159",
+    "lineage": "L-library-report",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l160",
+    "lineage": "L-lifetime-profiling",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l161",
+    "lineage": "L-lifted-tuples",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l162",
+    "lineage": "L-linspire-uniformity",
+    "note": "greater uniformity than scripting languages",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l163",
+    "lineage": "L-listcomp-lazy-popular",
+    "note": "list comprehensions suit lazy languages",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l164",
+    "lineage": "L-listcomp-monads-reverted",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l165",
+    "lineage": "L-listcomp-notation",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l166",
+    "lineage": "L-literate-comments",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l167",
+    "lineage": "L-lolita",
+    "note": "application",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l168",
+    "lineage": "L-loops-recursion-hard",
+    "note": "teaching fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C7",
+    "label": "l169",
+    "lineage": "L-many-ways-fit",
+    "note": "many ways that fit together",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l170",
+    "lineage": "L-matching-semantics",
+    "note": "matching decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l171",
+    "lineage": "L-math-look-teaching",
+    "note": "mathematical look aids teaching",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C7",
+    "label": "l172",
+    "lineage": "L-minimal-surfaces",
+    "note": "solutions as minimal surfaces",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l173",
+    "lineage": "L-minimalist-records",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l174",
+    "lineage": "L-miranda-identified-bottom",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l175",
+    "lineage": "L-miranda-mature",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l176",
+    "lineage": "L-miranda-typing",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l177",
+    "lineage": "L-module-interfaces",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l178",
+    "lineage": "L-module-little-debate",
+    "note": "method fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l179",
+    "lineage": "L-module-namespace-only",
+    "note": "module system as minimal namespace control",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l180",
+    "lineage": "L-module-not-distribution",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l181",
+    "lineage": "L-moggi-monads",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C5",
+    "label": "l182",
+    "lineage": "L-monad-as-typeclass",
+    "note": "monad as a type class pattern",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C5",
+    "label": "l183",
+    "lineage": "L-monad-definition",
+    "note": "monad definition",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l184",
+    "lineage": "L-monad-laws",
+    "note": "monad laws fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l185",
+    "lineage": "L-monad-transformers",
+    "note": "fact monads don't compose",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C5",
+    "label": "l186",
+    "lineage": "L-monadic-advantage",
+    "note": "conceptual advantage of monadic I/O",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l187",
+    "lineage": "L-monadic-dominated",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l188",
+    "lineage": "L-monadic-io",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l189",
+    "lineage": "L-monads-io-area",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l190",
+    "lineage": "L-monads-side-effects-examples",
+    "note": "examples fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l191",
+    "lineage": "L-monomorphism-restriction",
+    "note": "wart",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l192",
+    "lineage": "L-multiparam-resisted",
+    "note": "resist unforced steps into complexity",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l193",
+    "lineage": "L-namespaces",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l194",
+    "lineage": "L-naming-moment",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l195",
+    "lineage": "L-naturals-unary",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l196",
+    "lineage": "L-need-common-language",
+    "note": "method need",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l197",
+    "lineage": "L-newtype",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l198",
+    "lineage": "L-nhc-space-motivation",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l199",
+    "lineage": "L-nhc-york-profiling",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l200",
+    "lineage": "L-nk-brackets",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l201",
+    "lineage": "L-nk-controversy",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l202",
+    "lineage": "L-nk-efficiency",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l203",
+    "lineage": "L-nk-wadler-history",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C2",
+    "label": "l204",
+    "lineage": "L-non-strict-pure",
+    "note": "non-strict purely functional fixed",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l205",
+    "lineage": "L-non-von-neumann",
+    "note": "dead end",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l206",
+    "lineage": "L-not-from-miranda",
+    "note": "freedom for radical approaches",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l207",
+    "lineage": "L-numeric-classes",
+    "note": "compromise",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l208",
+    "lineage": "L-numeric-kinds",
+    "note": "extension",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l209",
+    "lineage": "L-observable-sharing",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l210",
+    "lineage": "L-ol-default",
+    "note": "keep the default unless clearly better",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l211",
+    "lineage": "L-one-prefix-operator",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l212",
+    "lineage": "L-open-participation",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l213",
+    "lineage": "L-overloaded-literals",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l214",
+    "lineage": "L-paper-is-history",
+    "note": "meta",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l215",
+    "lineage": "L-parametricity-debate",
+    "note": "debate",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l216",
+    "lineage": "L-parametricity-deforestation",
+    "note": "parametricity fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l217",
+    "lineage": "L-parser-bnf",
+    "note": "parser combinators transcribe BNF directly",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l218",
+    "lineage": "L-parser-history",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l219",
+    "lineage": "L-parser-monad",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l220",
+    "lineage": "L-parser-new-combinators",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l221",
+    "lineage": "L-parser-type",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l222",
+    "lineage": "L-pattern-match-lazy-complex",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l223",
+    "lineage": "L-pattern-readability",
+    "note": "readability fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l224",
+    "lineage": "L-ph",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l225",
+    "lineage": "L-polymorphic-recursion",
+    "note": "feature rule",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l226",
+    "lineage": "L-postmortem-debugging",
+    "note": "technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l227",
+    "lineage": "L-practical-areas",
+    "note": "method fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l228",
+    "lineage": "L-pretty-doc",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l229",
+    "lineage": "L-profiler-faster",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l230",
+    "lineage": "L-programming-environment",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l231",
+    "lineage": "L-programming-large",
+    "note": "area",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l232",
+    "lineage": "L-prototype-haskell10",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l233",
+    "lineage": "L-public-lists",
+    "note": "method fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l234",
+    "lineage": "L-pure-not-right-way",
+    "note": "purity is not necessarily the one right way",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l235",
+    "lineage": "L-pure-principled-attack",
+    "note": "functional programming as a principled attack",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C1",
+    "label": "l236",
+    "lineage": "L-purity-io-problem",
+    "note": "resolute commitment to purity",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l237",
+    "lineage": "L-qualified-types",
+    "note": "qualified types as a general framework",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l238",
+    "lineage": "L-quickcheck",
+    "note": "tool",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l239",
+    "lineage": "L-quickcheck-emulated",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l240",
+    "lineage": "L-quickcheck-exemplifies",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l241",
+    "lineage": "L-quickcheck-programmers",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l242",
+    "lineage": "L-quirky-elegance",
+    "note": "motive",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l243",
+    "lineage": "L-random-seed",
+    "note": "library",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l244",
+    "lineage": "L-realworld-impact",
+    "note": "method goal",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l245",
+    "lineage": "L-records-omitted",
+    "note": "omit features lacking an obvious right design",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l246",
+    "lineage": "L-redex-trails",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l247",
+    "lineage": "L-report-book-online",
+    "note": "method",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l248",
+    "lineage": "L-retainer-profiling",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l249",
+    "lineage": "L-runst",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l250",
+    "lineage": "L-sasl-higher-order",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l251",
+    "lineage": "L-sasl-os",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l252",
+    "lineage": "L-scheme-cbv",
+    "note": "reasoning fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l253",
+    "lineage": "L-scoped-type-variables",
+    "note": "feature/mistake",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l254",
+    "lineage": "L-section-negation",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l255",
+    "lineage": "L-sections",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l256",
+    "lineage": "L-segregate-formats",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l257",
+    "lineage": "L-seq-controversial",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l258",
+    "lineage": "L-seq-eval-class",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l259",
+    "lineage": "L-seq-for-speed",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l260",
+    "lineage": "L-seq-introduced",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l261",
+    "lineage": "L-seq-miranda",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l262",
+    "lineage": "L-seq-parametricity",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l263",
+    "lineage": "L-seq-polymorphic-today",
+    "note": "tradeoff",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l264",
+    "lineage": "L-seq-space-debugging",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l265",
+    "lineage": "L-shadowing-allowed",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l266",
+    "lineage": "L-single-constructor-tuple",
+    "note": "question",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l267",
+    "lineage": "L-space-sensitivity",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l268",
+    "lineage": "L-start-from-existing",
+    "note": "start from an existing language and evolve",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l269",
+    "lineage": "L-state-monad-plumbing",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l270",
+    "lineage": "L-stm",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l271",
+    "lineage": "L-stream-cont-equivalent",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l272",
+    "lineage": "L-stream-model",
+    "note": "model",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l273",
+    "lineage": "L-stream-primitive-efficiency",
+    "note": "decision",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l274",
+    "lineage": "L-strict-lazy-mix",
+    "note": "difficulty",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l275",
+    "lineage": "L-sum-of-products",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l276",
+    "lineage": "L-syntax-effort",
+    "note": "syntax matters as the user interface",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l277",
+    "lineage": "L-syntax-io-retrospect",
+    "note": "retrospect",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l278",
+    "lineage": "L-teaching-effective",
+    "note": "teaching fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l279",
+    "lineage": "L-teaching-goal",
+    "note": "goal",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l280",
+    "lineage": "L-template-haskell",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l281",
+    "lineage": "L-tools-research",
+    "note": "method fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l282",
+    "lineage": "L-top-to-bottom-left-right",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l283",
+    "lineage": "L-trace-garbled",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l284",
+    "lineage": "L-turner-declined",
+    "note": "method fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C2",
+    "label": "l285",
+    "lineage": "L-turner-lazy-lists",
+    "note": "elegance of lazy evaluation and lazy lists",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l286",
+    "lineage": "L-two-comment-styles",
+    "note": "method",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l287",
+    "lineage": "L-two-styles",
+    "note": "teaching fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l288",
+    "lineage": "L-type-class-ambiguity",
+    "note": "drawback",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l289",
+    "lineage": "L-type-class-applications",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l290",
+    "lineage": "L-type-class-basics",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l291",
+    "lineage": "L-type-class-chaos",
+    "note": "chaos fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l292",
+    "lineage": "L-type-class-generalisations",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C4",
+    "label": "l293",
+    "lineage": "L-type-class-origin",
+    "note": "type classes as principled overloading",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C4",
+    "label": "l294",
+    "lineage": "L-type-class-serendipity",
+    "note": "type classes serendipitous",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": "C4",
+    "label": "l295",
+    "lineage": "L-type-classes-distinctive",
+    "note": "type classes most distinctive",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l296",
+    "lineage": "L-type-classes-influence",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l297",
+    "lineage": "L-type-lab",
+    "note": "method laboratory",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l298",
+    "lineage": "L-type-level-programming",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l299",
+    "lineage": "L-type-system-anarchic",
+    "note": "implement and use before formalising",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l300",
+    "lineage": "L-typeclass-compiler-cost",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l301",
+    "lineage": "L-unlifted-indistinguishable",
+    "note": "omission",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l302",
+    "lineage": "L-unlifted-seq",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l303",
+    "lineage": "L-unsafeperformio",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l304",
+    "lineage": "L-user-infix-operators",
+    "note": "tooling",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l305",
+    "lineage": "L-views-excluded",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l306",
+    "lineage": "L-views-tension",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l307",
+    "lineage": "L-wadler-monads-programs",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l308",
+    "lineage": "L-wadlers-law",
+    "note": "observation",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l309",
+    "lineage": "L-web-invert",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l310",
+    "lineage": "L-web-static-types",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l311",
+    "lineage": "L-where-clause",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l312",
+    "lineage": "L-world-passing-rejected",
+    "note": "rejected model",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l313",
+    "lineage": "L-yale-environment",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l314",
+    "lineage": "L-yale-extensions",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l315",
+    "lineage": "L-yale-haskell",
+    "note": "fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l316",
+    "lineage": "L-yale-scheme-backend",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l317",
+    "lineage": "L-yale-scratchpad",
+    "note": "feature",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l318",
+    "lineage": "L-yale-strictness-compilation",
+    "note": "history",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l319",
+    "lineage": "L-yampa",
+    "note": "application",
+    "verdict": "not_principle"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"candidates\":[{\"id\":\"C1\",\"harms\":[\"makes I/O and arrays awkward (l10)\",\"a steep barrier before a program can do anything useful\",\"forbids convenient in-place update\"],\"strongest\":{\"axis\":\"ethical\",\"why\":\"it is a stance on how one should program: effects are not a default convenience but something to be controlled and declared.\"},\"also\":[{\"axis\":\"conceptual\",\"why\":\"typing effects reorganizes a program around what may happen, not only what is computed.\"}],\"beats\":{\"lineage\":\"l63\",\"why\":\"the convergence is an observation about where languages are heading, not the rule that chose purity in the first place.\"},\"statement\":\"Keep the language pure and make every effect explicit in the types, rather than allowing effects by default.\",\"instead_of\":\"effects-by-default\",\"scope\":\"language\",\"lineages\":[\"l62\",\"l69\",\"l104\",\"l236\"],\"quote\":\"q84\",\"quote_text\":\"Underlying all these developments is the realisation that being explicit about effects is extremely useful, and this is something that we believe may ultimately be seen as one of L’s main impacts on mainstream programming\",\"above_next\":\"purity is the ethical commitment the whole language is organized around; laziness is one of its consequences.\"},{\"id\":\"C2\",\"harms\":[\"unpredictable space use and space leaks (l149,l267)\",\"hard to profile and debug (l154)\",\"operational cost hidden from the source\"],\"strongest\":{\"axis\":\"conceptual\",\"why\":\"abstracting from evaluation order admits infinite structures and new control abstractions, changing what a value even is.\"},\"also\":[{\"axis\":\"emotive\",\"why\":\"the authors describe lazy evaluation as \\\"like a drug\\\", contact with what moved them.\"},{\"axis\":\"aesthetic\",\"why\":\"infinite data structures and simple implementation techniques are beautiful, economical constructions.\"}],\"beats\":{\"lineage\":\"l163\",\"why\":\"list comprehensions suiting lazy languages is one pleasant consequence, not the evaluation discipline itself.\"},\"statement\":\"Evaluate lazily by default, so values are computed only when needed and infinite structures and new abstractions become ordinary.\",\"instead_of\":\"strict, call-by-value evaluation\",\"scope\":\"language\",\"lineages\":[\"l148\",\"l150\",\"l151\",\"l152\",\"l204\",\"l285\"],\"quote\":\"q182\",\"quote_text\":\"Lazy evaluation—with its direct connection to the pure, call-by-name lambda calculus, the remarkable possibility of representing and manipulating infinite data structures, and addictively simple and beautiful implementation techniques—was like a drug.\",\"above_next\":\"laziness rewrites the mental model of computation; executable mathematics is a reading that laziness and purity make possible.\"},{\"id\":\"C3\",\"harms\":[\"the \\\"specification becomes the program\\\" gap holds only in principle\",\"the CPO/denotational framing intimidates newcomers\",\"seq and effects break the equational reading\"],\"strongest\":{\"axis\":\"conceptual\",\"why\":\"reading a program as equations, as mathematics one can reason about, reframes what programming is.\"},\"also\":[{\"axis\":\"aesthetic\",\"why\":\"expressions that look like mathematics have an economy and beauty the authors sought from day one.\"}],\"beats\":{\"lineage\":\"l171\",\"why\":\"the mathematical look aiding teaching is a use of the frame, not the commitment to referential transparency that creates it.\"},\"statement\":\"Preserve referential transparency so programs read as equations, as executable mathematics where the specification can become the program.\",\"instead_of\":\"programs as sequences of state-changing commands\",\"scope\":\"language\",\"lineages\":[\"l66\",\"l130\"],\"quote\":\"q81\",\"quote_text\":\"Because of referential transparency, L programs can be viewed as executable mathematics, as equations over the category of complete partial orders. In principle, at least, the specification becomes the program.\",\"above_next\":\"the equational frame is broader than any one mechanism; type classes are the distinctive device that serves it.\"},{\"id\":\"C4\",\"harms\":[\"ambiguity and puzzling error messages (l25,l288)\",\"dynamic semantics depends on type resolution (l58)\",\"the design space grew chaotic (l291)\"],\"strongest\":{\"axis\":\"conceptual\",\"why\":\"overloading becomes a type-directed abstraction (classes, instances, dictionaries) that reorganizes how generic code is written.\"},\"also\":[{\"axis\":\"aesthetic\",\"why\":\"a single principled construct replaced a tangle of special cases, with an elegant bounded-quantification reading.\"}],\"beats\":{\"lineage\":\"l237\",\"why\":\"qualified types generalise the idea further but it is type classes that caught the imagination and spread.\"},\"statement\":\"Solve overloading with a principled, type-directed abstraction of classes and instances, not ad hoc special-casing.\",\"instead_of\":\"ad hoc operator overloading\",\"scope\":\"language\",\"lineages\":[\"l24\",\"l293\",\"l294\",\"l295\"],\"quote\":\"q357\",\"quote_text\":\"Aside from laziness, type classes are undoubtedly L's most distinctive feature.\",\"above_next\":\"type classes are the distinctive feature that even made monads usable, so they rank above the monadic abstraction they carry.\"},{\"id\":\"C5\",\"harms\":[\"monads do not compose modularly (l185)\",\"do-notation blurs pure and imperative code (l52)\",\"a steep conceptual barrier for learners\"],\"strongest\":{\"axis\":\"conceptual\",\"why\":\"treating a computation as a first-class value, reasoned about abstractly, is a new frame for effects and sequencing.\"},\"also\":[{\"axis\":\"aesthetic\",\"why\":\"one small interface (return and bind) captures state, exceptions, parsing, continuations and more.\"}],\"beats\":{\"lineage\":\"l11\",\"why\":\"arrows are the same flavour in a more general setting but reached far fewer minds than monads.\"},\"statement\":\"Model effects and other notions of computation as first-class values, reasoning about computations abstractly rather than wiring their details by hand.\",\"instead_of\":\"built-in, hard-wired notions of sequencing and effects\",\"scope\":\"language\",\"lineages\":[\"l132\",\"l182\",\"l183\",\"l186\"],\"quote\":\"q227\",\"quote_text\":\"the big advantage is conceptual. It is much easier to think abstractly in terms of computations than concretely in terms of the details of failure and success continuations.\",\"above_next\":\"monads reorganize how effects are thought; combinator libraries are a building technique that benefits from them.\"},{\"id\":\"C6\",\"harms\":[\"embodies nothing fundamentally new (l30)\",\"host-language error messages leak into the DSL\",\"blurs the library/language boundary\"],\"strongest\":{\"axis\":\"conceptual\",\"why\":\"a library becomes a language: you design notation and meaning for a domain without building a compiler for it.\"},\"also\":[{\"axis\":\"aesthetic\",\"why\":\"new domain abstractions are composed from existing functions, an economical reuse of the whole host language.\"}],\"beats\":{\"lineage\":\"l217\",\"why\":\"parser combinators are one striking instance of the idea, less than the general stance of embedding any DSL.\"},\"statement\":\"Build abstractions as combinator libraries that turn the language itself into a domain-specific language, instead of inventing a new language and tooling each time.\",\"instead_of\":\"writing a standalone parser, type checker and interpreter per domain\",\"scope\":\"language\",\"lineages\":[\"l28\",\"l29\",\"l30\",\"l54\",\"l55\"],\"quote\":\"q35\",\"quote_text\":\"Another productive way to think of a combinator library is as a domain-specific language (DSL) for describing values of a particular type\",\"above_next\":\"embedding DSLs opens a new frame of use; minimal surfaces is the aesthetic sense that pervades it but guides less concretely.\"},{\"id\":\"C7\",\"harms\":[\"\\\"natural form\\\" is subjective\",\"elegance can hide real cost\"],\"strongest\":{\"axis\":\"aesthetic\",\"why\":\"the ideal of a simple surface holding significant complexity, recurring form after form, is a standard of beauty for solutions.\"},\"also\":[{\"axis\":\"conceptual\",\"why\":\"many ways to do a thing that still fit together coherently reshapes what a well-formed design looks like.\"}],\"beats\":{\"lineage\":\"l162\",\"why\":\"greater uniformity than scripting languages is one comparative virtue, not the aesthetic ideal of minimal surfaces itself.\"},\"statement\":\"Prefer solutions that are minimal surfaces: simple expressions carrying significant complexity, in forms that feel natural and recur across problems.\",\"instead_of\":\"accidental complexity and one-off special forms\",\"scope\":\"language\",\"lineages\":[\"l116\",\"l169\",\"l172\"],\"quote\":\"q208\",\"quote_text\":\"solutions that feel like minimal surfaces: simple expressions that comprise significant complexity, with forms that seem natural, recurring in problem after problem\"}],\"classification\":[[\"l1\",\"not_principle\",\"\",\"disclaimer about the account\"],[\"l2\",\"not_principle\",\"\",\"design fact\"],[\"l3\",\"not_principle\",\"\",\"fact about functional languages\"],[\"l4\",\"not_principle\",\"\",\"single design decision\"],[\"l5\",\"not_principle\",\"\",\"user's adoption story\"],[\"l6\",\"not_principle\",\"\",\"fact about what was straightforward\"],[\"l7\",\"not_principle\",\"\",\"history\"],[\"l8\",\"not_principle\",\"\",\"technique\"],[\"l9\",\"not_principle\",\"\",\"design fact\"],[\"l10\",\"not_principle\",\"\",\"limitation fact\"],[\"l11\",\"considered\",\"\",\"arrows as an abstract view of computation\"],[\"l12\",\"not_principle\",\"\",\"design wart\"],[\"l13\",\"not_principle\",\"\",\"single decision following purity\"],[\"l14\",\"not_principle\",\"\",\"design fact\"],[\"l15\",\"not_principle\",\"\",\"history\"],[\"l16\",\"not_principle\",\"\",\"comparison fact\"],[\"l17\",\"not_principle\",\"\",\"method/addenda fact\"],[\"l18\",\"not_principle\",\"\",\"two-level language fact\"],[\"l19\",\"not_principle\",\"\",\"semantics fact\"],[\"l20\",\"not_principle\",\"\",\"semantics question\"],[\"l21\",\"not_principle\",\"\",\"technique\"],[\"l22\",\"not_principle\",\"\",\"tooling\"],[\"l23\",\"not_principle\",\"\",\"comparison fact about call-by-value\"],[\"l24\",\"candidate\",\"C4\",\"bounded quantification reading of classes\"],[\"l25\",\"not_principle\",\"\",\"irritation fact\"],[\"l26\",\"not_principle\",\"\",\"symbiosis fact\"],[\"l27\",\"not_principle\",\"\",\"comparison\"],[\"l28\",\"candidate\",\"C6\",\"combinator library definition\"],[\"l29\",\"candidate\",\"C6\",\"combinator library as DSL\"],[\"l30\",\"candidate\",\"C6\",\"combinator libraries influential\"],[\"l31\",\"not_principle\",\"\",\"committee decision\"],[\"l32\",\"not_principle\",\"\",\"library fact\"],[\"l33\",\"not_principle\",\"\",\"community fact\"],[\"l34\",\"not_principle\",\"\",\"feature\"],[\"l35\",\"not_principle\",\"\",\"historical slogan\"],[\"l36\",\"considered\",\"\",\"conservatism: embody consensus, not break ground\"],[\"l37\",\"not_principle\",\"\",\"naming convention decision\"],[\"l38\",\"not_principle\",\"\",\"fact\"],[\"l39\",\"not_principle\",\"\",\"community fact\"],[\"l40\",\"not_principle\",\"\",\"tooling fact\"],[\"l41\",\"not_principle\",\"\",\"compiler pipeline fact\"],[\"l42\",\"not_principle\",\"\",\"compiler history\"],[\"l43\",\"not_principle\",\"\",\"tooling\"],[\"l44\",\"not_principle\",\"\",\"fact\"],[\"l45\",\"not_principle\",\"\",\"fact\"],[\"l46\",\"not_principle\",\"\",\"history\"],[\"l47\",\"not_principle\",\"\",\"debt fact\"],[\"l48\",\"not_principle\",\"\",\"design decision\"],[\"l49\",\"not_principle\",\"\",\"observation\"],[\"l50\",\"not_principle\",\"\",\"technique\"],[\"l51\",\"not_principle\",\"\",\"fact\"],[\"l52\",\"not_principle\",\"\",\"fact about do-notation\"],[\"l53\",\"not_principle\",\"\",\"fact\"],[\"l54\",\"candidate\",\"C6\",\"DSEL turns host into a domain language\"],[\"l55\",\"candidate\",\"C6\",\"features making a friendly DSEL host\"],[\"l56\",\"not_principle\",\"\",\"DSEL structure fact\"],[\"l57\",\"not_principle\",\"\",\"fact\"],[\"l58\",\"not_principle\",\"\",\"drawback fact\"],[\"l59\",\"not_principle\",\"\",\"research\"],[\"l60\",\"not_principle\",\"\",\"history\"],[\"l61\",\"not_principle\",\"\",\"library\"],[\"l62\",\"candidate\",\"C1\",\"long-term bet on principled control of effects\"],[\"l63\",\"considered\",\"\",\"convergence toward taming effects\"],[\"l64\",\"not_principle\",\"\",\"fact\"],[\"l65\",\"not_principle\",\"\",\"history\"],[\"l66\",\"candidate\",\"C3\",\"programs as executable mathematics\"],[\"l67\",\"not_principle\",\"\",\"fact\"],[\"l68\",\"not_principle\",\"\",\"decision\"],[\"l69\",\"candidate\",\"C1\",\"being explicit about effects\"],[\"l70\",\"not_principle\",\"\",\"fact\"],[\"l71\",\"not_principle\",\"\",\"FFI decision\"],[\"l72\",\"not_principle\",\"\",\"need\"],[\"l73\",\"not_principle\",\"\",\"method fact\"],[\"l74\",\"not_principle\",\"\",\"tooling\"],[\"l75\",\"considered\",\"\",\"all values first class, especially functions\"],[\"l76\",\"not_principle\",\"\",\"fact\"],[\"l77\",\"not_principle\",\"\",\"fact\"],[\"l78\",\"not_principle\",\"\",\"productivity fact\"],[\"l79\",\"not_principle\",\"\",\"feature\"],[\"l80\",\"not_principle\",\"\",\"feature\"],[\"l81\",\"not_principle\",\"\",\"feature\"],[\"l82\",\"not_principle\",\"\",\"feature\"],[\"l83\",\"not_principle\",\"\",\"feature\"],[\"l84\",\"not_principle\",\"\",\"feature\"],[\"l85\",\"not_principle\",\"\",\"application\"],[\"l86\",\"not_principle\",\"\",\"fact\"],[\"l87\",\"not_principle\",\"\",\"fact\"],[\"l88\",\"not_principle\",\"\",\"decision\"],[\"l89\",\"not_principle\",\"\",\"history\"],[\"l90\",\"not_principle\",\"\",\"history\"],[\"l91\",\"not_principle\",\"\",\"history\"],[\"l92\",\"not_principle\",\"\",\"goals not met\"],[\"l93\",\"not_principle\",\"\",\"history\"],[\"l94\",\"not_principle\",\"\",\"history\"],[\"l95\",\"not_principle\",\"\",\"history\"],[\"l96\",\"not_principle\",\"\",\"technique\"],[\"l97\",\"not_principle\",\"\",\"decision\"],[\"l98\",\"not_principle\",\"\",\"fact\"],[\"l99\",\"not_principle\",\"\",\"fact\"],[\"l100\",\"not_principle\",\"\",\"fact\"],[\"l101\",\"not_principle\",\"\",\"fact\"],[\"l102\",\"not_principle\",\"\",\"application fact\"],[\"l103\",\"not_principle\",\"\",\"fact\"],[\"l104\",\"candidate\",\"C1\",\"remorseless discipline of purity\"],[\"l105\",\"not_principle\",\"\",\"pretty fact\"],[\"l106\",\"considered\",\"\",\"commit to long-term stability\"],[\"l107\",\"not_principle\",\"\",\"application\"],[\"l108\",\"not_principle\",\"\",\"tooling\"],[\"l109\",\"not_principle\",\"\",\"library\"],[\"l110\",\"not_principle\",\"\",\"history\"],[\"l111\",\"not_principle\",\"\",\"history\"],[\"l112\",\"not_principle\",\"\",\"history\"],[\"l113\",\"not_principle\",\"\",\"tooling\"],[\"l114\",\"not_principle\",\"\",\"compiler\"],[\"l115\",\"not_principle\",\"\",\"decision\"],[\"l116\",\"candidate\",\"C7\",\"succinct readable high-level code\"],[\"l117\",\"not_principle\",\"\",\"technique\"],[\"l118\",\"not_principle\",\"\",\"feature\"],[\"l119\",\"not_principle\",\"\",\"feature\"],[\"l120\",\"not_principle\",\"\",\"tooling\"],[\"l121\",\"not_principle\",\"\",\"application\"],[\"l122\",\"not_principle\",\"\",\"history\"],[\"l123\",\"not_principle\",\"\",\"history\"],[\"l124\",\"not_principle\",\"\",\"feature\"],[\"l125\",\"not_principle\",\"\",\"tooling\"],[\"l126\",\"not_principle\",\"\",\"naming\"],[\"l127\",\"not_principle\",\"\",\"feature\"],[\"l128\",\"not_principle\",\"\",\"fact\"],[\"l129\",\"not_principle\",\"\",\"decision\"],[\"l130\",\"candidate\",\"C3\",\"expressions look like mathematics\"],[\"l131\",\"not_principle\",\"\",\"influence\"],[\"l132\",\"candidate\",\"C5\",\"IO a as a computation\"],[\"l133\",\"not_principle\",\"\",\"feature\"],[\"l134\",\"not_principle\",\"\",\"technique\"],[\"l135\",\"not_principle\",\"\",\"fact\"],[\"l136\",\"not_principle\",\"\",\"feature\"],[\"l137\",\"not_principle\",\"\",\"other language\"],[\"l138\",\"not_principle\",\"\",\"compiler\"],[\"l139\",\"not_principle\",\"\",\"keywords decision\"],[\"l140\",\"not_principle\",\"\",\"fact\"],[\"l141\",\"not_principle\",\"\",\"decision\"],[\"l142\",\"not_principle\",\"\",\"history\"],[\"l143\",\"not_principle\",\"\",\"decision\"],[\"l144\",\"not_principle\",\"\",\"feature\"],[\"l145\",\"not_principle\",\"\",\"fact\"],[\"l146\",\"not_principle\",\"\",\"fact\"],[\"l147\",\"considered\",\"\",\"exploit layout to avoid syntactic clutter\"],[\"l148\",\"candidate\",\"C2\",\"laziness natural for combinators\"],[\"l149\",\"not_principle\",\"\",\"fact about space leaks\"],[\"l150\",\"candidate\",\"C2\",\"laziness gives macro power\"],[\"l151\",\"candidate\",\"C2\",\"lazy evaluation's appeal\"],[\"l152\",\"candidate\",\"C2\",\"laziness enables stream I/O\"],[\"l153\",\"not_principle\",\"\",\"history\"],[\"l154\",\"not_principle\",\"\",\"drawback\"],[\"l155\",\"not_principle\",\"\",\"motive about legacy\"],[\"l156\",\"not_principle\",\"\",\"decision on let/where\"],[\"l157\",\"not_principle\",\"\",\"wart\"],[\"l158\",\"not_principle\",\"\",\"fact\"],[\"l159\",\"not_principle\",\"\",\"decision\"],[\"l160\",\"not_principle\",\"\",\"tooling\"],[\"l161\",\"not_principle\",\"\",\"decision\"],[\"l162\",\"considered\",\"\",\"greater uniformity than scripting languages\"],[\"l163\",\"considered\",\"\",\"list comprehensions suit lazy languages\"],[\"l164\",\"not_principle\",\"\",\"history\"],[\"l165\",\"not_principle\",\"\",\"feature\"],[\"l166\",\"not_principle\",\"\",\"feature\"],[\"l167\",\"not_principle\",\"\",\"application\"],[\"l168\",\"not_principle\",\"\",\"teaching fact\"],[\"l169\",\"candidate\",\"C7\",\"many ways that fit together\"],[\"l170\",\"not_principle\",\"\",\"matching decision\"],[\"l171\",\"considered\",\"\",\"mathematical look aids teaching\"],[\"l172\",\"candidate\",\"C7\",\"solutions as minimal surfaces\"],[\"l173\",\"not_principle\",\"\",\"decision\"],[\"l174\",\"not_principle\",\"\",\"fact\"],[\"l175\",\"not_principle\",\"\",\"history\"],[\"l176\",\"not_principle\",\"\",\"history\"],[\"l177\",\"not_principle\",\"\",\"history\"],[\"l178\",\"not_principle\",\"\",\"method fact\"],[\"l179\",\"considered\",\"\",\"module system as minimal namespace control\"],[\"l180\",\"not_principle\",\"\",\"fact\"],[\"l181\",\"not_principle\",\"\",\"history\"],[\"l182\",\"candidate\",\"C5\",\"monad as a type class pattern\"],[\"l183\",\"candidate\",\"C5\",\"monad definition\"],[\"l184\",\"not_principle\",\"\",\"monad laws fact\"],[\"l185\",\"not_principle\",\"\",\"fact monads don't compose\"],[\"l186\",\"candidate\",\"C5\",\"conceptual advantage of monadic I/O\"],[\"l187\",\"not_principle\",\"\",\"fact\"],[\"l188\",\"not_principle\",\"\",\"history\"],[\"l189\",\"not_principle\",\"\",\"fact\"],[\"l190\",\"not_principle\",\"\",\"examples fact\"],[\"l191\",\"not_principle\",\"\",\"wart\"],[\"l192\",\"considered\",\"\",\"resist unforced steps into complexity\"],[\"l193\",\"not_principle\",\"\",\"decision\"],[\"l194\",\"not_principle\",\"\",\"tooling\"],[\"l195\",\"not_principle\",\"\",\"fact\"],[\"l196\",\"not_principle\",\"\",\"method need\"],[\"l197\",\"not_principle\",\"\",\"feature\"],[\"l198\",\"not_principle\",\"\",\"history\"],[\"l199\",\"not_principle\",\"\",\"history\"],[\"l200\",\"not_principle\",\"\",\"fact\"],[\"l201\",\"not_principle\",\"\",\"history\"],[\"l202\",\"not_principle\",\"\",\"fact\"],[\"l203\",\"not_principle\",\"\",\"history\"],[\"l204\",\"candidate\",\"C2\",\"non-strict purely functional fixed\"],[\"l205\",\"not_principle\",\"\",\"dead end\"],[\"l206\",\"considered\",\"\",\"freedom for radical approaches\"],[\"l207\",\"not_principle\",\"\",\"compromise\"],[\"l208\",\"not_principle\",\"\",\"extension\"],[\"l209\",\"not_principle\",\"\",\"fact\"],[\"l210\",\"considered\",\"\",\"keep the default unless clearly better\"],[\"l211\",\"not_principle\",\"\",\"fact\"],[\"l212\",\"not_principle\",\"\",\"fact\"],[\"l213\",\"not_principle\",\"\",\"fact\"],[\"l214\",\"not_principle\",\"\",\"meta\"],[\"l215\",\"not_principle\",\"\",\"debate\"],[\"l216\",\"not_principle\",\"\",\"parametricity fact\"],[\"l217\",\"considered\",\"\",\"parser combinators transcribe BNF directly\"],[\"l218\",\"not_principle\",\"\",\"history\"],[\"l219\",\"not_principle\",\"\",\"fact\"],[\"l220\",\"not_principle\",\"\",\"fact\"],[\"l221\",\"not_principle\",\"\",\"fact\"],[\"l222\",\"not_principle\",\"\",\"fact\"],[\"l223\",\"not_principle\",\"\",\"readability fact\"],[\"l224\",\"not_principle\",\"\",\"history\"],[\"l225\",\"not_principle\",\"\",\"feature rule\"],[\"l226\",\"not_principle\",\"\",\"technique\"],[\"l227\",\"not_principle\",\"\",\"method fact\"],[\"l228\",\"not_principle\",\"\",\"fact\"],[\"l229\",\"not_principle\",\"\",\"tooling\"],[\"l230\",\"not_principle\",\"\",\"fact\"],[\"l231\",\"not_principle\",\"\",\"area\"],[\"l232\",\"not_principle\",\"\",\"history\"],[\"l233\",\"not_principle\",\"\",\"method fact\"],[\"l234\",\"considered\",\"\",\"purity is not necessarily the one right way\"],[\"l235\",\"considered\",\"\",\"functional programming as a principled attack\"],[\"l236\",\"candidate\",\"C1\",\"resolute commitment to purity\"],[\"l237\",\"considered\",\"\",\"qualified types as a general framework\"],[\"l238\",\"not_principle\",\"\",\"tool\"],[\"l239\",\"not_principle\",\"\",\"fact\"],[\"l240\",\"not_principle\",\"\",\"fact\"],[\"l241\",\"not_principle\",\"\",\"fact\"],[\"l242\",\"not_principle\",\"\",\"motive\"],[\"l243\",\"not_principle\",\"\",\"library\"],[\"l244\",\"not_principle\",\"\",\"method goal\"],[\"l245\",\"considered\",\"\",\"omit features lacking an obvious right design\"],[\"l246\",\"not_principle\",\"\",\"tooling\"],[\"l247\",\"not_principle\",\"\",\"method\"],[\"l248\",\"not_principle\",\"\",\"tooling\"],[\"l249\",\"not_principle\",\"\",\"feature\"],[\"l250\",\"not_principle\",\"\",\"history\"],[\"l251\",\"not_principle\",\"\",\"history\"],[\"l252\",\"not_principle\",\"\",\"reasoning fact\"],[\"l253\",\"not_principle\",\"\",\"feature/mistake\"],[\"l254\",\"not_principle\",\"\",\"fact\"],[\"l255\",\"not_principle\",\"\",\"feature\"],[\"l256\",\"not_principle\",\"\",\"fact\"],[\"l257\",\"not_principle\",\"\",\"fact\"],[\"l258\",\"not_principle\",\"\",\"history\"],[\"l259\",\"not_principle\",\"\",\"fact\"],[\"l260\",\"not_principle\",\"\",\"feature\"],[\"l261\",\"not_principle\",\"\",\"fact\"],[\"l262\",\"not_principle\",\"\",\"fact\"],[\"l263\",\"not_principle\",\"\",\"tradeoff\"],[\"l264\",\"not_principle\",\"\",\"fact\"],[\"l265\",\"not_principle\",\"\",\"decision\"],[\"l266\",\"not_principle\",\"\",\"question\"],[\"l267\",\"not_principle\",\"\",\"fact\"],[\"l268\",\"considered\",\"\",\"start from an existing language and evolve\"],[\"l269\",\"not_principle\",\"\",\"fact\"],[\"l270\",\"not_principle\",\"\",\"feature\"],[\"l271\",\"not_principle\",\"\",\"fact\"],[\"l272\",\"not_principle\",\"\",\"model\"],[\"l273\",\"not_principle\",\"\",\"decision\"],[\"l274\",\"not_principle\",\"\",\"difficulty\"],[\"l275\",\"not_principle\",\"\",\"fact\"],[\"l276\",\"considered\",\"\",\"syntax matters as the user interface\"],[\"l277\",\"not_principle\",\"\",\"retrospect\"],[\"l278\",\"not_principle\",\"\",\"teaching fact\"],[\"l279\",\"not_principle\",\"\",\"goal\"],[\"l280\",\"not_principle\",\"\",\"feature\"],[\"l281\",\"not_principle\",\"\",\"method fact\"],[\"l282\",\"not_principle\",\"\",\"fact\"],[\"l283\",\"not_principle\",\"\",\"fact\"],[\"l284\",\"not_principle\",\"\",\"method fact\"],[\"l285\",\"candidate\",\"C2\",\"elegance of lazy evaluation and lazy lists\"],[\"l286\",\"not_principle\",\"\",\"method\"],[\"l287\",\"not_principle\",\"\",\"teaching fact\"],[\"l288\",\"not_principle\",\"\",\"drawback\"],[\"l289\",\"not_principle\",\"\",\"fact\"],[\"l290\",\"not_principle\",\"\",\"fact\"],[\"l291\",\"not_principle\",\"\",\"chaos fact\"],[\"l292\",\"not_principle\",\"\",\"fact\"],[\"l293\",\"candidate\",\"C4\",\"type classes as principled overloading\"],[\"l294\",\"candidate\",\"C4\",\"type classes serendipitous\"],[\"l295\",\"candidate\",\"C4\",\"type classes most distinctive\"],[\"l296\",\"not_principle\",\"\",\"fact\"],[\"l297\",\"not_principle\",\"\",\"method laboratory\"],[\"l298\",\"not_principle\",\"\",\"feature\"],[\"l299\",\"considered\",\"\",\"implement and use before formalising\"],[\"l300\",\"not_principle\",\"\",\"fact\"],[\"l301\",\"not_principle\",\"\",\"omission\"],[\"l302\",\"not_principle\",\"\",\"fact\"],[\"l303\",\"not_principle\",\"\",\"feature\"],[\"l304\",\"not_principle\",\"\",\"tooling\"],[\"l305\",\"not_principle\",\"\",\"feature\"],[\"l306\",\"not_principle\",\"\",\"feature\"],[\"l307\",\"not_principle\",\"\",\"history\"],[\"l308\",\"not_principle\",\"\",\"observation\"],[\"l309\",\"not_principle\",\"\",\"feature\"],[\"l310\",\"not_principle\",\"\",\"feature\"],[\"l311\",\"not_principle\",\"\",\"feature\"],[\"l312\",\"not_principle\",\"\",\"rejected model\"],[\"l313\",\"not_principle\",\"\",\"history\"],[\"l314\",\"not_principle\",\"\",\"history\"],[\"l315\",\"not_principle\",\"\",\"fact\"],[\"l316\",\"not_principle\",\"\",\"history\"],[\"l317\",\"not_principle\",\"\",\"feature\"],[\"l318\",\"not_principle\",\"\",\"history\"],[\"l319\",\"not_principle\",\"\",\"application\"]]}\n",
+   "answer_sha256": "7e12fd519c5bedc58051d94ff3a2b5d0c4e84e5d4ea0f4f9f4ea65157071143f",
+   "date": "2026-10-09T11:52:50Z",
+   "errors": [],
+   "seconds": 226
+  }
+ ],
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "6defa44e89030291aa4c33d23f50d3dae6c3bed3f51dd8e840cbc760c702ac79",
+ "inputs": {
+  "record/controls/haskell/ideas/lineages_link_ideas_v2_claude-code_opus.json": {
+   "sha256": "ae8f9a7e557136f9104ce2a6ffc281c5d9436b921e22d120b3b19be5445cc91f"
+  },
+  "record/controls/haskell/ideas/timeline.jsonl": {
+   "sha256": "a487c657e131905d88689fae329e49c3864dd3996770fd527d4a4e53f2263455"
+  }
+ },
+ "lineage_labels": {
+  "l1": "L-account-biased",
+  "l10": "L-array-inplace-messier",
+  "l100": "L-gui-no-standard",
+  "l101": "L-haggis-concurrent",
+  "l102": "L-hardware-fp",
+  "l103": "L-haskell-big-implementations",
+  "l104": "L-haskell-overcame-impractical",
+  "l105": "L-haskell-pretty",
+  "l106": "L-haskell98-stability",
+  "l107": "L-haskore",
+  "l108": "L-hat-project",
+  "l109": "L-haxml",
+  "l11": "L-arrows",
+  "l110": "L-hbc-doomed",
+  "l111": "L-hbc-origin",
+  "l112": "L-hbc-stumbling",
+  "l113": "L-heap-profiler",
+  "l114": "L-helium",
+  "l115": "L-hierarchical-modules",
+  "l116": "L-high-level-succinct",
+  "l117": "L-higher-kind-unification",
+  "l118": "L-higher-kinds",
+  "l119": "L-higher-rank-types",
+  "l12": "L-at-patterns-tight",
+  "l120": "L-hood",
+  "l121": "L-house-os",
+  "l122": "L-hugs-merged",
+  "l123": "L-hugs-slowed",
+  "l124": "L-hugs-typechecker",
+  "l125": "L-hunit",
+  "l126": "L-imperative-fp-name",
+  "l127": "L-implicit-parameters",
+  "l128": "L-industrial-haskell",
+  "l129": "L-infix-binds-less",
+  "l13": "L-avoid-semicolon",
+  "l130": "L-infix-from-day-one",
+  "l131": "L-influence-csharp",
+  "l132": "L-io-a-computation",
+  "l133": "L-io-exceptions",
+  "l134": "L-io-implementation",
+  "l135": "L-io-textbooks",
+  "l136": "L-ioref",
+  "l137": "L-isabelle-class-laws",
+  "l138": "L-jhc",
+  "l139": "L-keywords-low",
+  "l14": "L-backquote-infix",
+  "l140": "L-kinds-classify",
+  "l141": "L-lambda-backslash",
+  "l142": "L-lambda-calculus-model",
+  "l143": "L-lambda-precedence-change",
+  "l144": "L-lava-classes",
+  "l145": "L-lava-sharing",
+  "l146": "L-layout-complex-spec",
+  "l147": "L-layout-rule-design",
+  "l148": "L-laziness-combinators",
+  "l149": "L-laziness-lifetimes",
+  "l15": "L-backus-lecture",
+  "l150": "L-laziness-macros",
+  "l151": "L-lazy-appeal",
+  "l152": "L-lazy-enables-stream",
+  "l153": "L-lazy-three-times",
+  "l154": "L-lazy-unpredictable",
+  "l155": "L-legacy-influence",
+  "l156": "L-let-and-where",
+  "l157": "L-letwhere-lazy-wart",
+  "l158": "L-libraries-modest-evolution",
+  "l159": "L-library-report",
+  "l16": "L-bind-vs-ml",
+  "l160": "L-lifetime-profiling",
+  "l161": "L-lifted-tuples",
+  "l162": "L-linspire-uniformity",
+  "l163": "L-listcomp-lazy-popular",
+  "l164": "L-listcomp-monads-reverted",
+  "l165": "L-listcomp-notation",
+  "l166": "L-literate-comments",
+  "l167": "L-lolita",
+  "l168": "L-loops-recursion-hard",
+  "l169": "L-many-ways-fit",
+  "l17": "L-blessed-addenda",
+  "l170": "L-matching-semantics",
+  "l171": "L-math-look-teaching",
+  "l172": "L-minimal-surfaces",
+  "l173": "L-minimalist-records",
+  "l174": "L-miranda-identified-bottom",
+  "l175": "L-miranda-mature",
+  "l176": "L-miranda-typing",
+  "l177": "L-module-interfaces",
+  "l178": "L-module-little-debate",
+  "l179": "L-module-namespace-only",
+  "l18": "L-bluespec-two-level",
+  "l180": "L-module-not-distribution",
+  "l181": "L-moggi-monads",
+  "l182": "L-monad-as-typeclass",
+  "l183": "L-monad-definition",
+  "l184": "L-monad-laws",
+  "l185": "L-monad-transformers",
+  "l186": "L-monadic-advantage",
+  "l187": "L-monadic-dominated",
+  "l188": "L-monadic-io",
+  "l189": "L-monads-io-area",
+  "l19": "L-bottom-every-type",
+  "l190": "L-monads-side-effects-examples",
+  "l191": "L-monomorphism-restriction",
+  "l192": "L-multiparam-resisted",
+  "l193": "L-namespaces",
+  "l194": "L-naming-moment",
+  "l195": "L-naturals-unary",
+  "l196": "L-need-common-language",
+  "l197": "L-newtype",
+  "l198": "L-nhc-space-motivation",
+  "l199": "L-nhc-york-profiling",
+  "l2": "L-adt-extended",
+  "l20": "L-bottom-tuple-distinct",
+  "l200": "L-nk-brackets",
+  "l201": "L-nk-controversy",
+  "l202": "L-nk-efficiency",
+  "l203": "L-nk-wadler-history",
+  "l204": "L-non-strict-pure",
+  "l205": "L-non-von-neumann",
+  "l206": "L-not-from-miranda",
+  "l207": "L-numeric-classes",
+  "l208": "L-numeric-kinds",
+  "l209": "L-observable-sharing",
+  "l21": "L-bytestring-fusion",
+  "l210": "L-ol-default",
+  "l211": "L-one-prefix-operator",
+  "l212": "L-open-participation",
+  "l213": "L-overloaded-literals",
+  "l214": "L-paper-is-history",
+  "l215": "L-parametricity-debate",
+  "l216": "L-parametricity-deforestation",
+  "l217": "L-parser-bnf",
+  "l218": "L-parser-history",
+  "l219": "L-parser-monad",
+  "l22": "L-cabal-hackage",
+  "l220": "L-parser-new-combinators",
+  "l221": "L-parser-type",
+  "l222": "L-pattern-match-lazy-complex",
+  "l223": "L-pattern-readability",
+  "l224": "L-ph",
+  "l225": "L-polymorphic-recursion",
+  "l226": "L-postmortem-debugging",
+  "l227": "L-practical-areas",
+  "l228": "L-pretty-doc",
+  "l229": "L-profiler-faster",
+  "l23": "L-cbv-recursive-combinators",
+  "l230": "L-programming-environment",
+  "l231": "L-programming-large",
+  "l232": "L-prototype-haskell10",
+  "l233": "L-public-lists",
+  "l234": "L-pure-not-right-way",
+  "l235": "L-pure-principled-attack",
+  "l236": "L-purity-io-problem",
+  "l237": "L-qualified-types",
+  "l238": "L-quickcheck",
+  "l239": "L-quickcheck-emulated",
+  "l24": "L-class-bounded-quantification",
+  "l240": "L-quickcheck-exemplifies",
+  "l241": "L-quickcheck-programmers",
+  "l242": "L-quirky-elegance",
+  "l243": "L-random-seed",
+  "l244": "L-realworld-impact",
+  "l245": "L-records-omitted",
+  "l246": "L-redex-trails",
+  "l247": "L-report-book-online",
+  "l248": "L-retainer-profiling",
+  "l249": "L-runst",
+  "l25": "L-class-irritations",
+  "l250": "L-sasl-higher-order",
+  "l251": "L-sasl-os",
+  "l252": "L-scheme-cbv",
+  "l253": "L-scoped-type-variables",
+  "l254": "L-section-negation",
+  "l255": "L-sections",
+  "l256": "L-segregate-formats",
+  "l257": "L-seq-controversial",
+  "l258": "L-seq-eval-class",
+  "l259": "L-seq-for-speed",
+  "l26": "L-classes-monads-symbiosis",
+  "l260": "L-seq-introduced",
+  "l261": "L-seq-miranda",
+  "l262": "L-seq-parametricity",
+  "l263": "L-seq-polymorphic-today",
+  "l264": "L-seq-space-debugging",
+  "l265": "L-shadowing-allowed",
+  "l266": "L-single-constructor-tuple",
+  "l267": "L-space-sensitivity",
+  "l268": "L-start-from-existing",
+  "l269": "L-state-monad-plumbing",
+  "l27": "L-clean-gui",
+  "l270": "L-stm",
+  "l271": "L-stream-cont-equivalent",
+  "l272": "L-stream-model",
+  "l273": "L-stream-primitive-efficiency",
+  "l274": "L-strict-lazy-mix",
+  "l275": "L-sum-of-products",
+  "l276": "L-syntax-effort",
+  "l277": "L-syntax-io-retrospect",
+  "l278": "L-teaching-effective",
+  "l279": "L-teaching-goal",
+  "l28": "L-combinator-definition",
+  "l280": "L-template-haskell",
+  "l281": "L-tools-research",
+  "l282": "L-top-to-bottom-left-right",
+  "l283": "L-trace-garbled",
+  "l284": "L-turner-declined",
+  "l285": "L-turner-lazy-lists",
+  "l286": "L-two-comment-styles",
+  "l287": "L-two-styles",
+  "l288": "L-type-class-ambiguity",
+  "l289": "L-type-class-applications",
+  "l29": "L-combinator-dsel-same",
+  "l290": "L-type-class-basics",
+  "l291": "L-type-class-chaos",
+  "l292": "L-type-class-generalisations",
+  "l293": "L-type-class-origin",
+  "l294": "L-type-class-serendipity",
+  "l295": "L-type-classes-distinctive",
+  "l296": "L-type-classes-influence",
+  "l297": "L-type-lab",
+  "l298": "L-type-level-programming",
+  "l299": "L-type-system-anarchic",
+  "l3": "L-adt-fundamental",
+  "l30": "L-combinator-influential",
+  "l300": "L-typeclass-compiler-cost",
+  "l301": "L-unlifted-indistinguishable",
+  "l302": "L-unlifted-seq",
+  "l303": "L-unsafeperformio",
+  "l304": "L-user-infix-operators",
+  "l305": "L-views-excluded",
+  "l306": "L-views-tension",
+  "l307": "L-wadler-monads-programs",
+  "l308": "L-wadlers-law",
+  "l309": "L-web-invert",
+  "l31": "L-committee-design",
+  "l310": "L-web-static-types",
+  "l311": "L-where-clause",
+  "l312": "L-world-passing-rejected",
+  "l313": "L-yale-environment",
+  "l314": "L-yale-extensions",
+  "l315": "L-yale-haskell",
+  "l316": "L-yale-scheme-backend",
+  "l317": "L-yale-scratchpad",
+  "l318": "L-yale-strictness-compilation",
+  "l319": "L-yampa",
+  "l32": "L-common-libraries",
+  "l33": "L-community-success",
+  "l34": "L-concurrent-haskell",
+  "l35": "L-cons-not-evaluate",
+  "l36": "L-conservative-language",
+  "l37": "L-constructors-capitalised",
+  "l38": "L-constructors-pattern-expr",
+  "l39": "L-continuation-io",
+  "l4": "L-adt-via-modules",
+  "l40": "L-core-lint",
+  "l41": "L-core-pipeline",
+  "l42": "L-core-systemf",
+  "l43": "L-cost-centres",
+  "l44": "L-cost-higherorder",
+  "l45": "L-curried-uncurried",
+  "l46": "L-currying-history",
+  "l47": "L-debt-to-miranda",
+  "l48": "L-defaulting-rule",
+  "l49": "L-design-slow",
+  "l5": "L-aetion-static-types",
+  "l50": "L-dictionary-passing",
+  "l51": "L-distribution-maturity",
+  "l52": "L-do-notation",
+  "l53": "L-dozen-languages",
+  "l54": "L-dsel-definition",
+  "l55": "L-dsel-host",
+  "l56": "L-dsel-structure",
+  "l57": "L-dsl-nonembedded",
+  "l58": "L-dynamic-semantics-overloading",
+  "l59": "L-eager-evaluation",
+  "l6": "L-algebraic-types-easy",
+  "l60": "L-early-impractical",
+  "l61": "L-edison",
+  "l62": "L-effects-bet",
+  "l63": "L-effects-convergence",
+  "l64": "L-empty-type",
+  "l65": "L-equations-burstall",
+  "l66": "L-executable-mathematics",
+  "l67": "L-existential-types",
+  "l68": "L-explicit-braces",
+  "l69": "L-explicit-effects",
+  "l7": "L-algebraic-types-origin",
+  "l70": "L-ffi-adhoc",
+  "l71": "L-ffi-c",
+  "l72": "L-ffi-need",
+  "l73": "L-ffi-process",
+  "l74": "L-ffi-tools",
+  "l75": "L-first-class-infix",
+  "l76": "L-fix-leaks",
+  "l77": "L-flat-namespace",
+  "l78": "L-fp-compilers-productivity",
+  "l79": "L-fran-behaviour",
+  "l8": "L-algorithmic-debugging",
+  "l80": "L-fran-events",
+  "l81": "L-fran-numeric",
+  "l82": "L-functional-dependencies",
+  "l83": "L-gadts",
+  "l84": "L-generic-programming",
+  "l85": "L-gf-app",
+  "l86": "L-ghc-complexity",
+  "l87": "L-ghc-extensions-early",
+  "l88": "L-ghc-frontend-fullsyntax",
+  "l89": "L-ghc-in-haskell",
+  "l9": "L-application-juxtaposition",
+  "l90": "L-ghc-origin",
+  "l91": "L-gmachine",
+  "l92": "L-goals-not-met",
+  "l93": "L-gofer-firsts",
+  "l94": "L-gofer-small-interpreter",
+  "l95": "L-gofer-to-hugs",
+  "l96": "L-graph-reduction",
+  "l97": "L-guards-left",
+  "l98": "L-gui-bindings-ffi",
+  "l99": "L-gui-idealists-pragmatists"
+ },
+ "lineages": 319,
+ "max_candidates": 7,
+ "max_thinking_tokens": 0,
+ "model": "opus",
+ "prompt": "find_principles_v2",
+ "prompt_sha256": "5eb0cb1b3e6bfce1ad4255063e7211f32a5b8721ca05c9c56331c35a2258441a",
+ "quote_chars": 300,
+ "quote_labels": {
+  "q1": "written:2007-06-09_01-introduction:skew-toward-authors-participation",
+  "q10": "written:2007-06-09_05-data-types-and-pattern-matching:algebraic-types-history",
+  "q100": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:generic-programming",
+  "q101": "written:2007-06-09_11-applications:haskell-chosen-for-compilation-partial-evaluation",
+  "q102": "written:2007-06-09_09-implementations:ghc-grew-complex",
+  "q103": "written:2007-06-09_09-implementations:ghc-early-extensions",
+  "q104": "written:2007-06-09_09-implementations:large-front-end-data-type-for-good-errors",
+  "q105": "written:2007-06-09_09-implementations:ghc-complete-implementation-in-haskell",
+  "q106": "written:2007-06-09_09-implementations:ghc-origins-as-lml-front-end",
+  "q107": "written:2007-06-09_02-the-genesis-of-haskell:g-machine-laziness-not-interpretation",
+  "q108": "written:2007-06-09_02-the-genesis-of-haskell:goals-not-realised",
+  "q109": "written:2007-06-09_09-implementations:gofer-do-notation-and-constructor-classes",
+  "q11": "written:2007-06-09_10-profiling-and-debugging:algorithmic-debugging",
+  "q110": "written:2007-06-09_09-implementations:gofer-first-multi-parameter-type-classes",
+  "q111": "written:2007-06-09_09-implementations:gofer-interpreter-small-footprint",
+  "q112": "written:2007-06-09_09-implementations:gofer-to-hugs",
+  "q113": "written:2007-06-09_02-the-genesis-of-haskell:graph-reduction-and-sk-combinators",
+  "q114": "written:2007-06-09_04-syntax:guards-moved-to-left",
+  "q115": "written:2007-06-09_11-applications:ffi-absence-hampered-bindings",
+  "q116": "written:2007-06-09_11-applications:declarative-gui-radical-question",
+  "q117": "written:2007-06-09_11-applications:idealists-vs-pragmatists-gui",
+  "q118": "written:2007-06-09_11-applications:purity-cost-for-gui",
+  "q119": "written:2007-06-09_11-applications:no-standard-gui-inhibits-haskell",
+  "q12": "written:2007-06-09_10-profiling-and-debugging:algorithmic-debugging-laziness-problem",
+  "q120": "written:2007-06-09_11-applications:haggis-drove-concurrent-haskell",
+  "q121": "written:2007-06-09_11-applications:laziness-higher-order-for-hardware",
+  "q122": "written:2007-06-09_09-implementations:haskell-is-a-big-language-to-implement",
+  "q123": "written:2007-06-09_10-profiling-and-debugging:haskell-dauntingly-large",
+  "q124": "written:2007-06-09_13-conclusion:haskell-contributed-through-purity-and-critical-mass",
+  "q125": "written:2007-06-09_04-syntax:haskell-is-a-pretty-language",
+  "q126": "written:2007-06-09_02-the-genesis-of-haskell:haskell98-commitment-to-stability",
+  "q127": "written:2007-06-09_12-the-impact-of-haskell:haskell98-stability-step",
+  "q128": "written:2007-06-09_11-applications:haskore-declarative-music-model",
+  "q129": "written:2007-06-09_11-applications:purity-laziness-ho-enable-elegant-music",
+  "q13": "written:2007-06-09_04-syntax:application-by-juxtaposition",
+  "q130": "written:2007-06-09_10-profiling-and-debugging:hat-not-mainstream",
+  "q131": "written:2007-06-09_10-profiling-and-debugging:one-trace-many-debuggers",
+  "q132": "written:2007-06-09_11-applications:haxml-two-approaches-tradeoff",
+  "q133": "written:2007-06-09_09-implementations:hbc-doomed-by-lml",
+  "q134": "written:2007-06-09_09-implementations:hbc-written-out-of-impatience",
+  "q135": "written:2007-06-09_09-implementations:hbc-type-checking-hard",
+  "q136": "written:2007-06-09_10-profiling-and-debugging:space-leaks-heap-profiling",
+  "q137": "written:2007-06-09_09-implementations:helium-for-teaching-and-error-messages",
+  "q138": "written:2007-06-09_12-the-impact-of-haskell:helium-drops-classes-tradeoff",
+  "q139": "written:2007-06-09_08-haskell-in-middle-age:hierarchical-module-names",
+  "q14": "written:2007-06-09_12-the-impact-of-haskell:in-place-update-messier",
+  "q140": "written:2007-06-09_12-the-impact-of-haskell:high-level-concentrate-on-problem",
+  "q141": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:first-order-unification-suffices",
+  "q142": "written:2007-06-09_02-the-genesis-of-haskell:constructor-classes",
+  "q143": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:constructor-classes-higher-kinded",
+  "q144": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:higher-kinded-as-elegant-generalisation",
+  "q145": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:higher-kinds-independent-utility",
+  "q146": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:higher-rank-types",
+  "q147": "written:2007-06-09_10-profiling-and-debugging:hood-observational-debugging",
+  "q148": "written:2007-06-09_10-profiling-and-debugging:hood-observes-functions",
+  "q149": "written:2007-06-09_11-applications:house-os-monad-for-hardware-access",
+  "q15": "written:2007-06-09_07-monads-and-input-output:arrows-generalise-monads",
+  "q150": "written:2007-06-09_09-implementations:parallel-hugs-development-and-merge",
+  "q151": "written:2007-06-09_09-implementations:standardisation-stabilised-hugs",
+  "q152": "written:2007-06-09_09-implementations:hugs-experimental-type-features",
+  "q153": "written:2007-06-09_10-profiling-and-debugging:hunit-traditional-testing",
+  "q154": "written:2007-06-09_07-monads-and-input-output:imperative-functional-programming",
+  "q155": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:implicit-parameters",
+  "q156": "written:2007-06-09_12-the-impact-of-haskell:extensions-vs-standard",
+  "q157": "written:2007-06-09_04-syntax:infix-binds-less-tightly",
+  "q158": "written:2007-06-09_04-syntax:infix-operators-like-mathematics",
+  "q159": "written:2007-06-09_02-the-genesis-of-haskell:haskell-features-in-csharp-and-linq",
+  "q16": "written:2007-06-09_04-syntax:at-patterns-bind-tightly-mistake",
+  "q160": "written:2007-06-09_12-the-impact-of-haskell:comprehensions-and-monad-comprehensions-as-influence",
+  "q161": "written:2007-06-09_07-monads-and-input-output:monadic-io-key-idea",
+  "q162": "written:2007-06-09_07-monads-and-input-output:exceptions-recovered-via-io",
+  "q163": "written:2007-06-09_07-monads-and-input-output:io-monad-exceptions",
+  "q164": "written:2007-06-09_07-monads-and-input-output:io-two-implementations",
+  "q165": "written:2007-06-09_12-the-impact-of-haskell:io-and-the-awkward-squad",
+  "q166": "written:2007-06-09_07-monads-and-input-output:mutable-state-in-io",
+  "q167": "written:2007-06-09_12-the-impact-of-haskell:type-classes-with-laws",
+  "q168": "written:2007-06-09_09-implementations:jhc-whole-program-no-dictionaries",
+  "q169": "written:2007-06-09_04-syntax:few-reserved-keywords",
+  "q17": "written:2007-06-09_04-syntax:avoid-semicolon-no-sequencing",
+  "q170": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:kinds-classify-types",
+  "q171": "written:2007-06-09_04-syntax:anonymous-function-backslash",
+  "q172": "written:2007-06-09_02-the-genesis-of-haskell:lambda-calculus-for-modelling-languages",
+  "q173": "written:2007-06-09_07-monads-and-input-output:lambda-precedence-change",
+  "q174": "written:2007-06-09_11-applications:class-system-signals-lists",
+  "q175": "written:2007-06-09_11-applications:sharing-vs-duplication-problem",
+  "q176": "written:2007-06-09_04-syntax:complex-layout-rule-programmer-expects",
+  "q177": "written:2007-06-09_04-syntax:layout-avoids-clutter",
+  "q178": "written:2007-06-09_04-syntax:layout-rules-simple-and-lenient",
+  "q179": "written:2007-06-09_11-applications:laziness-enables-combinator-libraries",
+  "q18": "written:2007-06-09_04-syntax:backquotes-function-to-infix",
+  "q180": "written:2007-06-09_10-profiling-and-debugging:laziness-abstracts-object-lifetimes",
+  "q181": "written:2007-06-09_11-applications:laziness-gives-macro-power",
+  "q182": "written:2007-06-09_02-the-genesis-of-haskell:laziness-as-a-drug",
+  "q183": "written:2007-06-09_07-monads-and-input-output:lazy-evaluation-enables-streams",
+  "q184": "written:2007-06-09_02-the-genesis-of-haskell:lazy-evaluation-invented-three-times",
+  "q185": "written:2007-06-09_10-profiling-and-debugging:lazy-evaluation-hides-operational-aspects",
+  "q186": "written:2007-06-09_12-the-impact-of-haskell:legacy-is-influence-on-successors",
+  "q187": "written:2007-06-09_13-conclusion:enduring-value-through-influence",
+  "q188": "written:2007-06-09_04-syntax:abandon-just-one-way",
+  "q189": "written:2007-06-09_05-data-types-and-pattern-matching:let-where-always-lazy-wart",
+  "q19": "written:2007-06-09_02-the-genesis-of-haskell:functional-programming-as-practical-tool",
+  "q190": "written:2007-06-09_09-implementations:haskell-98-libraries-still-modest",
+  "q191": "written:2007-06-09_11-applications:applications-grew-from-libraries",
+  "q192": "written:2007-06-09_02-the-genesis-of-haskell:library-report-for-portability",
+  "q193": "written:2007-06-09_09-implementations:libraries-grew-into-a-separate-report",
+  "q194": "written:2007-06-09_10-profiling-and-debugging:lag-drag-void-profiling",
+  "q195": "written:2007-06-09_05-data-types-and-pattern-matching:lifted-decision-and-tilde-patterns",
+  "q196": "written:2007-06-09_12-the-impact-of-haskell:uniformity-vs-perl-compactness",
+  "q197": "written:2007-06-09_04-syntax:comprehensions-popular-in-lazy-languages",
+  "q198": "written:2007-06-09_02-the-genesis-of-haskell:list-comprehensions-over-monads-reversed",
+  "q199": "written:2007-06-09_07-monads-and-input-output:syntactic-sugar-for-monads",
+  "q2": "written:2007-06-09_02-the-genesis-of-haskell:adt-extensions",
+  "q20": "written:2007-06-09_07-monads-and-input-output:monads-vs-ml-sequencing",
+  "q200": "written:2007-06-09_04-syntax:list-comprehensions",
+  "q201": "written:2007-06-09_04-syntax:literate-comments",
+  "q202": "written:2007-06-09_11-applications:laziness-essential-for-nlp-ambiguity",
+  "q203": "written:2007-06-09_12-the-impact-of-haskell:recursion-vs-simple-loops",
+  "q204": "written:2007-06-09_04-syntax:many-ways-to-define-functions",
+  "q205": "written:2007-06-09_05-data-types-and-pattern-matching:matching-tradeoff-equational-reasoning",
+  "q206": "written:2007-06-09_05-data-types-and-pattern-matching:rejected-matching-alternatives",
+  "q207": "written:2007-06-09_12-the-impact-of-haskell:mathematical-look-and-feel",
+  "q208": "written:2007-06-09_12-the-impact-of-haskell:minimal-surfaces",
+  "q209": "written:2007-06-09_05-data-types-and-pattern-matching:minimal-records-leave-field-open",
+  "q21": "written:2007-06-09_08-haskell-in-middle-age:blessed-addenda",
+  "q210": "written:2007-06-09_05-data-types-and-pattern-matching:minimalist-record-syntax",
+  "q211": "written:2007-06-09_05-data-types-and-pattern-matching:miranda-currying-isomorphism",
+  "q212": "written:2007-06-09_02-the-genesis-of-haskell:miranda-most-mature-candidate",
+  "q213": "written:2007-06-09_02-the-genesis-of-haskell:miranda-polymorphic-typing",
+  "q214": "written:2007-06-09_08-haskell-in-middle-age:interfaces-abandoned",
+  "q215": "written:2007-06-09_08-haskell-in-middle-age:regret-no-checked-interface-language",
+  "q216": "written:2007-06-09_08-haskell-in-middle-age:tensions-in-interfaces",
+  "q217": "written:2007-06-09_08-haskell-in-middle-age:module-system-emerged-without-debate",
+  "q218": "written:2007-06-09_08-haskell-in-middle-age:why-no-ml-module-debate",
+  "q219": "written:2007-06-09_08-haskell-in-middle-age:module-system-as-namespace-control",
+  "q22": "written:2007-06-09_12-the-impact-of-haskell:haskell-as-two-level-compile-time-language",
+  "q220": "written:2007-06-09_09-implementations:module-system-of-modesty",
+  "q221": "written:2007-06-09_09-implementations:modules-are-not-a-unit-of-distribution",
+  "q222": "written:2007-06-09_07-monads-and-input-output:moggi-monads-for-semantics",
+  "q223": "written:2007-06-09_07-monads-and-input-output:monad-as-type-class",
+  "q224": "written:2007-06-09_07-monads-and-input-output:monad-definition",
+  "q225": "written:2007-06-09_07-monads-and-input-output:monad-laws-unenforced",
+  "q226": "written:2007-06-09_07-monads-and-input-output:monad-transformers-dont-compose",
+  "q227": "written:2007-06-09_07-monads-and-input-output:monad-abstraction-conceptual-advantage",
+  "q228": "written:2007-06-09_07-monads-and-input-output:monadic-types-compact-and-polymorphic",
+  "q229": "written:2007-06-09_02-the-genesis-of-haskell:monadic-io-and-do",
+  "q23": "written:2007-06-09_05-data-types-and-pattern-matching:bottom-value-every-type",
+  "q230": "written:2007-06-09_01-introduction:monads-and-io",
+  "q231": "written:2007-06-09_07-monads-and-input-output:monads-distinctive-but-not-original",
+  "q232": "written:2007-06-09_07-monads-and-input-output:varieties-of-monads",
+  "q233": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:monomorphism-restriction",
+  "q234": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:monomorphism-restriction-a-wart",
+  "q235": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:reluctance-on-compiler-dependent-performance",
+  "q236": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:silent-duplication-of-computation",
+  "q237": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:committee-resistant-to-multi-parameter",
+  "q238": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:multi-parameter-ambiguity",
+  "q239": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:multi-parameter-type-classes",
+  "q24": "written:2007-06-09_05-data-types-and-pattern-matching:lifted-vs-unlifted-tuple-semantics",
+  "q240": "written:2007-06-09_04-syntax:namespaces-orthogonal-and-overlapping",
+  "q241": "written:2007-06-09_02-the-genesis-of-haskell:moment-of-naming",
+  "q242": "written:2007-06-09_05-data-types-and-pattern-matching:nat-type-inefficient-unary",
+  "q243": "written:2007-06-09_01-introduction:lack-of-common-language-hampers-use",
+  "q244": "written:2007-06-09_01-introduction:motivation-common-language",
+  "q245": "written:2007-06-09_02-the-genesis-of-haskell:tower-of-babel-common-language",
+  "q246": "written:2007-06-09_05-data-types-and-pattern-matching:newtype-motivation-isomorphic-abstract-types",
+  "q247": "written:2007-06-09_05-data-types-and-pattern-matching:newtype-single-constructor-choice",
+  "q248": "written:2007-06-09_09-implementations:nhc-space-efficiency-goal",
+  "q249": "written:2007-06-09_09-implementations:nhc-heap-profiling-link",
+  "q25": "written:2007-06-09_12-the-impact-of-haskell:rewrite-rules-for-performance",
+  "q250": "written:2007-06-09_05-data-types-and-pattern-matching:n-plus-k-syntactic-ambiguity",
+  "q251": "written:2007-06-09_05-data-types-and-pattern-matching:n-plus-k-controversy",
+  "q252": "written:2007-06-09_05-data-types-and-pattern-matching:n-plus-k-horse-trading",
+  "q253": "written:2007-06-09_05-data-types-and-pattern-matching:n-plus-k-patterns",
+  "q254": "written:2007-06-09_05-data-types-and-pattern-matching:n-plus-k-origin",
+  "q255": "written:2007-06-09_01-introduction:nature-non-strict-purely-functional",
+  "q256": "written:2007-06-09_02-the-genesis-of-haskell:non-von-neumann-hardware-dead-end",
+  "q257": "written:2007-06-09_02-the-genesis-of-haskell:fork-freedom-enabled-type-classes",
+  "q258": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:numeric-classes-compromise",
+  "q259": "written:2007-06-09_12-the-impact-of-haskell:types-of-numeric-kind",
+  "q26": "written:2007-06-09_09-implementations:cabal-and-hackage-for-packaging",
+  "q260": "written:2007-06-09_11-applications:observable-sharing-unsafe-but-tractable",
+  "q261": "written:2007-06-09_02-the-genesis-of-haskell:ol-as-default-solution",
+  "q262": "written:2007-06-09_04-syntax:one-prefix-operator-negation",
+  "q263": "written:2007-06-09_02-the-genesis-of-haskell:open-participation-benign-dictator",
+  "q264": "written:2007-06-09_05-data-types-and-pattern-matching:n-plus-k-overloading-complexity",
+  "q265": "written:2007-06-09_01-introduction:history-not-technical-description",
+  "q266": "written:2007-06-09_10-profiling-and-debugging:launchbury-vs-hughes",
+  "q267": "written:2007-06-09_10-profiling-and-debugging:parametricity-justifies-deforestation",
+  "q268": "written:2007-06-09_11-applications:bnf-to-executable-code",
+  "q269": "written:2007-06-09_11-applications:parser-combinators-history",
+  "q27": "written:2007-06-09_11-applications:call-by-value-cost-of-eta-expansion",
+  "q270": "written:2007-06-09_11-applications:parsers-and-monads",
+  "q271": "written:2007-06-09_11-applications:programmer-makes-new-combinators",
+  "q272": "written:2007-06-09_11-applications:parser-as-function-type",
+  "q273": "written:2007-06-09_05-data-types-and-pattern-matching:lazy-pattern-matching-semantics-complex",
+  "q274": "written:2007-06-09_05-data-types-and-pattern-matching:pattern-matching-increases-readability",
+  "q275": "written:2007-06-09_10-profiling-and-debugging:ph-eager-haskell-syntax",
+  "q276": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:polymorphic-recursion",
+  "q277": "written:2007-06-09_10-profiling-and-debugging:evaluation-dependence-trees",
+  "q278": "written:2007-06-09_10-profiling-and-debugging:post-mortem-debugging",
+  "q279": "written:2007-06-09_08-haskell-in-middle-age:areas-neglected-by-original-designers",
+  "q28": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:bounded-quantification",
+  "q280": "written:2007-06-09_11-applications:conceptual-vs-implementation-representation",
+  "q281": "written:2007-06-09_11-applications:smart-document-as-abstract-type",
+  "q282": "written:2007-06-09_10-profiling-and-debugging:profiler-faster-programs",
+  "q283": "written:2007-06-09_09-implementations:environments-long-neglected",
+  "q284": "written:2007-06-09_01-introduction:programming-in-the-large",
+  "q285": "written:2007-06-09_09-implementations:prototype-implemented-all-of-haskell-1-0",
+  "q286": "written:2007-06-09_02-the-genesis-of-haskell:public-vs-private-governance",
+  "q287": "written:2007-06-09_13-conclusion:purity-not-the-one-right-way",
+  "q288": "written:2007-06-09_13-conclusion:purely-functional-as-principled-attack",
+  "q289": "written:2007-06-09_07-monads-and-input-output:purity-drove-io-design",
+  "q29": "written:2007-06-09_12-the-impact-of-haskell:class-system-error-messages",
+  "q290": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:extensible-records-trex",
+  "q291": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:lacks-predicate-witnessed-at-runtime",
+  "q292": "written:2007-06-09_10-profiling-and-debugging:quickcheck-generators",
+  "q293": "written:2007-06-09_10-profiling-and-debugging:quickcheck-specifications-as-tests",
+  "q294": "written:2007-06-09_10-profiling-and-debugging:quickcheck-emulated-elsewhere",
+  "q295": "written:2007-06-09_10-profiling-and-debugging:quickcheck-uses-haskell-features",
+  "q296": "written:2007-06-09_10-profiling-and-debugging:quickcheck-succeeds-by-audience",
+  "q297": "written:2007-06-09_13-conclusion:quirky-elegance-drew-designers",
+  "q298": "written:2007-06-09_07-monads-and-input-output:random-numbers-use-io",
+  "q299": "written:2007-06-09_10-profiling-and-debugging:impact-as-a-goal",
+  "q3": "written:2007-06-09_05-data-types-and-pattern-matching:data-types-and-pattern-matching-fundamental",
+  "q30": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-supported-monads",
+  "q300": "written:2007-06-09_05-data-types-and-pattern-matching:records-no-right-design",
+  "q301": "written:2007-06-09_05-data-types-and-pattern-matching:records-omitted-despite-usefulness",
+  "q302": "written:2007-06-09_10-profiling-and-debugging:redex-trails",
+  "q303": "written:2007-06-09_02-the-genesis-of-haskell:free-online-text-defuses-ip-debate",
+  "q304": "written:2007-06-09_10-profiling-and-debugging:retainer-profiling",
+  "q305": "written:2007-06-09_07-monads-and-input-output:runST-encapsulates-imperative",
+  "q306": "written:2007-06-09_02-the-genesis-of-haskell:sasl-sugared-lambda-with-pattern-matching",
+  "q307": "written:2007-06-09_02-the-genesis-of-haskell:pure-lazy-fp-in-the-large",
+  "q308": "written:2007-06-09_02-the-genesis-of-haskell:simulate-call-by-name-easier",
+  "q309": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:lexically-scoped-type-variables",
+  "q31": "written:2007-06-09_07-monads-and-input-output:monads-typeclasses-symbiosis",
+  "q310": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:omission-of-scoped-type-variables-a-mistake",
+  "q311": "written:2007-06-09_04-syntax:minus-42-section-problem",
+  "q312": "written:2007-06-09_04-syntax:sections",
+  "q313": "written:2007-06-09_12-the-impact-of-haskell:separate-data-types-for-legacy-formats",
+  "q314": "written:2007-06-09_10-profiling-and-debugging:seq-breaks-semantics",
+  "q315": "written:2007-06-09_10-profiling-and-debugging:eval-class-solution",
+  "q316": "written:2007-06-09_10-profiling-and-debugging:eval-class-too-heavyweight",
+  "q317": "written:2007-06-09_10-profiling-and-debugging:seq-introduced-for-speed",
+  "q318": "written:2007-06-09_10-profiling-and-debugging:seq-and-strictness-annotations",
+  "q319": "written:2007-06-09_10-profiling-and-debugging:seq-predates-haskell",
+  "q32": "written:2007-06-09_11-applications:clean-integrated-io-vs-fragmented-haskell",
+  "q320": "written:2007-06-09_10-profiling-and-debugging:seq-weakens-parametricity",
+  "q321": "written:2007-06-09_10-profiling-and-debugging:seq-now-polymorphic-unsound-deforestation",
+  "q322": "written:2007-06-09_10-profiling-and-debugging:hughes-seq-for-space-debugging",
+  "q323": "written:2007-06-09_04-syntax:shadowing-allowed",
+  "q324": "written:2007-06-09_05-data-types-and-pattern-matching:single-constructor-sharing-tuple-properties-difficulty",
+  "q325": "written:2007-06-09_10-profiling-and-debugging:space-sensitivity-two-edged",
+  "q326": "written:2007-06-09_02-the-genesis-of-haskell:begin-from-existing-language",
+  "q327": "written:2007-06-09_07-monads-and-input-output:state-monad-hides-plumbing",
+  "q328": "written:2007-06-09_07-monads-and-input-output:stm-fits-haskell",
+  "q329": "written:2007-06-09_07-monads-and-input-output:streams-and-continuations-equivalent",
+  "q33": "written:2007-06-09_11-applications:combinator-library-definition",
+  "q330": "written:2007-06-09_07-monads-and-input-output:no-special-io-syntax",
+  "q331": "written:2007-06-09_07-monads-and-input-output:stream-io-as-behaviour",
+  "q332": "written:2007-06-09_07-monads-and-input-output:streams-primitive-for-efficiency",
+  "q333": "written:2007-06-09_12-the-impact-of-haskell:strict-and-lazy-evaluation-difficulty",
+  "q334": "written:2007-06-09_05-data-types-and-pattern-matching:sum-of-products-from-miranda",
+  "q335": "written:2007-06-09_04-syntax:syntax-as-personal-user-interface",
+  "q336": "written:2007-06-09_04-syntax:syntax-taken-seriously-despite-dismissal",
+  "q337": "written:2007-06-09_07-monads-and-input-output:retrospective-syntax-for-streams",
+  "q338": "written:2007-06-09_12-the-impact-of-haskell:types-and-recursion-early",
+  "q339": "written:2007-06-09_12-the-impact-of-haskell:teaching-as-explicit-design-goal",
+  "q34": "written:2007-06-09_11-applications:combinator-library-and-dsel-same",
+  "q340": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:template-meta-programming",
+  "q341": "written:2007-06-09_10-profiling-and-debugging:profiling-debugging-took-research",
+  "q342": "written:2007-06-09_05-data-types-and-pattern-matching:top-to-bottom-left-to-right-matching",
+  "q343": "written:2007-06-09_10-profiling-and-debugging:trace-garbled-output",
+  "q344": "written:2007-06-09_02-the-genesis-of-haskell:turner-declined-goals-differed",
+  "q345": "written:2007-06-09_02-the-genesis-of-haskell:lazy-lists-emulate-behaviours",
+  "q346": "written:2007-06-09_04-syntax:two-comment-styles",
+  "q347": "written:2007-06-09_04-syntax:declaration-vs-expression-style",
+  "q348": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:ambiguity-in-type-classes",
+  "q349": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-first-applications",
+  "q35": "written:2007-06-09_11-applications:combinator-library-as-dsl",
+  "q350": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-class-basic-idea",
+  "q351": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:attempts-to-bring-order",
+  "q352": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:awaiting-unifying-insight",
+  "q353": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-generalised-over-time",
+  "q354": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-origin-small-problem",
+  "q355": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-serendipity",
+  "q356": "written:2007-06-09_01-introduction:type-classes-as-distinctive",
+  "q357": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-classes-as-distinctive-feature",
+  "q358": "written:2007-06-09_12-the-impact-of-haskell:type-classes-as-influence",
+  "q359": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:haskell-as-type-system-laboratory",
+  "q36": "written:2007-06-09_11-applications:combinator-libraries-not-new-but-influential",
+  "q360": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:why-haskell-friendly-to-innovation-nontechnical",
+  "q361": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:why-haskell-friendly-to-innovation-technical",
+  "q362": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-level-programming",
+  "q363": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:anarchic-development",
+  "q364": "written:2007-06-09_09-implementations:type-classes-cost-size-and-speed",
+  "q365": "written:2007-06-09_05-data-types-and-pattern-matching:unlifted-distinguished-only-by-pattern-matching",
+  "q366": "written:2007-06-09_05-data-types-and-pattern-matching:unlifted-tuples-incompatible-with-seq",
+  "q367": "written:2007-06-09_07-monads-and-input-output:unsafePerformIO-no-safe-escape",
+  "q368": "written:2007-06-09_04-syntax:user-definable-infix-operators",
+  "q369": "written:2007-06-09_05-data-types-and-pattern-matching:views-never-returned",
+  "q37": "written:2007-06-09_01-introduction:design-by-committee",
+  "q370": "written:2007-06-09_05-data-types-and-pattern-matching:views-removed",
+  "q371": "written:2007-06-09_05-data-types-and-pattern-matching:views-tried-and-true-criterion",
+  "q372": "written:2007-06-09_05-data-types-and-pattern-matching:views-ease-abstraction-tension",
+  "q373": "written:2007-06-09_07-monads-and-input-output:wadler-monads-for-programs",
+  "q374": "written:2007-06-09_04-syntax:wadlers-law-of-effort",
+  "q375": "written:2007-06-09_11-applications:continuations-or-monads-for-web",
+  "q376": "written:2007-06-09_11-applications:web-app-invert-the-view",
+  "q377": "written:2007-06-09_11-applications:static-typing-for-web-forms",
+  "q378": "written:2007-06-09_04-syntax:where-attached-to-declaration",
+  "q379": "written:2007-06-09_07-monads-and-input-output:world-passing-rejected",
+  "q38": "written:2007-06-09_09-implementations:cross-implementation-common-libraries",
+  "q380": "written:2007-06-09_12-the-impact-of-haskell:uniqueness-types-as-io-alternative",
+  "q381": "written:2007-06-09_09-implementations:yale-haskell-programming-environment",
+  "q382": "written:2007-06-09_09-implementations:yale-haskell-as-extension-testbed",
+  "q383": "written:2007-06-09_09-implementations:common-lisp-backend-limits",
+  "q384": "written:2007-06-09_09-implementations:yale-haskell-via-scheme-techniques",
+  "q385": "written:2007-06-09_09-implementations:yale-haskell-scratch-pad",
+  "q386": "written:2007-06-09_09-implementations:yale-haskell-strictness-for-performance",
+  "q387": "written:2007-06-09_11-applications:arrows-improve-frp",
+  "q39": "written:2007-06-09_01-introduction:community-as-cause-and-indicator-of-success",
+  "q4": "written:2007-06-09_05-data-types-and-pattern-matching:abstract-type-distinct-class-instance",
+  "q40": "written:2007-06-09_07-monads-and-input-output:concurrent-haskell-mvars",
+  "q41": "written:2007-06-09_02-the-genesis-of-haskell:cons-should-not-evaluate-arguments",
+  "q42": "written:2007-06-09_02-the-genesis-of-haskell:conservative-consensus-intent",
+  "q43": "written:2007-06-09_04-syntax:capitalisation-and-colon-conventions",
+  "q44": "written:2007-06-09_05-data-types-and-pattern-matching:capitalization-rule-extended-to-types",
+  "q45": "written:2007-06-09_05-data-types-and-pattern-matching:capitalized-constructors-from-miranda",
+  "q46": "written:2007-06-09_05-data-types-and-pattern-matching:data-constructors-two-roles",
+  "q47": "written:2007-06-09_07-monads-and-input-output:continuation-io-transactions",
+  "q48": "written:2007-06-09_07-monads-and-input-output:continuations-preferred-localised-control",
+  "q49": "written:2007-06-09_09-implementations:core-lint-consistency-check",
+  "q5": "written:2007-06-09_05-data-types-and-pattern-matching:abstract-types-tradeoff",
+  "q50": "written:2007-06-09_09-implementations:core-intermediate-language",
+  "q51": "written:2007-06-09_09-implementations:core-based-on-system-f",
+  "q52": "written:2007-06-09_09-implementations:underestimating-typed-intermediate-language",
+  "q53": "written:2007-06-09_10-profiling-and-debugging:cost-centre-assignment-subtle",
+  "q54": "written:2007-06-09_10-profiling-and-debugging:cost-centres",
+  "q55": "written:2007-06-09_10-profiling-and-debugging:cost-assignment-for-higher-order-functions",
+  "q56": "written:2007-06-09_04-syntax:curried-and-uncurried-both-supported",
+  "q57": "written:2007-06-09_04-syntax:currying",
+  "q58": "written:2007-06-09_02-the-genesis-of-haskell:debt-to-miranda",
+  "q59": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:defaulting-clumsy-but-conservative",
+  "q6": "written:2007-06-09_05-data-types-and-pattern-matching:abstract-types-via-module-system",
+  "q60": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:type-defaulting",
+  "q61": "written:2007-06-09_02-the-genesis-of-haskell:language-design-is-slow",
+  "q62": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:dictionary-passing-translation",
+  "q63": "written:2007-06-09_09-implementations:gofer-dictionary-passing-variant",
+  "q64": "written:2007-06-09_09-implementations:distribution-took-fifteen-years",
+  "q65": "written:2007-06-09_07-monads-and-input-output:do-notation-looks-imperative",
+  "q66": "written:2007-06-09_07-monads-and-input-output:do-notation-not-monads-blurred-the-line",
+  "q67": "written:2007-06-09_01-introduction:proliferation-of-similar-languages-as-problem",
+  "q68": "written:2007-06-09_11-applications:dsel-definition",
+  "q69": "written:2007-06-09_11-applications:six-features-for-dsels",
+  "q7": "written:2007-06-09_12-the-impact-of-haskell:rich-static-type-system-as-reason-to-choose",
+  "q70": "written:2007-06-09_11-applications:dsel-execution-model",
+  "q71": "written:2007-06-09_11-applications:embedded-vs-nonembedded-dsl",
+  "q72": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:dynamic-semantics-depends-on-type-checker",
+  "q73": "written:2007-06-09_10-profiling-and-debugging:eager-haskell-non-strict-semantics",
+  "q74": "written:2007-06-09_13-conclusion:early-impracticality",
+  "q75": "written:2007-06-09_11-applications:type-classes-organise-data-structures",
+  "q76": "written:2007-06-09_13-conclusion:longterm-bet-on-principled-control-of-effects",
+  "q77": "written:2007-06-09_13-conclusion:convergence-from-both-ends",
+  "q78": "written:2007-06-09_13-conclusion:parallelism-punishes-unrestricted-effects",
+  "q79": "written:2007-06-09_05-data-types-and-pattern-matching:empty-type-not-appreciated",
+  "q8": "written:2007-06-09_05-data-types-and-pattern-matching:basic-algebraic-types-straightforward-rest-interesting",
+  "q80": "written:2007-06-09_05-data-types-and-pattern-matching:equations-with-pattern-matching-lineage",
+  "q81": "written:2007-06-09_12-the-impact-of-haskell:referential-transparency-executable-mathematics",
+  "q82": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:existential-data-constructors",
+  "q83": "written:2007-06-09_04-syntax:override-layout-for-generated-programs",
+  "q84": "written:2007-06-09_07-monads-and-input-output:being-explicit-about-effects",
+  "q85": "written:2007-06-09_08-haskell-in-middle-age:early-ad-hoc-ffi-mechanisms",
+  "q86": "written:2007-06-09_08-haskell-in-middle-age:ffi-c-as-lowest-common-denominator",
+  "q87": "written:2007-06-09_08-haskell-in-middle-age:need-to-call-other-languages",
+  "q88": "written:2007-06-09_08-haskell-in-middle-age:ffi-process-different-in-kind",
+  "q89": "written:2007-06-09_08-haskell-in-middle-age:preprocessing-tools-for-bindings",
+  "q9": "written:2007-06-09_02-the-genesis-of-haskell:hope-algebraic-data-types",
+  "q90": "written:2007-06-09_04-syntax:first-class-values-and-infix-ambiguity",
+  "q91": "written:2007-06-09_10-profiling-and-debugging:laziness-also-fixes-leaks",
+  "q92": "written:2007-06-09_08-haskell-in-middle-age:flat-namespace-irksome",
+  "q93": "written:2007-06-09_12-the-impact-of-haskell:abstraction-and-non-interference",
+  "q94": "written:2007-06-09_11-applications:behaviour-as-time-varying-value",
+  "q95": "written:2007-06-09_11-applications:events-and-hybrid-systems",
+  "q96": "written:2007-06-09_11-applications:num-classes-overload-behaviours",
+  "q97": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:functional-dependencies",
+  "q98": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:informal-spec-did-not-stop-use",
+  "q99": "written:2007-06-09_06-haskell-as-a-type-system-laboratory:generalised-algebraic-data-types"
+ },
+ "quotes_per_lineage": 4,
+ "redact": [
+  "Haskell=L"
+ ],
+ "vars": {
+  "designers": "Paul Hudak, John Hughes, Simon Peyton Jones and Philip Wadler",
+  "language": "Haskell"
+ },
+ "version": "find_principles v1",
+ "warnings": []
+}

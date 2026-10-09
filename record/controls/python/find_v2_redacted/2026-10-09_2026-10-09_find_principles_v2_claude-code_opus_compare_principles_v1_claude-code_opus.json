@@ -1,0 +1,194 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "G13",
+      "why": "don't clip silently"
+     },
+     {
+      "item": "G14",
+      "why": "no undefined behavior/result"
+     },
+     {
+      "item": "Z10",
+      "why": "errors never pass silently"
+     },
+     {
+      "item": "Z12",
+      "why": "refuse to guess, reject inconsistent"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [
+     {
+      "item": "Z2",
+      "why": "explicit over implicit"
+     }
+    ],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "G2",
+      "why": "as simple as possible"
+     },
+     {
+      "item": "Z3",
+      "why": "simple over complex"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [], \"B\": []}, {\"candidate\": \"C2\", \"A\": [{\"item\": \"G13\", \"why\": \"don't clip silently\"}, {\"item\": \"G14\", \"why\": \"no undefined behavior/result\"}, {\"item\": \"Z10\", \"why\": \"errors never pass silently\"}, {\"item\": \"Z12\", \"why\": \"refuse to guess, reject inconsistent\"}], \"B\": []}, {\"candidate\": \"C3\", \"A\": [], \"B\": []}, {\"candidate\": \"C4\", \"A\": [], \"B\": []}, {\"candidate\": \"C5\", \"A\": [{\"item\": \"Z2\", \"why\": \"explicit over implicit\"}], \"B\": []}, {\"candidate\": \"C6\", \"A\": [], \"B\": []}, {\"candidate\": \"C7\", \"A\": [{\"item\": \"G2\", \"why\": \"as simple as possible\"}, {\"item\": \"Z3\", \"why\": \"simple over complex\"}], \"B\": []}]}\n",
+   "answer_sha256": "72bcb8e9485079e85e75ca13de48b4cee71074b15eec2a3142b087a845b0aaae",
+   "date": "2026-10-09T11:45:05Z",
+   "errors": [],
+   "seconds": 24
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "In L, all objects that can be named are said to be \"first class.\"",
+   "statement": "Give every nameable thing equal status, assignable, passable and storable, rather than privileging some kinds of object. (instead of: privileged built-ins that can't be passed or stored like ordinary values)"
+  },
+  "C2": {
+   "quote": "I decided that there should be no undefined result values in L – instead, exceptions should always be raised when no correct return value can be computed.",
+   "statement": "When no correct value can be computed, raise rather than return an undefined or silently clipped result, and reject inconsistent constructions outright. (instead of: silent sentinels, truncation or undefined behavior as in C)"
+  },
+  "C3": {
+   "quote": "One of the rules I took from the predecessor was that every data type, when printed or converted to a string, should be represented by an expression that was a valid input to the language's parser.",
+   "statement": "Make a value's printed form a valid expression that reconstructs it, rather than a free-form description. (instead of: arbitrary, unparseable string descriptions of objects)"
+  },
+  "C4": {
+   "quote": "Using / 0-based indexing, half-open intervals, and suitable defaults (as L / ended up having), they are beautiful: a[:n] and a[i:i+n]",
+   "statement": "Index from zero with half-open intervals and suitable defaults so adjacent slices meet without off-by-one corrections. (instead of: 1-based closed intervals needing +1/-1 adjustments)"
+  },
+  "C5": {
+   "quote": "With explicit references, there is no need to have a special syntax for method definitions nor do you have to worry about complicated semantics concerning variable lookup. Instead, one simply defines a function whose first argument corresponds to the instance, which by convention is named \"self.\"",
+   "statement": "Make the instance an explicit first argument and explicit attribute access the only way to reach its state, rather than implicit resolution. (instead of: implicit this and hidden instance-variable lookup as in C++)"
+  },
+  "C6": {
+   "quote": "I decided to generalize these to a common concept, the sequence. This generalization made it so certain core operations such as getting the length (len(s)), indexing (s[i]), slicing (s[i:j]), and iteration (for i in s) worked the same on any sequence type.",
+   "statement": "Generalize related types under a shared concept so the same core operations work uniformly across them, rather than per-type operations. (instead of: separate, incompatible operations for each container type)"
+  },
+  "C7": {
+   "quote": "A major design constraint was that I didn't want to add syntax for methods that differed from the syntax for functions. Refactoring the grammar and the byte code generator to handle such similar cases differently felt like a huge task.",
+   "statement": "Prefer the minimal solution that reuses existing syntax over introducing new syntax for a new feature. (instead of: adding dedicated grammar for each new capability)"
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "69ceea6717b9262e40f07af0902eee040c39e6512c369c339786ff10d849cb59",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/python/find_v2_redacted/2026-10-09_find_principles_v2_claude-code_opus.json": {
+   "sha256": "4440d8489acb2322860e23177dafa13ecad978bcaa63b9d3ff85cae01d4554d8"
+  },
+  "record/controls/python/reference.md": {
+   "sha256": "0d6a91875bf553365da9db959e7b62a9424b079946b0a95d57583b9783833ea9"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 3,
+  "leaks": 0,
+  "neither": 4,
+  "passes": false,
+  "rows": [
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G13",
+     "G14",
+     "Z10",
+     "Z12"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "Z2"
+    ],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G2",
+     "Z3"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}

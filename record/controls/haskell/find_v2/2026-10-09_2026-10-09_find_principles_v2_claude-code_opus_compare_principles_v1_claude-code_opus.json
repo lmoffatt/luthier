@@ -1,0 +1,181 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "purity is controlling effects on principle"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "H3",
+      "why": "type classes as principled overloading"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "referential transparency = purity"
+     }
+    ],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "C5",
+      "why": "based on wide consensus"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [{\"item\": \"H2\", \"why\": \"purity is controlling effects on principle\"}], \"B\": []}, {\"candidate\": \"C2\", \"A\": [], \"B\": []}, {\"candidate\": \"C3\", \"A\": [{\"item\": \"H3\", \"why\": \"type classes as principled overloading\"}], \"B\": []}, {\"candidate\": \"C4\", \"A\": [{\"item\": \"H2\", \"why\": \"referential transparency = purity\"}], \"B\": []}, {\"candidate\": \"C5\", \"A\": [], \"B\": []}, {\"candidate\": \"C6\", \"A\": [], \"B\": []}, {\"candidate\": \"C7\", \"A\": [{\"item\": \"C5\", \"why\": \"based on wide consensus\"}], \"B\": []}]}\n",
+   "answer_sha256": "494dc07c4c4b91e7eee7b06016f94216c57473d9ffbf97e791f5e8091f880553",
+   "date": "2026-10-09T11:49:04Z",
+   "errors": [],
+   "seconds": 19
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "many of us were consciously making a longterm bet that principled control of effects would ultimately turn out to be important, despite the dominance of effects-by-default in mainstream languages.",
+   "statement": "Control effects on principle and make them explicit, even at the cost of convenience. (instead of: effects by default, unrestricted side effects)"
+  },
+  "C2": {
+   "quote": "the big advantage is conceptual. It is much easier to think abstractly in terms of computations than concretely in terms of the details of failure and success continuations.",
+   "statement": "Capture any notion of computation as an abstract value you sequence, rather than wiring each effect into the language. (instead of: a single built-in notion of computation and sequencing)"
+  },
+  "C3": {
+   "quote": "They were originally proposed early in the design process, by Wadler and Blott ... as a ... principled solution to a relatively small problem (operator overloading for numeric operations and equality).",
+   "statement": "Solve overloading with one principled general mechanism, constraints on types, rather than ad hoc special cases. (instead of: ad hoc operator overloading)"
+  },
+  "C4": {
+   "quote": "Because of referential transparency, Haskell programs can be viewed as executable mathematics, as equations over the category of complete partial orders. In principle, at least, the specification becomes the program.",
+   "statement": "Keep the language referentially transparent so programs read as executable mathematics. (instead of: programs as sequences of state changes)"
+  },
+  "C5": {
+   "quote": "The Haskell Committee wanted expressions to look as much like mathematics as possible, and thus from day one we bought into the idea that Haskell would have infix operators.",
+   "statement": "Make notation follow mathematical usage and the reader's eye. (instead of: the syntactic tradition of other programming languages)"
+  },
+  "C6": {
+   "quote": "solutions that feel like minimal surfaces: simple expressions that comprise significant complexity, with forms that seem natural, recurring in problem after problem",
+   "statement": "Prefer the simplest expression that carries the complexity, the form that recurs naturally across problems. (instead of: bespoke machinery built per problem)"
+  },
+  "C7": {
+   "quote": "we intended the language to be quite conservative, rather than to break new ground",
+   "statement": "Embody tried-and-true consensus rather than break new ground. (instead of: including novel, unproven features)"
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "b41cced1298a40236284a2d9746affdb1f8ea9288ddc88401ec2e141e3c06ca2",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/haskell/find_v2/2026-10-09_find_principles_v2_claude-code_opus.json": {
+   "sha256": "8e9825a47c1a52f077842ae19e644ccc3bb0708df4f1ba6774034792e26cdee5"
+  },
+  "record/controls/haskell/reference.md": {
+   "sha256": "fbfb3d4594fb31de6facc0d0930f3c87100b5f869a835ab8e2c2a3d8453d8721"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 4,
+  "leaks": 0,
+  "neither": 3,
+  "passes": true,
+  "rows": [
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "H3"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "C5"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}
