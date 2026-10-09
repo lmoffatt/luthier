@@ -301,3 +301,15 @@ def test_link_refuses_a_timeline_with_repeated_ids_and_passes_the_thinking_cap(t
     tl.write_text("".join(json.dumps(x) + "\n" for x in rows), encoding="utf-8")
     r = link(tmp_path, env, "--max-thinking-tokens", "2000")
     assert r.returncode == 0 and {c["thinking"] for c in calls(tmp_path)} == {"2000"}
+
+
+def test_link_refuses_a_second_run_on_the_same_state(tmp_path):
+    import fcntl
+    tl, env = setup(tmp_path)
+    (tmp_path / "out").mkdir()
+    held = open(tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.lock", "w")
+    fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    r = link(tmp_path, env)
+    assert r.returncode == 2 and "holds" in r.stderr and calls(tmp_path) == []
+    held.close()
+    assert link(tmp_path, env).returncode == 0

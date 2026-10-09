@@ -390,6 +390,14 @@ def main(argv: list[str]) -> int:
     state_path = args.output_dir / f"{tag}.json"
     md_path = args.output_dir / f"{tag}.md"
 
+    # one run per state: a second run would overwrite the first's placements (2026-10-09, two runs at once)
+    import fcntl
+    lock = open(args.output_dir / f"{tag}.lock", "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print(f"ERROR: another link_ideas run holds {tag}.lock; wait for it or stop it", file=sys.stderr)
+        return 2
     rows = sorted(load_timeline(args.timeline), key=lambda r: (r.get("time_utc", "") or "~", r["id"]))
     by_id = {r["id"]: r for r in rows}
     if len(by_id) != len(rows):
