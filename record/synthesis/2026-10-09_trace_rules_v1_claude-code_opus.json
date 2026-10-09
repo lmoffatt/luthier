@@ -1,0 +1,2204 @@
+{
+ "version": "trace_rules v1",
+ "date": "2026-10-09",
+ "prompt": "trace_rules_v1",
+ "prompt_sha256": "2d40233d6b38a5e88628125b368ad5e1b7d22a1db92e89830e3dcaf51339abe9",
+ "model": "opus",
+ "effort": "low",
+ "cli_version": "2.1.197 (Claude Code)",
+ "inputs": {
+  "record/ideas/lineages_link_ideas_v1_claude-code_opus.json": "3b2b5d5a4745a636db36eb2899622f7887c7eb45ab85b1574ddf974bac019e1c",
+  "record/ideas/timeline.jsonl": "b18b5806955d1b1377134fc1a570669b31d023e055b3f2c5d524ab5285f7615c",
+  "record/decisions.md": "4a8658045ba42463a6277175eb2a432d9eb5771b3a63150276e05654844bcea2"
+ },
+ "spec_sha256": {
+  "docs/spec/02-grammar.md": "d0011b720d39d9435d1e9fc55330f72daec84e0f0815baa7ecbf23426373bd14",
+  "docs/spec/03-libraries.md": "61db77aceebcf7a384fb658ffae0ee3e92a0163237c3d11ad66e759b29d9a277",
+  "docs/spec/04-kernel.md": "5245be0b60f280fd0f910d3bcb6d3e779b09d0611feca6363ed781aaefb961a4",
+  "docs/spec/05-static-semantics.md": "9f5f30a7d39c8044e47f289e217147588c0435d9c01413af8a61e5d657f12cf1",
+  "docs/spec/06-numbers.md": "f113e53a7a84234663db3c988a90b04dc2df82e8fde1f59d538f8f1d100bc0b3",
+  "docs/spec/08-tests.md": "854e99299d027acf1d8ff13a61d4a317c413276f9f47f6c2897f6f93c7d3bc88"
+ },
+ "input_sha256": "43e0329df6bf006442bc2f3c280866c22f468d10ace0a9c2112c07d94275ec1c",
+ "rules": [
+  {
+   "id": "S02.1",
+   "kind": "spec",
+   "source": "docs/spec/02-grammar.md:11",
+   "title": "Lexical",
+   "text": "name     ::= letter { letter | digit | \"_\" | \"'\" } { \".\" letter { letter | digit | \"_\" | \"'\" } } number   ::= digit { digit } [ \".\" digit { digit } ] [ (\"e\" | \"E\") [ \"+\" | \"-\" ] digit { digit } ] string   ::= '\"' { character } '\"' comment  ::= \"--\" up to the end of the line A dotted name `m.f` is one token; it is a qualified name or a projection, resolved by the checker (section 6). Names that start with a capital are types and laws by convention, not by rule. Reserved words: `data`, `match`, `e"
+  },
+  {
+   "id": "S02.2",
+   "kind": "spec",
+   "source": "docs/spec/02-grammar.md:30",
+   "title": "Acts",
+   "text": "program     ::= { act } act         ::= declaration | definition | alias | directive declaration ::= name { binder } \":\" term definition  ::= name { binder } [ \":\" term ] \":=\" body { clause } alias       ::= name { binder } \"=\" term body        ::= term | \"data\" \"{\" { name \":\" term [ \";\" ] } \"}\" | \"extern\" [ \"provisional\" ] string binder      ::= \"(\" name { name } \":\" term \")\" clause      ::= \"|\" pattern { \",\" pattern } \":=\" term directive   ::= \"import\" string [ \"as\" name ] | \"test\" name [ \"wit"
+  },
+  {
+   "id": "S02.3",
+   "kind": "spec",
+   "source": "docs/spec/02-grammar.md:56",
+   "title": "Terms",
+   "text": "Precedence, from the loosest to the tightest: &   ->   or   and   == /= < <= > >=   + -   * / mod   application   .field `&` and `->` associate to the right, the others to the left. `->` is the function type when its left side is a type and implication when it is a `Bool`; `*` is the product type or multiplication, `+` the sum type or addition, by the type of the left operand; `&` is the conjunction of laws. An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types of a fu"
+  },
+  {
+   "id": "S02.4",
+   "kind": "spec",
+   "source": "docs/spec/02-grammar.md:101",
+   "title": "Translations into the kernel",
+   "text": "`04 §5` gives the table: binders and clauses, `if`, `and`/`or`/implication, list literals, record values and projections, labeled products and sums, `Bool` and `Maybe`, tuple patterns in a lambda. Each translation produces kernel terms; a surface form that needed a new kernel construct would not be sugar."
+  },
+  {
+   "id": "S02.5",
+   "kind": "spec",
+   "source": "docs/spec/02-grammar.md:108",
+   "title": "What the parser leaves to the checker",
+   "text": "The parser does not decide what `->`, `*` and `+` are, nor whether a name in a pattern is a constructor, a label or a variable, nor what a dotted name refers to. It produces the acts as written, and the checker reads the whole file before it checks any of them (`05 §2`)."
+  },
+  {
+   "id": "S02.6",
+   "kind": "spec",
+   "source": "docs/spec/02-grammar.md:114",
+   "title": "Dotted names",
+   "text": "`e.position` is the component `position` of a value whose type names its components; it elaborates to a one-branch `match` on the type's component pattern, and works after a parenthesis, `(f x).field`, and through refinements (`{ s : Scene | p }` has the components of `Scene`). A module imported `as m` is a record whose components are its definitions, so `m.f` is the same dot. The resolution: the whole name as a qualified name first; otherwise the longest prefix that is a variable or a definitio"
+  },
+  {
+   "id": "S03.1",
+   "kind": "spec",
+   "source": "docs/spec/03-libraries.md:7",
+   "title": "A file is a structure",
+   "text": "A `.lut` file is a set of acts with dependencies among them, and it denotes a value of a dependent record type: `a : A := ..., b : B a := ...` is a term of `{ a : A, b : B a, ... }`, where the laws of each definition are the subtypes of its component. A file is the same kind of thing as `Ring`. This is the reading of ML's modules as dependent records: the signature of a library is its type, two interchangeable libraries are two values of one type, and a library with holes is a function whose par"
+  },
+  {
+   "id": "S03.2",
+   "kind": "spec",
+   "source": "docs/spec/03-libraries.md:20",
+   "title": "Import",
+   "text": "import \"x.lut\"            -- flat: the definitions enter the importer's namespace import \"x.lut\" as m       -- qualified: reached as m.f, with no collisions Search: next to the importing file, then the directories of `LUTHIER_PATH`, then the package's `lib/`. `.lut` is optional. Importing twice under one prefix does nothing; the same file may be loaded under two prefixes. A cycle of imports is an error. `core.lut` is imported implicitly. Name resolution inside a module `m`: `m.x` first (its own)"
+  },
+  {
+   "id": "S03.3",
+   "kind": "spec",
+   "source": "docs/spec/03-libraries.md:36",
+   "title": "Declaration in one file, definition in another",
+   "text": "A file may declare a value with its laws in its type, `sqrt : SquareRoot`, and another file give it a body, `sqrt := extern \"python:math.sqrt\"`. The type of the definition, if written, must agree with the declaration; if omitted, it is inherited. The laws of the declared type become obligations of the definition, so a specification has as many implementations as files that fill it, all compared against the same laws. This is C++'s separation of declaration and definition, and ML's functor with t"
+  },
+  {
+   "id": "S03.4",
+   "kind": "spec",
+   "source": "docs/spec/03-libraries.md:57",
+   "title": "What travels: the certificate with its hash",
+   "text": "`luthier test x.lut` writes `x.cert.json`. For each definition it records the laws run, each with its grade (`05 §7`): the mode, the cases, the result, the generators used for each variable, the seed and the first cases. And a hash of the definition's **dependency cone**: the definition and everything it refers to, transitively, written with the module prefix removed and the bound variables renamed canonically. Changing a definition changes the hash of everything that uses it. When a file is imp"
+  },
+  {
+   "id": "S03.5",
+   "kind": "spec",
+   "source": "docs/spec/03-libraries.md:75",
+   "title": "The libraries",
+   "text": "`src/luthier/lib/`, rewritten on 2026-10-04 under 04 and 05: | file | what it holds | |---|---| | `real`, `real_python` | functions on `Float64` (declared, bound to Python's math), `approx` (the equality of `Float64` within a relative tolerance), `NonNegative`, the tolerances of laws | | `random` | `Gen A = Nat -> Int -> A * Int`, a congruential generator, generators for `Int`, `Nat`, `Bool`, `Float64`, lists | | `array`, `array_python` | `Vec`, `Mat`, their shapes, native definitions of every o"
+  },
+  {
+   "id": "S04.1",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:32",
+   "title": "Acts",
+   "text": "A program is a set of top-level acts without order (`05 §2`). There are three, and three directives. | act | form | what it does | |---|---|---| | declaration | `x : T` | introduces `x` with its base `T` and no body: a hole | | definition | `x : T := t`, or `x := t` filling an earlier declaration | gives `x` a body | | alias | `x = t` | makes `x` stand for `t`; expanded before checking; no states | A data definition `x : U := data { ... }` is a definition whose body is a `data` term (section 2)."
+  },
+  {
+   "id": "S04.2",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:52",
+   "title": "Type formers",
+   "text": "| former | anonymous | with names | introduction | elimination | |---|---|---|---|---| | universe | `U` | | every type | | | exponential (Π) | `A -> B` | `(x : A) -> B`, `B` may mention `x` | `\\ x { t }` | application `f a` | | product (Σ) | `A * B` | `(x : A) * (y : B)`, `B` may mention `x`; n-ary `{ x : A, y : B }` | `(a, b)`; `{ x := a, y := b }` | pattern `(x, y)` in `match`; projection `e.x` | | sum | `A + B` | `(x : A) + (y : B)`; n-ary `< x : A \\| y : B >` | `x a`, by label | `match` on l"
+  },
+  {
+   "id": "S04.3",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:104",
+   "title": "Terms",
+   "text": "Besides the introductions and eliminations of section 2: - **Names.** A defined name stands for its body; a declared name is a hole and does not reduce. - **`match`.** `match t { p1 -> t1 ; ... }` with one branch per constructor or label of the type of `t`, none repeated and none missing, unless a variable or `_` branch catches the rest. Patterns: a constructor or label applied to patterns, a tuple `(p, q)`, a literal, a variable, `_`. - **Recursion.** A definition with a declared type may menti"
+  },
+  {
+   "id": "S04.4",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:131",
+   "title": "Reduction",
+   "text": "Evaluation reduces terms by these rules, each a definitional equality: - **beta**: `(\\ x { t }) a ≡ t[a/x]`; - **delta**: a defined name reduces to its body; aliases are expanded before checking, so they never reach evaluation; - **iota**: a `match` on a constructor, a label injection or a pair reduces to the branch that matches, with the pattern variables substituted; - **prim**: arithmetic and comparisons on literals of `Int`, `Float64`, `String`; `==` on values of types with structural equali"
+  },
+  {
+   "id": "S04.5",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:149",
+   "title": "Surface forms and their translations",
+   "text": "Everything below is sugar: each form translates into the kernel, and a form that needed a new kernel construct would not be sugar (`02 §4`). | surface | kernel | |---|---| | `f (x : A) (y : B) : C := t` | `f : (x : A) -> (y : B) -> C := \\ x { \\ y { t } }` | | `(x y : A)` in a binder | `(x : A) (y : A)` | | clauses `\\| p, q := t` under a header with parameters | a `match` on the tuple of parameters | | `if c then a else b` | `match c { true -> a ; false -> b }` | | `a and b`, `a or b`, `p -> q` w"
+  },
+  {
+   "id": "S04.6",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:171",
+   "title": "Primitive versus derived, and native versus extern",
+   "text": "Two different senses of \"primitive\" must not be confused. - *Semantically primitive* is what the kernel has: the formers of section 2 and `Int`, `Float64`, `String`. Every other type is defined natively from them (`05` R5). - *Primitive for performance* is an extern: a value computed by the environment because it is faster there. A numpy array is not a primitive type: with `Fin n = { k : Int | 0 <= k and k < n }`, `VecOf n` is natively the function type `Fin n -> Float64`, a matrix is `Fin m -> "
+  },
+  {
+   "id": "S04.7",
+   "kind": "spec",
+   "source": "docs/spec/04-kernel.md:226",
+   "title": "Status of the interpreter",
+   "text": "Implemented on 2026-10-04 (branch `kernel-v0`): every former and term of sections 2 and 3, the surface forms of section 5 except those noted below, the reduction of section 4, and the four rules of section 6. `tests/spec` (the accept/reject programs) and `tests/test_kernel.py` pass. Not yet: quote and unquote; local definitions in a block; a union `< ... >` written as the argument of an application needs parentheses (`List (< a : A | b : B >)`), because `<` after a term is a comparison."
+  },
+  {
+   "id": "R1",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:145",
+   "title": "A declaration mentions declared names.",
+   "text": "**R1. A declaration mentions declared names.** Every name in `D(n)` of a declaration exists: declared or defined. A declaration may mention types that are only declared; that is what lets an object's laws and its head refer to each other. Files: `r1_declaration.accept.lut`, `r1_declaration.reject.lut`. "
+  },
+  {
+   "id": "R2",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:150",
+   "title": "A definition uses defined types.",
+   "text": "**R2. A definition uses defined types.** For a definition `n`, every name that occurs in type position in its declared type or its body is defined, unless it belongs to `n`'s own object. In term position a declared name is allowed: a hole of a defined type is a parameter (`sigma : Float64`, set by `luthier run --set`), and what depends on it does not reduce until it is filled. Code over a type that is only declared, outside that type's object, must take the type as a parameter. Files: `r2_defini"
+  },
+  {
+   "id": "R3",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:166",
+   "title": "A predicate defines only what it touches.",
+   "text": "**R3. A predicate defines only what it touches.** The body of a subtype over a labeled base must touch every label; over an unlabeled base it must touch its parameter. A predicate that touches nothing (`\\ p { true }`) defines nothing. - `{ eq, add, mul | Associative A eq add }` is rejected: `mul` is a label no law touches, a semigroup juxtaposed to a bare function. - The `| true` records of the first libraries disappear. Files: `r3_connected.accept.lut`, `r3_dangling_label.reject.lut`, `r3_true_"
+  },
+  {
+   "id": "R4",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:174",
+   "title": "Only laws or recursion make a new type.",
+   "text": "**R4. Only laws or recursion make a new type.** A definition `x : U := t` makes `x` a type with a name of its own only if `t` is a subtype with a predicate (laws) or a recursive `data`. A body that is structural (a product, a sum, an exponential, a non-recursive `data`) introduces a name that claims nothing and is rejected: write `x = t` (an alias, R7), or write the type where it is used, or declare `x : t` and owe it laws. Files: `r4_product_inline.accept.lut`, `r4_recursive_data.accept.lut`, `"
+  },
+  {
+   "id": "R5",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:184",
+   "title": "An extern gives a value, never a type.",
+   "text": "**R5. An extern gives a value, never a type.** Types are defined natively. `x : T := extern \"...\"` is accepted when `T` is defined (R2 applies to externs as to any body); `x : U := extern \"...\"` is rejected. `extern provisional \"...\"` lifts both requirements, for working in a hurry on a type nobody has defined yet or on a Python type nobody has described: it is accepted, recorded in the certificate under `provisional` with the names it builds on, listed by `luthier check -v`, and never certified"
+  },
+  {
+   "id": "R6",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:205",
+   "title": "The body of a declared name is an inhabitant or a predicate.",
+   "text": "**R6. The body of a declared name is an inhabitant or a predicate.** If `x` is declared `x : T` and later given a body, the body has type `T`, or `T -> Bool`, or is a `Law` over `T`. Any other type is an error, reported against the declaration. Files: `r6_predicate_body.accept.lut`, `r6_body_type.reject.lut`. "
+  },
+  {
+   "id": "R7",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:210",
+   "title": "An alias is written with `=` and has no state.",
+   "text": "**R7. An alias is written with `=` and has no state.** `AB = A * B` makes `AB` stand for the term on the right everywhere; the checker expands it before anything else, so an alias is never declared, defined or certified. A name that is an alias and is also declared or defined is an error. A generator given to an alias is the generator of the type the alias stands for (2026-10-05): `gen FullCoords` with `FullCoords = VecOf (freeDim + 1)` draws every `VecOf 16`, and two aliases of one type cannot "
+  },
+  {
+   "id": "R8",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:221",
+   "title": "`==` exists only where equality is structural.",
+   "text": "**R8. `==` exists only where equality is structural.** `==` is defined on `Int`, `Float64`, `String`, `Unit`, `Empty`, and on products, sums, recursive `data` and subtypes built from types that have it. Not on exponentials, and not on anything containing one. A law that compares values of such a type takes the equality it uses as a parameter or as a component of its theory: the observational equality of the presentation. `algebra.lut` already does so (each structure carries its `eq`). Files: `r8"
+  },
+  {
+   "id": "R9",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:228",
+   "title": "Function types are contravariant in the domain and covariant in the codomain",
+   "text": "**R9. Function types are contravariant in the domain and covariant in the codomain** (`06 §5`). A function `A -> B` passes where `A' -> B'` is expected when `A'` refines `A` and `B` refines `B'`. Files: `r9_variance.accept.lut`, `r9_variance.reject.lut`. "
+  },
+  {
+   "id": "R10",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:232",
+   "title": "A law characterizes; a second implementation is not a law",
+   "text": "**R10. A law characterizes; a second implementation is not a law** (decided 2026-10-05; `07`). The laws of an object are the mathematical properties that determine its operations, up to the equality of the presentation: bilinearity and an orthonormal basis for an inner product, multilinearity, alternation and `det I == 1` for a determinant. A definition of the operation written in the kernel (a sum over the indices) is a *model* of those laws, certified against them like any other; an implementa"
+  },
+  {
+   "id": "R11",
+   "kind": "spec",
+   "source": "docs/spec/05-static-semantics.md:254",
+   "title": "A condition refines in its branch",
+   "text": "**R11. A condition refines in its branch** (decided 2026-10-06, `00`, *What types are for*; not implemented). In `if p x then a else b`, where `x` is a variable of type `T` and `p x` is a `Bool`, `x` has the type `{ x : T | p x }` inside `a` and `{ x : T | not (p x) }` inside `b`. A coercion of `x` to that refined type there owes nothing: the condition is the check, made once. If `a` asks for `{ x : T | p x }` and the condition is another predicate `q x`, the coercion owes `q x -> p x`, an oblig"
+  },
+  {
+   "id": "S06.1",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:20",
+   "title": "The problem this settles",
+   "text": "Until now `R` named the IEEE double, and every law over `R` read as a law of the reals while it was a law of the doubles. Three different things were one name: the real numbers, which have the good properties and no finite implementation; the doubles, a finite subset of them with rounded operations; and the rationals, which can be computed exactly. Code is to be written over the real numbers, the object with the good properties, and run over an approximation of them: the doubles now, intervals o"
+  },
+  {
+   "id": "S06.2",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:29",
+   "title": "The types",
+   "text": "| name | what it is | definition | |---|---|---| | `Int` | ℤ, without bound | `Int : U := primitive \"integer\"` | | `Nat` | the integers from 0 | `{ k : Int \\| 0 <= k }` | | `Fin n` | the n indices | `{ k : Int \\| 0 <= k and k < n }` | | `Real` | ℝ, the ideal | `Real : U := primitive \"real\"` | | `Float64` | the finite doubles | `Float64 : Real := primitive \"ieee754-binary64\"` | | `String` | text | `String : U := primitive \"unicode\"` | `R` disappears. Each primitive says, in its body, what it is. "
+  },
+  {
+   "id": "S06.3",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:52",
+   "title": "Axioms: what is assumed and never tested",
+   "text": "realField : CompleteOrderedField Real := axiom \"the real numbers\" `axiom` is a body that gives a value whose laws are assumed: the definition is accepted, and its obligations are recorded with the grade **assumed** instead of pending. `Real`'s structure cannot be tested, because nothing computes the sum of two reals; it is stated, and what is stated without proof or test is listed by `luthier check -v`, as the provisional externs are. An axiom is allowed only in `core.lut` and in the libraries o"
+  },
+  {
+   "id": "S06.4",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:66",
+   "title": "The ideal and its realizations",
+   "text": "Code is written over `Real` wherever it means real numbers: a vector, an inner product, a likelihood, a step of Levenberg-Marquardt. What runs is an approximation. Two kinds of declaration keep the types honest: - **A leaf of the environment is declared over what it really receives and returns.** numpy computes with doubles, so `dot : Vec Float64 -> Vec Float64 -> Float64 := extern \"...\"`. Its arguments must be accepted as declared; its result is a double, which is a real number, and is promoted"
+  },
+  {
+   "id": "S06.5",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:92",
+   "title": "Variance of function types",
+   "text": "A function `f : A -> B` can be used where `A' -> B'` is expected when `A' <: A` and `B <: B'`: it accepts every argument it will be given, and what it returns is of the expected kind. The domain goes against the refinement, the codomain with it. So `Float64 -> Float64` can be passed where `Float64 -> Real` is expected, and not where `Real -> Float64` is. The checker applies the rule when a function value is checked against a function type, component by component through products and sums; a valu"
+  },
+  {
+   "id": "S06.6",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:101",
+   "title": "The bridge with the environment",
+   "text": "- **A value is checked against its declared type when it crosses** (2026-10-05). An `Int` is a Python `int` or a numpy integer, never a `bool` or a `float`; a `Float64` is a `float`, or an `int` with an exact double, promoted; a `String` is a `str`; `Unit` is `None`. An array as a value of `Fin n -> Int` has an integer dtype, and as one of `Fin n -> Float64` a float dtype (an integer array is promoted), with exactly as many dimensions as indices. A number where a record, a pair or a function is "
+  },
+  {
+   "id": "S06.7",
+   "kind": "spec",
+   "source": "docs/spec/06-numbers.md:122",
+   "title": "Arrays over any type",
+   "text": "Array (A : U) (n : Nat) = Fin n -> A Vec (A : U) = { n : Nat, f : Fin n -> A } Mat (A : U) = { m : Nat, n : Nat, f : Fin m -> Fin n -> A } `Vec Real` is the vector of linear algebra, `Vec Float64` the one numpy computes with, `Vec Int` the indices of a graph (which until now were vectors of doubles read with a rounding). The bridge (`04 §6`): `Fin n -> Float64` is a one-dimensional ndarray of `float64`, `Fin n -> Int` one of `int64` with the range check of section 6, any other element type a lis"
+  },
+  {
+   "id": "G1",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:54",
+   "title": "A generator is a value of type `Gen T`.",
+   "text": "**G1. A generator is a value of type `Gen T`.** `Gen T = Nat -> Seed -> T * Seed`: a size and a seed give a value and the next seed, as in `lib/random.lut` today with `Seed` in place of `Int`. A generator is defined, typed and certified like any other value, and its type states what it promises.  - *Validity*: every value it gives belongs to `T`. For `g : Gen { x : T | p x }` this is the obligation that `p` holds of the value `g` gives, for every size and seed, tested as the obligation of an ext"
+  },
+  {
+   "id": "G2",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:82",
+   "title": "Sampling inverts a cumulative cost.",
+   "text": "**G2. Sampling inverts a cumulative cost.** To draw from a support with cost `c`, draw `u` uniform in [0, C) and return the first value at which the cumulative cost exceeds `u`. Over a finite list `v1, ..., vk` the cumulative cost at `vi` is the running sum `c(v1) + ... + c(vi)`. Over an interval [lo, hi] of numbers it is the integral of `c` from `lo` to `x`. The two metrics of numbers are two costs: `linear` is `c(x) = 1`, uniform between the bounds, and `log` is `c(x) = 1/|x|`, uniform in the "
+  },
+  {
+   "id": "G3",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:91",
+   "title": "How the functors follow a type.",
+   "text": "**G3. How the functors follow a type.** `exhaustive` and `sampled m` apply to a type by its form:  | form of the type | `exhaustive` | `sampled m` | |---|---|---| | `Unit`, `Bool`, `Fin n` | every value | by cost, equal unless given | | `Int`, `Nat` with bounds | every value between them | the metric over the bounds | | `Int`, `Nat` without bounds | error (G6) | the metric over [-s, s] or [0, s] | | `Float64`, `Rational` | error (G6) | the metric over the bounds, continuous; without bounds, erro"
+  },
+  {
+   "id": "G4",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:108",
+   "title": "A test names its generators.",
+   "text": "**G4. A test names its generators.** The directive of a test names the functor it applies to every parameter (`with n` is `sampled` with `n` cases; `exhaustive`), the metric of `sampled`, and may bind single parameters, or types, to other generators, inline or through a profile:  profile tape := { Seed := sampled linear, TestedFull := scaledPositionsWithin freeDim positionBox }  test gaussianFamily with 100 sampled linear under tape where { n   := census [0, 1, 2, 3, 5], tol := sampled log }  A "
+  },
+  {
+   "id": "G5",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:127",
+   "title": "No generator gives a type.",
+   "text": "**G5. No generator gives a type.** A binding of a parameter of type `U`, and a test of a law quantified over a parameter of type `U`, are static errors. A law over a declared type is certified per filling of the hole (`05 §7`), with the generators of the type that fills it, and a law over the models of a theory is certified per model (G9). Few definitions should take a type as a parameter. The legitimate ones are containers (`List A`, `Vec A`) and the laws of `algebra.lut`, which are predicates "
+  },
+  {
+   "id": "G6",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:138",
+   "title": "`exhaustive` applies to finite types only.",
+   "text": "**G6. `exhaustive` applies to finite types only.** Under `exhaustive`, a parameter of an infinite type (an integer without bounds, any `Float64`, `Rational` or `Real`) is a static error unless it is bound to a census. Lists are enumerated up to the size. When the product of the finite parameters exceeds a budget (G12), the cases are a covering array of pairs [Kuhn et al. 2004], which contains every pair of values of any two parameters, and the grade says so.  "
+  },
+  {
+   "id": "G7",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:146",
+   "title": "The bounds of a number are in its type; its metric is in its generator.",
+   "text": "**G7. The bounds of a number are in its type; its metric is in its generator.** The bounds of a numeric parameter belong to its type and are decided when the type is defined: a tolerance of Levenberg-Marquardt is not any positive double. `lmTol : { t : Float64 | 0.0 < t }` becomes a type with both bounds, and so do the tolerances of the libraries. A double without bounds in its type needs them from its binding (`sampled log in [1.0e-15, 1.0e-2]`).  The metric is chosen by the generator. `linear`"
+  },
+  {
+   "id": "G8",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:167",
+   "title": "Dimensions from a census, entries from a numeric generator, structure from a family.",
+   "text": "**G8. Dimensions from a census, entries from a numeric generator, structure from a family.** A vector generator is a dimension generator and an entry generator. The dimensions default to the census 0, 1, 2, 3, 5, 10 (LAPACK tests at these and at 50), which a binding can change. Matrices with structure are drawn by named families, each a generator:  - unit vectors, uniform on the sphere; probability vectors (Dirichlet); positions in a box; - symmetric; symmetric positive definite with a given spe"
+  },
+  {
+   "id": "G9",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:186",
+   "title": "A function over an infinite domain is drawn from a census of models.",
+   "text": "**G9. A function over an infinite domain is drawn from a census of models.** A function over `Fin n` is a table (G3). A function over an infinite domain, and a value of a theory (a labeled base with laws whose components are functions, such as `Objective`, `Likelihood`, `Sampler`, `Maximizer`), has no generic generator: a test binds it to a census, an explicit list of the program's values of that type.  likelihoods : Gen (Likelihood FullCoords) := census [fastFull, nativeFull] objectives  : Gen "
+  },
+  {
+   "id": "G10",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:207",
+   "title": "A subtype is drawn within its bounds or through a filter.",
+   "text": "**G10. A subtype is drawn within its bounds or through a filter.** An interval predicate (`lo <= x and x <= hi`, strict or not, on an integer or a double) gives the bounds of G7, with no rejection. A subtype with any other predicate is drawn by its base's generator filtered by the predicate. The filter's acceptance rate is recorded, and the draw of one value gives up after a budget of tries (G12), which makes the law not run with that reason. A subtype that a filter reaches too rarely is defined"
+  },
+  {
+   "id": "G11",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:216",
+   "title": "Dependent components are drawn in order.",
+   "text": "**G11. Dependent components are drawn in order.** The components of a record or a pair are drawn in the order of their dependencies, each with the earlier ones in its type. When a component's type is empty for the earlier ones (the entries of `Fin 0`), the earlier ones are drawn again, up to a budget (G12).  "
+  },
+  {
+   "id": "G12",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:223",
+   "title": "Every budget is an argument of the test, recorded in the entry.",
+   "text": "**G12. Every budget is an argument of the test, recorded in the entry.** The interpreter holds no fixed number for any of these:  - the tries per value of a filter (2000 today, in the code); - the redraws of a dependent record (10 today); - the probes of a quantified law inside a type (5 today); - the draws per evaluated case, as a multiple of `n`; - the largest size, with a schedule that reaches it within the `n` cases; - the product of finite parameters above which a covering array chooses the"
+  },
+  {
+   "id": "C1",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:246",
+   "title": "The identity of an entry includes its binding.",
+   "text": "**C1. The identity of an entry includes its binding.** An entry is identified by the law, the hash of its cone (`05 §7`) and its binding, expanded: for each parameter, the generator that drew it, as a functor with its parameters or as a name with its fingerprint. One law has as many entries as bindings it was tested under, and \"certified\" is always \"certified under a binding\". An entry also records the seed, the budgets (G12), the counts of C3, the reach, the labels (C5) and the time. "
+  },
+  {
+   "id": "C2",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:252",
+   "title": "Grades.",
+   "text": "**C2. Grades.** From the weakest: point, one case; census of `k`, each of `k` listed values; sampled `n`, `n` cases evaluated, with the bound 3/n on the probability that one more draw from the same generators fails, at 95% confidence [Hanley and Lippman-Hand 1983]; bounded; exhaustive; witnessed; assumed (`05 §7`). When the parameters of a law are drawn differently, its grade lists the reach of each, and is summarized by the weakest. "
+  },
+  {
+   "id": "C3",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:258",
+   "title": "`n` counts evaluated cases.",
+   "text": "**C3. `n` counts evaluated cases.** A case counts toward `n` when the law was evaluated to a verdict on it. Counted apart: cases whose parameters could not be drawn, cases skipped because the computation of a type obligation raised (`05 §7`), and cases where a premise was false (the left side of an implication, or the condition of the branch that carries the obligation). A test draws until `n` cases are evaluated or the budget of draws is spent, and an entry is accepted only if its evaluated cas"
+  },
+  {
+   "id": "C4",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:266",
+   "title": "A known outcome is not recomputed.",
+   "text": "**C4. A known outcome is not recomputed.** A test is deterministic given its code, its binding, its seed and `n`. An entry whose identity, seed and `n` match is reused whatever its outcome: a passed entry certifies, and a failed or not-run one is reported as known, with its date and reason, and not run again. `--deep` runs it again, and a new seed makes a new entry. "
+  },
+  {
+   "id": "C5",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:271",
+   "title": "Labels and coverage.",
+   "text": "**C5. Labels and coverage.** A law or a generator can label its cases (`classify`: near a bound, `κ` above 10^8, a member of a census, a premise that held), and the entry records the share of each label. A law can ask that a label hold in at least a given share of its cases (`cover`). The request is checked statistically, with a sequential Wilson bound as QuickCheck's `checkCoverage` does, and the law fails when its generators do not reach a region its author named. "
+  },
+  {
+   "id": "C6",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:277",
+   "title": "What a run requires.",
+   "text": "**C6. What a run requires.** `luthier run --require-certified` requires, for each law in the cone of the entry, a passed entry whose reach covers what the run gives that law. The values the run receives (the holes filled by `--set`, such as `lmTol = 1e-12` or the directory of a graph) are compared with the reach when the run starts: inside the interval, or a member of the census. Values computed during the run are compared at each call when the run is `--checked`, and recorded as not compared ot"
+  },
+  {
+   "id": "C7",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:287",
+   "title": "A result is checked once, when it is produced.",
+   "text": "**C7. A result is checked once, when it is produced.** The result of an analysis (the maximum of a posterior, an evidence, a fit) is one value, produced by a run, and its type says what it is: an optimum of this function on these data from this start (`00`, *What types are for*: an expensive result carries its inputs and its witness). Its membership in that type is checked once, where it is produced, by the forms of `05 §9`: the refined value, a witness, or a statistical verdict with its level. "
+  },
+  {
+   "id": "C8",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:303",
+   "title": "A statistical law declares its level.",
+   "text": "**C8. A statistical law declares its level.** It returns its statistic, its level `α` and its outcome. `α` is computed from the law's parameters: from the null distribution of the statistic when it is known (for a statistic standardized to z and compared with the threshold `zMax`, `α = 2(1 - Φ(zMax))`; for a Kolmogorov distance, the tail probability it is compared with), and otherwise estimated by running the law on the model it tests, with the number of runs an argument (G12), and recorded with"
+  },
+  {
+   "id": "C9",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:310",
+   "title": "A failure is repeated once.",
+   "text": "**C9. A failure is repeated once.** A statistical law that fails is evaluated again, with an independent seed derived from the first, and fails when both evaluations fail. The entry records the first failure, and the level of the whole procedure: `α²` for a single-run level `α`, since the two evaluations are independent. "
+  },
+  {
+   "id": "C10",
+   "kind": "spec",
+   "source": "docs/spec/08-tests.md:315",
+   "title": "Power is measured on controls.",
+   "text": "**C10. Power is measured on controls.** A statistical law that has controls (models broken on purpose, as the negative controls of the kernel) records, for each control, its rate of detection over `k` seeds, with `k` an argument and a Wilson interval. With the repetition of C9 that rate estimates `β²` for a single-run power `β`. A law whose rate on a control is below a threshold (an argument) is reported as weak, and a control it never detects as undetected.  The data of 2026-10-06 show why powe"
+  },
+  {
+   "id": "D-2026-10-06-a",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Material is classed by authorship, in the kinds of working method §4.",
+   "text": "Material is classed by authorship, in the kinds of working method §4."
+  },
+  {
+   "id": "D-2026-10-06-b",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "One decision log per repository; a decision that affects both goes in both.",
+   "text": "One decision log per repository; a decision that affects both goes in both."
+  },
+  {
+   "id": "D-2026-10-06-c",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Luciano's sources stay in their language and are committed before anything cites them.",
+   "text": "Luciano's sources stay in their language and are committed before anything cites them."
+  },
+  {
+   "id": "D-2026-10-06-d",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Luciano's notes stay where he wrote them, as part of his sources.",
+   "text": "Luciano's notes stay where he wrote them, as part of his sources."
+  },
+  {
+   "id": "D-2026-10-06-e",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A correction keeps the original and puts the corrected version in front.",
+   "text": "A correction keeps the original and puts the corrected version in front."
+  },
+  {
+   "id": "D-2026-10-06-f",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Every change is applied on top of a commit.",
+   "text": "Every change is applied on top of a commit."
+  },
+  {
+   "id": "D-2026-10-06-g",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A model takes decisions within margins, following principles; Luciano keeps safety, and the principles and the conflicts between them.",
+   "text": "A model takes decisions within margins, following principles; Luciano keeps safety, and the principles and the conflicts between them."
+  },
+  {
+   "id": "D-2026-10-06-h",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Reversibility, the parts of working method §8 that \"Si.\" confirmed as a bundle.",
+   "text": "Reversibility, the parts of working method §8 that \"Si.\" confirmed as a bundle."
+  },
+  {
+   "id": "D-2026-10-06-i",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The git for large data keeps its repository outside the folder it tracks.",
+   "text": "The git for large data keeps its repository outside the folder it tracks."
+  },
+  {
+   "id": "D-2026-10-06-j",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A document for Luciano is committed before he annotates it; his annotations are then committed verbatim, so they are the diff.",
+   "text": "A document for Luciano is committed before he annotates it; his annotations are then committed verbatim, so they are the diff."
+  },
+  {
+   "id": "D-2026-10-06-k",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The chat exports go to GitHub.",
+   "text": "The chat exports go to GitHub."
+  },
+  {
+   "id": "D-2026-10-06-l",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "In a document for Luciano, a numbered reference carries its statement; records may be terse.",
+   "text": "In a document for Luciano, a numbered reference carries its statement; records may be terse."
+  },
+  {
+   "id": "D-2026-10-06-m",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A step is a bite of decision Luciano can handle, with implications beyond its place; local decisions are the model's margin.",
+   "text": "A step is a bite of decision Luciano can handle, with implications beyond its place; local decisions are the model's margin."
+  },
+  {
+   "id": "D-2026-10-06-n",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "CLAUDE.md is a living document of operative rules, with no meta-information.",
+   "text": "CLAUDE.md is a living document of operative rules, with no meta-information."
+  },
+  {
+   "id": "D-2026-10-06-o",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The principles audit asks three questions (followed and useful; failing by conflict; new principles and their cost) and is run by a script.",
+   "text": "The principles audit asks three questions (followed and useful; failing by conflict; new principles and their cost) and is run by a script."
+  },
+  {
+   "id": "D-2026-10-06-p",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Luciano's observations on code live in a folder of their own, outside the code, each committed alone, so that the commit pins the code they observe.",
+   "text": "Luciano's observations on code live in a folder of their own, outside the code, each committed alone, so that the commit pins the code they observe."
+  },
+  {
+   "id": "D-2026-10-06-q",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A plan comes in two documents: the decisions for Luciano, the execution for the sessions.",
+   "text": "A plan comes in two documents: the decisions for Luciano, the execution for the sessions."
+  },
+  {
+   "id": "D-2026-10-06-r",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The model raises a latent conflict between principles when what it could cost is worth Luciano's attention, without nitpicking; he decides.",
+   "text": "The model raises a latent conflict between principles when what it could cost is worth Luciano's attention, without nitpicking; he decides."
+  },
+  {
+   "id": "D-2026-10-06-s",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A mechanism with a recurring cost (per commit, per session, or on Luciano's attention) is added only after a real case it would have caught. Applied to the plan",
+   "text": "A mechanism with a recurring cost (per commit, per session, or on Luciano's attention) is added only after a real case it would have caught. Applied to the plan: dropped the Decision: line in commits and its reminder (step 2.2), the header check (4.3), the hook before a push (5.2); the correspondence audit by prompt (5.3) waits for the next round of the interpreter; one decision per commit is no longer a rule. Commit before every change stays."
+  },
+  {
+   "id": "D-2026-10-06-t",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Sources are written in one grammar: repo@commit:path:line (or :a-b), and chat:session8:line.",
+   "text": "Sources are written in one grammar: repo@commit:path:line (or :a-b), and chat:session8:line."
+  },
+  {
+   "id": "D-2026-10-06-u",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A quote that the check of quotes finds at its line confirms a decision of Luciano's; the statements go through the fidelity audit.",
+   "text": "A quote that the check of quotes finds at its line confirms a decision of Luciano's; the statements go through the fidelity audit."
+  },
+  {
+   "id": "D-2026-10-06-v",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The objectives of each project are written down, in Luciano's words, for him to mark; the principles and the synthesis of P12 are measured against them.",
+   "text": "The objectives of each project are written down, in Luciano's words, for him to mark; the principles and the synthesis of P12 are measured against them."
+  },
+  {
+   "id": "D-2026-10-06-w",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "P12 (Luciano's attention is the scarce resource) goes into his global CLAUDE.md, which applies to every project.",
+   "text": "P12 (Luciano's attention is the scarce resource) goes into his global CLAUDE.md, which applies to every project."
+  },
+  {
+   "id": "D-2026-10-06-x",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The correspondence audit runs now, both directions, not deferred: that the specification reflects the implementation and the documentation is what matters most ",
+   "text": "The correspondence audit runs now, both directions, not deferred: that the specification reflects the implementation and the documentation is what matters most to Luciano. Reverses the part of D-2026-10-06-s that deferred step 5.3."
+  },
+  {
+   "id": "D-2026-10-06-y",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Every normative statement of docs/semantica carries an identifier, never reused: R, G and C as today, S for 02, K for 04, N for 06, L for 07, and in 00, 01 and ",
+   "text": "Every normative statement of docs/semantica carries an identifier, never reused: R, G and C as today, S for 02, K for 04, N for 06, L for 07, and in 00, 01 and 03 only what code enforces. A checker message carries the identifier of its rule, a test of tests/spec is named by it, and check_spec_tests.py grows into a check of traceability with an explicit list of what the checker decides outside the specification. The identifiers enter the specification once the report of the correspondence audit is in; the code, in the next round of the interpreter, since any change to it invalidates every certificate."
+  },
+  {
+   "id": "D-2026-10-06-z",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The invariant of stochasticity is written before A-9 builds generators on it, as a library task under today's tester: the invariant, its statistical tests at a ",
+   "text": "The invariant of stochasticity is written before A-9 builds generators on it, as a library task under today's tester: the invariant, its statistical tests at a level, and an extern source that draws in batches. Seed is a key and a counter."
+  },
+  {
+   "id": "D-2026-10-07-a",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Luthier proper is separated from the record of its development: README, docs/, src/, examples/ and tests/ present Luthier; record/ holds how it came to be. scri",
+   "text": "Luthier proper is separated from the record of its development: README, docs/, src/, examples/ and tests/ present Luthier; record/ holds how it came to be. scripts/ and prompts/ stay at the root. Three passes: the record moves, then docs/semantica becomes docs/spec, then guide/ and rationale/ are split from it."
+  },
+  {
+   "id": "D-2026-10-07-b",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "A function defined by its laws is an element of the guide: a type over an exponential defined by the laws of the function, whose values are its implementations,",
+   "text": "A function defined by its laws is an element of the guide: a type over an exponential defined by the laws of the function, whose values are its implementations, each certified against the same laws. Written once over a number model, `Exp (R : U) (m : NumberModel R)`: `Exp Real realModel` is the ideal, declared and never run; `Exp Float64 (float64Model tol)` runs. The arrow between them goes from the ideal to the doubles, `realize f x = round (f x)`, and a machine exp realizes the ideal when it stays within tolerance of that; stated, not run, until a Real computes (06 §9). The other direction, `Exp Float64 : Exp Real`, is false and R9 rejects it. examples/exp.lut holds it with two models, a Taylor sum and math.exp; section 8 of the guide replaces the agreement law `SameDouble`, which R10 does not count as a law, by `Double` defined by its recursion."
+  },
+  {
+   "id": "D-2026-10-07-c",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "`Real` stays the ideal, declared and never run, and the reals by construction (Cauchy sequences of rationals with a modulus, `examples/cauchy.lut`) are one more",
+   "text": "`Real` stays the ideal, declared and never run, and the reals by construction (Cauchy sequences of rationals with a modulus, `examples/cauchy.lut`) are one more realization of it beside `Float64`, not its definition. The alternative, defining `Real` as `Cauchy`, would make `Float64 : Real` an embedding instead of a subset and touch R9's free passage of a double where a real is expected and 06 §2. With this realization the arrow of examples/exp.lut, from the ideal to the doubles, can be run: `roundC (f (fromDouble x))`."
+  },
+  {
+   "id": "D-2026-10-07-d",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The element of the guide for a function defined by its laws is named \"Theory and model\": Hilbert's implicit definition made a type, the type the theory and a va",
+   "text": "The element of the guide for a function defined by its laws is named \"Theory and model\": Hilbert's implicit definition made a type, the type the theory and a value a model, so `Exp` and `Ring` are one element. The guide gains the section \"Declared, defined, computable\": a value is a hole, a procedure or a datum, and the line is how many observations an answer needs; declared is defined implicitly, defined explicitly, computable reduces to a datum. Eight changes, one commit each (33d3f87..7c2f86f)."
+  },
+  {
+   "id": "D-2026-10-07-e",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "No loose functions: a value is defined only at a defined type, and an exponential without laws is a base, as a lawless product is (R4); a function is a value of",
+   "text": "No loose functions: a value is defined only at a defined type, and an exponential without laws is a base, as a lawless product is (R4); a function is a value of a defined function type, a theory. The guide's list is reordered around it (Type, Value, Declaration, Law, Subtype/theory, Function type, Definition, ...), 05 R2 and R4 carry the rule as decided and not implemented, and P14 is proposed in his words. The libraries do not comply (exp in real.lut, the helpers); check -v is to report loose functions first."
+  },
+  {
+   "id": "D-2026-10-07-f",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The elements of the guide follow Luciano's scheme: Type with its bases, named by alias; the formers of a bicartesian closed category; the dependent type, an ele",
+   "text": "The elements of the guide follow Luciano's scheme: Type with its bases, named by alias; the formers of a bicartesian closed category; the dependent type, an element of its own; Law; subtype by law as the theory, the way to define a type; value as the model, the way to define a value; declaration; recursion as the second way (R4); apply and reduce. A functor is a theory over U, not an element; a lawless function is an alias; Function type folds into the theory, Value and Definition into the model (amends the list of D-2026-10-07-e, not its rule)."
+  },
+  {
+   "id": "D-2026-10-07-g",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "GPT's reading of the list of elements is answered point by point in record/IA; the guide is corrected on eleven points and says what the specification answers o",
+   "text": "GPT's reading of the list of elements is answered point by point in record/IA; the guide is corrected on eleven points and says what the specification answers on four; point 2 is declined on P14, with the reading that an explicit definition is the model of the singleton theory whose law is its formula, so a function without laws of its own is an expression, an alias, or that model. A mirror of the list, with why each thing is said, is record/elements-rationale-2026-10-07.md."
+  },
+  {
+   "id": "D-2026-10-07-h",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Program is an element of the guide, the last of the list: the theories a program states, the models it gives them, and the compositions of models by application",
+   "text": "Program is an element of the guide, the last of the list: the theories a program states, the models it gives them, and the compositions of models by application, certified as a chain graded by its weakest link (05 §7); taken from the closing hierarchy of GPT's reading."
+  },
+  {
+   "id": "D-2026-10-08-a",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The program's relation with the world, and its certificates, are read in a Bayesian frame: the program is an observer that updates its knowledge of the world by",
+   "text": "The program's relation with the world, and its certificates, are read in a Bayesian frame: the program is an observer that updates its knowledge of the world by what it reads. With exact laws and assumed hypotheses the frame works in its logical limit, probabilities 0 and 1 (Cox's theorem, as Jaynes uses it, makes graded knowledge probability). Probabilities enter with the classes of 09 §9 and with the grade sampled, whose n cases from a declared generator are evidence on a law."
+  },
+  {
+   "id": "D-2026-10-08-b",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The elements of the guide are framed by Luthier's view of computation: a timeless part, the plan, equivalence of expressions, and a temporal part, the execution",
+   "text": "The elements of the guide are framed by Luthier's view of computation: a timeless part, the plan, equivalence of expressions, and a temporal part, the execution of actions, tied both ways (the properties of actions and the strategies of their composition are values of types under the timeless rules; the equivalences are computed by executing actions), with knowledge between them read as Bayesian (D-2026-10-08-a). The list is grouped in three: the plan, the execution (action and reading, extern, world and pointer, execution and trace, realization), and what is known (certificate). The elements of the guide are fixed before the notes that argue them (09) are reviewed."
+  },
+  {
+   "id": "D-2026-10-08-c",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The list of elements is written for one use: to state the interpreter of Luthier in Luthier, with the executable kernel reduced to what a host must do (reduce t",
+   "text": "The list of elements is written for one use: to state the interpreter of Luthier in Luthier, with the executable kernel reduced to what a host must do (reduce terms given as data, the operations of the primitive types, call an extern and read and write a File); the parser, checker, tester and certificates would be Luthier definitions over Program, and the first Luthier interpreter is certified against the Python one."
+  },
+  {
+   "id": "D-2026-10-09-a",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The bibliography holds pointers, not copies: no PDF or book enters git, and each source is linked by its DOI (the publisher's or the author's page where it has ",
+   "text": "The bibliography holds pointers, not copies: no PDF or book enters git, and each source is linked by its DOI (the publisher's or the author's page where it has none). The copies read stay in record/bibliography/pdf/, outside git, each pinned by its SHA-256 in record/bibliography/README.md."
+  },
+  {
+   "id": "D-2026-10-09-b",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "Candidate principles are found by infectability and kept by P13: the distillation chooses and orders its candidates by infectability (Luciano's criterion of May",
+   "text": "Candidate principles are found by infectability and kept by P13: the distillation chooses and orders its candidates by infectability (Luciano's criterion of May for finding Luthier's principles: how much an idea changes the way of programming, on four axes, frequency not being one), and whether a principle stays is judged later by the decisions it guides once applied. Recurrence is shown as data, not used to rank."
+  },
+  {
+   "id": "D-2026-10-09-c",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The step that finds candidate principles is blind: it sees only the lineages, the language's name and designers, and Luciano's criterion of infectability unchan",
+   "text": "The step that finds candidate principles is blind: it sees only the lineages, the language's name and designers, and Luciano's criterion of infectability unchanged, with no description of Luthier, no principles in force, no log and no objectives; a second step sets its candidates against what is in force. A table that read the axes for Luthier's two kinds of idea was dropped. The filter is tested by a control on Python and Haskell (record/controls/), with references fixed before any run, a baseline of what the model knows without the corpus, and names redacted."
+  },
+  {
+   "id": "D-2026-10-09-d",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The principles are validated against real decisions mined from the Claude Code transcripts, by the plan record/plan-principles-validation-2026-10-09-decisions.m",
+   "text": "The principles are validated against real decisions mined from the Claude Code transcripts, by the plan record/plan-principles-validation-2026-10-09-decisions.md (draft 1) as Luciano marked it: D2, D3 and D5 to D14 as written; D1 qualified, a principle counts from its explicit formulation, when that formulation's logical structure is enough to make decisions; D4 replaced, each principle is reported with its number of cases and its figures, without thresholds or labels."
+  },
+  {
+   "id": "D-2026-10-09-e",
+   "kind": "decision",
+   "source": "record/decisions.md",
+   "title": "The synthesis of Luthier's ideas, rules and principles (map of themes and states, candidate principles set against those in force, rules traced to the ideas) an",
+   "text": "The synthesis of Luthier's ideas, rules and principles (map of themes and states, candidate principles set against those in force, rules traced to the ideas) and the validation of the candidates with a cutoff are carried out overnight by the model, by record/plan-synthesis-2026-10-09.md, which Luciano approved whole; for this plan the model may run the scripts that process the record. The review of cases and the scoring stay his."
+  }
+ ],
+ "labels": {
+  "l1": "L-reject-material-name",
+  "l2": "L-code-is-data",
+  "l3": "L-identifiers-central",
+  "l4": "L-remaking-foundations",
+  "l5": "L-type-carries-its-laws",
+  "l6": "L-code-to-understand",
+  "l7": "L-create-objects-uniformly",
+  "l8": "L-dependent-types-def",
+  "l9": "L-express-extracomputational",
+  "l10": "L-expressiveness",
+  "l11": "L-foundation-choice",
+  "l12": "L-primitives",
+  "l13": "L-reasoning-to-code-isomorphism",
+  "l14": "L-sample-probability-duality",
+  "l15": "L-semantic-then-efficient",
+  "l16": "L-semantics-own-universe",
+  "l17": "L-states-as-type-algebra",
+  "l18": "L-environment-first-object",
+  "l19": "L-environment-kinds",
+  "l20": "L-environment-resources",
+  "l21": "L-environment-stores-retrieves",
+  "l22": "L-variable-is-fields",
+  "l23": "L-variable-not-know-environment",
+  "l24": "L-code-operations",
+  "l25": "L-constructor-vs-function",
+  "l26": "L-constructors-in-type-space",
+  "l27": "L-dynamic-naming",
+  "l28": "L-element-belongs-one-type",
+  "l29": "L-function-holds-code",
+  "l30": "L-identifier-type-independent",
+  "l31": "L-inject-multiple-identifiers",
+  "l32": "L-language-self-writing",
+  "l33": "L-subtype-by-predicate",
+  "l34": "L-two-kinds-of-definition",
+  "l35": "L-type-definition-recursive",
+  "l36": "L-types-make-code-safe",
+  "l37": "L-composition-dot",
+  "l38": "L-equals-assertion",
+  "l39": "L-function-kinds",
+  "l40": "L-function-type-expression",
+  "l41": "L-sum-types-with-bar",
+  "l42": "L-test-result-one-or-explanation",
+  "l43": "L-type-autodetection",
+  "l44": "L-express-math-structures",
+  "l45": "L-language-parts-compiler",
+  "l46": "L-learn-from-each-run",
+  "l47": "L-pre-postconditions",
+  "l48": "L-simultaneous-definition",
+  "l49": "L-forms-of-definition",
+  "l50": "L-functor-as-implementation",
+  "l51": "L-type-inference",
+  "l52": "L-luthier-is-assignments",
+  "l53": "L-compile-time-prevents-invalid",
+  "l54": "L-couplings-as-types",
+  "l55": "L-dep-types-composition",
+  "l56": "L-dsl-as-model-compiler",
+  "l57": "L-dsl-unifies-domains",
+  "l58": "L-embedded-semantic-structure",
+  "l59": "L-formalize-state-energy-algebra",
+  "l60": "L-hott-dsl-for-biology",
+  "l61": "L-hott-ingredients-sufficient",
+  "l62": "L-hott-prob-tension",
+  "l63": "L-likelihood-type-propagation",
+  "l64": "L-markov-generated",
+  "l65": "L-meta-layer",
+  "l66": "L-models-as-well-typed-objects",
+  "l67": "L-proof-assistants-verify",
+  "l68": "L-sampler-type-indexed",
+  "l69": "L-separate-structure-inference",
+  "l70": "L-symmetry-as-identity-paths",
+  "l71": "L-type-safe-priors",
+  "l72": "L-types-spaces-identities-paths",
+  "l73": "L-dep-types-semantic-safety",
+  "l74": "L-encode-as-types",
+  "l75": "L-higher-paths-symmetries",
+  "l76": "L-hottification-definition",
+  "l77": "L-hottification-models-typed-objects",
+  "l78": "L-identity-paths-equivalences",
+  "l79": "L-machine-verifiable-theories",
+  "l80": "L-runtime-vs-semantic-safety",
+  "l81": "L-bayesian-mapping",
+  "l82": "L-compositional-kinetic",
+  "l83": "L-fisher-validation",
+  "l84": "L-macroir-consumes-models",
+  "l85": "L-meta-theory-discovery",
+  "l86": "L-replace-adhoc-model-spaces",
+  "l87": "L-adjoint-forward-diagnostic",
+  "l88": "L-contagiously-safe-dsl",
+  "l89": "L-dsl-kernel-yaml",
+  "l90": "L-epistemic-firewall",
+  "l91": "L-groupoid-structure",
+  "l92": "L-pre-formal-safety",
+  "l93": "L-proof-capsules",
+  "l94": "L-sav-bridge-to-proof",
+  "l95": "L-sav-framework",
+  "l96": "L-sav-triangle-identity",
+  "l97": "L-semantic-zones-kernel",
+  "l98": "L-tests-as-morphisms",
+  "l99": "L-epistemic-compression",
+  "l100": "L-hottification-roadmap",
+  "l101": "L-modelgraph-parammanager",
+  "l102": "L-reproducibility-formal",
+  "l103": "L-encode-epistemic-structure",
+  "l104": "L-argument-domains",
+  "l105": "L-snapshot-first",
+  "l106": "L-contract-bundle",
+  "l107": "L-oracle-vs-postcondition",
+  "l108": "L-io-codec-prism",
+  "l109": "L-reasonable-then-wild",
+  "l110": "L-types-are-concepts",
+  "l111": "L-cross-language",
+  "l112": "L-bayesian-complexity-estimate",
+  "l113": "L-butler-orchestrator",
+  "l114": "L-compiler-is-prover",
+  "l115": "L-declarative-and-optimizer",
+  "l116": "L-path-cost-estimate",
+  "l117": "L-paths-implementations",
+  "l118": "L-performance-database",
+  "l119": "L-computation-categories",
+  "l120": "L-generalize-database",
+  "l121": "L-self-estimation-functions",
+  "l122": "L-time-from-input-features",
+  "l123": "L-compose-programs",
+  "l124": "L-compare-equivalent-paths",
+  "l125": "L-verifiability",
+  "l126": "L-two-layers",
+  "l127": "L-minimal-primitives",
+  "l128": "L-bridge-language",
+  "l129": "L-delegate-execution",
+  "l130": "L-synthesize-runs",
+  "l131": "L-summary-bigger-than-data",
+  "l132": "L-model-of-computation",
+  "l133": "L-decompose-components",
+  "l134": "L-language-is-universe",
+  "l135": "L-grammar-parallel",
+  "l136": "L-inventory-cpp-constructs",
+  "l137": "L-no-inheritance-polymorphism",
+  "l138": "L-lisp-single-primitive",
+  "l139": "L-only-types-and-functions",
+  "l140": "L-based-on-hott",
+  "l141": "L-dependent-types-as-type-returning",
+  "l142": "L-universal-type",
+  "l143": "L-collaborative-filtering",
+  "l144": "L-self-extensible",
+  "l145": "L-executable-by-hand",
+  "l146": "L-hijack-code",
+  "l147": "L-probabilistic-hott",
+  "l148": "L-well-defined-dsl",
+  "l149": "L-path-equivalence-core",
+  "l150": "L-core-plus-libraries",
+  "l151": "L-closed-observer",
+  "l152": "L-external-element",
+  "l153": "L-abstraction-mechanism",
+  "l154": "L-decorator-algebra",
+  "l155": "L-decorators-error",
+  "l156": "L-express-invariances",
+  "l157": "L-function-by-properties",
+  "l158": "L-implementation-of-concept",
+  "l159": "L-start-from-reals",
+  "l160": "L-nonunivocal-functions",
+  "l161": "L-concept-first",
+  "l162": "L-commutative-program",
+  "l163": "L-program-not-a-type-in-hott",
+  "l164": "L-meta-recursive",
+  "l165": "L-first-class-contexts",
+  "l166": "L-context-as-dag",
+  "l167": "L-double-definition",
+  "l168": "L-expressivity-vs-redundancy",
+  "l169": "L-forward-and-undefined-types",
+  "l170": "L-implicit-types",
+  "l171": "L-typing-accumulates",
+  "l172": "L-forgetting-problem",
+  "l173": "L-simplify-type-composition",
+  "l174": "L-truncation-operators",
+  "l175": "L-forgetful-functors",
+  "l176": "L-patterns-in-composition",
+  "l177": "L-type-is-history",
+  "l178": "L-commuting-squares",
+  "l179": "L-express-alternatives",
+  "l180": "L-optimize-own-rules",
+  "l181": "L-statements-commute",
+  "l182": "L-time-as-dependency",
+  "l183": "L-acritical-amplifier",
+  "l184": "L-easy-delegation",
+  "l185": "L-spec-without-implementation",
+  "l186": "L-description-language",
+  "l187": "L-execution-is-verification",
+  "l188": "L-levels-of-equivalence",
+  "l189": "L-essential-vs-decoration",
+  "l190": "L-minimal-core-primitives",
+  "l191": "L-run-external-programs",
+  "l192": "L-forgetting-in-hott",
+  "l193": "L-hott-not-probabilistic",
+  "l194": "L-probabilities-and-types-together",
+  "l195": "L-minimalism-maximalism",
+  "l196": "L-map-to-other-languages",
+  "l197": "L-category-style-basics",
+  "l198": "L-dependent-types-basic",
+  "l199": "L-execute-when-defined",
+  "l200": "L-program-as-function",
+  "l201": "L-code-many-operations",
+  "l202": "L-hot-values-paths",
+  "l203": "L-particle-filtering-paths",
+  "l204": "L-synthesis-is-key",
+  "l205": "L-express-then-execute",
+  "l206": "L-quantifiers-first-class",
+  "l207": "L-von-neumann-epigraph",
+  "l208": "L-language-of-ideas",
+  "l209": "L-living-vs-dead-language",
+  "l210": "L-syntax-semantics-before-implementation",
+  "l211": "L-concrete-to-luthier-problem",
+  "l212": "L-class-carries-structure",
+  "l213": "L-generic-concept-contextualized",
+  "l214": "L-concepts-independent-or-tied",
+  "l215": "L-records-as-relational-db",
+  "l216": "L-projections-reconstruct",
+  "l217": "L-iteration-as-successor",
+  "l218": "L-definition-is-its-test",
+  "l219": "L-newton-raphson-toy-application",
+  "l220": "L-publish-arxiv",
+  "l221": "L-error-messages-remembering",
+  "l222": "L-language-for-the-ai",
+  "l223": "L-build-before-it-falls",
+  "l224": "L-abstract-algebra",
+  "l225": "L-sharing-platform",
+  "l226": "L-correlated-data-worth-more",
+  "l227": "L-code-enables-autodiff",
+  "l228": "L-things-guaranteed",
+  "l229": "L-value-carries-annotations",
+  "l230": "L-value-knows-operation",
+  "l231": "L-levels-of-view",
+  "l232": "L-levels-of-verification",
+  "l233": "L-luthierize-foreign-code",
+  "l234": "L-properties-within-error",
+  "l235": "L-forgetting-affects-precision",
+  "l236": "L-code-obeys-laws-not-floats",
+  "l237": "L-execution-as-forgetting",
+  "l238": "L-what-is-it-for",
+  "l239": "L-pyluthier-implementation",
+  "l240": "L-start-easy-own-language",
+  "l241": "L-recover-meaning-as-ai-codes",
+  "l242": "L-infectability-lens",
+  "l243": "L-mentor-friction",
+  "l244": "L-pipeline-method",
+  "l245": "L-date-both-consolidations",
+  "l246": "L-no-principle-without-example",
+  "l247": "L-spec-makes-decisions",
+  "l248": "L-pipeline-forgetting",
+  "l249": "L-accumulates-without-advancing",
+  "l250": "L-arena-or-lambda-calculus",
+  "l251": "L-algebraic-and-semantic",
+  "l252": "L-python-spirit",
+  "l253": "L-recursive-like-lisp",
+  "l254": "L-what-is-a-program",
+  "l255": "L-compose-programs-harmonically",
+  "l256": "L-compiling-detects-errors",
+  "l257": "L-library-adapter",
+  "l258": "L-apply-luthier-to-[private word]",
+  "l259": "L-result-type-closed",
+  "l260": "L-derived-is-proof-term",
+  "l261": "L-precondition-is-type",
+  "l262": "L-schema-from-type",
+  "l263": "L-verify-by-sampling",
+  "l264": "L-original-vs-derivative-types",
+  "l265": "L-derived-never-edited",
+  "l266": "L-function-deterministic",
+  "l267": "L-couple-to-sonolocalizacion",
+  "l268": "L-knowledge-butler",
+  "l269": "L-must-be-useful",
+  "l270": "L-gap-of-usefulness",
+  "l271": "L-fundamental-elements-question",
+  "l272": "L-knuth-expressive-languages",
+  "l273": "L-bootstrap-pact",
+  "l274": "L-core-five-pieces",
+  "l275": "L-definition-fundamental",
+  "l276": "L-definitional-equality",
+  "l277": "L-forgetting-is-fst",
+  "l278": "L-formers-are-primitive",
+  "l279": "L-hole-five-roles",
+  "l280": "L-next-recursor-syntax",
+  "l281": "L-program-inductive-eval",
+  "l282": "L-proposition-is-type-truth",
+  "l283": "L-refl-checks-definitional",
+  "l284": "L-reject-address-data",
+  "l285": "L-core-library-sugar-layers",
+  "l286": "L-data-sum-of-products",
+  "l287": "L-mutation-and-ownership",
+  "l288": "L-term-is-data-syntax",
+  "l289": "L-hole-needs-no-symbol",
+  "l290": "L-hole-goal-messages",
+  "l291": "L-hole-no-intention",
+  "l292": "L-language-indicates-knowledge",
+  "l293": "L-evidence-in-sigma",
+  "l294": "L-judgment-depends-on-type",
+  "l295": "L-know-that-vs-which",
+  "l296": "L-dot-separator",
+  "l297": "L-syntax-declarations-instantiations",
+  "l298": "L-block-is-program",
+  "l299": "L-equality-symbols",
+  "l300": "L-no-parameterless-lambda",
+  "l301": "L-one-binding-form",
+  "l302": "L-separate-type-from-term",
+  "l303": "L-coloneq-act-vs-equiv",
+  "l304": "L-juxtaposition-application",
+  "l305": "L-lisp-quote-code-as-data",
+  "l306": "L-unevaluated-is-syntactic",
+  "l307": "L-term-untyped-check",
+  "l308": "L-check-infer-bidirectional",
+  "l309": "L-data-gives-recursor",
+  "l310": "L-eval-fuel",
+  "l311": "L-reduction-three-rules",
+  "l312": "L-substitution-capture",
+  "l313": "L-indexed-data-families",
+  "l314": "L-define-invariants",
+  "l315": "L-laws-are-declarations",
+  "l316": "L-total-vs-partial-guarantee",
+  "l317": "L-definition-form-depends-on-type",
+  "l318": "L-numeric-tests-not-logic",
+  "l319": "L-redundancy-crosses-coloneq",
+  "l320": "L-sugar-adds-no-term-constructor",
+  "l321": "L-invariant-is-bool-function-field",
+  "l322": "L-laws-like-cpp-requires",
+  "l323": "L-concept-is-predicate-over-functions",
+  "l324": "L-no-value-without-passing-check",
+  "l325": "L-laws-are-the-normal-form",
+  "l326": "L-unit-is-group-of-functions",
+  "l327": "L-concept-is-a-function",
+  "l328": "L-law-is-type-plus-predicate",
+  "l329": "L-laws-force-decisions",
+  "l330": "L-almacen-is-constructor-function",
+  "l331": "L-check-value-vs-function",
+  "l332": "L-construction-pattern-is-core",
+  "l333": "L-certificate-first-class",
+  "l334": "L-luthier-is-verified-library",
+  "l335": "L-certificate-clause-with-hypotheses",
+  "l336": "L-name-the-pattern-library",
+  "l337": "L-units-with-parametrizable-requirements",
+  "l338": "L-luthier-is-extended-concepts",
+  "l339": "L-evaluation-storage-object",
+  "l340": "L-law-takes-function-as-argument",
+  "l341": "L-ev-sugar-syntax",
+  "l342": "L-symbol-economy",
+  "l343": "L-ascii-canonical",
+  "l344": "L-predicate-concatenation",
+  "l345": "L-match-is-recursor-sugar",
+  "l346": "L-predicate-delimiter-syntax",
+  "l347": "L-candidate-named-not-forall",
+  "l348": "L-coupled-functions-product",
+  "l349": "L-set-builder-notation",
+  "l350": "L-ten-elements",
+  "l351": "L-type-three-uses",
+  "l352": "L-base-vs-predicate-line",
+  "l353": "L-cross-representation-is-function",
+  "l354": "L-extern-is-labeled-hole",
+  "l355": "L-data-vs-subtype-choice",
+  "l356": "L-explicit-error-types",
+  "l357": "L-possible-vs-occurred-error",
+  "l358": "L-iteration-propagation",
+  "l359": "L-error-is-failing-predicate",
+  "l360": "L-functions-need-no-self-knowledge",
+  "l361": "L-laws-live-in-type",
+  "l362": "L-approxring-eps",
+  "l363": "L-nested-certified-structure",
+  "l364": "L-atomic-laws",
+  "l365": "L-conjunction-of-predicates",
+  "l366": "L-prototype-python-then-fast",
+  "l367": "L-luthier-describes-python-works",
+  "l368": "L-v0-scope-decisions",
+  "l369": "L-stuck-not-fail",
+  "l370": "L-import-declares-dependencies",
+  "l371": "L-content-hash-certificate",
+  "l372": "L-file-is-sigma-value",
+  "l373": "L-conceptual-vs-machine-impl",
+  "l374": "L-check-vs-test-stages",
+  "l375": "L-certificate-reproducible",
+  "l376": "L-generator-magnitude",
+  "l377": "L-hidden-parameter-exposed",
+  "l378": "L-what-belongs-in-luthier",
+  "l379": "L-statistical-law-over-sample",
+  "l380": "L-test-finds-domain-border",
+  "l381": "L-dismantle-prelude",
+  "l382": "L-opaque-type",
+  "l383": "L-report-in-concepts",
+  "l384": "L-luthier-v0-limits",
+  "l385": "L-concepts-belong-in-luthier",
+  "l386": "L-situated-physical-types",
+  "l387": "L-graph-ends-types-middle-trace",
+  "l388": "L-written-english",
+  "l389": "L-cumulative-no-recompute",
+  "l390": "L-files-as-interface",
+  "l391": "L-absolute-vs-local-coords",
+  "l392": "L-uncertainty-functor",
+  "l393": "L-delegate-representation-python",
+  "l394": "L-invert-arrow-registration",
+  "l395": "L-is-it-a-dsl",
+  "l396": "L-lut-first-then-python",
+  "l397": "L-law-only-when-known-true",
+  "l398": "L-dot-projection",
+  "l399": "L-module-is-record",
+  "l400": "L-tests-live-in-luthier",
+  "l401": "L-design-approval-before-code",
+  "l402": "L-do-what-said",
+  "l403": "L-map-invariants",
+  "l404": "L-score-identities-test",
+  "l405": "L-mutual-test-chain",
+  "l406": "L-map-as-iterate",
+  "l407": "L-native-extern-agree",
+  "l408": "L-sampler-likelihood-kernel",
+  "l409": "L-start-from-zero-light",
+  "l410": "L-array-primitive",
+  "l411": "L-no-exact-equality-floats",
+  "l412": "L-environment-evaluator",
+  "l413": "L-luthier-types-python-values",
+  "l414": "L-parser-leniency",
+  "l415": "L-objects-are-cycles",
+  "l416": "L-type-classes",
+  "l417": "L-math-concept-stack",
+  "l418": "L-type-closes-with-laws",
+  "l419": "L-shift-retraction",
+  "l420": "L-pure-interface-files",
+  "l421": "L-belief-prior-posterior",
+  "l422": "L-reported-vs-observed-info",
+  "l423": "L-convergence-law",
+  "l424": "L-negative-controls",
+  "l425": "L-validate-at-frontier",
+  "l426": "L-luthier-runs-and-tests",
+  "l427": "L-criterion-is-cli-hole",
+  "l428": "L-closed-vs-open-definition",
+  "l429": "L-declared-vs-defined",
+  "l430": "L-generated-code-not-real",
+  "l431": "L-operations-by-ops-or-properties",
+  "l432": "L-pure-vs-derived-math-objects",
+  "l433": "L-reals-with-without-zero",
+  "l434": "L-table-is-dependent-function",
+  "l435": "L-theory-is-record",
+  "l436": "L-spec-interpreter-first",
+  "l437": "L-spec-rule-accept-reject",
+  "l438": "L-genuine-dependence",
+  "l439": "L-laws-hypergraph-connected",
+  "l440": "L-rules-cost",
+  "l441": "L-alias-invariant-in-generator",
+  "l442": "L-form-before-laws",
+  "l443": "L-labels-are-binders",
+  "l444": "L-subtype-declaration-mark",
+  "l445": "L-types-and-values-unified",
+  "l446": "L-determined-means-reducing-body",
+  "l447": "L-test-run-same-operation",
+  "l448": "L-value-single-inhabitant",
+  "l449": "L-body-type-resolves-ambiguity",
+  "l450": "L-static-semantics-doc",
+  "l451": "L-extern-provisional-qualifier",
+  "l452": "L-defined-determined-axes",
+  "l453": "L-alias-equals-not-coloneq",
+  "l454": "L-object-has-head",
+  "l455": "L-opaque-body-is-law-conjunction",
+  "l456": "L-constructors-are-generator",
+  "l457": "L-theory-vs-presentation",
+  "l458": "L-translation-second-order",
+  "l459": "L-luthier-self-presentations",
+  "l460": "L-checker-richer-presentation",
+  "l461": "L-kernel-choice-criterion",
+  "l462": "L-presentation-must-be-value",
+  "l463": "L-presentation-supplies-equality",
+  "l464": "L-translation-inherits-laws",
+  "l465": "L-translation-tested-per-model",
+  "l466": "L-real-vs-theoretical-objects",
+  "l467": "L-sufficient-completeness",
+  "l468": "L-vec-is-function",
+  "l469": "L-array-laws-missing",
+  "l470": "L-determined-up-to-iso",
+  "l471": "L-extensionality-law",
+  "l472": "L-law-independence-witnessed",
+  "l473": "L-semantic-vs-performance-primitives",
+  "l474": "L-bases-firm-first",
+  "l475": "L-object-is-record-type",
+  "l476": "L-one-body-per-name",
+  "l477": "L-theorem-is-agrees-law",
+  "l478": "L-against-pure-waterfall",
+  "l479": "L-law-needs-concrete-case",
+  "l480": "L-certification-is-pointwise",
+  "l481": "L-equality-parametrized-probability",
+  "l482": "L-extern-gives-value-not-type",
+  "l483": "L-several-canonical-presentations",
+  "l484": "L-types-native-values-either",
+  "l485": "L-int-real-string-primitive",
+  "l486": "L-cartesian-closed",
+  "l487": "L-constructors-freely-generated",
+  "l488": "L-recursor-in-core",
+  "l489": "L-new-type-from-recursion-or-laws",
+  "l490": "L-structural-types-primitive",
+  "l491": "L-rules-as-errors-no-migration",
+  "l492": "L-rewrite-useful-new-syntax",
+  "l493": "L-generic-vs-project-location",
+  "l494": "L-rewrite-regression-numbers",
+  "l495": "L-table-accessor-partial",
+  "l496": "L-certify-reloads-per-name",
+  "l497": "L-pattern-bound-not-quantified",
+  "l498": "L-certification-forced-interpreter-rules",
+  "l499": "L-right-association-bit-equality",
+  "l500": "L-experiment-zero-independent",
+  "l501": "L-fin-int-vs-machine",
+  "l502": "L-int-overflow-numpy-bridge",
+  "l503": "L-primitive-keyword-explicit-state",
+  "l504": "L-algebra-chooses-number-object",
+  "l505": "L-distinguish-reals-from-float-subtype",
+  "l506": "L-reals-theory-rationals-float-models",
+  "l507": "L-float64-refines-real",
+  "l508": "L-constructive-reals",
+  "l509": "L-name-real",
+  "l510": "L-write-over-real-approximate-with-float",
+  "l511": "L-comparisons-undecidable",
+  "l512": "L-interval-enclosure-law",
+  "l513": "L-number-theory-record",
+  "l514": "L-nan-inf-not-reals",
+  "l515": "L-discrete-output-distribution",
+  "l516": "L-real-realized-by-float64",
+  "l517": "L-array-generic-element-type",
+  "l518": "L-leaf-declared-over-float64",
+  "l519": "L-function-subtyping-float64",
+  "l520": "L-real-carrier-plus-axiom",
+  "l521": "L-law-in-hole-declaration",
+  "l522": "L-leaf-not-certified-via-another-leaf",
+  "l523": "L-ad-hoc-laws-reproduce-implementation",
+  "l524": "L-law-characterizes-not-reimplements",
+  "l525": "L-one-name-per-thing",
+  "l526": "L-algebra-always-imported",
+  "l527": "L-best-math-object-as-invariant",
+  "l528": "L-symmetric-matrix-vs-operation",
+  "l529": "L-symmetric-matrix-type",
+  "l530": "L-equalities-should-be-setoid",
+  "l531": "L-folds-are-monoid-fold",
+  "l532": "L-position-encodings-iso",
+  "l533": "L-shapes-preconditions-in-types",
+  "l534": "L-shift-is-action",
+  "l535": "L-table-by-schema-laws",
+  "l536": "L-abs-returns-nonnegative",
+  "l537": "L-normalvec-uniform-law",
+  "l538": "L-objective-laws",
+  "l539": "L-acoustic-stage-drives-next",
+  "l540": "L-bool-read-by-position",
+  "l541": "L-bridge-ignores-declared-type",
+  "l542": "L-cert-hash-misses-python",
+  "l543": "L-certs-on-holes-never-match",
+  "l544": "L-exhaustive-int-is-small-range",
+  "l545": "L-field-laws-pass-by-tuned-magnitude",
+  "l546": "L-generator-ignores-refinement",
+  "l547": "L-hardcode-twice-across-bridge",
+  "l548": "L-pending-recorded-as-fail",
+  "l549": "L-provisional-externs-certified",
+  "l550": "L-real-only-a-label",
+  "l551": "L-run-record-omits-uncertified-cone",
+  "l552": "L-runs-not-what-certified",
+  "l553": "L-setoid-caught-real-bug",
+  "l554": "L-stale-certificates-not-pruned",
+  "l555": "L-cert-grades-not-implemented",
+  "l556": "L-certification-impl-broken",
+  "l557": "L-certs-internal-not-empirical",
+  "l558": "L-dome-gcc-externs",
+  "l559": "L-equality-check-holes",
+  "l560": "L-ergonomics-let-unary-minus",
+  "l561": "L-fix-certification-as-gate",
+  "l562": "L-guarantees-in-comments",
+  "l563": "L-int-tables-as-float",
+  "l564": "L-interpreted-likelihood-slow",
+  "l565": "L-kernel-triangle-works",
+  "l566": "L-project-constants-leak",
+  "l567": "L-refined-codomain-no-obligation",
+  "l568": "L-slow-nested-op-inference",
+  "l569": "L-statistical-tests-low-power",
+  "l570": "L-test-n-only-name",
+  "l571": "L-two-evaluators-diverge",
+  "l572": "L-validate-bridge-first",
+  "l573": "L-certificate-is-only-a-record",
+  "l574": "L-laws-didnt-need-language",
+  "l575": "L-luthier-describe-deal-inverted",
+  "l576": "L-own-contributions-vs-precedents",
+  "l577": "L-tag-version-for-reproducibility",
+  "l578": "L-test-distribution-in-directive",
+  "l579": "L-luthier-costs-more-than-returns",
+  "l580": "L-spec-faster-than-use",
+  "l581": "L-classify-problems-int-spec-proy",
+  "l582": "L-gen-over-refined-type",
+  "l583": "L-generated-value-checked-against-type",
+  "l584": "L-hash-compared-after-holes-filled",
+  "l585": "L-report-statistic-not-block",
+  "l586": "L-soundness-regression-suite",
+  "l587": "L-conversion-syntactic-no-dependent-elim",
+  "l588": "L-function-generators-degenerate",
+  "l589": "L-hardwired-names-interpreter",
+  "l590": "L-materialization-cache-bug",
+  "l591": "L-positional-identity-trap",
+  "l592": "L-preconditions-only-bool-match",
+  "l593": "L-vacuous-cases-pass",
+  "l594": "L-likelihood-tangent-dimension",
+  "l595": "L-one-generator-per-type",
+  "l596": "L-certification-performance-fixes",
+  "l597": "L-no-project-python-scripts",
+  "l598": "L-name-the-patches",
+  "l599": "L-lm-controls-excluded",
+  "l600": "L-interpreter-hash-recertify-cost",
+  "l601": "L-report-not-decidable",
+  "l602": "L-brokentext-needs-grammar",
+  "l603": "L-implicit-type-params",
+  "l604": "L-indexat-nat",
+  "l605": "L-refinements-in-sums-checked-flag",
+  "l606": "L-time-per-law",
+  "l607": "L-constants-must-be-parameters",
+  "l608": "L-dimension-in-types",
+  "l609": "L-exception-skips-obligation",
+  "l610": "L-generic-laws-dont-run",
+  "l611": "L-checker-loses-laws-in-branches",
+  "l612": "L-hole-no-default",
+  "l613": "L-problem-vs-objective",
+  "l614": "L-square-no-generator",
+  "l615": "L-statistical-law-level-retry",
+  "l616": "L-generation-part-of-certificate",
+  "l617": "L-generator-explicit-per-type",
+  "l618": "L-number-generator-limits-scale",
+  "l619": "L-check-refines-value-type",
+  "l620": "L-interval-arithmetic-bounded-real",
+  "l621": "L-check-bool-primary-derived",
+  "l622": "L-certifying-algorithm-witness",
+  "l623": "L-monad-vs-applicative-validation",
+  "l624": "L-refine-reading-not-path",
+  "l625": "L-tolerance-checks-dont-compose",
+  "l626": "L-concurrent-session-commit",
+  "l627": "L-pi-stays-with-luciano",
+  "l628": "L-certificates-enable-autonomy",
+  "l629": "L-certify-full-design-fisher",
+  "l630": "L-objective-from-list",
+  "l631": "L-reuse-not-run-law-result",
+  "l632": "L-cert-guarantees-via-typed-externs",
+  "l633": "L-phase-states-closing-check",
+  "l634": "L-mechanize-rules-lint-hook",
+  "l635": "L-binding-by-parameter",
+  "l636": "L-generator-is-luthier-value",
+  "l637": "L-polymorphic-one-instance",
+  "l638": "L-inverse-cdf-sampling",
+  "l639": "L-run-inputs-vs-cert-reach",
+  "l640": "L-hook-only-changed-files",
+  "l641": "L-literal-lint-type-vs-criterion",
+  "l642": "L-precommit-lints-not-certify",
+  "l643": "L-mechanical-rules-plan-consistency",
+  "l644": "L-check-exit-zero-unproven",
+  "l645": "L-mechanical-check-is-shadow",
+  "l646": "L-generators-plan-not-implemented",
+  "l647": "L-generic-functor-in-interpreter",
+  "l648": "L-generic-functor-needs-reflection",
+  "l649": "L-luthier-reflection-question",
+  "l650": "L-code-universe",
+  "l651": "L-typecase-breaks-parametricity",
+  "l652": "L-u-no-elimination",
+  "l653": "L-code-el-induction-recursion",
+  "l654": "L-code-fixpoint-constructors",
+  "l655": "L-code-universe-staged",
+  "l656": "L-fixpoint-generation-cost",
+  "l657": "L-code-universe-requirements",
+  "l658": "L-russell-plus-tarski-library",
+  "l659": "L-russell-vs-tarski-universe",
+  "l660": "L-signature-shows-parametricity",
+  "l661": "L-el-reading",
+  "l662": "L-el-vs-typeof-naming",
+  "l663": "L-elegant-vs-mosaic",
+  "l664": "L-languages-from-theory",
+  "l665": "L-sample-quality-is-prover-power",
+  "l666": "L-luthier-fills-need",
+  "l667": "L-luthier-states-not-programs",
+  "l668": "L-novel-evidence-combination",
+  "l669": "L-full-to-unprovable",
+  "l670": "L-optimize-needs-strong-certificates",
+  "l671": "L-need-written-objectives",
+  "l672": "L-note-not-field-data",
+  "l673": "L-chain-interpretable-steps",
+  "l674": "L-intermediate-ai-scale",
+  "l675": "L-statistical-and-deductive-tests",
+  "l676": "L-language-forces-method",
+  "l677": "L-functions-by-hand-cheaper",
+  "l678": "L-luciano-writes-interpreter-c",
+  "l679": "L-passthrough-or-orchestrator",
+  "l680": "L-monads-in-luthier-question",
+  "l681": "L-define-bnf-task",
+  "l682": "L-sonoloc-written-in-luthier",
+  "l683": "L-synthesize-python-call",
+  "l684": "L-reduce-to-minimum",
+  "l685": "L-bayesian-verification-regime",
+  "l686": "L-declarative-and-executive",
+  "l687": "L-effects-as-threaded-pointers",
+  "l688": "L-host-minimal-duties",
+  "l689": "L-knowledge-ties-parts",
+  "l690": "L-realization-ideal-and-runner",
+  "l691": "L-run-changes-states",
+  "l692": "L-three-kinds-of-proposition",
+  "l693": "L-trace-compare-consequence-cost",
+  "l694": "L-failure-mass-sampling",
+  "l695": "L-order-is-confluence",
+  "l696": "L-knowledge-vs-certificate",
+  "l697": "L-search-vs-cost-split",
+  "l698": "L-use-as-plan-element",
+  "l699": "L-cost-laws",
+  "l700": "L-discrepancy-threshold-cost",
+  "l701": "L-exterior-is-files",
+  "l702": "L-laws-of-interpretation-steps",
+  "l703": "L-posterior-per-computation",
+  "l704": "L-specs-in-luthier",
+  "l705": "L-type-parametrized-by-use",
+  "l706": "L-keep-witness-high-information",
+  "l707": "L-abstract-machine-certify",
+  "l708": "L-eval-modes",
+  "l709": "L-law-as-object-classifier",
+  "l710": "L-sup-not-sampleable",
+  "l711": "L-object-classifier-laws",
+  "l712": "L-membership-construction-or-hypothesis",
+  "l713": "L-function-as-expected-loss",
+  "l714": "L-many-function-types",
+  "l715": "L-agnostic-program-universe-state",
+  "l716": "L-do-as-data-dependency",
+  "l717": "L-when-to-evaluate",
+  "l718": "L-evaluation-steps-memory-states",
+  "l719": "L-declarative-of-implementation",
+  "l720": "L-executive-code-in-luthier",
+  "l721": "L-reuse-prior-interpreter-experience",
+  "l722": "L-combine-evidence-refine-certainty",
+  "l723": "L-analysis-only-at-moments",
+  "l724": "L-no-pdfs-doi-link",
+  "l725": "L-computation-for-biology"
+ },
+ "attempts": [
+  {
+   "answer": "{\"traces\": [[\"S02.1\",[\"l343\",\"l285\",\"l342\"]],[\"S02.2\",[\"l275\",\"l285\",\"l297\",\"l453\"]],[\"S02.3\",[\"l304\",\"l490\",\"l365\",\"l486\"]],[\"S02.4\",[\"l320\",\"l285\",\"l345\",\"l459\"]],[\"S02.5\",[\"l440\",\"l307\",\"l414\"]],[\"S02.6\",[\"l398\",\"l399\"]],[\"S03.1\",[\"l372\",\"l435\"]],[\"S03.2\",[\"l370\",\"l493\"]],[\"S03.3\",[\"l49\",\"l420\",\"l513\",\"l185\"]],[\"S03.4\",[\"l371\",\"l333\",\"l266\"]],[\"S03.5\",[\"l493\",\"l526\",\"l410\"]],[\"S04.1\",[\"l275\",\"l453\",\"l49\"]],[\"S04.2\",[\"l274\",\"l490\",\"l486\",\"l301\"]],[\"S04.3\",[\"l345\",\"l309\",\"l488\",\"l275\"]],[\"S04.4\",[\"l311\",\"l303\",\"l276\"]],[\"S04.5\",[\"l285\",\"l320\",\"l302\",\"l301\"]],[\"S04.6\",[\"l473\",\"l278\",\"l484\",\"l407\"]],[\"S04.7\",[\"l366\"]],[\"R1\",[\"l429\",\"l454\",\"l49\"]],[\"R2\",[\"l440\",\"l279\",\"l49\"]],[\"R3\",[\"l439\",\"l418\",\"l455\",\"l438\"]],[\"R4\",[\"l489\",\"l418\",\"l453\"]],[\"R5\",[\"l482\",\"l413\",\"l451\"]],[\"R6\",[\"l449\",\"l327\"]],[\"R7\",[\"l453\",\"l595\",\"l578\"]],[\"R8\",[\"l411\",\"l299\",\"l382\",\"l481\"]],[\"R9\",[\"l519\",\"l507\",\"l353\"]],[\"R10\",[\"l524\",\"l523\",\"l470\",\"l527\"]],[\"R11\",[\"l619\",\"l621\",\"l624\"]],[\"S06.1\",[\"l505\",\"l506\",\"l504\"]],[\"S06.2\",[\"l485\",\"l507\",\"l501\",\"l509\",\"l604\"]],[\"S06.3\",[\"l520\",\"l550\"]],[\"S06.4\",[\"l518\",\"l510\",\"l519\"]],[\"S06.5\",[\"l519\",\"l507\"]],[\"S06.6\",[\"l632\",\"l572\",\"l583\",\"l541\",\"l502\"]],[\"S06.7\",[\"l517\",\"l410\",\"l468\"]],[\"G1\",[\"l636\",\"l617\",\"l582\",\"l376\"]],[\"G2\",[\"l638\",\"l656\"]],[\"G3\",[\"l647\",\"l650\",\"l655\"]],[\"G4\",[\"l617\",\"l635\",\"l578\"]],[\"G5\",[\"l610\",\"l648\",\"l651\"]],[\"G6\",[\"l638\",\"l544\"]],[\"G7\",[\"l618\",\"l641\"]],[\"G8\",[\"l636\",\"l617\"]],[\"G9\",[\"l617\",\"l630\",\"l465\",\"l610\"]],[\"G10\",[\"l582\",\"l618\",\"l546\"]],[\"G11\",[]],[\"G12\",[\"l607\",\"l377\",\"l612\"]],[\"C1\",[\"l266\",\"l617\",\"l375\",\"l371\"]],[\"C2\",[\"l480\",\"l694\"]],[\"C3\",[\"l593\",\"l615\"]],[\"C4\",[\"l631\",\"l389\",\"l266\"]],[\"C5\",[\"l263\"]],[\"C6\",[\"l639\",\"l670\",\"l427\"]],[\"C7\",[\"l619\",\"l624\",\"l622\",\"l260\",\"l515\"]],[\"C8\",[\"l615\",\"l379\",\"l709\"]],[\"C9\",[\"l615\"]],[\"C10\",[\"l424\",\"l569\",\"l565\"]],[\"D-2026-10-06-a\",[\"l265\",\"l264\"]],[\"D-2026-10-06-b\",[]],[\"D-2026-10-06-c\",[\"l388\"]],[\"D-2026-10-06-d\",[\"l388\",\"l265\"]],[\"D-2026-10-06-e\",[\"l265\"]],[\"D-2026-10-06-f\",[]],[\"D-2026-10-06-g\",[\"l627\",\"l402\",\"l401\"]],[\"D-2026-10-06-h\",[]],[\"D-2026-10-06-i\",[]],[\"D-2026-10-06-j\",[]],[\"D-2026-10-06-k\",[]],[\"D-2026-10-06-l\",[]],[\"D-2026-10-06-m\",[\"l673\",\"l674\"]],[\"D-2026-10-06-n\",[]],[\"D-2026-10-06-o\",[]],[\"D-2026-10-06-p\",[\"l672\",\"l265\"]],[\"D-2026-10-06-q\",[\"l633\",\"l673\"]],[\"D-2026-10-06-r\",[\"l243\",\"l383\"]],[\"D-2026-10-06-s\",[\"l634\",\"l645\",\"l640\",\"l642\"]],[\"D-2026-10-06-t\",[]],[\"D-2026-10-06-u\",[]],[\"D-2026-10-06-v\",[\"l671\",\"l270\"]],[\"D-2026-10-06-w\",[\"l383\",\"l204\"]],[\"D-2026-10-06-x\",[\"l436\",\"l478\"]],[\"D-2026-10-06-y\",[\"l437\",\"l436\",\"l221\"]],[\"D-2026-10-06-z\",[\"l636\",\"l379\",\"l266\"]],[\"D-2026-10-07-a\",[]],[\"D-2026-10-07-b\",[\"l513\",\"l510\",\"l407\",\"l524\"]],[\"D-2026-10-07-c\",[\"l508\",\"l507\",\"l516\",\"l506\"]],[\"D-2026-10-07-d\",[\"l457\",\"l435\",\"l475\",\"l452\"]],[\"D-2026-10-07-e\",[\"l454\",\"l489\",\"l418\",\"l326\"]],[\"D-2026-10-07-f\",[\"l486\",\"l197\",\"l458\"]],[\"D-2026-10-07-g\",[\"l327\",\"l453\"]],[\"D-2026-10-07-h\",[\"l335\",\"l480\",\"l333\"]],[\"D-2026-10-08-a\",[\"l685\",\"l703\",\"l694\",\"l81\"]],[\"D-2026-10-08-b\",[\"l686\",\"l689\",\"l690\",\"l692\"]],[\"D-2026-10-08-c\",[\"l688\",\"l273\",\"l144\",\"l702\"]],[\"D-2026-10-09-a\",[\"l724\"]],[\"D-2026-10-09-b\",[\"l242\",\"l246\"]],[\"D-2026-10-09-c\",[\"l242\",\"l243\"]],[\"D-2026-10-09-d\",[\"l247\",\"l671\"]],[\"D-2026-10-09-e\",[\"l628\",\"l634\",\"l633\"]]]}\n",
+   "answer_sha256": "44fdb69b7a4690ac89929350df045af694775ebf64a1f2bf127515ee3b969dbb",
+   "errors": [],
+   "seconds": 153,
+   "date": "2026-10-09T14:59:54Z"
+  }
+ ],
+ "answer": {
+  "traces": [
+   [
+    "S02.1",
+    [
+     "l343",
+     "l285",
+     "l342"
+    ]
+   ],
+   [
+    "S02.2",
+    [
+     "l275",
+     "l285",
+     "l297",
+     "l453"
+    ]
+   ],
+   [
+    "S02.3",
+    [
+     "l304",
+     "l490",
+     "l365",
+     "l486"
+    ]
+   ],
+   [
+    "S02.4",
+    [
+     "l320",
+     "l285",
+     "l345",
+     "l459"
+    ]
+   ],
+   [
+    "S02.5",
+    [
+     "l440",
+     "l307",
+     "l414"
+    ]
+   ],
+   [
+    "S02.6",
+    [
+     "l398",
+     "l399"
+    ]
+   ],
+   [
+    "S03.1",
+    [
+     "l372",
+     "l435"
+    ]
+   ],
+   [
+    "S03.2",
+    [
+     "l370",
+     "l493"
+    ]
+   ],
+   [
+    "S03.3",
+    [
+     "l49",
+     "l420",
+     "l513",
+     "l185"
+    ]
+   ],
+   [
+    "S03.4",
+    [
+     "l371",
+     "l333",
+     "l266"
+    ]
+   ],
+   [
+    "S03.5",
+    [
+     "l493",
+     "l526",
+     "l410"
+    ]
+   ],
+   [
+    "S04.1",
+    [
+     "l275",
+     "l453",
+     "l49"
+    ]
+   ],
+   [
+    "S04.2",
+    [
+     "l274",
+     "l490",
+     "l486",
+     "l301"
+    ]
+   ],
+   [
+    "S04.3",
+    [
+     "l345",
+     "l309",
+     "l488",
+     "l275"
+    ]
+   ],
+   [
+    "S04.4",
+    [
+     "l311",
+     "l303",
+     "l276"
+    ]
+   ],
+   [
+    "S04.5",
+    [
+     "l285",
+     "l320",
+     "l302",
+     "l301"
+    ]
+   ],
+   [
+    "S04.6",
+    [
+     "l473",
+     "l278",
+     "l484",
+     "l407"
+    ]
+   ],
+   [
+    "S04.7",
+    [
+     "l366"
+    ]
+   ],
+   [
+    "R1",
+    [
+     "l429",
+     "l454",
+     "l49"
+    ]
+   ],
+   [
+    "R2",
+    [
+     "l440",
+     "l279",
+     "l49"
+    ]
+   ],
+   [
+    "R3",
+    [
+     "l439",
+     "l418",
+     "l455",
+     "l438"
+    ]
+   ],
+   [
+    "R4",
+    [
+     "l489",
+     "l418",
+     "l453"
+    ]
+   ],
+   [
+    "R5",
+    [
+     "l482",
+     "l413",
+     "l451"
+    ]
+   ],
+   [
+    "R6",
+    [
+     "l449",
+     "l327"
+    ]
+   ],
+   [
+    "R7",
+    [
+     "l453",
+     "l595",
+     "l578"
+    ]
+   ],
+   [
+    "R8",
+    [
+     "l411",
+     "l299",
+     "l382",
+     "l481"
+    ]
+   ],
+   [
+    "R9",
+    [
+     "l519",
+     "l507",
+     "l353"
+    ]
+   ],
+   [
+    "R10",
+    [
+     "l524",
+     "l523",
+     "l470",
+     "l527"
+    ]
+   ],
+   [
+    "R11",
+    [
+     "l619",
+     "l621",
+     "l624"
+    ]
+   ],
+   [
+    "S06.1",
+    [
+     "l505",
+     "l506",
+     "l504"
+    ]
+   ],
+   [
+    "S06.2",
+    [
+     "l485",
+     "l507",
+     "l501",
+     "l509",
+     "l604"
+    ]
+   ],
+   [
+    "S06.3",
+    [
+     "l520",
+     "l550"
+    ]
+   ],
+   [
+    "S06.4",
+    [
+     "l518",
+     "l510",
+     "l519"
+    ]
+   ],
+   [
+    "S06.5",
+    [
+     "l519",
+     "l507"
+    ]
+   ],
+   [
+    "S06.6",
+    [
+     "l632",
+     "l572",
+     "l583",
+     "l541",
+     "l502"
+    ]
+   ],
+   [
+    "S06.7",
+    [
+     "l517",
+     "l410",
+     "l468"
+    ]
+   ],
+   [
+    "G1",
+    [
+     "l636",
+     "l617",
+     "l582",
+     "l376"
+    ]
+   ],
+   [
+    "G2",
+    [
+     "l638",
+     "l656"
+    ]
+   ],
+   [
+    "G3",
+    [
+     "l647",
+     "l650",
+     "l655"
+    ]
+   ],
+   [
+    "G4",
+    [
+     "l617",
+     "l635",
+     "l578"
+    ]
+   ],
+   [
+    "G5",
+    [
+     "l610",
+     "l648",
+     "l651"
+    ]
+   ],
+   [
+    "G6",
+    [
+     "l638",
+     "l544"
+    ]
+   ],
+   [
+    "G7",
+    [
+     "l618",
+     "l641"
+    ]
+   ],
+   [
+    "G8",
+    [
+     "l636",
+     "l617"
+    ]
+   ],
+   [
+    "G9",
+    [
+     "l617",
+     "l630",
+     "l465",
+     "l610"
+    ]
+   ],
+   [
+    "G10",
+    [
+     "l582",
+     "l618",
+     "l546"
+    ]
+   ],
+   [
+    "G11",
+    []
+   ],
+   [
+    "G12",
+    [
+     "l607",
+     "l377",
+     "l612"
+    ]
+   ],
+   [
+    "C1",
+    [
+     "l266",
+     "l617",
+     "l375",
+     "l371"
+    ]
+   ],
+   [
+    "C2",
+    [
+     "l480",
+     "l694"
+    ]
+   ],
+   [
+    "C3",
+    [
+     "l593",
+     "l615"
+    ]
+   ],
+   [
+    "C4",
+    [
+     "l631",
+     "l389",
+     "l266"
+    ]
+   ],
+   [
+    "C5",
+    [
+     "l263"
+    ]
+   ],
+   [
+    "C6",
+    [
+     "l639",
+     "l670",
+     "l427"
+    ]
+   ],
+   [
+    "C7",
+    [
+     "l619",
+     "l624",
+     "l622",
+     "l260",
+     "l515"
+    ]
+   ],
+   [
+    "C8",
+    [
+     "l615",
+     "l379",
+     "l709"
+    ]
+   ],
+   [
+    "C9",
+    [
+     "l615"
+    ]
+   ],
+   [
+    "C10",
+    [
+     "l424",
+     "l569",
+     "l565"
+    ]
+   ],
+   [
+    "D-2026-10-06-a",
+    [
+     "l265",
+     "l264"
+    ]
+   ],
+   [
+    "D-2026-10-06-b",
+    []
+   ],
+   [
+    "D-2026-10-06-c",
+    [
+     "l388"
+    ]
+   ],
+   [
+    "D-2026-10-06-d",
+    [
+     "l388",
+     "l265"
+    ]
+   ],
+   [
+    "D-2026-10-06-e",
+    [
+     "l265"
+    ]
+   ],
+   [
+    "D-2026-10-06-f",
+    []
+   ],
+   [
+    "D-2026-10-06-g",
+    [
+     "l627",
+     "l402",
+     "l401"
+    ]
+   ],
+   [
+    "D-2026-10-06-h",
+    []
+   ],
+   [
+    "D-2026-10-06-i",
+    []
+   ],
+   [
+    "D-2026-10-06-j",
+    []
+   ],
+   [
+    "D-2026-10-06-k",
+    []
+   ],
+   [
+    "D-2026-10-06-l",
+    []
+   ],
+   [
+    "D-2026-10-06-m",
+    [
+     "l673",
+     "l674"
+    ]
+   ],
+   [
+    "D-2026-10-06-n",
+    []
+   ],
+   [
+    "D-2026-10-06-o",
+    []
+   ],
+   [
+    "D-2026-10-06-p",
+    [
+     "l672",
+     "l265"
+    ]
+   ],
+   [
+    "D-2026-10-06-q",
+    [
+     "l633",
+     "l673"
+    ]
+   ],
+   [
+    "D-2026-10-06-r",
+    [
+     "l243",
+     "l383"
+    ]
+   ],
+   [
+    "D-2026-10-06-s",
+    [
+     "l634",
+     "l645",
+     "l640",
+     "l642"
+    ]
+   ],
+   [
+    "D-2026-10-06-t",
+    []
+   ],
+   [
+    "D-2026-10-06-u",
+    []
+   ],
+   [
+    "D-2026-10-06-v",
+    [
+     "l671",
+     "l270"
+    ]
+   ],
+   [
+    "D-2026-10-06-w",
+    [
+     "l383",
+     "l204"
+    ]
+   ],
+   [
+    "D-2026-10-06-x",
+    [
+     "l436",
+     "l478"
+    ]
+   ],
+   [
+    "D-2026-10-06-y",
+    [
+     "l437",
+     "l436",
+     "l221"
+    ]
+   ],
+   [
+    "D-2026-10-06-z",
+    [
+     "l636",
+     "l379",
+     "l266"
+    ]
+   ],
+   [
+    "D-2026-10-07-a",
+    []
+   ],
+   [
+    "D-2026-10-07-b",
+    [
+     "l513",
+     "l510",
+     "l407",
+     "l524"
+    ]
+   ],
+   [
+    "D-2026-10-07-c",
+    [
+     "l508",
+     "l507",
+     "l516",
+     "l506"
+    ]
+   ],
+   [
+    "D-2026-10-07-d",
+    [
+     "l457",
+     "l435",
+     "l475",
+     "l452"
+    ]
+   ],
+   [
+    "D-2026-10-07-e",
+    [
+     "l454",
+     "l489",
+     "l418",
+     "l326"
+    ]
+   ],
+   [
+    "D-2026-10-07-f",
+    [
+     "l486",
+     "l197",
+     "l458"
+    ]
+   ],
+   [
+    "D-2026-10-07-g",
+    [
+     "l327",
+     "l453"
+    ]
+   ],
+   [
+    "D-2026-10-07-h",
+    [
+     "l335",
+     "l480",
+     "l333"
+    ]
+   ],
+   [
+    "D-2026-10-08-a",
+    [
+     "l685",
+     "l703",
+     "l694",
+     "l81"
+    ]
+   ],
+   [
+    "D-2026-10-08-b",
+    [
+     "l686",
+     "l689",
+     "l690",
+     "l692"
+    ]
+   ],
+   [
+    "D-2026-10-08-c",
+    [
+     "l688",
+     "l273",
+     "l144",
+     "l702"
+    ]
+   ],
+   [
+    "D-2026-10-09-a",
+    [
+     "l724"
+    ]
+   ],
+   [
+    "D-2026-10-09-b",
+    [
+     "l242",
+     "l246"
+    ]
+   ],
+   [
+    "D-2026-10-09-c",
+    [
+     "l242",
+     "l243"
+    ]
+   ],
+   [
+    "D-2026-10-09-d",
+    [
+     "l247",
+     "l671"
+    ]
+   ],
+   [
+    "D-2026-10-09-e",
+    [
+     "l628",
+     "l634",
+     "l633"
+    ]
+   ]
+  ]
+ }
+}

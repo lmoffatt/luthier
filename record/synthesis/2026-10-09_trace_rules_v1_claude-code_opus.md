@@ -1,0 +1,379 @@
+# The rules and the ideas they come from, 2026-10-09
+
+Written by `scripts/trace_rules.py` (trace_rules v1); prompt `trace_rules_v1`, model opus at effort low. The
+traces are the model's reading. Rules: the bold-numbered statements of the specification, the numbered sections of
+the documents without them, and the entries of the decision log.
+
+100 rules; 87 traced to at least one idea; 13 to none.
+
+## The specification
+
+- **S02.1** Lexical (`docs/spec/02-grammar.md:11`)
+  - `L-ascii-canonical` (Luciano, 2026-09-29): The canonical form of the language is ASCII; an editor may display -> as an arrow or * as a cross, but what is run by hand and grepped is the ASCII.
+  - `L-core-library-sugar-layers` (model, 2026-09-28): The language is three layers: a small core (a handful of term forms plus data, definition and reduction, a ten-line EBNF with reserved words data, match, extern), a base library written in Luthier, and sugar whose translation is mechanical; no Bool, numbers, =, Sigma or Subtype in the core.
+  - `L-symbol-economy` (model, 2026-09-29): A symbol is used only for what appears often with a fixed universal meaning and already exists outside with it; anything rare, content-bearing or without a natural reading is a word, since the language is read aloud and written by hand.
+- **S02.2** Acts (`docs/spec/02-grammar.md:30`)
+  - `L-definition-fundamental` (model, 2026-09-28): The most fundamental element of a program is not the type or the function but the definition, name : Type := term; a program is a finite unordered set of definitions and the DAG comes from which names each uses.
+  - `L-core-library-sugar-layers` (model, 2026-09-28): The language is three layers: a small core (a handful of term forms plus data, definition and reduction, a ten-line EBNF with reserved words data, match, extern), a base library written in Luthier, and sugar whose translation is mechanical; no Bool, numbers, =, Sigma or Subtype in the core.
+  - `L-syntax-declarations-instantiations` (Luciano, 2026-09-29): Luthier's syntax is reduced to only declarations and instantiations.
+  - `L-alias-equals-not-coloneq` (model, 2026-10-04): Naming a product (AB = A*B) is an abbreviation expanded before verification with no states; naming it with := is rejected, with = it is an alias.
+- **S02.3** Terms (`docs/spec/02-grammar.md:56`)
+  - `L-juxtaposition-application` (model, 2026-09-29): Application is written by juxtaposition f a and binds tighter than any operator, so f(a) is the same, f a b is curried and f (a, b) applies to a pair, the two coexisting as distinct types, with multiplication explicit.
+  - `L-structural-types-primitive` (model, 2026-10-04): Product, sum and exponential of types are made language primitives with their named record {..} and variant <..> forms, a named type being a Π or Σ over a finite set of labels read positionally.
+  - `L-conjunction-of-predicates` (Luciano, 2026-09-30): The law wrapper is unneeded; & is conjunction of quantified predicates (X->Bool)->(Y->Bool)->(X*Y->Bool) applied to curried functions, so the law's name is already the quoted expression.
+  - `L-cartesian-closed` (Luciano, 2026-10-04): Product, sum and exponential of types are missing to make Luthier a cartesian closed category.
+- **S02.4** Translations into the kernel (`docs/spec/02-grammar.md:101`)
+  - `L-sugar-adds-no-term-constructor` (model, 2026-09-29): Sugar may add nothing to Term: a construct that forces a new Term constructor is a primitive to discuss, not sugar.
+  - `L-core-library-sugar-layers` (model, 2026-09-28): The language is three layers: a small core (a handful of term forms plus data, definition and reduction, a ten-line EBNF with reserved words data, match, extern), a base library written in Luthier, and sugar whose translation is mechanical; no Bool, numbers, =, Sigma or Subtype in the core.
+  - `L-match-is-recursor-sugar` (Luciano, 2026-09-29): match is not primitive but sugar for the recursor a data declaration gives, the only way to open a data value, and over Bool it is if.
+  - `L-luthier-self-presentations` (Luciano, 2026-10-04): Luthier itself admits different equivalent primitive elements and laws (it already has several presentations of itself, with sugar-to-core a translation), and one must be chosen.
+- **S02.5** What the parser leaves to the checker (`docs/spec/02-grammar.md:108`)
+  - `L-rules-cost` (model, 2026-10-04): Enforcing order-independence and cycle detection has costs: native code over a declared-only type must become generic (the ML functor), and the whole file must be read before typing.
+  - `L-term-untyped-check` (model, 2026-09-29): Term is untyped syntax (senseless terms are constructible) and whether a term has sense is decided by check; a Term admitting only well-typed terms exists but is much harder, so raw syntax plus check suffices to start.
+  - `L-parser-leniency` (Luciano, 2026-10-02): What the parser rejects does not matter unless there are weighty theoretical reasons.
+- **S02.6** Dotted names (`docs/spec/02-grammar.md:114`)
+  - `L-dot-projection` (Luciano, 2026-10-01): Since a subtype's component names are public, a field is read with dot notation e.position, pure sugar over a match on the pattern the type declares that needs no new Term constructor and resolves root-level projection name collisions.
+  - `L-module-is-record` (model, 2026-10-01): A module is a record whose components are its definitions, so qualifying with the dot is the same as projecting.
+- **S03.1** A file is a structure (`docs/spec/03-libraries.md:7`)
+  - `L-file-is-sigma-value` (model, 2026-09-30): A .lut file denotes a value of a Sigma type with named components like Ring, so a library's signature is its type, two interchangeable libraries are two values of one type, and a parametrized library is a module-to-module function.
+  - `L-theory-is-record` (model, 2026-10-03): A Theory is a record (tuple) of types and predicates over them, defined when its laws are written and concrete/inhabited only when a model is given.
+- **S03.2** Import (`docs/spec/03-libraries.md:20`)
+  - `L-import-declares-dependencies` (Luciano, 2026-09-30): A .lut file declares its dependencies with import, which is the combinar operation (union of definitions rejecting conflicts), with a prefix form to disambiguate clashing names.
+  - `L-generic-vs-project-location` (model, 2026-10-04): Generic libraries live in luthier/lib and project-specific files in sonolocalización, ending the duplicated copies that caused confusion.
+- **S03.3** Declaration in one file, definition in another (`docs/spec/03-libraries.md:36`)
+  - `L-forms-of-definition` (Luciano, 2023-03-02): The language distinguishes declaration from definition and lets one define functions or variables by their type without giving the implementation or value (parameters).
+  - `L-pure-interface-files` (Luciano, 2026-10-02): Pure .lut files declare carriers and operations without bodies (like C++ pure virtual classes but with verified laws and concrete definitions on the leaves), and a separate Python-linking file fills each hole, while real.lut keeps its externs as the environment layer.
+  - `L-number-theory-record` (model, 2026-10-04): Numeric code is written once over a theory of numbers, a record with carrier, operations and equality; Real is its ideal model and Float64, intervals, Rational are others, filled through a per-file hole as in the ML functor.
+  - `L-spec-without-implementation` (Luciano, 2026-05-30): Inspired by Modelica, Luthier separates the specification of a program from its implementation.
+- **S03.4** What travels: the certificate with its hash (`docs/spec/03-libraries.md:57`)
+  - `L-content-hash-certificate` (model, 2026-09-30): Content-addressed build: a definition's certificate carries a hash of its elaborated type and body (and its dependency cone), so a matching hash on import satisfies the obligation, files are the source of truth and a relational DB is a reconstructible index.
+  - `L-certificate-first-class` (model, 2026-09-29): The certificate is a first-class value carrying its level of guarantee, composable and forgettable, accumulating by composition across values, functions and programs, with runs persisted as data.
+  - `L-function-deterministic` (model, 2026-09-13): If the identity of a derived object is its inputs, function, version and parameters, the function must be deterministic: seed and environment enter as explicit arguments, or the certificate lies.
+- **S03.5** The libraries (`docs/spec/03-libraries.md:75`)
+  - `L-generic-vs-project-location` (model, 2026-10-04): Generic libraries live in luthier/lib and project-specific files in sonolocalización, ending the duplicated copies that caused confusion.
+  - `L-algebra-always-imported` (Luciano, 2026-10-05): The algebra library must always be imported because it is the base of all the properties.
+  - `L-array-primitive` (Luciano, 2026-10-02): Arrays (Vec, Mat) enter as a primitive certified by algebraic laws with generators, with accessors and tabulate so Python traverses while Luthier still sees values, the conceptual endpoint being a dimension-indexed Vec : Nat -> U.
+- **S04.1** Acts (`docs/spec/04-kernel.md:32`)
+  - `L-definition-fundamental` (model, 2026-09-28): The most fundamental element of a program is not the type or the function but the definition, name : Type := term; a program is a finite unordered set of definitions and the DAG comes from which names each uses.
+  - `L-alias-equals-not-coloneq` (model, 2026-10-04): Naming a product (AB = A*B) is an abbreviation expanded before verification with no states; naming it with := is rejected, with = it is an alias.
+  - `L-forms-of-definition` (Luciano, 2023-03-02): The language distinguishes declaration from definition and lets one define functions or variables by their type without giving the implementation or value (parameters).
+- **S04.2** Type formers (`docs/spec/04-kernel.md:52`)
+  - `L-core-five-pieces` (model, 2026-09-28): The core is five pieces (the definition with the hole, lambda calculus with reduction, U, Π, data); from data come Σ, =, ⊥, ⊤, N, Program, while Bayes, the run database and numbers-with-error stay outside as libraries.
+  - `L-structural-types-primitive` (model, 2026-10-04): Product, sum and exponential of types are made language primitives with their named record {..} and variant <..> forms, a named type being a Π or Σ over a finite set of labels read positionally.
+  - `L-cartesian-closed` (Luciano, 2026-10-04): Product, sum and exponential of types are missing to make Luthier a cartesian closed category.
+  - `L-one-binding-form` (model, 2026-09-29): One binding form name : Type appears identically in declaration, parameter, dependent type and pair, with A -> B sugar for (_ : A) -> B and the dot disappearing.
+- **S04.3** Terms (`docs/spec/04-kernel.md:104`)
+  - `L-match-is-recursor-sugar` (Luciano, 2026-09-29): match is not primitive but sugar for the recursor a data declaration gives, the only way to open a data value, and over Bool it is if.
+  - `L-data-gives-recursor` (model, 2026-09-29): A data declaration gives three things: the type, the constructors (ordinary bodyless functions in normal form), and the recursor (one case per constructor with a reduction rule each); every function over the type is an instance of this recursor.
+  - `L-recursor-in-core` (Luciano, 2026-10-04): Whether the recursor is a core primitive: keep it as it is already implemented, versus the core having data, match and general recursion with the recursor of each type being a library definition.
+  - `L-definition-fundamental` (model, 2026-09-28): The most fundamental element of a program is not the type or the function but the definition, name : Type := term; a program is a finite unordered set of definitions and the DAG comes from which names each uses.
+- **S04.4** Reduction (`docs/spec/04-kernel.md:131`)
+  - `L-reduction-three-rules` (model, 2026-09-29): A reduction step has three rules, beta (substitute a lambda), delta (unfold a definition) and iota (run the recursor); the order of the clauses is the evaluation strategy, and another choice gives another trace for the same result.
+  - `L-coloneq-act-vs-equiv` (model, 2026-09-29): := is the act of giving a name a body, while ≡ is the larger relation that follows from all the := plus the computation rules (lambda substitution, recursor rules); "true by definition" broadly means true by unfolding and computing.
+  - `L-definitional-equality` (model, 2026-09-28): "True by definition" is definitional equality ≡ (two terms reducing to the same normal form), a judgment the reducer decides, distinct from =, the identity type whose terms are paths, making "the test is the code" literal.
+- **S04.5** Surface forms and their translations (`docs/spec/04-kernel.md:149`)
+  - `L-core-library-sugar-layers` (model, 2026-09-28): The language is three layers: a small core (a handful of term forms plus data, definition and reduction, a ten-line EBNF with reserved words data, match, extern), a base library written in Luthier, and sugar whose translation is mechanical; no Bool, numbers, =, Sigma or Subtype in the core.
+  - `L-sugar-adds-no-term-constructor` (model, 2026-09-29): Sugar may add nothing to Term: a construct that forces a new Term constructor is a primitive to discuss, not sugar.
+  - `L-separate-type-from-term` (model, 2026-09-29): The notation f : A -> A := \ (x) { x + x } separating type from term is preferred: instantiation is declaration plus := term, with one way to build functions (the lambda) and one to write their type (the arrow).
+  - `L-one-binding-form` (model, 2026-09-29): One binding form name : Type appears identically in declaration, parameter, dependent type and pair, with A -> B sugar for (_ : A) -> B and the dot disappearing.
+- **S04.6** Primitive versus derived, and native versus extern (`docs/spec/04-kernel.md:171`)
+  - `L-semantic-vs-performance-primitives` (model, 2026-10-04): What makes Vec seem primitive is performance not semantics, separating semantic primitives (the core) from performance primitives (the externs certified against the definition).
+  - `L-formers-are-primitive` (model, 2026-09-28): Elementary types and functions are not primitive; the primitives are the formers (U, Π, data), with N defined by data, R a structure with axioms and seno a hole.
+  - `L-types-native-values-either` (Luciano, 2026-10-04): Types are defined natively, while the values (executable functions) may be native or not, admitting both, since only the dubious part is worth reimplementing.
+  - `L-native-extern-agree` (Luciano, 2026-10-02): Each concept is written twice, native in Luthier as the slow conceptual reference and extern in Python as the fast version, and the test is that they agree; extern always, law always, native only when the law does not determine the operation.
+- **S04.7** Status of the interpreter (`docs/spec/04-kernel.md:226`)
+  - `L-prototype-python-then-fast` (model, 2026-09-30): Write the core interpreter in Python now to validate the design, since the interpreter uses its own types which are data, and only later rewrite eval in a fast language.
+- **R1** A declaration mentions declared names. (`docs/spec/05-static-semantics.md:145`)
+  - `L-declared-vs-defined` (Luciano, 2026-10-03): A type has states, declared (a forward-declared hole), defined (its invariants given) and certified; a value or extern definition requires a defined type while declarations may reference merely-declared types, which is what builds cyclic definitions.
+  - `L-object-has-head` (model, 2026-10-04): Every object has a head: a type whose body names its laws, so there are no free-standing laws that define.
+  - `L-forms-of-definition` (Luciano, 2023-03-02): The language distinguishes declaration from definition and lets one define functions or variables by their type without giving the implementation or value (parameters).
+- **R2** A definition uses defined types. (`docs/spec/05-static-semantics.md:150`)
+  - `L-rules-cost` (model, 2026-10-04): Enforcing order-independence and cycle detection has costs: native code over a declared-only type must become generic (the ML functor), and the whole file must be read before typing.
+  - `L-hole-five-roles` (model, 2026-09-28): The hole, a definition with a type and no body, plays five roles at once (axiom, program input, external function, pending definition, dead code), and "you don't execute until it's defined" is its exact semantics, removing the need for an External type.
+  - `L-forms-of-definition` (Luciano, 2023-03-02): The language distinguishes declaration from definition and lets one define functions or variables by their type without giving the implementation or value (parameters).
+- **R3** A predicate defines only what it touches. (`docs/spec/05-static-semantics.md:166`)
+  - `L-laws-hypergraph-connected` (model, 2026-10-04): Connection is a property of the whole set of laws: the hypergraph of laws must be connected and cover all components.
+  - `L-type-closes-with-laws` (Luciano, 2026-10-02): Defining a type must mean something: a mere juxtaposition or product is not a new type, which closes only when laws connect its subcomponents (the closed style, unusable until closed), as opposed to a derived type that is an expression of operators over defined types.
+  - `L-opaque-body-is-law-conjunction` (model, 2026-10-04): The body of an opaque type is the conjunction of the laws over it and its operations (Table := NonNegative & Reflexive & IntColumn); an operation the laws do not name stays outside the cycle.
+  - `L-genuine-dependence` (Luciano, 2026-10-04): The predicates connecting a type's components must be genuinely dependent and non-separable; a fake f(x,y)=g(x) should not count, and a separability failure needs a witnessed verdict.
+- **R4** Only laws or recursion make a new type. (`docs/spec/05-static-semantics.md:174`)
+  - `L-new-type-from-recursion-or-laws` (model, 2026-10-04): Only recursion (infinite freedom) or laws (refinement) generate a new named type; a product or sum without laws deserves no new name.
+  - `L-type-closes-with-laws` (Luciano, 2026-10-02): Defining a type must mean something: a mere juxtaposition or product is not a new type, which closes only when laws connect its subcomponents (the closed style, unusable until closed), as opposed to a derived type that is an expression of operators over defined types.
+  - `L-alias-equals-not-coloneq` (model, 2026-10-04): Naming a product (AB = A*B) is an abbreviation expanded before verification with no states; naming it with := is rejected, with = it is an alias.
+- **R5** An extern gives a value, never a type. (`docs/spec/05-static-semantics.md:184`)
+  - `L-extern-gives-value-not-type` (Luciano, 2026-10-04): An extern always gives a value, never a type (pyTable : Table .= extern, not Table := extern); when a Python value represents a native type the boundary is a certified representation translation.
+  - `L-luthier-types-python-values` (Luciano, 2026-10-02): Luthier provides only the types with their postconditions and laws; the values are external, instantiated extern in Python, and no extern is declared U.
+  - `L-extern-provisional-qualifier` (Luciano, 2026-10-04): A qualifier (extern provisional) lets an extern stand over a not-yet-defined type in a rush, recording the debt in the certificate.
+- **R6** The body of a declared name is an inhabitant or a predicate. (`docs/spec/05-static-semantics.md:205`)
+  - `L-body-type-resolves-ambiguity` (model, 2026-10-04): Whether a definition gives a value or a subtype is resolved by the body's type (T vs T->Bool), not by a symbol.
+  - `L-concept-is-a-function` (Luciano, 2026-09-29): A concept needs no new type: it is an ordinary function returning a type (with proofs) or a list of laws (with tests).
+- **R7** An alias is written with `=` and has no state. (`docs/spec/05-static-semantics.md:210`)
+  - `L-alias-equals-not-coloneq` (model, 2026-10-04): Naming a product (AB = A*B) is an abbreviation expanded before verification with no states; naming it with := is rejected, with = it is an alias.
+  - `L-one-generator-per-type` (model, 2026-10-05): A generator written over an alias is the generator of the type the alias names, and two generators for the same type are an error.
+  - `L-test-distribution-in-directive` (model, 2026-10-05): The distribution of test cases belongs in the directive, not in the type; an alias carrying a distribution contradicts R7.
+- **R8** `==` exists only where equality is structural. (`docs/spec/05-static-semantics.md:221`)
+  - `L-no-exact-equality-floats` (model, 2026-10-02): == does not decide over floats or arrays; comparison is an approximate relation with a tolerance (tolOf n = 8 n eps, the slack declared once).
+  - `L-equality-symbols` (model, 2026-09-29): Equality gets distinct symbols: := defines (an asymmetric act), = is the identity type (the proposition), == is library decidable equality, and ≡, the definitional one, is not written in programs.
+  - `L-opaque-type` (model, 2026-09-30): A large machine value like a numpy array enters Luthier as an opaque extern type whose values pass through untouched; such values have no equality, and comparing them is a function to R with tolerance.
+  - `L-equality-parametrized-probability` (Luciano, 2026-10-04): Objects are parametrized by observational equality and eventually by a probability of being equal or distinct, where equality returns a verdict with its level rather than a Bool.
+- **R9** Function types are contravariant in the domain and covariant in the codomain (`docs/spec/05-static-semantics.md:228`)
+  - `L-function-subtyping-float64` (Luciano, 2026-10-04): The function subtyping rule (domain contravariant, codomain covariant) accepts the argument and promotes the Float64 a leaf returns to Real, with an explicit toFloat64 where a Real must be rounded.
+  - `L-float64-refines-real` (Luciano, 2026-10-04): Float64 is written as a refinement of the real type (Float64 : Real := primitive), each finite double being a real.
+  - `L-cross-representation-is-function` (Luciano, 2026-09-29): A subtype is a restriction within one representation; when two types have different representations their relation is always a certified function with laws, never a subtype, with no implicit coercion (integers injected into the reals do not become reals).
+- **R10** A law characterizes; a second implementation is not a law (`docs/spec/05-static-semantics.md:232`)
+  - `L-law-characterizes-not-reimplements` (model, 2026-10-05): A law states the mathematical property that determines an operation up to the presentation's equality; a second implementation is consistency not characterization, and the native definition is one more model certified against it.
+  - `L-ad-hoc-laws-reproduce-implementation` (Luciano, 2026-10-05): The objects-as-types-with-laws theory is not used in the key cases (Vec, Table, Mat, Objective); ad hoc laws reproduce the function's implementation instead of stating the mathematical invariants that characterize it.
+  - `L-determined-up-to-iso` (model, 2026-10-04): Laws never determine a unique implementation and need not; they make all implementations behave the same from outside, determining the object up to isomorphism.
+  - `L-best-math-object-as-invariant` (Luciano, 2026-10-05): For every concept, find the mathematical object that best represents it and put it as the type's invariant rather than merely stating it.
+- **R11** A condition refines in its branch (`docs/spec/05-static-semantics.md:254`)
+  - `L-check-refines-value-type` (model, 2026-10-05): A check done on a value refines its type (inside if p x, x has the refined type) so nobody checks it again, with the result's granularity chosen by the cost of redoing it; this applies to run results, which are checked once into the run record.
+  - `L-check-bool-primary-derived` (Luciano, 2026-10-05): A check is written once as a Bool (the law, composing by and/or/not) with refinement by branch as the rule, and the refined type and other presentations are derived.
+  - `L-refine-reading-not-path` (model, 2026-10-05): When the checked fact is external, refining the value gives a guarantee that can expire, so the principle refines what was read, not the reference, and check and use must be the same operation.
+- **S06.1** The problem this settles (`docs/spec/06-numbers.md:20`)
+  - `L-distinguish-reals-from-float-subtype` (Luciano, 2026-10-04): Distinguish R, the set of reals, from the Python-implemented subtype (real/Float64), being precise about which is which.
+  - `L-reals-theory-rationals-float-models` (model, 2026-10-04): Separate ℝ as a theory with no finite implementation, ℚ as an exact computable model, and Float64 as a model of the rounded field tied to ℚ by a correct-rounding law testable in ℚ.
+  - `L-algebra-chooses-number-object` (Luciano, 2026-10-04): Rather than rewrite floating-point arithmetic, use algebra to choose the mathematical object that best represents the reals.
+- **S06.2** The types (`docs/spec/06-numbers.md:29`)
+  - `L-int-real-string-primitive` (model, 2026-10-04): Int, R and String are an unavoidable exception as core primitives, since defining IEEE double with data makes no sense.
+  - `L-float64-refines-real` (Luciano, 2026-10-04): Float64 is written as a refinement of the real type (Float64 : Real := primitive), each finite double being a real.
+  - `L-fin-int-vs-machine` (Luciano, 2026-10-04): Fin n is semantically the finite set over ℤ; a machine integer is not another definition of Fin but a representation of a subset of ℤ, written as two presentations with an equivalence law.
+  - `L-name-real` (Luciano, 2026-10-04): Name the real type Real rather than R.
+  - `L-indexat-nat` (model, 2026-10-05): An index typed Int admits negatives and makes an obligation genuinely false, so the honest type for an index is Nat.
+- **S06.3** Axioms: what is assumed and never tested (`docs/spec/06-numbers.md:52`)
+  - `L-real-carrier-plus-axiom` (model, 2026-10-04): Real is written as carrier plus structure, Real := primitive and realField : CompleteOrderedField Real := axiom, where axiom is a value whose laws are assumed.
+  - `L-real-only-a-label` (model, 2026-10-05): Real exists only at type-checking with no representation or generator and arithmetic over it rejected; the libraries are Float64 end to end, so the distinction yields nothing today.
+- **S06.4** The ideal and its realizations (`docs/spec/06-numbers.md:66`)
+  - `L-leaf-declared-over-float64` (Luciano, 2026-10-04): An extern leaf is declared over what it really receives and returns (Vec Float64, not Real), since the type cannot affirm what the implementation does not deliver, forcing libraries generic in the number type.
+  - `L-write-over-real-approximate-with-float` (Luciano, 2026-10-04): The numeric code is written once over Real, which has the better properties, and Float64 (or intervals, or Rational) is one of its approximations, so f(Real) is approximated by f(Float64).
+  - `L-function-subtyping-float64` (Luciano, 2026-10-04): The function subtyping rule (domain contravariant, codomain covariant) accepts the argument and promotes the Float64 a leaf returns to Real, with an explicit toFloat64 where a Real must be rounded.
+- **S06.5** Variance of function types (`docs/spec/06-numbers.md:92`)
+  - `L-function-subtyping-float64` (Luciano, 2026-10-04): The function subtyping rule (domain contravariant, codomain covariant) accepts the argument and promotes the Float64 a leaf returns to Real, with an explicit toFloat64 where a Real must be rounded.
+  - `L-float64-refines-real` (Luciano, 2026-10-04): Float64 is written as a refinement of the real type (Float64 : Real := primitive), each finite double being a real.
+- **S06.6** The bridge with the environment (`docs/spec/06-numbers.md:101`)
+  - `L-cert-guarantees-via-typed-externs` (model, 2026-10-05): A certificate now guarantees something because every value returned from Python is read by its declared type, and the certificate hash covers the Luthier code, the Python behind each extern and the interpreter.
+  - `L-validate-bridge-first` (model, 2026-10-05): Validating everything crossing from Python and --set against the declared type, including codomain refinements, is the only fix that can prevent a wrong number with no warning and so comes first.
+  - `L-generated-value-checked-against-type` (model, 2026-10-05): Each value a registered generator produces is checked against its type and a value outside it is an error, with gen T trusted as the declared-trust escape.
+  - `L-bridge-ignores-declared-type` (model, 2026-10-05): The Python bridge turns any int, float or str into a literal regardless of the declared type, and division follows the Python type, so an Int disguised as Float64 gives integer division.
+  - `L-int-overflow-numpy-bridge` (model, 2026-10-04): Int in the interpreter is unbounded ℤ (Python int) but becomes int64 on crossing to numpy with no check, a silent-overflow source the spec and bridge must name.
+- **S06.7** Arrays over any type (`docs/spec/06-numbers.md:122`)
+  - `L-array-generic-element-type` (Luciano, 2026-10-04): Array is generic in the element type with numeric operations over Real (Vec = Array Real), so index arrays become Array Int and writing it over Float64 would reglue definition to realization.
+  - `L-array-primitive` (Luciano, 2026-10-02): Arrays (Vec, Mat) enter as a primitive certified by algebraic laws with generators, with accessors and tabulate so Python traverses while Luthier still sees values, the conceptual endpoint being a dimension-indexed Vec : Nat -> U.
+  - `L-vec-is-function` (Luciano, 2026-10-04): A Vec is a function from indices below n to R (VecOf n := Pi with subtype), with tabulate as constructor and at as observer, the list being another presentation, yet it feels almost primitive.
+- **G1** A generator is a value of type `Gen T`. (`docs/spec/08-tests.md:54`)
+  - `L-generator-is-luthier-value` (model, 2026-10-05): A generator is a Luthier value with its own type and laws, certifiable like any other, and the random number generator is an extern with its stochasticity laws declared in Luthier.
+  - `L-generator-explicit-per-type` (Luciano, 2026-10-05): There is no single generator per type, so a test must name the explicit generator it bound to each type and the certificate records it (gen T := disappears); functions are generated by a census over registered values.
+  - `L-gen-over-refined-type` (model, 2026-10-05): A generator is defined only over a type with a predicate, so a type like BrokenGraph must be a refinement subtype whose predicate the generated values are checked against.
+  - `L-generator-magnitude` (model, 2026-09-30): A depth-bounded generator only reaches small numbers, so size is a test parameter growing from 1 to a cap along the cases, and a generator that returns a refined type carries its own law and travels certified.
+- **G2** Sampling inverts a cumulative cost. (`docs/spec/08-tests.md:82`)
+  - `L-inverse-cdf-sampling` (model, 2026-10-05): Sampling by the cumulative sum of costs is inverse-CDF sampling, one primitive for the continuous case (linear or log) and the finite census, with exhaustive over an infinite type a static error.
+  - `L-fixpoint-generation-cost` (model, 2026-10-06): Generating a value of a fixpoint needs termination control: the cost is the size and the per-size counts come from the code without looking at a value, under the same accumulated-cost rule as numbers and censuses.
+- **G3** How the functors follow a type. (`docs/spec/08-tests.md:91`)
+  - `L-generic-functor-in-interpreter` (model, 2026-10-05): Generic functors live in the interpreter, derived from the type's structure as == already is, named and recorded in the certificate but not written in Luthier.
+  - `L-code-universe` (model, 2026-10-05): A data Code describes the type shapes that can be generated, El decodes each to a type, and the functors become ordinary Luthier functions over codes.
+  - `L-code-universe-staged` (model, 2026-10-06): Implement the code universe in stages: first codes without mu (numbers with bounds, products, sums, vectors, refinements), adding mu with Boltzmann sampling when a recursive data needs generating.
+- **G4** A test names its generators. (`docs/spec/08-tests.md:108`)
+  - `L-generator-explicit-per-type` (Luciano, 2026-10-05): There is no single generator per type, so a test must name the explicit generator it bound to each type and the certificate records it (gen T := disappears); functions are generated by a census over registered values.
+  - `L-binding-by-parameter` (model, 2026-10-05): Each quantified variable is paired with its generator by parameter, the only thing that distinguishes tol from an input of the mean, with profiles serving as abbreviation.
+  - `L-test-distribution-in-directive` (model, 2026-10-05): The distribution of test cases belongs in the directive, not in the type; an alias carrying a distribution contradicts R7.
+- **G5** No generator gives a type. (`docs/spec/08-tests.md:127`)
+  - `L-generic-laws-dont-run` (model, 2026-10-05): Laws generic in a type parameter (Theta : U) never run because there is no generator of U, so they are certified only when a program fills the hole with a concrete type that has a generator, or by a well-chosen instance, and asking for a generator of U is a static error.
+  - `L-generic-functor-needs-reflection` (model, 2026-10-05): Generators as values and generics as functors over the type contradict, since a functor over any type would need (T:U)->Gen T and reflection over types, which Luthier lacks.
+  - `L-typecase-breaks-parametricity` (model, 2026-10-05): A match over types would break the parametricity on which proving a generic law in one instance rests.
+- **G6** `exhaustive` applies to finite types only. (`docs/spec/08-tests.md:138`)
+  - `L-inverse-cdf-sampling` (model, 2026-10-05): Sampling by the cumulative sum of costs is inverse-CDF sampling, one primitive for the continuous case (linear or log) and the finite census, with exhaustive over an infinite type a static error.
+  - `L-exhaustive-int-is-small-range` (model, 2026-10-05): "Exhaustive" over Int means only the range -16 to 16, so a law is certified exhaustive on 33 cases that are not exhaustive.
+- **G7** The bounds of a number are in its type; its metric is in its generator. (`docs/spec/08-tests.md:146`)
+  - `L-number-generator-limits-scale` (Luciano, 2026-10-05): A number generator needs explicit limit values and a linear or logarithmic scale (with special values and their weight), the limits carried in the type, so a Float64 without limits in its type is a static error if the binding does not supply them.
+  - `L-literal-lint-type-vs-criterion` (model, 2026-10-05): A mechanical criterion to classify numeric literals: a constant in type position (a refinement bound) defines a type, one in term position is a criterion.
+- **G8** Dimensions from a census, entries from a numeric generator, structure from a family. (`docs/spec/08-tests.md:167`)
+  - `L-generator-is-luthier-value` (model, 2026-10-05): A generator is a Luthier value with its own type and laws, certifiable like any other, and the random number generator is an extern with its stochasticity laws declared in Luthier.
+  - `L-generator-explicit-per-type` (Luciano, 2026-10-05): There is no single generator per type, so a test must name the explicit generator it bound to each type and the certificate records it (gen T := disappears); functions are generated by a census over registered values.
+- **G9** A function over an infinite domain is drawn from a census of models. (`docs/spec/08-tests.md:186`)
+  - `L-generator-explicit-per-type` (Luciano, 2026-10-05): There is no single generator per type, so a test must name the explicit generator it bound to each type and the certificate records it (gen T := disappears); functions are generated by a census over registered values.
+  - `L-objective-from-list` (model, 2026-10-05): An Objective should not be drawn by rejection (random functions almost never match their declared gradient) but taken from an explicit list of registered values, such as the project's own objective and a quadratic.
+  - `L-translation-tested-per-model` (model, 2026-10-04): A translation quantified over all carriers and models cannot be tested without a model generator, so it is certified per concrete model, not in general.
+  - `L-generic-laws-dont-run` (model, 2026-10-05): Laws generic in a type parameter (Theta : U) never run because there is no generator of U, so they are certified only when a program fills the hole with a concrete type that has a generator, or by a well-chosen instance, and asking for a generator of U is a static error.
+- **G10** A subtype is drawn within its bounds or through a filter. (`docs/spec/08-tests.md:207`)
+  - `L-gen-over-refined-type` (model, 2026-10-05): A generator is defined only over a type with a predicate, so a type like BrokenGraph must be a refinement subtype whose predicate the generated values are checked against.
+  - `L-number-generator-limits-scale` (Luciano, 2026-10-05): A number generator needs explicit limit values and a linear or logarithmic scale (with special values and their weight), the limits carried in the type, so a Float64 without limits in its type is a static error if the binding does not supply them.
+  - `L-generator-ignores-refinement` (model, 2026-10-05): The generator does not respect dependent refinements, producing false failures because the obligation was quantified over the base type, not the refined one.
+- **G11** Dependent components are drawn in order. (`docs/spec/08-tests.md:216`)
+  - no idea behind it
+- **G12** Every budget is an argument of the test, recorded in the entry. (`docs/spec/08-tests.md:223`)
+  - `L-constants-must-be-parameters` (model, 2026-10-05): A criterion hardcoded as a constant in the code (lmMaxIter, the rejection-sampler's try budget) must be a parameter, by the rule that every criterion is a parameter.
+  - `L-hidden-parameter-exposed` (model, 2026-09-30): A hidden parameter that affects the guarantee, like a max depth with no criterion, must be recorded in the certificate and exposed.
+  - `L-hole-no-default` (model, 2026-10-05): In Luthier a hole has no default, so each run must supply every parameter by --set; a parameter with a default value that --set replaces and the run records would be a new language feature.
+- **C1** The identity of an entry includes its binding. (`docs/spec/08-tests.md:246`)
+  - `L-function-deterministic` (model, 2026-09-13): If the identity of a derived object is its inputs, function, version and parameters, the function must be deterministic: seed and environment enter as explicit arguments, or the certificate lies.
+  - `L-generator-explicit-per-type` (Luciano, 2026-10-05): There is no single generator per type, so a test must name the explicit generator it bound to each type and the certificate records it (gen T := disappears); functions are generated by a census over registered values.
+  - `L-certificate-reproducible` (model, 2026-09-30): A certificate that does not record the seed, generation parameters and domain of each variable is not reproducible, so one seed per run is chosen and stored, each definition's derived from it, and --seed repeats the whole run.
+  - `L-content-hash-certificate` (model, 2026-09-30): Content-addressed build: a definition's certificate carries a hash of its elaborated type and body (and its dependency cone), so a matching hash on import satisfies the obligation, files are the source of truth and a relational DB is a reconstructible index.
+- **C2** Grades. (`docs/spec/08-tests.md:252`)
+  - `L-certification-is-pointwise` (Luciano, 2026-10-04): What is certified is not a name but a pointwise application of it on values (a chain of functions), so there are grades: point, sampled, exhaustive, proven, a chain at its weakest link.
+  - `L-failure-mass-sampling` (model, 2026-10-08): What n passing sampled cases update is the failure mass theta under the usage distribution, not the law's truth, with a Beta prior giving Beta(a,b+n), theta of order 1/n, composing by union bound and transferring between uses through the saved posterior.
+- **C3** `n` counts evaluated cases. (`docs/spec/08-tests.md:258`)
+  - `L-vacuous-cases-pass` (model, 2026-10-05): Vacuous cases count as passes: an unreached antecedent, a false law with n=0, and an empty exhaustive domain all pass.
+  - `L-statistical-law-level-retry` (model, 2026-10-05): A statistical law declares its level (the probability of failing on a correct model), is retried with an independent seed before a failure counts as a counterexample (level alpha squared), and reports a verdict with that level rather than a bare pass/fail.
+- **C4** A known outcome is not recomputed. (`docs/spec/08-tests.md:266`)
+  - `L-reuse-not-run-law-result` (model, 2026-10-05): Re-running a not-run law is wasted work when code, generators and seed are the same, since the result is deterministic, so the tester could reuse that result as it reuses a certificate.
+  - `L-cumulative-no-recompute` (Luciano, 2026-09-30): Luthier is cumulative, never computing the same thing twice except on an explicit override, with knowledge accumulating, perhaps in a relational database.
+  - `L-function-deterministic` (model, 2026-09-13): If the identity of a derived object is its inputs, function, version and parameters, the function must be deterministic: seed and environment enter as explicit arguments, or the certificate lies.
+- **C5** Labels and coverage. (`docs/spec/08-tests.md:271`)
+  - `L-verify-by-sampling` (model, 2026-09-13): Luthier verifies postconditions by sampling possible inputs, and postcondition verification and coverage calibration are the same computation.
+- **C6** What a run requires. (`docs/spec/08-tests.md:277`)
+  - `L-run-inputs-vs-cert-reach` (model, 2026-10-05): A run's inputs are compared against the reach of the certificates: what arrives via --set at startup, and what is computed during the run only under --checked.
+  - `L-optimize-needs-strong-certificates` (model, 2026-10-06): Type, certification and measurement are one idea from three sides; optimizing over weak certificates is worse than not optimizing, so generators and certificate reach come before selection, which picks only among covering implementations and records the chosen one in each result's provenance.
+  - `L-criterion-is-cli-hole` (model, 2026-10-03): A criterion is a hole filled from the command line with --set and recorded in the certificate with the hashes, while effects become externs and luthier run evaluates a main definition.
+- **C7** A result is checked once, when it is produced. (`docs/spec/08-tests.md:287`)
+  - `L-check-refines-value-type` (model, 2026-10-05): A check done on a value refines its type (inside if p x, x has the refined type) so nobody checks it again, with the result's granularity chosen by the cost of redoing it; this applies to run results, which are checked once into the run record.
+  - `L-refine-reading-not-path` (model, 2026-10-05): When the checked fact is external, refining the value gives a guarantee that can expire, so the principle refines what was read, not the reference, and check and use must be the same operation.
+  - `L-certifying-algorithm-witness` (model, 2026-10-05): A certifying algorithm returns its result plus a witness a simple checker verifies, the refined value being the special case where the witness is the value itself, giving in general a dependent pair with a law.
+  - `L-derived-is-proof-term` (model, 2026-09-13): A derived object, the tuple of inputs, function, parameters and result, is a proof term whose type is the proposition that the result was obtained that way, making the base a store of proofs.
+  - `L-discrete-output-distribution` (model, 2026-10-04): When a probabilistic path makes the output discrete (a rank, stop reason, count), the result type must be able to say it is a distribution over outcomes.
+- **C8** A statistical law declares its level. (`docs/spec/08-tests.md:303`)
+  - `L-statistical-law-level-retry` (model, 2026-10-05): A statistical law declares its level (the probability of failing on a correct model), is retried with an independent seed before a failure counts as a counterexample (level alpha squared), and reports a verdict with that level rather than a bare pass/fail.
+  - `L-statistical-law-over-sample` (model, 2026-09-30): A distribution defect like a biased generator is invisible to any per-case quantified law and needs a law over the whole sample with a probabilistic verdict, the statistical Bayes layer.
+  - `L-law-as-object-classifier` (Luciano, 2026-10-08): A law need not return Bool: its codomain can be an object classifier with an order and a 'holds' element (a quantale Omega, the positive reals as a cost, or the universe U of evidence types), the theory being the sublevel set under a threshold and Bool the case {0,infinity}.
+- **C9** A failure is repeated once. (`docs/spec/08-tests.md:310`)
+  - `L-statistical-law-level-retry` (model, 2026-10-05): A statistical law declares its level (the probability of failing on a correct model), is retried with an independent seed before a failure counts as a counterexample (level alpha squared), and reports a verdict with that level rather than a bare pass/fail.
+- **C10** Power is measured on controls. (`docs/spec/08-tests.md:315`)
+  - `L-negative-controls` (Luciano, 2026-10-02): A test is diagnostic only if a wrong version fails it, so negative controls (a case that must fail) are needed, since a law nothing exercises certifies nothing.
+  - `L-statistical-tests-low-power` (model, 2026-10-05): The statistical tests have low power: few cases and controls that break the model at double sigma, the easiest case to detect, so a 10-20% error in sigma may go undetected.
+  - `L-kernel-triangle-works` (model, 2026-10-05): The Kernel triangle with two controls, each breaking a different side, is among what works.
+
+## The decision log
+
+- **D-2026-10-06-a** Material is classed by authorship, in the kinds of working method §4. (`record/decisions.md`)
+  - `L-derived-never-edited` (model, 2026-09-13): A derived object is never edited; corrections are human assertions that are themselves originals, putting labels, quality control and corrections in the same place.
+  - `L-original-vs-derivative-types` (Luciano, 2026-09-13): Some types are original (made from audios and questionnaires) and all the rest are derivative, results of functions, so they necessarily have structure.
+- **D-2026-10-06-b** One decision log per repository; a decision that affects both goes in both. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-c** Luciano's sources stay in their language and are committed before anything cites them. (`record/decisions.md`)
+  - `L-written-english` (Luciano, 2026-09-30): Chat with Luciano is in Spanish but everything that stays written is in English, except his transcripts.
+- **D-2026-10-06-d** Luciano's notes stay where he wrote them, as part of his sources. (`record/decisions.md`)
+  - `L-written-english` (Luciano, 2026-09-30): Chat with Luciano is in Spanish but everything that stays written is in English, except his transcripts.
+  - `L-derived-never-edited` (model, 2026-09-13): A derived object is never edited; corrections are human assertions that are themselves originals, putting labels, quality control and corrections in the same place.
+- **D-2026-10-06-e** A correction keeps the original and puts the corrected version in front. (`record/decisions.md`)
+  - `L-derived-never-edited` (model, 2026-09-13): A derived object is never edited; corrections are human assertions that are themselves originals, putting labels, quality control and corrections in the same place.
+- **D-2026-10-06-f** Every change is applied on top of a commit. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-g** A model takes decisions within margins, following principles; Luciano keeps safety, and the principles and the conflicts between them. (`record/decisions.md`)
+  - `L-pi-stays-with-luciano` (model, 2026-10-05): The principal-investigator role in Luthier stays with Luciano because the design decisions are his, and an agent runs only subproblems with a mechanical acceptance criterion, since Luthier's mechanical verifier is stronger than a code-reading agent.
+  - `L-do-what-said` (Luciano, 2026-10-01): The model does what Luciano said and nothing more.
+  - `L-design-approval-before-code` (model, 2026-10-01): Before implementing anything the model describes the design and waits for approval before writing code.
+- **D-2026-10-06-h** Reversibility, the parts of working method §8 that "Si." confirmed as a bundle. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-i** The git for large data keeps its repository outside the folder it tracks. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-j** A document for Luciano is committed before he annotates it; his annotations are then committed verbatim, so they are the diff. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-k** The chat exports go to GitHub. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-l** In a document for Luciano, a numbered reference carries its statement; records may be terse. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-m** A step is a bite of decision Luciano can handle, with implications beyond its place; local decisions are the model's margin. (`record/decisions.md`)
+  - `L-chain-interpretable-steps` (Luciano, 2026-10-07): The AI generates so much output that the only workable way to use it is to chain steps whose result you can interpret.
+  - `L-intermediate-ai-scale` (Luciano, 2026-10-07): Is there an intermediate scale where the AI multiplies the author's effort without the result ceasing to be legible and checkable by him?
+- **D-2026-10-06-n** CLAUDE.md is a living document of operative rules, with no meta-information. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-o** The principles audit asks three questions (followed and useful; failing by conflict; new principles and their cost) and is run by a script. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-p** Luciano's observations on code live in a folder of their own, outside the code, each committed alone, so that the commit pins the code they observe. (`record/decisions.md`)
+  - `L-note-not-field-data` (model, 2026-10-06): A note a model wrote inside a data table is not a field datum and must not be read back as one.
+  - `L-derived-never-edited` (model, 2026-09-13): A derived object is never edited; corrections are human assertions that are themselves originals, putting labels, quality control and corrections in the same place.
+- **D-2026-10-06-q** A plan comes in two documents: the decisions for Luciano, the execution for the sessions. (`record/decisions.md`)
+  - `L-phase-states-closing-check` (model, 2026-10-05): Each phase of a plan should state what check closes it, and a phase with no mechanical check belongs to Luciano and not to the autonomous run.
+  - `L-chain-interpretable-steps` (Luciano, 2026-10-07): The AI generates so much output that the only workable way to use it is to chain steps whose result you can interpret.
+- **D-2026-10-06-r** The model raises a latent conflict between principles when what it could cost is worth Luciano's attention, without nitpicking; he decides. (`record/decisions.md`)
+  - `L-mentor-friction` (model, 2026-08-31): The mentor step produces friction on the design process without designing itself.
+  - `L-report-in-concepts` (Luciano, 2026-09-30): Work is reported to Luciano in concepts, the most important first, naming what failed or what limit was hit; a count like "33 laws" tells him nothing.
+- **D-2026-10-06-s** A mechanism with a recurring cost (per commit, per session, or on Luciano's attention) is added only after a real case it would have caught. Applied to the plan (`record/decisions.md`)
+  - `L-mechanize-rules-lint-hook` (Luciano, 2026-10-05): The instructions living in memory are moved to mechanical checks in three layers (what Luthier can reject, what a repo lint catches, what stays judgment with a mechanical reminder), which requires relaxing the rule that only Luciano runs the scripts for lints and certification.
+  - `L-mechanical-check-is-shadow` (model, 2026-10-05): Rules that are matters of judgment transfer to a mechanical check only as a substitute, a shadow of the real rule.
+  - `L-hook-only-changed-files` (model, 2026-10-05): A Stop hook that runs luthier check over all project files charges every turn; it should run only on changed .lut files.
+  - `L-precommit-lints-not-certify` (model, 2026-10-05): The pre-commit hook cannot run luthier certify (too slow, writes certificates mid-commit); it should run the lints and luthier check.
+- **D-2026-10-06-t** Sources are written in one grammar: repo@commit:path:line (or :a-b), and chat:session8:line. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-u** A quote that the check of quotes finds at its line confirms a decision of Luciano's; the statements go through the fidelity audit. (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-06-v** The objectives of each project are written down, in Luciano's words, for him to mark; the principles and the synthesis of P12 are measured against them. (`record/decisions.md`)
+  - `L-need-written-objectives` (model, 2026-10-06): Without the project's objectives written down, a model deciding within its margin has nothing to measure its decisions against.
+  - `L-gap-of-usefulness` (Luciano, 2026-09-21): The method is to find the gap of usefulness, a concrete place from which Luthier can begin to develop while being useful.
+- **D-2026-10-06-w** P12 (Luciano's attention is the scarce resource) goes into his global CLAUDE.md, which applies to every project. (`record/decisions.md`)
+  - `L-report-in-concepts` (Luciano, 2026-09-30): Work is reported to Luciano in concepts, the most important first, naming what failed or what limit was hit; a count like "33 laws" tells him nothing.
+  - `L-synthesis-is-key` (Luciano, 2026-05-30): Synthesizing information well is the key to the whole design.
+- **D-2026-10-06-x** The correspondence audit runs now, both directions, not deferred: that the specification reflects the implementation and the documentation is what matters most  (`record/decisions.md`)
+  - `L-spec-interpreter-first` (Luciano, 2026-10-04): Write the formal specification first, not of the whole interpreter but the static semantics, the judgments the checker decides, which today live only in the code.
+  - `L-against-pure-waterfall` (model, 2026-10-04): Pure waterfall fails: the rule changed three times and the two-bodies inconsistency surfaced only from writing a concrete example; specs written without executing err where no one imagined.
+- **D-2026-10-06-y** Every normative statement of docs/semantica carries an identifier, never reused: R, G and C as today, S for 02, K for 04, N for 06, L for 07, and in 00, 01 and  (`record/decisions.md`)
+  - `L-spec-rule-accept-reject` (model, 2026-10-04): Each spec rule is written with two small .lut files, one to accept and one to reject, turning the spec into the interpreter's test suite, the law with its negative control applied to Luthier itself.
+  - `L-spec-interpreter-first` (Luciano, 2026-10-04): Write the formal specification first, not of the whole interpreter but the static semantics, the judgments the checker decides, which today live only in the code.
+  - `L-error-messages-remembering` (model, 2026-06-26): Luthier must produce well-structured error messages, the remembering of why one erred, returning the failed sub-graph with each node's trace.
+- **D-2026-10-06-z** The invariant of stochasticity is written before A-9 builds generators on it, as a library task under today's tester: the invariant, its statistical tests at a  (`record/decisions.md`)
+  - `L-generator-is-luthier-value` (model, 2026-10-05): A generator is a Luthier value with its own type and laws, certifiable like any other, and the random number generator is an extern with its stochasticity laws declared in Luthier.
+  - `L-statistical-law-over-sample` (model, 2026-09-30): A distribution defect like a biased generator is invisible to any per-case quantified law and needs a law over the whole sample with a probabilistic verdict, the statistical Bayes layer.
+  - `L-function-deterministic` (model, 2026-09-13): If the identity of a derived object is its inputs, function, version and parameters, the function must be deterministic: seed and environment enter as explicit arguments, or the certificate lies.
+- **D-2026-10-07-a** Luthier proper is separated from the record of its development: README, docs/, src/, examples/ and tests/ present Luthier; record/ holds how it came to be. scri (`record/decisions.md`)
+  - no idea behind it
+- **D-2026-10-07-b** A function defined by its laws is an element of the guide: a type over an exponential defined by the laws of the function, whose values are its implementations, (`record/decisions.md`)
+  - `L-number-theory-record` (model, 2026-10-04): Numeric code is written once over a theory of numbers, a record with carrier, operations and equality; Real is its ideal model and Float64, intervals, Rational are others, filled through a per-file hole as in the ML functor.
+  - `L-write-over-real-approximate-with-float` (Luciano, 2026-10-04): The numeric code is written once over Real, which has the better properties, and Float64 (or intervals, or Rational) is one of its approximations, so f(Real) is approximated by f(Float64).
+  - `L-native-extern-agree` (Luciano, 2026-10-02): Each concept is written twice, native in Luthier as the slow conceptual reference and extern in Python as the fast version, and the test is that they agree; extern always, law always, native only when the law does not determine the operation.
+  - `L-law-characterizes-not-reimplements` (model, 2026-10-05): A law states the mathematical property that determines an operation up to the presentation's equality; a second implementation is consistency not characterization, and the native definition is one more model certified against it.
+- **D-2026-10-07-c** `Real` stays the ideal, declared and never run, and the reals by construction (Cauchy sequences of rationals with a modulus, `examples/cauchy.lut`) are one more (`record/decisions.md`)
+  - `L-constructive-reals` (model, 2026-10-04): Define the reals constructively as Cauchy sequences of rationals with a modulus of convergence, making ℝ's laws testable at finite precision and equality a precision parameter.
+  - `L-float64-refines-real` (Luciano, 2026-10-04): Float64 is written as a refinement of the real type (Float64 : Real := primitive), each finite double being a real.
+  - `L-real-realized-by-float64` (Luciano, 2026-10-04): Real is not implemented but delegated to Float64, which realizes it at runtime as an interpreter choice recorded in the certificate.
+  - `L-reals-theory-rationals-float-models` (model, 2026-10-04): Separate ℝ as a theory with no finite implementation, ℚ as an exact computable model, and Float64 as a model of the rounded field tied to ℚ by a correct-rounding law testable in ℚ.
+- **D-2026-10-07-d** The element of the guide for a function defined by its laws is named "Theory and model": Hilbert's implicit definition made a type, the type the theory and a va (`record/decisions.md`)
+  - `L-theory-vs-presentation` (model, 2026-10-04): A mathematical object is a theory and what one writes is a presentation; the theory is never written, Luthier has presentations (cycles with laws) and certified translations between them.
+  - `L-theory-is-record` (model, 2026-10-03): A Theory is a record (tuple) of types and predicates over them, defined when its laws are written and concrete/inhabited only when a model is given.
+  - `L-object-is-record-type` (model, 2026-10-04): An object is always a record type including its carrier, defined by its laws; implementations are its values, so there is never more than one body per name and translations always work.
+  - `L-defined-determined-axes` (model, 2026-10-04): Defined and determined are independent axes (a hole can have laws without implementation, an extern implementation without laws); a name passes declared, defined, determined, certified.
+- **D-2026-10-07-e** No loose functions: a value is defined only at a defined type, and an exponential without laws is a base, as a lawless product is (R4); a function is a value of (`record/decisions.md`)
+  - `L-object-has-head` (model, 2026-10-04): Every object has a head: a type whose body names its laws, so there are no free-standing laws that define.
+  - `L-new-type-from-recursion-or-laws` (model, 2026-10-04): Only recursion (infinite freedom) or laws (refinement) generate a new named type; a product or sum without laws deserves no new name.
+  - `L-type-closes-with-laws` (Luciano, 2026-10-02): Defining a type must mean something: a mere juxtaposition or product is not a new type, which closes only when laws connect its subcomponents (the closed style, unusable until closed), as opposed to a derived type that is an expression of operators over defined types.
+  - `L-unit-is-group-of-functions` (model, 2026-09-29): The unit of definition is not a function with a postcondition but a group of functions with the laws relating them; a single function is the group of size one.
+- **D-2026-10-07-f** The elements of the guide follow Luciano's scheme: Type with its bases, named by alias; the formers of a bicartesian closed category; the dependent type, an ele (`record/decisions.md`)
+  - `L-cartesian-closed` (Luciano, 2026-10-04): Product, sum and exponential of types are missing to make Luthier a cartesian closed category.
+  - `L-category-style-basics` (Luciano, 2026-05-30): The basic elements are defined in category-theory style, functors from arrows, out of a few basal elements.
+  - `L-translation-second-order` (Luciano, 2026-10-04): A translation between presentations of the same structure is a second-order Luthier concept, expressible in Luthier quantifying over presentations (type operators U->U), where Luthier starts to show its uses.
+- **D-2026-10-07-g** GPT's reading of the list of elements is answered point by point in record/IA; the guide is corrected on eleven points and says what the specification answers o (`record/decisions.md`)
+  - `L-concept-is-a-function` (Luciano, 2026-09-29): A concept needs no new type: it is an ordinary function returning a type (with proofs) or a list of laws (with tests).
+  - `L-alias-equals-not-coloneq` (model, 2026-10-04): Naming a product (AB = A*B) is an abbreviation expanded before verification with no states; naming it with := is rejected, with = it is an alias.
+- **D-2026-10-07-h** Program is an element of the guide, the last of the list: the theories a program states, the models it gives them, and the compositions of models by application (`record/decisions.md`)
+  - `L-certificate-clause-with-hypotheses` (model, 2026-09-29): A certificate is a clause with hypotheses (H1 and ... and Hn imply L), and a program's certificate is the closure of those clauses, which gives composition its exact meaning.
+  - `L-certification-is-pointwise` (Luciano, 2026-10-04): What is certified is not a name but a pointwise application of it on values (a chain of functions), so there are grades: point, sampled, exhaustive, proven, a chain at its weakest link.
+  - `L-certificate-first-class` (model, 2026-09-29): The certificate is a first-class value carrying its level of guarantee, composable and forgettable, accumulating by composition across values, functions and programs, with runs persisted as data.
+- **D-2026-10-08-a** The program's relation with the world, and its certificates, are read in a Bayesian frame: the program is an observer that updates its knowledge of the world by (`record/decisions.md`)
+  - `L-bayesian-verification-regime` (pasted, 2026-10-08): Verification is read as a Bayesian observer updating what it knows by what it observes, with proof, exhaustive and assumed at the logical limit of probabilities 0 and 1 and sampling where the rest enters.
+  - `L-posterior-per-computation` (model, 2026-10-08): With this bayesian logic any computation in Luthier carries a posterior of how sure you are of that computation.
+  - `L-failure-mass-sampling` (model, 2026-10-08): What n passing sampled cases update is the failure mass theta under the usage distribution, not the law's truth, with a Beta prior giving Beta(a,b+n), theta of order 1/n, composing by union bound and transferring between uses through the saved posterior.
+  - `L-bayesian-mapping` (model, 2025-06-17): Scientific knowledge production is mapped into explicit Bayesian structures (introduction to prior, methods to likelihood, results to observations, discussion to posterior) to make reasoning auditable and probabilistic.
+- **D-2026-10-08-b** The elements of the guide are framed by Luthier's view of computation: a timeless part, the plan, equivalence of expressions, and a temporal part, the execution (`record/decisions.md`)
+  - `L-declarative-and-executive` (pasted, 2026-10-08): Luthier has a declarative part (types that follow laws) and an executive part that runs commands (read a file, execute a function); the executive part can be internal or external.
+  - `L-knowledge-ties-parts` (pasted, 2026-10-08): What ties the declarative and executive parts is knowledge: the program holds propositions and updates them by what it executes.
+  - `L-realization-ideal-and-runner` (pasted, 2026-10-08): A realization is the ideal and what runs it, related by a law and a cost, with mutation and destruction as optimizations that keep the consequence and the host as a realization of the reduction rules.
+  - `L-three-kinds-of-proposition` (pasted, 2026-10-08): A certificate is a proposition with its evidence, and propositions are of three kinds (a timeless law, a trace fact never revised, a statement about the world that ages), every chain of evidence ending in laws assumed.
+- **D-2026-10-08-c** The list of elements is written for one use: to state the interpreter of Luthier in Luthier, with the executable kernel reduced to what a host must do (reduce t (`record/decisions.md`)
+  - `L-host-minimal-duties` (pasted, 2026-10-08): If the interpreter is written in Luthier the host need only reduce, run the primitive types' operations, and call an extern reading and writing a File, plus read a canonical serialization of Term, with everything else Luthier definitions over Program.
+  - `L-bootstrap-pact` (model, 2026-09-28): The only thing outside Luthier is a bootstrap that accepts a Program value, parses it and runs eval; once eval written in Luthier runs on itself the bootstrapper can be discarded, which is the concrete self-extensibility.
+  - `L-self-extensible` (Luciano, 2026-05-29): Luthier must be completely self-extensible: you write all of Luthier in Luthier, so only a few primitives are actually implemented.
+  - `L-laws-of-interpretation-steps` (model, 2026-10-08): Luthier should carry the laws of each interpretation step (reduce, apply), written in Luthier, so one can check that Luthier's precepts hold; with apply and reduce almost all of it is done.
+- **D-2026-10-09-a** The bibliography holds pointers, not copies: no PDF or book enters git, and each source is linked by its DOI (the publisher's or the author's page where it has  (`record/decisions.md`)
+  - `L-no-pdfs-doi-link` (Luciano, 2026-10-08): No PDFs or books are committed to git; the DOI is the pointer to each source, so for sources the repository points instead of containing.
+- **D-2026-10-09-b** Candidate principles are found by infectability and kept by P13: the distillation chooses and orders its candidates by infectability (Luciano's criterion of May (`record/decisions.md`)
+  - `L-infectability-lens` (model, 2026-08-31): Consolidation uses infectability as its lens: the ideas that most change how you program are the ones that most structure the language; it is a project-specific choice.
+  - `L-no-principle-without-example` (model, 2026-08-31): No principle enters the specification without an example worked by hand in the candidate notation.
+- **D-2026-10-09-c** The step that finds candidate principles is blind: it sees only the lineages, the language's name and designers, and Luciano's criterion of infectability unchan (`record/decisions.md`)
+  - `L-infectability-lens` (model, 2026-08-31): Consolidation uses infectability as its lens: the ideas that most change how you program are the ones that most structure the language; it is a project-specific choice.
+  - `L-mentor-friction` (model, 2026-08-31): The mentor step produces friction on the design process without designing itself.
+- **D-2026-10-09-d** The principles are validated against real decisions mined from the Claude Code transcripts, by the plan record/plan-principles-validation-2026-10-09-decisions.m (`record/decisions.md`)
+  - `L-spec-makes-decisions` (model, 2026-08-31): The specification is the first document that makes decisions; a decision is recognized because it excludes something that still coexists in the audios.
+  - `L-need-written-objectives` (model, 2026-10-06): Without the project's objectives written down, a model deciding within its margin has nothing to measure its decisions against.
+- **D-2026-10-09-e** The synthesis of Luthier's ideas, rules and principles (map of themes and states, candidate principles set against those in force, rules traced to the ideas) an (`record/decisions.md`)
+  - `L-certificates-enable-autonomy` (Luciano, 2026-10-05): Luthier's mechanical certificates and file-held state let the AI work sustainedly through the night and across context compaction, since a pass/fail certificate makes it prudent to run the check and continue.
+  - `L-mechanize-rules-lint-hook` (Luciano, 2026-10-05): The instructions living in memory are moved to mechanical checks in three layers (what Luthier can reject, what a repo lint catches, what stays judgment with a mechanical reminder), which requires relaxing the rule that only Luciano runs the scripts for lints and certification.
+  - `L-phase-states-closing-check` (model, 2026-10-05): Each phase of a plan should state what check closes it, and a phase with no mechanical check belongs to Luciano and not to the autonomous run.
+
