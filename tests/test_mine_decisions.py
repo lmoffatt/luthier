@@ -116,3 +116,17 @@ def test_a_later_commit_that_removes_added_lines_is_a_reversal(tmp_path):
     assert a["reversed_by"] == [{"unit": b["id"], "commit": h2, "lines": 3}]
     assert b["reverses"] == [{"unit": a["id"], "commit": h1, "lines": 3}]
     assert "reversals 1 " in (out / "decision_units.md").read_text()
+
+
+def test_files_under_an_account_folder_are_written_with_its_number():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("mine_decisions", MINE)
+    md = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(md)
+    home = Path.home()
+    assert md.label_path(f"{home}/.claude-databaum/projects/P/memory/n.md") == "[account 2]/projects/P/memory/n.md"
+    assert md.label_path(f"{home}/.claude/projects/P/memory/n.md") == "[account 1]/projects/P/memory/n.md"
+    assert md.label_path("/home/x/luthier/docs/a.md") == "/home/x/luthier/docs/a.md"
+    assert md.account_of(home / ".claude-databaum" / "projects" / "P" / "s.jsonl", {}) == 2
+    pinned = md.IACHAT / "raw" / "claude-code" / "d" / "P" / "s.x.jsonl.gz"
+    assert md.account_of(pinned, {"raw/claude-code/d/P/s.x.jsonl.gz": f"{home}/.claude/projects/P/s.jsonl"}) == 1

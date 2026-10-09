@@ -40,6 +40,7 @@ def test_writes_across_accounts_and_chat_time(tmp_path):
     w = pd.writes(accounts, re.compile(re.escape(folder) + r"/memory/[\w.-]+\.md"), prefilter=f"{folder}/memory")
     assert [(x["time"], Path(x["file"]).name, x["source"]) for x in w] == [
         ("2026-09-10T22:30Z", "nunca.md", "chat:s1aaaaaa:2"), ("2026-10-01T04:00Z", "otra.md", "chat:s2bbbbbb:1")]
+    assert [x["account"] for x in w] == [1, 2]
     assert pd.chat_time("chat:s1aaaaaa:1", accounts)[0] == "2026-09-10T22:20Z"
     assert pd.chat_time("chat:s1aaaaaa:9", accounts)[0] == ""
     assert pd.chat_time("chat:ffffffff:1", accounts)[1].startswith("no transcript")

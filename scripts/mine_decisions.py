@@ -43,7 +43,8 @@ from pathlib import Path
 VERSION = "mine_decisions v1"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 IACHAT = Path.home() / "Projects" / "IA_chat"
-LIVE = [Path.home() / ".claude" / "projects", Path.home() / ".claude-databaum" / "projects"]
+ACCOUNTS = [Path.home() / ".claude", Path.home() / ".claude-databaum"]  # account 1, account 2
+LIVE = [a / "projects" for a in ACCOUNTS]
 DEFAULT_PROJECTS = ["-home-lmoffatt-Projects-luthier", "-home-lmoffatt-Projects-sonolocalizacion"]
 DEFAULT_OUTPUT = REPO_ROOT / "record" / "validation"
 PRIVATE = REPO_ROOT / "scripts" / "export_chat.private"
@@ -131,6 +132,24 @@ EDIT_TOOLS = ("Edit", "Write", "NotebookEdit", "MultiEdit")
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def account_of(path: Path, manifest: dict[str, str]) -> int:
+    """1 or 2: the account a transcript came from, by its path, or by the origin IA_chat recorded for a pin."""
+    origin = manifest.get(str(path.relative_to(IACHAT)) if str(path).startswith(str(IACHAT)) else "", str(path))
+    for i, a in enumerate(ACCOUNTS, 1):
+        if origin.startswith(str(a) + "/"):
+            return i
+    return 0
+
+
+def label_path(f: str) -> str:
+    """A file under an account's folder, written with the account's number instead of the folder's name
+    (which may carry a private word)."""
+    for i, a in enumerate(ACCOUNTS, 1):
+        if f.startswith(str(a) + "/"):
+            return f"[account {i}]/" + f[len(str(a)) + 1:]
+    return f
 
 
 def private_words() -> list[re.Pattern]:
@@ -286,6 +305,15 @@ def main(argv: list[str]) -> int:
         print("no transcripts found", file=sys.stderr)
         return 1
     priv = private_words()
+    manifest = {}
+    if (IACHAT / "manifest.jsonl").exists():
+        for l in (IACHAT / "manifest.jsonl").read_text(encoding="utf-8").splitlines():
+            try:
+                m = json.loads(l)
+            except json.JSONDecodeError:
+                continue
+            if m.get("source") == "claude-code":
+                manifest[m["path"]] = m.get("origin", "")
     seen: set = set()
     rows = []
     for path, sha in sorted(srcs, key=lambda s: s[0].name):
@@ -294,6 +322,8 @@ def main(argv: list[str]) -> int:
         for u in mine_session(events, seen, args):
             for c in u["commits"]:
                 c["repo"], c["files"] = commit_files(c["hash"], args.repos)
+            for a in u["actions"]:
+                a["files"] = [label_path(f) for f in a["files"]]
             files = sorted({f for a in u["actions"] for f in a["files"] if f} | {f for c in u["commits"] for f in c["files"]})
             areas = sorted({area_of(f, args.language, args.method) for f in files}) or ["unknown"]
             words = len(u["text"].split())
@@ -301,11 +331,13 @@ def main(argv: list[str]) -> int:
             try:
                 src = str(path.relative_to(IACHAT))
             except ValueError:
-                src = str(path)
+                src = label_path(str(path))
             project = next((p for p in args.projects if p in str(path)), "")
             row = {"id": f"{sid[:8]}:{u['line']}", "session": sid, "project": project,
                    # the repository whose CLAUDE.md and memory the session's agent read: its working folder
                    "session_repo": project.rsplit("-Projects-", 1)[-1] if "-Projects-" in project else project,
+                   # each account has its own memory per project and its own global CLAUDE.md
+                   "account": account_of(path, manifest),
                    "source": src, "source_sha256": sha,
                    "time": u["time"], "luciano": {"line": u["line"], "uuid": u["uuid"], "words": words,
                                                   "text": u["text"][:args.text_chars]},

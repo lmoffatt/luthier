@@ -137,7 +137,7 @@ def writes(accounts: list[Path], path_re: re.Pattern, prefilter: str = "") -> li
     may be relative."""
     out = []
     pre = re.compile(re.escape(prefilter)) if prefilter else path_re
-    for a in accounts:
+    for acct, a in enumerate(accounts, 1):
         for f in (a / "projects").glob("*/*.jsonl"):
             with f.open(encoding="utf-8") as fh:
                 for n, l in enumerate(fh, 1):
@@ -155,12 +155,13 @@ def writes(accounts: list[Path], path_re: re.Pattern, prefilter: str = "") -> li
                         txt = inp.get("content") or inp.get("new_string") or ""
                         cmd = inp.get("command", "")
                         if fp and path_re.search(fp):
-                            out.append({"time": utc(ev["timestamp"]), "file": fp, "text": txt, "source": f"chat:{f.stem[:8]}:{n}"})
+                            out.append({"time": utc(ev["timestamp"]), "file": fp, "text": txt, "source": f"chat:{f.stem[:8]}:{n}",
+                                        "account": acct})
                         elif cmd:
                             for target in bash_targets(cmd):
                                 if path_re.search(target):
                                     out.append({"time": utc(ev["timestamp"]), "file": target, "text": cmd,
-                                                "source": f"chat:{f.stem[:8]}:{n}"})
+                                                "source": f"chat:{f.stem[:8]}:{n}", "account": acct})
     return sorted(out, key=lambda w: w["time"])
 
 
@@ -178,18 +179,29 @@ def main(argv: list[str]) -> int:
 
     principles = pl.parse_entries(args.principles.read_text(encoding="utf-8"), pl.P_HEAD_RE)
     rows = [json.loads(l) for l in args.timeline.read_text(encoding="utf-8").splitlines() if l.strip()]
-    global_writes = writes(args.accounts, re.compile(r"/\.claude(?:-databaum)?/CLAUDE\.md"))
+    # each account has its own global CLAUDE.md and its own memory per project; a write belongs to the
+    # account whose folder the written file is in, whichever account's session wrote it
+    def owner(path: str) -> int:
+        for i, a in enumerate(args.accounts, 1):
+            if path.startswith(str(a) + "/"):
+                return i
+        return 0
+    global_writes = {}
+    for i, a in enumerate(args.accounts, 1):
+        # the transcript may name the file with ~, so the cheap filter is the file's name alone
+        global_writes[i] = [w for w in writes(args.accounts, re.compile(re.escape(str(a)) + r"/CLAUDE\.md"), prefilter="/CLAUDE.md")
+                            if owner(w["file"]) == i]
     memory = {}
     for repo, folder in DEFAULT_REPOS.items():
         notes = {}
         for w in writes(args.accounts, re.compile(re.escape(folder) + r"/memory/[\w.-]+\.md"), prefilter=f"{folder}/memory"):
-            name = Path(w["file"]).name
-            if name != "MEMORY.md" and name not in notes:
-                notes[name] = w
-        for a in args.accounts:
+            name, acct = Path(w["file"]).name, owner(w["file"])
+            if name != "MEMORY.md" and acct and (acct, name) not in notes:
+                notes[(acct, name)] = w
+        for i, a in enumerate(args.accounts, 1):
             for p in (a / "projects" / folder / "memory").glob("*.md"):
-                if p.name in notes:
-                    notes[p.name]["now"] = p.read_text(encoding="utf-8")
+                if (i, p.name) in notes:
+                    notes[(i, p.name)]["now"] = p.read_text(encoding="utf-8")
         memory[repo] = notes
 
     out, problems = {}, []
@@ -217,17 +229,22 @@ def main(argv: list[str]) -> int:
             t, src = first_commit_with(PROJECTS / repo, f"- {pid} ", ["CLAUDE.md", "docs/principles.md", "record/principles.md"]
                                        if repo == "sonolocalizacion" else ["CLAUDE.md"])
             notes = []
-            for name, w in memory[repo].items():
+            for (acct, name), w in memory[repo].items():
                 shared = want & terms(w.get("now", "") or w["text"])
                 if len(shared) >= args.min_shared:
-                    notes.append({"note": name, "first_written": w["time"], "source": w["source"], "shared": len(shared)})
+                    notes.append({"note": name, "account": acct, "first_written": w["time"], "source": w["source"],
+                                  "shared": len(shared)})
             notes = sorted(notes, key=lambda x: -x["shared"])[:args.candidates]
             operative[repo] = {"claude_md": {"time": t, "source": src} if t else None, "memory_candidates": notes}
         stmt = terms(e["statement"])
-        g = next((w for w in global_writes if len(stmt & terms(w["text"])) >= max(3, round(args.global_share * len(stmt)))), None)
+        glob_ = {}
+        for i, ws in global_writes.items():
+            g = next((w for w in ws if len(stmt & terms(w["text"])) >= max(3, round(args.global_share * len(stmt)))), None)
+            if g:
+                glob_[str(i)] = {"time": g["time"], "source": g["source"]}
         out[pid] = {"statement": e["statement"], "sources": dated, "explicit": explicit,
                     "explicit_earlier_candidates": earlier,
-                    "operative": operative, "global_claude_md": {"time": g["time"], "source": g["source"]} if g else None,
+                    "operative": operative, "global_claude_md": glob_,
                     "status": "proposed: Luciano marks the explicit date and the memory notes"}
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "principle_dates.json").write_text(json.dumps({"version": VERSION, "principles": out, "problems": problems},
@@ -237,7 +254,11 @@ def main(argv: list[str]) -> int:
          "principle's entry in record/principles.md; an earlier row of his is listed when it shares terms with the principle, for",
          "you to say whether it already decides (D1). `operative` is the first commit putting the principle's id in that",
          "repository's CLAUDE.md, the first write of ~/.claude/CLAUDE.md carrying its statement, and the memory notes that may",
-         "state it (candidates, by shared terms). Under each principle, a Mark: line: ok, or which earlier row and which notes count.", ""]
+         "state it (candidates, by shared terms).", "",
+         "How to mark, under each principle, on its `Mark:` line, separated by `;`:",
+         "`ok` (the explicit date as proposed, no memory note counts); `earlier <row id>` (that earlier row of yours already",
+         "decides, so the principle counts from it); `memory <note.md>` (that note states the principle; it counts from the time",
+         "it was first written, in the repository it is listed under). Example: `earlier day:2026-10-04:x; memory nunca-hardcodear.md`.", ""]
     for pid, d in out.items():
         L += [f"## {pid} {d['statement']}", "", f"- explicit: {d['explicit'] or '?'} (" + "; ".join(
             f"{s['ref']} {s['time'] or s['where']}" for s in d["sources"]) + ")"]
@@ -247,9 +268,10 @@ def main(argv: list[str]) -> int:
             cm = o["claude_md"]
             L.append(f"- operative in {repo}: CLAUDE.md {cm['time'] + ' ' + cm['source'] if cm else 'never'}")
             for n in o["memory_candidates"]:
-                L.append(f"  - memory? `{n['note']}` first written {n['first_written']} ({n['source']}, {n['shared']} shared terms)")
-        if d["global_claude_md"]:
-            L.append(f"- operative everywhere: ~/.claude/CLAUDE.md {d['global_claude_md']['time']} ({d['global_claude_md']['source']})")
+                L.append(f"  - memory? `{n['note']}` of account {n['account']}, first written {n['first_written']}"
+                         f" ({n['source']}, {n['shared']} shared terms)")
+        for acct, g in d["global_claude_md"].items():
+            L.append(f"- operative in every repository of account {acct}: its global CLAUDE.md, {g['time']} ({g['source']})")
         L += ["", "Mark: ", ""]
     if problems:
         L += ["## Problems", ""] + [f"- {p}" for p in problems]
