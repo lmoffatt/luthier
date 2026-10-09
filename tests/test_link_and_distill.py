@@ -343,3 +343,14 @@ def test_link_refuses_a_second_run_on_the_same_state(tmp_path):
     assert r.returncode == 2 and "holds" in r.stderr and calls(tmp_path) == []
     held.close()
     assert link(tmp_path, env).returncode == 0
+
+
+def test_link_until_a_cutoff_reads_only_earlier_rows(tmp_path):
+    tl, env = setup(tmp_path)
+    r = link(tmp_path, env, "--until", "2026-05-30T00:00:00Z")
+    assert r.returncode == 0, r.stderr
+    state = json.loads((tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.json").read_text())
+    placed = set(state["assign"]) | set(state["unplaced"])
+    assert "dialogue:aaaa:weather" not in placed and "note:2026-05-30T10.00.00:costs" not in placed
+    assert state["until"] == "2026-05-30T00:00:00Z"
+    assert "2026-06-01" not in "".join(calls(tmp_path)[0]["prompt"].split("## Rows to place")[1:])

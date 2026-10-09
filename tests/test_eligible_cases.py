@@ -80,3 +80,27 @@ def test_marks_are_required_and_read(tmp_path):
     setup(tmp_path, mark="ok; memory otra-nota.md; whatever")
     r = run(tmp_path)
     assert r.returncode == 2 and "not among the listed candidates" in r.stderr and "cannot read the mark 'whatever'" in r.stderr
+
+
+def test_candidates_count_from_their_quote_and_inherit_a_principle_in_force(tmp_path):
+    setup(tmp_path, mark="")  # the principles in force unmarked: they only lend operative dates, read as proposed
+    (tmp_path / "timeline.jsonl").write_text(json.dumps({"id": "row-1", "time_utc": "2026-09-15T00:00:00Z"}) + "\n")
+    (tmp_path / "find.json").write_text(json.dumps({"answer": {"candidates": [
+        {"id": "C1", "statement": "Criteria are parameters.", "quote": "nunca hardcodear", "quote_row": "row-1"},
+        {"id": "C2", "statement": "Something new.", "quote": "algo", "quote_row": "row-1"}]}}))
+    (tmp_path / "match.json").write_text(json.dumps({"answer": {"matches": [
+        {"candidate": "C1", "verdict": "extends", "principle": "P11"}, {"candidate": "C2", "verdict": "new", "principle": ""}]}}))
+    r = subprocess.run([sys.executable, str(ELIG), "--units", str(tmp_path / "units.jsonl"), "--dates", str(tmp_path / "dates.json"),
+                        "--marks", str(tmp_path / "dates.md"), "--timeline", str(tmp_path / "timeline.jsonl"),
+                        "--output-dir", str(tmp_path / "out"), "--candidates", str(tmp_path / "find.json"),
+                        "--match", str(tmp_path / "match.json")], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    pairs = [json.loads(l) for l in (tmp_path / "out" / "eligibility.jsonl").read_text().splitlines()]
+    c1 = {p["unit"]: p for p in pairs if p["principle"] == "C1"}
+    c2 = {p["unit"]: p for p in pairs if p["principle"] == "C2"}
+    assert c1["a:2"]["explicit"] == "2026-09-15T00:00Z" and c1["a:2"]["eligible"]          # after its quote, before P11's CLAUDE.md
+    assert c1["a:1"]["reason"] == "before the principle was formulated"                    # 2026-09-10 is before the quote
+    assert not c1["a:6"]["eligible"] and c1["a:6"]["operative"] == "2026-10-06T08:18Z"     # inherited from P11
+    assert c2["a:6"]["eligible"] and c2["a:6"]["operative"] is None                        # new: never operative
+    st = json.loads((tmp_path / "out" / "statements.json").read_text())["candidates"]
+    assert st["C1"]["inherits"] == "P11" and st["C2"]["inherits"] is None

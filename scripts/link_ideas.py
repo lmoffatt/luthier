@@ -61,6 +61,7 @@ def sha256_bytes(b: bytes) -> str:
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--timeline", type=Path, default=DEFAULT_TIMELINE)
+    p.add_argument("--until", default=None, help="only rows dated before this UTC time (a cutoff); rows without a time are left out")
     p.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     p.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
     p.add_argument("--var", action="append", default=[], metavar="KEY=VALUE",
@@ -410,6 +411,8 @@ def main(argv: list[str]) -> int:
         print(f"ERROR: another link_ideas run holds {tag}.lock; wait for it or stop it", file=sys.stderr)
         return 2
     rows = sorted(load_timeline(args.timeline), key=lambda r: (r.get("time_utc", "") or "~", r["id"]))
+    if args.until:
+        rows = [r for r in rows if r.get("time_utc") and r["time_utc"] < args.until]
     by_id = {r["id"]: r for r in rows}
     if len(by_id) != len(rows):
         dup = [i for i, n in Counter(r["id"] for r in rows).items() if n > 1]
@@ -430,7 +433,7 @@ def main(argv: list[str]) -> int:
         state = {"version": VERSION, "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
                  "effort": args.effort, "cli_version": cli_version(cli) if cli else "", "window_chars": args.window_chars,
                  "max_thinking_tokens": args.max_thinking_tokens,
-                 "quote_chars": args.quote_chars, "timeline_path": timeline_rel, "prompt_vars": args.var,
+                 "quote_chars": args.quote_chars, "timeline_path": timeline_rel, "prompt_vars": args.var, "until": args.until,
                  "lineages": {}, "assign": {}, "unplaced": {}, "calls": []}
     if args.report_only:
         write_report(md_path, state, rows, by_id)

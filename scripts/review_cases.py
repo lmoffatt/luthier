@@ -90,7 +90,8 @@ def exposure(args) -> int:
     for p in load_jsonl(args.eligibility):
         if p["eligible"]:
             pairs[p["unit"]].append(p["principle"])
-    dates = json.loads(args.dates.read_text(encoding="utf-8"))["principles"]
+    dates = (json.loads(args.statements.read_text(encoding="utf-8"))["candidates"] if args.statements
+             else json.loads(args.dates.read_text(encoding="utf-8"))["principles"])
     units = {u["id"]: u for u in load_jsonl(args.units)}
     out = args.output_dir / f"exposure_{sample['date']}.jsonl"
     done = {r["case"] for r in load_jsonl(out)}
@@ -222,6 +223,8 @@ def main(argv: list[str]) -> int:
             s.add_argument("--units", type=Path, default=VALIDATION / "decision_units.jsonl")
             s.add_argument("--eligibility", type=Path, default=VALIDATION / "eligibility.jsonl")
             s.add_argument("--dates", type=Path, default=VALIDATION / "principle_dates.json")
+            s.add_argument("--statements", type=Path, default=None,
+                           help="statements.json of eligible_cases --candidates: judge candidates instead of the principles in force")
             s.add_argument("--session-chars", type=int, default=60000, help="how much of the session before the decision the judge reads")
             pc.common_args(s, JUDGE_PROMPT)
         if name == "apply":

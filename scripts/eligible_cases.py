@@ -39,6 +39,13 @@ STOP = set("the a an of to in is and or for on it be by as at that this with not
            "de la el en y que los las un una es no se por con para lo su al del como".split())
 
 
+def pc_rel(p: Path) -> str:
+    try:
+        return str(p.resolve().relative_to(REPO_ROOT))
+    except ValueError:
+        return str(p)
+
+
 def when(t: str) -> datetime:
     return datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone(timezone.utc)
 
@@ -151,6 +158,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--flag-share", type=float, default=0.6,
                     help="share of the principle's terms in the session's earlier turns that raises the lexical flag")
     ap.add_argument("--provisional", action="store_true", help="read a principle without a mark as ok, and say so")
+    ap.add_argument("--candidates", type=Path, default=None,
+                    help="a find_principles output: score its candidates instead of the principles of principle_dates")
+    ap.add_argument("--match", type=Path, default=None,
+                    help="the match_principles output for those candidates: a candidate covered by or extending a principle "
+                         "in force inherits its operative dates")
     args = ap.parse_args(argv)
 
     units = [json.loads(l) for l in args.units.read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -162,7 +174,30 @@ def main(argv: list[str]) -> int:
                 r = json.loads(l)
                 rows_by_id[r["id"]] = r
     marks = read_marks(args.marks) if args.marks.exists() else {}
-    resolved, problems = resolve_dates(dates, marks, rows_by_id, args.provisional)
+    if args.candidates:
+        # the principles in force only lend their operative dates; unmarked ones are read as proposed
+        inforce, _ = resolve_dates(dates, marks, rows_by_id, provisional=True)
+        found = json.loads(args.candidates.read_text(encoding="utf-8"))
+        match = {m["candidate"]: m for m in (json.loads(args.match.read_text(encoding="utf-8"))["answer"]["matches"]
+                                              if args.match else [])}
+        resolved, problems, statements = {}, [], {}
+        for c in found["answer"]["candidates"]:
+            row = rows_by_id.get(c["quote_row"])
+            if row is None or not row.get("time_utc"):
+                problems.append(f"{c['id']}: its quote row {c['quote_row']} has no time in the timeline")
+                continue
+            m = match.get(c["id"], {})
+            heir = m.get("principle") if m.get("verdict") in ("covered", "extends") else None
+            op = inforce[heir]["operative"] if heir in inforce else {}
+            resolved[c["id"]] = {"explicit": when(row["time_utc"]), "operative": defaultdict(lambda: None, op), "earlier": None,
+                                 "notes": [], "mark": f"candidate; inherits {heir}" if heir else "candidate", "statement": c["statement"]}
+            statements[c["id"]] = {"statement": c["statement"], "quote": c["quote"], "explicit": row["time_utc"], "inherits": heir}
+        dates = {cid: {"statement": v["statement"], "quote": v["quote"]} for cid, v in statements.items()}
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        (args.output_dir / "statements.json").write_text(json.dumps({"from": pc_rel(args.candidates), "candidates": statements},
+                                                                    ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    else:
+        resolved, problems = resolve_dates(dates, marks, rows_by_id, args.provisional)
     if problems:
         print("ERROR: the dates are not ready:\n  " + "\n  ".join(problems), file=sys.stderr)
         return 2

@@ -186,6 +186,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--eligibility", type=Path, default=VALIDATION / "eligibility.jsonl")
     ap.add_argument("--exposure", type=Path, nargs="*", default=None, help="default: every exposure_*.jsonl of the validation folder")
     ap.add_argument("--dates", type=Path, default=VALIDATION / "principle_dates.json")
+    ap.add_argument("--statements", type=Path, default=None,
+                    help="statements.json of eligible_cases --candidates: score candidates instead of the principles in force")
     ap.add_argument("--output-dir", type=Path, default=VALIDATION / "runs")
     ap.add_argument("--baseline-prompt", type=Path, default=BASELINE_PROMPT)
     ap.add_argument("--include-possible", action="store_true", help="sensitivity: add the cases judged possibly exposed")
@@ -205,7 +207,9 @@ def main(argv: list[str]) -> int:
     template, base_template = args.prompt.read_text(encoding="utf-8"), args.baseline_prompt.read_text(encoding="utf-8")
     exposure = [r for p in (args.exposure or sorted(VALIDATION.glob("exposure_*.jsonl"))) for r in load_jsonl(p)]
     cases, pairs = select(load_jsonl(args.cases), load_jsonl(args.eligibility), exposure, args.include_possible)
-    statements = {pid: d["statement"] for pid, d in json.loads(args.dates.read_text(encoding="utf-8"))["principles"].items()}
+    src = (json.loads(args.statements.read_text(encoding="utf-8"))["candidates"] if args.statements
+           else json.loads(args.dates.read_text(encoding="utf-8"))["principles"])
+    statements = {pid: d["statement"] for pid, d in src.items()}
     main_pairs = {p: [c for c in cids if cases[c]["decided_by"] in MAIN_DECIDERS] for p, cids in pairs.items()}
     print("approved usable cases:", len(cases), "| cases per principle:",
           ", ".join(f"{p} {len(v)}" for p, v in sorted(main_pairs.items(), key=lambda kv: int(kv[0][1:]))) or "none")
@@ -250,7 +254,7 @@ def main(argv: list[str]) -> int:
     for u in sorted(set(unrelated.values())):
         group = [cases[c] for c in every if unrelated[c] == u]
         b1.update(run.both(template, statements[u], group, f"B1:{u}", single))
-    ids = sorted(statements, key=lambda p: int(p[1:]))
+    ids = sorted(statements, key=lambda p: (len(p), p))
     perm = ids[:]
     while len(ids) > 1 and any(a == b for a, b in zip(ids, perm)):
         rng.shuffle(perm)
