@@ -151,9 +151,10 @@ def main(argv: list[str]) -> int:
         cands = {c["id"]: {"statement": c["statement"], "quote": ""} for c in rec["candidates"]}
     else:
         found = json.loads(args.candidates.read_text(encoding="utf-8"))
-        tag = Path(args.candidates).stem.split("_")[0] + "_find"
+        tag = Path(args.candidates).stem  # the find run's own name: date, prompt, agent, model
         run["inputs"][pc.rel(args.candidates)] = {"sha256": pc.sha256_bytes(args.candidates.read_bytes())}
-        cands = {c["id"]: {"statement": c["statement"], "quote": c["quote"]} for c in found["answer"]["candidates"]}
+        cands = {c["id"]: {"statement": c["statement"] + (f" (instead of: {c['instead_of']})" if c.get("instead_of") else ""),
+                           "quote": c["quote"]} for c in found["answer"]["candidates"]}
     run["candidates"] = cands
     body = "\n\n".join([
         "## List C\n\n" + "\n".join(f"- {cid}: {c['statement']}" + (f" (quote: \"{c['quote']}\")" if c["quote"] else "")

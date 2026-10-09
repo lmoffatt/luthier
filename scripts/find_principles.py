@@ -36,7 +36,7 @@ import principles_common as pc  # noqa: E402
 
 VERSION = "find_principles v1"
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_PROMPT = REPO_ROOT / "prompts" / "find_principles_v1.md"
+DEFAULT_PROMPT = REPO_ROOT / "prompts" / "find_principles_v2.md"
 DEFAULT_LINEAGES = REPO_ROOT / "record" / "ideas" / "lineages_link_ideas_v1_claude-code_opus.json"
 DEFAULT_TIMELINE = REPO_ROOT / "record" / "ideas" / "timeline.jsonl"
 DEFAULT_OUTPUT = REPO_ROOT / "record" / "distillation"
@@ -84,7 +84,7 @@ def expand(ans: dict, llabels: dict, qlabels: dict) -> tuple[dict, list[str]]:
     return {"classification": cls, "candidates": cands}, errors
 
 
-def check_answer(ans: dict, der: dict, qtext: dict, max_candidates: int) -> list[str]:
+def check_answer(ans: dict, der: dict, qtext: dict, max_candidates: int, needs_alternative: bool = False) -> list[str]:
     errors: list[str] = []
     cands = ans.get("candidates", []) or []
     cand_ids = [str(c.get("id", "")) for c in cands]
@@ -122,6 +122,8 @@ def check_answer(ans: dict, der: dict, qtext: dict, max_candidates: int) -> list
             errors.append(f"{cid}: scope {c.get('scope')!r} is not one of {SCOPES}")
         if not str(c.get("statement", "")).strip():
             errors.append(f"{cid}: empty statement")
+        if needs_alternative and not str(c.get("instead_of", "")).strip():
+            errors.append(f"{cid}: instead_of is missing; a principle names the road not taken")
         st = c.get("strongest") or {}
         if not isinstance(st, dict) or st.get("axis") not in pc.AXES or not str(st.get("why", "")).strip():
             errors.append(f"{cid}: strongest needs an axis among {pc.AXES} and a why")
@@ -169,6 +171,7 @@ def write_report(md: Path, run: dict, ans: dict, der: dict) -> None:
         q = rows.get(c["quote_row"], {})
         first = min((der[l]["first"] for l in lins), key=lambda m: m.get("time_utc", ""))
         L += [f"{c['id']}  {pc.wrap(c['statement'], indent='    ')}",
+              *([f"Instead of: {pc.wrap(c['instead_of'])}"] if c.get("instead_of") else []),
               f"Scope:      {c['scope']}",
               "-- from the rows, by the script",
               f"Quote:      \"{pc.wrap(q.get('quote', c['quote']))}\"",
@@ -250,7 +253,8 @@ def main(argv: list[str]) -> int:
 
     def expand_check(raw: dict):
         a, errors = expand(raw, llabels, qlabels)
-        return a, errors + (check_answer(a, der, qtext, args.max_candidates) if isinstance(a, dict) else [])
+        return a, errors + (check_answer(a, der, qtext, args.max_candidates, "instead_of" in template)
+                            if isinstance(a, dict) else [])
     ans, run["attempts"] = pc.ask(cli, prompt_text, args, expand_check)
     run["answer"] = ans
     run["warnings"] = run_warnings(ans) if ans else []

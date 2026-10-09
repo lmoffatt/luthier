@@ -50,7 +50,7 @@ if prompt.startswith("# Prompt: link_ideas_v"):
     if bad:
         assign = assign[1:]
     print(json.dumps({"new_lineages": new, "assign": assign, "unplaced": unplaced}))
-elif prompt.startswith("# Prompt: find_principles_v1"):
+elif prompt.startswith("# Prompt: find_principles_v"):
     blocks = prompt.split("## Input")[1].split("\n### ")[1:]
     cls, labels, quote, text = [], [], None, None
     for k, b in enumerate(blocks):
@@ -66,8 +66,8 @@ elif prompt.startswith("# Prompt: find_principles_v1"):
     print(json.dumps({"candidates": [{"id": "C1", "harms": ["a larger kernel"],
                                       "strongest": {"axis": "conceptual", "why": "reframes what a type is"},
                                       "also": [], "beats": {"lineage": labels[1], "why": "narrower"},
-                                      "statement": "A type is a concept.", "scope": "language",
-                                      "lineages": labels[:1], "quote": quote, "quote_text": text}],
+                                      "statement": "A type is a concept.", "instead_of": "a type as a mere label",
+                                      "scope": "language", "lineages": labels[:1], "quote": quote, "quote_text": text}],
                       "classification": cls}))
 elif prompt.startswith("# Prompt: match_principles_v1"):
     print(json.dumps({"matches": [{"candidate": "C1", "verdict": "extends", "principle": "P2", "change": "adds types",
@@ -225,7 +225,7 @@ def test_find_is_blind_checks_its_quotes_and_fills_in_whose_words(tmp_path):
     (tmp_path / "calls.jsonl").unlink()
     r = find(tmp_path, env, "--redact", "tipos=TYPES")
     assert r.returncode == 0, r.stderr
-    run = json.loads((tmp_path / "dist" / "2026-01-02_find_principles_v1_claude-code_opus.json").read_text())
+    run = json.loads((tmp_path / "dist" / "2026-01-02_find_principles_v2_claude-code_opus.json").read_text())
     assert len(run["attempts"]) == 2 and any("quote_text is not in" in e for e in run["attempts"][0]["errors"])
     prompt = calls(tmp_path)[0]["prompt"]
     body = prompt.split("## Input")[1]
@@ -235,9 +235,10 @@ def test_find_is_blind_checks_its_quotes_and_fills_in_whose_words(tmp_path):
         assert absent not in prompt, absent
     assert "Luthier" in prompt.split("## Input")[0] and "TYPES" in body and "los tipos" not in body
     assert run["answer"]["candidates"][0]["quote_row"] in ("day:2026-05-29:tipos", "note:2026-05-29T14.03.24:tipos")
-    md = (tmp_path / "dist" / "2026-01-02_find_principles_v1_claude-code_opus.md").read_text()
+    md = (tmp_path / "dist" / "2026-01-02_find_principles_v2_claude-code_opus.md").read_text()
     assert "-- from the rows, by the script" in md and "Said by:    Luciano" in md
     assert "Strongest:  conceptual. reframes what a type is" in md and "Harms:      a larger kernel" in md
+    assert "Instead of: a type as a mere label" in md
     assert "## Considered and left out" in md and "`L-costs-explicit`" in md
     r = find(tmp_path, env)
     assert r.returncode == 2 and "--force redoes it" in r.stderr
@@ -249,7 +250,7 @@ def test_match_sets_the_blind_candidates_against_what_is_in_force(tmp_path):
     (tmp_path / "principles.md").write_text(PRINCIPLES)
     (tmp_path / "decisions.md").write_text(DECISIONS)
     (tmp_path / "objectives.md").write_text("# Objectives\n\n1. Be useful.\n")
-    r = subprocess.run([sys.executable, str(MATCH), "--found", str(tmp_path / "dist" / "2026-01-02_find_principles_v1_claude-code_opus.json"),
+    r = subprocess.run([sys.executable, str(MATCH), "--found", str(tmp_path / "dist" / "2026-01-02_find_principles_v2_claude-code_opus.json"),
                         "--principles", str(tmp_path / "principles.md"), "--decisions", str(tmp_path / "decisions.md"),
                         "--objectives", str(tmp_path / "objectives.md"), "--output-dir", str(tmp_path / "dist"),
                         "--cli", "claude", "--date", "2026-01-02"], capture_output=True, text=True, env=env)
@@ -274,6 +275,7 @@ def test_find_and_match_checks():
             "candidates": [cand]}
     qtext = {"q1": "los tipos tienen que ser conceptos"}
     assert fp.check_answer(good, der, qtext, 7) == []
+    assert any("instead_of is missing" in e for e in fp.check_answer(good, der, qtext, 7, needs_alternative=True))
     bad = json.loads(json.dumps(good))
     bad["candidates"][0].update(quote="conceptos ... los tipos", harms=None, also=[{}, {}, {}],
                                 strongest={"axis": "popular", "why": ""}, beats={"lineage": "L-a", "why": "x"}, scope="x")
