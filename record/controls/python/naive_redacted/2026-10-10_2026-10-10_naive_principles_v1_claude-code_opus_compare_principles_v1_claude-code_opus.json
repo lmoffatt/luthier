@@ -1,0 +1,233 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "G7",
+      "why": "cut corners, fix later"
+     },
+     {
+      "item": "G14",
+      "why": "user bug no interpreter undefined behavior"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "G2",
+      "why": "as simple as possible"
+     },
+     {
+      "item": "G6",
+      "why": "good enough"
+     },
+     {
+      "item": "G7",
+      "why": "cut corners"
+     },
+     {
+      "item": "Z3",
+      "why": "simple better than complex"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [
+     {
+      "item": "G12",
+      "why": "errors not fatal via exceptions"
+     },
+     {
+      "item": "G13",
+      "why": "errors not silent"
+     },
+     {
+      "item": "Z10",
+      "why": "errors never pass silently"
+     },
+     {
+      "item": "Z12",
+      "why": "refuse to guess, reject ambiguity"
+     }
+    ],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [
+     {
+      "item": "G1",
+      "why": "borrow from B and Algol/C"
+     },
+     {
+      "item": "G15",
+      "why": "punctuation conservative"
+     }
+    ],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "G4",
+      "why": "optimize later, not premature"
+     },
+     {
+      "item": "A4",
+      "why": "evolutionary path, back-compat"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\":[{\"candidate\":\"C1\",\"A\":[{\"item\":\"G7\",\"why\":\"cut corners, fix later\"},{\"item\":\"G14\",\"why\":\"user bug no interpreter undefined behavior\"}],\"B\":[]},{\"candidate\":\"C2\",\"A\":[],\"B\":[]},{\"candidate\":\"C3\",\"A\":[{\"item\":\"G2\",\"why\":\"as simple as possible\"},{\"item\":\"G6\",\"why\":\"good enough\"},{\"item\":\"G7\",\"why\":\"cut corners\"},{\"item\":\"Z3\",\"why\":\"simple better than complex\"}],\"B\":[]},{\"candidate\":\"C4\",\"A\":[{\"item\":\"G12\",\"why\":\"errors not fatal via exceptions\"},{\"item\":\"G13\",\"why\":\"errors not silent\"},{\"item\":\"Z10\",\"why\":\"errors never pass silently\"},{\"item\":\"Z12\",\"why\":\"refuse to guess, reject ambiguity\"}],\"B\":[]},{\"candidate\":\"C5\",\"A\":[],\"B\":[]},{\"candidate\":\"C6\",\"A\":[{\"item\":\"G1\",\"why\":\"borrow from B and Algol/C\"},{\"item\":\"G15\",\"why\":\"punctuation conservative\"}],\"B\":[]},{\"candidate\":\"C7\",\"A\":[{\"item\":\"G4\",\"why\":\"optimize later, not premature\"},{\"item\":\"A4\",\"why\":\"evolutionary path, back-compat\"}],\"B\":[]}]}\n",
+   "answer_sha256": "a181d8af905bbfde56f16f95a375529580e6fac60dd959726b8d7fac09aaecc7",
+   "date": "2026-10-09T23:21:37Z",
+   "errors": [],
+   "seconds": 40
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "In Python, variables are simply names that refer to objects. Variables do not need to be declared before they are assigned and they can even change type in the middle of a program.",
+   "statement": "L is dynamically typed: variables are untyped names bound to objects and all type checking happens at run time rather than at a separate compile step, a deliberate corner-cutting simplification that keeps safety because every type error is still caught before the interpreter can malfunction."
+  },
+  "C2": {
+   "quote": "In Python, all objects that can be named are said to be \"first class.\"",
+   "statement": "Every object nameable in L (integers, strings, functions, classes, methods, modules, types) is first-class with equal status, assignable, passable, storable and introspectable at run time, made uniform by basing all objects on one common C structure whose type is itself a run-time object."
+  },
+  "C3": {
+   "quote": "Python simply drops the compile-time type checking completely. This is entirely in line with Python’s “corner-cutting” philosophy as it’s a simplification of the implementation that does not affect the eventual safety, since all type errors are caught at run time",
+   "statement": "The implementation consistently chooses the simplest design that works, cutting corners and letting useful features fall out of the mechanism rather than being designed in, even for subsystems like classes added late as an afterthought."
+  },
+  "C4": {
+   "quote": "For error handling, Python uses (non-resumable) exceptions.",
+   "statement": "Errors are handled through exceptions rather than undefined or silently-clipped results: no operation returns an undefined value, an exception is always raised when no correct value can be computed, and inconsistent situations are rejected rather than resolved silently."
+  },
+  "C5": {
+   "quote": "One of the rules I took from ABC was that every data type, when printed or converted to a string, should be represented by an expression that was a valid input to the language's parser.",
+   "statement": "A data type's printed representation should be a valid parser input that reconstructs it, and related indexable types are unified under common abstractions (the sequence; half-open 0-based slicing) so operations behave uniformly and compose without off-by-one corrections."
+  },
+  "C6": {
+   "quote": "instead of using braces for statement grouping, it uses indentation",
+   "statement": "Syntax uses indentation for grouping with a colon introducing the block, inherited from the predecessor B, dispensing with braces and semicolons, while borrowing keywords and operator meanings from C and Algol-family languages."
+  },
+  "C7": {
+   "quote": "I think I also wanted to optimize testing for exceptions by using pointer comparisons instead of string value comparisons in a misguided attempt to prematurely optimize execution time (a rare one – I usually optimized for my own coding time!).",
+   "statement": "The language evolves without needlessly breaking working code: new built-ins and features are added back-compatibly (new keywords only reluctantly, via __future__ opt-ins and deprecation), favoring the designer's own coding time and users' existing code over premature optimization."
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-10",
+ "effort": "low",
+ "input_sha256": "104e44d312b556b6a8225416b2f32da0795a4b29143784a7d92733af4cb455cb",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/python/naive_redacted/2026-10-10_naive_principles_v1_claude-code_opus.json": {
+   "sha256": "fabfd22755d7851fae74c2404c29e07833caaceee65c3348d4d34f86b564fb15"
+  },
+  "record/controls/python/reference.md": {
+   "sha256": "0d6a91875bf553365da9db959e7b62a9424b079946b0a95d57583b9783833ea9"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 5,
+  "leaks": 0,
+  "neither": 2,
+  "passes": true,
+  "rows": [
+   {
+    "A": [
+     "G7",
+     "G14"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G2",
+     "G6",
+     "G7",
+     "Z3"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "G12",
+     "G13",
+     "Z10",
+     "Z12"
+    ],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G1",
+     "G15"
+    ],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "G4",
+     "A4"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}

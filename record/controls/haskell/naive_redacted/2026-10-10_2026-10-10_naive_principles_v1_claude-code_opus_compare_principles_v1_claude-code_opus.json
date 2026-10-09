@@ -1,0 +1,203 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "H1",
+      "why": "laziness as defining theme"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "purity, no side effects"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "H3",
+      "why": "type classes, most distinctive"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [],
+    "B": [
+     {
+      "item": "F12",
+      "why": "data as initial algebras"
+     }
+    ],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "H5",
+      "why": "committee language"
+     },
+     {
+      "item": "H7",
+      "why": "stability goal"
+     },
+     {
+      "item": "C5",
+      "why": "wide consensus"
+     },
+     {
+      "item": "C6",
+      "why": "reduce diversity, unite community"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\":[{\"candidate\":\"C1\",\"A\":[{\"item\":\"H1\",\"why\":\"laziness as defining theme\"}],\"B\":[]},{\"candidate\":\"C2\",\"A\":[{\"item\":\"H2\",\"why\":\"purity, no side effects\"}],\"B\":[]},{\"candidate\":\"C3\",\"A\":[{\"item\":\"H3\",\"why\":\"type classes, most distinctive\"}],\"B\":[]},{\"candidate\":\"C4\",\"A\":[],\"B\":[]},{\"candidate\":\"C5\",\"A\":[],\"B\":[{\"item\":\"F12\",\"why\":\"data as initial algebras\"}]},{\"candidate\":\"C6\",\"A\":[],\"B\":[]},{\"candidate\":\"C7\",\"A\":[{\"item\":\"H5\",\"why\":\"committee language\"},{\"item\":\"H7\",\"why\":\"stability goal\"},{\"item\":\"C5\",\"why\":\"wide consensus\"},{\"item\":\"C6\",\"why\":\"reduce diversity, unite community\"}],\"B\":[]}]}\n",
+   "answer_sha256": "eb8a4d935c802d04cb14d113cea4ec91f70bc398aa31b5ec864485f9c057c173",
+   "date": "2026-10-09T23:21:30Z",
+   "errors": [],
+   "seconds": 39
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "the nature of the language to be designed (non-strict, purely functional)",
+   "statement": "L is non-strict, purely functional with lazy (call-by-need) evaluation as its defining core, embracing both the power (infinite structures, elegant combinators) and the cost (unpredictable space and evaluation order) that laziness brings."
+  },
+  "C2": {
+   "quote": "The Haskell Committee was resolute in its decision to keep the language pure—meaning no side effects— so the design of the I/O system was an important issue.",
+   "statement": "Purity, meaning no side effects, is held to firmly, which makes controlled handling of effects (I/O, state, exceptions) through monads the central design achievement and L's conscious long-term bet."
+  },
+  "C3": {
+   "quote": "Aside from laziness, type classes are undoubtedly Haskell's most distinctive feature.",
+   "statement": "Type classes, with their generalisations to higher kinds (constructor classes), multi-parameter classes, and functional dependencies, are L's most distinctive feature after laziness and the principled solution to overloading."
+  },
+  "C4": {
+   "quote": "Miranda added strong polymorphic typing and type inference, ideas that had proven very successful in ML.",
+   "statement": "L has strong static polymorphic typing with Hindley-Milner inference, inherited from ML via Miranda and extended anarchically into a laboratory for type-system research."
+  },
+  "C5": {
+   "quote": "Hope, the language that introduced algebraic data types",
+   "statement": "Algebraic data types defined as a sum of products, together with top-to-bottom left-to-right pattern matching, are fundamental to the language and its readability."
+  },
+  "C6": {
+   "quote": "Despite this, the Haskell Committee worked very hard...on designing (and arguing about) the syntax of Haskell.",
+   "statement": "Syntax was treated as the user interface and worked very hard: layout/offside rule, infix operators and sections, currying by juxtaposition, few keywords, aiming for programs that look like mathematics and read nicely."
+  },
+  "C7": {
+   "quote": "It was decided that a committee should be formed to design such a language",
+   "statement": "L was built by committee as a conservative common standard embodying consensus (ideally tried-and-true ideas) to unite the scattered lazy-functional community, with stability (L 98) and a growing community taken as both goal and measure of success."
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-10",
+ "effort": "low",
+ "input_sha256": "37f7900801e6665ad7e6172e924a5ac79f4d89d584f90c65b333c54508065fe1",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/haskell/naive_redacted/2026-10-10_naive_principles_v1_claude-code_opus.json": {
+   "sha256": "00ad747d0bb1ff4eb5c05139643ad50fe84e8db18eaaa113a91d4ac06bcfd49b"
+  },
+  "record/controls/haskell/reference.md": {
+   "sha256": "fbfb3d4594fb31de6facc0d0930f3c87100b5f869a835ab8e2c2a3d8453d8721"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 4,
+  "leaks": 1,
+  "neither": 2,
+  "passes": false,
+  "rows": [
+   {
+    "A": [
+     "H1"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H3"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [
+     "F12"
+    ],
+    "candidate": "C5",
+    "verdict": "leak"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "H5",
+     "H7",
+     "C5",
+     "C6"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}

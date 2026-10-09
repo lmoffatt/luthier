@@ -1,0 +1,198 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "pure language"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "H1",
+      "why": "laziness/non-strict"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "H3",
+      "why": "type classes, most distinctive"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [
+     {
+      "item": "H5",
+      "why": "committee language"
+     },
+     {
+      "item": "C5",
+      "why": "based on wide consensus"
+     },
+     {
+      "item": "C6",
+      "why": "reduce diversity, unite groups"
+     }
+    ],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "H7",
+      "why": "stability vs evolution"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [{\"item\": \"H2\", \"why\": \"pure language\"}], \"B\": []}, {\"candidate\": \"C2\", \"A\": [{\"item\": \"H1\", \"why\": \"laziness/non-strict\"}], \"B\": []}, {\"candidate\": \"C3\", \"A\": [{\"item\": \"H3\", \"why\": \"type classes, most distinctive\"}], \"B\": []}, {\"candidate\": \"C4\", \"A\": [], \"B\": []}, {\"candidate\": \"C5\", \"A\": [{\"item\": \"H5\", \"why\": \"committee language\"}, {\"item\": \"C5\", \"why\": \"based on wide consensus\"}, {\"item\": \"C6\", \"why\": \"reduce diversity, unite groups\"}], \"B\": []}, {\"candidate\": \"C6\", \"A\": [], \"B\": []}, {\"candidate\": \"C7\", \"A\": [{\"item\": \"H7\", \"why\": \"stability vs evolution\"}], \"B\": []}]}\n",
+   "answer_sha256": "fbbb379e068d9ce8eeabf2ad30c4cc657e6ade8e180a3258fbe7b417c6d79ef9",
+   "date": "2026-10-09T23:21:25Z",
+   "errors": [],
+   "seconds": 62
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "the nature of the language to be designed (non-strict, purely functional)",
+   "statement": "Haskell is purely functional with no side effects, a firm commitment that made it radical and elegant and shaped the whole design."
+  },
+  "C2": {
+   "quote": "the nature of the language to be designed (non-strict, purely functional)",
+   "statement": "Haskell is non-strict, using lazy (call-by-need) evaluation, prized for its tie to the lambda calculus, infinite data structures, and elegant implementation."
+  },
+  "C3": {
+   "quote": "A class declaration specifies the methods of the class ... and their types. A type is made into an instance of the class using an instance declaration, which provides an implementation for each of the class's methods, at the appropriate instance type.",
+   "statement": "Type classes, Haskell's most distinctive feature after laziness, provide principled overloading and became the framework into which a stream of type-system extensions fitted."
+  },
+  "C4": {
+   "quote": "A monad consists of a type constructor M and a pair of functions, return and >>= (sometimes pronounced “bind”).",
+   "statement": "Effects are made explicit and tamed through monads, especially the IO monad, which gives pure code a way to do input/output while keeping deterministic semantics."
+  },
+  "C5": {
+   "quote": "It was decided that a committee should be formed to design such a language",
+   "statement": "The language was designed by a committee aiming for a conservative, consensus language that united existing groups rather than breaking new ground."
+  },
+  "C6": {
+   "quote": "Despite this, the Haskell Committee worked very hard...on designing (and arguing about) the syntax of Haskell.",
+   "statement": "Syntax was treated as the language's user interface and worked on very hard, with the aim that expressions look like mathematics and programs look nice."
+  },
+  "C7": {
+   "quote": "this was a very significant moment because it represented a commitment to stability.",
+   "statement": "Haskell 98 marked a deliberate commitment to long-term stability after years of a frequently changing research vehicle, tentatively credited with the community's growth."
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-10",
+ "effort": "low",
+ "input_sha256": "2984c54457d0122f4792d2a4d9e4b3399bd270a7816fbdf1c1ceb801a96e1a31",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/haskell/naive/2026-10-10_naive_principles_v1_claude-code_opus.json": {
+   "sha256": "a2da0423a936861fea8cffca8fcb1ab9940680693cd019f98ec168b39fd850ae"
+  },
+  "record/controls/haskell/reference.md": {
+   "sha256": "fbfb3d4594fb31de6facc0d0930f3c87100b5f869a835ab8e2c2a3d8453d8721"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 5,
+  "leaks": 0,
+  "neither": 2,
+  "passes": true,
+  "rows": [
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H1"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H3"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "H5",
+     "C5",
+     "C6"
+    ],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "H7"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}
