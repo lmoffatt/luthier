@@ -122,7 +122,7 @@ def test_timeline_reads_written_notes(tmp_path):
     r = subprocess.run([sys.executable, str(TIMELINE), str(d), "--date", "2026-01-02"], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     rows = [json.loads(l) for l in (d / "timeline.jsonl").read_text().splitlines()]
-    assert [x["id"] for x in rows] == ["written:2023-03-13:cadena-de-asignaciones", "written:2025-06-17:types-as-entities"]
+    assert [x["id"] for x in rows] == ["written:2023-03-13_hacia-luthier:cadena-de-asignaciones", "written:2025-06-17_glossary:types-as-entities"]
     assert rows[0]["who"] == "Luciano" and rows[0]["time_local"] == "2023-03-13 14:48:27" and rows[0]["time_utc"] == "2023-03-13T17:48:27Z"
     assert rows[0]["source"] == "2023-03-13 hacia Luthier.md line 3" and rows[0]["quote"] == "Luthier es una cadena de asignaciones"
     assert rows[1]["who"] == "model" and rows[1]["extractor"] == "written"
