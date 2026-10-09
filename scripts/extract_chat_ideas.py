@@ -13,6 +13,11 @@ stands for skipped words) and the turn's author is checked against the entry's W
 printed and the count goes to the frontmatter. --check-only reruns that check without the model. Tool turns are dropped before the
 cut (--keep-tool-turns keeps them).
 
+A failed call is retried (--retries, after --retry-pause seconds). Each window's body is kept under
+`<output-dir>/.partial/<output stem>/` as soon as it comes back, named by the sha256 of what was
+sent (CLI, model, effort, prompt with the window), so a thread that fails halfway reuses its done
+windows on the next run; the folder goes once the thread's output is written.
+
 The frontmatter of the output is written here, deterministically (source, key, title, started,
 turns, windows, sha256 of the thread, prompt and its sha256, agent, model); the model writes only
 the body. Idempotent: a thread with a non-empty output is skipped (unless --force). Luciano runs
@@ -128,6 +133,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                    help="check the quotes of existing outputs against their threads; call no model")
     p.add_argument("--sleep", type=float, default=0.0, help="pause between calls, seconds")
     p.add_argument("--timeout", type=float, default=600.0, help="per call, seconds")
+    p.add_argument("--retries", type=int, default=1, help="further tries of a failed call (error or timeout)")
+    p.add_argument("--retry-pause", type=float, default=30.0, help="seconds before a retry")
     return p.parse_args(argv)
 
 
@@ -156,6 +163,18 @@ def _call(cli: str, prompt_text: str, model: str, timeout: float, effort: str = 
     if proc.returncode != 0:
         raise RuntimeError((proc.stderr or proc.stdout).strip() or "codex failed")
     return proc.stdout
+
+
+def _call_retrying(cli: str, prompt_text: str, model: str, args: argparse.Namespace) -> str:
+    for attempt in range(args.retries + 1):
+        try:
+            return _call(cli, prompt_text, model, args.timeout, args.effort)
+        except (RuntimeError, subprocess.TimeoutExpired) as exc:
+            if attempt == args.retries:
+                raise
+            print(f"  retry {attempt + 1}/{args.retries} in {args.retry_pause:g} s: {str(exc)[:120]}", flush=True)
+            time.sleep(args.retry_pause)
+    raise AssertionError("unreachable")
 
 
 def _clean_body(raw: str) -> str:
@@ -304,10 +323,19 @@ def main(argv: list[str]) -> int:
             continue
         print(f"[{i}/{len(jobs)}] {path.name}  ({len(turns)} turns, {len(wins)} windows)", flush=True)
         bodies = []
+        partial = args.output_dir / ".partial" / out.stem
         try:
             for k, win in enumerate(wins, 1):
                 prompt_text = template.replace(PLACEHOLDER, window_input(front, win, k, len(wins), len(turns)))
-                body = _clean_body(_call(cli, prompt_text, model, args.timeout, args.effort))
+                sent = hashlib.sha256("\0".join((cli, model, args.effort, prompt_text)).encode("utf-8")).hexdigest()
+                kept_win = partial / f"w{k}of{len(wins)}_{sent[:16]}.md"
+                if kept_win.exists():
+                    body = kept_win.read_text(encoding="utf-8")
+                    print(f"  window {k}: kept from an earlier run", flush=True)
+                else:
+                    body = _clean_body(_call_retrying(cli, prompt_text, model, args))
+                    partial.mkdir(parents=True, exist_ok=True)
+                    kept_win.write_text(body, encoding="utf-8")
                 if len(wins) > 1:
                     body = f"## Window {k} of {len(wins)}: turns {win[0]['n']} to {win[-1]['n']}\n\n{body}"
                 bodies.append(body)
@@ -325,6 +353,9 @@ def main(argv: list[str]) -> int:
                          effort=args.effort, quotes_found=f"{found}/{total}")
         args.output_dir.mkdir(parents=True, exist_ok=True)
         out.write_text(fm + "\n\n" + body + "\n", encoding="utf-8")
+        shutil.rmtree(partial, ignore_errors=True)
+        if partial.parent.is_dir() and not any(partial.parent.iterdir()):
+            partial.parent.rmdir()
         print(f"  -> {out.name} (quotes found {found}/{total})")
         for pr in problems:
             print(f"     - {pr}")

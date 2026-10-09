@@ -104,6 +104,13 @@ if "select_chats_v1" in prompt:
         print('{"verdict": "partial", "reason": "some turns", "turns": [1, 4, 99], "topics": ["types"]}')
 else:
     win = [l for l in prompt.splitlines() if l.startswith("window:")]
+    fail = os.environ.get("STUB_FAIL_WINDOW")
+    budget = Path(os.environ["STUB_LOG"] + ".failures")
+    if fail and win and win[0].startswith(f"window: {fail} of") and budget.exists():
+        left = int(budget.read_text())
+        if left > 0:
+            budget.write_text(str(left - 1))
+            sys.exit("API Error: Connection closed mid-response.")
     print("---\ngenerated_by: x\n---\n\n## Ideas\n\n### idea-" + (win[0].split()[1] if win else "0")
           + "\n- **Who**: Luciano\n- **Turn**: 1, 2026-09-28 23:56:04 UTC\n- **Kind**: idea\n- **What**: x\n- **Quote**: \"y\"\n")
 '''
@@ -141,13 +148,13 @@ def calls(tmp_path: Path) -> list[dict]:
     return [json.loads(l) for l in p.read_text().splitlines()] if p.exists() else []
 
 
-def run(script: Path, tmp_path: Path, *args: str) -> subprocess.CompletedProcess:
+def run(script: Path, tmp_path: Path, *args: str, env_extra: dict | None = None) -> subprocess.CompletedProcess:
     words = tmp_path / "private.words"
     if not words.exists():
         words.write_text("secretword\n# a comment\n", encoding="utf-8")
     extra = ["--private-words", str(words)] if script == SELECT else []
     return subprocess.run([sys.executable, str(script), *args, *extra], capture_output=True, text=True,
-                          env=make_env(tmp_path), cwd=tmp_path)
+                          env={**make_env(tmp_path), **(env_extra or {})}, cwd=tmp_path)
 
 
 # --- select_chats -------------------------------------------------------------------------------
@@ -225,6 +232,31 @@ def test_extract_writes_one_file_per_thread_with_windows_and_frontmatter(tmp_pat
     assert "## 3. Tool" not in cs[0]["prompt"] + cs[1]["prompt"]
     assert "window: 1 of 2; turns 1 to 2 of 4" in cs[0]["prompt"]
     assert "window: 2 of 2; turns 4 to 4 of 4" in cs[1]["prompt"]
+
+
+def test_extract_retries_a_failed_call_and_keeps_the_done_windows(tmp_path):
+    raw = tmp_path / "raw" / "claude-code"
+    raw.mkdir(parents=True)
+    (raw / "2026-09-28_aaaaaaaa_x.md").write_text(THREAD_A.format(cwd="", model_long="m" * 3000), encoding="utf-8")
+    out = tmp_path / "ideas"
+    base = [str(tmp_path / "raw"), "--output-dir", str(out), "--cli", "claude", "--window-chars", "3200",
+            "--retry-pause", "0"]
+    fail2 = {"STUB_FAIL_WINDOW": "2"}
+    budget = tmp_path / "calls.jsonl.failures"
+    budget.write_text("1")
+    r = run(EXTRACT, tmp_path, *base, env_extra=fail2)  # window 2 fails once, the retry succeeds
+    assert r.returncode == 0, r.stderr
+    assert len(calls(tmp_path)) == 3 and "retry 1/1" in r.stdout and not (out / ".partial").exists()
+    budget.write_text("2")
+    r = run(EXTRACT, tmp_path, *base, "--force", env_extra=fail2)  # fails twice: the thread fails
+    assert r.returncode == 1 and "ERROR" in r.stderr and len(calls(tmp_path)) == 6
+    kept = list((out / ".partial").rglob("*.md"))
+    assert [k.name[:6] for k in kept] == ["w1of2_"]
+    r = run(EXTRACT, tmp_path, *base, "--force", env_extra=fail2)  # window 1 kept, window 2 called
+    assert r.returncode == 0, r.stderr
+    assert len(calls(tmp_path)) == 7 and "window: 2 of 2" in calls(tmp_path)[-1]["prompt"]
+    assert "window 1: kept from an earlier run" in r.stdout and not (out / ".partial").exists()
+    assert "## Window 1 of 2" in next(out.glob("*.md")).read_text()
 
 
 def test_extract_skips_done_threads_and_dry_run_calls_nothing(tmp_path):
