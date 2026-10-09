@@ -137,3 +137,30 @@ designed for LLM-written code with human-readable specifications or verification
 or Verus for LLMs, Lean-for-AI efforts, intent/spec languages, "vericoding", AI-native
 languages, LMQL, any language whose stated goal is that a model writes and a human reviews the
 spec). Also literate and "executable paper" approaches where the spec is the program.
+
+## Addendum: cluster G, launched after the other six
+
+While A-F ran, Luciano wrote (chat, 2026-10-09): "fijate que hay nuevas ideas, (la ultima usar
+el object identifier de reales positivos, funcion de costo)". The model read it as the
+subobject classifier of a topos (Bool in Luthier today) replaced by the positive reals [0,∞],
+Lawvere's 1973 construction, as in the voice note of 2026-10-08 18.10.00 [14:35]-[17:34] (laws
+that go to a cost and not to a Boolean, "una especie de likelihood ... no normalizada") and
+[03:37]-[08:30] (a prior over parameters and a cost of failure, the function judged by an
+expectation). Cluster G got the same preamble with this paragraph:
+
+G. Truth values in [0,∞] or another quantale instead of Bool: languages and DSLs where a law,
+predicate or specification is valued in a cost, distance or unnormalized likelihood, and where
+satisfying it becomes minimizing a loss. This is F15 in depth, with F8 (priors) and F3
+(certificates). Look at least at: Lawvere-style quantitative/metric logics turned into
+languages (quantitative algebraic theories of Mardare-Panangaden-Plotkin and their tools,
+quantale-enriched or real-valued logics, continuous logic for metric structures), differentiable
+logics and specification languages that compile properties to loss functions (Vehicle, DL2,
+Logic Tensor Networks / Real Logic, fuzzy differentiable logics, "constraints as loss"),
+Probabilistic Soft Logic and hinge-loss Markov random fields, Markov logic networks,
+weighted/semiring logic programming (Dyna, semiring Datalog, weighted Prolog, ProbLog), soft
+constraint languages, signal temporal logic robustness as a language construct, Stan/PyMC
+(`target +=` as a cost), tropical/min-plus programming, and testing driven by a prior over
+inputs times a cost of failure (risk-based or importance-weighted property testing, Bayesian
+software reliability, "expected cost of failure" in test selection). For each, say whether the
+cost value is a first-class result of a law, whether Bool laws are a special case of it (the
+logical limit), and whether the language certifies or records the measured cost.
