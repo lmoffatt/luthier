@@ -517,3 +517,18 @@ Kind:       method. For P1 (what is found is in his ideas, not in the filter), P
             found, not brought)
 Status:     current, in prompts/find_principles_v1.md, scripts/find_principles.py,
             scripts/match_principles.py, scripts/compare_principles.py and record/controls/README.md
+
+D-2026-10-09-d  The principles are validated against real decisions mined from the Claude Code
+                transcripts, by the plan record/plan-principles-validation-2026-10-09-decisions.md
+                (draft 1) as Luciano marked it: D2, D3 and D5 to D14 as written; D1 qualified, a
+                principle counts from its explicit formulation, when that formulation's logical
+                structure is enough to make decisions; D4 replaced, each principle is reported with
+                its number of cases and its figures, without thresholds or labels.
+Author:     Luciano, on the model's plan revised after GPT's review
+Quote:      "explicit formulation, if its logical structure is enough to make decisions"
+            "porque vestir un numero entendible con umbrales arbitrarios? Dejemos el numero y listo."
+Source:     luthier@94cb3e1:record/plan-principles-validation-2026-10-09-decisions.md:50
+            luthier@94cb3e1:record/plan-principles-validation-2026-10-09-decisions.md:81
+Kind:       method. For P13 (a principle is worth the decisions it guides, now measured), P1 (the
+            cases enter only with his approval), P11 (every threshold the plan keeps is a parameter)
+Status:     current; step 0 waits for Luciano (iachat ingest claude-code)

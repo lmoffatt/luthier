@@ -1,6 +1,6 @@
 # Validating Luthier's principles against real decisions: the execution
 
-Draft 1, 2026-10-09, after GPT's review of draft 0 (`record/IA/handoff de gpt para claude 3.md`).
+Draft 2, 2026-10-09: the decisions as Luciano marked them (D-2026-10-09-d). Draft 1 followed GPT's review of draft 0 (`record/IA/handoff de gpt para claude 3.md`).
 Written for the sessions that carry it out and for GPT and Luciano to review.
 The choices it rests on are in `plan-principles-validation-2026-10-09-decisions.md` (D1 to D14);
 where a step depends on one, it says which and what it assumes until Luciano answers.
@@ -62,8 +62,11 @@ emergence in v1):
          "statement": "...", "quote": "...", "status": "current"}}
 ```
 
-- explicit: the `Quote:` and `Source:` of the principle in `record/principles.md`; its time from the
-  transcript line or the commit.
+- explicit (D1 as Luciano marked it: "explicit formulation, if its logical structure is enough to
+  make decisions"): by default the `Quote:` and `Source:` of the principle in `record/principles.md`,
+  its time from the transcript line or the commit. An earlier formulation of his counts instead when
+  it already says which way to go in a choice; the script lists, per principle, his earlier rows in
+  the timeline that share the principle's terms, and Luciano marks one or none. No model call.
 - operative, per repository (D2, i to iii): the commit that put the principle in that repository's
   `CLAUDE.md`; the transcript event that wrote it in `~/.claude/CLAUDE.md`; the transcript event that
   wrote a memory note stating it, per project folder. Found mechanically, by searching the
@@ -162,9 +165,9 @@ with an exposure other than `none` for the main run (D3), and any prompt with an
   picked the chosen one (lost a conflict); picked the other and no principle picked the chosen one;
   NEITHER.
 
-Report per principle: n and its label (D4: anecdotal under 5, exploratory 5 to 9, scored from 10);
-coverage; the four outcomes of D14; stable accuracy with a Wilson interval, only for scored
-principles; the same for B1 and B2 on the same cases, and the difference; the conflict matrix with
+Report per principle (D4 as Luciano marked it: the number, no thresholds or labels): n; coverage;
+the four outcomes of D14; stable accuracy with its Wilson interval; the same for B1 and B2 on the
+same cases, and the difference; the conflict matrix with
 its cases; reversals one by one. A denominator of zero gives null, said so.
 
 Writes `record/validation/runs/<UTC timestamp>_temporal_principles_<model>.json` (every payload,
