@@ -164,3 +164,13 @@ inputs times a cost of failure (risk-based or importance-weighted property testi
 software reliability, "expected cost of failure" in test selection). For each, say whether the
 cost value is a first-class result of a law, whether Bool laws are a special case of it (the
 logical limit), and whether the language certifies or records the measured cost.
+
+## Reports, by SHA-256 (commit 997059b)
+
+    7c4a224d54880fce573f571972b6effc6c116a12a056fa6eab6f965a87562ebb  reports/A-specification-languages.md
+    e50b605d5d577cb8aac5b6b43dba203f8205200322e435c3e94d1eb4862cfe2a  reports/B-contracts-assertions.md
+    71bfb68c20aef60fe9ca461165918fca0df12b7daa4e30e2f1167a0b3692586f  reports/C-implementations-numerics.md
+    40e6229f2098aeb2015b3aafd2c90595eee519cce924e033b8b0f9168e2bb6d8  reports/D-plan-effects-provenance.md
+    ccbb413b4aeac49779d690fd57883e043c84794f9109099b2fe14956aac8b818  reports/E-math-science-languages.md
+    903deb61dfc0ceaea2d79dd6e13f8ecde47d695206e80a3eaef6a5ee7989a3c4  reports/F-kernels-ai-languages.md
+    3bc00bb4bab2ea7f60ac434edd9e29a72e45268db578768d9f6af596ed53cc73  reports/G-cost-valued-laws.md
