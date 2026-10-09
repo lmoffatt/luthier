@@ -4,7 +4,12 @@ Written by `scripts/principle_dates.py` (principle_dates v1), no model. Times in
 principle's entry in record/principles.md; an earlier row of his is listed when it shares terms with the principle, for
 you to say whether it already decides (D1). `operative` is the first commit putting the principle's id in that
 repository's CLAUDE.md, the first write of ~/.claude/CLAUDE.md carrying its statement, and the memory notes that may
-state it (candidates, by shared terms). Under each principle, a Mark: line: ok, or which earlier row and which notes count.
+state it (candidates, by shared terms).
+
+How to mark, under each principle, on its `Mark:` line, separated by `;`:
+`ok` (the explicit date as proposed, no memory note counts); `earlier <row id>` (that earlier row of yours already
+decides, so the principle counts from it); `memory <note.md>` (that note states the principle; it counts from the time
+it was first written, in the repository it is listed under). Example: `earlier day:2026-10-04:x; memory nunca-hardcodear.md`.
 
 ## P1 Luciano's part stays discernible.
 
@@ -13,13 +18,13 @@ state it (candidates, by shared terms). Under each principle, a Mark: line: ok, 
   - earlier? 2026-10-05T09:21:01Z `dialogue:ba3fd298:sin-python-del-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern / no estaremos haciendo parches no?"
   - earlier? 2026-10-05T09:21:01Z `dialogue:c7437496:no-python-de-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern\nno estaremos haciendo parches no?"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 4 shared terms)
-  - memory? `sonolocalizacion-encuadre-estrategico.md` first written 2026-09-09T15:57Z (chat:b66f1892:66, 3 shared terms)
-  - memory? `luthier-objeto-matematico-como-invariante.md` first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 3 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 4 shared terms)
+  - memory? `sonolocalizacion-encuadre-estrategico.md` of account 1, first written 2026-09-09T15:57Z (chat:b66f1892:66, 3 shared terms)
+  - memory? `luthier-objeto-matematico-como-invariante.md` of account 1, first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 3 shared terms)
 
 Mark: 
 
@@ -28,8 +33,8 @@ Mark:
 - explicit: 2026-10-06T06:39Z (luthier@2a660c8:docs/working-method.md:96 2026-10-06T06:39Z)
   - earlier? 2026-06-05T16:14:19Z `day:2026-06-05:code-as-data-same-treatment-as-records`: "Las funciones como datos, o sea, el código como datos. entonces sí podés tener también lo mismo, ¿no?"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
 
 Mark: 
@@ -39,8 +44,8 @@ Mark:
 - explicit: 2026-10-06T06:39Z (luthier@2a660c8:docs/working-method.md:61 2026-10-06T06:39Z)
   - earlier? 2026-10-05T03:26:50Z `dialogue:88936d99:un-concepto-un-nombre`: "el principio es no declarar lo mismo con dos nombres distintos"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 3 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
 
 Mark: 
@@ -52,13 +57,13 @@ Mark:
   - earlier? 2026-10-05T09:21:01Z `dialogue:c7437496:no-python-de-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern\nno estaremos haciendo parches no?"
   - earlier? 2026-10-05T09:21:01Z `dialogue:aa680014:python-del-proyecto-solo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 12 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 11 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 9 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 12 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 11 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 9 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 17 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 11 shared terms)
-  - memory? `experimento-cero-equipamiento.md` first written 2026-09-01T18:12Z (chat:93ba9996:197, 6 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 17 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 11 shared terms)
+  - memory? `experimento-cero-equipamiento.md` of account 1, first written 2026-09-01T18:12Z (chat:93ba9996:197, 6 shared terms)
 
 Mark: 
 
@@ -69,13 +74,13 @@ Mark:
   - earlier? 2026-05-29T17:46:56Z `dialogue:20260529T1400:expresividad-sobre-redundancia`: "si vas a ser más redundante o expresivo ... en lo expresivo digamos, garpa más porque puede ser que lo redundante sea incómodo a veces y te limite al pedo"
   - earlier? 2026-09-30T03:50:20Z `dialogue:890a551c:tipos-semanticos-error-arbol-recursivo`: "Yo creo que los tipos deben ser semanticos es decir definidos por un numero o etiqueta y manteniendo una estructura comun. Porque en definitiva va a ser una predicado que falla y eso se puede represen"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 7 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 5 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 7 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 5 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 7 shared terms)
-  - memory? `luthierizacion-estado.md` first written 2026-09-30T13:32Z (chat:1e377538:284, 5 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 7 shared terms)
+  - memory? `luthierizacion-estado.md` of account 1, first written 2026-09-30T13:32Z (chat:1e377538:284, 5 shared terms)
 
 Mark: 
 
@@ -83,13 +88,13 @@ Mark:
 
 - explicit: 2026-10-06T06:18Z (chat:7217f251:196 2026-10-06T06:18Z)
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 7 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
-  - memory? `feedback-numbered-references.md` first written 2026-10-06T07:19Z (chat:7217f251:460, 4 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 7 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
+  - memory? `feedback-numbered-references.md` of account 1, first written 2026-10-06T07:19Z (chat:7217f251:460, 4 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 8 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 8 shared terms)
-  - memory? `definir-simbolos-en-cada-formula.md` first written 2026-09-11T15:37Z (chat:68ab54e1:94, 5 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 8 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 8 shared terms)
+  - memory? `definir-simbolos-en-cada-formula.md` of account 1, first written 2026-09-11T15:37Z (chat:68ab54e1:94, 5 shared terms)
 
 Mark: 
 
@@ -100,12 +105,12 @@ Mark:
   - earlier? 2023-02-22T19:12:49Z `written:2023-02-22_tapp-wish-list:aprender-de-cada-corrida`: "La idea es que de cada corrida del codigo algo se aprende, ya sea se sabe que una implementacion es correcta ya que se mide su velocidad."
   - earlier? 2026-05-30T21:07:38Z `note:2026-05-30T18.05.22:hott-como-espacio-donde-aplican-probabilidades`: "Son Metrópita y Teori te dan los puntos del espacio, los conjuntos donde aplicas las probabilidades. Sería una cosa así."
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 3 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 6 shared terms)
-  - memory? `nunca-hardcodear.md` first written 2026-09-10T22:30Z (chat:b66f1892:1030, 3 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 6 shared terms)
+  - memory? `nunca-hardcodear.md` of account 1, first written 2026-09-10T22:30Z (chat:b66f1892:1030, 3 shared terms)
 
 Mark: 
 
@@ -116,12 +121,12 @@ Mark:
   - earlier? 2022-07-05T10:53:28Z `written:2022-07-05_sin-titulo-2:environment-ejecuta-funciones`: "el environment tambien debe manejar 1\) la ejecución de funciones para generar nuevas variables."
   - earlier? 2022-08-03T14:56:18Z `written:2022-08-03_haskell:proceso-de-creacion-de-tipos-programable`: "Yo lo que quiero hacer es que el proceso (2) pueda ser programable, es decir que el lenguaje se pueda escribir a sí mismo. Para lograr esto, el lenguaje debe ser simple y robusto no tener sintactic su"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 6 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 6 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 7 shared terms)
-  - memory? `experimento-cero-equipamiento.md` first written 2026-09-01T18:12Z (chat:93ba9996:197, 4 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 7 shared terms)
+  - memory? `experimento-cero-equipamiento.md` of account 1, first written 2026-09-01T18:12Z (chat:93ba9996:197, 4 shared terms)
 
 Mark: 
 
@@ -130,10 +135,10 @@ Mark:
 - explicit: 2026-10-06T06:39Z (luthier@2a660c8:docs/working-method.md:110 2026-10-06T06:39Z; luthier@efd8143:docs/plan-working-method-2026-10-06.md:304 2026-10-06T08:07Z)
   - earlier? 2026-09-30T10:54:02Z `dialogue:890a551c:disaggregate-prelude`: "no me gusta prelude. me parece que deberia ser disgregado en sus componentes y que todo vaya a examples quizas? o hay algo fundamental? yo creo que sonolocalization no va a usar nada de esto no?"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 8 shared terms)
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 3 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 8 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 4 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 4 shared terms)
 
 Mark: 
 
@@ -144,13 +149,13 @@ Mark:
   - earlier? 2026-10-04T23:32:58Z `dialogue:88936d99:choose-best-math-object-for-r-via-algebra`: "No tiene sentido reescribir la aritmetica pero si usamos algebra podemos elegir el objeto matematico que mejor representa a R"
   - earlier? 2023-02-22T19:12:49Z `written:2023-02-22_tapp-wish-list:definir-funciones-en-grupo`: "Esto hace que muchas funciones se deban definir en grupo ya que las postcondiciones involucran a varias funciones a la vez (como leer y escribir o las operaciones en un objeto matematico como un grupo"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 8 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 8 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `luthier-objeto-matematico-como-invariante.md` first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 11 shared terms)
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 5 shared terms)
-  - memory? `luthier-estado-2026-10-05.md` first written 2026-10-05T06:57Z (chat:52d3e68e:3667, 4 shared terms)
+  - memory? `luthier-objeto-matematico-como-invariante.md` of account 1, first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 11 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 5 shared terms)
+  - memory? `luthier-estado-2026-10-05.md` of account 1, first written 2026-10-05T06:57Z (chat:52d3e68e:3667, 4 shared terms)
 
 Mark: 
 
@@ -158,13 +163,13 @@ Mark:
 
 - explicit: 2026-09-10T22:20Z (chat:6878a98d:1148 2026-09-10T22:20Z; chat:6878a98d:1175 2026-09-10T22:29Z)
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 6 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 6 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 8 shared terms)
-  - memory? `nunca-hardcodear.md` first written 2026-09-10T22:30Z (chat:b66f1892:1030, 7 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 8 shared terms)
+  - memory? `nunca-hardcodear.md` of account 1, first written 2026-09-10T22:30Z (chat:b66f1892:1030, 7 shared terms)
 
 Mark: 
 
@@ -173,14 +178,14 @@ Mark:
 - explicit: 2026-10-06T07:10Z (luthier@daa5b95:docs/plan-working-method-2026-10-06.md:37 2026-10-06T07:10Z; luthier@efd8143:docs/plan-working-method-2026-10-06.md:323 2026-10-06T08:07Z)
   - earlier? 2026-09-21T14:42:52Z `day:2026-09-21:luthier-como-meta-proyecto-ligado-a-sonolocalizacion`: "cuando yo ya empiece a ver el tema librerías, yo tengo que ya empezar a trabajar con Luthier"
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
-  - memory? `feedback-numbered-references.md` first written 2026-10-06T07:19Z (chat:7217f251:460, 4 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
+  - memory? `feedback-numbered-references.md` of account 1, first written 2026-10-06T07:19Z (chat:7217f251:460, 4 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 6 shared terms)
-  - memory? `sonolocalizacion-donde-vive.md` first written 2026-08-30T21:38Z (chat:4adb5dd2:41, 4 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 4 shared terms)
-- operative everywhere: ~/.claude/CLAUDE.md 2026-10-06T08:19Z (chat:8d5ce152:340)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 6 shared terms)
+  - memory? `sonolocalizacion-donde-vive.md` of account 1, first written 2026-08-30T21:38Z (chat:4adb5dd2:41, 4 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 4 shared terms)
+- operative in every repository of account 1: its global CLAUDE.md, 2026-10-06T08:19Z (chat:8d5ce152:340)
 
 Mark: 
 
@@ -191,13 +196,13 @@ Mark:
   - earlier? 2022-08-03T14:56:32Z `written:2022-08-03_tapp-before:equals-as-assertion`: "encontre una idea que me puede servir de generadora para tapp/quimulun: la idea de que el signo \"=\" representa aserciones, es decir que un lado es igual al otro."
   - earlier? 2023-03-02T14:27:43Z `written:2023-03-02_estoy-perdido:funciones-por-postconditions-sin-implementacion`: "Defino funciones que son de un tipo dado (es decir que cumplen con ciertas postconditions) sin decir cual es la implmentacion."
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 5 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 4 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 5 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 4 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
-  - memory? `protocolo-y-registro.md` first written 2026-09-09T19:10Z (chat:b66f1892:289, 9 shared terms)
-  - memory? `experimento-cero-equipamiento.md` first written 2026-09-01T18:12Z (chat:93ba9996:197, 3 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 9 shared terms)
+  - memory? `protocolo-y-registro.md` of account 1, first written 2026-09-09T19:10Z (chat:b66f1892:289, 9 shared terms)
+  - memory? `experimento-cero-equipamiento.md` of account 1, first written 2026-09-01T18:12Z (chat:93ba9996:197, 3 shared terms)
 
 Mark: 
 
@@ -208,13 +213,13 @@ Mark:
   - earlier? 2026-05-29T17:46:56Z `dialogue:20260529T1400:contexto-como-dag-y-tipos-implicitos`: "la manera de definir contexto sería como un DAG ... podrías definir tipos implícitos, a través de soluciones, o de, por ejemplo, el tipo que soluciona determinado problema"
   - earlier? 2026-05-29T17:46:56Z `dialogue:20260529T1400:tipos-no-definidos-y-forward-reference`: "vos podés por ejemplo, pasarte a un tipo que no está definido y lo definís después ... si no está definido nunca esos son otros tipos"
 - operative in luthier: CLAUDE.md never
-  - memory? `luthier-fase-semantica.md` first written 2026-09-29T00:08Z (chat:175c0408:122, 15 shared terms)
-  - memory? `luthier-ideas-pipeline.md` first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
-  - memory? `luthier-working-method.md` first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
+  - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 15 shared terms)
+  - memory? `luthier-ideas-pipeline.md` of account 1, first written 2026-08-31T23:13Z (chat:f453278e:48, 4 shared terms)
+  - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 4 shared terms)
 - operative in sonolocalizacion: CLAUDE.md never
-  - memory? `domo-srp-pipeline.md` first written 2026-09-09T15:56Z (chat:b66f1892:62, 6 shared terms)
-  - memory? `luthier-objeto-matematico-como-invariante.md` first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 5 shared terms)
-  - memory? `corridas-autonomas-largas.md` first written 2026-10-05T22:40Z (chat:fea341bd:164, 5 shared terms)
+  - memory? `domo-srp-pipeline.md` of account 1, first written 2026-09-09T15:56Z (chat:b66f1892:62, 6 shared terms)
+  - memory? `luthier-objeto-matematico-como-invariante.md` of account 1, first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 5 shared terms)
+  - memory? `corridas-autonomas-largas.md` of account 1, first written 2026-10-05T22:40Z (chat:fea341bd:164, 5 shared terms)
 
 Mark: 
 
