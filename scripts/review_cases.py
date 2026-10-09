@@ -144,7 +144,8 @@ def write(args) -> int:
          "and frozen before anyone read them; the approved ones are the experiment, none is replaced.", "",
          "Under each case: `Mark:` ok (the case is a real decision, the question and options are fair, what was chosen is right),",
          "no, or a correction in your words. `Tradeoff:` optional, a tradeoff you know the decision weighed, without naming a",
-         "principle. Under each exposure answer: ok if the agent had that principle in view before this moment, no if not.", ""]
+         "principle. Under each exposure answer (the judge says the agent already had that principle in view before this",
+         "moment): leave it blank to accept it, or write no if the agent did not have it in view; only a no changes anything.", ""]
     for cid in sample["cases"]:
         c = cases[cid]
         L += [f"## {cid}", "", f"**Question.** {c['question']}", "", f"- A: {c['A']}", f"- B: {c['B']}", "",
