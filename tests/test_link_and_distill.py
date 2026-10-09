@@ -26,7 +26,7 @@ bad = os.environ.get("STUB_BAD_ONCE") and not bad_marker.exists()
 if bad:
     bad_marker.write_text("x")
 
-if prompt.startswith("# Prompt: link_ideas_v1"):
+if prompt.startswith("# Prompt: link_ideas_v"):
     ex = prompt.split("## Existing lineages")[1].split("## Rows to place")[0]
     existing = [l.split(" | ")[0] for l in ex.splitlines() if " | " in l]
     rows = [l.split(" | ") for l in prompt.split("## Rows to place")[1].splitlines() if l.count(" | ") >= 5]
@@ -50,27 +50,36 @@ if prompt.startswith("# Prompt: link_ideas_v1"):
     if bad:
         assign = assign[1:]
     print(json.dumps({"new_lineages": new, "assign": assign, "unplaced": unplaced}))
-elif prompt.startswith("# Prompt: distill_principles_v1"):
-    blocks = prompt.split("## Lineages")[1].split("\n### ")[1:]
+elif prompt.startswith("# Prompt: find_principles_v1"):
+    blocks = prompt.split("## Input")[1].split("\n### ")[1:]
     cls, labels, quote, text = [], [], None, None
     for k, b in enumerate(blocks):
         lab = b.splitlines()[0].split()[0]
         labels.append(lab)
         cls.append([lab, "candidate", "C1", "recurs"] if k == 0 else [lab, "considered", "", "a smaller idea"])
         for l in b.splitlines():
-            m = re.match(r'- (q\d+) \| [^|]+ \| (\w+) \| \w+ \| "(.*)"$', l)
-            if k == 0 and m and quote is None and m.group(2) == "Luciano":
+            m = re.match(r'- (q\d+) \| [^|]+ \| ([^|]+) \| \w+ \| "(.*)"$', l)
+            if k == 0 and m and quote is None and m.group(2).strip() not in ("model", "pasted"):
                 quote, text = m.group(1), m.group(3)
     if bad:
         text = "words he never said"
-    print(json.dumps({"candidates": [{"id": "C1", "harms": [{"consumer": "computation", "how": "a larger kernel"}],
-                                      "strongest": {"consumer": "reader", "axis": "conceptual", "why": "reframes what a type is"},
+    print(json.dumps({"candidates": [{"id": "C1", "harms": ["a larger kernel"],
+                                      "strongest": {"axis": "conceptual", "why": "reframes what a type is"},
                                       "also": [], "beats": {"lineage": labels[1], "why": "narrower"},
                                       "statement": "A type is a concept.", "scope": "language",
-                                      "lineages": labels[:1], "quote": quote, "quote_text": text,
-                                      "assumption": "concepts are what a scientist reasons with",
-                                      "guides": ["D-2026-10-06-a"], "conflicts": [{"principle": "P2", "how": "x"}]}],
-                      "classification": cls, "against": []}))
+                                      "lineages": labels[:1], "quote": quote, "quote_text": text}],
+                      "classification": cls}))
+elif prompt.startswith("# Prompt: match_principles_v1"):
+    print(json.dumps({"matches": [{"candidate": "C1", "verdict": "extends", "principle": "P2", "change": "adds types",
+                                   "assumption": "a", "guides": ["D-2026-10-06-a"], "conflicts": []}], "against": []}))
+elif prompt.startswith("# Prompt: compare_principles_v1"):
+    cs = re.findall(r"^- (C\d+):", prompt.split("## List C")[1].split("## List A")[0], re.M)
+    first_a = re.search(r"^- ([A-Z]\d+):", prompt.split("## List A")[1], re.M).group(1)
+    print(json.dumps({"judgments": [{"candidate": c, "A": [{"item": first_a, "why": "same"}] if k == 0 else [],
+                                     "B": [{"item": "P1", "why": "echo"}] if k == 1 else []} for k, c in enumerate(cs)]}))
+elif prompt.startswith("# Prompt: recall_principles_v1"):
+    print(json.dumps({"candidates": [{"id": "C1", "statement": "Readability counts."},
+                                     {"id": "C2", "statement": "Your part stays discernible."}]}))
 else:
     print("?")
 '''
@@ -196,90 +205,108 @@ D-2026-10-06-a  First.
 Kind:       principle. For P1
 Status:     current
 """
+FIND = ROOT / "scripts" / "find_principles.py"
+MATCH = ROOT / "scripts" / "match_principles.py"
+COMPARE = ROOT / "scripts" / "compare_principles.py"
 
 
-def distill(tmp_path, env, *args):
-    (tmp_path / "principles.md").write_text(PRINCIPLES)
-    (tmp_path / "decisions.md").write_text(DECISIONS)
-    (tmp_path / "objectives.md").write_text("# Objectives\n\n1. Be useful.\n")
-    return subprocess.run([sys.executable, str(DISTILL), "--lineages", str(tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.json"),
-                           "--timeline", str(tmp_path / "timeline.jsonl"), "--principles", str(tmp_path / "principles.md"),
-                           "--decisions", str(tmp_path / "decisions.md"), "--objectives", str(tmp_path / "objectives.md"),
-                           "--output-dir", str(tmp_path / "dist"), "--cli", "claude", "--date", "2026-01-02", *args],
-                          capture_output=True, text=True, env=env)
+def find(tmp_path, env, *args):
+    return subprocess.run([sys.executable, str(FIND), "--lineages", str(tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.json"),
+                           "--timeline", str(tmp_path / "timeline.jsonl"), "--output-dir", str(tmp_path / "dist"),
+                           "--cli", "claude", "--date", "2026-01-02", "--var", "language=Luthier",
+                           "--var", "designers=Luciano Moffatt", *args], capture_output=True, text=True, env=env)
 
 
-def test_distill_drafts_candidates_with_the_quote_and_its_author_filled_in(tmp_path):
+def test_find_is_blind_checks_its_quotes_and_fills_in_whose_words(tmp_path):
     tl, env = setup(tmp_path)
     assert link(tmp_path, env).returncode == 0
     env["STUB_BAD_ONCE"] = "1"
     (tmp_path / "calls.jsonl.bad").unlink(missing_ok=True)
     (tmp_path / "calls.jsonl").unlink()
-    r = distill(tmp_path, env)
+    r = find(tmp_path, env, "--redact", "tipos=TYPES")
     assert r.returncode == 0, r.stderr
-    run = json.loads((tmp_path / "dist" / "2026-01-02_distill_principles_v1_claude-code_opus.json").read_text())
-    # the first answer of the run carried a quote that is not in its row
-    assert len(run["attempts"]) == 2 and any("the quote is not in row" in e for e in run["attempts"][0]["errors"])
-    # the per-day and per-note readings of one utterance tie in time; the id breaks the tie
-    assert run["answer"]["candidates"][0]["quote_row"] == "day:2026-05-29:tipos"
-    assert len(run["inputs"]) == 5
-    assert all(len(v["sha256"]) == 64 for v in run["inputs"].values()) and len(run["input_sha256"]) == 64
+    run = json.loads((tmp_path / "dist" / "2026-01-02_find_principles_v1_claude-code_opus.json").read_text())
+    assert len(run["attempts"]) == 2 and any("quote_text is not in" in e for e in run["attempts"][0]["errors"])
     prompt = calls(tmp_path)[0]["prompt"]
-    assert "at most 7" in prompt and "## Ledger" in prompt and "### l1 L-types-are-concepts" in prompt
-    assert "- q1 | 2026-05-29 14:00 | model | proposes" in prompt
-    assert run["quote_labels"]["q2"] == "day:2026-05-29:tipos"
-    assert run["lineage_labels"] == {"l1": "L-types-are-concepts", "l2": "L-costs-explicit"}
-    assert "rows:" not in prompt.split("## Lineages")[1]  # the counts are not shown to the model
-    md = (tmp_path / "dist" / "2026-01-02_distill_principles_v1_claude-code_opus.md").read_text()
-    assert "C1  A type is a concept." in md and "Said by:    Luciano, 2026-05-29 14:03" in md
-    assert "Source:     n.md [00:15] (row day:2026-05-29:tipos)" in md and "Mark:" in md
-    assert "lineages begun by model 1" in md
-    assert "-- from the rows, by the script" in md and "-- the model's reading (opus, effort low)" in md
-    assert "Strongest:  the person who uses and reads it, conceptual. reframes what a type is" in md
-    assert "Harms:      the computation. a larger kernel" in md
-    assert "Beats:      L-costs-explicit (Costs are explicit.). narrower" in md
-    assert "## Considered and left out" in md and "`L-costs-explicit`" in md and "Would have guided (for P13, later): D-2026-10-06-a" in md
-    assert "Finding: infectability" in prompt and "do not choose or\nrank by them" in prompt and "Two kinds of idea" in prompt
-    r = distill(tmp_path, env)
+    body = prompt.split("## Input")[1]
+    # blind: nothing of the principles, the log or the objectives; no counts; names redacted
+    for absent in ("Principles in force", "Decision log", "Ledger", "objectives", "rows:", "witnesses",
+                   "type carries", "certificate", "P13"):
+        assert absent not in prompt, absent
+    assert "Luthier" in prompt.split("## Input")[0] and "TYPES" in body and "los tipos" not in body
+    assert run["answer"]["candidates"][0]["quote_row"] in ("day:2026-05-29:tipos", "note:2026-05-29T14.03.24:tipos")
+    md = (tmp_path / "dist" / "2026-01-02_find_principles_v1_claude-code_opus.md").read_text()
+    assert "-- from the rows, by the script" in md and "Said by:    Luciano" in md
+    assert "Strongest:  conceptual. reframes what a type is" in md and "Harms:      a larger kernel" in md
+    assert "## Considered and left out" in md and "`L-costs-explicit`" in md
+    r = find(tmp_path, env)
     assert r.returncode == 2 and "--force redoes it" in r.stderr
 
 
-def test_distill_checks(tmp_path):
+def test_match_sets_the_blind_candidates_against_what_is_in_force(tmp_path):
+    tl, env = setup(tmp_path)
+    assert link(tmp_path, env).returncode == 0 and find(tmp_path, env).returncode == 0
+    (tmp_path / "principles.md").write_text(PRINCIPLES)
+    (tmp_path / "decisions.md").write_text(DECISIONS)
+    (tmp_path / "objectives.md").write_text("# Objectives\n\n1. Be useful.\n")
+    r = subprocess.run([sys.executable, str(MATCH), "--found", str(tmp_path / "dist" / "2026-01-02_find_principles_v1_claude-code_opus.json"),
+                        "--principles", str(tmp_path / "principles.md"), "--decisions", str(tmp_path / "decisions.md"),
+                        "--objectives", str(tmp_path / "objectives.md"), "--output-dir", str(tmp_path / "dist"),
+                        "--cli", "claude", "--date", "2026-01-02"], capture_output=True, text=True, env=env)
+    assert r.returncode == 0, r.stderr
+    prompt = calls(tmp_path)[-1]["prompt"]
+    assert "## Principles in force" in prompt and "## Ledger" in prompt and "### C1" in prompt
+    md = (tmp_path / "dist" / "2026-01-02_match_principles_v1_claude-code_opus.md").read_text()
+    assert "C1  A type is a concept." in md and "Against:    extends P2: adds types" in md
+    assert "Would have guided (for P13, later): D-2026-10-06-a" in md and "Mark:" in md
+
+
+def test_find_and_match_checks():
     sys.path.insert(0, str(ROOT / "scripts"))
-    import distill_principles as dp
-    der = {"L-a": {"members": [{"id": "r1", "quote": "los tipos tienen que ser conceptos", "who": "Luciano"}]},
-           "L-b": {"members": [{"id": "r2", "quote": "otra cosa", "who": "Luciano"}]}}
-    principles = {"P1": {}}
-    decisions = {"D-2026-10-06-a": {}}
-    cand = {"id": "C1", "statement": "s", "assumption": "a", "scope": "language", "lineages": ["L-a"],
-            "harms": [], "strongest": {"consumer": "computation", "axis": "emotive", "why": "w"}, "also": [],
-            "beats": {"lineage": "L-b", "why": "narrower"},
-            "quote_row": "r1", "quote": "los tipos ... conceptos", "guides": ["D-2026-10-06-a"]}
-    good = {"classification": [{"lineage": "L-a", "verdict": "candidate", "candidate": "C1"},
-                               {"lineage": "L-b", "verdict": "considered"}],
+    import find_principles as fp
+    import match_principles as mp
+    der = {"L-a": {"members": [{"id": "r1"}]}, "L-b": {"members": [{"id": "r2"}]}}
+    cand = {"id": "C1", "statement": "s", "scope": "language", "lineages": ["L-a"], "harms": [],
+            "strongest": {"axis": "emotive", "why": "w"}, "also": [], "beats": {"lineage": "L-b", "why": "n"},
+            "quote_label": "q1", "quote_row": "r1", "quote": "los tipos ... conceptos"}
+    good = {"classification": [{"lineage": "L-a", "label": "l1", "verdict": "candidate", "candidate": "C1"},
+                               {"lineage": "L-b", "label": "l2", "verdict": "considered", "candidate": None}],
             "candidates": [cand]}
-    assert dp.check_answer(good, der, principles, decisions, 7) == []
-    two = json.loads(json.dumps(good))
-    two["candidates"].append({**cand, "id": "C2"})
-    two["classification"][0] = {"lineage": "L-a", "verdict": "candidate", "candidate": "C1"}
-    assert any("C1: above_next is missing" in e for e in dp.check_answer(two, der, principles, decisions, 7))
+    qtext = {"q1": "los tipos tienen que ser conceptos"}
+    assert fp.check_answer(good, der, qtext, 7) == []
     bad = json.loads(json.dumps(good))
-    bad["classification"] = [{"lineage": "L-x", "verdict": "covered", "principle": "P9"}]
-    c = bad["candidates"][0]
-    c.update(quote="conceptos ... los tipos", guides=["D-x"], harms=None, also=[{}, {}, {}],
-             strongest={"consumer": "writer", "axis": "popular", "why": ""}, beats={"lineage": "L-a", "why": "x"})
-    errs = "\n".join(dp.check_answer(bad, der, principles, decisions, 0))
-    for e in ("1 candidates; at most 0", "unknown lineage 'L-x'", "principle 'P9'", "lineages not classified: L-a",
-              "the quote is not in row r1", "guides 'D-x'", "strongest needs", "also is a list of at most 2",
-              "harms must be a list", "beats must name a lineage classified considered"):
+    bad["candidates"][0].update(quote="conceptos ... los tipos", harms=None, also=[{}, {}, {}],
+                                strongest={"axis": "popular", "why": ""}, beats={"lineage": "L-a", "why": "x"}, scope="x")
+    errs = "\n".join(fp.check_answer(bad, der, qtext, 0))
+    for e in ("1 candidates; at most 0", "quote_text is not in q1", "strongest needs", "also is at most 2",
+              "harms must be a list", "beats must name", "scope 'x'"):
         assert e in errs, e
-    w = dp.run_warnings({"candidates": [cand, {**cand, "id": "C2"}, {**cand, "id": "C3"}]},
-                        "| a | few primitives, the rest derived; one kind of thing where there were several |")
-    assert any("strongest axis is emotive" in x for x in w) and any("no candidate names a harm" in x for x in w)
-    copy = {**cand, "strongest": {"consumer": "computation", "axis": "aesthetic",
-                                  "why": "few primitives, the rest derived; one kind of thing where there were"}}
-    assert any("repeats eight words of the table" in x for x in dp.run_warnings({"candidates": [copy]},
-               "| a | few primitives, the rest derived; one kind of thing where there were several |"))
+    principles, decisions = {"P1": {}}, {"D-2026-10-06-a": {}}
+    m = {"matches": [{"candidate": "C1", "verdict": "extends", "principle": "P9", "change": "", "assumption": "",
+                      "guides": ["D-x"], "conflicts": [{"principle": "P7"}]}], "against": [{"principle": "P3", "evidence": ["C9"]}]}
+    errs = "\n".join(mp.check(m, {"C1": {}, "C2": {}}, principles, decisions))
+    for e in ("names 'P9'", "extends without a change", "empty assumption", "guides 'D-x'", "conflicts with",
+              "C2: matched 0 times", "against: 'P3'", "evidence 'C9'"):
+        assert e in errs, e
+
+
+def test_compare_scores_hits_and_leaks_without_telling_the_judge_which_list_is_which(tmp_path):
+    tl, env = setup(tmp_path)
+    ref = tmp_path / "reference.md"
+    ref.write_text("# Reference\n\n- Z7 Readability counts.\n- Z2 Explicit is better than implicit.\n")
+    r = subprocess.run([sys.executable, str(COMPARE), "--reference", str(ref), "--recall", "--var", "language=Python",
+                        "--var", "designers=Guido van Rossum", "--cli", "claude", "--date", "2026-01-02"],
+                       capture_output=True, text=True, env=env)
+    assert r.returncode == 0, r.stderr
+    judge = calls(tmp_path)[-1]["prompt"]
+    assert "## List A" in judge and "## List B" in judge and "reference" not in judge.lower().split("## input")[1]
+    assert "Luthier" not in judge.split("## Input")[1].split("## List B")[0]
+    run = json.loads((tmp_path / "2026-01-02_recall_compare_principles_v1_claude-code_opus.json").read_text())
+    assert run["score"] == {**run["score"], "candidates": 2, "hits": 1, "leaks": 1, "neither": 0, "passes": False}
+    md = (tmp_path / "2026-01-02_recall_compare_principles_v1_claude-code_opus.md").read_text()
+    assert "| 2 | 1 | 1 | 0 | no |" in md and "states reference Z7" in md and "echoes Luthier P1" in md
+    assert "Reference items no candidate states (1 of 2)" in md
+
 
 def test_link_splits_a_window_whose_answer_hits_the_output_limit(tmp_path):
     tl, env = setup(tmp_path)

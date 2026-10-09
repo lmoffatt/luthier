@@ -496,4 +496,24 @@ Source:     chat:8c2cb06b:1185
 Kind:       method. The second quote is his criterion as the prompt records it; the model's memory
             of 2026-05-30 records that he chose to keep it. For P1 (his criterion, not one the
             model chose), P13 (kept in its place)
-Status:     current, in prompts/distill_principles_v1.md and scripts/distill_principles.py
+Status:     current for its two criteria; where they act changed with D-2026-10-09-c (the single
+            distillation became a blind finding step and a matching step)
+
+D-2026-10-09-c  The step that finds candidate principles is blind: it sees only the lineages, the
+                language's name and designers, and Luciano's criterion of infectability unchanged,
+                with no description of Luthier, no principles in force, no log and no objectives;
+                a second step sets its candidates against what is in force. A table that read the
+                axes for Luthier's two kinds of idea was dropped. The filter is tested by a control
+                on Python and Haskell (record/controls/), with references fixed before any run, a
+                baseline of what the model knows without the corpus, and names redacted.
+Author:     Luciano for the principle and the control; the model for the two steps, the baseline
+            and the redaction (the last two after his objection that a model knows Python and
+            Haskell)
+Quote:      "estan inyectando ideas de Luthier en el filtro que busca las ideas de Luthier."
+            "hace el control sobre python y haskell me gusto"
+Source:     chat:8c2cb06b:1427
+            chat:8c2cb06b:1439
+Kind:       method. For P1 (what is found is in his ideas, not in the filter), P4 (principles are
+            found, not brought)
+Status:     current, in prompts/find_principles_v1.md, scripts/find_principles.py,
+            scripts/match_principles.py, scripts/compare_principles.py and record/controls/README.md

@@ -57,3 +57,25 @@ Read, decided before running:
 Limits known before running: Luthier's own lineages were made with `link_ideas_v1`, which names
 Luthier; the controls use `link_ideas_v2`, which does not. The extraction prompt of the controls
 differs from those used for Luthier's notes, voice notes and chats.
+
+## Amendment, 2026-10-09, before any finding step ran
+
+Luciano: "el problema es que cualquier agente va a saber qué es haskell y python". A model knows
+both languages' principles from its training, so a hit may come from memory and not from the
+corpus. Added, before the finding step ran on either corpus (the extraction of ideas was already
+running; it reads the texts and does not judge principles):
+
+- **A baseline from memory.** `compare_principles.py --recall`: the same model lists each
+  language's principles with no text to read, and the judge scores that list against the same
+  reference. A hit of the filter counts as coming from the corpus only if the baseline did not hit
+  the same reference item.
+- **A redacted run.** The finding step runs twice per language: as is, and with names replaced in
+  what the model is shown (`--redact`): Python: `Python=L`, `Guido van Rossum=the designer`,
+  `Guido=the designer`, `van Rossum=the designer`, `ABC=the predecessor`; Haskell: `Haskell=L`.
+  Redaction is partial (a model can recognize Python from list comprehensions); a difference between
+  the two runs measures how much the name drives the answer.
+- **A language a model cannot know** is being looked for (released late 2025 or 2026, or obscure,
+  with a principles statement separate from its other design writings, preferably not about
+  verification or code written by models). If one is found, it gets the same protocol.
+
+Leakage keeps its reading: a Luthier item a candidate states with no reference item behind it.
