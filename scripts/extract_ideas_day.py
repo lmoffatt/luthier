@@ -83,6 +83,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                    help="Only these dates (YYYY-MM-DD); default every day found.")
     p.add_argument("--force", action="store_true", help="Redo a day even when its output covers its notes.")
     p.add_argument("--dry-run", action="store_true", help="List the days and their notes without calling the model.")
+    p.add_argument("--quote-match", choices=QUOTE_MATCHES, default="words",
+                   help="how a quote is compared with its transcript: words (default; punctuation and case "
+                        "dropped, since Whisper guesses them) or exact")
     p.add_argument("--check-only", action="store_true",
                    help="Only check the quotes of the existing outputs against the transcripts.")
     p.add_argument("--sleep", type=float, default=0.0, help="Pause between calls (seconds).")
@@ -189,14 +192,14 @@ def _assemble_input(notes: list[Note]) -> str:
 
 def _build_frontmatter(*, date: str, notes: list[Note], n_ideas: int, quotes_found: int,
                        quotes_total: int, prompt_id: str, prompt_sha: str, agent: str,
-                       model: str, effort: str) -> str:
+                       model: str, effort: str, quote_match: str = "words") -> str:
     lines = ["---", f"date: {date}", "notes:"]
     for n in notes:
         lines += [f"  - audio: {n.audio}", f"    transcript: {n.path.name}",
                   f"    duration: {n.duration}", f"    sha256: {n.sha256}"]
     lines += [
         f"ideas: {n_ideas}",
-        f"quotes_found: {quotes_found}/{quotes_total}",
+        f"quotes_found: {quotes_found}/{quotes_total} (match: {quote_match})",
         f"generated_by: {prompt_id}",
         f"prompt_sha256: {prompt_sha}",
         f"mode: {MODE}",
@@ -213,14 +216,27 @@ def _norm(text: str) -> str:
     return " ".join(text.split())
 
 
+def _words(text: str) -> str:
+    """The text as its words only: composed form, punctuation dropped, lower case, single spaces.
+    Whisper's punctuation and capitals are its own guess, so a quote that differs from the
+    transcript only there quotes it faithfully."""
+    text = unicodedata.normalize("NFC", text)
+    text = "".join(" " if unicodedata.category(c).startswith("P") else c for c in text)
+    return " ".join(text.casefold().split())
+
+
+QUOTE_MATCHES = ("words", "exact")
+
+
 ELLIPSIS_RE = re.compile(r"\s*(?:\.\.\.|…|\[\.\.\.\]|\[…\])\s*")
 
 
-def _pieces_in_order(quote: str, haystack: str) -> bool:
-    """A quote is found when each of its pieces, split at an ellipsis, occurs in order."""
+def _pieces_in_order(quote: str, haystack: str, norm=None) -> bool:
+    """A quote is found when each of its pieces, split at an ellipsis, occurs in order.
+    The quote is split before `norm` runs, since `norm` may drop the dots of the ellipsis."""
     pos = 0
     for piece in ELLIPSIS_RE.split(quote):
-        piece = piece.strip()
+        piece = (norm(piece) if norm else piece).strip()
         if not piece:
             continue
         i = haystack.find(piece, pos)
@@ -230,8 +246,12 @@ def _pieces_in_order(quote: str, haystack: str) -> bool:
     return True
 
 
-def check_quotes(body: str, notes: list[Note]) -> tuple[int, int, list[str]]:
-    """Return (found, total, problems): each quote looked for in the transcript of the note it cites."""
+def check_quotes(body: str, notes: list[Note], match: str = "words") -> tuple[int, int, list[str]]:
+    """Return (found, total, problems): each quote looked for in the transcript of the note it cites.
+    match "words" compares words only (punctuation and case dropped on both sides); "exact" keeps
+    them. A quote not found in its note but found in another note of the day is reported as cited
+    in the wrong note."""
+    norm = _words if match == "words" else _norm
     by_audio = {n.audio: n for n in notes}
     by_stem = {n.path.stem: n for n in notes}
     found, problems = 0, []
@@ -242,9 +262,14 @@ def check_quotes(body: str, notes: list[Note]) -> tuple[int, int, list[str]]:
         if note is None:
             problems.append(f"[{ts}] cites a note not in this day: {file_name}")
             continue
-        haystack = _norm(TIMESTAMP_RE.sub(" ", note.text))
-        if _pieces_in_order(_norm(text), haystack):
+        haystack = norm(TIMESTAMP_RE.sub(" ", note.text))
+        if _pieces_in_order(text, haystack, norm):
             found += 1
+            continue
+        elsewhere = [n.path.name for n in notes if n is not note
+                     and _pieces_in_order(text, norm(TIMESTAMP_RE.sub(" ", n.text)), norm)]
+        if elsewhere:
+            problems.append(f"cites the wrong note: {note.path.name} [{ts}], the quote is in {', '.join(elsewhere)}: \"{text[:80]}\"")
         else:
             problems.append(f"not found in {note.path.name} [{ts}]: \"{text[:80]}\"")
     return found, len(quotes), problems
@@ -258,9 +283,9 @@ def _existing_hashes(out: Path) -> set[str]:
     return set(SHA_LINE_RE.findall(fm.group(0))) if fm else set()
 
 
-def _rewrite_quote_counts(out: Path, found: int, total: int) -> None:
+def _rewrite_quote_counts(out: Path, found: int, total: int, match: str) -> None:
     text = out.read_text(encoding="utf-8")
-    new, n = re.subn(r"^quotes_found:.*$", f"quotes_found: {found}/{total}", text, count=1, flags=re.MULTILINE)
+    new, n = re.subn(r"^quotes_found:.*$", f"quotes_found: {found}/{total} (match: {match})", text, count=1, flags=re.MULTILINE)
     if n:
         out.write_text(new, encoding="utf-8")
 
@@ -315,8 +340,8 @@ def main(argv: list[str]) -> int:
             if not out.exists():
                 continue
             body = FRONTMATTER_RE.sub("", out.read_text(encoding="utf-8"))
-            found, total, problems = check_quotes(body, notes)
-            _rewrite_quote_counts(out, found, total)
+            found, total, problems = check_quotes(body, notes, args.quote_match)
+            _rewrite_quote_counts(out, found, total, args.quote_match)
             print(f"{out.name}: quotes found {found}/{total}")
             for pr in problems:
                 print(f"  - {pr}")
@@ -361,10 +386,10 @@ def main(argv: list[str]) -> int:
                 raw = _run_codex(user_message, model, args.timeout, REPO_ROOT)
             body = _clean_body(raw)
             n_ideas = len(IDEA_HEADING_RE.findall(body))
-            found, total, problems = check_quotes(body, notes)
+            found, total, problems = check_quotes(body, notes, args.quote_match)
             frontmatter = _build_frontmatter(
                 date=date, notes=notes, n_ideas=n_ideas, quotes_found=found, quotes_total=total,
-                prompt_id=prompt_id, prompt_sha=prompt_sha, agent=agent, model=model,
+                prompt_id=prompt_id, prompt_sha=prompt_sha, agent=agent, model=model, quote_match=args.quote_match,
                 effort=args.effort if cli == "claude" else "n/a",
             )
             out.write_text(f"{frontmatter}\n\n{body}\n", encoding="utf-8")
