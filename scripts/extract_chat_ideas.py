@@ -54,7 +54,7 @@ WHO_TO_AUTHOR = {"luciano": "Luciano", "model": "Model", "pasted": "Luciano"}
 
 def _words(text: str) -> str:
     """Words only: composed form, punctuation and symbols dropped, lower case, single spaces."""
-    text = unicodedata.normalize("NFC", text)
+    text = unicodedata.normalize("NFC", text).replace("\\n", " ").replace("\\t", " ")
     text = "".join(" " if unicodedata.category(c)[0] in "PS" else c for c in text)
     return " ".join(text.casefold().split())
 

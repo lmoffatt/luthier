@@ -304,9 +304,10 @@ def test_extract_checks_quotes_against_the_cited_turn_and_its_author(tmp_path):
         entry("model-words-as-his", "Luciano", 4, "esto es mío"),
         entry("wrong-author", "Luciano", 2, "esto es mío"),
         entry("no-such-turn", "model", 9, "x"),
+        entry("escaped-newline", "model", 2, "Olvido ∘ Serie\\n≡ Serie ∘ Olvido"),
     ])
     found, total, problems = eci.check_quotes(body, turns)
-    assert (found, total) == (2, 6)
+    assert (found, total) == (3, 7)
     text = "\n".join(problems)
     assert "reordered: not in turn 4" in text
     assert "model-words-as-his: not in turn 4; it is in turn 2 (Model)" in text
