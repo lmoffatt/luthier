@@ -17,8 +17,8 @@ Idempotent: a day whose output exists and lists the same notes with the same has
 its inputs. Luciano runs it, as he runs extract_ideas.py.
 
 After each call every quote of the body is looked for in the note it cites, with whitespace
-collapsed and both texts in Unicode's composed form; the quotes not found are printed, and the
-counts go to the frontmatter. --check-only runs that check on existing outputs, without the model.
+collapsed and both texts in Unicode's composed form, and an ellipsis in the quote allowed to
+stand for skipped words; the quotes not found are printed, and the counts go to the frontmatter. --check-only runs that check on existing outputs, without the model.
 """
 from __future__ import annotations
 
@@ -45,6 +45,8 @@ MODE = "editor"
 DEFAULT_CLAUDE_MODEL = "opus"
 DEFAULT_CODEX_MODEL = "gpt-5.4-mini"
 DEFAULT_TIMEOUT = 900.0
+DEFAULT_EFFORT = "low"
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
 
 DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
 ARCHIVO_RE = re.compile(r"^\s*\*\*Archivo:\*\*\s*(.+?)\s*$", re.MULTILINE)
@@ -73,6 +75,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--cli", choices=("auto", "claude", "codex"), default="auto",
                    help="Command line to use; 'auto' prefers claude and falls back to codex.")
     p.add_argument("--model", default=None, help="Model; default by command line.")
+    p.add_argument("--effort", choices=EFFORTS, default=DEFAULT_EFFORT,
+                   help=f"Thinking effort passed to claude (default {DEFAULT_EFFORT}: a day of 1,354 words took 64 s "
+                        "at low and over 900 s at the default effort of 2026-10-09; codex ignores it).")
     p.add_argument("--agent", default=None, help="Agent name in the frontmatter; default by command line.")
     p.add_argument("--days", nargs="*", default=None,
                    help="Only these dates (YYYY-MM-DD); default every day found.")
@@ -112,9 +117,9 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _run_claude(prompt_text: str, model: str, timeout: float) -> str:
+def _run_claude(prompt_text: str, model: str, effort: str, timeout: float) -> str:
     proc = subprocess.run(
-        ["claude", "-p", "--model", model, "--output-format", "text",
+        ["claude", "-p", "--model", model, "--effort", effort, "--output-format", "text",
          "--no-session-persistence", "--tools", ""],
         input=prompt_text, capture_output=True, text=True, timeout=timeout,
     )
@@ -184,7 +189,7 @@ def _assemble_input(notes: list[Note]) -> str:
 
 def _build_frontmatter(*, date: str, notes: list[Note], n_ideas: int, quotes_found: int,
                        quotes_total: int, prompt_id: str, prompt_sha: str, agent: str,
-                       model: str) -> str:
+                       model: str, effort: str) -> str:
     lines = ["---", f"date: {date}", "notes:"]
     for n in notes:
         lines += [f"  - audio: {n.audio}", f"    transcript: {n.path.name}",
@@ -197,6 +202,7 @@ def _build_frontmatter(*, date: str, notes: list[Note], n_ideas: int, quotes_fou
         f"mode: {MODE}",
         f"agent: {agent}",
         f"model: {model}",
+        f"effort: {effort}",
         "---",
     ]
     return "\n".join(lines)
@@ -205,6 +211,23 @@ def _build_frontmatter(*, date: str, notes: list[Note], n_ideas: int, quotes_fou
 def _norm(text: str) -> str:
     text = unicodedata.normalize("NFC", text)
     return " ".join(text.split())
+
+
+ELLIPSIS_RE = re.compile(r"\s*(?:\.\.\.|…|\[\.\.\.\]|\[…\])\s*")
+
+
+def _pieces_in_order(quote: str, haystack: str) -> bool:
+    """A quote is found when each of its pieces, split at an ellipsis, occurs in order."""
+    pos = 0
+    for piece in ELLIPSIS_RE.split(quote):
+        piece = piece.strip()
+        if not piece:
+            continue
+        i = haystack.find(piece, pos)
+        if i < 0:
+            return False
+        pos = i + len(piece)
+    return True
 
 
 def check_quotes(body: str, notes: list[Note]) -> tuple[int, int, list[str]]:
@@ -220,7 +243,7 @@ def check_quotes(body: str, notes: list[Note]) -> tuple[int, int, list[str]]:
             problems.append(f"[{ts}] cites a note not in this day: {file_name}")
             continue
         haystack = _norm(TIMESTAMP_RE.sub(" ", note.text))
-        if _norm(text) in haystack:
+        if _pieces_in_order(_norm(text), haystack):
             found += 1
         else:
             problems.append(f"not found in {note.path.name} [{ts}]: \"{text[:80]}\"")
@@ -315,7 +338,7 @@ def main(argv: list[str]) -> int:
     n_notes = sum(len(v) for v in days.values())
     print(f"Days: {len(days)} ({n_notes} notes) | done: {skipped} | pending: {len(jobs)}"
           + (f", of which {redo} redone because their notes changed" if redo else ""))
-    print(f"CLI: {cli} | model: {model} | agent: {agent} | prompt: {prompt_id} ({prompt_sha[:12]})")
+    print(f"CLI: {cli} | model: {model} | effort: {args.effort} | agent: {agent} | prompt: {prompt_id} ({prompt_sha[:12]})")
     if not jobs:
         print("Nothing to do.")
         return 0
@@ -333,7 +356,7 @@ def main(argv: list[str]) -> int:
             user_message = prompt_template.replace(PLACEHOLDER, _assemble_input(notes))
             print(f"[{i:02d}/{len(jobs):02d}] {date}: {len(notes)} notes", flush=True)
             if cli == "claude":
-                raw = _run_claude(user_message, model, args.timeout)
+                raw = _run_claude(user_message, model, args.effort, args.timeout)
             else:
                 raw = _run_codex(user_message, model, args.timeout, REPO_ROOT)
             body = _clean_body(raw)
@@ -342,6 +365,7 @@ def main(argv: list[str]) -> int:
             frontmatter = _build_frontmatter(
                 date=date, notes=notes, n_ideas=n_ideas, quotes_found=found, quotes_total=total,
                 prompt_id=prompt_id, prompt_sha=prompt_sha, agent=agent, model=model,
+                effort=args.effort if cli == "claude" else "n/a",
             )
             out.write_text(f"{frontmatter}\n\n{body}\n", encoding="utf-8")
             generated += 1
