@@ -242,7 +242,7 @@ def main(argv: list[str]) -> int:
             g = next((w for w in ws if len(stmt & terms(w["text"])) >= max(3, round(args.global_share * len(stmt)))), None)
             if g:
                 glob_[str(i)] = {"time": g["time"], "source": g["source"]}
-        out[pid] = {"statement": e["statement"], "sources": dated, "explicit": explicit,
+        out[pid] = {"statement": e["statement"], "quote": e.get("Quote", ""), "sources": dated, "explicit": explicit,
                     "explicit_earlier_candidates": earlier,
                     "operative": operative, "global_claude_md": glob_,
                     "status": "proposed: Luciano marks the explicit date and the memory notes"}
