@@ -81,4 +81,38 @@ def test_units_actions_commits_and_withholding(tmp_path):
     assert c["withheld"] == "private words (1)" and c["luciano"]["text"] == "[withheld]"
     assert c["files"] == ["/home/x/luthier/record/notes.md"] and c["areas"] == ["method"]
     md = (out / "decision_units.md").read_text()
-    assert "Units: 3; with a commit 1; withheld 1." in md and "databaum" not in md
+    assert "Units: 3; with a commit 1; withheld 1; reversals 0 " in md and "databaum" not in md
+
+
+def test_a_later_commit_that_removes_added_lines_is_a_reversal(tmp_path):
+    repo = tmp_path / "repo"
+    (repo / "docs").mkdir(parents=True)
+    git = lambda *a: subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True, check=True).stdout
+    git("init", "-q"); git("config", "user.email", "t@t"); git("config", "user.name", "t")
+    (repo / "docs" / "a.md").write_text("intro line\n")
+    git("add", "."); git("commit", "-q", "-m", "base")
+    (repo / "docs" / "a.md").write_text("intro line\nrule one says this\nrule two says that\nrule three says more\n")
+    git("add", "."); git("commit", "-q", "-m", "rules in")
+    h1 = git("rev-parse", "--short", "HEAD").strip()
+    (repo / "docs" / "a.md").write_text("intro line\nthe rules were dropped\n")
+    git("add", "."); git("commit", "-q", "-m", "rules out")
+    h2 = git("rev-parse", "--short", "HEAD").strip()
+    lines = [
+        ev(1, "user", "ponemos las tres reglas en el documento"),
+        ev(2, "assistant", [tool("Bash", "t1", command="git commit -q -m 'rules in' && git log --oneline -1")]),
+        ev(3, "user", result("t1", f"{h1} rules in")),
+        ev(4, "user", "mejor sacamos las reglas, no sirven"),
+        ev(5, "assistant", [tool("Bash", "t2", command="git commit -q -m 'rules out' && git log --oneline -1")]),
+        ev(6, "user", result("t2", f"{h2} rules out")),
+    ]
+    tdir = tmp_path / "t"
+    tdir.mkdir()
+    (tdir / "abcdef12-0000.jsonl").write_text("".join(json.dumps(x) + "\n" for x in lines))
+    out = tmp_path / "out"
+    r = subprocess.run([sys.executable, str(MINE), "--transcripts", str(tdir), "--output-dir", str(out),
+                        "--repos", str(repo), "--projects", "luthier"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    a, b = [json.loads(l) for l in (out / "decision_units.jsonl").read_text().splitlines()]
+    assert a["reversed_by"] == [{"unit": b["id"], "commit": h2, "lines": 3}]
+    assert b["reverses"] == [{"unit": a["id"], "commit": h1, "lines": 3}]
+    assert "reversals 1 " in (out / "decision_units.md").read_text()

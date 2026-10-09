@@ -15,7 +15,10 @@ turn (short, at most --short-words words, or long). Whether a short turn confirm
 proposal is a heuristic, recorded as such; who decided is settled later, case by case.
 
 Sources: by default the transcripts pinned in `~/Projects/IA_chat/raw/claude-code/` (sha256 in its
-manifest); with --live, `~/.claude/projects/` as it is now, each file's sha256 recorded. Subagent
+manifest); with --live, `~/.claude/projects/` and the second account's
+`~/.claude-databaum/projects/` as they are now, each file's sha256 recorded. A unit records the
+repository its session ran in (`session_repo`), whose CLAUDE.md and memory the agent read, and the
+reversals found in git: a later commit that removes lines an earlier unit's commit added. Subagent
 transcripts are not read; a turn followed by an agent or a workflow counts as delegated action.
 Events repeated across files (a resumed session copies its history) are counted once, by uuid.
 
@@ -40,7 +43,7 @@ from pathlib import Path
 VERSION = "mine_decisions v1"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 IACHAT = Path.home() / "Projects" / "IA_chat"
-LIVE = Path.home() / ".claude" / "projects"
+LIVE = [Path.home() / ".claude" / "projects", Path.home() / ".claude-databaum" / "projects"]
 DEFAULT_PROJECTS = ["-home-lmoffatt-Projects-luthier", "-home-lmoffatt-Projects-sonolocalizacion"]
 DEFAULT_OUTPUT = REPO_ROOT / "record" / "validation"
 PRIVATE = REPO_ROOT / "scripts" / "export_chat.private"
@@ -72,6 +75,49 @@ def bash_write(cmd: str) -> tuple[bool, list[str]]:
     return False, []
 
 
+def added_and_removed(repo: Path, h: str) -> tuple[dict, dict]:
+    """Per file, the lines a commit added and the lines it removed (stripped, non-trivial)."""
+    import subprocess
+    out = subprocess.run(["git", "-C", str(repo), "show", "--unified=0", "--format=", h], capture_output=True, text=True).stdout
+    added, removed, cur = {}, {}, None
+    for l in out.splitlines():
+        if l.startswith("+++ "):
+            cur = l[6:] if l.startswith("+++ b/") else None
+        elif l.startswith("--- "):
+            continue
+        elif cur and l.startswith("+") and len(l.strip("+ \t")) > 3:
+            added.setdefault(cur, set()).add(l[1:].strip())
+        elif cur and l.startswith("-") and len(l.strip("- \t")) > 3:
+            removed.setdefault(cur, set()).add(l[1:].strip())
+    return added, removed
+
+
+def link_reversals(rows: list[dict], repos: list[Path], min_lines: int, min_share: float = 0.5) -> int:
+    """A later unit reverses an earlier one when one of its commits removes, from a file, at least
+    min_lines lines and at least min_share of the lines a commit of the earlier unit added to that
+    file. Lines the later commit writes again (a text moved within the file) do not count."""
+    by_repo = {r.name: r for r in repos}
+    commits = [(row, c) for row in rows for c in row["commits"] if c.get("repo") in by_repo]
+    diffs = {c["hash"]: added_and_removed(by_repo[c["repo"]], c["hash"]) for _, c in commits}
+    n = 0
+    for i, (ra, ca) in enumerate(commits):
+        add_a = diffs[ca["hash"]][0]
+        for rb, cb in commits[i + 1:]:
+            if rb is ra or cb["repo"] != ca["repo"] or rb["time"] <= ra["time"]:
+                continue
+            add_b, rem_b = diffs[cb["hash"]]
+            best = 0
+            for f in add_a.keys() & rem_b.keys():
+                gone = (add_a[f] & rem_b[f]) - add_b.get(f, set())
+                if len(gone) >= min_lines and len(gone) >= min_share * len(add_a[f]):
+                    best = max(best, len(gone))
+            if best and all(x["unit"] != rb["id"] for x in ra.get("reversed_by", [])):
+                ra.setdefault("reversed_by", []).append({"unit": rb["id"], "commit": cb["hash"], "lines": best})
+                rb.setdefault("reverses", []).append({"unit": ra["id"], "commit": ca["hash"], "lines": best})
+                n += 1
+    return n
+
+
 def commit_files(h: str, repos: list[Path]) -> tuple[str, list[str]]:
     import subprocess
     for r in repos:
@@ -100,9 +146,10 @@ def sources(projects: list[str], live: bool, folder: Path | None = None) -> list
     if folder is not None:
         return [(f, sha256(f)) for f in sorted(folder.iterdir()) if f.name.endswith((".jsonl", ".jsonl.gz"))]
     if live:
-        for p in projects:
-            for f in sorted((LIVE / p).glob("*.jsonl")):
-                out.append((f, sha256(f)))
+        for root in LIVE:
+            for p in projects:
+                for f in sorted((root / p).glob("*.jsonl")):
+                    out.append((f, sha256(f)))
         return out
     best: dict[str, Path] = {}
     for p in projects:
@@ -158,10 +205,15 @@ def mine_session(events: list[tuple[int, dict]], seen_uuids: set, args) -> list[
     pending_cmd: dict[str, dict] = {}
     for n, ev in events:
         uid = ev.get("uuid")
-        if uid and uid in seen_uuids:
+        # a resumed or forked session copies earlier events, sometimes with new uuids: the time and
+        # the content identify an event as well
+        key = (ev.get("timestamp", ""), ev.get("type", ""), json.dumps(ev.get("message", {}), sort_keys=True)[:400])
+        if (uid and uid in seen_uuids) or (ev.get("timestamp") and key in seen_uuids):
             continue
         if uid:
             seen_uuids.add(uid)
+        if ev.get("timestamp"):
+            seen_uuids.add(key)
         t = luciano_text(ev)
         if t is not None:
             if cur and cur["actions"]:
@@ -199,8 +251,11 @@ def mine_session(events: list[tuple[int, dict]], seen_uuids: set, args) -> list[
                 if isinstance(x, dict) and x.get("type") == "tool_result" and x.get("tool_use_id") in pending_cmd:
                     out = x.get("content")
                     out = out if isinstance(out, str) else " ".join(y.get("text", "") for y in out or [] if isinstance(y, dict))
-                    for m in COMMIT_OUT.finditer(out):
-                        h, msg = (m.group(1), m.group(2)) if m.group(1) else (m.group(3), m.group(4))
+                    found = [(m.group(1), m.group(2)) for m in COMMIT_OUT.finditer(out) if m.group(1)]
+                    if not found:  # a quiet commit: the newest line of the git log that follows is the commit
+                        first = next((m for m in COMMIT_OUT.finditer(out) if m.group(3)), None)
+                        found = [(first.group(3), first.group(4))] if first else []
+                    for h, msg in found:
                         if all(c["hash"] != h for c in cur["commits"]):
                             cur["commits"].append({"hash": h, "message": msg[:200], "line": n})
     if cur and cur["actions"]:
@@ -220,6 +275,10 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--language", nargs="*", default=LANGUAGE, help="path patterns of the language's files")
     ap.add_argument("--method", nargs="*", default=METHOD, help="path patterns of the method's files")
     ap.add_argument("--repos", nargs="*", type=Path, default=DEFAULT_REPOS, help="where a commit's files are looked up")
+    ap.add_argument("--reversal-lines", type=int, default=3,
+                    help="lines a later commit must remove, of those an earlier one added, to count as a reversal")
+    ap.add_argument("--reversal-share", type=float, default=0.5,
+                    help="share of the earlier commit's added lines in that file the later one must remove")
     ap.add_argument("--date", default=date.today().isoformat())
     args = ap.parse_args(argv)
     srcs = sources(args.projects, args.live, args.transcripts)
@@ -243,7 +302,10 @@ def main(argv: list[str]) -> int:
                 src = str(path.relative_to(IACHAT))
             except ValueError:
                 src = str(path)
-            row = {"id": f"{sid[:8]}:{u['line']}", "session": sid, "project": next((p for p in args.projects if p in str(path)), ""),
+            project = next((p for p in args.projects if p in str(path)), "")
+            row = {"id": f"{sid[:8]}:{u['line']}", "session": sid, "project": project,
+                   # the repository whose CLAUDE.md and memory the session's agent read: its working folder
+                   "session_repo": project.rsplit("-Projects-", 1)[-1] if "-Projects-" in project else project,
                    "source": src, "source_sha256": sha,
                    "time": u["time"], "luciano": {"line": u["line"], "uuid": u["uuid"], "words": words,
                                                   "text": u["text"][:args.text_chars]},
@@ -267,6 +329,11 @@ def main(argv: list[str]) -> int:
                     c["message"] = "[withheld]"
             rows.append(row)
     rows.sort(key=lambda r: (r["time"], r["id"]))
+    owned: set = set()
+    for r in rows:  # a commit belongs to the first unit that made it
+        r["commits"] = [c for c in r["commits"] if (c.get("repo"), c["hash"][:7]) not in owned]
+        owned |= {(c.get("repo"), c["hash"][:7]) for c in r["commits"]}
+    n_rev = link_reversals(rows, args.repos, args.reversal_lines, args.reversal_share)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     out = args.output_dir / "decision_units.jsonl"
     out.write_text("".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in rows), encoding="utf-8")
@@ -276,7 +343,9 @@ def main(argv: list[str]) -> int:
          "before his next turn. Sources: " + ("the live transcripts" if args.live else "the copies pinned in IA_chat") +
          f", {len(srcs)} sessions, each by sha256 in the jsonl. Short turns have at most {args.short_words} words; whether one",
          "confirms a model's proposal is a heuristic. Units with a private word keep only their metadata.", "",
-         f"Units: {len(rows)}; with a commit {sum(bool(r['commits']) for r in rows)}; withheld {sum('withheld' in r for r in rows)}.", "",
+         f"Units: {len(rows)}; with a commit {sum(bool(r['commits']) for r in rows)}; withheld {sum('withheld' in r for r in rows)};"
+         f" reversals {n_rev} (a later commit removes at least {args.reversal_lines} lines and {args.reversal_share:.0%} of what an"
+         " earlier one added to a file).", "",
          "| project | areas | form | units |", "|---|---|---|---|"]
     for (p, a, f), n in sorted(by.items()):
         L.append(f"| {p} | {a} | {f} | {n} |")
@@ -285,6 +354,7 @@ def main(argv: list[str]) -> int:
         t = r["luciano"]["text"].replace("\n", " ")
         L.append(f"- {r['time'][:16]} `{r['id']}` {r['form']}, {'+'.join(r['areas'])}"
                  + (f", commit {', '.join(c['hash'][:7] for c in r['commits'])}" if r["commits"] else "")
+                 + (f", reversed by {', '.join(x['unit'] for x in r['reversed_by'])}" if r.get("reversed_by") else "")
                  + f": {t[:160]}")
     (args.output_dir / "decision_units.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     print(f"{len(rows)} units from {len(srcs)} sessions -> {out}")
