@@ -1,0 +1,174 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "Haskell is pure"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "H1",
+      "why": "Haskell is lazy"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [
+     {
+      "item": "H3",
+      "why": "type classes for overloading"
+     }
+    ],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [{\"item\": \"H2\", \"why\": \"Haskell is pure\"}], \"B\": []}, {\"candidate\": \"C2\", \"A\": [{\"item\": \"H1\", \"why\": \"Haskell is lazy\"}], \"B\": []}, {\"candidate\": \"C3\", \"A\": [], \"B\": []}, {\"candidate\": \"C4\", \"A\": [], \"B\": []}, {\"candidate\": \"C5\", \"A\": [{\"item\": \"H3\", \"why\": \"type classes for overloading\"}], \"B\": []}, {\"candidate\": \"C6\", \"A\": [], \"B\": []}, {\"candidate\": \"C7\", \"A\": [], \"B\": []}]}\n",
+   "answer_sha256": "f68aad111adbfe54c37fa8296610c68e50aa8db627f2efcba7457437a7511f2c",
+   "date": "2026-10-09T11:09:28Z",
+   "errors": [],
+   "seconds": 15
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "Underlying all these developments is the realisation that being explicit about effects is extremely useful, and this is something that we believe may ultimately be seen as one of Haskell’s main impacts on mainstream programming",
+   "statement": "Keep the language pure and make every effect explicit in the type of a computation."
+  },
+  "C2": {
+   "quote": "Lazy evaluation—with its direct connection to the pure, call-by-name lambda calculus, the remarkable possibility of representing and manipulating infinite data structures, and addictively simple and beautiful implementation techniques—was like a drug.",
+   "statement": "Evaluate lazily, so that evaluation order follows need and infinite structures are ordinary values."
+  },
+  "C3": {
+   "quote": "Because of referential transparency, Haskell programs can be viewed as executable mathematics, as equations over the category of complete partial orders. In principle, at least, the specification becomes the program.",
+   "statement": "Because of referential transparency a program can be read as executable mathematics, equations whose specification is the program."
+  },
+  "C4": {
+   "quote": "The key idea is to treat a value of type IO a as a “computation” that, when performed, might perform input and output before delivering a value of type a.",
+   "statement": "Model a computation that may have effects as a first-class value of type IO a (or any monad), sequenced by bind."
+  },
+  "C5": {
+   "quote": "They were originally proposed early in the design process, by Wadler and Blott ... as a ... principled solution to a relatively small problem (operator overloading for numeric operations and equality).",
+   "statement": "Resolve ad-hoc overloading in a principled way through type classes, constraints that qualify a polymorphic type."
+  },
+  "C6": {
+   "quote": "the idea of writing a library that turns Haskell into a domainspecific embedded language (DSEL), a term first coined by Hudak",
+   "statement": "Write a library that turns the language into a domain-specific embedded language sharing its syntax, types and tools."
+  },
+  "C7": {
+   "quote": "The Haskell Committee wanted expressions to look as much like mathematics as possible, and thus from day one we bought into the idea that Haskell would have infix operators.",
+   "statement": "Make expressions look as much like mathematics as possible, with infix operators from day one."
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "3f8bbbec934426cfdea8b30b78bce47f1e32d7627fd1d7d5d715a8fce46f5ad6",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/haskell/find/2026-10-09_find_principles_v1_claude-code_opus.json": {
+   "sha256": "3be85b56aee322d1fb04844c9e3613cac670bc4171acd56fb0f229b16ddf1b8a"
+  },
+  "record/controls/haskell/reference.md": {
+   "sha256": "fbfb3d4594fb31de6facc0d0930f3c87100b5f869a835ab8e2c2a3d8453d8721"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 3,
+  "leaks": 0,
+  "neither": 4,
+  "passes": false,
+  "rows": [
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H1"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "H3"
+    ],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "neither"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}

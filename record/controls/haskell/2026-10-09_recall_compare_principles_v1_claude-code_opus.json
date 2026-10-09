@@ -1,0 +1,205 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "purity, no side effects"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [
+     {
+      "item": "H1",
+      "why": "laziness is the default"
+     }
+    ],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [
+     {
+      "item": "H3",
+      "why": "type classes, overloading"
+     }
+    ],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [
+     {
+      "item": "C1",
+      "why": "general-purpose use"
+     },
+     {
+      "item": "C5",
+      "why": "based on wide consensus"
+     },
+     {
+      "item": "C6",
+      "why": "reduce diversity, unify community"
+     }
+    ],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "H2",
+      "why": "purity gives referential transparency"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [{\"item\": \"H2\", \"why\": \"purity, no side effects\"}], \"B\": []}, {\"candidate\": \"C2\", \"A\": [{\"item\": \"H1\", \"why\": \"laziness is the default\"}], \"B\": []}, {\"candidate\": \"C3\", \"A\": [], \"B\": []}, {\"candidate\": \"C4\", \"A\": [], \"B\": []}, {\"candidate\": \"C5\", \"A\": [{\"item\": \"H3\", \"why\": \"type classes, overloading\"}], \"B\": []}, {\"candidate\": \"C6\", \"A\": [{\"item\": \"C1\", \"why\": \"general-purpose use\"}, {\"item\": \"C5\", \"why\": \"based on wide consensus\"}, {\"item\": \"C6\", \"why\": \"reduce diversity, unify community\"}], \"B\": []}, {\"candidate\": \"C7\", \"A\": [{\"item\": \"H2\", \"why\": \"purity gives referential transparency\"}], \"B\": []}]}\n",
+   "answer_sha256": "b0a618c9cbc0bf0952b031ea96da17a70f98c84d77b409d78def52ea0581865a",
+   "date": "2026-10-09T10:24:00Z",
+   "errors": [],
+   "seconds": 34
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "",
+   "statement": "The language should be purely functional, with no side effects in the language's core, so that a function's result depends only on its arguments."
+  },
+  "C2": {
+   "quote": "",
+   "statement": "Lazy (non-strict) evaluation is the default, computing values only when needed, which keeps the language pure and enables modular programming with infinite data structures and separation of generation from control."
+  },
+  "C3": {
+   "quote": "",
+   "statement": "Side effects and interaction with the world are made explicit and controlled through types, using monads so that effectful computations are first-class values the type system tracks."
+  },
+  "C4": {
+   "quote": "",
+   "statement": "A strong, static type system with Hindley-Milner type inference and principal types catches errors at compile time while rarely requiring the programmer to write types."
+  },
+  "C5": {
+   "quote": "",
+   "statement": "Type classes provide principled, systematic overloading (ad hoc polymorphism), letting the same name denote operations across many types with constraints resolved by the compiler."
+  },
+  "C6": {
+   "quote": "",
+   "statement": "The language should be a general-purpose, standardized common vehicle that unifies the fragmented community of non-strict functional language researchers around one design."
+  },
+  "C7": {
+   "quote": "",
+   "statement": "Referential transparency and equational reasoning are preserved so that programs can be understood, transformed, and proved correct by substituting equals for equals."
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "e3b155b5f3e02d071fa29b853e1808dcf9086f07af81aeff2323542f3109f1ab",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/haskell/reference.md": {
+   "sha256": "fbfb3d4594fb31de6facc0d0930f3c87100b5f869a835ab8e2c2a3d8453d8721"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "recall_attempts": [
+  {
+   "answer": "{\"candidates\": [{\"id\": \"C1\", \"statement\": \"The language should be purely functional, with no side effects in the language's core, so that a function's result depends only on its arguments.\"}, {\"id\": \"C2\", \"statement\": \"Lazy (non-strict) evaluation is the default, computing values only when needed, which keeps the language pure and enables modular programming with infinite data structures and separation of generation from control.\"}, {\"id\": \"C3\", \"statement\": \"Side effects and interaction with the world are made explicit and controlled through types, using monads so that effectful computations are first-class values the type system tracks.\"}, {\"id\": \"C4\", \"statement\": \"A strong, static type system with Hindley-Milner type inference and principal types catches errors at compile time while rarely requiring the programmer to write types.\"}, {\"id\": \"C5\", \"statement\": \"Type classes provide principled, systematic overloading (ad hoc polymorphism), letting the same name denote operations across many types with constraints resolved by the compiler.\"}, {\"id\": \"C6\", \"statement\": \"The language should be a general-purpose, standardized common vehicle that unifies the fragmented community of non-strict functional language researchers around one design.\"}, {\"id\": \"C7\", \"statement\": \"Referential transparency and equational reasoning are preserved so that programs can be understood, transformed, and proved correct by substituting equals for equals.\"}]}\n",
+   "answer_sha256": "dac8bacd615216d92f382d87f0fcda947a2c75e20ef5162b6675c645f60552e9",
+   "date": "2026-10-09T10:23:27Z",
+   "errors": [],
+   "seconds": 17
+  }
+ ],
+ "recall_prompt_sha256": "97dae7e5b8be7770ed0fa3c2652600762e3a7aca518e181e9bbd2bbe36e7a156",
+ "score": {
+  "candidates": 7,
+  "hits": 5,
+  "leaks": 0,
+  "neither": 2,
+  "passes": true,
+  "rows": [
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H1"
+    ],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "H3"
+    ],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "C1",
+     "C5",
+     "C6"
+    ],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "hit"
+   },
+   {
+    "A": [
+     "H2"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}
