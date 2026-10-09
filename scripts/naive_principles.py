@@ -116,8 +116,11 @@ def main(argv: list[str]) -> int:
         print(f"ERROR: the prompt has unfilled {', '.join(left)}; pass --var", file=sys.stderr)
         return 2
     rows = link_ideas.load_timeline(args.timeline)
-    body, labels = idea_lines(rows, pc.redactor(args.redact))
-    prompt_text = template.replace(PLACEHOLDER, body)
+    red = pc.redactor(args.redact)
+    body, labels = idea_lines(rows, red)
+    # the names are redacted in the filled template too: find_principles redacts only the body, so its
+    # "redacted" runs of 2026-10-09 were shown the language and its designers in the prompt's first line
+    prompt_text = red(template).replace(PLACEHOLDER, body)
     print(f"rows: {len(rows)} | input: {len(prompt_text):,} chars (~{len(prompt_text) // 4:,} tokens) | "
           f"max candidates: {args.max_candidates}")
     if args.show_input:

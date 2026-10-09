@@ -374,7 +374,8 @@ def test_naive_shows_every_row_checks_rows_and_feeds_the_judge(tmp_path):
     tl, env = setup(tmp_path)
     env["STUB_BAD_ONCE"] = "1"
     args = [sys.executable, str(NAIVE), "--timeline", str(tl), "--output-dir", str(tmp_path / "naive"), "--cli", "claude",
-            "--date", "2026-01-02", "--var", "language=L", "--var", "designers=the designer", "--redact", "tipos=TYPES"]
+            "--date", "2026-01-02", "--var", "language=Lang", "--var", "designers=the designer", "--redact", "tipos=TYPES",
+            "--redact", "Lang=L"]
     r = subprocess.run(args, capture_output=True, text=True, env=env)
     assert r.returncode == 0, r.stderr
     run = json.loads((tmp_path / "naive" / "2026-01-02_naive_principles_v1_claude-code_opus.json").read_text())
@@ -382,6 +383,7 @@ def test_naive_shows_every_row_checks_rows_and_feeds_the_judge(tmp_path):
     prompt = calls(tmp_path)[0]["prompt"]
     body = prompt.split("## Ideas")[1]
     assert body.count(" | ") == 3 * len(rows_fixture()) and "infectab" not in prompt.lower()
+    assert "TYPES" in body and "Lang" not in prompt and "language, L," in prompt
     c1 = run["answer"]["candidates"][0]
     assert c1["quote_row"] == "note:2026-05-29T14.03.24:tipos" and c1["quote"] == "los tipos tienen que ser conceptos"
     assert c1["who"] == "Luciano"
