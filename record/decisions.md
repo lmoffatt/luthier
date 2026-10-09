@@ -532,3 +532,18 @@ Source:     luthier@94cb3e1:record/plan-principles-validation-2026-10-09-decisio
 Kind:       method. For P13 (a principle is worth the decisions it guides, now measured), P1 (the
             cases enter only with his approval), P11 (every threshold the plan keeps is a parameter)
 Status:     current; step 0 waits for Luciano (iachat ingest claude-code)
+
+D-2026-10-09-e  The synthesis of Luthier's ideas, rules and principles (map of themes and states,
+                candidate principles set against those in force, rules traced to the ideas) and the
+                validation of the candidates with a cutoff are carried out overnight by the model,
+                by record/plan-synthesis-2026-10-09.md, which Luciano approved whole; for this plan
+                the model may run the scripts that process the record. The review of cases and the
+                scoring stay his.
+Author:     Luciano
+Quote:      "SI apruebo todo el plan escribilo por si te quedas sin memoria e implementalo durante
+            toda la noche, te doy libertad de correr scripts."
+Source:     chat:8c2cb06b:2902
+Kind:       method. For P12 (the work reaches him synthesized), P8 (no step he must wait for at
+            night); against the working rule that he runs the scripts processing the record, set
+            aside here by his word for this plan
+Status:     current
