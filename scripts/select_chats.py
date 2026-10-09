@@ -401,7 +401,8 @@ def main(argv: list[str]) -> int:
                        "thread_path": str(path), "thread_sha256": _sha(path),
                        "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
                        "effort": args.effort,
-                       "max_model_chars": args.max_model_chars, "date": args.date}
+                       "max_model_chars": args.max_model_chars, "date": args.date,
+                       "query": args.query, "since": args.since or "", "until": args.until or ""}
                 said = mentions(text, args.query)
                 if c["withheld"]:
                     pass  # scrub_row records it as withheld, unjudged
