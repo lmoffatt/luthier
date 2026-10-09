@@ -180,7 +180,8 @@ def build(input_dir: Path, prompts: tuple[str, ...], tz: ZoneInfo) -> tuple[list
             elif extractor == "day":
                 key = front.get("date", path.name[:10])
             else:
-                key = (front.get("key") or path.name).split(":")[-1][:8]
+                ident = (front.get("key") or path.name).split(":")[-1]
+                key = ident[:8] if "-" in ident else ident  # a uuid is cut to its first block; a date id stays whole
             r.update(extractor=extractor, extraction=path.name, extraction_sha256=sha, prompt=prompt,
                      id=f"{extractor}:{key}:{r['slug']}")
             rows.append(r)
