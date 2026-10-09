@@ -2,15 +2,16 @@
 """The chronological list of ideas about Luthier: one row per idea, in time order, with who said
 it, when, the quote and where it comes from.
 
-Reads every ideas file of `record/ideas/` written by the three extractors (per voice note,
+Reads every ideas file of `record/ideas/` written by the four extractors (per voice note,
 `extract_ideas_v1`; per day, `extract_ideas_day_v1`; per conversation, `extract_ideas_dialogue_v1`;
-the list is --prompts), pinned by the sha256 of each file. No model: this is a merge, and a model
+per written note, `extract_ideas_note_v1`; the list is --prompts), pinned by the sha256 of each file. No model: this is a merge, and a model
 may run it. The three formats become one row: id, time, who (Luciano, model, pasted), kind, what,
 quote, source (the note and its `[mm:ss]`, or the thread and its turn), the extraction it comes
 from and the prompt that wrote it.
 
 Time. A voice note's name carries its local time (`WhatsApp Ptt 2026-05-29 at 14.03.24`), to
 which the quote's `[mm:ss]` is added; --note-tz says which zone that is. A chat turn carries UTC.
+A written note's time is its creation date, as its file's metadata gave it, in the same zone.
 Every row gets both the UTC instant and the local time, and the order is by instant.
 
 Both extractions of a note are kept (Luciano, 2026-10-09: "ambas"): a row from the per-note
@@ -36,7 +37,7 @@ from zoneinfo import ZoneInfo
 VERSION = "ideas_timeline v1"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = REPO_ROOT / "record" / "ideas"
-DEFAULT_PROMPTS = ("extract_ideas_v1", "extract_ideas_day_v1", "extract_ideas_dialogue_v1")
+DEFAULT_PROMPTS = ("extract_ideas_v1", "extract_ideas_day_v1", "extract_ideas_dialogue_v1", "extract_ideas_note_v1")
 DEFAULT_TZ = "America/Argentina/Buenos_Aires"
 
 FRONT_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
@@ -151,7 +152,28 @@ def rows_of_dialogue_file(path: Path, text: str, front: dict, tz: ZoneInfo) -> l
     return rows
 
 
+def rows_of_written_file(path: Path, text: str, front: dict, tz: ZoneInfo) -> list[dict]:
+    author = front.get("author", "Luciano")
+    who = "Luciano" if author.lower().startswith("luciano") else "model"
+    created = front.get("created", "")
+    try:
+        base = datetime.strptime(created[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=tz)
+    except ValueError:
+        base = None
+    rows = []
+    for slug, f in entries(text):
+        q = f.get("Quote", "")
+        ln = re.search(r"\(line (\d+)\)\s*$", q)
+        rows.append({"who": who, "kind": "idea", "slug": slug, "what": f.get("What", ""),
+                     "quote": unquote(re.sub(r"\s*\(line \d+\)\s*$", "", q)), "open": f.get("Open", ""),
+                     "also_in": f.get("Also at", ""), "note": front.get("note", path.name),
+                     "source": f"{front.get('note', path.name)} line {ln.group(1)}" if ln else front.get("note", path.name),
+                     "time": base})
+    return rows
+
+
 PARSERS = {"extract_ideas_v1": ("note", rows_of_note_file),
+           "extract_ideas_note_v1": ("written", rows_of_written_file),
            "extract_ideas_day_v1": ("day", rows_of_day_file),
            "extract_ideas_dialogue_v1": ("dialogue", rows_of_dialogue_file)}
 
@@ -179,6 +201,8 @@ def build(input_dir: Path, prompts: tuple[str, ...], tz: ZoneInfo) -> tuple[list
                 key = f"{stem.group(1)}-{stem.group(2)}-{stem.group(3)}T{stem.group(4)}.{stem.group(5)}.{stem.group(6)}" if stem else path.name[:20]
             elif extractor == "day":
                 key = front.get("date", path.name[:10])
+            elif extractor == "written":
+                key = front.get("created", path.name)[:10]
             else:
                 ident = (front.get("key") or path.name).split(":")[-1]
                 key = ident[:8] if "-" in ident else ident  # a uuid is cut to its first block; a date id stays whole
@@ -238,7 +262,7 @@ def write_outputs(rows: list[dict], inputs: list[dict], problems: list[str], out
         if d != day:
             day = d
             lines += [f"### {d}", ""]
-        mark = {"note": "note", "day": "day", "dialogue": "chat"}[r["extractor"]]
+        mark = {"note": "note", "day": "day", "dialogue": "chat", "written": "written"}[r["extractor"]]
         dup = " (also by day)" if r.get("also_by_day") else (" (also per note)" if r.get("also_by_note") else "")
         kind = f" {r['kind']}" if r.get("kind") and r["kind"] != "idea" else ""
         lines.append(f"- **{r['time_local'][11:16]}** {r['who']}{kind} [{mark}: {r['source']}]{dup} `{r['id']}`")
