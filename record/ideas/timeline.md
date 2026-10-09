@@ -5,20 +5,1034 @@ One row per idea as the extractors found it, in time order; the local times are 
 time is its UTC converted. A note extracted both per note and by day gives two rows, each marked, so a
 restatement across notes is told from the same note read twice. Nothing here was judged or merged.
 
-Rows: 875 (day 144, dialogue 430, note 301). Inputs: 73 files, listed at the end with their sha256.
+Rows: 1386 (day 144, dialogue 694, note 301, written 247). Inputs: 96 files, listed at the end with their sha256.
 
 Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: no time for 'material-esconde-lo-importante'
 
 | month | Luciano | model | total |
 |---|---|---|---|
+| 2022-06 | 26 | 0 | 26 |
+| 2022-07 | 11 | 0 | 11 |
+| 2022-08 | 30 | 0 | 30 |
+| 2023-02 | 17 | 0 | 17 |
+| 2023-03 | 23 | 0 | 23 |
+| 2025-06 | 0 | 140 | 140 |
 | 2026-05 | 267 | 8 | 275 |
 | 2026-06 | 28 | 0 | 28 |
 | 2026-08 | 50 | 30 | 80 |
-| 2026-09 | 122 | 244 | 366 |
-| 2026-10 | 125 | 0 | 125 |
+| 2026-09 | 149 | 270 | 419 |
+| 2026-10 | 186 | 150 | 336 |
 | undated | 1 | 0 | 1 |
 
 ## Ideas, by day
+
+### 2022-06-15
+
+- **08:55** Luciano [written: 2022-06-15 Sin título 2 .md line 11] `written:2022-06-15:clases-implican-predicados`
+  With tapp he wanted to explore the idea that classes imply predicates.
+  > con tapp quise explorar la idea de que las clases implican predicados y que el codigo es dato.
+
+- **08:55** Luciano [written: 2022-06-15 Sin título 2 .md line 13] `written:2022-06-15:codigo-es-dato`
+  The idea that code is data; he notes it offers great flexibility and wonders why modern languages don't follow that Lispean path, and whether he should program macror that way.
+  > La idea de que el codigo sea dato es muy, pero muy fuerte en cuanto a la flexibilidad que ofrece pero es notable que los lenguajes modernos no sigan ese camino Lispeano.
+
+- **08:55** Luciano [written: 2022-06-15 Sin título 2 .md line 9] `written:2022-06-15:identificadores-importan`
+  With quimulun Luciano wanted to explore the importance of identifiers in programming.
+  > con quimulun quise explorar la idea de la importancia de los identificadores.
+
+- **08:55** Luciano [written: 2022-06-15 Sin título 2 .md line 3] `written:2022-06-15:rehacer-desde-las-bases`
+  Re-making the language many times, each time rethinking the foundations of programming more deeply (quimulun, then tapp, now macror).
+  > estuve re-haciendo macror muchisimas veces cada vez volviendo a repensar mas las bases de la programacion.
+
+### 2022-06-28
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 53] `written:2022-06-28:channel-state-isomorphic-to-one`
+  Defining a type channel state isomorphic with the type ONE, and a physical channel type also isomorphic with ONE.
+  > un tipo channel state que es isomorfico con el tipo ONE
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 85] `written:2022-06-28:channels-multiplicity-as-product`
+  Multiplicity of channels is expressed as a product, not a sum, an exponential to a number, in contrast with multiplicity of states as sum.
+  > multiplicidad de canales (pero como producto, no suma, exponencial a un numero)
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 33] `written:2022-06-28:choose-efficient-path-after-validity`
+  Second objective: once semantic validity and semantic equivalence are established, one can choose the most efficient path.
+  > una vez que se establece la validez semantica y la equivalencia semantica se puede optar por el camino mas eficiente.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 3] `written:2022-06-28:code-to-understand`
+  The reason for coding is understanding, and understanding requires being able to manipulate the code and see how changes in it affect observables of the code.
+  > I code to understand.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 115] `written:2022-06-28:dependent-types`
+  Dependent types are types that depend on a value, which makes their cardinality that of the type of the value they take; the definition trails off unfinished.
+  > dependent-types: son tipos que dependen de un valor, lo cual hace que su cardinalidad sea la del typo del valor que toma
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 95] `written:2022-06-28:equivalence-relation-multinomial`
+  An equivalence relation between (state*k)^N and the sum over multi-indices of multinomial coefficients times state^a.
+  > Relacion de equivalencia entre (state\*k)^N y Sum\_{\|a\|=k} C(n,a) \*state^a , a-\>multiindice
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 27] `written:2022-06-28:equivalence-relations-for-optimization`
+  Establishing equivalence relations in quimulun matters because it allows optimizing computation times.
+  > Es importante establecer las relaciones de equivalencia en quimulun. Esto permite optimizar los tiempos de calculo.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 25] `written:2022-06-28:erase-code-data-distinction`
+  Creating new "objects" (values or variables, of types, functions or "classes") while losing the distinction between code and data.
+  > poder crear nuevos "objetos" (sean valores o variables, de tipos, funciones o "clases"). Al mismo tiempo perder la distincion entre codigo y dato.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 15] `written:2022-06-28:express-extra-computational-concepts-with-verification`
+  Expressiveness includes expressing extra-computational concepts (e.g. probability) intuitively and truthfully, by abstracting their computational properties and providing mechanisms to verify compliance, e.g. a probability must be between 0 and 1, rejecting out-of-range values and reporting invalid results.
+  > Expresa conceptos extra-computacionales (por ejemplo probabilidad) de forma intuitiva y veraz. La idea es abstraer las propiedades compulacionales de estos conceptos y proveer los mecanismos para verificar su cumplimiento.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 13] `written:2022-06-28:expressive-reference-to-known-structures`
+  Code is more expressive when it refers to known structures or algorithms and the reference is real, e.g. not calling a list an array.
+  > refiere a estructuras o algoritmos conocidos y esta referencia es real. Por ejemplo, no puedo llamar array a una lista.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 9] `written:2022-06-28:expressiveness-as-observable`
+  Expressiveness is an observable of code: the code must express its intention for both the human reader and the compiler.
+  > Expresividad: el codigo debe expresar la intención del mismo tanto para el que leer el codigo como para el compilador.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 107] `written:2022-06-28:how-to-define-values-types-variables-functions`
+  The problem of how to create values and their types, variables and types of variables, functions and types of functions, with the type of a variable marked uncertain.
+  > Como creo valores (values) y sus tipos (types), variables (variables), y tipos de variables (¿?), funciones y tipos de funciones.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 21] `written:2022-06-28:library-for-types-with-semantics`
+  A library that lets one express variables and types, including functional and class types, with their semantics.
+  > Expresar variables y tipos, y tipos funcionales, de clases etc y con sus semantica.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 31] `written:2022-06-28:one-to-one-reasoning-code-flow`
+  First objective: abstract and formalize the mechanisms of semantic determination so there is a one-to-one relation between reasoning and the flow of the code, thereby verifying the validity of the reasoning; an old idea.
+  > abstraer y formalizar los mecanismos de determnacion sematinca de forma que haya una relacion uno a uno entre el razonamiento y el flujo del codigo. De esta forma verificar la validez de los razonamientos. Es una vieja idea.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 111] `written:2022-06-28:primitive-functions`
+  A set of primitive functions: arithmetic, integer division, modulo, string concatenation, logical and comparison operators.
+  > funciones primitivas: suma, resta, multiplicacion, division, division entera, modulo, concatenacion de strings...., and, or, not, greater than, equal..
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 109] `written:2022-06-28:primitive-value-types`
+  A proposed set of primitive value types: boolean, integer, real, string, nothing (or zero), one (or something), memory, size, the last two marked uncertain.
+  > tipos de valores primitivos: boolean, integer, real, string, nothing (or zero), one (or something), memory (¿?), size (¿?)
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 93] `written:2022-06-28:sample-probability-duality`
+  Sample and probability form a duality, with tests that demonstrate it holds.
+  > muestra y probabilidad --\> dualidad y tests que demuestran que se cumple.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 23] `written:2022-06-28:semantics-live-in-own-universe`
+  This semantics lives in its own universe, not that of C++, even though it uses C++ structures to express it.
+  > Esta semantica "vive" en su propio universo que no es el de C++, aunque use las estructuras de C++ para expresarlos.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 17] `written:2022-06-28:slow-clear-algorithm-as-gold-standard`
+  A clear but inefficient algorithm can be optimized by a more cryptic one declared equivalent to it; the slow clear algorithm is easier to be convinced correct and serves as gold standard for the fast obscure one.
+  > es posible que una algoritmo que es expresado de una forma clara pero computacionalmente no eficiente pueda ser optimizado con un algoritmo mas criptico. Esto se expresa claramente como un algoritmo equivalente al algoritmo lento y claro.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 49] `written:2022-06-28:state-multiplicity-as-sum`
+  Multiplicity of states is building "the channel is in one of n states" by multiplying the proposition "the channel is in a state" by a number of possibilities; the state i among N similar states has type estado x N, with N the type 1+1+...+1.
+  > si quiero decir el estado i entre N estados "similares", el tipo del estado i seria estado x N, siendo N el tipo 1+1+1..+1 N veces. Es decir el set de N componentes.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 57] `written:2022-06-28:type-constructor-from-natural`
+  A type constructor that takes a natural number and returns a set containing that number.
+  > un constructor de tipos que toma un numero natural y te devuelve un conjunto que contiene ese numero natural.
+
+- **22:25** Luciano [written: 2022-06-28 Luciano Code style.md line 59] `written:2022-06-28:type-theory-vs-category-theory`
+  An open question about how far to go with type theory and how far to use category theory.
+  > aqui tengo que pensar hasta que punto sigo con type theory y hasta que punto uso category theory.
+
+### 2022-07-05
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 15] `written:2022-07-05:dos-mecanismos-del-environment`
+  The environment has two fundamental mechanisms: storing new variables and retrieving old ones.
+  > Hay dos mecanismos fundamentales del environment
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 21] `written:2022-07-05:dos-recursos-del-environment`
+  The environment has two resources: memory to store variables and computational resources to manage that memory and store or retrieve variables.
+  > El environment tiene dos recursos: 1\) memoria para guardar las variables. 2\) recursos computacionales para manejar la memoria y guardar o recuperar las variables.
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 9] `written:2022-07-05:environment-como-mapa-de-definiciones`
+  The environment is nothing but a map of definitions or values, a global variable at least where it is defined; the name for its entries (variables, constants) is still unsettled.
+  > El environment no puede ser otra cosa que un mapa de definiciones o valores (las llamaremos variables, pero pueden ser constantes, tendria que encontrar un nombre adecuado)... Y es una variable global (al menos donde esta definido...)
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 27] `written:2022-07-05:environment-ejecuta-funciones`
+  The environment must also handle the execution of functions to generate new variables, which with more than one processor brings queue management, and supplying memory and compute to the functions.
+  > el environment tambien debe manejar 1\) la ejecución de funciones para generar nuevas variables.
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 5] `written:2022-07-05:environment-es-el-primer-objeto`
+  Loading data requires defining an environment first, so the environment is the first object the language has to define.
+  > tengo que definir un environment donde cargar los datos, obvio.
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 39] `written:2022-07-05:environments-simples-y-compuestos`
+  There are simple environments (one type of value, a single identifier) and compound ones that admit multiple.
+  > hay environments simples (solo admiten un tipo de valor y un unico identificador) y otros compuestos que admiten multiples.
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 11] `written:2022-07-05:etiqueta-para-objeto-complejo`
+  Computation turns on identifying complex elements by a simple label; the environment provides this, returning a complex computational object from an identifying label, which lets programs stay short.
+  > Toda la gracia de la computacion pasa por identificar elementos complejos por una simple etiqueta.
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 33] `written:2022-07-05:frontera-con-el-sistema-operativo`
+  The problem of compute and memory exceeds the environment yet is tied to it, since you need memory and compute to operate one; this is the task of the operating system and compiler.
+  > Esto claramente es un problema que excede al del environment aunque esta unido indefectiblemente porque necesitas memoria y recursos computacionales para operar un environment. Esta es la tarea del sistema operativo y del compilador...
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 45] `written:2022-07-05:variable-como-nombre-direccion-tamano-tipo`
+  A variable is a name, a memory address, a memory size and a type; in fact the type contains the size and the name, if one wants, is the memory address.
+  > una variable es un nombre, una direccion de memoria, un tamaño de memoria y un typo. En realidad el tipo contiene el tamaño de memoria y el nombre, si se quiere, es la direccion de memoria
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 43] `written:2022-07-05:variable-no-debe-saber-su-environment`
+  A variable knows its name and could know its environment, but better it does not, because if it did there would be no way to predict whether it will acquire further resources, especially since the environment can know its own environment.
+  > mejor que no sepa su environment, porque si la variable sabe su environment, entonces no hay forma de predecir si va a adquirir otros recursos, especialmente si consideramos que el environment puede saber su environment.
+
+- **07:53** Luciano [written: 2022-07-05 Sin título 2.md line 37] `written:2022-07-05:variables-descienden-del-environment`
+  All variables descend from the environment, in that they can store and retrieve saved values as long as you give their name.
+  > todas las variables decienden environment, en el sentido de que pueden guardar nuevos valores y recuperar los valores guardados, siempre que les indiques su nombre.
+
+### 2022-08-03
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 65] `written:2022-08-03:codigo-como-dato`
+  Code as data: a function's code is like a type's parameters, except that instead of numbers or types it holds operations; computation is running the functions.
+  > la idea del codigo como dato, es hacer que el codigo de una funcion sea como los parametros de un tipo, solo que en lugar de tener numeros o tipos, tiene operaciones.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 53] `written:2022-08-03:constructores-en-el-espacio-de-cada-tipo`
+  Unlike Haskell where constructors live in the global space, perhaps they should live in each type's space (maybe.just vs just).
+  > En haskell los constructores viven en el espacion global. quizas sea buena idea que vivan en el espacio de cada tipo
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 19] `written:2022-08-03:declarar-funcion-es-declarar-su-test`
+  The central idea of tapp: declaring a function means declaring what it must satisfy as a test, so automatic tests can be generated.
+  > La idea central del tapp es que al declarar una funcion vos declaras que es lo que la funcion debe cumplir como un test y entonces es posible generar tests automaticos.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 103] `written:2022-08-03:definicion-de-tipo-es-recursiva`
+  A type must be universally accessible, like identifiers, so the definition of a type is necessarily recursive (temperature = type temperature ...).
+  > la definicion de un tipo es necesariamente recursiva.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 57] `written:2022-08-03:diferencia-constructor-funcion`
+  The difference between a constructor and a function: a function involves a computation (a further step) so no pattern matching; the constructor plus its parameters are the element, making elements transparent as if they had public members.
+  > cual es la diferencia entre un constructor y una funcion?
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 27] `written:2022-08-03:dos-formas-de-definir-tipos-constructivo-declarativo`
+  Two ways to define types, constructive (Haskell's data) and declarative (Haskell's class); a contrast with C++ concepts as predicates over types evaluated at compile time.
+  > hay dos formas de definir tipos: el constructivo (data en Haskell) y el declarativo (class en Haskell).
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 69] `written:2022-08-03:funcion-guarda-script-tapp-y-compilado`
+  A function holds its code written in tapp (script-like) plus some simplified compiled form.
+  > las funciones contienen el codigo escrito en tapp (es tipo script, si queres) ademas de alguna forma simplificada compilada.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 71] `written:2022-08-03:funciones-que-modifican-el-codigo`
+  Being able to apply functions that modify code: run tests, compute errors or derivatives, find equivalent codes, or estimate execution time.
+  > puedo aplicar funciones que modifican el codigo: como hacer tests o calcular errores o derivadas o encontar codigos equivalentes o estimar el tiempo de ejecucion.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 73] `written:2022-08-03:modelo-lisp`
+  An inclination to follow the Lisp model, which would put a function's whole body into its parameters.
+  > Yo creo que tengo que seguir el modelo Lisp.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 35] `written:2022-08-03:nombres-como-direcciones`
+  Names simplify programming; for dynamically created types or functions, a name is really an address or pointer, so a generated numeric identifier suffices.
+  > los nombres son grandes simplificadores de la programacion. La pregunta es si tengo tipos o funciones creadas dinamicamente, como creo nombres para ellas?
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 15] `written:2022-08-03:proceso-de-creacion-de-tipos-programable`
+  Luciano wants the user-level process of defining new types and functions to be itself programmable, the language writing itself; this requires a simple, robust language with no syntactic sugar.
+  > Yo lo que quiero hacer es que el proceso (2) pueda ser programable, es decir que el lenguaje se pueda escribir a sí mismo. Para lograr esto, el lenguaje debe ser simple y robusto no tener sintactic sugar.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 23] `written:2022-08-03:proposicion-que-cada-tipo-cumple`
+  Each type (no distinction between type and function) should indicate the proposition it satisfies, in two versions, a computational one and a written one derived from it; propositions provable by static tests (from the algebra of propositions) or dynamic ones (checked element by element).
+  > poder indicar en cada tipo (no distingo entre tipo y funcion) cual es la proposicion que cumple. Aqui hay dos versiones: una computacional y otra escrita. La idea es que la escrita sea derivada de la computacional. Las proposiciones pueden ser probadas con tests estaticos o dinamicos. Los test estaticos surjen del algebra de proposiciones. Los dinamicos se prueban uno a uno con los elementos de cada tipo.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 99] `written:2022-08-03:simetria-valor-tipo-funcion-identificador-independiente`
+  By the symmetry between variable-value, variable-type and variable-function, the identifier and the type should be completely independent; the identifier is a fantasy name unknown until resolved.
+  > si aplicamos la simetria de que pasamos de una variable-valor a una variable-tipo a una variable-funcion, entonces vemos que el identificador y el tipo deberian ser completamente independientes. El identificador es un nombre de fantasia que hasta que no lo resuelvo no deberia saber cual es.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 115] `written:2022-08-03:subtipos-con-predicado`
+  Subtypes defined by a predicate over the value, as in ambient temperature constrained to a range.
+  > ambient\_temperature = type ambient\_temperature x: real \| (-30\<x)& x\<40
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 17] `written:2022-08-03:testeos-probabilidades-errores-tiempos-en-la-sintaxis`
+  A wish to build tests, probabilities, errors and computation times into the language's syntax, together with equivalence relations for alternative functions, aiming at automatic self-optimization.
+  > incorporar los testeos, las probabilidades, los errores y los tiempos de calculo en la sintaxis del lenguaje junto con las relaciones de equivalencia para las funciones alternativas. La idea es tener una forma de auto-optimizacion automatica.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 25] `written:2022-08-03:un-elemento-cumple-muchos-tipos`
+  In type theory an element relates to a type, but the problem is that one element satisfies many types at once.
+  > en la teoria de tipos tenemos la relacion elemento y tipo. El problema es que un elemento cumple con muchos tipos a la vez.
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 47] `written:2022-08-03:un-elemento-un-tipo-sirve-a-muchos`
+  The chosen element-type relation: each element belongs to exactly one type but can serve to build many types, possibly via implicit conversion.
+  > cada elemento pertenece exactamente a un tipo, pero puede servir para construir una multitud de tipos (conversion implicita?).
+
+- **11:56** Luciano [written: 2022-08-03 haskell.md line 121] `written:2022-08-03:un-tipo-inyecta-varios-identificadores`
+  A type or function can inject more than one identifier into the environment; being ultra-explicit about how names are injected requires some mechanism, e.g. variable binds [Maybe, Just, Nothing].
+  > un tipo o una funcion puede inyectar mas de un identificador en el environment...
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 9] `written:2022-08-03:composition-with-dot`
+  Composition is written with a dot ".", and this is said to explain class methods.
+  > La composicion la indico con puntos . (esto explica los metodos de clases)
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 3] `written:2022-08-03:equals-as-assertion`
+  The sign "=" is read as an assertion that one side equals the other; this is taken as a generating idea for tapp/quimulun.
+  > encontre una idea que me puede servir de generadora para tapp/quimulun: la idea de que el signo \"=\" representa aserciones, es decir que un lado es igual al otro.
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 7] `written:2022-08-03:equals-defines-subtypes-by-predicate`
+  His proposal: use equals for assertions with predicates, to define subobject types, possibly indicated with guards "|".
+  > esa es mi idea: usar el igual para definir tipos subobjetos. (lo puedo indicar con guardas \"\|\").
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 5] `written:2022-08-03:equals-for-pattern-matching`
+  The equals sign is used for pattern matching when some symbol is unknown.
+  > Esto se usa para pattern matching cuando algun simbolo es desconocido.
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 29] `written:2022-08-03:identity-with-universal-law`
+  Identity is given with a universal law that id x equals x for all x.
+  > Identity id \| for_all x:a {id x = x}
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 37] `written:2022-08-03:io-type-with-roundtrip-laws`
+  An io type carries write and read functions and laws that writing then reading recovers the value, and reading then writing recovers the string.
+  > when (for_all x: a {x\| write \| read = (Just x,\"\")}) & (forall y: s {y\| read \| write = y})
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 13] `written:2022-08-03:subobject-as-central-concept`
+  The most important concept is the subObject: a subset of the algebraic object satisfying a predicate, a test.
+  > El concepto mas importante es el de subObjeto: un subconjunto del objeto algebraico que cumple con un cierto predicado, un test.
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 15] `written:2022-08-03:test-succeeds-or-explains-failure`
+  A test either succeeds or there is an explanation of why it fails.
+  > Ahora un test o es exitoso o hay una explicacion de porque falla.
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 41] `written:2022-08-03:two-kinds-of-functions`
+  Functions are of two types: predefined types and user defined.
+  > functions are of two types
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 11] `written:2022-08-03:type-autodetection`
+  Another criterion is to use "autodetection" of types.
+  > El otro criterio es usar la \"autodeteccion\" de tipos.
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 19] `written:2022-08-03:types-as-tagged-alternatives`
+  Types expressed as alternatives with "|", shown through maybe, either, and sum.
+  > maybe a = Nothing \| Just a
+
+- **11:56** Luciano [written: 2022-08-03 tapp before.md line 27] `written:2022-08-03:typing-a-write-function`
+  How to express the type of a function write a : a->string is raised as an open question.
+  > como expreso el tipo de write a?
+
+### 2023-02-22
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 31] `written:2023-02-22:aprender-de-cada-corrida`
+  From each run of the code something is learned: whether an implementation is correct, or by measuring its speed.
+  > La idea es que de cada corrida del codigo algo se aprende, ya sea se sabe que una implementacion es correcta ya que se mide su velocidad.
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 17] `written:2023-02-22:code-as-data`
+  Code as data: being able to operate on function definitions, which requires distinguishing the code from its application.
+  > Code as data. Debo poder operar sobre las definiciones de funciones. O sea que debo distinguir entre el codigo y la aplicacion del codigo.
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 11] `written:2023-02-22:definir-funciones-en-grupo`
+  Many functions must be defined together because their postconditions involve several functions at once, as in read and write or the operations of a mathematical object.
+  > Esto hace que muchas funciones se deban definir en grupo ya que las postcondiciones involucran a varias funciones a la vez (como leer y escribir o las operaciones en un objeto matematico como un grupo o field.
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 3] `written:2023-02-22:dos-tipos-de-tipos`
+  Two kinds of types: constructive ones (sum, product, exponential, function composition) and declarative ones that satisfy a proposition.
+  > Dos tipos de tipos:
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 9] `written:2023-02-22:el-subtipo-de-una-funcion-como-precondicion-de-otra`
+  The subtype defined by a function's postconditions is itself usable as a precondition of another function.
+  > lo cual hace que este subtipo sea usado como precondicion de otra funcion.
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 9] `written:2023-02-22:funciones-con-precondiciones-y-postcondiciones`
+  Functions are defined with preconditions (the subtypes of the arguments) and postconditions (propositions over arguments and returned values); the postconditions define the function's subtype.
+  > Las funciones se definen con precondiciones (los subtipos de los argumentos) y postcondiciones (proposiciones que involucran a argumentos y valores retornados).
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 29] `written:2023-02-22:optimizacion-automatica`
+  Allow automatic optimization of the code as the resource consumption of alternative implementations of functions is measured.
+  > Permitir la optimizacion automatica del codigo a medida que se mide el consumo de recursos de implementaciones alternativas de distintas funciones.
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 35] `written:2023-02-22:partes-grammar-y-front-compiler`
+  The language has parts: a tapp grammar definition with semantics rules, and a front compiler from tapp to C++.
+  > A. tapp grammar definition, semantics rules etc
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 13] `written:2023-02-22:poder-definir-objetos-matematicos`
+  A wish to be able to define this kind of mathematical object.
+  > Tengo que poder definir este tipo de objetos matematicos.
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 21] `written:2023-02-22:unsafe-a-safe`
+  Convert unsafe code into safe code, using types as encoders of preconditions.
+  > convertir unsafe code en safe code (usando los tipos como codificadores de precondiciones).
+
+- **16:12** Luciano [written: 2023-02-22 tapp wish list.md line 25] `written:2023-02-22:untested-a-tested`
+  Convert untested code into tested code: an implementation belongs to a type only if it has been duly tested, and the testing conditions ensure the code's validity.
+  > convertir untested code en tested code: haciendo que las implementaciones de las funciones solo pertenezcan a un tipo si han sido debidamente testeadas y que las condicones de testeo aseguran la validez del codigo.
+
+### 2023-02-28
+
+- **18:06** Luciano [written: 2023-02-28 Sin título 1 w.md line 13] `written:2023-02-28:categoria-como-clase-con-componentes`
+  A category declared as a class constructed from its components: objects, homs, composition and identity.
+  > Category(Obj,Hom,Compose,Id)
+
+- **18:06** Luciano [written: 2023-02-28 Sin título 1 w.md line 1] `written:2023-02-28:categoria-declaracion-estilos`
+  Opens the question of how to declare a category in the language, and notes there could be different styles for doing so.
+  > como hago para declarar una categoria
+
+- **18:06** Luciano [written: 2023-02-28 Sin título 1 w.md line 19] `written:2023-02-28:compose-con-ley-de-asociatividad`
+  Composition is a function on homs whose type carries the law that it is associative.
+  > function Compose (Hom(X,Y), Hom(Y,Z))-\>Hom(X,Z)=\>Associative (Compose)
+
+- **18:06** Luciano [written: 2023-02-28 Sin título 1 w.md line 5] `written:2023-02-28:estilo-cpp-clases-funciones`
+  One style for declaring a category modeled on C++, where there are classes or structs and functions.
+  > Estilo c++
+
+- **18:06** Luciano [written: 2023-02-28 Sin título 1 w.md line 21] `written:2023-02-28:id-con-leyes-de-identidad`
+  Id is a function giving an endo-hom whose type carries the left and right identity laws.
+  > function Id(X)-\>Hom(X,X) =\> Identity_right(Id(X),Hom(X,Y)) & Identity_left(Hom(Y,X),Id(X))
+
+- **18:06** Luciano [written: 2023-02-28 Sin título 1 w.md line 17] `written:2023-02-28:object-y-hom-como-tipos-dependientes`
+  Object is a type indexed by a category, and Hom is a type indexed by two objects.
+  > type Hom(Object X, Object Y)
+
+### 2023-03-02
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 21] `written:2023-03-02:declaration-vs-definition`
+  Two notions kept from reading HoTT: declaration (saying something has a type) and definition (saying how to obtain the value).
+  > 1\) declaration: decis que algo tiene un tipo
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 25] `written:2023-03-02:definiciones-constructivas-y-declarativas`
+  Two kinds of definitions, the constructive and the declarative.
+  > tenemos dos tipos de definiciones las constructivas y las declarativas
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 15] `written:2023-03-02:expresar-definiciones-matematicas-como-categorias`
+  The important question is how to express mathematical definitions (category, functor, group) in the language.
+  > como expreso las definiciones matematicas como categoria, functor, grupo etc
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 37] `written:2023-03-02:funciones-por-postconditions-sin-implementacion`
+  Defining functions of a given type (meeting certain postconditions) without stating the implementation.
+  > Defino funciones que son de un tipo dado (es decir que cumplen con ciertas postconditions) sin decir cual es la implmentacion.
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 9] `written:2023-03-02:functores-como-implementaciones`
+  A functor is read as an implementation.
+  > Functores : implementaciones
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 17] `written:2023-03-02:hott-o-zmt-como-base`
+  Whether to start from HoTT or from ZMT as the foundation.
+  > empiezo con HoTT o con ZMT?
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 39] `written:2023-03-02:implementacion-que-depende-de-implementaciones-desconocidas`
+  Defining functions and giving an implementation that depends on functions whose implementation is unknown.
+  > Defino funciones y doy su implementacion que depende de funciones cuya implementacion no se.
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 11] `written:2023-03-02:natural-transformations-como-traduccion`
+  A natural transformation is read as translating one implementation into another.
+  > Natural transformations: traducir una implementacion en otra
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 31] `written:2023-03-02:parametros-variables-de-tipo-sin-valor`
+  Defining variables of a given type without stating their value, i.e. parameters.
+  > Defino variables de un tipo dado sin decir cual es el valor, es decir parametros.
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 35] `written:2023-03-02:tipo-deducido-por-calculo-de-tipos`
+  The type is deduced by type calculation; if the derived type is larger than the parameter's type, this is flagged.
+  > El tipo se deduce por el calculo de tipos. Si el tipo derivado es mayor que el tipo del parametro, se indica.
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 43] `written:2023-03-02:tipos-de-funciones-por-postcondiciones`
+  Defining function types by stating their postconditions.
+  > Defino tipos de funciones, diciendo cuales son las postcondiciones.
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 41] `written:2023-03-02:tipos-de-variables-por-postcondiciones`
+  Defining variable types by stating their postconditions.
+  > Defino tipos de variables, diciendo cuales son sus postcondiciones
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 45] `written:2023-03-02:tuplas-con-crosscondiciones`
+  Defining a tuple of variable and function types with postconditions involving the whole tuple (crossconditions).
+  > Defino una tupla de tipos de variables y de funciones con postcondiciones que involucran a toda la tupla. (crosscondiciones).
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 47] `written:2023-03-02:unica-forma-de-definir-es-en-tuplas`
+  The conclusion that there is only one way to define, in tuples, which may hold one or more identifiers.
+  > solo hay una forma de definir y es en tuplas, que pueden tener uno o mas identificadores.
+
+- **11:27** Luciano [written: 2023-03-02 estoy perdido.md line 33] `written:2023-03-02:variables-funcion-con-verificacion-de-precondiciones`
+  Defining variables as functions of other variables or parameters, checking that the arguments meet the preconditions (belong to the predicted type).
+  > Defino variables que son funcion de otras variables o parametros. Se verifica si los argumentos de las funciones cumplen con las precondiciones ...
+
+### 2023-03-13
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 7] `written:2023-03-13:asignacion-identificador-igual-operacion`
+  each assignment has an identifier to recover the created object, an equals sign, and an operation that creates the object.
+  > cada asignacion tiene un identificador para recuperar el objeto creado, un signo igual y una operacion para crear el objeto.
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 11] `written:2023-03-13:asignacion-simultanea-por-interdependencia`
+  when the postconditions of objects are interdependent, those objects are assigned simultaneously.
+  > En el caso que las postcondiciones de los objetos sean interdependientes, los objetos se asignan simultaneamente.
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 81] `written:2023-03-13:code-as-data`
+  among the surveyed languages, Lisp's "code as data" is noted.
+  > Code as data.
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 13] `written:2023-03-13:condicion-devuelve-uno-o-mensaje`
+  a condition's result should not be just a boolean but either a one if met or a message explaining why it was not met.
+  > en realidad el resultado de cualquier condicion deberia ser uno si se cumplen las condiciones y un mensaje indicando porque no se cumplieron.
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 9] `written:2023-03-13:creaciones-verifican-pre-y-pos`
+  object creations verify that the pre- and postconditions of the created object are met.
+  > Las creaciones de objetos verifican que se cumplans las pre y pos conditions del objeto creado.
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 15] `written:2023-03-13:diccionario-humano-maquina-literalismo`
+  the most important structure in programming is the dictionary that joins human and machine, the basis of literalism.
+  > la estructura mas importante de la programacion es el diccionario que une el humano con la maquina, es la base del literalismo
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 5] `written:2023-03-13:luthier-cadena-de-asignaciones`
+  Luthier is a chain of assignments.
+  > Luthier es una cadena de asignaciones.
+
+- **14:48** Luciano [written: 2023-03-13 hacia Luthier.md line 3] `written:2023-03-13:luthier-programas-autoverificados`
+  Luthier is framed as the language for writing self-verified programs.
+  > como es Luthier el lenguaje para escribir programas autoverificados?
+
+### 2025-06-17
+
+- **06:20** model [written: Hottification program.md line 31] `written:2025-06-17:algebraic-composability-across-scales`
+  Algebraic model composability across subunits, pathways and scales, with hierarchical construction enforced by dependent types.
+  > Algebraic model composability across subunits, pathways, and scales.
+
+- **06:20** model [written: Hottification program.md line 26] `written:2025-06-17:certified-binding-and-energetic-objects`
+  The language yields certified binding schemes, conformational spaces and energetic couplings.
+  > Certified binding schemes, conformational spaces, energetic couplings.
+
+- **06:20** model [written: Hottification program.md line 32] `written:2025-06-17:dependent-types-for-hierarchy`
+  Hierarchical model construction is naturally enforced by dependent types.
+  > Hierarchical model construction naturally enforced by dependent types.
+
+- **06:20** model [written: Hottification program.md line 52] `written:2025-06-17:energetic-couplings-as-types`
+  Domain-specific extension of HoTT where energetic couplings are represented as types.
+  > Energetic couplings as types.
+
+- **06:20** model [written: Hottification program.md line 91] `written:2025-06-17:foundational-tension-hott-vs-probability`
+  A foundational tension: HoTT has invertible identities and univalence while probability has non-invertible uncertainty and partial identity, and no fully unified model yet exists.
+  > HoTT: invertible identities, univalence, internalized equivalence.
+
+- **06:20** model [written: Hottification program.md line 129] `written:2025-06-17:hottification-primitives-sufficiency`
+  Hypothesis that Sigma-types, Pi-types, identity types and HITs suffice to encode conformational models, energetic couplings and symmetry structures.
+  > Sigma-types, Pi-types, identity types, HITs are sufficient to encode conformational models, energetic couplings, and symmetry structures.
+
+- **06:20** model [written: Hottification program.md line 77] `written:2025-06-17:internal-equality-replaces-isomorphisms`
+  HoTT's internal equality replaces ad hoc isomorphisms, with types as spaces and identities as paths.
+  > Internal equality replaces ad hoc isomorphisms.
+
+- **06:20** model [written: Hottification program.md line 9] `written:2025-06-17:language-on-hott-for-biological-models`
+  A domain-specific modeling language built on Homotopy Type Theory in which biological models are expressed, composed and transformed with access to type-level structural equivalences, symmetries and compositional logic.
+  > Build a domain-specific modeling language based on Homotopy Type Theory (HoTT) that allows biological models to be expressed, composed, and transformed with full access to type-level structural equivalences, symmetries, and compositional logic.
+
+- **06:20** model [written: Hottification program.md line 163] `written:2025-06-17:macroir-likelihood-via-type-propagation`
+  Encode likelihood recursion via type-theoretic propagation, representing noise structures and model boundaries as dependent types linked to HoTT-compiled models.
+  > Encode likelihood recursion via type-theoretic propagation.
+
+- **06:20** model [written: Hottification program.md line 38] `written:2025-06-17:markov-models-as-generated-objects`
+  Markov models become generated objects rather than arbitrary inputs.
+  > Markov models become generated objects rather than arbitrary inputs.
+
+- **06:20** model [written: Hottification program.md line 33] `written:2025-06-17:mechanistic-to-kinetic-transition`
+  The language provides clean transitions from mechanistic theories to kinetic models.
+  > Clean transitions from mechanistic theories to kinetic models.
+
+- **06:20** model [written: Hottification program.md line 18] `written:2025-06-17:meta-layer-above-existing-dsls`
+  The language sits as a meta-layer above the ConformationalModel DSL, MacroIR, and Bayesian pipelines.
+  > Serve as meta-layer above ConformationalModel DSL, MacroIR, and Bayesian pipelines.
+
+- **06:20** model [written: Hottification program.md line 14] `written:2025-06-17:models-carry-embedded-semantic-structure`
+  Biological models should carry embedded semantic structure: symmetry groups, compositional operators, equivalence classes.
+  > Allow biological models to carry embedded semantic structure:
+
+- **06:20** model [written: Hottification program.md line 125] `written:2025-06-17:proof-assistant-verification`
+  Proof assistants (Coq, Lean, Agda) can verify semantic correctness of biological models via type-checking.
+  > Proof assistants (Coq, Lean, Agda) can verify semantic correctness of biological models via type-checking.
+
+- **06:20** model [written: Hottification program.md line 19] `written:2025-06-17:separate-structural-validity-from-inference`
+  Deterministic structural validity (via HoTT) is kept separate from probabilistic inference (via Bayesian layers); probability is handled downstream.
+  > Separate deterministic structural validity (via HoTT) from probabilistic inference (via Bayesian layers).
+
+- **06:20** model [written: Hottification program.md line 53] `written:2025-06-17:symmetry-reductions-as-path-identities`
+  Symmetry reductions are represented as path-based identities; identity types collapse state redundancies into reduced Markov spaces.
+  > Symmetry reductions as path-based identities.
+
+- **06:20** model [written: Hottification program.md line 159] `written:2025-06-17:tempering-state-spaces-as-type-indexed-ladders`
+  Reformulate sampler state spaces under type-theoretic structure, mapping parameter manifolds as type-indexed temperature ladders.
+  > Map parameter manifolds as type-indexed temperature ladders.
+
+- **06:20** model [written: Hottification program.md line 25] `written:2025-06-17:type-checking-prevents-invalid-models`
+  The semantic typing of the language prevents invalid models from being constructed, with automatic error prevention via type-checking.
+  > Semantic modeling language prevents invalid models from being constructed.
+
+- **06:20** model [written: Hottification program.md line 37] `written:2025-06-17:type-safe-prior-spaces`
+  Type-safe prior spaces for inference pipelines, bridging the MacroIR likelihood engine with structural model spaces.
+  > Type-safe prior spaces for inference pipelines.
+
+- **06:20** model [written: Hottification program.md line 135] `written:2025-06-17:type-system-for-state-and-energy-algebra`
+  Planned work to formalize a type system for state and energy algebra and implement HoTT-based state composition primitives.
+  > Formalize type system for state and energy algebra
+
+- **06:20** model [written: Hottification program.md line 105] `written:2025-06-17:types-as-molecular-states`
+  Hypothesis that biological models are well-typed objects where types represent molecular states, identity paths represent symmetries, and composition emerges via dependent type operations.
+  > Biological models can be defined as well-typed objects where types represent molecular states, identity paths represent symmetries, and model composition emerges via dependent type operations.
+
+- **06:20** model [written: Hottification program.md line 121] `written:2025-06-17:universality-across-biological-domains`
+  Hypothesis that the framework unifies models across channels, enzymes, networks, signaling and regulation.
+  > The DSL framework unifies models across channels, enzymes, networks, signaling, and regulation.
+
+- **06:20** model [written: program_hott_dsl.md line 9] `written:2025-06-17:dsl-based-on-hott-for-biological-models`
+  The core proposal: a domain-specific modeling language built on Homotopy Type Theory for expressing, composing, and transforming biological models with access to type-level structure.
+  > Build a domain-specific modeling language based on Homotopy Type Theory (HoTT) that allows biological models to be expressed, composed, and transformed with full access to type-level structural equivalences, symmetries, and compositional logic.
+
+- **06:20** model [written: program_hott_dsl.md line 52] `written:2025-06-17:energetic-couplings-as-types`
+  Energetic couplings are to be expressed as types.
+  > Energetic couplings as types.
+
+- **06:20** model [written: program_hott_dsl.md line 91] `written:2025-06-17:foundational-tension-hott-vs-probability`
+  A tension between HoTT (invertible identities, univalence) and probability (non-invertible uncertainty, partial identity), with no fully unified model yet.
+  > HoTT: invertible identities, univalence, internalized equivalence.
+
+- **06:20** model [written: program_hott_dsl.md line 32] `written:2025-06-17:hierarchical-models-via-dependent-types`
+  Hierarchical model construction across subunits, pathways, and scales is enforced by dependent types.
+  > Hierarchical model construction naturally enforced by dependent types.
+
+- **06:20** model [written: program_hott_dsl.md line 129] `written:2025-06-17:hottification-feasibility`
+  Hypothesis that Sigma-types, Pi-types, identity types, and HITs suffice to encode conformational models, energetic couplings, and symmetry structures.
+  > Sigma-types, Pi-types, identity types, HITs are sufficient to encode conformational models, energetic couplings, and symmetry structures.
+
+- **06:20** model [written: program_hott_dsl.md line 113] `written:2025-06-17:identity-types-collapse-redundancy`
+  Hypothesis that identity types automatically collapse state redundancies and symmetries into reduced Markov spaces.
+  > Identity types automatically collapse state redundancies and symmetries into reduced Markov spaces.
+
+- **06:20** model [written: program_hott_dsl.md line 163] `written:2025-06-17:likelihood-recursion-via-type-propagation`
+  MacroIR's likelihood recursion is to be encoded via type-theoretic propagation, with noise structures and model boundaries as dependent types.
+  > Encode likelihood recursion via type-theoretic propagation.
+
+- **06:20** model [written: program_hott_dsl.md line 125] `written:2025-06-17:machine-checkable-via-proof-assistants`
+  Hypothesis that proof assistants (Coq, Lean, Agda) can verify semantic correctness of biological models via type-checking.
+  > Proof assistants (Coq, Lean, Agda) can verify semantic correctness of biological models via type-checking.
+
+- **06:20** model [written: program_hott_dsl.md line 38] `written:2025-06-17:markov-models-as-generated-objects`
+  Markov models become generated objects rather than arbitrary inputs.
+  > Markov models become generated objects rather than arbitrary inputs.
+
+- **06:20** model [written: program_hott_dsl.md line 18] `written:2025-06-17:meta-layer-above-existing-dsls`
+  The language is positioned as a meta-layer above the ConformationalModel DSL, MacroIR, and Bayesian pipelines.
+  > Serve as meta-layer above ConformationalModel DSL, MacroIR, and Bayesian pipelines.
+
+- **06:20** model [written: program_hott_dsl.md line 105] `written:2025-06-17:models-as-well-typed-objects`
+  Hypothesis that biological models can be defined as well-typed objects where types are molecular states, identity paths are symmetries, and composition emerges from dependent type operations.
+  > Biological models can be defined as well-typed objects where types represent molecular states, identity paths represent symmetries, and model composition emerges via dependent type operations.
+
+- **06:20** model [written: program_hott_dsl.md line 14] `written:2025-06-17:models-carry-embedded-semantic-structure`
+  Biological models should carry embedded semantic structure such as symmetry groups, compositional operators, and equivalence classes.
+  > Allow biological models to carry embedded semantic structure:
+
+- **06:20** model [written: program_hott_dsl.md line 19] `written:2025-06-17:separate-structural-validity-from-probabilistic-inference`
+  Deterministic structural validity (via HoTT) is kept separate from probabilistic inference (via Bayesian layers).
+  > Separate deterministic structural validity (via HoTT) from probabilistic inference (via Bayesian layers).
+
+- **06:20** model [written: program_hott_dsl.md line 53] `written:2025-06-17:symmetry-reductions-as-path-identities`
+  Symmetry reductions are represented as path-based identities.
+  > Symmetry reductions as path-based identities.
+
+- **06:20** model [written: program_hott_dsl.md line 75] `written:2025-06-17:types-as-spaces-identities-as-paths`
+  HoTT provides types as spaces and identities as paths, with internal equality replacing ad hoc isomorphisms.
+  > Provides types as spaces, identities as paths, higher paths as equivalences.
+
+- **06:20** model [written: program_hott_dsl.md line 25] `written:2025-06-17:types-prevent-invalid-models`
+  The semantic language prevents invalid models from being constructed, with automatic error prevention via type-checking.
+  > Semantic modeling language prevents invalid models from being constructed.
+
+- **06:20** model [written: program_hott_dsl.md line 121] `written:2025-06-17:universality-across-biological-domains`
+  Hypothesis that one DSL framework unifies models across channels, enzymes, networks, signaling, and regulation.
+  > The DSL framework unifies models across channels, enzymes, networks, signaling, and regulation.
+
+- **06:21** model [written: term_hottification.md line 40] `written:2025-06-17:analogy-to-categorification-formalization-quantization`
+  HoTTification is placed as analogous to categorification, formalization, and quantization.
+  > Categorification** (Category Theory)
+
+- **06:21** model [written: term_hottification.md line 17] `written:2025-06-17:compile-time-correctness-instead-of-runtime-validation`
+  External or runtime-only validation is replaced with compile-time structural correctness.
+  > Replacing external or runtime-only validation with **compile-time structural correctness**.
+
+- **06:21** model [written: term_hottification.md line 14] `written:2025-06-17:equivalences-as-identity-paths`
+  Equivalences between model structures are represented as identity paths.
+  > Representing equivalences between model structures as **identity paths**.
+
+- **06:21** model [written: term_hottification.md line 9] `written:2025-06-17:hottification-as-transforming-a-model-into-a-hott-structure`
+  HoTTification is defined as turning a scientific model, algorithm, or modeling language into a formal structure governed by Homotopy Type Theory.
+  > **HoTTification** is the process of transforming a scientific model, algorithm, or modeling language into a formal structure governed by the principles of **Homotopy Type Theory (HoTT)**.
+
+- **06:21** model [written: term_hottification.md line 27] `written:2025-06-17:lifting-deterministic-structure-into-types`
+  For probabilistic models, deterministic structure is lifted into types.
+  > Probabilistic models (where deterministic structure is lifted into types).
+
+- **06:21** model [written: term_hottification.md line 29] `written:2025-06-17:likelihood-recursion-type-propagated`
+  In inference engines, likelihood recursion is type-propagated.
+  > Inference engines (where likelihood recursion is type-propagated).
+
+- **06:21** model [written: term_hottification.md line 13] `written:2025-06-17:model-components-as-types`
+  Model components are encoded as types.
+  > Encoding model components as **types**.
+
+- **06:21** model [written: term_hottification.md line 19] `written:2025-06-17:models-as-typed-mathematical-objects`
+  In HoTTification, models themselves become typed mathematical objects, with equivalences, symmetries, and compositions validated by the type system.
+  > **models themselves become typed mathematical objects**, with equivalences, symmetries, and compositions validated directly by the type system.
+
+- **06:21** model [written: term_hottification.md line 32] `written:2025-06-17:path-toward-machine-verifiable-biological-theories`
+  HoTTification offers a path toward machine-verifiable biological theories.
+  > A path toward machine-verifiable biological theories.
+
+- **06:21** model [written: term_hottification.md line 28] `written:2025-06-17:sampler-spaces-as-type-indexed-manifolds`
+  Sampler spaces, such as parallel tempering spaces, are treated as type-indexed manifolds.
+  > Sampler spaces (parallel tempering spaces as type-indexed manifolds).
+
+- **06:21** model [written: term_hottification.md line 44] `written:2025-06-17:semantic-safety-layer-above-runtime`
+  HoTTification introduces a semantic safety layer above runtime execution.
+  > Introduces **semantic safety layer** above runtime execution.
+
+- **06:21** model [written: term_hottification.md line 16] `written:2025-06-17:semantic-safety-via-dependent-typing`
+  Dependent typing enforces semantic safety, guaranteeing internal consistency of model compositions.
+  > Enforcing **semantic safety** via dependent typing, guaranteeing internal consistency of model compositions.
+
+- **06:21** model [written: term_hottification.md line 15] `written:2025-06-17:symmetries-as-higher-paths`
+  Higher-order symmetries and structural relations are captured as higher paths.
+  > Capturing higher-order symmetries and structural relations as **higher paths**.
+
+- **06:21** model [written: term_hottification.md line 33] `written:2025-06-17:unification-of-model-algebra-and-identity-preserving-transformations`
+  HoTTification unifies model algebra, compositional safety, and identity-preserving transformations.
+  > A unification of model algebra, compositional safety, and identity-preserving transformations.
+
+- **06:23** model [written: vault_glossary_v1.md line 40] `written:2025-06-17:bayesianization-of-the-scientific-pipeline`
+  Mapping scientific knowledge production into explicit Bayesian structures, section of a paper to component of inference.
+  > The process of formally mapping scientific knowledge production into explicit Bayesian structures:
+
+- **06:23** model [written: vault_glossary_v1.md line 14] `written:2025-06-17:compile-time-structural-validation`
+  Models are validated structurally at compile time.
+  > Compile-time structural validation of models.
+
+- **06:23** model [written: vault_glossary_v1.md line 70] `written:2025-06-17:conformational-algebra`
+  A compositional system for building kinetic models from conformational state components.
+  > A compositional system for building kinetic models from conformational state components:
+
+- **06:23** model [written: vault_glossary_v1.md line 13] `written:2025-06-17:dependent-types-enforce-semantic-safety`
+  Dependent types are what enforce semantic safety in the structure.
+  > Dependent types enforcing semantic safety.
+
+- **06:23** model [written: vault_glossary_v1.md line 102] `written:2025-06-17:dsls-as-model-compilers`
+  The DSLs being built are themselves model compilers, with pipelines from DSL to Markov models to engine, and from HoTT DSL to validated model spaces to inference.
+  > The DSLs you are building serve as model compilers.
+
+- **06:23** model [written: vault_glossary_v1.md line 72] `written:2025-06-17:external-product-of-conformational-dof`
+  Models are built as an external product of conformational degrees of freedom, with energetic coupling rules.
+  > External product of conformational degrees of freedom.
+
+- **06:23** model [written: vault_glossary_v1.md line 90] `written:2025-06-17:fim-self-consistency-diagnostic`
+  Validating a likelihood by comparing the Fisher Information Matrix from score covariance against the one from the Hessian; agreement validates the implementation without full inference.
+  > Agreement between these two estimates validates the correctness of likelihood implementation without requiring full inference.
+
+- **06:23** model [written: vault_glossary_v1.md line 12] `written:2025-06-17:higher-paths-as-equivalence-transformations`
+  Higher paths stand for transformations between equivalences.
+  > Higher paths as equivalence transformations.
+
+- **06:23** model [written: vault_glossary_v1.md line 8] `written:2025-06-17:hottification-as-transforming-models-into-hott-structure`
+  HoTTification is defined as turning a scientific model, algorithm or modeling language into a formal structure governed by Homotopy Type Theory.
+  > HoTTification is the process of transforming a scientific model, algorithm, or modeling language into a formal structure governed by Homotopy Type Theory (HoTT).
+
+- **06:23** model [written: vault_glossary_v1.md line 11] `written:2025-06-17:identity-paths-as-structural-equivalences`
+  Identity paths are read as structural equivalences between entities.
+  > Identity paths as structural equivalences.
+
+- **06:23** model [written: vault_glossary_v1.md line 27] `written:2025-06-17:invalid-models-eliminated-at-type-level`
+  Violations of model consistency are removed at the type level, before execution or inference.
+  > Violations of model consistency are eliminated at the type level, prior to execution or inference.
+
+- **06:23** model [written: vault_glossary_v1.md line 60] `written:2025-06-17:macroir-consumes-markov-models`
+  MacroIR consumes Markov models produced by the ConformationalModel DSL or by HoTTified model generators.
+  > MacroIR consumes Markov models produced by ConformationalModel DSL or HoTTified model generators.
+
+- **06:23** model [written: vault_glossary_v1.md line 57] `written:2025-06-17:macroirization`
+  Feeding structurally defined kinetic models into the MacroIR likelihood recursion engine, which computes full interval-averaged likelihoods for macroscopic current data.
+  > The act of feeding structurally defined kinetic models into the MacroIR likelihood recursion engine, which computes full interval-averaged likelihoods for macroscopic current data.
+
+- **06:23** model [written: vault_glossary_v1.md line 100] `written:2025-06-17:model-compiler`
+  A system translating high-level mechanistic model specifications into executable, inferable structures such as state spaces, likelihood functions and samplers.
+  > A system that translates high-level mechanistic model specifications into executable, inferable structures (e.g. state spaces, likelihood functions, samplers).
+
+- **06:23** model [written: vault_glossary_v1.md line 42] `written:2025-06-17:paper-sections-as-bayesian-components`
+  Introduction maps to prior, methods to likelihood, results to observations, discussion to posterior.
+  > Introduction → Prior.
+
+- **06:23** model [written: vault_glossary_v1.md line 30] `written:2025-06-17:runtime-vs-semantic-safety`
+  Runtime safety keeps a model running numerically; semantic safety keeps a model structurally meaningful, valid and well-posed before it runs; the contrast is framed as preventing crashes versus preventing invalid models from existing.
+  > Runtime safety: prevents crashes or numeric failures.
+
+- **06:23** model [written: vault_glossary_v1.md line 47] `written:2025-06-17:science-made-auditable-and-probabilistic`
+  The aim of the Bayesian mapping is to make scientific reasoning auditable, quantifiable and explicitly probabilistic at every step.
+  > The goal is to make scientific reasoning auditable, quantifiable, and explicitly probabilistic at every step.
+
+- **06:23** model [written: vault_glossary_v1.md line 27] `written:2025-06-17:semantic-safety-enforced-by-the-language`
+  Semantic safety is model correctness enforced by structural rules in the modeling language itself, so only structurally valid models can be constructed.
+  > Semantic safety refers to model correctness enforced by structural rules in the modeling language itself, ensuring that only structurally valid models can be constructed.
+
+- **06:23** model [written: vault_glossary_v1.md line 31] `written:2025-06-17:semantic-safety-prevents-invalid-models-from-existing`
+  Semantic safety is cast as preventing invalid scientific models from existing at all.
+  > Semantic safety: prevents invalid scientific models from existing.
+
+- **06:23** model [written: vault_glossary_v1.md line 75] `written:2025-06-17:symmetry-reduction-and-state-aggregation`
+  Symmetry reduction and aggregation of states by equivalent coupling configurations as mechanisms of the algebra.
+  > State aggregation based on equivalent coupling configurations.
+
+- **06:23** model [written: vault_glossary_v1.md line 10] `written:2025-06-17:types-as-entities`
+  Among the HoTT ingredients, types stand for the entities of the model.
+  > Types as entities.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 22] `written:2025-06-17:active-compiler-engines`
+  A development step: to prototype compiler engines described as active.
+  > Prototype Active Compiler Engines.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 23] `written:2025-06-17:bridge-type-theory-with-probabilistic-inference`
+  A development step: to bridge type theory with probabilistic inference engines.
+  > Bridge Type Theory with Probabilistic Inference Engines.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 6] `written:2025-06-17:compositional-type-safe-generative-model-spaces`
+  The strategic aim is to replace ad hoc model design with model spaces that are compositional, type-safe and generative.
+  > Replace ad hoc model design with compositional, type-safe, generative model spaces.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 19] `written:2025-06-17:hottification-operators`
+  A development step: to formalize operators named HoTTification Operators (left undefined here).
+  > Formalize HoTTification Operators.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 13] `written:2025-06-17:meta-theory-of-discovery-architecture`
+  The final product is framed not as new models themselves but as a meta-theory of scientific discovery architecture.
+  > The final product is not just new models, but **a meta-theory of scientific discovery architecture**.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 20] `written:2025-06-17:model-space-transformation-algebras`
+  A development step: to define algebras for transforming model spaces.
+  > Define Model-Space Transformation Algebras.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 21] `written:2025-06-17:type-constructors-for-conformational-model-composition`
+  A development step: to write type constructors for composing conformational models.
+  > Write Type Constructors for Conformational Model Composition.
+
+- **18:29** model [written: hottification_manifesto_v0.1.md line 7] `written:2025-06-17:unifiable-theory-building-system`
+  A theory-building system that unifies, characterized as machine-checkable, scalable, epistemically sound and scientifically creative.
+  > Create a unifiable theory-building system:
+
+### 2025-06-18
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 48] `written:2025-06-18:adjoint-forward-diagnostic-pair`
+  Each forward morphism (simulate, infer) is paired by adjunction with a diagnostic approximation (recover, summarize).
+  > $F \dashv G$: each forward morphism $F$ (e.g. simulate, infer) has a diagnostic approximation $G$ (e.g. recover, summarize).
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 21] `written:2025-06-18:contagiously-safe-dsl-compiler`
+  A compile-time safe model language whose safety is "contagious", with backend code generation.
+  > **Contagiously Safe DSL Compiler** | Compile-time safe model language + backend codegen
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 17] `written:2025-06-18:declarative-model-from-yaml`
+  A DSL kernel giving a declarative model interface specified in YAML, with a parser.
+  > **DSL Kernel (Model Spec + Parser)** | Declarative model interface from YAML
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 65] `written:2025-06-18:epistemic-firewall-against-drift`
+  The verification layer defends the system against silent semantic drift during refactoring.
+  > Epistemic firewall | Defends MacroIR++ against silent semantic drift during refactor
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 20] `written:2025-06-18:hott-kernel-with-semantic-zones`
+  A type-theoretic HoTT kernel providing a formal model/inference algebra plus "semantic zones".
+  > **Type-Theoretic HoTT Kernel** | Formal model/inference algebra + semantic zones
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 55] `written:2025-06-18:pre-formal-groupoid-of-operations`
+  Inference operations and their diagnostics form equivalence classes, a pre-formal groupoid structure.
+  > **Pre-formal groupoid structure**: inference operations and diagnostics form equivalence classes.
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 66] `written:2025-06-18:proof-proxy-bridging-empirical-to-formal`
+  The layer bridges empirical outputs to formal proofs, acting as a proof proxy before full formal typing lands.
+  > Proof proxy | Bridges empirical outputs to formal proofs
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 49] `written:2025-06-18:round-trip-identity-up-to-tolerance`
+  The test asserts that composing the diagnostic after the forward map recovers identity, up to statistical tolerance or structural equivalence.
+  > The SAV test asserts that $G \circ F \approx \text{id}$ up to statistical tolerance or structural equivalence.
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 19] `written:2025-06-18:safety-containers-validity-capsules`
+  Local safety containers (ScientificSafe<T>, Maybe_error<T>) that act as validity capsules around values.
+  > **ScientificSafe\<T>, Maybe\_error\<T>** | Local safety containers, validity capsules
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 16] `written:2025-06-18:semantic-adjoint-verification-as-soft-test-layer`
+  A "Semantic Adjoint Verification" layer that performs soft semantic testing via adjunctions, integrated at CLI level, as the kernel of early phases.
+  > **Semantic Adjoint Verification (SAV)** | Soft semantic test layer — CLI-integrated verification via adjunctions
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 54] `written:2025-06-18:soft-homotopy-before-hard-typing`
+  Semantic contracts form a "soft homotopy layer" that precedes hard type checking.
+  > **Soft homotopy layer**: semantic contracts before hard type checking.
+
+- **03:00** model [written: HoTTification Program Stack v2.0.md line 53] `written:2025-06-18:tests-as-witness-paths`
+  Each test forms a witness path between pipeline components, reading paths as equivalences in the HoTT sense.
+  > **Paths as equivalences**: each test forms a witness path between pipeline components.
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 10] `written:2025-06-18:approximate-triangle-identity`
+  Coherence is asserted through an approximate triangle identity G∘F ≈ Id, up to a statistical or structural tolerance.
+  > SAV tests assert semantic coherence through approximate triangle identities such as:
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 22] `written:2025-06-18:bridge-empirical-to-type-theoretic-proof`
+  SAV is positioned as a bridge from empirical tests through structural diagnostics toward future type-theoretic proof wrappers.
+  > **Bridges:** Empirical tests → structural diagnostics → future type-theoretic proof wrappers.
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 44] `written:2025-06-18:cli-morphism-correspondence`
+  Each command exposed by the inference engine CLI is treated as a morphism F in a semantic pipeline, for which SAV constructs a diagnostic co-operation G.
+  > Each command exposed by the inference engine CLI represents a morphism $F$ in a semantic pipeline ... SAV constructs a diagnostic co-operation $G$ for each such morphism
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 9] `written:2025-06-18:forward-operation-paired-with-diagnostic-co-operation`
+  Each forward operation F (simulation, inference, likelihood) is paired with a diagnostic co-operation G (reconstruction, inversion, summarization) in an adjoint-like relationship.
+  > Each forward operation $F$ ... is paired with a diagnostic co-operation $G$ ..., forming an adjoint-like relationship.
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 52] `written:2025-06-18:sav-as-epistemic-firewall-in-hottification`
+  Within the larger HoTTification program, SAV plays the role of epistemic firewall during the early refactor and modularization phases.
+  > This aligns directly with our larger HoTTification program, where SAV plays the role of **epistemic firewall** during the early refactor and modularization phases.
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 8] `written:2025-06-18:sav-semantic-adjoint-verification`
+  A verification framework for scientific inference engines that derives its test protocols from adjoint diagnostic pairs, rather than from arbitrary unit tests.
+  > A structured verification framework for scientific inference engines that derives test protocols from adjoint diagnostic pairs.
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 50] `written:2025-06-18:tests-as-epistemic-contracts-from-engine-structure`
+  SAV tests are not arbitrary unit tests; they encode epistemic contracts derived from the structure of the engine itself (e.g. simulate-then-infer should recover the generative model; a Fisher Information Matrix should be numerically stable).
+  > SAV tests are not arbitrary unit tests: they encode epistemic contracts derived from the structure of the engine itself.
+
+- **03:03** model [written: SAV_kernel_v1.0.md line 18] `written:2025-06-18:verification-compressed-to-minimal-diagnostic-suite`
+  Verification is compressed into a minimal suite of epistemically meaningful tests acting as a pre-formal safety envelope.
+  > SAV compresses verification into a minimal suite of epistemically meaningful tests, serving as a pre-formal safety envelope in HoTTified inference systems.
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 99] `written:2025-06-18:adjunctions-as-smart-tests`
+  Specific adjoint pairs correspond to tests: simulation ↔ inference, log-likelihood ↔ FIM, evidence ↔ normalization.
+  > simulation ↔ inference ... log-likelihood ↔ FIM ... evidence ↔ normalization
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 86] `written:2025-06-18:cli-operation-as-typed-morphism`
+  An HoTT perspective on inference where each CLI operation is a typed morphism between semantic spaces, and adjoint pairs define the test structure.
+  > Each CLI operation is a typed morphism.
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 19] `written:2025-06-18:contagiously-safe-dsl`
+  The Phase 4 goal is a "Contagiously Safe DSL" with a type-safe backend as the full realization of HoTTification.
+  > Contagiously Safe DSL + type-safe backend | Full realization of HoTTification
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 118] `written:2025-06-18:epistemic-compression`
+  Semantic structure matters more than test coverage; a few adjunction-derived tests cover most of the risk, aiming at epistemic compression and coherence before proof.
+  > Why semantic structure matters more than test coverage.
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 15] `written:2025-06-18:epistemic-firewall`
+  Phase 0 aims at semantic coherence before formal structure, framed as an epistemic firewall via diagnostic adjunctions.
+  > Semantic coherence before formal structure | **SAV** | Epistemic firewall via diagnostic adjunctions
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 66] `written:2025-06-18:hottification-phased-roadmap`
+  HoTTification as a staged program running from SAV diagnostics through DSL/CLI modularization, ScientificSafe/Maybe_error wrappers, to a full HoTT kernel with a contagiously safe DSL and type-safe backend.
+  > a roadmap for transforming scientific software into epistemically safe, type-structured engines.
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 66] `written:2025-06-18:sav-semantic-adjoint-verification`
+  SAV, a lightweight diagnostic framework for inference engines derived from adjoint functors, that checks coherence by enforcing approximate triangle identities across operations.
+  > We introduce **Semantic Adjoint Verification (SAV)** — a lightweight, semantically structured diagnostic framework for inference engines. Derived from adjoint functors, SAV tests validate the coherence of inference pipelines by enforcing approximate triangle identities across simulation, inference, and summarization operations.
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 49] `written:2025-06-18:semantic-pre-type-system`
+  SAV gives epistemic structure before proof, acting as a semantic pre-type system and the first executable layer of HoTTification.
+  > It operationalizes homotopical reasoning in real systems by embedding structured round-trip diagnostics, creating a *semantic pre-type system*.
+
+- **03:08** model [written: Deployment Plan and Paper Kernel.md line 127] `written:2025-06-18:tests-as-type-inhabiting-witnesses`
+  Once full type structure exists, SAV tests become type-inhabiting witnesses; failures are already read as epistemic witnesses of structural incoherence.
+  > Once full type structure is ready, SAV tests become **type-inhabiting witnesses**.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 33] `written:2025-06-18:adjunctions-before-types`
+  Adjoint pairs provide a scaffold before HoTT-level types are possible.
+  > **Adjunctions before types**: Adjoint pairs provide a scaffold before HoTT-level types are possible.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 55] `written:2025-06-18:contagious-safety`
+  A "Contagiously Safe" compiler as the program's endgame, safety propagating through the system.
+  > The Contagiously Safe Compiler is our endgame.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 22] `written:2025-06-18:external-dsl-parser`
+  Isolating a declarative model interface from the C++ internals, via a YAML DSL and CLI harness.
+  > Isolate declarative model interface from C++ internals
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 25] `written:2025-06-18:formal-hottification-dsl`
+  A fully HoTT-verified, type-safe DSL with semantic zones and an inference algebra; the "Contagiously Safe" compiler as endgame.
+  > Build type-safe DSL, semantic zones, and fully HoTT-verified inference algebra
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 12] `written:2025-06-18:foundation-and-roadmap-together`
+  The program is meant to be both a long-term type-theoretic foundation and a practical roadmap usable before full formalization.
+  > A long-term type-theoretic foundation for inference pipelines.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 9] `written:2025-06-18:hottification-core-mission`
+  Turning scientific inference engines from empirically working black boxes into epistemically structured, formally safe systems, using HoTT, Category Theory and Semantic Verification.
+  > To transform scientific inference engines from empirically functional black boxes into **epistemically structured, formally safe systems** using the principles of **Homotopy Type Theory (HoTT)**, **Category Theory**, and **Semantic Verification**.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 23] `written:2025-06-18:internal-modularization`
+  Clean separation of ModelGraph and ParameterManager structures.
+  > Clean separation of ModelGraph and ParameterManager structures
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 24] `written:2025-06-18:proof-oriented-encapsulation`
+  Local safety containers (`ScientificSafe<T>`, `Maybe_error<T>`) wrapping high-risk regions.
+  > Introduce `ScientificSafe<T>`, `Maybe_error<T>` wrappers
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 35] `written:2025-06-18:reproducibility-as-formal-problem`
+  The reproducibility crisis framed as a lack of structural verification rather than a sociological issue.
+  > The reproducibility crisis is not a sociological issue but a lack of structural verification.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 21] `written:2025-06-18:semantic-adjoint-verification`
+  A phase that derives orthogonal smart tests from adjoint functor pairs (diagnostic and forward).
+  > Derive orthogonal smart tests from adjoint functor pairs (diagnostic ⊗ forward)
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 57] `written:2025-06-18:semantic-elevation-not-rewrite`
+  The program as a semantic elevation of existing empirical systems rather than a rewrite.
+  > The HoTTification Program is not a rewrite — it is a **semantic elevation.**
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 34] `written:2025-06-18:soft-safety-before-hard-proof`
+  Using diagnostics to defend correctness when proofs are not yet constructed.
+  > **Soft safety before hard proof**: Use diagnostics to defend correctness even when proofs are not yet constructed.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 50] `written:2025-06-18:start-from-empirical-systems`
+  Starting not from pure logic but from empirical systems, structured epistemically, functorially and eventually formally.
+  > We do not start from pure logic. We start from empirical systems — but we structure them epistemically, functorially, and eventually formally.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 31] `written:2025-06-18:structure-before-syntax`
+  Embedding epistemic logic even before full type safety is available.
+  > **Structure before syntax**: Embed epistemic logic even before full type safety.
+
+- **03:13** model [written: ho_ttification_manifesto_v_2.md line 32] `written:2025-06-18:tests-as-morphisms`
+  Treating each CLI command as a functor and each test as a triangle identity.
+  > **Tests as morphisms**: Each CLI command is a functor; each test a triangle identity.
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 22] `written:2025-06-18:adjunctions-structure-diagnostics`
+  Adjunctions are treated as structuring diagnostics, not as abstract theory.
+  > **Adjunctions are not abstract — they structure diagnostics.**
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 14] `written:2025-06-18:code-encodes-epistemic-structure`
+  Scientific code should encode its epistemic structure, not only its algorithms.
+  > Scientific code should encode its **epistemic structure**, not just its algorithms.
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 36] `written:2025-06-18:contagiously-safe-dsls`
+  Contagiously Safe DSLs enforce structure at the compiler level.
+  > **Contagiously Safe DSLs** — systems where structure is enforced at the compiler level
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 38] `written:2025-06-18:homotopical-program-recursive-incremental`
+  The development is a homotopical program, recursive, incremental and convergent rather than a waterfall.
+  > This is not a waterfall. This is a homotopical program: recursive, incremental, convergent.
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 35] `written:2025-06-18:proof-capsules`
+  Proof Capsules are local type-safe wrappers, e.g. `ScientificSafe<T>`.
+  > **Proof Capsules** — local type-safe wrappers (e.g. `ScientificSafe<T>`)
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 21] `written:2025-06-18:reproducibility-as-formal-property`
+  Reproducibility is cast as a formal property rather than a practice.
+  > **Reproducibility is a formal property.**
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 24] `written:2025-06-18:safety-as-constructible-semantic-zone`
+  Safety is a constructible semantic zone rather than an afterthought.
+  > **Safety is not an afterthought — it is a constructible semantic zone.**
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 33] `written:2025-06-18:sav-semantic-adjoint-verification`
+  SAV, smart tests derived from adjunctions, as a layer of the scaffold.
+  > **SAV (Semantic Adjoint Verification)** — smart tests derived from adjunctions
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 34] `written:2025-06-18:semantic-interfaces-structural-contracts`
+  Semantic Interfaces are DSLs that expose structural contracts.
+  > **Semantic Interfaces** — DSLs that expose structural contracts
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 13] `written:2025-06-18:semantic-not-syntactic-verification`
+  Verification of scientific code should be semantic rather than merely syntactic.
+  > Verification must become **semantic**, not just syntactic.
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 25] `written:2025-06-18:software-as-executable-epistemology`
+  Scientific software is framed as executable epistemology rather than engineering.
+  > **Scientific software is not engineering — it is executable epistemology.**
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 23] `written:2025-06-18:tests-as-morphisms`
+  Tests are understood as morphisms rather than patches.
+  > **Tests are not patches — they are morphisms.**
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 47] `written:2025-06-18:type-safety-as-consequence-of-epistemic-clarity`
+  Type safety is to arise as a natural consequence of epistemic clarity, aiming at systems that know why they work.
+  > Move toward type safety as a *natural consequence* of epistemic clarity
+
+- **03:32** model [written: ho_ttification_manifesto_v_2 (1).md line 15] `written:2025-06-18:type-theoretic-compositional-homotopical-foundation`
+  The proposed long-term foundation is type-theoretic, compositional, and homotopical.
+  > The correct long-term foundation is type-theoretic, compositional, and homotopical.
 
 ### 2026-05-26
 
@@ -3046,7 +4060,805 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
   Opaque signals have no `==`; comparing two signals is a function to `R` with tolerance.
   > no tienen `==`, comparar señales es una función a `R` con tolerancia.
 
+- **10:05** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 2] `dialogue:ac750929:cov-identity-holds-only-in-window`
+  A real finding: the Cov[g] = ρ/2 identity in the gcc docstring holds only where the template falls entirely inside the window; where it pokes out, variance drops.
+  > La identidad Cov[g] = ρ/2 del docstring de `gcc` vale solo en los retardos donde el template cae entero dentro de la ventana.
+
+- **10:05** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 2] `dialogue:ac750929:luthier-describes-python-executes`
+  The criterion inherited from the Luthier handoff note: Luthier only describes (types, laws, extern, test) and Python does the work.
+  > Luthier describe (tipos, leyes, `extern`, `test`) y Python hace el trabajo.
+
+- **21:32** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 7] `dialogue:ac750929:answers-at-concept-level`
+  A rule for how work is reported to him: think in concepts, most important first, name what failed or what limit was hit; a count like "33 laws" tells him nothing.
+  > Yo pienso en conceptos: el mas importante primero. Cual es la certificacion mas importante? cual es la siguiente? que fallo?
+
+- **21:46** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 11] `dialogue:ac750929:field-stages-are-luthier-limit`
+  Sonolocalización's likelihood is certified by Luthier, the field stages are not, and that boundary is Luthier's limit, not sonolik's: Luthier v0 does not express expectations, nor certify a concrete run, nor handle objects that are files.
+  > El límite de Luthier es que no expresa esperanzas ... y no certifica una corrida concreta ni objetos que son archivos, por eso las etapas 00 a 04 son huecos tipados.
+
+- **21:49** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 14] `dialogue:1e377538:likelihood-starts-outside-luthier`
+  The likelihood is defined in Python and Luthier only states laws about it; the model names this as a gap in what it built.
+  > La verosimilitud está definida en Python, y Luthier solo enuncia leyes sobre ella.
+
+- **21:53** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 15] `dialogue:1e377538:luthier-is-where-concepts-live`
+  Luthier is the place where the concepts are expressed; if the likelihood is not defined there, the work is misdirected.
+  > La idea es que luthier es donde se expresan los conceptos, si no definimos ahi la likelihood estamos mal
+
+- **21:53** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 15] `dialogue:ac750929:concepts-belong-in-luthier`
+  Luthier is where concepts are expressed; if the likelihood is not defined there, the design is wrong.
+  > La idea es que luthier es donde se expresan los conceptos, si no definimos ahi la likelihood estamos mal
+
+- **21:54** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 18] `dialogue:1e377538:criterion-describe-only`
+  The criterion taken from the hand-off note was that Luthier only describes (types, laws, externs, tests) with no function bodies, which left it as a test harness over the Python modules rather than the home of the concepts.
+  > Luthier solo describe: tipos, leyes, extern a Python y test; ninguna función con cuerpo
+
+- **21:54** model correction of turn 2 [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 18] `dialogue:ac750929:organized-by-module-not-concept`
+  Taking the handoff note literally made Luthier a test harness over sonolik; the unit of organization was the Python module, not the concept, so the likelihood stayed in Python as a black box.
+  > La unidad de organización fue el módulo de Python (trace, noise, window), no el concepto ... Nunca me pregunté cuáles son los conceptos de sonolocalización y cómo se escriben como tipos.
+
+- **21:55** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 21] `dialogue:1e377538:types-include-functions-with-laws`
+  Types in Luthier include the functions together with the laws that govern them.
+  > sabes que los tipos incluyen las funciones con las leyes que las rigen no?
+
+- **21:55** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 21] `dialogue:ac750929:types-include-functions-with-laws`
+  Types include the functions and the laws that govern them.
+  > sabes que los tipos incluyen las funciones con las leyes que las rigen no?
+
+- **21:56** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 22] `dialogue:1e377538:central-concept-has-no-type`
+  Function subtypes with laws are the concepts (a LawfulCorrelator says what a correlator is), but the central concept, the log-likelihood, has no type of its own, and the laws written mix the defining ones with implementation details of gcc.
+  > el concepto central no tiene tipo: no hay un `LogLikelihood` que diga qué leyes cumple una verosimilitud
+
+- **21:56** model correction of turn 20 [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 22] `dialogue:ac750929:central-concept-has-no-type`
+  The central concept lacks a type: there is no `LogLikelihood` with its laws; and the written laws mix those that define the concept with those describing gcc's implementation.
+  > el concepto central no tiene tipo: no hay un `LogLikelihood` que diga qué leyes cumple una verosimilitud ... las leyes que escribí mezclan las que definen el concepto con las que describen la implementación de gcc
+
+- **21:58** Luciano question [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 23] `dialogue:1e377538:start-from-emitter-receiver-types`
+  Starting from the fundamentals, what types describe the emitters and receivers of sound.
+  > que tipos describen los emisores y los receptores de sonido?
+
+- **21:59** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 24] `dialogue:1e377538:emitter-receiver-as-functions`
+  A receiver is a function from pressure at a point to a recording, an emitter a function from time to a pressure field; the types are those functions with the laws that make the likelihood valid.
+  > Un receptor es una función de la presión en un punto a una grabación, y un emisor es una función del tiempo a un campo de presión.
+
+- **21:59** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 25] `dialogue:1e377538:inference-is-over-physical-objects`
+  The point is inference, and inference is about real-world physical objects: emitters and receivers situated in time, space, and emission frequency.
+  > La inferencia es sobre objetos fisicos del mundo real: emisores y receptores situados en tiempo espacio y frecuencia de emision etc
+
+- **21:59** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 25] `dialogue:ac750929:inference-over-physical-objects`
+  Inference is over real-world physical objects: emitters and receivers situated in time, space and emission frequency.
+  > La inferencia es sobre objetos fisicos del mundo real: emisores y receptores situados en tiempo espacio y frecuencia de emision etc
+
+- **22:00** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 26] `dialogue:1e377538:situated-object-is-primary-type`
+  The primary type is the situated object, not the function; the function (record, propagate) is the forward model, and inference is the inverse path, filling a hole with a value decorated by its uncertainty.
+  > Entonces el tipo primario no es la función sino el objeto situado, y la función (grabar, propagar) es el modelo directo que lo conecta con los datos.
+
+- **22:00** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 26] `dialogue:ac750929:situated-object-is-primary-type`
+  The primary type is the situated object, not the function; recording/propagating is the forward model, and inference is the inverse path from recordings to the object's coordinates, yielding a value decorated by its uncertainty.
+  > el tipo primario no es la función sino el objeto situado ... La inferencia es el camino inverso: de las grabaciones a las coordenadas del objeto.
+
+- **22:02** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 27] `dialogue:1e377538:pipeline-is-a-graph`
+  The whole thing is a graph: the physical-object types at the ends, inferring over the Python trace in the middle.
+  > Bueno, es un grafo. Al final llegamos a estos tipos, en el medio inferimos sobre la traza de python, creo.
+
+- **22:02** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 27] `dialogue:ac750929:its-a-graph`
+  The structure is a graph; at the ends are the situated-object types, in the middle inference runs over the Python trace.
+  > es un grafo. Al final llegamos a estos tipos, en el medio inferimos sobre la traza de python, creo.
+
+- **22:02** Luciano proposal [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 27] `dialogue:ac750929:write-world-lut`
+  Build a .lut file with the definitions of Emitter, Receiver, etc.
+  > te parece armara un archivo lut con las definiciones de Emitter, Receiver etc?
+
+- **22:10** Luciano decision [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 31] `dialogue:1e377538:english-for-written-material`
+  Chat is in Spanish but everything written (except his transcripts) goes in English.
+  > aca hablamos en castellano, pero todo lo que queda escrito (salvo mis transcriptos obviamente) va en ingles, ponelo en tu memoria.
+
+- **22:20** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 33] `dialogue:1e377538:work-produces-files-accumulative`
+  What remains are files and graphics; the human interface is reading comprehensible files (perhaps json); Luthier should be cumulative, never computing the same thing twice (except on override) with knowledge accumulating, perhaps in a relational database.
+  > la idea de luthier es que sea acumulativo, es decir no calcular dos veces lo mismo (excepto override command) y que el conocimiento se vaya acumulando en una base de datos relacional quizas?
+
+- **22:20** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 33] `dialogue:ac750929:cumulative-no-recompute`
+  Luthier should be cumulative: never compute the same thing twice (except an override command), with knowledge accumulating in a relational database.
+  > la idea de luthier es que sea acumulativo, es decir no calcular dos veces lo mismo (excepto override command) y que el conocimiento se vaya acumulando en una base de datos relacional quizas?
+
+- **22:20** Luciano decision [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 31] `dialogue:ac750929:everything-written-in-english`
+  Chat is in Spanish but everything that stays written goes in English, except his transcripts.
+  > aca hablamos en castellano, pero todo lo que queda escrito (salvo mis transcriptos obviamente) va en ingles
+
+- **22:20** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 33] `dialogue:ac750929:what-remains-are-files`
+  His way of working: what remains after running scripts are files and pdfs; the human interface is reading comprehensible files, perhaps json.
+  > al final de cuentas lo que queda son files ... La interfaz con el humano se da a nivel de leer files compresibles, quizas json?
+
+- **22:21** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 34] `dialogue:1e377538:content-addressed-store`
+  The accumulative piece already exists as the hash of each definition's dependency cone; a definition's value can be a file whose hash includes the input data, giving content-addressed build; a relational db serves as a reconstructible index, not the source of truth.
+  > lo que queda son files, y la pieza que los hace acumulativos ya existe en Luthier, el hash del cono de dependencias de cada definición.
+
+- **22:21** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 34] `dialogue:ac750929:content-addressed-files-db-as-index`
+  Content-addressed build: a definition's hash depends on function, arguments and input hashes; files are the truth with a small json sidecar, and the relational DB is a reconstructible index, not the source of truth.
+  > La base relacional sirve, pero como índice y no como fuente de verdad. La verdad son los archivos ... Si se borra la base no se pierde nada; si se borra un archivo, sí.
+
+- **22:41** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 35] `dialogue:1e377538:two-coordinate-systems`
+  Absolute GPS/datetime coordinates fix identity (two objects cannot occupy the same place at the same time, matters for certification and hash), but that precision is impractical for the experiment, so both kinds of type must be expressed.
+  > dos objetos no pueden ocupar el mismo lugar al mismo tiempo.
+
+- **22:41** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 35] `dialogue:ac750929:two-coordinate-systems`
+  Position and time can be fixed absolutely (GPS, date-time), which matters for certification/hash since two objects cannot occupy the same place at the same time; but that precision is not practical for the experiment, so both kinds of type are needed.
+  > dos objetos no pueden ocupar el mismo lugar al mismo tiempo. Ahora, esta precision no es practica a nivel del experimento. We have to express both kind of types.
+
+- **22:42** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 37] `dialogue:1e377538:coordinates-absolute-and-local`
+  Two coordinate systems with distinct roles, absolute (identity, hash) and local (inference), joined by a Frame, with a consistency law between them and a law that two objects do not share a local position at the same time.
+  > hay dos sistemas de coordenadas con dos funciones distintas, y el tipo tiene que tener los dos.
+
+- **22:42** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 37] `dialogue:ac750929:frame-joins-absolute-and-local`
+  Two coordinate systems with distinct roles (absolute geodesic = identity and hash; local metres = inference) joined by a Frame, with a consistency law between them and an "apart" law for the scene.
+  > hay dos sistemas de coordenadas con dos funciones distintas ... Las coordenadas absolutas ... son la identidad ... Las coordenadas locales ... son donde la medición tiene precisión de centímetros y donde corre la inferencia.
+
+- **22:50** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 38] `dialogue:1e377538:uncertainty-as-functor`
+  There must be a type for a credibility interval or probability density (a prior over position); the idea is a functor that decorates a value, e.g. position, with an uncertainty.
+  > la idea es que sea un functor, es decir que decoremos la posicion con una incerteza.
+
+- **22:50** Luciano [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 38] `dialogue:ac750929:uncertainty-as-functor`
+  A type for credibility interval or probability density, able to express a prior over position, as a functor that decorates position with uncertainty.
+  > la idea es que sea un functor, es decir que decoremos la posicion con una incerteza.
+
+- **22:53** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 39] `dialogue:1e377538:five-ways-to-decorate-uncertainty`
+  Five ways to decorate a value with uncertainty, differing in how exact the functor is and what they lose (Σ summary, credible region, distribution over a grid, log-likelihood, samples); the distribution over a grid proposed as canonical, Emitter parameterized by a type functor to avoid duplicating the type, and marginalizing the calibration is bind, not map.
+  > la forma de decorar `Emitter` sin duplicar el tipo es hacerlo de orden superior: `Emitter (F : U -> U)`
+
+- **22:53** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 39] `dialogue:ac750929:five-ways-to-decorate-uncertainty`
+  Five ways to decorate a value with uncertainty, distinguished by how exact the functor is and what they lose; Dist over a grid is proposed as canonical, with region and gaussian as derived summaries, and `Emitter (F : U -> U)` to avoid duplicating the type; dependence on the calibration is bind, not map.
+  > hay cinco formas, y se distinguen por qué tan exacto es el functor y qué información pierden.
+
+- **22:58** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 40] `dialogue:1e377538:delegate-representation-to-python`
+  Luthier expresses the concepts and the representation is delegated to Python; a question whether lut programs could be compiled to Python and then run.
+  > La idea es que luthier exprese los conceptos pero la representacion se delegue a Python.
+
+- **22:58** Luciano question [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 40] `dialogue:ac750929:compile-declaration-not-execution`
+  Luthier expresses the concepts while representation is delegated to Python; could the .lut programs be compiled to Python and then run?
+  > La idea es que luthier exprese los conceptos pero la representacion se delegue a Python ... si no se podrian compilar los programas de lut a python y luego correr python.
+
+- **22:59** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 41] `dialogue:1e377538:compile-declaration-to-representation`
+  Compiling to run gains little; the point is to generate the Python representation that today is written by hand (dataclasses per type, booleans per law, stubs per hole), so objects stop being opaque.
+  > No es al pedo, pero el motivo no es correr más rápido: es que hoy la representación en Python se escribe a mano, y eso es lo que un compilador tiene que eliminar.
+
+- **22:59** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 41] `dialogue:ac750929:compiling-eliminates-hand-mirror`
+  Compiling to run faster is almost worthless; the value is compiling the declaration to the representation, eliminating the hand-written Python that mirrors the .lut, with the generated .py never edited and carrying the .lut's hash.
+  > el motivo no es correr más rápido: es que hoy la representación en Python se escribe a mano, y eso es lo que un compilador tiene que eliminar.
+
+- **23:19** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 43] `dialogue:1e377538:two-alternatives-compile-vs-load`
+  Two alternatives to produce the Python representation: compile to files (readable, editor/mypy support, build step) or load the .lut at import (one source of truth, classes only at runtime); both need the same type-to-representation map, and the model would start with loading at import.
+  > Las dos alternativas hacen lo mismo con el `.lut`, lo leen y producen la representación en Python; difieren en cuándo lo hacen y en dónde queda el resultado.
+
+- **23:19** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 43] `dialogue:ac750929:hole-filled-by-environment`
+  Inverting the arrow so the .lut declares the hole with a signature and the environment (sonolik) fills it by registration, instead of signatures coming from what Python already has.
+  > el `.lut` solo declara `signalAt : Scene -> Receiver -> Signal` y es `sonolik` quien dice con qué lo llena.
+
+- **23:19** model proposal [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 43] `dialogue:ac750929:two-alternatives-compile-vs-load`
+  Two ways to produce the Python representation from the .lut: compile to files (A, readable, editor and mypy support, but two artifacts and a build step) or load on import (B, single source of truth, but classes exist only at runtime); B is the engine, A is B plus "print it".
+  > Las dos alternativas hacen lo mismo con el `.lut`, lo leen y producen la representación en Python; difieren en cuándo lo hacen y en dónde queda el resultado.
+
+- **23:35** Luciano question [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 46] `dialogue:1e377538:is-it-a-dsl`
+  Whether what they are making is at some point just a DSL in Python.
+  > En un punto lo que estamos haciendo es un dsl en python no?
+
+- **23:35** Luciano question [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 46] `dialogue:ac750929:is-this-a-dsl`
+  Whether what they are building is, at a point, a DSL in Python.
+  > En un punto lo que estamos haciendo es un dsl en python no?
+
+- **23:36** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 47] `dialogue:1e377538:what-justifies-a-separate-language`
+  In implementation it is a DSL in Python; only four things justify a separate language (the judgment that a value satisfies a type, the certificate as persistent composable evidence, the hole as a first-class citizen, and environment independence), plus a future fifth of proving rather than testing; these pay only if actually used.
+  > Lo que no es un DSL embebido, y es lo único que justifica un lenguaje aparte, son cuatro cosas.
+
+- **23:36** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 47] `dialogue:ac750929:what-justifies-a-separate-language`
+  Four things justify a language apart rather than an embedded DSL: judgment (the obligation is born from the declaration), the certificate as persistent composable evidence, the hole as a citizen the checker knows, and independence from the environment; a fifth, future: v0 tests, the aim is that one day it proves.
+  > Lo que no es un DSL embebido, y es lo único que justifica un lenguaje aparte, son cuatro cosas. Primera, el juicio ... Segunda, el certificado como evidencia persistente y componible ... Tercera, el hueco como ciudadano ... Cuarta, la independencia del entorno
+
+- **23:39** Luciano decision [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 48] `dialogue:ac750929:implement-b-stepwise`
+  Implement alternative B, bit by bit rather than all at once.
+  > implementemos B. Vamos de a poco, no todo junto.
+
+- **23:39** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 49] `dialogue:1e377538:invert-the-arrow-hole-filled-by-python`
+  First concrete step of plan B: invert the arrow so the .lut declares a hole with its signature and Python fills it by registration, rather than the concept naming its implementation via extern.
+  > El paso uno invierte la flecha.
+
+- **23:44** Luciano decision [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 50] `dialogue:1e377538:write-whole-lut-first`
+  Better to develop the whole lut program first and do the Python implementation afterward.
+  > quizas mejor desarrollamos todo el programa lut para despues hacer la implementacion en python no?
+
+- **23:44** Luciano decision [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 50] `dialogue:ac750929:spec-first-then-fill-holes`
+  Develop the whole .lut program first, then do the Python implementation.
+  > quizas mejor desarrollamos todo el programa lut para despues hacer la implementacion en python no?
+
+- **23:45** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 51] `dialogue:1e377538:law-only-when-known-true`
+  A hole-filled program is valid and check verifies its types; a law should be written only when already known true (by math or existing tests), because an unverified law that turns out false is worse than a hole.
+  > una ley se escriba solo cuando ya sabemos que es verdadera, por la matemática o por los test de pytest existentes
+
+### 2026-10-01
+
+- **00:22** model [chat: 2026-09-30_ac750929_vamos-a-usar-luthier-para-correr-todos-l.md turn 51] `dialogue:ac750929:holes-program-is-the-spec`
+  A program full of holes is a valid program whose check verifies the types; the complete .lut is the specification, and a law is written only when already known true (by math or existing pytest), since an unverified law that turns out false is worse than a hole.
+  > una ley se escriba solo cuando ya sabemos que es verdadera, por la matemática o por los test de pytest existentes ... una ley no verificada que después resulta falsa es peor que un hueco.
+
+- **00:33** model decision [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 53] `dialogue:1e377538:likelihood-defined-in-luthier`
+  The likelihood is now defined in Luthier, profileLoglik over a Trace of three functions of the lag summed over receivers for one emitter; several emitters are several hypotheses, not a sum; the dome is declared as a NormDist Position so "the dome is a distribution" is a law.
+  > varios emisores son varias hipótesis, no una suma.
+
+- **00:56** Luciano [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 56] `dialogue:1e377538:dot-notation-not-java`
+  Hand-written projection functions read like Java; since a subtype's component names are public, a dot notation (e.position) would be better.
+  > La informacion de que Emitter tiene position emission etc es publica, no sera mejor una notacion tipo: \ne.position o e[position] y chau?
+
+- **00:57** model proposal [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 57] `dialogue:1e377538:dot-is-pure-sugar`
+  e.position is correct and is pure syntactic sugar over a match on the pattern the type already declares, needing no new Term constructor, and it resolves the name-collision of root-level projection functions.
+  > `e.position` es lo correcto, y es azúcar pura
+
+- **00:58** Luciano question [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 58] `dialogue:1e377538:module-qualification-notation`
+  Whether module qualification could use C++ notation z7::addMod7, then whether that is the same thing as projection.
+  > y para calificacion de modulo podes usar la notacion C++  z7::addMod7 ?
+
+- **01:06** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 60] `dialogue:1e377538:projection-and-qualification-are-one`
+  The dot serves both projection and module qualification because they are the same: a module is a record whose components are its definitions, so qualifying is projecting; subtypes with named components became dependent products.
+  > El punto sirve para las dos cosas porque son la misma: un módulo es un registro cuyas componentes son sus definiciones, así que calificar es proyectar.
+
+- **01:06** model [chat: 2026-09-30_1e377538_vamos-a-usar-luthier-para-correr-todos-l.md turn 60] `dialogue:1e377538:two-sessions-collision`
+  Two Claude sessions editing the same folder collided; ownership of which session owns which files must be declared or a collision could overwrite without either noticing.
+  > Si vas a tener dos sesiones sobre la misma carpeta, decime cuál es dueña de qué archivos, porque la próxima colisión puede pisar algo sin que ninguna de las dos lo note.
+
 ### 2026-10-04
+
+- **00:01** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 3] `dialogue:88936d99:codec-cerrado-table-abierto`
+  Diagnosis that table.lut already carries both styles: the codec is written in the closed style Luciano asked for, while Table is open-style loose accessors without laws.
+  > **El codec ya está en el estilo cerrado que pedís.** `LawfulCodec : U := { c : Codec | RoundTrip c & Canonical c & Tolerant c & Rejects c }` junta parse y render con sus cuatro leyes
+
+- **00:04** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 5] `dialogue:88936d99:table-registro-subtipo-portador`
+  To make "being a Table guarantee things" without touching the interpreter, Table should be a record-subtype over a carrier with laws and a tested instance; making a bare `T : U` unusable would instead require changing the checker.
+  > Table tiene que ser un registro-subtipo sobre un portador, `TableOps (T : U) := { nRows, nCols, intAt, ... | leyes }`, con una instancia testeada. Para lograr que un `T : U` sin una instancia así no se pueda usar, hay que cambiar el checker.
+
+- **00:10** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 6] `dialogue:88936d99:dos-estados-declarado-definido`
+  A type has two states, declared (like C++ forward declaration) and defined (with its invariants declared); a value definition over a type should require that type to be defined.
+  > habria dos estados de un tipo: declarado (equivalente al forward declared de C++) definido (es decir con sus invariantes declaradas) La idea es que si vos decir a: A:= extern .... o a: A:= \a .... A tiene que si o si estar definida...
+
+- **00:10** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 7] `dialogue:88936d99:declarado-definido-no-se-distingue`
+  Today declared and defined are not distinguished, and an opaque extern counts as defined without having any invariants.
+  > **Declarado contra definido no se distingue.** `A : U` sin cuerpo se usa como cualquier otro tipo.
+
+- **00:14** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 8] `dialogue:88936d99:especificacion-primero`
+  The formal specification of the Luthier interpreter has to be written first, before implementing.
+  > creo que hay que escribir primero la especificacion formal del interprete de luthier no?
+
+- **00:14** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 8] `dialogue:88936d99:huecos-son-declaraciones-ciclos`
+  Holes are the declarations and may mention other declared-not-defined types so that cyclic definitions can be built.
+  > los huecos son las declaraciones y si claramente mencionan otros tripos declarados y no definidos para poder armar las definiciones ciclicas.
+
+- **00:16** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 9] `dialogue:88936d99:semantica-estatica-es-lo-que-falta`
+  What is missing is not the whole interpreter but the static semantics, the judgments the checker decides, which today live only in checker.py.
+  > lo que falta es la semántica estática, es decir, los juicios que el checker decide.
+
+- **00:16** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 9] `dialogue:88936d99:spec-como-suite-aceptar-rechazar`
+  Each rule written with two small .lut files, one that must be accepted and one that must be rejected, turning the spec into the interpreter's test suite, the law with its negative control applied to Luthier itself.
+  > cada regla con dos archivos `.lut` chicos, uno que debe aceptarse y uno que debe rechazarse. Eso convierte la spec en la suite del intérprete y es la ley con su control negativo, aplicada al propio Luthier.
+
+- **00:16** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 9] `dialogue:88936d99:tres-estados-de-un-nombre`
+  A name has three states, not two: declared (hole), defined (body given and laws stated), certified (test passed).
+  > De tu audio salen tres, no dos: declarado (hueco), definido (cuerpo dado y leyes enunciadas), certificado (el test pasó).
+
+- **00:30** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 10] `dialogue:88936d99:definiciones-solo-sobre-definidos`
+  Declarations may be over declared types; definitions should accept only defined types, except the components of the type being defined; externs only over defined types, though a qualifier might lift that in some circumstances.
+  > Las definiciones por otro lado deberian solo aceptar tipos definidos, salvo los componentes del tipo que se esta definiendo por supuesto? Los extern solo se definirian sobre tipos definidos, aunque quizas una calificacion podria levantar ese requirimiento para algunas circunstancias.
+
+- **00:30** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 10] `dialogue:88936d99:predicados-genuinamente-dependientes`
+  The predicates must be genuinely dependent; a fake function f(x,y)=g(x) should not count.
+  > los predicados deben cumplir que son dependientes, una fake funcion f(x,y)=g(x) no deberia servir.
+
+- **00:30** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 10] `dialogue:88936d99:yuxtaposicion-no-es-tipo`
+  The juxtaposition of types is not a type; the product type has its own invariants and accessors; predicates connecting subcomponents are needed.
+  > la juxtaposicion de tipos no seria un tipo (el tipo producto no es una simple juxtabposicion, tiene sus propias invariantes, incuye los accesors, etc). Tendriamos que tener Predicados que conecten los subcomponentes.
+
+- **00:32** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 11] `dialogue:88936d99:conectividad-sobre-el-conjunto-de-leyes`
+  Connection must be judged over the whole set of laws: the hypergraph of laws must be connected and cover all components, so no component dangles.
+  > lo que importa es que el hipergrafo (cada ley, con las componentes de las que depende de verdad) sea conexo y cubra todas las componentes.
+
+- **00:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 11] `dialogue:88936d99:costo-codigo-generico`
+  Cost of the rules: any native code over a declared-only type stops being legal and must become generic (the ML functor), and cycle detection forces reading the whole file before typing, turning order-independence from a wish into a requirement.
+  > cualquier código nativo sobre un tipo solo declarado deja de ser legal. ... código sobre un tipo indefinido es código genérico, el functor de ML del documento 03.
+
+- **00:32** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 11] `dialogue:88936d99:definicion-simultanea-del-ciclo`
+  Closing an object must be a single definition giving all cycle components at once against a type that binds them with laws; the new piece of the language is simultaneous definition filling a group of holes, which is literally "objects are the cycles".
+  > Haría falta la definición simultánea, `(Table, nRows, intAt, ...) : TableTheory := { ... }`, con las leyes del grupo como obligación del grupo. Esa es la pieza nueva del lenguaje, y es literalmente "los objetos son los ciclos".
+
+- **00:32** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 11] `dialogue:88936d99:separabilidad-como-criterio`
+  Genuine dependence is semantic separability: P does not connect x and y if P(x,y)=Q(x) and R(y); characterized by a witness where the separability implication fails, which needs a new "witnessed" verdict since Luthier only seeks counterexamples of universals.
+  > `P` es separable si y solo si `P(x,y') and P(x',y)` implica `P(x,y) and P(x',y')` para todo `x,x',y,y'`.
+
+- **00:32** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 11] `dialogue:88936d99:tipo-nuevo-vs-derivado`
+  Distinguish a new type (a name that only closes with laws) from a derived type (an expression of operators over defined types, defined by construction, no laws of its own); two label-less records with the same components are the same type.
+  > Lo que hay que distinguir es tipo nuevo de tipo derivado. ... Dos registros sin leyes con las mismas componentes son el mismo tipo.
+
+- **00:40** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 12] `dialogue:88936d99:nombrar-producto-poluciona`
+  A*B with no further invariant is not a new type, so naming it only pollutes the semantic space; components could be named behind the colon, `C: {a:A, b:B}`, internally A*B with accessors, to then write laws with the names.
+  > A* B sin ninguna invariente mas no seria un tipo nuevo por lo que darle un nombre solo poluciona el espacio semantico. ... C: {a: A , b:B} (seria internamente A * B con accesors .a .b) para luego armar las leyes con los nombres quizas?
+
+- **00:42** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 13] `dialogue:88936d99:etiquetas-son-nombres-de-ligadura`
+  Labels are binding names, like parameter names; a labeled record is the Sigma chain with all binders named; labels do not enter the type's identity, so a labeled record and the bare product are the same type.
+  > las etiquetas no entran en la identidad del tipo. `{ mean : R, var : R }` y `R * R` son el mismo tipo
+
+- **00:42** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 13] `dialogue:88936d99:forma-en-la-declaracion`
+  The shape must be in the declaration, not just for convenience, because a type's laws are written over its components and must be typed before the type closes; the exception for definitions must be "members of the cycle being closed", decided from the whole-file graph.
+  > la forma tiene que conocerse antes que las leyes, y las leyes antes de que el tipo cierre.
+
+- **00:42** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 13] `dialogue:88936d99:perturbed-invariante-oculta`
+  `Perturbed := { table, text | true }` is not an innocent alias: its real invariant (text matches table) lives in the generator, not the type; the rules would force writing the law or treating it as an unnamed product.
+  > su invariante real es "el texto tiene el mismo contenido que la tabla", y está en el generador, no en el tipo. Con tus reglas eso queda expuesto
+
+- **00:48** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 14] `dialogue:88936d99:eliminar-distincion-tipo-valor`
+  Almost eliminate the type/value distinction: all are types, except some types are values of others; the difference is whether they are determined/defined.
+  > mi idea es casi eliminar la disticion de tipos y valores. son todos tipos, salvo que algunos tipos son valores de otros. La diferencia estaria en si los tipos estan determinados o no, si estan definidos o no.
+
+- **00:50** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 15] `dialogue:88936d99:asimetria-cuerpo-computa-ley-verifica`
+  An asymmetry remains: a body computes, a law only verifies; Luthier cannot know if a set of laws left a single inhabitant unless a law is the equation `== body`, so "determined" in practice means having a reducing body.
+  > un cuerpo computa, una ley solo verifica. ... determinado se tiene que leer como "tiene un cuerpo (o un extern) que reduce"
+
+- **00:50** Luciano confirmation of turn 15 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 16] `dialogue:88936d99:no-hace-falta-otro-simbolo`
+  Accepting the unified-relation reading, concludes no extra symbol is needed.
+  > entonces no hace falta otro simbolo.
+
+- **00:50** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 15] `dialogue:88936d99:valor-es-tipo-de-un-habitante`
+  Reading a value as a type with a single inhabitant makes the "determined/undetermined" scale literal (4 is {n:N|n==4}), unifies the state table, collapses the two relations into one (refinement), and makes testing and running the same operation under different determination.
+  > un valor es un tipo con un solo habitante. `4` es `{ n : N | n == 4 }`. ... testear y correr pasan a ser la misma operación.
+
+- **00:50** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 17] `dialogue:88936d99:ambiguedad-se-resuelve-por-tipo-del-cuerpo`
+  The value/subtype ambiguity resolves by the body's type rather than a symbol: a body of type T determines an inhabitant, a body of type T->Bool (a Law over T) makes it the subtype; the two never coincide.
+  > la ambigüedad entre "C es un valor del par" y "C es un subtipo del par" se resuelve por el tipo del cuerpo, no por un símbolo.
+
+- **00:53** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 18] `dialogue:88936d99:spec-antes-de-implementar`
+  The specification documents must be in place before implementing the interpreter/compiler.
+  > Tenemos que tener eso antes de implementar el interprete/compilador etx
+
+- **00:54** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 19] `dialogue:88936d99:suite-aplicada-a-si-misma`
+  A tests/spec suite, one accept/reject .lut pair per rule plus the expected error, is what the interpreter must pass: the specification applied to itself.
+  > Esto es lo que el intérprete tiene que pasar, y es la especificación aplicada a sí misma.
+
+- **00:59** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 20] `dialogue:88936d99:calificador-para-tipos-no-definidos`
+  The qualifier is meant to allow an extern over a not-yet-defined type when there's no time to define everything; proposed `extern undefined` (rejecting `trusted`).
+  > pensaba en el calificador como para tomar tipos no definidos extern, cuando hay que hacer algo de apuro y no hay tiempo para definir todo. quizas algo extern undefined ?
+
+- **00:59** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 21] `dialogue:88936d99:extern-provisional`
+  Name the qualifier `extern provisional` to keep the debt visible, recorded in the certificate as a mark of the definition rather than a verdict.
+  > Me inclino por `provisional`, porque lo que querés que quede a la vista es la deuda, no el mecanismo.
+
+- **01:03** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 23] `dialogue:88936d99:definido-y-determinado-ejes-independientes`
+  In the written spec, defined and determined are independent axes: a hole can have its laws without an implementation, and an extern can have an implementation without laws.
+  > Definido y determinado son ejes independientes, como dijiste: un hueco puede tener sus leyes sin implementación, y un extern puede tener implementación sin leyes.
+
+- **01:27** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 25] `dialogue:88936d99:alias-con-igual`
+  Reporting Luciano's audio of 12:17: an alias `AB = A * B` is expanded before verification and has no states; naming the product with `:=` is rejected, with `=` it is an abbreviation.
+  > R8, `AB = A * B`, se expande antes de verificar y no tiene estados. ... nombrar el producto con `:=` se rechaza, con `=` es una abreviatura.
+
+- **01:27** model correction of turn 23 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 25] `dialogue:88936d99:conexo-no-circular`
+  Reporting Luciano's audio of 12:16, which corrected the closure unit from the strongly connected component (cycle) to connectedness: in the table.lut style there is no directed cycle, so the spec now has two graphs, the directed one and the law hypergraph whose connected components (clusters) are the unit of definition and closure.
+  > Vos decís que la condición es conexo, no circular ... Ahora 04 tiene dos grafos: el dirigido ... y el hipergrafo de leyes ... cuyas componentes conexas, que llamé clusters, son la unidad de definición (R3) y de cierre (R5).
+
+- **04:01** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 27] `dialogue:88936d99:objetos-circulares-ramas-nombran-el-ciclo`
+  Objects are "circular" components; branches are defined as new dependent entities that name the cycle class; this maps the structure onto the names and eases identifying isomorphisms between types.
+  > objetos son componentes "circulares". Las ramas se definen como nuevas entidades dependientes en el sentido que nombran la clase ciclo. Eso tiene la ventaja de mapear la estructura con los nombres y facilita la identificacion de isomorfismos entre tipos.
+
+- **04:06** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 29] `dialogue:88936d99:cuerpo-de-tipo-opaco-es-conjuncion-de-leyes`
+  Closing an opaque type's cycle is done by making its body the conjunction of the laws over it and its operations (`Table := NonNegative & Reflexive & IntColumn`), adding a third case to R7.
+  > El cuerpo de un tipo opaco es la conjunción de las leyes sobre él y sus operaciones.
+
+- **04:06** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 29] `dialogue:88936d99:todo-objeto-tiene-cabeza`
+  Two functions with no own carrier, tied by a law, only form an object if a name joins them and is defined by the law; every object has a head, a type whose body names the laws, so there are no loose laws that define.
+  > todo objeto tiene una cabeza: un tipo cuyo cuerpo nombra las leyes.
+
+- **04:22** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 30] `dialogue:88936d99:operaciones-por-otras-o-por-propiedades`
+  Mathematical objects define operations over a set; an operation can be defined through other operations or by its properties, and when both, a theorem connects the two; the elemental set of operations and object is not unique, a same math object admits different presentations.
+  > las operaciones se pueden definir a traves de otras operaciones o por propiedades. Si la operacion se puede definir con otras operaciones, ademas de por sus propiedades, bueno ahi habria un teorema que conecta ambas cosas. Yo intuyo que el conjunto elemental de operaciones y objeto, no es unico y que hay distintas formas de plantear un mismo objeto matematico.
+
+- **04:23** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 31] `dialogue:88936d99:constructores-son-el-generador`
+  Presenting a type by constructors tied to observers by laws (algebraic ADT spec) is the cycle, and the constructors are the generator: `gen Table` comes from composing constructors instead of a Python gen that bypasses the laws.
+  > los constructores son el generador. Una vez que el ciclo está determinado, `gen Table` sale de componer constructores
+
+- **04:23** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 31] `dialogue:88936d99:teoria-vs-presentacion`
+  A mathematical object is a theory and what one writes is a presentation of it; the theory should never be written, Luthier has presentations (cycles with laws) and translations between them, and a certified translation is the evidence that two presentations are the same object; the cycle is a property of the presentation, not the object.
+  > un objeto matemático es una **teoría**, y lo que uno escribe es una **presentación** de esa teoría. ... Mi propuesta concreta es que la teoría nunca se escriba. Luthier tiene presentaciones (ciclos con leyes) y traducciones entre ellas, y una traducción es testeable
+
+- **05:28** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 32] `dialogue:88936d99:traduccion-concepto-de-segundo-orden`
+  The translation between presentations should be a second-order Luthier concept, something expressible in Luthier itself.
+  > La traduccion entre presentaciones deberia ser un concepto luthier de segundo orden, algo que se puede expresar en luthier no?
+
+- **05:29** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 34] `dialogue:88936d99:luthier-admite-primitivas-equivalentes`
+  Following the presentation idea, Luthier itself should admit different primitive elements and laws, equivalent among themselves, and one would have to be chosen.
+  > luthier mismo deberia admitir distintos elementos y leyes primitivas, equivalentes entre si. Habria que elegir una.
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:checker-kernel-split-like-lean`
+  The checker may keep its richer presentation for speed, as Lean separates kernel from elaborator, provided its Term-to-core translation is written and someday is a certified Luthier file.
+  > El checker puede seguir con su presentación más rica por velocidad, igual que Lean separa el kernel del elaborador. La condición es que la traducción de su `Term` al núcleo esté escrita
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:criterion-for-canonical-is-static-semantics-directness`
+  The criterion for choosing the canonical core is not minimality but that the static semantics of 04 can be stated directly on the chosen presentation without going through a translation; hence the subtype stays primitive even though derivable.
+  > El criterio no es la minimalidad. Es que la semántica estática de 04 se pueda enunciar directamente sobre la presentación elegida, sin pasar por una traducción.
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:luthier-has-several-presentations-of-itself`
+  Luthier already has at least three presentations of itself (the primitives of 00 §3, the subtype of 01, and the checker's ~15 Term constructors), and the sugar-to-core rules of 02 are a translation between presentations; which is canonical is unwritten.
+  > Luthier tiene al menos tres presentaciones de sí mismo ... Además, las reglas \"azúcar ≡ núcleo\" de 02 §3–§4 son exactamente una traducción entre presentaciones del lenguaje: de la superficie al núcleo. Lo que no está escrito es cuál es la canónica
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:round-trip-law-needs-observational-equality`
+  The round-trip law `from (to p) == p` is an undecidable equality between records of functions; each presentation must supply its own observational equality as a component.
+  > Entonces `Translation` necesita que cada presentación aporte su igualdad observacional, y esa igualdad sería un componente más de la presentación.
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:translation-certified-per-model-not-universally`
+  Generic obligations quantified over all `A` and all models cannot be tested without a model generator, so a translation is certified per concrete model, not in general; this should be stated in the spec.
+  > Lo que se certifica es la traducción aplicada a cada modelo concreto. Pasar al universal requiere la capa de demostraciones. Esto conviene decirlo en la especificación: testeado por modelo, no en general.
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:translation-laws-inherited-by-translated-model`
+  When a translation returns a model in the other presentation, the target presentation's laws become an obligation that the translated model inherits and discharges.
+  > Como `toOr` devuelve un `OrNot A`, las leyes de `OrNot` son obligación del modelo traducido. `boolOrNot := toOr Bool boolAndNot` hereda esas leyes
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:translation-only-in-theory-as-type-style`
+  Translations only work for the "theory as a type" style, because a presentation by holes is a file not a value and cannot be passed to `to`; this tilts the choice toward a record of laws for objects with multiple presentations.
+  > Una presentación por huecos (`Table : U` con operaciones sueltas) no es un valor, es un archivo, así que no se la puede pasar a `to`.
+
+- **05:32** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 35] `dialogue:88936d99:translation-second-order-concept-typechecks`
+  A translation between two presentations of a structure is a second-order concept, quantifying over presentations (type operators `U -> U`), and the checker accepts it.
+  > `Translation (P Q : U -> U) : U := { to : (A : U) -> P A -> Q A, from : ... }` cuantifica sobre presentaciones (operadores de tipos `U -> U`), y `deMorgan : Translation AndNot OrNot := (toOr, toAnd)` lo acepta el checker.
+
+- **06:02** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 36] `dialogue:88936d99:does-table-need-a-constructor`
+  Whether an object requires a constructor, a function that returns Table.
+  > tengo que definir un constructor de table, es decir una funcion que tenga Table como resultado?
+
+- **06:02** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 36] `dialogue:88936d99:minimal-laws-to-define-table`
+  How to determine the minimal set of laws over Table's methods that defines Table uniquely.
+  > si yo tengo Table y distintas leyes sobre los metodos de Table, como determino el conjunto minimo para definir univocamente a Table... ?
+
+- **06:02** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 36] `dialogue:88936d99:vector-as-function-maybe-primitive`
+  A vector of size N could be a function from integers below N to R, so a vector is in a sense a function n→R; yet it is almost a primitive type since the alternative is defining it with a List.
+  > N vector podria ser ->( (entero <N)-> R) es decir que en cierto modo vector es una funcion de n-> R . El tema es que casi como que vector es un tipo primitivo siqueres porque como lo definimos sino? con una Lista?
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:array-lut-lacks-defining-laws`
+  array.lut already uses the opaque-Vec/at/tabulate pattern, but the three laws defining Vec (the at/tabulate cell, length, and extensionality) are written nowhere, so numpy fills two holes with no law tying them; R3 would reject this.
+  > Hoy `tabulate` y `at` son dos huecos que numpy llena sin ninguna ley que los ate. Es el caso de Table, pero en la librería en la que se apoya todo lo demás. Con R3 de 04 se rechazaría por la misma razón, y esas tres leyes son el ciclo de Vec.
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:constructors-needed-for-cells-and-generator`
+  Constructors are needed: without them there are no cells for sufficient completeness, every value comes from Python, and with them the generator comes for free by composing them (closing case 9).
+  > Sin constructores no hay casillas, así que la completitud suficiente ni se puede plantear ... Con constructores, el generador sale gratis componiéndolos
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:extensionality-law-makes-observations-identity`
+  An extensionality law, that two values are equal if all observers agree on them, is what turns "the same observations" into "the same object".
+  > Esa ley es la que convierte \"las mismas observaciones\" en \"la misma tabla\".
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:law-independence-as-witnessed-existential`
+  A law's independence can be partially tested with a negative control: a law is independent if a model exists that satisfies all the others and violates it; an existential, the `witnessed` verdict left open in 04.
+  > una ley es independiente si existe un modelo que cumple todas las demás y viola esa. Es un existencial, el veredicto `witnessed` que quedó abierto en 04.
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:list-as-other-presentation-of-vec`
+  The list `{ l : List R | length l == n }` is another presentation of Vec, with tabulate and index as the translation between the two.
+  > La lista es otra presentación: `{ l : List R | length l == n }`. La traducción entre ambas es `tabulate` en un sentido e indexar en el otro
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:semantic-vs-performance-primitives`
+  What makes Vec seem primitive is performance not semantics, separating semantic primitives (the core: U, Π, data, subtype) from performance primitives (the externs); Vec's definition is the function and numpy is a certified implementation.
+  > los primitivos semánticos son el núcleo: `U`, Π, `data` y el subtipo; los primitivos de rendimiento son los externs.
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:sufficient-completeness-over-minimality`
+  Aim not at minimality (undecidable, presentation-dependent) but at sufficient completeness (Guttag 1977): a law per observer-constructor cell plus extensionality, which the checker can verify mechanically.
+  > Mi propuesta es apuntar a la completitud suficiente y no a la minimalidad. La completitud es una tabla que el checker puede revisar mecánicamente, y la minimalidad no.
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:table-as-dependent-function`
+  Table is a function of (column, row) to cell with the cell type depending on the column, `(c : Column) -> Fin (nRows) -> CellType c`, with fromColumns as constructor and application as observer; whether the checker accepts that dependent type needs checking.
+  > Table es una función de (columna, fila) a celda, con el tipo de la celda dependiendo de la columna: `(c : Column) -> Fin (nRows) -> CellType c`.
+
+- **06:02** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 37] `dialogue:88936d99:vec-not-primitive-written-with-pi-and-subtype`
+  Vec is not primitive: `VecOf n := (i : { k : Int | 0 <= k and k < n }) -> R` is written with Π and subtype; tabulate is the constructor, at is the observer, the round-trip is a beta reduction, and extensionality is function equality decided exhaustively over the finite domain.
+  > `VecOf n := (i : { k : Int | 0 <= k and k < n }) -> R` se escribe con Π y subtipo, que están en el núcleo.
+
+- **06:39** Luciano decision [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 38] `dialogue:88936d99:fix-bases-before-revising-everything`
+  First make sure Luthier's bases are firm and complete in the sense discussed today; once decided, it is a matter of revising everything so those bases hold.
+  > yo lo que quiero primero es estar seguro de que las bases de Luthier estan firmes y completas en el sentido que estuvimos discutiendo hoy. Una vez que tenemos eso decidido, es cuestion de revisar todo para que se cumplan esas bases.
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:agrees-pattern-theorem-as-law-on-branch`
+  An operation defined both via others and by its properties gives a theorem, which in Luthier is a law on a branch: the `Agrees` pattern.
+  > Una operación que se define con otras y además por sus propiedades da un teorema, que en Luthier es una ley sobre una rama: el patrón `Agrees`.
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:declaration-mentions-declared-definition-mentions-defined`
+  A declaration mentions only declared names (enabling cyclic definitions); a definition mentions only defined names, except those of its own object, and an extern is a definition with `extern provisional` as emergency exit with its debt recorded.
+  > Una declaración solo menciona nombres declarados. Eso es lo que permite las definiciones cíclicas. Una definición solo menciona nombres definidos, salvo los de su propio objeto.
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:everything-is-a-type-value-is-single-inhabitant`
+  Everything is a type and a value is a type with a single inhabitant; `x : T` means "x refines T", and the type of the body decides what is defined (an inhabitant, a subtype, or a type defined by its laws) without a separate symbol.
+  > Todo es un tipo, y un valor es un tipo con un solo habitante. `x : T` quiere decir \"x refina a T\". El tipo del cuerpo decide qué se define
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:four-states-of-a-name`
+  A name passes through four states (declared, defined, determined, certified), with defined and determined independent of each other.
+  > Un nombre pasa por cuatro estados: declarado, definido, determinado y certificado. Definido y determinado son independientes entre sí.
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:law-connects-version-0-vs-semantic`
+  In version 0 a law "connects" components if it mentions them; the semantic version (that the law cannot be split into independent laws) is pending.
+  > En la versión 0, una ley \"conecta\" componentes si los menciona. La versión semántica ... queda pendiente.
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:laws-must-touch-all-components`
+  An object's laws must touch all its components; `| true` defines nothing and a product without laws is not a new type (its labels are binders and the product is structural); aliases use `=`.
+  > Las leyes de un objeto tienen que tocar a todos sus componentes. `| true` no define nada, y un producto sin leyes no es un tipo nuevo
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:object-is-a-cycle-branch-is-dependent`
+  An object is a cycle of the dependency graph; what names the object without being in the cycle is a branch, a new entity depending on it, and this structure written into the names helps recognize isomorphisms.
+  > Un objeto es un ciclo del grafo de dependencias. Lo que nombra al objeto sin estar en el ciclo es una rama: una entidad nueva que depende de él.
+
+- **06:40** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:single-style-object-as-record-with-carrier`
+  Propose a single style: an object is always a record type defined by its laws that includes its carrier, so the cycle always exists, implementations are values, R5 holds trivially, translations always work, and Vec fits; the cost is code parametrized by the model.
+  > Un objeto es siempre un tipo registro, definido por sus leyes, que incluye su portador
+
+- **06:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 39] `dialogue:88936d99:two-bodies-for-table-inconsistency`
+  Giving Table a body of laws and also `Table := extern` is two bodies for one name, forbidden by the one-`:=`-per-name rule; a symptom that the two coexisting styles of 04 §4 are really one badly written.
+  > Son dos cuerpos para un nombre, y la regla de un solo `:=` por nombre lo prohíbe. Es el síntoma de que los dos estilos que 04 §4 deja convivir son en realidad uno solo mal escrito.
+
+- **06:40** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 40] `dialogue:88936d99:waterfall-first-define-then-execute`
+  Names the proposal as a waterfall approach: first define everything, then execute it.
+  > un poco el waterfall approach, primero defino todo, despues lo ejecuto.
+
+- **06:41** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 41] `dialogue:88936d99:law-first-but-valid-only-when-tested`
+  This mirrors what Luthier preaches for code: the law is written first but holds only when a concrete case puts it to the test.
+  > Es lo que Luthier predica para el código: la ley se escribe primero, pero vale solo cuando un caso concreto la pone a prueba.
+
+- **06:41** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 41] `dialogue:88936d99:short-cascade-with-pilot`
+  Propose a short cascade: decide A–E, write each decision as accept/reject pairs in tests/spec (the suite as executable spec), change interpreter until it passes, run Vec as pilot, then rewrite 04 in prose, then libraries once.
+  > Escribo cada decisión como pares aceptar/rechazar en `tests/spec`, no como prosa. La suite es la especificación ejecutable.
+
+- **06:41** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 41] `dialogue:88936d99:specs-written-without-executing-are-wrong`
+  Pure waterfall is wrong: today's rule changed three times in two hours and the Table two-bodies inconsistency came from writing the example, not from thinking; specs written without executing err exactly where no one imagined.
+  > Las especificaciones escritas sin ejecutar se equivocan justo en lo que nadie imaginó.
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:both-constructor-and-constructorless-objects`
+  There are real objects with constructors and theoretical ones without; both should exist but made explicit in each case; maybe constructors can be required always, but how to indicate an object needs one must be thought through.
+  > hay objetos reales con constructor y objetos teoricos sin, creo que deberiamos tener ambos pero hacer explicito de cual hablamos en cada caso.
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:certification-is-pointwise-not-a-name`
+  What is certified is not a name but a pointwise application of a name with values, a chain of functions, so there are degrees of certification.
+  > lo certificado no es un nombre, es una aplicacion puntual de un nombre con valores, es decir una cadena de funciones. Entonces hay grados de certificacion.
+
+- **07:05** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:data-recursor-not-understood`
+  Says he still does not understand "data with its recursor".
+  > data con su recursor es algo que sigo sin entender.
+
+- **07:05** Luciano correction of turn 39 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:declaration-missing-from-core`
+  The proposed core is missing declaration as a distinct act.
+  > te estaria faltando declaracion!!
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:observational-equality-as-parameter-eventually-probabilistic`
+  Objects should be parametrized by observational equality and eventually by a probability of being equal or distinct, something not yet well thought out.
+  > tenemos que parametrizar por igualdad observacional y eventualmente por probabilidad de ser iguales o distintos o algo que no pense bien
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:pytable-uses-alias-not-definition`
+  It should be `pyTable: Table .= extern...` and not `Table := extern`.
+  > claramente pyTable: Table .= extern... y no Table:= extern , me parece a mi
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:semantic-non-separability-from-declared-property`
+  The semantic version of "connects" is not very hard: it arises from declaring the non-separable property of a function.
+  > la version semantica no es muy dificil, surge de declarar la propiedad no separable de una funcion.
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:several-canonical-presentations-with-equivalence`
+  There should really be several canonical presentations and Luthier should be able to prove the equivalence between them, though it is good to start with one.
+  > deberia haber varias canonicas y Luthier deberia poder demostrar la equivalencia entre ellas. Pero siempre es bueno empezar con una.
+
+- **07:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:translations-are-where-luthier-shows-use`
+  Translations are where Luthier starts to show its uses; the idea is to write equivalences in Luthier, for version 1 or 2.
+  > aqui es donde Luthier empieza a mostrar usos. La idea es poder escribir las equivalencias en Luthier, es para version 1 o 2
+
+- **07:05** Luciano decision [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:types-native-values-native-or-extern`
+  Types are defined natively; the values of types (executable functions) may be native or not, admitting both, since reimplementing everything makes no sense, only what is dubious.
+  > Los tipos se definen nativamente. los valores de los tipos (las funciones ejecutables) pueden ser definidas nativamente o no. Creo que debemos admitir ambos casos, ya que no tiene sentido re-implementar todo, solo lo que es dudoso?
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:agrees-pattern-explained`
+  Each operation is written twice (a slow native Luthier definition reading as the math, and a fast numpy extern), and an `Agrees` law compares them case by case; only the dubious part gets a native definition. The name `Agrees` was invented by the model.
+  > Cada operación se escribe dos veces. Una en Luthier, a partir del núcleo, que es lenta pero se lee como la definición matemática ... La otra es la de numpy, rápida, un extern. Una ley las compara caso por caso
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:degrees-of-certification-point-sampled-exhaustive-proven`
+  Certification grades, low to high: a point (one case), sampled (n cases from a declared generator), exhaustive (all cases of a finite domain), proven (universal, absent in version 0); for a chain the grade is the weakest link.
+  > un punto: un caso evaluado; muestreado: `n` casos de un generador declarado; exhaustivo: todos los casos de un dominio finito; demostrado: universal, que la versión 0 no tiene.
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:depends-on-vs-connects-with-witness`
+  Two distinct semantic notions: "depends on y" (an x and two y give different results) and "connects x with y" (the law does not split into `Q x and R y`, witnessed by a rectangle where diagonal cases fail); both are existentials whose test seeks a witness.
+  > *Conecta `x` con `y`.* La ley no se separa en `Q x and R y`. El testigo es un rectángulo: `P x y'` y `P x' y` valen, pero `P x y` o `P x' y'` fallan.
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:equality-probabilistic-in-probability-lut`
+  The probability-of-equality idea has a natural place in probability.lut, where two samplers are equal in distribution when a test cannot separate them, so equality returns a verdict with its level, not a Bool; it suffices now that equality be a component, not a fixed `==`.
+  > dos samplers son iguales en distribución cuando un test no los separa. Ahí la igualdad devolvería un veredicto con su nivel, no un `Bool`.
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:extern-always-gives-value-never-type`
+  With D, types are defined natively, so opaque carriers disappear; an extern always gives a value, never a type, and when a Python value represents a native type the boundary is a representation translation whose round-trip is certified.
+  > Un extern siempre da un valor, nunca un tipo.
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:int-real-string-core-primitives`
+  `Int`, `R` and `String` are an unavoidable exception: core primitives, since defining IEEE double with `data` makes no sense.
+  > `Int`, `R` y `String` son primitivos del núcleo. Definir el double de IEEE con `data` no tiene sentido.
+
+- **07:05** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:real-vs-theoretical-objects-from-definition-form`
+  With D the distinction between objects with constructors and theoretical objects comes out by itself: a native type has constructors by definition, a parametrized record type (a theory) has no constructors, its "constructors" are its models; the real object is native, the theoretical is parametrized.
+  > El objeto real es el nativo y el teórico es el parametrizado, y la forma de la definición dice cuál es cuál.
+
+- **07:25** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 44] `dialogue:88936d99:cartesian-closed-category-primitives`
+  Suggests product, sum and exponential of types may be missing to make Luthier a cartesian closed category.
+  > creo que estaria faltando los tipos producto de tipos, suma de tipos y exponencial de tipos para hacerlo Cartesian closed category?
+
+- **07:25** Luciano decision [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 44] `dialogue:88936d99:keep-recursor-as-primitive`
+  The recursor as primitive is fine; it is already implemented so why remove it.
+  > Creo que el recursor como primitiva esta bien, ya esta implementado para que sacarlo.
+
+- **07:25** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 44] `dialogue:88936d99:peano-needs-succ-distinct-from-n`
+  Questions whether Peano does not require stating `succ(N) != N`, and notes that zero and succ are the only case surviving without a definition.
+  > pero el caso que vos das, el de peano, no tenes que decir que succ(N)!= N ? igual ese es el unico caso que sobrevive sin definicion ni de zero ni de succ.
+
+- **07:25** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 44] `dialogue:88936d99:recursor-is-set-reduce`
+  Observes that what the recursor puts there is almost a definition of reduce (set/reduce).
+  > En cierto modo lo que pones ahi es casi una definicion de set(reduce) o algo asi no?
+
+- **07:25** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 44] `dialogue:88936d99:theory-is-tuple-of-types-and-predicates`
+  A Theory object is really a tuple of types (concrete or functions) and predicates over those types; if the predicates are defined, the Theory object would be concrete.
+  > un objeto Theory es en realidad una tupla de tipos (concretos o funciones) y Predicados respecto a esos tipos. Si los predicados estan definidos, creo que el objeto Theory seria concreto.
+
+- **07:25** model confirmation of turn 44 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 45] `dialogue:88936d99:ccc-pieces-all-present-except-sum-sugar`
+  Every cartesian-closed piece already works (exponential as Π, product as Σ, terminal Unit, initial empty data, sum as data), only the `Int + Bool` sugar of 02 §4 fails; the dependent Π and Σ make it locally cartesian closed; none need adding to the core, only listing as derived.
+  > Con terminal, productos y exponenciales ya es cartesiana cerrada. Con sumas e inicial es bicartesiana cerrada. Las versiones dependientes, Π y Σ, la vuelven localmente cartesiana cerrada
+
+- **07:25** model correction of turn 44 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 45] `dialogue:88936d99:data-brings-four-pieces`
+  `data` is not a recursor; each inductive type brings formation, introduction (constructors), elimination (the recursor) and computation; writing `data` declares the first two and generates the other two.
+  > `data` es el tipo, y el recursor viene con él.
+
+- **07:25** model correction of turn 44 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 45] `dialogue:88936d99:inductive-type-gives-peano-axioms-free`
+  In an inductive type the Peano disequalities are free theorems because `data` says N is freely generated with no equations between constructor terms, so constructors are disjoint, succ injective, succ n distinct from n; constructors are declared and defined but never determined by a body.
+  > En un tipo inductivo son teoremas que vienen gratis, porque `data` dice que `N` está generado *libremente* por `zero` y `succ`, sin ninguna ecuación entre términos de constructores.
+
+- **07:25** model confirmation of turn 44 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 45] `dialogue:88936d99:recursor-is-the-fold-catamorphism`
+  Yes, the recursor is the fold: for List it is exactly foldr; categorically `data` is the initial algebra and the recursor the unique arrow out (the catamorphism).
+  > El recursor es el *fold*. ... `data` es el álgebra inicial y el recursor es la única flecha que sale de ella hacia cualquier otra álgebra (el catamorfismo).
+
+- **07:25** model correction of turn 44 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 45] `dialogue:88936d99:recursor-not-implemented-only-match`
+  The recursor is not implemented; what exists is `match` plus general recursion with fuel; propose the core have data/match/recursion and the recursor of each type be a library definition, promoted later if the proof layer needs termination.
+  > el recursor no está implementado. Lo que hay es `match` ... más recursión general ... Mi propuesta es que el núcleo tenga `data`, `match` y recursión
+
+- **07:25** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 45] `dialogue:88936d99:theory-defined-vs-inhabited`
+  A theory is a dependent record; having its laws written makes it defined (a well-determined type), but not inhabited, which happens when someone gives a model; reserve "concrete" for inhabited and "defined" for the first.
+  > Yo reservaría \"concreto\" para lo segundo y \"definido\" para lo primero, así no se cruzan.
+
+- **07:26** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 47] `dialogue:88936d99:named-sum-needs-syntax`
+  The named sum has no structural syntax today (only `data { left ... ; right ... }`); it would need something like `< left : A | right : B >`, symmetric to the record, with `match` as its observer.
+  > Le faltaría una sintaxis, por ejemplo `< left : A | right : B >`, simétrica del registro. Su observador es el `match` sobre las etiquetas.
+
+- **07:26** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 47] `dialogue:88936d99:named-types-as-pi-or-sigma-over-labels`
+  Named product, named sum and named exponential all fit one idea: a named type is a Π or Σ over a finite set of labels; a record is Σ with named binders, also readable as a function from the label set; named sum is the dual `(l : {left,right}) * F l`.
+  > un tipo con nombres es un Π o un Σ sobre un conjunto finito de etiquetas.
+
+- **07:26** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 47] `dialogue:88936d99:r4-extends-to-non-recursive-data`
+  By R4's logic a sum without laws deserves no new name either, and a non-recursive `data` is a sum of named products; propose only recursive `data` (N, List) gives a new type, since only infinite freedom or laws create one; this clashes with the custom of writing `data Color`.
+  > lo único que genera un tipo nuevo es la recursión (libertad infinita) o las leyes (refinamiento).
+
+- **07:36** Luciano proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 48] `dialogue:88936d99:make-product-sum-exponential-core-primitives`
+  Analyze putting A*B, A+B and A^B as language primitives with their named versions, and asks for a better or more canonical form of the named notation.
+  > analizar poner A * B , A+B y A^B como primitivas del lenguaje y sus versions {a: A, b:B} |a:A, b:B| y a:A<-b:B ? (o alguna forma mejor o mas canonica
+
+- **07:37** model decision [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 49] `dialogue:88936d99:labels-positional-vs-label-identity`
+  Whether labels are part of the type's identity: the positional reading (labels are binders, reordering changes the type) versus the by-label reading (order irrelevant, names are identity, as in Dhall/row types); recommends positional, matching a Σ/+ core and leaving the by-label reading as a certifiable isomorphism.
+  > Recomiendo la posicional, porque es la que coincide con un núcleo de Σ y `+`, y deja la lectura por etiquetas como una traducción certificable (un isomorfismo) en lugar de una igualdad.
+
+- **07:37** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 49] `dialogue:88936d99:named-sum-has-no-dependent-version`
+  The named sum has no dependent version because in a sum value only one alternative is present, so the second cannot depend on the first; labels there are just names of injections.
+  > en un valor de la suma está presente una sola alternativa, así que la segunda no puede depender de la primera. Ahí las etiquetas son solo nombres de inyecciones.
+
+- **07:37** model confirmation of turn 48 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 49] `dialogue:88936d99:primitives-match-martin-lof`
+  Making them primitive is worth it and is the canonical design: Martin-Löf type theory has exactly Π, Σ, +, 0 and 1 as primitives and leaves inductive types for the recursive; this writes the (bi)cartesian closed structure into the core and makes R4 a consequence rather than a prohibition.
+  > la teoría de tipos de Martin-Löf tiene exactamente Π, Σ, `+`, `0` y `1` como primitivos, y deja los tipos inductivos para lo recursivo.
+
+- **07:37** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 49] `dialogue:88936d99:syntax-paren-binders-dhall-records-unions`
+  The `a:A * b:B` syntax clashes with the `:` of binders; propose extending the parenthesized form uniformly, with `{ a : A, b : B }` for named products and `< a : A | b : B >` for named sums (the two Dhall forms); don't use `^` for exponential (it inverts order and clashes with power) and the codomain can't be named.
+  > El registro con llaves y comas y la unión con `< \| >` son exactamente las dos formas del lenguaje Dhall, así que hay un precedente de un lenguaje que ya resolvió esto.
+
+- **07:45** Luciano confirmation of turn 49 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 50] `dialogue:88936d99:accept-all-suggestions`
+  Accepts all the model's suggestions (primitives Π/Σ/+/0/1, the parenthesized/Dhall syntax, positional labels) and asks to write the technical spec and revise the documents.
+  > acepto todas tus sugerencias. Entonces, ya podemos escribir las especificaciones tecnicas de Luthier y revisar nuevamente los documentos con estas nuevas decisiones ?
+
+- **07:47** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 51] `dialogue:88936d99:cycle-per-file-rule-dropped`
+  The rule of filling a cycle per file disappeared, because with native types and implementations as models a model gives all its operations in one record literal, so the rule had nothing left to protect.
+  > la regla de llenar un ciclo por archivo desapareció. ... un modelo da todas sus operaciones juntas en un literal de registro, así que la regla ya no tenía qué cuidar.
+
+- **07:47** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 51] `dialogue:88936d99:r2-hole-usable-as-term`
+  A consequence of R2: a hole of a defined type (`sigma : R`) can be used in a definition if it appears in term position, else `luthier run --set` parameters would be illegal; the "defined type" requirement falls on type positions.
+  > La exigencia de \"tipo definido\" quedó entonces sobre las posiciones de tipo, que es tu frase original: \"no podés definir un valor de un tipo no definido\".
+
+- **08:01** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 53] `dialogue:88936d99:strict-mode-for-migration`
+  Propose a `--strict` flag so R2–R8 violations are errors with it and warnings without, while existing code is migrated, becoming default when migration ends; the alternative is migrating all libraries first (the cascade to avoid).
+  > Propongo un flag `--strict` en `check`, `test`, `run` y `eval` ... con el flag, las violaciones de R2 a R8 son errores; sin el flag, son advertencias con el mismo mensaje.
+
+- **08:12** Luciano decision [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 54] `dialogue:88936d99:rewrite-useful-parts-in-new-syntax`
+  The whole .lut program does almost nothing useful yet except the distance calibration; the idea is to take what is useful (by use or by theoretical elegance, like the algebra part) and rewrite it following the new syntax.
+  > Mi idea es tomar lo util hacho (sea por util o por teoricamente elegante, la parte de algebra etc) y re-escribirlo siguiendo la nueva sintaxis.
+
+- **08:13** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 55] `dialogue:88936d99:experiment-zero-regression-criterion`
+  Acceptance criterion: the rewritten experiment_zero must give the same numbers on session A (σ 25.6 cm with everything, 4.9 cm without parlante_A2); if a number changes, something broke or was discovered and we must know which.
+  > Es una regresión concreta: si la reescritura cambia un número, algo se rompió o algo se descubrió, y en los dos casos hay que saber cuál.
+
+- **08:13** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 55] `dialogue:88936d99:generic-vs-project-file-locations`
+  Propose generic libraries live in luthier/lib and project files (distances, distance_graph, experiment_zero) in sonolocalización, since duplicated copies caused confusion.
+  > lo del proyecto (`distances`, `distance_graph`, `experiment_zero`) viva en sonolocalización. Hoy hay copias en los dos lados, y eso ya causó confusión.
+
+- **08:13** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 55] `dialogue:88936d99:no-strict-mode-if-old-code-archived`
+  Not migrating the old code removes the need for strict mode: the interpreter can apply the rules as errors from day one; libraries are rewritten in dependency order, each as a pilot of the spec, with what cannot be expressed going to the case record and back to 04/05.
+  > si lo viejo no se migra, no hace falta el modo estricto. El intérprete puede aplicar las reglas como errores desde el primer día.
+
+- **08:20** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 56] `dialogue:88936d99:array-is-multidimensional-vec`
+  Asks whether array differs from vector only in having more dimensions (vec (vec n) m), and argues one can work everything with arrays, never converting them to Vec, since they are Vec-typed by definition; asks what the actual problem is.
+  > en realidad vos podes trabajar todo con arrays y nunca convertirlos en Vec. En realidad son tipo Vec por definicion, no entiendo bien cual es el problema?
+
+- **08:21** model correction of turn 37 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 57] `dialogue:88936d99:array-equals-vec-roundtrip-is-free`
+  Array and Vec are the same: a k-dimensional array is a function from a multi-index, and a numpy array is a value of that type by definition; the model corrects that the round-trip is not certified but holds by construction, and case 24 dissolves into a beta reduction; what `Agrees` certifies is that numpy's operations compute the same as the native definitions.
+  > Me equivoqué al escribir en 04 §6 que la ida y vuelta \"se certifica\": esa ida y vuelta vale por construcción. Lo que sí se certifica (con `Agrees`) es que las operaciones de numpy ... computan lo mismo que sus definiciones nativas.
+
+- **08:21** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 57] `dialogue:88936d99:finite-domain-function-equality-exhaustive`
+  R8 (functions have no structural `==`) appears here on its own: two vectors, even a lambda and an array, are compared by observational equality pointwise over `Fin n`, decided exhaustively because the domain is finite.
+  > se usa la igualdad observacional, punto a punto sobre `Fin n`. Como el dominio es finito, esa comparación se decide de forma exhaustiva, no por muestreo.
+
+- **08:21** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 57] `dialogue:88936d99:three-interpreter-rules-for-python-functions`
+  A function type like `Fin n -> R` can be inhabited by a Luthier lambda or a Python object; three interpreter rules are missing (none in the language): apply a Python value as indexing with the interpreter checking `0<=i<n` itself, materialize a finite-domain lambda into an array, and map each type to its Python representation.
+  > Faltan tres reglas en el intérprete, ninguna en el lenguaje
+
+- **08:25** Luciano decision [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 58] `dialogue:88936d99:implement-whole-plan`
+  Asks to correct the 04 §6 frase and then implement the whole plan.
+  > si, por favor corregi esa frase. y luego implementa todo el plan
+
+- **08:25** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 59] `dialogue:88936d99:gen-structural-body-becomes-alias-by-r4`
+  Because `Gen` has a structural body (a function), R4 turns it into an alias.
+  > El único cambio de fondo es que `Gen` tiene cuerpo estructural (una función), así que por R4 pasa a ser un alias.
+
+- **08:25** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 59] `dialogue:88936d99:r3-looks-at-law-before-whole-value`
+  R3 has to read the law before applying it to the whole value, or projections stay hidden behind the substituted pair.
+  > Corrijo el análisis de R3: tiene que mirar la ley antes de aplicarla al valor entero. Si no, las proyecciones quedan ocultas detrás del par que se sustituye.
+
+- **09:22** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 61] `dialogue:88936d99:codec-as-theory-in-three-steps`
+  `Codec`/`LawfulCodec` collapse into one name in three steps (declared, laws, defined), carrying its own equality as a component, with `csv` as a model that passes the laws.
+  > El par `Codec`/`LawfulCodec` pasó a ser un solo nombre en tres pasos: declarado, leyes, definido. Lleva su igualdad como componente.
+
+- **09:22** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 61] `dialogue:88936d99:table-accessors-disguised-partial`
+  The table accessors return default 0, 0.0 or "" where the column is missing, a partial function in disguise protected by the schema invariant, not the type.
+  > Es una función parcial disfrazada, y el comentario lo dice: la protegen las invariantes del esquema, no el tipo.
+
+- **09:22** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 61] `dialogue:88936d99:vec-and-mat-native-not-opaque`
+  The array type is native rather than an opaque `Vec : U`; accessors become definitions, indices are `Fin`, and range obligations hold by construction.
+  > Ya no hay `Vec : U` opaco. El tipo es nativo, y los accesores son definiciones, no huecos
+
+- **09:31** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 63] `dialogue:88936d99:reload-per-name-inefficiency`
+  Certification is slow in part because the script reloads and rechecks everything once per name; an option to run all imported obligations of a file in one invocation would fix it.
+  > Para certificar las obligaciones de `array.lut` usando los generadores de `array_python`, el script llama a `luthier test --name X --deep` una vez por nombre, y cada llamada vuelve a cargar y chequear todo
+
+- **09:36** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 64] `dialogue:88936d99:tuple-not-constructor-patterns`
+  Luciano asks whether the pattern quantification covers a pair or an n-tuple; the model answers that tuple patterns of any length are covered but constructor patterns are not yet.
+  > dupla o n-tupla no?
+
+- **09:37** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 65] `dialogue:88936d99:six-interpreter-fixes-from-certification`
+  Certification itself forced six interpreter rules, all written into the spec: laws not mentioning a parameter are not quantified over it; infinite-domain functions generated as constants or affine; tuple patterns of any length; empty matrices keep their shape; lazy tables in iterative algorithms compute each entry once; and `sumTo` associates to the right.
+  > **El orden de la suma:** `sumTo` asocia a la derecha, como antes. Este era el que impedía la igualdad bit a bit.
+
+- **09:46** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 66] `dialogue:88936d99:likelihood-sampling-round-trip`
+  Luciano asks whether the round trip between likelihood and sampling/simulation is defined.
+  > esta definida la ida y vuelta de  likelihood y sampling/simulation=
+
+- **09:47** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 67] `dialogue:88936d99:current-law-necessary-not-sufficient`
+  The current law (zero mean score, equality of information) is the first two Bartlett identities, necessary but not sufficient; a PIT goodness-of-fit test would close the loop.
+  > Score medio cero e igualdad de información son las dos primeras identidades de Bartlett. Las cumple la densidad verdadera, pero no excluyen una verosimilitud que acierte esos dos momentos y falle en la forma de la distribución.
+
+- **09:47** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 67] `dialogue:88936d99:kernel-as-object-with-presentations`
+  The kernel Θ ⇝ Y would be the object, with simulator and likelihood as presentations; the translation between them is not exactly computable in general, so what is written is the law that they are the same kernel, not the forward/back functions.
+  > El objeto sería el kernel Θ ⇝ Y, con el simulador y la verosimilitud como presentaciones, y una traducción entre ellas en el sentido de 05 §9. En general esa traducción no es computable de forma exacta.
+
+- **09:47** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 67] `dialogue:88936d99:pit-goodness-of-fit-proposal`
+  Add a probability-integral-transform goodness-of-fit law to `DensityPair` for the Gaussian case, and write the kernel as the head of the object with simulator and likelihood as its two presentations.
+  > Agregar a `DensityPair` la ley de bondad de ajuste por transformada integral de probabilidad, para el caso gaussiano
+
+- **09:52** Luciano confirmation of turn 67 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 68] `dialogue:88936d99:implement-kernel-proposal`
+  Luciano accepts the kernel-with-PIT proposal and asks to implement, commit and merge both repos.
+  > implementa tu propuesta y  comitea y mergea ambos repositorios
+
+- **09:52** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 69] `dialogue:88936d99:kernel-three-presentations-triangle`
+  `Kernel (Theta)` is declared over three presentations of one core (simulator, likelihood, PIT), defined by one law per side of the triangle, with the forward/back functions absent because they can't be computed exactly, the equivalence staying as law.
+  > Las funciones que irían y volverían entre las presentaciones no existen, porque no se pueden calcular de forma exacta; la equivalencia queda como ley, y así lo dice 05 §9.
+
+- **09:52** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 69] `dialogue:88936d99:product-types-associate-right`
+  The product of types now associates to the right, like the tuple, fixing a mismatch where `R * R * Int` associated left.
+  > Ahora el producto de tipos asocia a la derecha, como la tupla.
 
 - **10:28** Luciano [note: WhatsApp Ptt 2026-10-04 at 10.28.34.md [00:08]] `note:2026-10-04T10.28.34:codigo-generado-no-es-luthier`
   Está atascado porque Claude le genera código de Luthier, pero para él eso no es código, no cumple las normativas reales de Luthier; y no sabe si en el fondo las cumple o no.
@@ -3171,6 +4983,268 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 - **12:31** Luciano [note: WhatsApp Ptt 2026-10-04 at 12.30.05.md [01:01]] `note:2026-10-04T12.30.05:funcion-con-otros-tipos-es-tipo-condicional`
   si definís una función que tiene otros tipos, de alguna manera eso es un tipo condicional, y así los estás incluyendo; pero esa inclusión no está en la definición circular.
   > si vos estás definiendo una función que tiene otros tipos de alguna manera eso es un tipo condicional entonces de alguna manera los estás incluyendo pero claro no está en en esta definición circular
+
+- **19:42** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 73] `dialogue:88936d99:experiment-zero-independent-of-distances`
+  `experiment_zero` does not depend on `distances`; it uses its own model over the whole position vector, with `distances` and its checks a separate branch.
+  > `experiment_zero` no depende de `distances`. Usa su propio modelo sobre el vector entero de posiciones.
+
+- **19:46** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 74] `dialogue:88936d99:why-fin-over-int-not-machine`
+  Luciano asks why `Fin` is defined over `Int` rather than a machine integer, wanting both possibilities analyzed rather than a decision run.
+  > porque definimos Fin como Int y no como entero machine? ... para que analicemos ambas posibilidades
+
+- **19:47** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 75] `dialogue:88936d99:fin-is-semantic-finite-set-machine-is-representation`
+  `Fin n` is semantically the finite set over ℤ and should stay there; a machine integer is not another definition of `Fin` but a representation of a subset of ℤ, to be written as two presentations with an equivalence law holding where it doesn't overflow.
+  > El entero de máquina no es otra definición de `Fin`: es una representación de un subconjunto de ℤ, igual que un array de numpy representa una función `Fin n -> R`.
+
+- **20:29** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 77] `dialogue:88936d99:int-is-unbounded-bridge-unchecked`
+  Two integer semantics coexist: `Int` is exact ℤ in the interpreter, but becomes `int64` mod 2^64 on crossing to numpy with no check in the bridge, a silent-overflow source.
+  > `Int` en el intérprete es ℤ exacto, porque es el `int` de Python. En cuanto ese valor entra a numpy pasa a ser `int64` módulo 2⁶⁴, sin ninguna verificación en el puente.
+
+- **20:31** Luciano question [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 78] `dialogue:88936d99:why-does-r-without-definition-not-error`
+  Luciano asks why `R : U` declared without a definition does not raise an error.
+  > vos declaras R: U pero no hay definicion, eso porque  no da error?
+
+- **20:31** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 79] `dialogue:88936d99:primitive-state-should-be-in-program-not-checker`
+  The primitive types are a hidden name-set exception in the checker; the state of a name should be readable in the program, resolved with a `primitive "..."` body accepted only in `core.lut`.
+  > que la implementación lo resuelva con una lista de nombres es justo el tipo de cosa que veníamos sacando: el estado de un nombre debería leerse en el programa, no en una lista escondida en el checker.
+
+- **20:32** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 80] `dialogue:88936d99:choose-best-math-object-for-r-via-algebra`
+  Rather than rewrite arithmetic, use algebra to choose the mathematical object that best represents R.
+  > No tiene sentido reescribir la aritmetica pero si usamos algebra podemos elegir el objeto matematico que mejor representa a R
+
+- **20:35** Luciano correction [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 81] `dialogue:88936d99:r-reals-versus-real-python-subtype-confusion`
+  Luciano points out a confusion between R the set of reals and `real` the Python-implemented subtype, asking for more precision and whether types get written as `pyarray real : Array R`.
+  > por un lado esta R el conjunto de los reales por otro lado esta real que es el subtipo de los Reales implementado por python. No estas siendo lo preciso que se deberia ser me parece.
+
+- **20:36** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 82] `dialogue:88936d99:separate-reals-rationals-float64`
+  Separate ℝ as a theory (ordered complete field, completeness not testable, no finite implementation), ℚ as an exact computable model, and Float64 as a model of the rounded field tied to ℚ by a correct-rounding law testable exactly.
+  > ℝ no tiene implementación finita: no hay ningún tipo ejecutable cuyos valores sean todos los reales.
+
+- **20:39** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 83] `dialogue:88936d99:float64-refines-real`
+  Float64 should be written as refining R (each finite double is a real), `Float64 : R := primitive "ieee754-binary64"`.
+  > no seria Float64: R:= primitive \"ieee754-binary64\" ?
+
+- **20:40** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 84] `dialogue:88936d99:constructive-reals-as-native-definition`
+  If `Float64 : R` then R must be a type with a definition; the model proposes constructive reals (Cauchy sequences of rationals with modulus of convergence), making ℝ's laws testable at finite precision and equality a precision parameter, with Float64 restricted to finite values.
+  > Un real es una sucesión de racionales con módulo de convergencia ... Las operaciones de ℝ son computables a cualquier precisión, aunque la igualdad no es decidible.
+
+- **20:40** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 85] `dialogue:88936d99:rename-r-to-real`
+  Name the real type `Real` (or `Real`), replacing `R`.
+  > o Real
+
+- **20:44** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 87] `dialogue:88936d99:r-should-be-real-not-float64-approximation-view`
+  Where it says `R` it should say `Real`, not `Float64`, because reals have better properties: you have a function f(Real) and approximate it with f(Float64), and later could approximate with f(Float_con_CI).
+  > Yo creo que tiene que decir Real, porque los reals tienen mejores propiedades que los Float64 la idea es que vos tenes una funcion f(Real) y la aproximas con f(Float64) Porque tambien lo podemos aproximar con f(Float_con_CI) mas adelante.
+
+- **20:44** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 88] `dialogue:88936d99:aproximacion-certificada-por-encierro`
+  With an interval model the approximation law is stated once for any `f` as enclosure, so the tolerance is computed instead of chosen by hand, paid in `test` not in `run`.
+  > La ley de aproximación se enuncia una vez para cualquier `f`: f_Float64 x ∈ f_Interval x ... la tolerancia deja de ser una constante elegida a mano (el `roundingSlack = 8` de hoy) para pasar a salir del cálculo.
+
+- **20:44** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 88] `dialogue:88936d99:comparaciones-indecidibles-costo`
+  Moving off a fixed `Float64` makes comparisons undecidable in general; a branch depending on a real comparison over overlapping intervals has no answer, which the model calls the most delicate point.
+  > Las comparaciones dejan de ser decidibles en general. `if x < y` sobre intervalos que se solapan no tiene respuesta.
+
+- **20:44** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 88] `dialogue:88936d99:numeros-como-teoria-y-modelos`
+  The numeric code is written once over a "theory of numbers", a record with carrier, operations and equality; `Real` is its ideal model and `Float64`, intervals and `Rational` are other models, filled through a per-file hole as in the ML functor.
+  > Lo que se escribe una vez es la función sobre una *teoría de los números*: un registro con el portador `T : U`, sus operaciones (`+`, `*`, `/`, `<`, `sqrt`, `exp`, `log`, `erf`...) y su igualdad. `Real` es el modelo ideal de esa teoría; `Float64`, los intervalos y `Rational` son otros modelos.
+
+- **22:02** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 91] `dialogue:88936d99:comparacion-indecidible-es-probabilistica`
+  An undecidable comparison is not a deep problem: if it is probabilistic, a probabilistic answer is given.
+  > no es tan grave, si es probabilistico se da una respuesta probabilistia y ya. Yo creo que estas viendo un problema donde no lo hay.
+
+- **22:03** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 92] `dialogue:88936d99:nan-infinito-son-error`
+  Since `Float64 : Real`, NaN and ±∞ can't be values of `Float64`; NaN is always an error, overflow to ∞ is an error, and a meaningful ∞ (log-likelihood of an impossible datum) is requested with an explicit `ExtendedReal` type.
+  > NaN siempre es un error. ... El ±∞ que da el desborde también es un error ... El ∞ con significado se pide en el tipo. ... `ExtendedReal = < finite : Float64 | negInf : Unit | posInf : Unit >`
+
+- **22:03** model confirmation of turn 91 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 92] `dialogue:88936d99:salida-discreta-es-distribucion`
+  Confirming Luciano's point, the only remaining case is a discrete output (a rank, a stop reason, a count), where the result type has to carry a distribution over outcomes.
+  > cuando la salida es discreta (un rango, un motivo de parada, un conteo). Ahí la respuesta pasa a ser una distribución sobre resultados, y el tipo del resultado tiene que poder decirlo.
+
+- **22:05** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 95] `dialogue:88936d99:no-implementar-real-delegar-en-float64`
+  `Real` should not be implemented; it must be delegated to `Float64`.
+  > implementamos Real? yo creo que no, que lo debemos delegar en Float_64
+
+- **22:06** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 96] `dialogue:88936d99:leyes-exactas-no-testeables-en-float64`
+  Exact laws of `Real` (e.g. associativity of addition) can't be tested against the `Float64` realization; laws over `Real` have to be written with tolerance, and exact ones stay stated or are tested over `Rational`.
+  > Las leyes exactas de `Real` no se pueden testear con la realización `Float64`. La asociatividad de la suma, por ejemplo, fallaría. Las leyes sobre `Real` tienen que escribirse con tolerancia
+
+- **22:06** model confirmation of turn 95 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 96] `dialogue:88936d99:real-ideal-realizado-por-float64`
+  `Real` stays as the ideal type without its own implementation and is realized by `Float64` at run time; the realization is the interpreter's choice, registered in the certificate and the run record.
+  > `Real` queda como el tipo ideal, sin implementación propia, y cuando el programa corre se *realiza* con `Float64`. ... La realización es una elección del intérprete, hoy siempre `Float64`, y queda registrada en el certificado
+
+- **22:08** model proposal [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 98] `dialogue:88936d99:array-generico-sobre-real`
+  `Array` is generic in the element type with numeric operations over `Real`, so indices become `Array Int` and `index` (which rounded a double) disappears; writing `Vec` over `Float64` would reglue the definition to its realization.
+  > Lo definiría genérico en el tipo de los elementos, y las operaciones numéricas sobre `Real` ... Escribir `Vec` sobre `Float64` volvería a pegar la definición con su realización, que es justo lo que acabamos de separar.
+
+- **22:10** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 100] `dialogue:88936d99:dot-caracterizado-por-base-ortonormal`
+  numpy operations implementing the vector operations can be stated as a model of a theory, `numpyVectors : VectorSpace (VecOf n) := {...}`, rather than operation by operation.
+  > si se quiere todo junto, como un modelo de una teoría: `numpyVectors : VectorSpace (VecOf n) := { add := extern ..., scale := extern ..., ... }`.
+
+- **22:12** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 101] `dialogue:88936d99:dot-no-puede-declararse-sobre-real`
+  You can't declare `dot` over `Real` when you can only hand it a `Real` that is not `Float64`; and `Vec` should be `Vec A`, parametric.
+  > a dot le doy un Real que no es Float64 y cagamos, no podes decir eso. Pero Vec no es (Vec A) ?
+
+- **22:13** model correction of turn 100 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 102] `dialogue:88936d99:hojas-honestas-sobre-float64`
+  numpy leaves must be declared on what they actually receive and return (`Vec Float64 -> Vec Float64 -> Float64`), because the type can't affirm what the implementation doesn't deliver; this forces the libraries to be generic in the number model after all.
+  > `dot` no puede declararse sobre `Real`. ... La hoja se declara sobre lo que realmente recibe y devuelve: dot : Vec Float64 -> Vec Float64 -> Float64 := extern
+
+- **22:14** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 103] `dialogue:88936d99:argumento-aceptado-resultado-promovido`
+  The argument must be accepted and the result can be promoted; and `Real` is missing the declaration of its structure.
+  > el argumento tiene que ser aceptado, el resultado en realidad podes promoverlo. Ahora lo que no estas diciendo es Real : U := Field Real o lo que sea
+
+- **22:15** model correction of turn 103 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 104] `dialogue:88936d99:real-portador-mas-estructura-axioma`
+  `Real : U := Field Real` mistypes and is circular; it is written as carrier plus structure, `Real := primitive "real"` and `realField : CompleteOrderedField Real := axiom`, where `axiom` is a value whose laws are assumed, the "assumed" certificate grade from `02-que-robar`, listed by `check -v`.
+  > Lo que querés decir se escribe en dos piezas, el portador y su estructura ... es un **axioma**, un valor cuyas leyes se *asumen*. Es el grado de certificado 'asumido' que figuraba en `02-que-robar` ... y que nunca implementamos.
+
+- **22:15** model confirmation of turn 103 [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 104] `dialogue:88936d99:variancia-de-tipos-funcion`
+  The function subtyping rule has the domain contravariant and the codomain covariant, which lets the `Float64` a leaf returns promote to `Real`; declared as the more precise `Float64`, a `Real` entering needs an explicit `toFloat64` that makes the rounding visible.
+  > el dominio va al revés y el codominio va a favor. ... Donde de verdad entra un `Real` que no se sabe que es double, hace falta un `toFloat64 : Real -> Float64` explícito, y ese redondeo queda a la vista.
+
+- **23:58** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 114] `dialogue:88936d99:ley-en-la-declaracion-del-hueco`
+  Putting the law on `inner` leaves the certificate on a name nobody uses while the real `dot` runs uncertified; the law belongs in the hole's declaration so every use of `dot` is the use of a certified value and the `inner` copy disappears.
+  > Lo correcto sería que la ley esté en la declaración del hueco ... el certificado queda en el `dot` mismo, y cada uso de `dot` en cualquier archivo es el uso de un valor certificado. La fila `inner` desaparece.
+
+- **23:58** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 114] `dialogue:88936d99:ninguna-hoja-se-certifica-apoyandose-en-otra`
+  `DotAgrees`'s tolerance uses `norm`, another leaf, so certifying `dot` trusts `norm`; using the native `normDef` in the tolerance keeps no leaf certified by leaning on another.
+  > lo limpio es usar `normDef` (la nativa) en las tolerancias, para que ninguna hoja se certifique apoyándose en otra.
+
+### 2026-10-05
+
+- **00:09** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 119] `dialogue:88936d99:leyes-ad-hoc-reproducen-la-implementacion`
+  The theory of Objects-as-Types-obeying-laws is not being used in the key cases (`Vec`, `Table`, `Mat`); ad hoc laws appear that reproduce the functions' implementation instead of stating the mathematical invariants that characterize them.
+  > todo el desarrollo teorico de Objetos como Tipos que siguen leyes no esta apropiadamente usando en los casos clave como Vec, Table, Mat ... Aparecen leyes ad hoc que lo que hacen es reproducir la implementacion de las funciones en lugar de decir sus invariantes matematicas que las caracterizan.
+
+- **00:10** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 120] `dialogue:88936d99:caracterizaciones-de-objetos-del-algebra-lineal`
+  Each linear-algebra operation has a determining characterization already partly written but treated as secondary: `det` by multilinear/alternating/`det I == 1`, `trace` by linear/`tr(AB)==tr(BA)`/`tr I == n`, `eigvalsSym` by `A v == λ v` with orthonormal `V`, `solve` by `A (solve A b) == b`, `pinvSym` by the four Moore-Penrose conditions, `dot` by bilinearity plus `dot (e i)(e j) == delta i j`.
+  > `det` se caracteriza por multilineal, alternante y `det I == 1`; `trace` por lineal, `tr (A B) == tr (B A)` y `tr I == n` ... `pinvSym` por las cuatro condiciones de Moore-Penrose. Varias de esas ya están en `array.lut` ... Están al revés: esas son las definiciones.
+
+- **00:10** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 120] `dialogue:88936d99:caracterizar-no-reimplementar`
+  Proposes the principle that a law states the mathematical property that determines an operation (up to presentation equality); a second implementation is consistency, not a law, and the native definition (`dotDef`) is one more model certified against the characterization, with `Agrees` left as a uniqueness corollary.
+  > La ley de una operación enuncia la propiedad matemática que la determina (salvo la igualdad de la presentación). Una segunda implementación no es una ley. ... `dotDef` se certifica contra la caracterización como cualquier otro modelo.
+
+- **00:10** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 120] `dialogue:88936d99:objetos-sin-ley-table-objective`
+  `Table` is structural with accessors returning 0 for a missing column and no law saying what a table is; `Objective` is a lawless record where nothing ties `grad` to `value`, though the likelihood's `ScoreIsGradient` law exists and wasn't applied.
+  > No hay ninguna ley que diga qué es una tabla ... **Objective.** Es un registro sin ley, `{ value, grad, stepMatrix }`. Nada ata `grad` a `value`.
+
+- **00:26** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 125] `dialogue:88936d99:un-concepto-un-nombre`
+  The principle is not to declare the same thing under two different names (he refuses renaming `Symmetric` to `SymmetricMat`, keep the original).
+  > el principio es no declarar lo mismo con dos nombres distintos
+
+- **00:29** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 126] `dialogue:88936d99:algebra-siempre-importada`
+  `algebra` must always be imported because it is the base of all the properties.
+  > algebra tiene que ser importada siempre porque es la base de todas las propiedades.
+
+- **00:35** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 129] `dialogue:88936d99:objeto-matematico-como-invariante`
+  For every concept (associativity included) find the mathematical object that best represents it and put it as the type's invariant, not just state it.
+  > La idea en realidad es buscar el objeto matematico que mejor lo represente y decirlo." / "mas que decirlo, ponerlo como invariante
+
+- **00:38** Luciano [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 131] `dialogue:88936d99:matriz-simetrica-vs-operacion-simetrica`
+  A symmetric matrix and a symmetric operation are distinct things, though a symmetric matrix does obey symmetric laws.
+  > ahora una matriz simetrica y una operacion simetrica son cosas distintas, ahora que pienso
+
+- **00:40** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 120] `dialogue:88936d99:precondicion-matematica-en-el-tipo`
+  Jacobi diverges on a non-symmetric square matrix because the type lied; the fix is to make the spectral operations take `Symmetric`, a case of putting the mathematical precondition in the type.
+  > Es el tipo el que mentía: Jacobi toma matrices simétricas. Agregué `Symmetric : U := { a : Square | approxMat 0.0 a (transposeDef a) }` ... Esto es un caso del punto que marcaste: la precondición matemática no estaba en el tipo.
+
+- **00:56** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 135] `dialogue:88936d99:codificaciones-de-posiciones-por-iso`
+  The three encodings of the positions (the 3×N matrix, the flat `3n+a` vector, the free coordinates) are tied by no law though `flatten` is an `Iso`; the gauge defines the same set twice with magic numbers and should be one injection `Fin freeDim -> Fin (3·nodes)` with the rest derived.
+  > Las tres codificaciones de las posiciones no están atadas por ninguna ley. ... `flatten` es un Iso, y algebra ya tiene Iso. El gauge ... define el mismo conjunto dos veces ... Es una inyección `Fin freeDim -> Fin (3·nodes)`; habría que definirla una vez y derivar lo demás.
+
+- **00:56** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 135] `dialogue:88936d99:hojas-sin-su-forma-en-el-tipo`
+  The leaves don't carry their shape in the type; `matVec` accepts any shape when its natural invariant is `(a : Mat Float64) -> VecOf a.n -> VecOf a.m`, and `solve` needs a non-singular matrix.
+  > Las hojas no llevan su forma en el tipo. `matVec : Mat -> Vec -> Vec` acepta cualquier forma. El invariante natural es `(a : Mat Float64) -> VecOf a.n -> VecOf a.m`, y `solve` necesita una matriz no singular.
+
+- **00:56** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 135] `dialogue:88936d99:igualdades-como-setoid`
+  `BeliefFamily.same` and `Codec.eq` are loose equalities that should be `Setoid B` and `Setoid Table`.
+  > `BeliefFamily.same` y `Codec.eq` son igualdades sueltas. Deberían ser `Setoid B` y `Setoid Table`.
+
+- **00:56** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 135] `dialogue:88936d99:pliegue-de-monoide-unico`
+  `sumTo`, `sumToInt`, `totalDef`, `maxOver`, `forallBelow`, `listLength` are the same monoid fold over `Fin n` and should be one `fold`, right-associated to keep the bit-for-bit result.
+  > Los pliegues sobre `Fin n` son la misma operación. ... son todos el pliegue de un monoide. Ahora que algebra tiene Monoid, sería un solo `fold`. Tiene que asociar a la derecha, que es lo que hoy da el bit a bit.
+
+- **00:56** model [chat: 2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 135] `dialogue:88936d99:shift-como-accion-afin`
+  `shift` is an action of the tangent space on `Theta` (an affine space); `ShiftByZero` is its `LeftIdentity` and its `Associative` is missing, and `MeanModel`/`Likelihood` should carry that action as invariant.
+  > `shift` es una acción del espacio tangente sobre Theta (un espacio afín). `ShiftByZero` es exactamente `LeftIdentity` de esa acción, y falta su `Associative` ... El tipo `MeanModel`/`Likelihood` debería llevar esa acción como invariante.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:acoplamiento-sin-version`
+  Sonolocalización depends on Luthier's working tree with uncommitted changes, so its results are not reproducible from a Luthier commit; the fix is to tag a version.
+  > Sonolocalización depende del working tree de `~/Projects/luthier` ... que hoy tiene cambios sin commitear. Los resultados de sonolocalización no se pueden reproducir a partir de un commit de Luthier.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:agrees-exactos-transliteracion`
+  Exact `Agrees` laws certify a transliteration, which by R10 is "consistent, not characterized", and are fragile to a BLAS change.
+  > Los `Agrees` exactos certifican una transliteración. ... Por tu propia R10 eso es \"consistente, no caracterizado\". Además es frágil: un cambio de BLAS, o reescribir `lm.py` con `lstsq`, lo rompe sin que el algoritmo esté mal.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:certificado-promete-de-mas`
+  The certificate neither enables nor blocks anything: it is only a record, which is fine, but then the word "certificate" is excessive.
+  > El certificado no habilita ni bloquea nada; es un registro. Está bien que lo sea, pero entonces la palabra \"certificado\" sobra.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:ergonomia-let-implicitos`
+  Lack of `let` and of implicit arguments costs the writing badly; both should come before any kernel refinement.
+  > No hay `let`, y `fit` en `experiment_zero.lut` termina en `} } } } } } } } } }`. ... Las dos cosas están en la lista de pendientes; las pondría antes que cualquier refinamiento del kernel.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:idea-central-con-antecedentes`
+  The core idea of a theory carrying its equality as a component, models as records of operations, and laws run as tests, has precedents in Maude views, Lean structures and QuickCheck typeclass laws; three contributions are its own.
+  > Una teoría con su igualdad como componente, modelos como registros de operaciones y leyes corridas como tests es lo que hacen las views de Maude, las `structure` de Lean y las typeclass laws de QuickCheck. Hay tres aportes propios que valen: el certificado con el hash del cono de dependencias, la R10 (caracterizar en lugar de reimplementar) y el objeto como componente fuertemente conexa.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:incoherencia-distribucion-en-alias`
+  The distribution of test cases belongs in the directive, not in the type: an alias carries a distribution the type system says does not exist, which contradicts R7.
+  > La distribución de los casos es parte del test, no del tipo: tendría que ir en la directiva (`test validity over BrokenGraph from genBroken`) o como argumento explícito.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:leyes-no-necesitan-el-lenguaje`
+  The four laws that actually paid off are well chosen but none needed the language; they come out the same with pytest + hypothesis.
+  > ninguna necesitaba el lenguaje: salen igual con pytest + hypothesis, que ya está en `sonolik/tests` y trae shrinking y una base de ejemplos.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:r10-caracterizar-lo-mas-valioso`
+  R10, characterize instead of reimplement, is the most valuable thing produced this week.
+  > La R10 es lo más valioso que salió de esta semana.
+
+- **04:28** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 4] `dialogue:0602f3b5:trato-invertido-en-sonolocalizacion`
+  The handoff deal (Luthier only describes, nothing non-trivial goes in Luthier) got inverted; now gauge, jacobian, model and native solvers live in Luthier and Python must match it bit for bit.
+  > La nota de traspaso decía que Luthier solo describe (tipos, leyes, `extern` a Python, `test`) y que nada con cuerpo no trivial va en Luthier. Hoy `experiment_zero.lut` tiene el gauge, la jacobiana, el modelo, el `main`, Jacobi nativo para `pinvSym` y un LM nativo duplicado.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:cache-materializacion-incorrecta`
+  The materialization cache, keyed only by `id(f)`, returns incorrect results; it is a correctness bug, not a performance one.
+  > Pasar la misma función a un `extern` que espera `Fin 3` y después a otro que espera `Fin 5` da (3, 3). Es un bug de corrección, no de rendimiento.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:casos-vacuos-cuentan-como-pasados`
+  Vacuous cases count as passes: an implication whose antecedent is never reached passes 100/100, a false law passed 29/29 with n=0, and an empty exhaustive domain passes with 0 cases.
+  > Una implicación cuyo antecedente el generador nunca alcanza pasa 100/100 sin descartes. ... una ley falsa pasó 29/29, siempre con n = 0. Un dominio exhaustivo vacío (`Fin 0`) pasa con 0 casos.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:certificado-no-ve-python`
+  The certificate hash covers only the elaborated `.lut` text and an extern's target name, so changing the Python body keeps it "certified"; changing printer or interpreter invalidates certificates that did not change meaning.
+  > El hash cubre el texto `.lut` elaborado, y de un `extern` solo entra el nombre del target. El agente cambió `dbl` de `x + x` a `x * 3`: `check -v` siguió diciendo \"certified\" y `eval` dio 6. ... cambiar el printer o el intérprete invalida certificados que no cambiaron de significado
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:conversion-sintactica-sin-eliminacion-dependiente`
+  Conversion is syntactic on neutral terms (`VecOf (n+0)` and `VecOf n` do not convert), there is no dependent elimination, and a type error becomes a pending obligation.
+  > La conversión es sintáctica en términos neutros: `VecOf (n + 0)` y `VecOf n` no convierten, y el error de tipos se vuelve una obligación pendiente. No hay eliminación dependiente.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:externs-subtipo-no-chequeados`
+  Externs whose codomain is a subtype are not checked; rule 3 of 04 §6 ("shape is checked on crossing") is not implemented, and there is no contract in `eval` or `run`.
+  > La regla 3 de 04 §6 (\"la forma se chequea al cruzar\") no está implementada. Las obligaciones solo existen dentro de `test`: en `eval` y `run` no hay contrato
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:generadores-de-funciones-degenerados`
+  Function generators are degenerate: "every Int->Int is constant" passes 200/200, so any law quantified over functions is tested on a degenerate sample.
+  > \"Toda `f : Int -> Int` es constante\" pasa 200/200, y \"toda `Float64 -> Float64` es afín\" también. Cualquier ley cuantificada sobre funciones, como los `Sampler`, `Objective` o `Maximizer` genéricos, se prueba sobre una muestra degenerada
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:identidad-posicional-es-trampa`
+  The positional identity of products and sums lets fields be swapped silently; it is what the spec says, and it is a trap.
+  > La identidad posicional de productos y sumas permite intercambiar campos en silencio. Es lo que dice la spec, y es una trampa.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:nombres-cableados-en-interprete`
+  There are hardwired names in the interpreter; `Fin` is recognized only by name, and an alias of `Fin` loses its array representation and memoization.
+  > Hay nombres cableados en el intérprete (`Bool`, `List`, `Maybe`, `Fin`, `Nat`): `Fin` se reconoce solo por nombre, y un alias de `Fin` pierde la representación como array y la memoización.
+
+- **04:46** model proposal [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:orden-de-prioridades-kernel`
+  A prioritized order of fixes for whoever works on Luthier next, headed by hashing extern source and directives and fixing the materialization cache key.
+  > 1. Hash del código fuente de los `extern` y de las directivas `gen`/`n`/modo. 2. Arreglar la clave de la caché de materialización. 3. Chequear el codominio de los `extern` al cruzar.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:precondiciones-solo-en-bool`
+  Preconditions are only generated in `match` over `Bool`; match by constructor or label generates none, open in 05 §10.
+  > Las precondiciones solo se generan en los `match` sobre `Bool`: en los `match` por constructor o etiqueta no se genera ninguna. La spec ya lo tiene como abierto en 05 §10.
+
+- **04:46** model [chat: 2026-10-05_0602f3b5_analsis-critico-de-la-libreria-luthier-e.md turn 8] `dialogue:0602f3b5:tolerancia-de-otra-hoja-bajo-prueba`
+  The tolerance is drawn from another sheet that is itself under test, so a `solve` returning zeros passes 50/50 when `cond` returns 1e30.
+  > `SolveInverts` escala la tolerancia por `cond`. Un `solve` que siempre devuelve ceros pasa 50/50 si `cond` devuelve 1e30.
 
 ### 2026-10-07
 
@@ -3562,6 +5636,25 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 
 | file | prompt | model | effort | rows | quotes found | sha256 |
 |---|---|---|---|---|---|---|
+| 2022-06-15_sin-titulo-2_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 4 | 4/4 | 7464ec15ab36 |
+| 2022-06-28_luciano-code-style_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 22 | 22/22 | 86806ffafa2c |
+| 2022-07-05_sin-titulo-2_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 11 | 11/11 | 66ee9e2e9762 |
+| 2022-08-03_haskell_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 18 | 18/18 | a30a26e3067d |
+| 2022-08-03_tapp-before_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 12 | 12/12 | cbea4bd47100 |
+| 2023-02-22_tapp-wish-list_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 11 | 11/11 | 146d41575b79 |
+| 2023-02-28_sin-titulo-1-w_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 6 | 6/6 | b662f039f4e0 |
+| 2023-03-02_estoy-perdido_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 15 | 15/15 | ec1267be01cf |
+| 2023-03-13_hacia-luthier_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 8 | 8/8 | 6fd719ea84ad |
+| 2025-06-17_hottification-manifesto-v0-1_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 8 | 8/8 | ce614cd54cff |
+| 2025-06-17_hottification-program_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 22 | 22/22 | 116b25632ab5 |
+| 2025-06-17_program-hott-dsl_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 17 | 17/17 | 068fc0576289 |
+| 2025-06-17_term-hottification_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 14 | 14/14 | 575e579e42f2 |
+| 2025-06-17_vault-glossary-v1_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 21 | 21/21 | 7b7093559a2c |
+| 2025-06-18_deployment-plan-and-paper-kernel_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 9 | 9/9 | f480fc794784 |
+| 2025-06-18_ho-ttification-manifesto-v-2-1_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 14 | 14/14 | 2ceead335b4d |
+| 2025-06-18_ho-ttification-manifesto-v-2_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 15 | 15/15 | 3bcb7eaf347a |
+| 2025-06-18_hottification-program-stack-v2-0_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 12 | 12/12 | ec6a3ab036de |
+| 2025-06-18_sav-kernel-v1-0_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 8 | 7/8 | f953b470e246 |
 | 2026-05-26_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 13 | 13/13 | 068202b742db |
 | 2026-05-27_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus |  | 11 | 11/11 | 56cf9820016a |
 | 2026-05-29_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 21 | 20/22 (match: words) | 7090d52b9545 |
@@ -3634,4 +5727,8 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | claude-code_2026-09-13_f16636f6_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 15 | 15/15 | a1e91c8693df |
 | claude-code_2026-09-28_175c0408_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 79 | 78/79 | 0627cd6656c7 |
 | claude-code_2026-09-28_890a551c_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 242 | 240/242 | b3f07eb12aa3 |
+| claude-code_2026-09-30_1e377538_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 31 | 31/31 | a1f2700c8b0d |
+| claude-code_2026-09-30_ac750929_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 29 | 29/29 | 0dacdc63fae2 |
+| claude-code_2026-10-04_88936d99_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 184 | 181/184 | a2301adab311 |
+| claude-code_2026-10-05_0602f3b5_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 20 | 20/20 | 8ad2fa22e647 |
 | gemini_2026-05-29_20260529_extract_ideas_dialogue_v1_claude-code_opus_ideas.md | extract_ideas_dialogue_v1 | opus | low | 62 | 61/62 | 6ca4846f5f3a |
