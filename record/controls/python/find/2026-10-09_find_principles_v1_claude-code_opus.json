@@ -1,0 +1,1794 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "candidates": [
+   {
+    "above_next": "a frame for the entire object model reaches further than a single typing discipline",
+    "also": [
+     {
+      "axis": "aesthetic",
+      "why": "one uniform rule replaces a hierarchy of special cases"
+     }
+    ],
+    "beats": {
+     "lineage": "L-sequence-concept",
+     "why": "the sequence concept generalizes across a few types; first-class generalizes across all objects"
+    },
+    "harms": [
+     "erases useful distinctions between kinds of value, so less can be caught statically",
+     "boxing everything in one object structure has a run-time cost"
+    ],
+    "id": "C1",
+    "lineages": [
+     "L-first-class",
+     "L-introspection-type-object",
+     "L-type-is-object"
+    ],
+    "quote": "One of my goals for Python was to make it so that all objects were \"first class.\" By this, I meant that I wanted all objects that could be named in the language ... to have equal status.",
+    "quote_label": "q8",
+    "quote_row": "written:2009-02-27_first-class-everything:first-class-everything",
+    "scope": "language",
+    "statement": "Every object that can be named has equal, first-class status: assignable, passable, storable, including types themselves.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "treating every nameable thing as an object of equal status reorganizes the whole mental model of the language"
+    }
+   },
+   {
+    "above_next": "the typing discipline shapes every line a programmer writes, where indentation shapes the surface",
+    "also": [
+     {
+      "axis": "ethical",
+      "why": "dropping compile-time checking is cast as corner-cutting that costs no eventual safety"
+     }
+    ],
+    "beats": {
+     "lineage": "L-builtins-reassignable",
+     "why": "reassignable built-ins is one consequence of late binding, narrower than the whole typing model"
+    },
+    "harms": [
+     "type errors surface only at run time, sometimes far from their cause",
+     "no compiler coercion, so passing an int for a float can pass silently (l75)"
+    ],
+    "id": "C2",
+    "lineages": [
+     "L-dynamic-typing",
+     "L-dynamic-no-return"
+    ],
+    "quote": "In Python, variables are simply names that refer to objects. Variables do not need to be declared before they are assigned and they can even change type in the middle of a program.",
+    "quote_label": "q2",
+    "quote_row": "written:2009-01-13_introduction-and-overview:dynamic-typing-names-refer-to-objects",
+    "scope": "language",
+    "statement": "Variables are names referring to objects, needing no declaration, and all type checking happens at run time.",
+    "strongest": {
+     "axis": "conceptual",
+     "why": "types live on values, not on variables, so a name is just a binding to an object; this rewires how one thinks about variables"
+    }
+   },
+   {
+    "above_next": "indentation infects on sight, before code is even run, where a correctness policy shows only when something goes wrong",
+    "also": [
+     {
+      "axis": "ethical",
+      "why": "the layout you read is the layout the machine runs; no divergence allowed"
+     }
+    ],
+    "beats": {
+     "lineage": "L-colon",
+     "why": "the colon only clarifies where a block begins; indentation carries the whole grouping"
+    },
+    "harms": [
+     "whitespace becomes semantically load-bearing, so invisible characters change meaning",
+     "mixed tabs and spaces can break code silently"
+    ],
+    "id": "C3",
+    "lineages": [
+     "L-indentation"
+    ],
+    "quote": "instead of using braces for statement grouping, it uses indentation",
+    "quote_label": "q14",
+    "quote_row": "written:2009-01-13_introduction-and-overview:indentation-for-grouping",
+    "scope": "language",
+    "statement": "Statements are grouped by indentation rather than by braces or keywords.",
+    "strongest": {
+     "axis": "aesthetic",
+     "why": "removing braces makes the visible structure the actual structure, an economy that sticks on sight"
+    }
+   },
+   {
+    "above_next": "a correctness stance outranks the explicitness convention that follows it",
+    "also": [
+     {
+      "axis": "conceptual",
+      "why": "forbidding undefined result values reframes what a function may legitimately return"
+     }
+    ],
+    "beats": {
+     "lineage": "L-long-suffix-violation",
+     "why": "not bothering users with implementation details is a comfort rule; never passing silently is a safety stance that bites harder"
+    },
+    "harms": [
+     "forces handling or crashing where a caller might prefer a sentinel",
+     "exceptions used as control flow can hide costly paths"
+    ],
+    "id": "C4",
+    "lineages": [
+     "L-no-undefined-raise",
+     "L-c3-rejects"
+    ],
+    "quote": "I decided that there should be no undefined result values in Python – instead, exceptions should always be raised when no correct return value can be computed.",
+    "quote_label": "q48",
+    "quote_row": "written:2009-02-03_early-language-design-and-development:no-undefined-values",
+    "scope": "language",
+    "statement": "There are no undefined result values: an exception is always raised when no correct value can be computed, and errors never pass silently.",
+    "strongest": {
+     "axis": "ethical",
+     "why": "a stand that a wrong answer is worse than a stopped program"
+    }
+   },
+   {
+    "above_next": "explicitness as a named rule outranks the design-economy principle that comes next",
+    "also": [
+     {
+      "axis": "aesthetic",
+      "why": "a method is just a function; x.f(a) equals C.f(x, a), one rule with no special method syntax"
+     }
+    ],
+    "beats": {
+     "lineage": "L-reject-instancevar-declarations",
+     "why": "rejecting instance-variable declarations is the absence of a feature; explicit self is a positive rule seen everywhere"
+    },
+    "harms": [
+     "every method carries a visible self, which users read as redundant boilerplate",
+     "ties the model to the function-with-first-argument equivalence"
+    ],
+    "id": "C5",
+    "lineages": [
+     "L-self-explicit"
+    ],
+    "quote": "With explicit references, there is no need to have a special syntax for method definitions nor do you have to worry about complicated semantics concerning variable lookup. Instead, one simply defines a function whose first argument corresponds to the instance, which by convention is named \"self.\"",
+    "quote_label": "q88",
+    "quote_row": "written:2009-02-18_adding-support-for-user-defined-classes:explicit-self-removes-special-cases",
+    "scope": "language",
+    "statement": "A method is just a function whose first argument, by convention self, is the instance; explicit reference is the only way to reach instance variables.",
+    "strongest": {
+     "axis": "ethical",
+     "why": "making the instance an explicit argument is a stand for explicitness over hidden lookup magic"
+    }
+   },
+   {
+    "above_next": "a design-method principle guides more choices than a single slicing convention",
+    "also": [
+     {
+      "axis": "ethical",
+      "why": "restraint about growing the language, keeping the surface small"
+     }
+    ],
+    "beats": {
+     "lineage": "L-everything-statement",
+     "why": "everything-is-a-statement is one instance of this restraint, not the rule itself"
+    },
+    "harms": [
+     "reusing mechanisms can overload them past clarity (a class body runs arbitrary code)",
+     "avoiding syntax pushes complexity into conventions and __dunder__ names"
+    ],
+    "id": "C6",
+    "lineages": [
+     "L-class-callable-factory",
+     "L-no-separate-method-syntax",
+     "L-special-methods",
+     "L-metaclass-no-syntax-change"
+    ],
+    "quote": "making the class object itself callable was the right, \"minimal\" solution, requiring no new syntax... what I had done was simply to turn each class into its own factory.",
+    "quote_label": "q69",
+    "quote_row": "written:2009-02-18_adding-support-for-user-defined-classes:callable-class-no-new-operator",
+    "scope": "language",
+    "statement": "Prefer the minimal solution that reuses existing mechanisms over adding new syntax.",
+    "strongest": {
+     "axis": "aesthetic",
+     "why": "solve by reusing what already exists rather than adding grammar, an economy of means"
+    }
+   },
+   {
+    "also": [
+     {
+      "axis": "conceptual",
+      "why": "it reframes indices as boundaries between items rather than the items themselves"
+     }
+    ],
+    "beats": {
+     "lineage": "L-list-comprehension",
+     "why": "the list comprehension's beauty is borrowed from set-builder notation; the slicing invariant is Python's own"
+    },
+    "harms": [
+     "half-open intervals confuse newcomers who expect the last index included",
+     "0-based plus half-open is two conventions to internalize at once"
+    ],
+    "id": "C7",
+    "lineages": [
+     "L-halfopen-slicing-indexing"
+    ],
+    "quote": "Using / 0-based indexing, half-open intervals, and suitable defaults (as Python / ended up having), they are beautiful: a[:n] and a[i:i+n]",
+    "quote_label": "q239",
+    "quote_row": "written:2013-10-24_why-python-uses-0-based-indexing:zero-based-half-open-defaults-elegant",
+    "scope": "language",
+    "statement": "Index from 0 with half-open intervals and suitable defaults, so common slices need no +1/-1 corrections.",
+    "strongest": {
+     "axis": "aesthetic",
+     "why": "the adjacency invariant, one slice's end being the next one's start, is a small beauty that lodges in the head"
+    }
+   }
+  ],
+  "classification": [
+   {
+    "candidate": null,
+    "label": "l1",
+    "lineage": "L-concise",
+    "note": "complicated tasks expressible in little code, a value",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C2",
+    "label": "l2",
+    "lineage": "L-dynamic-typing",
+    "note": "dynamic typing",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l3",
+    "lineage": "L-exceptions-errorhandling",
+    "note": "design fact: errors via exceptions",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C1",
+    "label": "l4",
+    "lineage": "L-first-class",
+    "note": "first-class everything",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l5",
+    "lineage": "L-for-iterable",
+    "note": "loop over any iterable, not an index",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l6",
+    "lineage": "L-general-purpose",
+    "note": "design fact: general purpose",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l7",
+    "lineage": "L-immutable-primitives",
+    "note": "design fact: immutable primitives",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l8",
+    "lineage": "L-impl-bytecode",
+    "note": "implementation technique",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C3",
+    "label": "l9",
+    "lineage": "L-indentation",
+    "note": "indentation grouping",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l10",
+    "lineage": "L-multiple-impls",
+    "note": "fact: multiple implementations",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l11",
+    "lineage": "L-oop-support",
+    "note": "design fact: OOP support",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l12",
+    "lineage": "L-stdlib",
+    "note": "fact/motive: stdlib popularity",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l13",
+    "lineage": "L-syntax-from-c",
+    "note": "fact: syntax from C",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l14",
+    "lineage": "L-borrow-fix-abc",
+    "note": "method: borrow what's good, fix problems",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l15",
+    "lineage": "L-bridge-c-shell",
+    "note": "motive/story",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l16",
+    "lineage": "L-name-python",
+    "note": "story: the name",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l17",
+    "lineage": "L-open-source-early",
+    "note": "story: open source early",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l18",
+    "lineage": "L-pgen",
+    "note": "story: pgen",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l19",
+    "lineage": "L-python-origins-cwi",
+    "note": "story: CWI origins",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l20",
+    "lineage": "L-releases-cvs",
+    "note": "story: releases, CVS",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l21",
+    "lineage": "L-syntax-tastes",
+    "note": "story: syntax tastes",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l22",
+    "lineage": "L-why-not-shell",
+    "note": "motive: shell wouldn't do",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l23",
+    "lineage": "L-python-like-lisp",
+    "note": "observation: like Lisp",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l24",
+    "lineage": "L-abc-design-method",
+    "note": "method: task analysis then user testing",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l25",
+    "lineage": "L-colon",
+    "note": "colon clarifies the block",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l26",
+    "lineage": "L-hashtable",
+    "note": "technique: hash table",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l27",
+    "lineage": "L-int-long-different-semantics",
+    "note": "design fact/bug",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l28",
+    "lineage": "L-list-flexible-array",
+    "note": "design fact: flexible array",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l29",
+    "lineage": "L-long-bignum",
+    "note": "design fact: bignum",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l30",
+    "lineage": "L-long-suffix-violation",
+    "note": "users shouldn't care about uninteresting implementation details",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l31",
+    "lineage": "L-machine-ints-common",
+    "note": "design fact/motive",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C4",
+    "label": "l32",
+    "lineage": "L-no-undefined-raise",
+    "note": "always raise, no undefined",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l33",
+    "lineage": "L-overflow-check",
+    "note": "design fact/correction",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l34",
+    "lineage": "L-repr-valid-input",
+    "note": "printed form valid as parser input",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l35",
+    "lineage": "L-sequence-concept",
+    "note": "generalize types to a common sequence concept",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l36",
+    "lineage": "L-traditional-number-model",
+    "note": "design fact: number model",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l37",
+    "lineage": "L-tuple-from-abc",
+    "note": "design fact: tuple",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l38",
+    "lineage": "L-tuple-syntax",
+    "note": "design fact: tuple syntax",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l39",
+    "lineage": "L-abc-mixed-checking",
+    "note": "fact about ABC",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l40",
+    "lineage": "L-abc-runtime-checking",
+    "note": "fact about ABC",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l41",
+    "lineage": "L-abc-static-typed",
+    "note": "fact about ABC",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C2",
+    "label": "l42",
+    "lineage": "L-dynamic-no-return",
+    "note": "no going back from dynamic",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l43",
+    "lineage": "L-assignment-instance-bootstrap",
+    "note": "design reasoning: bootstrap",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l44",
+    "lineage": "L-assignment-no-search",
+    "note": "assignment creates in local scope, never searches",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l45",
+    "lineage": "L-class-body-statements",
+    "note": "don't artificially limit what's allowed in a class body",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C6",
+    "label": "l46",
+    "lineage": "L-class-callable-factory",
+    "note": "class callable, minimal solution",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l47",
+    "lineage": "L-class-dictionary",
+    "note": "technique: class dictionary",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l48",
+    "lineage": "L-class-dynamic-modification",
+    "note": "classes and instances modifiable dynamically",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l49",
+    "lineage": "L-classbody-namespace-mechanism",
+    "note": "technique: namespace mechanism",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l50",
+    "lineage": "L-classes-added-late",
+    "note": "story: classes added late",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l51",
+    "lineage": "L-dict-based-lookup",
+    "note": "technique: dict lookup",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l52",
+    "lineage": "L-instance-representation",
+    "note": "technique: instance representation",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C1",
+    "label": "l53",
+    "lineage": "L-introspection-type-object",
+    "note": "introspection: type as object",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l54",
+    "lineage": "L-method-resolution-mro",
+    "note": "technique: MRO",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l55",
+    "lineage": "L-modula3-method-model",
+    "note": "influence: Modula-3",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l56",
+    "lineage": "L-multiple-inheritance",
+    "note": "design fact: multiple inheritance",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l57",
+    "lineage": "L-no-method-checking",
+    "note": "no conformance checking, call first found",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C6",
+    "label": "l58",
+    "lineage": "L-no-separate-method-syntax",
+    "note": "no separate method syntax",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l59",
+    "lineage": "L-object-type-struct",
+    "note": "technique: type struct",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l60",
+    "lineage": "L-permissive-vs-smalltalk",
+    "note": "objects more permissive than Smalltalk",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l61",
+    "lineage": "L-reject-instancevar-declarations",
+    "note": "no declarations for instance variables",
+    "verdict": "considered"
+   },
+   {
+    "candidate": "C5",
+    "label": "l62",
+    "lineage": "L-self-explicit",
+    "note": "explicit self",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l63",
+    "lineage": "L-siebren-classes-suggestion",
+    "note": "story: Siebren's suggestion",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C6",
+    "label": "l64",
+    "lineage": "L-special-methods",
+    "note": "special methods, no new syntax",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l65",
+    "lineage": "L-bound-unbound-methods",
+    "note": "technique: bound methods",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l66",
+    "lineage": "L-common-c-struct",
+    "note": "technique: common C struct",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l67",
+    "lineage": "L-everything-statement",
+    "note": "every part an executable statement",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l68",
+    "lineage": "L-grammar-overpermissive",
+    "note": "design fact/bug",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l69",
+    "lineage": "L-class-exceptions-introduced",
+    "note": "history: class exceptions",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l70",
+    "lineage": "L-distinguish-exceptions",
+    "note": "design requirement",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l71",
+    "lineage": "L-exception-identity-nameclash",
+    "note": "design fact: exception identity",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l72",
+    "lineage": "L-exception-pointer-optimization",
+    "note": "story: pointer optimization",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l73",
+    "lineage": "L-exceptions-as-strings",
+    "note": "history: string exceptions",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l74",
+    "lineage": "L-string-literal-unification-bug",
+    "note": "bug story",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l75",
+    "lineage": "L-int-float-silent-error",
+    "note": "design cost/fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l76",
+    "lineage": "L-integer-division",
+    "note": "design fact/mistake",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l77",
+    "lineage": "L-mixed-mode-arithmetic",
+    "note": "design fact: mixed-mode",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l78",
+    "lineage": "L-rationals-failed",
+    "note": "story: rationals failed",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l79",
+    "lineage": "L-result-type-rule",
+    "note": "design fact/mistake",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l80",
+    "lineage": "L-c-extensions-easy",
+    "note": "design fact: easy C extensions",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l81",
+    "lineage": "L-distutils",
+    "note": "history: distutils",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l82",
+    "lineage": "L-dynamic-loading",
+    "note": "technique/history: dynamic loading",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l83",
+    "lineage": "L-embedding",
+    "note": "story: embedding",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l84",
+    "lineage": "L-grand-renaming",
+    "note": "history: grand renaming",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l85",
+    "lineage": "L-py-prefix",
+    "note": "convention: Py prefix",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l86",
+    "lineage": "L-standalone-globals",
+    "note": "history: standalone globals",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l87",
+    "lineage": "L-closures",
+    "note": "feature: closures",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l88",
+    "lineage": "L-functional-added",
+    "note": "history: functional added",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l89",
+    "lineage": "L-functional-superseded",
+    "note": "history: functional superseded",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l90",
+    "lineage": "L-lambda-intent",
+    "note": "fact: lambda intent",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l91",
+    "lineage": "L-lambda-motivation",
+    "note": "motive: lambda",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l92",
+    "lineage": "L-lambda-terminology",
+    "note": "story: lambda terminology",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l93",
+    "lineage": "L-less-discussion-early",
+    "note": "story: less discussion early",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l94",
+    "lineage": "L-not-functional",
+    "note": "accept the language's dynamic nature, no functional optimization",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l95",
+    "lineage": "L-beaudry-hook",
+    "note": "technique/history: Beaudry hook",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l96",
+    "lineage": "L-class-creation-api",
+    "note": "technique: class creation API",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l97",
+    "lineage": "L-class-creation-hidden",
+    "note": "design fact: creation hidden",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l98",
+    "lineage": "L-metaclass-namespace-limit",
+    "note": "technique: namespace limit",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C6",
+    "label": "l99",
+    "lineage": "L-metaclass-no-syntax-change",
+    "note": "metaclass without syntax change",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l100",
+    "lineage": "L-class-impl-problems",
+    "note": "history: class impl problems",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l101",
+    "lineage": "L-classes-afterthought",
+    "note": "story: classes afterthought",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l102",
+    "lineage": "L-metaclass-influence",
+    "note": "influence: metaclass book",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l103",
+    "lineage": "L-new-style-coexist",
+    "note": "history/compat: new-style coexist",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l104",
+    "lineage": "L-new-style-rewrite",
+    "note": "history: new-style rewrite",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l105",
+    "lineage": "L-class-attr-defaults",
+    "note": "design fact: attr defaults",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l106",
+    "lineage": "L-decorator-syntax",
+    "note": "feature/history: decorator syntax",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l107",
+    "lineage": "L-decorators-success",
+    "note": "history: decorators success",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l108",
+    "lineage": "L-descriptor-classes",
+    "note": "feature: descriptor classes",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l109",
+    "lineage": "L-descriptor-no-syntax",
+    "note": "don't introduce a feature and new syntax at once",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l110",
+    "lineage": "L-descriptors",
+    "note": "technique: descriptors",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l111",
+    "lineage": "L-new-method",
+    "note": "feature: __new__",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l112",
+    "lineage": "L-new-style-concepts",
+    "note": "fact: new-style concepts",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l113",
+    "lineage": "L-slots",
+    "note": "technique: __slots__",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l114",
+    "lineage": "L-antigravity-easteregg",
+    "note": "joke: easter egg",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l115",
+    "lineage": "L-c3-adoption",
+    "note": "technique: C3",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C4",
+    "label": "l116",
+    "lineage": "L-c3-rejects",
+    "note": "C3 rejects inconsistent orderings, errors not silent",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l117",
+    "lineage": "L-mro-22-algorithm",
+    "note": "technique: 2.2 MRO",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l118",
+    "lineage": "L-mro-22-broken",
+    "note": "history: MRO broken",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l119",
+    "lineage": "L-mro-concept",
+    "note": "concept/technique: MRO",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l120",
+    "lineage": "L-mro-diamond-problem",
+    "note": "technique: diamond problem",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l121",
+    "lineage": "L-mro-three-algorithms",
+    "note": "history: three MROs",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l122",
+    "lineage": "L-comprehension-design-factors",
+    "note": "method: factors governing comprehension design",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l123",
+    "lineage": "L-comprehension-extensions",
+    "note": "history: comprehension extensions",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l124",
+    "lineage": "L-comprehension-forloop-origin",
+    "note": "story: for-loop origin",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l125",
+    "lineage": "L-comprehension-performance",
+    "note": "fact: performance",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l126",
+    "lineage": "L-comprehension-vs-mapfilter",
+    "note": "readability over functional notation",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l127",
+    "lineage": "L-genexp",
+    "note": "feature: generator expressions",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l128",
+    "lineage": "L-genexp-syntax",
+    "note": "don't guess, don't break existing code",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l129",
+    "lineage": "L-list-comprehension",
+    "note": "Pythonic set-builder notation",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l130",
+    "lineage": "L-listcomp-genexp-equivalence",
+    "note": "equivalence fact",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l131",
+    "lineage": "L-listcomp-leak",
+    "note": "bug/history: leak",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l132",
+    "lineage": "L-setbuilder-difference",
+    "note": "fact: no universal set",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l133",
+    "lineage": "L-floor-division",
+    "note": "design fact: floor division",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C7",
+    "label": "l134",
+    "lineage": "L-halfopen-slicing-indexing",
+    "note": "half-open 0-based slicing",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l135",
+    "lineage": "L-metaclass-not-ruby",
+    "note": "fact: not from Ruby",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l136",
+    "lineage": "L-newstyle-iteration",
+    "note": "history: iteration",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l137",
+    "lineage": "L-ruby-inspired-by-python",
+    "note": "story: Ruby inspired by Python",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l138",
+    "lineage": "L-smalltalk-bytecode-influence",
+    "note": "influence: Smalltalk bytecode",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l139",
+    "lineage": "L-smalltalk-metaclass-unaware",
+    "note": "story: Smalltalk metaclass",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": "C1",
+    "label": "l140",
+    "lineage": "L-type-is-object",
+    "note": "type itself an object from the start",
+    "verdict": "candidate"
+   },
+   {
+    "candidate": null,
+    "label": "l141",
+    "lineage": "L-builtins-reassignable",
+    "note": "adding to the language never breaks code; names resolved at run time",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l142",
+    "lineage": "L-constant-convention",
+    "note": "fact: constant convention",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l143",
+    "lineage": "L-keyword-definition",
+    "note": "definition: keyword",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l144",
+    "lineage": "L-keywords-costly",
+    "note": "keep reserved words few",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l145",
+    "lineage": "L-literal-definition",
+    "note": "definition: literal",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l146",
+    "lineage": "L-none-keyword",
+    "note": "history: None keyword",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l147",
+    "lineage": "L-none-singleton",
+    "note": "design fact: None singleton",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l148",
+    "lineage": "L-none-true-false-both",
+    "note": "fact: keyword and literal",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l149",
+    "lineage": "L-true-false-keywords",
+    "note": "history: True/False keywords",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l150",
+    "lineage": "L-bool-type-history",
+    "note": "history: bool type",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l151",
+    "lineage": "L-no-feature-in-bugfix",
+    "note": "method: no features in a bugfix release",
+    "verdict": "considered"
+   },
+   {
+    "candidate": null,
+    "label": "l152",
+    "lineage": "L-handwritten-lexer",
+    "note": "technique: handwritten lexer",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l153",
+    "lineage": "L-lalr-regret",
+    "note": "regret/technique: LALR",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l154",
+    "lineage": "L-own-parser-generator",
+    "note": "story: own parser generator",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l155",
+    "lineage": "L-pgen2",
+    "note": "history: pgen2",
+    "verdict": "not_principle"
+   },
+   {
+    "candidate": null,
+    "label": "l156",
+    "lineage": "L-regex-ebnf-grammar",
+    "note": "technique: EBNF grammar",
+    "verdict": "not_principle"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"candidates\": [{\"id\": \"C1\", \"harms\": [\"erases useful distinctions between kinds of value, so less can be caught statically\", \"boxing everything in one object structure has a run-time cost\"], \"strongest\": {\"axis\": \"conceptual\", \"why\": \"treating every nameable thing as an object of equal status reorganizes the whole mental model of the language\"}, \"also\": [{\"axis\": \"aesthetic\", \"why\": \"one uniform rule replaces a hierarchy of special cases\"}], \"beats\": {\"lineage\": \"l35\", \"why\": \"the sequence concept generalizes across a few types; first-class generalizes across all objects\"}, \"statement\": \"Every object that can be named has equal, first-class status: assignable, passable, storable, including types themselves.\", \"scope\": \"language\", \"lineages\": [\"l4\", \"l53\", \"l140\"], \"quote\": \"q8\", \"quote_text\": \"One of my goals for Python was to make it so that all objects were \\\"first class.\\\" By this, I meant that I wanted all objects that could be named in the language ... to have equal status.\", \"above_next\": \"a frame for the entire object model reaches further than a single typing discipline\"}, {\"id\": \"C2\", \"harms\": [\"type errors surface only at run time, sometimes far from their cause\", \"no compiler coercion, so passing an int for a float can pass silently (l75)\"], \"strongest\": {\"axis\": \"conceptual\", \"why\": \"types live on values, not on variables, so a name is just a binding to an object; this rewires how one thinks about variables\"}, \"also\": [{\"axis\": \"ethical\", \"why\": \"dropping compile-time checking is cast as corner-cutting that costs no eventual safety\"}], \"beats\": {\"lineage\": \"l141\", \"why\": \"reassignable built-ins is one consequence of late binding, narrower than the whole typing model\"}, \"statement\": \"Variables are names referring to objects, needing no declaration, and all type checking happens at run time.\", \"scope\": \"language\", \"lineages\": [\"l2\", \"l42\"], \"quote\": \"q2\", \"quote_text\": \"In Python, variables are simply names that refer to objects. Variables do not need to be declared before they are assigned and they can even change type in the middle of a program.\", \"above_next\": \"the typing discipline shapes every line a programmer writes, where indentation shapes the surface\"}, {\"id\": \"C3\", \"harms\": [\"whitespace becomes semantically load-bearing, so invisible characters change meaning\", \"mixed tabs and spaces can break code silently\"], \"strongest\": {\"axis\": \"aesthetic\", \"why\": \"removing braces makes the visible structure the actual structure, an economy that sticks on sight\"}, \"also\": [{\"axis\": \"ethical\", \"why\": \"the layout you read is the layout the machine runs; no divergence allowed\"}], \"beats\": {\"lineage\": \"l25\", \"why\": \"the colon only clarifies where a block begins; indentation carries the whole grouping\"}, \"statement\": \"Statements are grouped by indentation rather than by braces or keywords.\", \"scope\": \"language\", \"lineages\": [\"l9\"], \"quote\": \"q14\", \"quote_text\": \"instead of using braces for statement grouping, it uses indentation\", \"above_next\": \"indentation infects on sight, before code is even run, where a correctness policy shows only when something goes wrong\"}, {\"id\": \"C4\", \"harms\": [\"forces handling or crashing where a caller might prefer a sentinel\", \"exceptions used as control flow can hide costly paths\"], \"strongest\": {\"axis\": \"ethical\", \"why\": \"a stand that a wrong answer is worse than a stopped program\"}, \"also\": [{\"axis\": \"conceptual\", \"why\": \"forbidding undefined result values reframes what a function may legitimately return\"}], \"beats\": {\"lineage\": \"l30\", \"why\": \"not bothering users with implementation details is a comfort rule; never passing silently is a safety stance that bites harder\"}, \"statement\": \"There are no undefined result values: an exception is always raised when no correct value can be computed, and errors never pass silently.\", \"scope\": \"language\", \"lineages\": [\"l32\", \"l116\"], \"quote\": \"q48\", \"quote_text\": \"I decided that there should be no undefined result values in Python – instead, exceptions should always be raised when no correct return value can be computed.\", \"above_next\": \"a correctness stance outranks the explicitness convention that follows it\"}, {\"id\": \"C5\", \"harms\": [\"every method carries a visible self, which users read as redundant boilerplate\", \"ties the model to the function-with-first-argument equivalence\"], \"strongest\": {\"axis\": \"ethical\", \"why\": \"making the instance an explicit argument is a stand for explicitness over hidden lookup magic\"}, \"also\": [{\"axis\": \"aesthetic\", \"why\": \"a method is just a function; x.f(a) equals C.f(x, a), one rule with no special method syntax\"}], \"beats\": {\"lineage\": \"l61\", \"why\": \"rejecting instance-variable declarations is the absence of a feature; explicit self is a positive rule seen everywhere\"}, \"statement\": \"A method is just a function whose first argument, by convention self, is the instance; explicit reference is the only way to reach instance variables.\", \"scope\": \"language\", \"lineages\": [\"l62\"], \"quote\": \"q88\", \"quote_text\": \"With explicit references, there is no need to have a special syntax for method definitions nor do you have to worry about complicated semantics concerning variable lookup. Instead, one simply defines a function whose first argument corresponds to the instance, which by convention is named \\\"self.\\\"\", \"above_next\": \"explicitness as a named rule outranks the design-economy principle that comes next\"}, {\"id\": \"C6\", \"harms\": [\"reusing mechanisms can overload them past clarity (a class body runs arbitrary code)\", \"avoiding syntax pushes complexity into conventions and __dunder__ names\"], \"strongest\": {\"axis\": \"aesthetic\", \"why\": \"solve by reusing what already exists rather than adding grammar, an economy of means\"}, \"also\": [{\"axis\": \"ethical\", \"why\": \"restraint about growing the language, keeping the surface small\"}], \"beats\": {\"lineage\": \"l67\", \"why\": \"everything-is-a-statement is one instance of this restraint, not the rule itself\"}, \"statement\": \"Prefer the minimal solution that reuses existing mechanisms over adding new syntax.\", \"scope\": \"language\", \"lineages\": [\"l46\", \"l58\", \"l64\", \"l99\"], \"quote\": \"q69\", \"quote_text\": \"making the class object itself callable was the right, \\\"minimal\\\" solution, requiring no new syntax... what I had done was simply to turn each class into its own factory.\", \"above_next\": \"a design-method principle guides more choices than a single slicing convention\"}, {\"id\": \"C7\", \"harms\": [\"half-open intervals confuse newcomers who expect the last index included\", \"0-based plus half-open is two conventions to internalize at once\"], \"strongest\": {\"axis\": \"aesthetic\", \"why\": \"the adjacency invariant, one slice's end being the next one's start, is a small beauty that lodges in the head\"}, \"also\": [{\"axis\": \"conceptual\", \"why\": \"it reframes indices as boundaries between items rather than the items themselves\"}], \"beats\": {\"lineage\": \"l129\", \"why\": \"the list comprehension's beauty is borrowed from set-builder notation; the slicing invariant is Python's own\"}, \"statement\": \"Index from 0 with half-open intervals and suitable defaults, so common slices need no +1/-1 corrections.\", \"scope\": \"language\", \"lineages\": [\"l134\"], \"quote\": \"q239\", \"quote_text\": \"Using / 0-based indexing, half-open intervals, and suitable defaults (as Python / ended up having), they are beautiful: a[:n] and a[i:i+n]\"}], \"classification\": [[\"l1\", \"considered\", \"\", \"complicated tasks expressible in little code, a value\"], [\"l2\", \"candidate\", \"C2\", \"dynamic typing\"], [\"l3\", \"not_principle\", \"\", \"design fact: errors via exceptions\"], [\"l4\", \"candidate\", \"C1\", \"first-class everything\"], [\"l5\", \"considered\", \"\", \"loop over any iterable, not an index\"], [\"l6\", \"not_principle\", \"\", \"design fact: general purpose\"], [\"l7\", \"not_principle\", \"\", \"design fact: immutable primitives\"], [\"l8\", \"not_principle\", \"\", \"implementation technique\"], [\"l9\", \"candidate\", \"C3\", \"indentation grouping\"], [\"l10\", \"not_principle\", \"\", \"fact: multiple implementations\"], [\"l11\", \"not_principle\", \"\", \"design fact: OOP support\"], [\"l12\", \"not_principle\", \"\", \"fact/motive: stdlib popularity\"], [\"l13\", \"not_principle\", \"\", \"fact: syntax from C\"], [\"l14\", \"considered\", \"\", \"method: borrow what's good, fix problems\"], [\"l15\", \"not_principle\", \"\", \"motive/story\"], [\"l16\", \"not_principle\", \"\", \"story: the name\"], [\"l17\", \"not_principle\", \"\", \"story: open source early\"], [\"l18\", \"not_principle\", \"\", \"story: pgen\"], [\"l19\", \"not_principle\", \"\", \"story: CWI origins\"], [\"l20\", \"not_principle\", \"\", \"story: releases, CVS\"], [\"l21\", \"not_principle\", \"\", \"story: syntax tastes\"], [\"l22\", \"not_principle\", \"\", \"motive: shell wouldn't do\"], [\"l23\", \"not_principle\", \"\", \"observation: like Lisp\"], [\"l24\", \"considered\", \"\", \"method: task analysis then user testing\"], [\"l25\", \"considered\", \"\", \"colon clarifies the block\"], [\"l26\", \"not_principle\", \"\", \"technique: hash table\"], [\"l27\", \"not_principle\", \"\", \"design fact/bug\"], [\"l28\", \"not_principle\", \"\", \"design fact: flexible array\"], [\"l29\", \"not_principle\", \"\", \"design fact: bignum\"], [\"l30\", \"considered\", \"\", \"users shouldn't care about uninteresting implementation details\"], [\"l31\", \"not_principle\", \"\", \"design fact/motive\"], [\"l32\", \"candidate\", \"C4\", \"always raise, no undefined\"], [\"l33\", \"not_principle\", \"\", \"design fact/correction\"], [\"l34\", \"considered\", \"\", \"printed form valid as parser input\"], [\"l35\", \"considered\", \"\", \"generalize types to a common sequence concept\"], [\"l36\", \"not_principle\", \"\", \"design fact: number model\"], [\"l37\", \"not_principle\", \"\", \"design fact: tuple\"], [\"l38\", \"not_principle\", \"\", \"design fact: tuple syntax\"], [\"l39\", \"not_principle\", \"\", \"fact about ABC\"], [\"l40\", \"not_principle\", \"\", \"fact about ABC\"], [\"l41\", \"not_principle\", \"\", \"fact about ABC\"], [\"l42\", \"candidate\", \"C2\", \"no going back from dynamic\"], [\"l43\", \"not_principle\", \"\", \"design reasoning: bootstrap\"], [\"l44\", \"considered\", \"\", \"assignment creates in local scope, never searches\"], [\"l45\", \"considered\", \"\", \"don't artificially limit what's allowed in a class body\"], [\"l46\", \"candidate\", \"C6\", \"class callable, minimal solution\"], [\"l47\", \"not_principle\", \"\", \"technique: class dictionary\"], [\"l48\", \"considered\", \"\", \"classes and instances modifiable dynamically\"], [\"l49\", \"not_principle\", \"\", \"technique: namespace mechanism\"], [\"l50\", \"not_principle\", \"\", \"story: classes added late\"], [\"l51\", \"not_principle\", \"\", \"technique: dict lookup\"], [\"l52\", \"not_principle\", \"\", \"technique: instance representation\"], [\"l53\", \"candidate\", \"C1\", \"introspection: type as object\"], [\"l54\", \"not_principle\", \"\", \"technique: MRO\"], [\"l55\", \"not_principle\", \"\", \"influence: Modula-3\"], [\"l56\", \"not_principle\", \"\", \"design fact: multiple inheritance\"], [\"l57\", \"considered\", \"\", \"no conformance checking, call first found\"], [\"l58\", \"candidate\", \"C6\", \"no separate method syntax\"], [\"l59\", \"not_principle\", \"\", \"technique: type struct\"], [\"l60\", \"considered\", \"\", \"objects more permissive than Smalltalk\"], [\"l61\", \"considered\", \"\", \"no declarations for instance variables\"], [\"l62\", \"candidate\", \"C5\", \"explicit self\"], [\"l63\", \"not_principle\", \"\", \"story: Siebren's suggestion\"], [\"l64\", \"candidate\", \"C6\", \"special methods, no new syntax\"], [\"l65\", \"not_principle\", \"\", \"technique: bound methods\"], [\"l66\", \"not_principle\", \"\", \"technique: common C struct\"], [\"l67\", \"considered\", \"\", \"every part an executable statement\"], [\"l68\", \"not_principle\", \"\", \"design fact/bug\"], [\"l69\", \"not_principle\", \"\", \"history: class exceptions\"], [\"l70\", \"not_principle\", \"\", \"design requirement\"], [\"l71\", \"not_principle\", \"\", \"design fact: exception identity\"], [\"l72\", \"not_principle\", \"\", \"story: pointer optimization\"], [\"l73\", \"not_principle\", \"\", \"history: string exceptions\"], [\"l74\", \"not_principle\", \"\", \"bug story\"], [\"l75\", \"not_principle\", \"\", \"design cost/fact\"], [\"l76\", \"not_principle\", \"\", \"design fact/mistake\"], [\"l77\", \"not_principle\", \"\", \"design fact: mixed-mode\"], [\"l78\", \"not_principle\", \"\", \"story: rationals failed\"], [\"l79\", \"not_principle\", \"\", \"design fact/mistake\"], [\"l80\", \"not_principle\", \"\", \"design fact: easy C extensions\"], [\"l81\", \"not_principle\", \"\", \"history: distutils\"], [\"l82\", \"not_principle\", \"\", \"technique/history: dynamic loading\"], [\"l83\", \"not_principle\", \"\", \"story: embedding\"], [\"l84\", \"not_principle\", \"\", \"history: grand renaming\"], [\"l85\", \"not_principle\", \"\", \"convention: Py prefix\"], [\"l86\", \"not_principle\", \"\", \"history: standalone globals\"], [\"l87\", \"not_principle\", \"\", \"feature: closures\"], [\"l88\", \"not_principle\", \"\", \"history: functional added\"], [\"l89\", \"not_principle\", \"\", \"history: functional superseded\"], [\"l90\", \"not_principle\", \"\", \"fact: lambda intent\"], [\"l91\", \"not_principle\", \"\", \"motive: lambda\"], [\"l92\", \"not_principle\", \"\", \"story: lambda terminology\"], [\"l93\", \"not_principle\", \"\", \"story: less discussion early\"], [\"l94\", \"considered\", \"\", \"accept the language's dynamic nature, no functional optimization\"], [\"l95\", \"not_principle\", \"\", \"technique/history: Beaudry hook\"], [\"l96\", \"not_principle\", \"\", \"technique: class creation API\"], [\"l97\", \"not_principle\", \"\", \"design fact: creation hidden\"], [\"l98\", \"not_principle\", \"\", \"technique: namespace limit\"], [\"l99\", \"candidate\", \"C6\", \"metaclass without syntax change\"], [\"l100\", \"not_principle\", \"\", \"history: class impl problems\"], [\"l101\", \"not_principle\", \"\", \"story: classes afterthought\"], [\"l102\", \"not_principle\", \"\", \"influence: metaclass book\"], [\"l103\", \"not_principle\", \"\", \"history/compat: new-style coexist\"], [\"l104\", \"not_principle\", \"\", \"history: new-style rewrite\"], [\"l105\", \"not_principle\", \"\", \"design fact: attr defaults\"], [\"l106\", \"not_principle\", \"\", \"feature/history: decorator syntax\"], [\"l107\", \"not_principle\", \"\", \"history: decorators success\"], [\"l108\", \"not_principle\", \"\", \"feature: descriptor classes\"], [\"l109\", \"considered\", \"\", \"don't introduce a feature and new syntax at once\"], [\"l110\", \"not_principle\", \"\", \"technique: descriptors\"], [\"l111\", \"not_principle\", \"\", \"feature: __new__\"], [\"l112\", \"not_principle\", \"\", \"fact: new-style concepts\"], [\"l113\", \"not_principle\", \"\", \"technique: __slots__\"], [\"l114\", \"not_principle\", \"\", \"joke: easter egg\"], [\"l115\", \"not_principle\", \"\", \"technique: C3\"], [\"l116\", \"candidate\", \"C4\", \"C3 rejects inconsistent orderings, errors not silent\"], [\"l117\", \"not_principle\", \"\", \"technique: 2.2 MRO\"], [\"l118\", \"not_principle\", \"\", \"history: MRO broken\"], [\"l119\", \"not_principle\", \"\", \"concept/technique: MRO\"], [\"l120\", \"not_principle\", \"\", \"technique: diamond problem\"], [\"l121\", \"not_principle\", \"\", \"history: three MROs\"], [\"l122\", \"considered\", \"\", \"method: factors governing comprehension design\"], [\"l123\", \"not_principle\", \"\", \"history: comprehension extensions\"], [\"l124\", \"not_principle\", \"\", \"story: for-loop origin\"], [\"l125\", \"not_principle\", \"\", \"fact: performance\"], [\"l126\", \"considered\", \"\", \"readability over functional notation\"], [\"l127\", \"not_principle\", \"\", \"feature: generator expressions\"], [\"l128\", \"considered\", \"\", \"don't guess, don't break existing code\"], [\"l129\", \"considered\", \"\", \"Pythonic set-builder notation\"], [\"l130\", \"not_principle\", \"\", \"equivalence fact\"], [\"l131\", \"not_principle\", \"\", \"bug/history: leak\"], [\"l132\", \"not_principle\", \"\", \"fact: no universal set\"], [\"l133\", \"not_principle\", \"\", \"design fact: floor division\"], [\"l134\", \"candidate\", \"C7\", \"half-open 0-based slicing\"], [\"l135\", \"not_principle\", \"\", \"fact: not from Ruby\"], [\"l136\", \"not_principle\", \"\", \"history: iteration\"], [\"l137\", \"not_principle\", \"\", \"story: Ruby inspired by Python\"], [\"l138\", \"not_principle\", \"\", \"influence: Smalltalk bytecode\"], [\"l139\", \"not_principle\", \"\", \"story: Smalltalk metaclass\"], [\"l140\", \"candidate\", \"C1\", \"type itself an object from the start\"], [\"l141\", \"considered\", \"\", \"adding to the language never breaks code; names resolved at run time\"], [\"l142\", \"not_principle\", \"\", \"fact: constant convention\"], [\"l143\", \"not_principle\", \"\", \"definition: keyword\"], [\"l144\", \"considered\", \"\", \"keep reserved words few\"], [\"l145\", \"not_principle\", \"\", \"definition: literal\"], [\"l146\", \"not_principle\", \"\", \"history: None keyword\"], [\"l147\", \"not_principle\", \"\", \"design fact: None singleton\"], [\"l148\", \"not_principle\", \"\", \"fact: keyword and literal\"], [\"l149\", \"not_principle\", \"\", \"history: True/False keywords\"], [\"l150\", \"not_principle\", \"\", \"history: bool type\"], [\"l151\", \"considered\", \"\", \"method: no features in a bugfix release\"], [\"l152\", \"not_principle\", \"\", \"technique: handwritten lexer\"], [\"l153\", \"not_principle\", \"\", \"regret/technique: LALR\"], [\"l154\", \"not_principle\", \"\", \"story: own parser generator\"], [\"l155\", \"not_principle\", \"\", \"history: pgen2\"], [\"l156\", \"not_principle\", \"\", \"technique: EBNF grammar\"]]}\n",
+   "answer_sha256": "dcc895ecdb1798908e0b36b58bac581f212def01f6bc9465a8a95dd471f9d590",
+   "date": "2026-10-09T10:48:22Z",
+   "errors": [],
+   "seconds": 203
+  }
+ ],
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "55316336bdaa824ef22e9bbd6131dd2c3bd645a1557d5a7e6132e262af4103e8",
+ "inputs": {
+  "record/controls/python/ideas/lineages_link_ideas_v2_claude-code_opus.json": {
+   "sha256": "f4564d99c9aa2187d72ca3c0e4fa7953bbeaad5fdad4c5a285e0fa59c24d652e"
+  },
+  "record/controls/python/ideas/timeline.jsonl": {
+   "sha256": "a50956041718ba293765615543f18aba7f453889fefea5f9fbe1416c8b782378"
+  }
+ },
+ "lineage_labels": {
+  "l1": "L-concise",
+  "l10": "L-multiple-impls",
+  "l100": "L-class-impl-problems",
+  "l101": "L-classes-afterthought",
+  "l102": "L-metaclass-influence",
+  "l103": "L-new-style-coexist",
+  "l104": "L-new-style-rewrite",
+  "l105": "L-class-attr-defaults",
+  "l106": "L-decorator-syntax",
+  "l107": "L-decorators-success",
+  "l108": "L-descriptor-classes",
+  "l109": "L-descriptor-no-syntax",
+  "l11": "L-oop-support",
+  "l110": "L-descriptors",
+  "l111": "L-new-method",
+  "l112": "L-new-style-concepts",
+  "l113": "L-slots",
+  "l114": "L-antigravity-easteregg",
+  "l115": "L-c3-adoption",
+  "l116": "L-c3-rejects",
+  "l117": "L-mro-22-algorithm",
+  "l118": "L-mro-22-broken",
+  "l119": "L-mro-concept",
+  "l12": "L-stdlib",
+  "l120": "L-mro-diamond-problem",
+  "l121": "L-mro-three-algorithms",
+  "l122": "L-comprehension-design-factors",
+  "l123": "L-comprehension-extensions",
+  "l124": "L-comprehension-forloop-origin",
+  "l125": "L-comprehension-performance",
+  "l126": "L-comprehension-vs-mapfilter",
+  "l127": "L-genexp",
+  "l128": "L-genexp-syntax",
+  "l129": "L-list-comprehension",
+  "l13": "L-syntax-from-c",
+  "l130": "L-listcomp-genexp-equivalence",
+  "l131": "L-listcomp-leak",
+  "l132": "L-setbuilder-difference",
+  "l133": "L-floor-division",
+  "l134": "L-halfopen-slicing-indexing",
+  "l135": "L-metaclass-not-ruby",
+  "l136": "L-newstyle-iteration",
+  "l137": "L-ruby-inspired-by-python",
+  "l138": "L-smalltalk-bytecode-influence",
+  "l139": "L-smalltalk-metaclass-unaware",
+  "l14": "L-borrow-fix-abc",
+  "l140": "L-type-is-object",
+  "l141": "L-builtins-reassignable",
+  "l142": "L-constant-convention",
+  "l143": "L-keyword-definition",
+  "l144": "L-keywords-costly",
+  "l145": "L-literal-definition",
+  "l146": "L-none-keyword",
+  "l147": "L-none-singleton",
+  "l148": "L-none-true-false-both",
+  "l149": "L-true-false-keywords",
+  "l15": "L-bridge-c-shell",
+  "l150": "L-bool-type-history",
+  "l151": "L-no-feature-in-bugfix",
+  "l152": "L-handwritten-lexer",
+  "l153": "L-lalr-regret",
+  "l154": "L-own-parser-generator",
+  "l155": "L-pgen2",
+  "l156": "L-regex-ebnf-grammar",
+  "l16": "L-name-python",
+  "l17": "L-open-source-early",
+  "l18": "L-pgen",
+  "l19": "L-python-origins-cwi",
+  "l2": "L-dynamic-typing",
+  "l20": "L-releases-cvs",
+  "l21": "L-syntax-tastes",
+  "l22": "L-why-not-shell",
+  "l23": "L-python-like-lisp",
+  "l24": "L-abc-design-method",
+  "l25": "L-colon",
+  "l26": "L-hashtable",
+  "l27": "L-int-long-different-semantics",
+  "l28": "L-list-flexible-array",
+  "l29": "L-long-bignum",
+  "l3": "L-exceptions-errorhandling",
+  "l30": "L-long-suffix-violation",
+  "l31": "L-machine-ints-common",
+  "l32": "L-no-undefined-raise",
+  "l33": "L-overflow-check",
+  "l34": "L-repr-valid-input",
+  "l35": "L-sequence-concept",
+  "l36": "L-traditional-number-model",
+  "l37": "L-tuple-from-abc",
+  "l38": "L-tuple-syntax",
+  "l39": "L-abc-mixed-checking",
+  "l4": "L-first-class",
+  "l40": "L-abc-runtime-checking",
+  "l41": "L-abc-static-typed",
+  "l42": "L-dynamic-no-return",
+  "l43": "L-assignment-instance-bootstrap",
+  "l44": "L-assignment-no-search",
+  "l45": "L-class-body-statements",
+  "l46": "L-class-callable-factory",
+  "l47": "L-class-dictionary",
+  "l48": "L-class-dynamic-modification",
+  "l49": "L-classbody-namespace-mechanism",
+  "l5": "L-for-iterable",
+  "l50": "L-classes-added-late",
+  "l51": "L-dict-based-lookup",
+  "l52": "L-instance-representation",
+  "l53": "L-introspection-type-object",
+  "l54": "L-method-resolution-mro",
+  "l55": "L-modula3-method-model",
+  "l56": "L-multiple-inheritance",
+  "l57": "L-no-method-checking",
+  "l58": "L-no-separate-method-syntax",
+  "l59": "L-object-type-struct",
+  "l6": "L-general-purpose",
+  "l60": "L-permissive-vs-smalltalk",
+  "l61": "L-reject-instancevar-declarations",
+  "l62": "L-self-explicit",
+  "l63": "L-siebren-classes-suggestion",
+  "l64": "L-special-methods",
+  "l65": "L-bound-unbound-methods",
+  "l66": "L-common-c-struct",
+  "l67": "L-everything-statement",
+  "l68": "L-grammar-overpermissive",
+  "l69": "L-class-exceptions-introduced",
+  "l7": "L-immutable-primitives",
+  "l70": "L-distinguish-exceptions",
+  "l71": "L-exception-identity-nameclash",
+  "l72": "L-exception-pointer-optimization",
+  "l73": "L-exceptions-as-strings",
+  "l74": "L-string-literal-unification-bug",
+  "l75": "L-int-float-silent-error",
+  "l76": "L-integer-division",
+  "l77": "L-mixed-mode-arithmetic",
+  "l78": "L-rationals-failed",
+  "l79": "L-result-type-rule",
+  "l8": "L-impl-bytecode",
+  "l80": "L-c-extensions-easy",
+  "l81": "L-distutils",
+  "l82": "L-dynamic-loading",
+  "l83": "L-embedding",
+  "l84": "L-grand-renaming",
+  "l85": "L-py-prefix",
+  "l86": "L-standalone-globals",
+  "l87": "L-closures",
+  "l88": "L-functional-added",
+  "l89": "L-functional-superseded",
+  "l9": "L-indentation",
+  "l90": "L-lambda-intent",
+  "l91": "L-lambda-motivation",
+  "l92": "L-lambda-terminology",
+  "l93": "L-less-discussion-early",
+  "l94": "L-not-functional",
+  "l95": "L-beaudry-hook",
+  "l96": "L-class-creation-api",
+  "l97": "L-class-creation-hidden",
+  "l98": "L-metaclass-namespace-limit",
+  "l99": "L-metaclass-no-syntax-change"
+ },
+ "lineages": 156,
+ "max_candidates": 7,
+ "max_thinking_tokens": 0,
+ "model": "opus",
+ "prompt": "find_principles_v1",
+ "prompt_sha256": "892e58875a4e363999434477845968c022d19f470d8198c556b3d0f6b9912387",
+ "quote_chars": 300,
+ "quote_labels": {
+  "q1": "written:2009-01-13_introduction-and-overview:expressiveness-little-code",
+  "q10": "written:2009-01-13_introduction-and-overview:python-general-purpose-not-scripting",
+  "q100": "written:2009-03-03_how-everything-became-an-executable-stat:everything-is-an-executable-statement",
+  "q101": "written:2009-03-03_how-everything-became-an-executable-stat:uniform-statements-simplify-grammar-and-compiler",
+  "q102": "written:2009-03-03_how-everything-became-an-executable-stat:syntax-allows-what-semantics-did-not-support",
+  "q103": "written:2009-03-06_how-exceptions-came-to-be-classes:class-exceptions-introduced-1997",
+  "q104": "written:2009-03-06_how-exceptions-came-to-be-classes:exceptions-as-classes-in-modern-languages",
+  "q105": "written:2009-03-06_how-exceptions-came-to-be-classes:scheme-to-identify-kinds-of-exceptions",
+  "q106": "written:2009-03-06_how-exceptions-came-to-be-classes:avoid-name-clashes-between-modules",
+  "q107": "written:2009-03-06_how-exceptions-came-to-be-classes:identity-not-value-semantics",
+  "q108": "written:2009-03-06_how-exceptions-came-to-be-classes:literal-interning-came-later",
+  "q109": "written:2009-03-06_how-exceptions-came-to-be-classes:modula-3-token-influence",
+  "q11": "written:2009-01-13_introduction-and-overview:immutable-primitive-types",
+  "q110": "written:2009-03-06_how-exceptions-came-to-be-classes:premature-optimization-pointer-comparison",
+  "q111": "written:2009-03-06_how-exceptions-came-to-be-classes:early-choice-strings-for-exceptions",
+  "q112": "written:2009-03-06_how-exceptions-came-to-be-classes:reuse-existing-builtin-type",
+  "q113": "written:2009-03-06_how-exceptions-came-to-be-classes:compiler-unifies-literals-breaks-across-modules",
+  "q114": "written:2009-03-10_the-problem-with-integer-division:close-but-wrong-answer-hard-to-notice",
+  "q115": "written:2009-03-10_the-problem-with-integer-division:no-type-declarations-no-coercion",
+  "q116": "written:2009-03-10_the-problem-with-integer-division:abc-exact-rationals",
+  "q117": "written:2009-03-10_the-problem-with-integer-division:fixing-integer-division",
+  "q118": "written:2009-03-10_the-problem-with-integer-division:integer-division-as-rite-of-passage",
+  "q119": "written:2010-08-24_why-python-s-integer-division-floors:floor-vs-ambiguous-slash",
+  "q12": "written:2009-01-13_introduction-and-overview:bytecode-compiler-and-interpreter",
+  "q120": "written:2009-03-10_the-problem-with-integer-division:forbidding-mixed-mode-arithmetic",
+  "q121": "written:2009-03-10_the-problem-with-integer-division:rationals-did-not-pan-out",
+  "q122": "written:2009-03-10_the-problem-with-integer-division:result-type-follows-operands",
+  "q123": "written:2009-03-17_dynamically-loaded-modules:c-extension-modules-easy-from-the-start",
+  "q124": "written:2009-03-17_dynamically-loaded-modules:distutils-builds-from-anywhere-via-saved-options",
+  "q125": "written:2009-03-17_dynamically-loaded-modules:distutils-scope-complexity-and-fragmentation",
+  "q126": "written:2009-03-17_dynamically-loaded-modules:building-modules-remained-a-mystery",
+  "q127": "written:2009-03-17_dynamically-loaded-modules:community-growth-demanded-separate-loading",
+  "q128": "written:2009-03-17_dynamically-loaded-modules:dynamic-linking-maintenance-nightmare",
+  "q129": "written:2009-03-17_dynamically-loaded-modules:restructuring-dynamic-linking-code",
+  "q13": "written:2009-02-18_adding-support-for-user-defined-classes:c-centric-object-implementation",
+  "q130": "written:2009-03-31_the-great-or-grand-renaming:demand-for-embedded-python",
+  "q131": "written:2009-03-31_the-great-or-grand-renaming:renaming-paired-with-unit-tests",
+  "q132": "written:2009-03-31_the-great-or-grand-renaming:renamings-are-traumatic-for-communities",
+  "q133": "written:2009-03-31_the-great-or-grand-renaming:two-phase-transition-with-macros",
+  "q134": "written:2009-03-31_the-great-or-grand-renaming:py-prefix-naming-convention",
+  "q135": "written:2009-03-31_the-great-or-grand-renaming:freely-defined-global-names",
+  "q136": "written:2009-03-31_the-great-or-grand-renaming:name-clashes-block-embedding",
+  "q137": "written:2009-03-31_the-great-or-grand-renaming:python-as-stand-alone-program",
+  "q138": "written:2009-04-21_origins-of-python-s-functional-features:closures-as-correct-solution",
+  "q139": "written:2009-04-21_origins-of-python-s-functional-features:closures-enabled-other-advanced-features",
+  "q14": "written:2009-01-13_introduction-and-overview:indentation-for-grouping",
+  "q140": "written:2009-04-21_origins-of-python-s-functional-features:default-argument-workaround",
+  "q141": "written:2009-04-21_origins-of-python-s-functional-features:lambda-could-not-reference-enclosing-scope",
+  "q142": "written:2009-04-21_origins-of-python-s-functional-features:addition-of-map-filter-reduce-and-lambda",
+  "q143": "written:2009-04-21_origins-of-python-s-functional-features:features-were-contributed-code",
+  "q144": "written:2009-04-21_origins-of-python-s-functional-features:map-filter-reduce-superseded-by-comprehensions",
+  "q145": "written:2009-04-21_origins-of-python-s-functional-features:lambda-only-a-syntactic-tool",
+  "q146": "written:2009-04-21_origins-of-python-s-functional-features:code-strings-via-exec-seen-as-hacky",
+  "q147": "written:2009-04-21_origins-of-python-s-functional-features:dislike-of-separate-named-function",
+  "q148": "written:2009-04-21_origins-of-python-s-functional-features:exec-based-anonymous-function-hacks",
+  "q149": "written:2009-04-21_origins-of-python-s-functional-features:user-demand-drove-list-and-function-features",
+  "q15": "written:2009-02-03_early-language-design-and-development:indentation-from-abc",
+  "q150": "written:2009-04-21_origins-of-python-s-functional-features:terminology-raised-unmet-expectations",
+  "q151": "written:2009-04-21_origins-of-python-s-functional-features:unhappy-with-lambda-terminology",
+  "q152": "written:2009-04-21_origins-of-python-s-functional-features:big-changes-required-less-discussion-then",
+  "q153": "written:2013-11-11_the-history-of-bool-true-and-false:breakneck-development-pace",
+  "q154": "written:2009-04-21_origins-of-python-s-functional-features:dynamism-precludes-functional-optimizations",
+  "q155": "written:2009-04-21_origins-of-python-s-functional-features:python-not-functional-despite-first-class-functions",
+  "q156": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:beaudry-insight-led-to-new-style-classes",
+  "q157": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:callable-base-class-triggers-hook",
+  "q158": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:class-attribute-removes-c-requirement",
+  "q159": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:user-supplied-final-construction-function",
+  "q16": "written:2011-07-08_karin-dewar-indentation-and-the-colon:B-first-published-language-with-indentation-grouping",
+  "q160": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:class-creation-api-three-arguments",
+  "q161": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:class-creation-as-hidden-internal-step",
+  "q162": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:internal-api-became-public",
+  "q163": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:classes-as-first-class-objects",
+  "q164": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:body-executed-before-creation-limits-metaclasses",
+  "q165": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:python-3000-alternative-namespace-mapping",
+  "q166": "written:2009-04-24_metaclasses-and-extension-classes-a-k-a-:no-change-to-class-syntax",
+  "q167": "written:2010-06-21_new-style-classes:builtin-types-not-subclassable",
+  "q168": "written:2010-06-21_new-style-classes:class-implementation-a-source-of-griping",
+  "q169": "written:2010-06-21_new-style-classes:user-classes-outside-the-type-system",
+  "q17": "written:2011-07-08_karin-dewar-indentation-and-the-colon:removing-begin-end-influenced-by-plauger",
+  "q170": "written:2010-06-21_new-style-classes:classes-as-afterthought-cut-corners",
+  "q171": "written:2010-06-21_new-style-classes:metaclass-notion-from-forman-danforth",
+  "q172": "written:2013-10-24_origin-of-metaclasses-in-python:new-style-classes-inspired-by-forman-danforth",
+  "q173": "written:2010-06-21_new-style-classes:eventual-removal-and-the-object-idiom",
+  "q174": "written:2010-06-21_new-style-classes:new-style-as-feature-not-replacement",
+  "q175": "written:2010-06-21_new-style-classes:object-as-root-of-hierarchy",
+  "q176": "written:2010-06-21_new-style-classes:reimplementation-in-2.2-do-it-right",
+  "q177": "written:2010-06-21_new-style-classes:rewrite-judged-a-success",
+  "q178": "written:2010-06-21_new-style-classes:scope-of-the-rewrite",
+  "q179": "written:2010-06-21_the-inside-story-on-new-style-classes:class-attributes-as-default-values",
+  "q18": "written:2009-01-13_introduction-and-overview:multiple-implementations",
+  "q180": "written:2010-06-21_the-inside-story-on-new-style-classes:decorator-syntax-chosen-by-bdfl-pronouncement",
+  "q181": "written:2010-06-21_the-inside-story-on-new-style-classes:decorators-address-readability-downside",
+  "q182": "written:2010-06-21_the-inside-story-on-new-style-classes:decorators-exceeded-expectations",
+  "q183": "written:2010-06-21_the-inside-story-on-new-style-classes:classmethod-staticmethod-property-built-on-descriptors",
+  "q184": "written:2010-06-21_the-inside-story-on-new-style-classes:no-new-syntax-at-first",
+  "q185": "written:2010-06-21_the-inside-story-on-new-style-classes:descriptor-protocol-get",
+  "q186": "written:2010-06-21_the-inside-story-on-new-style-classes:descriptor-set-and-delete",
+  "q187": "written:2010-06-21_the-inside-story-on-new-style-classes:descriptors-generalize-bound-methods",
+  "q188": "written:2010-06-21_the-inside-story-on-new-style-classes:limitation-of-hard-coded-wrapping",
+  "q189": "written:2010-06-21_the-inside-story-on-new-style-classes:new-enables-creation-patterns-and-unpickling",
+  "q19": "written:2009-01-27_personal-history-part-2-cnri-and-beyond:ironpython-port-to-dotnet",
+  "q190": "written:2010-06-21_the-inside-story-on-new-style-classes:new-for-subclassing-immutable-types",
+  "q191": "written:2010-06-21_the-inside-story-on-new-style-classes:new-hook-for-customizing-object-creation",
+  "q192": "written:2010-06-21_the-inside-story-on-new-style-classes:new-style-classes-introduced-new-concepts",
+  "q193": "written:2010-06-21_the-inside-story-on-new-style-classes:slots-as-descriptor-application",
+  "q194": "written:2010-06-21_the-inside-story-on-new-style-classes:slots-ultimate-goal-was-performance",
+  "q195": "written:2010-06-21_import-antigravity:antigravity-as-stdlib-easter-egg",
+  "q196": "written:2010-06-21_import-antigravity:easter-egg-inside-the-easter-egg",
+  "q197": "written:2010-06-23_method-resolution-order:adopt-c3-linearization",
+  "q198": "written:2010-06-23_method-resolution-order:inheritance-defines-ordering-rules",
+  "q199": "written:2010-06-23_method-resolution-order:c3-rejects-inconsistent-hierarchies",
+  "q2": "written:2009-01-13_introduction-and-overview:dynamic-typing-names-refer-to-objects",
+  "q20": "written:2009-01-27_personal-history-part-2-cnri-and-beyond:jython-python-in-and-for-java",
+  "q200": "written:2010-06-23_method-resolution-order:rejection-matches-zen-errors-not-silent",
+  "q201": "written:2010-06-23_method-resolution-order:precompute-and-store-mro",
+  "q202": "written:2010-06-23_method-resolution-order:documented-wrong-algorithm",
+  "q203": "written:2010-06-23_method-resolution-order:monotonicity-as-the-core-problem",
+  "q204": "written:2010-06-23_method-resolution-order:mro-special-case-preserve-first-order",
+  "q205": "written:2010-06-23_method-resolution-order:pedroni-found-inconsistency",
+  "q206": "written:2010-06-23_method-resolution-order:mro-defines-attribute-search-order",
+  "q207": "written:2010-06-23_method-resolution-order:mro-trivial-under-single-inheritance",
+  "q208": "written:2010-06-23_method-resolution-order:classic-mro-fails-on-diamond",
+  "q209": "written:2010-06-23_method-resolution-order:new-style-classes-make-diamonds-universal",
+  "q21": "written:2009-01-13_introduction-and-overview:full-oo-support",
+  "q210": "written:2010-06-23_method-resolution-order:object-methods-make-order-critical",
+  "q211": "written:2010-06-23_method-resolution-order:specialized-override-should-win",
+  "q212": "written:2010-06-23_method-resolution-order:python-had-three-mro-algorithms",
+  "q213": "written:2010-06-29_from-list-comprehensions-to-generator-ex:design-factors-four",
+  "q214": "written:2010-06-29_from-list-comprehensions-to-generator-ex:set-and-dict-comprehensions",
+  "q215": "written:2010-06-29_from-list-comprehensions-to-generator-ex:algol-60-inspiration",
+  "q216": "written:2010-06-29_from-list-comprehensions-to-generator-ex:bare-sequence-after-in-from-for-loop",
+  "q217": "written:2010-06-29_from-list-comprehensions-to-generator-ex:comprehensions-faster-no-stack-frame",
+  "q218": "written:2010-06-29_from-list-comprehensions-to-generator-ex:comprehensions-vs-map-filter",
+  "q219": "written:2010-06-29_from-list-comprehensions-to-generator-ex:lambda-too-verbose-disagreement",
+  "q22": "written:2009-01-13_introduction-and-overview:extensive-standard-library",
+  "q220": "written:2010-06-29_from-list-comprehensions-to-generator-ex:generator-expressions-lazy",
+  "q221": "written:2010-06-29_from-list-comprehensions-to-generator-ex:genexp-needs-own-frame",
+  "q222": "written:2010-06-29_from-list-comprehensions-to-generator-ex:genexp-ambiguity-parentheses-not-part-of-syntax",
+  "q223": "written:2010-06-29_from-list-comprehensions-to-generator-ex:genexp-syntax-stricter-than-listcomp",
+  "q224": "written:2010-06-29_from-list-comprehensions-to-generator-ex:refuse-to-guess-ambiguity",
+  "q225": "written:2010-06-29_from-list-comprehensions-to-generator-ex:comprehension-syntax",
+  "q226": "written:2010-06-29_from-list-comprehensions-to-generator-ex:list-comprehensions-from-set-notation",
+  "q227": "written:2010-06-29_from-list-comprehensions-to-generator-ex:listcomp-equivalent-to-list-of-genexp",
+  "q228": "written:2010-06-29_from-list-comprehensions-to-generator-ex:loop-variable-leak-dirty-secret",
+  "q229": "written:2010-06-29_from-list-comprehensions-to-generator-ex:python3-both-faster-no-gap",
+  "q23": "written:2009-01-13_introduction-and-overview:syntax-borrows-from-c",
+  "q230": "written:2010-06-29_from-list-comprehensions-to-generator-ex:python3-fix-leak-via-genexp-strategy",
+  "q231": "written:2010-06-29_from-list-comprehensions-to-generator-ex:no-universal-set-in-python",
+  "q232": "written:2010-08-24_why-python-s-integer-division-floors:div-and-mod-go-together",
+  "q233": "written:2010-08-24_why-python-s-integer-division-floors:floating-point-modulo-hesitation",
+  "q234": "written:2010-08-24_why-python-s-integer-division-floors:floor-affects-only-negative-operands",
+  "q235": "written:2010-08-24_why-python-s-integer-division-floors:why-c-differs",
+  "q236": "written:2013-10-24_why-python-uses-0-based-indexing:adjacency-invariant",
+  "q237": "written:2013-10-24_why-python-uses-0-based-indexing:avoid-plus-minus-one-compensations",
+  "q238": "written:2013-10-24_why-python-uses-0-based-indexing:closed-intervals-force-minus-one",
+  "q239": "written:2013-10-24_why-python-uses-0-based-indexing:zero-based-half-open-defaults-elegant",
+  "q24": "written:2009-01-20_personal-history-part-1-cwi:borrow-from-abc-fix-its-problems",
+  "q240": "written:2013-10-24_origin-of-metaclasses-in-python:metaclass-design-not-from-ruby",
+  "q241": "written:2013-10-24_origin-of-metaclasses-in-python:new-style-classes-an-iteration",
+  "q242": "written:2013-10-24_origin-of-metaclasses-in-python:ruby-inspired-by-python",
+  "q243": "written:2013-10-24_origin-of-metaclasses-in-python:smalltalk-bytecode-influence",
+  "q244": "written:2013-10-24_origin-of-metaclasses-in-python:smalltalk-metaclasses-different-and-late",
+  "q245": "written:2013-10-24_origin-of-metaclasses-in-python:meta-type-as-its-own-type",
+  "q246": "written:2013-10-24_origin-of-metaclasses-in-python:type-as-object-from-the-start",
+  "q247": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:adding-a-builtin-must-not-break-existing-code",
+  "q248": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:allowing-builtin-reassignment-for-consistency-and-evolution",
+  "q249": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:builtins-are-ordinary-names-to-the-parser",
+  "q25": "written:2009-01-20_personal-history-part-1-cwi:design-new-rather-than-port",
+  "q250": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:new-builtins-are-cheap-to-add",
+  "q251": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:constant-versus-literal",
+  "q252": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:keyword-cannot-name-a-variable",
+  "q253": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:keyword-is-identifier-shaped-but-a-token",
+  "q254": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:new-keywords-kill-or-reshape-features",
+  "q255": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:reserved-words-impose-a-global-cost",
+  "q256": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:assignment-target-must-be-a-variable",
+  "q257": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:literal-describes-a-constant-value",
+  "q258": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:literals-parse-differently-from-names",
+  "q259": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:none-keyword-decision-had-no-downside",
+  "q26": "written:2009-01-20_personal-history-part-1-cwi:bridge-the-gap-between-c-and-the-shell",
+  "q260": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:none-made-keyword-for-social-reasons",
+  "q261": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:none-as-singleton-for-absence",
+  "q262": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:none-true-false-are-both-keywords-and-literals",
+  "q263": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:true-false-became-keywords-in-python-3",
+  "q264": "written:2013-11-10_the-story-of-none-true-and-false-and-an-:true-false-introduced-as-builtins-not-keywords",
+  "q265": "written:2013-11-11_the-history-of-bool-true-and-false:true-false-not-reserved-words",
+  "q266": "written:2013-11-11_the-history-of-bool-true-and-false:bool-added-in-bugfix-release-2-2-1",
+  "q267": "written:2013-11-11_the-history-of-bool-true-and-false:bool-differs-between-2-2-1-and-2-3",
+  "q268": "written:2013-11-11_the-history-of-bool-true-and-false:bool-formally-introduced-2-3-pep-285",
+  "q269": "written:2013-11-11_the-history-of-bool-true-and-false:feature-in-bugfix-release-regret",
+  "q27": "written:2009-01-20_personal-history-part-1-cwi:name-irreverent-and-in-tradition",
+  "q270": "written:2018-05-12_the-origins-of-pgen:no-generator-for-lexer",
+  "q271": "written:2018-05-12_the-origins-of-pgen:would-choose-more-powerful-engine",
+  "q272": "written:2018-05-12_the-origins-of-pgen:avoided-advanced-techniques",
+  "q273": "written:2018-05-12_the-origins-of-pgen:why-own-parser-generator",
+  "q274": "written:2018-05-12_the-origins-of-pgen:pgen2-origin-at-elemental",
+  "q275": "written:2018-05-12_the-origins-of-pgen:pgen2-reused-for-2to3",
+  "q276": "written:2018-05-12_the-origins-of-pgen:python38-drops-c-pgen",
+  "q277": "written:2018-05-12_the-origins-of-pgen:two-pgens-c-and-python",
+  "q278": "written:2018-05-12_the-origins-of-pgen:ebnf-to-bnf-not-improvement",
+  "q279": "written:2018-05-12_the-origins-of-pgen:parsing-engine-and-empty-productions",
+  "q28": "written:2009-01-20_personal-history-part-1-cwi:resisting-the-snake",
+  "q280": "written:2018-05-12_the-origins-of-pgen:power-unchanged-ll1",
+  "q281": "written:2018-05-12_the-origins-of-pgen:variable-number-of-children",
+  "q29": "written:2009-01-20_personal-history-part-1-cwi:under-analyze-the-name",
+  "q3": "written:2009-02-10_python-s-use-of-dynamic-typing:python-drops-compile-time-checking",
+  "q30": "written:2009-01-20_personal-history-part-1-cwi:open-source-before-the-term",
+  "q31": "written:2009-01-20_personal-history-part-1-cwi:pgen-first-code-least-changed",
+  "q32": "written:2018-05-12_the-origins-of-pgen:pgen-first-code-for-python",
+  "q33": "written:2009-01-20_personal-history-part-1-cwi:abc-inspiration-amoeba-motivation",
+  "q34": "written:2009-01-20_personal-history-part-1-cwi:releases-driven-by-feedback",
+  "q35": "written:2009-01-20_personal-history-part-1-cwi:syntax-taste-from-algol-pascal-abc",
+  "q36": "written:2009-01-20_personal-history-part-1-cwi:amoeba-primitives-unlike-the-shell",
+  "q37": "written:2009-01-27_personal-history-part-2-cnri-and-beyond:python-shares-much-with-lisp",
+  "q38": "written:2009-02-03_early-language-design-and-development:abc-foremost-influence",
+  "q39": "written:2009-02-03_early-language-design-and-development:colon-before-indented-block",
+  "q4": "written:2009-02-10_python-s-use-of-dynamic-typing:python-is-dynamically-typed",
+  "q40": "written:2011-07-08_karin-dewar-indentation-and-the-colon:colon-not-indentation-is-the-dewar-contribution",
+  "q41": "written:2011-07-08_karin-dewar-indentation-and-the-colon:colon-resolves-the-for-line-misunderstanding",
+  "q42": "written:2009-02-03_early-language-design-and-development:hash-table-over-btree",
+  "q43": "written:2009-02-03_early-language-design-and-development:int-long-divergent-semantics",
+  "q44": "written:2009-02-03_early-language-design-and-development:list-as-flexible-array",
+  "q45": "written:2009-02-03_early-language-design-and-development:bignum-long-type",
+  "q46": "written:2009-02-03_early-language-design-and-development:explicit-long-suffix-violates-philosophy",
+  "q47": "written:2009-02-03_early-language-design-and-development:machine-ints-for-common-case",
+  "q48": "written:2009-02-03_early-language-design-and-development:no-undefined-values",
+  "q49": "written:2009-02-03_early-language-design-and-development:overflow-check-cost-dwarfed",
+  "q5": "written:2009-01-13_introduction-and-overview:non-resumable-exceptions",
+  "q50": "written:2009-02-03_early-language-design-and-development:overflow-raises-exception",
+  "q51": "written:2009-02-03_early-language-design-and-development:should-have-promoted-to-long",
+  "q52": "written:2009-02-03_early-language-design-and-development:printed-repr-valid-input",
+  "q53": "written:2009-02-03_early-language-design-and-development:sequence-generalization",
+  "q54": "written:2009-02-03_early-language-design-and-development:machine-numbers-over-rationals",
+  "q55": "written:2009-03-10_the-problem-with-integer-division:c-numerical-model",
+  "q56": "written:2009-02-03_early-language-design-and-development:tuple-kept-with-indexing",
+  "q57": "written:2009-02-03_early-language-design-and-development:empty-and-one-tuple-notation",
+  "q58": "written:2009-02-10_python-s-use-of-dynamic-typing:abc-compromise-global-dynamic-local-static",
+  "q59": "written:2009-02-10_python-s-use-of-dynamic-typing:abc-also-checked-types-at-runtime",
+  "q6": "written:2009-03-06_how-exceptions-came-to-be-classes:exceptions-for-error-handling",
+  "q60": "written:2009-02-10_python-s-use-of-dynamic-typing:interactivity-forces-dynamic-typing",
+  "q61": "written:2009-02-10_python-s-use-of-dynamic-typing:runtime-checking-as-sanity-check-and-debugging-aid",
+  "q62": "written:2009-02-10_python-s-use-of-dynamic-typing:abc-static-typing-with-inference",
+  "q63": "written:2009-02-10_python-s-use-of-dynamic-typing:dynamic-typing-is-irreversible",
+  "q64": "written:2009-02-10_python-s-use-of-dynamic-typing:operator-overloading-blocks-type-deduction",
+  "q65": "written:2009-02-18_adding-support-for-user-defined-classes:assign-if-exists-has-bootstrap-problem",
+  "q66": "written:2009-02-18_adding-support-for-user-defined-classes:assignment-always-creates-in-first-dict",
+  "q67": "written:2009-02-18_adding-support-for-user-defined-classes:any-statements-in-class-body",
+  "q68": "written:2009-03-03_how-everything-became-an-executable-stat:class-body-as-arbitrary-code",
+  "q69": "written:2009-02-18_adding-support-for-user-defined-classes:callable-class-no-new-operator",
+  "q7": "written:2009-01-13_introduction-and-overview:everything-first-class",
+  "q70": "written:2009-02-18_adding-support-for-user-defined-classes:class-dictionary-holds-methods",
+  "q71": "written:2009-02-18_adding-support-for-user-defined-classes:class-variables-fall-out",
+  "q72": "written:2009-02-18_adding-support-for-user-defined-classes:dynamic-modifiability-of-classes-and-objects",
+  "q73": "written:2009-02-18_adding-support-for-user-defined-classes:new-style-classes-constrain-dict",
+  "q74": "written:2009-02-18_adding-support-for-user-defined-classes:class-body-as-executed-namespace",
+  "q75": "written:2009-02-18_adding-support-for-user-defined-classes:classes-added-late-but-pre-release",
+  "q76": "written:2009-02-18_adding-support-for-user-defined-classes:attribute-lookup-by-dictionary-search",
+  "q77": "written:2009-02-18_adding-support-for-user-defined-classes:instance-as-classref-plus-dict",
+  "q78": "written:2009-02-18_adding-support-for-user-defined-classes:type-structure-as-runtime-object",
+  "q79": "written:2009-02-18_adding-support-for-user-defined-classes:depth-first-left-to-right-mro",
+  "q8": "written:2009-02-27_first-class-everything:first-class-everything",
+  "q80": "written:2010-06-23_method-resolution-order:classic-mro-depth-first-left-to-right",
+  "q81": "written:2009-02-18_adding-support-for-user-defined-classes:modula-3-precedent",
+  "q82": "written:2009-02-18_adding-support-for-user-defined-classes:multiple-inheritance-because-it-was-cheap",
+  "q83": "written:2009-02-18_adding-support-for-user-defined-classes:no-conformance-checking",
+  "q84": "written:2009-02-18_adding-support-for-user-defined-classes:no-separate-method-syntax",
+  "q85": "written:2009-02-18_adding-support-for-user-defined-classes:type-as-table-of-function-pointers",
+  "q86": "written:2009-02-18_adding-support-for-user-defined-classes:more-permissive-than-smalltalk",
+  "q87": "written:2009-02-18_adding-support-for-user-defined-classes:rejected-declarations-and-sigils",
+  "q88": "written:2009-02-18_adding-support-for-user-defined-classes:explicit-self-removes-special-cases",
+  "q89": "written:2009-02-18_adding-support-for-user-defined-classes:explicit-self-the-decision",
+  "q9": "written:2009-01-13_introduction-and-overview:for-loops-over-iterables",
+  "q90": "written:2009-02-18_adding-support-for-user-defined-classes:implicit-instance-variables-impossible",
+  "q91": "written:2009-02-18_adding-support-for-user-defined-classes:objects-defined-in-python-the-motivation",
+  "q92": "written:2009-02-18_adding-support-for-user-defined-classes:dunder-special-method-names",
+  "q93": "written:2009-02-18_adding-support-for-user-defined-classes:special-methods-map-c-function-pointers",
+  "q94": "written:2009-02-27_first-class-everything:attribute-lookup-then-call",
+  "q95": "written:2009-02-27_first-class-everything:bound-method",
+  "q96": "written:2009-02-27_first-class-everything:unbound-methods-removed-py3k",
+  "q97": "written:2010-06-21_the-inside-story-on-new-style-classes:x-f-equals-C-f-x",
+  "q98": "written:2009-02-27_first-class-everything:common-c-data-structure",
+  "q99": "written:2009-03-03_how-everything-became-an-executable-stat:early-grammar-restricted-declarative-elements"
+ },
+ "quotes_per_lineage": 4,
+ "redact": [],
+ "vars": {
+  "designers": "Guido van Rossum",
+  "language": "Python"
+ },
+ "version": "find_principles v1",
+ "warnings": []
+}

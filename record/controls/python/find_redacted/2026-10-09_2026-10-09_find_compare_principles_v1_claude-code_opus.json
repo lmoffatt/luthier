@@ -1,0 +1,189 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "judgments": [
+   {
+    "A": [
+     {
+      "item": "G13",
+      "why": "errors not pass silently"
+     },
+     {
+      "item": "G14",
+      "why": "no undefined behavior"
+     },
+     {
+      "item": "Z10",
+      "why": "errors never pass silently"
+     }
+    ],
+    "B": [],
+    "candidate": "C1"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C2"
+   },
+   {
+    "A": [
+     {
+      "item": "G2",
+      "why": "as simple as possible"
+     },
+     {
+      "item": "Z3",
+      "why": "simple better than complex"
+     }
+    ],
+    "B": [],
+    "candidate": "C3"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6"
+   },
+   {
+    "A": [
+     {
+      "item": "G9",
+      "why": "don't bother users with handled details"
+     }
+    ],
+    "B": [],
+    "candidate": "C7"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"judgments\": [{\"candidate\": \"C1\", \"A\": [{\"item\": \"G13\", \"why\": \"errors not pass silently\"}, {\"item\": \"G14\", \"why\": \"no undefined behavior\"}, {\"item\": \"Z10\", \"why\": \"errors never pass silently\"}], \"B\": []}, {\"candidate\": \"C2\", \"A\": [], \"B\": []}, {\"candidate\": \"C3\", \"A\": [{\"item\": \"G2\", \"why\": \"as simple as possible\"}, {\"item\": \"Z3\", \"why\": \"simple better than complex\"}], \"B\": []}, {\"candidate\": \"C4\", \"A\": [], \"B\": []}, {\"candidate\": \"C5\", \"A\": [], \"B\": []}, {\"candidate\": \"C6\", \"A\": [], \"B\": []}, {\"candidate\": \"C7\", \"A\": [{\"item\": \"G9\", \"why\": \"don't bother users with handled details\"}], \"B\": []}]}\n",
+   "answer_sha256": "f07b86b636a18e798586d167f0ae8ff91065065093730b81431f441f9c4c7acf",
+   "date": "2026-10-09T10:52:50Z",
+   "errors": [],
+   "seconds": 21
+  }
+ ],
+ "candidates": {
+  "C1": {
+   "quote": "I decided that there should be no undefined result values in L – instead, exceptions should always be raised when no correct return value can be computed.",
+   "statement": "When no correct value can be computed, raise an exception; never return an undefined value or let an error pass silently."
+  },
+  "C2": {
+   "quote": "In L, all objects that can be named are said to be \"first class.\"",
+   "statement": "Every object that can be named has equal status: it can be assigned, passed, returned and stored like any other."
+  },
+  "C3": {
+   "quote": "A major design constraint was that I didn't want to add syntax for methods that differed from the syntax for functions.",
+   "statement": "Prefer the minimal solution that reuses existing mechanisms; do not add new syntax when an existing construct will serve."
+  },
+  "C4": {
+   "quote": "In L, variables are simply names that refer to objects.",
+   "statement": "Variables are names that refer to objects, needing no declaration; all type checking happens at run time."
+  },
+  "C5": {
+   "quote": "One of the rules I took from the predecessor was that every data type, when printed or converted to a string, should be represented by an expression that was a valid input to the language's parser.",
+   "statement": "Every value, when printed or converted to a string, should read back as a valid expression to the parser."
+  },
+  "C6": {
+   "quote": "I decided to generalize these to a common concept, the sequence.",
+   "statement": "Generalize related types to a common concept so core operations work the same on all of them."
+  },
+  "C7": {
+   "quote": "the predecessor-inspired philosophy of not requiring users to care about a uninteresting implementation details",
+   "statement": "Do not require users to care about uninteresting implementation details."
+  }
+ },
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "2d2277497cea22504f3d00209537ae6085849e06f3fe9fc9c7474a26af6f62b8",
+ "inputs": {
+  "docs/rationale/10-prior-art-languages.md": {
+   "sha256": "0c0fbcc04646f24ad47d23d897901a3e132f861cc4c08397a053d17b2565aa52"
+  },
+  "record/controls/python/find_redacted/2026-10-09_find_principles_v1_claude-code_opus.json": {
+   "sha256": "ce9a2ccf5fdef86a7715c166e50a83daff6690a6e291c8af4eb69596e5bc506a"
+  },
+  "record/controls/python/reference.md": {
+   "sha256": "0d6a91875bf553365da9db959e7b62a9424b079946b0a95d57583b9783833ea9"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  }
+ },
+ "model": "opus",
+ "prompt_sha256": "a69f0e1f6e173ef01f70fedff5b397f74316d3e43d63db7a841376bab1dc0f36",
+ "score": {
+  "candidates": 7,
+  "hits": 3,
+  "leaks": 0,
+  "neither": 4,
+  "passes": false,
+  "rows": [
+   {
+    "A": [
+     "G13",
+     "G14",
+     "Z10"
+    ],
+    "B": [],
+    "candidate": "C1",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C2",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G2",
+     "Z3"
+    ],
+    "B": [],
+    "candidate": "C3",
+    "verdict": "hit"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C4",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C5",
+    "verdict": "neither"
+   },
+   {
+    "A": [],
+    "B": [],
+    "candidate": "C6",
+    "verdict": "neither"
+   },
+   {
+    "A": [
+     "G9"
+    ],
+    "B": [],
+    "candidate": "C7",
+    "verdict": "hit"
+   }
+  ]
+ },
+ "version": "compare_principles v1"
+}
