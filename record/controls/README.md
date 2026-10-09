@@ -108,3 +108,28 @@ Read (the model's, for Luciano to weigh):
   rules G1, G3 to G7: borrow ideas, don't fret about performance, good enough; Haskell's H4 to H7:
   a committee language, beauty against utility, evolution against stability) never came out. The
   filter finds principles about the artifact, not about how it is made.
+
+## The naive run, 2026-10-10, written before it ran
+
+Luciano, 2026-10-10, after reading the results above: "Quizas darle todas las ideas a un agente
+naive y pedirle que extraiga de ahi las reglas y principios sea mejor que esta arquitectura
+elaborada y pretendidamente precisa?" and, on the proposal to measure it, "Si correlo ahora".
+
+What changes against find v2: the model sees every row of the timeline (date, who, the idea), not
+the lineages; it is asked for "the rules and principles of this language", with no criterion of
+infectability, no definition of a principle and no instruction to be blind
+(`scripts/naive_principles.py`, prompt `naive_principles_v1`). What stays: the same timelines, the
+same references, the same judge (`compare_principles_v1`), the same memory baseline, the same
+redactions, opus at effort low, at most 7 candidates on the controls.
+
+On Luthier, at most 10, as in the synthesis. There is no reference to score against, so the judge's
+list A is the pipeline's ten candidates (`record/distillation/naive/reference.md`, S1 to S10) and
+list B, as always, P1 to P14 and F1 to F16. Read there: how many naive candidates state a pipeline
+candidate, and whether any states an item of P1 to P14, the principles about the process that no
+run has found so far. The labels "hit" and "leak" of the judge's report mean, on Luthier, "states a
+pipeline candidate" and "states a Luthier item and no pipeline candidate".
+
+Read, decided before running, as numbers and without thresholds (D-2026-10-09-d): on each control,
+hits of naive against hits of find v2 (as is and redacted) and against memory, and which reference
+items naive hits that memory did not; whether any naive candidate states a process item (Python
+G1, G3 to G7; Haskell H4 to H7).

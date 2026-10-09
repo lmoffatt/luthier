@@ -547,3 +547,19 @@ Kind:       method. For P12 (the work reaches him synthesized), P8 (no step he m
             night); against the working rule that he runs the scripts processing the record, set
             aside here by his word for this plan
 Status:     current
+
+D-2026-10-10-a  The pipeline that finds candidate principles is measured against a naive agent:
+                every idea of the timeline, the question "what are the rules and principles of
+                this language?", nothing more; on the controls of Python and Haskell, judged as
+                before, and on Luthier, judged against the pipeline's ten candidates and P1 to P14.
+                The model runs the scripts for this comparison.
+Author:     Luciano for the hypothesis and the leave to run; the model for the measure
+Quote:      "Quizas darle todas las ideas a un agente naive y pedirle que extraiga de ahi las
+            reglas y principios sea mejor que esta arquitectura elaborada y pretendidamente
+            precisa?"
+            "Si correlo ahora"
+Source:     chat (session of 2026-10-10)
+Kind:       method. For P8 (no more bureaucracy than it pays for: the pipeline's steps must earn
+            their place); against the working rule that he runs the scripts processing the
+            record, set aside here by his word for this comparison
+Status:     current, in record/controls/README.md (the naive run)
