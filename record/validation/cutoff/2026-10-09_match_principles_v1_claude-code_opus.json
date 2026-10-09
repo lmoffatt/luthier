@@ -1,0 +1,151 @@
+{
+ "agent": "claude-code",
+ "answer": {
+  "against": [],
+  "matches": [
+   {
+    "assumption": "the laws that define a function can always be run as tests; shown false if a definition's postconditions cannot be turned into an executable check",
+    "candidate": "C1",
+    "change": "adds that defining a function at its type and writing its test are one act, so definition yields verification with no separate step",
+    "conflicts": [],
+    "guides": [
+     "D-2026-10-07-b",
+     "D-2026-10-07-e"
+    ],
+    "principle": "P14",
+    "verdict": "extends"
+   },
+   {
+    "assumption": "every named type is a subtype carved by a predicate, so type, constructor and forget always derive from one predicate; false if a useful type has no predicate behind it",
+    "candidate": "C2",
+    "change": "",
+    "conflicts": [],
+    "guides": [
+     "D-2026-10-07-f",
+     "D-2026-10-07-e"
+    ],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "holding code as an ordinary datum buys the meta-recursion the interpreter-in-Luthier needs more than it costs in complexity; false if the kernel cannot reduce terms given as data cheaply",
+    "candidate": "C3",
+    "change": "",
+    "conflicts": [],
+    "guides": [
+     "D-2026-10-08-c"
+    ],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "the language a program speaks is fixed by which forgetful functor it applies, so forgetting is a first-class choice; false if controlling forgetting turns out not to tame the growth of accumulated typing",
+    "candidate": "C4",
+    "change": "",
+    "conflicts": [],
+    "guides": [],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "all of Luthier's execution can be cast as verifying equivalences of expressions; false if some needed computation has no reading as an equivalence check",
+    "candidate": "C5",
+    "change": "",
+    "conflicts": [],
+    "guides": [
+     "D-2026-10-08-b"
+    ],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "each discipline's content reduces to invariances a language can carry; false if a discipline's useful structure is not an invariance",
+    "candidate": "C6",
+    "change": "lifts the invariant from one concept's type to the stated aim of the whole language: to express the invariances of each discipline",
+    "conflicts": [],
+    "guides": [
+     "D-2026-10-07-b",
+     "D-2026-10-08-a"
+    ],
+    "principle": "P10",
+    "verdict": "extends"
+   },
+   {
+    "assumption": "many equivalent implementation paths can be proven equivalent and ranked by estimated cost, so declaration and optimization can be one tool; false if proving path equivalence stays intractable (its lineage calls it the hardest part)",
+    "candidate": "C7",
+    "change": "",
+    "conflicts": [],
+    "guides": [],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "a bodyless typed declaration can serve all five roles with 'do not execute until defined' as its only semantics, needing no External type or core symbol; false if any of the five roles demands its own construct",
+    "candidate": "C8",
+    "change": "",
+    "conflicts": [],
+    "guides": [],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "Curry-Howard holds throughout Luthier so a term is a proof of its type; false if a useful type admits terms that are not proofs of the proposition it stands for",
+    "candidate": "C9",
+    "change": "",
+    "conflicts": [],
+    "guides": [],
+    "principle": "",
+    "verdict": "new"
+   },
+   {
+    "assumption": "a small set of hand-executable founding components can generate the whole edifice of concepts; false if some needed concept cannot be built from them and must be native",
+    "candidate": "C10",
+    "change": "",
+    "conflicts": [],
+    "guides": [
+     "D-2026-10-08-c"
+    ],
+    "principle": "",
+    "verdict": "new"
+   }
+  ]
+ },
+ "attempts": [
+  {
+   "answer": "{\"matches\": [{\"candidate\": \"C1\", \"verdict\": \"extends\", \"principle\": \"P14\", \"change\": \"adds that defining a function at its type and writing its test are one act, so definition yields verification with no separate step\", \"assumption\": \"the laws that define a function can always be run as tests; shown false if a definition's postconditions cannot be turned into an executable check\", \"guides\": [\"D-2026-10-07-b\", \"D-2026-10-07-e\"], \"conflicts\": []}, {\"candidate\": \"C2\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"every named type is a subtype carved by a predicate, so type, constructor and forget always derive from one predicate; false if a useful type has no predicate behind it\", \"guides\": [\"D-2026-10-07-f\", \"D-2026-10-07-e\"], \"conflicts\": []}, {\"candidate\": \"C3\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"holding code as an ordinary datum buys the meta-recursion the interpreter-in-Luthier needs more than it costs in complexity; false if the kernel cannot reduce terms given as data cheaply\", \"guides\": [\"D-2026-10-08-c\"], \"conflicts\": []}, {\"candidate\": \"C4\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"the language a program speaks is fixed by which forgetful functor it applies, so forgetting is a first-class choice; false if controlling forgetting turns out not to tame the growth of accumulated typing\", \"guides\": [], \"conflicts\": []}, {\"candidate\": \"C5\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"all of Luthier's execution can be cast as verifying equivalences of expressions; false if some needed computation has no reading as an equivalence check\", \"guides\": [\"D-2026-10-08-b\"], \"conflicts\": []}, {\"candidate\": \"C6\", \"verdict\": \"extends\", \"principle\": \"P10\", \"change\": \"lifts the invariant from one concept's type to the stated aim of the whole language: to express the invariances of each discipline\", \"assumption\": \"each discipline's content reduces to invariances a language can carry; false if a discipline's useful structure is not an invariance\", \"guides\": [\"D-2026-10-07-b\", \"D-2026-10-08-a\"], \"conflicts\": []}, {\"candidate\": \"C7\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"many equivalent implementation paths can be proven equivalent and ranked by estimated cost, so declaration and optimization can be one tool; false if proving path equivalence stays intractable (its lineage calls it the hardest part)\", \"guides\": [], \"conflicts\": []}, {\"candidate\": \"C8\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"a bodyless typed declaration can serve all five roles with 'do not execute until defined' as its only semantics, needing no External type or core symbol; false if any of the five roles demands its own construct\", \"guides\": [], \"conflicts\": []}, {\"candidate\": \"C9\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"Curry-Howard holds throughout Luthier so a term is a proof of its type; false if a useful type admits terms that are not proofs of the proposition it stands for\", \"guides\": [], \"conflicts\": []}, {\"candidate\": \"C10\", \"verdict\": \"new\", \"principle\": \"\", \"change\": \"\", \"assumption\": \"a small set of hand-executable founding components can generate the whole edifice of concepts; false if some needed concept cannot be built from them and must be native\", \"guides\": [\"D-2026-10-08-c\"], \"conflicts\": []}], \"against\": []}\n",
+   "answer_sha256": "93830929d5cb3c6de050c671d96bc118f88f197bafc8036fc9093352dfa95814",
+   "date": "2026-10-09T15:57:54Z",
+   "errors": [],
+   "seconds": 40
+  }
+ ],
+ "cli_version": "2.1.197 (Claude Code)",
+ "date": "2026-10-09",
+ "effort": "low",
+ "input_sha256": "6989ab8ed234fc1ffbec1d39b98e7d735c11c9c927f1e0b06f2d8c91ee15eb0f",
+ "inputs": {
+  "record/decisions.md": {
+   "sha256": "4a8658045ba42463a6277175eb2a432d9eb5771b3a63150276e05654844bcea2"
+  },
+  "record/ideas/timeline.jsonl": {
+   "sha256": "b18b5806955d1b1377134fc1a570669b31d023e055b3f2c5d524ab5285f7615c"
+  },
+  "record/objectives.md": {
+   "sha256": "d8f47b306d937a6a80b320dd9d5c28c63e588d91b0c4bfa997377a71f5dfbfbf"
+  },
+  "record/principles.md": {
+   "sha256": "d8f6191fe95890311c6269e1322cdc64cdd0f8a90e4d6aad548d1789852ff62b"
+  },
+  "record/validation/cutoff/2026-10-09_find_principles_v2_claude-code_opus.json": {
+   "sha256": "09a576df30f1d8cf2e6588096e39f960b597b34a9b293bd1d1ac090ffc7b0f9a"
+  },
+  "record/validation/cutoff/lineages_link_ideas_v2_claude-code_opus.json": {
+   "sha256": "c81023f451dcdc23264cc22492a2c2e3346cb4b39d9a00cabddad629ff283736"
+  }
+ },
+ "ledger_sha256": "72e5ca0166a1ae5c654631544fac0a8a27c5aa35a687a7e73385c606d5f6320c",
+ "model": "opus",
+ "prompt": "match_principles_v1",
+ "prompt_sha256": "007b56b7e8bba03eaae45189cfd8dd754d1915963ab21fc2bedf3982a36a3033",
+ "version": "match_principles v1"
+}
