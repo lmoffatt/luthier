@@ -93,3 +93,5 @@ Each step, when done, gets a line: step, commit, what came out, anything that we
 - B2 done, 9eba77d: 10 candidates (7 first said by Luciano); 8 new, C1 extends P14, C6 extends P10.
 - B3 done: eligibility with --after the cutoff (c5fcd8e): 175 units to draft.
 - B4 running: draft_cases on the 175 units, output in record/validation/cutoff.
+- B4 done, 9c09cf1: 175 units drafted; 95 decisions (54 his choice, 23 his confirmation, 18 the model's; 4 constructed; 22 reversals), 72 not a decision, 8 skipped for private words.
+- B5 done: sample of 40 frozen (3234d91; the 22 reversals and 18 stratified), exposure judged (b5a9b8d; of 390 pairs 217 none, 117 possible, 56 explicit), review written (record/validation/cutoff/review_2026-10-10.md). The night stops here: Luciano marks the review; then review_cases.py apply and the scoring, his.
