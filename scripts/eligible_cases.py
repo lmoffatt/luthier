@@ -160,6 +160,8 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--provisional", action="store_true", help="read a principle without a mark as ok, and say so")
     ap.add_argument("--candidates", type=Path, default=None,
                     help="a find_principles output: score its candidates instead of the principles of principle_dates")
+    ap.add_argument("--after", default=None,
+                    help="only units after this UTC time are eligible (a cutoff: what the candidates were found from ends here)")
     ap.add_argument("--match", type=Path, default=None,
                     help="the match_principles output for those candidates: a candidate covered by or extending a principle "
                          "in force inherits its operative dates")
@@ -209,6 +211,8 @@ def main(argv: list[str]) -> int:
             op = r["operative"].get((acct, repo))
             if r["explicit"] is None:
                 ok, why = False, "no explicit date"
+            elif args.after and not t > when(args.after):
+                ok, why = False, "before the cutoff"
             elif not t > r["explicit"]:
                 ok, why = False, "before the principle was formulated"
             elif op is not None and not t < op:
@@ -252,7 +256,7 @@ def main(argv: list[str]) -> int:
         if reasons and "withheld" not in u:
             cands.append({"unit": u["id"], "reasons": reasons, "eligible_for": by_unit.get(u["id"], [])})
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    stamp = {"version": VERSION, "provisional": args.provisional, "flag_share": args.flag_share}
+    stamp = {"version": VERSION, "provisional": args.provisional, "flag_share": args.flag_share, "after": args.after}
     (args.output_dir / "eligibility.jsonl").write_text("".join(json.dumps({**p, **stamp}, sort_keys=True) + "\n" for p in pairs),
                                                        encoding="utf-8")
     (args.output_dir / "draft_candidates.json").write_text(json.dumps({**stamp, "candidates": cands}, indent=1) + "\n",

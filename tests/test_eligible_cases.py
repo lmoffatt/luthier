@@ -102,5 +102,11 @@ def test_candidates_count_from_their_quote_and_inherit_a_principle_in_force(tmp_
     assert c1["a:1"]["reason"] == "before the principle was formulated"                    # 2026-09-10 is before the quote
     assert not c1["a:6"]["eligible"] and c1["a:6"]["operative"] == "2026-10-06T08:18Z"     # inherited from P11
     assert c2["a:6"]["eligible"] and c2["a:6"]["operative"] is None                        # new: never operative
+    r = subprocess.run([sys.executable, str(ELIG), "--units", str(tmp_path / "units.jsonl"), "--dates", str(tmp_path / "dates.json"),
+                        "--marks", str(tmp_path / "dates.md"), "--timeline", str(tmp_path / "timeline.jsonl"),
+                        "--output-dir", str(tmp_path / "out2"), "--candidates", str(tmp_path / "find.json"),
+                        "--match", str(tmp_path / "match.json"), "--after", "2026-10-01T00:00:00Z"], capture_output=True, text=True)
+    late = {(p["unit"], p["principle"]): p for p in map(json.loads, (tmp_path / "out2" / "eligibility.jsonl").read_text().splitlines())}
+    assert late[("a:2", "C2")]["reason"] == "before the cutoff" and late[("a:6", "C2")]["eligible"]
     st = json.loads((tmp_path / "out" / "statements.json").read_text())["candidates"]
     assert st["C1"]["inherits"] == "P11" and st["C2"]["inherits"] is None
