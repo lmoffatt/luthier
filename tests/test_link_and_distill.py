@@ -374,7 +374,7 @@ def test_naive_shows_every_row_checks_rows_and_feeds_the_judge(tmp_path):
     tl, env = setup(tmp_path)
     env["STUB_BAD_ONCE"] = "1"
     args = [sys.executable, str(NAIVE), "--timeline", str(tl), "--output-dir", str(tmp_path / "naive"), "--cli", "claude",
-            "--date", "2026-01-02", "--var", "language=Lang", "--var", "designers=the designer", "--redact", "tipos=TYPES",
+            "--date", "2026-01-02", "--var", "language=Lang", "--var", "designers=the designer", "--redact", "Types=TYPES",
             "--redact", "Lang=L"]
     r = subprocess.run(args, capture_output=True, text=True, env=env)
     assert r.returncode == 0, r.stderr
