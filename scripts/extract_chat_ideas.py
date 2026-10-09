@@ -33,6 +33,8 @@ DEFAULT_OUTPUT = REPO_ROOT / "record" / "ideas"
 DEFAULT_PROMPT = REPO_ROOT / "prompts" / f"{PROMPT_ID}.md"
 DEFAULT_CLAUDE_MODEL = "opus"
 DEFAULT_CODEX_MODEL = "gpt-5"
+DEFAULT_EFFORT = "low"
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
 PLACEHOLDER = "<<<THREAD>>>"
 MODE = "editor"
 
@@ -52,6 +54,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--cli", choices=("auto", "claude", "codex"), default="auto")
     p.add_argument("--model", default=None)
     p.add_argument("--agent", default=None, help="name of the agent in the frontmatter; default by CLI")
+    p.add_argument("--effort", choices=EFFORTS, default=DEFAULT_EFFORT, help="thinking effort passed to claude (default low: extract_ideas_day measured 64 s at low against over 900 s at the default effort, 2026-10-09); codex ignores it")
     p.add_argument("--window-chars", type=int, default=60000, help="largest window sent in one call")
     p.add_argument("--keep-tool-turns", action="store_true", help="keep the Tool turns in what the model sees")
     p.add_argument("--only", nargs="*", default=None, help="only threads whose file name contains one of these")
@@ -73,9 +76,9 @@ def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.strip().lower()).strip("-") or "x"
 
 
-def _call(cli: str, prompt_text: str, model: str, timeout: float) -> str:
+def _call(cli: str, prompt_text: str, model: str, timeout: float, effort: str = DEFAULT_EFFORT) -> str:
     if cli == "claude":
-        proc = subprocess.run(["claude", "-p", "--model", model, "--output-format", "text",
+        proc = subprocess.run(["claude", "-p", "--model", model, "--effort", effort, "--output-format", "text",
                                "--no-session-persistence", "--tools", ""],
                               input=prompt_text, capture_output=True, text=True, timeout=timeout)
         if proc.returncode != 0:
@@ -148,14 +151,14 @@ def output_stem(front: dict, path: Path) -> str:
 
 
 def frontmatter(*, front: dict, path: Path, sha: str, n_turns: int, n_windows: int, n_ideas: int,
-                prompt_sha: str, agent: str, model: str, window_chars: int) -> str:
+                prompt_sha: str, agent: str, model: str, window_chars: int, effort: str) -> str:
     lines = ["---", f"source: {front.get('source', '')}", f"key: {front.get('source', '')}:{front.get('account', '')}:{front.get('id', '')}",
              f"title: \"{front.get('title', '').replace(chr(34), chr(39))}\"", f"started: {front.get('started', '')}",
              f"ended: {front.get('ended', '')}", f"thread: {path.name}", f"thread_sha256: {sha}",
              f"copy: {'local-only' if 'local-only' in path.parts else 'tracked'}",
              f"turns: {n_turns}", f"windows: {n_windows}", f"window_chars: {window_chars}", f"ideas: {n_ideas}",
              f"generated_by: {PROMPT_ID}", f"prompt_sha256: {prompt_sha}", f"mode: {MODE}",
-             f"agent: {agent}", f"model: {model}", "---"]
+             f"agent: {agent}", f"model: {model}", f"effort: {effort}", "---"]
     return "\n".join(lines)
 
 
@@ -204,7 +207,7 @@ def main(argv: list[str]) -> int:
             continue
         jobs.append((path, text, front, turns, out))
     print(f"threads: {len(threads)} | done: {skipped} | pending: {len(jobs)}")
-    print(f"CLI: {cli or '-'} | model: {model} | agent: {agent} | prompt: {PROMPT_ID} | window: {args.window_chars}")
+    print(f"CLI: {cli or '-'} | model: {model} | effort: {args.effort} | agent: {agent} | prompt: {PROMPT_ID} | window: {args.window_chars}")
 
     failures = 0
     for i, (path, text, front, turns, out) in enumerate(jobs, 1):
@@ -218,7 +221,7 @@ def main(argv: list[str]) -> int:
         try:
             for k, win in enumerate(wins, 1):
                 prompt_text = template.replace(PLACEHOLDER, window_input(front, win, k, len(wins), len(turns)))
-                body = _clean_body(_call(cli, prompt_text, model, args.timeout))
+                body = _clean_body(_call(cli, prompt_text, model, args.timeout, args.effort))
                 if len(wins) > 1:
                     body = f"## Window {k} of {len(wins)}: turns {win[0]['n']} to {win[-1]['n']}\n\n{body}"
                 bodies.append(body)
@@ -231,7 +234,8 @@ def main(argv: list[str]) -> int:
         body = "\n\n".join(bodies)
         fm = frontmatter(front=front, path=path, sha=hashlib.sha256(text.encode("utf-8")).hexdigest(),
                          n_turns=len(turns), n_windows=len(wins), n_ideas=len(IDEA_RE.findall(body)),
-                         prompt_sha=prompt_sha, agent=agent, model=model, window_chars=args.window_chars)
+                         prompt_sha=prompt_sha, agent=agent, model=model, window_chars=args.window_chars,
+                         effort=args.effort)
         args.output_dir.mkdir(parents=True, exist_ok=True)
         out.write_text(fm + "\n\n" + body + "\n", encoding="utf-8")
         print(f"  -> {out.name}")

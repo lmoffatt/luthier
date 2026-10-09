@@ -171,6 +171,7 @@ def test_select_judges_with_the_model_and_by_cwd_and_reports_withheld(tmp_path):
     assert all("thread_sha256" in r and "prompt_sha256" in r for r in rows.values())
     cs = calls(tmp_path)
     assert len(cs) == 1  # not the cwd thread, not the withheld one, not the one where Luciano never says luthier
+    assert cs[0]["argv"][cs[0]["argv"].index("--effort") + 1] == "low"
     assert "a video about something else" in r.stdout  # the reason is printed as it is made
     assert "[tool output" not in cs[0]["prompt"]
     md = (out / "2026-01-02_select_chats_v1_claude-code_opus.md").read_text()
@@ -220,6 +221,7 @@ def test_extract_writes_one_file_per_thread_with_windows_and_frontmatter(tmp_pat
     assert "## Window 1 of 2: turns 1 to 2" in text and "## Window 2 of 2: turns 4 to 4" in text
     cs = calls(tmp_path)
     assert len(cs) == 2
+    assert all(c["argv"][c["argv"].index("--effort") + 1] == "low" for c in cs) and "effort: low" in head
     assert "## 3. Tool" not in cs[0]["prompt"] + cs[1]["prompt"]
     assert "window: 1 of 2; turns 1 to 2 of 4" in cs[0]["prompt"]
     assert "window: 2 of 2; turns 4 to 4 of 4" in cs[1]["prompt"]

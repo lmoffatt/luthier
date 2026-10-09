@@ -33,6 +33,8 @@ PLACEHOLDER = "<<<TRANSCRIPCION>>>"
 MODO = "editor"
 
 DEFAULT_CLAUDE_MODEL = "sonnet"
+DEFAULT_EFFORT = "low"
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
 DEFAULT_CODEX_MODEL = "gpt-5.4-mini"
 
 DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
@@ -56,6 +58,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
                    help="CLI a usar. 'auto' prioriza claude y usa codex de fallback.")
     p.add_argument("--model", default=None, help="Modelo. Default según el CLI.")
     p.add_argument("--agente", default=None, help="Nombre del agente en el frontmatter. Default según el CLI.")
+    p.add_argument("--effort", choices=EFFORTS, default=DEFAULT_EFFORT,
+                   help="Esfuerzo de razonamiento pasado a claude (default low; codex lo ignora).")
     p.add_argument("--force", action="store_true", help="Regenerar aunque exista el output.")
     p.add_argument("--dry-run", action="store_true", help="Listar sin llamar al modelo.")
     p.add_argument("--sleep", type=float, default=0.0, help="Pausa entre llamadas (segundos).")
@@ -85,9 +89,9 @@ def _slug(text: str) -> str:
     return text.strip("-") or "x"
 
 
-def _run_claude(prompt_text: str, model: str, timeout: float) -> str:
+def _run_claude(prompt_text: str, model: str, timeout: float, effort: str = DEFAULT_EFFORT) -> str:
     proc = subprocess.run(
-        ["claude", "-p", "--model", model, "--output-format", "text",
+        ["claude", "-p", "--model", model, "--effort", effort, "--output-format", "text",
          "--no-session-persistence", "--tools", ""],
         input=prompt_text, capture_output=True, text=True, timeout=timeout,
     )
@@ -132,7 +136,7 @@ def _extract_meta(transcription: str, stem: str) -> tuple[str, str, str]:
 
 
 def _build_frontmatter(*, audio: str, fecha: str, duracion: str, n_ideas: int,
-                       prompt_id: str, agente: str, modelo: str) -> str:
+                       prompt_id: str, agente: str, modelo: str, effort: str) -> str:
     lines = [
         "---",
         f"audio: {audio}",
@@ -143,6 +147,7 @@ def _build_frontmatter(*, audio: str, fecha: str, duracion: str, n_ideas: int,
         f"modo: {MODO}",
         f"agente: {agente}",
         f"modelo: {modelo}",
+        f"effort: {effort}",
         "---",
     ]
     return "\n".join(lines)
@@ -205,7 +210,7 @@ def main(argv: list[str]) -> int:
             user_message = prompt_template.replace(PLACEHOLDER, transcription)
             print(f"[{i:02d}/{len(jobs):02d}] {t.name}", flush=True)
             if cli == "claude":
-                raw = _run_claude(user_message, modelo, args.timeout)
+                raw = _run_claude(user_message, modelo, args.timeout, args.effort)
             else:
                 raw = _run_codex(user_message, modelo, args.timeout, REPO_ROOT)
             body = _clean_body(raw)
@@ -213,7 +218,7 @@ def main(argv: list[str]) -> int:
             audio, fecha, duracion = _extract_meta(transcription, t.stem)
             frontmatter = _build_frontmatter(
                 audio=audio, fecha=fecha, duracion=duracion, n_ideas=n_ideas,
-                prompt_id=prompt_id, agente=agente, modelo=modelo,
+                prompt_id=prompt_id, agente=agente, modelo=modelo, effort=args.effort,
             )
             out.write_text(f"{frontmatter}\n\n{body}\n", encoding="utf-8")
             generated += 1

@@ -42,6 +42,8 @@ DEFAULT_TO = REPO_ROOT / "record" / "IA" / "raw"
 DEFAULT_IACHAT = Path.home() / "Projects" / "IA_chat"
 DEFAULT_CLAUDE_MODEL = "opus"
 DEFAULT_CODEX_MODEL = "gpt-5"
+DEFAULT_EFFORT = "low"
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
 PLACEHOLDER = "<<<THREAD>>>"
 VERDICTS = ("yes", "partial", "no")
 
@@ -63,6 +65,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--cli", choices=("auto", "claude", "codex"), default="auto")
     p.add_argument("--model", default=None)
     p.add_argument("--agent", default=None, help="name of the agent in the output; default by CLI")
+    p.add_argument("--effort", choices=EFFORTS, default=DEFAULT_EFFORT, help="thinking effort passed to claude (default low: extract_ideas_day measured 64 s at low against over 900 s at the default effort, 2026-10-09); codex ignores it")
     p.add_argument("--date", default=date.today().isoformat(), help="date of the run, in the file names")
     p.add_argument("--max-model-chars", type=int, default=600, help="how much of each model turn the judge sees")
     p.add_argument("--cwd-is-yes", dest="cwd_rule", action="store_true", default=True,
@@ -186,9 +189,9 @@ def _resolve_cli(choice: str) -> str:
     raise RuntimeError(f"{choice if choice != 'auto' else 'neither claude nor codex'} is not on the PATH")
 
 
-def _call(cli: str, prompt_text: str, model: str, timeout: float) -> str:
+def _call(cli: str, prompt_text: str, model: str, timeout: float, effort: str = DEFAULT_EFFORT) -> str:
     if cli == "claude":
-        proc = subprocess.run(["claude", "-p", "--model", model, "--output-format", "text",
+        proc = subprocess.run(["claude", "-p", "--model", model, "--effort", effort, "--output-format", "text",
                                "--no-session-persistence", "--tools", ""],
                               input=prompt_text, capture_output=True, text=True, timeout=timeout)
         if proc.returncode != 0:
@@ -215,12 +218,12 @@ def parse_answer(raw: str, valid_turns: list[int]) -> dict:
 
 
 def judge(cli: str, template: str, text: str, model: str, timeout: float, max_model_chars: int,
-          retries: int) -> dict:
+          retries: int, effort: str = DEFAULT_EFFORT) -> dict:
     prompt_text = template.replace(PLACEHOLDER, digest(text, max_model_chars))
     valid = luciano_turns(text)
     last: Exception | None = None
     for _ in range(retries + 1):
-        raw = _call(cli, prompt_text, model, timeout)
+        raw = _call(cli, prompt_text, model, timeout, effort)
         try:
             return parse_answer(raw, valid)
         except (ValueError, json.JSONDecodeError) as exc:
@@ -309,7 +312,7 @@ def write_summary(md: Path, rows: list[dict], args: argparse.Namespace, prompt_s
     lost = [r for r in rows if r["withheld"]]
     lines = [f"# Selection of conversations for luthier's record, {args.date}", "",
              f"Written by `scripts/select_chats.py` for Luciano. Prompt `{PROMPT_ID}` (sha256 {prompt_sha}),",
-             f"model {model} via {agent}; candidates from `iachat fetch --dry-run --query {args.query}"
+             f"model {model} at effort {args.effort} via {agent}; candidates from `iachat fetch --dry-run --query {args.query}"
              f"{' --since ' + args.since if args.since else ''}{' --until ' + args.until if args.until else ''}"
              f"{' --source ' + args.source if args.source else ''}` at `{args.iachat}`; a thread whose cwd is this",
              f"repository is yes by rule ({'on' if args.cwd_rule else 'off'}); a thread where Luciano's turns say the "
@@ -397,6 +400,7 @@ def main(argv: list[str]) -> int:
                        "started": front.get("started", ""), "cwd": front.get("cwd", ""),
                        "thread_path": str(path), "thread_sha256": _sha(path),
                        "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
+                       "effort": args.effort,
                        "max_model_chars": args.max_model_chars, "date": args.date}
                 said = mentions(text, args.query)
                 if c["withheld"]:
@@ -410,7 +414,7 @@ def main(argv: list[str]) -> int:
                                turns=[], topics=[], judged_by="rule")
                 else:
                     row.update(judge(cli, template, text, model, args.timeout, args.max_model_chars,
-                                     args.retries), judged_by=model)
+                                     args.retries, args.effort), judged_by=model)
                     if args.sleep:
                         time.sleep(args.sleep)
             except Exception as exc:  # one bad thread must not stop the others
