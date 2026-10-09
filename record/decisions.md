@@ -491,7 +491,9 @@ Quote:      "Ok vamos con la 3."
             "La infectabilidad no es un principio *de* Luthier; es el mejor criterio *para
             encontrar* los principios de Luthier: las ideas que más cambian la forma de programar
             son las que más estructuran el lenguaje."
-Source:     chat:8c2cb06b; luthier@97330c9:prompts/consolidate_ideas_v1.md:29 (his decision, recorded
-            in the prompt; the model's memory of 2026-05-30 records that he chose to keep it)
-Kind:       method. For P1 (his criterion, not one the model chose), P13 (kept in its place)
+Source:     chat:8c2cb06b:1185
+            luthier@97330c9:prompts/consolidate_ideas_v1.md:29
+Kind:       method. The second quote is his criterion as the prompt records it; the model's memory
+            of 2026-05-30 records that he chose to keep it. For P1 (his criterion, not one the
+            model chose), P13 (kept in its place)
 Status:     current, in prompts/distill_principles_v1.md and scripts/distill_principles.py
