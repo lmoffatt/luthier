@@ -62,6 +62,7 @@ elif prompt.startswith("# Prompt: distill_principles_v1"):
     print(json.dumps({"classification": cls,
                       "candidates": [{"id": "C1", "statement": "A type is a concept.", "scope": "language",
                                       "lineages": labels, "quote": quote, "quote_text": text,
+                                      "infectability": {"axes": ["conceptual"], "why": "reframes what a type is"},
                                       "assumption": "concepts are what a scientist reasons with",
                                       "guides": ["D-2026-10-06-a"], "conflicts": [{"principle": "P2", "how": "x"}]}],
                       "against": []}))
@@ -222,6 +223,8 @@ def test_distill_drafts_candidates_with_the_quote_and_its_author_filled_in(tmp_p
     assert "C1  A type is a concept." in md and "Said by:    Luciano, 2026-05-29 14:03" in md
     assert "Source:     n.md [00:15] (row day:2026-05-29:tipos)" in md and "Mark:" in md
     assert "lineages begun by model 1" in md
+    assert "Infectious: conceptual. reframes what a type is" in md and "Would have guided (for P13, later): D-2026-10-06-a" in md
+    assert "Finding: infectability" in prompt and "do not rank by it" in prompt
     r = distill(tmp_path, env)
     assert r.returncode == 2 and "--force redoes it" in r.stderr
 
@@ -234,15 +237,17 @@ def test_distill_checks(tmp_path):
     decisions = {"D-2026-10-06-a": {}}
     good = {"classification": [{"lineage": "L-a", "verdict": "candidate", "candidate": "C1"}],
             "candidates": [{"id": "C1", "statement": "s", "assumption": "a", "scope": "language", "lineages": ["L-a"],
+                            "infectability": {"axes": ["ethical"], "why": "w"},
                             "quote_row": "r1", "quote": "los tipos ... conceptos", "guides": ["D-2026-10-06-a"]}]}
     assert dp.check_answer(good, der, principles, decisions, 7) == []
     bad = json.loads(json.dumps(good))
     bad["classification"] = [{"lineage": "L-b", "verdict": "covered", "principle": "P9"}]
     bad["candidates"][0]["quote"] = "conceptos ... los tipos"
     bad["candidates"][0]["guides"] = ["D-x"]
+    bad["candidates"][0]["infectability"] = {"axes": ["popular"], "why": ""}
     errs = "\n".join(dp.check_answer(bad, der, principles, decisions, 0))
     for e in ("1 candidates; at most 0", "unknown lineage 'L-b'", "principle 'P9'", "lineages not classified: L-a",
-              "the quote is not in row r1", "guides 'D-x'"):
+              "the quote is not in row r1", "guides 'D-x'", "infectability needs axes"):
         assert e in errs, e
 
 

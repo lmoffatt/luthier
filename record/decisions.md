@@ -479,3 +479,19 @@ Source:     chat:b377c2a0
 Kind:       rule. For P2 (the hash says which copy was read); P7 (each repository is
             self-contained) gives way for sources, which are pointed at as a File is in 09 §5
 Status:     current, in record/bibliography/ and .gitignore.
+
+D-2026-10-09-b  Candidate principles are found by infectability and kept by P13: the distillation
+                chooses and orders its candidates by infectability (Luciano's criterion of May for
+                finding Luthier's principles: how much an idea changes the way of programming, on
+                four axes, frequency not being one), and whether a principle stays is judged later
+                by the decisions it guides once applied. Recurrence is shown as data, not used to rank.
+Author:     Luciano chose among three options; the model wrote them, after finding that the
+            distillation it had written ranked by recurrence, against the criterion he had chosen
+Quote:      "Ok vamos con la 3."
+            "La infectabilidad no es un principio *de* Luthier; es el mejor criterio *para
+            encontrar* los principios de Luthier: las ideas que más cambian la forma de programar
+            son las que más estructuran el lenguaje."
+Source:     chat:8c2cb06b; luthier@97330c9:prompts/consolidate_ideas_v1.md:29 (his decision, recorded
+            in the prompt; the model's memory of 2026-05-30 records that he chose to keep it)
+Kind:       method. For P1 (his criterion, not one the model chose), P13 (kept in its place)
+Status:     current, in prompts/distill_principles_v1.md and scripts/distill_principles.py

@@ -26,6 +26,28 @@ principle is worth the decisions it guides or helps interpret (P13). What is not
 
 Few principles that explain many decisions are better than many that explain one each.
 
+## How candidates are found, and how they are kept
+
+Two criteria, each in its place (Luciano, 2026-10-09).
+
+**Finding: infectability.** A candidate is chosen and ranked by its infectability: its power to
+infect the mind of whoever programs and change how they think about programming. Infectability is
+not a principle of Luthier; it is the best criterion for finding Luthier's principles, since the
+ideas that most change the way of programming are the ones that most structure the language. It
+is not frequency, length, or the amount of material behind an idea: an idea said once can be more
+infectious than one said fifty times. It is expressive power, conceptual originality, the capacity
+to reorganize the frame, persistence in the head of whoever hears it. It acts on four axes, not
+exclusive: aesthetic (elegance and economy of the formulation), ethical (a stance on how one should
+program, what a language should be), emotive (the enthusiasm, the desire, what moves the author to
+invent it), conceptual (a reorganized understanding, a new frame opened). A strong idea strikes on
+several axes; a mediocre one strikes on none with force. (Luciano's criterion, from the prompt
+`consolidate_ideas_v1`, section "Criterio de evaluación: infectabilidad", in Spanish there.)
+
+**Keeping: P13.** Whether a principle stays is decided later, once applied, by the decisions it
+guides or helps interpret. So for each candidate you also name the decisions in the log it would
+have guided, as evidence for that later judgment, not as a reason to rank it. Recurrence (rows,
+witnesses, days) is shown to you as data about the idea's history; do not rank by it.
+
 ## Whose words
 
 The lineage lists say who said each idea first (`origin`: Luciano, model or pasted) and give quotes
@@ -57,13 +79,12 @@ Under Input, each in its own block:
    - `candidate`: it could become a principle; give the candidate's id.
    - `not_principle`: a design fact, question, motive, technique or noise; say which in a few words.
    Several lineages may feed one candidate.
-2. **Write the candidates**, at most {max_candidates}, the strongest first: those whose lineages
-   recur over more days, began with Luciano, and would have guided decisions in the log. For each:
-   a statement in one sentence; scope (`language` or `method`); the lineages it compresses; one
-   quote, verbatim from one of those lineages' rows, preferably Luciano's; the assumption it rests
-   on (what would have to be true for it to be worth having, and what would show it false); the
-   decisions in the log it would have guided, by id; the principles in force it would conflict
-   with, and how.
+2. **Write the candidates**, at most {max_candidates}, the most infectious first. For each: a
+   statement in one sentence; scope (`language` or `method`); the lineages it compresses; one
+   quote, verbatim from one of those lineages' rows, preferably Luciano's; its infectability, the
+   axes it strikes on and why, in a sentence or two; the assumption it rests on (what would have
+   to be true for it to be worth having, and what would show it false); the decisions in the log
+   it would have guided, by id, or none; the principles in force it would conflict with, and how.
 3. **Name principles in force that the lineages argue against**, if any: a principle whose
    assumption the ideas contradict, or one no lineage and no decision supports. Give the evidence by
    id. Do not propose retiring one on a hunch.
@@ -78,6 +99,8 @@ One JSON object and nothing else, no fence, no prose:
                      "a few words"], ...],
  "candidates": [{"id": "C<n>", "statement": "...", "scope": "language" | "method",
                  "lineages": ["l<n>", ...], "quote": "q<n>", "quote_text": "verbatim",
+                 "infectability": {"axes": ["aesthetic" | "ethical" | "emotive" | "conceptual", ...],
+                                   "why": "..."},
                  "assumption": "...", "guides": ["D-...", ...],
                  "conflicts": [{"principle": "P<n>", "how": "..."}]}],
  "against": [{"principle": "P<n>", "why": "...", "evidence": ["l<n> or a decision id", ...]}]}

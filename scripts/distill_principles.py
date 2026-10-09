@@ -57,6 +57,7 @@ DEFAULT_EFFORT = "low"
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 PLACEHOLDER = "<<<INPUT>>>"
 VERDICTS = ("covered", "extends", "candidate", "not_principle")
+AXES = ("aesthetic", "ethical", "emotive", "conceptual")
 SCOPES = ("language", "method")
 ELLIPSIS_RE = re.compile(r"\s*(?:\.\.\.|…|\[\.\.\.\]|\[…\])\s*")
 
@@ -254,6 +255,10 @@ def check_answer(ans: dict, der: dict, principles: dict, decisions: dict, max_ca
         for field in ("statement", "assumption"):
             if not str(c.get(field, "")).strip():
                 errors.append(f"{cid}: empty {field}")
+        inf = c.get("infectability") or {}
+        axes = inf.get("axes", []) if isinstance(inf, dict) else []
+        if not axes or any(a not in AXES for a in axes) or not str(inf.get("why", "")).strip():
+            errors.append(f"{cid}: infectability needs axes among {AXES} and a why")
     for a in ans.get("against", []) or []:
         if a.get("principle") not in principles:
             errors.append(f"against: {a.get('principle')!r} is not in force")
@@ -289,9 +294,10 @@ def write_report(md: Path, run: dict, ans: dict, der: dict, principles: dict) ->
          f"Written by `scripts/distill_principles.py` ({VERSION}) for Luciano to mark. Prompt `{PROMPT_ID}` (sha256",
          f"{run['prompt_sha256'][:12]}), model {run['model']} at effort {run['effort']} via {run['agent']} ({run['cli_version']}).",
          "Inputs, each by sha256: " + "; ".join(f"`{k}` {v['sha256'][:12]}" for k, v in run["inputs"].items()) + ".",
-         "The candidates are the model's drafts. Whose words each quote is, its source and how often its lineages",
-         "recur were filled in from the rows by the script. Under each candidate, a Mark: line for ok, no, or a",
-         "correction.", "",
+         "The candidates are the model's drafts, chosen and ordered by infectability, Luciano's criterion for finding",
+         "principles; whether one stays is judged later by P13, from the decisions it guides once applied (D-2026-10-09-b).",
+         "Whose words each quote is, its source and how often its lineages recur were filled in from the rows by the",
+         "script. Under each candidate, a Mark: line for ok, no, or a correction.", "",
          f"Lineages: {len(der)}. " + ", ".join(f"{v} {by_verdict.get(v, 0)}" for v in VERDICTS) + ".", "",
          "| principle | lineages it covers | lineages that extend it |", "|---|---|---|"]
     for pid in sorted(principles, key=lambda p: int(p[1:])):
@@ -317,8 +323,9 @@ def write_report(md: Path, run: dict, ans: dict, der: dict, principles: dict) ->
               f"Witnesses:  first {first.get('time_local', '')[:10]} by {first.get('who', '?')}; "
               f"{sum(der[l]['witnesses'] for l in lins)} witnesses over {len({m.get('time_local', '')[:10] for l in lins for m in der[l]['members']})} days; "
               f"lineages begun by " + ", ".join(f"{o} {n}" for o, n in origins.items()),
+              f"Infectious: {wrap(', '.join(c['infectability']['axes']) + '. ' + c['infectability']['why'])}",
               f"Assumption: {wrap(c['assumption'])}",
-              f"Guides:     {', '.join(c.get('guides', [])) or 'no decision in the log'}",
+              f"Would have guided (for P13, later): {', '.join(c.get('guides', [])) or 'no decision in the log'}",
               f"Conflicts:  {wrap('; '.join(k['principle'] + ': ' + k['how'] for k in c.get('conflicts', [])) or 'none named')}",
               "Status:     proposed by distill_principles_v1, for Luciano to mark",
               "Mark:       ", ""]
