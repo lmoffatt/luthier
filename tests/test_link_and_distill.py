@@ -77,6 +77,11 @@ elif prompt.startswith("# Prompt: compare_principles_v1"):
     first_a = re.search(r"^- ([A-Z]\d+):", prompt.split("## List A")[1], re.M).group(1)
     print(json.dumps({"judgments": [{"candidate": c, "A": [{"item": first_a, "why": "same"}] if k == 0 else [],
                                      "B": [{"item": "P1", "why": "echo"}] if k == 1 else []} for k, c in enumerate(cs)]}))
+elif prompt.startswith("# Prompt: naive_principles_v1"):
+    rs = re.findall(r"^(r\d+) \| ", prompt.split("## Ideas")[1], re.M)
+    rows = ["r999"] if bad else rs[1:3]
+    print(json.dumps({"candidates": [{"id": "C1", "statement": "Types are concepts.", "rows": rows},
+                                     {"id": "C2", "statement": "Costs are explicit.", "rows": rs[-2:-1]}]}))
 elif prompt.startswith("# Prompt: recall_principles_v1"):
     print(json.dumps({"candidates": [{"id": "C1", "statement": "Readability counts."},
                                      {"id": "C2", "statement": "Your part stays discernible."}]}))
@@ -354,3 +359,35 @@ def test_link_until_a_cutoff_reads_only_earlier_rows(tmp_path):
     assert "dialogue:aaaa:weather" not in placed and "note:2026-05-30T10.00.00:costs" not in placed
     assert state["until"] == "2026-05-30T00:00:00Z"
     assert "2026-06-01" not in "".join(calls(tmp_path)[0]["prompt"].split("## Rows to place")[1:])
+
+
+NAIVE = ROOT / "scripts" / "naive_principles.py"
+
+
+def write_reference(tmp_path):
+    ref = tmp_path / "reference.md"
+    ref.write_text("# Reference\n\n- Z7 Readability counts.\n")
+    return ref
+
+
+def test_naive_shows_every_row_checks_rows_and_feeds_the_judge(tmp_path):
+    tl, env = setup(tmp_path)
+    env["STUB_BAD_ONCE"] = "1"
+    args = [sys.executable, str(NAIVE), "--timeline", str(tl), "--output-dir", str(tmp_path / "naive"), "--cli", "claude",
+            "--date", "2026-01-02", "--var", "language=L", "--var", "designers=the designer", "--redact", "tipos=TYPES"]
+    r = subprocess.run(args, capture_output=True, text=True, env=env)
+    assert r.returncode == 0, r.stderr
+    run = json.loads((tmp_path / "naive" / "2026-01-02_naive_principles_v1_claude-code_opus.json").read_text())
+    assert len(run["attempts"]) == 2 and any("unknown rows r999" in e for e in run["attempts"][0]["errors"])
+    prompt = calls(tmp_path)[0]["prompt"]
+    body = prompt.split("## Ideas")[1]
+    assert body.count(" | ") == 3 * len(rows_fixture()) and "infectab" not in prompt.lower()
+    c1 = run["answer"]["candidates"][0]
+    assert c1["quote_row"] == "note:2026-05-29T14.03.24:tipos" and c1["quote"] == "los tipos tienen que ser conceptos"
+    assert c1["who"] == "Luciano"
+    r = subprocess.run([sys.executable, str(COMPARE), "--reference", str(write_reference(tmp_path)), "--candidates",
+                        str(tmp_path / "naive" / "2026-01-02_naive_principles_v1_claude-code_opus.json"),
+                        "--cli", "claude", "--date", "2026-01-02"], capture_output=True, text=True, env=env)
+    assert r.returncode == 0, r.stderr
+    r = subprocess.run(args, capture_output=True, text=True, env=env)
+    assert r.returncode == 2 and "--force redoes it" in r.stderr
