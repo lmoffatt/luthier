@@ -52,8 +52,14 @@ line and stop.
 
 Rules:
 
-- Verbatim quotes, in the language of the source. You may take the final wording between
-  hesitations, never rewrite it. A model's quote is cut to the sentence that carries the idea.
+- Verbatim quotes, in the language of the source, copied from the turn the entry cites. You may
+  take the final wording between hesitations, never rewrite it. Words you skip are marked with
+  "..."; nothing is added, merged or reordered. A model's quote is cut to the sentence that
+  carries the idea.
+- A formula, a diagram or a summary that a model wrote is the model's, even when it restates
+  something Luciano said: never put it into words as his. When his idea is only in his own loose
+  wording, quote that wording.
+- Each quote is checked by a script against the turn it cites and that turn's author.
 - No invention: no concept, decision or context that is not in the turns.
 - Ambiguity is kept: what was left open, half said or unresolved is recorded as such.
 - Every entry cites its turn number and the turn's time, as the heading gives them.

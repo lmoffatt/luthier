@@ -285,3 +285,30 @@ def test_check_private_finds_whole_words_and_skips_local_only(tmp_path):
     (d / "a.md").write_text("clean\n", encoding="utf-8")
     r = subprocess.run([sys.executable, str(CHECK), str(d), "--words", str(words)], capture_output=True, text=True)
     assert r.returncode == 0 and "0 hits" in r.stdout
+
+
+def test_extract_checks_quotes_against_the_cited_turn_and_its_author(tmp_path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("eci", EXTRACT)
+    eci = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(eci)
+    thread = THREAD_A.format(cwd="", model_long="Olvido ∘ Serie ≡ Serie ∘ Olvido. Esto es mío.")
+    _, turns = eci.parse_thread(thread)
+
+    def entry(slug, who, turn, quote):
+        return f"### {slug}\n- **Who**: {who}\n- **Turn**: {turn}, t\n- **Kind**: idea\n- **What**: x\n- **Quote**: \"{quote}\"\n"
+    body = "## Ideas\n\n" + "".join([
+        entry("ok-punctuation", "Luciano", 1, "Quiero empezar, a definir la semantica de Luthier"),
+        entry("ok-ellipsis", "Luciano", 4, "porque necesitamos ... para el hueco"),
+        entry("reordered", "Luciano", 4, "para el hueco ... porque necesitamos"),
+        entry("model-words-as-his", "Luciano", 4, "esto es mío"),
+        entry("wrong-author", "Luciano", 2, "esto es mío"),
+        entry("no-such-turn", "model", 9, "x"),
+    ])
+    found, total, problems = eci.check_quotes(body, turns)
+    assert (found, total) == (2, 6)
+    text = "\n".join(problems)
+    assert "reordered: not in turn 4" in text
+    assert "model-words-as-his: not in turn 4; it is in turn 2 (Model)" in text
+    assert "wrong-author: says luciano, but turn 2 is Model's" in text
+    assert "no-such-turn: cites turn 9" in text
