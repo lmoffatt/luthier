@@ -10,6 +10,10 @@ link). The copies read live in `pdf/`, outside git, and the hash (SHA-256) pins 
 read, as a hash pins a `File` in `docs/rationale/09-extern-and-the-world.md`. Where there is no
 DOI the link is the publisher's or the author's page. `luthier.bib` holds the entries.
 
+`survey-2026-10-09.md` is a wider search, one section per aspect of Luthier, with 152 more
+references in `survey.bib`, none with a copy. `checkdoi.py` resolves a list of DOIs against Crossref
+or doi.org.
+
 | key | link | copy read |
 |---|---|---|
 | lawvere1973 | https://doi.org/10.1007/BF02924844 | `308ece4614294138891dd1b8960129cf20d41df88b57d2fa04752d8d1be03ce5` |
