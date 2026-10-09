@@ -41,6 +41,7 @@ DEFAULT_CODEX_MODEL = "gpt-5"
 DEFAULT_EFFORT = "low"
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 PLACEHOLDER = "<<<NOTE>>>"
+VARS: list[str] = []  # the --var values of this run, recorded in each output
 MODE = "editor"
 SKIP_NAMES = {"manifest.jsonl", "timeline.md", "README.md"}
 SKIP_SUFFIX = ("_ideas.md",)
@@ -62,6 +63,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--effort", choices=EFFORTS, default=DEFAULT_EFFORT, help="thinking effort passed to claude (codex ignores it)")
     p.add_argument("--agent", default=None)
     p.add_argument("--author", default="Luciano", help="author of a note that states none")
+    p.add_argument("--var", action="append", default=[], metavar="KEY=VALUE",
+                   help="fills {KEY} in the prompt (for the controls: --var language=Python)")
     p.add_argument("--only", nargs="*", default=None, help="only notes whose file name contains one of these")
     p.add_argument("--force", action="store_true")
     p.add_argument("--dry-run", action="store_true")
@@ -205,6 +208,7 @@ def frontmatter(*, path: Path, sha: str, meta: dict, n_ideas: int, quotes: str, 
                       f"title: \"{meta['title'].replace(chr(34), chr(39))}\"", f"author: {meta['author']}",
                       f"created: {meta['created']}", f"ideas: {n_ideas}", f"quotes_found: {quotes}",
                       f"generated_by: {PROMPT_ID}", f"prompt_sha256: {prompt_sha}", f"mode: {MODE}",
+                      *([f"prompt_vars: {'; '.join(VARS)}"] if VARS else []),
                       f"agent: {agent}", f"model: {model}", f"effort: {effort}", "---"])
 
 
@@ -234,6 +238,16 @@ def main(argv: list[str]) -> int:
         print(f"ERROR: the prompt has no {PLACEHOLDER}", file=sys.stderr)
         return 2
     prompt_sha = hashlib.sha256(args.prompt.read_bytes()).hexdigest()
+    global PROMPT_ID, VARS
+    VARS = list(args.var)
+    PROMPT_ID = args.prompt.stem  # the prompt's file names it; the default is extract_ideas_note_v1
+    for kv in args.var:
+        k, _, v = kv.partition("=")
+        template = template.replace("{" + k + "}", v)
+    left = sorted(set(re.findall(r"\{([a-z_]+)\}", template)))
+    if left:
+        print(f"ERROR: the prompt has unfilled {', '.join(left)}; pass --var", file=sys.stderr)
+        return 2
     cli = None
     if not (args.dry_run or args.check_only):
         try:

@@ -63,6 +63,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--timeline", type=Path, default=DEFAULT_TIMELINE)
     p.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     p.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT)
+    p.add_argument("--var", action="append", default=[], metavar="KEY=VALUE",
+                   help="fills {KEY} in the prompt (link_ideas_v2: --var language=... --var designers=...)")
     p.add_argument("--cli", choices=("auto", "claude", "codex"), default="auto")
     p.add_argument("--model", default=None)
     p.add_argument("--agent", default=None)
@@ -372,6 +374,15 @@ def main(argv: list[str]) -> int:
             print(f"ERROR: not found: {p}", file=sys.stderr)
             return 2
     template = args.prompt.read_text(encoding="utf-8")
+    global PROMPT_ID
+    PROMPT_ID = args.prompt.stem  # the prompt's file names it; the default is link_ideas_v1
+    for kv in args.var:
+        k, _, v = kv.partition("=")
+        template = template.replace("{" + k + "}", v)
+    left = sorted(set(re.findall(r"\{([a-z_]+)\}", template)))
+    if left:
+        print(f"ERROR: the prompt has unfilled {', '.join(left)}; pass --var", file=sys.stderr)
+        return 2
     if PLACEHOLDER not in template:
         print(f"ERROR: the prompt has no {PLACEHOLDER}", file=sys.stderr)
         return 2
@@ -419,7 +430,7 @@ def main(argv: list[str]) -> int:
         state = {"version": VERSION, "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
                  "effort": args.effort, "cli_version": cli_version(cli) if cli else "", "window_chars": args.window_chars,
                  "max_thinking_tokens": args.max_thinking_tokens,
-                 "quote_chars": args.quote_chars, "timeline_path": timeline_rel,
+                 "quote_chars": args.quote_chars, "timeline_path": timeline_rel, "prompt_vars": args.var,
                  "lineages": {}, "assign": {}, "unplaced": {}, "calls": []}
     if args.report_only:
         write_report(md_path, state, rows, by_id)

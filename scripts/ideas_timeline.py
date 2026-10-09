@@ -154,7 +154,9 @@ def rows_of_dialogue_file(path: Path, text: str, front: dict, tz: ZoneInfo) -> l
 
 def rows_of_written_file(path: Path, text: str, front: dict, tz: ZoneInfo) -> list[dict]:
     author = front.get("author", "Luciano")
-    who = "Luciano" if author.lower().startswith("luciano") else "model"
+    low = author.lower()
+    # Luciano, a model, or (in the controls) the text's own authors by name
+    who = "Luciano" if low.startswith("luciano") else ("model" if low.startswith("model") else author)
     created = front.get("created", "")
     try:
         base = datetime.strptime(created[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=tz)
@@ -174,6 +176,7 @@ def rows_of_written_file(path: Path, text: str, front: dict, tz: ZoneInfo) -> li
 
 PARSERS = {"extract_ideas_v1": ("note", rows_of_note_file),
            "extract_ideas_note_v1": ("written", rows_of_written_file),
+           "extract_ideas_text_v1": ("written", rows_of_written_file),
            "extract_ideas_day_v1": ("day", rows_of_day_file),
            "extract_ideas_dialogue_v1": ("dialogue", rows_of_dialogue_file)}
 
@@ -203,7 +206,7 @@ def build(input_dir: Path, prompts: tuple[str, ...], tz: ZoneInfo) -> tuple[list
                 key = front.get("date", path.name[:10])
             elif extractor == "written":
                 # date and the note's own name: two copies of a note on one day are two sources
-                key = path.name.split("_extract_ideas_note_v1")[0]
+                key = re.split(r"_extract_ideas_(?:note|text)_v1", path.name)[0]
             else:
                 ident = (front.get("key") or path.name).split(":")[-1]
                 key = ident[:8] if "-" in ident else ident  # a uuid is cut to its first block; a date id stays whole

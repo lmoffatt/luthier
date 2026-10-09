@@ -159,7 +159,8 @@ def test_link_is_incremental_and_pinned_to_its_prompt(tmp_path):
     r = link(tmp_path, env)
     assert r.returncode == 0 and len(calls(tmp_path)) == n + 1 and "pending: 1" in r.stdout
     assert "L-types-are-concepts" in calls(tmp_path)[-1]["prompt"].split("## Rows to place")[0]
-    other = tmp_path / "other_prompt.md"
+    (tmp_path / "edited").mkdir()
+    other = tmp_path / "edited" / "link_ideas_v1.md"  # same prompt id, other content
     other.write_text((ROOT / "prompts" / "link_ideas_v1.md").read_text() + "\nchanged\n")
     r = link(tmp_path, env, "--prompt", str(other))
     assert r.returncode == 2 and "--force starts over" in r.stderr
