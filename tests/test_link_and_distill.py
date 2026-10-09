@@ -30,34 +30,38 @@ if prompt.startswith("# Prompt: link_ideas_v1"):
     ex = prompt.split("## Existing lineages")[1].split("## Rows to place")[0]
     existing = [l.split(" | ")[0] for l in ex.splitlines() if " | " in l]
     rows = [l.split(" | ") for l in prompt.split("## Rows to place")[1].splitlines() if l.count(" | ") >= 5]
+    if os.environ.get("STUB_LIMIT") and len(rows) > 2:
+        print("API Error: Claude's response exceeded the 32000 output token maximum. To configure this behavior, set the CLAUDE_CODE_MAX_OUTPUT_TOKENS environment variable.")
+        sys.exit(0)
     new, assign, unplaced = [], [], []
     target = existing[0] if existing else "L-types-are-concepts"
     if not existing:
         new.append({"id": target, "scope": "language", "statement": "Types are concepts."})
-    for i, r in enumerate(rows):
+    for r in rows:
         if "UNPLACE" in r[4]:
-            unplaced.append({"row": r[0], "reason": "not about Luthier"})
+            unplaced.append([r[0], "not about Luthier"])
         else:
             rel = "proposes" if r[2] == "model" else ("confirms" if "confirm" in r[3] else "restates")
-            assign.append({"row": r[0], "lineage": target, "relation": rel})
+            assign.append([r[0], target, rel])
     if bad:
         assign = assign[1:]
     print(json.dumps({"new_lineages": new, "assign": assign, "unplaced": unplaced}))
 elif prompt.startswith("# Prompt: distill_principles_v1"):
     blocks = prompt.split("## Lineages")[1].split("\n### ")[1:]
-    cls, quote_row, quote = [], None, None
+    cls, labels, quote, text = [], [], None, None
     for b in blocks:
-        lid = b.splitlines()[0].strip()
-        cls.append({"lineage": lid, "verdict": "candidate", "principle": None, "candidate": "C1", "note": "recurs"})
+        lab = b.splitlines()[0].split()[0]
+        labels.append(lab)
+        cls.append([lab, "candidate", "C1", "recurs"])
         for l in b.splitlines():
-            m = re.match(r'- (\S+) \| [^|]+ \| (\w+) \| \w+ \| "(.*)"$', l)
-            if m and quote_row is None and m.group(2) == "Luciano":
-                quote_row, quote = m.group(1), m.group(3)
+            m = re.match(r'- (q\d+) \| [^|]+ \| (\w+) \| \w+ \| "(.*)"$', l)
+            if m and quote is None and m.group(2) == "Luciano":
+                quote, text = m.group(1), m.group(3)
     if bad:
-        quote = "words he never said"
+        text = "words he never said"
     print(json.dumps({"classification": cls,
                       "candidates": [{"id": "C1", "statement": "A type is a concept.", "scope": "language",
-                                      "lineages": [c["lineage"] for c in cls], "quote_row": quote_row, "quote": quote,
+                                      "lineages": labels, "quote": quote, "quote_text": text,
                                       "assumption": "concepts are what a scientist reasons with",
                                       "guides": ["D-2026-10-06-a"], "conflicts": [{"principle": "P2", "how": "x"}]}],
                       "against": []}))
@@ -211,7 +215,9 @@ def test_distill_drafts_candidates_with_the_quote_and_its_author_filled_in(tmp_p
     assert len(run["inputs"]) == 5
     assert all(len(v["sha256"]) == 64 for v in run["inputs"].values()) and len(run["input_sha256"]) == 64
     prompt = calls(tmp_path)[0]["prompt"]
-    assert "at most 7" in prompt and "## Ledger" in prompt and "### L-types-are-concepts" in prompt
+    assert "at most 7" in prompt and "## Ledger" in prompt and "### l1 L-types-are-concepts" in prompt
+    assert "- q1 | 2026-05-29 14:00 | model | proposes" in prompt
+    assert run["quote_labels"]["q2"] == "day:2026-05-29:tipos" and run["lineage_labels"] == {"l1": "L-types-are-concepts"}
     md = (tmp_path / "dist" / "2026-01-02_distill_principles_v1_claude-code_opus.md").read_text()
     assert "C1  A type is a concept." in md and "Said by:    Luciano, 2026-05-29 14:03" in md
     assert "Source:     n.md [00:15] (row day:2026-05-29:tipos)" in md and "Mark:" in md
@@ -238,3 +244,16 @@ def test_distill_checks(tmp_path):
     for e in ("1 candidates; at most 0", "unknown lineage 'L-b'", "principle 'P9'", "lineages not classified: L-a",
               "the quote is not in row r1", "guides 'D-x'"):
         assert e in errs, e
+
+
+def test_link_splits_a_window_whose_answer_hits_the_output_limit(tmp_path):
+    tl, env = setup(tmp_path)
+    env["STUB_LIMIT"] = "1"
+    r = link(tmp_path, env)
+    assert r.returncode == 0, r.stderr
+    assert "the window is split in two" in r.stderr
+    state = json.loads((tmp_path / "out" / "lineages_link_ideas_v1_claude-code_opus.json").read_text())
+    assert len(state["assign"]) + len(state["unplaced"]) == 5
+    splits = [c for c in state["calls"] if c["split"]]
+    assert splits and all("output limit" in c["attempts"][0]["error"] for c in splits)
+    assert all(c["rows"] <= 2 for c in state["calls"] if c["accepted"])

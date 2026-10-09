@@ -44,8 +44,9 @@ Under Input, each in its own block:
    For and against.
 3. **Ledger**: counts of decisions per principle and the pairs that collided, computed from the log.
 4. **Objectives**: `record/objectives.md`.
-5. **Lineages**: one block each: id, scope, statement, origin, first seen, witnesses (distinct
-   sources) and days, then up to four quotes `row id | time | who | relation | "quote"`.
+5. **Lineages**: one block each, headed `### l<n> <lineage id>`: scope, statement, origin, first
+   seen, witnesses (distinct sources) and days, then up to four quotes
+   `q<n> | time | who | relation | "quote"`. You refer to lineages by `l<n>` and to quotes by `q<n>`.
 
 ## Your task
 
@@ -72,18 +73,19 @@ Under Input, each in its own block:
 One JSON object and nothing else, no fence, no prose:
 
 ```
-{"classification": [{"lineage": "<id>", "verdict": "covered" | "extends" | "candidate" | "not_principle",
-                     "principle": "P<n>" or null, "candidate": "C<n>" or null, "note": "a few words"}],
+{"classification": [["l<n>", "covered" | "extends" | "candidate" | "not_principle",
+                     "P<n>" for covered and extends, "C<n>" for candidate, "" otherwise,
+                     "a few words"], ...],
  "candidates": [{"id": "C<n>", "statement": "...", "scope": "language" | "method",
-                 "lineages": ["<id>", ...], "quote_row": "<row id>", "quote": "verbatim",
+                 "lineages": ["l<n>", ...], "quote": "q<n>", "quote_text": "verbatim",
                  "assumption": "...", "guides": ["D-...", ...],
                  "conflicts": [{"principle": "P<n>", "how": "..."}]}],
- "against": [{"principle": "P<n>", "why": "...", "evidence": ["<lineage or decision id>", ...]}]}
+ "against": [{"principle": "P<n>", "why": "...", "evidence": ["l<n> or a decision id", ...]}]}
 ```
 
-A script checks that every lineage is classified once, that every id exists, that each quote is in
-its row, and that `quote_row` belongs to one of the candidate's lineages, before your answer is
-accepted.
+A script checks that every lineage is classified once, that every id exists, that `quote_text` is
+in the quote it names, and that the quote belongs to one of the candidate's lineages, before your
+answer is accepted. Keep the JSON compact.
 
 ## Input
 

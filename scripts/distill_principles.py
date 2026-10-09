@@ -84,6 +84,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--max-input-chars", type=int, default=700000, help="refuse to send more than this")
     p.add_argument("--retries", type=int, default=2)
     p.add_argument("--timeout", type=float, default=1800.0)
+    p.add_argument("--max-output-tokens", type=int, default=0,
+                   help="passed to claude as CLAUDE_CODE_MAX_OUTPUT_TOKENS (0: the CLI's default)")
     p.add_argument("--date", default=date.today().isoformat())
     p.add_argument("--force", action="store_true", help="redo a run of this date that exists")
     p.add_argument("--dry-run", action="store_true", help="assemble and measure the input; call no model")
@@ -111,26 +113,37 @@ def pick_quotes(members: list[dict], n: int) -> list[dict]:
     return sorted(chosen, key=lambda m: (m.get("time_utc", ""), m["id"]))
 
 
-def lineage_block(d: dict, n_quotes: int, quote_chars: int) -> str:
+def lineage_block(d: dict, n_quotes: int, quote_chars: int, label: str, qlabels: dict) -> str:
     head = (f"scope: {d['scope']} | origin: {d['origin']} | first seen: {d['first'].get('time_local', '')[:10]} | "
             f"rows: {d['rows']} | witnesses: {d['witnesses']} | days: {d['days']} | last: {d['last']}")
     if d["adopted_by_luciano"]:
         head += f" | taken up by Luciano: {d['adopted_by_luciano'].get('time_local', '')[:10]}"
-    lines = [f"### {d['id']}", head, f"statement: {d['statement']}", "quotes:"]
+    lines = [f"### {label} {d['id']}", head, f"statement: {d['statement']}", "quotes:"]
     for m in pick_quotes(d["members"], n_quotes):
-        lines.append(f"- {m['id']} | {m.get('time_local', '')[:16]} | {m.get('who')} | {m['relation']} | "
+        q = f"q{len(qlabels) + 1}"
+        qlabels[q] = m["id"]
+        lines.append(f"- {q} | {m.get('time_local', '')[:16]} | {m.get('who')} | {m['relation']} | "
                      f"\"{link_ideas.clip(m.get('quote', ''), quote_chars)}\"")
     return "\n".join(lines)
 
 
-def assemble(texts: dict[str, str], der: dict[str, dict], n_quotes: int, quote_chars: int) -> str:
+def labels_for(der: dict[str, dict]) -> dict[str, str]:
+    """l<n> -> lineage id, in order of first appearance."""
+    order = sorted(der.values(), key=lambda d: (d["first"].get("time_utc", ""), d["id"]))
+    return {f"l{i}": d["id"] for i, d in enumerate(order, 1)}
+
+
+def assemble(texts: dict[str, str], der: dict[str, dict], n_quotes: int, quote_chars: int,
+             qlabels: dict | None = None) -> str:
+    """The input; fills qlabels (q<n> -> row id) as the quotes are numbered."""
+    qlabels = {} if qlabels is None else qlabels
+    llabels = labels_for(der)
     blocks = [f"## Principles in force (record/principles.md)\n\n{texts['principles']}",
               f"## Decision log (record/decisions.md)\n\n{texts['decisions']}",
               f"## Ledger (scripts/principles_ledger.py, computed from the two above)\n\n{texts['ledger']}",
               f"## Objectives (record/objectives.md)\n\n{texts['objectives']}",
               f"## Lineages ({len(der)})\n\n" + "\n\n".join(
-                  lineage_block(d, n_quotes, quote_chars)
-                  for d in sorted(der.values(), key=lambda d: (d["first"].get("time_utc", ""), d["id"])))]
+                  lineage_block(der[lid], n_quotes, quote_chars, lab, qlabels) for lab, lid in llabels.items())]
     return "\n\n".join(blocks) + "\n"
 
 
@@ -153,6 +166,36 @@ def quote_in(quote: str, source: str) -> bool:
             return False
         pos = i + len(piece)
     return True
+
+
+def expand(ans: dict, llabels: dict[str, str], qlabels: dict[str, str]) -> tuple[dict, list[str]]:
+    """The compact answer (l<n>, q<n>, classification as lists) in the long form, with ids."""
+    if not isinstance(ans, dict):
+        return ans, ["the answer is not a JSON object"]
+    errors, cls = [], []
+    lid = lambda x: llabels.get(x, f"?{x}")
+    for c in ans.get("classification", []) or []:
+        if not (isinstance(c, list) and len(c) in (3, 4)):
+            errors.append(f"classification entry {c!r} is not [l<n>, verdict, ref, note]")
+            continue
+        ref = c[2] or None
+        cls.append({"lineage": lid(c[0]), "verdict": c[1], "principle": ref if c[1] in ("covered", "extends") else None,
+                    "candidate": ref if c[1] == "candidate" else None, "note": c[3] if len(c) == 4 else ""})
+    cands = []
+    for c in ans.get("candidates", []) or []:
+        c = dict(c)
+        c["lineages"] = [lid(x) for x in c.get("lineages", []) or []]
+        q = c.pop("quote", None)
+        c["quote_row"] = qlabels.get(q, f"?{q}")
+        c["quote_label"] = q
+        c["quote"] = c.pop("quote_text", "")
+        cands.append(c)
+    against = []
+    for a in ans.get("against", []) or []:
+        a = dict(a)
+        a["evidence"] = [llabels.get(e, e) for e in a.get("evidence", []) or []]
+        against.append(a)
+    return {"classification": cls, "candidates": cands, "against": against}, errors
 
 
 def check_answer(ans: dict, der: dict, principles: dict, decisions: dict, max_candidates: int) -> list[str]:
@@ -328,7 +371,9 @@ def main(argv: list[str]) -> int:
     ledger_text, _ = pl.ledger(principles, decisions, in_force, None, args.date)
     texts = {"principles": args.principles.read_text(encoding="utf-8"), "decisions": args.decisions.read_text(encoding="utf-8"),
              "objectives": args.objectives.read_text(encoding="utf-8"), "ledger": ledger_text}
-    body = assemble(texts, der, args.quotes_per_lineage, args.quote_chars)
+    qlabels: dict[str, str] = {}
+    body = assemble(texts, der, args.quotes_per_lineage, args.quote_chars, qlabels)
+    llabels = labels_for(der)
     prompt_text = template.replace(PLACEHOLDER, body)
     pending = sum(1 for r in rows if r["id"] not in state["assign"] and r["id"] not in state["unplaced"])
     print(f"lineages: {len(der)} | timeline rows not yet in a lineage: {pending} | input: {len(prompt_text):,} chars "
@@ -369,19 +414,24 @@ def main(argv: list[str]) -> int:
            "max_candidates": args.max_candidates, "quotes_per_lineage": args.quotes_per_lineage, "quote_chars": args.quote_chars,
            "inputs": {rel(p): {"sha256": sha256_bytes(p.read_bytes())} for k, p in paths.items() if k != "prompt"},
            "ledger_sha256": sha256_bytes(ledger_text.encode()), "input_sha256": sha256_bytes(prompt_text.encode()),
+           "lineage_labels": llabels, "quote_labels": qlabels,
            "lineages": len(der), "attempts": [], "answer": None}
     text, ans = prompt_text, None
     for attempt in range(args.retries + 1):
         t0 = time.time()
         try:
-            raw = link_ideas.call(cli, text, model, args.effort, args.timeout)
+            raw = link_ideas.call(cli, text, model, args.effort, args.timeout, args.max_output_tokens)
+        except link_ideas.OutputLimit as exc:
+            run["attempts"].append({"error": f"output limit: {exc}", "seconds": round(time.time() - t0)})
+            print("the answer hit the output token limit; raise it with --max-output-tokens", file=sys.stderr)
+            break
         except Exception as exc:
             run["attempts"].append({"error": str(exc)[:500], "seconds": round(time.time() - t0)})
             print(f"call failed: {str(exc)[:200]}", file=sys.stderr)
             continue
         try:
-            cand = link_ideas.parse_json(raw)
-            errors = check_answer(cand, der, principles, decisions, args.max_candidates)
+            cand, errors = expand(link_ideas.parse_json(raw), llabels, qlabels)
+            errors = errors + check_answer(cand, der, principles, decisions, args.max_candidates)
         except (ValueError, json.JSONDecodeError) as exc:
             cand, errors = None, [f"not valid JSON: {exc}"]
         run["attempts"].append({"answer": raw, "answer_sha256": sha256_bytes(raw.encode()), "errors": errors,
@@ -390,7 +440,7 @@ def main(argv: list[str]) -> int:
         if not errors:
             ans = cand
             break
-        print(f"answer rejected ({len(errors)} errors): {errors[0][:160]}", file=sys.stderr)
+        print(f"answer rejected ({len(errors)} errors): {errors[0][:160]}\nthe answer began: {raw.strip()[:200]!r}", file=sys.stderr)
         text = (prompt_text + "\n\n## Your previous answer was rejected\n\n" + "\n".join(f"- {e}" for e in errors)
                 + "\n\nAnswer again, the whole JSON object.\n")
     run["answer"] = ans

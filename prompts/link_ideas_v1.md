@@ -29,8 +29,9 @@ Under Input:
 
 1. **Existing lineages**, possibly none: one line each, `id | scope | first seen | rows | statement`.
    You may add rows to them. You may not rename or delete them.
-2. **Rows to place**: one line each, `row id | local time | who | kind | what | "quote"`, in time
-   order. `who` is Luciano, model or pasted (pasted text in Luciano's turn that may not be his).
+2. **Rows to place**: one line each, `r<n> | local time | who | kind | what | "quote"`, in time
+   order; `r<n>` is the row's number in this window, and you refer to rows only by it. `who` is
+   Luciano, model or pasted (pasted text in Luciano's turn that may not be his).
    `kind` comes from the conversations (idea, decision, question, proposal, confirmation of turn k,
    rejection of turn k, correction of turn k); rows from voice and written notes are all `idea`.
    Two rows from the same voice note, one extracted per note and one per day, are the same
@@ -60,8 +61,8 @@ One JSON object and nothing else, no fence, no prose:
 ```
 {"new_lineages": [{"id": "L-<kebab-slug>", "scope": "language" | "method" | "other",
                    "statement": "one sentence"}],
- "assign": [{"row": "<row id>", "lineage": "<lineage id>", "relation": "<relation>"}],
- "unplaced": [{"row": "<row id>", "reason": "a few words"}]}
+ "assign": [["r<n>", "<lineage id>", "<relation>"], ...],
+ "unplaced": [["r<n>", "a few words"], ...]}
 ```
 
 - `scope`: `language` for what Luthier is or how it works (types, laws, certificates, syntax,
@@ -69,8 +70,9 @@ One JSON object and nothing else, no fence, no prose:
   decisions, models, reviews); `other` for the rest (motivation, other projects as they bear on
   Luthier).
 - New ids are short, unique, and not among the existing ones.
-- Every row id of "Rows to place" appears once in `assign` or `unplaced`, and no other row id
-  appears. A script checks this, and the ids, before your answer is accepted.
+- Every `r<n>` of "Rows to place" appears once in `assign` or `unplaced`, and no other. A script
+  checks this, and the lineage ids, before your answer is accepted.
+- Keep it compact: no spaces or line breaks beyond what JSON needs.
 
 ## Input
 

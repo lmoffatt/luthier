@@ -67,7 +67,9 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--model", default=None)
     p.add_argument("--agent", default=None)
     p.add_argument("--effort", choices=EFFORTS, default=DEFAULT_EFFORT, help="passed to claude; codex ignores it")
-    p.add_argument("--window-chars", type=int, default=120000, help="largest block of rows sent in one call")
+    p.add_argument("--window-chars", type=int, default=60000, help="largest block of rows sent in one call")
+    p.add_argument("--max-output-tokens", type=int, default=0,
+                   help="passed to claude as CLAUDE_CODE_MAX_OUTPUT_TOKENS (0: the CLI's default)")
     p.add_argument("--quote-chars", type=int, default=200, help="each row's quote is cut to this length in the prompt")
     p.add_argument("--max-calls", type=int, default=0, help="stop after this many calls (0: no limit)")
     p.add_argument("--retries", type=int, default=2, help="asks again when an answer fails the checks")
@@ -94,15 +96,29 @@ def cli_version(cli: str) -> str:
         return ""
 
 
-def call(cli: str, prompt_text: str, model: str, effort: str, timeout: float) -> str:
+TOKEN_LIMIT_MARK = "output token maximum"
+
+
+class OutputLimit(RuntimeError):
+    """The CLI cut the answer at its output token limit; it says so in plain text, exit 0."""
+
+
+def call(cli: str, prompt_text: str, model: str, effort: str, timeout: float, max_output_tokens: int = 0) -> str:
     if cli == "claude":
         cmd = ["claude", "-p", "--model", model, "--effort", effort, "--output-format", "text",
                "--no-session-persistence", "--tools", ""]
     else:
         cmd = ["codex", "exec", "--skip-git-repo-check", "--color", "never", "--sandbox", "read-only", "-m", model, "-"]
-    proc = subprocess.run(cmd, input=prompt_text, capture_output=True, text=True, timeout=timeout)
+    env = None
+    if max_output_tokens:
+        import os
+        env = {**os.environ, "CLAUDE_CODE_MAX_OUTPUT_TOKENS": str(max_output_tokens)}
+    proc = subprocess.run(cmd, input=prompt_text, capture_output=True, text=True, timeout=timeout, env=env)
+    text = (proc.stdout or "") + (proc.stderr or "")
+    if TOKEN_LIMIT_MARK in text and "{" not in proc.stdout:
+        raise OutputLimit(text.strip()[:300])
     if proc.returncode != 0:
-        raise RuntimeError((proc.stderr or proc.stdout).strip() or f"{cli} failed")
+        raise RuntimeError(text.strip() or f"{cli} failed")
     return proc.stdout
 
 
@@ -124,8 +140,8 @@ def clip(text: str, n: int) -> str:
     return text if len(text) <= n else text[:n - 1].rstrip() + "…"
 
 
-def row_line(r: dict, quote_chars: int) -> str:
-    return (f"{r['id']} | {r.get('time_local', '')[:16]} | {r.get('who', '')} | {r.get('kind', 'idea')} | "
+def row_line(r: dict, quote_chars: int, label: str | None = None) -> str:
+    return (f"{label or r['id']} | {r.get('time_local', '')[:16]} | {r.get('who', '')} | {r.get('kind', 'idea')} | "
             f"{clip(r.get('what', ''), 300)} | \"{clip(r.get('quote', ''), quote_chars)}\"")
 
 
@@ -162,11 +178,30 @@ def build_input(state: dict, by_id: dict, win: list[dict], quote_chars: int) -> 
         first = min((m.get("time_local", "")[:10] for m in ms), default="")
         lines.append(lineage_line(lin, first, len(ms)))
     lines += ["", f"## Rows to place ({len(win)})", ""]
-    lines += [row_line(r, quote_chars) for r in win]
+    lines += [row_line(r, quote_chars, f"r{i}") for i, r in enumerate(win, 1)]
     return "\n".join(lines) + "\n"
 
 
 # --- the checks ------------------------------------------------------------------------------------
+
+def expand(ans: dict, win: list[dict]) -> tuple[dict, list[str]]:
+    """The compact answer (rows as r<n>, entries as lists) in the long form, with row ids."""
+    if not isinstance(ans, dict):
+        return ans, ["the answer is not a JSON object"]
+    local = {f"r{i}": r["id"] for i, r in enumerate(win, 1)}
+    errors, assign, unplaced = [], [], []
+    for a in ans.get("assign", []) or []:
+        if not (isinstance(a, list) and len(a) == 3):
+            errors.append(f"assign entry {a!r} is not [r<n>, lineage, relation]")
+            continue
+        assign.append({"row": local.get(a[0], f"?{a[0]}"), "lineage": a[1], "relation": a[2]})
+    for u in ans.get("unplaced", []) or []:
+        if not (isinstance(u, list) and len(u) == 2):
+            errors.append(f"unplaced entry {u!r} is not [r<n>, reason]")
+            continue
+        unplaced.append({"row": local.get(u[0], f"?{u[0]}"), "reason": str(u[1])})
+    return {"new_lineages": ans.get("new_lineages", []) or [], "assign": assign, "unplaced": unplaced}, errors
+
 
 def check_answer(ans: dict, state: dict, win: list[dict]) -> list[str]:
     errors: list[str] = []
@@ -195,16 +230,17 @@ def check_answer(ans: dict, state: dict, win: list[dict]) -> list[str]:
         rid = a.get("row")
         seen[rid] += 1
         if a.get("lineage") not in ids:
-            errors.append(f"row {rid}: lineage {a.get('lineage')!r} is neither existing nor new")
+            errors.append(f"row {label_of(rid, win)}: lineage {a.get('lineage')!r} is neither existing nor new")
         if a.get("relation") not in RELATIONS:
-            errors.append(f"row {rid}: relation {a.get('relation')!r} is not one of {RELATIONS}")
+            errors.append(f"row {label_of(rid, win)}: relation {a.get('relation')!r} is not one of {RELATIONS}")
     for u in unplaced:
         seen[u.get("row")] += 1
         if not str(u.get("reason", "")).strip():
-            errors.append(f"row {u.get('row')}: unplaced without a reason")
-    foreign = [r for r in seen if r not in set(window_ids)]
-    missing = [r for r in window_ids if seen[r] == 0]
-    twice = [r for r in window_ids if seen[r] > 1]
+            errors.append(f"row {label_of(u.get('row'), win)}: unplaced without a reason")
+    label = {r["id"]: f"r{i}" for i, r in enumerate(win, 1)}
+    foreign = [str(r).lstrip("?") for r in seen if r not in set(window_ids)]
+    missing = [label[r] for r in window_ids if seen[r] == 0]
+    twice = [label[r] for r in window_ids if seen[r] > 1]
     if foreign:
         errors.append(f"row ids not in this window: {', '.join(map(str, foreign[:10]))}")
     if missing:
@@ -212,6 +248,13 @@ def check_answer(ans: dict, state: dict, win: list[dict]) -> list[str]:
     if twice:
         errors.append(f"rows placed more than once: {', '.join(twice[:10])}")
     return errors
+
+
+def label_of(rid, win: list[dict]) -> str:
+    for i, r in enumerate(win, 1):
+        if r["id"] == rid:
+            return f"r{i}"
+    return str(rid).lstrip("?")
 
 
 def apply_answer(ans: dict, state: dict, n_call: int) -> None:
@@ -374,24 +417,34 @@ def main(argv: list[str]) -> int:
         return 0
 
     failed = False
-    for k, win in enumerate(wins, 1):
+    queue = list(wins)
+    k = 0
+    while queue:
+        win = queue.pop(0)
+        k += 1
         if args.max_calls and k > args.max_calls:
             break
         body = build_input(state, by_id, win, args.quote_chars)
         base_prompt = template.replace(PLACEHOLDER, body)
         attempts, prompt_text, ans = [], base_prompt, None
-        print(f"[{k}/{len(wins)}] {len(win)} rows, {win[0].get('time_local', '')[:10]} to {win[-1].get('time_local', '')[:10]}", flush=True)
+        print(f"[{k}/{k + len(queue)}] {len(win)} rows, {win[0].get('time_local', '')[:10]} to {win[-1].get('time_local', '')[:10]}", flush=True)
+        split = False
         for attempt in range(args.retries + 1):
             t0 = time.time()
             try:
-                raw = call(cli, prompt_text, model, args.effort, args.timeout)
+                raw = call(cli, prompt_text, model, args.effort, args.timeout, args.max_output_tokens)
+            except OutputLimit as exc:
+                attempts.append({"error": f"output limit: {exc}", "seconds": round(time.time() - t0)})
+                split = len(win) > 1
+                print(f"  the answer hit the output token limit; " + ("the window is split in two" if split else "a single row, cannot split"), file=sys.stderr)
+                break
             except Exception as exc:
                 attempts.append({"error": str(exc)[:500], "seconds": round(time.time() - t0)})
                 print(f"  call failed: {str(exc)[:200]}", file=sys.stderr)
                 continue
             try:
-                cand = parse_json(raw)
-                errors = check_answer(cand, state, win)
+                cand, errors = expand(parse_json(raw), win)
+                errors = errors + check_answer(cand, state, win)
             except (ValueError, json.JSONDecodeError) as exc:
                 cand, errors = None, [f"not valid JSON: {exc}"]
             attempts.append({"answer": raw, "answer_sha256": sha256_bytes(raw.encode()), "errors": errors,
@@ -399,14 +452,19 @@ def main(argv: list[str]) -> int:
             if not errors:
                 ans = cand
                 break
-            print(f"  answer rejected ({len(errors)} errors): {errors[0][:160]}", file=sys.stderr)
+            print(f"  answer rejected ({len(errors)} errors): {errors[0][:160]}\n  the answer began: {raw.strip()[:200]!r}", file=sys.stderr)
             prompt_text = (base_prompt + "\n\n## Your previous answer was rejected\n\n" + "\n".join(f"- {e}" for e in errors)
                            + "\n\nAnswer again, the whole JSON object for this window.\n")
         n_call = len(state["calls"]) + 1
         state["calls"].append({"n": n_call, "date": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                                "rows": len(win), "first_row": win[0]["id"], "last_row": win[-1]["id"],
                                "input_sha256": sha256_bytes(base_prompt.encode()), "timeline_sha256": timeline_sha,
-                               "accepted": ans is not None, "attempts": attempts})
+                               "accepted": ans is not None, "split": split, "attempts": attempts})
+        if split:
+            half = len(win) // 2
+            queue[:0] = [win[:half], win[half:]]
+            save_state(state_path, state)
+            continue
         if ans is None:
             save_state(state_path, state)
             print(f"  window {k} not placed after {len(attempts)} attempts; state saved, run again to resume", file=sys.stderr)
