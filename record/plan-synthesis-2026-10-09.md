@@ -83,3 +83,4 @@ committed for Luciano. The night stops here: the review, and the scoring after i
 ## Progress log
 
 Each step, when done, gets a line: step, commit, what came out, anything that went wrong.
+- A0 done: transcripts pinned (both accounts, one new file); the units were already committed by Luciano at 656a754 (337 units, 100 with a commit, 29 reversals, 22 withheld). He is marking principle_dates.md: not touched.
