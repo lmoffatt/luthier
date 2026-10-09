@@ -89,3 +89,7 @@ Each step, when done, gets a line: step, commit, what came out, anything that we
 - A2 done, b2bdc62 and 4b88aab: 10 candidates found blind; against P1 to P14, 9 new, 1 extends P10 (the mathematical object as invariant).
 - A4 done, eb7984e: record/synthesis/2026-10-09_synthesis.md (557 lines, summary first). Part A complete.
 - B1 running: lineages of the 1,020 rows before 2026-09-30 with link_ideas_v2 (the prompt that does not describe Luthier; v1 states one of the candidates as a fact), in record/validation/cutoff.
+- B1 done, daacc9a: 404 lineages of the 1,020 rows before the cutoff.
+- B2 done, 9eba77d: 10 candidates (7 first said by Luciano); 8 new, C1 extends P14, C6 extends P10.
+- B3 done: eligibility with --after the cutoff (c5fcd8e): 175 units to draft.
+- B4 running: draft_cases on the 175 units, output in record/validation/cutoff.
