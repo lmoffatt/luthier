@@ -2605,7 +2605,7 @@ first 2026-09-02 10:56 by Luciano; 3 rows, 2 witnesses, 1 days, last 2026-09-02
 - 2026-09-02 10:57 Luciano refines [WhatsApp Ptt 2026-09-02 at 10.53.08.md [04:13]] `day:2026-09-02:librerias-por-propiedades-y-adaptador-universal`: "en ese sentido Luthier serviría como una especie de adaptador universal entre distintas librerías."
 - 2026-09-02 10:57 Luciano restates [WhatsApp Ptt 2026-09-02 at 10.53.08.md [04:13]] `note:2026-09-02T10.53.08:luthier-adaptador-universal`: "en ese sentido Luthier serviría como una especie de adaptador universal entre distintas librerías"
 
-### L-apply-luthier-to-databaum (method)
+### L-apply-luthier-to-[private word] (method)
 
 Luthier's concepts (function plus version, a table of functions) are carried into the design of the analysis/derivation store.
 
