@@ -4,6 +4,8 @@
 For every thread `.md` under the input directory (default record/IA/raw, as `iachat fetch` leaves
 it), the prompt `extract_ideas_dialogue_v1` is run through the `claude` (or `codex`) command line
 and the ideas are written to `<output-dir>/<source>_<date>_<id8>_<prompt>_<agent>_<model>_ideas.md`.
+A thread under a `local-only/` folder (ignored by
+git) is marked `copy: local-only` in the frontmatter, since its source is not in the repository.
 A long thread is cut into windows at turn boundaries (--window-chars); each window is one call,
 and the bodies are concatenated under one heading per window. Tool turns are dropped before the
 cut (--keep-tool-turns keeps them).
@@ -150,6 +152,7 @@ def frontmatter(*, front: dict, path: Path, sha: str, n_turns: int, n_windows: i
     lines = ["---", f"source: {front.get('source', '')}", f"key: {front.get('source', '')}:{front.get('account', '')}:{front.get('id', '')}",
              f"title: \"{front.get('title', '').replace(chr(34), chr(39))}\"", f"started: {front.get('started', '')}",
              f"ended: {front.get('ended', '')}", f"thread: {path.name}", f"thread_sha256: {sha}",
+             f"copy: {'local-only' if 'local-only' in path.parts else 'tracked'}",
              f"turns: {n_turns}", f"windows: {n_windows}", f"window_chars: {window_chars}", f"ideas: {n_ideas}",
              f"generated_by: {PROMPT_ID}", f"prompt_sha256: {prompt_sha}", f"mode: {MODE}",
              f"agent: {agent}", f"model: {model}", "---"]

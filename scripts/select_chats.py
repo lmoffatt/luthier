@@ -3,7 +3,10 @@
 
 The candidates come from the archive of conversations (`~/Projects/IA_chat`) through its own
 command, `iachat fetch --dry-run`, so the same privacy rules apply: a thread the fetch would
-withhold is still judged here, and reported as withheld, so that Luciano knows what stays out.
+withhold is not judged (what a model says about it could describe what is private) and is only
+listed as withheld, with its title and the private words replaced by a mark. The outputs are
+committed to a public repository, so every text they carry is scrubbed of the words of
+`scripts/export_chat.private` (--private-words) and checked again before the script ends.
 A model reads each candidate (Luciano's turns complete, the model's turns shortened) with
 `prompts/select_chats_v1.md` and answers yes, partial or no, with its reason and the turns that
 are about Luthier. Two rules spare the model: a thread whose cwd is this repository is yes (--cwd-is-yes;
@@ -65,6 +68,8 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     p.add_argument("--cwd-is-yes", dest="cwd_rule", action="store_true", default=True,
                    help="a thread whose cwd is this repository is yes without a model (default)")
     p.add_argument("--no-cwd-rule", dest="cwd_rule", action="store_false")
+    p.add_argument("--private-words", type=Path, default=REPO_ROOT / "scripts" / "export_chat.private",
+                   help="words that must not appear in the outputs; one per line")
     p.add_argument("--min-mentions", type=int, default=1,
                    help="Luciano's turns that must say the query for a thread to reach the model; fewer is no by rule (0 disables)")
     p.add_argument("--take", default="yes,partial", help="verdicts that go into the fetch command")
@@ -229,14 +234,71 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def load_done(jsonl: Path) -> dict[str, dict]:
+MARK = "[private word]"
+
+
+def load_words(path: Path) -> list[str]:
+    if not path.exists():
+        return []
+    return [w.strip() for w in path.read_text(encoding="utf-8").splitlines() if w.strip() and not w.startswith("#")]
+
+
+def _pattern(word: str) -> re.Pattern:
+    import unicodedata
+    return re.compile(r"(?<!\w)" + re.escape(unicodedata.normalize("NFC", word)) + r"(?!\w)", re.IGNORECASE)
+
+
+def scrub_text(text: str, words: list[str]) -> str:
+    for w in words:
+        text = _pattern(w).sub(MARK, text)
+    return text
+
+
+def scrub_row(row: dict, words: list[str]) -> dict:
+    """A row fit for a public repository: private words marked everywhere, and a withheld thread
+    keeps no judgement but the fact that it was withheld and how many private words the archive saw."""
+    row = dict(row)
+    if row.get("withheld"):
+        m = re.match(r"private words: (.*)", row["withheld"])
+        if m:
+            row["withheld"] = f"private words ({len(m.group(1).split(', '))})"
+        row.update(verdict="withheld", judged_by="archive", turns=[], topics=[],
+                   reason="withheld by the archive; not judged")
+    for k, v in row.items():
+        if isinstance(v, str):
+            row[k] = scrub_text(v, words)
+        elif isinstance(v, list):
+            row[k] = [scrub_text(x, words) if isinstance(x, str) else x for x in v]
+    return row
+
+
+def load_done(jsonl: Path, words: list[str]) -> dict[str, dict]:
+    """The rows already there, scrubbed; the file is rewritten when that changes one."""
     done: dict[str, dict] = {}
     if jsonl.exists():
+        changed = False
         for ln in jsonl.read_text(encoding="utf-8").splitlines():
             if ln.strip():
                 row = json.loads(ln)
-                done[row["key"]] = row
+                clean = scrub_row(row, words)
+                changed |= clean != row
+                done[row["key"]] = clean
+        if changed:
+            jsonl.write_text("".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in done.values()),
+                             encoding="utf-8")
+            print(f"rewritten without private words: {jsonl}")
     return done
+
+
+def check_outputs(paths: list[Path], words: list[str]) -> list[str]:
+    hits = []
+    for p in paths:
+        if p.exists():
+            for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+                for w in words:
+                    if _pattern(w).search(line):
+                        hits.append(f"{p}:{n}: {w}")
+    return hits
 
 
 def write_summary(md: Path, rows: list[dict], args: argparse.Namespace, prompt_sha: str,
@@ -244,7 +306,7 @@ def write_summary(md: Path, rows: list[dict], args: argparse.Namespace, prompt_s
     take = [v.strip() for v in args.take.split(",") if v.strip()]
     rows = sorted(rows, key=lambda r: (r.get("started", ""), r["key"]))
     taken = [r for r in rows if r.get("verdict") in take and not r["withheld"]]
-    lost = [r for r in rows if r.get("verdict") in take and r["withheld"]]
+    lost = [r for r in rows if r["withheld"]]
     lines = [f"# Selection of conversations for luthier's record, {args.date}", "",
              f"Written by `scripts/select_chats.py` for Luciano. Prompt `{PROMPT_ID}` (sha256 {prompt_sha}),",
              f"model {model} via {agent}; candidates from `iachat fetch --dry-run --query {args.query}"
@@ -253,8 +315,8 @@ def write_summary(md: Path, rows: list[dict], args: argparse.Namespace, prompt_s
              f"repository is yes by rule ({'on' if args.cwd_rule else 'off'}); a thread where Luciano's turns say the "
              f"query fewer than {args.min_mentions} times is no by rule; the model's turns were cut to "
              f"{args.max_model_chars} characters. Verdicts taken: {', '.join(take)}.", "",
-             f"Candidates: {len(rows)}. Taken: {len(taken)}. Withheld by the archive's privacy rules but "
-             f"judged {', '.join(take)}: {len(lost)}. Errors: {len(errors)}.", "",
+             f"Candidates: {len(rows)}. Taken: {len(taken)}. Withheld by the archive's privacy rules, not judged: "
+             f"{len(lost)}. Errors: {len(errors)}. Private words are replaced by `{MARK}` throughout.", "",
              "| started | source | key | verdict | by | withheld | reason |", "|---|---|---|---|---|---|---|"]
     for r in rows:
         lines.append(f"| {r.get('started', '')[:10]} | {r['source']} | `{r['key']}` | {r.get('verdict', '')} | "
@@ -264,9 +326,10 @@ def write_summary(md: Path, rows: list[dict], args: argparse.Namespace, prompt_s
         lines += ["", "## The fetch (Luciano runs it)", "", "```",
                   f"iachat fetch --ids {ids} --to {args.to}", "```"]
     if lost:
-        lines += ["", "## Judged relevant but withheld", "",
-                  "These stay in the archive; copying them needs a decision (a redacted copy, a local-only "
-                  "copy, or an override in `flags.override`).", ""]
+        lines += ["", "## Withheld by the archive", "",
+                  "Not judged and not copied. `iachat fetch --dry-run` in the archive shows which words held each "
+                  "one; copying one needs a line in the archive's `flags.override`, a copy under "
+                  "`record/IA/raw/local-only/` (ignored by git) or a redacted copy.", ""]
         lines += [f"- `{r['key']}` {r['title'][:60]}: {r['withheld']}" for r in lost]
     if errors:
         lines += ["", "## Errors", ""] + [f"- {e}" for e in errors]
@@ -304,7 +367,10 @@ def main(argv: list[str]) -> int:
     tag = f"{args.date}_{PROMPT_ID}_{agent}_{model}"
     jsonl = args.output_dir / f"{tag}.jsonl"
     md = args.output_dir / f"{tag}.md"
-    done = {} if args.force else load_done(jsonl)
+    words = load_words(args.private_words)
+    if not words:
+        print(f"WARNING: no private words at {args.private_words}; nothing will be scrubbed", file=sys.stderr)
+    done = {} if args.force else load_done(jsonl, words)
 
     print(f"candidates: {len(cands)} | already judged: {sum(c['key'] in done for c in cands)} | "
           f"withheld by the archive: {sum(bool(c['withheld']) for c in cands)}")
@@ -333,7 +399,9 @@ def main(argv: list[str]) -> int:
                        "prompt": PROMPT_ID, "prompt_sha256": prompt_sha, "model": model, "agent": agent,
                        "max_model_chars": args.max_model_chars, "date": args.date}
                 said = mentions(text, args.query)
-                if args.cwd_rule and cwd_is_repo(front, REPO_ROOT):
+                if c["withheld"]:
+                    pass  # scrub_row records it as withheld, unjudged
+                elif args.cwd_rule and cwd_is_repo(front, REPO_ROOT):
                     row.update(verdict="yes", reason="cwd is this repository", turns=luciano_turns(text),
                                topics=[], judged_by="rule")
                 elif args.min_mentions and len(said) < args.min_mentions:
@@ -349,6 +417,7 @@ def main(argv: list[str]) -> int:
                 errors.append(f"{c['key']}: {exc}")
                 print(f"[{i}/{len(cands)}] ERROR {c['key']}: {exc}", file=sys.stderr)
                 continue
+            row = scrub_row(row, words)
             fh.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
             fh.flush()
             rows.append(row)
@@ -357,7 +426,10 @@ def main(argv: list[str]) -> int:
             write_summary(md, rows, args, prompt_sha, model, agent, errors)
     write_summary(md, rows, args, prompt_sha, model, agent, errors)
     print(f"written: {jsonl}\n         {md}")
-    return 1 if errors else 0
+    leaks = check_outputs([jsonl, md], words)
+    for l in leaks:
+        print(f"PRIVATE WORD LEFT: {l}", file=sys.stderr)
+    return 1 if errors or leaks else 0
 
 
 if __name__ == "__main__":

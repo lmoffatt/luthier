@@ -73,8 +73,10 @@ if args[0] == "fetch":
     assert "--dry-run" in args and "--query" in args, args
     print("would copy  claude-code:-:aaaaaaaa-1111-2222-3333-444444444444  quiero empezar a definir la semantica de luthier  -> claude-code/a.md")
     print("would copy  gemini:-:20260626T0607  Https://www.youtube.com/live/x  -> gemini/b.md")
-    print("withheld  claude-code:-:cccccccc-1111-2222-3333-444444444444  lee los audios de hoy  (private words: secretword)")
+    print("withheld  claude-code:-:cccccccc-1111-2222-3333-444444444444  lee los audios de secretword  (private words: secretword)")
     print("would copy  claude-code:-:dddddddd-1111-2222-3333-444444444444  lee los audios de macro  -> claude-code/d.md")
+    # the withheld thread's title carries the private word, as happens in the real archive
+
     print("3 to copy, 1 withheld; target repository /x has a remote")
 elif args[0] == "show":
     assert args[-1] == "--path"
@@ -140,7 +142,11 @@ def calls(tmp_path: Path) -> list[dict]:
 
 
 def run(script: Path, tmp_path: Path, *args: str) -> subprocess.CompletedProcess:
-    return subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True,
+    words = tmp_path / "private.words"
+    if not words.exists():
+        words.write_text("secretword\n# a comment\n", encoding="utf-8")
+    extra = ["--private-words", str(words)] if script == SELECT else []
+    return subprocess.run([sys.executable, str(script), *args, *extra], capture_output=True, text=True,
                           env=make_env(tmp_path), cwd=tmp_path)
 
 
@@ -158,18 +164,18 @@ def test_select_judges_with_the_model_and_by_cwd_and_reports_withheld(tmp_path):
     assert rows["claude-code:-:aaaaaaaa-1111-2222-3333-444444444444"]["turns"] == [1, 4]
     assert rows["gemini:-:20260626T0607"]["verdict"] == "no"
     c = rows["claude-code:-:cccccccc-1111-2222-3333-444444444444"]
-    assert c["verdict"] == "partial" and c["withheld"].startswith("private words") and c["turns"] == [1, 4]
+    assert c["verdict"] == "withheld" and c["judged_by"] == "archive" and c["withheld"] == "private words (1)"
+    assert "secretword" not in json.dumps(rows) and "[private word]" in c["title"]
     d = rows["claude-code:-:dddddddd-1111-2222-3333-444444444444"]
     assert d["verdict"] == "no" and d["judged_by"] == "rule" and "0 times" in d["reason"]
     assert all("thread_sha256" in r and "prompt_sha256" in r for r in rows.values())
     cs = calls(tmp_path)
-    assert len(cs) == 2  # neither the cwd thread nor the one where Luciano never says luthier went to the model
+    assert len(cs) == 1  # not the cwd thread, not the withheld one, not the one where Luciano never says luthier
     assert "a video about something else" in r.stdout  # the reason is printed as it is made
-    assert "x" * 601 not in cs[0]["prompt"] + cs[1]["prompt"]  # model turns are cut
-    assert "[tool output" not in cs[0]["prompt"] + cs[1]["prompt"]
+    assert "[tool output" not in cs[0]["prompt"]
     md = (out / "2026-01-02_select_chats_v1_claude-code_opus.md").read_text()
     assert "iachat fetch --ids claude-code:-:aaaaaaaa-1111-2222-3333-444444444444 --to" in md
-    assert "cccccccc" in md.split("## Judged relevant but withheld")[1]
+    assert "cccccccc" in md.split("## Withheld by the archive")[1] and "secretword" not in md
 
 
 def test_select_is_idempotent_and_no_cwd_rule_asks_the_model(tmp_path):
@@ -183,7 +189,7 @@ def test_select_is_idempotent_and_no_cwd_rule_asks_the_model(tmp_path):
     assert r.returncode == 0 and len(calls(tmp_path)) == n
     assert "already judged: 4" in r.stdout
     r = run(SELECT, tmp_path, *common, "--force", "--no-cwd-rule", "--min-mentions", "0")
-    assert r.returncode == 0 and len(calls(tmp_path)) == n + 4
+    assert r.returncode == 0 and len(calls(tmp_path)) == n + 3  # the withheld one is never sent
 
 
 def test_select_dry_run_calls_nothing(tmp_path):
@@ -233,3 +239,47 @@ def test_extract_skips_done_threads_and_dry_run_calls_nothing(tmp_path):
     assert r.returncode == 0 and len(calls(tmp_path)) == 1 and "done: 1 | pending: 0" in r.stdout
     r = run(EXTRACT, tmp_path, str(tmp_path / "raw"), "--output-dir", str(out), "--cli", "claude", "--force")
     assert r.returncode == 0 and len(calls(tmp_path)) == 2
+
+
+def test_select_scrubs_an_earlier_output_and_model_turns_are_cut(tmp_path):
+    root = make_archive(tmp_path)
+    out = tmp_path / "sel"
+    out.mkdir()
+    jsonl = out / "2026-01-02_select_chats_v1_claude-code_opus.jsonl"
+    old = {"key": "claude-code:-:cccccccc-1111-2222-3333-444444444444", "title": "lee los audios de secretword",
+           "withheld": "private words: secretword", "rel": "", "source": "claude-code", "started": "2026-09-28T23:56:04Z",
+           "verdict": "partial", "reason": "a secretword business talk", "turns": [1], "topics": ["secretword"], "judged_by": "opus"}
+    jsonl.write_text(json.dumps(old) + "\n", encoding="utf-8")
+    r = run(SELECT, tmp_path, "--iachat", str(root), "--output-dir", str(out), "--date", "2026-01-02",
+            "--cli", "claude", "--to", str(tmp_path / "raw"), "--no-cwd-rule", "--min-mentions", "0")
+    assert r.returncode == 0, r.stderr
+    text = jsonl.read_text() + (out / "2026-01-02_select_chats_v1_claude-code_opus.md").read_text()
+    assert "secretword" not in text and "rewritten without private words" in r.stdout
+    rows = {json.loads(l)["key"]: json.loads(l) for l in jsonl.read_text().splitlines()}
+    assert rows["claude-code:-:cccccccc-1111-2222-3333-444444444444"]["verdict"] == "withheld"
+    cs = calls(tmp_path)
+    assert len(cs) == 3 and all("x" * 601 not in c["prompt"] for c in cs)  # model turns are cut
+
+
+# --- check_private ------------------------------------------------------------------------------
+
+CHECK = ROOT / "scripts" / "check_private.py"
+
+
+def test_check_private_finds_whole_words_and_skips_local_only(tmp_path):
+    words = tmp_path / "w.private"
+    words.write_text("secretword\nsecret phrase\n", encoding="utf-8")
+    d = tmp_path / "rec"
+    (d / "local-only").mkdir(parents=True)
+    (d / "a.md").write_text("fine\nSecretWord here\nsecretwords is another word\na Secret Phrase too\n", encoding="utf-8")
+    (d / "local-only" / "b.md").write_text("secretword\n", encoding="utf-8")
+    (d / "c.png").write_bytes(b"secretword")
+    r = subprocess.run([sys.executable, str(CHECK), str(d), "--words", str(words)], capture_output=True, text=True)
+    assert r.returncode == 1
+    assert "a.md:2: secretword" in r.stdout and "a.md:4: secret phrase" in r.stdout
+    assert "a.md:3" not in r.stdout and "b.md" not in r.stdout and "c.png" not in r.stdout
+    r = subprocess.run([sys.executable, str(CHECK), str(d), "--words", str(words), "--all"], capture_output=True, text=True)
+    assert "b.md:1: secretword" in r.stdout
+    (d / "a.md").write_text("clean\n", encoding="utf-8")
+    r = subprocess.run([sys.executable, str(CHECK), str(d), "--words", str(words)], capture_output=True, text=True)
+    assert r.returncode == 0 and "0 hits" in r.stdout
