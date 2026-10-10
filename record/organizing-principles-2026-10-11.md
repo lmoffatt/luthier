@@ -142,3 +142,23 @@ changes.
 ## Decisions taken by the model
 
 - Committed his note verbatim (fa3f972) and wrote this document. No change to `docs/principles.md`.
+
+## Addendum, same day: two more organizers in the note
+
+Luciano added two before and after the analysis above (committed at fa3f972 and the commit
+following it). The analysis above did not cover them.
+
+- E. Expressive over restrictive: if there is more than one way to do things, all should be
+  expressible in Luthier. It organizes L10 (many paths), the SSA rebinding and the default
+  arguments of 2026-10-11 (D-2026-10-11-c), and P5 (a free choice is legitimate). It pulls against
+  W3 (start minimal) and L7 (minimal core); the resolution already in force is that the core is
+  minimal and the expressible surface is wide, through libraries (L7's second clause). *Proposed*:
+  E is a rule for deciding between designs, so it belongs with the generators, and W3 is the
+  order of work, not a limit on the language.
+- F. Clear separation of the declarative and the executive; the executive is given by the demand,
+  and the declarative becomes everything that is universal, minimally processed. He says F gave
+  rise to B. So F is the generator and B its first consequence; "universal" is L20, "minimally
+  processed" is L19's "the program is the synthesis and is kept", and L12 (two faces) is F
+  restated. *Proposed*: in the structure of §2, F replaces B as the second deviation from type
+  theory, which has no executive face at all: there computation is normalization of a term, with
+  no demand.
