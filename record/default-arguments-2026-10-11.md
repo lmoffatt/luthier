@@ -49,3 +49,24 @@ is not a term today, so it does not collide.
    of the parameter's type; a law of `f` speaks of every `tol`.
 6. Python's trap with mutable defaults (evaluated once, shared between calls) does not arise
    without effects (L18, a definition has no effects).
+
+## Luciano's objection, and a revised syntax
+
+Luciano (chat, 2026-10-11): "me hace ruido con la idea de que := sea algo definitorio, puesto asi es
+como que abre la puerta a que las definiciones son mutables, lo cual no estaria mal ya que el
+lenguaje admite mutaciones."
+
+The objection is right about the declaration and not about the call. Mutation in Luthier is two
+names, before and after (D-2026-10-10-e); no name ever changes its value, and that is what lets the
+hash of a name stand for its value in the memo and the certificate (L18, L19). A call
+`f a (tol := 1e-3)` changes nothing in `f`: it fills the hole `tol` once, for that application, as
+`import ... with num := float64` fills the hole of a file (`06` §7). What reads as redefinition is
+`(tol : Float64 := 1e-6)` in the declaration, which looks like `tol` is already defined.
+
+*Proposed, revised.* Keep `:=` at the call, where it is the one definition of that parameter in that
+application, and mark the default in the declaration with something that does not say "defined":
+
+    f (x : A) (tol : Float64 default 1e-6) : B := ...
+    f a (tol := 1e-3)
+
+`default` would be a new keyword; a symbol (`?=`) is the other option.
