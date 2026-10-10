@@ -1,16 +1,16 @@
 # Lineages of the ideas about Luthier
 
 Written by `scripts/link_ideas.py` (link_ideas v1) for Luciano and for the distillation. Prompt `link_ideas_v1`
-(sha256 df7eb949f556), model opus at effort low via claude-code (2.1.197 (Claude Code)); 17 calls. Input: `record/ideas/timeline.jsonl`, last read with sha256
-b18b5806955d. Who said an idea first and whether Luciano adopted a model's idea are computed from the rows' times and authors, not by the model.
+(sha256 df7eb949f556), model opus at effort low via claude-code (2.1.197 (Claude Code)); 18 calls. Input: `record/ideas/timeline.jsonl`, last read with sha256
+7dc725eb861a. Who said an idea first and whether Luciano adopted a model's idea are computed from the rows' times and authors, not by the model.
 
-Rows: 2322 in the timeline; placed 2293, unplaced 29, pending 0. Lineages: 725.
+Rows: 2333 in the timeline; placed 2304, unplaced 29, pending 0. Lineages: 735.
 
 | scope | first said by Luciano | first said by model | first said by pasted |
 |---|---|---|---|
 | language | 285 | 304 | 9 |
-| method | 41 | 53 | 2 |
-| other | 20 | 11 | 0 |
+| method | 46 | 53 | 2 |
+| other | 25 | 11 | 0 |
 
 First said by a model and then taken up by Luciano: 40.
 
@@ -2482,10 +2482,11 @@ first 2026-08-31 20:14 by model; 1 rows, 1 witnesses, 1 days, last 2026-08-31
 
 The working method is the pipeline audios to ideas to consolidation to mentor, and only after that cycle comes writing the specification.
 
-first 2026-08-31 20:14 by model; 2 rows, 2 witnesses, 1 days, last 2026-08-31; taken up by Luciano 2026-08-31
+first 2026-08-31 20:14 by model; 3 rows, 3 witnesses, 2 days, last 2026-10-09; taken up by Luciano 2026-08-31
 
 - 2026-08-31 20:14 model proposes [2026-08-31_f453278e_lee-todos-los-audios.md turn 4] `dialogue:f453278e:pipeline-audios-ideas`: "es el pipeline audios → ideas → consolidación → mentor, y después de ese ciclo recién viene escribir la especificación."
 - 2026-08-31 20:21 Luciano confirms [2026-08-31_e6fc53cf_lee-todos-los-audios.md turn 5] `dialogue:e6fc53cf:interes-por-la-especificacion`: "es muy interesante esta propuesta:"
+- 2026-10-09 10:52 Luciano refines [WhatsApp Ptt 2026-10-09 at 10.52.06.md [00:03]] `day:2026-10-09:recuperar-dialogos-ia-como-materia-prima`: "estoy tratando de recuperar todo lo que sería el basamento de las ideas, es decir, de los diálogos con la IA y mis audios, que eso serían como la materia prima…"
 
 ### L-date-both-consolidations (method)
 
@@ -7285,11 +7286,99 @@ first 2026-10-08 21:39 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-08
 
 - 2026-10-08 21:39 Luciano states [2026-10-08_b377c2a0_lee-los-ultimos-tres-audios-de-hoy.md turn 39] `dialogue:b377c2a0:computacion-para-biologia-como-matematica-para-fisica`: "Mi intuicion de estudiante era que la computacion podia ocupara para la biologia el rol que la matematica ocupo para la fisica. Toda mi vida apunto a trabajar…"
 
+### L-ai-to-condense-dispersion (method)
+
+Use the AI to help synthesize and condense his own dispersion, consolidating a mass of ideas into polished ones by a protocol.
+
+first 2026-10-09 10:43 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:43 Luciano states [WhatsApp Ptt 2026-10-09 at 10.43.06.md [00:51]] `day:2026-10-09:ia-para-condensar-la-dispersion`: "mi idea es usar la IA para eso como para ayudar a condensar mi dispersión"
+
+### L-trust-ai-via-principles (method)
+
+Fixing solid principles should let him trust what the AI does faster than he can analyze; how to trust the AI is the open question.
+
+first 2026-10-09 10:44 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:44 Luciano states [WhatsApp Ptt 2026-10-09 at 10.43.06.md [01:06]] `day:2026-10-09:confiar-en-la-ia-si-hay-principios-solidos`: "es que si fijamos principios sólidos entonces voy a poder confiar entre comillas que lo que hace la IA que es mucho más rápido en lo que yo puedo analizar, le…"
+
+### L-ai-output-exceeds-processing (method)
+
+The AI generates information faster than he can process it, flooding and clogging him, so forms of synthesis are needed.
+
+first 2026-10-09 10:44 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:44 Luciano states [WhatsApp Ptt 2026-10-09 at 10.43.06.md [01:27]] `day:2026-10-09:la-ia-inunda-y-atora-la-capacidad-de-procesamiento`: "si la IA tiene una capacidad de generación de información que supera mi capacidad de procesamiento te inunda de información y te atora tu capacidad de procesam…"
+
+### L-expansion-synthesis-cycle (method)
+
+The work expands before it contracts: one idea generates many and then synthesis reaches a richer core, a breathing cycle of expansion and synthesis.
+
+first 2026-10-09 10:46 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:46 Luciano states [WhatsApp Ptt 2026-10-09 at 10.43.06.md [03:14]] `day:2026-10-09:ciclo-expansion-sintesis-respiracion`: "es como que tenés ideas, expansión, y después síntesis, algo así como una especie de un ciclo de respiración"
+
+### L-few-rich-concepts-analyzable (method)
+
+A synthesis of few but rich concepts can be judged for sense; when it grows long with ideas he doesn't command it distracts and distorts until he doubts everything.
+
+first 2026-10-09 10:47 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:47 Luciano states [WhatsApp Ptt 2026-10-09 at 10.43.06.md [04:36]] `day:2026-10-09:la-sintesis-analizable-por-pocos-conceptos-ricos`: "cuando vos tenés un número limitado de conceptos, pero conceptos que son muy ricos, entonces ahí uno tiene la posibilidad de decir, bueno, esto tiene sentido,…"
+
+### L-voice-is-identity (other)
+
+One keeps one's identity above all through the voice, because the voice cannot be imitated, and it shows even in writing as a personal, not academic voice.
+
+first 2026-10-09 10:53 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:53 Luciano states [WhatsApp Ptt 2026-10-09 at 10.52.06.md [01:08]] `day:2026-10-09:la-voz-como-identidad-no-imitable`: "es la idea de que uno mantiene su identidad más que nada con la voz, porque la voz no se puede imitar"
+
+### L-academic-language-excludes (other)
+
+Academic language communicates easily among academics but blocks outsiders, a jargon of exclusivity, academics being a parasite society feeds that returns an internal skeleton.
+
+first 2026-10-09 10:54 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:54 Luciano states [WhatsApp Ptt 2026-10-09 at 10.52.06.md [01:59]] `day:2026-10-09:lenguaje-academico-jerga-de-exclusividad`: "el lenguaje académico es un lenguaje que es fácil de comunicar entre académicos, pero que bloquea a los que no lo son"
+
+### L-personal-voice-communicates (other)
+
+The personal voice is less communicable than the academic, but its humanity lets other humans in similar pursuits identify with it, a real possible communication.
+
+first 2026-10-09 10:54 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:54 Luciano states [WhatsApp Ptt 2026-10-09 at 10.52.06.md [02:52]] `day:2026-10-09:la-voz-personal-comunica-por-humanidad`: "la voz personal de alguna manera no es tan comunicable... la humanidad de la voz... puede hacer identificarse a otros seres humanos que también estén en algo p…"
+
+### L-idea-affects-world-when-executed (other)
+
+Ideas are free and don't affect the world until executed, when they can affect it enormously; some ideas have enormous power.
+
+first 2026-10-09 10:56 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:56 Luciano states [WhatsApp Ptt 2026-10-09 at 10.52.06.md [04:16]] `day:2026-10-09:ideas-vs-acciones-y-la-ejecucion`: "Si no se ejecuta la idea, la idea no afecta el mundo. Pero claro, si se ejecuta, sí, podría afectarlo muchísimo"
+
+### L-idea-as-infective-virus (other)
+
+A powerful idea is like a more infective virus that also organizes, by analogy with the cell nucleus being a virus that appropriates the cell and leaves something better.
+
+first 2026-10-09 10:56 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
+
+- 2026-10-09 10:56 Luciano states [WhatsApp Ptt 2026-10-09 at 10.52.06.md [04:35]] `day:2026-10-09:idea-como-virus-infectivo-y-organizador`: "un virus más infectivo, poderoso, no sé, o organizador también... el núcleo celular en realidad es un virus, eso me encantó"
+
 ## Unplaced rows
 
 - development step heading, a request not an idea (5): `written:2025-06-17_hottification-manifesto-v0-1:active-compiler-engines`, `written:2025-06-17_hottification-manifesto-v0-1:bridge-type-theory-with-probabilistic-inference`, `written:2025-06-17_hottification-manifesto-v0-1:hottification-operators`, `written:2025-06-17_hottification-manifesto-v0-1:model-space-transformation-algebras`, `written:2025-06-17_hottification-manifesto-v0-1:type-constructors-for-conformational-model-composition`
 - a confirmation to proceed, not an idea (2): `dialogue:52d3e68e:hacer-todos-los-cambios-1-4`, `dialogue:52d3e68e:luciano-authorizes-changes-1-4`
+- DSL registry implementation detail (1): `dialogue:01998d16:dsl-overloading-by-vector-of-compilers`
+- a request, not an idea (1): `dialogue:01998d16:solve-registration-for-all-types-not-just-one`
+- macro_dr implementation helper, not a Luthier idea (1): `dialogue:01998d16:transfer-op-to-propagates-transformation`
 - a coordination report about session file ownership, not an idea about Luthier (1): `dialogue:1e377538:two-sessions-collision`
+- musing on discrete topology, too vague (1): `dialogue:20260605T1318:estructura-de-datos-como-topologia-discreta`
+- philosophical remark on reals, too vague (1): `dialogue:20260605T1318:solo-existen-los-enteros`
+- general remark, not about Luthier (1): `dialogue:20260605T1318:topologia-reduce-geometria-a-enteros`
+- model framing a video as validation, no new idea (1): `dialogue:20260626T0748:grafo-como-geometria-higher-dimensional-syntax`
+- a pointer to a video, no idea stated (1): `dialogue:20260628T2122:video-como-inspiracion-para-luthier`
 - a request about committing branches (1): `dialogue:52d3e68e:separate-luciano-notes-from-model-code-on-commit`
 - a request to draft the BNF, not an idea (1): `dialogue:890a551c:intento-de-bnf`
 - a scale correction about signal size, not an idea about Luthier (1): `dialogue:890a551c:million-samples`
@@ -7300,14 +7389,6 @@ first 2026-10-08 21:39 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-08
 - a physics finding about sonolocalizacion, not about Luthier (1): `dialogue:ac750929:cov-identity-holds-only-in-window`
 - report about the document's contents (1): `dialogue:c7437496:fixpoint-code-and-accumulated-cost`
 - request to document the analysis (1): `dialogue:c7437496:put-the-analysis-in-a-document`
-- lists several distinct open questions, not one idea (1): `dialogue:f453278e:lo-abierto`
-- macro_dr implementation helper, not a Luthier idea (1): `dialogue:01998d16:transfer-op-to-propagates-transformation`
-- DSL registry implementation detail (1): `dialogue:01998d16:dsl-overloading-by-vector-of-compilers`
-- a request, not an idea (1): `dialogue:01998d16:solve-registration-for-all-types-not-just-one`
 - advice to narrow scope, not a Luthier idea (1): `dialogue:c886516d:critica-acotar-y-estudiar-sistemas`
-- musing on discrete topology, too vague (1): `dialogue:20260605T1318:estructura-de-datos-como-topologia-discreta`
-- general remark, not about Luthier (1): `dialogue:20260605T1318:topologia-reduce-geometria-a-enteros`
-- philosophical remark on reals, too vague (1): `dialogue:20260605T1318:solo-existen-los-enteros`
-- model framing a video as validation, no new idea (1): `dialogue:20260626T0748:grafo-como-geometria-higher-dimensional-syntax`
-- a pointer to a video, no idea stated (1): `dialogue:20260628T2122:video-como-inspiracion-para-luthier`
 - document organization request, where cost belongs in docs (1): `dialogue:eea11c08:list-mixes-two-uses`
+- lists several distinct open questions, not one idea (1): `dialogue:f453278e:lo-abierto`

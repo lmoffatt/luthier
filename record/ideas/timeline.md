@@ -1,11 +1,11 @@
 # Timeline of ideas about Luthier
 
-Written by `scripts/ideas_timeline.py` (ideas_timeline v1) on 2026-10-09, for Luciano and for the tools that read it.
+Written by `scripts/ideas_timeline.py` (ideas_timeline v1) on 2026-10-10, for Luciano and for the tools that read it.
 One row per idea as the extractors found it, in time order; the local times are in America/Argentina/Buenos_Aires, a chat turn's
 time is its UTC converted. A note extracted both per note and by day gives two rows, each marked, so a
 restatement across notes is told from the same note read twice. Nothing here was judged or merged.
 
-Rows: 2322 (day 144, dialogue 1630, note 301, written 247). Inputs: 116 files, listed at the end with their sha256.
+Rows: 2333 (day 155, dialogue 1630, note 301, written 247). Inputs: 117 files, listed at the end with their sha256.
 
 Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: no time for 'material-esconde-lo-importante'; claude-code_2026-10-05_c7437496_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: id dialogue:c7437496:tres-resultados-passed-failed-not-run repeated, suffixed -2
 
@@ -22,7 +22,7 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | 2026-06 | 48 | 15 | 0 | 63 |
 | 2026-08 | 50 | 30 | 0 | 80 |
 | 2026-09 | 151 | 275 | 0 | 426 |
-| 2026-10 | 364 | 755 | 41 | 1160 |
+| 2026-10 | 375 | 755 | 41 | 1171 |
 | undated | 1 | 0 | 0 | 1 |
 
 ## Ideas, by day
@@ -9385,6 +9385,52 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
   Responding to Luciano's cost idea, the model asks whether 0 = true as in Lawvere; with that orientation cost is a distance and a Bool law is the case {0, ∞}, whereas Caesar uses the opposite orientation.
   > ¿0 = verdadero, como en Lawvere? Con esa orientación el costo es una distancia y una ley Bool es el caso {0, ∞}; Caesar usa la orientación opuesta.
 
+### 2026-10-09
+
+- **10:43** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.43.06.md [00:51]] `day:2026-10-09:ia-para-condensar-la-dispersion`
+  Using the AI to help synthesize and condense his own dispersion, consolidating a mass of ideas into polished ones, following a protocol for how to summarize.
+  > mi idea es usar la IA para eso como para ayudar a condensar mi dispersión
+
+- **10:44** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.43.06.md [01:06]] `day:2026-10-09:confiar-en-la-ia-si-hay-principios-solidos`
+  The hope that fixing solid principles would let him trust, in quotes, what the AI does much faster than he can analyze; the open question is how to trust the AI.
+  > es que si fijamos principios sólidos entonces voy a poder confiar entre comillas que lo que hace la IA que es mucho más rápido en lo que yo puedo analizar, le puedo confiar
+
+- **10:44** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.43.06.md [01:27]] `day:2026-10-09:la-ia-inunda-y-atora-la-capacidad-de-procesamiento`
+  The AI's capacity to generate information exceeds his capacity to process it; it floods and clogs him, so forms of synthesis are needed.
+  > si la IA tiene una capacidad de generación de información que supera mi capacidad de procesamiento te inunda de información y te atora tu capacidad de procesamiento entonces tenés que tener formas de síntesis
+
+- **10:46** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.43.06.md [03:14]] `day:2026-10-09:ciclo-expansion-sintesis-respiracion`
+  The paradox that this work expands instead of contracting (one idea generates many through combination), with the hope that after the expansion the consolidation reaches a core that synthesizes better; a breathing cycle of ideas, expansion, synthesis.
+  > es como que tenés ideas, expansión, y después síntesis, algo así como una especie de un ciclo de respiración
+
+- **10:47** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.43.06.md [04:36]] `day:2026-10-09:la-sintesis-analizable-por-pocos-conceptos-ricos`
+  A synthesis can be analyzed because it has few, rich concepts, letting him judge what has sense and fits what he believes; the danger is when it grows long and carries ideas he doesn't fully command, which distract and distort until he doubts everything.
+  > cuando vos tenés un número limitado de conceptos, pero conceptos que son muy ricos, entonces ahí uno tiene la posibilidad de decir, bueno, esto tiene sentido, esto no
+
+- **10:52** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.52.06.md [00:03]] `day:2026-10-09:recuperar-dialogos-ia-como-materia-prima`
+  The day's task: recover all his conversations with the AI, as the raw material from which the ideas of Luthier, and when they appeared, can be documented.
+  > estoy tratando de recuperar todo lo que sería el basamento de las ideas, es decir, de los diálogos con la IA y mis audios, que eso serían como la materia prima para encontrar las ideas que se apliquen
+
+- **10:53** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.52.06.md [01:08]] `day:2026-10-09:la-voz-como-identidad-no-imitable`
+  Documenting his own ideas comes from keeping his identity, which rests on the voice because the voice can't be imitated; even in writing his voice shows, and it is a personal, not academic voice.
+  > es la idea de que uno mantiene su identidad más que nada con la voz, porque la voz no se puede imitar
+
+- **10:54** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.52.06.md [01:59]] `day:2026-10-09:lenguaje-academico-jerga-de-exclusividad`
+  Academic language is easy to communicate among academics but blocks non-academics, a jargon of exclusivity; academics are a kind of parasite the society feeds, which returns something and gives an internal structure, a skeleton.
+  > el lenguaje académico es un lenguaje que es fácil de comunicar entre académicos, pero que bloquea a los que no lo son
+
+- **10:54** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.52.06.md [02:52]] `day:2026-10-09:la-voz-personal-comunica-por-humanidad`
+  The personal voice is less communicable than the academic, but its humanity, something said by a human, can make other humans engaged in something similar identify with it, so it is a real possible communication.
+  > la voz personal de alguna manera no es tan comunicable... la humanidad de la voz... puede hacer identificarse a otros seres humanos que también estén en algo parecido. Entonces, de alguna manera, es una comunicación posible y real
+
+- **10:56** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.52.06.md [04:16]] `day:2026-10-09:ideas-vs-acciones-y-la-ejecucion`
+  An old idea of his: ideas don't affect the world, they are free and not personal; only when executed do they affect it, possibly enormously; some ideas have enormous power.
+  > Si no se ejecuta la idea, la idea no afecta el mundo. Pero claro, si se ejecuta, sí, podría afectarlo muchísimo
+
+- **10:56** Luciano [day: WhatsApp Ptt 2026-10-09 at 10.52.06.md [04:35]] `day:2026-10-09:idea-como-virus-infectivo-y-organizador`
+  A powerful idea is like a more infective virus, also an organizer; the analogy that the cell nucleus is really a virus, a criminal organization that appropriates the cell like a virus and leaves something better.
+  > un virus más infectivo, poderoso, no sé, o organizador también... el núcleo celular en realidad es un virus, eso me encantó
+
 ### undated
 
 - **** Luciano correction of turn 113 [chat: 2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md] `dialogue:890a551c:material-esconde-lo-importante`
@@ -9428,6 +9474,7 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | 2026-10-04_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 0 | 0/0 | 8001c649cab8 |
 | 2026-10-07_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 14 | 14/14 | b63fff0fed2e |
 | 2026-10-08_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 23 | 23/23 | 1c53488c16bb |
+| 2026-10-09_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 11 | 11/11 (match: words) | 84ea85c4fb9d |
 | WhatsApp Ptt 2026-05-26 at 12.32.24_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 9 |  | ae4cb5d79307 |
 | WhatsApp Ptt 2026-05-26 at 12.41.09_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 8 |  | d3472d1dcc65 |
 | WhatsApp Ptt 2026-05-27 at 13.39.04_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 10 |  | b0c56d728568 |
