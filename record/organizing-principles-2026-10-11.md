@@ -195,3 +195,13 @@ inputs. The value of the law is then a random variable, not a number. That, and 
 is what makes "Bayesian statistics to compose it" necessary: D is not cost-valued laws alone, it is
 cost-valued laws whose costs are themselves uncertain. It is the justification of D to write in
 draft 2, and it is where the sentence "type theory fails for floats" would mislead a reader.
+
+## Addendum 3: Russell settled
+
+Decided D-2026-10-11-d (Luciano): laws accumulate; characterization is the limit, not the
+requirement, because requiring it would forbid adding laws one at a time, against E. So in §2 the
+third deviation (C) reads: laws constrain progressively and are validated empirically; a function
+type is a subtype of A → B whose inhabitants are the implementations certified so far against the
+laws it has so far; when the laws determine the function up to its equality the type is
+contractible modulo that equality and the choice among inhabitants is by cost alone (L10); before
+that, the choice is also free (P5). Open: W5.

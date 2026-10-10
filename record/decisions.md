@@ -810,3 +810,21 @@ Kind:       language design, grammar. For P11 (every criterion is a parameter: d
             arguments (05 §10)
 Status:     current; spec amended (02 §1, §2, §3, §8; 04 §5; 05 R12); not implemented; the syntax
             of blocks is still open
+
+D-2026-10-11-d  Laws accumulate; a function need not be characterized. A law may only constrain
+                (a subtype of A → B with many inhabitants); a set of laws that determines the
+                function up to its equality (the definite description, "à la Russell") is the
+                limit a definition may reach, never what it must reach. Requiring it of every
+                function would forbid adding laws one at a time, and that is against being
+                expressive (organizer E). The implementation of an under-determined function is
+                a free choice among the inhabitants (P5), certified against the laws it has.
+Author:     Luciano
+Quote:      "si es a lo Russell para toda funcion no puedo contruir leyes acumulativamente, y eso
+            va en contra de ser expresivo" (chat)
+Source:     record/Lucianos ideas/principios organizadores.txt (fa3f972, 1c7a284); chat (session
+            of 2026-10-11); record/organizing-principles-2026-10-11.md §5
+Kind:       language design, semantics of laws. For E (expressive over restrictive) and P5 (a
+            free choice is legitimate); bounds C's "properties that determine the function
+            univocally" to the limit case; consistent with L4, L5 as drafted
+Status:     current; settles the first of the two open items of the analysis of 2026-10-11; W5
+            (native against extern) still open
