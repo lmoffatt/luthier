@@ -205,3 +205,23 @@ type is a subtype of A → B whose inhabitants are the implementations certified
 laws it has so far; when the laws determine the function up to its equality the type is
 contractible modulo that equality and the choice among inhabitants is by cost alone (L10); before
 that, the choice is also free (P5). Open: W5.
+
+## Addendum 4: what "à la Russell" means
+
+Luciano (chat): not constructive ("a lo Tarski" in his words) but mathematical, from outside, as an
+entomologist observes a bug. So §5 misread him: the point is not uniqueness but the mode of
+definition. *Proposed* reading: Russell's distinction between knowledge by acquaintance and
+knowledge by description. In Martin-Löf type theory a function is known by acquaintance, it is its
+term. In Luthier a function is known by description: the laws are what is known of it, and the
+implementation, native or extern, is the specimen under observation, tested empirically. This is
+the exact statement of the third deviation (C), and it is sharper than "validated empirically":
+the deviation is in what a definition is, and the empirical testing follows from it.
+
+Two consequences. First, C's "laws are not copies of the implementation" is now a theorem of C: a
+description that transcribes the specimen is acquaintance, not description. Second, W5 is
+answered: a native definition cannot be an oracle, because "agrees with the native" is a law that
+copies an implementation; the native is one more specimen (L5), and the agreement test is a
+consistency check between specimens. W5 stays as a practice of bootstrapping, while a function has
+too few laws to be known by description, and leaves the principles. The attribution to Tarski is
+his; Tarski's definition of truth is itself given from outside, in a metalanguage, so the contrast
+he draws is better named constructive (Brouwer, Martin-Löf) against descriptive.

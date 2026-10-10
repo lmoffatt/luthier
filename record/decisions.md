@@ -826,5 +826,12 @@ Source:     record/Lucianos ideas/principios organizadores.txt (fa3f972, 1c7a284
 Kind:       language design, semantics of laws. For E (expressive over restrictive) and P5 (a
             free choice is legitimate); bounds C's "properties that determine the function
             univocally" to the limit case; consistent with L4, L5 as drafted
+Clarified:  "à la Russell" in the note does not mean uniqueness; it means definition by
+            description, from outside, as against constructive definition by a term: "no ser a lo
+            tarski (constructivo) sino a lo matematico (desde afuera, como un entomologo observa
+            un bicho)" (chat). The model's reading: Russell's knowledge by description against
+            knowledge by acquaintance; a function is known by the properties observed of it, and
+            the implementation, native or extern, is the specimen. The accumulation of laws
+            stands as decided above.
 Status:     current; settles the first of the two open items of the analysis of 2026-10-11; W5
             (native against extern) still open
