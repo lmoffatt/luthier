@@ -96,3 +96,24 @@ conditions follow.
 
 A default argument is not a redefinition under this rule: the parameter is immutable in the body,
 and the call fills it once. The choice between `default` and `?=` is independent.
+
+## `<-` as the marker
+
+Luciano (chat, 2026-10-11): "por eso yo queria introducir <-". His note had `(arg<-value:T)` and
+`F (arg<-value)`.
+
+This answers the earlier objection to `<-` (that it is assignment in R): assignment is the meaning
+wanted. *Proposed*, from his note:
+
+- `x := e` defines `x` once; a second definition of `x` is an error.
+- `x <- e` binds `x` and may rebind it: each `x <- e` is a fresh name in the core, as in SSA
+  (D-2026-10-10-e), and later uses of `x` mean the latest. The operator is the marker; no `mut`
+  keyword and no warning. A name first bound with `:=` cannot be rebound with `<-`.
+- `<-` needs order, so it is allowed in a block and in parameter lists and calls, and is an error at
+  the top level of a file (`05` §2, a program is a set of acts without order).
+- A default is the first binding of a mutable parameter, and the call rebinds it before the body
+  runs: `f (x : A) (tol : Float64 <- 1e-6) : B := ...`, called `f a (tol <- 1e-3)`. The elaborated
+  call carries the value the body sees.
+
+Cost: `<-` clashes with `<` followed by a negation. The lexer takes `<-` as one token, so `a<-1` is a
+binding and a comparison with a negative number needs a space, `a < -1`, as in R.
