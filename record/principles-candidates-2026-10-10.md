@@ -132,6 +132,16 @@ one runs; a table from identifiers to implementations) is the inspiration for Lu
 interpreter, where an implementation is static Luthier code and what the table needs is the
 output type. Source: the same audio, 04:26 to 05:49. Not a decision; to read before implementing.
 
+**Demand solves forgetting.** "La ventaja de la ejecución en demanda es que me soluciona el
+problema del olvido. Yo no tengo que tener todos los detalles que tienen una función infinitos,
+sino solamente los que te piden al final ... vos podés ponerle a cada variable una decoración
+infinita que vos se la pedís a demanda ... la demanda final es la que te soluciona todo el
+código". Source: audio 2026-10-10 17.28.45 (c6b302c), whole. The complement of L13 (forgetting is
+first-class): dependent typing accumulates history, and the demand is what chooses which part of
+it to materialize; the "infinite decoration" is code, not values (the program is the synthesis,
+the computation the expansion: audio 11.42.15). The strongest single statement of
+D-2026-10-10-d and f, a candidate for the wording of the strategy principle (C2).
+
 ## Left open on purpose (P8: until a real case asks for it)
 
 Laws with values in a semiring rather than in booleans: boolean (and, or), tropical (sum, min)
