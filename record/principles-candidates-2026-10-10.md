@@ -155,8 +155,14 @@ Source: chat 2026-10-10. A position on the objectives, for record/objectives.md,
 to mark.
 
 **`external` is a Luthier function that inhabits a hole with a body in another language.** It
-takes a name (and a file) and gives a Maybe function: found, with its signature, declared and
-not yet certified; the laws are certified afterwards by its tests (D-2026-10-10-d). The language
+takes a name (and a file) and gives a Maybe function: found, with its signature, declared. It
+is validated like any other function: the first time an action asks for it, the plan includes
+its test against the type with its laws (D-2026-10-10-d), and the certificate stays in the
+store under the hash of (library and version, type), so the second time only the hash is found
+(L11). "Lo que haria Luthier es validar cada una de las funciones external contra un tipo ...
+la primera vez que se pida se valide y luego quede un hash de validacion" (Luciano, chat
+2026-10-10). Without a type with a law to validate against, the external is not applied: the
+coupling rule. The language
 is stated ("podría ser obvio, pero mejor decirlo, porque así no hay sorpresas"). One
 environment per language, the environments communicating through bridges (D-2026-10-10-g).
 Source: audio 2026-10-10 17.41.53 (0b5bd1c), whole. L8 already names "external function" as a
@@ -164,8 +170,8 @@ face of the hole. Prior art: foreign function interfaces (Haskell's foreign impo
 extern), Jupyter's one kernel per language, Apache Arrow as the shared representation of tables.
 The model's two conditions, proposed: the memo key of an external carries language, library and
 version (P2); `external` declares pure or effectful, an effectful external being an action, not
-a definition (D-2026-10-10-c), the one place a certificate can be false without Luthier
-detecting it.
+a definition (D-2026-10-10-c), and the declaration of purity is itself tested statistically
+(same inputs twice, same result), one more law under L11.
 
 ## Left open on purpose (P8: until a real case asks for it)
 
