@@ -264,6 +264,18 @@ precondition of section 7, which only weakens an obligation raised in a branch, 
 discharge the interpreter does today (an obligation equal to the condition of its branch).
 Files: to be written with the implementation.
 
+**R12. `:=` defines once; `<-` rebinds** (decided 2026-10-11, D-2026-10-11-c; not implemented). A
+name bound with `:=` is defined once, and a second definition of it is an error ("x is defined
+twice"). A name bound with `<-` may be bound again with `<-`: each binding is a fresh name in the
+core, as in static single assignment, and every later use means the latest (D-2026-10-10-e, a
+mutable parameter is two variables, before and after). A name first bound with `:=` cannot be
+rebound with `<-`. Rebinding needs an order, so `<-` is allowed in a block, in a parameter's default
+and in a named argument, and is an error at the top level of a file, which is a set of acts without
+order (section 2). A default is the first binding of its parameter and the call rebinds it before
+the body runs; the elaborated call, which is what is hashed and certified, carries the value the
+body sees. A law of a function is quantified over a defaulted parameter, not tested at its default.
+Files: to be written with the implementation.
+
 ## 6. Reports that do not reject
 
 `luthier check -v` reports, without rejecting (2026-10-05: also the axioms, `06 §3`):

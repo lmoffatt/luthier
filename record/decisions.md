@@ -787,3 +787,26 @@ Source:     record/Lucianos ideas/El problema de las tipos recursivos.txt (0cbe4
 Kind:       language design, grammar. For L18 (a definition has no effects), P8 (no more
             bureaucracy than it pays for). Sugar only: no kernel construct added
 Status:     current; spec amended (02 §3, 04 §5); not implemented
+
+D-2026-10-11-c  `:=` defines a name once; `<-` binds and rebinds. Each `<-` is a fresh name in the
+                core (SSA, D-2026-10-10-e) and later uses mean the latest; a name bound with :=
+                cannot be rebound. `<-` needs order: allowed in blocks, defaults and named
+                arguments, an error at the top level of a file. Default arguments are written
+                `(tol : T <- d)` and called by name `f a (tol <- v)`; defaults are filled once
+                every parameter without a default is given; they belong to the definition, not
+                the type; the elaborated call carries every value. `<-` is one token, so a
+                comparison with a negative number needs a space.
+Author:     Luciano for `<-` as the operator of rebinding and of defaults, and for default
+            arguments in the Python style; Claude for the type before the default, the filling
+            rule and the restriction to ordered places, accepted
+Quote:      "default arguments y como indicarlos y llamarlos ... (arg<-value:T) ... F (arg<-value)"
+            (note); "si es inmutable --> error, si es mutable --> pasa"; "por eso yo queria
+            introducir <-"; "Si, me parece que es un buen avance" (chat)
+Source:     record/Lucianos ideas/python style.txt (c3c63d9); chat (session of 2026-10-11);
+            record/default-arguments-2026-10-11.md
+Kind:       language design, grammar. For P11 (every criterion is a parameter: defaults make it
+            livable), P2 (the elaborated call records every parameter), L18 (no effects: no
+            mutable default shared between calls). Partly answers the open item on implicit
+            arguments (05 §10)
+Status:     current; spec amended (02 §1, §2, §3, §8; 04 §5; 05 R12); not implemented; the syntax
+            of blocks is still open

@@ -170,6 +170,8 @@ kernel construct would not be sugar (`02 §4`).
 | `Bool` | `< true : Unit \| false : Unit >`, in `core.lut` |
 | `Maybe A` | `< nothing : Unit \| just : A >` |
 | `Failures E` | `List E`, the failures of a check, empty when it holds (`05 §9`) |
+| `f a (tol <- v)`, `f` with `(tol : T <- d)` | `f a v`: arguments by name are placed in their parameter's position, and a parameter not given takes its default `d` once every parameter without a default is given; a function value has no names and no defaults (D-2026-10-11-c) |
+| `y <- e` in a block | a fresh name `y1 := e`, and every later `y` means `y1` (`05` R12) |
 | `\ (x, y) { t }` | `\ p { match p { (x, y) -> t } }` |
 
 ## 6. Primitive versus derived, and native versus extern

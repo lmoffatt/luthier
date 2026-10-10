@@ -23,6 +23,9 @@ Reserved words: `data`, `match`, `extern`, `provisional`, `test`, `with`, `exhau
 written infix; `Bool`, `Int`, `Float64`, `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat`, `Fin` are
 definitions of `core.lut`.
 
+`<-` is one token (2026-10-11, D-2026-10-11-c): `a<-1` is a binding, and a comparison with a negative
+number needs a space, `a < -1`, as in R.
+
 Layout: an act starts at column 0, and an indented line continues the act above it. Inside
 `( )`, `[ ]`, `< >` and the braces of `match` and of a lambda, line breaks are ignored; inside the
 braces of a record type, a line break separates components.
@@ -38,7 +41,7 @@ braces of a record type, a line break separates components.
     body        ::= term
                   | "data" "{" { name ":" term [ ";" ] } "}"
                   | "extern" [ "provisional" ] string
-    binder      ::= "(" name { name } ":" term ")"
+    binder      ::= "(" name { name } ":" term [ "<-" term ] ")"            -- with a default
     clause      ::= "|" pattern { "," pattern } ":=" term
 
     directive   ::= "import" string [ "as" name ]
@@ -83,6 +86,7 @@ An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types
              | "[" [ term { "," term } ] "]"                                              -- list
              | "\" lparam { lparam } "{" term "}"                                         -- lambda
              | "match" term "{" { pattern "->" term [ ";" ] } "}"
+             | "(" name "<-" term ")"                                                     -- named argument
              | "if" term "then" term [ "else" term ]                                     -- one arm: a Maybe or a reason
              | "extern" [ "provisional" ] string
              | "forget" atom
@@ -145,5 +149,6 @@ of `d`.
 ## 8. Open
 
 - Quote and unquote: the syntax of a term as a value of `Term`.
-- Local definitions in a block, `{ x := t ; u }`.
+- Local definitions in a block, `{ x := t ; u }`. Inside a block `x <- t` binds and rebinds (`05` R12).
+  The block's syntax collides with a record value, `{ x := a ; y := b }`, and is not settled.
 - A saved evaluation, a quoted term together with its value.

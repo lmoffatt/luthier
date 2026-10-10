@@ -2,7 +2,7 @@
 
 Source: `record/Lucianos ideas/python style.txt` (committed verbatim at c3c63d9). Written by Claude
 in the chat of 2026-10-11. What cites the spec is marked by its section; what is proposed here is
-marked *Proposed*. Nothing here is decided.
+marked *Proposed*. Decided as D-2026-10-11-c (last section), the earlier proposals superseded.
 
 Luciano's note: Python functions have many parameters with defaults, called by position or by name;
 "esto permitiria exponer todos los parametros de un tipo, pero poniendo un alias y un valor de
