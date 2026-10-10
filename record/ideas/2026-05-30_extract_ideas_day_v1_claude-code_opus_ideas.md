@@ -42,7 +42,7 @@ notes:
     duration: ~00:49
     sha256: 75237e816fe3fdeba9c40dfaf302e5d1b2c3bb979d86b6f7463dccc54f947ae2
 ideas: 18
-quotes_found: 18/18
+quotes_found: 18/18 (match: words)
 generated_by: extract_ideas_day_v1
 prompt_sha256: 73e1209ad6ae639a83a6f9a717caaea120e02966659544221e05bb847dd88079
 mode: editor

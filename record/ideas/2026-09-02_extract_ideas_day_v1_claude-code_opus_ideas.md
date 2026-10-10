@@ -10,7 +10,7 @@ notes:
     duration: ~04:31
     sha256: bd18d897037614396847480299fda68718c6f1405491cba0a193341214282a02
 ideas: 9
-quotes_found: 9/9
+quotes_found: 9/9 (match: words)
 generated_by: extract_ideas_day_v1
 prompt_sha256: 73e1209ad6ae639a83a6f9a717caaea120e02966659544221e05bb847dd88079
 mode: editor

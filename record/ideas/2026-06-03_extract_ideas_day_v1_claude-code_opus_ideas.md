@@ -6,7 +6,7 @@ notes:
     duration: ~01:47
     sha256: 705dc053a5e3ab6475e6a09ac068d5d7d498f991aca0c45455b319adf0a1e2e5
 ideas: 5
-quotes_found: 3/5
+quotes_found: 5/5 (match: words)
 generated_by: extract_ideas_day_v1
 prompt_sha256: 73e1209ad6ae639a83a6f9a717caaea120e02966659544221e05bb847dd88079
 mode: editor
