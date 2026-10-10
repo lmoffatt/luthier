@@ -107,6 +107,14 @@ Source: audio 2026-10-10 16.49.14, 03:20 to 07:06; the old term "parámetro de i
 and in his C++ (`Transfer_Op_to`, the forward version). Resolved as the fourth condition of
 D-2026-10-10-d (D-2026-10-10-f).
 
+**A function captures the functions it uses by hash, and is universal over the models of its
+theories.** "si ya tus funciones son ciudadanos de primera, bueno, entonces vos tenés que decir
+que los estás usando ... tus funciones son las funciones de funciones". Two options in the audio:
+parametrize everything, or a default that can be changed. Source: audio 2026-10-10 17.00.40
+(76ba165), 00:00 to 01:49. Resolved in D-2026-10-10-g: both at once, parametrization by theory
+with implicit resolution; modules as parametrized values instantiated on demand; overloads and
+bridges by the orchestrator. Extends L6 and L10; the bridges extend L14.
+
 ## Left open on purpose (P8: until a real case asks for it)
 
 Laws with values in a semiring rather than in booleans: boolean (and, or), tropical (sum, min)

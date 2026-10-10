@@ -661,3 +661,38 @@ Kind:       implementation decision. For D-2026-10-10-d (the memo key already ca
             Transfer_Op_to in C++ is the forward version
 Status:     current
 
+D-2026-10-10-g  Code is universal over the models of the theories it requires. A function is
+                parametrized by theories (Real, Field, LinearAlgebra), not by single functions;
+                the model is resolved implicitly from the scope and can be passed explicitly.
+                Modules are values: a parametrized module is a function from models to records
+                of definitions, applicative because definitions have no effects (D-2026-10-10-c),
+                instantiated on demand with the parameter threaded down from the action, so C
+                calls A(Field) and B(Field) with the one Field. A specialization (overload) is one
+                more representative of the law's class, valid on a subtype, chosen by cost with
+                "most specific" as one parametrized criterion (P11), and certified against the
+                same law as the generic one. Overloads are the only source of mismatch between
+                representations; there the orchestrator inserts bridges (conversions, L14) by
+                cost, under three conditions: two bridge paths agree up to the law (a commuting
+                diagram, checked); a bridge carries its error in the certificate (L11); the
+                bridges inserted appear in the plan (L7). Edges of the DAG are by operation used,
+                the signature by theory.
+Author:     Luciano for the parametrization by theory, overloading, modules parametrized and
+            instantiated on demand, bridges by the orchestrator; the model for the three
+            conditions on bridges and the two levels of granularity, accepted
+Quote:      "el codigo seria, en principio universal a los valores de funciones que cumplan las
+            leyes requeridas, por lo que la opcion de parametrizar todo suena saludable. Y uno
+            parameterizaria a nivel de aReal o LinearAlgebra"
+            "si no lo son, bueno se especifican como en C++ por overloading?"
+            "los modulos (o librerias, no se como llamarlo) tambien estaria parameterizados"
+            "C llama a A (FieldA) y B(FieldA). Y sino habria que hacer puentes automagicos de una
+            representacion a la otra. Igual esto estaria manejado por el orquetador que buscaria
+            lo mas eficiente."
+Source:     chat (session of 2026-10-10); record/audios/WhatsApp Ptt 2026-10-10 at 17.00.40.md
+            (76ba165, the question "cómo se hace normalmente")
+Kind:       implementation decision. For L6 (modules as values), L10 (the quotient: overloads and
+            bridged specializations as representatives of one class), L14, L7, P11, L8 (a module
+            with an unfilled parameter is a module with a hole). Prior art: ML functors and 1ML
+            (Rossberg 2015), Stepanov's concepts, typeclasses and modular implicits, Backpack,
+            Julia's promotion rules; Reynolds' parametricity as the ground of universality
+Status:     current
+
