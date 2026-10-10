@@ -17,8 +17,28 @@ notes:
     transcript: WhatsApp Ptt 2026-10-10 at 11.42.15.md
     duration: ~04:12
     sha256: d6617493d99b78df57deeeb435064ec2561fa7198482a0e41e6842bc4810fd72
-ideas: 16
-quotes_found: 15/16 (match: words)
+  - audio: WhatsApp Ptt 2026-10-10 at 16.49.14.mp3
+    transcript: WhatsApp Ptt 2026-10-10 at 16.49.14.md
+    duration: ~07:09
+    sha256: 17d626cf5f996df7ceaa12512b8648a78d7f42dbbb464b3db0ecd65ca9b3b899
+  - audio: WhatsApp Ptt 2026-10-10 at 17.00.40.mp3
+    transcript: WhatsApp Ptt 2026-10-10 at 17.00.40.md
+    duration: ~02:05
+    sha256: 89e5c7af42677199a64f1664ccd1f51684af3e3074b24e78d8d3bbc443dcbe55
+  - audio: WhatsApp Ptt 2026-10-10 at 17.25.23.mp3
+    transcript: WhatsApp Ptt 2026-10-10 at 17.25.23.md
+    duration: ~08:03
+    sha256: cf669d4cd55ec87c977ed68850a7bde080f8957cc22add332ff9e7861d6f4389
+  - audio: WhatsApp Ptt 2026-10-10 at 17.28.45.mp3
+    transcript: WhatsApp Ptt 2026-10-10 at 17.28.45.md
+    duration: ~01:40
+    sha256: 867894bfe15c341ee601099d9bb2e133fbeb0d38592207b21a6e77e9da2581aa
+  - audio: WhatsApp Ptt 2026-10-10 at 17.41.53.mp3
+    transcript: WhatsApp Ptt 2026-10-10 at 17.41.53.md
+    duration: ~02:39
+    sha256: 151c9a92f18c7fb3ef2d93b3228643c954e8522c502ade2efca2d5c46751b6ca
+ideas: 27
+quotes_found: 27/27 (match: words)
 generated_by: extract_ideas_day_v1
 prompt_sha256: 73e1209ad6ae639a83a6f9a717caaea120e02966659544221e05bb847dd88079
 mode: editor
@@ -29,94 +49,146 @@ effort: low
 
 ## Ideas
 
-### tipos-como-invariantes-de-una-disciplina
-- **What**: The first principle of Luthier: types are invariants, and Luthier captures the invariants of a discipline; the hard and central problem is how to discover those invariants when you don't yet know them.
-- **Quote**: "el primer principio, por supuesto, es que los tipos son invariantes" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[00:06]`)
-- **Course**: `[00:06]` of note 1: states types are invariants, Luthier captures the invariants of a discipline; `[00:36]` calls it strong and hard, asks "cómo podés ir llegando a eso"; `[00:50]` the point is not to know the invariants in advance ("si las sabés de entrada, ya está todo resuelto") but to discover them ("lo importante sería descubrirlas").
-- **Open**: He asks how to discover a discipline's invariants without already knowing them, and leaves it open.
-
-### que-es-una-invariante
-- **What**: A tentative definition of invariant: something that does not change whatever happens.
-- **Quote**: "una invariante, bueno, es algo que no cambia, sería, no sé qué es lo que dice, que siempre, digamos, pase lo que pase, eso no cambia, se mantiene" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[01:07]`)
-- **Course**: `[01:07]` of note 1: defines invariant loosely as what does not change no matter what.
+### tipos-son-invariantes
+- **What**: The first principle: types are the invariants of a discipline, and Luthier's hard part is discovering those invariants, not assuming them known.
+- **Quote**: "el primer principio, por supuesto, es que los tipos son invariantes," (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[00:06]`)
+- **Course**: `[00:06]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: states the principle and calls it very strong; `[00:42]`-`[00:57]`: if you already knew the invariants everything is solved, so "lo importante sería descubrirlas."
 
 ### invariantes-como-leyes-predicados
-- **What**: Invariants are represented by laws, and laws are predicates: statements that something holds, is feasible, is positive.
-- **Quote**: "en principio las invariantes las estaríamos representando con leyes, leyes que vienen a ser predicados, es decir, esto ocurre, esto es factible" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[01:26]`)
-- **Course**: `[01:26]` of note 1: invariants represented by laws, laws are predicates.
+- **What**: Invariants are represented by laws, and laws are predicates: statements that something occurs, is feasible, is the case.
+- **Quote**: "leyes que vienen a ser predicados, es decir, esto ocurre, esto es factible," (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[01:34]`)
+- **Course**: `[01:26]`-`[01:47]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: invariants represented with laws that are predicates.
 
-### invariante-laxa-como-costo
-- **What**: A looser version of invariant: not a yes/no predicate but a cost, from zero to infinity, important when verifying functions; it naturally fits real numbers, where equality is really a distance.
-- **Quote**: "Habría una versión, digamos, más laxa de invariantes, que sería, esto tiene un costo, ¿no? El costo puede ser cero o puede ir hasta infinito" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[01:56]`)
-- **Course**: `[01:56]` of note 1: introduces cost as a laxer invariant, 0 to infinity, useful for verifying functions; `[08:15]` with cost you don't get a verified type but a type with cost ("esto me sirve como tal cosa, pero con tanto costo"), with an engineer/bricklayer analogy at `[10:25]`; `[10:52]` cost serves mainly for reals, where you can't say two numbers are equal, only that they're a certain distance apart, so cost approximates the relation like a distance.
-- **Open**: How costs combine under the boolean operations (sum, min, max, arithmetic or geometric mean) he does not resolve: "tendría que ver cuáles son las equivalencias entre costos y las operaciones booleanas, que eso no lo tengo muy claro" `[09:04]`.
+### costo-como-invariante-relajada
+- **What**: A laxer version of an invariant: instead of a predicate, a cost (from zero to infinity). It yields a type-with-cost rather than a verified type, and it fits reals, where equality is really a distance.
+- **Quote**: "Habría una versión, digamos, más laxa de invariantes, que sería, esto tiene un costo, ¿no?" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[01:56]`)
+- **Course**: `[01:56]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: introduces cost, important for verifying functions; `[08:41]`: "Lo que te daría no sería un tipo verificado, sino un tipo con costo."; `[11:14]`: cost as a kind of distance for reals, "y eso se parece un poco a un costo."
+- **Open**: how costs combine under the boolean operations (sum, minimum, maximum, arithmetic or geometric average) is left undecided (`[09:01]`-`[10:08]`).
 
 ### tipos-como-proposiciones
-- **What**: Types are propositions: a type is an affirmation about something.
-- **Quote**: "la idea es que tenemos tipos como proposiciones, ¿no? O sea que un tipo es una afirmación acerca de algo." (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[02:20]`)
-- **Course**: `[02:20]` of note 1: states types are propositions.
+- **What**: Types are propositions: a type is an assertion about something.
+- **Quote**: "O sea que un tipo es una afirmación acerca de algo." (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[02:26]`)
+- **Course**: `[02:20]`-`[02:29]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: types as propositions, a type asserts something.
 
 ### tipos-naturales-vs-predicativos
-- **What**: Two kinds of types: natural types that arise by construction (from a function), and predicative types that are verified by testing whether a candidate satisfies them; Luthier starts from verification because construction demands more knowledge than he has.
-- **Quote**: "Hay en realidad dos tipos de tipos, si se quiere. Están los tipos naturales, es decir, tipos que surgen de una función... Y los tipos predicativos, es decir, los tipos... que se verifica si cumplen eso o no." (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[02:36]`)
-- **Course**: `[02:36]` of note 1: distinguishes natural (constructive) and predicative (verified) types; `[03:00]` natural/constructive types are harder, these are the mathematical types; `[03:16]` he can only build a few, gives a vector type built recursively from a function number→real at `[03:27]`; `[04:20]` a function's types are recursive, you run the function to the end; `[04:45]` by construction you can know a value is the minimum without proving it separately, calling that a dependent type `[05:13]`; `[05:24]` Luthier's proposal is that propositional types be by testing/verification, not by construction, because construction needs more knowledge he has, "podría ser a lo largo eso que se incorpore, no lo sé".
-- **Open**: Whether constructive types get incorporated later he leaves undecided.
+- **What**: Two kinds of types: natural (by construction, arising from a function) and predicative (checked by verification). Luthier starts from verification because construction demands more knowledge than he has.
+- **Quote**: "Están los tipos naturales, es decir, tipos que surgen de una función, digamos." (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[02:41]`)
+- **Course**: `[02:36]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: names the two kinds; `[03:24]`-`[05:13]`: by-construction (mathematical, dependent) types are harder, example of minimum known by construction; `[05:24]`: "la idea de Luthier es que los tipos proposicionales serían por testeo, por verificación."
+- **Open**: whether by-construction types may be incorporated later is left undecided (`[05:46]`).
 
-### operaciones-de-construccion-de-tipos
-- **What**: The building blocks of types: the operations of Cartesian closed categories (sum, product, exponential), dependent types, and booleans as elements, plus the predicatives that build laws; a question is whether the object classifier uses only 0/1 booleans or also integers and positive reals.
-- **Quote**: "va a tener las operaciones de Cartesian Close Categories, que son mano suma, producto y exponencial y tipos dependientes y booleans como elementos" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[05:58]`)
-- **Course**: `[05:58]` of note 1: lists the CCC operations, dependent types, booleans as elements, plus predicatives that build laws; `[06:28]` laws are themselves another element, a predicative over a Luthier object; `[06:49]` laws can be combined with or, and, maybe, if; `[07:13]` the question whether the object classifier uses only 0 and 1 or also integers and positive reals, "esa sería una extensión que estábamos hablando".
-- **Open**: Whether the object classifier is just booleans or extends to integers and positive reals.
+### ccc-y-leyes-construyen-tipos
+- **What**: Types are built from the operations of Cartesian Closed Categories (sum, product, exponential, dependent types, booleans as elements) plus predicatives; predicatives build laws, and laws combine with or/and/if.
+- **Quote**: "va a tener las operaciones de Cartesian Close Categories," (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[05:58]`)
+- **Course**: `[05:58]`-`[06:10]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: the CCC operations; `[06:21]`-`[07:07]`: predicatives build laws, laws are themselves predicates over a Luthier type and combine with or/and.
 
-### ley-constructor-pertenencia-tres-caras
-- **What**: A law, a type constructor (with maybe), and a membership function are three faces of the same thing: a law generates a type, generates a constructor that may or may not build, and generates a function telling whether a candidate belongs.
-- **Quote**: "esa ley te genera un tipo, te genera un constructor de tipo con maybe... y bueno, este genera una función que dice si un candidato pertenece a un tipo o sea, son tres cosas de lo mismo" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[07:46]`)
-- **Course**: `[07:46]` of note 1: law, maybe-constructor and membership function are three faces of the same thing; `[08:15]` contrasts: with cost instead of predicate there is no constructor, you get a type with cost rather than a verified type.
+### object-classifier-mas-alla-de-booleans
+- **What**: Open question of whether the object classifier uses only the booleans 0 and 1, or extends to integers and positive reals.
+- **Quote**: "la pregunta es si vos usás solamente como object classifier los 0 y 1 en los booleans o si también usás los enteros los reales positivos" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[07:13]`)
+- **Course**: `[07:13]`-`[07:31]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: raises it as an extension under discussion.
+- **Open**: left unresolved.
 
-### verificar-leyes-como-rompecabezas
-- **What**: Verifying a law is like a puzzle: a law such as the field axioms relates not just the two elements being combined but all others, so checking it requires computing cases you aren't computing and seeing whether all the pieces fit together coherently; you can either check that the pieces present fit, or try to fill in missing pieces.
-- **Quote**: "es como una especie de reumpecabezas la ley, ¿no?... vos podés ver las piezas que ya están se encajan todas entre sí o podés tratar de llenar piezas que no están a ver si las encontrás y las pones" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[13:23]`)
-- **Course**: `[11:59]` of note 1: laws often involve more than one function; addition in a field relates all members, not just the two being summed `[12:14]`; so addition is a property of the whole subset `[12:26]` and verifying it forces computing sums you aren't computing; `[13:23]` the law is a puzzle, check that present pieces fit or fill missing ones; `[14:40]` "saber de completar los círculos de verificación", generate examples from the cases you have and test them.
+### ley-genera-constructor-y-pertenencia
+- **What**: One law is three things at once: it generates a type, a type constructor (with maybe), and a function telling whether a candidate belongs to the type.
+- **Quote**: "o sea, son tres cosas de lo mismo" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[08:10]`)
+- **Course**: `[07:38]`-`[08:10]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: a law generates the type, the constructor with maybe, and the membership function.
 
-### asociatividad-aparece-con-tres-elementos
-- **What**: Associativity cannot be verified by summing two numbers; it only appears when you sum three, so the system needs a record of which variables were derived in order to know when a given law becomes testable.
-- **Quote**: "Si sumas dos números no vas a verificar la asociatividad, porque el valor de esa suma no depende de la asociatividad. Vos recién, cuando sumas tres números, ves la asociatividad" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[15:56]`)
-- **Course**: `[15:26]` of note 1: three numbers are needed to test associativity; `[16:05]` so you need a record of the variables you derived, to know when associativity is required; `[18:06]` a qualification: even 1+2 may need associativity because 2 is 1+1, left hanging ("y si le es complejo esto... Sí. Pero...").
-- **Open**: Whether summing two numbers already invokes associativity through the decomposition 2 = 1+1 he raises and does not settle.
+### verificar-una-ley-es-un-rompecabezas
+- **What**: Verifying a law (like the field laws for sum) is like a jigsaw: the law relates many elements, so checking it requires computing combinations you aren't otherwise computing, trying to complete the circles of verification by generating and testing examples.
+- **Quote**: "es como una especie de reumpecabezas la ley, ¿no?" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[13:23]`)
+- **Course**: `[11:34]`-`[13:02]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: sum as a property of the whole subset, verifying needs uncomputed sums; `[14:21]`-`[14:40]`: "completar los círculos de verificación"; `[15:00]`-`[15:24]`: generate examples from the objects you name and test them; `[02:14]` of `WhatsApp Ptt 2026-10-10 at 11.11.22.mp3`: full verification is "un delirio," so prove associativity only at some point going backward.
 
-### lazy-evaluation-el-codigo-es-codigo-hasta-evaluar
-- **What**: Make the iter lazy: expressions like sums stay as code and keep being code; things only take form when you evaluate, and there are several modes of evaluation (with error, with record, with testing).
-- **Quote**: "si yo hago que el iter sea lazy evaluation... entonces yo tengo todas las expresiones, la suma y todo eso es código y va a seguir siendo código" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[19:09]`)
-- **Course**: `[19:09]` of note 1: lazy evaluation keeps sums and expressions as code; `[19:36]` things only form when you evaluate ("evalúo con error", "evalúo con registro", "evalúo con testeo"); `[20:03]` asks how the tests chain; note 3 `[00:00]`: lazy evaluation is the best way to define exactly what you want to compute, since to compute a value you must compute backward all the values it needs `[00:23]`.
+### una-ley-se-invoca-solo-cuando-una-derivacion-la-necesita
+- **What**: A law is only needed when a derivation actually invokes it: adding two numbers doesn't test associativity, three do; this calls for a record of the variables that were derived.
+- **Quote**: "Vos recién, cuando sumas tres números, ves la asociatividad" (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[16:14]`)
+- **Course**: `[15:56]`-`[16:14]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: two numbers don't need associativity, three do; `[16:16]`: "tener un registro de las variables que vos tuviste derivadas."
+- **Open**: he toys with whether 1+2 already needs associativity (since 2 is 1+1) and leaves it half-settled (`[18:08]`-`[18:20]`).
 
-### funcion-con-testeo-como-efecto-lateral
-- **What**: Evaluating with testing leaves you a tested function rather than the naive function created from nothing, and that tested function is reused elsewhere; this raises the complication of functions changing as a side effect, since f(x) modifies f because you now know f works.
-- **Quote**: "evaluar con testeo me queda la función con testeo... O sea, no es la función creada de la nada, o sea, la función naif. Y esa función con testeo, después se usaría en otro lado." (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[20:17]`)
-- **Course**: `[20:17]` of note 1: testing leaves a tested function reused later; `[20:46]` the complication of side effects, f(x) modifies f because now f is known to work; `[21:25]` the easier route: test f first, then build it, so f is already tested.
-- **Open**: How tested-ness propagates as a side effect versus testing f up front he presents as two options without choosing.
+### lazy-evaluation-y-el-problema-del-olvido
+- **What**: Make evaluation lazy so expressions stay as code until demanded; the final demand (a print, a saved value) defines what to compute and pulls backward only what is needed, which solves the problem of having to remember everything.
+- **Quote**: "Estoy pensando que la Lazy Evaluation sería la mejor manera de definir qué es lo que quiero exactamente definir." (`WhatsApp Ptt 2026-10-10 at 11.11.22.mp3` `[00:00]`)
+- **Course**: `[19:15]`-`[19:30]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: with lazy iter the sum and everything stays code; `[19:56]`: only on evaluation (with error, with registro, with testeo) "ahí es donde las cosas se forman"; `[00:00]` of `WhatsApp Ptt 2026-10-10 at 11.11.22.mp3`: lazy eval as the best way to define what to compute, going backward from the saved value; `[01:02]` of `WhatsApp Ptt 2026-10-10 at 11.42.15.mp3`: recomputing A (with and without error) is tolerable, "Nunca olvidarías el programa, siempre tenés que acordarte de todo"; `[00:00]` of `WhatsApp Ptt 2026-10-10 at 17.28.45.mp3`: "La ventaja de la ejecución en demanda es que me soluciona el problema del olvido."
 
-### certificados-y-grados-de-certeza-de-funciones
-- **What**: To compute a value you may want a certificate that the functions computing it work, and functions could carry a degree of certainty (grade 1, 2, 3, with 100 or 200 samples); full verification of all paths is unfeasible, so you only partially check, e.g. some associativity at some point.
-- **Quote**: "necesito funciones que estén testeadas con tanto entonces yo calculo a con las funciones testeadas con grado 1 grado 2... tengo grado de certeza, con 100 samples, 200 samples, lo que sea, cada una de las funciones" (`WhatsApp Ptt 2026-10-10 at 11.11.22.mp3` `[03:02]`)
-- **Course**: note 3 `[01:26]`: computing a value may need a certificate that the functions work; `[01:51]` verifying all paths to a sum are equal is "un delirio", so instead check some path, some associativity partially `[02:33]`; `[03:02]` functions carry a degree of certainty by number of samples, "medio choto como definición pero es operativo"; `[03:45]` most likely the functions work, the idea is they work unless there's an error, and errors would distort the values `[03:57]`.
-- **Open**: The sample-grade definition he himself calls crude ("medio choto"); and whether some errors distort only some values he raises without resolving.
+### evaluar-modifica-la-funcion
+- **What**: Since functions are values, evaluating f(x) can modify f (now you know f works), giving a tested function distinct from the naive one; or you test f first so it is already tested when built.
+- **Quote**: "cuando yo hago f de x, claro, yo modifico f, o sea, porque ahora sé que f funciona, por ejemplo." (`WhatsApp Ptt 2026-10-10 at 10.12.21.mp3` `[21:08]`)
+- **Course**: `[21:00]`-`[21:19]` of `WhatsApp Ptt 2026-10-10 at 10.12.21.mp3`: f(x) as a side effect on f; `[21:35]`: the easier alternative, "Yo testeo a F, entonces ahora está F testeada."
 
-### lazy-recomputo-al-pedir-con-error
-- **What**: A cost of lazy evaluation: if you asked for A without error and later need B which needs A with error, you must recompute A; not terrible, just compute it twice.
-- **Quote**: "si ya pediste el valor con A sin error, después el de B, y pedís el de B con error, tenés que volver a calcular el de A, lo cual no sería tan terrible" (`WhatsApp Ptt 2026-10-10 at 11.42.15.mp3` `[00:16]`)
-- **Course**: note 4 `[00:00]`: asking A then B-with-error forces recomputing A; `[00:26]` not terrible, just compute twice, "mala suerte".
+### longitud-del-programa-vs-del-calculo
+- **What**: A program stays short because it is written synthetically, while a computation can grow large because it expands the search variables.
+- **Quote**: "lo que es, digamos, la longitud de un programa frente a la rectitud de, digamos, un cálculo." (`WhatsApp Ptt 2026-10-10 at 11.42.15.mp3` `[01:25]`)
+- **Course**: `[01:25]`-`[01:43]` of `WhatsApp Ptt 2026-10-10 at 11.42.15.mp3`: the computation expands, the program stays synthetic.
 
-### el-programa-nunca-se-olvida
-- **What**: The program is always fully kept, you never forget it, so you can compute anything; only things out of scope are lost forever; a program is written synthetically and stays short, whereas a calculation can grow large because it expands the search variables.
-- **Quote**: "nunca vos dejarías... vos resumirías el programa... Nunca olvidarías el programa, siempre tenés que acordarte de todo, a poder calcular cualquier cosa." (`WhatsApp Ptt 2026-10-10 at 11.42.15.mp3` `[00:52]`)
-- **Course**: note 4 `[00:52]`: the program is never forgotten, you keep everything; `[01:07]` things out of scope are lost for good; `[01:16]` the length of a program versus the extent of a calculation, a calculation grows as it expands search variables, the program stays short because written synthetically `[01:40]`; `[01:43]` "podría ser un principio aplicable".
+### forward-vs-backward
+- **What**: Two modes of work: backward (determine what to compute from what's demanded, keeping all past history, like keeping five years of receipts) and forward (compute everything, markovian and past-less, more wasteful but reduces complexity by consumption). Both have a role.
+- **Quote**: "está el método backward, y el forward." (`WhatsApp Ptt 2026-10-10 at 11.42.15.mp3` `[01:51]`)
+- **Course**: `[01:58]`-`[02:30]` of `WhatsApp Ptt 2026-10-10 at 11.42.15.mp3`: forward computes unused things, only what modifies the world is seen; `[03:07]`-`[03:57]`: forward as markovian/past-less, backward must keep its whole history; `[04:03]`: "tenés que tener las dos formas de trabajar, las dos tienen un rol."
 
-### backward-y-forward-las-dos-formas
-- **What**: Two ways of working: backward (lazy, start from what you're asked and determine what you need) and forward (compute everything exactly as told, discarding the rest); forward is inefficient but markovian (no past, you consume and stay where you are), backward must remember all your history; both have a role.
-- **Quote**: "uno podría pensar que tenés que tener las dos formas de trabajar. las dos tienen un rol" (`WhatsApp Ptt 2026-10-10 at 11.42.15.mp3` `[04:03]`)
-- **Course**: note 4 `[01:51]`: introduces backward and forward; backward works out what's needed for what's asked `[01:58]`; forward computes everything, doesn't care what's discarded, is less efficient because it computes things that never change the world `[02:27]`; only what modifies the world (printed, saved) is seen `[02:42]`, so internal variables' correctness you'll never know under forward `[02:57]`; forward's advantage is being markovian, a program without past `[03:09]`, while backward must keep its whole history like keeping five years of receipts `[03:34]`; `[04:03]` you should have both forms, each has a role.
-- **Open**: How the two forms coexist in Luthier he leaves as a conclusion without a mechanism.
+### implementaciones-como-quotient-sobre-el-predicado
+- **What**: Defining types with predicates gives an equivalence relation; the implementations of a function are the quotient over the predicate of its laws, which lets you swap implementations proven equal (the basis for optimization).
+- **Quote**: "Las implementaciones de una función son el quotient sobre el predicate de las leyes de esa función." (`WhatsApp Ptt 2026-10-10 at 16.49.14.mp3` `[00:47]`)
+- **Course**: `[00:04]`-`[00:39]` of `WhatsApp Ptt 2026-10-10 at 16.49.14.mp3`: predicates define a subset / equivalence, members replaceable by one another; `[00:47]`: implementations as the quotient; `[01:14]`-`[01:39]`: the quotient's remainder is speed or error, the basis for optimizing.
+
+### equivalencia-por-functor-o-modelo
+- **What**: Beyond exact equality, two functions can be a functor/model of each other, living in different but equivalent (isomorphic) models (lists vs vectors, Python vs R), with a conversion cost.
+- **Quote**: "vos podés tener funciones que no implementen exactamente lo mismo, pero que sean, digamos, una functor de la otra, una modelo de la otra." (`WhatsApp Ptt 2026-10-10 at 16.49.14.mp3` `[01:45]`)
+- **Course**: `[01:45]`-`[02:37]` of `WhatsApp Ptt 2026-10-10 at 16.49.14.mp3`: different models, isomorphic classes, Python/R with a conversion cost.
+
+### igualdad-de-datos-y-costo-de-representacion
+- **What**: Another grade of equivalence: the same data represented differently; functions rest on a particular representation, so there is a cost to transforming data from one format to another.
+- **Quote**: "la igualdad de los datos son los mismos datos pero están representados de distintas maneras" (`WhatsApp Ptt 2026-10-10 at 16.49.14.mp3` `[02:50]`)
+- **Course**: `[02:47]`-`[03:18]` of `WhatsApp Ptt 2026-10-10 at 16.49.14.mp3`: same data, different representations, all modeling the same function, with a transformation cost.
+
+### decoracion-por-demanda-contaminacion
+- **What**: One single code can be run to compute the value, the value with error, the derivative, or any monad/decoration; what you compute is fixed only at the final demand (the print), which propagates backward like a poisonous stain. On demand you demand with your conditions.
+- **Quote**: "sería como una especie de contaminación, vos lo tocas y es como una mancha venenosa que va para atrás" (`WhatsApp Ptt 2026-10-10 at 16.49.14.mp3` `[04:27]`)
+- **Course**: `[03:30]`-`[04:15]` of `WhatsApp Ptt 2026-10-10 at 16.49.14.mp3`: the print at the end defines which branch and which calculation applies; `[05:14]`: "con cualquier monad o decoración que yo quiera poner, lo que yo llamaba el parámetro de implementación"; `[05:27]`: "Cuando vos demandás, demandás con tus condiciones"; `[00:47]` of `WhatsApp Ptt 2026-10-10 at 17.28.45.mp3`: every variable can carry an infinite decoration requested on demand; `[01:25]` of `WhatsApp Ptt 2026-10-10 at 17.28.45.mp3`: "la demanda final es la que te soluciona todo el código para adelante, para atrás."
+- **Open**: how to attach error to an input that entered as a plain real with no error (`[05:54]`-`[06:11]` of `16.49.14`); and whether these decorations are forward or backward, to be discussed with the AI (`[06:51]`-`[07:06]` of `16.49.14`).
+
+### funciones-como-valores-captura-de-dependencias
+- **What**: If functions are values, they can change, so a function that uses other functions must capture them somehow: either parametrize everything (the used functions are input parameters) or have a default that can be swapped (e.g. which FFT implementation).
+- **Quote**: "cuando uno ya considera que las funciones son variables, o sea, son valores, entonces los valores pueden cambiar." (`WhatsApp Ptt 2026-10-10 at 17.00.40.mp3` `[00:00]`)
+- **Course**: `[00:13]`-`[00:56]` of `WhatsApp Ptt 2026-10-10 at 17.00.40.mp3`: parametrize all used functions as inputs; `[00:58]`-`[01:42]`: or a default value you can change (FFTW/GSL implementations); `[01:49]`: asks how this is normally done, since functions are first-class.
+
+### modulos-como-teorias-matematicas
+- **What**: Modules represent mathematical theories (linear algebra, reals, Fourier transforms), carrying types and functions with their laws, defined without value, with implementations that are generic where possible.
+- **Quote**: "los módulos representarían justamente teorías matemáticas, como que se llama algebra lineal o reales o, no sé, transformadas de Fourier" (`WhatsApp Ptt 2026-10-10 at 17.25.23.mp3` `[00:00]`)
+- **Course**: `[00:00]`-`[00:46]` of `WhatsApp Ptt 2026-10-10 at 17.25.23.mp3`: theory with types and functions, all with laws, defined without value, then generic implementations.
+
+### el-modulo-define-la-sintaxis
+- **What**: A module's type fixes a single syntax: the names of its functions and types and how they are represented, like Python/R libraries but with all their laws, with dotted names.
+- **Quote**: "los módulos tendrían una única sintaxis que está dada por justamente cuando vos definís el tipo del módulo" (`WhatsApp Ptt 2026-10-10 at 17.25.23.mp3` `[00:49]`)
+- **Course**: `[00:49]`-`[01:02]` of `WhatsApp Ptt 2026-10-10 at 17.25.23.mp3`: the module type defines function and type names and representation; `[01:21]`-`[01:44]`: dotted names like Python's np., libraries but with laws.
+
+### luthier-absorbe-librerias-reescribiendo-sus-leyes
+- **What**: An immediate application: have the AI take a Python/R library and generate Luthier code that writes each function with all the laws it satisfies, a way to suck in other languages' implementations while understanding what each does; writing the tests reveals bad design.
+- **Quote**: "el primer trabajo que podría hacer Luthier es agarrar y decirle a la IA, bueno, ahora vos agarrame toda esta librería de Python" (`WhatsApp Ptt 2026-10-10 at 17.25.23.mp3` `[01:46]`)
+- **Course**: `[01:46]`-`[02:17]` of `WhatsApp Ptt 2026-10-10 at 17.25.23.mp3`: generate a Luthier with the laws of a library's functions; `[02:21]`-`[03:03]`: pedagogical, understand what libraries do; `[03:23]`: pivot_wide/pivot_long "y una no es la inversa de la otra y tendrían que ser una inversa de la otra," revealing bad design.
+
+### modulo-teorico-vs-modulo-de-implementacion
+- **What**: In general you write a theoretical module and the implementation module(s), the latter possibly in Python, in R, and so on, with conversions between them.
+- **Quote**: "vos vas a hacer un módulo teórico y el módulo de la implementación" (`WhatsApp Ptt 2026-10-10 at 17.25.23.mp3` `[04:05]`)
+- **Course**: `[04:03]`-`[04:22]` of `WhatsApp Ptt 2026-10-10 at 17.25.23.mp3`: theoretical module plus implementation modules in different languages.
+
+### interprete-tabla-de-implementaciones
+- **What**: The Luthier interpreter: inspired by his own C++ DSL in MacroDR (virtual Compile classes), it would keep a table of identifiers with the implementations of each function; in Luthier the implementation is static Luthier code, and you need to know the output type.
+- **Quote**: "lo que habría que tener es, digamos, una tabla de identificadores con las implementaciones de las distintas funciones" (`WhatsApp Ptt 2026-10-10 at 17.25.23.mp3` `[05:10]`)
+- **Course**: `[04:30]`-`[05:10]` of `WhatsApp Ptt 2026-10-10 at 17.25.23.mp3`: inspiration from the MacroDR DSL with virtual classes; `[05:30]`-`[05:46]`: the implementation is the static Luthier code, you need the output type.
+
+### tipo-de-salida-polimorfico-por-demanda
+- **What**: A function can have multiple output types (sin as a real, a real in [-1,1], etc.), with the output type fixed by the required input type: a polymorphism in both the function and its return, possible under on-demand execution.
+- **Quote**: "Una función podría tener multiplicidad de tipos de salida y que el tipo de salida queda definido por el tipo de entrada que es requerido." (`WhatsApp Ptt 2026-10-10 at 17.25.23.mp3` `[07:20]`)
+- **Course**: `[05:49]`-`[06:21]` of `WhatsApp Ptt 2026-10-10 at 17.25.23.mp3`: sin has several result types; `[06:38]`: "Hacemos implementación por demanda"; `[07:20]`-`[07:53]`: output type set by required input type, possible with on-demand execution.
+
+### external-como-funcion-de-luthier
+- **What**: Turn external into a Luthier function that takes, say, a file and returns a maybe function: it finds the function (written in another language), stores it in the registry under its name ready to run, and must declare which language it is in.
+- **Quote**: "Una tentación que yo tenía es convertir external en una función de Python de alguna manera," (`WhatsApp Ptt 2026-10-10 at 17.41.53.mp3` `[00:00]`)
+- **Course**: `[00:08]`-`[01:01]` of `WhatsApp Ptt 2026-10-10 at 17.41.53.mp3`: external fetches the foreign function and stores it in the registry under its name; `[01:48]`: "el external tendría que decir en qué lenguaje está," better declared than guessed so there are no surprises.
+
+### un-environment-por-lenguaje
+- **What**: The interpreter would hold a registry of variables and functions, one environment per language in use, running several languages that communicate with each other.
+- **Quote**: "tendríamos una especie de registro de variables y de funciones, un environment por cada uno de los lenguajes que usemos." (`WhatsApp Ptt 2026-10-10 at 17.41.53.mp3` `[02:16]`)
+- **Course**: `[01:05]`-`[01:39]` of `WhatsApp Ptt 2026-10-10 at 17.41.53.mp3`: the interpreter has beds ("camitas") to run Python, R and others, with inter-program communication; `[02:16]`-`[02:28]`: one environment per language, several languages communicating.
 
 ## Notes
 
-Note 2 (`WhatsApp Ptt 2026-10-10 at 10.12.35.mp3`): "Un poco." trivial fragment, no idea.
+- `WhatsApp Ptt 2026-10-10 at 10.12.35.mp3`: "Un poco.", a fragment with no idea about Luthier.

@@ -5,7 +5,7 @@ One row per idea as the extractors found it, in time order; the local times are 
 time is its UTC converted. A note extracted both per note and by day gives two rows, each marked, so a
 restatement across notes is told from the same note read twice. Nothing here was judged or merged.
 
-Rows: 2349 (day 171, dialogue 1630, note 301, written 247). Inputs: 118 files, listed at the end with their sha256.
+Rows: 2360 (day 182, dialogue 1630, note 301, written 247). Inputs: 118 files, listed at the end with their sha256.
 
 Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: no time for 'material-esconde-lo-importante'; claude-code_2026-10-05_c7437496_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: id dialogue:c7437496:tres-resultados-passed-failed-not-run repeated, suffixed -2
 
@@ -22,7 +22,7 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | 2026-06 | 48 | 15 | 0 | 63 |
 | 2026-08 | 50 | 30 | 0 | 80 |
 | 2026-09 | 151 | 275 | 0 | 426 |
-| 2026-10 | 391 | 755 | 41 | 1187 |
+| 2026-10 | 402 | 755 | 41 | 1198 |
 | undated | 1 | 0 | 0 | 1 |
 
 ## Ideas, by day
@@ -9433,69 +9433,113 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 
 ### 2026-10-10
 
-- **10:12** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [00:06]] `day:2026-10-10:tipos-como-invariantes-de-una-disciplina`
-  The first principle of Luthier: types are invariants, and Luthier captures the invariants of a discipline; the hard and central problem is how to discover those invariants when you don't yet know them.
-  > el primer principio, por supuesto, es que los tipos son invariantes
+- **10:12** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [00:06]] `day:2026-10-10:tipos-son-invariantes`
+  The first principle: types are the invariants of a discipline, and Luthier's hard part is discovering those invariants, not assuming them known.
+  > el primer principio, por supuesto, es que los tipos son invariantes,
 
-- **10:13** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:07]] `day:2026-10-10:que-es-una-invariante`
-  A tentative definition of invariant: something that does not change whatever happens.
-  > una invariante, bueno, es algo que no cambia, sería, no sé qué es lo que dice, que siempre, digamos, pase lo que pase, eso no cambia, se mantiene
+- **10:13** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:34]] `day:2026-10-10:invariantes-como-leyes-predicados`
+  Invariants are represented by laws, and laws are predicates: statements that something occurs, is feasible, is the case.
+  > leyes que vienen a ser predicados, es decir, esto ocurre, esto es factible,
 
-- **10:13** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:26]] `day:2026-10-10:invariantes-como-leyes-predicados`
-  Invariants are represented by laws, and laws are predicates: statements that something holds, is feasible, is positive.
-  > en principio las invariantes las estaríamos representando con leyes, leyes que vienen a ser predicados, es decir, esto ocurre, esto es factible
+- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:56]] `day:2026-10-10:costo-como-invariante-relajada`
+  A laxer version of an invariant: instead of a predicate, a cost (from zero to infinity). It yields a type-with-cost rather than a verified type, and it fits reals, where equality is really a distance.
+  > Habría una versión, digamos, más laxa de invariantes, que sería, esto tiene un costo, ¿no?
 
-- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:56]] `day:2026-10-10:invariante-laxa-como-costo`
-  A looser version of invariant: not a yes/no predicate but a cost, from zero to infinity, important when verifying functions; it naturally fits real numbers, where equality is really a distance.
-  > Habría una versión, digamos, más laxa de invariantes, que sería, esto tiene un costo, ¿no? El costo puede ser cero o puede ir hasta infinito
+- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:26]] `day:2026-10-10:tipos-como-proposiciones`
+  Types are propositions: a type is an assertion about something.
+  > O sea que un tipo es una afirmación acerca de algo.
 
-- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:20]] `day:2026-10-10:tipos-como-proposiciones`
-  Types are propositions: a type is an affirmation about something.
-  > la idea es que tenemos tipos como proposiciones, ¿no? O sea que un tipo es una afirmación acerca de algo.
+- **10:15** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:41]] `day:2026-10-10:tipos-naturales-vs-predicativos`
+  Two kinds of types: natural (by construction, arising from a function) and predicative (checked by verification). Luthier starts from verification because construction demands more knowledge than he has.
+  > Están los tipos naturales, es decir, tipos que surgen de una función, digamos.
 
-- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:36]] `day:2026-10-10:tipos-naturales-vs-predicativos`
-  Two kinds of types: natural types that arise by construction (from a function), and predicative types that are verified by testing whether a candidate satisfies them; Luthier starts from verification because construction demands more knowledge than he has.
-  > Hay en realidad dos tipos de tipos, si se quiere. Están los tipos naturales, es decir, tipos que surgen de una función... Y los tipos predicativos, es decir, los tipos... que se verifica si cumplen eso o no.
+- **10:18** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [05:58]] `day:2026-10-10:ccc-y-leyes-construyen-tipos`
+  Types are built from the operations of Cartesian Closed Categories (sum, product, exponential, dependent types, booleans as elements) plus predicatives; predicatives build laws, and laws combine with or/and/if.
+  > va a tener las operaciones de Cartesian Close Categories,
 
-- **10:18** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [05:58]] `day:2026-10-10:operaciones-de-construccion-de-tipos`
-  The building blocks of types: the operations of Cartesian closed categories (sum, product, exponential), dependent types, and booleans as elements, plus the predicatives that build laws; a question is whether the object classifier uses only 0/1 booleans or also integers and positive reals.
-  > va a tener las operaciones de Cartesian Close Categories, que son mano suma, producto y exponencial y tipos dependientes y booleans como elementos
+- **10:19** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [07:13]] `day:2026-10-10:object-classifier-mas-alla-de-booleans`
+  Open question of whether the object classifier uses only the booleans 0 and 1, or extends to integers and positive reals.
+  > la pregunta es si vos usás solamente como object classifier los 0 y 1 en los booleans o si también usás los enteros los reales positivos
 
-- **10:20** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [07:46]] `day:2026-10-10:ley-constructor-pertenencia-tres-caras`
-  A law, a type constructor (with maybe), and a membership function are three faces of the same thing: a law generates a type, generates a constructor that may or may not build, and generates a function telling whether a candidate belongs.
-  > esa ley te genera un tipo, te genera un constructor de tipo con maybe... y bueno, este genera una función que dice si un candidato pertenece a un tipo o sea, son tres cosas de lo mismo
+- **10:20** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [08:10]] `day:2026-10-10:ley-genera-constructor-y-pertenencia`
+  One law is three things at once: it generates a type, a type constructor (with maybe), and a function telling whether a candidate belongs to the type.
+  > o sea, son tres cosas de lo mismo
 
-- **10:25** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [13:23]] `day:2026-10-10:verificar-leyes-como-rompecabezas`
-  Verifying a law is like a puzzle: a law such as the field axioms relates not just the two elements being combined but all others, so checking it requires computing cases you aren't computing and seeing whether all the pieces fit together coherently; you can either check that the pieces present fit, or try to fill in missing pieces.
-  > es como una especie de reumpecabezas la ley, ¿no?... vos podés ver las piezas que ya están se encajan todas entre sí o podés tratar de llenar piezas que no están a ver si las encontrás y las pones
+- **10:25** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [13:23]] `day:2026-10-10:verificar-una-ley-es-un-rompecabezas`
+  Verifying a law (like the field laws for sum) is like a jigsaw: the law relates many elements, so checking it requires computing combinations you aren't otherwise computing, trying to complete the circles of verification by generating and testing examples.
+  > es como una especie de reumpecabezas la ley, ¿no?
 
-- **10:28** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [15:56]] `day:2026-10-10:asociatividad-aparece-con-tres-elementos`
-  Associativity cannot be verified by summing two numbers; it only appears when you sum three, so the system needs a record of which variables were derived in order to know when a given law becomes testable.
-  > Si sumas dos números no vas a verificar la asociatividad, porque el valor de esa suma no depende de la asociatividad. Vos recién, cuando sumas tres números, ves la asociatividad
+- **10:28** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [16:14]] `day:2026-10-10:una-ley-se-invoca-solo-cuando-una-derivacion-la-necesita`
+  A law is only needed when a derivation actually invokes it: adding two numbers doesn't test associativity, three do; this calls for a record of the variables that were derived.
+  > Vos recién, cuando sumas tres números, ves la asociatividad
 
-- **10:31** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [19:09]] `day:2026-10-10:lazy-evaluation-el-codigo-es-codigo-hasta-evaluar`
-  Make the iter lazy: expressions like sums stay as code and keep being code; things only take form when you evaluate, and there are several modes of evaluation (with error, with record, with testing).
-  > si yo hago que el iter sea lazy evaluation... entonces yo tengo todas las expresiones, la suma y todo eso es código y va a seguir siendo código
+- **10:33** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [21:08]] `day:2026-10-10:evaluar-modifica-la-funcion`
+  Since functions are values, evaluating f(x) can modify f (now you know f works), giving a tested function distinct from the naive one; or you test f first so it is already tested when built.
+  > cuando yo hago f de x, claro, yo modifico f, o sea, porque ahora sé que f funciona, por ejemplo.
 
-- **10:32** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [20:17]] `day:2026-10-10:funcion-con-testeo-como-efecto-lateral`
-  Evaluating with testing leaves you a tested function rather than the naive function created from nothing, and that tested function is reused elsewhere; this raises the complication of functions changing as a side effect, since f(x) modifies f because you now know f works.
-  > evaluar con testeo me queda la función con testeo... O sea, no es la función creada de la nada, o sea, la función naif. Y esa función con testeo, después se usaría en otro lado.
+- **11:11** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.11.22.md [00:00]] `day:2026-10-10:lazy-evaluation-y-el-problema-del-olvido`
+  Make evaluation lazy so expressions stay as code until demanded; the final demand (a print, a saved value) defines what to compute and pulls backward only what is needed, which solves the problem of having to remember everything.
+  > Estoy pensando que la Lazy Evaluation sería la mejor manera de definir qué es lo que quiero exactamente definir.
 
-- **11:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.11.22.md [03:02]] `day:2026-10-10:certificados-y-grados-de-certeza-de-funciones`
-  To compute a value you may want a certificate that the functions computing it work, and functions could carry a degree of certainty (grade 1, 2, 3, with 100 or 200 samples); full verification of all paths is unfeasible, so you only partially check, e.g. some associativity at some point.
-  > necesito funciones que estén testeadas con tanto entonces yo calculo a con las funciones testeadas con grado 1 grado 2... tengo grado de certeza, con 100 samples, 200 samples, lo que sea, cada una de las funciones
+- **11:43** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [01:25]] `day:2026-10-10:longitud-del-programa-vs-del-calculo`
+  A program stays short because it is written synthetically, while a computation can grow large because it expands the search variables.
+  > lo que es, digamos, la longitud de un programa frente a la rectitud de, digamos, un cálculo.
 
-- **11:42** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [00:16]] `day:2026-10-10:lazy-recomputo-al-pedir-con-error`
-  A cost of lazy evaluation: if you asked for A without error and later need B which needs A with error, you must recompute A; not terrible, just compute it twice.
-  > si ya pediste el valor con A sin error, después el de B, y pedís el de B con error, tenés que volver a calcular el de A, lo cual no sería tan terrible
+- **11:44** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [01:51]] `day:2026-10-10:forward-vs-backward`
+  Two modes of work: backward (determine what to compute from what's demanded, keeping all past history, like keeping five years of receipts) and forward (compute everything, markovian and past-less, more wasteful but reduces complexity by consumption). Both have a role.
+  > está el método backward, y el forward.
 
-- **11:43** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [00:52]] `day:2026-10-10:el-programa-nunca-se-olvida`
-  The program is always fully kept, you never forget it, so you can compute anything; only things out of scope are lost forever; a program is written synthetically and stays short, whereas a calculation can grow large because it expands the search variables.
-  > nunca vos dejarías... vos resumirías el programa... Nunca olvidarías el programa, siempre tenés que acordarte de todo, a poder calcular cualquier cosa.
+- **16:50** Luciano [day: WhatsApp Ptt 2026-10-10 at 16.49.14.md [00:47]] `day:2026-10-10:implementaciones-como-quotient-sobre-el-predicado`
+  Defining types with predicates gives an equivalence relation; the implementations of a function are the quotient over the predicate of its laws, which lets you swap implementations proven equal (the basis for optimization).
+  > Las implementaciones de una función son el quotient sobre el predicate de las leyes de esa función.
 
-- **11:46** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [04:03]] `day:2026-10-10:backward-y-forward-las-dos-formas`
-  Two ways of working: backward (lazy, start from what you're asked and determine what you need) and forward (compute everything exactly as told, discarding the rest); forward is inefficient but markovian (no past, you consume and stay where you are), backward must remember all your history; both have a role.
-  > uno podría pensar que tenés que tener las dos formas de trabajar. las dos tienen un rol
+- **16:50** Luciano [day: WhatsApp Ptt 2026-10-10 at 16.49.14.md [01:45]] `day:2026-10-10:equivalencia-por-functor-o-modelo`
+  Beyond exact equality, two functions can be a functor/model of each other, living in different but equivalent (isomorphic) models (lists vs vectors, Python vs R), with a conversion cost.
+  > vos podés tener funciones que no implementen exactamente lo mismo, pero que sean, digamos, una functor de la otra, una modelo de la otra.
+
+- **16:52** Luciano [day: WhatsApp Ptt 2026-10-10 at 16.49.14.md [02:50]] `day:2026-10-10:igualdad-de-datos-y-costo-de-representacion`
+  Another grade of equivalence: the same data represented differently; functions rest on a particular representation, so there is a cost to transforming data from one format to another.
+  > la igualdad de los datos son los mismos datos pero están representados de distintas maneras
+
+- **16:53** Luciano [day: WhatsApp Ptt 2026-10-10 at 16.49.14.md [04:27]] `day:2026-10-10:decoracion-por-demanda-contaminacion`
+  One single code can be run to compute the value, the value with error, the derivative, or any monad/decoration; what you compute is fixed only at the final demand (the print), which propagates backward like a poisonous stain. On demand you demand with your conditions.
+  > sería como una especie de contaminación, vos lo tocas y es como una mancha venenosa que va para atrás
+
+- **17:00** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.00.40.md [00:00]] `day:2026-10-10:funciones-como-valores-captura-de-dependencias`
+  If functions are values, they can change, so a function that uses other functions must capture them somehow: either parametrize everything (the used functions are input parameters) or have a default that can be swapped (e.g. which FFT implementation).
+  > cuando uno ya considera que las funciones son variables, o sea, son valores, entonces los valores pueden cambiar.
+
+- **17:25** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.25.23.md [00:00]] `day:2026-10-10:modulos-como-teorias-matematicas`
+  Modules represent mathematical theories (linear algebra, reals, Fourier transforms), carrying types and functions with their laws, defined without value, with implementations that are generic where possible.
+  > los módulos representarían justamente teorías matemáticas, como que se llama algebra lineal o reales o, no sé, transformadas de Fourier
+
+- **17:26** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.25.23.md [00:49]] `day:2026-10-10:el-modulo-define-la-sintaxis`
+  A module's type fixes a single syntax: the names of its functions and types and how they are represented, like Python/R libraries but with all their laws, with dotted names.
+  > los módulos tendrían una única sintaxis que está dada por justamente cuando vos definís el tipo del módulo
+
+- **17:27** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.25.23.md [01:46]] `day:2026-10-10:luthier-absorbe-librerias-reescribiendo-sus-leyes`
+  An immediate application: have the AI take a Python/R library and generate Luthier code that writes each function with all the laws it satisfies, a way to suck in other languages' implementations while understanding what each does; writing the tests reveals bad design.
+  > el primer trabajo que podría hacer Luthier es agarrar y decirle a la IA, bueno, ahora vos agarrame toda esta librería de Python
+
+- **17:29** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.25.23.md [04:05]] `day:2026-10-10:modulo-teorico-vs-modulo-de-implementacion`
+  In general you write a theoretical module and the implementation module(s), the latter possibly in Python, in R, and so on, with conversions between them.
+  > vos vas a hacer un módulo teórico y el módulo de la implementación
+
+- **17:30** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.25.23.md [05:10]] `day:2026-10-10:interprete-tabla-de-implementaciones`
+  The Luthier interpreter: inspired by his own C++ DSL in MacroDR (virtual Compile classes), it would keep a table of identifiers with the implementations of each function; in Luthier the implementation is static Luthier code, and you need to know the output type.
+  > lo que habría que tener es, digamos, una tabla de identificadores con las implementaciones de las distintas funciones
+
+- **17:32** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.25.23.md [07:20]] `day:2026-10-10:tipo-de-salida-polimorfico-por-demanda`
+  A function can have multiple output types (sin as a real, a real in [-1,1], etc.), with the output type fixed by the required input type: a polymorphism in both the function and its return, possible under on-demand execution.
+  > Una función podría tener multiplicidad de tipos de salida y que el tipo de salida queda definido por el tipo de entrada que es requerido.
+
+- **17:41** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.41.53.md [00:00]] `day:2026-10-10:external-como-funcion-de-luthier`
+  Turn external into a Luthier function that takes, say, a file and returns a maybe function: it finds the function (written in another language), stores it in the registry under its name ready to run, and must declare which language it is in.
+  > Una tentación que yo tenía es convertir external en una función de Python de alguna manera,
+
+- **17:44** Luciano [day: WhatsApp Ptt 2026-10-10 at 17.41.53.md [02:16]] `day:2026-10-10:un-environment-por-lenguaje`
+  The interpreter would hold a registry of variables and functions, one environment per language in use, running several languages that communicate with each other.
+  > tendríamos una especie de registro de variables y de funciones, un environment por cada uno de los lenguajes que usemos.
 
 ### undated
 
@@ -9541,7 +9585,7 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | 2026-10-07_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 14 | 14/14 (match: words) | 3426f8c0d009 |
 | 2026-10-08_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 23 | 23/23 (match: words) | f3959b7bb217 |
 | 2026-10-09_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 11 | 11/11 (match: words) | 84ea85c4fb9d |
-| 2026-10-10_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 16 | 15/16 (match: words) | 1bef3f3bf1fc |
+| 2026-10-10_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 27 | 27/27 (match: words) | eeda9da25961 |
 | WhatsApp Ptt 2026-05-26 at 12.32.24_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 9 |  | ae4cb5d79307 |
 | WhatsApp Ptt 2026-05-26 at 12.41.09_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 8 |  | d3472d1dcc65 |
 | WhatsApp Ptt 2026-05-27 at 13.39.04_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 10 |  | b0c56d728568 |
