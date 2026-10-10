@@ -162,3 +162,36 @@ following it). The analysis above did not cover them.
   restated. *Proposed*: in the structure of §2, F replaces B as the second deviation from type
   theory, which has no executive face at all: there computation is normalization of a term, with
   no demand.
+
+## Addendum 2: why depart from type theory
+
+Source: `record/Lucianos ideas/el problema de los floating point.txt` (committed verbatim, same
+day): type theory works for integers and stops working for float, linear algebra and statistics;
+there Boolean type theory fails, and to be strict or expressive one needs something else, hence
+[0,+inf).
+
+*Proposed* sharpening, because the diagnosis decides what D has to be. Type theory does not fail
+on floats: Float64 is an ordinary inductive type, IEEE 754 operations are total functions on it,
+and Flocq proves exact theorems about them in Coq. What fails is the law of the ideal object
+(associativity, A·A⁻¹ = I, a probability integrates to one) when it is asserted of the concrete
+realization (L15). There is a Boolean way out and it is what Flocq takes: the law becomes an error
+bound, |fl(a+b) − (a+b)| ≤ ε|a+b|, a predicate parametrized by ε (P11). It is honest and it stays
+inside type theory. Its cost is threefold: ε is fixed in the law, so one law per tolerance and
+per representation; worst-case bounds compose into condition numbers and become useless after a
+few steps; and nothing statistical can be said, which is the whole of the data case. [0,∞) is
+what removes the three at once: the law states the distance, the demand states the tolerance (B),
+so one law serves float32, float64, interval and exact (E, L10), and composition is of costs, not
+of worst cases.
+
+Integers are not the other side of the line; machine Int64 overflows, and the pattern is the same
+(ideal ℤ, concrete realization). The difference is that for integers exactness is recoverable
+(bignum) and for floats it never is, so the distance is intrinsic. The line is "the realization
+satisfies the ideal law exactly" against "approximately", not int against float.
+
+One consequence the note does not draw. Over integers a law's value is computed exactly. Over
+floats the cost itself is not available: the ideal value (the real sum) is not in hand, so the
+residual is estimated, by a bound, an interval, or a reference at higher precision on sampled
+inputs. The value of the law is then a random variable, not a number. That, and not a preference,
+is what makes "Bayesian statistics to compose it" necessary: D is not cost-valued laws alone, it is
+cost-valued laws whose costs are themselves uncertain. It is the justification of D to write in
+draft 2, and it is where the sentence "type theory fails for floats" would mislead a reader.
