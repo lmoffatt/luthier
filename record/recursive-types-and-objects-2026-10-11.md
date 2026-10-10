@@ -100,3 +100,40 @@ In the spec today (`04` §5, `05` R11):
 
 Neither proposal adds a kernel construct: the first is sugar into `match` and `just`, the second a
 restriction the type checker already makes.
+
+## 4. smartMaybe: the error form chosen by the demand
+
+Luciano's note (ba108aa): "Yo quisiera un smartMaybe que de acuerdo a la demanda sea o un Maybe
+comun o un maybeError que me devuelve un error type o un string explicativo. Lo mismo con la Law
+... normalmente quiero devolver un maybeError, pero a veces para optimizar es mejor devolver un
+Maybe. Entonces, si es a demanda, bueno, devuelvo lo que me piden."
+
+What the spec has. `05` §5, *Checks*, lists the forms of one predicate (Bool, `refine` into
+`Maybe`, the reason of a failure, every failure, a witness), "each derived from `p` and tied to it
+by a law", and makes the Bool primary. L19 (the demand determines the computation) already names
+"the value, its error" among what a demand asks for.
+
+*Proposed.* Invert the primacy: the richest form is written once and the others are its
+forgetful projections,
+
+    List E  ->  < ok : { x : T | p x } | failed : E >  ->  Maybe { x : T | p x }  ->  Bool
+
+each map canonical, so by L13 (forgetting is determined by the demand) the consumer's demand picks
+one and nobody writes the poorer forms by hand.
+
+What the optimization costs. Under forward on demand (D-2026-10-10-d) a node is computed once and
+whole. Two cases:
+
+- The explanation is a separate definition that reads the decision's intermediates (formatting a
+  message, collecting context). A consumer that matches only on `ok` or `failed` never demands it,
+  and it is not computed. This case is free, and it is the common one.
+- The cheaper form stops early: `Bool` from "every failure" needs only to know whether the list is
+  empty, and a whole node computes all failures. Getting the saving needs the demand "is it empty"
+  to cross the fold that builds the list and become "stop at the first". That is a rewrite of the
+  plan, not of the program; it is open.
+
+For a `Law` the explaining form must carry both sides, `< holds : W | fails : E >`, because `not`
+of a failure needs evidence of success. `and` accumulates failures, `or` keeps the first success,
+and `not` swaps the sides. Bool gets all three for free; the explaining form pays with `W`. For a
+quantified law the sides are already in the certificate (`05` §7): the counterexample on failure,
+the grade with its `n` on success.
