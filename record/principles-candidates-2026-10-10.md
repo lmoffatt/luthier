@@ -21,7 +21,14 @@ expresar todo, solo elegir lo que va por default").
 
 ## Retouches to existing principles
 
-**L13 (forgetting is first-class)** gains its operational justification. Forward is Markovian:
+**L13 (forgetting is first-class)** is resolved by the demand: "olvidar esta determinado por
+todo lo que no hay que recordar, es decir lo que pide el valor demandado. Eso soluciona el tema
+de los functores de olvido" (Luciano, chat 2026-10-10). The forgetful projection is the
+complement of the dependency cone of the demanded value, so it is canonical, one per demand, and
+"the language being spoken" is what was asked for. Forgetting at run time (freeing nodes) and
+forgetting in the type (the history dependent typing accumulates) are one: the type demanded
+says how much history to keep (D-2026-10-10-h, L11), the program is never forgotten, and only
+what leaves scope is lost. It also gains its operational justification. Forward is Markovian:
 "estás en un estado y ya está, todo lo que pasó antes lo olvidaste"; backward must keep its
 history: "tenés que guardar las boletas de 5 años"; scope is backward's forgetting: "si hay cosas
 que se salen de scope, ya está. Ahí se pierden para siempre". Source: audio 2026-10-10 11.42.15,
