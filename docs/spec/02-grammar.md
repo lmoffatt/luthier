@@ -83,7 +83,7 @@ An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types
              | "[" [ term { "," term } ] "]"                                              -- list
              | "\" lparam { lparam } "{" term "}"                                         -- lambda
              | "match" term "{" { pattern "->" term [ ";" ] } "}"
-             | "if" term "then" term "else" term
+             | "if" term "then" term [ "else" term ]                                     -- one arm: a Maybe or a reason
              | "extern" [ "provisional" ] string
              | "forget" atom
              | atom "." name                                                              -- projection
@@ -97,6 +97,9 @@ A pattern `name` is a constructor of the scrutinee's data type or a label of its
 one, and a variable otherwise. A label of a sum is an injection: `circle 2.0` against
 `< circle : Float64 | square : Float64 >`, `true` against `Bool`. A union `< ... >` written as the argument of
 an application needs parentheses, because `<` after a term is a comparison.
+
+An `else` belongs to the nearest `if` without one: `if a then if b then x else y` is
+`if a then (if b then x else y)` (2026-10-11, D-2026-10-11-b).
 
 ## 4. Translations into the kernel
 

@@ -771,3 +771,19 @@ Kind:       language design. For L13 (forgetting is determined by the demand), L
             determines the computation), P11 (n is a parameter of the demand). Cost: not of an
             explaining form explains only as much as its success side carries
 Status:     current; spec amended (05 §9, 04 §3); not implemented; stopping the fold at n failures is open
+
+D-2026-10-11-b  An if without else is a guarded value: `if c then a` is `if c then just a else
+                nothing` when c is a Bool, and `ok a` or `failed` with the first failure when c
+                is a Failures E (D-2026-10-11-a), which a demand for Maybe forgets. Without
+                effects (L18) a branch that does nothing has no meaning, so this is the only
+                reading; a forgotten else is caught by the type checker (a Maybe where a value
+                was expected). An else belongs to the nearest if without one. Precedent: Rust
+                bool::then, Scala Option.when.
+Author:     Luciano
+Quote:      "monoide (T:U) (op:T->T->T ) -> Maybe monoide := if (leyesdeMonoide T op ->
+            monoide{T op}" (note); "acepto eso, entonces." (chat)
+Source:     record/Lucianos ideas/El problema de las tipos recursivos.txt (0cbe437); chat
+            (session of 2026-10-11); record/recursive-types-and-objects-2026-10-11.md §3
+Kind:       language design, grammar. For L18 (a definition has no effects), P8 (no more
+            bureaucracy than it pays for). Sugar only: no kernel construct added
+Status:     current; spec amended (02 §3, 04 §5); not implemented

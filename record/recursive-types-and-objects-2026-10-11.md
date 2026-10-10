@@ -86,7 +86,7 @@ In the spec today (`04` §5, `05` R11):
 - A check whose evidence must outlive the branch returns the refined value:
   `match refine p x { just y -> ... ; nothing -> ... }`.
 
-*Proposed* (needs Luciano's decision, it changes the grammar):
+*Proposed*, and decided for the first item (D-2026-10-11-b, 2026-10-11):
 
 1. **A one-armed `if` is a guarded value.** Luciano's note writes `if c -> v` with no `else`.
    Without effects (L18) a branch that does nothing has no meaning, so the only reading is

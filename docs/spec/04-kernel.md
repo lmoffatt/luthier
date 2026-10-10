@@ -157,7 +157,9 @@ kernel construct would not be sugar (`02 §4`).
 | `f (x : A) (y : B) : C := t` | `f : (x : A) -> (y : B) -> C := \ x { \ y { t } }` |
 | `(x y : A)` in a binder | `(x : A) (y : A)` |
 | clauses `\| p, q := t` under a header with parameters | a `match` on the tuple of parameters |
-| `if c then a else b` | `match c { true -> a ; false -> b }` |
+| `if c then a else b` | `match c { true -> a ; false -> b }`; `c : Failures E` is first projected by `holds` (`05 §9`) |
+| `if c then a`, `c : Bool` | `if c then just a else nothing`, of type `Maybe A` (D-2026-10-11-b) |
+| `if c then a`, `c : Failures E` | `match c { nil -> ok a ; cons e es -> failed e }`, the reason form of `05 §9`; a demand for `Maybe A` forgets `e` |
 | `a and b`, `a or b`, `p -> q` with `p : Bool` | `and a b`, `or a b`, `implies p q` |
 | `[a, b, c]` | `cons a (cons b (cons c nil))`, element type from the expected type |
 | `{ x := a, y := b }` | `(a, b)`, checked against a type with components `x`, `y` |
