@@ -137,3 +137,25 @@ of a failure needs evidence of success. `and` accumulates failures, `or` keeps t
 and `not` swaps the sides. Bool gets all three for free; the explaining form pays with `W`. For a
 quantified law the sides are already in the certificate (`05` §7): the counterexample on failure,
 the grade with its `n` on success.
+
+## 5. n failures or all of them: the compiler
+
+Decided by Luciano (D-2026-10-11-a): smartMaybe, with the demand asking for the first n failures or
+for all of them, "como un compilador".
+
+The forms of section 4 become one family with a parameter: the first n failures of the explaining
+form. `Bool` and `Maybe` are n = 1, forgotten; "the reason" is n = 1; "every failure" is n = ∞. A
+compiler's error limit is this n (`-fmax-errors` in GCC, `-ferror-limit` in Clang), and a type
+checker is the canonical case: a predicate over programs, "is well typed", whose explaining form
+is the diagnostics.
+
+What a compiler has to solve, and Luthier gets from its graph. After the first error a compiler
+must decide which later errors are real and which are cascades of the first; it does so with
+recovery heuristics and poisoned types. In Luthier the dependencies are explicit, so a failure at a
+node blocks only its cone: "all the failures" means the failures of the nodes outside the cone of
+an earlier failure, and they are independent by construction. Over independent checks the failures
+accumulate (an applicative functor); along a dependency the bind stops at the first.
+
+*Open.* With strict whole nodes (D-2026-10-10-d) a fold that builds the list of failures computes
+all of them. For n finite the demand has to carry n into the fold so it stops; that is a rewrite of
+the plan, not of the program.

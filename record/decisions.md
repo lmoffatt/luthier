@@ -752,3 +752,22 @@ Kind:       rule. For P3 (the best reading in front, the original in git), P12; 
             D-2026-10-10-b (the document was to be worked in another thread)
 Status:     current: docs/principles.md draft 1 (5769005), unapproved
 
+
+D-2026-10-11-a  smartMaybe: a predicate is written once, in its explaining form (the failures
+                it finds), and the poorer forms (the first failure, Maybe, Bool) are its
+                forgetful projections, chosen by the demand. Laws too return the explaining
+                form. The demand asks for the first n failures or for all of them, as a
+                compiler's error limit; Bool is the first failure, forgotten. Inverts the
+                primacy of 05 §5 (Checks), where Bool is primary and the explaining forms are
+                written apart and tied by a law (firstViolation and ReportsValidity).
+Author:     Luciano
+Quote:      "Yo quisiera un smartMaybe que de acuerdo a la demanda sea o un Maybe comun o un
+            maybeError" (note); "Si, vamos con smartMaybe. Y la idea es que podes pedir
+            n-fallas o completo (como un compilador, no?)" (chat)
+Source:     record/Lucianos ideas/El problema de las tipos recursivos.txt (ba108aa); chat
+            (session of 2026-10-11); analysis in record/recursive-types-and-objects-2026-10-11.md
+            §4 and §5
+Kind:       language design. For L13 (forgetting is determined by the demand), L19 (the demand
+            determines the computation), P11 (n is a parameter of the demand). Cost: not of an
+            explaining form explains only as much as its success side carries
+Status:     current; spec 05 §5 not yet amended; stopping the fold at n failures is open
