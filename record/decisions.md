@@ -563,3 +563,16 @@ Kind:       method. For P8 (no more bureaucracy than it pays for: the pipeline's
             their place); against the working rule that he runs the scripts processing the
             record, set aside here by his word for this comparison
 Status:     current, in record/controls/README.md (the naive run)
+
+D-2026-10-10-b  The principles of the language and the way of working get a presentation document,
+                docs/principles.md, drafted from the synthesis, the cutoff run, the naive runs and
+                the five web answers, to be worked with Luciano in another thread; and the days of
+                synthesis and validation close with a conclusions document in the record.
+Author:     Luciano
+Quote:      "Quiero que entonces ahora hagamos un documento ya en docs con los principios y la
+            forma de trabajar. Vamos a trabajar en otro hilo sobre este documento."
+Source:     chat (session of 2026-10-10)
+Kind:       rule. For P12 (what reaches him is synthesized); docs/ presents Luthier, record/ holds
+            how it came to be (D-2026-10-07-a)
+Status:     current: docs/principles.md draft 0 (unapproved), record/conclusions-2026-10-10.md
+
