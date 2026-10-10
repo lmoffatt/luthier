@@ -723,7 +723,9 @@ D-2026-10-10-i  A first use case: absorb an existing library into Luthier by wri
                 existing implementation against it (L14). The first candidate is tidyverse's
                 pivot_wider and pivot_longer: the law "one is the inverse of the other" fails in
                 general (row order, column types), and writing it forces saying up to which
-                equality it holds (L16). A failing law is the finding.
+                equality it holds (L16). A failing law is the finding: the conditions under
+                which it holds are the reasons of the library's design ("obliga a ver porque
+                eligio lo que eligio"), not a verdict on it.
 Author:     Luciano
 Quote:      "el primer trabajo que podría hacer Luthier es agarrar y decirle a la IA, bueno,
             ahora vos agarrame toda esta librería de Python ... y que ponga, digamos, en el
