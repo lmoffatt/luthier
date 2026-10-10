@@ -59,6 +59,22 @@ things at once: the type, the constructor with Maybe, the membership function. S
 **L3 (defining a function defines its test)** joins D-2026-10-10-d: the tests are actions, so
 verification enters the same plan as the prints.
 
+**L10 (one function, many paths)** stated as a quotient: the implementations of a function are
+the quotient by the equivalence "compute the same function up to the law's equality"; one class
+per mathematical function, and inside the class the fibre of what differs: speed, error, place
+of execution. "Las implementaciones de una función son el quotient sobre el predicate de las
+leyes de esa función ... sería la parte que representa el grupo de equivalencia y después las
+diferencias". Source: audio 2026-10-10 16.49.14 (8a4c70f), 00:04 to 01:39; the same idea without
+the word on 2026-05-30 (`note:2026-05-30T18.01.53:equivalencias-para-clasificar-y-separar-decoraciones`).
+The model's precision: the predicate of a law gives a subset (L4), the equivalence is between
+implementations that satisfy it, and the class is chosen by law, the fibre by cost.
+
+**L14 (Luthier orchestrates other languages)** gains the conversion cost: the same function over
+lists and over vectors, in Python and in R, the same data in two file formats, are models of one
+function on equivalent classes, and converting between representations has a cost, so conversion
+is one more edge in the graph of paths of L10. Source: audio 2026-10-10 16.49.14, 01:39 to 03:18.
+Prior art: representation independence (Reynolds).
+
 ## Ideas of the audios the draft does not have
 
 **What never reaches an output needs no certificate.** "lo único que se ve es lo que modifica el
@@ -80,6 +96,16 @@ uno no maneja del todo ... y ahí dudas de todo". Source: audio 2026-10-09 10.43
 05:06. For the way of working (P12), a criterion for what the model brings him.
 
 **Mutable parameters as before and after.** D-2026-10-10-e.
+
+**Decorations are demanded at the print.** The same code computes the value, the value with
+error, the derivative, the test, "cualquier monad o decoración", and which one is said when the
+print is asked: "cuando vos demandás, demandás con tus condiciones". The demand marks the live
+path backward "como una mancha venenosa que va para atrás"; his open question is whether
+decorations are forward or backward, and how an input entered as a plain real gets an error.
+Source: audio 2026-10-10 16.49.14, 03:20 to 07:06; the old term "parámetro de implementación"
+(05:20). Already in his writing as "funciones que modifican el codigo: tests, errores, derivadas",
+and in his C++ (`Transfer_Op_to`, the forward version). Resolved as the fourth condition of
+D-2026-10-10-d (D-2026-10-10-f).
 
 ## Left open on purpose (P8: until a real case asks for it)
 

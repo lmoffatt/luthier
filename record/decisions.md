@@ -635,3 +635,29 @@ Kind:       implementation decision. For D-2026-10-10-c, L7 (both names explicit
             Leijen 2021)
 Status:     current
 
+D-2026-10-10-f  Decorations (value with error, derivative, test, any monad) are chosen backward
+                and propagated forward: the fourth condition of D-2026-10-10-d. The action names
+                the mode ("print de la derivada de y respecto de x"); the plan marks each live
+                node with its mode; the run interprets the same DAG under that mode (L6, code is
+                data) and the decorated values flow forward. At the leaves one of three: the leaf
+                lifts on its own (a constant has error zero and derivative zero); the leaf takes
+                an explicit mark given with the demand (the variable differentiated against, the
+                uncertainty of a measurement); or the leaf cannot supply what the mode asks and
+                is a hole (L8), found at planning, before anything is computed. The derivative is
+                the one decoration with two propagation modes, forward (dual numbers) and reverse
+                (the tape); the choice is by cost, a parameter (P11), default by shape (forward
+                for few inputs, reverse for few outputs).
+Author:     Luciano for the scheme and the question; the model for the three cases at the leaves
+            and the derivative's exception, accepted
+Quote:      "Cuando vos demandás, demandás con tus condiciones."
+            "si estas decoraciones son forward o backward, y acá estoy un poquito en la duda de
+            cuál de las dos sería mejor"
+            "Si"
+Source:     record/audios/WhatsApp Ptt 2026-10-10 at 16.49.14.md (8a4c70f, 03:20 to 07:06); chat
+            (session of 2026-10-10)
+Kind:       implementation decision. For D-2026-10-10-d (the memo key already carries the mode),
+            L6, L8, P11. Prior art: tagless final interpreters, JAX's transformations (grad as a
+            reinterpretation of the traced program), forward and reverse mode AD; his own
+            Transfer_Op_to in C++ is the forward version
+Status:     current
+
