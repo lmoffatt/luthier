@@ -758,7 +758,7 @@ D-2026-10-11-a  smartMaybe: a predicate is written once, in its explaining form 
                 forgetful projections, chosen by the demand. Laws too return the explaining
                 form. The demand asks for the first n failures or for all of them, as a
                 compiler's error limit; Bool is the first failure, forgotten. Inverts the
-                primacy of 05 §5 (Checks), where Bool is primary and the explaining forms are
+                primacy of 05 §9 (Checks), where Bool is primary and the explaining forms are
                 written apart and tied by a law (firstViolation and ReportsValidity).
 Author:     Luciano
 Quote:      "Yo quisiera un smartMaybe que de acuerdo a la demanda sea o un Maybe comun o un
@@ -770,4 +770,4 @@ Source:     record/Lucianos ideas/El problema de las tipos recursivos.txt (ba108
 Kind:       language design. For L13 (forgetting is determined by the demand), L19 (the demand
             determines the computation), P11 (n is a parameter of the demand). Cost: not of an
             explaining form explains only as much as its success side carries
-Status:     current; spec 05 §5 not yet amended; stopping the fold at n failures is open
+Status:     current; spec amended (05 §9, 04 §3); not implemented; stopping the fold at n failures is open

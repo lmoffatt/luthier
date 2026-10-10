@@ -121,8 +121,9 @@ Besides the introductions and eliminations of section 2:
   It is the fold of the type (`foldr` for `List`). A proof layer would make it primitive and
   forbid general recursion, so that every function terminates; version 0 tests and does not
   need it.
-- **Laws.** A law is a term of type `Bool`, or a function into `Bool` whose parameters are
-  quantified, or a conjunction `p & q` of laws, of type `Law`. `Law` is the type of what a
+- **Laws.** A law is a term of type `Bool` or `Failures E` (the failures it finds, `05 §9`), or a
+  function into either whose parameters are quantified, or a conjunction `p & q` of laws, of type
+  `Law`. `Law` is the type of what a
   test runs (`05 §7`).
 - **Extern.** `extern "python:module.function"` is a value the environment provides, with the
   type the context gives it (`05` R5). `extern provisional "..."` is the same value, marked as
@@ -166,6 +167,7 @@ kernel construct would not be sugar (`02 §4`).
 | `< x : A \| y : B >` | `(x : A) + (y : B)` |
 | `Bool` | `< true : Unit \| false : Unit >`, in `core.lut` |
 | `Maybe A` | `< nothing : Unit \| just : A >` |
+| `Failures E` | `List E`, the failures of a check, empty when it holds (`05 §9`) |
 | `\ (x, y) { t }` | `\ p { match p { (x, y) -> t } }` |
 
 ## 6. Primitive versus derived, and native versus extern

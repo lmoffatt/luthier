@@ -18,8 +18,9 @@ applications, not names.
 Every symbol used in this document.
 
 - `x : T`, `x : T := t`, `x = t`, `U`, `≡`: as in `04 §0`. A *hole* is a declared name with no body.
-- `Bool` is `< true : Unit | false : Unit >`; `Law` is the type of a conjunction of quantified
-  Bool-valued laws (`04 §3`).
+- `Bool` is `< true : Unit | false : Unit >`; `Failures E` is `List E`, the failures a check finds,
+  empty when it holds (section 9, *Checks*); `Law` is the type of a conjunction of quantified
+  Bool- or Failures-valued laws (`04 §3`).
 - A *name* is a top-level act's name, qualified by its module prefix (`03 §2`).
 - `D(n)` is the set of names that occur in the declared type of `n`; `B(n)` the set that occur
   in its body. Occurrence is syntactic, after elaboration and after expanding aliases;
@@ -33,7 +34,7 @@ Every symbol used in this document.
 - An *object* is a strongly connected component of the dependency graph: a maximal set of
   names each reachable from each other. A name no cycle passes through is an object of one.
 - A *branch* of an object `O` is a name outside `O` with an edge into `O`.
-- A *law* is a Bool- or Law-valued definition, or one conjunct (split at `&`) of the predicate
+- A *law* is a Bool-, Failures- or Law-valued definition, or one conjunct (split at `&`) of the predicate
   of a subtype. A law *touches* the names and labels that occur free in it.
 - A *labeled base* is a product with named components, `{ x : A, y : B }`; its *labels* are the
   component names.
@@ -57,7 +58,7 @@ The body says what is defined, and its type decides how; no marker distinguishes
 (rule R6):
 
 - `x : T := t` with `t : T` defines `x` as the inhabitant `t`.
-- `x : T := p` with `p : T -> Bool`, or `p` a `Law` over a `T`, defines `x` as the subtype
+- `x : T := p` with `p : T -> Bool` or `p : T -> Failures E`, or `p` a `Law` over a `T`, defines `x` as the subtype
   `{ y : T | p y }`, a type: `x : U`.
 - `x : U := data { ... }` defines a recursive type.
 - `x : T := extern "..."` defines a value whose body the environment holds (R5).
@@ -203,7 +204,7 @@ Files: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`,
 `r5_extern_type.reject.lut`, `r5_extern_over_declared.reject.lut`.
 
 **R6. The body of a declared name is an inhabitant or a predicate.** If `x` is declared `x : T`
-and later given a body, the body has type `T`, or `T -> Bool`, or is a `Law` over `T`. Any other
+and later given a body, the body has type `T`, or `T -> Bool`, or `T -> Failures E`, or is a `Law` over `T`. Any other
 type is an error, reported against the declaration.
 Files: `r6_predicate_body.accept.lut`, `r6_body_type.reject.lut`.
 
@@ -411,29 +412,52 @@ laws (sample and likelihood), the slope of the transform is the density (transfo
 and simulated data have a uniform transform (sample and transform). The project certifies it on the
 model of the tape distances, with two negative controls, each breaking one side.
 
-**Checks** (decided 2026-10-06). A subtype `{ x : T | p x }`, with `p : T -> Bool`, has two
-presentations. One is its characteristic function, `p` itself, which says yes or no. The other is
-the partial inverse of its inclusion, `refine p : T -> Maybe { x : T | p x }`, which gives the same
-value at its finer type, or nothing. Each gives the other, so neither is written twice. The Bool is
-the primary form: laws are Bool-valued, and Bools compose with `and`, `or` and `not`. `refine` is
-written once, generically, and R11 is what makes it typable:
+**Checks** (decided 2026-10-06; primacy inverted 2026-10-11, D-2026-10-11-a; not implemented).
+A subtype `{ x : T | p x }` is written once, by the check that explains it: `p : T -> Failures E`,
+with `Failures E = List E`, the failures `p` finds in `x`, empty exactly when `x` is in the subtype.
+The other forms are its forgetful projections, and the demand chooses among them (L13, forgetting is
+determined by the demand). None is written by hand and no law ties them, since each is computed
+from `p`:
 
-    refine (T : U) (p : T -> Bool) (x : T) : Maybe { y : T | p y } := if p x then just x else nothing
+| form | type | from `p x` |
+|---|---|---|
+| every failure | `T -> Failures E` | `p x` itself |
+| the first `n` failures | `T -> Failures E` | its first `n` elements |
+| the reason of a failure | `T -> < ok : { x : T \| p x } \| failed : E >` | `ok x` if empty, else `failed` of the first |
+| the refined value, `refine p` | `T -> Maybe { x : T \| p x }` | the reason, with the failure forgotten |
+| the characteristic function, `holds p` | `T -> Bool` | whether it is empty |
 
-Which one a program uses depends on whether the evidence must outlive the branch. Where the result
-of the check is used inside the branch, the Bool and R11 suffice. Where the value leaves it (it is
+A Bool-valued predicate is the check that explains nothing: `Bool` is `Failures Unit` cut at one
+failure (`true` the empty list, `false` one `unit`), and every rule that accepts a `Failures E`
+accepts a `Bool`. A `Failures E` used where a `Bool` is expected (the condition of an `if`, an
+operand of `and`) is projected by `holds` implicitly, as a subtype is forgotten into its base.
+
+The demand carries `n` (P11, every criterion is a parameter). An action that reports (`luthier
+check`, `luthier test`, a diagnostic a program prints) asks for every failure unless told otherwise,
+as a compiler with no error limit; a condition (`if`, a `match` on `ok` and `failed`, `refine`) asks
+for one. With dependencies explicit, "every failure" is well defined where a compiler has to guess
+which errors are cascades of the first: a failure blocks only the cone of its node, and the failures
+outside it are independent. Stopping the computation of `p x` at the `n`-th failure, rather than
+computing them all and keeping `n`, is open (section 10).
+
+Composition. `and` concatenates the failures: over independent checks they accumulate, which makes
+the form an applicative functor. `or` holds when either operand holds, and otherwise keeps the
+failures of both. `not` has no failure to report when `p` holds, so it is taken on the projection to
+`Bool` and loses the explanation, unless the check carries a witness (below). Checks chained along a
+dependency (read, then validate, then fit) compose by the bind of the reason form and stop at the
+first failure. `refine` is written once, generically, and R11 is what makes it typable:
+
+    refine (T E : U) (p : T -> Failures E) (x : T) : Maybe { y : T | p y } := match p x { nil -> just x ; cons e es -> nothing }
+
+Which form a program uses depends on whether the evidence must outlive the branch. Where the result
+of the check is used inside the branch, `holds` and R11 suffice. Where the value leaves it (it is
 returned, stored in a record, passed on later), and at the boundary of a program (a value read from
-a file or given by an extern), the evidence travels in the type: the check returns the refined value.
-Checks chained at a boundary (read, then validate, then fit) compose by the bind of `Maybe`, or of a
-sum with a reason, and stop at the first failure.
+a file or given by an extern), the evidence travels in the type: the check returns the refined value
+or the reason. The pair `firstViolation` and `ReportsValidity` of the distance graph is the earlier
+form, two definitions and a law between them; under this rule it is one check and its projections.
 
-Other contexts ask for other forms, each derived from `p` and tied to it by a law:
+Other contexts ask for forms that are not projections of the failures:
 
-- *The reason of a failure.* `T -> < ok : { x : T | p x } | failed : E >`, failed exactly when `p`
-  fails. `firstViolation` with `ReportsValidity` is this form for a distance graph.
-- *Every failure.* `T -> List E`, empty exactly when `p` holds. It accumulates the failures where
-  the bind stops at the first, which makes it an applicative functor. For a graph checked by hand, all
-  the violations at once.
 - *A witness.* A check that computes evidence returns it: a dependent pair `(x, w)` with a law
   saying `w` attests `p x`. A Cholesky factor attests positive definiteness, the least distance
   attests separation, the seed that caught a mutant attests the control, the failing row attests a
@@ -463,6 +487,9 @@ every value that crosses from Python, to debug the bridge.
 - Whether a file that imports a provisional definition may itself be certified, or inherits the mark.
 - Generators from constructors: a concrete type's generator built by composing its constructors,
   so laws are testable without a generator written in Python that bypasses the predicate (case 9).
+- Stopping a check at the `n`-th failure (section 9, *Checks*). With nodes computed once and whole
+  (D-2026-10-10-d), a fold that builds the failures computes them all; for `n` finite the demand has
+  to reach into the fold so it stops. A rewrite of the plan, not of the program.
 - Equality as a degree: for samplers, two values are equal in distribution when a test does not
   separate them; the equality component would return a verdict with its level instead of a `Bool`.
 - Whether an alias may abbreviate a value (`two = 1 + 1`) as well as a type.

@@ -60,7 +60,7 @@ Luciano's note:
     monoide (T : U) (op : T -> T -> T) -> Maybe monoide :=
     if (leyesdeMonoide T op -> monoide { T op }
 
-This is `refine` (`05` §5, *Checks*) with the record as `T` and the laws as `p`. It works as
+This is `refine` (`05` §9, *Checks*) with the record as `T` and the laws as `p`. It works as
 written only when the condition is a `Bool`. Associativity quantifies over all of `T`: it is a
 `Law` (`04` §3), and over an infinite carrier no `if` can evaluate it. Three cases:
 
@@ -108,7 +108,7 @@ comun o un maybeError que me devuelve un error type o un string explicativo. Lo 
 ... normalmente quiero devolver un maybeError, pero a veces para optimizar es mejor devolver un
 Maybe. Entonces, si es a demanda, bueno, devuelvo lo que me piden."
 
-What the spec has. `05` §5, *Checks*, lists the forms of one predicate (Bool, `refine` into
+What the spec has. `05` §9, *Checks*, lists the forms of one predicate (Bool, `refine` into
 `Maybe`, the reason of a failure, every failure, a witness), "each derived from `p` and tied to it
 by a law", and makes the Bool primary. L19 (the demand determines the computation) already names
 "the value, its error" among what a demand asks for.
