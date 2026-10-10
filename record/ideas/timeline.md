@@ -5,7 +5,7 @@ One row per idea as the extractors found it, in time order; the local times are 
 time is its UTC converted. A note extracted both per note and by day gives two rows, each marked, so a
 restatement across notes is told from the same note read twice. Nothing here was judged or merged.
 
-Rows: 2333 (day 155, dialogue 1630, note 301, written 247). Inputs: 117 files, listed at the end with their sha256.
+Rows: 2349 (day 171, dialogue 1630, note 301, written 247). Inputs: 118 files, listed at the end with their sha256.
 
 Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: no time for 'material-esconde-lo-importante'; claude-code_2026-10-05_c7437496_extract_ideas_dialogue_v1_claude-code_opus_ideas.md: id dialogue:c7437496:tres-resultados-passed-failed-not-run repeated, suffixed -2
 
@@ -22,7 +22,7 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | 2026-06 | 48 | 15 | 0 | 63 |
 | 2026-08 | 50 | 30 | 0 | 80 |
 | 2026-09 | 151 | 275 | 0 | 426 |
-| 2026-10 | 375 | 755 | 41 | 1171 |
+| 2026-10 | 391 | 755 | 41 | 1187 |
 | undated | 1 | 0 | 0 | 1 |
 
 ## Ideas, by day
@@ -9431,6 +9431,72 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
   A powerful idea is like a more infective virus, also an organizer; the analogy that the cell nucleus is really a virus, a criminal organization that appropriates the cell like a virus and leaves something better.
   > un virus más infectivo, poderoso, no sé, o organizador también... el núcleo celular en realidad es un virus, eso me encantó
 
+### 2026-10-10
+
+- **10:12** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [00:06]] `day:2026-10-10:tipos-como-invariantes-de-una-disciplina`
+  The first principle of Luthier: types are invariants, and Luthier captures the invariants of a discipline; the hard and central problem is how to discover those invariants when you don't yet know them.
+  > el primer principio, por supuesto, es que los tipos son invariantes
+
+- **10:13** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:07]] `day:2026-10-10:que-es-una-invariante`
+  A tentative definition of invariant: something that does not change whatever happens.
+  > una invariante, bueno, es algo que no cambia, sería, no sé qué es lo que dice, que siempre, digamos, pase lo que pase, eso no cambia, se mantiene
+
+- **10:13** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:26]] `day:2026-10-10:invariantes-como-leyes-predicados`
+  Invariants are represented by laws, and laws are predicates: statements that something holds, is feasible, is positive.
+  > en principio las invariantes las estaríamos representando con leyes, leyes que vienen a ser predicados, es decir, esto ocurre, esto es factible
+
+- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:56]] `day:2026-10-10:invariante-laxa-como-costo`
+  A looser version of invariant: not a yes/no predicate but a cost, from zero to infinity, important when verifying functions; it naturally fits real numbers, where equality is really a distance.
+  > Habría una versión, digamos, más laxa de invariantes, que sería, esto tiene un costo, ¿no? El costo puede ser cero o puede ir hasta infinito
+
+- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:20]] `day:2026-10-10:tipos-como-proposiciones`
+  Types are propositions: a type is an affirmation about something.
+  > la idea es que tenemos tipos como proposiciones, ¿no? O sea que un tipo es una afirmación acerca de algo.
+
+- **10:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:36]] `day:2026-10-10:tipos-naturales-vs-predicativos`
+  Two kinds of types: natural types that arise by construction (from a function), and predicative types that are verified by testing whether a candidate satisfies them; Luthier starts from verification because construction demands more knowledge than he has.
+  > Hay en realidad dos tipos de tipos, si se quiere. Están los tipos naturales, es decir, tipos que surgen de una función... Y los tipos predicativos, es decir, los tipos... que se verifica si cumplen eso o no.
+
+- **10:18** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [05:58]] `day:2026-10-10:operaciones-de-construccion-de-tipos`
+  The building blocks of types: the operations of Cartesian closed categories (sum, product, exponential), dependent types, and booleans as elements, plus the predicatives that build laws; a question is whether the object classifier uses only 0/1 booleans or also integers and positive reals.
+  > va a tener las operaciones de Cartesian Close Categories, que son mano suma, producto y exponencial y tipos dependientes y booleans como elementos
+
+- **10:20** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [07:46]] `day:2026-10-10:ley-constructor-pertenencia-tres-caras`
+  A law, a type constructor (with maybe), and a membership function are three faces of the same thing: a law generates a type, generates a constructor that may or may not build, and generates a function telling whether a candidate belongs.
+  > esa ley te genera un tipo, te genera un constructor de tipo con maybe... y bueno, este genera una función que dice si un candidato pertenece a un tipo o sea, son tres cosas de lo mismo
+
+- **10:25** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [13:23]] `day:2026-10-10:verificar-leyes-como-rompecabezas`
+  Verifying a law is like a puzzle: a law such as the field axioms relates not just the two elements being combined but all others, so checking it requires computing cases you aren't computing and seeing whether all the pieces fit together coherently; you can either check that the pieces present fit, or try to fill in missing pieces.
+  > es como una especie de reumpecabezas la ley, ¿no?... vos podés ver las piezas que ya están se encajan todas entre sí o podés tratar de llenar piezas que no están a ver si las encontrás y las pones
+
+- **10:28** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [15:56]] `day:2026-10-10:asociatividad-aparece-con-tres-elementos`
+  Associativity cannot be verified by summing two numbers; it only appears when you sum three, so the system needs a record of which variables were derived in order to know when a given law becomes testable.
+  > Si sumas dos números no vas a verificar la asociatividad, porque el valor de esa suma no depende de la asociatividad. Vos recién, cuando sumas tres números, ves la asociatividad
+
+- **10:31** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [19:09]] `day:2026-10-10:lazy-evaluation-el-codigo-es-codigo-hasta-evaluar`
+  Make the iter lazy: expressions like sums stay as code and keep being code; things only take form when you evaluate, and there are several modes of evaluation (with error, with record, with testing).
+  > si yo hago que el iter sea lazy evaluation... entonces yo tengo todas las expresiones, la suma y todo eso es código y va a seguir siendo código
+
+- **10:32** Luciano [day: WhatsApp Ptt 2026-10-10 at 10.12.21.md [20:17]] `day:2026-10-10:funcion-con-testeo-como-efecto-lateral`
+  Evaluating with testing leaves you a tested function rather than the naive function created from nothing, and that tested function is reused elsewhere; this raises the complication of functions changing as a side effect, since f(x) modifies f because you now know f works.
+  > evaluar con testeo me queda la función con testeo... O sea, no es la función creada de la nada, o sea, la función naif. Y esa función con testeo, después se usaría en otro lado.
+
+- **11:14** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.11.22.md [03:02]] `day:2026-10-10:certificados-y-grados-de-certeza-de-funciones`
+  To compute a value you may want a certificate that the functions computing it work, and functions could carry a degree of certainty (grade 1, 2, 3, with 100 or 200 samples); full verification of all paths is unfeasible, so you only partially check, e.g. some associativity at some point.
+  > necesito funciones que estén testeadas con tanto entonces yo calculo a con las funciones testeadas con grado 1 grado 2... tengo grado de certeza, con 100 samples, 200 samples, lo que sea, cada una de las funciones
+
+- **11:42** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [00:16]] `day:2026-10-10:lazy-recomputo-al-pedir-con-error`
+  A cost of lazy evaluation: if you asked for A without error and later need B which needs A with error, you must recompute A; not terrible, just compute it twice.
+  > si ya pediste el valor con A sin error, después el de B, y pedís el de B con error, tenés que volver a calcular el de A, lo cual no sería tan terrible
+
+- **11:43** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [00:52]] `day:2026-10-10:el-programa-nunca-se-olvida`
+  The program is always fully kept, you never forget it, so you can compute anything; only things out of scope are lost forever; a program is written synthetically and stays short, whereas a calculation can grow large because it expands the search variables.
+  > nunca vos dejarías... vos resumirías el programa... Nunca olvidarías el programa, siempre tenés que acordarte de todo, a poder calcular cualquier cosa.
+
+- **11:46** Luciano [day: WhatsApp Ptt 2026-10-10 at 11.42.15.md [04:03]] `day:2026-10-10:backward-y-forward-las-dos-formas`
+  Two ways of working: backward (lazy, start from what you're asked and determine what you need) and forward (compute everything exactly as told, discarding the rest); forward is inefficient but markovian (no past, you consume and stay where you are), backward must remember all your history; both have a role.
+  > uno podría pensar que tenés que tener las dos formas de trabajar. las dos tienen un rol
+
 ### undated
 
 - **** Luciano correction of turn 113 [chat: 2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md] `dialogue:890a551c:material-esconde-lo-importante`
@@ -9460,21 +9526,22 @@ Rows without a time (listed last): claude-code_2026-09-28_890a551c_extract_ideas
 | 2025-06-18_ho-ttification-manifesto-v-2_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 15 | 15/15 | 3bcb7eaf347a |
 | 2025-06-18_hottification-program-stack-v2-0_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 12 | 12/12 | ec6a3ab036de |
 | 2025-06-18_sav-kernel-v1-0_extract_ideas_note_v1_claude-code_opus_ideas.md | extract_ideas_note_v1 | opus | low | 8 | 7/8 | f953b470e246 |
-| 2026-05-26_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 13 | 13/13 | 068202b742db |
-| 2026-05-27_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus |  | 11 | 11/11 | 56cf9820016a |
+| 2026-05-26_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 13 | 13/13 (match: words) | e93b51079f81 |
+| 2026-05-27_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus |  | 11 | 11/11 (match: words) | ea522bee214b |
 | 2026-05-29_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 21 | 20/22 (match: words) | 7090d52b9545 |
-| 2026-05-30_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 18 | 18/18 | 9cdf368d65e4 |
-| 2026-05-31_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 2 | 2/2 | 5cc73ff6042d |
-| 2026-06-03_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 5 | 3/5 | 65f3cac04909 |
-| 2026-06-05_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 7 | 5/7 | b40c7fd99f7c |
-| 2026-08-28_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 5 | 5/5 | 84fdbc362ad4 |
-| 2026-08-31_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 12 | 11/12 | 8d1b28b81ec8 |
-| 2026-09-02_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 9 | 9/9 | 837c0baad455 |
-| 2026-09-21_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 4 | 4/4 | 307cbf4e7af5 |
-| 2026-10-04_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 0 | 0/0 | 8001c649cab8 |
-| 2026-10-07_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 14 | 14/14 | b63fff0fed2e |
-| 2026-10-08_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 23 | 23/23 | 1c53488c16bb |
+| 2026-05-30_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 18 | 18/18 (match: words) | 409e72fdb2f5 |
+| 2026-05-31_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 2 | 2/2 (match: words) | b74d52c33dcd |
+| 2026-06-03_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 5 | 5/5 (match: words) | 877ae677b9d3 |
+| 2026-06-05_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 7 | 6/7 (match: words) | 6b3d16c50400 |
+| 2026-08-28_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 5 | 5/5 (match: words) | b84f51e77be0 |
+| 2026-08-31_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 12 | 11/12 (match: words) | 7202c08dc17b |
+| 2026-09-02_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 9 | 9/9 (match: words) | 96ad928663be |
+| 2026-09-21_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 4 | 4/4 (match: words) | 29e936bdf877 |
+| 2026-10-04_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 0 | 0/0 (match: words) | 5963c4f47395 |
+| 2026-10-07_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 14 | 14/14 (match: words) | 3426f8c0d009 |
+| 2026-10-08_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 23 | 23/23 (match: words) | f3959b7bb217 |
 | 2026-10-09_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 11 | 11/11 (match: words) | 84ea85c4fb9d |
+| 2026-10-10_extract_ideas_day_v1_claude-code_opus_ideas.md | extract_ideas_day_v1 | opus | low | 16 | 15/16 (match: words) | 1bef3f3bf1fc |
 | WhatsApp Ptt 2026-05-26 at 12.32.24_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 9 |  | ae4cb5d79307 |
 | WhatsApp Ptt 2026-05-26 at 12.41.09_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 8 |  | d3472d1dcc65 |
 | WhatsApp Ptt 2026-05-27 at 13.39.04_extract_ideas_v1_claude-code_opus_ideas.md | extract_ideas_v1 | opus |  | 10 |  | b0c56d728568 |

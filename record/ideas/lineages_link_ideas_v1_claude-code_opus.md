@@ -1,18 +1,18 @@
 # Lineages of the ideas about Luthier
 
 Written by `scripts/link_ideas.py` (link_ideas v1) for Luciano and for the distillation. Prompt `link_ideas_v1`
-(sha256 df7eb949f556), model opus at effort low via claude-code (2.1.197 (Claude Code)); 18 calls. Input: `record/ideas/timeline.jsonl`, last read with sha256
-7dc725eb861a. Who said an idea first and whether Luciano adopted a model's idea are computed from the rows' times and authors, not by the model.
+(sha256 df7eb949f556), model opus at effort low via claude-code (2.1.197 (Claude Code)); 19 calls. Input: `record/ideas/timeline.jsonl`, last read with sha256
+fcccb05a803e. Who said an idea first and whether Luciano adopted a model's idea are computed from the rows' times and authors, not by the model.
 
-Rows: 2333 in the timeline; placed 2304, unplaced 29, pending 0. Lineages: 735.
+Rows: 2349 in the timeline; placed 2320, unplaced 29, pending 0. Lineages: 742.
 
 | scope | first said by Luciano | first said by model | first said by pasted |
 |---|---|---|---|
-| language | 285 | 304 | 9 |
+| language | 292 | 304 | 9 |
 | method | 46 | 53 | 2 |
 | other | 25 | 11 | 0 |
 
-First said by a model and then taken up by Luciano: 40.
+First said by a model and then taken up by Luciano: 41.
 
 ## Lineages, by first appearance
 
@@ -329,12 +329,13 @@ first 2022-08-03 11:56 by Luciano; 10 rows, 10 witnesses, 3 days, last 2026-09-2
 
 There are two ways to define types, the constructive and the declarative.
 
-first 2022-08-03 11:56 by Luciano; 4 rows, 4 witnesses, 4 days, last 2026-10-04
+first 2022-08-03 11:56 by Luciano; 5 rows, 5 witnesses, 5 days, last 2026-10-10
 
 - 2022-08-03 11:56 Luciano states [2022-08-03 haskell.md line 27] `written:2022-08-03_haskell:dos-formas-de-definir-tipos-constructivo-declarativo`: "hay dos formas de definir tipos: el constructivo (data en Haskell) y el declarativo (class en Haskell)."
 - 2023-02-22 16:12 Luciano restates [2023-02-22 tapp wish list.md line 3] `written:2023-02-22_tapp-wish-list:dos-tipos-de-tipos`: "Dos tipos de tipos:"
 - 2023-03-02 11:27 Luciano restates [2023-03-02 estoy perdido.md line 25] `written:2023-03-02_estoy-perdido:definiciones-constructivas-y-declarativas`: "tenemos dos tipos de definiciones las constructivas y las declarativas"
 - 2026-10-04 10:42 Luciano restates [WhatsApp Ptt 2026-10-04 at 10.28.34.md [14:25]] `note:2026-10-04T10.28.34:clase-cerrada-vs-abierta`: "yo defino table como un tipo, así como simplemente un puntero al vacío. Después defino todas las funciones... Y después defino los constraints... En realidad e…"
+- 2026-10-10 10:14 Luciano refines [WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:36]] `day:2026-10-10:tipos-naturales-vs-predicativos`: "Hay en realidad dos tipos de tipos, si se quiere. Están los tipos naturales, es decir, tipos que surgen de una función... Y los tipos predicativos, es decir, l…"
 
 ### L-type-definition-recursive (language)
 
@@ -1071,7 +1072,7 @@ first 2026-05-26 12:32 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-05-26
 
 Types are concepts, types as propositions, and types include functions and higher-order functions.
 
-first 2026-05-26 12:33 by Luciano; 9 rows, 8 witnesses, 4 days, last 2026-10-06
+first 2026-05-26 12:33 by Luciano; 10 rows, 9 witnesses, 5 days, last 2026-10-10
 
 - 2026-05-26 12:33 Luciano states [WhatsApp Ptt 2026-05-26 at 12.32.24.md [00:38]] `day:2026-05-26:tipos-como-conceptos-y-proposiciones`: "los tipos tienen que ser conceptos, tipos como proposiciones y los tipos incluyen también funciones, funciones y funciones de orden superior"
 - 2026-05-26 12:33 Luciano restates [WhatsApp Ptt 2026-05-26 at 12.32.24.md [00:38]] `note:2026-05-26T12.32.24:tipos-como-proposiciones`: "los tipos tienen que ser conceptos, tipos como proposiciones y los tipos incluyen también funciones, funciones y funciones de orden superior"
@@ -1079,9 +1080,9 @@ first 2026-05-26 12:33 by Luciano; 9 rows, 8 witnesses, 4 days, last 2026-10-06
 - 2026-05-29 14:08 Luciano restates [2026-05-29_20260529T1400_bueno-vamos-a-sonar-un-poco-inventar-un.md turn 5] `dialogue:20260529T1400:tipos-como-proposiciones`: "tipos tienen que ser conceptos, o sea, tipos como proposiciones, y los tipos incluyen también funciones, no funciones y funciones de orden superior"
 - 2026-08-31 19:49 Luciano restates [WhatsApp Ptt 2026-08-31 at 19.48.17.md [01:02]] `note:2026-08-31T19.48.17:tipos-como-proposiciones`: "la idea era originalmente que el código son, digamos, tiene significado, es decir, que pertenecer a un tipo, digamos, significa afirmar una proposición"
 - 2026-08-31 19:51 Luciano restates [WhatsApp Ptt 2026-08-31 at 19.48.17.md [02:52]] `day:2026-08-31:tipo-afirma-una-proposicion`: "O sea, si vos tenés una clase de algo, entonces significa que cumple ciertas proposiciones."
-- ... 1 more rows
-- 2026-08-31 20:10 model proposes [2026-08-31_f453278e_lee-todos-los-audios.md turn 2] `dialogue:f453278e:tipos-como-proposiciones`: "Luthier es un lenguaje (o metalenguaje) que inventás donde los tipos son proposiciones: pertenecer a un tipo significa afirmar algo garantizado sobre el valor."
+- ... 2 more rows
 - 2026-10-06 01:22 Luciano restates [2026-10-05_ba3fd298_analsis-critico-de-como-esta-la-implemen.md turn 103] `dialogue:ba3fd298:founding-idea-types-as-propositions-for-functions`: "types as propositions pero extendido tambien a funciones (son tipos) y los tipos de las funciones son sus postconditions e invariantes. La idea de que pertnece…"
+- 2026-10-10 10:14 Luciano restates [WhatsApp Ptt 2026-10-10 at 10.12.21.md [02:20]] `day:2026-10-10:tipos-como-proposiciones`: "la idea es que tenemos tipos como proposiciones, ¿no? O sea que un tipo es una afirmación acerca de algo."
 
 ### L-cross-language (language)
 
@@ -1581,7 +1582,7 @@ first 2026-05-29 14:29 by Luciano; 3 rows, 3 witnesses, 2 days, last 2026-05-30
 
 Luthier's aim is to express the invariances of the disciplines (a species mates within itself; electrons are fermions, photons bosons).
 
-first 2026-05-29 14:29 by Luciano; 7 rows, 5 witnesses, 3 days, last 2026-06-28
+first 2026-05-29 14:29 by Luciano; 8 rows, 6 witnesses, 4 days, last 2026-10-10
 
 - 2026-05-29 14:29 Luciano states [2026-05-29_20260529T1400_bueno-vamos-a-sonar-un-poco-inventar-un.md turn 11] `dialogue:20260529T1400:expresar-invarianzas-de-disciplinas`: "la idea de luthier es expresar invarianzas de los de las disciplinas"
 - 2026-05-29 14:29 Luciano restates [WhatsApp Ptt 2026-05-29 at 14.28.55.md [00:58]] `note:2026-05-29T14.28.55:expresar-invarianzas-de-disciplinas`: "la idea de Luthier es expresar invarianzas de las disciplinas"
@@ -1590,6 +1591,7 @@ first 2026-05-29 14:29 by Luciano; 7 rows, 5 witnesses, 3 days, last 2026-06-28
 - 2026-06-03 12:04 Luciano restates [WhatsApp Ptt 2026-06-03 at 12.03.35.md [01:15]] `note:2026-06-03T12.03.35:describir-invariantes-primero`: "Primero Luthier va a ser un lenguaje que describa más que nada lo que llaman invariantes"
 - 2026-06-28 22:16 model proposes [2026-06-29_20260628T2122_https-youtu-be-edivgibm-ya-si-cfowvzaauu.md turn 44] `dialogue:20260628T2122:luthier-razonamiento-estructural-sobre-el-mundo-fisico`: "tu propuesta de modelar la realidad mediante grafos (DAGs) y tipos dependientes (HoTT) ataca exactamente este vacío fundamental: la necesidad de un *razonamien…"
 - 2026-06-28 22:16 model proposes [2026-06-29_20260628T2122_https-youtu-be-edivgibm-ya-si-cfowvzaauu.md turn 44] `dialogue:20260628T2122:luthier-relator-de-invarianzas-frente-a-predictores-estadisticos`: "Si los LLMs son \"predictores estadísticos\", Luthier apunta a ser un \"relator de invarianzas\""
+- 2026-10-10 10:12 Luciano restates [WhatsApp Ptt 2026-10-10 at 10.12.21.md [00:06]] `day:2026-10-10:tipos-como-invariantes-de-una-disciplina`: "el primer principio, por supuesto, es que los tipos son invariantes"
 
 ### L-function-by-properties (language)
 
@@ -3515,20 +3517,22 @@ first 2026-09-29 20:30 by model; 9 rows, 9 witnesses, 1 days, last 2026-09-29; t
 
 The whole language reduces to ten elements, of which eight are standard type theory and two are Luthier's own, the first-class hole and the test-checked certified subtype.
 
-first 2026-09-29 23:49 by model; 2 rows, 1 witnesses, 1 days, last 2026-09-29
+first 2026-09-29 23:49 by model; 3 rows, 2 witnesses, 2 days, last 2026-10-10; taken up by Luciano 2026-10-10
 
 - 2026-09-29 23:49 model proposes [2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md turn 131] `dialogue:890a551c:diez-elementos-orden-para-pensar`: "Eso es todo el lenguaje: tipo, valor, función, definición, hueco; función dependiente, dato, subtipo; aplicar y reducir. Diez palabras."
 - 2026-09-29 23:49 model refines [2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md turn 131] `dialogue:890a551c:ocho-estandar-dos-de-luthier`: "de los diez, ocho son teoría de tipos estándar y dos son de Luthier. El hueco como concepto de primera (no como error de compilación) y el subtipo cuyo predica…"
+- 2026-10-10 10:18 Luciano refines [WhatsApp Ptt 2026-10-10 at 10.12.21.md [05:58]] `day:2026-10-10:operaciones-de-construccion-de-tipos`: "va a tener las operaciones de Cartesian Close Categories, que son mano suma, producto y exponencial y tipos dependientes y booleans como elementos"
 
 ### L-type-three-uses (language)
 
 A type's one piece of information is used for three purposes, typing (a judgement), constructing, and asking as a predicate; only the third exists for subtypes, is what Luthier adds, and leaves a certificate, with construction being asking and packaging.
 
-first 2026-09-29 23:53 by Luciano; 3 rows, 3 witnesses, 2 days, last 2026-09-30
+first 2026-09-29 23:53 by Luciano; 4 rows, 4 witnesses, 3 days, last 2026-10-10
 
 - 2026-09-29 23:53 Luciano states [2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md turn 132] `dialogue:890a551c:tres-usos-de-un-tipo`: "la informacion es la misma, es como que el programa usa esa informacion para tres propositos diferentes."
 - 2026-09-29 23:53 model refines [2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md turn 133] `dialogue:890a551c:tercer-uso-solo-en-subtipos`: "Para los tipos base ... hay dos usos, tipar y construir ... Para los subtipos hay tres, y el tercero es el que Luthier agrega ... el tercero deje rastro y los…"
 - 2026-09-30 00:16 model refines [2026-09-28_890a551c_quiero-empezar-a-definir-la-semantica-de.md turn 143] `dialogue:890a551c:construir-es-preguntar-y-empaquetar`: "construir es preguntar y empaquetar. La relación es literal: `Dia(34) := match Dia 34 { ok c -> ok (34, c) ; fail e -> fail e }`."
+- 2026-10-10 10:20 Luciano restates [WhatsApp Ptt 2026-10-10 at 10.12.21.md [07:46]] `day:2026-10-10:ley-constructor-pertenencia-tres-caras`: "esa ley te genera un tipo, te genera un constructor de tipo con maybe... y bueno, este genera una función que dice si un candidato pertenece a un tipo o sea, s…"
 
 ### L-base-vs-predicate-line (language)
 
@@ -4839,11 +4843,12 @@ first 2026-10-04 06:41 by model; 1 rows, 1 witnesses, 1 days, last 2026-10-04
 
 What is certified is not a name but a pointwise application of it on values (a chain of functions), so there are grades: point, sampled, exhaustive, proven, a chain at its weakest link.
 
-first 2026-10-04 07:05 by Luciano; 3 rows, 3 witnesses, 1 days, last 2026-10-04
+first 2026-10-04 07:05 by Luciano; 4 rows, 4 witnesses, 2 days, last 2026-10-10
 
 - 2026-10-04 07:05 Luciano states [2026-10-04_52d3e68e_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:52d3e68e:certification-is-graded-over-applications-not-names`: "lo certificado no es un nombre, es una aplicacion puntual de un nombre con valores, es decir una cadena de funciones. Entonces hay grados de certificacion."
 - 2026-10-04 07:05 Luciano restates [2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 42] `dialogue:88936d99:certification-is-pointwise-not-a-name`: "lo certificado no es un nombre, es una aplicacion puntual de un nombre con valores, es decir una cadena de funciones. Entonces hay grados de certificacion."
 - 2026-10-04 07:05 model refines [2026-10-04_88936d99_lee-la-ultima-trascripcion-de-audio.md turn 43] `dialogue:88936d99:degrees-of-certification-point-sampled-exhaustive-proven`: "un punto: un caso evaluado; muestreado: `n` casos de un generador declarado; exhaustivo: todos los casos de un dominio finito; demostrado: universal, que la ve…"
+- 2026-10-10 11:14 Luciano refines [WhatsApp Ptt 2026-10-10 at 11.11.22.md [03:02]] `day:2026-10-10:certificados-y-grados-de-certeza-de-funciones`: "necesito funciones que estén testeadas con tanto entonces yo calculo a con las funciones testeadas con grado 1 grado 2... tengo grado de certeza, con 100 sampl…"
 
 ### L-equality-parametrized-probability (language)
 
@@ -7035,13 +7040,14 @@ first 2026-10-08 06:04 by model; 4 rows, 2 witnesses, 1 days, last 2026-10-08
 
 Laws could be extended to go not to a boolean but to a cost: graded cost laws like a generalized unnormalized likelihood, asking how much a value costs rather than whether it complies.
 
-first 2026-10-08 07:44 by model; 5 rows, 5 witnesses, 1 days, last 2026-10-08; taken up by Luciano 2026-10-08
+first 2026-10-08 07:44 by model; 6 rows, 6 witnesses, 2 days, last 2026-10-10; taken up by Luciano 2026-10-08
 
 - 2026-10-08 07:44 model restates [2026-10-08_b377c2a0_lee-los-ultimos-tres-audios-de-hoy.md turn 2] `dialogue:b377c2a0:ley-como-costo`: "las leyes podrían ir del tipo a un costo en vez de a Bool, graduadas, sin cota, costo y no beneficio, algo como un likelihood no normalizado"
 - 2026-10-08 18:24 Luciano states [WhatsApp Ptt 2026-10-08 at 18.10.00.md [14:47]] `day:2026-10-08:leyes-de-costo-en-vez-de-leyes-booleanas`: "uno podría extender este concepto y que sean las leyes vayan de no a un boolean sino a un costo"
 - 2026-10-08 18:25 Luciano restates [WhatsApp Ptt 2026-10-08 at 18.10.00.md [15:16]] `note:2026-10-08T18.10.00:leyes-de-costo-en-vez-de-booleanas`: "leyes de costo, no leyes de que pasa o no pasa, o sea, es verdadera, falsa, sino leyes de costo, que sería como una especie de likelihood"
 - 2026-10-08 18:27 Luciano restates [WhatsApp Ptt 2026-10-08 at 18.10.00.md [17:27]] `note:2026-10-08T18.10.00:costo-de-un-valor-segun-la-ley`: "cuál es el costo de este valor, este valor según esta ley no sería si cumple o no cumple, sino cuánto me sale esta ley"
 - 2026-10-08 21:47 model refines [2026-10-09_af100b3b_quiero-hacer-una-busqueda-extensiva-para.md turn 4] `dialogue:af100b3b:bool-como-caso-limite-y-dos-lecturas-de-una-ley`: "**Bool como caso límite ya funciona** en Caesar/HeyVL y en Probabilistic Soft Logic (una regla dura es una regla de peso infinito)."
+- 2026-10-10 10:14 Luciano restates [WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:56]] `day:2026-10-10:invariante-laxa-como-costo`: "Habría una versión, digamos, más laxa de invariantes, que sería, esto tiene un costo, ¿no? El costo puede ser cero o puede ir hasta infinito"
 
 ### L-discrepancy-threshold-cost (language)
 
@@ -7213,11 +7219,13 @@ first 2026-10-08 18:31 by Luciano; 2 rows, 1 witnesses, 1 days, last 2026-10-08
 
 An open question of evaluation strategy: for A=2+2 whether A is stored as 2+2 or as 4, since keeping the expression lets one recompute with different assumptions.
 
-first 2026-10-08 18:33 by Luciano; 3 rows, 3 witnesses, 1 days, last 2026-10-08
+first 2026-10-08 18:33 by Luciano; 5 rows, 5 witnesses, 2 days, last 2026-10-10
 
 - 2026-10-08 18:33 Luciano states [WhatsApp Ptt 2026-10-08 at 18.10.00.md [23:02]] `day:2026-10-08:cuando-y-como-evaluar-una-expresion`: "A es igual a 2 más 2, ¿qué haces con eso? ¿Lo guardás como A2 más 2 o aplicás o le asignás 2 más 2, el valor 4 y A pasa a valer 4 ¿cuánto vale A? ¿A vale 2 más…"
 - 2026-10-08 18:33 Luciano restates [WhatsApp Ptt 2026-10-08 at 18.10.00.md [23:16]] `note:2026-10-08T18.10.00:eager-vs-lazy-cuando-evaluar`: "¿cuánto vale A? ¿A vale 2 más 2 o A vale 4? eso es un problema"
 - 2026-10-08 18:35 Luciano refines [WhatsApp Ptt 2026-10-08 at 18.10.00.md [25:27]] `note:2026-10-08T18.10.00:recomputar-desde-la-expresion-guardada`: "yo con la misma expresión puedo calcular varias cosas distintas."
+- 2026-10-10 10:31 Luciano refines [WhatsApp Ptt 2026-10-10 at 10.12.21.md [19:09]] `day:2026-10-10:lazy-evaluation-el-codigo-es-codigo-hasta-evaluar`: "si yo hago que el iter sea lazy evaluation... entonces yo tengo todas las expresiones, la suma y todo eso es código y va a seguir siendo código"
+- 2026-10-10 11:42 Luciano refines [WhatsApp Ptt 2026-10-10 at 11.42.15.md [00:16]] `day:2026-10-10:lazy-recomputo-al-pedir-con-error`: "si ya pediste el valor con A sin error, después el de B, y pedís el de B con error, tenés que volver a calcular el de A, lo cual no sería tan terrible"
 
 ### L-evaluation-steps-memory-states (language)
 
@@ -7365,6 +7373,62 @@ A powerful idea is like a more infective virus that also organizes, by analogy w
 first 2026-10-09 10:56 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-09
 
 - 2026-10-09 10:56 Luciano states [WhatsApp Ptt 2026-10-09 at 10.52.06.md [04:35]] `day:2026-10-09:idea-como-virus-infectivo-y-organizador`: "un virus más infectivo, poderoso, no sé, o organizador también... el núcleo celular en realidad es un virus, eso me encantó"
+
+### L-invariant-definition (language)
+
+An invariant is something that does not change whatever happens.
+
+first 2026-10-10 10:13 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 10:13 Luciano states [WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:07]] `day:2026-10-10:que-es-una-invariante`: "una invariante, bueno, es algo que no cambia, sería, no sé qué es lo que dice, que siempre, digamos, pase lo que pase, eso no cambia, se mantiene"
+
+### L-invariants-as-laws-predicates (language)
+
+Invariants are represented by laws, and laws are predicates (statements that something holds, is feasible, is positive).
+
+first 2026-10-10 10:13 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 10:13 Luciano states [WhatsApp Ptt 2026-10-10 at 10.12.21.md [01:26]] `day:2026-10-10:invariantes-como-leyes-predicados`: "en principio las invariantes las estaríamos representando con leyes, leyes que vienen a ser predicados, es decir, esto ocurre, esto es factible"
+
+### L-law-verification-puzzle (language)
+
+Verifying a law is like fitting a puzzle: the law relates all elements at once, so checking it means computing cases and seeing whether the pieces cohere.
+
+first 2026-10-10 10:25 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 10:25 Luciano states [WhatsApp Ptt 2026-10-10 at 10.12.21.md [13:23]] `day:2026-10-10:verificar-leyes-como-rompecabezas`: "es como una especie de reumpecabezas la ley, ¿no?... vos podés ver las piezas que ya están se encajan todas entre sí o podés tratar de llenar piezas que no est…"
+
+### L-law-needs-enough-operands (language)
+
+A law like associativity only becomes testable once enough variables are derived (three numbers for associativity), so the system must record which were derived to know when a law can be checked.
+
+first 2026-10-10 10:28 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 10:28 Luciano states [WhatsApp Ptt 2026-10-10 at 10.12.21.md [15:56]] `day:2026-10-10:asociatividad-aparece-con-tres-elementos`: "Si sumas dos números no vas a verificar la asociatividad, porque el valor de esa suma no depende de la asociatividad. Vos recién, cuando sumas tres números, ve…"
+
+### L-testing-updates-function (language)
+
+Evaluating with testing yields a tested function reused elsewhere, so a function changes as a side effect once you know it works.
+
+first 2026-10-10 10:32 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 10:32 Luciano states [WhatsApp Ptt 2026-10-10 at 10.12.21.md [20:17]] `day:2026-10-10:funcion-con-testeo-como-efecto-lateral`: "evaluar con testeo me queda la función con testeo... O sea, no es la función creada de la nada, o sea, la función naif. Y esa función con testeo, después se us…"
+
+### L-program-kept-calculation-grows (language)
+
+The program is always fully kept and never forgotten so anything can be recomputed; the program stays synthetically short while a calculation can grow large.
+
+first 2026-10-10 11:43 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 11:43 Luciano states [WhatsApp Ptt 2026-10-10 at 11.42.15.md [00:52]] `day:2026-10-10:el-programa-nunca-se-olvida`: "nunca vos dejarías... vos resumirías el programa... Nunca olvidarías el programa, siempre tenés que acordarte de todo, a poder calcular cualquier cosa."
+
+### L-backward-forward-evaluation (language)
+
+Two ways of working, backward (lazy, starting from what is asked) and forward (compute everything, markovian with no past), each with its role.
+
+first 2026-10-10 11:46 by Luciano; 1 rows, 1 witnesses, 1 days, last 2026-10-10
+
+- 2026-10-10 11:46 Luciano states [WhatsApp Ptt 2026-10-10 at 11.42.15.md [04:03]] `day:2026-10-10:backward-y-forward-las-dos-formas`: "uno podría pensar que tenés que tener las dos formas de trabajar. las dos tienen un rol"
 
 ## Unplaced rows
 

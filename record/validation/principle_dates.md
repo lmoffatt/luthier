@@ -14,9 +14,9 @@ it was first written, in the repository it is listed under). Example: `earlier d
 ## P1 Luciano's part stays discernible.
 
 - explicit: 2026-10-06T06:39Z (luthier@2a660c8:docs/working-method.md:74 2026-10-06T06:39Z)
-  - earlier? 2026-10-05T09:21:01Z `dialogue:aa680014:python-del-proyecto-solo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern"
-  - earlier? 2026-10-05T09:21:01Z `dialogue:ba3fd298:sin-python-del-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern / no estaremos haciendo parches no?"
-  - earlier? 2026-10-05T09:21:01Z `dialogue:c7437496:no-python-de-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern\nno estaremos haciendo parches no?"
+  - earlier? 2026-10-05T09:21:01Z `dialogue:aa680014:python-del-proyecto-solo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern" No, esta es otra idea, es que luthier sirva de un orquestador con testing
+  - earlier? 2026-10-05T09:21:01Z `dialogue:ba3fd298:sin-python-del-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern / no estaremos haciendo parches no?" idem arriba
+  - earlier? 2026-10-05T09:21:01Z `dialogue:c7437496:no-python-de-proyecto-salvo-externs`: "la idea de luthier es que yo no tenga que hacer python project dedicated scripts salvo las funciones que son llamadas con extern\nno estaremos haciendo parches no?" misma idea de antes
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
   - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
   - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
@@ -26,12 +26,12 @@ it was first written, in the repository it is listed under). Example: `earlier d
   - memory? `sonolocalizacion-encuadre-estrategico.md` of account 1, first written 2026-09-09T15:57Z (chat:b66f1892:66, 3 shared terms)
   - memory? `luthier-objeto-matematico-como-invariante.md` of account 1, first written 2026-10-05T03:38Z (chat:52d3e68e:2805, 3 shared terms)
 
-Mark: 
+Mark: esta idea no representa que se discerne la parte humana de la agentica, sino que luthier sea una forma de escribir scripts que sean semanticamente autocontenidos y autotesteabless
 
 ## P2 Everything derived carries how it was derived.
 
 - explicit: 2026-10-06T06:39Z (luthier@2a660c8:docs/working-method.md:96 2026-10-06T06:39Z)
-  - earlier? 2026-06-05T16:14:19Z `day:2026-06-05:code-as-data-same-treatment-as-records`: "Las funciones como datos, o sea, el código como datos. entonces sí podés tener también lo mismo, ¿no?"
+  - earlier? 2026-06-05T16:14:19Z `day:2026-06-05:code-as-data-same-treatment-as-records`: "Las funciones como datos, o sea, el código como datos. entonces sí podés tener también lo mismo, ¿no?" no es que los datos indiquen de donde provienen, sino que al ser el codigo como datos, podes modificar el codigo como se modifican datos. 
 - operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
   - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
   - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 5 shared terms)
@@ -43,7 +43,7 @@ Mark:
 
 - explicit: 2026-10-06T06:39Z (luthier@2a660c8:docs/working-method.md:61 2026-10-06T06:39Z)
   - earlier? 2026-10-05T03:26:50Z `dialogue:88936d99:un-concepto-un-nombre`: "el principio es no declarar lo mismo con dos nombres distintos"
-- operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf
+- operative in luthier: CLAUDE.md 2026-10-06T08:18Z luthier@fea45bf si, pero no incluye la parte del best reading at front
   - memory? `luthier-working-method.md` of account 1, first written 2026-10-06T06:12Z (chat:7217f251:179, 6 shared terms)
   - memory? `luthier-fase-semantica.md` of account 1, first written 2026-09-29T00:08Z (chat:175c0408:122, 3 shared terms)
 - operative in sonolocalizacion: CLAUDE.md 2026-10-06T08:18Z sonolocalizacion@ede219f

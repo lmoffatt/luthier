@@ -776,6 +776,86 @@
    "lineage": "L-pipeline-method",
    "relation": "refines"
   },
+  "day:2026-10-10:asociatividad-aparece-con-tres-elementos": {
+   "call": 19,
+   "lineage": "L-law-needs-enough-operands",
+   "relation": "states"
+  },
+  "day:2026-10-10:backward-y-forward-las-dos-formas": {
+   "call": 19,
+   "lineage": "L-backward-forward-evaluation",
+   "relation": "states"
+  },
+  "day:2026-10-10:certificados-y-grados-de-certeza-de-funciones": {
+   "call": 19,
+   "lineage": "L-certification-is-pointwise",
+   "relation": "refines"
+  },
+  "day:2026-10-10:el-programa-nunca-se-olvida": {
+   "call": 19,
+   "lineage": "L-program-kept-calculation-grows",
+   "relation": "states"
+  },
+  "day:2026-10-10:funcion-con-testeo-como-efecto-lateral": {
+   "call": 19,
+   "lineage": "L-testing-updates-function",
+   "relation": "states"
+  },
+  "day:2026-10-10:invariante-laxa-como-costo": {
+   "call": 19,
+   "lineage": "L-cost-laws",
+   "relation": "restates"
+  },
+  "day:2026-10-10:invariantes-como-leyes-predicados": {
+   "call": 19,
+   "lineage": "L-invariants-as-laws-predicates",
+   "relation": "states"
+  },
+  "day:2026-10-10:lazy-evaluation-el-codigo-es-codigo-hasta-evaluar": {
+   "call": 19,
+   "lineage": "L-when-to-evaluate",
+   "relation": "refines"
+  },
+  "day:2026-10-10:lazy-recomputo-al-pedir-con-error": {
+   "call": 19,
+   "lineage": "L-when-to-evaluate",
+   "relation": "refines"
+  },
+  "day:2026-10-10:ley-constructor-pertenencia-tres-caras": {
+   "call": 19,
+   "lineage": "L-type-three-uses",
+   "relation": "restates"
+  },
+  "day:2026-10-10:operaciones-de-construccion-de-tipos": {
+   "call": 19,
+   "lineage": "L-ten-elements",
+   "relation": "refines"
+  },
+  "day:2026-10-10:que-es-una-invariante": {
+   "call": 19,
+   "lineage": "L-invariant-definition",
+   "relation": "states"
+  },
+  "day:2026-10-10:tipos-como-invariantes-de-una-disciplina": {
+   "call": 19,
+   "lineage": "L-express-invariances",
+   "relation": "restates"
+  },
+  "day:2026-10-10:tipos-como-proposiciones": {
+   "call": 19,
+   "lineage": "L-types-are-concepts",
+   "relation": "restates"
+  },
+  "day:2026-10-10:tipos-naturales-vs-predicativos": {
+   "call": 19,
+   "lineage": "L-two-kinds-of-definition",
+   "relation": "refines"
+  },
+  "day:2026-10-10:verificar-leyes-como-rompecabezas": {
+   "call": 19,
+   "lineage": "L-law-verification-puzzle",
+   "relation": "states"
+  },
   "dialogue:01998d16:accept-functions-only-after-they-pass-the-test": {
    "call": 16,
    "lineage": "L-types-make-code-safe",
@@ -11921,6 +12001,25 @@
    "rows": 11,
    "split": false,
    "timeline_sha256": "7dc725eb861abf974f0d961310acb899672571dfefe8f51ef1056623612351df"
+  },
+  {
+   "accepted": true,
+   "attempts": [
+    {
+     "answer": "{\"new_lineages\":[{\"id\":\"L-invariant-definition\",\"scope\":\"language\",\"statement\":\"An invariant is something that does not change whatever happens.\"},{\"id\":\"L-invariants-as-laws-predicates\",\"scope\":\"language\",\"statement\":\"Invariants are represented by laws, and laws are predicates (statements that something holds, is feasible, is positive).\"},{\"id\":\"L-law-verification-puzzle\",\"scope\":\"language\",\"statement\":\"Verifying a law is like fitting a puzzle: the law relates all elements at once, so checking it means computing cases and seeing whether the pieces cohere.\"},{\"id\":\"L-law-needs-enough-operands\",\"scope\":\"language\",\"statement\":\"A law like associativity only becomes testable once enough variables are derived (three numbers for associativity), so the system must record which were derived to know when a law can be checked.\"},{\"id\":\"L-testing-updates-function\",\"scope\":\"language\",\"statement\":\"Evaluating with testing yields a tested function reused elsewhere, so a function changes as a side effect once you know it works.\"},{\"id\":\"L-program-kept-calculation-grows\",\"scope\":\"language\",\"statement\":\"The program is always fully kept and never forgotten so anything can be recomputed; the program stays synthetically short while a calculation can grow large.\"},{\"id\":\"L-backward-forward-evaluation\",\"scope\":\"language\",\"statement\":\"Two ways of working, backward (lazy, starting from what is asked) and forward (compute everything, markovian with no past), each with its role.\"}],\"assign\":[[\"r1\",\"L-express-invariances\",\"restates\"],[\"r2\",\"L-invariant-definition\",\"states\"],[\"r3\",\"L-invariants-as-laws-predicates\",\"states\"],[\"r4\",\"L-cost-laws\",\"restates\"],[\"r5\",\"L-types-are-concepts\",\"restates\"],[\"r6\",\"L-two-kinds-of-definition\",\"refines\"],[\"r7\",\"L-ten-elements\",\"refines\"],[\"r8\",\"L-type-three-uses\",\"restates\"],[\"r9\",\"L-law-verification-puzzle\",\"states\"],[\"r10\",\"L-law-needs-enough-operands\",\"states\"],[\"r11\",\"L-when-to-evaluate\",\"refines\"],[\"r12\",\"L-testing-updates-function\",\"states\"],[\"r13\",\"L-certification-is-pointwise\",\"refines\"],[\"r14\",\"L-when-to-evaluate\",\"refines\"],[\"r15\",\"L-program-kept-calculation-grows\",\"states\"],[\"r16\",\"L-backward-forward-evaluation\",\"states\"]],\"unplaced\":[]}\n",
+     "answer_sha256": "4e1d62f3ee5d3011562fa1367c69a10b93f31e51aa408cd92b8ac049505dd8fe",
+     "errors": [],
+     "seconds": 59
+    }
+   ],
+   "date": "2026-10-10T04:02:38Z",
+   "first_row": "day:2026-10-10:tipos-como-invariantes-de-una-disciplina",
+   "input_sha256": "05eb3c3dd087ae092a6c3a43f4b0ef77a3fb14f9b51bbad5cbe89465e819b908",
+   "last_row": "day:2026-10-10:backward-y-forward-las-dos-formas",
+   "n": 19,
+   "rows": 16,
+   "split": false,
+   "timeline_sha256": "fcccb05a803ecc26c25db3e25d3bd6a6983dc25c8da465377bd111e0e183c4f0"
   }
  ],
  "cli_version": "2.1.197 (Claude Code)",
@@ -12111,6 +12210,12 @@
    "id": "L-atomic-laws",
    "scope": "language",
    "statement": "Compound laws like Identity and Distributive are split into left and right atomic laws so each can fail separately, with the structure's components a product the predicate runs over."
+  },
+  "L-backward-forward-evaluation": {
+   "call": 19,
+   "id": "L-backward-forward-evaluation",
+   "scope": "language",
+   "statement": "Two ways of working, backward (lazy, starting from what is asked) and forward (compute everything, markovian with no past), each with its role."
   },
   "L-base-vs-predicate-line": {
    "call": 7,
@@ -13984,11 +14089,23 @@
    "scope": "language",
    "statement": "With an interval model the approximation law is stated once for any f as enclosure (f_Float64 x ∈ f_Interval x), so the tolerance is computed in test rather than chosen by hand."
   },
+  "L-invariant-definition": {
+   "call": 19,
+   "id": "L-invariant-definition",
+   "scope": "language",
+   "statement": "An invariant is something that does not change whatever happens."
+  },
   "L-invariant-is-bool-function-field": {
    "call": 6,
    "id": "L-invariant-is-bool-function-field",
    "scope": "language",
    "statement": "In version 0 an invariant is a function returning Bool, stored as a field of the definition beside the body, with a generator hole filled by type and the run kept as data."
+  },
+  "L-invariants-as-laws-predicates": {
+   "call": 19,
+   "id": "L-invariants-as-laws-predicates",
+   "scope": "language",
+   "statement": "Invariants are represented by laws, and laws are predicates (statements that something holds, is feasible, is positive)."
   },
   "L-inventory-cpp-constructs": {
    "call": 2,
@@ -14182,6 +14299,12 @@
    "scope": "method",
    "statement": "As Luthier preaches for code, a law is written first but holds only when a concrete case puts it to the test."
   },
+  "L-law-needs-enough-operands": {
+   "call": 19,
+   "id": "L-law-needs-enough-operands",
+   "scope": "language",
+   "statement": "A law like associativity only becomes testable once enough variables are derived (three numbers for associativity), so the system must record which were derived to know when a law can be checked."
+  },
   "L-law-only-when-known-true": {
    "call": 7,
    "id": "L-law-only-when-known-true",
@@ -14193,6 +14316,12 @@
    "id": "L-law-takes-function-as-argument",
    "scope": "language",
    "statement": "A law takes the function under test as its first argument and the quantified variables after, so the type it belongs to has any implementation as a term."
+  },
+  "L-law-verification-puzzle": {
+   "call": 19,
+   "id": "L-law-verification-puzzle",
+   "scope": "language",
+   "statement": "Verifying a law is like fitting a puzzle: the law relates all elements at once, so checking it means computing cases and seeing whether the pieces cohere."
   },
   "L-laws-are-declarations": {
    "call": 6,
@@ -15088,6 +15217,12 @@
    "scope": "language",
    "statement": "Code and data in the Lisp form: Program is an inductive type and eval a partial function Program → Name → Maybe Term, with no eval injecting arbitrary terms into the type system, which prevents self-hacking."
   },
+  "L-program-kept-calculation-grows": {
+   "call": 19,
+   "id": "L-program-kept-calculation-grows",
+   "scope": "language",
+   "statement": "The program is always fully kept and never forgotten so anything can be recomputed; the program stays synthetically short while a calculation can grow large."
+  },
   "L-program-not-a-type-in-hott": {
    "call": 3,
    "id": "L-program-not-a-type-in-hott",
@@ -15939,6 +16074,12 @@
    "id": "L-test-run-same-operation",
    "scope": "language",
    "statement": "Evaluating a predicate on determined names is running and on undetermined names is testing: the same evaluator under a different determination."
+  },
+  "L-testing-updates-function": {
+   "call": 19,
+   "id": "L-testing-updates-function",
+   "scope": "language",
+   "statement": "Evaluating with testing yields a tested function reused elsewhere, so a function changes as a side effect once you know it works."
   },
   "L-tests-as-morphisms": {
    "call": 2,
