@@ -10,3 +10,10 @@ monoide:U := monoide{ T:U, op: T->T->T | leyesdeMonoide T op}
 
 monoide (T:U) (op:T->T->T ) -> Maybe monoide :=
 if (leyesdeMonoide T op -> monoide{T op}
+
+
+
+hay otro tema que me preocupa mas y es el siguiente. 
+Yo quisiera un smartMaybe que de acuerdo a la demanda se o un Maybe comun o un maybeError que me devuelve un error type o un string explicativo. 
+Lo mismo con la Law: me devuelve un boolean o un error explicativo? 
+Eso me volvia loco porque normalmente quiero devolver un maybeError, pero a veces para optimizar es mejor devolver un Maybe. Entonces, si es a demanda, bueno, devuelvo lo que me piden. 
