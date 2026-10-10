@@ -2,3 +2,11 @@ Si tomamos como tipos naive (es decir sin predicados) a los
 sum, product, exponential de teoria de categorias + dependent types
 el problema es que yo no puedo definir un vector en general, solo tengo  Vector N, como std::array<N> en c++.
 Como puedo expresar nativamente std::vector en Luthier, que alternativas tengo. 
+
+
+Entonces, del mismo modo podriamos esconder todos los modificadores de cualquier tipo, no?
+En particular los objetos matematicos?
+monoide:U := monoide{ T:U, op: T->T->T | leyesdeMonoide T op} 
+
+monoide (T:U) (op:T->T->T ) -> Maybe monoide :=
+if (leyesdeMonoide T op -> monoide{T op}
