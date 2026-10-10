@@ -142,6 +142,18 @@ it to materialize; the "infinite decoration" is code, not values (the program is
 the computation the expansion: audio 11.42.15). The strongest single statement of
 D-2026-10-10-d and f, a candidate for the wording of the strategy principle (C2).
 
+**Luthier as a coupling language.** "el uso de luthier seria el acople entre librerias no? un
+lenguaje de acople, eso me parece que seria util." The joint between two libraries is a theory
+(D-2026-10-10-g) of which each library is a model; the bridges, with their cost and error, live
+at the joint; so do the bugs. The rule that distinguishes it from Python as glue: no coupling
+without a law, "si el tipo no sigue la ley no se aplica el calculo" (Luciano, confirming the
+model's "sin ley no hay acople"). What L14 (Luthier orchestrates other languages) means in
+practice; for O1 (useful now, without a native FFT) and O5 (the core is what states and checks
+laws by hand; the values come from the libraries). Prior art: coordination languages (Gelernter
+and Carriero 1992), glue languages (Ousterhout 1998), workflow languages (Snakemake, Nextflow).
+Source: chat 2026-10-10. A position on the objectives, for record/objectives.md, which is his
+to mark.
+
 ## Left open on purpose (P8: until a real case asks for it)
 
 Laws with values in a semiring rather than in booleans: boolean (and, or), tropical (sum, min)
