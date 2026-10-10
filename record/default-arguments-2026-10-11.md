@@ -70,3 +70,29 @@ application, and mark the default in the declaration with something that does no
     f a (tol := 1e-3)
 
 `default` would be a new keyword; a symbol (`?=`) is the other option.
+
+## Defining a name twice
+
+Luciano (chat, 2026-10-11): "el tema es si vos definis dos veces a un simbolo que pasa? si es
+inmutable --> error, si es mutable --> pasa (+warning?)".
+
+Today: an error. The checker reports "x is defined twice" (`src/luthier/checker.py`, checked on a
+two-line file). The spec states no rule for it.
+
+*Proposed.* Luciano's rule is compatible with D-2026-10-10-e if the second definition of a mutable
+name is surface for a fresh name, as in SSA: `x := 1 ; x := x + 1` is `x0 := 1 ; x1 := x0 + 1`, and
+each later `x` means the latest. The core stays immutable and hashes still stand for values. Two
+conditions follow.
+
+- **Only where there is order.** A file is a set of acts without order (`05` §2, `03` §1): a use of
+  `x` in another definition would mean `x0` or `x1` depending on where it is written, so the file
+  would become a sequence. Redefinition fits inside a block, where order exists (local definitions
+  in a block are open, `02` §8), and stays an error at the top level of a file. Inside a recursion,
+  a redefined name becomes a parameter of the recursive call, as a phi node does in SSA.
+- **A marker instead of a warning.** The name is marked mutable where it is first defined
+  (`mut x := 1`, keyword to be chosen); then a redefinition is intended and needs no warning, and
+  without the marker it is an error. A warning on every intended redefinition would be ignored
+  (P8, no more bureaucracy than it pays for).
+
+A default argument is not a redefinition under this rule: the parameter is immutable in the body,
+and the call fills it once. The choice between `default` and `?=` is independent.
