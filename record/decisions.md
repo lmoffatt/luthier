@@ -696,3 +696,46 @@ Kind:       implementation decision. For L6 (modules as values), L10 (the quotie
             Julia's promotion rules; Reynolds' parametricity as the ground of universality
 Status:     current
 
+D-2026-10-10-h  Return-type polymorphism by demand. A function may have several certified
+                codomains (sin into Real, into [-1, 1]); the type the consumer requires flows
+                backward along the plan, as decorations do (D-2026-10-10-f), and selects which
+                certificate of the codomain is demanded. The narrower codomain is the same
+                function with a theorem attached (L4), so asking for it has the cost of its
+                certificate. When no consumer fixes the type, a default applies, a parameter
+                (P11); without a default the demand is a hole (L8), found at planning.
+Author:     Luciano for the polymorphism and its ground in execution on demand; the model for
+            its reading as bidirectional typing and the quotient, and for default and hole,
+            accepted
+Quote:      "Una función podría tener multiplicidad de tipos de salida y que el tipo de salida
+            queda definido por el tipo de entrada que es requerido ... habría un polimorfismo en
+            las funciones y un polimorfismo en la función de retorno. Fíjate vos que eso lo podés
+            hacer si vos haces ejecución en demanda."
+            "Si"
+Source:     record/audios/WhatsApp Ptt 2026-10-10 at 17.25.23.md (7b0481d, 05:49 to 07:53); chat
+            (session of 2026-10-10)
+Kind:       implementation decision. For D-2026-10-10-d and f, L4, L8, P11. Prior art:
+            bidirectional typing (Pierce and Turner 2000; Dunfield and Krishnaswami 2021),
+            Haskell's return-type polymorphism (read, mempty) and its defaulting rules
+Status:     current
+
+D-2026-10-10-i  A first use case: absorb an existing library into Luthier by writing its
+                theoretical module (types, functions, laws, no values) and certifying the
+                existing implementation against it (L14). The first candidate is tidyverse's
+                pivot_wider and pivot_longer: the law "one is the inverse of the other" fails in
+                general (row order, column types), and writing it forces saying up to which
+                equality it holds (L16). A failing law is the finding.
+Author:     Luciano
+Quote:      "el primer trabajo que podría hacer Luthier es agarrar y decirle a la IA, bueno,
+            ahora vos agarrame toda esta librería de Python ... y que ponga, digamos, en el
+            lenguaje de Luthier todas las leyes que cumplen todas las funciones"
+            "vos podés hacer pivot wide y pivot long, creo, en R, en tidyverse. y una no es la
+            inversa de la otra y tendrían que ser una inversa de la otra"
+            "lo de pivot_wide puede ser una buen caso de uso, no?"
+Source:     record/audios/WhatsApp Ptt 2026-10-10 at 17.25.23.md (7b0481d, 01:44 to 03:45); chat
+            (session of 2026-10-10)
+Kind:       objective, candidate for record/objectives.md (which is his to mark). For O1 (be
+            useful now), O3 (make what others wrote legible), O4 (several implementations,
+            tested equivalent), L14, L16; a real case before any mechanism (P8), and one that
+            exercises bridges (R and Python representations of one table)
+Status:     current; not started
+

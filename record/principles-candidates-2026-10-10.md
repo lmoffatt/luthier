@@ -115,6 +115,23 @@ parametrize everything, or a default that can be changed. Source: audio 2026-10-
 with implicit resolution; modules as parametrized values instantiated on demand; overloads and
 bridges by the orchestrator. Extends L6 and L10; the bridges extend L14.
 
+**Modules are theories; a theoretical module is a module of holes.** "los módulos
+representarían justamente teorías matemáticas ... tipos y funciones, todos con sus leyes bien
+marcados, todo definido pero sin valor, y después va a haber implementaciones que en lo posible
+serán genéricas". Source: audio 2026-10-10 17.25.23 (7b0481d), 00:00 to 00:40 and 03:53 to 04:25.
+L8 (declare, define, inhabit) at the level of the module; D-2026-10-10-g.
+
+**Return-type polymorphism by demand.** D-2026-10-10-h. Source: the same audio, 05:49 to 07:53.
+
+**Absorb libraries with their laws; pivot_wider and pivot_longer as the first case.**
+D-2026-10-10-i. Source: the same audio, 01:44 to 03:45. "Al tratar de escribir los tésitos, se
+entiende mejor cada implementación" (02:42): the pedagogical face, for O3.
+
+**The interpreter after MacroDR.** His C++ DSL in MacroDR (two virtual classes, one compiles and
+one runs; a table from identifiers to implementations) is the inspiration for Luthier's
+interpreter, where an implementation is static Luthier code and what the table needs is the
+output type. Source: the same audio, 04:26 to 05:49. Not a decision; to read before implementing.
+
 ## Left open on purpose (P8: until a real case asks for it)
 
 Laws with values in a semiring rather than in booleans: boolean (and, or), tropical (sum, min)
