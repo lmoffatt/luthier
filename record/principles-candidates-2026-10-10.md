@@ -1,0 +1,94 @@
+# Candidates for docs/principles.md from the audios of 2026-10-09 and 2026-10-10
+
+For the thread that works docs/principles.md (D-2026-10-10-b). Nothing here is applied to the
+draft. Each item says where it comes from: an audio (record/audios, commit 60a10aa, with the
+timestamp), a decision (record/decisions.md), or the model's proposal in the chat of 2026-10-10,
+marked as such. The audio quotes are verbatim, transcription errors included.
+
+## New principles
+
+**C1. A definition has no effects; effects live only in the actions.** D-2026-10-10-c. Implicit
+in L9 (a program is a DAG) and L12 (execution is the verification of equivalences), not stated.
+It is the one assumption under which every evaluation strategy gives the same result. Source:
+Luciano, chat 2026-10-10 ("lo que si es no-side effects").
+
+**C2. The evaluation strategy is a parameter separate from the program; by default, forward on
+demand.** D-2026-10-10-d. A plan backward from the actions over names, then a strict forward run
+over the live subgraph. Source: Luciano, audio 2026-10-10 11.42.15, 01:51 to 04:07 ("está el
+método backward, y el forward ... uno podría pensar que tenés que tener las dos formas de
+trabajar, las dos tienen un rol"); chat 2026-10-10 ("Lo ideal es no elegir, es decir, poder
+expresar todo, solo elegir lo que va por default").
+
+## Retouches to existing principles
+
+**L13 (forgetting is first-class)** gains its operational justification. Forward is Markovian:
+"estás en un estado y ya está, todo lo que pasó antes lo olvidaste"; backward must keep its
+history: "tenés que guardar las boletas de 5 años"; scope is backward's forgetting: "si hay cosas
+que se salen de scope, ya está. Ahí se pierden para siempre". Source: audio 2026-10-10 11.42.15,
+01:07 and 03:20 to 03:55. With D-2026-10-10-d the plan knows each node's last consumer, so
+backward also forgets as soon as it can (the model's observation).
+
+**L9 (a program is a DAG)** should separate two structures: the DAG of definitions, which says
+what depends on what and has no cycles once operations are declared before their laws; and the
+structure the laws generate over terms, an equivalence (islands, a quotient) when laws are
+boolean and a metric space when laws carry a distance. L10 (one function, many paths) and L12
+live in the second. Source: Luciano, chat 2026-10-10 ("las relaciones de equivalencia generan
+islas separadas. Mas complejo es las relaciones de distancia: estas generarian un espacio
+metrico"); the separation is the model's proposal.
+
+**L11 (verification is one operation, exact or statistical)** should say that the grade of
+evidence depends on the distribution sampled, not only on the number of samples, and that errors
+concentrate at the edges (zero, empty, overflow, NaN), against the audio's assumption that an
+error "te trastocarían todos los valores". Source: audio 2026-10-10 11.11.22, 03:02 to 04:12
+(grades 1, 2, 3 by 100 or 200 samples); the correction is the model's, from the practice of
+QuickCheck, Hypothesis, LAPACK's test matrices.
+
+**L5 (a law characterizes; it does not re-run)** gains coherence: a law over several functions is
+"una especie de rompecabezas" tested on the values actually computed, and associativity only
+appears when three numbers are summed; testing every path "es un delirio". Source: audio
+2026-10-10 10.12.21, 11:38 to 18:20; 11.11.22, 02:14 to 02:44. The model's addition: the cases
+to test are the generators the law's theory dictates (generalized associativity, Mac Lane's
+coherence), not a sample of paths.
+
+**L4 (the certified subtype from a predicate)** receives the scope decision: types by
+verification first, types by construction later, because construction "implican un mayor
+conocimiento que yo tengo, pero podría ser a lo largo eso que se incorpore". A law gives three
+things at once: the type, the constructor with Maybe, the membership function. Source: audio
+2026-10-10 10.12.21, 05:24 to 08:10.
+
+**L3 (defining a function defines its test)** joins D-2026-10-10-d: the tests are actions, so
+verification enters the same plan as the prints.
+
+## Ideas of the audios the draft does not have
+
+**What never reaches an output needs no certificate.** "lo único que se ve es lo que modifica el
+mundo, es decir, lo que se imprime, lo que se guarda ... son variables internas del programa que
+no nos producen un output, esas no, calcularlas o no, no lo vas a saber nunca si lo verdadero o
+no". Source: audio 2026-10-10 11.42.15, 02:37 to 03:05. The ground of verification on demand.
+
+**The program is the synthesis of the computation; what is kept is the program.** "la longitud
+de un programa frente a la rectitud de un cálculo. Un cálculo puede crecer mucho porque expande
+las variables de búsqueda. En cambio el programa, bueno, no tanto, porque justamente está escrito
+de una manera sintética ... Nunca olvidarías el programa". Source: audio 2026-10-10 11.42.15,
+01:02 to 01:51. The same figure as the audio of 2026-10-09 10.43.06 on expansion and synthesis
+("una especie de un ciclo de respiración", 03:14 to 03:23), reached from the other side. P2
+(everything derived carries how it was derived) applied to execution.
+
+**A synthesis can be judged; a long text cannot.** "Una síntesis uno la puede analizar, porque es
+una síntesis y tiene pocos conceptos ... El problema es cuando ya es muy largo y tiene ideas que
+uno no maneja del todo ... y ahí dudas de todo". Source: audio 2026-10-09 10.43.06, 04:24 to
+05:06. For the way of working (P12), a criterion for what the model brings him.
+
+**Mutable parameters as before and after.** D-2026-10-10-e.
+
+## Left open on purpose (P8: until a real case asks for it)
+
+Laws with values in a semiring rather than in booleans: boolean (and, or), tropical (sum, min)
+for costs and distances, logarithmic (sum, logsumexp) for evidence, with the temperature T as the
+parameter between them. Source: audio 2026-10-10 10.12.21, 01:56 to 02:15 and 08:15 to 10:45
+(costs from zero to infinity, "cuáles son las equivalencias entre costos y las operaciones
+booleanas, que eso no lo tengo muy claro"); the semirings are the model's answer. Metric
+equality: a certificate carrying its tolerance, function types carrying their Lipschitz constant
+(condition number), numerical laws with a normalized distance and a direction (backward or
+forward error). Candidate real case: linear algebra, with LAPACK's test ratios as the reference.
+Uniqueness annotations. Incremental planning.
