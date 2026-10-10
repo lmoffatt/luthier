@@ -741,3 +741,14 @@ Kind:       objective, candidate for record/objectives.md (which is his to mark)
             exercises bridges (R and Python representations of one table)
 Status:     current; not started
 
+D-2026-10-10-j  docs/principles.md goes to draft 1 in this thread, from the nine voice notes of
+                2026-10-10 and D-2026-10-10-c to i, before the timeline carries the day's rows
+                (notes cited by file and minute until then). L18, L19, L20 and W14 new; L4, L5,
+                L8, L9, L10, L11, L13, L14 retouched; draft 0 kept at 6d9dbd3.
+Author:     Luciano
+Quote:      "Bueno, con todo esto edita el documento en doc"
+Source:     chat (session of 2026-10-10)
+Kind:       rule. For P3 (the best reading in front, the original in git), P12; amends
+            D-2026-10-10-b (the document was to be worked in another thread)
+Status:     current: docs/principles.md draft 1 (5769005), unapproved
+
