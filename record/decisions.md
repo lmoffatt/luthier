@@ -576,3 +576,62 @@ Kind:       rule. For P12 (what reaches him is synthesized); docs/ presents Luth
             how it came to be (D-2026-10-07-a)
 Status:     current: docs/principles.md draft 0 (unapproved), record/conclusions-2026-10-10.md
 
+D-2026-10-10-c  A definition has no effects. Its result depends only on its inputs; effects live
+                only in the actions (print, save). A mutable parameter written as two variables,
+                before and after, is not an effect: the dependence is an edge of the graph. What is
+                forbidden is what the graph does not show.
+Author:     Luciano
+Quote:      "lo que si es no-side effects"
+Source:     chat (session of 2026-10-10, on the audios of 2026-10-10)
+Kind:       principle of the language, candidate for docs/principles.md. For L9 (a program is a
+            DAG), L12 (execution is the verification of equivalences); it is the one assumption
+            under which every evaluation strategy gives the same result
+Status:     current
+
+D-2026-10-10-d  Forward on demand: the evaluation strategy is a parameter separate from the
+                program (P11). By default: a plan backward from the actions over names, evaluating
+                nothing (a branch whose use depends on a value marks both branches live); then a
+                strict forward run over the live subgraph, in topological order, each node once and
+                whole. Three conditions it rests on: (i) errors and holes are values that flow,
+                so a live-but-unused branch cannot abort the run; (ii) results are memoized in a
+                store keyed by the hash of (code, inputs, mode), the retention policy a parameter;
+                (iii) the tests are actions, so "verify everything" is asking for all tests and
+                "verify on demand" is asking for the tests of what an action uses (L3). Named by
+                Luciano "forward por demanda"; mechanism "retro-forward"; not Haskell's laziness,
+                which is per expression and interleaved with the run.
+Author:     Luciano for the scheme and the name; the model for the three conditions, accepted
+Quote:      "1) cargas el arbol de definiciones 2) detectas los 'print' 3) corres para atras desde
+            el print hasta la base, pero no ramifico (no genero 3 f, solo detecto nombres)
+            4) calculo los caminos detectados forward."
+            "Lo ideal es no elegir, es decir, poder expresar todo, solo elegir lo que va por
+            default."
+            "si, dale."
+Source:     chat (session of 2026-10-10); record/audios/WhatsApp Ptt 2026-10-10 at 11.42.15.md
+            (60a10aa, 01:51 to 04:07, backward and forward "las dos tienen un rol"); 11.11.22.md
+            (60a10aa, 00:00, "la Lazy Evaluation sería la mejor manera de definir qué es lo que
+            quiero exactamente definir")
+Kind:       implementation decision. For P11 (every criterion is a parameter), L7 (the core is
+            executable by hand: the plan is readable node by node), L9, L13 (forgetting: the last
+            consumer of a node is known from the plan). Prior art: topological schedulers of build
+            systems (Make, Bazel; Mokhov, Mitchell, Peyton Jones 2018), magic sets, Halide's
+            algorithm/schedule split
+Status:     current; the strategy parameter has its place from the start and only the default is
+            implemented (P8)
+
+D-2026-10-10-e  Mutable parameters are two variables, before and after, in the core (x1 = f(x0));
+                in-place mutation is an optimization the planner applies when x0 has no other
+                consumer after f, the same last-consumer analysis that frees nodes. The form f(x)
+                that mutates is library, translated to the two names. A uniqueness or linearity
+                annotation on the type (a guarantee of no copy) is foreseen, not implemented.
+Author:     Luciano for the model of two variables; the model for the planner's criterion and
+            the annotation, accepted
+Quote:      "Los parametros mutables son una optimizacion importante y se pueden modelar como dos
+            variables (antes y despues), que es como se modela un incremento con una funcion
+            pura."
+Source:     chat (session of 2026-10-10)
+Kind:       implementation decision. For D-2026-10-10-c, L7 (both names explicit in the core),
+            L2 (uniqueness as a proposition on the type). Prior art: SSA, Fortran intent(inout),
+            LAPACK's overwrite of A, Clean's uniqueness types, Perceus (Reinking, Xie, de Moura,
+            Leijen 2021)
+Status:     current
+
