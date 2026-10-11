@@ -1,7 +1,9 @@
 # Luthier
 
-A language where a type carries the laws its values must satisfy, and defining something defines
-its test. Version 0 tests; it does not prove.
+A language that verifies models of theories. A theory is a type with its laws; a model is a value
+of it, and defining a model defines its test. A function is the case of a theory with one symbol.
+What runs is decided by a demand from outside, which picks among the models of a theory by cost.
+Version 0 tests; it does not prove.
 
 ```
 import "algebra"
@@ -32,8 +34,8 @@ ringZ7: passed
 
 `CommutativeRing` is a type in the `algebra` library, built from the structures below it: an
 abelian group and a monoid over one equality, joined by distributivity, with a symmetric product.
-Declaring `ringZ7 : CommutativeRing Z7` records the obligation; `test` runs it and writes
-the certificate. A wrong implementation fails with a counterexample:
+`CommutativeRing` is the theory and `ringZ7` a model of it over `Z7`. Declaring
+`ringZ7 : CommutativeRing Z7` records the obligation; `test` runs it and writes the certificate. A wrong implementation fails with a counterexample:
 
 ```
 badRing : Ring Bool := {
