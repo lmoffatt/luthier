@@ -1,0 +1,42 @@
+-- The laws of the kernel's theory: what exponentials, products, sums and data satisfy by
+-- construction (04 §2, §4: the beta and eta rules, the recursion principle). Every concrete type
+-- belongs to this theory (Luciano, 2026-10-11: "todo pertenece a una teoria"), and it is the one
+-- theory the interpreter is certified against by conformance rather than by test. Stating it here
+-- makes that conformance a test like any other: a model of KernelLaws at finite types is checked
+-- exhaustively, and an interpreter that failed one of these would be caught by `luthier test`.
+-- Each law takes its types and equalities first and the quantified variables last, so a partial
+-- application is the predicate a theory fills (as in algebra.lut).
+
+-- exponential: beta. Eta, `\ y { f y } == f`, is not stated: equality of functions is not
+-- structural (05 R8); observed pointwise it is beta.
+Beta (A B : U) (eqB : B -> B -> Bool) (f : A -> B) (x : A) : Bool := eqB ((\ (y : A) { f y }) x) (f x)
+
+-- product: the two projections, and pairing the projections gives the pair back
+PairFst (A B : U) (eqA : A -> A -> Bool) (a : A) (b : B) : Bool := eqA (match (a, b) { (x, y) -> x }) a
+PairSnd (A B : U) (eqB : B -> B -> Bool) (a : A) (b : B) : Bool := eqB (match (a, b) { (x, y) -> y }) b
+Pairing (A B : U) (eqAB : A * B -> A * B -> Bool) (p : A * B) : Bool := eqAB (match p { (x, y) -> (x, y) }) p
+
+-- sum: a match on an injection takes that branch; stated on Bool and Maybe, the kernel's sums
+IfTrue  (C : U) (eqC : C -> C -> Bool) (a b : C) : Bool := eqC (if true then a else b) a
+IfFalse (C : U) (eqC : C -> C -> Bool) (a b : C) : Bool := eqC (if false then a else b) b
+maybeCase (A C : U) (d : C) (f : A -> C) (m : Maybe A) : C := match m { nothing -> d ; just x -> f x }
+noneOf (A : U) : Maybe A := nothing
+CaseNothing (A C : U) (eqC : C -> C -> Bool) (d : C) (f : A -> C) : Bool := eqC (maybeCase A C d f (noneOf A)) d
+CaseJust (A C : U) (eqC : C -> C -> Bool) (d : C) (f : A -> C) (a : A) : Bool := eqC (maybeCase A C d f (just a)) (f a)
+
+-- data: the recursion principle of List, witnessed by a fold. The general statement quantifies
+-- over the algebra (n : B, c : A -> B -> B); it is stated over the lists, with the algebra fixed,
+-- until functions of two arguments have generators (05 §7).
+foldList (A B : U) (n : B) (c : A -> B -> B) (xs : List A) : B :=
+  match xs { nil -> n ; cons x rest -> c x (foldList A B n c rest) }
+FoldNil  (A B : U) (eqB : B -> B -> Bool) (n : B) (c : A -> B -> B) : Bool := eqB (foldList A B n c (nil A)) n
+FoldCons (A B : U) (eqB : B -> B -> Bool) (n : B) (c : A -> B -> B) (x : A) (xs : List A) : Bool :=
+  eqB (foldList A B n c (cons A x xs)) (c x (foldList A B n c xs))
+
+-- The theory: a pair of types with their equalities, bound by the laws above; its models are the
+-- types of the kernel at which the laws are checked.
+KernelLaws (A B : U) : U := {
+  eqA : A -> A -> Bool, eqB : B -> B -> Bool, eqAB : A * B -> A * B -> Bool, n : B, c : A -> B -> B
+  | Beta A B eqB & PairFst A B eqA & PairSnd A B eqB & Pairing A B eqAB
+  & IfTrue B eqB & IfFalse B eqB & CaseNothing A B eqB & CaseJust A B eqB
+  & FoldNil A B eqB n c & FoldCons A B eqB n c }

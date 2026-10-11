@@ -884,7 +884,10 @@ Kind:       language design, certification (05 §7). For G2 (description), L21, 
 Amended:    (same day, his feedback at 9d65118) the citation is a key into a .bib whose entry
             carries a DOI, ISBN or URL resolved by record/bibliography/checkdoi.py; the
             certificate records who checked the correspondence: human, ai+human, or none.
-            Proposed syntax `cite name bibkey checked ai+human`.
+            Proposed syntax `cite name bibkey checked ai+human`. Amended again (c167022): the
+            citation is a value of a type Reference (key, doi, isbn, url, sha256, law
+            Resolvable), read from a .bib as a module (`biblio.kantorovich1948`), and the
+            certificate records its identifiers and hash.
 Status:     current; spec amendment to 05 §7 pending; syntax `cite` open to his preference
 
 D-2026-10-11-g  W15 enters docs/principles.md: a long analysis is reported as such, as a delicate
@@ -914,3 +917,45 @@ Source:     record/answers-annotations-principles-2026-10-11-c.md
 Kind:       method, testing. For W6 (a test must fail when the thing is wrong), G2 (the power of a
             description is measured on specimens that differ)
 Status:     current; not implemented
+
+D-2026-10-11-i  Blocks. A brace term whose last item is a bare expression is a block, its value
+                that expression; without a final expression it is a record value. Items: `x := t`
+                once, `x <- t` bind or rebind, an action with its result bound. Each item becomes a
+                definition with a fresh name (SSA, 04 §5, 05 R12), after which dependencies give
+                the only order. A name is visible from its binding to the end of its block and in
+                nested blocks; `:=` of a name defined in an enclosing scope is an error, not a
+                shadowing; `<-` rebinds only block-local `<-` names and the parameters of the
+                enclosing definition. Actions take and return the world, `w1 <- print w0 "x"`, so
+                their order is the dependency through `w`. Three kinds of block: the body of a
+                definition or lambda, `main` in a file, the session; a file is never a block. A
+                rebinding whose previous binding has no consumer is an error in a file and
+                allowed in a session.
+Author:     Luciano for the demand (blocks, boundaries, scopes; the dead-rebinding question) and
+            the acceptance; Claude for the rules
+Quote:      "Lo cual nos introduce al concepto de bloques. Y ahi te pido ayuda."; "tenemos que
+            definir las boundaries para los blocks y los name scopes."; "Si" (c167022, read as
+            accepting the two pending decisions)
+Source:     record/answers-annotations-principles-2026-10-11-c.md (blocks), -d.md
+Kind:       language design, grammar and static semantics (02 §3, §8; 04 §5; 05 R12). For L9 (the
+            DAG is the only order), L12 draft 3 (actions verified before and after), L13, G1, G4;
+            resolves the open collision of block and record syntax (02 §8)
+Status:     current; spec amendment pending; not implemented
+
+D-2026-10-11-j  Operators are resolved by the type, and a type names its model: `i : Int` has the
+                ring of Int, `j : Z7` has ringZ7; a carrier with two models is two types, with
+                explicit conversion (forget and a constructor); operators of a wider model apply
+                to a narrower type only through a homomorphism stated and certified as a law.
+                Where a theory does not fix the operator's role (a function over Monoid on Int,
+                which carries two), the model is named. The scope rule proposed in the second
+                round is withdrawn.
+Author:     Luciano for the principle (a value belongs to a type of a model, whose operators it
+            uses; laws must coincide across models) and the acceptance; Claude for the two-types
+            rule and the homomorphism condition
+Quote:      "un valor pertenece a un tipo de un modelo, y ese modelo tiene sus operadores. Claro
+            que podrias tener operadores para modelos mas amplios, pero ahi entiendo que deberia
+            haber coincidencia de leyes" (9d65118); "Si" (c167022)
+Source:     record/answers-annotations-principles-2026-10-11-c.md (operators and models)
+Kind:       language design, static semantics (02 §3 operator directive; 05 §10 implicit
+            arguments). For G0 (the type is the proposition "member of this model"), G2, L13, L20
+            draft 3; examples/z7ring.lut to be rewritten (Z7 as a quotient, not a subtype)
+Status:     current; spec amendment pending; not implemented

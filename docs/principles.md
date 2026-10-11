@@ -229,9 +229,9 @@ after his annotation.) A function belongs to a theory (Real, Field, LinearAlgebr
 model as its first, often implicit, argument, so it is written once for every model; the model is
 resolved from the scope and can be passed explicitly. A theory over a model of another theory is
 a theory. Every type belongs to a theory; the concrete types (products, sums, exponentials,
-`data`) belong to the kernel's, whose laws are the β and η rules and the recursion principle
-(third round). Open (third round): operators resolved by the type, the type naming its model; a
-carrier with two models is two types. Modules are values: a parametrized module is a function from models to
+`data`) belong to the kernel's, whose laws are the β and η rules and the recursion principle,
+stated in `lib/kernel_laws.lut` (third and fourth rounds). Operators are resolved by the type, the
+type naming its model; a carrier with two models is two types (D-2026-10-11-j). Modules are values: a parametrized module is a function from models to
 definitions, applicative because definitions have no effects (L18), instantiated on demand with
 the parameter threaded down from the action. A specialization is one more representative of the
 law's class (L10), valid on a subtype, certified against the same law; where representations
@@ -493,11 +493,13 @@ W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los 
 - The session as a block over the dataflow of L19: `<-` to explore, `:=` to lock, a file may
   contain a block, `<-` stays banned at the top level of a file (second round §17; his decision
   pending); then the spec, `04 §7` and a section on the session.
-- Operators resolved by the type, where the type names its model; a carrier with two models is
-  two types; cross-model use only through a certified homomorphism (third round; his decision
-  pending). The scope rule of the second round is withdrawn.
-- Blocks: six rules proposed (form by the last item, items, SSA translation, scope without
-  shadowing, the world threaded by `<-`, three kinds of block) (third round; his decision pending).
+- Decided 2026-10-11, to the spec: operators by the type naming its model (D-2026-10-11-j);
+  blocks, six rules and the dead-rebinding rule (D-2026-10-11-i); the session as a block follows.
+  Pending: Python-like separators in blocks; `laws.lut` split from `algebra.lut`; `plan.lut`, an
+  order of execution as a value with the law that two orders are equivalent (fourth round).
+- The kernel's theory stated in Luthier: `src/luthier/lib/kernel_laws.lut`, tested on `Fin 3`,
+  `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (`05` R8), functions
+  over `Fin n` not enumerated by `exhaustive` (to fix).
 - `proved` by citation: the citation a `.bib` key with a resolved DOI, ISBN or URL, and who
   checked (human, ai+human, none) recorded; syntax `cite name bibkey checked ai+human` proposed,
   allowed in user code (D-2026-10-11-f as amended; to `05 §7`).
