@@ -259,7 +259,11 @@ seen on; a lone implementation is never replaced. (Draft 7, from the counterexam
 round) A sampled edge is admissible only on inputs the distribution it sampled covers, and only as
 a direct edge, never summed into a path, until a probabilistic bound exists as a law; the
 tolerance charged at a node is the demand's pulled back through the sensitivity of the cone from
-the node to the demand (`11` §5), and where no sensitivity is known there is no substitution. The
+the node to the demand (`11` §5), and where no sensitivity is known there is no substitution. (Draft
+7, Claude) The same for every grade: a link certified on a subtype is a link only at inputs
+certified (L4) in that subtype, so a path exists at x only where every link does; a `proved` link by
+citation carries the theorem's hypotheses as parameters (γ_n needs n·u < 1, false for float32 over
+an hour at 48 kHz) and is void where they fail. The
 author's free choice among the inhabitants of
 an under-determined function
 (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared. From G0
@@ -405,7 +409,9 @@ seed, the plan that produced it, the plan being a value (`lib/plan.lut`), and (d
 of the certificates in its live cone, so a host library or platform that changed is a new result;
 (draft 7, Kimi) the grade the demand states is in the identity too, and a memo hit serves a demand
 only if the cached cone meets that grade, checked at the hit and not only when the certificate was
-issued;
+issued; (draft 7, Claude) the runtime includes the thread count and scheduling of the host, and an
+extern whose bits depend on scheduling is not bit-identical to itself, so its identity law is
+`Cost`, never `Bool` (L21);
 the run database is
 what the planner reads to choose the plan and is not an input of the result once the plan is
 fixed; evidence accumulates by a separate action with its own record, so "each node once" and
@@ -505,7 +511,11 @@ into the class the planner moves in (L10); the agreement test of W5 between nati
 this law, and the holotype formula of G2 evaluated over `Rational` is one more specimen, with grade
 exact, checked by the same law. (Draft 7, Kimi) An identity certificate admits a specimen into the
 planner's graph and never raises a node's grade: the grade a demand requires is met only by
-certificates of the laws. A function
+certificates of the laws. (Draft 7, Claude) And the identity law admits a specimen to the planner's
+graph only beside a certificate of at least one law of the description at the grade the demand
+requires; a table of the native's outputs on the grid agrees with it exactly there and is
+acquaintance in its limiting form (L5), refused by the first law over the signature (`delay s s =
+0`) and by nothing else. A function
 known correct by a theorem outside Luthier is certified `proved` by citation (D-2026-10-11-f),
 and the chain law, citation, native, identity, extern is carried by hash. From G2 (the specimen
 can be recognized as the same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt

@@ -92,3 +92,28 @@ make it a condition of the act.
   power of two and breaks shift-invariance on long signals) survives his correction on zero laws.
   Fix taken in draft 7: an identity certificate admits a specimen and never raises a node's grade;
   the grade a demand requires is met only by certificates of the laws.
+
+## 5. Claude, last to arrive; the round is complete
+
+Three breaks with float arithmetic worked to the bit (ties-to-even), the only response that did.
+
+- L10, the sharpest of the round: two `proved` links certified on a subtype (`Fin 3 -> Prob`, sums
+  bounded by 3), chained, and used at an input outside the subtype (`[2^53, 1, -2^53]`); every link
+  proved, the sum a bound, the cheapest representative returns 0 for 1 under a certificate that
+  says proved within 2.7e-15. Draft 7's scope rule covered sampled links only; this shows the
+  domain of a link matters at every grade, and that `cite` drops a theorem's hypotheses (γ_n needs
+  n·u < 1, false for float32 over an hour of audio). Both taken in draft 7.
+- L19: the reduction order inside a threaded BLAS flips a near-tie, so one identity holds two
+  values on two machines, and L21's `Bool` identity reports an implementation change that did not
+  happen. Taken: thread count and scheduling in the runtime the identity binds; an extern whose bits
+  depend on scheduling has a `Cost` identity, never `Bool`. Not taken: "memoize no result an
+  identical rerun fails to reproduce", which doubles every run.
+- L14: a lookup table of the native's outputs on the grid passes the identity law exactly on
+  G × S and is wrong off the grid (2.5 ms at 1 m cells, 25 tolerances), and `delay s s = 0` would
+  have refused it. After his correction this is a rule of the planner, not of application: taken
+  in L21, merged with Kimi's, the identity law admits a specimen only beside a certificate of at
+  least one law of the description at the grade the demand requires.
+
+Six models, eighteen counterexamples, four rules changed (L10, L19, L21 and, by his correction, L14
+restored to his words). The prompt is kept for the next round: `record/IA/principles round 3/` holds
+it in each response's head.
