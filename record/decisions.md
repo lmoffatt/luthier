@@ -1024,3 +1024,29 @@ Kind:       semantics of demand (L14, L19, L2, G1, G4). For L2 (membership is a 
             what leaves the program), P11 (the opt-out is a parameter of the demand)
 Status:     current; in docs/principles.md draft 4 (L2, L14, L19); 04 §7 pending; the opt-out's
             syntax open; not implemented
+
+D-2026-10-12-a  Luthier is presented as a verifier of models of theories, not of functions: a
+                theory is a signature with its laws, written in the kernel's bicartesian closed
+                category; a model is a value of a theory; a function is a theory of one symbol over
+                the theories its laws import. G2 is widened accordingly and printed before G1, in
+                the order he had the eurekas (function type first, demand second); tags G1 and G2
+                are kept since the record cites them. L20, the object of 05 §3, D-2026-10-07-e and
+                D-2026-10-11-j are the definition of G2 rather than derivations. The execution by
+                demand (G1) and the grade of a model (G3) are what model theory lacks and stay
+                outside the presentation's first clause only if that clause carries both faces.
+Author:     Luciano for the reframing and the order; Claude for the formulation, the two caveats
+            (the demand does not fold in; a Luthier model satisfies its theory up to a cost) and
+            the choice to widen G2 instead of adding a G5
+Quote:      "que tal si en lugar de presentar Luthier como verificador de funciones lo
+            presentamos como verificador de modelos de teorias? Al tomar elementos de CCC como
+            estructuras donde se escriben las leyes, las teorias y modelos pasarian a ser los
+            elementos de Luthier. Creo que de hecho lo son segun nuestros principios pero quizas
+            diciendolo como principio organizador se puedan unir varios principios en uno" (chat,
+            2026-10-12); "Si, dale" (chat); his observation on draft 7 at 66f0bef
+Source:     record/answers-annotations-principles-2026-10-12.md; docs/principles.md draft 8
+Kind:       organizers (G2, order of G1 and G2). For P13 (one idea now carries L20, 05 §3,
+            D-2026-10-07-e, D-2026-10-11-j), P1 (his quotes verbatim, the formulation marked
+            Proposed), G1 and G3 (named as what model theory lacks)
+Status:     current; docs/principles.md draft 8 (4f6beef); README first paragraph with the two
+            faces; the holotype still pending; G3 as a further eureka to be analyzed (his words,
+            2026-10-12)
