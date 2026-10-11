@@ -1,0 +1,12 @@
+-- R13: an operator is resolved by the type, and a type names its model. Z7 is its own type (a sum
+-- over Fin 7), its + is the ring's, and Int keeps its own; the two never mix without `rep`.
+Z7 = < z7 : Fin 7 >
+rep (a : Z7) : Int := match a { z7 k -> k }
+proj (k : Int) : Z7 := z7 (k mod 7)
+addZ7 (a b : Z7) : Z7 := proj (rep a + rep b)
+operator + := addZ7
+
+five : Z7 := proj 5
+sum : Z7 := five + proj 4
+ten : Int := 3 + 7
+mixed : Int := rep five + ten

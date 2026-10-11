@@ -307,6 +307,17 @@ class OperatorDirective:
 
 
 @dataclass
+class CiteDirective:
+    """`cite x r checked by`: the laws of `x` hold by a theorem outside Luthier, the reference `r`
+    (a value of `Reference`, from a `.bib`); `checked` says who checked the correspondence:
+    human, ai+human or none (05 §7, D-2026-10-11-f). The grade is `proved`."""
+    name: str
+    term: Term
+    checked: str = "none"
+    line: int = 0
+
+
+@dataclass
 class GenDirective:
     """`gen T := term` chooses a Luthier generator (of type Gen T) for values of T;
     `gen T := extern "python:mod.fn"` a Python one, called as fn(rng, size)."""
@@ -328,6 +339,7 @@ class Program:
     tests: list = field(default_factory=list)
     gens: list = field(default_factory=list)
     imports: list = field(default_factory=list)
+    cites: list = field(default_factory=list)
 
     def find(self, name: str) -> Optional[Def]:
         for d in self.defs:

@@ -12,7 +12,7 @@ from .lexer import LexError
 from .checker import Checker, TypeCheckError
 from .evaluator import Env, EvalError, evaluate
 from .generators import Generators
-from .testing import run_test
+from .testing import run_test, TestReport
 from .certify import (cert_path, read_certificate, write_certificate, definition_hash, entries_of,
                       fingerprint, hash_of, why_different, generator_fingerprint)
 from .pretty import pp
@@ -33,8 +33,53 @@ def search_dirs(importer: str) -> list:
     return dirs
 
 
+def reference_fields(ck, term) -> dict:
+    """The fields of an elaborated Reference value, each projected and evaluated (05 §7, cite)."""
+    from .syntax import Proj
+    out = {}
+    for f in ("key", "doi", "isbn", "url", "title", "sha256"):
+        try:
+            with ck.silent():
+                t, _ = ck.infer([], Proj(term, f))
+            v = evaluate(ck.env, t)
+            out[f] = v.value if hasattr(v, "value") else pp(v)
+        except Exception:
+            out[f] = "?"
+    return out
+
+
+def bib_to_luthier(text: str) -> str:
+    """A `.bib` file as Luthier source: one `Reference` value per entry, named by its key (sanitized to a
+    name), with doi, isbn, url, title and the sha256 of the entry's text; fields it lacks are "".
+    Braces in values are stripped, quotes and backslashes escaped."""
+    import hashlib
+    import re
+    out = ['import "reference"', ""]
+    for m in re.finditer(r"@(\w+)\s*\{\s*([^,\s]+)\s*,(.*?)\n\}", text, re.S):
+        kind, key, body = m.group(1), m.group(2), m.group(3)
+        if kind.lower() in ("comment", "preamble", "string"):
+            continue
+        fields = {}
+        for fm in re.finditer(r"(\w+)\s*=\s*(\{(?:[^{}]|\{[^{}]*\})*\}|\"[^\"]*\"|[^,\n]+)", body):
+            v = fm.group(2).strip()
+            if v[:1] in "{\"":
+                v = v[1:-1]
+            fields[fm.group(1).lower()] = v.replace("{", "").replace("}", "").strip()
+        def lit(s):
+            return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+        name = re.sub(r"[^A-Za-z0-9_]", "_", key)
+        if not re.match(r"[A-Za-z_]", name):
+            name = "ref_" + name
+        digest = hashlib.sha256(m.group(0).encode("utf-8")).hexdigest()
+        out.append(f"{name} : Reference := {{ key := {lit(key)}, doi := {lit(fields.get('doi', ''))}, "
+                   f"isbn := {lit(fields.get('isbn', ''))}, url := {lit(fields.get('url', ''))}, "
+                   f"title := {lit(fields.get('title', ''))}, sha256 := {lit(digest)} }}")
+    return "\n".join(out) + "\n"
+
+
 def resolve_import(path: str, importer: str) -> str:
-    """`import "x"`: next to the importing file, then LUTHIER_PATH, then the base library. `.lut` optional."""
+    """`import "x"`: next to the importing file, then LUTHIER_PATH, then the base library. `.lut` optional;
+    a `.bib` file is a module of references."""
     for base in search_dirs(importer):
         for name in (path, path + ".lut"):
             c = os.path.join(base, name)
@@ -69,6 +114,7 @@ class Loader:
         self.stale_why: dict = {}         # qualified name -> why its certificate is not trusted
         self.known: dict = {}             # qualified name -> its matching entry, when that test did not pass
         self.cert_files: list = []        # (path, prefix) in load order, accepted once all is loaded
+        self.cites: list = []             # (qualified name, top) of every `cite` directive
 
     def load_file(self, path: str, prefix: str = "", top: bool = False):
         path = os.path.abspath(path)
@@ -81,6 +127,8 @@ class Loader:
         self.stack.append(path)
         with open(path, encoding="utf-8") as f:
             src = f.read()
+        if path.endswith(".bib"):
+            src = bib_to_luthier(src)       # a bibliography is a module of Reference values (05 §7)
         try:
             prog = parse(src)
         except (ParseError, LexError) as e:
@@ -108,6 +156,8 @@ class Loader:
             self.origin[qualify(prefix, d.name)] = (path, prefix, d.name)
         for t in prog.tests:
             self.tests.append((qualify(prefix, t.name), t.n, t.exhaustive, t.size, top))
+        for c in prog.cites:
+            self.cites.append((qualify(prefix, c.name), top))
         self.cert_files.append((path, prefix))
         self.stack.pop()
         self.loaded.add(key)
@@ -138,11 +188,14 @@ class Loader:
                 if match is None:
                     self._stale(q, why_different(entries[0].get("fingerprint", {}), fp))
                     continue
-                why = self._unacceptable(match, directives.get(q))
+                why = self._unacceptable(match, directives.get(q)) if match.get("outcome") != "proved" else None
                 if why is not None:
                     self._stale(q, why)
                     continue
                 outcome = match.get("outcome") or ("passed" if match.get("passed") else "failed")
+                if outcome == "proved":
+                    self.checker.certified[q] = match     # by citation: the directive's cases do not apply
+                    continue
                 if outcome == "passed" and match.get("provisional"):
                     self.known[q] = dict(match, outcome="passed over provisional externs "
                                                        + ", ".join(match["provisional"]) + ", not certified")
@@ -255,6 +308,11 @@ def cmd_check(args):
     if args.verbose and ck.axioms:
         for q, desc in ck.axioms.items():
             print(f"  assumed {q}: {desc}; its laws are stated and never tested (06 §3)")
+    if args.verbose and ck.cites:
+        for q, (ref, checked) in ck.cites.items():
+            f = reference_fields(ck, ref)
+            ident = f.get("doi") or f.get("isbn") or f.get("url") or ""
+            print(f"  cited {q}: {f.get('key')} ({ident}), checked by {checked}; grade proved when tested (05 §7)")
     if args.verbose and ck.provisional:
         for q, over in ck.provisional.items():
             what = f"builds on {', '.join(over)}" if over else "an extern type nobody has defined"
@@ -322,6 +380,13 @@ def cmd_test(args):
                 seen.add(m)
     reports = []
     ok = True
+    # `cite` (05 §7): a cited name gets a report, with its laws run as a control when it has any
+    cited_top = [q for q, top in loader.cites if top]
+    seen_names = {q for q, _, _, _ in directives}
+    for q in cited_top:
+        if q not in seen_names:
+            directives.append((q, args.n, args.exhaustive, args.size))
+            seen_names.add(q)
     run_seed = args.seed if args.seed is not None else random.randrange(2 ** 31)
     if any(not ex for _, _, ex, _ in directives):
         print(f"run seed {run_seed} (repeat with --seed {run_seed})")
@@ -330,8 +395,17 @@ def cmd_test(args):
         is_top = any(p == path for _, _, p in loader.top_programs())
         if args.show_cases:
             print(f"{name}:")
-        r = run_test(ck, gens, name, n=n, exhaustive=exhaustive, seed=derive_seed(run_seed, name),
-                     deep=args.deep or is_top, prefix=prefix, show_cases=args.show_cases, size=size)
+        if name in ck.cites and name not in ck.obligations:
+            from .certify import definition_hash, fingerprint as _fp
+            import datetime
+            r = TestReport(name, when=datetime.datetime.now().isoformat(timespec="seconds"),
+                           hash=definition_hash(ck.env, name, prefix), fingerprint=_fp(ck.env, name, prefix))
+        else:
+            r = run_test(ck, gens, name, n=n, exhaustive=exhaustive, seed=derive_seed(run_seed, name),
+                         deep=args.deep or is_top, prefix=prefix, show_cases=args.show_cases, size=size)
+        if name in ck.cites:
+            ref, checked = ck.cites[name]
+            r.citation = dict(reference_fields(ck, ref), checked=checked)
         r.run_seed = run_seed
         print(r.summary())
         reports.append(r)
@@ -369,7 +443,7 @@ def cmd_test(args):
             by_file[path][0].append(r)
             by_file[path][1][r.definition] = local
         for path, (rs, names) in by_file.items():
-            keep = {local for q, (p, pre, local) in loader.origin.items() if p == path and q in ck.obligations}
+            keep = {local for q, (p, pre, local) in loader.origin.items() if p == path and (q in ck.obligations or q in ck.cites)}
             write_certificate(cert_path(path), rs, names, keep)
             print(f"certificate: {cert_path(path)}")
     return 0 if ok else 1

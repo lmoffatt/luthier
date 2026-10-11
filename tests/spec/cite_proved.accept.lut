@@ -1,0 +1,11 @@
+-- 05 §7, cite: a definition correct by a theorem outside Luthier is cited with a Reference read
+-- from a .bib; the grade is proved, and who checked the correspondence is recorded.
+import "reference"
+import "cite_sources.bib" as biblio
+
+double (x : Int) : Int := x + x
+cite double biblio.kantorovich1948 checked ai+human
+
+Doubles : U := { f : Int -> Int | \ (x : Int) { f x == x * 2 } }
+twice : Doubles := \ (x : Int) { x + x }
+cite twice biblio.higham2002 checked human

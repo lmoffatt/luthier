@@ -16,6 +16,8 @@ import random
 import itertools
 from typing import Optional, Callable
 
+MAX_TABLES = 20000   # tables of Fin n -> Fin m enumerated exhaustively at most
+
 from .syntax import *
 from .subst import subst, free_vars
 from .pretty import pp
@@ -504,6 +506,20 @@ class Generators:
                     return None
                 out += [Inj(i, label, v, ty) for v in vs]
             return out
+        if isinstance(w, Pi) and w.name == "_" and fin_bound(self.env, w.dom) is not None:
+            # a function over Fin n to a finite type is one of its m^n tables (05 §7, open item of
+            # 2026-10-11): every table, as a lambda over the index, up to MAX_TABLES of them
+            d = whnf(self.env, fin_bound(self.env, w.dom), self.fuel())
+            if isinstance(d, Lit) and isinstance(d.value, int):
+                n = max(d.value, 0)
+                cod = self.enumerate(w.cod, size)
+                if cod is None or len(cod) ** n > MAX_TABLES:
+                    return None
+                out = []
+                for vals in itertools.product(cod, repeat=n):
+                    branches = tuple((PLit(i), v) for i, v in enumerate(vals))
+                    out.append(Lam(PVar("i"), Match(Var("i"), branches), w.dom))
+                return out
         if isinstance(w, Subtype) and isinstance(w.pred, NoLaw):
             return self.enumerate(w.base, size)
         if isinstance(w, Subtype):

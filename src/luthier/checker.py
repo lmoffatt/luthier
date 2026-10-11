@@ -104,6 +104,7 @@ class Checker:
         self.lam_params: list = []     # names bound by the enclosing lambdas: a block may rebind them with <- (05 R12)
         self.session: bool = False     # a session block: an unused rebinding is reported, not an error
         self.block_reports: list = []  # what a session block reports
+        self.cites: dict = {}          # qualified name -> (elaborated Reference term, checked by) (05 §7, cite)
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
         self.provisional: dict = {}    # name -> [declared types it builds on], for `extern provisional`
@@ -190,6 +191,25 @@ class Checker:
             self.load_object(obj)
         for g in prog.gens:
             self.add_gen(g)
+        for c in prog.cites:
+            self.add_cite(c)
+
+    def add_cite(self, c):
+        """`cite x r checked by` (05 §7, D-2026-10-11-f): x is a definition of this program, r a value
+        of Reference (lib/reference.lut), and the correspondence was checked by human, ai+human or
+        none. Recorded here; `luthier test` writes the grade `proved` with the reference."""
+        q = self.resolve(c.name)
+        if q is None or q not in self.env.defs:
+            self.err(f"cite {c.name}: no definition {c.name}")
+        ref = self.resolve("Reference")
+        if ref is None or ref not in self.env.defs:
+            self.err("cite needs the type Reference: import \"reference\"")
+        self.current_def = q
+        try:
+            term = self.check([], c.term, Var(ref))
+        finally:
+            self.current_def = None
+        self.cites[q] = (term, c.checked)
 
     # ------------------------------------------------------------ objects
     def load_object(self, obj):
@@ -452,6 +472,10 @@ class Checker:
             w2 = self.whnf(self.base_type(w.cod))
             if not isinstance(w2, Pi):
                 self.err(f"operator {d.op}: {pp(d.term)} does not take two arguments")
+            for d1, d2, _, f in self.operators.get(d.op, ()):
+                if self.conv(self.base_type(d1), self.base_type(w.dom)) and self.conv(self.base_type(d2), self.base_type(w2.dom)):
+                    self.err(f"operator {d.op} already means {pp(f)} on {pp(d1)} and {pp(d2)}: a carrier with two "
+                             f"models is two types (05 R13)")
             self.operators.setdefault(d.op, []).append((w.dom, w2.dom, w2.cod, term))
         finally:
             self.current_def = None

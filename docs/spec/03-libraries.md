@@ -23,7 +23,8 @@ passed like any other.
     import "x.lut" as m       -- qualified: reached as m.f, with no collisions
 
 Search: next to the importing file, then the directories of `LUTHIER_PATH`, then the package's
-`lib/`. `.lut` is optional. Importing twice under one prefix does nothing; the same file may be
+`lib/`. `.lut` is optional. A `.bib` file imports as a module of `Reference` values
+(`lib/reference.lut`), one per entry, named by its key, for `cite` (`05 §7`; 2026-10-11). Importing twice under one prefix does nothing; the same file may be
 loaded under two prefixes. A cycle of imports is an error. `core.lut` is imported implicitly.
 
 Name resolution inside a module `m`: `m.x` first (its own), then `x` (core and what the root

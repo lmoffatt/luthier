@@ -139,6 +139,8 @@ class Parser:
                 prog.gens.append(self.parse_gen())
             elif self.at_kw("operator"):
                 prog.defs.append(self.parse_operator())
+            elif self.at_kw("cite"):
+                prog.cites.append(self.parse_cite())
             elif self.at_kw("import"):
                 prog.imports.append(self.parse_import())
             else:
@@ -171,6 +173,23 @@ class Parser:
             alias = self.expect("name").text
         self.end_of_block()
         return ImportDirective(path, alias, t.line)
+
+    def parse_cite(self) -> CiteDirective:
+        t = self.expect("keyword", "cite")
+        name = self.expect("name").text
+        term = self.parse_postfix(self.parse_atom())    # a name, `biblio.key`, or a parenthesized term
+        checked = "none"
+        if self.at("name") and self.peek().text == "checked":
+            self.next()
+            parts = []
+            while self.toks[self.i].kind not in ("newline", "eof"):
+                parts.append(self.toks[self.i].text)
+                self.i += 1
+            checked = "".join(parts)
+            if checked not in ("human", "ai+human", "none"):
+                self.err(f"cite ... checked expects human, ai+human or none, got {checked!r}")
+        self.end_of_block()
+        return CiteDirective(name, term, checked, t.line)
 
     def parse_operator(self) -> OperatorDirective:
         t = self.expect("keyword", "operator")

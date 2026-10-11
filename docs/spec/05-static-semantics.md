@@ -285,7 +285,8 @@ Files: `r12_block.accept.lut`, `r12_defined_twice.reject.lut`, `r12_rebind_defin
 `r12_unused_rebinding.reject.lut`, `r12_toplevel_arrow.reject.lut`.
 
 **R13. An operator is resolved by the type, and a type names its model** (decided 2026-10-11,
-D-2026-10-11-j; not implemented). The operators on the values of a type are those of the model the
+D-2026-10-11-j; implemented the same day: resolution by the argument types, and a second meaning of
+an operator on the same types refused). The operators on the values of a type are those of the model the
 type names: `i : Int` adds with the ring of `Int`, `j : Z7` with `ringZ7`. A carrier with two models
 is two types (`Int` as a ring and as the max-plus semiring; `Float64` under two tolerances), and the
 conversion between them is explicit, `forget` to the carrier and a constructor back, never silent.
@@ -295,7 +296,7 @@ two is `mod 7` being a ring homomorphism. Where a theory does not fix the role o
 function over a bare `Monoid` applied at `Int`, which carries two), the model is named in the call.
 The subtype is the wrong relation for a quotient: `examples/z7ring.lut` is rewritten with `Z7` as
 its own type.
-Files: to be written with the implementation.
+Files: `r13_operator_by_type.accept.lut`, `r13_two_models.reject.lut`.
 
 ## 6. Reports that do not reject
 
@@ -512,8 +513,9 @@ every value that crosses from Python, to debug the bridge.
 
 ## 10. Open
 
-- `exhaustive` over `Fin n -> Fin m`: finite (m^n tables) and not enumerated; functions are drawn as
-  sampled tables (section 7). Found writing `lib/kernel_laws.lut`, 2026-10-11.
+- Done 2026-10-11: `exhaustive` over `Fin n -> T` with `T` finite enumerates the tables (at most
+  20000); `cite` implemented with `lib/reference.lut` and `.bib` files as modules of references
+  (`cite_proved.accept.lut`, `cite_not_reference.reject.lut`).
 - Eta for exponentials cannot be stated as a law, since equality of functions is not structural
   (R8); `kernel_laws.lut` states it pointwise, which is beta.
 - The `Reference` type and the reading of a `.bib` as a module (`biblio.key`), for `cite`.

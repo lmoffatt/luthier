@@ -343,6 +343,7 @@ def _write_certificate(path: str, reports: list, names: dict, keep: set = None):
             "provisional": r.provisional,
             "generation": r.generation,
             "laws": [asdict(l) for l in r.laws],
+            "citation": getattr(r, "citation", None),
         }
         # entries of another filling are kept; those written before fingerprints can match nothing
         others = [e for e in entries_of(data.get(local)) if e.get("hash") != r.hash and e.get("fingerprint")]

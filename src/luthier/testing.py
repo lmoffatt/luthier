@@ -63,11 +63,14 @@ class TestReport:
     fingerprint: dict = field(default_factory=dict)   # what the test ran (certify.fingerprint)
     generators: dict = field(default_factory=dict)    # registered generators drawn from -> their fingerprint
     provisional: list = field(default_factory=list)   # provisional externs in its cone: never certified (05 R5)
+    citation: Optional[dict] = None                   # `cite`: the reference and who checked; grade proved (05 §7)
 
     @property
     def outcome(self) -> str:
         """failed if a law failed; not run if none failed and some could not be run; passed when
-        every law passed."""
+        every law passed; proved when a citation establishes the laws and none of those run failed."""
+        if self.citation is not None and not any(l.outcome == FAILED for l in self.laws):
+            return "proved"
         if not self.laws:
             return "no laws"
         if any(l.outcome == FAILED for l in self.laws):
@@ -78,7 +81,7 @@ class TestReport:
 
     @property
     def passed(self) -> bool:
-        return self.outcome == PASSED
+        return self.outcome in (PASSED, "proved")
 
     def summary(self) -> str:
         lines = []
@@ -91,7 +94,10 @@ class TestReport:
                 lines.append(f"       counterexample: {l.failure}")
             if l.error:
                 lines.append(f"       {'not run' if l.outcome == NOT_RUN else 'error'}: {l.error}")
-        verdict = {PASSED: "passed", FAILED: "FAILED", NOT_RUN: "NOT RUN", "no laws": "no laws"}[self.outcome]
+        verdict = {PASSED: "passed", FAILED: "FAILED", NOT_RUN: "NOT RUN", "no laws": "no laws",
+                   "proved": "proved by citation"}[self.outcome]
+        if self.citation is not None and self.outcome == "proved":
+            verdict += f" ({self.citation.get('key', '?')}, checked by {self.citation.get('checked', 'none')})"
         if self.provisional and self.outcome == PASSED:
             verdict += f", over provisional externs ({', '.join(self.provisional)}): not certified"
         if self.certified:

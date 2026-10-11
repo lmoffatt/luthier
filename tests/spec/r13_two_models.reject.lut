@@ -1,0 +1,9 @@
+-- R13: a carrier with two models is two types; a second meaning of + on the same types is refused.
+-- expect: a carrier with two models is two types
+Z7 = < z7 : Fin 7 >
+rep (a : Z7) : Int := match a { z7 k -> k }
+proj (k : Int) : Z7 := z7 (k mod 7)
+addZ7 (a b : Z7) : Z7 := proj (rep a + rep b)
+maxZ7 (a b : Z7) : Z7 := if rep a > rep b then a else b
+operator + := addZ7
+operator + := maxZ7

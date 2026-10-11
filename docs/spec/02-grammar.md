@@ -161,8 +161,6 @@ of `d`.
 - A saved evaluation, a quoted term together with its value.
 - The session: a block typed one item at a time, with the world as its implicit `w` (section 9);
   its command line and what it prints are not specified yet.
-- `exhaustive` over a function type `Fin n -> Fin m` (m^n tables, finite) is not enumerated by the
-  interpreter, which draws functions as sampled tables (`05 §7`); it should be.
 
 ## 9. Blocks (2026-10-11, D-2026-10-11-i)
 
