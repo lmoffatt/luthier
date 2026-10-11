@@ -71,6 +71,9 @@ implementation is not substitutable until an equivalence test against an existin
 so the planner's menu is what has been compared, not what has been written. Touches D-2026-10-
 11-d and L10, both his, G4 (every path expressible: still true, every path is written; only the
 substitution waits for its law) and P5.
+      OK
+
+
 
 **One default needs a sentence: does demanding a value demand its certificates?** L14 says an
 extern is validated the first time an action asks for it. L19 says tests are actions and what
@@ -79,6 +82,11 @@ differ. *Proposed*: a demand for a value demands every certificate in its depend
 once through the memo; `test` as an action is for demanding certificates without values. The
 other reading (a value may reach an output uncertified) empties L2 (membership is a guarantee)
 for exactly the values that leave the program.
+      bueno, si, demandar un valor demanda sus certificados, salvo que se pida lo contrario (por el principio de que si algo se podria hacer Luthier deberia dar un mecanismo para hacerlo) (probablemente con assumed?)
+      test es exactamente eso. 
+
+
+
 
 **Two rules already decided in substance, to be written into the principles (mine to draft,
 his to mark).**
