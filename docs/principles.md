@@ -3,8 +3,9 @@
 Draft 7, 2026-10-11, unapproved. Draft 6 (8809e20) was read by four models with a new prompt: break
 L10, L19 and L14 with worked examples (`record/IA/principles round 3/`, d824b21; synthesis
 `record/contradictions-ia-2026-10-11-c.md`). All three broke; draft 7 repairs L10 and L19 and
-amends the proposal on L14, which stays his to mark, with the holotype and the order of the
-organizers. Draft 4 (c7c6396) was read by seven models with the same prompt
+amends L14, which his correction then settled (a function with no laws is a theory's hole, not a
+function to run); the holotype and the order of the organizers stay his to mark. Draft 4 (c7c6396)
+was read by seven models with the same prompt
 (`record/IA/principles 2023 10 11 2/`, 4f4e208, 15fcaf7; synthesis
 `record/contradictions-ia-2026-10-11-b.md`); draft 5 reworded what the first five caught, draft 6
 propagates what Kimi and Perplexity showed still spoken in exact terms, each retouch marked by its
@@ -461,15 +462,14 @@ the distribution is the model's correction, from the practice of property-based 
 `extern` from Python or any host, declared over what they really receive and return, with
 description and verification kept on Luthier's side. An external function is validated like any
 other, against its type with its laws, the first time an action asks for it, and its certificate
-stays by hash; without a type with a law to validate against it is not applied. (Draft 5, retouch
-proposed, his mark pending) His words are "si el tipo no sigue la ley no se aplica el calculo": an
-extern is applied under its declared type; where the type has laws it is validated against them
-first and refused if it fails; where it has none yet, as every function starts (D-2026-10-11-d), it
-runs where it is named, as a specimen, and (draft 7, amended after four counterexamples) neither
-it nor the native enters the planner's graph for the function until one non-identity law of the
-type is certified against it; the identity law of L21 then admits it (D-2026-10-11-m). Identity
-alone never certifies the description, and before a law exists it must not deliver the value
-either, or G2 is bypassed in the execution if not in the record. The extern's certificate binds the
+stays by hash; without a type with a law to validate against it is not applied. (Draft 7, after his
+correction) His words are "si el tipo no sigue la ley no se aplica el calculo", and they stand as
+written: an extern is declared over a type, a type carries its laws (L2), the extern is validated
+against them before it is applied and refused if it fails; the agreement test with the native is in
+addition (W5), and the planner's substitution is D-2026-10-11-m. A function with no laws at all is
+not a function to run but a hole of a theory being defined (L8); the claim that "every function
+starts with zero laws" came from a critique, not from D-2026-10-11-d, and drafts 5 and 6 carried it
+wrongly. The extern's certificate binds the
 host library's version and the platform (W10), and its
 declaration says whether it is a definition or an action (L12, L18). (Draft 4,
 D-2026-10-11-n) This is the default for every value: demanding a value demands every certificate
