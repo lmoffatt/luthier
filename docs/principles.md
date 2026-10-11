@@ -100,7 +100,7 @@ across runs. What type theory lacks: two truth values, and a run that leaves not
 to depart is not that type theory fails on floats (Flocq proves exact theorems about them) but
 what the Boolean way costs: a tolerance fixed in each law, worst-case bounds that compose into
 condition numbers, and nothing to say about data (`record/organizing-principles-2026-10-11.md`,
-addendum 2). Full articulation to come as `docs/rationale/cost-valued-laws.md` (D6). Candidate by
+addendum 2). Articulated in `docs/rationale/11-cost-valued-laws.md`, draft 0 (D6). Candidate by
 the P13 check, in his words a wish.
 
 **G4. Expressive over restrictive; it decides between designs.** Source: "Luthier debe ser expresivo mas que restrictivo: si hay
@@ -480,7 +480,7 @@ W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los 
 
 ## 4. What is open
 
-- The articulation of G3 as `docs/rationale/cost-valued-laws.md` (D6): Ω replaced by [0,∞),
+- The articulation of G3, `docs/rationale/11-cost-valued-laws.md` draft 0 (D6): Ω replaced by [0,∞),
   quantitative equality, graded judgments, cost as −log p or as distance, how the uncertainty of
   a cost is represented in a certificate; the algebra of composition (second round §16): a
   Lipschitz constant per function type where known (sensitivity types, Reed and Pierce 2010;
@@ -493,10 +493,12 @@ W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los 
 - The session as a block over the dataflow of L19: `<-` to explore, `:=` to lock, a file may
   contain a block, `<-` stays banned at the top level of a file (second round §17; his decision
   pending); then the spec, `04 §7` and a section on the session.
-- Decided 2026-10-11, to the spec: operators by the type naming its model (D-2026-10-11-j);
-  blocks, six rules and the dead-rebinding rule (D-2026-10-11-i); the session as a block follows.
-  Pending: Python-like separators in blocks; `laws.lut` split from `algebra.lut`; `plan.lut`, an
-  order of execution as a value with the law that two orders are equivalent (fourth round).
+- Done 2026-10-11, in the spec: blocks (`02 §9`, `04 §5`, `05` R12, D-2026-10-11-i); operators by
+  the type naming its model (`05` R13, D-2026-10-11-j; `examples/z7ring.lut` rewritten, Z7 its own
+  type and `mod 7` a certified homomorphism); Python-like separators (`02 §1`, D-2026-10-11-k);
+  `cite` and `proved` by citation (`05 §7`, D-2026-10-11-f); `lib/laws.lut` split from `algebra.lut`
+  (D-2026-10-11-l). Pending: the session's command line; `plan.lut`, an order of execution as a
+  value with the law that two orders are equivalent (fourth round); the implementation of all of it.
 - The kernel's theory stated in Luthier: `src/luthier/lib/kernel_laws.lut`, tested on `Fin 3`,
   `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (`05` R8), functions
   over `Fin n` not enumerated by `exhaustive` (to fix).
