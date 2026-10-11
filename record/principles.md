@@ -145,3 +145,12 @@ Assumption: a function written without its laws is one nobody can trust or repla
 Status:     proposed 2026-10-07, for Luciano to mark; stated in the guide, and in 05 R2 and R4 as
             decided and not implemented (D-2026-10-07-e)
 ```
+
+P15 Adherence to the principles must be cheap to compute; what is cheap is found as the work goes.
+Quote:      "making the principle adherance manageable to calculate is key and should be a
+            guiding principle. what is manageable is something to be discovered."
+Source:     docs/principles.md, reply on W15 (18da042), 2026-10-11; D-2026-10-11-g
+Assumption: a principle that costs more to apply than the decision it guides is not applied, so
+            the form of the principles (few organizers, derivations written) is part of their
+            content.
+Status:     proposed by Luciano 2026-10-11, wording the model's, awaiting his mark

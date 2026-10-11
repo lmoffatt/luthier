@@ -862,3 +862,38 @@ Kind:       method, record of the principles. For P1 (his quotes first, the mode
             P3 (draft 1 kept in git, the best reading in front), P13 (the check of decisions
             guided per organizer), W14 (five organizers instead of thirty-four peers)
 Status:     current; draft 2 unapproved, awaiting his marks
+
+D-2026-10-11-f  A function known correct by a theorem outside Luthier is certified `proved` by
+                citation: the citation is recorded in the certificate, the grade is `proved`,
+                allowed in user code (unlike `axiom`, whose grade `assumed` records nothing). The
+                certificate of a law travels to another implementation by a certificate of
+                identity: exactly where the identity law is boolean (`==` structural, 05 R8),
+                with the observed distance added where it is a cost (G3); the type of the
+                identity law's result (Bool or Cost) says which. Proposed syntax `cite name
+                "..."`, a directive next to `test`.
+Author:     Luciano for the idea (axiom for a known-correct implementation, verified by bitwise
+            identity) and the yes; Claude for `proved` by citation instead of `axiom`, the
+            condition on floats and the syntax
+Quote:      "cuando sabemos por ejemplo que una implementacion es correcta por teorema matematico
+            conocido (esto seria algo que requeriria una palabra clave nueva, quizas axiom ?) y
+            luego por identidad bitwise con valores conocidos se verifica una implementacion
+            externa"; "Si, desde ya" (annotations, 2c18c41, 18da042)
+Source:     record/answers-annotations-principles-2026-10-11.md §11, §4; -b.md §11
+Kind:       language design, certification (05 §7). For G2 (description), L21, L11; distinguishes
+            assumed (no justification) from proved (a citation to check)
+Status:     current; spec amendment to 05 §7 pending; syntax `cite` open to his preference
+
+D-2026-10-11-g  W15 enters docs/principles.md: a long analysis is reported as such, as a delicate
+                question or as a conflict between principles, and goes to Luciano as one question.
+                P15 proposed in his words for record/principles.md: adherence to the principles
+                must be cheap to compute; what is cheap is found as the work goes.
+Author:     Luciano for the distinction and the principle; Claude for the trigger (the same
+            decision revisited twice without new evidence, or more than one screen)
+Quote:      "mi engagement va a ser mejor cuando mi capacidad cognitiva es usada para el
+            desarrollo optimo del proyecto ... deadlocks ... legitimos ... o ilegitimos"; "agree. I
+            think that making the principle adherance manageable to calculate is key and should
+            be a guiding principle. what is manageable is something to be discovered"
+Source:     docs/principles.md annotations (2c18c41, 18da042); record/answers-...-b.md §15
+Kind:       method. For P12 (his attention is the scarce resource), P4, P13; a rule of behaviour,
+            no recurring mechanism
+Status:     current; W15 in draft 3; P15 awaiting his mark on the wording
