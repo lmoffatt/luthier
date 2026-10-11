@@ -46,8 +46,9 @@ Two more bodies (`06`): `primitive "..."`, a type the interpreter provides, allo
 `core.lut`; and `axiom "..."`, a value whose laws are assumed, allowed only in `core.lut` and `lib/`.
 
 Directives: `import "file" [as m]` (`03`), `test x [with n | exhaustive] [size k]` (`05 §7`),
-`gen T := g` (the generator of `T`), and `operator op := f` (the meaning of an infix operator
-on the argument types of `f`). Directives are not definitions and have no states.
+`gen T := g` (the generator of `T`), `operator op := f` (the meaning of an infix operator
+on the argument types of `f`, the type naming its model, `05` R13), and `cite x r [checked by]`
+(the grade `proved` by the reference `r`, `05 §7`, D-2026-10-11-f). Directives are not definitions and have no states.
 
 ## 2. Type formers
 
@@ -171,7 +172,9 @@ kernel construct would not be sugar (`02 §4`).
 | `Maybe A` | `< nothing : Unit \| just : A >` |
 | `Failures E` | `List E`, the failures of a check, empty when it holds (`05 §9`) |
 | `f a (tol <- v)`, `f` with `(tol : T <- d)` | `f a v`: arguments by name are placed in their parameter's position, and a parameter not given takes its default `d` once every parameter without a default is given; a function value has no names and no defaults (D-2026-10-11-c) |
-| `y <- e` in a block | a fresh name `y1 := e`, and every later `y` means `y1` (`05` R12) |
+| `y <- e` in a block | a fresh name `yk := e`, `k` the count of bindings of `y` so far, and every later `y` means `yk` (`05` R12; `02 §9`) |
+| `{ i1 ; ... ; in ; e }`, a block | the definitions of its items with fresh names, and `e`; a sub-DAG with one output; a `<-` whose previous binding has no consumer is an error in a file (D-2026-10-11-i) |
+| `w1 <- act w0 ...`, an action in a block | an ordinary binding: actions take and return the world, and their order is the dependency through `w` |
 | `\ (x, y) { t }` | `\ p { match p { (x, y) -> t } }` |
 
 ## 6. Primitive versus derived, and native versus extern

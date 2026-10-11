@@ -274,6 +274,26 @@ and in a named argument, and is an error at the top level of a file, which is a 
 order (section 2). A default is the first binding of its parameter and the call rebinds it before
 the body runs; the elaborated call, which is what is hashed and certified, carries the value the
 body sees. A law of a function is quantified over a defaulted parameter, not tested at its default.
+Blocks (2026-10-11, D-2026-10-11-i; `02 §9`): a brace term with a final expression is a block, the
+body of a lambda is one; a name bound in a block is visible to the end of that block and in nested
+blocks; `:=` of a name already defined in an enclosing scope is an error, not a shadowing; `<-`
+rebinds only block-local `<-` names and the parameters of the enclosing definition; a `<-` whose
+previous binding has no consumer is an error in a file and reported in a session; actions take and
+return the world, so their order is the dependency through it. Three kinds of block: a body, `main`
+in a file, the session.
+Files: to be written with the implementation.
+
+**R13. An operator is resolved by the type, and a type names its model** (decided 2026-10-11,
+D-2026-10-11-j; not implemented). The operators on the values of a type are those of the model the
+type names: `i : Int` adds with the ring of `Int`, `j : Z7` with `ringZ7`. A carrier with two models
+is two types (`Int` as a ring and as the max-plus semiring; `Float64` under two tolerances), and the
+conversion between them is explicit, `forget` to the carrier and a constructor back, never silent.
+The operators of a wider model apply to a narrower type only through a homomorphism stated and
+certified as a law: a value of `Z7` uses `Int`'s `+` after `forget`, and the law that relates the
+two is `mod 7` being a ring homomorphism. Where a theory does not fix the role of an operator (a
+function over a bare `Monoid` applied at `Int`, which carries two), the model is named in the call.
+The subtype is the wrong relation for a quotient: `examples/z7ring.lut` is rewritten with `Z7` as
+its own type.
 Files: to be written with the implementation.
 
 ## 6. Reports that do not reject
@@ -304,8 +324,8 @@ functions), over a domain, by a mode. The grades, from weakest to strongest:
 | bounded | every case of a box of an infinite domain (`Int` in [-size, size]) |
 | exhaustive | every case of a finite domain |
 | witnessed | an existential law: a case exhibited (section 4) |
-| proved | universal; not in version 0 |
-| assumed | an axiom: the laws are stated and taken as true, never tested (`06 §3`) |
+| proved | universal; by a proof (not in version 0), or by citation: `cite x r checked by` records that a theorem outside Luthier, the reference `r` (a `Reference` value read from a `.bib`, with DOI, ISBN or URL and hash), establishes the laws of `x`, and who checked the correspondence, `human`, `ai+human` or `none` (D-2026-10-11-f, 2026-10-11; allowed in user code) |
+| assumed | an axiom: the laws are stated and taken as true, never tested, nothing recorded behind them (`06 §3`) |
 
 A certificate entry records the law, the values it was applied to, the grade with its `n`, the
 generators, the seed, the first cases, and the hash of the dependency cone (`03 §4`). The grade of
@@ -491,6 +511,11 @@ every value that crosses from Python, to debug the bridge.
 
 ## 10. Open
 
+- `exhaustive` over `Fin n -> Fin m`: finite (m^n tables) and not enumerated; functions are drawn as
+  sampled tables (section 7). Found writing `lib/kernel_laws.lut`, 2026-10-11.
+- Eta for exponentials cannot be stated as a law, since equality of functions is not structural
+  (R8); `kernel_laws.lut` states it pointwise, which is beta.
+- The `Reference` type and the reading of a `.bib` as a module (`biblio.key`), for `cite`.
 - The tests for the semantic dependence of section 4: their syntax (a test mode that searches for a
   witness) and their place in the checker (do they gate the definition of an object, or report).
 - `=` as alias (R7) against `=` as the identity type of `00 §4`, when the proof layer comes.

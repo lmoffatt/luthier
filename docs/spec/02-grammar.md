@@ -19,7 +19,7 @@ A dotted name `m.f` is one token; it is a qualified name or a projection, resolv
 (section 6). Names that start with a capital are types and laws by convention, not by rule.
 
 Reserved words: `data`, `match`, `extern`, `provisional`, `test`, `with`, `exhaustive`, `gen`,
-`import`, `forget`, `U`, `operator`, `if`, `then`, `else`. `and`, `or` and `mod` are ordinary names
+`import`, `forget`, `U`, `operator`, `if`, `then`, `else`, `cite`, `checked`. `and`, `or` and `mod` are ordinary names
 written infix; `Bool`, `Int`, `Float64`, `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat`, `Fin` are
 definitions of `core.lut`.
 
@@ -27,8 +27,10 @@ definitions of `core.lut`.
 number needs a space, `a < -1`, as in R.
 
 Layout: an act starts at column 0, and an indented line continues the act above it. Inside
-`( )`, `[ ]`, `< >` and the braces of `match` and of a lambda, line breaks are ignored; inside the
-braces of a record type, a line break separates components.
+`( )`, `[ ]`, `< >` and the braces of `match`, line breaks are ignored; inside the braces of a
+record type, of a record value and of a block (the body of a lambda included), a line break
+separates items and `;` is equivalent to it, so several items may share a line (2026-10-11,
+D-2026-10-11-k).
 
 ## 2. Acts
 
@@ -48,6 +50,7 @@ braces of a record type, a line break separates components.
                   | "test" name [ "with" number | "exhaustive" ] [ "size" number ]
                   | "gen" name ":=" ( term | "extern" string )
                   | "operator" op ":=" term
+                  | "cite" name term [ "checked" ( "human" | "ai+human" | "none" ) ]   -- D-2026-10-11-f
 
 Binders before the colon are parameters: `f (x : A) (y : B) : C := t` is
 `f : (x : A) -> (y : B) -> C := \ x { \ y { t } }`, and `(x y : A)` is `(x : A) (y : A)`.
@@ -65,7 +68,9 @@ Precedence, from the loosest to the tightest:
 `&` and `->` associate to the right, the others to the left. `->` is the function type when its
 left side is a type and implication when it is a `Bool`; `*` is the product type or multiplication,
 `+` the sum type or addition, by the type of the left operand; `&` is the conjunction of laws.
-An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types of a function.
+An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types of a function, and a
+type names its model (2026-10-11, D-2026-10-11-j; `05` R13): `i : Int` adds with the ring of `Int`,
+`j : Z7` with the ring of `Z7`; a carrier with two models is two types, converted explicitly.
 
     term   ::= term op term
              | term atom                                      -- application
@@ -82,9 +87,10 @@ An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types
              | "{" name { name } ":" term { sep name { name } ":" term } "|" term "}"   -- subtype with labels
              | "{" pattern ":" term "|" term "}"                                          -- subtype
              | "{" name ":=" term { sep name ":=" term } "}"                            -- record value
+             | "{" { item sep } term "}"                                                  -- block (section 9)
              | "<" name ":" term { "|" name ":" term } ">"                                -- sum, n-ary
              | "[" [ term { "," term } ] "]"                                              -- list
-             | "\" lparam { lparam } "{" term "}"                                         -- lambda
+             | "\" lparam { lparam } "{" { item sep } term "}"                            -- lambda; its body is a block
              | "match" term "{" { pattern "->" term [ ";" ] } "}"
              | "(" name "<-" term ")"                                                     -- named argument
              | "if" term "then" term [ "else" term ]                                     -- one arm: a Maybe or a reason
@@ -93,6 +99,7 @@ An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the argument types
              | atom "." name                                                              -- projection
 
     sep     ::= "," | ";" | line break
+    item    ::= name ":=" term | name "<-" term                                           -- in a block
     lparam  ::= name | "(" name { name } ":" term ")" | "(" pattern { "," pattern } ")"
     pattern ::= "_" | name { patom } | patom
     patom   ::= name | number | string | "(" pattern { "," pattern } ")"
@@ -149,6 +156,33 @@ of `d`.
 ## 8. Open
 
 - Quote and unquote: the syntax of a term as a value of `Term`.
-- Local definitions in a block, `{ x := t ; u }`. Inside a block `x <- t` binds and rebinds (`05` R12).
-  The block's syntax collides with a record value, `{ x := a ; y := b }`, and is not settled.
 - A saved evaluation, a quoted term together with its value.
+- The session: a block typed one item at a time, with the world as its implicit `w` (section 9);
+  its command line and what it prints are not specified yet.
+- `exhaustive` over a function type `Fin n -> Fin m` (m^n tables, finite) is not enumerated by the
+  interpreter, which draws functions as sampled tables (`05 §7`); it should be.
+
+## 9. Blocks (2026-10-11, D-2026-10-11-i)
+
+A brace term whose last item is a bare expression is a block, and that expression is its value; a
+brace term with no final expression is a record value. The body of a lambda and the body of a
+definition written with braces are blocks. The items of a block are `x := t` (once), `x <- t` (bind
+or rebind) and an action with its result bound, `w1 <- print w0 "x"`; `<-` exists only in a block,
+in a parameter's default and in a named argument, and is an error at the top level of a file.
+
+- Translation (`04 §5`): each item becomes a definition with a fresh name, `x <- t` as `xk := t`
+  with `k` the number of bindings of `x` so far in the block, and every later `x` means `xk`;
+  after the translation the block is a sub-DAG with one output and dependencies give the only
+  order, so items that do not refer to each other commute (L9).
+- Scope: a name bound in a block is visible from its binding to the end of that block and inside
+  blocks nested in it, not outside. `:=` of a name defined in an enclosing scope or at the top
+  level is an error (defined twice), not a shadowing. `<-` may rebind only a name first bound with
+  `<-` in the same block or a parameter of the enclosing definition, whose default is its first
+  binding (D-2026-10-11-c).
+- A `<-` whose previous binding of the same name has no consumer is an error in a file ("unused
+  binding") and allowed in a session, where it is reported.
+- The world: an action takes and returns the world, so the order among actions is the dependency
+  through `w`, not the text; two actions that share no world value are unordered. In a session
+  the world is the implicit `w` of the session block; in a file, of `main`.
+- Three kinds of block and no other: the body of a definition or lambda; a block named `main` in a
+  file, the script; the session. A file is never a block.

@@ -959,3 +959,26 @@ Kind:       language design, static semantics (02 §3 operator directive; 05 §1
             arguments). For G0 (the type is the proposition "member of this model"), G2, L13, L20
             draft 3; examples/z7ring.lut to be rewritten (Z7 as a quotient, not a subtype)
 Status:     current; spec amendment pending; not implemented
+
+D-2026-10-11-k  Separators are Python-like in blocks and record values: a line break separates
+                items and `;` is equivalent to it; inside parentheses, brackets, `< >` and the
+                braces of `match`, line breaks are ignored as before. The braces of a lambda stop
+                ignoring line breaks, since a lambda body is a block.
+Author:     Claude, proposed; Luciano, accepted ("Si a todo")
+Quote:      "aca cabe la pregunta somos C (siempre ;) o somos Python (supongo que ; es
+            equivalente a line break)" (c167022)
+Source:     record/answers-annotations-principles-2026-10-11-d.md
+Kind:       grammar (02 §1). For G4 (nothing gained by a mandatory `;`)
+Status:     current; spec amended; not implemented
+
+D-2026-10-11-l  The laws of relations and actions (Reflexive, Symmetric, Antisymmetric,
+                Transitive, Total, Associative, the identities, inverses, commutativity,
+                distributivity, homomorphism) move from lib/algebra.lut to lib/laws.lut;
+                algebra.lut imports it and keeps the structures (Setoid, Monoid, Group, Ring,
+                Field and their instances). No change of meaning.
+Author:     Luciano for the question; Claude for the split and the name; accepted ("Si a todo")
+Quote:      "ahora las leyes de asociatividad, simetria etc deberian definirse en un modulos laws
+            o algebra o un nombre mejor?" (c167022)
+Source:     record/answers-annotations-principles-2026-10-11-d.md
+Kind:       libraries (03). For G2 (laws come first, stated once over the signature they need)
+Status:     current; to be done in this session
