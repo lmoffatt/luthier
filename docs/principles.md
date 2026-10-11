@@ -90,6 +90,10 @@ ya fue validada aunque sea una vez. Y la validacion de las funciones es progresi
 ser a lo tarski (constructivo) sino a lo matematico (desde afuera, como un entomologo observa un
 bicho)" (chat, D-2026-10-11-d); the composition of invariances as "la parte Tarski" (audio 08.58,
 32:01 to 34:07).
+        no entiendo porque el orden de primero la demanda y luego el valor y tipo funcion, cuando el orden en que tuve los eurekas fue al reves? Hay alguna razon?
+        Un tercer momento eureka fue cuando me di cuenta que necesitaba los objetos ya que hay funciones que se testean mutuamente, o sea que "la programacion basada en objetos" tiene una base matematica, solo que las clases (o interfases) serian las Teorias y los objetos serian los modelos de las teorias.  Me parece que esto, si bien es muy demandante para crear objetos, tenes que declarar leyes para los mismos, hace que los objetos tengan un lugar en la programacion funcional. Probablemente esto ya exista en la programacion funcional solo que no se lo relaciona con objetos? En realidad, las funciones aisladas serian, si existieran, modelos de teorias simples? Podemos tomar los modelos y teorias como el elemento de Luthier?
+
+
 *Proposed* formulation: the laws are what is known of a function, and the implementation, native
 or extern, is the specimen under observation. A description is derived by composition of the
 laws of the parts when such a law exists, and observed otherwise; laws accumulate, and a set of
