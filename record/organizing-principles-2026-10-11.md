@@ -328,3 +328,28 @@ demanded return type selects which law to derive (G2's derived route, when a com
 exists) and everything else is forgotten (L13). *Proposed* as the worked example of G1 and G2
 together in step 2: doubling positives is positive only when positivity is demanded and
 derivable; sin of positives forgets to Real because no law composes.
+
+## Addendum 7: the generator of L12, and Luciano's doubt about Maybe
+
+Luciano (chat): D3 as withdrawn is correct. Then: what is the generator of "computation is
+verifying an equivalence relation (at least the declarative part)"? And a doubt: computing
+`Maybe T` is deciding T or not T, "y eso no sé si es una relación de equivalencia".
+
+*Proposed*. L12 derives from G0, not from G1 as §1 placed it: types as propositions makes
+computing a value of type A the inhabiting of A, and in HoTT the first proposition is identity,
+his "path equivalence is the fundamental concept" of 2026-05-29. G1 only adds which equivalence
+is checked (the demanded one). The doubt is right and it sharpens L12. Not every proposition is
+an equation. A law on a value is a predicate (x > 0) and certifying the value is deciding it,
+`Maybe T`, with `just x` the proof and `nothing` its absence; a law on a function is an equation
+between terms (f (x + y) = f x + f y), and that is where equivalences live and where G0's
+quotient comes from (L10). So L12 should read "computation is the verification of propositions;
+for functions these are equations, and the quotient follows", instead of "of equivalences". The
+trick `p x = true` turns a predicate into an equation but explains nothing.
+
+Under G3 the two kinds become one: Lawvere's reading of a metric is an equality valued in [0,∞),
+and a predicate on X becomes the distance from x to the subtype T (the infimum of d(x, t) over t
+in T); "is x in T" becomes "how far is x from T", and `nothing` is cost ∞. So the dichotomy
+Luciano noticed is real in G0 and dissolves in G3, which is one more sign that G3 is load-bearing
+(§3). Also, `Maybe T` presupposes that T is decidable by computation or by sampling (L4, L11);
+HoTT does not grant that for every proposition, and Luthier's answer is that what cannot be
+decided stays a hole (L8).
