@@ -1,0 +1,43 @@
+-- The laws of relations and of actions, stated once over the signature they need and nothing
+-- else: a relation is a function into Bool, an operation a function into its own carrier, an action
+-- `act : M -> X -> V` of M on X. The structures that bind these laws (Setoid, Monoid, Group, Ring,
+-- Field, the spaces) are in algebra.lut; the laws of the kernel's own types in kernel_laws.lut.
+-- Each law takes its types and equalities first and the quantified variables last, so a partial
+-- application is the predicate a theory fills (D-2026-10-11-l, split from algebra.lut).
+
+-- ---------------------------------------------------------------- laws of a relation
+Reflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
+-- Symmetric, once, for any function of two arguments of one type with an equality on its result:
+-- a relation is a function into Bool, a commutative operation a function into its own carrier, a
+-- bilinear form a function into the scalars, a matrix a function of two indices.
+Symmetric (A B : U) (eqB : B -> B -> Bool) (f : A -> A -> B) (x y : A) : Bool := eqB (f x y) (f y x)
+Antisymmetric (A : U) (eq : A -> A -> Bool) (le : A -> A -> Bool) (x y : A) : Bool := le x y -> le y x -> eq x y
+Transitive (A : U) (r : A -> A -> Bool) (x y z : A) : Bool := r x y -> r y z -> r x z
+Total (A : U) (r : A -> A -> Bool) (x y : A) : Bool := r x y or r y x
+
+-- ---------------------------------------------------------------- laws of an action
+-- `act : M -> X -> V`, M acting on X. A binary operation on A is A acting on itself, so the laws
+-- of an operation are these with M, X and V all A: associativity is the law of an action of a
+-- monoid, distributivity the law of an action by additive maps, and a linear map or a bilinear
+-- form satisfies the same laws as the product of a ring.
+Associative (M V : U) (eq : V -> V -> Bool) (op : M -> M -> M) (act : M -> V -> V) (a b : M) (x : V) : Bool :=
+  eq (act (op a b) x) (act a (act b x))
+LeftIdentity  (M V : U) (eq : V -> V -> Bool) (act : M -> V -> V) (e : M) (x : V) : Bool := eq (act e x) x
+RightIdentity (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (x : A) : Bool := eq (f x e) x
+LeftInverse   (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := eq (f (inv x) x) e
+RightInverse  (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := eq (f x (inv x)) e
+-- a map that preserves an operation: f (x op y) == f x op' f y
+Homomorphism (A B : U) (eqB : B -> B -> Bool) (opA : A -> A -> A) (opB : B -> B -> B) (f : A -> B) (x y : A) : Bool :=
+  eqB (f (opA x y)) (opB (f x) (f y))
+-- each `act a` is a homomorphism of the addition of V
+LeftDistrib (M V : U) (eq : V -> V -> Bool) (add : V -> V -> V) (act : M -> V -> V) (a : M) (x y : V) : Bool :=
+  Homomorphism V V eq add add (act a) x y
+-- the action of a sum is the sum of the actions: acting on each x is a homomorphism from the addition of M
+RightDistrib (M X V : U) (eq : V -> V -> Bool) (addM : M -> M -> M) (add : V -> V -> V) (act : M -> X -> V) (a b : M) (x : X) : Bool :=
+  Homomorphism M V eq addM add (\ m { act m x }) a b
+-- two actions on one V commute
+CommutingActions (M K V : U) (eq : V -> V -> Bool) (act : M -> V -> V) (sc : K -> V -> V) (a : M) (c : K) (x : V) : Bool :=
+  eq (act a (sc c x)) (sc c (act a x))
+-- scaling the first argument scales the value
+Homogeneous (K X V : U) (eq : V -> V -> Bool) (scX : K -> X -> X) (scV : K -> V -> V) (f : X -> X -> V) (c : K) (x y : X) : Bool :=
+  eq (f (scX c x) y) (scV c (f x y))
