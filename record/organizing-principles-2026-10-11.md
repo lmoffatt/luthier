@@ -298,3 +298,33 @@ with minute marks; what is already in draft 1 is only pointed to.
 
 Net effect on the plan: D1's G2 and G3 are reworded; one candidate consequence (L21, identity
 certificates) is added to step 2; everything else is already in draft 1 or belongs to the spec.
+
+## Addendum 6: the audios of 09.19 and 09.21
+
+09.19 (00:00 to 00:53): "la guía es la teoría de tipos, pero en realidad el disparador es darme
+cuenta de que los tipos de funciones son las leyes que las definen. Esa fue mi eureka moment. Y el
+otro eureka moment es ... la demanda de un valor por el mundo externo me define todos los tipos
+necesarios para obtener eso ... No sé si hay más momentos eureka. Después son sí principios de
+buen uso."
+
+This settles the status question of §2 and D1 in his own terms, with three tiers instead of one
+first principle and four peers:
+
+- the guide: type theory (G0);
+- two eurekas, the generative ideas proper: a function type is its laws (the step from G0 to G2:
+  the type is the description, the implementation an inhabitant) and the demand defines every
+  type needed (G1);
+- principles of good use: the rest. G3 (cost, Bayes) is by his words a wish in development, G4
+  (expressive) a rule for choosing between designs; both guide decisions (P13) without being
+  eurekas.
+
+*Proposed*: draft 2 prints the three tiers with these names. The deviations of §2 remain the
+model's reading of what each tier departs from; the tiers are his.
+
+09.21 (00:00 to 00:29): "aplicás una función a un subtipo de los reales, y entonces tenés tantos
+overloads como subtipos de los reales, y eso puede ser un tanto overwhelming. Ahí es donde entra
+el tema del functor olvido." Answers the open item of 09.01: overloads are not enumerated; the
+demanded return type selects which law to derive (G2's derived route, when a composition law
+exists) and everything else is forgotten (L13). *Proposed* as the worked example of G1 and G2
+together in step 2: doubling positives is positive only when positivity is demanded and
+derivable; sin of positives forgets to Real because no law composes.

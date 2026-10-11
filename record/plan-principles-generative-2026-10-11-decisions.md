@@ -1,7 +1,7 @@
 # Rewriting the principles from generative ideas: the decisions
 
-Draft 1, 2026-10-11. Draft 0 (85975c6) was written before the audios of 08.58 and 09.01
-(45df807, 844e505); what they changed is marked "(audio 08.58)" and listed in addendum 5 of the
+Draft 1, 2026-10-11. Draft 0 (85975c6) was written before the audios of 08.58, 09.01, 09.19 and
+09.21 (45df807, 844e505, and the two commits after cd391b1); what they changed is marked "(audio 08.58)" and listed in addendum 5 of the
 analysis. Written for Luciano, to answer before the execution starts. The execution is
 in `plan-principles-generative-2026-10-11-execution.md`. What comes from a source is cited; the
 rest is Claude's proposal. Settled in chat today and not asked again: one first principle with
@@ -22,8 +22,9 @@ The analysis the plan rests on is `record/organizing-principles-2026-10-11.md`.
 
 Answer with the number and ok, no, or a correction.
 
-**D1. The organizers and their order.** One first principle and four deviations, each named by
-what type theory lacks:
+**D1. The organizers and their order.** Three tiers, in his words (audio 09.19, 00:00 to
+00:53): the guide, two eureka moments, and principles of good use. Each is also named by what
+type theory lacks (the model's reading):
 
 - G0 Type theory as guidance (his A): types as propositions, laws define objects, a law gives a
   quotient.
@@ -39,8 +40,13 @@ what type theory lacks:
   (audio 08.58 at 05:47, in his words a wish more than a principle). Type theory's truth values
   are two and a run leaves nothing.
 - G4 Expressive over restrictive (his E). Type theory has one canonical form per value.
+- Tiers (audio 09.19): G0 is the guide; G1 and the step from G0 to G2 ("los tipos de funciones
+  son las leyes que las definen") are the two eurekas; G3 (his wish in development) and G4 are
+  principles of good use.
 - Recommended: this order; G4 last because it decides between designs rather than describing the
-  language, and the execution treats it as the tie-breaker among derivations.
+  language, and the execution treats it as the tie-breaker among derivations. Step 2 takes the
+  audio of 09.21 (overloads by subtype, answered by the forgetful functor) as the worked example
+  of G1 and G2 together.
 
 **D2. The wording.** Each organizer is printed as his quote first, verbatim from the note or the
 timeline, then a formulation of at most two lines by the model, marked *Proposed* until he marks
