@@ -30,7 +30,9 @@ Layout: an act starts at column 0, and an indented line continues the act above 
 `( )`, `[ ]`, `< >` and the braces of `match`, line breaks are ignored; inside the braces of a
 record type, of a record value and of a block (the body of a lambda included), a line break
 separates items and `;` is equivalent to it, so several items may share a line (2026-10-11,
-D-2026-10-11-k).
+D-2026-10-11-k). As at the top level, a line indented deeper than the block's first item continues
+the item above it, and so does a line that cannot start an item: one beginning with `else`, `then`,
+`in` or an infix operator.
 
 ## 2. Acts
 

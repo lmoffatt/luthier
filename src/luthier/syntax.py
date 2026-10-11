@@ -182,6 +182,15 @@ class RecordLit(Term):
 
 
 @dataclass(frozen=True)
+class Block(Term):
+    """`{ x := a ; y <- b ; e }` (02 §9, D-2026-10-11-i): items, each (kind, name, term) with kind
+    ':=' (once) or '<-' (bind or rebind), and the final expression, the block's value. The checker
+    turns it into nested one-branch matches with fresh scopes (04 §5)."""
+    items: tuple
+    result: Term
+
+
+@dataclass(frozen=True)
 class Proj(Term):
     """`t.field` before elaboration: a component of a value whose type names its components.
     Elaborates to a one-branch match on the type's component pattern."""

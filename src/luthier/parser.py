@@ -33,6 +33,8 @@ class Parser:
         self.skip_newlines = 0    # depth counter: inside (), {}, [] newlines are ignored
         self.strict_newlines = 0  # while > 0, a newline always ends the current phrase (subtype components)
         self.no_brace = 0         # while > 0, '{' does not start an atom (match scrutinee)
+        self.item_mode = 0        # while > 0, inside a block: a newline separates items (02 §1, D-2026-10-11-k)
+        self.block_stack = []     # (nesting level, column of the first item) of the enclosing blocks
         self.in_angle = 0         # while > 0, '>' closes a sum `< a : A | b : B >` instead of comparing
 
     # ------------------------------------------------------------ helpers
@@ -41,6 +43,22 @@ class Parser:
         (a continuation of the same definition). Never in strict mode."""
         if self.toks[j].kind != "newline":
             return False
+        if self.item_mode > 0 and self._item_start_after(j):
+            return False
+        if self.item_mode > 0 and self.block_stack and self.skip_newlines == self.block_stack[-1][0]:
+            # at the block's own level a line break separates items, unless the next line is indented
+            # deeper than the first item: then it continues the item above, as at the top level (02 §1)
+            k = j
+            while self.toks[k].kind == "newline":
+                k += 1
+            t = self.toks[k]
+            if t.kind == "keyword" and t.text in ("else", "then", "in"):
+                return True       # a line that cannot start an item continues the one above
+            if t.kind == "name" and t.text in INFIX_NAMES:
+                return True
+            if t.kind == "symbol" and t.text in ("+", "-", "*", "/", "==", "/=", "<", "<=", ">", ">=", "->", "&", "|", "."):
+                return True
+            return t.col > self.block_stack[-1][1]
         if self.skip_newlines > 0:
             return True
         if self.strict_newlines > 0:
@@ -49,6 +67,17 @@ class Parser:
         while self.toks[k].kind == "newline":
             k += 1
         return self.toks[k].kind != "eof" and self.toks[k].col > 0
+
+    def _item_start_after(self, j: int) -> bool:
+        """After the newlines at j: `name :=` or `name <-`, the start of an item of a block (02 §9)."""
+        k = j
+        while self.toks[k].kind == "newline":
+            k += 1
+        t = self.toks[k]
+        if t.kind != "name":
+            return False
+        n = self.toks[k + 1]
+        return n.kind == "symbol" and n.text in (":=", "<-")
 
     def peek(self, k=0) -> Token:
         j = self.i
@@ -184,6 +213,9 @@ class Parser:
         return t.kind != "eof" and t.col > 0
 
     def parse_def(self) -> Def:
+        if self.at("name") and self._peek_is_sym_after_name("<-"):
+            self.err("`<-` is an error at the top level of a file, which is a set of acts without order; "
+                     "it binds inside a block (05 R12)")
         name_tok = self.expect("name")
         name = name_tok.text
         binders = []
@@ -490,13 +522,55 @@ class Parser:
             else:
                 self.err("expected a lambda parameter")
         self.expect("symbol", "{")
-        self.skip_newlines += 1
-        body = self.parse_term()
-        self.skip_newlines -= 1
-        self.expect("symbol", "}")
+        items, final = self.parse_items(self.skip_newlines)
+        if final is None:
+            self.err("the body of a lambda is a block and ends with an expression (02 §9)")
+        body = Block(tuple(items), final) if items else final
         for p, ann in reversed(params):
             body = Lam(p, body, ann=ann)
         return body
+
+    def _skip_seps(self):
+        """Between the items of a block or a record value: newlines, and one `,` or `;` (02 §1)."""
+        self.skip_nl()
+        if self.at_sym(",") or self.at_sym(";"):
+            self.next()
+            self.skip_nl()
+
+    def parse_items(self, saved: int):
+        """After `{`: the items `name := t` and `name <- t` of a block or a record value, and the
+        final expression of a block if there is one; consumes the `}`. A newline separates items,
+        and `;` or `,` are equivalent to it (D-2026-10-11-k)."""
+        items = []
+        final = None
+        self.item_mode += 1
+        self.skip_newlines = saved + 1
+        self.skip_nl()
+        self.block_stack.append((self.skip_newlines, self.toks[self.i].col))
+        try:
+            while True:
+                self.skip_nl()
+                if self.at_sym("}"):
+                    break
+                if self.at("name") and (self._peek_is_sym_after_name(":=") or self._peek_is_sym_after_name("<-")):
+                    name = self.next().text
+                    kind = self.next().text
+                    val = self.parse_term()
+                    items.append((kind, name, val))
+                    self._skip_seps()
+                    continue
+                final = self.parse_term()
+                self._skip_seps()
+                if not self.at_sym("}"):
+                    self.err("the value of a block is its last item; nothing follows it (02 §9)")
+                break
+        finally:
+            self.item_mode -= 1
+            self.skip_newlines = saved
+            self.block_stack.pop()
+        self.skip_nl()
+        self.expect("symbol", "}")
+        return items, final
 
     def parse_paren(self) -> Term:
         # `name (x : T) :` at column 0 inside a term: a new definition reached while the previous
@@ -597,32 +671,20 @@ class Parser:
         components."""
         self.expect("symbol", "{")
         saved = self.skip_newlines
+        self.skip_nl()
+        if not (self.at("name") and self._binder_ahead_from(0)):
+            # a record value `{ a := x, b := y }` or a block `{ x := a ; y <- b ; e }` (02 §9)
+            items, final = self.parse_items(saved)
+            if final is None:
+                if not items:
+                    self.err("expected the items of a record value or a block")
+                if any(k == "<-" for k, _, _ in items):
+                    self.err("a block ends with an expression, its value; a record value has only `:=` fields (02 §9)")
+                return RecordLit(tuple((n, v) for _, n, v in items))
+            return Block(tuple(items), final)
         self.skip_newlines = 0
         self.strict_newlines += 1
         self._skip_raw_newlines()
-        if self.at("name") and self._peek_is_sym_after_name(":="):
-            fields = []
-            while True:
-                name = self.expect("name").text
-                self.expect("symbol", ":=")
-                self.skip_newlines = saved + 1
-                val = self.parse_term()
-                self.skip_newlines = 0
-                fields.append((name, val))
-                self._skip_raw_newlines()
-                if self.at_sym(",") or self.at_sym(";"):
-                    self.next()
-                    self._skip_raw_newlines()
-                    continue
-                if self.at_sym("}"):
-                    break
-                if self.at("name"):
-                    continue
-                self.err("expected another field or '}' in a record literal")
-            self.strict_newlines -= 1
-            self.skip_newlines = saved
-            self.expect("symbol", "}")
-            return RecordLit(tuple(fields))
         groups = []  # list of (names, type)
         while True:
             names = [self.expect("name").text]

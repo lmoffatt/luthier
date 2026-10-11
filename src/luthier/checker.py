@@ -48,6 +48,25 @@ def lookup(ctx: Ctx, name: str) -> Optional[Term]:
     return None
 
 
+def names_mentioned(t) -> set:
+    """Every Var name that occurs in a surface or elaborated term, binders ignored: an
+    over-approximation of the free variables, enough to know that a binding was used."""
+    out: set = set()
+    stack = [t]
+    while stack:
+        x = stack.pop()
+        if isinstance(x, Var):
+            out.add(x.name)
+        elif isinstance(x, (tuple, list)):
+            stack.extend(x)
+        elif hasattr(x, "__dataclass_fields__"):
+            for f in x.__dataclass_fields__:
+                v = getattr(x, f)
+                if isinstance(v, (Term, tuple, list)):
+                    stack.append(v)
+    return out
+
+
 def pi_arity(ty: Term) -> int:
     n = 0
     while isinstance(ty, Pi):
@@ -82,6 +101,9 @@ class Checker:
         self.implicit_params: dict = {}  # qualified name -> how many leading parameters are implicit
         self._meta_names: set = set()     # the unknowns made for implicit parameters, all distinct
         self.operators: dict = {}      # op -> [(lhs type, rhs type, result type, function term)]
+        self.lam_params: list = []     # names bound by the enclosing lambdas: a block may rebind them with <- (05 R12)
+        self.session: bool = False     # a session block: an unused rebinding is reported, not an error
+        self.block_reports: list = []  # what a session block reports
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
         self.provisional: dict = {}    # name -> [declared types it builds on], for `extern provisional`
@@ -942,6 +964,8 @@ class Checker:
             return t, Var("Law")
         if isinstance(t, App):
             return self.infer_app(ctx, t)
+        if isinstance(t, Block):
+            return self.check_block(ctx, t, None)
         if isinstance(t, Lam):
             if t.ann is None:
                 self.err(f"cannot infer the type of {pp(t)}: annotate the parameter or give an expected type")
@@ -950,7 +974,11 @@ class Checker:
             if t.res is not None and isinstance(param, PVar):
                 # elaborated: the body was checked against its result type already
                 return Lam(param, t.body, dom, t.res), Pi(param.name, dom, t.res)
-            body, cod = self.infer(ctx2, t.body)
+            self.lam_params.append(set(pattern_vars(param)))
+            try:
+                body, cod = self.infer(ctx2, t.body)
+            finally:
+                self.lam_params.pop()
             name = param.name if isinstance(param, PVar) else fresh("p")
             if not isinstance(param, PVar):
                 pt = pattern_to_term(param)
@@ -1393,6 +1421,9 @@ class Checker:
             ext = Extern(self.register_extern(t.target, ty), ty)
             self.extern_obligations(ctx, ext, ty)
             return ext
+        if isinstance(t, Block):
+            term, _ = self.check_block(ctx, t, ty)
+            return term
         if isinstance(t, Lam) and isinstance(w, Pi):
             if t.ann is not None:
                 ann = self.check(ctx, t.ann, Univ())
@@ -1401,7 +1432,11 @@ class Checker:
             param, ctx2 = self.bind_pattern(ctx, t.param, w.dom)
             pt = pattern_to_term(param)
             cod = subst(w.cod, {w.name: pt}) if pt is not None else w.cod
-            body = self.check(ctx2, t.body, cod)
+            self.lam_params.append(set(pattern_vars(param)))
+            try:
+                body = self.check(ctx2, t.body, cod)
+            finally:
+                self.lam_params.pop()
             # keep the result type: a component projected out of a value is typed again later
             # (a law of an enclosing structure), and must have the type it was checked at
             return Lam(param, body, w.dom, cod if isinstance(param, PVar) else None)
@@ -1882,6 +1917,49 @@ class Checker:
             return False
 
     # ------------------------------------------------------------- patterns
+    def check_block(self, ctx: Ctx, t: Block, ty: Optional[Term]):
+        """A block (02 §9, 05 R12): `x := v` defines once, an error if x is a top-level name or already
+        bound; `x <- v` binds, or rebinds a name first bound with <- in this block or a parameter of the
+        enclosing lambdas; a rebinding whose previous value was never used is an error (reported in a
+        session). Each item becomes a one-branch match, a fresh scope: SSA (04 §5)."""
+        ctx2 = list(ctx)
+        arrow_used: dict = {}       # name bound with <- in this block -> used since its last binding
+        params = set().union(*self.lam_params) if self.lam_params else set()
+        elab = []
+        def mark(term):
+            for n in names_mentioned(term):
+                if n in arrow_used:
+                    arrow_used[n] = True
+        for kind, name, val in t.items:
+            mark(val)             # the value may use the previous binding of the name it rebinds
+            if kind == ":=":
+                q = self.resolve(name)
+                if lookup(ctx2, name) is not None or (q is not None and q in self.env.defs):
+                    self.err(f"{name} is defined twice: `:=` defines a name once; a block rebinds with `<-` (05 R12)")
+            else:
+                if lookup(ctx2, name) is not None and name not in arrow_used and name not in params:
+                    self.err(f"{name} was bound with `:=` and cannot be rebound with `<-` (05 R12)")
+                if name in arrow_used and not arrow_used[name]:
+                    msg = f"unused binding: {name} is rebound before its previous value is used (05 R12)"
+                    if self.session:
+                        self.block_reports.append(msg)
+                    else:
+                        self.err(msg)
+            v, vty = self.infer(ctx2, val)
+            ctx2.append((name, vty))
+            elab.append((name, v))
+            if kind == "<-":
+                arrow_used[name] = False
+        mark(t.result)
+        if ty is None:
+            r, rty = self.infer(ctx2, t.result)
+        else:
+            r, rty = self.check(ctx2, t.result, ty), ty
+        term = r
+        for name, v in reversed(elab):
+            term = Match(v, ((PVar(name), term),))
+        return term, rty
+
     def bind_pattern(self, ctx: Ctx, p: Pattern, ty: Term, binding: bool = True):
         """Resolve constructor names in `p`, return (pattern, extended ctx).
         `binding`: lambda and subtype parameters always bind; in a match, a name that is a

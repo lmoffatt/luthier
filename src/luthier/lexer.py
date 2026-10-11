@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import re
 
-SYMBOLS = [":=", "->", "==", "/=", "<=", ">=", "'{", "${",
+SYMBOLS = [":=", "->", "==", "/=", "<=", ">=", "<-", "'{", "${",
            ":", "(", ")", "{", "}", "[", "]", ",", "|", "&", "\\", "*", "+", "-", "/", "<", ">", "=", ";", "."]
 KEYWORDS = {"data", "match", "extern", "test", "with", "exhaustive", "gen", "import", "forget", "U", "operator",
             "if", "then", "else", "provisional", "primitive", "axiom", "let", "in"}
@@ -16,7 +16,7 @@ TOKEN_RE = re.compile(r"""
   | (?P<number>\d+(\.\d+)?([eE][+-]?\d+)?)
   | (?P<string>"(?:[^"\\]|\\.)*")
   | (?P<name>[A-Za-z_][A-Za-z0-9_']*(\.[A-Za-z_][A-Za-z0-9_']*)*(\#\d+)?)
-  | (?P<symbol>:=|->|==|/=|<=|>=|'\{|\$\{|[:(){}\[\],|&\\*+\-/<>=;.])
+  | (?P<symbol>:=|->|==|/=|<=|>=|<-|'\{|\$\{|[:(){}\[\],|&\\*+\-/<>=;.])
 """, re.VERBOSE)
 
 

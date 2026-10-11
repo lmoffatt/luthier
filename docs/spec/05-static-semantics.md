@@ -264,7 +264,7 @@ precondition of section 7, which only weakens an obligation raised in a branch, 
 discharge the interpreter does today (an obligation equal to the condition of its branch).
 Files: to be written with the implementation.
 
-**R12. `:=` defines once; `<-` rebinds** (decided 2026-10-11, D-2026-10-11-c; not implemented). A
+**R12. `:=` defines once; `<-` rebinds** (decided 2026-10-11, D-2026-10-11-c; blocks implemented 2026-10-11, defaults and named arguments not yet). A
 name bound with `:=` is defined once, and a second definition of it is an error ("x is defined
 twice"). A name bound with `<-` may be bound again with `<-`: each binding is a fresh name in the
 core, as in static single assignment, and every later use means the latest (D-2026-10-10-e, a
@@ -281,7 +281,8 @@ rebinds only block-local `<-` names and the parameters of the enclosing definiti
 previous binding has no consumer is an error in a file and reported in a session; actions take and
 return the world, so their order is the dependency through it. Three kinds of block: a body, `main`
 in a file, the session.
-Files: to be written with the implementation.
+Files: `r12_block.accept.lut`, `r12_defined_twice.reject.lut`, `r12_rebind_defined.reject.lut`,
+`r12_unused_rebinding.reject.lut`, `r12_toplevel_arrow.reject.lut`.
 
 **R13. An operator is resolved by the type, and a type names its model** (decided 2026-10-11,
 D-2026-10-11-j; not implemented). The operators on the values of a type are those of the model the
