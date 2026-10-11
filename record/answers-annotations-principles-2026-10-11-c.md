@@ -23,12 +23,17 @@ second `<-` must depend on the first, is the common case (the mutable parameter,
 D-2026-10-10-e) but not a requirement: `x <- 1 ; x <- 2` translates to `x1 := 1 ; x2 := 2`, where
 `x1` is dead and is freed (L13); legal, and a lint may say "unused binding".
 
+         analiza si hay usos legitimos del caso de la no dependencia, porque si no los hay seria un code smell. 
+
+
 *Proposed* semantics of a block, in six rules:
 
 1. **Form.** A block is a brace term `{ s1 ; s2 ; ... ; e }` whose items are separated by `;` or
    line breaks, and whose last item is a bare expression, its value. A brace term with no final
    expression, `{ x := a ; y := b }`, is a record value, as today. That settles the collision of
    `02 §8` by the last item, with no new keyword. The body of a lambda, `\ x { ... }`, is already a
+               aca cabe la pregunta somos C (siempre ;) o somos Python (supongo que ; es equivalente a line break)
+
    block in this sense (`02 §3`), and so is the body of a definition written with braces.
 2. **Items.** `x := t` (once), `x <- t` (bind or rebind), an action with its result bound
    (`w <- print w "..."`, below), and nothing else. `<-` exists only here, in a parameter's default
@@ -58,6 +63,10 @@ and named arguments are one mechanism; actions are ordered by data, not by text;
 the script are the same object. What it costs: the record-against-block rule by the last item,
 which a reader must learn, and the no-shadowing rule, which makes some names longer. Decision for
 you, by rule; the six go to the spec (`02 §3`, `04 §5`, `05` R12) if you accept them.
+
+            Aqui estoy pensando que deberiamos tener una forma de expresar en Luthier un orden de ejecucion, lo cual es util para la fase de ejecucion, ya que permite expresar que dos ordenes son equivalentes. Porque la fase de ejecucion se expresa en Luthier, como dijimos. 
+
+
 
 ## Operators and models
 
@@ -112,6 +121,7 @@ laws are the one theory certified by conformance of the interpreter and not by t
 trust of `00` (*What is known*). The second round's sentence on free types is replaced: every type
 belongs to a theory; the concrete types belong to the kernel's. L20 and the open item in draft 3
 are corrected accordingly.
+         OK. pero para ilustrar el poder de Luthier deberiamos definir estas leyes. 
 
 > un module podria ser un conjunto de tipos y operadores sin una teoria unificadora quizas?
 
@@ -119,6 +129,8 @@ It can, and it is still a theory: `03 §1` reads a file as a value of a dependen
 file is the same kind of thing as `Ring`", so a module of unrelated types and operators is the
 product of their theories, whose unifying theory is that product, with no law joining the
 components. Nothing to add; the word module stays for the file as a namespace.
+         ahora las leyes de asociatividad, simetria etc deberian definirse en un modulos laws o algebra o un nombre mejor? 
+
 
 ## `Sqr` over `*`, `Double` over `+`
 
@@ -132,6 +144,8 @@ fixed by a theory whose roles are fixed (`Sqr (r : Ring A) := Twice r.mul`). Thi
 case for the rule "by type where the theory fixes the role, by name otherwise", and it goes into
 the rationale as the example.
 
+
+
 ## `assumed`, citations, checking
 
 > Assumed es como el estado inicial de una demostracion recursiva, quizas?
@@ -139,6 +153,8 @@ the rationale as the example.
 Yes: the hypotheses one starts from, the base case and the induction hypothesis in a proof, the
 axioms of the reals in `core.lut`, and in a test the generators' claim that they cover the domain.
 Every chain of evidence ends there (`00`).
+
+
 
 > La citation deberia ser mejor que eso, con un paper fisico o libro o pagina de wikipedia quizas?
 > checked by hand cuando puede ser chequeado por IA + human in the loop (o su ausencia, tambien
@@ -153,8 +169,12 @@ records who checked the correspondence between the theorem and the definition: `
 
     cite sqrtNewton kantorovich1948 checked ai+human
 
+pero kantorovich1948 debe ser entonces un valor de un tipo reference o algo asi que tiene posiblemente un hash, un file un doi o lo que te parezca conveniente. quizas kantorovich sea 
+optim.biblio.kantorovich o quizas estemos en optim y solo bilblio.
+
 `none` is allowed and is what it says. The grade is `proved` in the three cases; what differs is
-recorded, and a reader of the certificate sees it.
+recorded, and a reader of the certificate sees it. 
+      OK
 
 ## Mutation testing
 
@@ -164,6 +184,8 @@ Taken as your decision (D-2026-10-11-h): it enters W6 as a check to implement, `
 --mutate`, which alters an implementation (a constant, an operator, a branch) and reports every law
 that still passes; a law no mutation fails is reported as not diagnostic. You chose to add it
 before a case; the rule of `CLAUDE.md` yields to your instruction, and the decision says so.
+         El problema es como mutamos un programa, me parece que eso es toda una caja de pandora. 
+
 
 ## Block boundaries and name scopes
 
@@ -174,9 +196,14 @@ name is visible from its binding to the end of its block and in nested blocks; n
 `:=`; `<-` rebinds only block-local `<-` names and parameters; a file is a namespace of unique
 names (`03 §2`), qualified by import, never a block.
 
+
+
 ## Settled, amended, pending
 
 - Decided by him: mutation testing to implement (D-2026-10-11-h).
 - Amended: D-2026-10-11-f, citation as a `.bib` key with a resolved identifier, and who checked.
+      podemos usar el .bib para la citation tambien, si
+
 - Conceded: every type belongs to a theory; the scope rule for operators withdrawn.
 - Pending his decision: the six rules of blocks; operators by type with the type naming its model.
+         Si
