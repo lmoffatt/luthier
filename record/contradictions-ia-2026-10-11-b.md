@@ -71,3 +71,44 @@ Claude max, DeepSeek and Grok say the bottleneck is approval: dozens of *Propose
 L15, L16 and L20 retouched twice in one day, retouches landing without W2's worked examples. True.
 Draft 5 adds no new mechanism; it rewords mine. What would stop the drift is his marks on one
 draft, and the two items of §2 are the only ones that cannot wait for them.
+
+## 5. Kimi and Perplexity, added later the same night (15fcaf7)
+
+Both read draft 4, so the weighted graph, the two caches and `assumed` as one grade (draft 5)
+answer part of what they say. What was new, all propagated in draft 6 as one or two sentences each,
+except the last, which is for his mark:
+
+- Kimi: if a result's identity carries the demanded tolerance and the plan, two consumers of one
+  definition make two nodes, so "each node once" and "paid once" fail. Answer: once per plan; a
+  stricter demand is another node of another plan; the looser certificate still serves what it met
+  (L19).
+- Kimi: L2's first clause ("asserts the laws") and its draft 4 clause ("structural, laws are
+  evidence") contradict inside one L. Answer: the structural proposition outright, the laws through
+  the certificate at its grade, and "guarantee" means what the grade says (L2).
+- Kimi: there is no root tolerance; the outermost action has no caller, and L17 forbids constants.
+  Answer: the action's tolerance is a declared default argument (D-2026-10-11-c), recorded with the
+  call (L17).
+- Kimi: progressive validation against hash-frozen certificates. Answer: a certificate is a
+  snapshot; a later test issues a new one that supersedes it, both kept, latest in front, which is
+  P3 (L19).
+- Kimi: an axiom is an assumed inhabitant, against "no value inhabits an undefined type". Answer:
+  an axiom is a law with grade `assumed`, not a value (L8).
+- Kimi: L12's "the class's name" needs a canonical form G4 refuses. Answer: scoped to the
+  decidable fragment, where a normal form exists (L12).
+- Kimi: accept/reject pairs cannot carry graded truth. Answer: a pair over a law into `Cost`
+  carries its parameters, as the tests already do (`08`) (W2).
+- Perplexity: error, time and memory are not one scalar; the planner needs a trade-off it does not
+  have. Answer: the trade-off is a parameter of the demand (L10, L17).
+- Perplexity: meaning, realization under a plan and evidence state must be three objects (L19);
+  forgetting must mean not materializing, never erasing what reconstructs (L13); effects on owned
+  state are verified, irreversible or concurrent ones are typed, logged and audited (L12); two
+  sessions differing in the order of independent bindings must be provably equivalent
+  (`Confluent`, L19); an extern's certificate binds version and platform (L14); the trust boundary
+  in four layers (L7).
+- Perplexity and Claude high: W15 reports deadlocks but gives no order among the organizers.
+  Proposed, his mark pending: the order of his tiers, guide, eurekas, good use; inside a tier the
+  conflict goes to him (W15).
+
+Not accepted: Perplexity's "G3 must be a prerequisite before building the planner" (the Boolean
+interim of D8 is what the planner builds on first); Kimi's "an executable suite of Boolean pairs is
+incompatible with graded truth" (it is Boolean at a declared tolerance, which is the interim).

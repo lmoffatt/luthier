@@ -1,10 +1,11 @@
 # The principles of Luthier and the way it is built
 
-Draft 5, 2026-10-11, unapproved. Draft 4 (c7c6396) was read by five models with the same prompt
-(`record/IA/principles 2023 10 11 2/`, 4f4e208; synthesis
-`record/contradictions-ia-2026-10-11-b.md`);
-draft 5 rewords what that round caught, each retouch marked "(draft 5)"; two items wait for his
-mark (L14's gate, the holotype). Draft 3 (f156aeb) was read by eight models asked for the
+Draft 6, 2026-10-11, unapproved. Draft 4 (c7c6396) was read by seven models with the same prompt
+(`record/IA/principles 2023 10 11 2/`, 4f4e208, 15fcaf7; synthesis
+`record/contradictions-ia-2026-10-11-b.md`); draft 5 reworded what the first five caught, draft 6
+propagates what Kimi and Perplexity showed still spoken in exact terms, each retouch marked by its
+draft; three items wait for his mark (L14's gate, the holotype, the order of the organizers). Draft
+3 (f156aeb) was read by eight models asked for the
 contradictions that would hamper implementation (`record/IA/principles 2023 10 11/`, a8e28f0;
 synthesis `record/contradictions-ia-2026-10-11.md`, his marks 0d6932d); draft 4 incorporates
 what that round settled, D-2026-10-11-m and -n, and the corrections it exposed, each retouch
@@ -159,7 +160,10 @@ and the derivation, *Proposed*. Order: by first organizer.
 
 **L2. A type is a proposition, and membership is a guarantee.** Belonging to a type asserts the
 propositions, laws included, that the value satisfies; function types carry their laws the same
-way. (Draft 4) `a : A` is one judgment, structural and decidable for the kernel's types; what a
+way; (draft 6) it asserts the structural proposition outright and the laws through the certificate,
+at the grade the certificate has, so "guarantee" means what the grade says: proved or exhaustive,
+a guarantee; sampled, evidence at a level; assumed, a hole that says so. (Draft 4) `a : A` is one
+judgment, structural and decidable for the kernel's types; what a
 law adds is evidence, and the certificate of the law carries its grade (proved, exhaustive, cases,
 sampled, assumed) and, for a law into `Cost`, the worst cost seen (`11` §4). The guarantee is what
 the certificate says and no more, and what leaves the program carries one (L19, D-2026-10-11-n).
@@ -204,7 +208,10 @@ G3's truth values). Source: Luciano, 2022-06-15 (`written:2022-06-15_sin-titulo-
 **L7. The core is minimal and executable by hand.** A handful of well-specified primitives, so
 that a program can be run with pencil and paper; everything else is a library whose translation to
 the core is mechanical. (Draft 4) Hand execution is of the kernel given a plan, an order of
-execution that is a value (`lib/plan.lut`); the planner's choice among plans is outside the kernel.
+execution that is a value (`lib/plan.lut`); the planner's choice among plans is outside the kernel;
+(draft 6) four layers, each trusted
+differently: the kernel, checked by hand; the libraries and the interpreter in Luthier, certified
+against the kernel's laws; the host runtime, a specimen; the planner, advice that the plan records.
 From G0 (a type theory is a few rules whose judgments a person checks; a
 small trusted kernel) and G2 (the paper semantics is the description, and every interpreter is a
 specimen certified against it). Source: Luciano, 2026-05-29 ("Luthier tendría que ser ejecutable a
@@ -212,7 +219,8 @@ mano"). Draft 0 of the plan proposed moving it to the way of working; withdrawn 
 
 **L8. Declare, then define, then inhabit.** A declaration without a body is a first-class hole: at
 once axiom, program input, external function, pending definition and dead code; nothing executes
-until it is defined, and no value inhabits an undefined type. (Draft 4) To the type checker the five
+until it is defined, and no value inhabits an undefined type; (draft 6) an axiom is not a value
+but a law with grade `assumed`, so it does not inhabit. (Draft 4) To the type checker the five
 are one, and
 the elaborated form records which it is, since the demand treats them differently: an input asks
 for a value, an external calls the host, a pending definition is an error, an axiom is a law with
@@ -227,10 +235,13 @@ with G1 (nothing is produced until demanded). Source: Luciano, 2026-05-29
 
 **L10. One function, many paths.** A function has many equivalent implementations, each with its
 precision, speed, memory and place of execution; equivalence is established first, and the choice
-among paths follows expected loss and cost, estimated from a database of measured runs. Stated as
+among paths follows expected loss and cost, estimated from a database of measured runs; (draft 6)
+error, time and memory are not one scalar, and the trade-off among them is a parameter of the
+demand (L17), never the planner's own. Stated as
 a quotient: the implementations of a function are the quotient by "compute the same function up to
 the law's equality", one class per mathematical function, and inside the class the fibre of what
-differs; the class is chosen by law, the representative by cost. (Draft 4, D-2026-10-11-m) The class is
+differs; the class is chosen by law, the representative by cost. (Draft 4, D-2026-10-11-m) The class
+is
 exact in the theory (`Real`); in a model that carries a distance it is the ball of the demanded
 radius (`11` §3), and closeness is not transitive, so the planner substitutes one implementation
 for another only along a certified equivalence between the two, the identity law of L21 with its
@@ -255,10 +266,13 @@ than runs. (Draft 3, his annotation) Executing is the executive face: an action 
 of the world, and it is verified too, by observing the world before and after it; the laws over
 actions are stated over those two observations, as a mutable parameter is two variables (L9);
 (draft 4) an observation is itself an action, so this stops where the world can
-be read back (a file written and reread), and says nothing beyond.
+be read back (a file written and reread), and says nothing beyond; (draft 6) an effect on state
+Luthier owns is verified this way, an irreversible or concurrent effect outside it is typed, logged
+and audited, never verified.
 Retouched (addenda 7 and 8): every function induces an equivalence on its domain, its kernel, so
 computing f(x) is placing x in its class and the value is the class's name, (draft 5) an
-interpretation of computation, not the evaluator's mechanism; a predicate is the
+interpretation of computation, not the evaluator's mechanism, and a name exists only where a
+normal form does, the decidable fragment (G4 refuses a canonical form elsewhere); a predicate is the
 two-class case and `Maybe T` places x in one of them. This equivalence on the domain is distinct
 from the equivalence between terms that a law induces, which is L10's quotient. From G0 (identity
 is the first proposition; his "path equivalence is the fundamental concept", 2026-05-29); the
@@ -330,7 +344,9 @@ forgotten is everything the demanded value does not need, the complement of its 
 so the projection is canonical, one per demand, and the language being spoken is what was asked
 for. Forgetting at run time (a node freed after its last consumer) and forgetting in the type (how
 much history a certificate keeps) are one; the program is never forgotten, only what leaves scope
-is lost. Retouched (audios 09.01 and 09.21): a function on a type applied to a subtype does not
+is lost; (draft 6) forgetting is not materializing a derived value, never erasing what reconstructs
+or recertifies it (code, inputs, model, seed, plan, tolerance), which the memo's identity keeps.
+Retouched (audios 09.01 and 09.21): a function on a type applied to a subtype does not
 produce one overload per subtype; the demanded return type selects which law to derive by
 composition (G2), and the rest is forgotten: doubling positives is positive only when positivity
 is demanded and derivable, sin of positives forgets to Real because no law composes. (Draft 4)
@@ -345,7 +361,9 @@ to 03:55; `WhatsApp Ptt 2026-10-10 at 17.28.45.md`); the overloads 2026-10-11 (`
 2026-10-11 at 09.21.05.md`, 00:00 to 00:29; `09.01.13.md`).
 
 **L17. Every criterion is a parameter.** Thresholds, budgets, limits and statistical levels are
-never constants in code; they are declared, passed and recorded. From G1 (the tolerance belongs to
+never constants in code; they are declared, passed and recorded; (draft 6) the outermost demand, an
+action with no caller, carries its tolerance as a declared default argument (D-2026-10-11-c),
+recorded with the call, so there is a root and it is a parameter. From G1 (the tolerance belongs to
 the demand) and G3 (a law states a distance, not a threshold), so a constant in the code has no
 place to live; restates P11 (every criterion is a parameter, never a constant in the code).
 Source: P11, in force; first applied as a rule of the language 2026-10-05
@@ -380,6 +398,13 @@ G3's "kept across runs" never meet on one node. (Draft 5) A test is an action wh
 certificate, memoized by the certificate's identity (code, cases, seed, the distribution and level
 sampled, L11) and rerun when asked or when that identity changed; the demand states the grade it
 requires (P11), and a certificate serves every demand whose tolerance and grade it meets (`11` §4).
+(Draft 6) "Each node once" is once per plan: a stricter demand on the same definition is another
+node of another plan, and the looser certificate still serves what it met. Three objects, never one:
+the meaning of a program, the class its laws fix; a realization, the result under a plan; the
+evidence, its certificates. A certificate is a frozen snapshot by hash; a later test does not
+change it, it issues a new one that supersedes it, both kept, the latest in front (P3), so progress
+is the chain of certificates. Two sessions that differ only in the order of independent bindings
+are equivalent by `Confluent` (L18), the law the session block is certified against.
 The program is the synthesis and is kept, the
 computation is the expansion and is redone. From G1 directly; the audio of 08.58 (15:35 to 17:12,
 30:37 to 31:21) adds the
@@ -431,8 +456,9 @@ extern is applied under its declared type; where the type has laws it is validat
 first and refused if it fails; where it has none yet, as every function starts (D-2026-10-11-d), it
 runs with its certificate graded by what it has and may replace the native only by the identity
 law of L21 (D-2026-10-11-m), which admits a specimen and never certifies the description, so G2 is
-not bypassed. The extern's hash includes the host library's version (W10), and its declaration
-says whether it is a definition or an action (L12, L18). (Draft 4,
+not bypassed. The extern's certificate binds the host library's version and the platform (W10), and
+its
+declaration says whether it is a definition or an action (L12, L18). (Draft 4,
 D-2026-10-11-n) This is the default for every value: demanding a value demands every certificate
 in its dependency cone, paid once through the memo, unless the demand asks otherwise by a
 mechanism to be named, which leaves a certificate of grade `assumed` (draft 5), since what could
@@ -507,7 +533,9 @@ Luciano, 2026-06-03 (`day:2026-06-03:primero-sintaxis-y-semantica-despues-implem
 
 **W2. No rule enters without a worked example.** Each principle is tried by hand in the candidate
 notation before it enters, and each rule of the specification is written as accept/reject pairs,
-so the specification is an executable suite. (Draft 3) "El ejercicio clears the mind": a worked
+so the specification is an executable suite; (draft 6) a pair over a law into `Cost` carries its
+parameters (tolerance, level, seed, distribution) as the test does (`08`), so the suite stays
+Boolean at a declared tolerance. (Draft 3) "El ejercicio clears the mind": a worked
 example shows contradictions that are not obvious. Source: the model from Luciano's audios,
 2026-08-31
 (`dialogue:e6fc53cf:disciplina-ejemplo-en-papel`); the pairs 2026-10-04
@@ -598,7 +626,10 @@ cheap to compute (P15, proposed in his words, `record/principles.md`). Source: L
 revisits the same decision twice without new evidence, or exceeds what one screen can carry, the
 session stops and reports which it is: a delicate question, or a conflict between principles,
 naming them; either goes to Luciano as one question (P12), and the second is the signal that a
-principle is missing or two must be ordered (P4, P13). Source: Luciano, 2026-10-11 (annotation on
+principle is missing or two must be ordered (P4, P13). (Draft 6, proposed, his mark pending) The
+order among the organizers is the order of his tiers: the guide, then the two eurekas, then good
+use; G0 before G1 and G2, those before G3, G3 before G4; inside a tier the conflict goes to him.
+Source: Luciano, 2026-10-11 (annotation on
 W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los principios"; reply:
 "agree"); the trigger is the model's.
 
