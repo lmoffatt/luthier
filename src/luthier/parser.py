@@ -33,6 +33,7 @@ class Parser:
         self.skip_newlines = 0    # depth counter: inside (), {}, [] newlines are ignored
         self.strict_newlines = 0  # while > 0, a newline always ends the current phrase (subtype components)
         self.no_brace = 0         # while > 0, '{' does not start an atom (match scrutinee)
+        self.defaults_seen = {}   # parameter defaults of the definition being parsed (D-2026-10-11-c)
         self.item_mode = 0        # while > 0, inside a block: a newline separates items (02 §1, D-2026-10-11-k)
         self.block_stack = []     # (nesting level, column of the first item) of the enclosing blocks
         self.in_angle = 0         # while > 0, '>' closes a sum `< a : A | b : B >` instead of comparing
@@ -239,6 +240,7 @@ class Parser:
         name = name_tok.text
         binders = []
         implicit = 0
+        self.defaults_seen = {}
         # implicit parameters first, `{A B : U}`, then the explicit ones
         while self.at_sym("{") and self._binder_ahead():
             names, typ = self.parse_binder("{", "}")
@@ -254,7 +256,7 @@ class Parser:
             for names, btype in reversed(binders):
                 for n in reversed(names):
                     body = Lam(PVar(n), body, ann=btype)
-            return Def(name, None, body, alias=True, line=name_tok.line)
+            return self._with_defaults(Def(name, None, body, alias=True, line=name_tok.line))
         typ = None
         if self.at_sym(":"):
             self.next()
@@ -301,7 +303,7 @@ class Parser:
                 raise ParseError(f"line {name_tok.line}: clauses need parameters in the header")
             body = self.clauses_to_match(binders, clauses)
         if data is not None:
-            return Def(name, typ or Univ(), None, data=data, line=name_tok.line)
+            return self._with_defaults(Def(name, typ or Univ(), None, data=data, line=name_tok.line))
         # wrap binders: type becomes Pi chain, body becomes Lam chain
         for names, btype in reversed(binders):
             for n in reversed(names):
@@ -311,7 +313,13 @@ class Parser:
                     body = Lam(PVar(n), body, ann=btype)
         if typ is None and body is None:
             self.err(f"definition {name!r} needs a type or a body")
-        return Def(name, typ, body, line=name_tok.line, implicit=implicit)
+        return self._with_defaults(Def(name, typ, body, line=name_tok.line, implicit=implicit))
+
+    def _with_defaults(self, d: Def) -> Def:
+        if getattr(self, "defaults_seen", None):
+            d.defaults = dict(self.defaults_seen)
+        self.defaults_seen = {}
+        return d
 
     def _peek_after_nl_is(self, sym) -> bool:
         j = self.i
@@ -349,8 +357,16 @@ class Parser:
             names.append(self.next().text)
         self.expect("symbol", ":")
         typ = self.parse_term()
+        default = None
+        if self.at_sym("<-"):
+            self.next()
+            default = self.parse_term()
+            if len(names) != 1:
+                self.err("a default belongs to one parameter: write (x : T <- d)")
         self.skip_newlines -= 1
         self.expect("symbol", close)
+        if default is not None:
+            self.defaults_seen[names[0]] = default
         return (names, typ)
 
     def _binder_ahead(self) -> bool:
@@ -612,6 +628,14 @@ class Parser:
             self.no_brace = saved_nb
 
     def _parse_paren_body(self) -> Term:
+        if self.at("name") and self._peek_is_sym_after_name("<-"):
+            # `(tol <- v)`: an argument by name (D-2026-10-11-c)
+            name = self.next().text
+            self.next()
+            val = self.parse_term()
+            self.skip_newlines -= 1
+            self.expect("symbol", ")")
+            return NamedArg(name, val)
         # dependent binder: ( x y : T ) -> B   or  ( x : T ) * B
         if self.at("name") and (self.peek(1).kind == "symbol" and self.peek(1).text == ":" or
                                 (self.peek(1).kind == "name" and self._binder_ahead())):

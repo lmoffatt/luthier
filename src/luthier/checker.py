@@ -105,6 +105,7 @@ class Checker:
         self.session: bool = False     # a session block: an unused rebinding is reported, not an error
         self.block_reports: list = []  # what a session block reports
         self.cites: dict = {}          # qualified name -> (elaborated Reference term, checked by) (05 §7, cite)
+        self.defaults: dict = {}       # qualified name -> {parameter: default term} (D-2026-10-11-c)
         self.labels: dict = {}         # label -> (alias name, index) for sums named by an alias; None if ambiguous
         self.kernel: bool = False      # loading core.lut: the kernel's own definitions (exempt from R4)
         self.provisional: dict = {}    # name -> [declared types it builds on], for `extern provisional`
@@ -187,6 +188,8 @@ class Checker:
         for d in prog.defs:
             if getattr(d, "implicit", 0):
                 self.implicit_params[self.qualify(d.name)] = d.implicit
+            if getattr(d, "defaults", None):
+                self.defaults[self.qualify(d.name)] = dict(d.defaults)
         for obj in file_objects(self, prog):
             self.load_object(obj)
         for g in prog.gens:
@@ -990,6 +993,8 @@ class Checker:
             return self.infer_app(ctx, t)
         if isinstance(t, Block):
             return self.check_block(ctx, t, None)
+        if isinstance(t, NamedArg):
+            self.err(f"({t.name} <- ...) is an argument by name; it goes in a call of a function with that parameter")
         if isinstance(t, Lam):
             if t.ann is None:
                 self.err(f"cannot infer the type of {pp(t)}: annotate the parameter or give an expected type")
@@ -1191,6 +1196,9 @@ class Checker:
         h, args = unapply(t)
         if isinstance(h, Var) and lookup(ctx, h.name) is None:
             q = self.resolve(h.name)
+            if q is not None and (q in self.defaults or any(isinstance(a, NamedArg) for a in args)):
+                # the whole spine at once, so a partial spine inside it is not filled again
+                return self.infer_spine(ctx, h, self.fill_defaults(ctx, h, q, args))
             k = self.implicit_params.get(q, 0) if q is not None else 0
             if k:
                 res = self.infer_implicit_app(ctx, h, args, k)
@@ -1202,6 +1210,62 @@ class Checker:
             self.err(f"{pp(f)} : {pp(fty)} is not a function, cannot apply it to {pp(t.arg)}")
         a = self.check(ctx, t.arg, w.dom)
         return App(f, a), subst(w.cod, {w.name: a})
+
+    # ------------------------------------------------------------ defaults and named arguments
+    def fill_defaults(self, ctx: Ctx, h: Var, q: str, args: list):
+        """`f a (tol <- v)` (04 §5, D-2026-10-11-c): arguments by name go to their parameter's position,
+        positional ones fill the others in order, and a parameter not given takes its default once
+        every parameter without a default is given; a default may mention the parameters before it.
+        Returns the list of arguments with every one in place, or the positional ones when the call is
+        partial (a parameter without a default is missing) and nothing is filled."""
+        defaults = self.defaults.get(q, {})
+        params = []
+        ty = self.env.defs[q].type
+        while isinstance(ty, Pi):
+            params.append(ty.name)
+            ty = ty.cod
+        named = {a.name: a.term for a in args if isinstance(a, NamedArg)}
+        for n in named:
+            if n not in params:
+                self.err(f"{h.name} has no parameter {n} to give by name")
+        positional = [a for a in args if not isinstance(a, NamedArg)]
+        if not named and len(positional) >= len(params):
+            return positional
+        given: dict = {}
+        pos = list(positional)
+        for p in params:
+            if p in named:
+                given[p] = named[p]
+            elif pos:
+                given[p] = pos.pop(0)
+        if pos:
+            self.err(f"{h.name} takes {len(params)} arguments, {len(args)} given")
+        missing_required = [p for p in params if p not in given and p not in defaults]
+        if missing_required:
+            if named:
+                self.err(f"{h.name}: the argument {missing_required[0]} is missing; defaults are filled once every "
+                         f"parameter without a default is given")
+            return positional           # a partial application; nothing is filled
+        out = []
+        for p in params:
+            if p in given:
+                a = given[p]
+            else:
+                a = subst(defaults[p], {pp_: given[pp_] for pp_ in params if pp_ in given})
+            given[p] = a
+            out.append(a)
+        return out
+
+    def infer_spine(self, ctx: Ctx, h: Term, args: list):
+        """`h a1 ... an` argument by argument, each checked against its parameter's type."""
+        f, fty = self.infer(ctx, h)
+        for a in args:
+            w = self.whnf(self.base_type(fty))
+            if not isinstance(w, Pi):
+                self.err(f"{pp(f)} : {pp(fty)} is not a function, cannot apply it to {pp(a)}")
+            a2 = self.check(ctx, a, w.dom)
+            f, fty = App(f, a2), subst(w.cod, {w.name: a2})
+        return f, fty
 
     # ------------------------------------------------------------ implicit arguments
     def infer_implicit_app(self, ctx: Ctx, h: Var, args: list, k: int):

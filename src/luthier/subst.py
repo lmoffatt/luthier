@@ -103,6 +103,16 @@ def subst(t: Term, mapping: dict[str, Term]) -> Term:
         return RecordLit(tuple((n, subst(v, mapping)) for n, v in t.fields))
     if isinstance(t, Proj):
         return Proj(subst(t.term, mapping), t.field)
+    if isinstance(t, NamedArg):
+        return NamedArg(t.name, subst(t.term, mapping))
+    if isinstance(t, Block):
+        # items bind in sequence; a binder shadows the mapping for what follows (SSA, 04 §5)
+        items = []
+        m = dict(mapping)
+        for kind, name, val in t.items:
+            items.append((kind, name, subst(val, m)))
+            m.pop(name, None)
+        return Block(tuple(items), subst(t.result, m))
     if isinstance(t, Lam):
         ann = subst(t.ann, mapping) if t.ann is not None else None
         if t.res is not None:

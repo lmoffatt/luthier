@@ -1,0 +1,4 @@
+-- R12, D-2026-10-11-c: an argument by name must name a parameter.
+-- expect: has no parameter
+approx (x y : Float64) (tol : Float64 <- 1.0e-6) : Bool := if x > y then x - y <= tol else y - x <= tol
+bad : Bool := approx 1.0 1.0 (eps <- 0.5)

@@ -182,6 +182,13 @@ class RecordLit(Term):
 
 
 @dataclass(frozen=True)
+class NamedArg(Term):
+    """`(tol <- v)` in an application: the argument for the parameter named tol (D-2026-10-11-c)."""
+    name: str
+    term: Term
+
+
+@dataclass(frozen=True)
 class Block(Term):
     """`{ x := a ; y <- b ; e }` (02 §9, D-2026-10-11-i): items, each (kind, name, term) with kind
     ':=' (once) or '<-' (bind or rebind), and the final expression, the block's value. The checker
@@ -283,6 +290,7 @@ class Def:
     pending: bool = False  # a declared type `T : base` whose laws are not given yet: its body is
                            # the labeled base, so the laws can be written over it (05 §1)
     implicit: int = 0      # how many leading parameters are implicit, `{A : U}`: inferred where it is applied
+    defaults: dict = field(default_factory=dict)  # parameter name -> default term, `(tol : T <- d)` (D-2026-10-11-c)
 
 
 @dataclass
