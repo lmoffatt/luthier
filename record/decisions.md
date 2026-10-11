@@ -808,8 +808,8 @@ Kind:       language design, grammar. For P11 (every criterion is a parameter: d
             livable), P2 (the elaborated call records every parameter), L18 (no effects: no
             mutable default shared between calls). Partly answers the open item on implicit
             arguments (05 §10)
-Status:     current; spec amended (02 §1, §2, §3, §8; 04 §5; 05 R12); not implemented; the syntax
-            of blocks is still open
+Status:     current; spec amended (02 §1, §2, §3, §8; 04 §5; 05 R12); implemented 2026-10-11 (defaults,
+            named arguments; blocks by D-2026-10-11-i)
 
 D-2026-10-11-d  Laws accumulate; a function need not be characterized. A law may only constrain
                 (a subtype of A → B with many inhabitants); a set of laws that determines the
@@ -888,7 +888,8 @@ Amended:    (same day, his feedback at 9d65118) the citation is a key into a .bi
             citation is a value of a type Reference (key, doi, isbn, url, sha256, law
             Resolvable), read from a .bib as a module (`biblio.kantorovich1948`), and the
             certificate records its identifiers and hash.
-Status:     current; spec amendment to 05 §7 pending; syntax `cite` open to his preference
+Status:     current; spec amended and implemented 2026-10-11: lib/reference.lut, .bib as a module,
+            `cite x biblio.key checked ai+human`, grade proved in the certificate
 
 D-2026-10-11-g  W15 enters docs/principles.md: a long analysis is reported as such, as a delicate
                 question or as a conflict between principles, and goes to Luciano as one question.
@@ -939,7 +940,8 @@ Source:     record/answers-annotations-principles-2026-10-11-c.md (blocks), -d.m
 Kind:       language design, grammar and static semantics (02 §3, §8; 04 §5; 05 R12). For L9 (the
             DAG is the only order), L12 draft 3 (actions verified before and after), L13, G1, G4;
             resolves the open collision of block and record syntax (02 §8)
-Status:     current; spec amendment pending; not implemented
+Status:     current; spec amended (02 §9, 04 §5, 05 R12) and implemented 2026-10-11, the session included
+            (`luthier session`); actions and the world wait for action primitives
 
 D-2026-10-11-j  Operators are resolved by the type, and a type names its model: `i : Int` has the
                 ring of Int, `j : Z7` has ringZ7; a carrier with two models is two types, with
@@ -958,7 +960,8 @@ Source:     record/answers-annotations-principles-2026-10-11-c.md (operators and
 Kind:       language design, static semantics (02 §3 operator directive; 05 §10 implicit
             arguments). For G0 (the type is the proposition "member of this model"), G2, L13, L20
             draft 3; examples/z7ring.lut to be rewritten (Z7 as a quotient, not a subtype)
-Status:     current; spec amendment pending; not implemented
+Status:     current; spec amended (05 R13) and implemented 2026-10-11 (resolution by the argument types
+            was already there; a second meaning on the same types is refused); z7ring.lut rewritten
 
 D-2026-10-11-k  Separators are Python-like in blocks and record values: a line break separates
                 items and `;` is equivalent to it; inside parentheses, brackets, `< >` and the
@@ -969,7 +972,7 @@ Quote:      "aca cabe la pregunta somos C (siempre ;) o somos Python (supongo qu
             equivalente a line break)" (c167022)
 Source:     record/answers-annotations-principles-2026-10-11-d.md
 Kind:       grammar (02 §1). For G4 (nothing gained by a mandatory `;`)
-Status:     current; spec amended; not implemented
+Status:     current; spec amended and implemented 2026-10-11
 
 D-2026-10-11-l  The laws of relations and actions (Reflexive, Symmetric, Antisymmetric,
                 Transitive, Total, Associative, the identities, inverses, commutativity,
@@ -981,4 +984,4 @@ Quote:      "ahora las leyes de asociatividad, simetria etc deberian definirse e
             o algebra o un nombre mejor?" (c167022)
 Source:     record/answers-annotations-principles-2026-10-11-d.md
 Kind:       libraries (03). For G2 (laws come first, stated once over the signature they need)
-Status:     current; to be done in this session
+Status:     current; done 2026-10-11 (addff54)

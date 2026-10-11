@@ -497,8 +497,11 @@ W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los 
   the type naming its model (`05` R13, D-2026-10-11-j; `examples/z7ring.lut` rewritten, Z7 its own
   type and `mod 7` a certified homomorphism); Python-like separators (`02 §1`, D-2026-10-11-k);
   `cite` and `proved` by citation (`05 §7`, D-2026-10-11-f); `lib/laws.lut` split from `algebra.lut`
-  (D-2026-10-11-l). Pending: the session's command line; `plan.lut`, an order of execution as a
-  value with the law that two orders are equivalent (fourth round); the implementation of all of it.
+  (D-2026-10-11-l). Implemented 2026-10-11 in the interpreter: blocks and the session (`luthier
+  session`), defaults and named arguments, R13's refusal of two models on one type, `cite` with
+  `.bib` modules, exhaustive tables of `Fin n -> T`; `lib/plan.lut` states an order of execution as a
+  value and confluence as a law, checked exhaustively in `examples/plan_confluence.lut`. Pending:
+  actions and the world as a value; the memo between the items of a session.
 - The kernel's theory stated in Luthier: `src/luthier/lib/kernel_laws.lut`, tested on `Fin 3`,
   `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (`05` R8), functions
   over `Fin n` not enumerated by `exhaustive` (to fix).
