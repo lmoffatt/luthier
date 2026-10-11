@@ -1,6 +1,10 @@
 # The principles of Luthier and the way it is built
 
-Draft 6, 2026-10-11, unapproved. Draft 4 (c7c6396) was read by seven models with the same prompt
+Draft 7, 2026-10-11, unapproved. Draft 6 (8809e20) was read by four models with a new prompt: break
+L10, L19 and L14 with worked examples (`record/IA/principles round 3/`, d824b21; synthesis
+`record/contradictions-ia-2026-10-11-c.md`). All three broke; draft 7 repairs L10 and L19 and
+amends the proposal on L14, which stays his to mark, with the holotype and the order of the
+organizers. Draft 4 (c7c6396) was read by seven models with the same prompt
 (`record/IA/principles 2023 10 11 2/`, 4f4e208, 15fcaf7; synthesis
 `record/contradictions-ia-2026-10-11-b.md`); draft 5 reworded what the first five caught, draft 6
 propagates what Kimi and Perplexity showed still spoken in exact terms, each retouch marked by its
@@ -250,7 +254,12 @@ which the planner may exchange, and they form a weighted graph, not a class: a s
 path whose summed distance (`11` §2) is within the demanded tolerance, so two specimens joined
 through a third may each replace it and not each other; the sum is a bound only when every link
 is one (proved, exhaustive), otherwise an estimate with the weakest grade and the samples it was
-seen on; a lone implementation is never replaced. The author's free choice among the inhabitants of
+seen on; a lone implementation is never replaced. (Draft 7, from the counterexamples of the third
+round) A sampled edge is admissible only on inputs the distribution it sampled covers, and only as
+a direct edge, never summed into a path, until a probabilistic bound exists as a law; the
+tolerance charged at a node is the demand's pulled back through the sensitivity of the cone from
+the node to the demand (`11` §5), and where no sensitivity is known there is no substitution. The
+author's free choice among the inhabitants of
 an under-determined function
 (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared. From G0
 (the quotient), G3 (the choice by cost and the database of runs) and G4 (every path expressible,
@@ -391,7 +400,9 @@ demanding.
 What never reaches an output needs no certificate, and what reaches one carries its cone's
 certificates (D-2026-10-11-n; `test` demands certificates without values). (Draft 4) A result is
 identified by code, inputs, mode, the demanded type and tolerance, the model its type names, the
-seed, and the plan that produced it, the plan being a value (`lib/plan.lut`); the run database is
+seed, the plan that produced it, the plan being a value (`lib/plan.lut`), and (draft 7) the hashes
+of the certificates in its live cone, so a host library or platform that changed is a new result;
+the run database is
 what the planner reads to choose the plan and is not an input of the result once the plan is
 fixed; evidence accumulates by a separate action with its own record, so "each node once" and
 G3's "kept across runs" never meet on one node. (Draft 5) A test is an action whose result is a
@@ -454,10 +465,12 @@ stays by hash; without a type with a law to validate against it is not applied. 
 proposed, his mark pending) His words are "si el tipo no sigue la ley no se aplica el calculo": an
 extern is applied under its declared type; where the type has laws it is validated against them
 first and refused if it fails; where it has none yet, as every function starts (D-2026-10-11-d), it
-runs with its certificate graded by what it has and may replace the native only by the identity
-law of L21 (D-2026-10-11-m), which admits a specimen and never certifies the description, so G2 is
-not bypassed. The extern's certificate binds the host library's version and the platform (W10), and
-its
+runs where it is named, as a specimen, and (draft 7, amended after four counterexamples) neither
+it nor the native enters the planner's graph for the function until one non-identity law of the
+type is certified against it; the identity law of L21 then admits it (D-2026-10-11-m). Identity
+alone never certifies the description, and before a law exists it must not deliver the value
+either, or G2 is bypassed in the execution if not in the record. The extern's certificate binds the
+host library's version and the platform (W10), and its
 declaration says whether it is a definition or an action (L12, L18). (Draft 4,
 D-2026-10-11-n) This is the default for every value: demanding a value demands every certificate
 in its dependency cone, paid once through the memo, unless the demand asks otherwise by a
