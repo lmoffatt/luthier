@@ -403,6 +403,9 @@ certificates (D-2026-10-11-n; `test` demands certificates without values). (Draf
 identified by code, inputs, mode, the demanded type and tolerance, the model its type names, the
 seed, the plan that produced it, the plan being a value (`lib/plan.lut`), and (draft 7) the hashes
 of the certificates in its live cone, so a host library or platform that changed is a new result;
+(draft 7, Kimi) the grade the demand states is in the identity too, and a memo hit serves a demand
+only if the cached cone meets that grade, checked at the hit and not only when the certificate was
+issued;
 the run database is
 what the planner reads to choose the plan and is not an input of the result once the plan is
 fixed; evidence accumulates by a separate action with its own record, so "each node once" and
@@ -500,7 +503,9 @@ D-2026-10-11-m)
 The identity law between two specimens, with its distance, is what admits a second implementation
 into the class the planner moves in (L10); the agreement test of W5 between native and extern is
 this law, and the holotype formula of G2 evaluated over `Rational` is one more specimen, with grade
-exact, checked by the same law. A function
+exact, checked by the same law. (Draft 7, Kimi) An identity certificate admits a specimen into the
+planner's graph and never raises a node's grade: the grade a demand requires is met only by
+certificates of the laws. A function
 known correct by a theorem outside Luthier is certified `proved` by citation (D-2026-10-11-f),
 and the chain law, citation, native, identity, extern is carried by hash. From G2 (the specimen
 can be recognized as the same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt

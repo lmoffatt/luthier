@@ -75,3 +75,20 @@ theory being defined (L8). So L14 stands in his words: an extern is validated ag
 laws before it is applied and refused if it fails; W5's agreement test is in addition; substitution
 is D-2026-10-11-m with the round's scope and sensitivity rules. The L14 question is closed; the
 four counterexamples remain useful as spec tests for the planner, under a type with one weak law.
+
+## 4. Kimi, added after the others (69db1e8)
+
+Same L10 break (a sampled link used outside its support; draft 7 already has the fix). Two new
+holes, both of the same shape Kimi names: the rule records the protective information and does not
+make it a condition of the act.
+
+- L19: the grade the demand states is not in the result's identity, so an exploratory run with a
+  lenient grade and a calibration run demanding `sampled` share one memo entry, and the gate "serves
+  every demand whose tolerance and grade it meets" is checked at issue, never at the memo hit. Fix
+  taken in draft 7: the demand's grade is in the identity and the hit is re-gated.
+- L14/L21: an identity certificate graded `sampled` can satisfy a demand's grade requirement, so a
+  node whose laws are only `assumed` presents `sampled` evidence from a certificate that certifies
+  nothing about the description. The example (laws stated, never run; an extern that pads to a
+  power of two and breaks shift-invariance on long signals) survives his correction on zero laws.
+  Fix taken in draft 7: an identity certificate admits a specimen and never raises a node's grade;
+  the grade a demand requires is met only by certificates of the laws.
