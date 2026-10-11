@@ -881,6 +881,10 @@ Quote:      "cuando sabemos por ejemplo que una implementacion es correcta por t
 Source:     record/answers-annotations-principles-2026-10-11.md §11, §4; -b.md §11
 Kind:       language design, certification (05 §7). For G2 (description), L21, L11; distinguishes
             assumed (no justification) from proved (a citation to check)
+Amended:    (same day, his feedback at 9d65118) the citation is a key into a .bib whose entry
+            carries a DOI, ISBN or URL resolved by record/bibliography/checkdoi.py; the
+            certificate records who checked the correspondence: human, ai+human, or none.
+            Proposed syntax `cite name bibkey checked ai+human`.
 Status:     current; spec amendment to 05 §7 pending; syntax `cite` open to his preference
 
 D-2026-10-11-g  W15 enters docs/principles.md: a long analysis is reported as such, as a delicate
@@ -897,3 +901,16 @@ Source:     docs/principles.md annotations (2c18c41, 18da042); record/answers-..
 Kind:       method. For P12 (his attention is the scarce resource), P4, P13; a rule of behaviour,
             no recurring mechanism
 Status:     current; W15 in draft 3; P15 awaiting his mark on the wording
+
+D-2026-10-11-h  Mutation testing enters W6 as a check to implement: `luthier test --mutate` alters
+                an implementation (a constant, an operator, a branch) and reports every law that
+                still passes; a law that no mutation fails is reported as not diagnostic. Added
+                before a case it would have caught, on Luciano's instruction, which overrides the
+                rule of CLAUDE.md for this one mechanism.
+Author:     Luciano
+Quote:      "Mutation test es un principio o working trait que deberia ser implementado, buena
+            sugerencia." (9d65118)
+Source:     record/answers-annotations-principles-2026-10-11-c.md
+Kind:       method, testing. For W6 (a test must fail when the thing is wrong), G2 (the power of a
+            description is measured on specimens that differ)
+Status:     current; not implemented

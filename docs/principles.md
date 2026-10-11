@@ -228,8 +228,10 @@ lh == rh, de hecho creo que es la ley de <-").
 after his annotation.) A function belongs to a theory (Real, Field, LinearAlgebra) and takes its
 model as its first, often implicit, argument, so it is written once for every model; the model is
 resolved from the scope and can be passed explicitly. A theory over a model of another theory is
-a theory. Open (second round §3): operators resolved by the model in scope, never by the types of
-the arguments; free types allowed, bare functions not (P14). Modules are values: a parametrized module is a function from models to
+a theory. Every type belongs to a theory; the concrete types (products, sums, exponentials,
+`data`) belong to the kernel's, whose laws are the β and η rules and the recursion principle
+(third round). Open (third round): operators resolved by the type, the type naming its model; a
+carrier with two models is two types. Modules are values: a parametrized module is a function from models to
 definitions, applicative because definitions have no effects (L18), instantiated on demand with
 the parameter threaded down from the action. A specialization is one more representative of the
 law's class (L10), valid on a subtype, certified against the same law; where representations
@@ -422,8 +424,8 @@ practice holds while a function has too few laws to be known by description. Sou
 known to be true is worse than a hole; negative controls and reproduced numbers, never passing
 examples alone, are what make a test diagnostic. (Draft 3, his words) A meta-test that must always
 exist: the test must fail where it must fail, not only pass where it must pass; realized today by
-negative controls on the input, and later, after a case, by mutation of the implementation. For
-G2. Source: Luciano, 2025-09-27 (snapshots
+negative controls on the input and, to implement (D-2026-10-11-h), by mutation of the
+implementation: a law that no mutation fails is not diagnostic. For G2. Source: Luciano, 2025-09-27 (snapshots
 before tests); the control stated 2026-10-02 (`dialogue:51cca364:a-test-needs-a-negative-control`).
 
 **W7. The design stays with Luciano.** The model describes and waits; AI work comes in scoped
@@ -491,10 +493,14 @@ W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los 
 - The session as a block over the dataflow of L19: `<-` to explore, `:=` to lock, a file may
   contain a block, `<-` stays banned at the top level of a file (second round §17; his decision
   pending); then the spec, `04 §7` and a section on the session.
-- Operators resolved by the model in scope, never by the types of the arguments (second round §3;
-  his decision pending).
-- `proved` by citation: syntax `cite name "..."` proposed, grade `proved` recorded with the string,
-  allowed in user code (D-2026-10-11-f; to `05 §7`).
+- Operators resolved by the type, where the type names its model; a carrier with two models is
+  two types; cross-model use only through a certified homomorphism (third round; his decision
+  pending). The scope rule of the second round is withdrawn.
+- Blocks: six rules proposed (form by the last item, items, SSA translation, scope without
+  shadowing, the world threaded by `<-`, three kinds of block) (third round; his decision pending).
+- `proved` by citation: the citation a `.bib` key with a resolved DOI, ISBN or URL, and who
+  checked (human, ai+human, none) recorded; syntax `cite name bibkey checked ai+human` proposed,
+  allowed in user code (D-2026-10-11-f as amended; to `05 §7`).
 - Units as a candidate L under G0: a dimension is a proposition, dimensions form a group under
   multiplication, the quantities of one dimension a one-dimensional vector space, the whole a
   graded algebra; addition inside a dimension, multiplication across (second round §18). Precedent
