@@ -26,7 +26,8 @@ one screen. Done when he has marked the five formulations and the marks are comm
 
 ## Step 2. The derivations (D3, D4)
 
-In the same file, one row per L1 to L20 and W6: number, organizers it derives from, the
+In the same file, one row per L1 to L20, W6 and the candidate L21 (identity certificates, D3):
+number, organizers it derives from, the
 derivation in at most two lines, the extra assumption if any, and one of: derives, needs
 assumption, moves to W (D3). Sources of draft 1 are copied unchanged.
 
@@ -35,7 +36,7 @@ the grep is
 
     grep -c -E "^\| L[0-9]+ .*\| (G[0-4]( G[0-4])*|moves to W) \|" record/principles-generators-2026-10-11.md
 
-and the count equals 21. Extra assumptions are collected at the end of the file as candidates
+and the count equals 22. Extra assumptions are collected at the end of the file as candidates
 for a further organizer or as free choices (P5).
 
 ## Step 3. The P13 check (D5)

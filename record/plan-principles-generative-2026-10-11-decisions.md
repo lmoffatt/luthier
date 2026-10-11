@@ -1,6 +1,8 @@
 # Rewriting the principles from generative ideas: the decisions
 
-Draft 0, 2026-10-11. Written for Luciano, to answer before the execution starts. The execution is
+Draft 1, 2026-10-11. Draft 0 (85975c6) was written before the audios of 08.58 and 09.01
+(45df807, 844e505); what they changed is marked "(audio 08.58)" and listed in addendum 5 of the
+analysis. Written for Luciano, to answer before the execution starts. The execution is
 in `plan-principles-generative-2026-10-11-execution.md`. What comes from a source is cited; the
 rest is Claude's proposal. Settled in chat today and not asked again: one first principle with
 deviations justified by what it costs not to depart (chat, after the floating point note); laws
@@ -28,9 +30,14 @@ what type theory lacks:
 - G1 Declarative and executive are separate; the executive is the demand (his F, which generates
   his B). Type theory has no executive face.
 - G2 A function is known by description, from outside; the implementation is the specimen (his C,
-  as clarified: à la Russell, not constructive). Type theory knows a function by its term.
+  as clarified: à la Russell, not constructive). A description is derived by composition of the
+  laws of the parts when such a law exists (his "parte Tarski", audio 08.58 at 32:01) and observed
+  otherwise; the demand says which descriptions are produced. Type theory knows a function by its
+  term.
 - G3 Laws are valued in [0,∞) and their cost is itself uncertain, so composition is Bayesian (his
-  D, with addendum 2 of the analysis). Type theory's truth values are two.
+  D, with addendum 2 of the analysis); what a run teaches is kept and accumulates across runs
+  (audio 08.58 at 05:47, in his words a wish more than a principle). Type theory's truth values
+  are two and a run leaves nothing.
 - G4 Expressive over restrictive (his E). Type theory has one canonical form per value.
 - Recommended: this order; G4 last because it decides between designs rather than describing the
   language, and the execution treats it as the tie-breaker among derivations.
@@ -45,6 +52,9 @@ criterion is a parameter) and the orchestration half of L14 move to the way of w
 W17, because no organizer generates them. L12 (two faces) is absorbed by G1 as its statement; L1
 (invariances of the disciplines) stays as the first consequence of G2.
 - Recommended: yes. The move keeps their sources and their text.
+- Added from the audio of 08.58 (09:20 to 13:19): a candidate L21 under G2, a certificate of
+  identity of the implementation (same bits with the same seed) kept apart from a certificate of
+  the law. Enters step 2 as *Proposed*; he marks it with the others.
 
 **D4. Numbering.** The L numbers are kept (L18, L19 and L20 are cited in `record/decisions.md` and
 in the spec); each L gets a tag of its organizers, and draft 2 is ordered by organizer, not by

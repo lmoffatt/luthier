@@ -225,3 +225,76 @@ consistency check between specimens. W5 stays as a practice of bootstrapping, wh
 too few laws to be known by description, and leaves the principles. The attribution to Tarski is
 his; Tarski's definition of truth is itself given from outside, in a metalanguage, so the contrast
 he draws is better named constructive (Brouwer, Martin-Löf) against descriptive.
+
+## Addendum 5: the audio of 2026-10-11 08.58 (45df807) and 09.01 (844e505)
+
+Thirty-four minutes on the principles, recorded after the note. What it adds to the organizers,
+with minute marks; what is already in draft 1 is only pointed to.
+
+- The founding idea, in his history (01:52 to 03:32): types as propositions, and "que una función
+  pertenezca a ese valor de un tipo significa que esa función está testeada ... testeás una sola
+  vez". G0 and G2's inhabitance, as in §1. Nothing to change.
+- A candidate organizer he calls a wish (05:36 to 06:17): "cuando vos corrés un programa aprendés
+  algo y eso que aprendés queda en algún lado"; "es como un deseo más que un principio, porque no
+  tengo una idea clara de cómo lograrlo, más allá de que el modelo para eso es la estadística
+  bayesiana". Then (06:24 to 07:57): Bayes expands rather than contracts; contract by keeping
+  samples of the posterior, as a particle filter, accumulating run after run at a √n rate.
+  *Proposed*: this is the executive half of G3 and not a sixth organizer. G3 as written says the
+  cost of a law is uncertain; the audio says where the evidence goes: it is kept, and it
+  accumulates across runs. G3's formulation gains the clause "and what a run teaches is kept".
+  L10's database of measured runs and L11's progressive grades are its consequences. Marked as
+  his wish, in his words.
+- The declarative as prior (08:49 to 09:08): "declarar lo que se sabe, que es un poco como la idea
+  del prior". *Proposed*: the Bayesian reading of G1. The declarative program is the prior, the
+  demand with the world's data is the update, the output is the posterior collapsed (14:06, "casi
+  como de la cuántica ... colapsa la función de onda"; 15:52 to 17:12: read all demands, run,
+  collapse to the output values, write; the code object stays, 30:37 to 30:45 asks whether it is
+  consumed or stable, and L19 answers: kept). It ties G1 to G3 by an image rather than a theorem;
+  it goes in the generators file as his, not as a dependency.
+- Two kinds of verification (09:20 to 13:19): sampling or chosen cases against the law; and
+  regression, "verificar bit a bit que sea igual" with a fixed seed, "por lo menos sabés que no
+  cambia la implementación", practical when moving code. The statistical kind is for functions
+  being proposed, "prueba científica", where the test is the object of interest. *Proposed*: a
+  consequence under G2 that draft 1 lacks: a certificate of identity of the implementation
+  (same bits, same seed) is a different claim from a certificate of the law, and both are kept.
+  Candidate L21.
+- Interpreter or script (17:12 to 23:35): "una pregunta importante de Luthier". Script runs all
+  and can drop what has no effect; interpreter keeps an environment to inspect, as R, and he knows
+  how to build it (MacroDR). He notes the interpreter makes the script trivial. *Proposed*: not a
+  principles decision. Under G1 both are sequences of demands over a program that is kept (L19):
+  the script is one batch of demands, the interpreter is demands one at a time with the memo
+  between them, and the backward plan drops what no demand reaches in both. It is an item for the
+  spec (04 §7, status of the interpreter), not for draft 2.
+- The forgetful functor by demand (24:55 to 27:57): sin x returns what is asked, Real or [−1, 1]
+  or the application; "hasta que no aparezca no hace falta". L13 and the return-type polymorphism
+  of 2026-10-10 (7b0481d). The short audio (09.01) adds the composite case: sin of positives is
+  Real, doubling positives is positive, and applying a function on a type to a subtype needs
+  overloading, "automáticamente es otra historia". Nothing to change in the organizers; an open
+  item of the spec on how a subtype's law propagates through an application.
+- Seed functions (28:21 to 29:36): automatic derivatives by templates made the paper possible; in
+  Luthier every function is "una especie de función semilla que el código puede transformar en
+  otras funciones", specialized by what is asked. L19 and L20. Forward or backward (29:39 to
+  30:21): both, and forward "sería directamente como un print", so perhaps no difference. L19's
+  "the evaluation strategy is a parameter" already says so.
+- Luthier as a target for AI (31:25 to 32:00): a language the AI can generate, that can absorb
+  foreign libraries "con sus propias invarianzas". L14. *Proposed*: G2 explains why this is
+  possible at all: a library absorbed is a specimen, known by its description, and its code is not
+  needed.
+- Composition of invariances, "la parte Tarski" (32:01 to 34:07): undefined so far; there are
+  laws of composition of invariances (the sum of two normals is normal) that would simplify
+  proofs; by demand you ask for certain invariances and only those propagate backward, "si no
+  tenés infinitas invarianzas". So the audio corrects addendum 4: by Tarski he means
+  compositional derivation of a property from the properties of the parts, which is what Tarski's
+  semantics is, and by Russell the observation from outside. The contrast is derived against
+  observed, and he wants both. *Proposed*: G2's formulation becomes "a function is known by
+  description; a description is derived by composition of the laws of its parts when such a law
+  exists, and observed otherwise; the demand says which descriptions are produced". The original
+  remark in addendum 4 stays, wrong on this point.
+- Units (24:12 to 24:52): a wish from Kimulun, never used. A feature under G0 (a dimension is a
+  proposition), not an organizer.
+- Pure against stateful (03:58 to 05:00): he does not have the monadic answer and wants one.
+  L18 and the iteration step above (read, run, collapse, write) are the current answer; whether
+  it suffices is for the spec.
+
+Net effect on the plan: D1's G2 and G3 are reworded; one candidate consequence (L21, identity
+certificates) is added to step 2; everything else is already in draft 1 or belongs to the spec.

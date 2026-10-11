@@ -832,6 +832,10 @@ Clarified:  "à la Russell" in the note does not mean uniqueness; it means defin
             un bicho)" (chat). The model's reading: Russell's knowledge by description against
             knowledge by acquaintance; a function is known by the properties observed of it, and
             the implementation, native or extern, is the specimen. The accumulation of laws
-            stands as decided above.
+            stands as decided above. Correction from the audio of 08.58 (45df807, 32:01 to
+            34:07): by "Tarski" he means the compositional derivation of a property from the
+            properties of the parts (the sum of two normals is normal), not constructivism;
+            Luthier wants both routes, derived and observed, and the demand chooses which
+            invariances are produced.
 Status:     current; settles the first of the two open items of the analysis of 2026-10-11; W5
             (native against extern) still open
