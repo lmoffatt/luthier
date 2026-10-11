@@ -145,3 +145,35 @@ floats, so that no law is written twice; today they are not there, and `05 §3` 
 Cost-valued, Bool included". Small.
 
 For his mark: `Bool` as a subtype of `Cost` in the kernel (touches `05 §3`, `core.lut`), ok / no.
+
+## 4. Not a subtype: a retract, by two certified homomorphisms
+
+His question in the chat: "bool como subtipo si o no? resiste un analisis? Me parece que no es un
+subtipo, mas bien es algo asi como una proyeccion, de un functor de Cost a Bool o al reves?"
+
+The proposal of §3 (Bool as a subtype of Cost in the kernel) is withdrawn; his reading is the
+right one. Cost = [0,∞] in Lawvere's orientation (0 true, order reversed, product +, unit 0) and
+Bool with ∧ and unit true are quantales, and there are three maps:
+
+- i : Bool → Cost, true ↦ 0, false ↦ ∞. A quantale homomorphism (unit, ∧ to + and to max, ∨ to
+  min), injective, image closed under the operations: a sub-quantale.
+- p₀ : Cost → Bool, c ↦ (c == 0). A homomorphism (a + b = 0 iff both are 0; max, min likewise),
+  with p₀ ∘ i = id and i ⊣ p₀ as a Galois connection. So Bool is a retract of Cost.
+- p_ε : Cost → Bool, c ↦ (c ≤ ε), ε > 0. Preserves unit, max, min, not +: it is colax (a + b ≤ ε
+  implies both ≤ ε, never the converse). Adjoint to i_ε (true ↦ ε), which fails the unit law.
+
+In enriched terms: a Bool-category is a preorder, a Cost-category a generalized metric space;
+change of base along i reads a preorder as a 0/∞ metric; along p₀ it collapses a metric to the
+preorder "distance 0", the quotient of L10 exact in the theory; p_ε is not a change of base, since
+"d ≤ ε" is not transitive. The three maps are the three places of L10 (draft 5): the exact class
+in the theory, the ball of the demanded radius in the model, the non-transitivity of closeness.
+
+*Proposed* for Luthier, by D-2026-10-11-j as it stands: Bool stays 1 + 1 in the kernel; Bool and
+Cost are two types with their models (and, or; +, max, min); i and p₀ are two certified
+functions with three laws (i a homomorphism, p₀ a homomorphism, p₀ ∘ i = id) in `lib/laws.lut`,
+the first content of G3; p_ε lives only in the demand with ε its parameter (L17); a Bool-valued
+law is used where a Cost is demanded through the bridge i (L20), cost zero, grade exact, inserted
+by the planner. `Cost` enters `core.lut` over `ExtendedReal`. Nothing implicit, nothing new in
+the kernel.
+
+For his mark: this instead of the subtype of §3. ok / no.
