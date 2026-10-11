@@ -1004,8 +1004,8 @@ Kind:       semantics of the planner (L10, L21, W5). For G0 (the quotient lives 
             agreement test between native and extern is the law that admits the second specimen.
             Dissolves the holotype objection: the formula over Rational is a specimen with grade
             exact, checked by the same pairwise law
-Status:     current; to docs/principles.md draft 4 (L10, L21, W5) and to the spec of the planner
-            when it exists; not implemented
+Status:     current; in docs/principles.md draft 4 (L10, L16, L21, W5); the spec of the planner
+            pending; not implemented
 
 D-2026-10-11-n  Demanding a value demands every certificate in its dependency cone, paid once
                 through the memo. The demand may ask otherwise, by a mechanism to be named
@@ -1022,5 +1022,5 @@ Source:     record/contradictions-ia-2026-10-11.md §2 (one default needs a sent
             the three Claude critiques
 Kind:       semantics of demand (L14, L19, L2, G1, G4). For L2 (membership is a guarantee for
             what leaves the program), P11 (the opt-out is a parameter of the demand)
-Status:     current; to docs/principles.md draft 4 (L14, L19) and 04 §7; the opt-out's syntax
-            open; not implemented
+Status:     current; in docs/principles.md draft 4 (L2, L14, L19); 04 §7 pending; the opt-out's
+            syntax open; not implemented
