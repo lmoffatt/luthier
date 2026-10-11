@@ -1,5 +1,16 @@
 # The principles of Luthier and the way it is built
 
+Draft 8, 2026-10-12, unapproved. Draft 7 (cd314a4) received one observation from Luciano (66f0bef,
+answered in `record/answers-annotations-principles-2026-10-12.md`): the eurekas were printed in the
+model's order, not his, and a third eureka, objects as models of theories, was missing. His decision
+in the chat of 2026-10-12 (D-2026-10-12-a): Luthier is presented as a verifier of models of
+theories, with the kernel's bicartesian closed category as the language the laws are written in, so
+that theories and models are the elements of Luthier. Draft 8 widens G2 to theories and models with
+the function type as its one-symbol case, prints it before G1 (his order; tags kept, as L numbers
+were by D4), moves L20 under it and names the derivations that follow from it directly; §2 swaps its
+two sections accordingly; the P13 table is not recounted. Every retouch is marked "(draft 8)". The
+order of the organizers is thereby settled; the holotype still waits for his mark. The extension of
+Boolean logic to Lawvere and Bayes (G3) he names as a further eureka, to be analyzed next (§4).
 Draft 7, 2026-10-11, unapproved. Draft 6 (8809e20) was read by four models with a new prompt: break
 L10, L19 and L14 with worked examples (`record/IA/principles round 3/`, d824b21; synthesis
 `record/contradictions-ia-2026-10-11-c.md`). All three broke; draft 7 repairs L10 and L19 and
@@ -68,6 +79,57 @@ by what type theory lacks.
 
 ### The two eurekas
 
+**G2. A type with laws is a theory and its value a model; a function type is its laws, and a
+function is known by description.** (Draft 8, widened on his observation, 66f0bef, and
+D-2026-10-12-a; printed first because it was the trigger, audio 09.19, 00:00 to 00:14.) Source: "el
+disparador es
+darme cuenta de eso, que los tipos de funciones son las leyes que las definen. Esa fue mi eureka
+moment" (audio 09.19, 00:00 to 00:14); "Las leyes deben ser propiedades (matematicas o no) que
+determinen univocamente la funcion que estamos definiendo. Las funciones se definen a lo Russel.
+Y se testean empiricamente. Que una implementacion sea valor de un tipo de funcion siginfica que
+ya fue validada aunque sea una vez. Y la validacion de las funciones es progresiva" (note); "no
+ser a lo tarski (constructivo) sino a lo matematico (desde afuera, como un entomologo observa un
+bicho)" (chat, D-2026-10-11-d); the composition of invariances as "la parte Tarski" (audio 08.58,
+32:01 to 34:07); (draft 8) "Un tercer momento eureka fue cuando me di cuenta que necesitaba los
+objetos ya que hay funciones que se testean mutuamente, o sea que 'la programacion basada en
+objetos' tiene una base matematica, solo que las clases (o interfases) serian las Teorias y los
+objetos serian los modelos de las teorias" (66f0bef); "que tal si en lugar de presentar Luthier como
+verificador de funciones lo presentamos como verificador de modelos de teorias? Al tomar elementos
+de CCC como estructuras donde se escriben las leyes, las teorias y modelos pasarian a ser los
+elementos de Luthier" (chat, 2026-10-12, D-2026-10-12-a).
+*Proposed* formulation (draft 8): a theory is a signature with its laws, written in the kernel's
+language (`04`, a bicartesian closed category: this is where G0 is used); a model is a value of a
+theory, and declaring `m : T` records the obligation to satisfy the laws of `T`; a law relates
+several symbols (`inverse x * x = unit`), which no single function can carry, so the unit declared
+is the theory and the unit valued is the model; a function is a theory of one symbol over the
+theories its laws import, and the eureka of 09.19 is this case, where he saw it first. Luthier
+verifies models of theories; what it verifies about a function is the case of one symbol.
+*Proposed* formulation, the function (drafts 2 to 7): the laws are what is known of a function, and
+the implementation, native
+or extern, is the specimen under observation. A description is derived by composition of the
+laws of the parts when such a law exists, and observed otherwise; laws accumulate, and a set of
+laws that determines the function up to its equality is the limit a definition may reach, not what
+it must reach (D-2026-10-11-d). (Draft 3) A law is written over the signature of its theory, an
+implementation over a model; the first is the holotype, `\ x { x * x }` as the formula of `Sqr`,
+the second a specimen checked against it (his "holotipos", second round §3; `00`, *Value, the
+model*; `05` R10). (Draft 5, correction of this reading proposed, his mark pending) In nomenclature
+the holotype is the name-bearing specimen and the diagnosis is the text, so: the law is the
+diagnosis; a reference implementation, the formula over `Rational` or the native, is the holotype;
+every other implementation is a specimen compared to the holotype by the identity law (L21) and to
+the diagnosis by the laws. What type theory lacks: it knows a function by acquaintance, as its term.
+(Draft 8) What model theory lacks: a grade and a demand; a model of Luthier satisfies its theory up
+to a cost, certified at a grade and progressively (G3), and is chosen for execution by a demand
+(G1); naming it "model" must not promise exactness. What follows from G2 as its definition rather
+than by derivation: L20 (a function is declared in a theory and is universal over its models), the
+object of `05 §3` (the names a cycle of laws joins), D-2026-10-07-e (no loose functions: a
+definition at a bare exponential is not a defined type) and D-2026-10-11-j (a carrier with two
+models is two types); and three L read in its terms: L10 is many models of one theory,
+interchangeable in the quotient; L21 is the difference between two models being identified and both
+satisfying the theory; L14's extern is a model whose carrier is foreign. The precedent in
+programming is algebraic specification and the module systems of ML and the lawful type classes of
+Haskell, where the mechanism exists without being the organizing idea (the answer of 2026-10-12,
+references to be checked before they are cited here).
+
 **G1. The demand defines what is computed.** Source: "la demanda de un valor por el mundo externo
 me define todos los tipos necesarios para obtener eso" (audio 09.19, 00:24); "la compilacion se
 dispara por la demanda externa (es decir un print o un valor que sale al mundo), y la demanda
@@ -80,32 +142,6 @@ que se sabe, que es un poco como la idea del prior" (audio 08.58, 08:59).
 processed; the executive face is a demand from outside, and the demanded type fixes the path, the
 types and the tolerances actually produced. What type theory lacks: an executive face; there,
 computation is the normalization of a given term, with no demand.
-
-**G2. A function type is its laws; a function is known by description.** Source: "el disparador es
-darme cuenta de eso, que los tipos de funciones son las leyes que las definen. Esa fue mi eureka
-moment" (audio 09.19, 00:00 to 00:14); "Las leyes deben ser propiedades (matematicas o no) que
-determinen univocamente la funcion que estamos definiendo. Las funciones se definen a lo Russel.
-Y se testean empiricamente. Que una implementacion sea valor de un tipo de funcion siginfica que
-ya fue validada aunque sea una vez. Y la validacion de las funciones es progresiva" (note); "no
-ser a lo tarski (constructivo) sino a lo matematico (desde afuera, como un entomologo observa un
-bicho)" (chat, D-2026-10-11-d); the composition of invariances as "la parte Tarski" (audio 08.58,
-32:01 to 34:07).
-        no entiendo porque el orden de primero la demanda y luego el valor y tipo funcion, cuando el orden en que tuve los eurekas fue al reves? Hay alguna razon?
-        Un tercer momento eureka fue cuando me di cuenta que necesitaba los objetos ya que hay funciones que se testean mutuamente, o sea que "la programacion basada en objetos" tiene una base matematica, solo que las clases (o interfases) serian las Teorias y los objetos serian los modelos de las teorias.  Me parece que esto, si bien es muy demandante para crear objetos, tenes que declarar leyes para los mismos, hace que los objetos tengan un lugar en la programacion funcional. Probablemente esto ya exista en la programacion funcional solo que no se lo relaciona con objetos? En realidad, las funciones aisladas serian, si existieran, modelos de teorias simples? Podemos tomar los modelos y teorias como el elemento de Luthier?
-
-
-*Proposed* formulation: the laws are what is known of a function, and the implementation, native
-or extern, is the specimen under observation. A description is derived by composition of the
-laws of the parts when such a law exists, and observed otherwise; laws accumulate, and a set of
-laws that determines the function up to its equality is the limit a definition may reach, not what
-it must reach (D-2026-10-11-d). (Draft 3) A law is written over the signature of its theory, an
-implementation over a model; the first is the holotype, `\ x { x * x }` as the formula of `Sqr`,
-the second a specimen checked against it (his "holotipos", second round §3; `00`, *Value, the
-model*; `05` R10). (Draft 5, correction of this reading proposed, his mark pending) In nomenclature
-the holotype is the name-bearing specimen and the diagnosis is the text, so: the law is the
-diagnosis; a reference implementation, the formula over `Rational` or the native, is the holotype;
-every other implementation is a specimen compared to the holotype by the identity law (L21) and to
-the diagnosis by the laws. What type theory lacks: it knows a function by acquaintance, as its term.
 
 ### Principles of good use
 
@@ -315,6 +351,92 @@ identity proposition acquires a distance). Source: Luciano, 2026-05-30
 (`day:2026-05-30:niveles-de-equivalencia`); the law of a binding 2026-10-11 (reply: "luego de <-
 lh == rh, de hecho creo que es la ley de <-").
 
+### From theory and model, G2
+
+(Draft 8) The section is printed before G1 and L20 is moved here from G0's section; everything else
+stands.
+
+**L1. Luthier expresses the invariances of the disciplines.** What moves the language: a species
+mates within itself, electrons are fermions, a probability integrates to one. A definition states
+the invariances that determine a concept, and the language exists so that stating them is natural.
+From G2 (what is known of a thing is its description; "la idea de luthier es ayudar a descubrir
+las invariantes de los calculos", note), with P14 (a type is a concept). Source: Luciano,
+2026-05-29 (`dialogue:20260529T1400:expresar-invarianzas-de-disciplinas`).
+
+**L3. Defining a function defines its test.** Declaring what a function must satisfy is declaring
+the test that will be run on it, so definition and verification are one act. From G2 directly:
+the eureka of 09.19 in its 2022 form. Source: Luciano, 2022-08-03
+(`written:2022-08-03_haskell:declarar-funcion-es-declarar-su-test`).
+
+**L11. Verification is one operation, exact or statistical.** (Draft 4) What is known by a theorem is
+cited, what can be enumerated is checked exhaustively, what has chosen cases is checked on them,
+what can only be sampled is checked statistically, and the grade of the evidence (proved,
+exhaustive, cases, sampled at a level, assumed) travels with the value in a certificate hashed over
+its dependency cone; the line is the method, since associativity over `Int` is computable and
+cannot be checked by running. The grade of a sampled certificate depends on the distribution
+sampled, not only
+on the number of samples, because errors concentrate at the edges. From G2 (observation is how a
+description is verified) and G3 (the grade is the uncertainty of the cost). Source: Luciano,
+2022-08-03 and 2023-02-22 (`written:2023-02-22_tapp-wish-list:untested-a-tested`); the grades by
+samples 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 11.11.22.md`, 03:02 to 04:12); the dependence on
+the distribution is the model's correction, from the practice of property-based testing.
+
+**L14. Luthier orchestrates other languages.** Types and laws are native; values may come through
+`extern` from Python or any host, declared over what they really receive and return, with
+description and verification kept on Luthier's side. An external function is validated like any
+other, against its type with its laws, the first time an action asks for it, and its certificate
+stays by hash; without a type with a law to validate against it is not applied. (Draft 7, after his
+correction) His words are "si el tipo no sigue la ley no se aplica el calculo", and they stand as
+written: an extern is declared over a type, a type carries its laws (L2), the extern is validated
+against them before it is applied and refused if it fails; the agreement test with the native is in
+addition (W5), and the planner's substitution is D-2026-10-11-m. A function with no laws at all is
+not a function to run but a hole of a theory being defined (L8); the claim that "every function
+starts with zero laws" came from a critique, not from D-2026-10-11-d, and drafts 5 and 6 carried it
+wrongly. The extern's certificate binds the
+host library's version and the platform (W10), and its
+declaration says whether it is a definition or an action (L12, L18). (Draft 4,
+D-2026-10-11-n) This is the default for every value: demanding a value demands every certificate
+in its dependency cone, paid once through the memo, unless the demand asks otherwise by a
+mechanism to be named, which leaves a certificate of grade `assumed` (draft 5), since what could
+be done Luthier gives a way to do (G4); `test` is the action that demands certificates without
+values (L19). Luthier is in use
+a coupling language: the joint between two libraries is a theory of which each is a model, the
+bridges between representations live at the joint with their cost and error, and no coupling
+without a law. From G2: an absorbed library is a specimen known by its description, and its code
+is not needed; "que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones
+con sus propias invarianzas" (audio 08.58, 31:25 to 32:00). Source: Luciano, 2026-05-26
+(`note:2026-05-26T12.32.24:lenguaje-no-atado-a-cpp`); the validation on first demand and the
+coupling language 2026-10-10 (chat: "si el tipo no sigue la ley no se aplica el calculo";
+`WhatsApp Ptt 2026-10-10 at 17.41.53.md`; `WhatsApp Ptt 2026-10-10 at 16.49.14.md`, 01:39 to
+03:18). Draft 0 of the plan proposed moving its orchestration half to the way of working;
+withdrawn (D3).
+
+**L21. A certificate of identity is not a certificate of the law.** *Proposed*, candidate. Checking
+that an implementation gives the same bits as before, with the same seed, certifies that the
+implementation has not changed; checking it against its laws, by chosen or sampled cases,
+certifies the description. Both are kept, apart, and the certificate of the law travels by the
+certificate of identity (his annotation): exactly where the identity is boolean (`==` structural,
+`05` R8: integers, decidable types, the same implementation rerun), and with the observed distance
+added where it is a cost (G3), since two implementations over floats are almost never
+bit-identical. The type of the identity law's result says which (`Bool` or `Cost`). (Draft 4,
+D-2026-10-11-m)
+The identity law between two specimens, with its distance, is what admits a second implementation
+into the class the planner moves in (L10); the agreement test of W5 between native and extern is
+this law, and the holotype formula of G2 evaluated over `Rational` is one more specimen, with grade
+exact, checked by the same law. (Draft 7, Kimi) An identity certificate admits a specimen into the
+planner's graph and never raises a node's grade: the grade a demand requires is met only by
+certificates of the laws. (Draft 7, Claude) And the identity law admits a specimen to the planner's
+graph only beside a certificate of at least one law of the description at the grade the demand
+requires; a table of the native's outputs on the grid agrees with it exactly there and is
+acquaintance in its limiting form (L5), refused by the first law over the signature (`delay s s =
+0`) and by nothing else. A function
+known correct by a theorem outside Luthier is certified `proved` by citation (D-2026-10-11-f),
+and the chain law, citation, native, identity, extern is carried by hash. From G2 (the specimen
+can be recognized as the same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt
+2026-10-11 at
+08.58.46.md`, 09:20 to 13:19: "verificar bit a bit que sea igual ... por lo menos sabés que no
+cambia la implementación"; the statistical kind for "prueba científica").
+
 **L20. A function is declared in a theory and is universal over its models.** (Draft 3, reworded
 after his annotation.) A function belongs to a theory (Real, Field, LinearAlgebra) and takes its
 model as its first, often implicit, argument, so it is written once for every model; (draft 4) the
@@ -331,7 +453,9 @@ the parameter threaded down from the action. A specialization is one more repres
 law's class (L10), valid on a subtype, certified against the same law; where representations
 differ, the orchestrator inserts bridges by cost, coherent up to the law, carrying their error,
 visible in the plan; (draft 5) a specialization and a bridge each enter the planner's graph by an
-identity certificate with its distance (L10, D-2026-10-11-m). From G0 (a theory is a type, a model
+identity certificate with its distance (L10, D-2026-10-11-m). (Draft 8) From G2, of which it is the
+definition rather than a consequence: a function belongs to the theory its laws are stated in, and a
+model is where it runs; before draft 8 from G0 (a theory is a type, a model
 its inhabitant) and G1 ("lo declarativo
 pasa a ser todo lo universal posible"; instantiated on demand). Source: Luciano, 2026-10-10 ("el
 codigo seria, en principio universal a los valores de funciones que cumplan las leyes requeridas",
@@ -443,89 +567,6 @@ becomes its `main` block (D-2026-10-11-i). Source: Luciano, 2026-10-10 (`WhatsAp
 03:20 to 07:06; `WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 05:49 to 07:53; `WhatsApp Ptt 2026-10-10
 at 17.28.45.md`; D-2026-10-10-d, f, h). The three cases at the leaves and the memo key are the
 model's, accepted.
-
-### From description, G2
-
-**L1. Luthier expresses the invariances of the disciplines.** What moves the language: a species
-mates within itself, electrons are fermions, a probability integrates to one. A definition states
-the invariances that determine a concept, and the language exists so that stating them is natural.
-From G2 (what is known of a thing is its description; "la idea de luthier es ayudar a descubrir
-las invariantes de los calculos", note), with P14 (a type is a concept). Source: Luciano,
-2026-05-29 (`dialogue:20260529T1400:expresar-invarianzas-de-disciplinas`).
-
-**L3. Defining a function defines its test.** Declaring what a function must satisfy is declaring
-the test that will be run on it, so definition and verification are one act. From G2 directly:
-the eureka of 09.19 in its 2022 form. Source: Luciano, 2022-08-03
-(`written:2022-08-03_haskell:declarar-funcion-es-declarar-su-test`).
-
-**L11. Verification is one operation, exact or statistical.** (Draft 4) What is known by a theorem is
-cited, what can be enumerated is checked exhaustively, what has chosen cases is checked on them,
-what can only be sampled is checked statistically, and the grade of the evidence (proved,
-exhaustive, cases, sampled at a level, assumed) travels with the value in a certificate hashed over
-its dependency cone; the line is the method, since associativity over `Int` is computable and
-cannot be checked by running. The grade of a sampled certificate depends on the distribution
-sampled, not only
-on the number of samples, because errors concentrate at the edges. From G2 (observation is how a
-description is verified) and G3 (the grade is the uncertainty of the cost). Source: Luciano,
-2022-08-03 and 2023-02-22 (`written:2023-02-22_tapp-wish-list:untested-a-tested`); the grades by
-samples 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 11.11.22.md`, 03:02 to 04:12); the dependence on
-the distribution is the model's correction, from the practice of property-based testing.
-
-**L14. Luthier orchestrates other languages.** Types and laws are native; values may come through
-`extern` from Python or any host, declared over what they really receive and return, with
-description and verification kept on Luthier's side. An external function is validated like any
-other, against its type with its laws, the first time an action asks for it, and its certificate
-stays by hash; without a type with a law to validate against it is not applied. (Draft 7, after his
-correction) His words are "si el tipo no sigue la ley no se aplica el calculo", and they stand as
-written: an extern is declared over a type, a type carries its laws (L2), the extern is validated
-against them before it is applied and refused if it fails; the agreement test with the native is in
-addition (W5), and the planner's substitution is D-2026-10-11-m. A function with no laws at all is
-not a function to run but a hole of a theory being defined (L8); the claim that "every function
-starts with zero laws" came from a critique, not from D-2026-10-11-d, and drafts 5 and 6 carried it
-wrongly. The extern's certificate binds the
-host library's version and the platform (W10), and its
-declaration says whether it is a definition or an action (L12, L18). (Draft 4,
-D-2026-10-11-n) This is the default for every value: demanding a value demands every certificate
-in its dependency cone, paid once through the memo, unless the demand asks otherwise by a
-mechanism to be named, which leaves a certificate of grade `assumed` (draft 5), since what could
-be done Luthier gives a way to do (G4); `test` is the action that demands certificates without
-values (L19). Luthier is in use
-a coupling language: the joint between two libraries is a theory of which each is a model, the
-bridges between representations live at the joint with their cost and error, and no coupling
-without a law. From G2: an absorbed library is a specimen known by its description, and its code
-is not needed; "que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones
-con sus propias invarianzas" (audio 08.58, 31:25 to 32:00). Source: Luciano, 2026-05-26
-(`note:2026-05-26T12.32.24:lenguaje-no-atado-a-cpp`); the validation on first demand and the
-coupling language 2026-10-10 (chat: "si el tipo no sigue la ley no se aplica el calculo";
-`WhatsApp Ptt 2026-10-10 at 17.41.53.md`; `WhatsApp Ptt 2026-10-10 at 16.49.14.md`, 01:39 to
-03:18). Draft 0 of the plan proposed moving its orchestration half to the way of working;
-withdrawn (D3).
-
-**L21. A certificate of identity is not a certificate of the law.** *Proposed*, candidate. Checking
-that an implementation gives the same bits as before, with the same seed, certifies that the
-implementation has not changed; checking it against its laws, by chosen or sampled cases,
-certifies the description. Both are kept, apart, and the certificate of the law travels by the
-certificate of identity (his annotation): exactly where the identity is boolean (`==` structural,
-`05` R8: integers, decidable types, the same implementation rerun), and with the observed distance
-added where it is a cost (G3), since two implementations over floats are almost never
-bit-identical. The type of the identity law's result says which (`Bool` or `Cost`). (Draft 4,
-D-2026-10-11-m)
-The identity law between two specimens, with its distance, is what admits a second implementation
-into the class the planner moves in (L10); the agreement test of W5 between native and extern is
-this law, and the holotype formula of G2 evaluated over `Rational` is one more specimen, with grade
-exact, checked by the same law. (Draft 7, Kimi) An identity certificate admits a specimen into the
-planner's graph and never raises a node's grade: the grade a demand requires is met only by
-certificates of the laws. (Draft 7, Claude) And the identity law admits a specimen to the planner's
-graph only beside a certificate of at least one law of the description at the grade the demand
-requires; a table of the native's outputs on the grid agrees with it exactly there and is
-acquaintance in its limiting form (L5), refused by the first law over the signature (`delay s s =
-0`) and by nothing else. A function
-known correct by a theorem outside Luthier is certified `proved` by citation (D-2026-10-11-f),
-and the chain law, citation, native, identity, extern is carried by hash. From G2 (the specimen
-can be recognized as the same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt
-2026-10-11 at
-08.58.46.md`, 09:20 to 13:19: "verificar bit a bit que sea igual ... por lo menos sabés que no
-cambia la implementación"; the statistical kind for "prueba científica").
 
 ### From cost, G3
 
@@ -673,6 +714,11 @@ W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los 
   Lipschitz constant per function type where known (sensitivity types, Reed and Pierce 2010;
   condition numbers), a sampled cost where not, costs adding as −log p under independence; worked
   examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to one.
+
+- (Draft 8) The extension of Boolean logic to Lawvere and Bayes, G3, which he names as another
+motivator or eureka (chat, 2026-10-12: "luego vamos a analizar la parte mas dificil es la extencion
+de logica booleana a Lawvere/bayesiana, otro motivador/Eureka"); whether it is the third eureka or a
+principle of good use is his to mark after that analysis.
 
 - The composition of invariances (G2's derived route): which laws compose and how the demand
   selects them (audio 08.58, 32:01 to 34:07; audio 09.21).
