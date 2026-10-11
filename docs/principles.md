@@ -199,11 +199,17 @@ two faces are G1's statement. Source: Luciano, 2026-05-30 ("la matemática no ej
 ejecución en Luthier sería esa verificación de equivalencias"); the kernel reading 2026-10-11
 (chat: "una funcion genera equivalencias f(a)==f(b) ==> a~b y mas si f(a)=true").
 
+            Esto es incompleto, ya que esto es valido en la cara declarativa de Luthier, 
+            en la cara ejecutiva de luthier execution es una modificacion del estado del mundo
+
+
 **L16. Equality has levels and belongs to the object.** Definition (`:=`), the identity
 proposition (`=`), decidable equality (`==`) and definitional equality by reduction (`≡`) are
 different things, and each object carries the observational equality that fits it. From G0
 (the identity type and its levels) with G3 (under cost, the identity proposition acquires a
-distance). Source: Luciano, 2026-05-30 (`day:2026-05-30:niveles-de-equivalencia`).
+distance). Source: Luciano, 2026-05-30 (`day:2026-05-30:niveles-de-equivalencia`). 
+            aqui no estaria faltado "<-" que incluimos para el caso de argumentos por default, un sugar muy importante para tener interfases amigables.?
+
 
 **L20. Code is universal over the models of its theories.** A function is parametrized by theories
 (Real, Field, LinearAlgebra), not by single functions; the model is resolved from the scope and can
@@ -217,6 +223,11 @@ pasa a ser todo lo universal posible"; instantiated on demand). Source: Luciano,
 codigo seria, en principio universal a los valores de funciones que cumplan las leyes requeridas",
 chat; `WhatsApp Ptt 2026-10-10 at 17.00.40.md`; `WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to
 04:25; D-2026-10-10-g). The conditions on bridges are the model's, accepted.
+         aca no entiendo bien que queres decir. 
+         una funcion es declarada generalmente dentro de una theoria (que quizas pueda ser el nombre luthier para objeto/modulo/clase) 
+
+
+
 
 ### From the demand, G1
 
@@ -332,6 +343,8 @@ same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt 2026-10
 08.58.46.md`, 09:20 to 13:19: "verificar bit a bit que sea igual ... por lo menos sabés que no
 cambia la implementación"; the statistical kind for "prueba científica").
 
+            si, me gusta el certificado de la la law se transporta por el certificado de identity. 
+
 ### From cost, G3
 
 **L15. The ideal world is realized with a guarantee.** Code is written over ideal objects (Real)
@@ -339,12 +352,17 @@ and realized by concrete ones (Float64); the realization's laws hold within a st
 and the error of each step is itself a law rather than a false claim of exactness. From G3
 directly: the realization's distance to the ideal law is the law's value, and the tolerance is the
 demand's (G1). Source: Luciano, 2026-05-29; the floats note of 2026-10-11 (5cc41fa).
+         Esto es un testigo de la idea de que tenemos un functor que va de Real--> Float64 y que ahi vemos algunas propiedades  de Real proyectadas en Float, seria eso? 
+
 
 ### Under the tie-breaker, G4
 
 G4 generates no L of its own and decides between designs: `:=` once and `<-` for rebinding with
 default arguments (D-2026-10-11-c), `if` without `else` as a guarded value (D-2026-10-11-b), many
 paths expressible (L10), accumulating laws rather than required characterization (D-2026-10-11-d).
+         Explicame esto, no se que queres decir, explicame la logica de under the tie-braaker. 
+
+
 
 ## 3. The way of working
 
@@ -353,22 +371,28 @@ Unchanged from draft 1 except W5, restated.
 **W1. The specification comes before the implementation.** Syntax and semantics are fixed on paper
 first, and the implementation passes the specification instead of silently defining the language.
 Source: Luciano, 2026-06-03 (`day:2026-06-03:primero-sintaxis-y-semantica-despues-implementar`).
+            Si, la implementacion puede quejarse y decir "esto no hay forma de hacerlo" (con una forma mas tecnica de decirlo quizas?)
+
 
 **W2. No rule enters without a worked example.** Each principle is tried by hand in the candidate
 notation before it enters, and each rule of the specification is written as accept/reject pairs,
 so the specification is an executable suite. Source: the model from Luciano's audios, 2026-08-31
 (`dialogue:e6fc53cf:disciplina-ejemplo-en-papel`); the pairs 2026-10-04
 (`dialogue:52d3e68e:short-cascade-with-pilot-spec-as-tests`).
+            si, el ejercicio clears the mind, un ejemplo puede mostrar contradicciones no obvias
+
 
 **W3. Start minimal and add only what is used.** Begin from zero with the indispensable, do each
 step in detail before scaling, and reduce until removing more would break something needed. The
 order of work, not a limit on the language (G4). Source: Luciano, 2026-10-02
 (`dialogue:51cca364:empezar-de-cero-con-luthier-liviano`).
+            bueno, no estaria usando mucho este criterio, pero es un buen criterio para frenar la proliferacion de abstracciones
 
 **W4. The real application drives the growth.** Luthier must take root in something useful
 (sonolocalización) and grow only where the application finds something it cannot express; kernel
 work without real pressure moves the specification for nothing. Source: Luciano, 2026-09-21
 (`day:2026-09-21:luthier-tiene-que-ser-util`).
+            Misma linea que arriba
 
 **W5. Concepts live in Luthier, execution in the host; native against extern is bootstrapping.**
 The `.lut` is designed before the Python; each concept is written native (slow, conceptual) and
@@ -378,11 +402,16 @@ not an oracle, since "agrees with the native" would be a law that copies an impl
 one more specimen (L5), the agreement test is a consistency check between specimens, and the
 practice holds while a function has too few laws to be known by description. Source: Luciano,
 2026-09-30.
+            Si, esto es clave. Luthier tiene que ser expresivo para todo.
+            Ahora, aqui hay un principio que sugiere que debo escribir la implementacion en Luthier y luego usar eso para testear la implementacion externa. 
+            No se si es un principio constructivo. Puede serlo para ingenieria reversa: saber que implemtacion usa un lenguaje ajeno o cuando sabemos por ejemplo que una implementacion es correcta por teorema matematico conocido (esto seria algo que requeriria una palabra clave nueva, quizas axiom ?) y luego por identidad bitwise con valores conocidos se verifica una implementacion externa. Esto es una idea nueva que merece discusion. 
 
 **W6. A test must fail when the thing is wrong.** Laws are written before the algorithm; a law not
 known to be true is worse than a hole; negative controls and reproduced numbers, never passing
 examples alone, are what make a test diagnostic. For G2. Source: Luciano, 2025-09-27 (snapshots
 before tests); the control stated 2026-10-02 (`dialogue:51cca364:a-test-needs-a-negative-control`).
+
+            Esto es un meta-test que tiene que existir siempre: el test debe fallar donde debe fallar, no solo debe pasar cuando debe pasar.    
 
 **W7. The design stays with Luciano.** The model describes and waits; AI work comes in scoped
 steps whose results he can interpret and check, because wholesale delegation cannot be judged.
@@ -390,10 +419,14 @@ For P1 (Luciano's part stays discernible). Source: Luciano, 2026-10-07
 (`day:2026-10-07:chaining-ai-output-you-can-interpret`); the PI role 2026-10-05
 (`dialogue:fea341bd:el-pi-de-diseño-queda-en-luciano`).
 
+
+
 **W8. Every phase closes on a mechanical check.** A phase of a plan names the check that closes
 it; a phase without one belongs to Luciano, and every rule that can become a check becomes one
 (certifier, lint, test). State lives in files, never in a conversation. Source: the model,
 2026-10-05 (`dialogue:fea341bd:cada-fase-con-su-chequeo-o-es-de-luciano`), adopted by Luciano.
+
+
 
 **W9. A patch is named as a patch.** What compensates for a missing piece is logged as such and
 kept out of the specification until the piece exists. Source: the model, 2026-10-05
@@ -403,6 +436,8 @@ kept out of the specification until the piece exists. Source: the model, 2026-10
 version, every parameter and the seed; certificates and the record are the same discipline. P2 in
 force. Source: `record/principles.md`.
 
+
+
 **W11. Every change can be undone.** Small commits, one decision per commit, tags for what is
 reproduced, ownership declared between concurrent sessions. P6 in force. Source:
 `record/principles.md`.
@@ -410,25 +445,36 @@ reproduced, ownership declared between concurrent sessions. P6 in force. Source:
 **W12. Reports are concepts, the most important first.** What failed and what limit was hit come
 first; a count says nothing. For P12 (Luciano's attention is the scarce resource). Source:
 Luciano, 2026-09-30 (`dialogue:ac750929:answers-at-concept-level`).
+               esto es muy importante para la interaccion con la IA
 
 **W13. The foundations are rethought, the reasonable version first.** The language has been remade
 many times (quimulun, tapp, macror, Luthier), each time deeper; the method is to work out the
 reasonable version and then look for the wild one. G0 is the reasonable version; G1 to G3 the
 wild one. Source: Luciano, 2022-06-15 (`written:2022-06-15_sin-titulo-2:rehacer-desde-las-bases`)
 and 2026-05-26 (`day:2026-05-26:razonar-primero-despues-la-locura`).
+               Esto hace al meta-metodo, desestabiliza el sistema y lo hace crecer. El arte esta en no desestabilizarlo antes de tiempo. 
 
 **W14. What reaches Luciano has few, rich concepts.** A synthesis can be judged because it has few
 concepts; a long text with ideas he does not fully handle makes him doubt everything, and that is
 what to avoid. For P12 (Luciano's attention is the scarce resource), as a criterion for what the
 model brings him. Source: Luciano, 2026-10-09 (`WhatsApp Ptt 2026-10-09 at 10.43.06.md`, 04:24 to
 05:06).
+               Clave: no sobrecalentemos el cerebro de Luciano, es el recurso escaso: hay que usarlo para lo importante la direccion estrategica del proyecto. 
+               La IA tiene una directiva de mantener mi engagement, hay que cambiar esa directiva en el siguiente sentido: mi engagement va a ser mejor cuando mi capacidad cognitiva es usada para el desarrollo optimo del proyecto. Optimo en base a que? En base a los principios de este documento, por lo que algo clave es que el computo de la adhesion a los principios de este documento sea eficiente, que no de lugar a deadlocks, por lo que un tema fundamental es detectar cuando ocurren estos deadlocks o tiempos largos de analisis. Estos pueden ser legitimos, es un tema delicado que requiere analisis o ilegitimos: hay una contradiccion entre los principios que impide una resolucion. Tenemos que analizar si es uno u otro y en eso mi asistencia es fundamental.
 
 ## 4. What is open
 
 - The articulation of G3 as `docs/rationale/cost-valued-laws.md` (D6): Ω replaced by [0,∞),
   quantitative equality, graded judgments, cost as −log p or as distance, how the uncertainty of
-  a cost is represented in a certificate.
+  a cost is represented in a certificate.  
+               Aqui hay un concepto fundamental y es la composicion de judments. Como se transfiere la quantitative equality a traves la aplicacion de funciones, cual es el algebra. Esto es lo que define la practicabilidad de esta extension. Y eso se va a ver con ejemplos probablemente. 
+
 - The composition of invariances (G2's derived route): which laws compose and how the demand
   selects them (audio 08.58, 32:01 to 34:07; audio 09.21).
+
+
 - Interpreter or script, for the spec (04 §7), not for this file.
+            Aqui claude le esquivo al bulto, no tomo la discusion de si Luthier debia ser tipo interprete de comandos (como es macroir) o monolitico (como es un programa de C, y decirme cual es el nombre de la tecnica alternativa al interprete de comandos si es que existe alternativa)
+
 - Units as propositions (G0), a wish from Kimulun (audio 08.58, 24:12).
+            Es quimulun. (es un repositorio en mi maquina y en github) Y si unidades (metros, segundos) hacen a los types y no se pueden suman metros y segundos (salvo que tengas velocidades que conviertan unos en otros). 
