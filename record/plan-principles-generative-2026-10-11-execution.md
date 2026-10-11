@@ -1,6 +1,8 @@
 # Rewriting the principles from generative ideas: the execution
 
-Draft 0, 2026-10-11. Written for the sessions that carry it out. The choices it rests on are in
+Draft 0, 2026-10-11. Written for the sessions that carry it out. Status 2026-10-11 (D-2026-10-11-e):
+steps 1 to 4 done in one file, `docs/principles.md` draft 2 (cd24137), derivations inline and the
+P13 check in its header, on Luciano's instruction; step 5 pending; step 6 is his. The choices it rests on are in
 `plan-principles-generative-2026-10-11-decisions.md` (D1 to D8); where a step depends on one it
 says which, and what it assumes until Luciano answers. Inputs: `docs/principles.md` draft 1
 (d6a4ff5 or later), `record/Lucianos ideas/principios organizadores.txt` (fa3f972, 1c7a284),

@@ -839,3 +839,26 @@ Clarified:  "à la Russell" in the note does not mean uniqueness; it means defin
             invariances are produced.
 Status:     current; settles the first of the two open items of the analysis of 2026-10-11; W5
             (native against extern) still open
+
+D-2026-10-11-e  docs/principles.md is rewritten from Luciano's organizers: three tiers in his
+                words (the guide, type theory; two eurekas, the demand and the function type as
+                its laws; principles of good use, cost and expressive), the twenty L derived
+                under them with numbers kept, L21 candidate, W5 restated as bootstrapping. The
+                plan's D1 to D8 are taken as recommended on his instruction to write the file;
+                every formulation and derivation stays *Proposed* until his marks. Steps 1 to 4
+                of the execution collapse into the one file (derivations inline, P13 check in
+                the header); step 5 (the rationale of cost-valued laws) remains.
+Author:     Luciano for the organizers, the tiers and the instruction; Claude for the
+            formulations, derivations and the collapse of the steps
+Quote:      "mi idea ahora es tener un archivo de principios actualizado asi lo veo yo" (chat);
+            "la guía es la te[o]ría de tipos ... los tipos de funciones son las leyes que las
+            definen. Esa fue mi eureka moment ... la demanda de un valor por el mundo externo me
+            define todos los tipos necesarios ... Después son sí principios de buen uso" (audio
+            09.19)
+Source:     record/plan-principles-generative-2026-10-11-decisions.md (f4cb0d6);
+            record/organizing-principles-2026-10-11.md (384fc5f); docs/principles.md draft 2
+            (cd24137)
+Kind:       method, record of the principles. For P1 (his quotes first, the model's text marked),
+            P3 (draft 1 kept in git, the best reading in front), P13 (the check of decisions
+            guided per organizer), W14 (five organizers instead of thirty-four peers)
+Status:     current; draft 2 unapproved, awaiting his marks
