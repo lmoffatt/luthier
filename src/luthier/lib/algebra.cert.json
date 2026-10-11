@@ -1,6 +1,341 @@
 {
   "intRing": [
     {
+      "hash": "1ed8db011d58b545",
+      "when": "2026-10-11T22:10:39",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 472973047,
+      "run_seed": 864037863,
+      "fingerprint": {
+        "code": "df1c5c65ef169dcf",
+        "externs": {},
+        "interpreter": "4382ee22672f03a8"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Associative Int Int exactInt \\ a b { a + b } \\ a b { a + b }",
+          "params": [
+            "a : Int",
+            "b : Int",
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "a = 0, b = 1, x = 0",
+            "a = -1, b = -1, x = 1",
+            "a = 1, b = -1, x = 0",
+            "a = -1, b = -1, x = -1",
+            "a = 0, b = -1, x = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Int Int exactInt \\ a b { a + b } 0",
+          "params": [
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = -1",
+            "x = -1",
+            "x = -1",
+            "x = 1",
+            "x = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.005,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Int exactInt \\ a b { a + b } 0",
+          "params": [
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 1",
+            "x = 0",
+            "x = 0",
+            "x = 0",
+            "x = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.005,
+          "skipped": 0
+        },
+        {
+          "label": "LeftInverse Int exactInt (\\ a b { a + b }, 0).op (\\ a b { a + b }, 0).unit \\ a { 0 - a }",
+          "params": [
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 1",
+            "x = 1",
+            "x = 1",
+            "x = -1",
+            "x = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "RightInverse Int exactInt (\\ a b { a + b }, 0).op (\\ a b { a + b }, 0).unit \\ a { 0 - a }",
+          "params": [
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 0",
+            "x = 0",
+            "x = -1",
+            "x = 0",
+            "x = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Int Int exactInt ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op",
+          "params": [
+            "x : Int",
+            "y : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 0, y = -1",
+            "x = -1, y = 0",
+            "x = -1, y = 0",
+            "x = 1, y = 0",
+            "x = 0, y = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "Associative Int Int exactInt \\ a b { a * b } \\ a b { a * b }",
+          "params": [
+            "a : Int",
+            "b : Int",
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "a = 1, b = 1, x = -1",
+            "a = 0, b = 1, x = 0",
+            "a = -1, b = -1, x = 1",
+            "a = 1, b = -1, x = 0",
+            "a = 0, b = 0, x = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Int Int exactInt \\ a b { a * b } 1",
+          "params": [
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 1",
+            "x = -1",
+            "x = 1",
+            "x = 0",
+            "x = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.005,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Int exactInt \\ a b { a * b } 1",
+          "params": [
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 1",
+            "x = 1",
+            "x = 0",
+            "x = -1",
+            "x = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.005,
+          "skipped": 0
+        },
+        {
+          "label": "LeftDistrib Int Int exactInt ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op (\\ a b { a * b }, 1).op",
+          "params": [
+            "a : Int",
+            "x : Int",
+            "y : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "a = 1, x = 0, y = 1",
+            "a = 1, x = -1, y = 1",
+            "a = -1, x = 1, y = 0",
+            "a = 0, x = 0, y = 0",
+            "a = 1, x = 1, y = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.013,
+          "skipped": 0
+        },
+        {
+          "label": "RightDistrib Int Int Int exactInt ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op (\\ a b { a * b }, 1).op",
+          "params": [
+            "a : Int",
+            "b : Int",
+            "x : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0, x = 0",
+            "a = -1, b = 0, x = 0",
+            "a = 0, b = 0, x = 0",
+            "a = 1, b = 0, x = 0",
+            "a = 0, b = -1, x = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.016,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Int Int (exactInt, ((\\ a b { a + b }, 0), \\ a { 0 - a }), \\ a b { a * b }, 1).eq (exactInt, ((\\ a b { a + b }, 0), \\ a { 0 - a }), \\ a b { a * b }, 1).mul.op",
+          "params": [
+            "x : Int",
+            "y : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = -1, y = 0",
+            "x = 0, y = 1",
+            "x = 1, y = 1",
+            "x = 0, y = 0",
+            "x = 1, y = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        }
+      ],
+      "citation": null
+    },
+    {
       "hash": "fbfbe6ae81682137",
       "when": "2026-10-11T21:32:17",
       "passed": true,
@@ -1029,20 +1364,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "exactBool": [
     {
-      "hash": "189c4203e6c8f323",
-      "when": "2026-10-06T04:08:10",
+      "hash": "893bb62abde37960",
+      "when": "2026-10-11T22:10:39",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 344594531,
-      "run_seed": 20261005,
+      "seed": 1472512992,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "df1c5c65ef169dcf",
+        "code": "7a1486ba7ee21dee",
         "externs": {},
-        "interpreter": "655f03d2b7a2df97"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -1050,18 +1387,14 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "Associative Int Int exactInt \\ a b { a + b } \\ a b { a + b }",
+          "label": "Reflexive Bool \\ p q { p == q }",
           "params": [
-            "a : Int",
-            "b : Int",
-            "x : Int"
+            "x : Bool"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -1069,73 +1402,24 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+            "true (Unit: all values) | false (Unit: all values)"
           ],
           "sample_cases": [
-            "a = 1, b = 1, x = 1",
-            "a = 0, b = 0, x = -1",
-            "a = -1, b = 0, x = 0",
-            "a = -1, b = 0, x = 0",
-            "a = -1, b = 1, x = 1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.01,
-          "skipped": 0
-        },
-        {
-          "label": "LeftIdentity Int Int exactInt \\ a b { a + b } 0",
-          "params": [
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = 1",
-            "x = -1",
-            "x = 0",
-            "x = -1",
-            "x = 0"
-          ],
-          "outcome": "passed",
-          "seconds": 0.006,
-          "skipped": 0
-        },
-        {
-          "label": "RightIdentity Int exactInt \\ a b { a + b } 0",
-          "params": [
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = -1",
-            "x = 1",
-            "x = 1",
-            "x = -1",
-            "x = 0"
+            "x = true",
+            "x = false",
+            "x = false",
+            "x = true",
+            "x = false"
           ],
           "outcome": "passed",
           "seconds": 0.005,
           "skipped": 0
         },
         {
-          "label": "LeftInverse Int exactInt (\\ a b { a + b }, 0).op (\\ a b { a + b }, 0).unit \\ a { 0 - a }",
+          "label": "Symmetric Bool Bool \\ p q { p == q } \\ p q { p == q }",
           "params": [
-            "x : Int"
+            "x : Bool",
+            "y : Bool"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -1143,231 +1427,23 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+            "true (Unit: all values) | false (Unit: all values)",
+            "true (Unit: all values) | false (Unit: all values)"
           ],
           "sample_cases": [
-            "x = 0",
-            "x = 0",
-            "x = 1",
-            "x = 0",
-            "x = 1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.007,
-          "skipped": 0
-        },
-        {
-          "label": "RightInverse Int exactInt (\\ a b { a + b }, 0).op (\\ a b { a + b }, 0).unit \\ a { 0 - a }",
-          "params": [
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = -1",
-            "x = -1",
-            "x = 0",
-            "x = 1",
-            "x = 0"
-          ],
-          "outcome": "passed",
-          "seconds": 0.008,
-          "skipped": 0
-        },
-        {
-          "label": "Symmetric Int Int exactInt ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op",
-          "params": [
-            "x : Int",
-            "y : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = -1, y = -1",
-            "x = 1, y = -1",
-            "x = 0, y = -1",
-            "x = 0, y = 0",
-            "x = 1, y = -1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.008,
-          "skipped": 0
-        },
-        {
-          "label": "Associative Int Int exactInt \\ a b { a * b } \\ a b { a * b }",
-          "params": [
-            "a : Int",
-            "b : Int",
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "a = 0, b = 1, x = -1",
-            "a = 0, b = 0, x = 0",
-            "a = 0, b = -1, x = 0",
-            "a = -1, b = 0, x = 0",
-            "a = -1, b = -1, x = 1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.01,
-          "skipped": 0
-        },
-        {
-          "label": "LeftIdentity Int Int exactInt \\ a b { a * b } 1",
-          "params": [
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = 1",
-            "x = 0",
-            "x = 0",
-            "x = 0",
-            "x = 0"
-          ],
-          "outcome": "passed",
-          "seconds": 0.006,
-          "skipped": 0
-        },
-        {
-          "label": "RightIdentity Int exactInt \\ a b { a * b } 1",
-          "params": [
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = 0",
-            "x = 0",
-            "x = 0",
-            "x = 1",
-            "x = -1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.005,
-          "skipped": 0
-        },
-        {
-          "label": "LeftDistrib Int Int exactInt ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op (\\ a b { a * b }, 1).op",
-          "params": [
-            "a : Int",
-            "x : Int",
-            "y : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "a = 0, x = 0, y = 0",
-            "a = -1, x = 0, y = 0",
-            "a = 1, x = -1, y = 0",
-            "a = 1, x = 1, y = 0",
-            "a = -1, x = 0, y = -1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.014,
-          "skipped": 0
-        },
-        {
-          "label": "RightDistrib Int Int Int exactInt ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op ((\\ a b { a + b }, 0), \\ a { 0 - a }).monoid.op (\\ a b { a * b }, 1).op",
-          "params": [
-            "a : Int",
-            "b : Int",
-            "x : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "a = 0, b = -1, x = -1",
-            "a = 0, b = 1, x = 1",
-            "a = -1, b = -1, x = 0",
-            "a = 0, b = 1, x = 0",
-            "a = 0, b = 0, x = 1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.018,
-          "skipped": 0
-        },
-        {
-          "label": "Symmetric Int Int (exactInt, ((\\ a b { a + b }, 0), \\ a { 0 - a }), \\ a b { a * b }, 1).eq (exactInt, ((\\ a b { a + b }, 0), \\ a { 0 - a }), \\ a b { a * b }, 1).mul.op",
-          "params": [
-            "x : Int",
-            "y : Int"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
-          ],
-          "sample_cases": [
-            "x = 0, y = 1",
-            "x = -1, y = 0",
-            "x = -1, y = -1",
-            "x = 0, y = -1",
-            "x = -1, y = -1"
+            "x = false, y = true",
+            "x = true, y = false",
+            "x = false, y = false",
+            "x = true, y = true",
+            "x = true, y = false"
           ],
           "outcome": "passed",
           "seconds": 0.01,
           "skipped": 0
         }
-      ]
-    }
-  ],
-  "exactBool": [
+      ],
+      "citation": null
+    },
     {
       "hash": "f3932a3e22f44e08",
       "when": "2026-10-11T21:32:17",
@@ -1599,20 +1675,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "exactInt": [
     {
-      "hash": "799a31229c3cfe32",
-      "when": "2026-10-06T00:53:07",
+      "hash": "50391943525bdaa7",
+      "when": "2026-10-11T22:10:39",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 442227079,
-      "run_seed": 20261005,
+      "seed": 362537907,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "7a1486ba7ee21dee",
+        "code": "784d4724d1a4112f",
         "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -1620,16 +1698,14 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "Reflexive Bool \\ p q { p == q }",
+          "label": "Reflexive Int \\ a b { a == b }",
           "params": [
-            "x : Bool"
+            "x : Int"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -1637,49 +1713,48 @@
           "failure": null,
           "error": null,
           "domains": [
-            "true (Unit: all values) | false (Unit: all values)"
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
           ],
           "sample_cases": [
-            "x = true",
-            "x = true",
-            "x = true",
-            "x = true",
-            "x = true"
+            "x = 0",
+            "x = -1",
+            "x = 1",
+            "x = 0",
+            "x = -1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.003,
+          "skipped": 0
+        },
+        {
+          "label": "Symmetric Int Bool \\ p q { p == q } \\ a b { a == b }",
+          "params": [
+            "x : Int",
+            "y : Int"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+          ],
+          "sample_cases": [
+            "x = 1, y = 1",
+            "x = 1, y = 1",
+            "x = -1, y = 1",
+            "x = 0, y = 1",
+            "x = 0, y = -1"
           ],
           "outcome": "passed",
           "seconds": 0.006,
           "skipped": 0
-        },
-        {
-          "label": "Symmetric Bool Bool \\ p q { p == q } \\ p q { p == q }",
-          "params": [
-            "x : Bool",
-            "y : Bool"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "true (Unit: all values) | false (Unit: all values)",
-            "true (Unit: all values) | false (Unit: all values)"
-          ],
-          "sample_cases": [
-            "x = true, y = true",
-            "x = false, y = true",
-            "x = true, y = true",
-            "x = false, y = false",
-            "x = false, y = false"
-          ],
-          "outcome": "passed",
-          "seconds": 0.011,
-          "skipped": 0
         }
-      ]
-    }
-  ],
-  "exactInt": [
+      ],
+      "citation": null
+    },
     {
       "hash": "3332077cb6405fd3",
       "when": "2026-10-11T21:32:17",
@@ -1911,20 +1986,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "exactNonNegative": [
     {
-      "hash": "4ef748c6cfa3f394",
-      "when": "2026-10-06T00:53:07",
+      "hash": "2307d25c183bf898",
+      "when": "2026-10-11T22:10:39",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 2097075572,
-      "run_seed": 20261005,
+      "seed": 1906147174,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "784d4724d1a4112f",
+        "code": "bfb3e61595510eb9",
         "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -1932,16 +2009,14 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "Reflexive Int \\ a b { a == b }",
+          "label": "Reflexive NonNegative \\ a b { a == b }",
           "params": [
-            "x : Int"
+            "x : NonNegative"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -1949,24 +2024,24 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
           ],
           "sample_cases": [
-            "x = 0",
-            "x = 1",
-            "x = -1",
-            "x = -1",
-            "x = 1"
+            "x = 0.8975631107135305",
+            "x = 0.20608776520508054",
+            "x = 0.3111660883226446",
+            "x = 0.4965016713601036",
+            "x = 0.6709154540631799"
           ],
           "outcome": "passed",
-          "seconds": 0.003,
+          "seconds": 0.008,
           "skipped": 0
         },
         {
-          "label": "Symmetric Int Bool \\ p q { p == q } \\ a b { a == b }",
+          "label": "Symmetric NonNegative Bool \\ p q { p == q } \\ a b { a == b }",
           "params": [
-            "x : Int",
-            "y : Int"
+            "x : NonNegative",
+            "y : NonNegative"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -1974,24 +2049,23 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)"
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
           ],
           "sample_cases": [
-            "x = 1, y = 1",
-            "x = 1, y = 1",
-            "x = 0, y = -1",
-            "x = 0, y = 1",
-            "x = 1, y = 0"
+            "x = 0.6524929991469395, y = 0.4384297530359291",
+            "x = 0.033710911406351185, y = 0.7211747147425931",
+            "x = 0.8775811212790994, y = 0.6464430927782518",
+            "x = 0.3398174343031768, y = 0.9870220159178189",
+            "x = 0.4223544480907151, y = 0.3939749527612182"
           ],
           "outcome": "passed",
-          "seconds": 0.007,
+          "seconds": 0.014,
           "skipped": 0
         }
-      ]
-    }
-  ],
-  "exactNonNegative": [
+      ],
+      "citation": null
+    },
     {
       "hash": "8793f9ce7d8e2310",
       "when": "2026-10-11T21:32:17",
@@ -2223,20 +2297,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "allOf": [
     {
-      "hash": "bf222bd45047ec31",
-      "when": "2026-10-06T00:53:07",
+      "hash": "ac1cce6a4502cfa4",
+      "when": "2026-10-11T22:10:39",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 1222857545,
-      "run_seed": 20261005,
+      "seed": 894582145,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "bfb3e61595510eb9",
+        "code": "a67be8e15385f10b",
         "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -2244,16 +2320,16 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "Reflexive NonNegative \\ a b { a == b }",
+          "label": "Associative Bool Bool exactBool and and",
           "params": [
-            "x : NonNegative"
+            "a : Bool",
+            "b : Bool",
+            "x : Bool"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -2261,49 +2337,72 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
+            "true (Unit: all values) | false (Unit: all values)",
+            "true (Unit: all values) | false (Unit: all values)",
+            "true (Unit: all values) | false (Unit: all values)"
           ],
           "sample_cases": [
-            "x = 0.6067790206335966",
-            "x = 0.11946003186101661",
-            "x = 0.6803024989963051",
-            "x = 0.3356093260800199",
-            "x = 0.015831539928400362"
-          ],
-          "outcome": "passed",
-          "seconds": 0.009,
-          "skipped": 0
-        },
-        {
-          "label": "Symmetric NonNegative Bool \\ p q { p == q } \\ a b { a == b }",
-          "params": [
-            "x : NonNegative",
-            "y : NonNegative"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
-          ],
-          "sample_cases": [
-            "x = 0.7491233734793372, y = 0.8884271527527807",
-            "x = 0.15010337117213113, y = 0.19612693837959028",
-            "x = 0.09189212772800004, y = 0.09049314615800319",
-            "x = 0.2741255131277418, y = 0.9515183952713919",
-            "x = 0.3917465287271713, y = 0.14224906620419286"
+            "a = false, b = true, x = false",
+            "a = false, b = true, x = true",
+            "a = false, b = true, x = false",
+            "a = false, b = true, x = true",
+            "a = false, b = false, x = false"
           ],
           "outcome": "passed",
           "seconds": 0.015,
           "skipped": 0
+        },
+        {
+          "label": "LeftIdentity Bool Bool exactBool and true",
+          "params": [
+            "x : Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "true (Unit: all values) | false (Unit: all values)"
+          ],
+          "sample_cases": [
+            "x = false",
+            "x = true",
+            "x = false",
+            "x = true",
+            "x = false"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Bool exactBool and true",
+          "params": [
+            "x : Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "true (Unit: all values) | false (Unit: all values)"
+          ],
+          "sample_cases": [
+            "x = true",
+            "x = false",
+            "x = true",
+            "x = false",
+            "x = false"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
         }
-      ]
-    }
-  ],
-  "allOf": [
+      ],
+      "citation": null
+    },
     {
       "hash": "dc2346bc03bb5c3e",
       "when": "2026-10-11T21:32:17",
@@ -2613,20 +2712,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "anyOf": [
     {
-      "hash": "63873a0e6aa8fb92",
-      "when": "2026-10-06T00:53:07",
+      "hash": "642c815e989c12ec",
+      "when": "2026-10-11T22:10:39",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 1127326984,
-      "run_seed": 20261005,
+      "seed": 380543237,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "a67be8e15385f10b",
+        "code": "467d8c86d6ff870b",
         "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -2634,14 +2735,12 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "Associative Bool Bool exactBool and and",
+          "label": "Associative Bool Bool exactBool or or",
           "params": [
             "a : Bool",
             "b : Bool",
@@ -2658,42 +2757,18 @@
             "true (Unit: all values) | false (Unit: all values)"
           ],
           "sample_cases": [
-            "a = false, b = true, x = false",
             "a = true, b = false, x = true",
             "a = true, b = true, x = false",
-            "a = false, b = false, x = true",
-            "a = false, b = false, x = true"
+            "a = true, b = false, x = true",
+            "a = true, b = true, x = true",
+            "a = true, b = false, x = true"
           ],
           "outcome": "passed",
-          "seconds": 0.016,
+          "seconds": 0.026,
           "skipped": 0
         },
         {
-          "label": "LeftIdentity Bool Bool exactBool and true",
-          "params": [
-            "x : Bool"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "true (Unit: all values) | false (Unit: all values)"
-          ],
-          "sample_cases": [
-            "x = true",
-            "x = true",
-            "x = true",
-            "x = false",
-            "x = true"
-          ],
-          "outcome": "passed",
-          "seconds": 0.009,
-          "skipped": 0
-        },
-        {
-          "label": "RightIdentity Bool exactBool and true",
+          "label": "LeftIdentity Bool Bool exactBool or false",
           "params": [
             "x : Bool"
           ],
@@ -2707,19 +2782,42 @@
           ],
           "sample_cases": [
             "x = false",
-            "x = false",
             "x = true",
+            "x = false",
             "x = true",
             "x = false"
           ],
           "outcome": "passed",
-          "seconds": 0.008,
+          "seconds": 0.01,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity Bool exactBool or false",
+          "params": [
+            "x : Bool"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "true (Unit: all values) | false (Unit: all values)"
+          ],
+          "sample_cases": [
+            "x = false",
+            "x = false",
+            "x = true",
+            "x = true",
+            "x = true"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
           "skipped": 0
         }
-      ]
-    }
-  ],
-  "anyOf": [
+      ],
+      "citation": null
+    },
     {
       "hash": "a2f485ff5ab9773c",
       "when": "2026-10-11T21:32:17",
@@ -3029,20 +3127,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "largest": [
     {
-      "hash": "9c3a19789dbe943e",
-      "when": "2026-10-06T00:53:07",
+      "hash": "87f257e830cea0d1",
+      "when": "2026-10-11T22:10:40",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 1712562944,
-      "run_seed": 20261005,
+      "seed": 1179902615,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "467d8c86d6ff870b",
+        "code": "1193958c22a98892",
         "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -3050,18 +3150,15 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "Associative Bool Bool exactBool or or",
+          "label": "match (a > b) { true -> a ; false -> b } >= 0.0",
           "params": [
-            "a : Bool",
-            "b : Bool",
-            "x : Bool"
+            "a : NonNegative",
+            "b : NonNegative"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -3069,25 +3166,26 @@
           "failure": null,
           "error": null,
           "domains": [
-            "true (Unit: all values) | false (Unit: all values)",
-            "true (Unit: all values) | false (Unit: all values)",
-            "true (Unit: all values) | false (Unit: all values)"
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
           ],
           "sample_cases": [
-            "a = false, b = true, x = true",
-            "a = false, b = true, x = true",
-            "a = false, b = false, x = true",
-            "a = false, b = true, x = false",
-            "a = true, b = false, x = true"
+            "a = 0.418239262539029, b = 0.6391178443400651",
+            "a = 0.09817619693852131, b = 0.5669047925712014",
+            "a = 0.22068566317583072, b = 0.8797918664698887",
+            "a = 0.7042814241470516, b = 0.3660319219051742",
+            "a = 0.11670129380221272, b = 0.905281173154767"
           ],
           "outcome": "passed",
-          "seconds": 0.016,
+          "seconds": 0.012,
           "skipped": 0
         },
         {
-          "label": "LeftIdentity Bool Bool exactBool or false",
+          "label": "Associative NonNegative NonNegative exactNonNegative \\ a b { match (a > b) { true -> a ; false -> b } } \\ a b { match (a > b) { true -> a ; false -> b } }",
           "params": [
-            "x : Bool"
+            "a : NonNegative",
+            "b : NonNegative",
+            "x : NonNegative"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -3095,23 +3193,25 @@
           "failure": null,
           "error": null,
           "domains": [
-            "true (Unit: all values) | false (Unit: all values)"
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
           ],
           "sample_cases": [
-            "x = false",
-            "x = false",
-            "x = true",
-            "x = false",
-            "x = false"
+            "a = 0.07982316321490845, b = 0.9676307811702174, x = 0.449718502727227",
+            "a = 0.9422522922909422, b = 0.710949562279948, x = 0.5500622511297841",
+            "a = 0.08223626345926349, b = 0.9894402693924282, x = 0.674545503689489",
+            "a = 0.22003474652705357, b = 0.6925399866650712, x = 0.2619668676579441",
+            "a = 0.36054135675318455, b = 0.05061915552738072, x = 0.09281758227055348"
           ],
           "outcome": "passed",
-          "seconds": 0.008,
+          "seconds": 0.021,
           "skipped": 0
         },
         {
-          "label": "RightIdentity Bool exactBool or false",
+          "label": "LeftIdentity NonNegative NonNegative exactNonNegative \\ a b { match (a > b) { true -> a ; false -> b } } 0.0",
           "params": [
-            "x : Bool"
+            "x : NonNegative"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -3119,23 +3219,46 @@
           "failure": null,
           "error": null,
           "domains": [
-            "true (Unit: all values) | false (Unit: all values)"
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
           ],
           "sample_cases": [
-            "x = false",
-            "x = false",
-            "x = false",
-            "x = false",
-            "x = true"
+            "x = 0.2508094383687527",
+            "x = 0.252407412570232",
+            "x = 0.18859564695709663",
+            "x = 0.05691595293939078",
+            "x = 0.8958224849505483"
           ],
           "outcome": "passed",
-          "seconds": 0.007,
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "RightIdentity NonNegative exactNonNegative \\ a b { match (a > b) { true -> a ; false -> b } } 0.0",
+          "params": [
+            "x : NonNegative"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
+          ],
+          "sample_cases": [
+            "x = 0.13518789263347508",
+            "x = 0.011313659363006767",
+            "x = 0.44224916772197265",
+            "x = 0.5135371722222764",
+            "x = 0.8523338588440987"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
           "skipped": 0
         }
-      ]
-    }
-  ],
-  "largest": [
+      ],
+      "citation": null
+    },
     {
       "hash": "101710d264967aca",
       "when": "2026-10-11T21:32:17",
@@ -3523,20 +3646,22 @@
           "skipped": 0
         }
       ]
-    },
+    }
+  ],
+  "foldWithFrom": [
     {
-      "hash": "bee104010bb727bc",
-      "when": "2026-10-06T00:53:07",
+      "hash": "54c68a502fb44fdb",
+      "when": "2026-10-11T22:10:40",
       "passed": true,
       "outcome": "passed",
       "n": 100,
       "mode": "sampled",
-      "seed": 2027251717,
-      "run_seed": 20261005,
+      "seed": 434054023,
+      "run_seed": 864037863,
       "fingerprint": {
-        "code": "1193958c22a98892",
+        "code": "9be9756e672d8fc3",
         "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
+        "interpreter": "4382ee22672f03a8"
       },
       "generators": {},
       "provisional": [],
@@ -3544,17 +3669,15 @@
         "size": 16,
         "growth": "1 to size over a sampled run",
         "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
+        "python_generators": [],
         "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
       },
       "laws": [
         {
-          "label": "match (a > b) { true -> a ; false -> b } >= 0.0",
+          "label": "not (lo >= n) -> 0 <= lo and lo < n",
           "params": [
-            "a : NonNegative",
-            "b : NonNegative"
+            "n : Int",
+            "lo : Nat"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -3562,26 +3685,25 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
           ],
           "sample_cases": [
-            "a = 0.764240663692346, b = 0.9178353952761198",
-            "a = 0.8377811901461822, b = 0.3784537835175037",
-            "a = 0.017547358444549355, b = 0.15515886524583777",
-            "a = 0.9660017537505894, b = 0.7398825235078841",
-            "a = 0.3371337705251074, b = 0.5850394751950254"
+            "n = -1, lo = 0",
+            "n = 0, lo = 1",
+            "n = 0, lo = 1",
+            "n = 0, lo = 1",
+            "n = -1, lo = 0"
           ],
           "outcome": "passed",
-          "seconds": 0.013,
+          "seconds": 0.01,
           "skipped": 0
         },
         {
-          "label": "Associative NonNegative NonNegative exactNonNegative \\ a b { match (a > b) { true -> a ; false -> b } } \\ a b { match (a > b) { true -> a ; false -> b } }",
+          "label": "not (lo >= n) -> 0 <= lo + 1",
           "params": [
-            "a : NonNegative",
-            "b : NonNegative",
-            "x : NonNegative"
+            "n : Int",
+            "lo : Nat"
           ],
           "mode": "sampled",
           "cases": 100,
@@ -3589,73 +3711,23 @@
           "failure": null,
           "error": null,
           "domains": [
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0",
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
           ],
           "sample_cases": [
-            "a = 0.11036782712743043, b = 0.8301512020610771, x = 0.9849975268968645",
-            "a = 0.04347603446266812, b = 0.896124670600497, x = 0.8084360709655685",
-            "a = 0.25727168270573, b = 0.36026332999807176, x = 0.9310308601945456",
-            "a = 0.7024449768195866, b = 0.8919212108780972, x = 0.6464513310207529",
-            "a = 0.5035144012637713, b = 0.7411243608504934, x = 0.996598972773038"
+            "n = 0, lo = 0",
+            "n = -1, lo = 0",
+            "n = 1, lo = 1",
+            "n = -1, lo = 1",
+            "n = -1, lo = 1"
           ],
           "outcome": "passed",
-          "seconds": 0.034,
-          "skipped": 0
-        },
-        {
-          "label": "LeftIdentity NonNegative NonNegative exactNonNegative \\ a b { match (a > b) { true -> a ; false -> b } } 0.0",
-          "params": [
-            "x : NonNegative"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
-          ],
-          "sample_cases": [
-            "x = 0.9872659165348767",
-            "x = 0.2900654013596442",
-            "x = 0.681776777999098",
-            "x = 0.8230719454914421",
-            "x = 0.18397537158039157"
-          ],
-          "outcome": "passed",
-          "seconds": 0.011,
-          "skipped": 0
-        },
-        {
-          "label": "RightIdentity NonNegative exactNonNegative \\ a b { match (a > b) { true -> a ; false -> b } } 0.0",
-          "params": [
-            "x : NonNegative"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64) where x >= 0.0"
-          ],
-          "sample_cases": [
-            "x = 0.49513985669784244",
-            "x = 0.0594387250427546",
-            "x = 0.5495436027830476",
-            "x = 0.6743348322288523",
-            "x = 0.8901855252314403"
-          ],
-          "outcome": "passed",
-          "seconds": 0.011,
+          "seconds": 0.009,
           "skipped": 0
         }
-      ]
-    }
-  ],
-  "foldWithFrom": [
+      ],
+      "citation": null
+    },
     {
       "hash": "ad3c46ba465e9b5c",
       "when": "2026-10-11T21:32:17",
@@ -3827,86 +3899,6 @@
         "code": "9be9756e672d8fc3",
         "externs": {},
         "interpreter": "3ec05c3a1d461c8f"
-      },
-      "generators": {},
-      "provisional": [],
-      "generation": {
-        "size": 16,
-        "growth": "1 to size over a sampled run",
-        "generators": {},
-        "python_generators": [
-          "NormalDouble"
-        ],
-        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
-      },
-      "laws": [
-        {
-          "label": "not (lo >= n) -> 0 <= lo and lo < n",
-          "params": [
-            "n : Int",
-            "lo : Nat"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
-          ],
-          "sample_cases": [
-            "n = 1, lo = 0",
-            "n = -1, lo = 1",
-            "n = 0, lo = 0",
-            "n = 0, lo = 1",
-            "n = -1, lo = 1"
-          ],
-          "outcome": "passed",
-          "seconds": 0.01,
-          "skipped": 0
-        },
-        {
-          "label": "not (lo >= n) -> 0 <= lo + 1",
-          "params": [
-            "n : Int",
-            "lo : Nat"
-          ],
-          "mode": "sampled",
-          "cases": 100,
-          "passed": true,
-          "failure": null,
-          "error": null,
-          "domains": [
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt)",
-            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
-          ],
-          "sample_cases": [
-            "n = -1, lo = 0",
-            "n = 0, lo = 1",
-            "n = 1, lo = 0",
-            "n = 0, lo = 0",
-            "n = 1, lo = 0"
-          ],
-          "outcome": "passed",
-          "seconds": 0.01,
-          "skipped": 0
-        }
-      ]
-    },
-    {
-      "hash": "4b7b8427bb9a93bf",
-      "when": "2026-10-06T00:53:07",
-      "passed": true,
-      "outcome": "passed",
-      "n": 100,
-      "mode": "sampled",
-      "seed": 1623676599,
-      "run_seed": 20261005,
-      "fingerprint": {
-        "code": "9be9756e672d8fc3",
-        "externs": {},
-        "interpreter": "c2e1f73fa5899d76"
       },
       "generators": {},
       "provisional": [],
