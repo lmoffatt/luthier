@@ -64,3 +64,14 @@ candidates for `tests/spec/` once the planner exists; logged here so they are no
 `delay` first against strongest arrival (chatGPT), `sin_fast` outside the sample (DeepSeek), the
 singular matrix (Gemini), the FFT on a prime length (chatGPT), the cancellation under a swap
 (Gemini), the stale memo across a library version (all four).
+
+## 3. His correction, same night
+
+"¿Cómo que toda función empieza con cero leyes? Eso es para definir una teoría." The premise of the
+four L14 counterexamples, and of the draft 5 and 6 wording of L14, came from Claude max's second
+round ("which is where D-d says every function starts"), not from D-2026-10-11-d, which says laws
+accumulate and need not characterize, nothing about zero. A function with no laws is a hole of a
+theory being defined (L8). So L14 stands in his words: an extern is validated against its type's
+laws before it is applied and refused if it fails; W5's agreement test is in addition; substitution
+is D-2026-10-11-m with the round's scope and sensitivity rules. The L14 question is closed; the
+four counterexamples remain useful as spec tests for the planner, under a type with one weak law.
