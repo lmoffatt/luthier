@@ -19,6 +19,8 @@ session: a name bound to a provisional value for inspection and then rebound aft
 which is what a REPL is for. So the rule: a `<-` whose previous binding of the same name has no
 consumer is an error in a file and allowed in a session, where the lint says "unused binding".
 Goes with the six rules (D-2026-10-11-i) as rule 3a.
+    OK
+
 
 ## `;` or line break
 
@@ -34,6 +36,9 @@ line; inside parentheses and brackets line breaks are ignored as today. This cha
 `02 §1` (the braces of a lambda stop ignoring line breaks, since a lambda body is a block) and
 nothing else. Decision for you; recommended yes, since every block will otherwise end its lines
 with `;` for no information.
+    OK
+
+
 
 ## Expressing an order of execution in Luthier
 
@@ -53,6 +58,8 @@ gets laws like the declarative one, a scheduler is a model certified against `Li
 "these two orders are equivalent" is a law tested on the values actually computed, the puzzle of
 L5. *Proposed* as a library, `plan.lut`, after the session is in the spec; it is the first thing
 G3 will need too, since the cost of a schedule is where expected loss is computed (L10).
+    OK
+
 
 ## The kernel's laws, defined
 
@@ -74,6 +81,8 @@ sampled; enumerating `Fin n -> Fin m` (m^n tables) is finite and should be allow
 observed pointwise it is beta, which is what the file says. Since every concrete type belongs to
 this theory, `KernelLaws` is also the first candidate for `assumed` outside `core.lut`: the
 interpreter's conformance is what a user takes on trust, and now a user can also test it.
+          assumed or proved? 
+
 
 ## Where the laws live
 
@@ -87,6 +96,9 @@ and actions, imported by `algebra.lut`, `kernel_laws.lut` and anything that stat
 operation it does not own; `algebra.lut` keeps the structures. The name `laws` is plain and says
 what G2 says, that laws come first. Decision for you; it is a move of definitions with no change of
 meaning, one commit.
+           Agreed
+
+
 
 ## References as values
 
@@ -110,6 +122,9 @@ library such as `optim` carries its own `optim.biblio`. The directive then takes
 
 and the certificate records the reference's identifiers and hash, so a reader finds the source
 from the certificate alone (W10). Goes with D-2026-10-11-f as its syntax; amended again below.
+
+        OK
+
 
 ## Mutation: how to mutate a program
 
