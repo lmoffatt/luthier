@@ -104,3 +104,44 @@ the third. The derivations that move under it: L20, `05 §3`, D-2026-10-07-e, D-
 
 1. Order of the eurekas: his order (function type, then demand), tags kept. ok / no.
 2. G5 as the third eureka, with the formulation above or his correction. ok / no / corrected.
+
+## 3. Bool and Cost, or Cost alone; two versions of Luthier
+
+Source: his annotation under G3 in `docs/principles_2.md` (his working copy, not committed at his
+request), 2026-10-12:
+
+> Aca la pregunta es si usamos boolean y cost o solo cost con boolean usando los extremos. Parece
+> mas simple lo segundo, pero computar con costos es algo en que no hay tanta experiencia y exige
+> a todo el proyecto. Entonces, cabe la posibilidad de dos versiones de Luthier, una bool y otra
+> de costos (o nombres mejores). Si hacemos dos versiones, empezariamos por bool, necesitariamos
+> una forma de indicar costos y la composicion es facil promoviendo de bool a costos... o
+> colapsando costos a boolean con corte..
+
+What the drafts already say (D8 item 1; `11` §2; L21): one language; a law returns `Bool` or
+`Cost` and the type of the result says which; `Bool` is the two-valued case, 0 and ∞; until the
+algebra of G3 exists the application runs on a Boolean interim (laws of the form
+d(f x, g x) ≤ tol, tol a parameter, no composition of tolerances along a chain, no run database).
+In the interpreter today only `Bool` exists; `Cost` is proposed over `ExtendedReal` of `core.lut`
+and `05 §3` defines a law as Bool-, Failures- or Law-valued.
+
+*Proposed* answer: not two versions; one language with `Bool` a subtype of `Cost`,
+`{ c : Cost | c == 0 or c == posInf }`, so that promotion is the inclusion of a subtype (forgotten
+by L13, free), and the Boolean version is the fragment where every law lands in that subtype,
+where max and sum are `and`. The cutoff goes the other way and does not compose: in [0,∞] the sum
+composes (d ≤ a and d' ≤ b give a + b along a chain, the triangle inequality), while "≤ ε" is not
+a homomorphism, since two links each ≤ ε give ≤ 2ε. This is the non-transitivity of L10 (draft 5)
+seen from G3, and it is the Lawvere point: the cutoff is legitimate only at the end of a chain,
+at the demand, where ε is the demand's parameter (L17; D8 item 1, "the proposition is cost ≤ ε
+with ε the demand's"); in the middle of a chain the cost is carried. Hence the Boolean version is
+not obtained by collapsing a cost-valued Luthier, and the cost-valued one is not obtained by
+promoting the Boolean: promotion gives the values, not the composition (sensitivities, `11` §5).
+A fragment and its extension, not two versions.
+
+Where he is right: computing with costs has little precedent and touches the whole project. That
+is true of the algebra of composition (`11` §5, §6: a Lipschitz constant per function type,
+condition numbers, Bayes) and of the run database, and the Boolean interim isolates exactly that.
+Its real cost: `Cost` and the inclusion of `Bool` must enter the kernel before the first law over
+floats, so that no law is written twice; today they are not there, and `05 §3` must say "a law is
+Cost-valued, Bool included". Small.
+
+For his mark: `Bool` as a subtype of `Cost` in the kernel (touches `05 §3`, `core.lut`), ok / no.
