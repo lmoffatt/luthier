@@ -29,7 +29,8 @@ one screen. Done when he has marked the five formulations and the marks are comm
 In the same file, one row per L1 to L20, W6 and the candidate L21 (identity certificates, D3):
 number, organizers it derives from, the
 derivation in at most two lines, the extra assumption if any, and one of: derives, needs
-assumption, moves to W (D3). Sources of draft 1 are copied unchanged.
+assumption, moves to W (D3: decided here, row by row, not in advance; L7, L17 and L14 are
+expected to derive, from G0 and G2, from G1 and G3, and from G2). Sources of draft 1 are copied unchanged.
 
 Check that closes the step: every row has a non-empty organizer field or the mark "moves to W";
 the grep is
