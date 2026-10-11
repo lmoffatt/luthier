@@ -353,3 +353,22 @@ Luciano noticed is real in G0 and dissolves in G3, which is one more sign that G
 (§3). Also, `Maybe T` presupposes that T is decidable by computation or by sampling (L4, L11);
 HoTT does not grant that for every proposition, and Luthier's answer is that what cannot be
 decided stays a hole (L8).
+
+## Addendum 8: Luciano's correction, every function generates an equivalence
+
+Luciano (chat): "una función genera equivalencias f(a) == f(b) ⟹ a ~ b, y más si f(a) = true".
+He is right and addendum 7 was wrong on the predicates. Every function induces an equivalence on
+its domain, its kernel, and factors through the quotient X/~ into Y; a predicate is the case with
+two classes, T and its complement, and deciding `Maybe T` places x in its class. So computing
+f(x) is classifying: the value is the name of the class of x under f, and checking f(a) = f(b)
+is checking a ~ b. L12 keeps "equivalences" under this reading, and `Maybe T` fits without the
+trick addendum 7 dismissed: `p x = true` is the class.
+
+*Proposed*, to keep in the derivation of L12 and L10: two different equivalences are present and
+must not be conflated. The kernel equivalence on the domain, induced by a function, is what
+computing a value does. The equivalence between terms induced by a law (f (x + y) and f x + f y
+fall in the same class under the semantics; two implementations are equivalent when they compute
+the same function) is G0's quotient, L10. Under G3 the kernel reading generalizes: a function
+pulls the distance of Y back to a pseudodistance on X, d(a, b) = d(f a, f b), and the classes
+become "indistinguishable by f up to ε". The remark of addendum 7 on decidability (what cannot
+be decided stays a hole, L8) stands.
