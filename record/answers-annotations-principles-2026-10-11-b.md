@@ -21,6 +21,7 @@ observations are the demand of the world's state. So L12 in draft 3: "Evaluation
 execution is an action on the world, verified by observing the world before and after it, and the
 laws over actions are stated over those two observations." From G2 (observation) and G1 (the
 action is the executive face).
+        OK
 
 ## 2. `:=` is a binding too, and the law of `<-`
 
@@ -36,6 +37,12 @@ reduces to its body, so it is definitional equality `≡` made by an act); after
 `<-` on that name, and in the core each rebinding is a fresh name, so on its own name it also
 holds for all time (R12). L16 in draft 3 says so, with the two binding acts and their one law,
 next to the levels of equality.
+          Una cosa que estoy pensando es la concatenacion de Luthier statements. 
+          Aqui hay un principio guia: si aceptamos como propusimos la falta de orden de los statements, <- no podria tener lugar, porque dos <- suponen un orden. 
+          pero por otro lado, tambien dijimos que el orden esta dado por las dependencias, 
+          esto implica algo ligeramente complejo: el segundo <- deberia depender del primer valor asignado por el <- o estar en otro bloque (definicion donde <- es usado para valores default vs bloques de uso). 
+          Lo cual nos introduce al concepto de bloques. Y ahi te pido ayuda.  
+
 
 ## 3. Terminology, theories in theories, operators, free types, what a law is
 
@@ -47,12 +54,17 @@ Fixed: *theory* (a type with laws, usually parameterized; `05 §3`) and *model* 
 is a model of the theory that is its signature. *Object* keeps the spec's meaning, the cycle of a
 type and its laws (`05 §3`), and is not used for a theory. Draft 3 uses these four words and no
 others; a glossary line goes in the header.
+        Ok, un module podria ser un conjunto de tipos y operadores sin una teoria unificadora quizas? 
+
 
 > una theory que contiene otras theories. Supongo que seguira siendo theory.
 
 Yes. A theory over a model of another is still a theory (`Exp R m` over a `NumberModel`, a vector
 space over a field, `00`), and a theory with a component that is a theory is a theory whose
 signature has that component. Nothing new.
+      OK
+
+
 
 > Para acceder a los tipos y funciones de una teoria usamos los prefixed names, y podriamos usar
 > el infame criterio de C++ de que los operadores + /* etc se resuelven por el tipo pero serian
@@ -67,6 +79,12 @@ silently. L20 already says where the model comes from: the scope, or passed expl
 rule I propose: an operator belongs to a theory, and the model it applies is the one in scope for
 that theory, never inferred from the arguments' types; a program that wants another model names
 it. It is a decision of the spec (`05 §10`, implicit arguments), and it is yours.
+      aqui hay materia para discutir: te parece que i:Int vs j: Ring 7 son el mismo tipo? claramente no lo son, por mas que internamente sean integer... 
+      un valor pertenece a un tipo de un modelo, y ese modelo tiene sus operadores. 
+      Claro que podrias tener operadores para modelos mas amplios, pero ahi entiendo que deberia haber coincidencia de leyes, cosa que no ocurre en otros lenguajes de programacion... 
+      aqui debemos discutir
+
+
 
 > si vamos a dejar que existan tipos libres, tipos que no pertenezcan a ninguna teoria.
 
@@ -76,6 +94,8 @@ equations of their constructors, and they are the initial models of the theories
 P14 (a type is a concept; a function is a value of a defined function type, never of a bare
 exponential) binds functions, not every type. So a free type is allowed and a bare function is
 not. Recommended as is.
+       No es cierto. products, sum exponentials pertencen a category theory. data no se bien a que pero tambien. 
+       Podriamos tirar esos nombres como un using category_theory de C++, pero creo que todo pertenece a una teoria. 
 
 > que carajo es una Ley? aqui estamos en el caso de que una ley es un valor? Podemos definir
 > simetria de otra forma que por su implementacion? El principio de la leyes se aplica a todo
@@ -97,6 +117,9 @@ what it may not do is compute the answer with a model. The object classifier for
 type of function types with their laws, which is where `Sqr` lives; the holotype `\ x { x * x }` is
 a value of it, not the type. G2 in draft 3 gains the sentence: "a law is written over the signature
 of its theory; an implementation over a model; the first is the holotype, the second a specimen."
+           en realidad Square deberia ir sobre una funcion * que sea multiplicativa y no sumativa, ahi seria Double, que es multiplicativa vs sumativa, vos sabras tenes mas informacion que yo. luego el tipo de Sqr se deduce por overloading quizas?
+
+
 
 ## 11. `assumed` against `proved`, and how to indicate the identity
 
@@ -120,6 +143,10 @@ and the certificate of the chain says which. *Proposed* syntax, a directive next
 which records grade `proved` with that string. Allowed in user code, unlike `axiom`. Decided yes
 in your reply; it goes to `05 §7` with this syntax unless you prefer another word.
 
+        Assumed es como el estado inicial de una demostracion recursiva, quizas?
+        La citation deberia ser mejor que eso, con un paper fisico o libro o pagina de wikipedia quizas? checked by hand cuando puede ser chequeado por IA + human in the loop (o su ausencia, tambien vale, pero registrado)?
+
+
 > La identity habria que indicarla de alguna forma? podria ser identity sensu boolean o sensu
 > lawvere, aqui como seria la forma de indicarlo en codigo?
 
@@ -132,6 +159,10 @@ and is what `algebra.lut` does with `eq`. The certificate records, for the first
 the second, the grade and the worst cost seen with the input that reached it (prior art G). The
 transport of item 4 then reads off the certificate: exact when the identity law is boolean, with
 that cost when it is a distance.
+
+          Nice
+
+
 
 ## 12. W6, the difference
 
@@ -146,7 +177,11 @@ recurring cost enters after a case it would have caught) makes it wait for a law
 wrong implementation. That was the whole difference: control of the input against mutation of
 the implementation, and one is in force and the other waits.
 
+      Mutation test es un principio o working trait que deberia ser implementado, buena sugerencia. 
+
 ## 15. W15 and a principle on the cost of adherence
+
+
 
 > agree. I think that making the principle adherence manageable to calculate is key and should be
 > a guiding principle. what is manageable is something to be discovered.
@@ -156,6 +191,8 @@ W15 enters draft 3. The guiding principle you state is of the kind that lives in
 compute; what is cheap is found as the work goes.* Logged as proposed by you, with that wording,
 for your mark; it is the reason behind five organizers instead of thirty-four peers, and behind
 W14 and W15.
+
+     
 
 ## 17. `<-` at the top level, and the session as a block, expanded
 
@@ -193,6 +230,9 @@ one place where `<-` is allowed (R12), typed incrementally. Concretely:
 So the ban on `<-` at the top level of a file stays, the session is a block, and a file may
 contain a block. Decision for you: the session as a block, with this discipline (`<-` to explore,
 `:=` to lock). If yes, it goes to the spec as a section on the session and the status of `04 §7`.
+      tenemos que definir las boundaries para los blocks y los name scopes. 
+
+
 
 ## 18. Units multiply and invert but do not add
 
