@@ -154,3 +154,17 @@ comes with the session and `plan.lut`, after the spec.
 - D-2026-10-11-f amended: the citation is a `Reference` value, read from a `.bib`, with its
   identifiers and hash in the certificate.
 - Pending his decision: Python-like separators in blocks; `laws.lut` split from `algebra.lut`.
+
+## Fifth round, one question
+
+> assumed or proved? (on `KernelLaws` as a candidate for `assumed` outside `core.lut`)
+
+`assumed`, and tested. `proved` by citation needs a theorem outside Luthier that establishes the
+laws for this definition; for the kernel's rules there is none: `04 §4` is the definition of the
+rules, not a theorem about the interpreter, and that the interpreter realizes them is exactly what
+`00` (*What is known*) lists as the base of trust, "the host realizes the rules of reduction". So
+the grade of the kernel's conformance is `assumed`, as for the reals. What `kernel_laws.lut` adds
+is a control on the assumption: the laws can be run on finite types, and `examples/kernel_finite.lut`
+records `sampled 200` for ten of them. The reals cannot be tested; the kernel can. An assumption
+with a control is the strongest thing a base of trust can be, and the certificate shows both: the
+`assumed` axiom and the test that, so far, agrees with it. Everything else in the round: OK.
