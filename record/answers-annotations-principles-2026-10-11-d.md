@@ -168,3 +168,53 @@ is a control on the assumption: the laws can be run on finite types, and `exampl
 records `sampled 200` for ten of them. The reals cannot be tested; the kernel can. An assumption
 with a control is the strongest thing a base of trust can be, and the certificate shows both: the
 `assumed` axiom and the test that, so far, agrees with it. Everything else in the round: OK.
+
+## Sixth round: which kernel laws cannot be proved
+
+Source: his copy `answers-annotations-principles-2026-10-11-d_mod.md` (f8e5b03; he wrote in a copy
+because this file changed under him): "which kernel laws cannot be proved? Elaborate." Three
+things are called "the kernel's laws" and the answer differs for each.
+
+**The rules of the calculus** (`04 §4`: beta, delta, iota, prim, extern). These are definitions,
+not theorems: `(\ x { t }) a ≡ t[a/x]` holds by fiat, there is nothing to prove, and that is why
+`kernel_laws.lut` states them as laws to be *checked*, not derived. The theorems *about* the
+calculus are four, and they split:
+
+- Confluence, that the order of reduction does not change the result: provable for the pure part
+  by the standard method (Tait and Martin-Löf, parallel reduction), and true of the whole only if
+  externs are pure, which is L18 as an assumption on the environment. Per program it is testable:
+  two schedules of the same plan give the same outputs, the law `Equivalent` of `plan.lut` (fourth
+  round), so a theorem no one has proved for Luthier is a certificate any program can earn.
+- Type preservation, that a well-typed term reduces to a well-typed term: provable, a metatheory
+  project of the size of a thesis (MetaCoq did it for Coq's kernel); not done, and until done it
+  is `assumed`, with the accept/reject suite (`tests/spec`) as its control.
+- Termination: false. Recursion is general (`04 §3`: "nothing guarantees termination"), so a
+  program may not terminate, `≡` is semi-decidable, and "every program terminates" is not a law of
+  this kernel. Per run it is a fact of the trace (it terminated on these inputs), never a law.
+- Consistency as a logic: unprovable, and today false. The kernel has one universe, `U : U`,
+  which is inconsistent (Girard, Hurkens; the guide lists the hierarchy of universes as a later
+  layer, `00 §4`: "it bites only when there are proofs"). As a programming language this is
+  harmless, Haskell lives with it; for an internal prover it is fatal, since every type has an
+  inhabitant that does not terminate. Hence the grade `proved` cannot come from a proof inside
+  Luthier until universe levels and a total fragment exist, and `05 §7` is right to say "not in
+  version 0". `proved` by citation (D-2026-10-11-f) is the only `proved` there is.
+
+**Eta.** Not a rule of `04 §4` at all, and the one law of the kernel's types that is neither
+provable from the rules nor testable: `\ y { f y } == f` needs equality of functions, which is not
+structural (`05` R8) and is not observable; pointwise it collapses to beta. HoTT adds function
+extensionality as an axiom (or derives it from univalence); Luthier either adds it as `assumed`
+when the proof layer comes or does without, and today does without. This is the precise answer to
+"which cannot be proved": eta, consistency, termination; the first for lack of an equality, the
+second for lack of universe levels, the third because it is false.
+
+**The interpreter.** "The Python program realizes `04 §4`" is provable in principle (CakeML and
+CompCert are proofs of exactly this kind) and will not be proved for a Python implementation,
+whose meaning rests on CPython, the operating system and the processor; it is the base of trust of
+`00`, `assumed`, with two controls: the accept/reject suite and `kernel_laws.lut` on finite types.
+Below it, the primitives: `Int` unbounded (Python's integers, by construction), `Float64` IEEE 754
+(the processor, assumed), each extern's conformance to its declared type (tested at first demand,
+L14). Every certificate's chain ends in these, and `check -v` lists them.
+
+So, in one line: the rules need no proof; confluence and preservation are provable and unproved,
+with controls; termination is false by design; consistency is unprovable until universe levels;
+eta is unstatable; the interpreter is trusted with controls. "Nice!" on mutation, noted.
