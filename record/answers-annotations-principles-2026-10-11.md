@@ -19,6 +19,9 @@ Evaluating a term places it in its class (the kernel reading, addendum 8); execu
 changes the state of the world, and the only things that do so are the actions. The two faces
 then read as G1's statement, which is where I had placed them. Change taken as routine.
 
+        Aqui hay algo clave y es que las ejecuciones tambien se verifican observando el mundo antes y despues del acto y las leyes sobre las ejecuciones hablan sobre esto. Me parece que esto deberia estan mencionado en los principios o convenceme de que surge de ellos. (aunque es claro que surge de ellos, pero creo que igual habria que mencionarlo porque ilustra como Luthier habla de la invariantes sobre las ejecuciones). 
+
+
 ## 2. L16, is `<-` missing?
 
 > aqui no estaria faltado "<-" que incluimos para el caso de argumentos por default, un sugar muy
@@ -33,6 +36,8 @@ make names, they assert nothing." The default-argument sugar itself (`(tol : T <
 `f a (tol <- v)`) is already listed under G4 as a decision it took (D-2026-10-11-c); on "muy
 importante para interfaces amigables" I agree, and it is what made P11 livable
 (`record/default-arguments-2026-10-11.md`).
+        me estas caminando. := es binding tambien, luego de <- lh == rh, de hecho creo que es la ley de <-, aunque eso vale para cosas que tienen eq, pero supongo que siempre hay formas mas suaves de equality
+
 
 ## 3. L20, functions and theories
 
@@ -53,6 +58,13 @@ say. Draft 3 rewrites it: "L20. A function is declared in a theory and is univer
 models." A Luthier module as a value (`fft : FFTLib := import "fft.lut"`) is still open in the
 spec (`03`, last section); when it comes, a module is a model of the theory that is its signature,
 and the two notions meet.
+        Aca el tema es que tenemos que fijar una terminologia para Luthier asi como C++ tiene su terminologia. Theory and model asi planteadas suenan perfecto. 
+        La pregunta es que hacemos con una theory que contiene otras theories. Supongo que seguira siendo theory. Para acceder a los tipos y funciones de una teoria usamos los prefixed names, y podriamos usar el infame criterio de C++ de que los operadores + /* etc se resuelven por el tipo pero serian los definidos por la teoria. Discutir sobre esto. 
+
+        Una pregunta es si vamos a dejar que existan tipos libres, tipos que no pertenezcan a ninguna teoria. 
+        Otra cosa es que carajo es una Ley? aqui estamos en el caso de que una ley es un valor? 
+        Podemos definir simetria de otra forma que por su implementacion? El principio de la leyes se aplica a todo menos a la formulacion de las propias leyes? Esto en realidad lo resolvi con square:={x:A| square x== x*x}, es decir pongo eq a la implementacion y el tema esta formalmente resuelto. En el fondo es como los holotipos de la especies de insectos, se elige un ejemplar como el caracteristico de la clase y los otros son iguales por equivalencia. Pero claro, esto es asi para las leyes, para las funciones usamos un object classifier que es distinto a una implementacion. 
+ 
 
 ## 4. L21, the certificate travels
 
@@ -64,7 +76,10 @@ implementation rerun with the same seed. Over floats two different implementatio
 never bit-identical (a different order of operations rounds differently), so the transport is up
 to a distance, and that is G3's quantitative identity: the cost of the identity certificate is the
 observed distance, and the law's certificate travels with that cost added. Draft 3 states the
-transport and the condition in L21. See item 11 for the chain you propose with `axiom`.
+transport and the condition in L21. See item 11
+ for the chain you propose with `axiom`.
+        Yes, agree
+
 
 ## 5. L15, a functor Real → Float64?
 
@@ -80,6 +95,9 @@ every law of `Real` is projected onto `Float64` with a cost, |fl(a + b) − (a +
 "some properties of Real projected on Float" is exactly right, with the projection carrying the
 cost of each property. This is the same object as item 16: the algebra that says how the cost
 moves through application. Draft 3 adds the sentence to L15 as your reading, with the two caveats.
+          I agree
+
+
 
 ## 6. G4, "under the tie-breaker"
 
@@ -93,6 +111,8 @@ language (no L of its own) and shows up as the reason behind decisions: `<-` reb
 (D-2026-10-11-c), `if` without `else` as a guarded value (D-2026-10-11-b), many paths (L10), laws
 that accumulate instead of required characterization (D-2026-10-11-d). The heading was bad. Draft
 3: "G4 decides between designs", with that paragraph.
+        Entendi el tie-braker. que mas necesitas saber?
+
 
 ## 7. W1, the implementation may complain
 
@@ -104,6 +124,8 @@ the specification accepts and no interpreter can run, or two rules that cannot b
 specification then changes by a recorded decision, never silently. Draft 3 adds the sentence to
 W1. There is a related mechanism already in force: W9 (a patch is named as a patch) is what the
 implementation does while the specification has not yet answered.
+      OK
+
 
 ## 8. W2, the example clears the mind
 
@@ -111,6 +133,8 @@ implementation does while the specification has not yet answered.
 
 Added to W2 in your words: a worked example shows contradictions that are not obvious. It is also
 the reason W2 sits with G2: an example is an observation of the rule.
+      Good
+
 
 ## 9 and 10. W3 and W4
 
@@ -121,6 +145,8 @@ the reason W2 sits with G2: an example is an observation of the rule.
 W3 restated in your words: its job is to stop the proliferation of abstractions; and the record
 agrees you do not invoke it often, so it is a brake and not a motor. W4 is the motor: growth
 comes from the application. Draft 3 writes the pair that way, W4 before W3.
+      OK
+
 
 ## 11. W5, native as a test of the external, and `axiom`
 
@@ -156,12 +182,18 @@ checked the correspondence. The chain then is: law, stated; native, certified `p
 citation; extern, certified by identity against the native on known values (L21), exact over
 integers, up to a cost over floats (item 4). The certificate of the extern carries the whole
 chain by hash, and anyone can see that its root is a citation, not a test.
+          good, entonces cuando usariamos assumed y cuando proved?
+
 
 This is a decision for you, since it adds a grade or a construct to the spec: (a) `proved` by
 citation as a grade of a function's certificate, with the citation recorded; (b) the identity
 test as the transport, with its cost over floats. If you say yes, it goes to `05 §7` and to L21,
 and W5 is rewritten with the two legitimate cases named. Recommended: yes to both; the spec's
 grades were made for this.
+        Si, desde ya. La identity habria que indicarla de alguna forma?
+        podria ser identity sensu boolean o sensu lawvere, aqui como seria la forma de indicarlo en codigo?
+
+
 
 ## 12. W6, the meta-test
 
@@ -173,12 +205,15 @@ mutation testing: alter the implementation and check that some law fails; a law 
 alteration can fail is not a law. This can become a `luthier` check later (W8), but under the
 rule of `CLAUDE.md` it waits for a case it would have caught; the negative controls of 2026-10-02
 are that case for tests, not yet for laws.
+        no entiendo la diferencia, 
+
 
 ## 13. W12
 
 > esto es muy importante para la interaccion con la IA
 
 Added as the reason of W12.
+
 
 ## 14. W13, the meta-method
 
@@ -188,6 +223,8 @@ Added as the reason of W12.
 Taken in your words. It also names the risk of today's work: the rewrite from generators
 destabilized the list of principles on purpose; the sign that it was not before time is that every
 L found a generator and three that I had moved out came back (D3).
+
+
 
 ## 15. W14, engagement and deadlocks
 
@@ -219,6 +256,7 @@ one screen can carry, the session stops and reports which of the two it is, nami
 That is a rule of behaviour, not a detector with a recurring cost, so it can enter now. *Proposed*
 W15: "A long analysis is reported as such, as a delicate question or as a conflict between
 principles, and goes to Luciano as one question." Your mark decides.
+      agree. I think that making the principle adherance manageable to calculate is key and should be a guiding principle. what is manageable is something to be discovered. 
 
 ## 16. Open, the composition of judgments
 
@@ -247,6 +285,8 @@ known (it is, for the arithmetic of IEEE and for linear algebra by condition num
 sampled cost when it is not. Examples for the rationale (D6): the sum of n floats, a matrix
 inverse with κ(A), and a probability that must integrate to one after sampling. I write them
 there.
+        Good making progress
+
 
 ## 17. Interpreter or script
 
@@ -268,6 +308,8 @@ for interactive use). The REPL is a build system driven one target at a time; th
 the same build system given every target at once. MacroDR is a REPL; a C program is batch; Luthier
 as specified is the third.
 
+
+
 Recommendation: the environment, as in MacroDR and R, as the user-facing model, because you know
 how to build it, because sonolocalización is worked interactively, and because inspection of
 intermediate values is G1 applied by a person (each inspection is a demand). Implemented as the
@@ -280,6 +322,9 @@ memo keyed by hash (L19) already gives that; (c) the "collapse" of the audio of 
 demand, run, write) is the batch case and loses nothing. Decision for you: the session as a block
 with `<-`. Recommended: yes; then it goes to the spec as the status of `04 §7` and a section on
 the session.
+          Lets revisit D-2026-10-11-c forbids `<-` at the top level of a file
+          Lets continue understanding this, expand the explanations
+
 
 ## 18. Units
 
@@ -295,17 +340,25 @@ dimension; that is the law. It is not yet an L because no application has demand
 sonolocalización has metres, seconds and a speed of sound, so the pressure exists. Draft 3 lists
 it in the open items as a candidate L under G0 with that derivation, and the quimulun repository
 as its precedent.
+        OK. units can be multiplied and inverted but not summed, it is kind of weird?
 
 ## What changes in draft 3 without a decision
 
 L12 reworded (item 1); L16 the binding sentence (2); L20 reworded (3); L21 the transport and its
 condition (4); L15 your functor reading (5); G4 heading and paragraph (6); W1, W2, W3, W4, W6,
 W12, W13 in your words (7 to 10, 12 to 14); quimulun (18); open items extended (16, 18).
+        OK
+
 
 ## What needs your decision
 
 - Item 11: `proved` by citation as a grade of a function's certificate, and identity as the
   transport (exact, or with cost over floats). Recommended yes.
+        Yes but I already said I want to understand the distinction between proved and assumed (probably unsafely taken as true, something usefull as an algorithm proving point, like when we start a test)
+
 - Item 15: W15, a long analysis is reported as a delicate question or as a conflict between
   principles. Recommended yes.
+          Yes
+
 - Item 17: the session as a block, `<-` per command, over the dataflow of L19. Recommended yes.
+          Elaborate.
