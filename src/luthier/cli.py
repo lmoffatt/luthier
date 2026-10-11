@@ -658,6 +658,59 @@ def cmd_eval(args):
     return 0
 
 
+def cmd_session(args):
+    """The session (02 §9, D-2026-10-11-i): a block typed one item at a time. `x := t` defines once,
+    `x <- t` binds and rebinds, a bare term is evaluated and printed with its type; an unused
+    rebinding is reported, not refused. Each line re-evaluates the block so far (version 0: no memo)."""
+    import re
+    loader = load(args.files, not args.no_core)
+    ck = loader.checker
+    ck.session = True
+    if args.fuel is not None:
+        ck.env.run_fuel = args.fuel
+    items: list = []
+    interactive = sys.stdin.isatty()
+    if interactive:
+        print("Luthier session. `x := t` defines once, `x <- t` binds and rebinds, a term evaluates; "
+              ":items lists the block, :quit ends.")
+    item_re = re.compile(r"^([A-Za-z_][A-Za-z0-9_']*)\s*(:=|<-)\s*(.+)$")
+    while True:
+        try:
+            line = input("luthier> " if interactive else "")
+        except EOFError:
+            break
+        line = line.strip()
+        if not line or line.startswith("--"):
+            continue
+        if line in (":quit", ":q"):
+            break
+        if line == ":items":
+            for it in items:
+                print("  " + it)
+            continue
+        m = item_re.match(line)
+        if m:
+            src = "{ " + " ; ".join(items + [line]) + " ; " + m.group(1) + " }"
+        elif items:
+            src = "{ " + " ; ".join(items + [line]) + " }"
+        else:
+            src = line
+        try:
+            t = parse_term(src)
+            ck.block_reports = []
+            with ck.silent():
+                t2, ty = ck.infer([], t)
+            v = evaluate(ck.env, t2)
+            for r in ck.block_reports:
+                print(f"  note: {r}")
+            print(f"{pp(v)} : {pp(ty)}")
+            if m:
+                items.append(line)
+        except (ParseError, LexError, TypeCheckError, EvalError) as e:
+            print(f"error: {e}")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="luthier", description="Luthier version 0")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -709,6 +762,12 @@ def main(argv=None):
     p.add_argument("--seed", type=int, default=None, help="the run seed of every file")
     p.add_argument("--imports", action="store_true", help="pass --imports to every `luthier test`")
     p.set_defaults(fn=cmd_certify)
+
+    p = sub.add_parser("session", help="a session: a block typed one item at a time over .lut files (02 §9)")
+    p.add_argument("files", nargs="*")
+    p.add_argument("--fuel", type=int, default=None)
+    p.add_argument("--no-core", action="store_true", help="do not load core.lut implicitly")
+    p.set_defaults(fn=cmd_session)
 
     p = sub.add_parser("eval", help="evaluate a term in the context of .lut files")
     p.add_argument("files", nargs="+")

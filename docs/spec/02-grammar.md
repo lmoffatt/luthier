@@ -159,8 +159,10 @@ of `d`.
 
 - Quote and unquote: the syntax of a term as a value of `Term`.
 - A saved evaluation, a quoted term together with its value.
-- The session: a block typed one item at a time, with the world as its implicit `w` (section 9);
-  its command line and what it prints are not specified yet.
+- The session (`luthier session [files]`, 2026-10-11): a block typed one item at a time; `x := t`
+  defines once, `x <- t` binds and rebinds, a bare term is evaluated and printed with its type, an
+  unused rebinding is reported; each line re-evaluates the block so far (no memo yet). The world as
+  its implicit `w` waits for actions.
 
 ## 9. Blocks (2026-10-11, D-2026-10-11-i)
 
