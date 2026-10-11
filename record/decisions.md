@@ -985,3 +985,42 @@ Quote:      "ahora las leyes de asociatividad, simetria etc deberian definirse e
 Source:     record/answers-annotations-principles-2026-10-11-d.md
 Kind:       libraries (03). For G2 (laws come first, stated once over the signature they need)
 Status:     current; done 2026-10-11 (addff54)
+
+D-2026-10-11-m  The planner substitutes one implementation for another only along a certified
+                equivalence between the two: the identity law of L21, with its result `Bool` or
+                `Cost`. The class of L10 is the component connected by such certificates, not
+                the set of everything that passes the laws accumulated so far; the distance of a
+                chain of substitutions is the sum of its links (rationale 11 §2). A lone
+                implementation is never replaced. The author's free choice among the inhabitants
+                of an under-determined function (D-2026-10-11-d, P5) stays; the planner's choice
+                is only among what has been compared.
+Author:     Claude, proposed; Luciano, accepted ("OK")
+Quote:      "OK" (0d6932d, under the proposed resolution)
+Source:     record/contradictions-ia-2026-10-11.md §2 (the planner's freedom); raised by six of the
+            eight critiques in record/IA/principles 2023 10 11/ (a8e28f0)
+Kind:       semantics of the planner (L10, L21, W5). For G0 (the quotient lives in the theory; in
+            the model the class is what the certificates connect), G3 (the chain carries its
+            budget), G4 (every path is written; only the substitution waits for its law). W5's
+            agreement test between native and extern is the law that admits the second specimen.
+            Dissolves the holotype objection: the formula over Rational is a specimen with grade
+            exact, checked by the same pairwise law
+Status:     current; to docs/principles.md draft 4 (L10, L21, W5) and to the spec of the planner
+            when it exists; not implemented
+
+D-2026-10-11-n  Demanding a value demands every certificate in its dependency cone, paid once
+                through the memo. The demand may ask otherwise, by a mechanism to be named
+                (probably `assumed`), since what could be done Luthier gives a way to do (G4).
+                `test` is the action that demands certificates without values. L14 (validated
+                the first time an action asks) is the default; L19's "what never reaches an
+                output needs no certificate" is its complement, not an exception.
+Author:     Luciano
+Quote:      "bueno, si, demandar un valor demanda sus certificados, salvo que se pida lo
+            contrario (por el principio de que si algo se podria hacer Luthier deberia dar un
+            mecanismo para hacerlo) (probablemente con assumed?) test es exactamente eso."
+            (0d6932d)
+Source:     record/contradictions-ia-2026-10-11.md §2 (one default needs a sentence); raised by
+            the three Claude critiques
+Kind:       semantics of demand (L14, L19, L2, G1, G4). For L2 (membership is a guarantee for
+            what leaves the program), P11 (the opt-out is a parameter of the demand)
+Status:     current; to docs/principles.md draft 4 (L14, L19) and 04 §7; the opt-out's syntax
+            open; not implemented
