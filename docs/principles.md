@@ -1,6 +1,11 @@
 # The principles of Luthier and the way it is built
 
-Draft 2, 2026-10-11, unapproved: every statement waits for Luciano's mark. Draft 1 (d6a4ff5)
+Draft 3, 2026-10-11, unapproved. Draft 2 (cd24137) was annotated by Luciano (2c18c41), answered
+(`record/answers-annotations-principles-2026-10-11.md`), replied to (18da042) and answered again
+(`...-b.md`); draft 3 incorporates what those two rounds settled, each retouch marked "(draft 3)".
+Terminology fixed in this draft: a *theory* is a type with laws, usually parameterized; a *model*
+is a value of a theory; a *module* is a file as a namespace, until modules are values; an *object*
+is the cycle of a type and its laws (`05 §3`). Draft 1 (d6a4ff5)
 listed twenty principles of the language and fourteen of the way of working as peers. Draft 2
 derives the twenty from his organizers, as he asked in `record/Lucianos ideas/principios
 organizadores.txt` ("un principio es un organizador y como su nombre lo indica es el primero"),
@@ -72,8 +77,10 @@ bicho)" (chat, D-2026-10-11-d); the composition of invariances as "la parte Tars
 or extern, is the specimen under observation. A description is derived by composition of the
 laws of the parts when such a law exists, and observed otherwise; laws accumulate, and a set of
 laws that determines the function up to its equality is the limit a definition may reach, not what
-it must reach (D-2026-10-11-d). What type theory lacks: it knows a function by acquaintance, as its
-term.
+it must reach (D-2026-10-11-d). (Draft 3) A law is written over the signature of its theory, an
+implementation over a model; the first is the holotype, `\ x { x * x }` as the formula of `Sqr`,
+the second a specimen checked against it (his "holotipos", second round §3; `00`, *Value, the
+model*; `05` R10). What type theory lacks: it knows a function by acquaintance, as its term.
 
 ### Principles of good use
 
@@ -96,11 +103,13 @@ condition numbers, and nothing to say about data (`record/organizing-principles-
 addendum 2). Full articulation to come as `docs/rationale/cost-valued-laws.md` (D6). Candidate by
 the P13 check, in his words a wish.
 
-**G4. Expressive over restrictive.** Source: "Luthier debe ser expresivo mas que restrictivo: si hay
+**G4. Expressive over restrictive; it decides between designs.** Source: "Luthier debe ser expresivo mas que restrictivo: si hay
 mas de una forma de hacer las cosas, todas deberian poder ser expresadas en Luthier" (note).
 *Proposed* formulation: when the language could forbid or allow, it allows and asks for the law
 that makes the alternatives equivalent; a free choice among equivalents is legitimate (P5). It
-decides between designs rather than describing the language, so it is the tie-breaker below.
+decides between designs rather than describing the language: when G0 to G3 allow two designs
+equally, G4 chooses the one that allows both and asks for the law that makes them equivalent, so
+it generates no L of its own and appears as the reason behind decisions (section 2, last part).
 What type theory lacks: one canonical form per value.
 
 ### How the organizers depend on each other (*Proposed*, D8)
@@ -187,33 +196,40 @@ quotient 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 16.49.14.md`, 00:04 to 01:39), 
 without the word 2026-05-30
 (`note:2026-05-30T18.01.53:equivalencias-para-clasificar-y-separar-decoraciones`).
 
-**L12. Execution is the verification of equivalences.** Luthier first describes the problem and
-its equivalences; running is checking them, as mathematics verifies rather than runs, with a
-declarative face (types, laws, theories, holes) and an executive face (values, actions).
+**L12. Evaluation is verification; execution is an action on the world.** Luthier first describes
+the problem and its equivalences; evaluating is checking them, as mathematics verifies rather
+than runs. (Draft 3, his annotation) Executing is the executive face: an action changes the state
+of the world, and it is verified too, by observing the world before and after it; the laws over
+actions are stated over those two observations, as a mutable parameter is two variables (L9).
 Retouched (addenda 7 and 8): every function induces an equivalence on its domain, its kernel, so
 computing f(x) is placing x in its class and the value is the class's name; a predicate is the
 two-class case and `Maybe T` places x in one of them. This equivalence on the domain is distinct
 from the equivalence between terms that a law induces, which is L10's quotient. From G0 (identity
 is the first proposition; his "path equivalence is the fundamental concept", 2026-05-29); the
-two faces are G1's statement. Source: Luciano, 2026-05-30 ("la matemática no ejecuta ... la
+two faces are G1's statement; the verification of actions from G2 (observation) and G1. Source:
+Luciano, 2026-05-30 ("la matemática no ejecuta ... la
 ejecución en Luthier sería esa verificación de equivalencias"); the kernel reading 2026-10-11
-(chat: "una funcion genera equivalencias f(a)==f(b) ==> a~b y mas si f(a)=true").
-
-            Esto es incompleto, ya que esto es valido en la cara declarativa de Luthier, 
-            en la cara ejecutiva de luthier execution es una modificacion del estado del mundo
-
+(chat: "una funcion genera equivalencias f(a)==f(b) ==> a~b y mas si f(a)=true"); the actions
+2026-10-11 (annotation on draft 2: "las ejecuciones tambien se verifican observando el mundo antes
+y despues del acto").
 
 **L16. Equality has levels and belongs to the object.** Definition (`:=`), the identity
 proposition (`=`), decidable equality (`==`) and definitional equality by reduction (`≡`) are
-different things, and each object carries the observational equality that fits it. From G0
-(the identity type and its levels) with G3 (under cost, the identity proposition acquires a
-distance). Source: Luciano, 2026-05-30 (`day:2026-05-30:niveles-de-equivalencia`). 
-            aqui no estaria faltado "<-" que incluimos para el caso de argumentos por default, un sugar muy importante para tener interfases amigables.?
+different things, and each object carries the observational equality that fits it. (Draft 3, his
+annotation) The binding acts are two, `:=` once and `<-` rebinding, and they share one law: after
+the act the name equals the term in the equality its type has, structural `==` where it exists
+(`05` R8), observational otherwise, a distance under G3; after `:=` for all time, after `<-` until
+the next `<-` (`05` R12). From G0 (the identity type and its levels) with G3 (under cost, the
+identity proposition acquires a distance). Source: Luciano, 2026-05-30
+(`day:2026-05-30:niveles-de-equivalencia`); the law of a binding 2026-10-11 (reply: "luego de <-
+lh == rh, de hecho creo que es la ley de <-").
 
-
-**L20. Code is universal over the models of its theories.** A function is parametrized by theories
-(Real, Field, LinearAlgebra), not by single functions; the model is resolved from the scope and can
-be passed explicitly. Modules are values: a parametrized module is a function from models to
+**L20. A function is declared in a theory and is universal over its models.** (Draft 3, reworded
+after his annotation.) A function belongs to a theory (Real, Field, LinearAlgebra) and takes its
+model as its first, often implicit, argument, so it is written once for every model; the model is
+resolved from the scope and can be passed explicitly. A theory over a model of another theory is
+a theory. Open (second round §3): operators resolved by the model in scope, never by the types of
+the arguments; free types allowed, bare functions not (P14). Modules are values: a parametrized module is a function from models to
 definitions, applicative because definitions have no effects (L18), instantiated on demand with
 the parameter threaded down from the action. A specialization is one more representative of the
 law's class (L10), valid on a subtype, certified against the same law; where representations
@@ -223,11 +239,6 @@ pasa a ser todo lo universal posible"; instantiated on demand). Source: Luciano,
 codigo seria, en principio universal a los valores de funciones que cumplan las leyes requeridas",
 chat; `WhatsApp Ptt 2026-10-10 at 17.00.40.md`; `WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to
 04:25; D-2026-10-10-g). The conditions on bridges are the model's, accepted.
-         aca no entiendo bien que queres decir. 
-         una funcion es declarada generalmente dentro de una theoria (que quizas pueda ser el nombre luthier para objeto/modulo/clase) 
-
-
-
 
 ### From the demand, G1
 
@@ -338,12 +349,16 @@ withdrawn (D3).
 **L21. A certificate of identity is not a certificate of the law.** *Proposed*, candidate. Checking
 that an implementation gives the same bits as before, with the same seed, certifies that the
 implementation has not changed; checking it against its laws, by chosen or sampled cases,
-certifies the description. Both are kept, apart. From G2 (the specimen can be recognized as the
-same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt 2026-10-11 at
+certifies the description. Both are kept, apart, and the certificate of the law travels by the
+certificate of identity (his annotation): exactly where the identity is boolean (`==` structural,
+`05` R8: integers, decidable types, the same implementation rerun), and with the observed distance
+added where it is a cost (G3), since two implementations over floats are almost never
+bit-identical. The type of the identity law's result says which (`Bool` or `Cost`). A function
+known correct by a theorem outside Luthier is certified `proved` by citation (D-2026-10-11-f),
+and the chain law, citation, native, identity, extern is carried by hash. From G2 (the specimen
+can be recognized as the same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt 2026-10-11 at
 08.58.46.md`, 09:20 to 13:19: "verificar bit a bit que sea igual ... por lo menos sabés que no
 cambia la implementación"; the statistical kind for "prueba científica").
-
-            si, me gusta el certificado de la la law se transporta por el certificado de identity. 
 
 ### From cost, G3
 
@@ -351,18 +366,18 @@ cambia la implementación"; the statistical kind for "prueba científica").
 and realized by concrete ones (Float64); the realization's laws hold within a stated tolerance,
 and the error of each step is itself a law rather than a false claim of exactness. From G3
 directly: the realization's distance to the ideal law is the law's value, and the tolerance is the
-demand's (G1). Source: Luciano, 2026-05-29; the floats note of 2026-10-11 (5cc41fa).
-         Esto es un testigo de la idea de que tenemos un functor que va de Real--> Float64 y que ahi vemos algunas propiedades  de Real proyectadas en Float, seria eso? 
+demand's (G1). (Draft 3, his reading) Rounding `Real -> Float64` is a functor in Lawvere's sense,
+a map that expands distances by at most a constant, and each law of `Real` is projected onto
+`Float64` with its cost; it is not a homomorphism, and the exact map is the inclusion the other
+way. Source: Luciano, 2026-05-29; the floats note of 2026-10-11 (5cc41fa); the functor 2026-10-11
+(annotation: "un functor que va de Real--> Float64 y que ahi vemos algunas propiedades de Real
+proyectadas en Float").
 
-
-### Under the tie-breaker, G4
+### Decided by G4
 
 G4 generates no L of its own and decides between designs: `:=` once and `<-` for rebinding with
 default arguments (D-2026-10-11-c), `if` without `else` as a guarded value (D-2026-10-11-b), many
 paths expressible (L10), accumulating laws rather than required characterization (D-2026-10-11-d).
-         Explicame esto, no se que queres decir, explicame la logica de under the tie-braaker. 
-
-
 
 ## 3. The way of working
 
@@ -370,29 +385,29 @@ Unchanged from draft 1 except W5, restated.
 
 **W1. The specification comes before the implementation.** Syntax and semantics are fixed on paper
 first, and the implementation passes the specification instead of silently defining the language.
-Source: Luciano, 2026-06-03 (`day:2026-06-03:primero-sintaxis-y-semantica-despues-implementar`).
-            Si, la implementacion puede quejarse y decir "esto no hay forma de hacerlo" (con una forma mas tecnica de decirlo quizas?)
-
+(Draft 3) The implementation may return a counterexample to the specification, a program it
+accepts and nothing can run, or two rules that cannot both hold; the specification then changes by
+a recorded decision, never silently (W9 is what the implementation does meanwhile). Source:
+Luciano, 2026-06-03 (`day:2026-06-03:primero-sintaxis-y-semantica-despues-implementar`).
 
 **W2. No rule enters without a worked example.** Each principle is tried by hand in the candidate
 notation before it enters, and each rule of the specification is written as accept/reject pairs,
-so the specification is an executable suite. Source: the model from Luciano's audios, 2026-08-31
+so the specification is an executable suite. (Draft 3) "El ejercicio clears the mind": a worked
+example shows contradictions that are not obvious. Source: the model from Luciano's audios, 2026-08-31
 (`dialogue:e6fc53cf:disciplina-ejemplo-en-papel`); the pairs 2026-10-04
 (`dialogue:52d3e68e:short-cascade-with-pilot-spec-as-tests`).
-            si, el ejercicio clears the mind, un ejemplo puede mostrar contradicciones no obvias
-
-
-**W3. Start minimal and add only what is used.** Begin from zero with the indispensable, do each
-step in detail before scaling, and reduce until removing more would break something needed. The
-order of work, not a limit on the language (G4). Source: Luciano, 2026-10-02
-(`dialogue:51cca364:empezar-de-cero-con-luthier-liviano`).
-            bueno, no estaria usando mucho este criterio, pero es un buen criterio para frenar la proliferacion de abstracciones
 
 **W4. The real application drives the growth.** Luthier must take root in something useful
 (sonolocalización) and grow only where the application finds something it cannot express; kernel
-work without real pressure moves the specification for nothing. Source: Luciano, 2026-09-21
+work without real pressure moves the specification for nothing. (Draft 3) The motor of growth; W3
+is its brake. Source: Luciano, 2026-09-21
 (`day:2026-09-21:luthier-tiene-que-ser-util`).
-            Misma linea que arriba
+
+**W3. Start minimal and add only what is used.** Begin from zero with the indispensable, do each
+step in detail before scaling, and reduce until removing more would break something needed. (Draft
+3) Its job is to stop the proliferation of abstractions; a brake, not a motor, and in his words
+not often invoked. The order of work, not a limit on the language (G4). Source: Luciano, 2026-10-02
+(`dialogue:51cca364:empezar-de-cero-con-luthier-liviano`).
 
 **W5. Concepts live in Luthier, execution in the host; native against extern is bootstrapping.**
 The `.lut` is designed before the Python; each concept is written native (slow, conceptual) and
@@ -402,16 +417,14 @@ not an oracle, since "agrees with the native" would be a law that copies an impl
 one more specimen (L5), the agreement test is a consistency check between specimens, and the
 practice holds while a function has too few laws to be known by description. Source: Luciano,
 2026-09-30.
-            Si, esto es clave. Luthier tiene que ser expresivo para todo.
-            Ahora, aqui hay un principio que sugiere que debo escribir la implementacion en Luthier y luego usar eso para testear la implementacion externa. 
-            No se si es un principio constructivo. Puede serlo para ingenieria reversa: saber que implemtacion usa un lenguaje ajeno o cuando sabemos por ejemplo que una implementacion es correcta por teorema matematico conocido (esto seria algo que requeriria una palabra clave nueva, quizas axiom ?) y luego por identidad bitwise con valores conocidos se verifica una implementacion externa. Esto es una idea nueva que merece discusion. 
 
 **W6. A test must fail when the thing is wrong.** Laws are written before the algorithm; a law not
 known to be true is worse than a hole; negative controls and reproduced numbers, never passing
-examples alone, are what make a test diagnostic. For G2. Source: Luciano, 2025-09-27 (snapshots
+examples alone, are what make a test diagnostic. (Draft 3, his words) A meta-test that must always
+exist: the test must fail where it must fail, not only pass where it must pass; realized today by
+negative controls on the input, and later, after a case, by mutation of the implementation. For
+G2. Source: Luciano, 2025-09-27 (snapshots
 before tests); the control stated 2026-10-02 (`dialogue:51cca364:a-test-needs-a-negative-control`).
-
-            Esto es un meta-test que tiene que existir siempre: el test debe fallar donde debe fallar, no solo debe pasar cuando debe pasar.    
 
 **W7. The design stays with Luciano.** The model describes and waits; AI work comes in scoped
 steps whose results he can interpret and check, because wholesale delegation cannot be judged.
@@ -419,14 +432,10 @@ For P1 (Luciano's part stays discernible). Source: Luciano, 2026-10-07
 (`day:2026-10-07:chaining-ai-output-you-can-interpret`); the PI role 2026-10-05
 (`dialogue:fea341bd:el-pi-de-diseño-queda-en-luciano`).
 
-
-
 **W8. Every phase closes on a mechanical check.** A phase of a plan names the check that closes
 it; a phase without one belongs to Luciano, and every rule that can become a check becomes one
 (certifier, lint, test). State lives in files, never in a conversation. Source: the model,
 2026-10-05 (`dialogue:fea341bd:cada-fase-con-su-chequeo-o-es-de-luciano`), adopted by Luciano.
-
-
 
 **W9. A patch is named as a patch.** What compensates for a missing piece is logged as such and
 kept out of the specification until the piece exists. Source: the model, 2026-10-05
@@ -436,45 +445,57 @@ kept out of the specification until the piece exists. Source: the model, 2026-10
 version, every parameter and the seed; certificates and the record are the same discipline. P2 in
 force. Source: `record/principles.md`.
 
-
-
 **W11. Every change can be undone.** Small commits, one decision per commit, tags for what is
 reproduced, ownership declared between concurrent sessions. P6 in force. Source:
 `record/principles.md`.
 
 **W12. Reports are concepts, the most important first.** What failed and what limit was hit come
-first; a count says nothing. For P12 (Luciano's attention is the scarce resource). Source:
-Luciano, 2026-09-30 (`dialogue:ac750929:answers-at-concept-level`).
-               esto es muy importante para la interaccion con la IA
+first; a count says nothing. For P12 (Luciano's attention is the scarce resource); (draft 3) in his
+words, "muy importante para la interacción con la IA". Source: Luciano, 2026-09-30 (`dialogue:ac750929:answers-at-concept-level`).
 
 **W13. The foundations are rethought, the reasonable version first.** The language has been remade
 many times (quimulun, tapp, macror, Luthier), each time deeper; the method is to work out the
 reasonable version and then look for the wild one. G0 is the reasonable version; G1 to G3 the
-wild one. Source: Luciano, 2022-06-15 (`written:2022-06-15_sin-titulo-2:rehacer-desde-las-bases`)
+wild one. (Draft 3, his words) This is the meta-method: it destabilizes the system and makes it
+grow, and the art is not to destabilize it before its time. Source: Luciano, 2022-06-15 (`written:2022-06-15_sin-titulo-2:rehacer-desde-las-bases`)
 and 2026-05-26 (`day:2026-05-26:razonar-primero-despues-la-locura`).
-               Esto hace al meta-metodo, desestabiliza el sistema y lo hace crecer. El arte esta en no desestabilizarlo antes de tiempo. 
 
 **W14. What reaches Luciano has few, rich concepts.** A synthesis can be judged because it has few
 concepts; a long text with ideas he does not fully handle makes him doubt everything, and that is
 what to avoid. For P12 (Luciano's attention is the scarce resource), as a criterion for what the
-model brings him. Source: Luciano, 2026-10-09 (`WhatsApp Ptt 2026-10-09 at 10.43.06.md`, 04:24 to
-05:06).
-               Clave: no sobrecalentemos el cerebro de Luciano, es el recurso escaso: hay que usarlo para lo importante la direccion estrategica del proyecto. 
-               La IA tiene una directiva de mantener mi engagement, hay que cambiar esa directiva en el siguiente sentido: mi engagement va a ser mejor cuando mi capacidad cognitiva es usada para el desarrollo optimo del proyecto. Optimo en base a que? En base a los principios de este documento, por lo que algo clave es que el computo de la adhesion a los principios de este documento sea eficiente, que no de lugar a deadlocks, por lo que un tema fundamental es detectar cuando ocurren estos deadlocks o tiempos largos de analisis. Estos pueden ser legitimos, es un tema delicado que requiere analisis o ilegitimos: hay una contradiccion entre los principios que impide una resolucion. Tenemos que analizar si es uno u otro y en eso mi asistencia es fundamental.
+model brings him. (Draft 3, his annotation) His engagement is served when his cognition goes to the
+strategic direction of the project, optimal by these principles; so adherence to them must be
+cheap to compute (P15, proposed in his words, `record/principles.md`). Source: Luciano, 2026-10-09
+(`WhatsApp Ptt 2026-10-09 at 10.43.06.md`, 04:24 to 05:06); the annotation of 2026-10-11.
+
+**W15. A long analysis is reported as such.** (Draft 3, new, D-2026-10-11-g.) When an analysis
+revisits the same decision twice without new evidence, or exceeds what one screen can carry, the
+session stops and reports which it is: a delicate question, or a conflict between principles,
+naming them; either goes to Luciano as one question (P12), and the second is the signal that a
+principle is missing or two must be ordered (P4, P13). Source: Luciano, 2026-10-11 (annotation on
+W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los principios"; reply:
+"agree"); the trigger is the model's.
 
 ## 4. What is open
 
 - The articulation of G3 as `docs/rationale/cost-valued-laws.md` (D6): Ω replaced by [0,∞),
   quantitative equality, graded judgments, cost as −log p or as distance, how the uncertainty of
-  a cost is represented in a certificate.  
-               Aqui hay un concepto fundamental y es la composicion de judments. Como se transfiere la quantitative equality a traves la aplicacion de funciones, cual es el algebra. Esto es lo que define la practicabilidad de esta extension. Y eso se va a ver con ejemplos probablemente. 
+  a cost is represented in a certificate; the algebra of composition (second round §16): a
+  Lipschitz constant per function type where known (sensitivity types, Reed and Pierce 2010;
+  condition numbers), a sampled cost where not, costs adding as −log p under independence; worked
+  examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to one.
 
 - The composition of invariances (G2's derived route): which laws compose and how the demand
   selects them (audio 08.58, 32:01 to 34:07; audio 09.21).
 
-
-- Interpreter or script, for the spec (04 §7), not for this file.
-            Aqui claude le esquivo al bulto, no tomo la discusion de si Luthier debia ser tipo interprete de comandos (como es macroir) o monolitico (como es un programa de C, y decirme cual es el nombre de la tecnica alternativa al interprete de comandos si es que existe alternativa)
-
-- Units as propositions (G0), a wish from Kimulun (audio 08.58, 24:12).
-            Es quimulun. (es un repositorio en mi maquina y en github) Y si unidades (metros, segundos) hacen a los types y no se pueden suman metros y segundos (salvo que tengas velocidades que conviertan unos en otros). 
+- The session as a block over the dataflow of L19: `<-` to explore, `:=` to lock, a file may
+  contain a block, `<-` stays banned at the top level of a file (second round §17; his decision
+  pending); then the spec, `04 §7` and a section on the session.
+- Operators resolved by the model in scope, never by the types of the arguments (second round §3;
+  his decision pending).
+- `proved` by citation: syntax `cite name "..."` proposed, grade `proved` recorded with the string,
+  allowed in user code (D-2026-10-11-f; to `05 §7`).
+- Units as a candidate L under G0: a dimension is a proposition, dimensions form a group under
+  multiplication, the quantities of one dimension a one-dimensional vector space, the whole a
+  graded algebra; addition inside a dimension, multiplication across (second round §18). Precedent
+  quimulun (his repository); pressure from sonolocalización (metres, seconds, the speed of sound).
