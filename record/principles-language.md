@@ -895,36 +895,46 @@ History:    draft 1 (5769005): stated. draft 4 (c7c6396): one judgment, structur
             the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it. the grade list deleted here, defined in Terms.
 
-L7  A law characterizes; it is verified by one operation, exact or statistical; and the certificate
-    of identity is not the certificate of the law.
+L7  A law characterizes; a certifier produces its evidence, exact or statistical; and the
+    certificate of identity is not the certificate of the law.
 From:       G0 (a law defines the object) and G1 (a law that transcribes the specimen is
             acquaintance, not description; observation is how a description is verified) with G2
             (the grade is the uncertainty of the cost); extends P10 (the mathematical object that
             best represents a concept is the invariant of its type)
-L7.1   A law states a mathematical property of an operation; a second implementation checked against
+L7.1   A law is the proposition; a certifier is a method that produces evidence for it, and one law
+       may have several: a theorem cited, an exhaustive run, chosen cases, a sample, an assumption
+       (D-2026-10-12-k). The law is not the procedure that checks it, and a universal law over an
+       infinite carrier has no certifier that runs it. [proposed]
+L7.2   A law states a mathematical property of an operation; a second implementation checked against
        the first is consistency, and the native definition is one more model certified against the
        law. [settled]
-L7.2   A law over several functions is tested on the values actually computed, as a puzzle whose
+L7.3   A law over several functions is tested on the values actually computed, as a puzzle whose
        pieces must fit; the cases to test are chosen by the law, its arity (three elements for
        associativity) and the distribution sampled, never every path. [settled]
-L7.3   Laws accumulate, and a law need not determine the operation; when the laws do determine it up
+L7.4   Laws accumulate, and a law need not determine the operation; when the laws do determine it up
        to the presentation's equality, that is the limit (D-2026-10-11-d). [settled]
-L7.4   What is known by a theorem is cited, what can be enumerated is checked exhaustively, what has
-       chosen cases is checked on them, what can only be sampled is checked statistically, and the
-       grade of the evidence (Terms) travels with the value in a certificate hashed over its
-       dependency cone; the line is the method, since associativity over `Int` is computable and
+L7.5   The certifier is chosen by what the law admits: what is known by a theorem is cited, what can
+       be enumerated is checked exhaustively, what has chosen cases is checked on them, what can
+       only be sampled is checked statistically; the evidence travels with the value in a
+       certificate (L16). The line is the method, since associativity over `Int` is computable and
        cannot be checked by running. [settled]
-L7.5   The grade of a sampled certificate depends on the distribution sampled, not only on the
+L7.6   The grade of a sampled certificate depends on the distribution sampled, not only on the
        number of samples, because errors concentrate at the edges. [settled]
-L7.6   Checking that an implementation gives the same bits as before, with the same seed, certifies
+L7.7   Verification by a theorem is `proved` by citation (D-2026-10-11-f); verification by
+       delegation is the same certifier with the host library's guarantee as the theorem cited
+       (LAPACK's backward-error bounds, the condition number their hypothesis) and the library's
+       version and platform as hypotheses the certificate carries; no new grade. A function known
+       correct by a theorem outside Luthier is certified this way, and the chain law, citation,
+       native, identity, extern is carried by hash. [proposed]
+L7.8   Checking that an implementation gives the same bits as before, with the same seed, certifies
        that the implementation has not changed; checking it against its laws, by chosen or sampled
        cases, certifies the description. Both are kept, apart. [settled]
-L7.7   (His annotation) The certificate of the law travels by the certificate of identity: exactly
-       where the identity is boolean (`==` structural, `05` R8: integers, decidable types, the same
-       implementation rerun), and with the observed distance added where it is a cost (G2), since
-       two implementations over floats are almost never bit-identical; the type of the identity
-       law's result says which (`Bool` or `Cost`). [settled]
-References: `05` R8; D-2026-10-11-d
+L7.9   (His annotation) The certificate of the law travels by the certificate of identity (L16.7):
+       exactly where the identity is boolean (`==` structural, `05` R8: integers, decidable types,
+       the same implementation rerun), and with the observed distance added where it is a cost (G2),
+       since two implementations over floats are almost never bit-identical; the type of the
+       identity law's result says which (`Bool` or `Cost`). [settled]
+References: `05` R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
             decirlo" (chat, 2026-10-05) (L11) "verificacion externa por teoremas o por delegacion
@@ -938,7 +948,7 @@ Source:     (L5) Luciano, 2026-10-05 (chat:52d3e68e:2760); the puzzle 2026-10-10
             bcdac41 (L21, the distinction identity/law) Luciano, 2026-10-11 (WhatsApp Ptt 2026-10-11
             at 08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his annotation on
             draft 8 (bcdac41)
-Status:     settled
+Status:     settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark
 History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d: laws accumulate
             and need not determine the operation. (L11) draft 0 (6d9dbd3): stated. draft 4
             (c7c6396): the four methods and the grade in the certificate; the dependence on the
@@ -957,7 +967,9 @@ History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d
             Example, the provenance phrases into this History, the wording otherwise as draft 10 had
             it. the generators of clause 2 are the model's addition; clause 5 is the model's
             correction, from the practice of property-based testing; the grade list deleted here,
-            defined in Terms.
+            defined in Terms. draft 11, step 4 (2026-10-12): clause 1 written on D-2026-10-12-k (GPT
+            en's distinction); delegation as citation moved here from L14.8 as clause 7; clause 5
+            reworded with the certifier and the grade list cited from Terms; clause 9 cites L16.7.
 
 L16 A certificate records what is known of a law, its domain, its bound and its evidence; it is
     frozen, it serves every demand it meets, and it transports along identity.
