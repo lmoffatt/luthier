@@ -1530,6 +1530,6 @@ Quote:      "there is not such a thing as a flat import, seria y lo bueno de eso
             List algo asi" (chat, 2026-10-12)
 Source:     chat 2026-10-12, after D-2026-10-12-ae
 Kind:       language (spec 2, 12.S22). For L14, P16
-Status:     current; amends -ae (names enter the environment, but only those listed); open, his:
-            whether core is imported by an explicit list in every file or is the implicit scope of
-            the outermost block
+Status:     current; amends -ae (names enter the environment, but only those listed). Core, his
+            answer ("si, core ahi si incluiria esos tipos"): `core.lut` encloses the outermost block of
+            every file, its names (`Int`, `Bool`, `List` and the rest) visible unqualified
