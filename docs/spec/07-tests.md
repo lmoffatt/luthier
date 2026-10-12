@@ -56,7 +56,7 @@ A generic generator takes a type and builds a generator of it by following the t
 
 Today `generators.py` enumerates the tables of a function over `Fin n` up to a fixed count and draws by registered generators; the table is the design.
 
-**7.R1. A test names its generators.** [proposed] The directive of a test names the functor it applies to every parameter (`with n` is `sampled` with `n` cases; `exhaustive`), the metric of `sampled`, and may bind single parameters, or types, to other generators, inline or through a profile:
+**7.R1. A test names its generators.** [proposed] The directive of a test names the functor it applies to every parameter (`with n` is `sampled` with `n` cases; `exhaustive`), the metric of `sampled`, and may bind single parameters, or types, to other generators, inline or through a profile: In the language designed the directive is the function of 7.S20.
 
     profile tape := { Seed := sampled linear, TestedFull := scaledPositionsWithin freeDim positionBox }
 
@@ -130,6 +130,15 @@ A statistical law (the uniformity of draws, a density pair, the transform of res
 **7.S18. A failure is repeated once.** [proposed] A statistical law that fails is evaluated again, with an independent seed derived from the first, and fails when both evaluations fail. The entry records the first failure, and the level of the whole procedure: `α²` for a single-run level `α`, since the two evaluations are independent.
 
 **7.S19. Power is measured on controls.** [proposed] A statistical law that has controls (models broken on purpose, as the negative controls of the kernel) records, for each control, its rate of detection over `k` seeds, with `k` an argument and a Wilson interval. With the repetition of spec 7.S18 that rate estimates `β²` for a single-run power `β`. A law whose rate on a control is below a threshold (an argument) is reported as weak, and a control it never detects as undetected. The data of 2026-10-06 show why power has to be measured. Fitted to session A, the Kolmogorov test of the transform of the residuals gave tail probabilities between 0.58 and 0.74 for fits whose sigma was 4.9, 15 and 31 cm. The transform is computed with the fitted sigma, so it does not see a problem of scale, and what does see one is an informative prior on sigma. The law passed each time, and nothing in its certificate said that it could not have failed.
+
+
+## §12 The test as a function
+
+**7.S20. `test` is a function with named arguments.** [decided D-2026-10-12-ab] `test` is a function
+of `lib/test.lut`, the one with the most parameters in the language, so each option is a named
+argument with a default: the mode (`exhaustive`, `sampled` with its metric), the number of cases,
+the size, the bindings and the profile, which is a record value, and every budget of 7.S8. The
+directive forms of 7.R1 are its older surface (`spec 2`).
 
 ## Open
 

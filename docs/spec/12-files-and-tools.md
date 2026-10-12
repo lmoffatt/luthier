@@ -10,7 +10,7 @@ Chapter 12 of the specification, draft 0, 2026-10-12. Sources: `docs/spec/03-lib
 
 ## §2 Import
 
-**12.S3. The two forms of import.** [implemented] `import "x.lut"` brings the definitions of `x.lut` into the importer's namespace; `import "x.lut" as m` reaches them as `m.f`, with no collision between files. The extension `.lut` may be omitted.
+**12.S3. The two forms of import.** [implemented] `import "x.lut"` brings the definitions of `x.lut` into the importer's namespace; `import "x.lut" as m` reaches them as `m.f`, with no collision between files. The extension `.lut` may be omitted. In the language designed `import` is the function of 12.S22.
 
 **12.S4. Where a file is looked for.** [implemented] Next to the importing file, then in each directory of the environment variable `LUTHIER_PATH`, then in the `lib/` directory of the interpreter's package. `core.lut` is imported implicitly, unless the command is given `--no-core`.
 
@@ -54,6 +54,18 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 **12.S19. `luthier eval files term`.** [implemented] Infers the type of a term in the context of the files, evaluates it, and prints the value with its type. It records nothing and demands no certificate. [proposed] Under D-2026-10-12-y a value demanded from outside the program meets the same strictness as `run`; whether `eval` is exempt as a probe is not decided.
 
 **12.S20. `luthier session files`.** [implemented] Reads one item per line over the loaded files: `x := t` defines once, `x <- t` binds and rebinds, a bare term is evaluated and printed with its type, an unused rebinding is reported as a note and not refused; `:items` lists the block and `:quit` ends. Each line re-evaluates the block so far, with no memo (D-2026-10-11-i). Its semantics as a block over the dataflow of the demand are spec 8; the memo between items is O8.
+
+
+## §6 When a file is read
+
+**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ac] `import` is read at
+once, since the names it adds are unknown until it is read and the checker is the demand that needs
+them; its functions wait for a demand. An extern's file is read
+only when `run` or `test` reaches its node (`spec 3 §8`).
+
+**12.S22. Modules are values.** [decided D-2026-10-12-ab] `import` is a function whose value is a
+module, a value of the record type of 12.S1; the form by which a module's names enter the importer's
+namespace is to be specified.
 
 ## Open
 

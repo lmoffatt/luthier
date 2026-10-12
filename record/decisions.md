@@ -1425,9 +1425,9 @@ Kind:       principles of the method (record/principles.md P16). For P13 (the de
             brake: flexibility has a cost), P6
 Status:     current; P16 in record/principles.md, proposed wording, his mark pending
 
-D-2026-10-12-ab The reserved words. Keywords: `data`, `match`, `if`, `then`, `else`, and
-                possibly `operator`. Everything else that can be Luthier is Luthier: `let`/`in`
-                (blocks), `U`, `forget`, `provisional`, `gen` (removed), `extern`, `primitive`,
+D-2026-10-12-ab The reserved words. Keywords: `data`, `match`, `if`, `then`, `else`, `U` (his
+                correction: the universe is a kernel former), and possibly `operator`. Everything
+                else that can be Luthier is Luthier: `let`/`in` (blocks), `forget`, `provisional`, `gen` (removed), `extern`, `primitive`,
                 `axiom`, `test`, `cite` and the contextual words of tests become names of core or
                 of a library, with named arguments where they take options (`test` will be the
                 function with the most parameters, so a positional or keyword syntax does not
@@ -1440,7 +1440,7 @@ Quote:      "test justamente va a ser una de las funciones con mas parameterizac
             debe ser luthier. el extern es una accion no? porque abre un file. necesitamos el tipo
             de implicitos creo. If then else match data--> keywords. operator -> podria ser
             keyword... Igual sean o no keyword, su semantica debiera ser expresable por luthier no?
-            los modulos son valores." (chat, 2026-10-12)
+            los modulos son valores." "U me parece que es keyword no?" (chat, 2026-10-12)
 Source:     chat 2026-10-12, on the analysis of the reserved words of spec 2.S2
 Kind:       language (spec 2, 3, 10, 12; L14, L4, L11). For L14, P16
 Status:     current; the question of extern and import as actions inside definitions (against

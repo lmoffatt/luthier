@@ -164,7 +164,7 @@ its refinement as a precondition inside the match. A refinement deeper in a payl
 record in a sum) and one under a data type are not entered. `luthier run --checked` tests every
 value an extern gives against the Bool laws of its type as it crosses, each entry of an array and
 each component of a record included; a quantified law is left to `test`, and a function an extern
-gives is tested when it is called (`spec 10`).
+gives is tested when it is called (`spec 10`). In the language designed the checker does not resolve the target (4.S24).
 Files: r5_extern_value.accept.lut, r5_extern_type.reject.lut.
 
 **4.R6. The body of a declared name is an inhabitant or a predicate.** [implemented] If `x` is
@@ -338,6 +338,17 @@ test csv with 200
 invariants (the cells of a column all of one kind, rows below `nRows`), `Table` would be declared
 over this base and defined by them. `Codec` carries its equality as a component (4.R8), because a
 `Table` contains a function and has no `==`.
+
+
+## §11 What the checker infers and what it does not open
+
+**4.S23. Implicit arguments from the expected type.** [decided D-2026-10-12-ab] Implicit arguments
+are inferred from the type the context expects as well as from the types of the explicit arguments,
+since `extern` and `axiom`, as names of core, take their type from where they are used.
+
+**4.S24. The checker does not open an extern's file.** [decided D-2026-10-12-ac] 4.R5 is checked on
+the declared type alone: the checker records the target of an extern and its type, and does not
+resolve it (`spec 3 §8`). Today it imports the host module and rejects a target it cannot resolve.
 
 ## Open
 

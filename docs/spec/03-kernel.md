@@ -17,12 +17,12 @@ definition `x : T := t`, or `x := t` filling an earlier declaration, gives `x` a
 
 **3.S2. Bodies.** [implemented] The body of a definition is a term, a `data` term (§2), or
 `extern "target"` (§3). Two further bodies exist, `primitive "..."` and `axiom "..."`; what they
-mean and where they are allowed is `spec 11`.
+mean and where they are allowed is `spec 11`. Replaced: 3.S39, 3.S40.
 
 **3.S3. Directives.** [implemented] Directives are not definitions and have no states. They are
 `import` (`spec 12`), `test` and `gen` (`spec 7`), `operator` (`spec 4`) and `cite` (`spec 6`). The
 `profile` directive (`spec 7`) is [proposed] here: it is on the brief's list but not in
-`syntax.py`.
+`syntax.py`. Replaced: 3.S39, 3.S40.
 
 ## §2 Type formers
 
@@ -114,7 +114,7 @@ the interpreter has no `Cost` yet.
 **3.S13. Extern.** [implemented] `extern "python:module.function"` is a value the host provides,
 with the type its context gives it; `extern provisional "..."` is the same value marked as debt.
 Its validation is `spec 10`, and the rule that it needs a declared type is `spec 4.R5`.
-Examples: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`.
+Examples: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`. Replaced: 3.S39, 3.S40.
 
 ## §4 Reduction
 
@@ -263,6 +263,21 @@ lists with the algebra fixed, until functions of two arguments have generators.
 **3.S38. `lib/term.lut`.** [proposed] The theory of `Term`: the data of §6, alpha-equivalence, the
 canonical form of 3.S34, substitution, and `reduce` of 3.S33 with the laws that relate it to
 `KernelLaws`. Not written.
+
+
+## §8 Constructs as names, and when a file is read
+
+**3.S39. Bodies and directives as names of core.** [decided D-2026-10-12-ab] `extern`, `primitive`
+and `axiom` are names of `core.lut`; a body is their application, recognized by the checker, so the
+restriction of `primitive` and `axiom` to core and the libraries becomes a law over `Program` (`spec
+4 §9`). The directives `test`, `cite` and `import` are functions (`spec 7`, `spec 6`, `spec 12`).
+
+**3.S40. An extern is a route.** [decided D-2026-10-12-ac] An extern is a definition like any other:
+its name, its declared type and the route to the host's function, a datum. Reading the host's file
+is the evaluation of that node, done when a demand reaches it, once per plan, with the hash of what
+was read entering the identity of the result (L5.6); a file no demand reaches is never read, and it
+need not exist when the program is checked (L11.7). Today the checker resolves every extern when it
+checks the file.
 
 ## Open
 

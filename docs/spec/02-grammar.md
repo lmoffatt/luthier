@@ -29,7 +29,7 @@ A dotted name `m.f` is one token, a qualified name or a projection that the chec
 `under`, `where` and `profile` are ordinary names that act as keywords in their position. Here `gen` goes from the language [proposed] (spec 2.S19); the parser still reads
 it today. `and`, `or` and `mod` are ordinary names written infix; `Bool`, `Int`, `Float64`,
 `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat` and `Fin` are definitions of `core.lut`, not
-words of the grammar.
+words of the grammar. Replaced: 2.S21.
 
 **2.S3. The arrow `<-`.** [implemented] `<-` is one token (D-2026-10-11-c): `a<-1` is a binding,
 and a comparison with a negative number needs a space, `a < -1`.
@@ -66,7 +66,7 @@ declared in one act and defined in another, in the same file or another; what th
 definition means depends on its type (spec 4). An alias with binders is a function on types:
 `Maybe (A : U) = < nothing : Unit | just : A >`.
 
-**2.S6. Directives.** [implemented] The directives other than `test` are:
+**2.S6. Directives.** [implemented] The directives other than `test` are: Replaced: 2.S21.
 
     directive   ::= "import" string [ "as" name ]
                   | "operator" op ":=" term
@@ -201,7 +201,7 @@ In a dependent product the type of a later component may mention earlier ones, a
 **2.S15. `let` and negation.** [implemented] `let p = e in body` is `match e { p -> body }`, the
 pattern a name or a tuple. `-x` is negation, an error on a type other than `Int` or `Float64`. It
 binds looser than application, so `-f x` is `-(f x)`, and as an argument it needs parentheses,
-`f (-x)`, since `f -x` is `f - x`.
+`f (-x)`, since `f -x` is `f - x`. Replaced: 2.S21.
 
 **2.S16. Implicit parameters.** [implemented] `{A B : U}` before the other parameters of a
 definition makes them implicit. Where the definition is applied they are inferred by matching the
@@ -251,7 +251,7 @@ block; in a file, of `main`.
 
 **2.S19. The test directive and the profile.** [proposed] Decided by Luciano on 2026-10-06
 (`docs/spec/08-tests.md` §12), without an id in `record/decisions.md`. The directive `test`
-extends, the act `profile` is new, and the act `gen` and its word are removed:
+extends, the act `profile` is new, and the act `gen` and its word are removed: Replaced: 2.S21.
 
     directive ::= "test" name [ "with" number | "exhaustive" ] [ "sampled" name ] [ "size" number ]
                   [ "under" name ] [ "where" "{" binding { "," binding } "}" ]
@@ -273,6 +273,19 @@ one candidate syntax,
 The type `Term` itself, and `Program`, belong to `spec 3`. A theory that states this grammar in
 Luthier would be `grammar.lut` (L14), not written. A saved evaluation, a quoted term together with
 its value, stays open (spec 8).
+
+
+## §11 The keywords, and what becomes Luthier
+
+**2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `data`, `match`, `if`,
+`then`, `else`, `U`, and possibly `operator`. Everything else is a core or library
+name: `let` and `in` give way to blocks (§8); `forget` is a function of core; `extern`,
+`primitive` and `axiom` are names of core whose application the checker recognizes (`spec 3 §8`),
+with `provisional` a named argument of `extern`; `test` and `cite` are functions whose options
+(`with`, `exhaustive`, `size`, `sampled`, `under`, `where`, `profile`, `checked`) are named
+arguments and values (`spec 7`, `spec 6`); `import` gives a module value (`spec
+12.S22`). Keyword or not, what each construct means is stated in Luthier (L14.5). The parser reads the
+older forms today, and the statements above that describe them say so.
 
 ## Open
 
