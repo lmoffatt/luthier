@@ -1129,19 +1129,23 @@ L6.1   Predicates combine by and, or, then, and by a quantifier over a carrier, 
        predicate; costs combine by sum, max and weighted sum, and the result is a cost; a
        combination that mixes the two is a cost, each predicate lifted. [proposed]
 L6.2   The lift is explicit and named: `lift : Bool -> Cost` sends true to 0 and false to ∞, `exact
-       : Cost -> Bool` is c == 0, both homomorphisms with `exact ∘ lift = id`, so `Bool` is a
-       retract of `Cost`, not a subtype, and the planner inserts the lift as a bridge of cost zero.
-       [settled]
-L6.3   The cutoff `within ε : Cost -> Bool` lives only in the demand, since it does not compose (two
-       links within ε are within 2ε). [settled]
+       : Cost -> Bool` is c == 0, with `exact ∘ lift = id`, so `Bool` is a retract of `Cost`, not a
+       subtype, and the planner inserts the lift as a bridge of cost zero; whether the two are
+       homomorphisms waits for the algebra (O1), since Boolean or has no counterpart among the
+       operations of `Cost` yet. [proposed]
+L6.3   The cutoff is the demand's (L10.17), passed down from it; it does not compose (two links
+       within ε are within 2ε), so no law carries one. [proposed]
 L6.4   `&`, the only join the libraries use today, is the Boolean and. [settled]
-L6.5   The law of a theory is one law, so its certificate is one certificate, and its grade is
-       composed from the grades of the parts: with `&`, the weakest; with a sum of costs, the costs
-       summed, each at its grade. [proposed]
+L6.5   The law of a theory is one law, so its certificate is one certificate; how the grades of its
+       parts combine is the demand's parameter, the vector of grades or the weakest
+       (D-2026-10-12-i); how the costs of its parts combine is the theory's algebra, with two
+       candidate models, min and max, or 1/n log-sum-exp and 1/n sum (D-2026-10-12-p); the
+       composition along a path is the sum (L16.7, D-2026-10-12-q). [proposed]
+References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q
 Rests on:   O1 (the algebra of costs; the two candidate models, D-2026-10-12-p)
 Source:     his note of 2026-10-12 on the reorder plan (14ea9f0)
-Status:     proposed on his note of 2026-10-12; clauses 2 and 3 settled on his mark of draft 9, the
-            names lift, exact and within his to rename
+Status:     proposed on his note of 2026-10-12; the names lift, exact and within his to rename;
+            clauses 2, 3, 5 reworded on D-2026-10-12-h, -i, -p, -q
 History:    draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): new, on his note of 2026-10-12 on the
             plan ("faltan las leyes de los costos y de los predicates y cómo se lift a costos"); the
             text is the record's G3 of draft 9 (lift, exact, within) and the paragraph that stood in
@@ -1150,7 +1154,10 @@ History:    draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): new, on his note of 2
             the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it. clause 1 is the paragraph that stood in G2 at draft 10;
             clause 5 is the composed grade from the former L11, on his note on Terms; "a law is a
-            predicate or a cost" deleted here, defined in Terms.
+            predicate or a cost" deleted here, defined in Terms. draft 11, step 4 (2026-10-12):
+            "homomorphisms" withdrawn until the algebra exists (GPT en, GPT sp); "only in the
+            demand" became "the demand's, passed down" (D-2026-10-12-h); the grade of a sum
+            parameterizable (D-2026-10-12-i); the two candidate algebras named (D-2026-10-12-p).
 
 L8  The ideal world is realized with a guarantee.
 From:       G2 directly: the realization's distance to the ideal law is the law's value, and the

@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 294bfac2341f, commit c6a9bc0 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 5593b6fcefe6, commit 76a4af6 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -480,17 +480,22 @@ demand (the cutoff lives in the demand).
   predicate; costs combine by sum, max and weighted sum, and the result is a cost; a combination that
   mixes the two is a cost, each predicate lifted. [proposed]
 - L6.2 The lift is explicit and named: `lift : Bool -> Cost` sends true to 0 and false to ∞, `exact
-  : Cost -> Bool` is c == 0, both homomorphisms with `exact ∘ lift = id`, so `Bool` is a retract of
-  `Cost`, not a subtype, and the planner inserts the lift as a bridge of cost zero. [settled]
-- L6.3 The cutoff `within ε : Cost -> Bool` lives only in the demand, since it does not compose (two
-  links within ε are within 2ε). [settled]
+  : Cost -> Bool` is c == 0, with `exact ∘ lift = id`, so `Bool` is a retract of `Cost`, not a
+  subtype, and the planner inserts the lift as a bridge of cost zero; whether the two are
+  homomorphisms waits for the algebra (O1), since Boolean or has no counterpart among the operations
+  of `Cost` yet. [proposed]
+- L6.3 The cutoff is the demand's (L10.17), passed down from it; it does not compose (two links
+  within ε are within 2ε), so no law carries one. [proposed]
 - L6.4 `&`, the only join the libraries use today, is the Boolean and. [settled]
-- L6.5 The law of a theory is one law, so its certificate is one certificate, and its grade is
-  composed from the grades of the parts: with `&`, the weakest; with a sum of costs, the costs summed,
-  each at its grade. [proposed]
+- L6.5 The law of a theory is one law, so its certificate is one certificate; how the grades of its
+  parts combine is the demand's parameter, the vector of grades or the weakest (D-2026-10-12-i); how
+  the costs of its parts combine is the theory's algebra, with two candidate models, min and max, or
+  1/n log-sum-exp and 1/n sum (D-2026-10-12-p); the composition along a path is the sum (L16.7,
+  D-2026-10-12-q). [proposed]
+References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q.
 Rests on: O1 (the algebra of costs; the two candidate models, D-2026-10-12-p).
-Status: proposed on his note of 2026-10-12; clauses 2 and 3 settled on his mark of draft 9, the
-names lift, exact and within his to rename.
+Status: proposed on his note of 2026-10-12; the names lift, exact and within his to rename; clauses
+2, 3, 5 reworded on D-2026-10-12-h, -i, -p, -q.
 
 **L8. The ideal world is realized with a guarantee.**
 From: G2 directly: the realization's distance to the ideal law is the law's value, and the tolerance
