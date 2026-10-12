@@ -1,5 +1,14 @@
 # The principles of Luthier
 
+Draft 9, 2026-10-12, unapproved. Draft 8 (4f6beef) was annotated by Luciano (bcdac41, nine marks);
+draft 9 applies them in place, each retouch marked "(draft 9)", with the answers in
+`record/answers-annotations-principles-2026-10-12.md` §5: the holotype paragraphs removed and his
+words put in their place (the item is settled); the lift from Bool to Cost explicit and named (G3);
+G4 retired as an organizer, its content a candidate L22, his mark pending; L3 widened to the theory;
+L8, L11, L18 completed in his words; L20 absorbed into G2; L21 restated as graded transport,
+replacing two clauses of draft 7, his mark pending. Where a retouch is his decision it says so;
+where it is the model's proposal on his doubt it is marked *Proposed* and he corrects it here.
+
 (2026-10-12) The way of working, W1 to W15, is a document of its own, `docs/way-of-working.md`, at his instruction (D-2026-10-12-b); until then this file was "The principles of Luthier and the way it is built" and its §3 held the W.
 
 Draft 8, 2026-10-12, unapproved. Draft 7 (cd314a4) received one observation from Luciano (66f0bef,
@@ -11,7 +20,8 @@ that theories and models are the elements of Luthier. Draft 8 widens G2 to theor
 the function type as its one-symbol case, prints it before G1 (his order; tags kept, as L numbers
 were by D4), moves L20 under it and names the derivations that follow from it directly; §2 swaps its
 two sections accordingly; the P13 table is not recounted. Every retouch is marked "(draft 8)". The
-order of the organizers is thereby settled; the holotype still waits for his mark. The extension of
+order of the organizers is thereby settled; the holotype waited for his mark (settled in draft 9).
+The extension of
 Boolean logic to Lawvere and Bayes (G3) he names as a further eureka, to be analyzed next (§4).
 Draft 7, 2026-10-11, unapproved. Draft 6 (8809e20) was read by four models with a new prompt: break
 L10, L19 and L14 with worked examples (`record/IA/principles round 3/`, d824b21; synthesis
@@ -111,20 +121,12 @@ the implementation, native
 or extern, is the specimen under observation. A description is derived by composition of the
 laws of the parts when such a law exists, and observed otherwise; laws accumulate, and a set of
 laws that determines the function up to its equality is the limit a definition may reach, not what
-it must reach (D-2026-10-11-d). (Draft 3) A law is written over the signature of its theory, an
-implementation over a model; the first is the holotype, `\ x { x * x }` as the formula of `Sqr`,
-the second a specimen checked against it (his "holotipos", second round §3; `00`, *Value, the
-model*; `05` R10). (Draft 5, correction of this reading proposed, his mark pending)
-aca Sqr no es un ejemplo de ley, lo que quise decir es que las leyes las tenes que escribir con una implementacion de las mismas, 
-las teorias las escribis con un object classifier (hecho de leyes). 
-Luego verificas que la implementacion de los modelos verifiquen las leyes. 
-
-
- In nomenclature
-the holotype is the name-bearing specimen and the diagnosis is the text, so: the law is the
-diagnosis; a reference implementation, the formula over `Rational` or the native, is the holotype;
-every other implementation is a specimen compared to the holotype by the identity law (L21) and to
-the diagnosis by the laws. What type theory lacks: it knows a function by acquaintance, as its term.
+it must reach (D-2026-10-11-d). (Draft 9, his correction; the holotype of drafts 3 to 8 removed, it
+was his metaphor for the representative of a class, which is L10's) In his words: a law is written
+as an implementation of itself, a program that returns its Bool or Cost; a theory is written as an
+object classifier made of laws, the map that sends a structure over the signature to the cost of its
+being a model, which is where G3 enters G2; the implementation of a model is then verified against
+the laws. What type theory lacks: it knows a function by acquaintance, as its term.
 (Draft 8) What model theory lacks: a grade and a demand; a model of Luthier satisfies its theory up
 to a cost, certified at a grade and progressively (G3), and is chosen for execution by a demand
 (G1); naming it "model" must not promise exactness. What follows from G2 as its definition rather
@@ -137,9 +139,6 @@ satisfying the theory; L14's extern is a model whose carrier is foreign. The pre
 programming is algebraic specification and the module systems of ML and the lawful type classes of
 Haskell, where the mechanism exists without being the organizing idea (the answer of 2026-10-12,
 references to be checked before they are cited here).
-
-Lo del holotipo me parece que blow out of proportion, era una metafora para decir algo que en Cocientes se usa que vos elegis un elemento del cociente como el representante de la clase de equivalencia. 
-
 
 **G1. The demand defines what is computed.** Source: "la demanda de un valor por el mundo externo
 me define todos los tipos necesarios para obtener eso" (audio 09.19, 00:24); "la compilacion se
@@ -155,7 +154,6 @@ types and the tolerances actually produced. What type theory lacks: an executive
 computation is the normalization of a given term, with no demand.
 
 
-
 ### Principles of good use
 
 **G3. Laws are valued in cost, and what a run teaches is kept.** Source: "queremos que Luthier use
@@ -167,8 +165,14 @@ o estadistica. Ahi la teoria de tipos booleana falla y si queres ser estricto o 
 necesitas otra cosa. De ahi el [0, +inf)" (`el problema de los floating point.txt`, 5cc41fa);
 "cuando vos corres un programa aprendés algo y eso que aprendés queda en algún lado ... es como un
 deseo más que un principio" (audio 08.58, 05:47 to 06:08).
-*Proposed* formulation: a law is valued in [0,∞), 0 true and ∞ false, so that one law serves every
-representation and the demand supplies the tolerance; over floats the cost of a law is itself
+*Proposed* formulation: a law is valued in [0,∞), 0 true and ∞ false, and the demand supplies the
+tolerance; (draft 9, his mark: "no podes promover booleans a cost a troche y moche") a Bool-valued
+law and a Cost-valued law are both laws and coexist; Bool is a retract of Cost, not a subtype (`lift
+: Bool -> Cost`, true to 0 and false to ∞, and `exact : Cost -> Bool`, c == 0, both homomorphisms
+with `exact ∘ lift = id`), the lift is explicit and named, inserted by the planner as a bridge of
+cost zero, and the cutoff `within ε : Cost -> Bool` lives only in the demand, since it does not
+compose (two links within ε are within 2ε; the answer of 2026-10-12, §4; names proposed, his to
+change); over floats the cost of a law is itself
 estimated, so its value is uncertain and evidence composes as Bayes composes it, and is kept
 across runs. What type theory lacks: two truth values, and a run that leaves nothing. The reason
 to depart is not that type theory fails on floats (Flocq proves exact theorems about them) but
@@ -176,12 +180,17 @@ what the Boolean way costs: a tolerance fixed in each law, worst-case bounds tha
 condition numbers, and nothing to say about data (`record/organizing-principles-2026-10-11.md`,
 addendum 2). Articulated in `docs/rationale/11-cost-valued-laws.md`, draft 0 (D6). Candidate by
 the P13 check, in his words a wish.
-          Es medio forzado, no podes promover booleans a cost (necesitamos un nombre) a troche y moche confunde. 
-          Lamentablemente necesitamos dos tipos de leyes o tener leyes y costos conviviendo quizas? (y ahi si, los boolean se 
-          promueven (lift?) a cost)
-
-
-**G4. Expressive over restrictive; it decides between designs.** Source: "Luthier debe ser expresivo
+**G4. Expressive over restrictive; it decides between designs.** (Draft 9, *Proposed* on his doubt,
+his mark pending: retired as an organizer. His words: "Mi idea era otra: si hay una forma 'no
+luthieriana' de definir o implementar algo, luthier deberia dar la posibilidad de hacerlo con un
+world especifico ... me da que es una declaracion de buenas intenciones nomas". What cites it: four
+decisions by their Kind lines (D-2026-10-11-k, -m, -n and one more), L10's "every path expressible"
+and the tie-breaker of D8; none reverses without it, k is taste, m follows from L10 and G0, n is his
+escape hatch. What survives is the concrete content, as candidate L22 under G1: a non-Luthier way of
+defining or implementing something is allowed inside a named world (L12), its certificates `assumed`
+(D-2026-10-11-n), visible in the plan. "The law that makes two ways equivalent" is L21 and needs no
+principle; P5 stays in `record/principles.md`. The text below is kept until his mark.) Source:
+"Luthier debe ser expresivo
 mas que restrictivo: si hay
 mas de una forma de hacer las cosas, todas deberian poder ser expresadas en Luthier" (note).
 *Proposed* formulation: when the language could forbid or allow, it allows and asks for the law
@@ -191,12 +200,6 @@ equally, G4 chooses the one that allows both and asks for the law that makes the
 it generates no L of its own and appears as the reason behind decisions (section 2, last part) and
 inside L10.
 What type theory lacks: one canonical form per value.
-          No se si esto suma. Mi idea era otra era que, si hay una forma "no luthieriana" de definir o implementar algo, luthier deberia dar la posibilidad de hacerlo con un world especifico. Pero estoy bastante en duda. 
-          Evaluemos si se pierde algo retirando este principio. 
-          O sea Expressive over restrictive suena bien, pero me da que es una declaracion de buenas intenciones nomas. 
-          
-
-
 ### How the organizers depend on each other (*Proposed*, D8)
 
 1. G0's quotient needs G1 and G3 where the carrier carries a distance: there two implementations
@@ -298,8 +301,9 @@ functions, laws, no values) is a module of holes. From G0 (a hole is a hypothesi
 with G1 (nothing is produced until demanded). Source: Luciano, 2026-05-29
 (`dialogue:20260529T1400:tipos-no-definidos-y-forward-reference`); the hole named 2026-09-29;
 `external` and the theoretical module 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 17.41.53.md`;
-`WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to 00:40). 
-        Si, pero al ser declarado, asumimos que es del tipo declarado y si se usa en un contexto donde el tipo es incompatible, hay un error. 
+`WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to 00:40). (Draft 9, his words) A declared name is
+assumed to have its declared type, and its use where that type is incompatible is an error (`05` R1,
+the checker).
         
 
 
@@ -388,14 +392,11 @@ From G2 (what is known of a thing is its description; "la idea de luthier es ayu
 las invariantes de los calculos", note), with P14 (a type is a concept). Source: Luciano,
 2026-05-29 (`dialogue:20260529T1400:expresar-invarianzas-de-disciplinas`).
 
-**L3. Defining a function defines its test.** Declaring what a function must satisfy is declaring
-the test that will be run on it, so definition and verification are one act. From G2 directly:
+**L3. Defining a model defines its test.** (Draft 9, his mark: widened to the theory.) Declaring a
+model of a theory, `m : T`, declares the tests it will be run on, so definition and verification are
+one act; a function is the one-symbol case. From G2 directly:
 the eureka of 09.19 in its 2022 form. Source: Luciano, 2022-08-03
 (`written:2022-08-03_haskell:declarar-funcion-es-declarar-su-test`).
-      Quizas lo debamos ampliar a Theory aqui? 
-
-
-
 **L11. Verification is one operation, exact or statistical.** (Draft 4) What is known by a theorem is
 cited, what can be enumerated is checked exhaustively, what has chosen cases is checked on them,
 what can only be sampled is checked statistically, and the grade of the evidence (proved,
@@ -407,8 +408,12 @@ on the number of samples, because errors concentrate at the edges. From G2 (obse
 description is verified) and G3 (the grade is the uncertainty of the cost). Source: Luciano,
 2022-08-03 and 2023-02-22 (`written:2023-02-22_tapp-wish-list:untested-a-tested`); the grades by
 samples 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 11.11.22.md`, 03:02 to 04:12); the dependence on
-the distribution is the model's correction, from the practice of property-based testing.
-        Tambien podria haber verificacion externa por teoremas o por delegacion (creo en Lapack, por ejemplo)
+the distribution is the model's correction, from the practice of property-based testing. (Draft 9,
+on his mark "verificacion externa por teoremas o por delegacion (creo en Lapack)") Verification by a
+theorem is `proved` by citation (D-2026-10-11-f); verification by delegation is the same mechanism
+with the host library's guarantee as the theorem cited (LAPACK's backward-error bounds, the
+condition number their hypothesis) and the library's version and platform as hypotheses the
+certificate carries (L14); no new grade. *Proposed*.
 
 
 **L14. Luthier orchestrates other languages.** Types and laws are native; values may come through
@@ -452,26 +457,26 @@ bit-identical. The type of the identity law's result says which (`Bool` or `Cost
 D-2026-10-11-m)
 The identity law between two specimens, with its distance, is what admits a second implementation
 into the class the planner moves in (L10); the agreement test of W5 between native and extern is
-this law, and the holotype formula of G2 evaluated over `Rational` is one more specimen, with grade
-exact, checked by the same law. (Draft 7, Kimi) An identity certificate admits a specimen into the
-planner's graph and never raises a node's grade: the grade a demand requires is met only by
-certificates of the laws. (Draft 7, Claude) And the identity law admits a specimen to the planner's
-graph only beside a certificate of at least one law of the description at the grade the demand
-requires; a table of the native's outputs on the grid agrees with it exactly there and is
-acquaintance in its limiting form (L5), refused by the first law over the signature (`delay s s =
-0`) and by nothing else. A function
+this law, and the reference formula of a law evaluated over `Rational` is one more specimen, with
+grade
+exact, checked by the same law. (Draft 9, his correction, replacing the two clauses of draft 7 from
+Kimi and Claude; his mark pending on the wording) Certification transports along identity: if B is
+certified at grade g on inputs X and the identity A ≡ B is certified at grade h on inputs Y, then A
+is certified at the weaker of g and h on X ∩ Y, and by nothing else. The two counterexamples of the
+third round follow: with B's laws only `assumed` the transport gives A `assumed`, nothing (Kimi); a
+lookup table equal to the native on a grid is certified on the grid and nowhere else (Claude). A
+function
 known correct by a theorem outside Luthier is certified `proved` by citation (D-2026-10-11-f),
 and the chain law, citation, native, identity, extern is carried by hash. From G2 (the specimen
 can be recognized as the same specimen, or described). Source: Luciano, 2026-10-11 (`WhatsApp Ptt
 2026-10-11 at
 08.58.46.md`, 09:20 to 13:19: "verificar bit a bit que sea igual ... por lo menos sabés que no
 cambia la implementación"; the statistical kind for "prueba científica").
-          No entiendo que sireve esto. La idea era que si vos tenes que B esta certificado y A es identico a B por transporte A esta certificado, aca decis algo negativo, no entiendo. 
-
-
-
-
-**L20. A function is declared in a theory and is universal over its models.** (Draft 3, reworded
+**L20. A function is declared in a theory and is universal over its models.** (Draft 9, his mark "no
+entiendo porque hacerlo un principio. Surge solo": absorbed into G2, of which it is the definition;
+the clause on specializations and bridges belongs to L10 and modules as values to the spec, `03`;
+the tag L20 stays for the record's citations, and the text stays here until the spec takes its
+parts.) (Draft 3, reworded
 after his annotation.) A function belongs to a theory (Real, Field, LinearAlgebra) and takes its
 model as its first, often implicit, argument, so it is written once for every model; (draft 4) the
 model is
@@ -495,10 +500,6 @@ pasa a ser todo lo universal posible"; instantiated on demand). Source: Luciano,
 codigo seria, en principio universal a los valores de funciones que cumplan las leyes requeridas",
 chat; `WhatsApp Ptt 2026-10-10 at 17.00.40.md`; `WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to
 04:25; D-2026-10-10-g). The conditions on bridges are the model's, accepted.
-          no entiendo porque hacerlo un principio. Surge solo, me parece. Pero puede aclarar, no se. 
-
-
-
 ### From the demand, G1
 
 **L9. A program is a DAG and statements commute.** The unit is the definition; dependencies give
@@ -558,12 +559,11 @@ distance, a result in the same class at a distance the plan records, and for the
 is `Confluent` in `lib/plan.lut`, a law a dataflow is certified against rather than a theorem
 assumed. From G1 as its precondition rather
 than its consequence: the declarative face can be universal and minimally processed only if
-definitions have no effects. Source: Luciano, 2026-10-10 ("lo que si es no-side effects", chat;
+definitions have no effects. (Draft 9, his words) No effect on the world; its one effect is on the
+program: it takes its name, once, and enters the map of definitions, so the same name is not defined
+twice (`:=` once; `<-` only in a block, D-2026-10-11-i). Source: Luciano, 2026-10-10 ("lo que si es
+no-side effects", chat;
 D-2026-10-10-c).
-        No tiene efectos en el mundo exterior, pero tiene efectos en el mundo interior: se ocupa el identificador y se guarda la definicion en el mapa de definiciones. No podes usar el mismo identificador dos veces.  
-
-
-
 **L19. The demand determines the computation.** The evaluation strategy is a parameter separate
 from the program (L17); by default, a plan backward from the actions over names, evaluating
 nothing, then a strict forward run over the live subgraph, each node once and whole: forward on
