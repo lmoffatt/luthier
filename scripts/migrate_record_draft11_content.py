@@ -18,7 +18,7 @@ pp = importlib.util.module_from_spec(spec); spec.loader.exec_module(pp)
 RECORD = ROOT / "record/principles-language.md"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--upto", type=int, default=10)
+ap.add_argument("--upto", type=int, default=11)
 UPTO = ap.parse_args().upto
 
 text = RECORD.read_text(encoding="utf-8")
@@ -376,7 +376,17 @@ def edit10():
                                "memory, model for what a type names and specimen for the planner's "
                                "candidates; applied where the old word stood.")
 
-EDITS = [edit1, edit2, edit3, edit4, edit5, edit6, edit7, edit8, edit9, edit10]
+# ---- edit 11: the two citations of the merged L11 that edit 3 missed -----------------------------
+def edit11():
+    e = E["L9"]
+    e["clauses"] = [(t.replace("where L13 and L11 live", "where L13 and the verification of actions (clause 9) live"), s)
+                    for t, s in e["clauses"]]
+    f = E["L14"]
+    f["From"] = f["From"].replace("with L11; delegation from G1 and G2 (the former L11); transport (clause 9) from G1",
+                                  "with L9; delegation (now L7.7) from G1 and G2; transport (now L16.7) from G1")
+    assert "clause 9) live" in " ".join(t for t, _ in e["clauses"]) and "now L7.7" in f["From"]
+
+EDITS = [edit1, edit2, edit3, edit4, edit5, edit6, edit7, edit8, edit9, edit10, edit11]
 for f in EDITS[:UPTO]:
     f()
 

@@ -557,7 +557,7 @@ L9.5   A mutable parameter is two variables, before and after, so it is not an e
        one has no other consumer; what is forbidden is what the graph does not show. [settled]
 L9.6   The DAG says what depends on what; the structure the laws generate over terms (an equivalence
        when laws are boolean, a metric space when they carry a distance) is a second structure,
-       where L13 and L11 live. [settled]
+       where L13 and the verification of actions (clause 9) live. [settled]
 L9.7   A definition's result depends only on its inputs; effects live only in the actions (print,
        save). It is the one assumption under which every evaluation strategy gives the same result;
        over a carrier with a distance, a result in the same class at a distance the plan records,
@@ -1071,8 +1071,8 @@ L14 Luthier orchestrates other languages: an extern is a specimen certified by i
 From:       G1: an absorbed library is a specimen known by its description, and its code is not
             needed ("que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones
             con sus propias invarianzas", audio 08.58, 31:25 to 32:00); the world from G0, the
-            demand (the demand names the world it runs in) with L11; delegation from G1 and G2 (the
-            former L11); transport (clause 9) from G1
+            demand (the demand names the world it runs in) with L9; delegation (now L7.7) from G1
+            and G2; transport (now L16.7) from G1
 L14.1  Types and laws are native; values may come through `extern` from Python or any host, declared
        over what they really receive and return, with description and verification kept on Luthier's
        side. [settled]
