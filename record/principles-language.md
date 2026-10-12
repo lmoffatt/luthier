@@ -491,31 +491,22 @@ History:    draft 0 (6d9dbd3): stated. draft 4 (c7c6396): the elaborated form re
             the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it.
 
-L5  Equality has levels, belongs to the object, and is a law that composes.
+L5  Equality has levels and belongs to the object.
 From:       G0 (the identity type and its levels) with G2 (under cost, the identity proposition
             acquires a distance); clause 4 from G1 (the specimen can be recognized as the same
             specimen, or described)
 L5.1   Definition (`:=`), the identity proposition (`=`), decidable equality (`==`) and definitional
        equality by reduction (`≡`) are different things, and each object carries the observational
        equality that fits it. [settled]
-L5.2   (His annotation) The binding acts are two, `:=` once and `<-` rebinding, and they share one
-       law: after the act the name equals the term in the equality its type has, structural `==`
-       where it exists (`05` R8), observational otherwise, a distance under G2; after `:=` for all
-       time, after `<-` until the next `<-` (`05` R12). [settled]
-L5.3   In the kernel the binding is exact: the name denotes the term, and reduction does not depend
+L5.2   In the kernel the binding is exact: the name denotes the term, and reduction does not depend
        on a tolerance; the distance enters when the planner realizes the term by another
        representative, which it does only along a certified equivalence carrying its distance (L13,
        D-2026-10-11-m). [settled]
-L5.4   The identity law between two specimens, with its distance, is what admits a second
-       implementation into the class the planner moves in (L13, D-2026-10-11-m); the agreement test
-       of W5 between native and extern is this law, and the reference formula of a law evaluated
-       over `Rational` is one more specimen, with grade exact, checked by the same law. [candidate]
-L5.5   Identity is a law, so it composes as HoTT composes paths: reflexive, symmetric, transitive;
-       under cost the composed path costs the sum of its links and holds at the weakest of their
-       grades, and a sampled link holds only on the inputs its samples cover, so the composition
-       holds on the intersection of the domains certified. [proposed]
-References: `05` R12, `05` R8; D-2026-10-11-m; W5
-Rests on:   O1 (the composition under cost), O2 (the equality a type comes with)
+L5.3   Equality is a law of the object: Boolean where the carrier is decidable, a distance where it
+       carries one, and the type of the identity law's result, `Bool` or `Cost`, says which (L7);
+       how a certified identity composes along a path is L16.7. [proposed]
+References: D-2026-10-11-m
+Rests on:   O2 (the equality a type comes with)
 Quote:      (L16) "luego de <- lh == rh, de hecho creo que es la ley de <-" (reply, 18da042) (L21,
             the identity clauses) "verificar bit a bit que sea igual ... por lo menos sabés que no
             cambia la implementación" (audio 08.58, 09:20 to 13:19); the statistical kind for
@@ -524,8 +515,7 @@ Source:     (L16) Luciano, 2026-05-30 (day:2026-05-30:niveles-de-equivalencia); 
             2026-10-11 (reply, 18da042) (L21, the identity clauses) Luciano, 2026-10-11 (WhatsApp
             Ptt 2026-10-11 at 08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his
             annotation on draft 8 (bcdac41)
-Status:     settled; clause 4 from the identity entry of drafts 1 to 9 (Numbering), candidate;
-            clause 5 proposed
+Status:     settled; clause 3 proposed
 History:    (L16) draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: the law of a
             binding. draft 4 (c7c6396): the kernel's binding is exact; the distance enters with the
             planner. (L21, the identity clauses) draft 1 (5769005): proposed, candidate. draft 3
@@ -540,7 +530,10 @@ History:    (L16) draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: 
             split into numbered clauses with the status each sentence had in draft 10, the examples
             into Example, the provenance phrases into this History, the wording otherwise as draft
             10 had it. clause 5 is his note of 2026-10-12 on the reorder plan put in words, and what
-            L13.7 states for the planner's paths.
+            L13.7 states for the planner's paths. draft 11, step 4 (2026-10-12): the binding-acts
+            clause (2) moved to L9, the identity-law clause (4) to L13, the composition clause (5)
+            to L16.7 with its intersection rule deleted (D-2026-10-12-q); clause 3 written in their
+            place.
 
 L9  A program is a DAG of definitions without effects, and statements commute.
 From:       G0, the demand (the DAG is what the demand walks backward) with G2 (the second

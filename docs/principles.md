@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 fd63e9942abc, commit 9c066a6 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 ba992bd65f2b, commit 1e91fa5 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -115,32 +115,22 @@ References: `05` R1.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
 Status: settled.
 
-**L5. Equality has levels, belongs to the object, and is a law that composes.**
+**L5. Equality has levels and belongs to the object.**
 From: G0 (the identity type and its levels) with G2 (under cost, the identity proposition acquires a
 distance); clause 4 from G1 (the specimen can be recognized as the same specimen, or described).
 - L5.1 Definition (`:=`), the identity proposition (`=`), decidable equality (`==`) and definitional
   equality by reduction (`≡`) are different things, and each object carries the observational equality
   that fits it. [settled]
-- L5.2 (His annotation) The binding acts are two, `:=` once and `<-` rebinding, and they share one
-  law: after the act the name equals the term in the equality its type has, structural `==` where it
-  exists (`05` R8), observational otherwise, a distance under G2; after `:=` for all time, after `<-`
-  until the next `<-` (`05` R12). [settled]
-- L5.3 In the kernel the binding is exact: the name denotes the term, and reduction does not depend
+- L5.2 In the kernel the binding is exact: the name denotes the term, and reduction does not depend
   on a tolerance; the distance enters when the planner realizes the term by another representative,
   which it does only along a certified equivalence carrying its distance (L13, D-2026-10-11-m).
   [settled]
-- L5.4 The identity law between two specimens, with its distance, is what admits a second
-  implementation into the class the planner moves in (L13, D-2026-10-11-m); the agreement test of W5
-  between native and extern is this law, and the reference formula of a law evaluated over `Rational`
-  is one more specimen, with grade exact, checked by the same law. [candidate]
-- L5.5 Identity is a law, so it composes as HoTT composes paths: reflexive, symmetric, transitive;
-  under cost the composed path costs the sum of its links and holds at the weakest of their grades,
-  and a sampled link holds only on the inputs its samples cover, so the composition holds on the
-  intersection of the domains certified. [proposed]
-References: `05` R12, `05` R8; D-2026-10-11-m; W5.
-Rests on: O1 (the composition under cost), O2 (the equality a type comes with).
-Status: settled; clause 4 from the identity entry of drafts 1 to 9 (Numbering), candidate; clause 5
-proposed.
+- L5.3 Equality is a law of the object: Boolean where the carrier is decidable, a distance where it
+  carries one, and the type of the identity law's result, `Bool` or `Cost`, says which (L7); how a
+  certified identity composes along a path is L16.7. [proposed]
+References: D-2026-10-11-m.
+Rests on: O2 (the equality a type comes with).
+Status: settled; clause 3 proposed.
 
 **L9. A program is a DAG of definitions without effects, and statements commute.**
 From: G0, the demand (the DAG is what the demand walks backward) with G2 (the second structure's
