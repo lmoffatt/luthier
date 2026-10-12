@@ -93,92 +93,43 @@ igual me da la sensacion que Object es mas teoria o function que al reves.
 
 ## The organizers
 
-Three tiers, in his words (`record/audios/WhatsApp Ptt 2026-10-11 at 09.19.36.md`, 00:00 to
-00:53): the guide, two eureka moments, and after them "principios de buen uso".
+> **Claude (2026-10-12), on your notes in `principles_cont.md`:** rewritten here as you asked.
+> G0 names what governs execution; G2 is cut to the length of G1; G3 is printed with G2, as how a
+> law is validated, with the two kinds of law and how they combine; your quotes are out of this
+> file (they stay in the record, which is where tracking lives); G4 is out (it stays in the record
+> as retired); the Tier lines are gone and Status is one line. The record is untouched until you
+> mark this; then it takes these wordings and the projection is regenerated.
+
+The guide, then the two eurekas; G3 goes with G2.
 
 **G0. Type theory is the guide.** A type is a proposition and a value its proof; a law is a
-proposition over terms, so it defines a mathematical object and a quotient, and inside a class the
-representative is free: free in the theory, where the law is exact; in a model the planner's freedom
-is what L10 states. Luthier departs from type theory in three places, named under G1, G2 and G3 by
-what type theory lacks.
-Tier: the guide.
-Status: settled; the formulation is the model's.
+proposition over terms, so it defines a mathematical object and a quotient, and inside the class
+the representative is free. Type theory guides what is declared. What governs execution is the
+demand (G1), read in the same theory: a demanded type is a judgment to inhabit, execution is the
+search for an inhabitant, and cost ranks the candidates (G3); where type theory normalizes a
+given term, Luthier searches for one.
+Status: settled; the clause on execution is proposed on your note.
 
-**G2. A type with laws is a theory and its value a model; a function type is its laws, and a
-function is known by description.** A theory is a signature with its laws, written in the kernel's
-language (`04`, a bicartesian closed category: this is where G0 is used); a model is a value of a
-theory, and declaring `m : T` records the obligation to satisfy the laws of `T`; a law relates
-several symbols (`inverse x * x = unit`), which no single function can carry, so the unit declared
-is the theory and the unit valued is the model. The common case in practice is not the smallest
-theory but one that adds a single symbol, a function type with its laws, to structures already
-modelled with their equality: every law is an equality, and the equality of a carrier is itself a
-function with laws (reflexive, symmetric, transitive, or those of a distance) that the new symbol
-must respect; the model of such a theory is a function in the standard sense, and the eureka of
-09.19 is this case, where he saw it first. (His words, D-2026-10-12-e) An isolated function has no
-sense; it has sense in a context, and what looks like a lone function is one whose inverse and whose
-theory nobody took the trouble to find. Luthier verifies models of theories; what it verifies about
-a function is that it is a model of its type's laws. The function: the laws are what is known of a
-function, and the implementation, native or extern, is the specimen under observation. A description
-is derived by composition of the laws of the parts when such a law exists, and observed otherwise;
-laws accumulate, and a set of laws that determines the function up to its equality is the limit a
-definition may reach, not what it must reach (D-2026-10-11-d). (His words) A law is written as an
-implementation of itself, a program that returns its Bool or Cost; a theory is written as an object
-classifier made of laws, the map that sends a structure over the signature to the cost of its being
-a model, which is where G3 enters G2; the implementation of a model is then verified against the
-laws. What type theory lacks: it knows a function by acquaintance, as its term. What model theory
-lacks: a grade and a demand; a model of Luthier satisfies its theory up to a cost, certified at a
-grade and progressively (G3), and is chosen for execution by a demand (G1); naming it "model" must
-not promise exactness. What follows from G2 as its definition rather than by derivation: L20 (a
-function is declared in a theory and is universal over its models), the object of `05 §3` (the names
-a cycle of laws joins), D-2026-10-07-e (no loose functions: a definition at a bare exponential is
-not a defined type) and D-2026-10-11-j (a carrier with two models is two types); and three L read in
-its terms: L10 is many models of one theory, interchangeable in the quotient; L21 is the difference
-between two models being identified and both satisfying the theory; L14's extern is a model whose
-carrier is foreign. The precedent in programming is algebraic specification, the module systems of
-ML and the lawful type classes of Haskell, where the mechanism exists without being the organizing
-idea (references to be checked before they are cited).
-Tier: eureka, the first (the trigger, audio 09.19, 00:00 to 00:14), printed first (D-2026-10-12-a).
-Status: settled (the widening, the order, the removal of the holotype and the function as the common
-case are his decisions); the formulation is the model's except the paragraph marked his; the
-precedent's references unchecked.
+**G2. A type with its law is a theory; a value of it is a model.** Declaring `m : T` is the
+obligation that `m` satisfy the law of `T`, and Luthier verifies it. A function type with its law
+is the theory of one symbol, its model a function; it has sense only over the theories it depends
+on. What type theory lacks: it knows a function by its term; Luthier knows it by its law.
+Status: settled; this wording proposed on your note, the long form in the record.
+
+**G3. How a law is validated.** A law is a predicate or a cost: a function into `Bool`, or into
+`Cost`, the interval [0,∞) with 0 true and ∞ false. Laws combine by and, or, then, and a
+quantifier over a carrier; a combination of predicates is a predicate, and a cost as soon as one
+cost enters. A law is validated by a certificate with a grade (proved, exhaustive, cases, sampled
+at a level, assumed) and, for a cost, the worst cost seen; the demand supplies the tolerance; what
+a run teaches is kept.
+Status: candidate (one decision guided so far); printed with G2 on your note; the algebra of
+costs open (`11`).
 
 **G1. The demand defines what is computed.** The declarative face states what is known, universal
 and minimally processed; the executive face is a demand from outside, and the demanded type fixes
 the path, the types and the tolerances actually produced. What type theory lacks: an executive face;
 there, computation is the normalization of a given term, with no demand.
-Tier: eureka, the second, printed second (D-2026-10-12-a).
-Status: settled; the formulation is the model's.
-
-**G3. Laws are valued in cost, and what a run teaches is kept.** A law is valued in [0,∞), 0 true
-and ∞ false, and the demand supplies the tolerance. A Bool-valued law and a Cost-valued law are both
-laws and coexist (his mark: "no podes promover booleans a cost a troche y moche"); Bool is a retract
-of Cost, not a subtype: `lift : Bool -> Cost` (true to 0, false to ∞) and `exact : Cost -> Bool` (c
-== 0), both homomorphisms with `exact ∘ lift = id`; the lift is explicit and named, inserted by the
-planner as a bridge of cost zero; the cutoff `within ε : Cost -> Bool` lives only in the demand,
-since it does not compose (two links within ε are within 2ε). Over floats the cost of a law is
-itself estimated, so its value is uncertain and evidence composes as Bayes composes it, and is kept
-across runs. What type theory lacks: two truth values, and a run that leaves nothing. The reason to
-depart is not that type theory fails on floats (Flocq proves exact theorems about them) but what the
-Boolean way costs: a tolerance fixed in each law, worst-case bounds that compose into condition
-numbers, and nothing to say about data (`record/organizing-principles-2026-10-11.md`, addendum 2).
-Articulated in `docs/rationale/11-cost-valued-laws.md`, draft 0 (D6).
-Tier: good use; named by him on 2026-10-12 as a further motivator or eureka, to be analyzed (the
-extension of Boolean logic to Lawvere and Bayes).
-Status: candidate by the P13 check (one decision, D-2026-10-10-g), in his words a wish; the names
-lift, exact and within are the model's, his to change; whether it is a third eureka or a principle
-of good use is his to mark after the analysis he announced.
-
-**G4. Expressive over restrictive; it decides between designs. Retired.** Retired. What he meant by
-it is concrete and is a rule, L22 (a non-Luthier way is allowed inside a named world). "The law that
-makes two ways equivalent" is L21; P5 (a free choice is a legitimate principle) stays in
-`record/principles.md`. The decisions it was named for stand without it: `:=` once and `<-` for
-rebinding with default arguments (D-2026-10-11-c), `if` without `else` as a guarded value
-(D-2026-10-11-b), many paths expressible (L10), accumulating laws rather than required
-characterization (D-2026-10-11-d): each stands on L10, G0 or his own decision, and none needed the
-tie-breaker.
-Tier: good use, retired (draft 9, D-2026-10-12-c); the tag stays so that the record's citations
-resolve.
-Status: retired (D-2026-10-12-c), reversible by him in one line.
+Status: settled.
 
 ## How the organizers depend on each other
 
