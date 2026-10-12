@@ -73,40 +73,62 @@ merges with L14.
    derived rules between the principles and the spec.) Today the memo identity of L10 sits inside a
    settled principle, so the agent treats it as untouchable; as a derived rule under "the demand
    determines the computation" the agent knows the spec can refine it. This tells the reader its
-   degree of freedom at every point. No merge of pairs gives that.
+   degree of freedom at every point. No merge of pairs gives that. 
+ok
+
 2. **One status per sentence.** (All six.) For the agent this decides what is implemented; "settled…
    proposed, candidate" on one line forces a guess. Kimi's numbered clauses (L10.1, L10.2) are the
    mechanism: each clause carries its status and can be cited and tested on its own, without
    splitting an L into ten entries.
+ok
+
 3. **A tie-break rule.** (Claude.) A human reader who meets L5 against L13 asks Luciano; the agent
    chooses silently and goes on. Precedence matters more for the agent than for a human reader. It
    does not need numbered Gs to exist: one line suffices, *the statement decides over its clauses;
    between statements, the lower-numbered L*.
+ok
+
 4. **Which settled principles rest on something open.** (Kimi: a dependency map; four settled
    principles rest on G2's open cost algebra.) It tells the agent where to leave a parameter in the
    spec instead of fixing a value. Only Kimi proposes it.
+ok
+but G2 cost algebra is not that open, there are basically two models: min max vs 1/n logsumexp 1/n sum (the 1/n is my addition is it ok?ok)
+
 5. **Each term in one formal category, defined once.** (GPT sp's list: Structure, Theory, Model,
    Law, Certificate, Plan, Demand, Action, World, with Theory(S, L); Claude's *specimen* and
    *resources*; Kimi and DeepSeek: grades defined once, in Terms; GPT en: nothing unresolved
    appears declaratively in Terms.) The terms pass into the spec as they are; two senses of "type"
    in the principles become two senses in the spec.
+ok. lets define the new ones too
+
 6. **One home per mechanism, cross-references elsewhere.** (All six.) Duplication is where the
    contradictions hid: the transport rule in L5, L13 and L14 drifted apart.
+
+ok
+
 7. **Open questions listed with the principle each one blocks** (Kimi), apart from Luciano's
    pending marks and from the changelog (Claude's three-way split; GPT en's four-way). What is open
    tells the agent what not to fix; the changelog is noise for it and belongs in `decisions.md`.
+exactly, changelog is not belonging here, find another place
+
 8. **A fixed shape per entry**: statement in one or two sentences, consequences, references,
    status. (Claude, DeepSeek, Kimi, GPT sp, GPT en.) The header of draft 10 already promises it
    (Kimi) and the body does not keep it.
+ok
+
+
 9. **A reference key** for P, R, D ids and spec sections, and no names the agent cannot resolve
    ("Kimi", "the third round"). (Claude.) Mostly solved by taking the provenance out of the
    projection.
+ok
 
 Where the model disagrees with the critiques. Claude, DeepSeek and GPT sp move the worked examples
 to an appendix. *Proposed:* keep them attached to their entry in a field of their own. For the
 agent the example y = 11 after rebinding defines the semantics of `<-` better than the paragraph
 does; a short statement with the example at hand reads better than a short statement with the
 example three pages away.
+
+ok
 
 What counts little for intelligibility: the old-to-new numbering table (it matters for the record,
 not for reading today's document; Claude and Kimi ask for it, DeepSeek asks to freeze ids, GPT sp
@@ -116,25 +138,27 @@ list of dependencies in text serves the agent as well); and the two lints Claude
 `--check` (every reference resolves; no sentence in two entries), which are process, not
 intelligibility, and are weighed separately below.
 
+yes do the old to new table
+
 ## 3. The proposed shape
 
 *Proposed*, taking GPT en's single hierarchy as the form, Kimi's two mechanisms inside it, and one
 line of precedence. The three sit at different levels (form, addressing, conflict) and do not
 compete.
 
-1. **Purpose.** One sentence: Luthier expresses the invariances of the disciplines (today L1).
+1. **Purpose.** One sentence: Luthier expresses the invariances of the disciplines (today L1). ok
 2. **Orientation.** One short paragraph with what G0–G3 say today, unnumbered, no status, no
-   mechanics. The history of the eurekas stays in the record.
+   mechanics. The history of the eurekas stays in the record.  ok
 3. **Terms.** Only settled definitions, each term in one category, grades defined here and nowhere
-   else.
+   else.  ok
 4. **Principles.** Under Luciano's six topics. Each entry: tag and statement (one or two
    sentences, the fixed part); numbered clauses (the derived rules, each with its own status); an
    example field where one exists; references (spec section, D ids); what it derives from and
-   what open item it rests on.
+   what open item it rests on.  ok
 5. **Precedence.** One line: the statement decides over its clauses; between statements, the
-   lower-numbered L.
+   lower-numbered L.  ok
 6. **What is open.** Only questions whose answer changes the language, each with the principle it
-   blocks. Luciano's pending marks in a list of their own. The changelog to `decisions.md`.
+   blocks. Luciano's pending marks in a list of their own. The changelog to `decisions.md`.  ok
 
 The count of principles follows from applying the shape to the six topics and is not chosen in
 advance. The merges the critiques agree on (L9+L11; G3's content into L10+L12; L1 to the purpose)
@@ -146,31 +170,56 @@ Each touches a settled principle or a term, so one commit does not undo it.
 
 1. The shape of section 3, or a different one. (The alternative with the most support among the
    critiques: Claude's three Gs of two sentences each as the precedence layer, each L listed under
-   its G.)
+   its G.) claudes suggestion
+
+
+
 2. Sampled links: compose at grade `sampled` by G2, refusal being a planner policy set by the
    demand (Claude; P11, every criterion is a parameter, supports it), or never summed into a path
    until a probabilistic bound exists as a law (DeepSeek, Kimi, GPT sp, and L13 today). Touches
-   L5 and L13, both settled.
+   L5 and L13, both settled. 
+  elaborate
+
+
 3. The cutoff: the demand's, passed down to L3's constructor (Claude), or removed from the
    fundamental subtype construction (GPT en).
+   I know a place for the cutoff, a minimal cutoff to consider an implementation, it is a parameter at the demand level. 
+
+
 4. The grade of a sum: a vector of grades (L6) or the weakest (L13). The open item "the grade as a
-   lattice".
+   lattice".  thats parameterizable, both.
+
 5. What `a : A` asserts at grade `sampled` or `assumed`: *proposed*, "supported at grade g", not
    truth; `assumed` permits reasoning and does not make `a` a model. (GPT en.)
+   a is model of A  with cost C, we pass the statistics to cost, we need a convertion. might be we work with logCost in nat. 
+
+
 6. A law is the proposition; a certifier is a method that produces evidence for it; one law may
    have several certifiers. (GPT en.) Today L3 and L7 read as if every law were executable.
+    yes
+
+
 7. Vocabulary: *structure* for a kernel type and *theory* for a Luthier type; *cost* for the law
    and *resources* for time and memory; *model* for what a type names and *specimen* for the
    planner's candidates. (GPT sp, Claude.)
+   agreed
+
+
 8. Actions on Luthier's own state are idempotent and memoizable; actions on the world never are.
    (Claude.)
+ good
+
 9. L12 becomes "no unrecorded policy constants", excluding kernel primitives and mathematical
    constants. (DeepSeek.)
+ok
+
+
 10. The two lints in `--check`, now or after the record is current. The rule in `CLAUDE.md` admits
     a mechanism with a recurring cost only after a real case it would have caught; the cases
     exist (G0 sends the ranking of candidates to G2, which Kimi caught and a reference lint would
     have; D-2026-10-11-n written out five times, which a duplicate-sentence lint would have). The
     cost falls on each commit, not on Luciano's attention.
+ok
 
 ## 5. Order of execution
 
@@ -181,16 +230,24 @@ order is fixed by that, not by the critiques:
 
 1. Update the record from draft 10 (renumbering, today's merges, his marks) until `--check`
    passes.
+ok
+
 2. Extend the projector for numbered clauses with their own status and for the example field; add
    the two lints if decided.
+ok
 3. Apply the shape of section 3 in the record: entry format, grades in Terms only, examples into
    their field, provenance out of the projection, "What is open" split, reference key.
+ok
 4. Apply Luciano's decisions 2–9: the merges, the resolutions of the contradictions, the
    vocabulary. Regenerate; check `docs/principles-for-readers.md` against the new numbering.
-5. Tag draft 11.
+ok
 
+5. Tag draft 11.
+ok
 The plan proper, in its two documents (decisions for Luciano, execution for the sessions), is
 written after his marks on this one.
+ok 
+
 
 ## 6. Decisions the model took on its own
 
