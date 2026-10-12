@@ -56,15 +56,16 @@ theory is written:
 the theory (4.S12). A model of it is a branch:
 `csv : Codec := { parse := parseTable, render := renderTable }`.
 
-**4.S9. Three kinds of object.** [decided D-2026-10-12-ai] An object is one of three. A *concrete
-type* is defined natively (a `data`, an exponential, a product, a sum); its values are built by its
-constructors (those of the `data`, the lambda, the pair, the injections) and observed by its
-eliminators. A *subtype* is a type with a law that involves a single name, `{ x : T | p x }`. A
-*theory type* has a law that involves more than one name, so its names are defined together (a
-cycle of the dependency graph, D-2026-10-12-z); it has no constructors of its own, and its values
-are its models. [implemented] Today the checker tells two kinds by their form: a concrete type, and
-a theory in the sense of G1, a subtype of a labeled base, usually parameterized (`Group (A : U)`),
-whose models are given as values of the labeled base.
+**4.S9. Concrete types and theories.** [decided D-2026-10-12-aj] A name defines a *concrete
+type* or a *theory*. A concrete type is defined natively (a `data`, an exponential, a product, a
+sum), with no law; its values are built by its constructors (those of the `data`, the lambda, the
+pair, the injections) and observed by its eliminators. A theory (Terms) carries a law, stated
+with the kernel's subtype former, `{ x : T | p x }`, whether its law involves one name or more
+(a strongly connected component, spec 1.S8); its values are its models. Positive doubles,
+an idempotent function and a group are all theories. Amends D-2026-10-12-ai, which made the
+subtype a third kind. [implemented] Today the checker tells the two apart by their form, and takes
+as a theory in the sense of G1 a subtype of a labeled base, usually parameterized (`Group (A :
+U)`), whose models are given as values of the labeled base.
 
 **4.S10. A body computes; a law only checks.** [implemented] Whether laws pin down a unique
 inhabitant is undecidable and is never asked. Two bodies for one meaning are two names, and their

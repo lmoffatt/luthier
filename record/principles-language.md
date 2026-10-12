@@ -158,8 +158,9 @@ Each term has one category and is defined here and nowhere else; the principles 
 
 - An *object* is anything a name defines: a theory, or a value, a function or a datum, with or
   without laws; the word for what C++ calls a regular type, whose counterpart here is a type that
-  comes with its equality (O2). A *theory* is the object several names define together, a cycle
-  of the dependency graph, the one-symbol function type included (D-2026-10-12-z).
+  comes with its equality (O2). A *theory* is a type with its law, written in one name or in
+  several (then a cycle of the dependency graph); the number of names is its presentation
+  (D-2026-10-12-aj).
 
 (History: the status paragraph of the Terms at draft 10: his list (D-2026-10-12-f); the names
 structure, cost and certificate are the model's where he left a question mark, marked OK by him on

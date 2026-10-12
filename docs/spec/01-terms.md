@@ -52,11 +52,12 @@ the base of a subtype, the parts of a product, sum or function type, the argumen
 operator. Every other occurrence is in term position.
 
 **1.S8. The graph, theories and branches.** [implemented] The dependency graph has the names as
-nodes and an edge `n -> m` whenever m is in D(n) or B(n). A theory is a strongly connected
-component of this graph: a maximal set of names each reachable from each other, and a name no cycle
-passes through is a theory of one name, the one-symbol function type included. Where a source says
-"object" for the cycle, this chapter writes "theory" (D-2026-10-12-z); the word
-object keeps the wider sense of the Terms. A branch of a theory O is a name outside O with an edge into O. A law touches the
+nodes and an edge `n -> m` whenever m is in D(n) or B(n). A strongly connected
+component of this graph is a maximal set of names each reachable from each other. A theory written
+in several names is such a component, and one written in one name is a component of one name; what
+makes either a theory is its law, not the component (D-2026-10-12-aj). Where a source says
+"object" for the cycle, this chapter writes "theory"; the word object keeps the wider sense of the
+Terms. A branch of a theory O is a name outside O with an edge into O. A law touches the
 names and labels that occur free in it.
 
 ## §4 Numbers and measures

@@ -1747,6 +1747,25 @@ Quote:      "Object is one of concrete type, subtype (law involving a single nam
             (law involving more than a name)"
 Source:     luthier@e31780f:record/spec-wave-1-for-his-marks.md:99
 Kind:       terms (spec 4.S9; Terms of docs/principles.md). For D-2026-10-12-z
-Status:     current; amends the model's part of D-2026-10-12-z, which counts the one-symbol function
+Status:     amended by D-2026-10-12-aj the same day (subtype is the kernel's former, not a kind;
+            two kinds remain). Before that: current; amends the model's part of D-2026-10-12-z,
+            which counts the one-symbol function
             type among theories: under this one a function with a law on itself alone is a subtype.
             Terms not changed (the spec does not edit the principles): one question to him
+
+D-2026-10-12-aj A theory is a type with its law, whatever the number of names that write it: a
+                one-symbol function with a law is a theory, and so is a subtype of a datum. A theory
+                written across several names is a cycle of the dependency graph, which is how it is
+                presented, not another kind. Subtype is the name of the kernel's former, not a kind
+                beside theory. The distinction worth naming is how a law is certified: checked once
+                on a value, or certified over a domain.
+Author:     the model, on his two candidates; accepted by Luciano
+Quote:      "todo subtipo (tipo + Ley) es una teoria ."
+            "acepto tu propuesta entonces"
+Source:     chat:f15ae1b6:794
+            chat:f15ae1b6:802
+Kind:       terms (Terms of docs/principles.md; spec 1.S8, 4.S9). For P10 (the invariant does not
+            change with the presentation), 3.S34 (canonical form)
+Status:     current; amends D-2026-10-12-ai (two kinds: concrete type and theory) and the model's
+            part of D-2026-10-12-z ("several names define together"). Whether *object* keeps a role
+            is asked to him the same day
