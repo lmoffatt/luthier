@@ -561,11 +561,15 @@ Quote:      "verificacion externa por teoremas o por delegacion (creo en Lapack)
 Source:     Luciano, 2022-08-03 and 2023-02-22 (written:2023-02-22_tapp-wish-list:untested-a-
             tested); the grades by samples 2026-10-10 (WhatsApp Ptt 2026-10-10 at 11.11.22.md,
             03:02 to 04:12); his annotation on draft 8, bcdac41
-Status:     settled; the reading of delegation as citation is proposed, his mark pending
+Status:     settled; the reading of delegation as citation is proposed, his mark pending; he
+            restated the delegation in his own words on the readers' document ("proved by citing
+            a theorem or taken from a software library", afdd7c7), the reading as citation not
+            marked
 History:    draft 0 (6d9dbd3): stated.
             draft 4 (c7c6396): the four methods and the grade in the certificate; the dependence
             on the distribution.
             draft 9 (0636378), on his mark: delegation as citation of the host's guarantee.
+            readers' draft 0 (afdd7c7): his correction adds the library as a source of proof.
 
 L14 Luthier orchestrates other languages.
 From:       G2: an absorbed library is a specimen known by its description, and its code is not

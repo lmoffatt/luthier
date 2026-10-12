@@ -1,6 +1,7 @@
 # Luthier: the ideas behind it
 
-Draft 0, 2026-10-12, unapproved. Written for a reader who programs or does science and wants to
+Draft 1, 2026-10-12, unapproved. Draft 0 (f3fb261) received five corrections from Luciano
+(afdd7c7); draft 1 writes them into the text, each marked "(draft 1)". Written for a reader who programs or does science and wants to
 know what Luthier is for, without the apparatus. The prose is the model's; Luciano's own words,
 the sources and the history of each idea are in `record/principles-language.md`, and every
 paragraph here names, in parentheses, the entry it rests on. The version for the people writing
@@ -12,9 +13,9 @@ Luthier is a language for saying what a computation must satisfy, and then check
 implementation satisfies it. A theory is a type together with its laws. A model is a value of that
 theory, something that claims to satisfy the laws. Luthier verifies models of theories. A single
 function is the smallest case: a theory with one symbol, whose laws say what the function must do
-(G2). Version 0 tests; it does not prove.
-            Aqui habri que decir algo en el sentido que un type tiene estructura, tiene datos y funciones. 
-
+(G2). (Draft 1, his correction) A type here is not a bare set of values. It has structure: the
+data it holds and the functions defined on that data, and the laws are statements about those
+functions (G2). Version 0 tests; it does not prove.
 
 Here is the whole idea in one example. The integers modulo 7 form a ring. In Luthier you declare
 the type `Z7`, write addition, multiplication and negation on it, and then declare
@@ -24,7 +25,8 @@ associativity, and records the result. Defining the model defined its test (L3).
 
 ## The guide
 
-The guide is type theory. A type is or represents a proposition and a value of the type is a proof of it. A law
+The guide is type theory. A type is, or at least represents, a proposition, and a value of the
+type is a proof of it (draft 1, his wording). A law
 is a proposition about terms, so it carves out a mathematical object: everything that satisfies
 the law. Two implementations that satisfy the same laws are, for the purposes of the law,
 interchangeable (G0). Luthier follows type theory as far as it goes and departs from it in three
@@ -35,14 +37,18 @@ places, each time because type theory lacks something a working scientist needs.
 Type theory knows a function by its term, the code that computes it. Luthier knows a function by
 its description: the laws it satisfies. The code, native or borrowed from Python, is a specimen
 under observation, and the laws are what is known about it. This is the eureka that started the
-project: the type of a function is the set of laws that define it (G2). But many times, the laws are defined for sets of functions, then  this functions are not isolated, they form part of a model of a theory. Therefore the unit of Luthier is the pair model:Theory, the affirmation (proved somehow) that a set of functions on a data type follow a theory. 
-A function is declared
-inside a theory and is written once for every model of that theory, so the code that works for one
-ring works for every ring (L20).
+project: the type of a function is the set of laws that define it (G2). (Draft 1, his correction)
+Often, though, a law speaks of several functions at once: associativity needs an operation, an
+inverse law needs the operation, the inverse and the unit. Such functions are not isolated; together
+they form a model of a theory. So the unit of Luthier is the pair, a model of a theory: the claim,
+backed by evidence of some grade, that a set of functions on a data type satisfies the theory's laws
+(G2). A function is declared inside a theory and is written once for every model of that theory, so
+the code that works for one ring works for every ring (L20).
 
 Belonging to a type is therefore a guarantee, and the guarantee says exactly how strong it is. A
-value carries a certificate for each law it was checked against, with a grade: proved by citing a
-theorem or taken from a software library, exhaustive over every case, checked on chosen cases, sampled statistically at a stated
+value carries a certificate for each law it was checked against, with a grade: proved, by citing a
+theorem or by delegating to a software library that carries its own guarantee (draft 1, his
+correction), exhaustive over every case, checked on chosen cases, sampled statistically at a stated
 level, or merely assumed (L2, L11). The basic building block is a type carved out of a bigger one
 by a predicate, which gives three things at once: the new type, its only constructor, and the
 function that says whether a value belongs (L4). A law characterizes an operation
@@ -74,8 +80,8 @@ its types (L13). Every threshold, budget and statistical level is a parameter pa
 demand, never a constant hidden in the code (L17).
 
 Evaluation is verification: Luthier checks equivalences rather than executing instructions.
-Execution proper is an action on the world, and an action is verifiable too, by observing the world
-before and after it (L12). Code that does not follow Luthier's way, say a foreign algorithm taken
+Execution proper is an action on the world, and an action is verifiable too (draft 1, his word), by
+observing the world before and after it (L12). Code that does not follow Luthier's way, say a foreign algorithm taken
 as is, can still run, inside a named world, with its certificates marked as assumed, until a law
 is certified for it (L22).
 
