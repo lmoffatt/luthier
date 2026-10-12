@@ -256,6 +256,9 @@ for sums (stated on `Bool` and `Maybe`); `FoldNil` and `FoldCons` for the recurs
 `List`. It is the theory the host is certified against today: `luthier test` checks its models at
 `Fin 3` and `Fin 2` (`examples/kernel_finite.lut`, sampled). The reduction of the host is thereby a
 specimen of this theory (L14.3).
+[decided D-2026-10-12-ak] The laws of a structural `==` (reflexive, symmetric, transitive,
+substitutive), which make a concrete type an object, are to be stated in the same file; they are
+not there yet.
 
 **3.S37. What it cannot state.** [implemented] Eta, `\ y { f y } == f`, is not statable, since
 equality of functions is not structural (`spec 4.R8`); observed pointwise it is beta. Functions over

@@ -156,9 +156,10 @@ Each term has one category and is defined here and nowhere else; the principles 
 - The *declarative face* of a program is what it states: its types, laws and definitions. The
   *executive face* is what the demands ask of it.
 
-- An *object* is anything a name defines: a theory, or a value, a function or a datum, with or
-  without laws; the word for what C++ calls a regular type, whose counterpart here is a type that
-  comes with its equality (O2). A *theory* is a type with its law, written in one name or in
+- An *object* is a type with its equality, the word for what C++ calls a regular type: the base
+  theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author
+  states for an observational one; a kernel type with no equality is a *structure*
+  (D-2026-10-12-ak). A *theory* is an object with its further laws, written in one name or in
   several (then a cycle of the dependency graph); the number of names is its presentation
   (D-2026-10-12-aj).
 

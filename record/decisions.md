@@ -1769,3 +1769,19 @@ Kind:       terms (Terms of docs/principles.md; spec 1.S8, 4.S9). For P10 (the i
 Status:     current; amends D-2026-10-12-ai (two kinds: concrete type and theory) and the model's
             part of D-2026-10-12-z ("several names define together"). Whether *object* keeps a role
             is asked to him the same day
+
+D-2026-10-12-ak An *object* is a type with its equality: the base theory (a setoid, O2), whose laws
+                (reflexive, symmetric, transitive, substitutive) the kernel guarantees for a
+                structural `==` and the author states for an observational one. Three levels: a
+                structure (a kernel type with no equality, a function over an infinite domain), an
+                object (with its equality), a theory (an object with further laws). A concrete type
+                has no law written by its author; the laws of its equality are the kernel's. Those
+                laws are to be stated in `lib/kernel_laws.lut` (L14), not there yet.
+Author:     the model, on his question; accepted by Luciano
+Quote:      "pero la == estuctural no es una ley?"
+            "Ok, aceptado."
+Source:     chat:f15ae1b6:878
+            chat:f15ae1b6:894
+Kind:       terms (Terms of docs/principles.md; spec 3.S36, 4.S9; O2, L3). For L3, L14, O2
+Status:     current; refines D-2026-10-12-z (object no longer "anything a name defines") and
+            D-2026-10-12-aj. His remark: it follows category theory in some way

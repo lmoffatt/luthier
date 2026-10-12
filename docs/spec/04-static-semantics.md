@@ -58,7 +58,8 @@ the theory (4.S12). A model of it is a branch:
 
 **4.S9. Concrete types and theories.** [decided D-2026-10-12-aj] A name defines a *concrete
 type* or a *theory*. A concrete type is defined natively (a `data`, an exponential, a product, a
-sum), with no law; its values are built by its constructors (those of the `data`, the lambda, the
+sum), with no law written by its author: the laws of its equality, where it has `==`, are the
+kernel's (D-2026-10-12-ak); its values are built by its constructors (those of the `data`, the lambda, the
 pair, the injections) and observed by its eliminators. A theory (Terms) carries a law, stated
 with the kernel's subtype former, `{ x : T | p x }`, whether its law involves one name or more
 (a strongly connected component, spec 1.S8); its values are its models. Positive doubles,
