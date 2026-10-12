@@ -1078,3 +1078,26 @@ Source:     record/answers-annotations-principles-2026-10-12.md §5 (G4)
 Kind:       organizers. For P13 (in four drafts G4 generated no L and guided no decision that
             needed it), P8 (no more bureaucracy than it pays for)
 Status:     current; docs/principles.md draft 9; reversible by him in one line
+
+D-2026-10-12-d  The principles of the language are kept in three documents for three readers, with
+                one source of truth: `record/principles-language.md` holds every G and L as an
+                entry with its statement, formulation, derivation, his quotes, sources, status and
+                history by draft, and the history of the drafts; `docs/principles.md` is projected
+                from it by `scripts/project_principles.py` (statement, formulation, derivation,
+                status, the open items; no quotes, no sources, no draft marks) and is not edited by
+                hand; `docs/principles-for-readers.md` is written in prose for a general reader,
+                and every statement in it cites a G or L the record defines, which the same script
+                checks.
+Author:     Luciano for the three readers and the approval; Claude for the proposal that the
+            record is the source and the other two derive from it, and for the field layout
+Quote:      "De documento principles quiero sacar tres 1) adecuado para consumo del publico en
+            general 2) adecuado para el agente que haga la especificacion 3) adacuado para
+            rastrear el origen de las ideas y la evolucion de los documentos" (chat, 2026-10-12);
+            "Y apruebo lo que decis" (chat)
+Source:     chat, 2026-10-12
+Kind:       documents (docs/, record/). For P2 (the agent's document records its input commit and
+            the script's version), P1 (his quotes and the model's formulations are separate fields),
+            P12 (the agent reads a third of the text). Against P8 (one more file and a script to
+            rerun after each edit of the record); the real case: draft 9 is 681 lines of which the
+            header and the sources are half, read whole by every agent that builds the spec
+Status:     current; the docs/principles_2.md copy of draft 7 deleted at his instruction
