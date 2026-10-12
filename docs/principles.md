@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 4b626743b696, commit ba8b9ed (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 e9f7f000e5d4, commit a6eef20 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -53,6 +53,10 @@ Each term has one category and is defined here and nowhere else; the principles 
   universe `U`, and are copied, compared and memoized. The executive face acts on the world `W`,
   one world, each value of it used once, never memoized (D-2026-10-13-b). (A metaphor, not a term:
   mind and world, as in McDowell's *Mind and World*, 1994.)
+- Three things make the language: what is said (the definitions, `U`), what is done (the actions,
+  `W`), and what is certified. A *certifier* is the one action on Luthier's own state whose result
+  comes back to the declarative face as a trusted value: the passage from acquaintance to
+  description (G1). It is not a keyword; its five kernel forms are names of core (D-2026-10-13-d).
 
 - An *object* is a type with its equality, the word for what C++ calls a regular type: the base
   theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author
@@ -335,7 +339,9 @@ classifier when it means G2's truth values).
   (`lib/plan.lut`); the planner's choice among plans is outside the kernel. [settled]
 - L7.3 Four layers, each trusted differently: the kernel, checked by hand; the libraries and the
   interpreter in Luthier, certified against the kernel's laws; the host runtime, a specimen; the
-  planner, advice that the plan records. [settled]
+  planner, advice that the plan records. The five certifiers of L9.1 are kernel: names of core the
+  checker recognizes, as `extern` and `axiom`, checked by hand (D-2026-10-13-d, the last sentence
+  proposed). [settled]
 - L7.4 A Luthier program is an element of Luthier; programs build, inspect and run other programs,
   and the interpreter is meant to be written in the language it interprets. [settled]
 - L7.5 What a library can decide, the core does not: the core asks of each library the fewest
@@ -441,9 +447,15 @@ its type).
   same implementation rerun), and with the observed distance added where it is a cost (G2), since two
   implementations over floats are almost never bit-identical; the type of the identity law's result
   says which (`Bool` or `Cost`). [settled]
-References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k.
+- L9.10 A certifier is a value, as a generator is (D-2026-10-06-ab): the five of clause 1 are
+  primitive, and any other is a value of the theory `Certifier`, certified against its own law, its
+  level on laws that hold and its power on controls (spec 7.S17 to 7.S19); a certificate it emits
+  carries the certifier's own certificate in its cone, and the evidence composes (spec 6.S12).
+  Certification is not a keyword (D-2026-10-13-d). [proposed]
+References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
-Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark.
+Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
+proposed (D-2026-10-13-d).
 
 **L10. A certificate records what is known of a law, its domain, its bound and its evidence; it is
 frozen, it serves every demand it meets, and it transports along identity.**
@@ -497,7 +509,8 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   without new evidence. [settled]
 - L10.10 Only a certifier builds a certificate: the constructor of `Certificate` is in no interface
   outside the theory of certification (L6.12), so clause 9 is enforced by the language and not left to
-  good conduct (D-2026-10-13-c). [proposed]
+  good conduct (D-2026-10-13-c); the precedent is the abstract type `thm` of the LCF provers, which
+  only the kernel's rules build. [proposed]
 Example: with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
 lookup table equal to the native on a grid is certified on the grid and nowhere else (clause 7).
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t; P3, P11.

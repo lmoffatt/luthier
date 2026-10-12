@@ -1,6 +1,6 @@
-# Principles, 2026-10-13: six changes for your marks
+# Principles, 2026-10-13: nine changes for your marks
 
-At ba8b9ed. All six are `[proposed]` in `record/principles-language.md` and projected into
+At a6eef20 and after. All nine are `[proposed]` in `record/principles-language.md` and projected into
 `docs/principles.md`. Each one already guided a chapter of the specification (P13: a principle is
 worth the decisions it guides). Mark as usual: "ok", "no" or a comment under a line.
 
@@ -24,6 +24,17 @@ worth the decisions it guides). Mark as usual: "ok", "no" or a comment under a l
 - L10.10, new: only a certifier builds a certificate; its constructor is in no interface outside
   the theory of certification, so "no evidence for free" (L10.9) is enforced, not trusted
   (D-2026-10-13-c).
+- Terms, the triad, on your question of a keyword for certifiers: what is said (`U`), what is
+  done (`W`), what is certified. A certifier is the one action on Luthier's own state whose result
+  comes back to the declarative face as a trusted value. Not a keyword: its five kernel forms are
+  names of core (D-2026-10-13-d).
+- L7.3, completed: the five certifiers of L9.1 belong to the kernel layer, names the checker
+  recognizes as it does `extern` and `axiom`, checked by hand (D-2026-10-13-d).
+- L9.10, new: a certifier is a value, as a generator is; beyond the five primitive ones, a
+  certifier is a value of a theory `Certifier`, certified against its own law (its level on laws
+  that hold, its power on controls, spec 7.S17 to 7.S19), and a certificate it emits carries the
+  certifier's certificate in its cone (D-2026-10-13-d). L10.10 now names LCF's `thm` as the
+  precedent for the abstract `Certificate`.
 
 The spec follows: 2.S21 lists `W` among the keywords; 10.S4 and 10.S5 say one world and `W` the
 core's; chapter 12 proposes the private part by ascription (2f3435b).

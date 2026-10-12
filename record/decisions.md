@@ -1869,3 +1869,24 @@ Quote:      "Justamente, parte privada en los modulos es una decision de arquite
 Source:     chat:f15ae1b6:1473
 Kind:       language and principles (L6.12, L10.10 new; spec 6, 12). For L6, L10.9, L14
 Status:     proposed; his mark pending
+
+D-2026-10-13-d  Certifiers are not a keyword: they are values. Luthier's shape is a triad, to say
+                (`U`), to act (`W`) and to certify, and the certifier is the one action on
+                Luthier's own state whose result re-enters the declarative face as a trusted value,
+                the arrow from acquaintance to description (G1). What that needs of the core is
+                already there: `Certificate` abstract (L10.10, as LCF's `thm`), the five
+                certifiers of L9.1 primitives of core recognized by the checker, hand-checked as
+                the kernel layer of L7.3. Beyond them a certifier is a value of a theory
+                `Certifier`, certified against its own law (its level on true laws, its power on
+                controls, spec 7.S17 to 7.S19), and a certificate it emits carries the certifier's
+                certificate in its cone.
+Author:     Luciano for the question (a keyword `C` to abstract what Luthier does); the model for the
+            answer, accepted
+Quote:      "Estoy pensando si los Certifiers son tan importantes si no merecerian una palabra clave
+            (C) tambien. Esto permitiria abstraer mejor lo que hace Luthier."
+            "Si"
+Source:     chat:f15ae1b6:1618
+            chat:f15ae1b6:1638
+Kind:       principles (Terms; L7.3, L9.10, L10.10). For L14, D-2026-10-12-ab (the direction: test
+            became a function), D-2026-10-06-ab (generators are values, the precedent)
+Status:     current for no keyword; the triad and `Certifier` as a theory proposed in their wording
