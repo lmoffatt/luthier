@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 32387035ad59, commit e07356e (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 42a50412a60f, commit 665096b (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -164,7 +164,7 @@ the separation of the second structure is the model's proposal.
   in a block, D-2026-10-11-i). [settled]
 - L9.9 (His annotation) Executing is the executive face: an action changes the state of the world,
   and it is verified too, by observing the world before and after it; the laws over actions are stated
-  over those two observations, as a mutable parameter is two variables (L9). [settled]
+  over those two observations, as a mutable parameter is two variables (clause 5). [settled]
 - L9.10 An observation is itself an action, so this stops where the world can be read back (a file
   written and reread), and says nothing beyond; an effect on state Luthier owns is verified this way,
   an irreversible or concurrent effect outside it is typed, logged and audited, never verified.
@@ -291,9 +291,9 @@ clause).
 - L13.10 The author's free choice among the inhabitants of an under-determined function
   (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared. [settled]
 - L13.11 The identity law between two specimens, with its distance, is what admits a second
-  implementation into the planner's graph (L13, D-2026-10-11-m); the agreement test of W5 between
-  native and extern is this law, and the reference formula of a law evaluated over `Rational` is one
-  more specimen, with grade exact, checked by the same law. [candidate]
+  implementation into the planner's graph (D-2026-10-11-m); the agreement test of W5 between native
+  and extern is this law, and the reference formula of a law evaluated over `Rational` is one more
+  specimen, with grade exact, checked by the same law. [candidate]
 Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
 there (clause 9).
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q; W5; P5.

@@ -1,5 +1,7 @@
 # Luthier: the ideas behind it
 
+Draft 4, 2026-10-12, unapproved: the citations follow draft 11 of `docs/principles.md`, where L3,
+L11 and L12 merged into L2, L9 and L10 and L16 (certificates) is new; the prose unchanged.
 Draft 3, 2026-10-12, unapproved: the citations in parentheses renumbered to draft 10 of
 `docs/principles.md` (G1 theory and model, G2 cost, the demand under G0 since draft 11; L1 to L15), the prose
 unchanged; the mapping from the old tags is the Numbering table of

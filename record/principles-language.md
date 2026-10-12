@@ -568,7 +568,8 @@ L9.8   (His words) No effect on the world; its one effect is on the program: it 
        `<-` only in a block, D-2026-10-11-i). [settled]
 L9.9   (His annotation) Executing is the executive face: an action changes the state of the world,
        and it is verified too, by observing the world before and after it; the laws over actions are
-       stated over those two observations, as a mutable parameter is two variables (L9). [settled]
+       stated over those two observations, as a mutable parameter is two variables (clause 5).
+       [settled]
 L9.10  An observation is itself an action, so this stops where the world can be read back (a file
        written and reread), and says nothing beyond; an effect on state Luthier owns is verified
        this way, an irreversible or concurrent effect outside it is typed, logged and audited, never
@@ -807,9 +808,9 @@ L13.10 The author's free choice among the inhabitants of an under-determined fun
        (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared.
        [settled]
 L13.11 The identity law between two specimens, with its distance, is what admits a second
-       implementation into the planner's graph (L13, D-2026-10-11-m); the agreement test of W5
-       between native and extern is this law, and the reference formula of a law evaluated over
-       `Rational` is one more specimen, with grade exact, checked by the same law. [candidate]
+       implementation into the planner's graph (D-2026-10-11-m); the agreement test of W5 between
+       native and extern is this law, and the reference formula of a law evaluated over `Rational`
+       is one more specimen, with grade exact, checked by the same law. [candidate]
 Example:    γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
             there (clause 9)
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q; W5; P5

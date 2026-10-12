@@ -20,7 +20,15 @@ are provenance words, the grade lists now in Terms, and the two within-entry rep
 mutable parameter, L14 on validation and on citation) joined. Deviations from the letter of the
 step: the six topics are the order inside each organizer's section, not subsections, since a topic
 cuts across organizers; L1 stays an entry, under Purpose, so that citations resolve; the two faces
-are defined in Terms; the open questions carry ids O1 to O12 and the reference lint resolves them. The choices it rests on are
+are defined in Terms; the open questions carry ids O1 to O12 and the reference lint resolves them. Step 4 done: twelve edits, one commit each, by
+`scripts/migrate_record_draft11_content.py --upto N` from the step 3 record (1e91fa5 to the commit
+that names this status); `--check --strict` passes; `docs/principles-for-readers.md` draft 4 cites
+the new numbering; the diff of statements and every clause not settled are in
+`record/draft-11-for-his-marks-2026-10-12.md`. Deviations from the letter of the step: the numbers
+of draft 10 are kept, with gaps where L3, L11 and L12 merged, and the certificate entry is L16, so
+that one renumbering, if he wants a contiguous one, is one mechanical commit; L16.9 (no operation
+on certificates raises a grade, lowers an evidence cost or widens a domain without new evidence)
+is GPT en's rule, added as proposed; the clause-level statuses of what moved unchanged were kept. The choices it rests on are
 D-2026-10-12-g to -p in `record/decisions.md` (6b729dc) and D1 to D3 of
 `plan-principles-draft-11-2026-10-12-decisions.md`; where a step depends on one of the latter it
 says which, and what it assumes until Luciano answers. Inputs: `docs/principles.md` draft 10
