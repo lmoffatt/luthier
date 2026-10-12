@@ -1307,3 +1307,50 @@ Source:     record/plan-principles-draft-11-2026-10-12-decisions.md D3 (57a0023)
 Kind:       document (docs/principles.md). For P12, P13 (a G earns its place by the conflicts it
             decides); refines D-2026-10-12-g
 Status:     current; step 3 of the execution plan
+
+D-2026-10-12-t  An `assumed` certificate carries what is asserted: a Boolean law asserted true, or a
+                cost law asserted with a formula of the inputs (a library's documented bound, such as
+                LAPACK's p(n)·ε·κ(A)); its bound is 0 or the formula evaluated at the input, its
+                evidence cost the demand's parameter for assumptions, with no default. When the
+                formula is a cited guarantee with its hypotheses it is proved by delegation, not
+                assumed.
+Author:     Luciano for the two kinds; Claude for the evidence cost as the demand's parameter
+            without default (L16.2 of draft 11, marked by him to elaborate, not refused) and for the
+            border with delegation
+Quote:      "elabora un poco, supongo que asumed tiene o es boolean o tiene una formula de cost (por
+            ejemplo lapack libraries con eps y condition number." (chat, 2026-10-12)
+Source:     chat 2026-10-12, on record/draft-11-for-his-marks-2026-10-12.md item 1
+Kind:       principles (the certificate entry, L7 delegation, L4 holes). For G2 (evidence is a
+            cost), P11 (the cost of an assumption a parameter)
+Status:     current; applied in draft 11 as the certificate entry's clause on assumed, proposed
+            wording
+
+D-2026-10-12-u  What the planner ranks: his formula exp(−cost)/resources is a candidate; the weight
+                may enter as log(resources) added to the cost, so that the rank is cost + w·log
+                resources, minimized, the same as exp(−cost)/resources^w.
+Author:     Luciano
+Quote:      "si, es un candidato , podria ser que log(resources) se sume al costo tambien. suena
+            mejor" (chat, 2026-10-12)
+Source:     chat 2026-10-12, on record/draft-11-for-his-marks-2026-10-12.md item 4
+Kind:       principles (one function, many specimens). For P11 (w the demand's), G2
+Status:     current, candidate; applied in draft 11 as the clause on the efficiency
+
+D-2026-10-12-v  The principles are numbered contiguously in draft 11, in document order, with a
+                conversion table (draft 11, draft 10, before) for the follow-up; D-2026-10-12-g to -u
+                cite draft 10 tags.
+Author:     Luciano
+Quote:      "numeros contiguos, con tabla de conversion para el seguimiento." (chat, 2026-10-12)
+Source:     chat 2026-10-12
+Kind:       document. For P12 (the reader meets no gaps), P2 (the table carries the derivation)
+Status:     current; applied in draft 11
+
+D-2026-10-12-w  His marks on the three other new clauses of draft 11: the first instance of the
+                conversion from statistics to an evidence cost, −log(1 − ε̂(n, δ)) in nats with δ the
+                demand's ("bien"); the rule that no operation on certificates raises a grade, lowers
+                an evidence cost or widens a domain without new evidence ("ok"); lift and exact a
+                retraction, not called homomorphisms until the algebra exists ("ok").
+Author:     Luciano
+Quote:      "2-> bien" "3-> ok" "5->ok" (chat, 2026-10-12)
+Source:     chat 2026-10-12, on record/draft-11-for-his-marks-2026-10-12.md items 2, 3, 5
+Kind:       principles (the certificate entry, laws combine). For G2
+Status:     current; the three clauses settled in draft 11
