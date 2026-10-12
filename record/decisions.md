@@ -1604,10 +1604,15 @@ D-2026-10-06-ab Generators and certificates, his answers on record/generators-20
                 a function covers what its generators drew, and a run must stay inside it; a
                 result is checked once, when produced. A statistical law declares its level,
                 repeats a failure with an independent seed and measures its power on controls.
-                The matrix families of the analysis stand.
+                The matrix families of the analysis stand. A function over an infinite domain
+                is drawn from a census of the program's values. Every budget (the tries of a
+                rejection first) is an argument, and a law not run is not run again while its
+                code and seed are unchanged.
 Author:     Luciano; the bindings, the certificate of results and the three parts of 5.5 the
             model's proposals, accepted
-Quote:      "Los generadores son Luthier citizens como cualquier otro."
+Quote:      "yo quisiera que los tests  pidan un generador explicito para cada tipo involucrado."
+            "Bueno, seria el caso mas simple: un censo sobre los valores registrados no?"
+            "Los generadores son Luthier citizens como cualquier otro."
             "O sea en realidad la idea es solo tengo generadores  sobre tipos definidos."
             "Listo."
             "la tolerancia de Levenberg-Marquardt no puede ser cualquiera, tiene limites"
@@ -1617,7 +1622,10 @@ Quote:      "Los generadores son Luthier citizens como cualquier otro."
             "Estoy evaluando si los generadores deberian ser propiedad del tipo o functores sobre
             el tipo"
             "Los geradores de matrices ya los planteaste bien."
-Source:     sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:62
+            "OK"
+Source:     chat:aa680014:3732
+            chat:aa680014:3732
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:62
             sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:54
             sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:32
             sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:36
@@ -1626,10 +1634,14 @@ Source:     sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:62
             sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:66
             sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:71
             sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:72
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:77
 Kind:       language and tool (spec 7; the decisions listed at the head of the old 08, d12b554).
             For L10.3, L5.18, P11
 Status:     current; the functors and the cumulative cost were "estoy evaluando" (his leaning,
-            "creo que es lo segundo"), the rest answered. Entered 2026-10-12 by the same session
+            "creo que es lo segundo"), the rest answered. The request that started the analysis is
+            of 2026-10-05 (chat:aa680014:3732); the "OK" of 0703:77 answers the round of R11, the
+            budget of rejection as an argument and no rerun of laws not run. Entered 2026-10-12 by
+            the same session
 
 D-2026-10-06-ac The grammar of D-2026-10-06-ab (old 08 §12): `test name [with n | exhaustive]
                 [sampled metric] [size k] [under profile] [where { bindings }]`, a new act
