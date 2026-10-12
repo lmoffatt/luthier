@@ -1700,3 +1700,53 @@ Source:     sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:80
 Kind:       language (spec 2.S19, 7.R1). For D-2026-10-06-ab
 Status:     replaced in its syntax by D-2026-10-12-ab (`test` a function with named arguments, the
             profile a record value); `gen` removed stands. Entered 2026-10-12 by the same session
+
+D-2026-10-12-ag Where the correspondence of the old grades to the five of the Terms lives (spec
+                1.S12) is settled when the laws of certification are written in Luthier's terms;
+                the principles are then determined back from those laws.
+Author:     Luciano
+Quote:      "this question will be solved when we determine the laws of the certification in luthier
+            terms."
+            "When these laws are formulated, then we will backdetermine the principles."
+Source:     luthier@e31780f:record/spec-wave-1-for-his-marks.md:38
+            luthier@e31780f:record/spec-wave-1-for-his-marks.md:39
+Kind:       method (spec 1.S12, spec 6; L14). For L14, P13
+Status:     current; open until chapter 6 (wave 2) states the laws of certification
+
+D-2026-10-12-ah His marks on wave 1 of the specification: ok on the sections of chapters 2, 3, 7, 11
+                and 12 of record/spec-wave-1-for-his-marks.md, the model's readings included. So:
+                2.S20 (quote and eval, candidate syntax); 3.S11, 3.S29 (fields), 3.S30 to 3.S34,
+                3.S38, and a rule of evaluation counts as implemented only with a program whose
+                value is compared; the model's parts of chapter 7, 7.S2 included (read: decided,
+                since the idea is his and the section is ok); 11.S3, 11.S5, 11.S10, 11.S11 (to
+                spec 7), 11.S13 (the range to the demand), 11.S18, 11.S19; 12.S1, 12.S9, `eval`
+                exempt from certification and printing the states of the cone, `run --checked`
+                kept, `run --no-record` retired. Left as they were: 11.S16 and 11.S17, which wait
+                for his mark on L13.3 and L13.4; the three items carried into chapter 12 from the
+                old 03 §6.
+Author:     Luciano; the items the model's (the agents' and the integrating session's)
+Quote:      "ok"
+            "ok"
+            "ok"
+            "ok"
+            "ok"
+Source:     luthier@e31780f:record/spec-wave-1-for-his-marks.md:50
+            luthier@e31780f:record/spec-wave-1-for-his-marks.md:81
+            luthier@e31780f:record/spec-wave-1-for-his-marks.md:132
+            luthier@e31780f:record/spec-wave-1-for-his-marks.md:156
+            luthier@e31780f:record/spec-wave-1-for-his-marks.md:177
+Kind:       language and tool (spec 2, 3, 7, 11, 12). For L14, P2, L11.2
+Status:     current; chapter 1 and chapter 4 had no ok and keep their proposed items (1.S11, the
+            rename of the rounding defect to η, 4.S16, 4.S21)
+
+D-2026-10-12-ai An object is one of three: a concrete type; a subtype, whose law involves a single
+                name; or a theory type, whose law involves more than one name. Spec 4.S9 is
+                restated by it.
+Author:     Luciano
+Quote:      "Object is one of concrete type, subtype (law involving a single name)  o theory type
+            (law involving more than a name)"
+Source:     luthier@e31780f:record/spec-wave-1-for-his-marks.md:99
+Kind:       terms (spec 4.S9; Terms of docs/principles.md). For D-2026-10-12-z
+Status:     current; amends the model's part of D-2026-10-12-z, which counts the one-symbol function
+            type among theories: under this one a function with a law on itself alone is a subtype.
+            Terms not changed (the spec does not edit the principles): one question to him
