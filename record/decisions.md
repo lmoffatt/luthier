@@ -1809,3 +1809,18 @@ Status:     current. Wave 2 changes shape: chapter 6 states certification in Lut
             it takes as a parameter, and the interface it asks of the library is what chapter 5
             fixes; the two candidate algebras of D-2026-10-12-p can be two models of that
             interface. The rule may be a principle of the method; his mark pending
+
+D-2026-10-12-am What certification asks of a library of costs, spec 6.S5: a preorder `≤` to compare
+                with the cutoff, a least element `0` for what is exact, a greatest `⊤` for what
+                fails and absorbs, a composition `⊕` along a path (associative, unit `0`, monotone
+                in each argument), and `lift` from `Bool` (`true` to `0`, `false` to `⊤`); nothing
+                that subtracts. Of the algebras of D-2026-10-12-p, max and the plain sum satisfy
+                it; the averaged forms with 1/n are not associative, and a library that takes them
+                needs another `⊕` along a path.
+Author:     the model; accepted by Luciano
+Quote:      "asi como esta bien"
+Source:     chat:f15ae1b6:1139
+Kind:       language (spec 6.S5; the interface of the library of costs, D-2026-10-12-al; O1). For
+            P16 (the smallest interface is the cheapest to keep), L10.9
+Status:     current; the interface the core depends on, so a library of costs can add to it and
+            not change it

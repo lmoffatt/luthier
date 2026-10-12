@@ -18,7 +18,7 @@ Notation shared by every chapter is `spec 1`. Here: `C` is a type of costs, the 
 
 **6.S4. Certification takes its cost type as a parameter.** [decided D-2026-10-12-al] The theory of this chapter is written over a type `C` and the operations of §1, not over a fixed `Cost`. A library of costs supplies models of `C`; which algebra it uses, how a sample's statistics become a cost and what its operations are called are decided when that library is implemented. This chapter fixes only what it uses.
 
-**6.S5. Five operations and their laws.** [proposed] Certification uses exactly these, and asks of them these laws, so that a library of costs is a model of them:
+**6.S5. Five operations and their laws.** [decided D-2026-10-12-am] Certification uses exactly these, and asks of them these laws, so that a library of costs is a model of them:
 
 | operation | used for | laws |
 |---|---|---|
