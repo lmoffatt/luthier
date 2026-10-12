@@ -239,7 +239,7 @@ result in the same class at a distance the plan records, and for the Boolean cas
 (His words) No effect on the world; its one effect is on the program: it takes its name, once, and
 enters the map of definitions, so the same name is not defined twice (`:=` once; `<-` only in a
 block, D-2026-10-11-i).
-Status: settled. settled.
+Status: settled.
 
 **L10 (was L19, L13). The demand determines the computation and the types produced.** The
 evaluation strategy is a parameter separate from the program (L12); by default, a plan backward from
@@ -397,7 +397,7 @@ libraries and the interpreter in Luthier, certified against the kernel's laws; t
 specimen; the planner, advice that the plan records. A Luthier program is an element of Luthier;
 programs build, inspect and run other programs, and the interpreter is meant to be written in the
 language it interprets.
-Status: settled. settled.
+Status: settled.
 
 ## What is open
 
