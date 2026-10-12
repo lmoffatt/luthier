@@ -2,7 +2,7 @@
 
 Draft 10, 2026-10-12, unapproved; written by hand from the projection of 44df5a7 and Luciano's
 corrections on it (`docs/principles_corr.md` d5e81e3, his notes e3fa339, `docs/principles_cont.md`
-323bda0, `docs/principles_3.md` 59ea8e9, `docs/principles copy.md` 01ba854, `docs/principles copy 2.md` 660b019), every one of them
+323bda0, `docs/principles_3.md` 59ea8e9, `docs/principles copy.md` 01ba854, `docs/principles copy 2.md` 660b019, `docs/principles copy 3.md` 792ac84), every one of them
 applied; the
 organizers renumbered on the last (G1 theory and model, G2 cost, G3 the demand; the record keeps
 the old tags until it is updated); what the model added on his
@@ -15,8 +15,10 @@ then). The way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Terms
 
-- A *structure* is a type in the kernel's language (`04`): products, sums, function types and
-  recursive types, built from each other.
+- A *structure* is a type in the kernel's language (`04`), built from four forms: a product, a
+  value made of several named fields (a record, a tuple); a sum, a value that is one of several
+  cases, each tagged (a variant, an enumeration, `Maybe`); a function type `A -> B`; and a
+  recursive type, one defined in terms of itself (a list, a tree). Each form may hold the others.
 - A *predicate* is a function into `Bool`. A *cost* is a function into `Cost`, the non-negative
   reals with infinity, 0 true and ∞ false.
 - A *law* is a predicate or a cost, or a combination of laws that is again a predicate or a cost;
@@ -65,17 +67,16 @@ search for an inhabitant, and cost ranks the candidates (G2); where type theory 
 given term, Luthier searches for one.
 Status: settled, marked OK by him on 2026-10-12.
 
-**G1. A type is a theory and its values are its models.** The first eureka, in his words: a type
-is a proposition; a proposition can say that a structure follows the rules of a theory; so "this
-structure satisfies the laws" is said, in the language of types, as "it is of the type of the
-theory": it is a model of the theory, and Luthier verifies that it is. Types thereby carry a
+**G1. A type is a theory and its values are its models.** If a type is a proposition, then a
+proposition can say that a structure follows the rules of a theory; so "this structure satisfies
+the laws of the theory" is said, in the language of types, as "it is of the type of the theory": it is a model of the theory, and Luthier verifies that it is. Types thereby carry a
 strong semantic meaning, and coding and testing are one act: to declare `m : T` is to declare the
 tests `m` will pass (L3). What type
 theory lacks: it knows a value by its term; Luthier knows it by the law it satisfies.
 Status: settled; this wording is his note of 2026-10-12 put in order; the long form in the record.
 
-**G2. Laws are valued in cost: one logic, extended to the non-negative reals.** The second
-eureka, in his words: not every theory follows Booleans; many are represented better by costs; and
+**G2. Laws are valued in cost: one logic, extended to the non-negative reals.** Not every theory
+is easily described by Booleans; many are represented better by costs; and
 since object classifiers exist that extend logic to the non-negative reals, the composition of
 errors in numerical libraries can be attacked with this one unified logic. How a law is validated:
 a law is a predicate or a cost, a function into `Bool` or into `Cost`, [0,∞) with 0 true and ∞
