@@ -91,7 +91,8 @@ rest are fixed here so that no chapter redefines them.
 the Terms (proved, exhaustive, cases, sampled, assumed); the domain and the evidence cost carry
 what the older grades point, census of k, bounded and witnessed said, and the grades of `05 §7`
 (point, sampled, bounded, exhaustive, witnessed, proved, assumed) are read through that
-correspondence. What an `assumed` certificate records is D-2026-10-12-t.
+correspondence. What an `assumed` certificate records is D-2026-10-12-t. Where the correspondence lives is
+settled when the laws of certification are written in Luthier (D-2026-10-12-ag).
 
 ## §5 Tests and certificates
 

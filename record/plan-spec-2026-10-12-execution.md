@@ -151,3 +151,11 @@ token, the ranking, the trace), the rest syntax or placement.
   `[proposed]` item and the agents' questions, with the model's reading where it has one; it also
   flags δ used twice (confidence in 1.S11 and 7.S11, rounding defect in 11.S16). Next: his marks,
   committed verbatim, then applied; then step (4), the decisions of wave 2.
+- 2026-10-12, same session: his marks on `record/spec-wave-1-for-his-marks.md` committed verbatim
+  (e31780f) and applied (90add45): D-2026-10-12-ag (the place of the grade correspondence waits for
+  the laws of certification in Luthier), -ah (ok on chapters 2, 3, 7, 11, 12), -ai (4.S9: concrete
+  type, subtype, theory type). Left proposed: 1.S11 and the rename of the rounding defect, 4.S16,
+  4.S21, 11.S16 and 11.S17 (wait on L13.3 and L13.4), three items carried into 12. Open to him: -ai
+  puts a function with a law on itself alone among subtypes, while Terms (-z) count the one-symbol
+  function type among theories. D-2026-10-12-x to -af now quote their sources in the grammar
+  (21fc94e). Next: step (4), the decisions of wave 2.
