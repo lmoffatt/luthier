@@ -15,6 +15,7 @@ sources (`docs/rationale/09-extern-and-the-world.md`, `11-cost-valued-laws.md`,
 ## Status
 
 - 2026-10-12: plan written; decisions D1 to D10 with Luciano; nothing started.
+- 2026-10-12, on his observation that the other principle documents carried past decisions: `docs/way-of-working.md` (4eb914e), `docs/rationale/11-cost-valued-laws.md` (d953792) and `docs/principles-for-readers.md` draft 6 (5076a6d) brought to draft 11, and the citation check of `project_principles.py --check` now covers the three; an agent of wave 1 may cite any of them.
 
 ## Rules for every step
 
