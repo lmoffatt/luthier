@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 3808857edf39, commit d12b554 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 3774ee0e0fbd, commit d7bf6e2 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -343,6 +343,10 @@ specification plan.
 - L14.4 What the kernel cannot yet express is written in the host and marked as such, a hole of the
   theory it belongs to (L2), so that the boundary of "where it can" is visible and shrinks with each
   version. [proposed]
+- L14.5 (His words) Keyword or not, the semantics of every construct is expressible in Luthier: a
+  keyword is surface syntax, and what it means is stated as a theory in Luthier (`match` and `data` by
+  the laws of the kernel, `if` as a `match` on `Bool`); every other construct is a name of core or of
+  a library, with named arguments for its options (D-2026-10-12-ab). [proposed]
 Rests on: O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
 version 0 in chat on 2026-10-12, to be specified in chapter 3.
 Status: his principle, stated in his words; the clauses are the model's wording, proposed, his mark

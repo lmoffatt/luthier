@@ -899,6 +899,11 @@ L14.3  The host implements what Luthier states and is a specimen of it, certifie
 L14.4  What the kernel cannot yet express is written in the host and marked as such, a hole of the
        theory it belongs to (L2), so that the boundary of "where it can" is visible and shrinks with
        each version. [proposed]
+L14.5  (His words) Keyword or not, the semantics of every construct is expressible in Luthier: a
+       keyword is surface syntax, and what it means is stated as a theory in Luthier (`match` and
+       `data` by the laws of the kernel, `if` as a `match` on `Bool`); every other construct is a
+       name of core or of a library, with named arguments for its options (D-2026-10-12-ab).
+       [proposed]
 Rests on:   O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
             version 0 in chat on 2026-10-12, to be specified in chapter 3
 Quote:      "necesitamos una teoria de librerias, la iremos haciendo a medida que la necesitemos.

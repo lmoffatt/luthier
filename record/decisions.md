@@ -1424,3 +1424,24 @@ Kind:       principles of the method (record/principles.md P16). For P13 (the de
             before it was named: D-2026-10-12-q, -r, L10.2, D4 and D6 of the spec plan), P8 (the
             brake: flexibility has a cost), P6
 Status:     current; P16 in record/principles.md, proposed wording, his mark pending
+
+D-2026-10-12-ab The reserved words. Keywords: `data`, `match`, `if`, `then`, `else`, and
+                possibly `operator`. Everything else that can be Luthier is Luthier: `let`/`in`
+                (blocks), `U`, `forget`, `provisional`, `gen` (removed), `extern`, `primitive`,
+                `axiom`, `test`, `cite` and the contextual words of tests become names of core or
+                of a library, with named arguments where they take options (`test` will be the
+                function with the most parameters, so a positional or keyword syntax does not
+                fit it). Keyword or not, the semantics of every construct is expressible in
+                Luthier (L14). Modules are values. `extern` is an action, since it opens a file.
+                Implicit arguments inferred from the expected type (bidirectional) are needed.
+Author:     Luciano; the one-by-one analysis and the classification the model's (chat)
+Quote:      "test justamente va a ser una de las funciones con mas parameterizaciones de modo que
+            la alternativa, usar posicional, no es buena. Yo creo que todo lo que pueda ser luthier
+            debe ser luthier. el extern es una accion no? porque abre un file. necesitamos el tipo
+            de implicitos creo. If then else match data--> keywords. operator -> podria ser
+            keyword... Igual sean o no keyword, su semantica debiera ser expresable por luthier no?
+            los modulos son valores." (chat, 2026-10-12)
+Source:     chat 2026-10-12, on the analysis of the reserved words of spec 2.S2
+Kind:       language (spec 2, 3, 10, 12; L14, L4, L11). For L14, P16
+Status:     current; the question of extern and import as actions inside definitions (against
+            L4.7) open, one question to him
