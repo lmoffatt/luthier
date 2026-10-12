@@ -1101,3 +1101,29 @@ Kind:       documents (docs/, record/). For P2 (the agent's document records its
             rerun after each edit of the record); the real case: draft 9 is 681 lines of which the
             header and the sources are half, read whole by every agent that builds the spec
 Status:     current; the docs/principles_2.md copy of draft 7 deleted at his instruction
+
+D-2026-10-12-e  A function is presented as the common case, not the smallest: a theory that adds
+                one symbol to types already modelled, with their equality, since every law is an
+                equality and the equality of a carrier is itself a function with laws. An isolated
+                function has no sense; it has sense in a context, and what looks like a lone
+                function is one whose inverse and whose theory nobody took the trouble to find.
+                G2, the README and the readers' document say so; the setoid as the base case of
+                every theory and a type naming its equality (R13) stay proposed, his mark pending.
+Author:     Luciano for the observation and the decision; Claude for the survey of the .lut
+            files (58 certified functions, every one with an imported equality; 12 models; 341
+            definitions without a law) and for the wording
+Quote:      "me parece que es muy difcil encontrar un caso en que verifiques una funcion
+            relevante aislada, siempre viene con un tipo asociado al menos, y siempre tiene la
+            igualdad asociada tambien... Y las igualdades vienen asociadas con funciones tambien"
+            (chat, 2026-10-12)
+            "Si, lo comun es extender una teoria con un caso. Lo que pasa es que yo sospecho que
+            son funciones porque no nos tomamos el trabajo de pensar cual es su inversa o a que
+            teoria pertenecen. una funcion sola, aislada no tendria sentido, tiene sentido en un
+            contexto, a eso voy." (chat, 2026-10-12)
+Source:     chat, 2026-10-12
+Kind:       organizers (G2, its presentation). For P14 (no loose functions: a function without
+            its theory is a hole), L20 (a function is declared in a theory), L16 (equality
+            belongs to the object), P13 (one idea now explains the 58 certified functions and the
+            341 without a law alike)
+Status:     current; record/principles-language.md G2, docs/principles.md reprojected,
+            docs/principles-for-readers.md draft 2, README first paragraph
