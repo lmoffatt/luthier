@@ -1508,3 +1508,28 @@ Quote:      "o sea que no habria nombres importados al namespace, lo cual hace q
 Source:     chat 2026-10-12, answering the open question of D-2026-10-12-ad
 Kind:       language (spec 12.S3, 12.S6, 12.S21, 12.S22; spec 2 §6). For L14, P16
 Status:     current; closes the flat-import question of -ad
+
+D-2026-10-12-af Import names what enters the environment. `import "linear_algebra.lut"
+                Linear_Algebra` brings the one name `Linear_Algebra` of that file into the
+                importer's environment, and `import "linear_algebra.lut" Linear_Algebra as LA`
+                brings it under the name `LA`, as Python's `from x import Y as Z`. The import line
+                says which file each imported name comes from, so the checker still knows where to
+                look and reads the file only when the name is first needed (laziness kept, D-ad).
+                There is no import of every name (no `*`), which would be the flat import back
+                (D-ae). The model's reading, proposed: the form is sugar for an alias of a projection
+                of the module value, `LA = (import "linear_algebra.lut").Linear_Algebra` (spec 4.R7:
+                an alias has no state, so the certificates of the original are the alias's), and a
+                function over `LA` is universal over its models (G1).
+Author:     Luciano for the selective import with `as`; Claude for the translation into an alias
+            and the ban on `*`
+Quote:      "there is not such a thing as a flat import, seria y lo bueno de eso es que permite la
+            laziness en importar! ... queremos escribir algo como import "linear_algebra.lut"
+            Linear_Algebra ... y podriamos hacer import "linear_algebra.lut" Linear_Algebra as LA a
+            la python ... Entonces cuando hacemos import decimos que nombres entran al environment y
+            con eso podemos buscar. Luego, con core es como que hacermo import "core.lut" Int Bool
+            List algo asi" (chat, 2026-10-12)
+Source:     chat 2026-10-12, after D-2026-10-12-ae
+Kind:       language (spec 2, 12.S22). For L14, P16
+Status:     current; amends -ae (names enter the environment, but only those listed); open, his:
+            whether core is imported by an explicit list in every file or is the implicit scope of
+            the outermost block

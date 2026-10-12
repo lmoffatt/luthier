@@ -64,13 +64,17 @@ reaches its node (`spec 3 §8`). `test "x.lut"` is the action that demands every
 every name, every import, every law, so it is where latent errors appear (`spec 7`). There is no flat
 import (12.S22).
 
-**12.S22. Modules are values, and no names are imported.** [decided D-2026-10-12-ae] `import` is a
-function whose value is a module, a value of the record type of 12.S1, bound to the name its
-importer gives it: `la := import "linear_algebra.lut"`. A name of a module is reached only through
-that name, `la.f`, a projection (`spec 2 §6`), so every name says where to look for it; there is no
-flat import and no `open`, and the file carries no name of its own. The names of `core.lut` are
-visible unqualified in the outermost block of every file, core being the scope that encloses it, as
-an enclosing block's names are visible in a nested one (this last sentence proposed).
+**12.S22. Modules are values, and an import names what enters.** [decided D-2026-10-12-af] `import`
+is a function whose value is a module, a value of the record type of 12.S1. A module is reached
+through a name its importer gives it, `la := import "linear_algebra.lut"` and then `la.f`, or by
+naming the names that enter the environment: `import "linear_algebra.lut" Linear_Algebra`, or
+`import "linear_algebra.lut" Linear_Algebra as LA`. The import line says which file each name comes
+from, so the checker knows where to look and reads the file only when a name is first needed
+(12.S21). There is no import of every name and no `open` (D-2026-10-12-ae), and the file carries no
+name of its own. The selective form is sugar for an alias of a projection, `LA = (import
+"linear_algebra.lut").Linear_Algebra`, so the alias's certificates are the original's (`spec 4.R7`;
+this reading proposed). Whether `core.lut` is imported by an explicit list or encloses the outermost
+block of every file is open.
 
 ## Open
 
