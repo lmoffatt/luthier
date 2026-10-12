@@ -1156,3 +1156,109 @@ Kind:       terms (G2, L3, Terms). For P12 (ten terms instead of a glossary that
 Status:     current; record/principles-language.md Terms, docs/principles.md reprojected; the
             spec's "object" unchanged; answers in
             record/answers-annotations-principles-2026-10-12.md §6
+
+D-2026-10-12-g  The shape of `docs/principles.md` draft 11, on the six IA critiques of draft 10
+                (`record/recommendations-ia-principles-2026-10-12.md`, his marks e8d7db1): a
+                purpose sentence; the organizers as Claude's suggestion, three G of two
+                sentences each with no mechanics, each L listed under its G, the G deciding
+                between its Ls and G0 between Gs; Terms with settled definitions only, each term
+                in one category, the grades defined there and nowhere else, the new terms
+                defined too; each principle as a statement of one or two sentences and numbered
+                clauses each with its own status, an example field, references, what it derives
+                from and what open item it rests on; one precedence line; "What is open" with
+                the principle each question blocks, his pending marks apart, the changelog out
+                of the document; an old-to-new numbering table. The count of principles follows
+                from the shape and is not fixed in advance.
+Author:     Luciano on the recommendations; Claude for the composition (GPT en's hierarchy,
+            Kimi's clauses and dependency map, Claude's precedence) and for sending the changelog
+            to the record's drafts table
+Quote:      "ok" on 2.1 to 2.9 and 3.1 to 3.6; "claudes suggestion" on 4.1; "exactly, changelog is
+            not belonging here, find another place"; "yes do the old to new table"; "ok. lets
+            define the new ones too"
+Source:     record/recommendations-ia-principles-2026-10-12.md (e8d7db1)
+Kind:       document (docs/principles.md, record/principles-language.md,
+            scripts/project_principles.py). For P12 (one status per sentence, one home per
+            mechanism), P2 (the projector carries the shape), P8 (the lints admitted on the two
+            cases they would have caught)
+Status:     current; execution in record/plan-principles-draft-11-2026-10-12-execution.md
+
+D-2026-10-12-h  The cutoff is a parameter of the demand: the minimal cutoff for an implementation
+                to be considered. It is not a parameter of the certified-subtype constructor.
+Author:     Luciano
+Quote:      "I know a place for the cutoff, a minimal cutoff to consider an implementation, it is a
+            parameter at the demand level."
+Source:     record/recommendations-ia-principles-2026-10-12.md (e8d7db1), §4.3
+Kind:       principles (L3, L6, L13). For P11 (every criterion is a parameter), G3 (the demand)
+Status:     current; to apply in draft 11
+
+D-2026-10-12-i  The grade of a sum of costs is parameterizable: the vector of grades (L6) or the
+                weakest (L13), the demand's choice.
+Author:     Luciano
+Quote:      "thats parameterizable, both."
+Source:     same, §4.4
+Kind:       principles (L6, L13). For P11
+Status:     current; the composition along a path stays the sum (plan decisions, D1)
+
+D-2026-10-12-j  A value with a sampled or assumed certificate is a model of its theory with a cost:
+                the statistics of the evidence convert to a cost, possibly a log cost in nats.
+                Not "supported at grade g" (GPT en).
+Author:     Luciano; the conversion is open
+Quote:      "a is model of A with cost C, we pass the statistics to cost, we need a convertion.
+            might be we work with logCost in nat."
+Source:     same, §4.5
+Kind:       principles (G2, L2, L7, the certificate entry). For G2 (one logic, extended to cost),
+            P10 (the invariant of the type)
+Status:     current; the conversion and the cost of `assumed` are D2 of the plan decisions
+
+D-2026-10-12-k  A law is the proposition; a certifier is a method that produces evidence for it;
+                one law may have several certifiers.
+Author:     Luciano, on GPT en
+Quote:      "yes"
+Source:     same, §4.6
+Kind:       principles (L3, L7). For G1
+Status:     current; to apply in draft 11
+
+D-2026-10-12-l  Vocabulary: *structure* for a kernel type and *theory* for a Luthier type; *cost*
+                for the law and *resources* for time and memory; *model* for what a type names and
+                *specimen* for the planner's candidates.
+Author:     Luciano, on GPT sp and Claude
+Quote:      "agreed"
+Source:     same, §4.7
+Kind:       terms. For P12
+Status:     current; extends D-2026-10-12-f
+
+D-2026-10-12-m  Actions on Luthier's own state (writing a certificate, a test) are idempotent and
+                memoizable; actions on the world never are.
+Author:     Luciano, on Claude
+Quote:      "good"
+Source:     same, §4.8
+Kind:       principles (L9, L10, L11, Terms). For P6 (every change can be undone)
+Status:     current; to apply in draft 11
+
+D-2026-10-12-n  L12 reads "no unrecorded policy constants"; kernel primitives (0, ∞, lift, exact)
+                and mathematical constants are excluded.
+Author:     Luciano, on DeepSeek
+Quote:      "ok"
+Source:     same, §4.9
+Kind:       principles (L12). For P11
+Status:     current; to apply in draft 11
+
+D-2026-10-12-o  Two lints enter `scripts/project_principles.py --check`: every cross-reference
+                resolves (L, G, D id, spec section); no sentence appears in two entries. The real
+                cases: G0 sending the ranking of candidates to G2 (Kimi), D-2026-10-11-n written
+                out five times (Claude).
+Author:     Luciano, on Claude
+Quote:      "ok"
+Source:     same, §4.10
+Kind:       working rules (the mechanism rule of CLAUDE.md). For P8, P2
+Status:     current; step 2 of the execution plan
+
+D-2026-10-12-p  The algebra of costs is not open at large: two candidate models, min/max and
+                1/n log-sum-exp with 1/n sum, the 1/n his addition.
+Author:     Luciano
+Quote:      "but G2 cost algebra is not that open, there are basically two models: min max vs 1/n
+            logsumexp 1/n sum (the 1/n is my addition is it ok?ok)"
+Source:     same, §2.4
+Kind:       principles (G2, L6). For G2
+Status:     current; which combination is parameterizable and which is forced by soundness is D1
+            of the plan decisions
