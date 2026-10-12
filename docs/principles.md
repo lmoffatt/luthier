@@ -203,7 +203,7 @@ the law travels by the certificate of identity (his annotation): exactly where t
 boolean (`==` structural, `05` R8: integers, decidable types, the same implementation rerun), and
 with the observed distance added where it is a cost (G2), since two implementations over floats are
 almost never bit-identical. The type of the identity law's result says which (`Bool` or `Cost`).
-Status: settled. settled The distinction identity/law is from the former L21.
+Status: settled. The distinction identity/law is from the former L21.
 
 **L8 (was L15). The ideal world is realized with a guarantee.** Code is written over ideal objects
 (Real) and realized by concrete ones (Float64); the realization's laws hold within a stated
