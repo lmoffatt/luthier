@@ -1824,3 +1824,48 @@ Kind:       language (spec 6.S5; the interface of the library of costs, D-2026-1
             P16 (the smallest interface is the cheapest to keep), L10.9
 Status:     current; the interface the core depends on, so a library of costs can add to it and
             not change it
+
+D-2026-10-13-a  There is one world. Its parts (a file, a clock) exist in Luthier's internal
+                representation of it: an action is a directed request, checked by comparing the
+                representation before and after. Whether two parts are independent is a theory of
+                that model, in a library, certified like any law, and not imposed by the language.
+Author:     Luciano
+Quote:      "No porque en realidad nosotros tenemos una representacion interna del W y podemos
+            hacer solicitudes dirigidas y comparamos al principio y final, por lo que la distincion
+            esta en nuestra cabeza y no afuera."
+            "es un mundo solo, despues podemos tener una teoria de que distintas partes del mundo
+            son independientes pero eso estaria en nuestro modelo, no esta impuesto desde el
+            lenguaje."
+Source:     chat:f15ae1b6:1481
+            chat:f15ae1b6:1515
+Kind:       principles (L4.12 new; spec 10.S4). For L4, D-2026-10-12-al
+Status:     current; L4.12 proposed in its wording
+
+D-2026-10-13-b  `W`, the world, is a keyword and a primitive of the core, the counterpart of `U`:
+                definitions live in the mind (the universe `U`, timeless, copied, compared,
+                memoized) and actions act on the world. The model's proposal for its rules: `W`
+                has no introduction (it enters at `main` or the session), no `==`, and each value
+                of it is used once (Clean's uniqueness). `U` keeps its name; `M` is a reading of
+                the duality, not a symbol.
+Author:     Luciano for `W` as a keyword beside `U` and the duality; the model for the three rules
+            and for keeping `U`
+Quote:      "W como contraparte de U  como palabra clave suena bien."
+            "estoy pensando si no seria interesante tener dos primitivas duales  M (mind/model) y W
+            (wolrd)"
+Source:     chat:f15ae1b6:1473
+            chat:f15ae1b6:1481
+Kind:       language and principles (amends D-2026-10-12-ab: the keywords gain `W`; L4.11, L7.1,
+            Terms; spec 2, 3, 10). For L4, L7, P16
+Status:     current for `W` as a keyword; the three rules proposed. His "Si" to keeping `U`
+            (chat:f15ae1b6:1498) read as such
+
+D-2026-10-13-c  The private part of a module is given by ascription: an importer sees a module only
+                through the theory it gives it as type (spec 12.S22), as ML's opaque signatures, so a
+                representation stays hidden and another model of the theory can replace it. A
+                value only some theory may build (a `Certificate`) has its constructor in no
+                interface.
+Author:     the model; Luciano named it an important architectural decision
+Quote:      "Justamente, parte privada en los modulos es una decision de arquitectura importante."
+Source:     chat:f15ae1b6:1473
+Kind:       language and principles (L6.12, L10.10 new; spec 6, 12). For L6, L10.9, L14
+Status:     proposed; his mark pending
