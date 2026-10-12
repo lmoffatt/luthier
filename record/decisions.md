@@ -3,7 +3,8 @@
 The decision log of luthier. Written for the audits and for anyone checking why something is the way
 it is. An entry is written when its decision is taken; a decision that is reversed keeps its entry,
 marked reversed. Sources follow the grammar of `docs/plan-working-method-execution-2026-10-06.md`;
-principles are named by number, their statements are in `docs/principles.md`. Luciano's answers to
+principles are named by number, their statements are in `docs/principles.md` (L, G) and, since
+2026-10-12, `docs/way-of-working.md` (W). Luciano's answers to
 the bites of the plan are at `efd8143`, cited as `plan@efd8143`.
 
 ```
@@ -1050,3 +1051,14 @@ Kind:       organizers (G2, order of G1 and G2). For P13 (one idea now carries L
 Status:     current; docs/principles.md draft 8 (4f6beef); README first paragraph with the two
             faces; the holotype still pending; G3 as a further eureka to be analyzed (his words,
             2026-10-12)
+
+D-2026-10-12-b  The principles of the language and the way of working are two documents:
+                `docs/principles.md` keeps G and L, `docs/way-of-working.md` holds W1 to W15,
+                statements and numbers unchanged.
+Author:     Luciano
+Quote:      "Creo que principles y the way of working son dos documentos distintos y deben ser
+            separados" (chat, 2026-10-12)
+Source:     chat, 2026-10-12
+Kind:       documents (docs/). For P12 (what reaches him is one question per screen; the W were a
+            third of the file and guide no L), P7 (each document self-contained)
+Status:     current; split at 0db35c2
