@@ -18,6 +18,7 @@ citation form: a rule is cited `spec 4.R3`, a section `spec 8 §2`. The six file
 git keeping them; the record's drafts table of the principles gains a sibling for the spec,
 `record/spec-drafts.md`, one row per chapter with its sources and commits (P2, P3). Alternative:
 one file `docs/spec.md`; rejected by the model because twelve sessions would edit one file.
+fist option
 
 **D2. Status per rule, and the check that closes a chapter.** Every rule and every stated
 behaviour carries one of three marks, `[implemented]`, `[decided]` (by a D id, not yet in the
@@ -28,11 +29,17 @@ files and they pass, each `[decided]` rule names its D id and it exists, referen
 (L, G, O ids) and to other chapters resolve, and no sentence of eight words appears in two
 chapters. A chapter is done when the check passes on it. This repeats for the spec the mechanism
 of D-2026-10-12-o; the real case is the drift between 05 §7 and 08 C2 on the grades.
+ok
+
+
 
 **D3. Terms are the principles'.** Chapter 1 has the formal notation only (`x : T`, `≡`,
 `t[a/x]`, D(n), B(n), the dependency graph, accept/reject) and cites `docs/principles.md` Terms for
 every word of the language; it defines nothing twice. Today the §0 of 04, 05, 06, 08 and 09 each
 restate the notation.
+
+yes
+
 
 **D4. The grades in wave 1 are the five of Terms.** Chapter 7 and the mentions in 4 and 12 use
 proved, exhaustive, cases, sampled, assumed, with the domain and the evidence cost carrying what
@@ -43,27 +50,41 @@ is stated in chapter 7 as `[decided]` by D-2026-10-12-r with 08 C2's 3/n rule as
 instance, and its full form waits for chapter 6 (wave 2). This changes the vocabulary the
 interpreter prints; the certificate files gain a field and lose none.
 
+I am not sure if this is a matter for the specification or for different libraries, I think it is something we will learn by doing.
+so as a general rule, lets do the thing that it is easier to build from.  
+
+
 **D5. Object.** O7 is taken in chapter 4: `05 §3` reads "theories are cycles", a strongly
 connected component of the dependency graph is the presentation of a theory with its models, and
 the word *object* survives only in "object classifier" (D-2026-10-12-f left it open). One
 commit over chapters 3 and 4.
+Yo propuse que Object se use para englobar a theoria y funcion y dato (no tenemos nombre para lo que seria un tipo regular de c++), y dejar teoria para varias cosas se definen interrelacionadamente.  
+
+
 
 **D6. Numbers: the rounding correction.** Chapter 11 states L13.3 and L13.4 (rounding is
 non-expansive up to an additive defect of about ε|x|; the functor reading stands with
 "non-expansive plus an additive term") as `[decided]` if you mark them ok here, `[proposed]`
 otherwise; the rest of chapter 11 is 06 as it stands, with the rounding law of 06 §8 as its
 worked instance.
+esta no puede ser una decision irreversible, todo lo que tenga que ver con epsilon lo iremos descubriendo along the way
 
 **D7. What `run` requires.** Chapter 12 states certification by default (D-2026-10-11-n): `run`
 refuses a cone with an uncertified or provisional name unless the demand opts out; the opt-out's
 syntax is O3 and stays `[proposed]` in wave 1 with one candidate, a flag `--assume name` that
 leaves a certificate of grade assumed for that name, recorded in `.run.json`. Today
 `--require-certified` is the exception and the default runs anything; the default inverts.
+no, empecemos siendo estrictos, sino es un viva la pepa y no testeamos Luthier nunca. 
+
 
 **D8. Libraries: spec or manual.** The spec specifies what a library file is, how it is imported,
 and what travels with it (chapter 12, from 03 §1 to §4). The content of the libraries (`algebra`,
 `array`, `probability`, the table of 03 §5) is the manual's, so wave 1 does not describe them and
 03 §5 goes to the record's spec-drafts note until the manual exists.
+bien, necestiamos una teoria de librerias, la iremos haciendo a medida que la necesitemos. Pero tiene que ser una teoria escrita en luthier. 
+Aqui algo que es un principio de luthier: todas las especificaciones de como se corre luthier tienen que estar escritas en luthier, de ser esto posible. 
+La implementacion puede ser en python, of course y podemos intentar ambos caminos: nucleo minimo en python e implementacion en luthier y lo contrario, solo teoria y testeo en luthier y todo implementado en python.
+
 
 **D9. Who writes wave 1, and the cost.** Chapters 1, 2, 3, 11 and 12 by Sonnet, one agent each,
 in parallel, each in its own worktree; chapters 4 and 7 by Opus, since they carry the most rules
@@ -72,8 +93,13 @@ agent gets a brief that names its sources by commit, what is decided (this docum
 does not touch (the principles, the interpreter, the other chapters) and the check that closes
 it. Alternative: everything by this session's model, serial; slower, no cheaper in attention.
 
+si, confio en tu criterio
+
+
 **D10. Out of scope for wave 1, stated so that nobody drifts into it.** The manual (00, 01,
 principles-for-readers); the rationale folder (02-que-robar, 07, 09, 10, 11 stay as they are,
 cited by the chapters where they are sources); chapters 5, 6, 8, 9, 10; the interpreter, except
 the accept/reject programs of rules already implemented, which the check runs and does not
 change.
+
+ok
