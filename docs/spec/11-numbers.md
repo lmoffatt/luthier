@@ -20,7 +20,7 @@ Files: n1_numbers.accept.lut, n3_primitive_outside_core.reject.lut.
 
 **11.S4. What a primitive is.** [implemented] `Int` is realized exactly by the host's unbounded integers. `Real` has no implementation of its own: the interpreter computes none of its operations, and its structure is an axiom (11.R3). The operations of `Float64` are the machine's rounded ones, not those of `Real`: the refinement is of the values, not of the operations. `Rational : Real` is a primitive of `core.lut`, represented by the host's fractions, with `+ − × /` and the comparisons exact and no `mod`; its values come from `fromInt`, `ratio` and `toQ` of `lib/rational.lut`.
 
-**11.S5. The conversion from an integer.** [implemented] `toFloat64 : Int -> Float64` is the nearest double to an integer, exact below 2^53; the name stays with the integers (decision of 2026-10-05, decided without an id). A value of `Real` that is not known to be a double enters a leaf only through an explicit rounding to the nearest double, exact on doubles. [proposed] That rounding waits for a `Real` that computes (11.S10): until then no value of `Real` is not a double and no law over `Real` is tested.
+**11.S5. The conversion from an integer.** [implemented] `toFloat64 : Int -> Float64` is the nearest double to an integer, exact below 2^53; the name stays with the integers (D-2026-10-05-c). A value of `Real` that is not known to be a double enters a leaf only through an explicit rounding to the nearest double, exact on doubles. [proposed] That rounding waits for a `Real` that computes (11.S10): until then no value of `Real` is not a double and no law over `Real` is tested.
 
 ## §3 Axioms
 

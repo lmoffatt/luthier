@@ -198,8 +198,8 @@ Files: r8_equality_parameter.accept.lut, r8_equality_function.reject.lut.
 refines `A` and `B` refines `B'`.
 Files: r9_variance.accept.lut, r9_variance.reject.lut.
 
-**4.R10. A law characterizes; a second implementation is not a law.** [proposed] Decided
-2026-10-05 without a decision id (`07` of the old numbering). The laws of a theory are the
+**4.R10. A law characterizes; a second implementation is not a law.** [decided D-2026-10-05-a]
+The laws of a theory are the
 mathematical properties that determine its operations, up to the equality of the presentation:
 bilinearity and an orthonormal basis for an inner product; multilinearity, alternation and
 `det I == 1` for a determinant. A definition of the operation written in the kernel (a sum over
@@ -218,8 +218,7 @@ second declaration (commutativity is `Symmetric` with result type equal to the a
 associativity of an operation is the law of an action of a set on itself). Structures are built by
 inclusion of the ones below them; `algebra` is imported by every library that states a property.
 
-**4.R11. A condition refines in its branch.** [proposed] Decided 2026-10-06 without a decision id
-(`00`, *What types are for*, of the old numbering); not implemented. In `if p x then a else b`,
+**4.R11. A condition refines in its branch.** [decided D-2026-10-06-aa] Not implemented. In `if p x then a else b`,
 where `x` is a variable of type `T` and `p x` is a `Bool`, `x` has the type `{ x : T | p x }`
 inside `a` and `{ x : T | not (p x) }` inside `b`. A coercion of `x` to that refined type there
 owes nothing: the condition is the check, made once. If `a` asks for `{ x : T | p x }` and the
@@ -297,8 +296,7 @@ observable about every constructed value. An extensionality law (two values are 
 observer agrees on them) turns "same observations" into "same value"; holes that the entry of
 `luthier run` depends on.
 
-**4.S20. Consistent, not characterized.** [proposed] Decided 2026-10-05 without a decision id and
-not implemented. For each operation with laws, `check -v` reports whether they characterize it
+**4.S20. Consistent, not characterized.** [decided D-2026-10-05-b] Not implemented. For each operation with laws, `check -v` reports whether they characterize it
 (4.R10) or only compare it with another implementation. Version 0 can only tell the two apart by
 name: a law whose body applies the operation and another definition to the same arguments and
 compares the results is a comparison. Characterization proper is a judgement the author makes.
@@ -355,6 +353,3 @@ resolve it (`spec 3 §8`). Today it imports the host module and rejects a target
 - O2, which 4.R8 rests on.
 - O9 (4.S7, 4.R2, 4.R5).
 - O8, the session as a block (4.R12).
-- Decided without an id, to be assigned by the integrator: 4.R10 (a law characterizes, 2026-10-05),
-  4.R11 (a condition refines in its branch, 2026-10-06), and 4.S20 (consistent, not characterized,
-  2026-10-05).

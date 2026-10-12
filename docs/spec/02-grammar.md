@@ -26,7 +26,7 @@ A dotted name `m.f` is one token, a qualified name or a projection that the chec
 `provisional`, `test`, `with`, `exhaustive`, `import`, `forget`, `U`, `operator`, `if`, `then`,
 `else`, `cite`, `let`, `in`, `primitive` and `axiom`. The last two bodies are allowed only in
 `core.lut` and the libraries of the distribution (spec 11). `as`, `checked`, `size`, `sampled`,
-`under`, `where` and `profile` are ordinary names that act as keywords in their position. Here `gen` goes from the language [proposed] (spec 2.S19); the parser still reads
+`under`, `where` and `profile` are ordinary names that act as keywords in their position. Here `gen` goes from the language (D-2026-10-06-ac, spec 2.S19); the parser still reads
 it today. `and`, `or` and `mod` are ordinary names written infix; `Bool`, `Int`, `Float64`,
 `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat` and `Fin` are definitions of `core.lut`, not
 words of the grammar. Replaced: 2.S21.
@@ -249,8 +249,8 @@ block; in a file, of `main`.
 
 ## §9 Tests, profiles and the removal of `gen`
 
-**2.S19. The test directive and the profile.** [proposed] Decided by Luciano on 2026-10-06
-(`docs/spec/08-tests.md` §12), without an id in `record/decisions.md`. The directive `test`
+**2.S19. The test directive and the profile.** [decided D-2026-10-06-ac] The grammar the model
+wrote for D-2026-10-06-ab (old `08 §12`). The directive `test`
 extends, the act `profile` is new, and the act `gen` and its word are removed: Replaced: 2.S21.
 
     directive ::= "test" name [ "with" number | "exhaustive" ] [ "sampled" name ] [ "size" number ]
