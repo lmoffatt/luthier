@@ -62,6 +62,9 @@ reading. The choice of algebra for a conjunction of laws stays parameterizable
 
 This touches L5 and L13, both settled, and goes against DeepSeek, Kimi and GPT sp, who keep
 L13's prohibition without naming the bound.
+But the idea would be that Luthier should support any algebra that we might think on, we should start with the simplest
+
+ok
 
 ## D2. The conversion of statistics to a cost, and what `assumed` costs
 
@@ -78,6 +81,9 @@ to assumptions, a parameter with no default, so that a demand that names none re
 values (D-2026-10-11-n stands: certification by default, opt-out in the demand). The five grades
 stay as names in the certificate for the reader; the planner reads the costs.
 
+The same, the conversion is expressed by a dedicated function and we might choose different functions on different theories. 
+Luthier would ask for some input output shape, that the particular function is filled on each case. 
+
 ## D3. The organizers as the precedence layer
 
 His mark on §4.1 chooses Claude's suggestion (three G of two sentences each, each L under its G,
@@ -88,6 +94,8 @@ paragraph with the Gs "unnumbered, no status". The two can hold together only on
 and head the sections the Ls are listed under, so that the table of contents is the derivation.
 The precedence line reads: the statement decides over its clauses; the G decides between its Ls;
 G0 decides between Gs. The history of the eurekas and the P13 count go to the record.
+
+Ok
 
 ## Settled by the model, one commit undoes each
 
