@@ -96,29 +96,6 @@ face; there, computation is the normalization of a given term, with no demand.
 Status: settled; printed third on his renumbering; whether it is an eureka of its own or the
 executive clause of the guide (G0) is his to say.
 
-## How the organizers depend on each other
-
-*Proposed* (D8 of the generative plan).
-
-1. G0's quotient needs G3 and G2 where the carrier carries a distance: there two implementations
-   are interchangeable only up to a distance and below the tolerance the demanded type carries.
-   On decidable carriers the exact quotient is correct and the kernel proceeds without G2;
-   "optimización por error" has no meaning there and needs none. The interface that lets G2
-   arrive without a rewrite: every law returns a `Cost`, and `Bool` is the two-valued case, the
-   type of the result saying which (`11` §2, L21). A law into `Cost` returns a measure; the
-   proposition is cost ≤ ε with ε the demand's, so G0's "a law is a proposition" holds once the
-   tolerance is supplied. Until G2's algebra exists the application runs on this Boolean interim:
-   laws of the form d(f x, g x) ≤ tol with tol a parameter (L17), no composition of tolerances
-   along a chain, no run database.
-2. G1's inhabitance needs G2: "validada aunque sea una vez" gives the certificate of a : A a
-   grade, which is sound only if truth is graded. The judgment itself stays one and structural;
-   the grade is its evidence (L2, `11` §4).
-3. G3's planner is G0's proof search with G2's cost: it searches for an inhabitant of the
-   demanded type and ranks candidates by cost.
-
-So G2, the least developed, is load-bearing for G0 and G1 over carriers with a distance, whatever
-the P13 count says today; over decidable carriers the Boolean kernel stands on its own.
-
 ## The principles of the language
 
 Each L keeps its number and source from draft 1. `From:` names the organizers it derives from and
@@ -198,9 +175,16 @@ Status: settled.
 
 **L10. One function, many paths.** A function has many equivalent implementations, each with its
 precision, speed, memory and place of execution; equivalence is established first, and the choice
-among paths follows expected loss and cost, estimated from a database of measured runs; error, time
-and memory are not one scalar, and the trade-off among them is a parameter of the demand (L17),
-never the planner's own. Stated as a quotient: the implementations of a function are the quotient by
+among paths follows expected loss and cost, estimated from a database of measured runs; error, time and memory are not one scalar, and the trade-off among them is a parameter of the
+demand (L17), never the planner's own; his formula of 2026-10-12 for what the planner ranks is an
+efficiency, exp(−cost) over the resources used (time, memory), so that a model of cost zero has
+efficiency 1/resources and not zero, with the weight between cost and resources the demand's
+parameter (proposed wording of his chat note). Two regimes: on a decidable carrier (`Int`, `Fin n`)
+two implementations compute the same function or not, the quotient is exact, there is no
+precision to trade and the Boolean kernel stands on its own; on a carrier with a distance
+(`Float64`) they are interchangeable only up to a distance within the demanded tolerance, and
+precision can be traded for resources, which is where cost (G2) and the demand (G3) enter G0's
+quotient. Stated as a quotient: the implementations of a function are the quotient by
 "compute the same function up to the law's equality", one class per mathematical function, and
 inside the class the fibre of what differs; the class is chosen by law, the representative by cost.
 The class is exact in the theory (`Real`); in a model that carries a distance it is the ball of the
@@ -484,6 +468,10 @@ Status: proposed, candidate; the wording is the model's.
 
 ## What is open
 
+- The Boolean interim the application runs on until G2's algebra exists: laws of the form
+  d(f x, g x) ≤ tol with tol a parameter (L17), every law returning `Bool` or `Cost` with the
+  result type saying which (`11` §2, L21), no composition of tolerances along a chain, no run
+  database.
 - The articulation of G2, `docs/rationale/11-cost-valued-laws.md` draft 0 (D6): Ω replaced by
   [0,∞), quantitative equality, graded judgments, cost as −log p or as distance, how the
   uncertainty of a cost is represented in a certificate; the algebra of composition (second
