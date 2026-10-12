@@ -2,7 +2,9 @@
 
 Draft 10, 2026-10-12, unapproved; written by hand from the projection of 44df5a7 and Luciano's
 corrections on it (`docs/principles_corr.md` d5e81e3, his notes e3fa339, `docs/principles_cont.md`
-323bda0, `docs/principles_3.md` 59ea8e9), every one of them applied; what the model added on his
+323bda0, `docs/principles_3.md` 59ea8e9, `docs/principles copy.md` 01ba854), every one of them applied; the
+organizers renumbered on the last (G1 theory and model, G2 cost, G3 the demand; the record keeps
+the old tags until it is updated); what the model added on his
 notes is marked *proposed* in the entry's Status. Written for the agent that builds the
 specification: each entry gives its statement, its formulation, what it derives from, and its
 status. His quotes, the sources and the history by draft are in `record/principles-language.md`,
@@ -17,12 +19,12 @@ then). The way of working, W1 to W15, is `docs/way-of-working.md`.
 - A *predicate* is a function into `Bool`. A *cost* is a function into `Cost`, the non-negative
   reals with infinity, 0 true and ∞ false.
 - A *law* is a predicate or a cost, or a combination of laws that is again a predicate or a cost;
-  how laws combine is stated under G3.
+  how laws combine is stated under G2.
 - A *theory* is a structure with its law.
 - A *model* is an inhabitant of a theory: a value of its structure whose law is certified.
 - A *function* is a value of a function type `A -> B`, in the standard sense. A function type with
-  its law is a theory of one symbol, and a function that satisfies it is a model of that theory;
-  this is the common case in practice, and a function has sense only in that context.
+  its law is a theory, and a function that satisfies it is a model of that theory; a function has
+  sense only in the context of that theory and its dependences.
 - The *dependences* of a theory are the theories whose models its structure and law take as
   parameters (`Monoid A eq` depends on `Setoid A`; `VectorSpace K F V` on `Field K`). Every theory
   has dependences; a function type has at least the setoids of its carriers, since its law uses
@@ -47,65 +49,76 @@ yet marked. *Object* (`05 §3`) is not a term; see What is open.
 
 ## The organizers
 
-The guide, then the two eurekas; G3 goes with G2.
+The guide, then the two eurekas, then the demand. Renumbered on his note of 2026-10-12: G1 is
+theory and model (G2 until draft 9), G2 is cost (G3 until draft 9), G3 is the demand (G1 until
+draft 9); the record and `record/decisions.md` keep the old tags until the record is updated with
+this mapping.
 
 **G0. Type theory is the guide.** A type is a proposition and a value its proof; a law is a
 proposition over terms, so it defines a mathematical object and a quotient, and inside the class
 the representative is free. Type theory guides what is declared. What governs execution is the
-demand (G1), read in the same theory: a demanded type is a judgment to inhabit, execution is the
-search for an inhabitant, and cost ranks the candidates (G3); where type theory normalizes a
+demand (G3), read in the same theory: a demanded type is a judgment to inhabit, execution is the
+search for an inhabitant, and cost ranks the candidates (G2); where type theory normalizes a
 given term, Luthier searches for one.
-Status: settled; the clause on execution is proposed on his note.
+Status: settled, marked OK by him on 2026-10-12.
 
-**G2. A type with its law is a theory; a value of it is a model.** Declaring `m : T` is the
-obligation that `m` satisfy the law of `T`, and Luthier verifies it. A function type with its law
-is the theory of one symbol, its model a function; it has sense only over the theories it depends
-on. What type theory lacks: it knows a function by its term; Luthier knows it by its law.
-Status: settled; this wording proposed on his note, the long form in the record.
+**G1. A type is a theory and its values are its models.** The first eureka, in his words: a type
+is a proposition; a proposition can say that a structure follows the rules of a theory; so "this
+structure satisfies the laws" is said, in the language of types, as "it is of the type of the
+theory": it is a model of the theory. Types thereby carry a strong semantic meaning, and coding
+and testing are one act: to declare `m : T` is to declare the tests `m` will pass (L3). What type
+theory lacks: it knows a value by its term; Luthier knows it by the law it satisfies.
+Status: settled; this wording is his note of 2026-10-12 put in order; the long form in the record.
 
-**G3. How a law is validated.** A law is a predicate or a cost: a function into `Bool`, or into
-`Cost`, the interval [0,∞) with 0 true and ∞ false. Laws combine by and, or, then, and a
-quantifier over a carrier; a combination of predicates is a predicate, and a cost as soon as one
-cost enters; `&`, the only join the libraries use today, is one operator among these, and under
-cost the join is a sum, a max or a weighted sum. A law is validated by a certificate with a grade
-(proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst cost seen; the
-demand supplies the tolerance; what a run teaches is kept.
-Status: candidate (one decision guided so far); printed with G2 on his note; the combinations are
-proposed on his note on Terms; the algebra of costs open (`11`).
+**G2. Laws are valued in cost: one logic, extended to the non-negative reals.** The second
+eureka, in his words: not every theory follows Booleans; many are represented better by costs; and
+since object classifiers exist that extend logic to the non-negative reals, the composition of
+errors in numerical libraries can be attacked with this one unified logic. How a law is validated:
+a law is a predicate or a cost, a function into `Bool` or into `Cost`, [0,∞) with 0 true and ∞
+false. Laws combine by and, or, then, and a quantifier over a carrier; a combination of predicates
+is a predicate, and a cost as soon as one cost enters; `&`, the only join the libraries use today,
+is one operator among these, and under cost the join is a sum, a max or a weighted sum. A law is
+validated by a certificate with a grade (proved, exhaustive, cases, sampled at a level, assumed)
+and, for a cost, the worst cost seen; the demand supplies the tolerance; what a run teaches is
+kept.
+Status: the second eureka on his note of 2026-10-12 (candidate by the P13 count, one decision
+guided so far); the combinations are proposed on his note on Terms; the algebra of costs open
+(`11`), the analysis he announced pending.
 
-**G1. The demand defines what is computed.** The declarative face states what is known, universal
+**G3. The demand defines what is computed.** The declarative face states what is known, universal
 and minimally processed; the executive face is a demand from outside, and the demanded type fixes
-the path, the types and the tolerances actually produced. What type theory lacks: an executive face;
-there, computation is the normalization of a given term, with no demand.
-Status: settled.
+the path, the types and the tolerances actually produced. What type theory lacks: an executive
+face; there, computation is the normalization of a given term, with no demand.
+Status: settled; printed third on his renumbering; whether it is an eureka of its own or the
+executive clause of the guide (G0) is his to say.
 
 ## How the organizers depend on each other
 
 *Proposed* (D8 of the generative plan).
 
-1. G0's quotient needs G1 and G3 where the carrier carries a distance: there two implementations
+1. G0's quotient needs G3 and G2 where the carrier carries a distance: there two implementations
    are interchangeable only up to a distance and below the tolerance the demanded type carries.
-   On decidable carriers the exact quotient is correct and the kernel proceeds without G3;
-   "optimización por error" has no meaning there and needs none. The interface that lets G3
+   On decidable carriers the exact quotient is correct and the kernel proceeds without G2;
+   "optimización por error" has no meaning there and needs none. The interface that lets G2
    arrive without a rewrite: every law returns a `Cost`, and `Bool` is the two-valued case, the
    type of the result saying which (`11` §2, L21). A law into `Cost` returns a measure; the
    proposition is cost ≤ ε with ε the demand's, so G0's "a law is a proposition" holds once the
-   tolerance is supplied. Until G3's algebra exists the application runs on this Boolean interim:
+   tolerance is supplied. Until G2's algebra exists the application runs on this Boolean interim:
    laws of the form d(f x, g x) ≤ tol with tol a parameter (L17), no composition of tolerances
    along a chain, no run database.
-2. G2's inhabitance needs G3: "validada aunque sea una vez" gives the certificate of a : A a
+2. G1's inhabitance needs G2: "validada aunque sea una vez" gives the certificate of a : A a
    grade, which is sound only if truth is graded. The judgment itself stays one and structural;
    the grade is its evidence (L2, `11` §4).
-3. G1's planner is G0's proof search with G3's cost: it searches for an inhabitant of the
+3. G3's planner is G0's proof search with G2's cost: it searches for an inhabitant of the
    demanded type and ranks candidates by cost.
 
-So G3, the least developed, is load-bearing for G0 and G2 over carriers with a distance, whatever
+So G2, the least developed, is load-bearing for G0 and G1 over carriers with a distance, whatever
 the P13 count says today; over decidable carriers the Boolean kernel stands on its own.
 
 ## The principles of the language
 
 Each L keeps its number and source from draft 1. `From:` names the organizers it derives from and
-the derivation, the model's unless marked his. Order: by first organizer, G0, G2, G1, G3.
+the derivation, the model's unless marked his. Order: by first organizer, G0, G1, G3, G2.
 
 ### From the guide, G0
 
@@ -118,7 +131,7 @@ level; assumed, a hole that says so. What a law adds is evidence, and the certif
 carries its grade (proved, exhaustive, cases, sampled, assumed) and, for a law into `Cost`, the
 worst cost seen (`11` §4). The guarantee is what the certificate says and no more, and what leaves
 the program carries one (L19, D-2026-10-11-n).
-From: G0 directly; the second clause is the step to G2.
+From: G0 directly; the second clause is the step to G1.
 Status: settled.
 
 **L4. The certified subtype from a predicate is the fundamental construction pattern.** From a
@@ -129,7 +142,7 @@ constructor takes the tolerance as a parameter (L17) and the certificate records
 was checked at, so a stricter demand asks for a new check (`11` §4). Types are verified before they
 are constructed: Luthier starts from types by verification, and types by construction may come in
 later.
-From: G0 (a predicate is a proposition; its subtype is the type of its proofs) with G2 (verified,
+From: G0 (a predicate is a proposition; its subtype is the type of its proofs) with G1 (verified,
 not constructed).
 Status: settled.
 
@@ -141,7 +154,7 @@ law, its arity (three elements for associativity) and the distribution sampled (
 path. Laws accumulate, and a law need not determine the operation; when the laws do determine it up
 to the presentation's equality, that is the limit (D-2026-10-11-d). The generators are the model's
 addition.
-From: G0 (a law defines the object) and G2 (a law that transcribes the specimen is acquaintance, not
+From: G0 (a law defines the object) and G1 (a law that transcribes the specimen is acquaintance, not
 description); extends P10 (the mathematical object that best represents a concept is the invariant
 of its type).
 Status: settled.
@@ -150,7 +163,7 @@ Status: settled.
 other programs, and the interpreter is meant to be written in the language it interprets.
 From: G0 through the universe, the type of types (the object classifier of HoTT; the note's "object
 classifier" names this when it means types as values, and the subobject classifier when it means
-G3's truth values).
+G2's truth values).
 Status: settled.
 
 **L7. The core is minimal and executable by hand.** A handful of well-specified primitives, so that
@@ -161,7 +174,7 @@ trusted differently: the kernel, checked by hand; the libraries and the interpre
 certified against the kernel's laws; the host runtime, a specimen; the planner, advice that the plan
 records.
 From: G0 (a type theory is a few rules whose judgments a person checks; a small trusted kernel) and
-G2 (the paper semantics is the description, and every interpreter is a specimen certified against
+G1 (the paper semantics is the description, and every interpreter is a specimen certified against
 it).
 Status: settled.
 
@@ -176,7 +189,7 @@ is the operation that inhabits a hole with a body in another language, naming th
 theoretical module (types, functions, laws, no values) is a module of holes. (His words) A declared
 name is assumed to have its declared type, and its use where that type is incompatible is an error
 (`05` R1, the checker).
-From: G0 (a hole is a hypothesis of the context) with G1 (nothing is produced until demanded).
+From: G0 (a hole is a hypothesis of the context) with G3 (nothing is produced until demanded).
 Status: settled.
 
 **L10. One function, many paths.** A function has many equivalent implementations, each with its
@@ -204,7 +217,7 @@ every link does; a `proved` link by citation carries the theorem's hypotheses as
 needs n·u < 1, false for float32 over an hour at 48 kHz) and is void where they fail. The author's
 free choice among the inhabitants of an under-determined function (D-2026-10-11-d, P5) stays; the
 planner's choice is only among what has been compared.
-From: G0 (the quotient), G3 (the choice by cost and the database of runs) and, before its
+From: G0 (the quotient), G2 (the choice by cost and the database of runs) and, before its
 retirement, G4 (every path expressible; now L10's own clause).
 Status: settled; the weighted graph, the admissibility of sampled edges and the subtype clause are
 the model's, from the rounds of critiques.
@@ -223,8 +236,8 @@ only where a normal form does, the decidable fragment (no canonical form elsewhe
 the two-class case and `Maybe T` places x in one of them. This equivalence on the domain is distinct
 from the equivalence between terms that a law induces, which is L10's quotient.
 From: G0 (identity is the first proposition; his "path equivalence is the fundamental concept",
-2026-05-29); the two faces are G1's statement; the verification of actions from G2 (observation) and
-G1.
+2026-05-29); the two faces are G3's statement; the verification of actions from G1 (observation) and
+G3.
 Status: settled.
 
 **L16. Equality has levels and belongs to the object.** Definition (`:=`), the identity proposition
@@ -232,27 +245,27 @@ Status: settled.
 and each object carries the observational equality that fits it. (His annotation) The binding acts
 are two, `:=` once and `<-` rebinding, and they share one law: after the act the name equals the
 term in the equality its type has, structural `==` where it exists (`05` R8), observational
-otherwise, a distance under G3; after `:=` for all time, after `<-` until the next `<-` (`05` R12).
+otherwise, a distance under G2; after `:=` for all time, after `<-` until the next `<-` (`05` R12).
 In the kernel the binding is exact: the name denotes the term, and reduction does not depend on a
 tolerance; the distance enters when the planner realizes the term by another representative, which
 it does only along a certified equivalence carrying its distance (L10, D-2026-10-11-m).
-From: G0 (the identity type and its levels) with G3 (under cost, the identity proposition acquires a
+From: G0 (the identity type and its levels) with G2 (under cost, the identity proposition acquires a
 distance).
 Status: settled.
 
-### From theory and model, G2
+### From theory and model, G1
 
 **L1. Luthier expresses the invariances of the disciplines.** What moves the language: a species
 mates within itself, electrons are fermions, a probability integrates to one. A definition states
 the invariances that determine a concept, and the language exists so that stating them is natural.
-From: G2 (what is known of a thing is its description; "la idea de luthier es ayudar a descubrir las
+From: G1 (what is known of a thing is its description; "la idea de luthier es ayudar a descubrir las
 invariantes de los calculos", note), with P14 (a type is a concept).
 Status: settled.
 
 **L3. Defining a model defines its test.** Declaring a model of a theory, `m : T`, declares the
-tests it will be run on, so definition and verification are one act; a function type with its laws
-is the one-symbol case, and its model a function.
-From: G2 directly: the eureka of 09.19 in its 2022 form.
+tests it will be run on, so definition and verification are one act; a function type with its law
+is a theory, and its model a function.
+From: G1 directly: the eureka of 09.19 in its 2022 form.
 Status: settled (the widening is his mark).
 
 **L11. Verification is one operation, exact or statistical.** What is known by a theorem is cited,
@@ -269,7 +282,7 @@ library's version and platform as hypotheses the certificate carries (L14); no n
 (*Proposed*, on his mark). The law of a theory is one law, so its certificate is one certificate,
 and its grade is composed from the grades of the parts: with `&`, the weakest; with a sum of costs,
 the costs summed, each at its grade (proposed, on his note on Terms).
-From: G2 (observation is how a description is verified) and G3 (the grade is the uncertainty of the
+From: G1 (observation is how a description is verified) and G2 (the grade is the uncertainty of the
 cost).
 Status: settled; the reading of delegation as citation is proposed, his mark pending; he restated
 the delegation in his own words on the readers' document ("proved by citing a theorem or taken from
@@ -292,7 +305,7 @@ certificate of grade `assumed` (D-2026-10-11-n), since what could be done Luthie
 (L22); `test` is the action that demands certificates without values (L19). Luthier is in use a
 coupling language: the joint between two libraries is a theory of which each is a model, the bridges
 between representations live at the joint with their cost and error, and no coupling without a law.
-From: G2: an absorbed library is a specimen known by its description, and its code is not needed
+From: G1: an absorbed library is a specimen known by its description, and its code is not needed
 ("que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones con sus propias
 invarianzas", audio 08.58, 31:25 to 32:00).
 Status: settled by his correction (draft 7); the opt-out's syntax open.
@@ -302,7 +315,7 @@ gives the same bits as before, with the same seed, certifies that the implementa
 changed; checking it against its laws, by chosen or sampled cases, certifies the description. Both
 are kept, apart, and the certificate of the law travels by the certificate of identity (his
 annotation): exactly where the identity is boolean (`==` structural, `05` R8: integers, decidable
-types, the same implementation rerun), and with the observed distance added where it is a cost (G3),
+types, the same implementation rerun), and with the observed distance added where it is a cost (G2),
 since two implementations over floats are almost never bit-identical. The type of the identity law's
 result says which (`Bool` or `Cost`). The identity law between two specimens, with its distance, is
 what admits a second implementation into the class the planner moves in (L10, D-2026-10-11-m); the
@@ -315,7 +328,7 @@ on X ∩ Y, and by nothing else. The two counterexamples of the third round foll
 grid is certified on the grid and nowhere else (Claude). A function known correct by a theorem
 outside Luthier is certified `proved` by citation (D-2026-10-11-f), and the chain law, citation,
 native, identity, extern is carried by hash.
-From: G2 (the specimen can be recognized as the same specimen, or described).
+From: G1 (the specimen can be recognized as the same specimen, or described).
 Status: proposed, candidate; the graded transport is his correction, his mark on the wording
 pending.
 
@@ -334,15 +347,33 @@ law; where representations differ, the orchestrator inserts bridges by cost, coh
 carrying their error, visible in the plan; a specialization and a bridge each enter the planner's
 graph by an identity certificate with its distance (L10, D-2026-10-11-m). The conditions on bridges
 are the model's, accepted.
-From: G2, of which it is the definition rather than a consequence: a function belongs to the theory
+From: G1, of which it is the definition rather than a consequence: a function belongs to the theory
 its laws are stated in, and a model is where it runs; before draft 8 from G0 (a theory is a type, a
-model its inhabitant) and G1 ("lo declarativo pasa a ser todo lo universal posible"; instantiated on
+model its inhabitant) and G3 ("lo declarativo pasa a ser todo lo universal posible"; instantiated on
 demand).
-Status: absorbed into G2 on his mark (draft 9): the clause on specializations and bridges belongs to
+Status: absorbed into G1 on his mark (draft 9): the clause on specializations and bridges belongs to
 L10 and modules as values to the spec (`03`); the tag stays for the record's citations and the text
 stays until the spec takes its parts.
 
-### From the demand, G1
+### From cost, G2
+
+**L15. The ideal world is realized with a guarantee.** Code is written over ideal objects (Real) and
+realized by concrete ones (Float64); the realization's laws hold within a stated tolerance, and the
+error of each step is itself a law rather than a false claim of exactness. (His reading) Rounding
+`Real -> Float64` is a functor in Lawvere's sense, and each law of `Real` is projected onto
+`Float64` with its cost; it is not a homomorphism, and the exact map is the inclusion the other way.
+(Correction proposed, his mark pending) Rounding does not expand distances by at most a constant:
+two reals astride a rounding boundary land one ulp apart at any distance, so no multiplicative
+constant exists; rounding is non-expansive up to an additive defect of about ε|x|, and for
+subtraction and division the sensitivity is per input, the condition number (`11` §7). The functor
+reading stands with "non-expansive plus an additive term", and the cost algebra needs both parts: a
+multiplicative one where a Lipschitz constant exists and an additive one where rounding enters (`11`
+§5, open).
+From: G2 directly: the realization's distance to the ideal law is the law's value, and the tolerance
+is the demand's (G3).
+Status: settled in its statement; the correction on rounding is proposed, his mark pending.
+
+### From the demand, G3
 
 **L9. A program is a DAG and statements commute.** The unit is the definition; dependencies give the
 only order there is, and time is reconstructed from them rather than from the text. Inside a block
@@ -353,7 +384,7 @@ with two parents, not a cycle; a mutable parameter is two variables, before and 
 in place is the planner's optimization when the earlier one has no other consumer. The DAG says what
 depends on what; the structure the laws generate over terms (an equivalence when laws are boolean, a
 metric space when they carry a distance) is a second structure, where L10 and L12 live.
-From: G1 (the DAG is what the demand walks backward) with G3 (the second structure's metric); the
+From: G3 (the DAG is what the demand walks backward) with G2 (the second structure's metric); the
 separation of the second structure is the model's proposal.
 Status: settled.
 
@@ -366,20 +397,20 @@ history a certificate keeps) are one; the program is never forgotten, only what 
 lost; forgetting is not materializing a derived value, never erasing what reconstructs or
 recertifies it (code, inputs, model, seed, plan, tolerance), which the memo's identity keeps. A
 function on a type applied to a subtype does not produce one overload per subtype; the demanded
-return type selects which law to derive by composition (G2), and the rest is forgotten: doubling
+return type selects which law to derive by composition (G1), and the rest is forgotten: doubling
 positives is positive only when positivity is demanded and derivable, sin of positives forgets to
 Real because no law composes. What is derivable is a property of the expression, independent of the
 demand; the demand chooses which of it is derived, certified and carried, so the elaboration (types,
 derivable laws) does not depend on the observer; the memo of results does (L19), and they are two
 caches.
-From: G1 directly, with G2 for what is derived.
+From: G3 directly, with G1 for what is derived.
 Status: settled.
 
 **L17. Every criterion is a parameter.** Thresholds, budgets, limits and statistical levels are
 never constants in code; they are declared, passed and recorded. The outermost demand, an action
 with no caller, carries its tolerance as a declared default argument (D-2026-10-11-c), recorded with
 the call, so there is a root and it is a parameter.
-From: G1 (the tolerance belongs to the demand) and G3 (a law states a distance, not a threshold), so
+From: G3 (the tolerance belongs to the demand) and G2 (a law states a distance, not a threshold), so
 a constant in the code has no place to live; restates P11 (every criterion is a parameter, never a
 constant in the code).
 Status: settled.
@@ -393,7 +424,7 @@ result in the same class at a distance the plan records, and for the Boolean cas
 (His words) No effect on the world; its one effect is on the program: it takes its name, once, and
 enters the map of definitions, so the same name is not defined twice (`:=` once; `<-` only in a
 block, D-2026-10-11-i).
-From: G1 as its precondition rather than its consequence: the declarative face can be universal and
+From: G3 as its precondition rather than its consequence: the declarative face can be universal and
 minimally processed only if definitions have no effects.
 Status: settled.
 
@@ -417,7 +448,7 @@ at the hit and not only when the certificate was issued; the runtime includes th
 scheduling of the host, and an extern whose bits depend on scheduling is not bit-identical to
 itself, so its identity law is `Cost`, never `Bool` (L21). The run database is what the planner
 reads to choose the plan and is not an input of the result once the plan is fixed; evidence
-accumulates by a separate action with its own record, so "each node once" and G3's "kept across
+accumulates by a separate action with its own record, so "each node once" and G2's "kept across
 runs" never meet on one node. A test is an action whose result is a certificate, memoized by the
 certificate's identity (code, cases, seed, the distribution and level sampled, L11) and rerun when
 asked or when that identity changed; the demand states the grade it requires (P11), and a
@@ -434,7 +465,7 @@ batch of demands or demands one at a time with the memo between them (08.58, 17:
 for the spec, 04 §7); a session is a block and a file is never one, so a session saved to a file
 becomes its `main` block (D-2026-10-11-i). The three cases at the leaves and the memo key are the
 model's, accepted.
-From: G1 directly; the audio of 08.58 (15:35 to 17:12, 30:37 to 31:21) adds the iteration step, read
+From: G3 directly; the audio of 08.58 (15:35 to 17:12, 30:37 to 31:21) adds the iteration step, read
 every demand, run, collapse to the outputs, write, and asks whether the code object is consumed or
 stable: kept.
 Status: settled; the identity of a result, the memo gate and the three objects are the model's, from
@@ -444,40 +475,22 @@ the rounds of critiques.
 Luthier's way, an extern with no law yet, a foreign algorithm taken as is, is allowed inside a named
 world (L12): its certificates are `assumed` (D-2026-10-11-n), the plan shows the world it ran in,
 and nothing from it enters the planner's graph (L10) until a law is certified.
-From: G1 (the demand names the world it runs in) with L12 and L14.
+From: G3 (the demand names the world it runs in) with L12 and L14.
 Status: proposed, candidate; the wording is the model's.
-
-### From cost, G3
-
-**L15. The ideal world is realized with a guarantee.** Code is written over ideal objects (Real) and
-realized by concrete ones (Float64); the realization's laws hold within a stated tolerance, and the
-error of each step is itself a law rather than a false claim of exactness. (His reading) Rounding
-`Real -> Float64` is a functor in Lawvere's sense, and each law of `Real` is projected onto
-`Float64` with its cost; it is not a homomorphism, and the exact map is the inclusion the other way.
-(Correction proposed, his mark pending) Rounding does not expand distances by at most a constant:
-two reals astride a rounding boundary land one ulp apart at any distance, so no multiplicative
-constant exists; rounding is non-expansive up to an additive defect of about ε|x|, and for
-subtraction and division the sensitivity is per input, the condition number (`11` §7). The functor
-reading stands with "non-expansive plus an additive term", and the cost algebra needs both parts: a
-multiplicative one where a Lipschitz constant exists and an additive one where rounding enters (`11`
-§5, open).
-From: G3 directly: the realization's distance to the ideal law is the law's value, and the tolerance
-is the demand's (G1).
-Status: settled in its statement; the correction on rounding is proposed, his mark pending.
 
 ## What is open
 
-- The articulation of G3, `docs/rationale/11-cost-valued-laws.md` draft 0 (D6): Ω replaced by
+- The articulation of G2, `docs/rationale/11-cost-valued-laws.md` draft 0 (D6): Ω replaced by
   [0,∞), quantitative equality, graded judgments, cost as −log p or as distance, how the
   uncertainty of a cost is represented in a certificate; the algebra of composition (second
   round §16): a Lipschitz constant per function type where known (sensitivity types, Reed and
   Pierce 2010; condition numbers), a sampled cost where not, costs adding as −log p under
   independence; worked examples the sum of n floats, a matrix inverse with κ(A), a sampled
   probability integrating to one.
-- The extension of Boolean logic to Lawvere and Bayes, G3, which he names as another motivator or
+- The extension of Boolean logic to Lawvere and Bayes, G2, which he names as another motivator or
   eureka (chat, 2026-10-12); whether it is the third eureka or a principle of good use is his to
   mark after that analysis.
-- The composition of invariances (G2's derived route): which laws compose and how the demand
+- The composition of invariances (G1's derived route): which laws compose and how the demand
   selects them (audio 08.58, 32:01 to 34:07; audio 09.21).
 - The session as a block over the dataflow of L19: `<-` to explore, `:=` to lock, a file may
   contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the spec's
@@ -525,5 +538,5 @@ Status: settled in its statement; the correction on rounding is proposed, his ma
   the three-level answer to his doubt on validation as execution; and whether `05 §3` renames
   *object* (D-2026-10-12-f).
 - His marks pending on this record: L21's wording (graded transport), L15's correction on
-  rounding, L11's delegation as citation, the names lift, exact and within (G3), L22 as a
+  rounding, L11's delegation as citation, the names lift, exact and within (G2), L22 as a
   candidate.
