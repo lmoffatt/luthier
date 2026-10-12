@@ -8,32 +8,37 @@ His list (2026-10-12, `docs/principles_corr.md` at d5e81e3, D-2026-10-12-f), in 
 left a question mark the name is the model's proposal and says so.
 
 - A *structure* (proposed; his candidates structure, object, data) is a type in the kernel's
-  language (`04`): products, sums, function types and recursive types, built from each other.
+  language (`04`): products, sums, function types and recursive types, built from each other.  OK
 - A *predicate* is a function into `Bool`. A *cost* (proposed) is a function into `Cost`, the
-  non-negative reals with infinity, 0 true and ∞ false (G3).
-- A *law* is a predicate or a cost over the symbols of a structure; both are laws and coexist (G3).
-- A *theory* is a structure with its laws.
-- A *model* is an inhabitant of a theory: a value of its structure whose laws are certified.
+  non-negative reals with infinity, 0 true and ∞ false (G3). OK
+- A *law* is a predicate or a cost over the symbols of a structure; both are laws and coexist (G3). 
+No, a Law is either a predicate or a function of predicates that is a predicate, or a cost, or a function of costs that is a cost or a function of costs and predicates that is a cost.  [lo escribi largo para que entiendas lo que digo, quizas encuentres la forma elegante de decirlo]
+
+- A *theory* is a structure with its law.  (singular porque es una funcion compuesta de laws, pero la forma de unirlas puede variar no tiene porque ser un and, pueden ser otras cosas)
+- A *model* is an inhabitant of a theory: a value of its structure whose law is certified.
 - A *function* is a value of a function type `A -> B`, in the standard sense (his correction). A
   function type with its laws is a theory of one symbol, and a function that satisfies them is a
   model of it; this is the common case in practice (D-2026-10-12-e), and a function has sense only
-  in that context.
+  in that context. (aqui habria que aclarar que es un dependent theory, porque es una teoria que se cuelga de otras teorias, puede ser el setoide u otra cosa)
 - A *certificate* (proposed; his "validation or proof") is the record that a law was checked, with
   its grade (proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst
-  value seen; a proof is a certificate of grade proved. To *certify* is to produce one.
+  value seen; a proof is a certificate of grade proved. To *certify* is to produce one.  OK 
 - *Evaluation* computes a value, or the value of a law, and has no effect (L18). *Execution* is an
   action on the world (print, save). On his doubt, whether checking a law is an execution since it
   changes state (proposed): checking the law is evaluation; recording that it was checked writes a
   certificate into the store Luthier owns, with the memo, and that is an action, verified by
   reading the store back (L12) and never an action on the world outside; `test` is that action
-  (L19).
+  (L19).  
 - The *demand* is a request for a value from outside the program, an action, carrying the type and
   the tolerance it wants. The *planner* is what chooses, among the models certified equivalent,
-  the one that runs.
+  the one that runs, and it plans the type of the output too, it might be the with an error, or the derivative or some type decoration (algo asi mejor dicho. Esta idea de que la demanda determina el tipo del output, es algo que me parece no tiene aun las herramientas teoricas como para implementarlo)
 
 The spec's *object* (`05 §3`, a strongly connected component of the dependency graph, the names a
 cycle of laws joins) is not among his terms; in them it is a theory written in one cycle of names
-with its models. Whether `05` renames it is open.
+with its models. Whether `05` renames it is open. 
+aqui estaria: yo creo que ese strongly connected component seria o una teoria que no es una funcion o no usamos el termino, 
+igual me da la sensacion que Object es mas teoria o function que al reves. 
+
 
 ## The organizers
 
