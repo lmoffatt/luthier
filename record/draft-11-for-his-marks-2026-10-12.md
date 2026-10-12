@@ -4,6 +4,9 @@
 `record/plan-principles-draft-11-2026-10-12-execution.md`, D-2026-10-12-g to -s). Everything the
 model wrote is marked proposed in the record; this lists it. Mark each line ok, no, or a correction.
 
+
+**His answers (chat, 2026-10-12), applied in 83066a7 and the renumbering that follows:** 1, `assumed` is Boolean or carries a cost formula (D-2026-10-12-t); 2, 3, 5 ok (D-2026-10-12-w); 4, a candidate, with log(resources) added to the cost (D-2026-10-12-u); numbers contiguous with a conversion table (D-2026-10-12-v). The tags below are draft 11 before the renumbering; the map, in document order: L4→L2, L5→L3, L9→L4, L10→L5, L13→L6, L15→L7, L2→L8, L7→L9, L16→L10, L14→L11, L6→L12, L8→L13; L1 stays. The clauses still not settled are the ones of drafts 8 to 10 (rounding, the decorated output, the identity law, the world, delegation, how laws combine) and the rewordings of his decisions of today, listed above.
+
 ## The statements, draft 10 against draft 11
 
 | Tag | Draft 10 | Draft 11 |

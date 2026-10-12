@@ -28,7 +28,10 @@ the new numbering; the diff of statements and every clause not settled are in
 of draft 10 are kept, with gaps where L3, L11 and L12 merged, and the certificate entry is L16, so
 that one renumbering, if he wants a contiguous one, is one mechanical commit; L16.9 (no operation
 on certificates raises a grade, lowers an evidence cost or widens a domain without new evidence)
-is GPT en's rule, added as proposed; the clause-level statuses of what moved unchanged were kept. The choices it rests on are
+is GPT en's rule, added as proposed; the clause-level statuses of what moved unchanged were kept. Step 5 in progress: his answers on the five new items applied (83066a7, D-2026-10-12-t, -u,
+-w); the principles renumbered contiguously L1 to L13 by `scripts/migrate_record_draft11_renumber.py`
+(D-2026-10-12-v), the Numbering table with a column per draft; `docs/principles-for-readers.md` draft 5.
+Pending: his marks on the clauses not settled, the P13 recount, the tag. The choices it rests on are
 D-2026-10-12-g to -p in `record/decisions.md` (6b729dc) and D1 to D3 of
 `plan-principles-draft-11-2026-10-12-decisions.md`; where a step depends on one of the latter it
 says which, and what it assumes until Luciano answers. Inputs: `docs/principles.md` draft 10

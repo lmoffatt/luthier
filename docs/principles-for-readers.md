@@ -1,9 +1,11 @@
 # Luthier: the ideas behind it
 
-Draft 4, 2026-10-12, unapproved: the citations follow draft 11 of `docs/principles.md`, where L3,
-L11 and L12 merged into L2, L9 and L10 and L16 (certificates) is new; the prose unchanged.
+Draft 5, 2026-10-12, unapproved: the citations follow the contiguous numbering of draft 11 of
+`docs/principles.md` (D-2026-10-12-v; the Numbering table there maps every draft); the prose
+unchanged. Draft 4, 2026-10-12: the citations followed draft 11 before its renumbering, where
+three entries merged into others and the certificate entry was new.
 Draft 3, 2026-10-12, unapproved: the citations in parentheses renumbered to draft 10 of
-`docs/principles.md` (G1 theory and model, G2 cost, the demand under G0 since draft 11; L1 to L15), the prose
+`docs/principles.md` (G1 theory and model, G2 cost, the demand under G0 since draft 11; fifteen principles), the prose
 unchanged; the mapping from the old tags is the Numbering table of
 `record/principles-language.md`. Draft 2, 2026-10-12, unapproved. Draft 0 (f3fb261) received five corrections from Luciano
 (afdd7c7); draft 1 (43d7796) wrote them into the text, each marked "(draft 1)"; draft 2 applies
@@ -65,17 +67,17 @@ Belonging to a type is therefore a guarantee, and the guarantee says exactly how
 value carries a certificate for each law it was checked against, with a grade: proved, by citing a
 theorem or by delegating to a software library that carries its own guarantee (draft 1, his
 correction), exhaustive over every case, checked on chosen cases, sampled statistically at a stated
-level, or merely assumed (L2, L7). The basic building block is a type carved out of a bigger one
+level, or merely assumed (L8, L9). The basic building block is a type carved out of a bigger one
 by a predicate, which gives three things at once: the new type, its only constructor, and the
-function that says whether a value belongs (L2). A law characterizes an operation
-mathematically; it does not re-run a second copy of the code and compare (L7). And checking that
+function that says whether a value belongs (L8). A law characterizes an operation
+mathematically; it does not re-run a second copy of the code and compare (L9). And checking that
 an implementation still gives the same bits as yesterday is a different thing from checking that
 it satisfies its laws; Luthier keeps the two certificates apart, and lets a certificate of the
-law travel along a certificate of identity, at the weaker of the two grades (L7, L14).
+law travel along a certificate of identity, at the weaker of the two grades (L9, L11).
 
 Declaring comes before defining, and defining before inhabiting. A name declared without a body
 is a hole: it may be an axiom, an input, an external function, or something not yet written.
-Nothing runs until it is defined, and nothing inhabits a type that has not been defined (L4).
+Nothing runs until it is defined, and nothing inhabits a type that has not been defined (L2).
 
 ## The second departure: the demand decides what runs
 
@@ -83,23 +85,23 @@ In type theory, computation is the normalization of a term you already have. Lut
 executive face. A program states what is known, as universally as possible. Nothing is computed
 until something outside asks for a value: a print, a file saved, a test. That demand names the
 type it wants and the tolerance it accepts, and from those Luthier works out which path to
-compute and which types are actually produced (G0, L10).
+compute and which types are actually produced (G0, L5).
 
 A program is therefore a graph of definitions, not a sequence of steps. The order of statements
-in the file does not matter; dependencies give the only order there is (L9). A definition has no
+in the file does not matter; dependencies give the only order there is (L4). A definition has no
 side effects; effects live only in actions, and that is the one assumption under which every
-evaluation strategy gives the same result (L9). The default strategy plans backward from the
+evaluation strategy gives the same result (L4). The default strategy plans backward from the
 actions over the names they need, then runs forward over that live subgraph, each node once; a
-test is an action too, so verifying is a form of demanding (L10). What the demanded value does
+test is an action too, so verifying is a form of demanding (L5). What the demanded value does
 not need is forgotten, which is how Luthier avoids carrying the whole history of a computation in
-its types (L10). Every threshold, budget and statistical level is a parameter passed with the
-demand, never a constant hidden in the code (L10).
+its types (L5). Every threshold, budget and statistical level is a parameter passed with the
+demand, never a constant hidden in the code (L5).
 
 Evaluation is verification: Luthier checks equivalences rather than executing instructions.
 Execution proper is an action on the world, and an action is verifiable too (draft 1, his word), by
-observing the world before and after it (L9). Code that does not follow Luthier's way, say a foreign algorithm taken
+observing the world before and after it (L4). Code that does not follow Luthier's way, say a foreign algorithm taken
 as is, can still run, inside a named world, with its certificates marked as assumed, until a law
-is certified for it (L14).
+is certified for it (L11).
 
 ## The third departure: laws have a cost, and a run teaches something
 
@@ -113,9 +115,9 @@ developed part of Luthier, and its author calls it a wish as much as a principle
 
 Code is written over ideal objects, real numbers, and realized by concrete ones, 64-bit floats.
 The realization satisfies the ideal laws within a stated tolerance, and the error of each step is
-itself a law rather than a false claim of exactness (L8). Equality has levels: definition,
+itself a law rather than a false claim of exactness (L13). Equality has levels: definition,
 identity, decidable equality, equality by reduction, and each object carries the one that fits it
-(L5).
+(L3).
 
 ## One function, many paths
 
@@ -123,18 +125,18 @@ A function has many implementations: fast or precise, in memory or on disk, nati
 Luthier first establishes which of them are equivalent, by their laws and by certified identity
 between pairs, and only then chooses among them by cost: expected error, time, memory, each a
 parameter of the demand rather than the planner's own opinion. An implementation that has never
-been compared is never substituted (L13). Luthier borrows freely from other languages: values may
+been compared is never substituted (L6). Luthier borrows freely from other languages: values may
 come from Python or any host through `extern`, declared over what they really receive and
 return, validated against their laws the first time they are asked for, and refused if they fail.
 In practice Luthier is a coupling language, the joint where two libraries meet under one theory
-(L14).
+(L11).
 
 ## The small core
 
 The core is a handful of primitives, small enough that a program can be run with pencil and paper
 given a plan of execution; everything else is a library whose translation to the core is
-mechanical (L15). A Luthier program is itself a value of Luthier, so programs can build, inspect
-and run other programs, and the interpreter is meant to be written in Luthier (L15). What moves
+mechanical (L7). A Luthier program is itself a value of Luthier, so programs can build, inspect
+and run other programs, and the interpreter is meant to be written in Luthier (L7). What moves
 all of this is the wish to state the invariances of a discipline in the language itself: a
 species mates within itself, electrons are fermions, a probability integrates to one (L1).
 
