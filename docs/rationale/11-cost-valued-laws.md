@@ -1,7 +1,15 @@
 # Laws valued in cost
 
-Draft 0, 2026-10-11, unapproved. The articulation of the organizer G3 of `docs/principles.md`
-(laws are valued in cost, and what a run teaches is kept), asked for by D6 of
+Draft 0, 2026-10-11, unapproved; citations moved to draft 11 of `docs/principles.md` on 2026-10-12,
+the text otherwise as written. Status 2026-10-12: this is the working note of O1 (the algebra of
+costs); since it was written Luciano decided that the algebra has two candidate models, min and max
+or 1/n log-sum-exp and 1/n sum (D-2026-10-12-p), that composition along a path is the sum
+(D-2026-10-12-q), that a sample's statistics convert to an evidence cost by a function declared per
+theory, −log(1 − ε̂(n, δ)) in nats first (D-2026-10-12-r), that the cutoff is the demand's
+(D-2026-10-12-h), and that an `assumed` certificate may carry a cost formula such as p(n)·ε·κ(A)
+(D-2026-10-12-t); §4 to §6 below predate those and are superseded where they differ. The
+articulation of the organizer G2 of `docs/principles.md`
+(laws are valued in cost), asked for by D6 of
 `record/plan-principles-generative-2026-10-11-decisions.md`. Sources: Luciano's notes
 `record/Lucianos ideas/principios organizadores.txt` (fa3f972) and `el problema de los floating
 point.txt` (5cc41fa); his voice note of 2026-05-29 (`note:2026-05-29T14.14.08:matrimonio-hott-bayes`)
@@ -15,7 +23,7 @@ probability; n a number of terms or of samples.
 
 ## 1. The problem
 
-Luthier writes code over ideal objects and runs it on concrete ones (L15): `Real` and `Float64`,
+Luthier writes code over ideal objects and runs it on concrete ones (L13): `Real` and `Float64`,
 a probability and a sample of it, a linear map and a matrix of doubles. The laws of the ideal
 (associativity, A·A⁻¹ = I, a probability integrates to one) are false of the concrete realization,
 so a type theory that asserts them of `Float64` lies, and one that refuses them says nothing.
@@ -23,7 +31,7 @@ so a type theory that asserts them of `Float64` lies, and one that refuses them 
 The Boolean way out exists and is honest: the law becomes a bound, |fl(a + b) − (a + b)| ≤ ε|a + b|,
 a predicate with ε as a parameter (P11). Flocq proves such theorems in Coq, and Luthier's
 `rational.lut` certifies `sumTo` within γ_n of the exact sum this way. Its three costs are what
-force G3 (Luciano: "si queres ser estricto o expresivo, necesitas otra cosa. De ahi el [0, +inf)"):
+force G2 (Luciano: "si queres ser estricto o expresivo, necesitas otra cosa. De ahi el [0, +inf)"):
 the tolerance is fixed in each law, so there is one law per tolerance and per representation;
 worst-case bounds compose into condition numbers and say nothing after a few steps; and about
 data, where the property itself is a likelihood, nothing can be said at all.
@@ -43,10 +51,10 @@ infinity (`core.lut` already has `ExtendedReal` with `posInf`); a law into `Bool
 
 Propositional equality becomes a quantitative equation, s =_ε t (quantitative equational logic,
 Mardare, Panangaden, Plotkin; G table): the quotient of G0 becomes a pseudometric space, the class
-of L10 is the ball of radius the demanded tolerance, and identity at distance 0 is the exact case.
+of L6 is the ball of radius the demanded tolerance, and identity at distance 0 is the exact case.
 This answers Deepseek's first question: paths do not become distributions, they acquire a length.
 A function pulls the distance of its codomain back to its domain, d_f(a, b) = d(f a, f b), so the
-kernel reading of L12 (computing is classifying) survives: the classes become "indistinguishable
+kernel reading of the former L12 (computing is classifying, kept in the record of L4) survives: the classes become "indistinguishable
 by f up to ε" (addendum 8).
 
 ## 4. Judgments
@@ -56,11 +64,11 @@ probability. What changes is its evidence: the certificate carries the grade (`0
 law into `Cost` the worst cost seen with the input that reached it, as Hypothesis prints and
 discards (G §2). The demand supplies the tolerance, so one certificate serves every demand whose
 tolerance is above the worst cost recorded, and a stricter demand asks for more cases or a better
-implementation (L10). What cannot be decided stays a hole (L8).
+implementation (L6). What cannot be decided stays a hole (L2).
 
 ## 5. How cost moves through application
 
-This is what decides whether G3 is practicable (Luciano, annotation on draft 2: "la composicion de
+This is what decides whether G2 is practicable (Luciano, annotation on draft 2: "la composicion de
 judgments, como se transfiere la quantitative equality a traves de la aplicacion de funciones, cual
 es el algebra"). Two known forms.
 
@@ -78,8 +86,8 @@ sum, which is the Bayesian composition Luciano named ("usar estadistica bayesian
 componerlo"). A bound ‖r‖ ≤ ε is a uniform likelihood on the ball, cost 0 inside and ∞ outside,
 the Boolean limit; a Gaussian error of width σ is the quadratic cost d²/2σ², monotone in d, so a
 distance reading is a likelihood reading under a noise model whose width is the demanded
-tolerance. The choice among implementations (L10) is then decision theory, expected loss against
-cost of computing; the progressive validation of G2 is the posterior over "the law holds" updated
+tolerance. The choice among implementations (L6) is then decision theory, expected loss against
+cost of computing; the progressive validation of G1 is the posterior over "the law holds" updated
 case by case, the reading `00` (*What is known*) already proposes and D-2026-10-08-a left open.
 
 The practicable version is both: a constant per function type where it is known, which it is for
@@ -91,7 +99,7 @@ Over integers a law's value is computed exactly. Over floats it is not available
 (the real sum) is not in hand, so the residual is estimated by a bound, an interval, or a reference
 at higher precision on sampled inputs; Luthier's reference is `Rational` ("what the doubles are
 compared against", `06 §8`, `rational.lut`). The value of the law is then a random variable, not a
-number, and that, not a preference, is why Bayes is needed: G3 is cost-valued laws whose costs are
+number, and that, not a preference, is why Bayes is needed: G2 is cost-valued laws whose costs are
 themselves uncertain (addendum 2). The certificate records the summary of what was seen (worst,
 mean, the number of cases, the generators, the seed), and composition of uncertain costs is the
 composition of §5 under the likelihood reading.
@@ -107,7 +115,7 @@ example in one line: the worst case adds the n roundoffs, the expectation adds t
 
 **A matrix inverse.** ‖A·A⁻¹ − I‖ is bounded by a constant times n·κ(A)·ε; the Lipschitz constant
 of the inverse is κ(A), which is a property of the input, not of the implementation. As a cost law
-the residual is returned, and the demand with its tolerance decides, through L10, whether float32,
+the residual is returned, and the demand with its tolerance decides, through L6, whether float32,
 float64 or one step of iterative refinement is the representative: the class is fixed by the law,
 the representative by the cost at this κ(A). Linear algebra libraries publish bounds rather than
 booleans (Luciano's note), and this is where they enter.
@@ -116,7 +124,7 @@ booleans (Luciano's note), and this is where they enter.
 about 1/√n; the Boolean version is the statistical test at a declared level and power (`08`, a
 statistical law declares its level and its power); the cost version is the −log-likelihood of the
 estimate under the sampling distribution, with n from the demand (P11). Two estimators of the same
-density are equivalent up to the tolerance the demand sets, which is L10 again, for data.
+density are equivalent up to the tolerance the demand sets, which is L6 again, for data.
 
 ## 8. Open
 
