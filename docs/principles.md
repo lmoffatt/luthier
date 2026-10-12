@@ -160,8 +160,8 @@ evaluated over `Rational` is one more specimen, with grade exact, checked by the
 is a law, so it composes as HoTT composes paths: reflexive, symmetric, transitive; under cost the
 composed path costs the sum of its links and holds at the weakest of their grades, and a sampled
 link holds only on the inputs its samples cover, so the composition holds on the intersection of the
-domains certified (his note of 2026-10-12 on the plan; what L10 states for the planner's paths).
-Status: settled. The identity clauses come from the former L5 (candidate); the composition is his
+domains certified (his note of 2026-10-12 on the plan; what L13 states for the planner's paths).
+Status: settled. The identity clauses come from the former L21 (candidate); the composition is his
 note put in words, proposed.
 
 ### 3. Laws and their verification
@@ -179,7 +179,7 @@ grade is composed from the grades of the parts: with `&`, the weakest; with a su
 costs summed, each at its grade (proposed, on his note on Terms).
 Status: proposed on his note of 2026-10-12 on the plan ("faltan las leyes de los costos y de los
 predicates y cómo se lift a costos"); the text is the record's G3 (lift, exact, within, his to
-rename) and the paragraph that stood in G2; the composed grade from the former L7.
+rename) and the paragraph that stood in G2; the composed grade from the former L11.
 
 **L7 (was L5, L11, L21). A law characterizes; it is verified by one operation, exact or
 statistical; and the certificate of identity is not the certificate of the law.** A law states a
@@ -203,7 +203,7 @@ the law travels by the certificate of identity (his annotation): exactly where t
 boolean (`==` structural, `05` R8: integers, decidable types, the same implementation rerun), and
 with the observed distance added where it is a cost (G2), since two implementations over floats are
 almost never bit-identical. The type of the identity law's result says which (`Bool` or `Cost`).
-Status: settled. settled The distinction identity/law is from the former L5.
+Status: settled. settled The distinction identity/law is from the former L21.
 
 **L8 (was L15). The ideal world is realized with a guarantee.** Code is written over ideal objects
 (Real) and realized by concrete ones (Float64); the realization's laws hold within a stated
@@ -292,7 +292,7 @@ independent of the demand; the demand chooses which of it is derived, certified 
 elaboration (types, derivable laws) does not depend on the observer; the memo of results does (L10),
 and they are two caches.
 Status: settled; the identity of a result, the memo gate and the three objects are the model's, from
-the rounds of critiques. The former L10 restated without the forgetful functor on his note of
+the rounds of critiques. The former L13 restated without the forgetful functor on his note of
 2026-10-12.
 
 **L11 (was L12). An action is verified by observing the world before and after it.** Executing is
@@ -383,7 +383,7 @@ grid is certified on the grid and nowhere else (Claude). A function known correc
 outside Luthier is certified `proved` by citation (D-2026-10-11-f), and the chain law, citation,
 native, identity, extern is carried by hash.
 Status: settled by his correction (draft 7); the opt-out's syntax open. proposed, candidate; the
-wording is the model's. Delegation (from the former L7) and transport (from the former L5, his
+wording is the model's. Delegation (from the former L11) and transport (from the former L21, his
 correction) placed here on his note of 2026-10-12.
 
 ### 6. The language itself
