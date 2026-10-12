@@ -14,12 +14,42 @@ left a question mark the name is the model's proposal and says so.
 - A *law* is a predicate or a cost over the symbols of a structure; both are laws and coexist (G3). 
 No, a Law is either a predicate or a function of predicates that is a predicate, or a cost, or a function of costs that is a cost or a function of costs and predicates that is a cost.  [lo escribi largo para que entiendas lo que digo, quizas encuentres la forma elegante de decirlo]
 
+> **Claude (2026-10-12):** Accepted. The short form: laws are closed under combination. A law is a predicate or a cost, or any
+> combination of laws by the operations of `Bool` (and, or, not, implies, a quantifier over a
+> carrier) and of `Cost` (sum, max, a weighted sum); the combination is a predicate when everything
+> in it is, and a cost as soon as one cost enters, the predicates lifted by G3's `lift`. In algebra:
+> laws form a two-sorted algebra, `Bool` a retract of `Cost`, and a law is a term of that algebra over
+> the structure's symbols. The quantifier over a carrier is one of the operations, and it is where
+> the grades come from: exhaustive when the carrier is enumerated, sampled when it is not. I will put
+> this wording in the record if you mark it.
+
+
 - A *theory* is a structure with its law.  (singular porque es una funcion compuesta de laws, pero la forma de unirlas puede variar no tiene porque ser un and, pueden ser otras cosas)
+
+> **Claude (2026-10-12):** Accepted, singular. Today every theory in the libraries joins its laws with `&`
+> (`Objective := GradIsGradient & StepMatrixPositive`, `Exp ... | Homomorphic R m f & AtZero R m f`),
+> which is the Boolean join and one combination among those the algebra above allows; under `Cost`
+> the join is a sum, a max, or a weighted sum, which is Bayes composing evidence (G3). Two
+> consequences I would write down: the certificate of a theory is the certificate of one law, and
+> its grade is the composition of the grades of the parts (with `&`, the weakest; with a sum of
+> costs, the costs summed, each with its grade); and `&` in the spec becomes one operator of the
+> law algebra, no longer the only way to state a theory.
+
 - A *model* is an inhabitant of a theory: a value of its structure whose law is certified.
 - A *function* is a value of a function type `A -> B`, in the standard sense (his correction). A
   function type with its laws is a theory of one symbol, and a function that satisfies them is a
   model of it; this is the common case in practice (D-2026-10-12-e), and a function has sense only
   in that context. (aqui habria que aclarar que es un dependent theory, porque es una teoria que se cuelga de otras teorias, puede ser el setoide u otra cosa)
+
+> **Claude (2026-10-12):** Agreed, and it belongs in Terms. Proposed: a *dependent theory* is a theory whose
+> structure and law take models of other theories as parameters: `Monoid (A : U) (eq : Setoid A)`,
+> `VectorSpace (K : U) (F : Field K)`, `Exp (R : U) (m : NumberModel R)`. Every theory in the
+> libraries is one, and a function type with its laws is the one-symbol case, dependent at least on
+> the setoids of its carriers, since its law uses their equality. L20 already states the rule ("a
+> theory over a model of another theory is a theory"); what is new is the name and that the
+> dependence is never empty. In type theory's terms it is a Π over models, which is why the demand
+> can later choose the model (the next note).
+
 - A *certificate* (proposed; his "validation or proof") is the record that a law was checked, with
   its grade (proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst
   value seen; a proof is a certificate of grade proved. To *certify* is to produce one.  OK 
@@ -33,11 +63,32 @@ No, a Law is either a predicate or a function of predicates that is a predicate,
   the tolerance it wants. The *planner* is what chooses, among the models certified equivalent,
   the one that runs, and it plans the type of the output too, it might be the with an error, or the derivative or some type decoration (algo asi mejor dicho. Esta idea de que la demanda determina el tipo del output, es algo que me parece no tiene aun las herramientas teoricas como para implementarlo)
 
+> **Claude (2026-10-12):** Yes: the demand names the decorated type, the value with its error, its derivative, its
+> certificate, and the planner produces that (L19 says it; Terms should). On the tools, a
+> proposal, since it is the part you doubt: a decoration is a different model of the same theory.
+> Code written over `Real` (L20, universal over models) run over the model of dual numbers gives the
+> derivative; run over intervals, or over pairs (value, cost), gives the error. The demand choosing
+> the output type is then the demand choosing the model the code runs in (D-2026-10-11-j, the type
+> names its model), and the planner's work is to insert the bridges between representations
+> (L10, L20). Forward-mode differentiation by dual numbers is standard and needs nothing new; what
+> is missing is the algebra of costs for the error (G3, `11` §5), which is the open item. So the
+> theory exists for the derivative and not yet for the error. Not to be implemented until you mark
+> it.
+
+
 The spec's *object* (`05 §3`, a strongly connected component of the dependency graph, the names a
 cycle of laws joins) is not among his terms; in them it is a theory written in one cycle of names
 with its models. Whether `05` renames it is open. 
 aqui estaria: yo creo que ese strongly connected component seria o una teoria que no es una funcion o no usamos el termino, 
-igual me da la sensacion que Object es mas teoria o function que al reves. 
+igual me da la sensacion que Object es mas teoria o function que al reves.
+
+> **Claude (2026-10-12):** Agreed. What `05 §3` calls an object is a cycle of names: a type, the operations on it and
+> the law that ties them (`Codec` and `RoundTrip` in the spec's example; `Z7`, `eqZ7`, `addZ7`,
+> `ringZ7`), which in your terms is a theory with its model written together, never a function.
+> Proposal: drop the term; `05 §3` becomes "theories are cycles", the graph fact stays as the rule
+> that decides where a theory ends, and *object* survives only in "object classifier", your other
+> sense. Cost: one commit over `05` and `04`, nothing else depends on the word. Your decision.
+ 
 
 
 ## The organizers
