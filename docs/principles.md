@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 69018bd30951, commit 07930da (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 d4a8523d5332, commit cd9369e (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -598,9 +598,8 @@ blocks; the done and implemented items are in the record's drafts table.
   the whole a graded algebra; addition inside a dimension, multiplication across (second round
   §18). Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
   speed of sound). Blocks nothing.
-- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z): *object* is anything a name defines and a
-  theory is the object several names define together; `05 §3` reads "theories are cycles" in chapter
-  4 of the specification. Blocks nothing.
+- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z) by the term *object* in Terms; `05 §3` reads
+  "theories are cycles" in chapter 4 of the specification. Blocks nothing.
 - **O8** (spec) The session as a block over the dataflow of L5: `<-` to explore, `:=` to lock, a
   file may contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the
   spec's `04 §7` and a section on the session; the memo between the items of a session. Blocks

@@ -1352,9 +1352,8 @@ blocks; the done and implemented items are in the record's drafts table.
   the whole a graded algebra; addition inside a dimension, multiplication across (second round
   §18). Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
   speed of sound). Blocks nothing.
-- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z): *object* is anything a name defines and a
-  theory is the object several names define together; `05 §3` reads "theories are cycles" in chapter
-  4 of the specification. Blocks nothing.
+- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z) by the term *object* in Terms; `05 §3` reads
+  "theories are cycles" in chapter 4 of the specification. Blocks nothing.
 - **O8** (spec) The session as a block over the dataflow of L5: `<-` to explore, `:=` to lock, a
   file may contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the
   spec's `04 §7` and a section on the session; the memo between the items of a session. Blocks
