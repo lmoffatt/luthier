@@ -1856,7 +1856,7 @@ Source:     chat:f15ae1b6:1473
             chat:f15ae1b6:1481
 Kind:       language and principles (amends D-2026-10-12-ab: the keywords gain `W`; L4.11, L7.1,
             Terms; spec 2, 3, 10). For L4, L7, P16
-Status:     current for `W` as a keyword; the three rules proposed. His "Si" to keeping `U`
+Status:     current, the three rules too since D-2026-10-13-e. His "Si" to keeping `U`
             (chat:f15ae1b6:1498) read as such
 
 D-2026-10-13-c  The private part of a module is given by ascription: an importer sees a module only
@@ -1868,7 +1868,7 @@ Author:     the model; Luciano named it an important architectural decision
 Quote:      "Justamente, parte privada en los modulos es una decision de arquitectura importante."
 Source:     chat:f15ae1b6:1473
 Kind:       language and principles (L6.12, L10.10 new; spec 6, 12). For L6, L10.9, L14
-Status:     proposed; his mark pending
+Status:     current since D-2026-10-13-e
 
 D-2026-10-13-d  Certifiers are not a keyword: they are values. Luthier's shape is a triad, to say
                 (`U`), to act (`W`) and to certify, and the certifier is the one action on
@@ -1890,3 +1890,18 @@ Source:     chat:f15ae1b6:1618
 Kind:       principles (Terms; L7.3, L9.10, L10.10). For L14, D-2026-10-12-ab (the direction: test
             became a function), D-2026-10-06-ab (generators are values, the precedent)
 Status:     current for no keyword; the triad and `Certifier` as a theory proposed in their wording
+
+D-2026-10-13-e  His marks on the nine changes to the principles of 2026-10-13: ok, with a correction
+                to the triad. Every reading of the world changes Luthier's internal state, so what
+                sets a certifier apart is not that it changes that state but what it changes: the
+                belief that a value belongs to a type.
+Author:     Luciano
+Quote:      "Aca hay sutilezas, cualquier lectura del mundo cambia el estado interno de Luthier,"
+            "lo que cambia aqui es la creencia de que un valor pertenece a un tipo."
+            "OK"
+Source:     luthier@24a0615:record/principles-2026-10-13-for-his-marks.md:31
+            luthier@24a0615:record/principles-2026-10-13-for-his-marks.md:32
+            luthier@24a0615:record/principles-2026-10-13-for-his-marks.md:45
+Kind:       principles (Terms; L4.11, L4.12, L6.12, L7.3, L7.5, L9.10, L10.10). For P13
+Status:     current; the clauses settled, the triad reworded on his correction; D-2026-10-13-b's three
+            rules on W and D-2026-10-13-c are current with them
