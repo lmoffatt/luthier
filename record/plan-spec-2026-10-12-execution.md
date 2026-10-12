@@ -165,3 +165,7 @@ token, the ranking, the trace), the rest syntax or placement.
   libraries are implemented). Step (4) changes shape: no decisions document for wave 2. Next,
   chapter 6 states certification in Luthier over a `Cost` taken as a parameter, and chapter 5 the
   interface it asks of the library; the open choices go to the libraries.
+- 2026-10-12, same session: chapter 6 written, draft 0 (`docs/spec/06-certification.md`): certification
+  over a cost type taken as a parameter, the five operations it asks of the library (6.S5) proposed.
+  Next: his marks on 6.S5 above all, since that interface is what the library of costs cannot change
+  later; then chapter 5, the laws, over the same parameter.
