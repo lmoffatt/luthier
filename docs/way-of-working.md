@@ -41,7 +41,10 @@ not an oracle, since "agrees with the native" would be a law that copies an impl
 one more specimen (L9), the agreement test is a consistency check between specimens, (draft 4) which
 is the identity
 law of L6.11 that admits the second specimen into the planner's graph (D-2026-10-11-m), and the
-practice holds while a function has too few laws to be known by description. Source: Luciano,
+practice holds while a function has too few laws to be known by description. (2026-10-12) The
+same practice at the scale of the language is L14 (what can be written in Luthier is written in
+Luthier): the host's implementation is a specimen of what Luthier states, and the two orders of
+bootstrapping are two paths to one theory. Source: Luciano,
 2026-09-30.
 
 **W6. A test must fail when the thing is wrong.** Laws are written before the algorithm; a law not
