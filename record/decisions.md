@@ -1472,3 +1472,24 @@ Kind:       language (L11, L5, L10.6; spec 3, 10, 12). The interpreter does othe
             extern) and rejects one it cannot resolve
 Status:     current; to implement; resolves the question of D-2026-10-12-ab on extern and import
             inside definitions
+
+D-2026-10-12-ad Import is lazy too, and `test` of a module is the total demand. A module is a
+                value, a record of its definitions; `la := import "linear_algebra.lut"` binds it,
+                and the file is read only when a demand needs a name of `la` (the checker meeting
+                `la.f`, or `run` needing its value), so `import` is not an action either. Laziness
+                leaves latent dead code, so `test "linear_algebra.lut"` is the action that
+                initializes everything: it demands every name of the module, reads every import,
+                checks every definition and certifies every law. Corrects D-2026-10-12-ac, which
+                read `import` at once; that reason holds only for a flat import, whose names cannot
+                be traced to their file.
+Author:     Luciano; the correction of -ac and the flat-import caveat the model's
+Quote:      "en realidad yo solo importo linear_algebra.lut cuando necesito una funcion de la... con
+            lo que import tampoco seria una accion. Esto dejaria muchos muertos latentes, con lo que
+            deberia haber un comando que inicialize todo para chequear que las cosas estan
+            definidas." "si yo hago test "linear_algebra.lut" por ejemplo seria una accion y ahi
+            inicializo todo." (chat, 2026-10-12)
+Source:     chat 2026-10-12, after D-2026-10-12-ac
+Kind:       language (L11.7, L5; spec 12.S21, 12.S22; 7.S20). For L5 (only what the demand needs is
+            produced), L14
+Status:     current; -ac partly reversed (import); open, his: whether a flat import survives (as an
+            explicit `open`, read at once) or not, and whether a module carries its own name

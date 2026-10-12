@@ -1164,8 +1164,10 @@ L11.6  A definition or an implementation that does not follow Luthier's way, an 
        [candidate]
 L11.7  (His words) A file is read when some demand needs it: an extern is a route to a function, its
        file opened only when a demand reaches the node, and not even required to exist when the
-       program is checked; an import is read at once, since the checker needs the names it adds, and
-       the functions it brings are loaded only when demanded (D-2026-10-12-ac). [proposed]
+       program is checked; a module is a value, and its file is read when a demand first needs one
+       of its names, so an import is not an action either; `test` of a module is the action that
+       demands everything in it, the one that finds what is latent and ill defined (D-2026-10-12-ac,
+       -ad). [proposed]
 References: D-2026-10-11-m; W5, W10
 Rests on:   O3 (the opt-out's syntax; the world as a value)
 Quote:      (L14) "si el tipo no sigue la ley no se aplica el calculo" (chat, 2026-10-10) "que la IA

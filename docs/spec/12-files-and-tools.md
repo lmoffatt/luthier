@@ -58,10 +58,12 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 ## §6 When a file is read
 
-**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ac] `import` is read at
-once, since the names it adds are unknown until it is read and the checker is the demand that needs
-them; its functions wait for a demand. An extern's file is read
-only when `run` or `test` reaches its node (`spec 3 §8`).
+**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ad] A module's file is read
+when a demand first needs one of its names: the checker meeting `la.f`, or `run` needing its value;
+an import no demand reaches is never read. An extern's file is read only when `run` or `test`
+reaches its node (`spec 3 §8`). `test "x.lut"` is the action that demands everything in the module:
+every name, every import, every law, so it is where latent errors appear (`spec 7`). A flat import,
+whose names cannot be traced to their file, is open (D-2026-10-12-ad).
 
 **12.S22. Modules are values.** [decided D-2026-10-12-ab] `import` is a function whose value is a
 module, a value of the record type of 12.S1; the form by which a module's names enter the importer's
