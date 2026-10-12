@@ -15,31 +15,33 @@ with "+" is a merge, detailed below; "→ G1" is an absorption into the organize
 
 1. What the language is for
    - L1 Luthier expresses the invariances of the disciplines.
+   ok
 
 2. Types, theories and models: the declarative face
    - L2 A type is a proposition, and membership is a guarantee.
-   - L4 The certified subtype from a predicate is the fundamental construction pattern.
+   - L4 The certified subtype from a predicate is the fundamental construction pattern.  -> from a Law (predicate or cost) 
    - L8 Declare, then define, then inhabit.
    - L16 Equality has levels and belongs to the object.
    - L3 Defining a model defines its test. → G1, which already says it ("to declare `m : T` is
-     to declare the tests `m` will pass").
-   - L20 A function is declared in a theory and is universal over its models. → G1 (done, draft 9).
+     to declare the tests `m` will pass"). 
+   - L20 A function is declared in a theory and is universal over its models. → G1 (done, draft 9). --> esto me parece que se puede sacar. 
 
-3. Laws and their verification
+3. Laws and their verification  --> aca estarian faltando las leyes de los costos y de los predicates y como esto se lift a costos. 
    - L5 + L11 A law characterizes, and is verified by one operation, exact or statistical.
-   - L21 A certificate of identity is not a certificate of the law. (candidate; kept apart)
+   - L21 A certificate of identity is not a certificate of the law. (candidate; kept apart)  --> a ver identity es una law y aplicando hott podemos aplicar transitividad no? (si es con costo sumando costos obvio)
    - L15 The ideal world is realized with a guarantee.
 
 4. Programs and their execution: the executive face
    - L9 + L18 A program is a DAG of definitions without effects, and statements commute.
-   - L19 + L13 The demand determines the computation, and what it forgets.
+   - L19 + L13 The demand determines the computation, and what the types. 
+   (el forgetful functor no ayuda aca a entender)
    - L12 Evaluation is verification; execution is an action on the world. (shortened: the half
-     now in Terms goes; what stays is that an action is verified by observing before and after)
-   - L17 Every criterion is a parameter.
+     now in Terms goes; what stays is that an action is verified by observing before and after) -> si a lo segundo
+   - L17 Every criterion is a parameter.-->  no hardcoded constants!!
 
 5. Implementations and the outside
-   - L10 One function, many paths.
-   - L14 + L22 Luthier orchestrates other languages; what does not follow its way lives in a world.
+   - L10 One function, many paths, chosen by maximizing the performance chosen by the demander.  
+   - L14 + L22 Luthier orchestrates other languages; what does not follow its way lives in a world. aca podria ir lo de certificar por delegacion y la transferencia de certificacion por igualdad de funciones. 
 
 6. The language itself
    - L6 + L7 The core is minimal, executable by hand, and its programs are data.
@@ -64,11 +66,14 @@ algebra of costs exists); L17 (a rule of its own, P11 restated); L10 (the planne
 
 - D1 Numbering. D4 of the generative plan kept the L numbers because the record cites them. With
   the G renumbered today, the model proposes to renumber L1 to L15 in the order above and to keep
-  the map old → new in `record/principles-language.md`, as the G mapping is kept. The alternative
-  is to keep the old numbers with merged headings (L5/L11).
+  the map old → new in `record/principles-language.md`, as the G mapping is kept. 
+  Hace esto
+
+  The alternative
+  is to keep the old numbers with merged headings (L5/L11).--> NO
 
 - D2 L21. Kept apart as a candidate until he marks its wording (graded transport), or merged into
-  L5 + L11 now.
+  L5 + L11 now. -> merged?
 
 ## Execution, once marked
 
