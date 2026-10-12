@@ -1445,3 +1445,30 @@ Source:     chat 2026-10-12, on the analysis of the reserved words of spec 2.S2
 Kind:       language (spec 2, 3, 10, 12; L14, L4, L11). For L14, P16
 Status:     current; the question of extern and import as actions inside definitions (against
             L4.7) open, one question to him
+
+D-2026-10-12-ac When a file is read. An `extern` is a definition like any other: its name, its
+                declared type and the route to the host's function, a datum. The checker registers
+                its type and its edge in the graph and does not open the file, which need not exist
+                when the program is checked; the file is read when a demand reaches the node, once
+                per plan, its hash entering the identity of the result and its certificate; an
+                extern no demand reaches is never read and needs no certificate. `import` is read
+                at once, since the names it adds are unknown until it is read (the checker is the
+                demand that needs them), but the functions it brings are not loaded or evaluated
+                until a demand reaches them. One rule: a file is read when some demand needs it;
+                the checker demands names and types, `run` and `test` demand values.
+Author:     Luciano; the unifying rule and the consequences for certification the model's
+Quote:      "todo tiene o no tiene efecto sobre el mundo depende cuando. extern tiene efecto cuando
+            se ejecuta el programa. ... debemos ejecutar extern si la funcion no es usada por la
+            demanda? yo creo que no. SOlo se registrarian los tipos de la variables y su inclusion
+            en el compilation tree pero no se abriria el archivo ni nada (habria que definir si el
+            archivo debiera existir, calculo que no debiera). ... declaras la ruta para llegar a la
+            funcion." "import es otro costal porque import te agrega nombres que si no los
+            importas no sabes que existen entonces import seria de ejecucion inmediata en cuanto a
+            la lectura, pero no en cuanto a cargar las funciones." (chat, 2026-10-12)
+Source:     chat 2026-10-12, after D-2026-10-12-ab
+Kind:       language (L11, L5, L10.6; spec 3, 10, 12). The interpreter does otherwise today: the
+            checker imports the Python module of every extern when it checks the file
+            (`src/luthier/checker.py`, the `importlib.import_module` in the registration of an
+            extern) and rejects one it cannot resolve
+Status:     current; to implement; resolves the question of D-2026-10-12-ab on extern and import
+            inside definitions

@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 3774ee0e0fbd, commit d7bf6e2 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 7024fb7f5f7f, commit a8cab43 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -510,6 +510,10 @@ world it runs in) with L4; delegation (now L9.7) from G1 and G2; transport (now 
   yet, a foreign algorithm taken as is, may execute inside a named world (L4): its certificates carry
   the cost of an assumption (L10.2), the plan shows the world it ran in, and nothing from it enters
   the planner's graph (L6) nor a certified theory until a law is certified. [candidate]
+- L11.7 (His words) A file is read when some demand needs it: an extern is a route to a function,
+  its file opened only when a demand reaches the node, and not even required to exist when the program
+  is checked; an import is read at once, since the checker needs the names it adds, and the functions
+  it brings are loaded only when demanded (D-2026-10-12-ac). [proposed]
 References: D-2026-10-11-m; W5, W10.
 Rests on: O3 (the opt-out's syntax; the world as a value).
 Status: settled by his correction of draft 7; clause 6 candidate, reworded.
