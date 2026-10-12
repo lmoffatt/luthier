@@ -12,7 +12,8 @@ chapter, k the rule's number in it, and the files are programs in `tests/spec/` 
 must accept and reject. A statement, `**N.Sk.**`, is a behaviour no single program decides. The
 status is one of:
 
-- `[implemented]`: in the interpreter, with its two programs passing;
+- `[implemented]`: in the interpreter, with its two programs passing; a rule of evaluation also
+  needs a program whose value is compared (D-2026-10-12-ah);
 - `[decided D-YYYY-MM-DD-x]`: taken by that entry of `record/decisions.md`, not yet implemented;
 - `[proposed]`: the model's, awaiting Luciano's mark.
 

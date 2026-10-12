@@ -264,7 +264,7 @@ still reads `gen name ":=" ( term | "extern" string )`.
 
 ## §10 Terms as data
 
-**2.S20. Quote and unquote.** [proposed] A term as a value of the type `Term` (D-2026-10-12-x, L7.4):
+**2.S20. Quote and unquote.** [decided D-2026-10-12-ah] A term as a value of the type `Term` (D-2026-10-12-x, L7.4):
 one candidate syntax,
 
     atom ::= ... | "quote" "{" term "}"          -- the term, as a value of Term

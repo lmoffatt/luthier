@@ -102,7 +102,7 @@ itself, and definitions may mention each other. Recursion is general: nothing gu
 termination, and evaluation runs under a step budget (fuel). The recursor of a `data` is a library
 definition written with `match` and recursion, the fold of the structure; `k_recursor.accept.lut`
 defines it for the natural numbers. A proof layer that made it primitive and forbade general
-recursion is not part of version 0 [proposed].
+recursion is not part of version 0 [decided D-2026-10-12-ah].
 
 **3.S12. Laws as terms.** [implemented] A law has type `Bool` or `Law`, a function into
 one of these whose parameters are quantified, or a conjunction `p & q`; the interpreter also takes
@@ -120,7 +120,9 @@ Examples: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`. Repl
 
 Evaluation reduces terms by five rules, each a definitional equality (`≡`, `spec 1`). The programs
 named are those of `tests/spec/` that contain the redex; the suite runs them through the checker,
-and reduction proper is exercised by the library tests.
+and reduction proper is exercised by the library tests. A rule of evaluation counts as implemented
+only with a program whose value is compared (D-2026-10-12-ah); 3.S14 to 3.S18 have none yet, and
+their mark stays `[implemented]` for the interpreter until those programs exist.
 
 **3.S14. Beta.** [implemented] `(\ x { t }) a ≡ t[a/x]`. In `k_recursor.accept.lut` the lambda
 `\k r { succ r }` is applied by `recN`.
@@ -216,27 +218,27 @@ In `Term`, `Var` is a name, `Lit` a literal, `U` the universe, `Lam` and `App` t
 `Pi` and `Sigma` the dependent forms, `Pair` the product introduction, `Match` the eliminator,
 `Inj` and `Sum` the sum, `Data` a recursive structure, `Subtype` the subtype, `Extern`,
 `Primitive` and `Axiom` the three provided bodies, and `Hole` a declaration with no body. The
-constructors of `Pattern` and the fields of `Act` are [proposed]; the decision names the four
-data and not their fields.
+constructors of `Pattern` and the fields of `Act` are as listed [decided D-2026-10-12-ah]; D-2026-10-12-x named the
+four data and not their fields.
 
-**3.S30. Term is the kernel term.** [proposed] `Term` is the kernel term after elaboration, with the
+**3.S30. Term is the kernel term.** [decided D-2026-10-12-ah] `Term` is the kernel term after elaboration, with the
 sugar of `spec 2` translated away, not the surface term. The hashes of the certificates (`spec 6`)
-are computed over it. Not decided; the model's choice in the chat of 2026-10-12.
+are computed over it.
 
-**3.S31. Names are strings.** [proposed] Variables and labels are strings. Alpha-equivalence, two
+**3.S31. Names are strings.** [decided D-2026-10-12-ah] Variables and labels are strings. Alpha-equivalence, two
 terms equal up to renaming of bound variables, is a law of the theory of `Term` (L3.3), and not a
 property of a representation by de Bruijn indices.
 
-**3.S32. Quote and eval.** [proposed] `quote { t }` gives the `Term` of the term `t` with no
+**3.S32. Quote and eval.** [decided D-2026-10-12-ah] `quote { t }` gives the `Term` of the term `t` with no
 obligation. `eval A t : Maybe A` checks `t` against `A` at evaluation time and gives `nothing` when
 it does not check. Neither is in the interpreter.
 
-**3.S33. Reduction as a function.** [proposed] The rules of §4 (beta, delta, iota, prim, extern)
+**3.S33. Reduction as a function.** [decided D-2026-10-12-ah] The rules of §4 (beta, delta, iota, prim, extern)
 are stated as a function `reduce : Term -> Term` in `lib/term.lut`, the interpreter written in
 Luthier, certified against the host's evaluator as two specimens of one theory (L14.3, `spec 9`).
 The file is not written.
 
-**3.S34. Canonical form.** [proposed] The canonical form of a `Term` renames bound variables
+**3.S34. Canonical form.** [decided D-2026-10-12-ah] The canonical form of a `Term` renames bound variables
 canonically and removes module prefixes. The hashes of `spec 6` are computed over this form, so two
 programs that differ in the names of their bound variables or in the module that holds a definition
 have one hash.
@@ -260,7 +262,7 @@ equality of functions is not structural (`spec 4.R8`); observed pointwise it is 
 `Fin n` are not enumerated by `exhaustive`. Both are O11. The recursion principle is stated over
 lists with the algebra fixed, until functions of two arguments have generators.
 
-**3.S38. `lib/term.lut`.** [proposed] The theory of `Term`: the data of §6, alpha-equivalence, the
+**3.S38. `lib/term.lut`.** [decided D-2026-10-12-ah] The theory of `Term`: the data of §6, alpha-equivalence, the
 canonical form of 3.S34, substitution, and `reduce` of 3.S33 with the laws that relate it to
 `KernelLaws`. Not written.
 

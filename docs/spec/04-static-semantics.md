@@ -56,12 +56,15 @@ theory is written:
 the theory (4.S12). A model of it is a branch:
 `csv : Codec := { parse := parseTable, render := renderTable }`.
 
-**4.S9. Two kinds of definition, told by their form.** [implemented] A *concrete type* is defined
-natively (a `data`, an exponential, a product, a sum, a subtype of those); its values are built by
-its constructors (those of the `data`, the lambda, the pair, the injections) and observed by its
-eliminators. A theory in the sense of G1 is a subtype of a labeled base, usually parameterized
-(`Group (A : U)`); it has no constructors of its own: its values are its models, given as values
-of the labeled base.
+**4.S9. Three kinds of object.** [decided D-2026-10-12-ai] An object is one of three. A *concrete
+type* is defined natively (a `data`, an exponential, a product, a sum); its values are built by its
+constructors (those of the `data`, the lambda, the pair, the injections) and observed by its
+eliminators. A *subtype* is a type with a law that involves a single name, `{ x : T | p x }`. A
+*theory type* has a law that involves more than one name, so its names are defined together (a
+cycle of the dependency graph, D-2026-10-12-z); it has no constructors of its own, and its values
+are its models. [implemented] Today the checker tells two kinds by their form: a concrete type, and
+a theory in the sense of G1, a subtype of a labeled base, usually parameterized (`Group (A : U)`),
+whose models are given as values of the labeled base.
 
 **4.S10. A body computes; a law only checks.** [implemented] Whether laws pin down a unique
 inhabitant is undecidable and is never asked. Two bodies for one meaning are two names, and their
