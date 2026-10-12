@@ -38,7 +38,7 @@ principles.
 | [9. Specimens and the planner](09-planner.md) | L6 | wave 3 |
 | [10. Actions and the world](10-world.md) | L4, L11 | wave 3 |
 | [11. Numbers](11-numbers.md) | L13 | the file `06-numbers.md` of 2026-10-07 stands until rewritten |
-| [12. Files and tools](12-files-and-tools.md) | L5, L10, L14 | the file `03-libraries.md` of 2026-10-11 stands until rewritten |
+| [12. Files and tools](12-files-and-tools.md) | L5, L10, L14 | draft 0, 2026-10-12 |
 
 Until a chapter is written, the file it replaces is the specification of that part, under the
 numbering of 2026-10-04 (`02` grammar, `03` libraries, `04` kernel, `05` static semantics, `06`

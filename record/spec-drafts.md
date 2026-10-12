@@ -43,4 +43,4 @@ exists:
 | 9 Specimens and the planner | | 04 §6, 05 R10 | | | |
 | 10 Actions and the world | | 05 R5 and R12, 02 §9, 09 | | | |
 | 11 Numbers | 06 | 06 at bd4537e; D-2026-10-12-y (D6) | | | |
-| 12 Files and tools | 03 §1 to §4 | 03, 05 §7 as implemented; D-2026-10-12-y (D7) | | | |
+| 12 Files and tools | 03 §1 to §4 | 03, 05 §7 as implemented; D-2026-10-12-y (D7) | Sonnet, brief `record/spec-briefs/12-files-and-tools.md` at 3445ad8 | 2026-10-12: 20 statements, 1 rule; S1 (a file denotes a dependent record type, `lib/library.lut`) and S9 (the pure file plus `_python` file pattern) proposed; S17 strict `run` decided; two questions for Luciano: do `--checked` and `--no-record` stay, and does `eval` refuse an uncertified cone as `run` does; the old 03 kept until step 2 | |
