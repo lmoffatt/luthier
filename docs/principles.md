@@ -101,7 +101,7 @@ elementos de Luthier" (chat, 2026-10-12, D-2026-10-12-a).
 language (`04`, a bicartesian closed category: this is where G0 is used); a model is a value of a
 theory, and declaring `m : T` records the obligation to satisfy the laws of `T`; a law relates
 several symbols (`inverse x * x = unit`), which no single function can carry, so the unit declared
-is the theory and the unit valued is the model; a function is a theory of one symbol over the
+is the theory and the unit valued is the model; an isolated function is a theory of one symbol over the
 theories its laws import, and the eureka of 09.19 is this case, where he saw it first. Luthier
 verifies models of theories; what it verifies about a function is the case of one symbol.
 *Proposed* formulation, the function (drafts 2 to 7): the laws are what is known of a function, and
@@ -112,7 +112,13 @@ laws that determines the function up to its equality is the limit a definition m
 it must reach (D-2026-10-11-d). (Draft 3) A law is written over the signature of its theory, an
 implementation over a model; the first is the holotype, `\ x { x * x }` as the formula of `Sqr`,
 the second a specimen checked against it (his "holotipos", second round §3; `00`, *Value, the
-model*; `05` R10). (Draft 5, correction of this reading proposed, his mark pending) In nomenclature
+model*; `05` R10). (Draft 5, correction of this reading proposed, his mark pending)
+aca Sqr no es un ejemplo de ley, lo que quise decir es que las leyes las tenes que escribir con una implementacion de las mismas, 
+las teorias las escribis con un object classifier (hecho de leyes). 
+Luego verificas que la implementacion de los modelos verifiquen las leyes. 
+
+
+ In nomenclature
 the holotype is the name-bearing specimen and the diagnosis is the text, so: the law is the
 diagnosis; a reference implementation, the formula over `Rational` or the native, is the holotype;
 every other implementation is a specimen compared to the holotype by the identity law (L21) and to
@@ -130,6 +136,9 @@ programming is algebraic specification and the module systems of ML and the lawf
 Haskell, where the mechanism exists without being the organizing idea (the answer of 2026-10-12,
 references to be checked before they are cited here).
 
+Lo del holotipo me parece que blow out of proportion, era una metafora para decir algo que en Cocientes se usa que vos elegis un elemento del cociente como el representante de la clase de equivalencia. 
+
+
 **G1. The demand defines what is computed.** Source: "la demanda de un valor por el mundo externo
 me define todos los tipos necesarios para obtener eso" (audio 09.19, 00:24); "la compilacion se
 dispara por la demanda externa (es decir un print o un valor que sale al mundo), y la demanda
@@ -142,6 +151,8 @@ que se sabe, que es un poco como la idea del prior" (audio 08.58, 08:59).
 processed; the executive face is a demand from outside, and the demanded type fixes the path, the
 types and the tolerances actually produced. What type theory lacks: an executive face; there,
 computation is the normalization of a given term, with no demand.
+
+
 
 ### Principles of good use
 
@@ -163,6 +174,10 @@ what the Boolean way costs: a tolerance fixed in each law, worst-case bounds tha
 condition numbers, and nothing to say about data (`record/organizing-principles-2026-10-11.md`,
 addendum 2). Articulated in `docs/rationale/11-cost-valued-laws.md`, draft 0 (D6). Candidate by
 the P13 check, in his words a wish.
+          Es medio forzado, no podes promover booleans a cost (necesitamos un nombre) a troche y moche confunde. 
+          Lamentablemente necesitamos dos tipos de leyes o tener leyes y costos conviviendo quizas? (y ahi si, los boolean se 
+          promueven (lift?) a cost)
+
 
 **G4. Expressive over restrictive; it decides between designs.** Source: "Luthier debe ser expresivo
 mas que restrictivo: si hay
@@ -174,6 +189,11 @@ equally, G4 chooses the one that allows both and asks for the law that makes the
 it generates no L of its own and appears as the reason behind decisions (section 2, last part) and
 inside L10.
 What type theory lacks: one canonical form per value.
+          No se si esto suma. Mi idea era otra era que, si hay una forma "no luthieriana" de definir o implementar algo, luthier deberia dar la posibilidad de hacerlo con un world especifico. Pero estoy bastante en duda. 
+          Evaluemos si se pierde algo retirando este principio. 
+          O sea Expressive over restrictive suena bien, pero me da que es una declaracion de buenas intenciones nomas. 
+          
+
 
 ### How the organizers depend on each other (*Proposed*, D8)
 
@@ -276,7 +296,10 @@ functions, laws, no values) is a module of holes. From G0 (a hole is a hypothesi
 with G1 (nothing is produced until demanded). Source: Luciano, 2026-05-29
 (`dialogue:20260529T1400:tipos-no-definidos-y-forward-reference`); the hole named 2026-09-29;
 `external` and the theoretical module 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 17.41.53.md`;
-`WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to 00:40).
+`WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to 00:40). 
+        Si, pero al ser declarado, asumimos que es del tipo declarado y si se usa en un contexto donde el tipo es incompatible, hay un error. 
+        
+
 
 **L10. One function, many paths.** A function has many equivalent implementations, each with its
 precision, speed, memory and place of execution; equivalence is established first, and the choice
@@ -367,6 +390,9 @@ las invariantes de los calculos", note), with P14 (a type is a concept). Source:
 the test that will be run on it, so definition and verification are one act. From G2 directly:
 the eureka of 09.19 in its 2022 form. Source: Luciano, 2022-08-03
 (`written:2022-08-03_haskell:declarar-funcion-es-declarar-su-test`).
+      Quizas lo debamos ampliar a Theory aqui? 
+
+
 
 **L11. Verification is one operation, exact or statistical.** (Draft 4) What is known by a theorem is
 cited, what can be enumerated is checked exhaustively, what has chosen cases is checked on them,
@@ -380,6 +406,8 @@ description is verified) and G3 (the grade is the uncertainty of the cost). Sour
 2022-08-03 and 2023-02-22 (`written:2023-02-22_tapp-wish-list:untested-a-tested`); the grades by
 samples 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 11.11.22.md`, 03:02 to 04:12); the dependence on
 the distribution is the model's correction, from the practice of property-based testing.
+        Tambien podria haber verificacion externa por teoremas o por delegacion (creo en Lapack, por ejemplo)
+
 
 **L14. Luthier orchestrates other languages.** Types and laws are native; values may come through
 `extern` from Python or any host, declared over what they really receive and return, with
@@ -436,6 +464,10 @@ can be recognized as the same specimen, or described). Source: Luciano, 2026-10-
 2026-10-11 at
 08.58.46.md`, 09:20 to 13:19: "verificar bit a bit que sea igual ... por lo menos sabés que no
 cambia la implementación"; the statistical kind for "prueba científica").
+          No entiendo que sireve esto. La idea era que si vos tenes que B esta certificado y A es identico a B por transporte A esta certificado, aca decis algo negativo, no entiendo. 
+
+
+
 
 **L20. A function is declared in a theory and is universal over its models.** (Draft 3, reworded
 after his annotation.) A function belongs to a theory (Real, Field, LinearAlgebra) and takes its
@@ -461,6 +493,9 @@ pasa a ser todo lo universal posible"; instantiated on demand). Source: Luciano,
 codigo seria, en principio universal a los valores de funciones que cumplan las leyes requeridas",
 chat; `WhatsApp Ptt 2026-10-10 at 17.00.40.md`; `WhatsApp Ptt 2026-10-10 at 17.25.23.md`, 00:00 to
 04:25; D-2026-10-10-g). The conditions on bridges are the model's, accepted.
+          no entiendo porque hacerlo un principio. Surge solo, me parece. Pero puede aclarar, no se. 
+
+
 
 ### From the demand, G1
 
@@ -479,6 +514,7 @@ Luciano, 2026-05-29 (`note:2026-05-29T14.46.22:contexto-como-dag`); the unordere
 definitions already in 2023-03-13 (`written:2023-03-13_hacia-luthier`); the two structures and the
 mutable parameters 2026-10-10 (chat; D-2026-10-10-e); the separation of the second structure is
 the model's proposal.
+
 
 **L13. Forgetting is determined by the demand.** Dependent typing accumulates history, so the
 language needs non-invertible forgetful projections, and the demand chooses them: what is
@@ -522,6 +558,9 @@ assumed. From G1 as its precondition rather
 than its consequence: the declarative face can be universal and minimally processed only if
 definitions have no effects. Source: Luciano, 2026-10-10 ("lo que si es no-side effects", chat;
 D-2026-10-10-c).
+        No tiene efectos en el mundo exterior, pero tiene efectos en el mundo interior: se ocupa el identificador y se guarda la definicion en el mapa de definiciones. No podes usar el mismo identificador dos veces.  
+
+
 
 **L19. The demand determines the computation.** The evaluation strategy is a parameter separate
 from the program (L17); by default, a plan backward from the actions over names, evaluating
