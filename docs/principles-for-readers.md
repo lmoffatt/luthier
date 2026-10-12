@@ -1,7 +1,7 @@
 # Luthier: the ideas behind it
 
 Draft 3, 2026-10-12, unapproved: the citations in parentheses renumbered to draft 10 of
-`docs/principles.md` (G1 theory and model, G2 cost, G3 the demand; L1 to L15), the prose
+`docs/principles.md` (G1 theory and model, G2 cost, the demand under G0 since draft 11; L1 to L15), the prose
 unchanged; the mapping from the old tags is the Numbering table of
 `record/principles-language.md`. Draft 2, 2026-10-12, unapproved. Draft 0 (f3fb261) received five corrections from Luciano
 (afdd7c7); draft 1 (43d7796) wrote them into the text, each marked "(draft 1)"; draft 2 applies
@@ -81,7 +81,7 @@ In type theory, computation is the normalization of a term you already have. Lut
 executive face. A program states what is known, as universally as possible. Nothing is computed
 until something outside asks for a value: a print, a file saved, a test. That demand names the
 type it wants and the tolerance it accepts, and from those Luthier works out which path to
-compute and which types are actually produced (G3).
+compute and which types are actually produced (G0, L10).
 
 A program is therefore a graph of definitions, not a sequence of steps. The order of statements
 in the file does not matter; dependencies give the only order there is (L9). A definition has no

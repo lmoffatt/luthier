@@ -13,7 +13,14 @@ draft 10 the lints report nine unresolved references (the former L21 cited from 
 L13; the old numbers in the introduction of the principles) and two literal repeats (the grade list
 in Terms and L7; "a law is a predicate or a cost" in Terms and L6). The redundancy the critiques
 named (the transport rule in L5, L13, L14; D-2026-10-11-n in five entries) is paraphrase, not copy,
-so the lint does not see it and step 3 removes it by hand. The choices it rests on are
+so the lint does not see it and step 3 removes it by hand. Step 3 done: the shape applied by
+`scripts/migrate_record_draft11_shape.py` (the clauses written by hand from draft 10, the assembly
+mechanical); `--check --strict` passes; per entry, the words of draft 10 missing from the clauses
+are provenance words, the grade lists now in Terms, and the two within-entry repeats (L9 on the
+mutable parameter, L14 on validation and on citation) joined. Deviations from the letter of the
+step: the six topics are the order inside each organizer's section, not subsections, since a topic
+cuts across organizers; L1 stays an entry, under Purpose, so that citations resolve; the two faces
+are defined in Terms; the open questions carry ids O1 to O12 and the reference lint resolves them. The choices it rests on are
 D-2026-10-12-g to -p in `record/decisions.md` (6b729dc) and D1 to D3 of
 `plan-principles-draft-11-2026-10-12-decisions.md`; where a step depends on one of the latter it
 says which, and what it assumes until Luciano answers. Inputs: `docs/principles.md` draft 10

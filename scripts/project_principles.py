@@ -11,7 +11,7 @@ Status, History. Outside the fences, the record has prose sections under `##` an
 before `## Terms` it has the drafts table and a `## Numbering` section.
 
 The projection, written for the agent that builds the specification, keeps from the record what
-follows its `## Terms` heading: the headings, the prose, and for each entry its tag, statement,
+follows its `## Purpose` heading (or `## Terms`, when there is none): the headings, the prose, and for each entry its tag, statement,
 Formulation, Tier or From, clauses, Example, References, Rests on, and Status; it ends with the
 record's `## Numbering` section. It drops Quote, Source and History (they are in the record), the
 drafts table before `## Terms`, and any prose paragraph that starts with `(History:`. Its header
@@ -23,8 +23,8 @@ below the header, which carries the date), when `docs/principles-for-readers.md`
 record does not define, and it lists, as information, the entries the readers' document does not
 cite. It also runs the two lints of D-2026-10-12-o over the projected text: every reference
 resolves (a G, L or L.n tag to an entry or clause; a D id to `record/decisions.md`; a P to
-`record/principles.md`; a W to `docs/way-of-working.md`; an R to the static semantics; a
-backticked spec or rationale number to a file), and no sentence of eight words or more appears
+`record/principles.md`; a W to `docs/way-of-working.md`; an R to the static semantics; an O to an
+open question of the record, written `- **O1**`; a backticked spec or rationale number to a file), and no sentence of eight words or more appears
 twice, in two entries or in one (any run of eight words). The lints are information unless `--strict`, when they fail the
 check; clause statuses outside the vocabulary and gaps in clause numbering fail it always.
 `--write` writes the projection. With neither, prints it.
@@ -57,10 +57,11 @@ P_RE = re.compile(r"\bP(\d+)\b")
 W_RE = re.compile(r"\bW(\d+)\b")
 R_RE = re.compile(r"\bR(\d+)\b")
 DOC_RE = re.compile(r"`(\d\d)(?: §\d+)?`")
+O_RE = re.compile(r"\bO(\d+)\b")
 STATUS_RE = re.compile(r"^(.*?)\s*\[(settled|proposed|candidate|mark pending)\]$")
 STATUSES = ("settled", "proposed", "candidate", "mark pending")
 FIELDS_PROJECTED = ("Formulation", "Tier", "From", "Example", "References", "Rests on", "Status")
-START_HEADING = "## Terms"
+START_HEADINGS = ("## Purpose", "## Terms")
 NUMBERING_HEADING = "## Numbering"
 MIN_WORDS = 8
 
@@ -72,9 +73,9 @@ def parse_record(text: str) -> list[tuple[str, object]]:
     "n", "text" and "status" (None when the clause carries no bracketed status)."""
     lines = text.splitlines()
     try:
-        start = next(i for i, l in enumerate(lines) if l.strip() == START_HEADING)
+        start = next(i for i, l in enumerate(lines) if l.strip() in START_HEADINGS)
     except StopIteration:
-        raise SystemExit(f"{RECORD.name}: no `{START_HEADING}` heading")
+        raise SystemExit(f"{RECORD.name}: no `{'` or `'.join(START_HEADINGS)}` heading")
     items: list[tuple[str, object]] = []
     in_fence = False
     prose: list[str] = []
@@ -245,6 +246,7 @@ def known_ids(root: Path) -> dict[str, set[str] | None]:
         "W": ids(root / "docs/way-of-working.md", r"^\*\*W(\d+)\b"),
         "R": ids(root / "docs/spec/05-static-semantics.md", r"\bR(\d+)\b"),
         "doc": docs if docs else None,
+        "O": None,
     }
 
 
@@ -254,6 +256,7 @@ def lint_references(items: list, record_text: str, root: Path) -> list[str]:
     tags = {e["tag"] for e in entries}
     clauses = {f"{e['tag']}.{c['n']}" for e in entries for c in e["clauses"]}
     known = known_ids(root)
+    known["O"] = set(re.findall(r"^- \*\*O(\d+)\*\*", record_text, re.M)) or None
     problems: list[str] = []
     scopes: list[tuple[str, str]] = []
     for kind, item in items:
@@ -270,7 +273,7 @@ def lint_references(items: list, record_text: str, root: Path) -> list[str]:
                 problems.append(f"{where}: {tag} is not an entry")
             elif n and f"{tag}.{n}" not in clauses:
                 problems.append(f"{where}: {tag}.{n} is not a clause")
-        for cls, rx in (("D", D_RE), ("P", P_RE), ("W", W_RE), ("R", R_RE), ("doc", DOC_RE)):
+        for cls, rx in (("D", D_RE), ("P", P_RE), ("W", W_RE), ("R", R_RE), ("doc", DOC_RE), ("O", O_RE)):
             if known[cls] is None:
                 continue
             for m in rx.finditer(text):
