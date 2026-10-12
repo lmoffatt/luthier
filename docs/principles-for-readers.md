@@ -95,7 +95,7 @@ demand, never a constant hidden in the code (L12).
 
 Evaluation is verification: Luthier checks equivalences rather than executing instructions.
 Execution proper is an action on the world, and an action is verifiable too (draft 1, his word), by
-observing the world before and after it (L11). Code that does not follow Luthier's way, say a foreign algorithm taken
+observing the world before and after it (L9). Code that does not follow Luthier's way, say a foreign algorithm taken
 as is, can still run, inside a named world, with its certificates marked as assumed, until a law
 is certified for it (L14).
 

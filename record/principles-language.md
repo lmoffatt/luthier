@@ -86,7 +86,7 @@ The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder pl
 | L8 | L15 | renumbered |
 | L9 | L9, L18 | merged: a DAG of definitions without effects |
 | L10 | L19, L13 | merged: the demand determines the computation and the types produced |
-| L11 | L12 | renumbered and shortened |
+| L11 | L12 | renumbered and shortened; merged into L9 in draft 11 |
 | L12 | L17 | renumbered; statement in his words |
 | L13 | L10 | renumbered; statement in his words |
 | L14 | L14, L22, L11 (delegation), L21 (transport) | merged |
@@ -145,7 +145,7 @@ Each term has one category and is defined here and nowhere else; the principles 
   not checked. A proof is a certificate of grade proved. To *certify* is to produce one.
 - *Evaluation* computes a function, and has no effect (L9). *Execution* is an action on the world
   (print, save). Writing a certificate into the store Luthier owns is an action on Luthier's own
-  state, verified by reading the store back (L11); `test` is that action (L10).
+  state, verified by reading the store back (L9); `test` is that action (L10).
 - The *demand* is a request for a value from outside the program, an action, carrying the type and
   the tolerance it wants, the type possibly decorated: the value with its error, its derivative,
   its certificate. The *planner* is what chooses, among the models certified equivalent, the one
@@ -535,7 +535,8 @@ History:    (L16) draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: 
             to L16.7 with its intersection rule deleted (D-2026-10-12-q); clause 3 written in their
             place.
 
-L9  A program is a DAG of definitions without effects, and statements commute.
+L9  A program is a DAG of definitions without effects, and statements commute; actions have effects,
+    and are verified by observing the world before and after.
 From:       G0, the demand (the DAG is what the demand walks backward) with G2 (the second
             structure's metric); a definition without effects is G0, the demand's precondition
             rather than its consequence: the declarative face can be universal and minimally
@@ -545,30 +546,45 @@ L9.1   The unit is the definition; dependencies give the only order there is, an
        reconstructed from them rather than from the text. [settled]
 L9.2   Inside a block the text fixes which binding a name means, each `<-` a fresh name
        (D-2026-10-11-i), and then dependencies give the only order. [settled]
-L9.3   Operations are declared before their laws, so a law that binds two operations is a node with
+L9.3   (His annotation) The binding acts are two, `:=` once and `<-` rebinding, and they share one
+       law: after the act the name equals the term in the equality its type has, structural `==`
+       where it exists (`05` R8), observational otherwise, a distance under G2; after `:=` for all
+       time, after `<-` until the next `<-` (`05` R12). [settled]
+L9.4   Operations are declared before their laws, so a law that binds two operations is a node with
        two parents, not a cycle. [settled]
-L9.4   A mutable parameter is two variables, before and after, so it is not an effect, the
+L9.5   A mutable parameter is two variables, before and after, so it is not an effect, the
        dependence is an edge, and mutation in place is the planner's optimization when the earlier
        one has no other consumer; what is forbidden is what the graph does not show. [settled]
-L9.5   The DAG says what depends on what; the structure the laws generate over terms (an equivalence
+L9.6   The DAG says what depends on what; the structure the laws generate over terms (an equivalence
        when laws are boolean, a metric space when they carry a distance) is a second structure,
        where L13 and L11 live. [settled]
-L9.6   A definition's result depends only on its inputs; effects live only in the actions (print,
+L9.7   A definition's result depends only on its inputs; effects live only in the actions (print,
        save). It is the one assumption under which every evaluation strategy gives the same result;
        over a carrier with a distance, a result in the same class at a distance the plan records,
        and for the Boolean case this is `Confluent` in `lib/plan.lut`, a law a dataflow is certified
        against rather than a theorem assumed. [settled]
-L9.7   (His words) No effect on the world; its one effect is on the program: it takes its name,
+L9.8   (His words) No effect on the world; its one effect is on the program: it takes its name,
        once, and enters the map of definitions, so the same name is not defined twice (`:=` once;
        `<-` only in a block, D-2026-10-11-i). [settled]
+L9.9   (His annotation) Executing is the executive face: an action changes the state of the world,
+       and it is verified too, by observing the world before and after it; the laws over actions are
+       stated over those two observations, as a mutable parameter is two variables (L9). [settled]
+L9.10  An observation is itself an action, so this stops where the world can be read back (a file
+       written and reread), and says nothing beyond; an effect on state Luthier owns is verified
+       this way, an irreversible or concurrent effect outside it is typed, logged and audited, never
+       verified. [settled]
+L9.11  An action on Luthier's own state, writing a certificate or running a test, is idempotent and
+       memoizable; an action on the world never is: the world is an opaque, unique value, so an
+       action on it is never served from the memo (D-2026-10-12-m, O3). [proposed]
 Example:    after `x <- 1`, `y := x + 10`, `x <- 2`, y is 11, as the session answers (clause 2)
-References: D-2026-10-11-i
+References: `05` R12, `05` R8; D-2026-10-11-i, D-2026-10-12-m
+Rests on:   O3 (the world as a value)
 Quote:      (L18) "lo que si es no-side effects" (chat, 2026-10-10)
 Source:     (L9) Luciano, 2026-05-29 (note:2026-05-29T14.46.22:contexto-como-dag); the unordered set
             of definitions already in 2023-03-13 (written:2023-03-13_hacia-luthier); the two
             structures and the mutable parameters 2026-10-10 (chat; D-2026-10-10-e) (L18) Luciano,
             2026-10-10 (chat; D-2026-10-10-c); his annotation on draft 8, bcdac41
-Status:     settled
+Status:     settled; clause 11 proposed
 History:    (L9) draft 0 (6d9dbd3): stated. draft 2 (cd24137): the two structures. draft 5
             (5b1446c): inside a block the text fixes the binding (D-2026-10-11-i). (L18) draft 1
             (5769005): stated. draft 4 (c7c6396): `Confluent` as the law a dataflow is certified
@@ -577,7 +593,46 @@ History:    (L9) draft 0 (6d9dbd3): stated. draft 2 (cd24137): the two structure
             (2026-10-12): the formulation split into numbered clauses with the status each sentence
             had in draft 10, the examples into Example, the provenance phrases into this History,
             the wording otherwise as draft 10 had it. clause 4 joins the two sentences of draft 10
-            on the mutable parameter, which said the same thing twice.
+            on the mutable parameter, which said the same thing twice. draft 11, step 4
+            (2026-10-12): L11 (an action is verified by observing the world before and after it)
+            merged in as clauses 9 and 10, the binding acts of L5.2 as clause 3, clause 11 on
+            actions on Luthier's own state written (D-2026-10-12-m) (absorbed L11) From: G0
+            (identity is the first proposition; his "path equivalence is the fundamental concept",
+            2026-05-29); the two faces are G0, the demand's statement; the verification of actions
+            from G1 (observation) and G0, the demand Quote: "la matemática no ejecuta ... la
+            ejecución en Luthier sería esa verificación de equivalencias" (2026-05-30) "una funcion
+            genera equivalencias f(a)==f(b) ==> a~b y mas si f(a)=true" (chat, 2026-10-11) "las
+            ejecuciones tambien se verifican observando el mundo antes y despues del acto"
+            (annotation on draft 2, 2c18c41) Source: Luciano, 2026-05-30; the kernel reading
+            2026-10-11 (chat); the actions 2026-10-11 (annotation on draft 2, 2c18c41) Status:
+            settled History: draft 0 (6d9dbd3): stated. draft 2 (cd24137), addenda 7 and 8: the
+            kernel of a function as the equivalence on its domain. draft 3 (c085ba4), his
+            annotation: actions verified by observing the world before and after. draft 4 (c7c6396):
+            an observation is an action; stops where the world can be read back. draft 5 (5b1446c):
+            the kernel reading is an interpretation, not the mechanism; a name only where a normal
+            form exists (formerly under G4). draft 6 (8809e20): effects outside Luthier typed,
+            logged and audited. draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): renumbered from L12;
+            shortened on his note of 2026-10-12: evaluation and execution are in Terms, the reading
+            of computation as the kernel of a function stays in this record (History below). the
+            reading dropped from the projection at draft 10: Luthier first describes the problem and
+            its equivalences; evaluating is checking them, as mathematics verifies rather than runs.
+            (His annotation) Executing is the executive face: an action changes the state of the
+            world, and it is verified too, by observing the world before and after it; the laws over
+            actions are stated over those two observations, as a mutable parameter is two variables
+            (L9). An observation is itself an action, so this stops where the world can be read back
+            (a file written and reread), and says nothing beyond; an effect on state Luthier owns is
+            verified this way, an irreversible or concurrent effect outside it is typed, logged and
+            audited, never verified. Every function induces an equivalence on its domain, its
+            kernel, so computing f(x) is placing x in its class and the value is the class's name:
+            an interpretation of computation, not the evaluator's mechanism, and a name exists only
+            where a normal form does, the decidable fragment (no canonical form elsewhere); a
+            predicate is the two-class case and `Maybe T` places x in one of them. This equivalence
+            on the domain is distinct from the equivalence between terms that a law induces, which
+            is L10's quotient. draft 11, step 3 (2026-10-12): the formulation split into numbered
+            clauses with the status each sentence had in draft 10, the examples into Example, the
+            provenance phrases into this History, the wording otherwise as draft 10 had it.
+            shortened at draft 10 on his note of 2026-10-12: evaluation and execution are in Terms,
+            the reading of computation as the kernel of a function stays in this History.
 
 L10 The demand determines the computation and the types produced.
 From:       G0, the demand directly; the audio of 08.58 (15:35 to 17:12, 30:37 to 31:21) adds the
@@ -962,7 +1017,7 @@ L14.2  (His words, "si el tipo no sigue la ley no se aplica el calculo") An exte
 L14.3  A function with no laws at all is not a function to run but a hole of a theory being defined
        (L4). [settled]
 L14.4  The extern's certificate binds the host library's version and the platform (W10), and its
-       declaration says whether it is a definition or an action (L11, L9). [settled]
+       declaration says whether it is a definition or an action (L9). [settled]
 L14.5  Certification is the default for every value: demanding a value demands every certificate in
        its dependency cone, paid once through the memo, unless the demand asks otherwise by a
        mechanism to be named (O3), which leaves a certificate of grade `assumed` (D-2026-10-11-n),
@@ -1100,6 +1155,15 @@ History:    draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: roundi
             the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it.
 ```
+
+(History: L11 at draft 11 step 3, merged into L9 in step 4: L11 An action is verified by observing
+the world before and after it. 1. (His annotation) Executing is the executive face: an action
+changes the state of the world, and it is verified too, by observing the world before and after it;
+the laws over actions are stated over those two observations, as a mutable parameter is two
+variables (L9). [settled] 2. An observation is itself an action, so this stops where the world can
+be read back (a file written and reread), and says nothing beyond; an effect on state Luthier owns
+is verified this way, an irreversible or concurrent effect outside it is typed, logged and audited,
+never verified. [settled])
 
 ## What is open
 
