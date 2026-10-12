@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 b21d98841a59, commit d3a5ed2 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 cb86fa4e566b, commit 2b79c02 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -49,6 +49,10 @@ Each term has one category and is defined here and nowhere else; the principles 
   that runs, and plans the decorated type the demand asks for.
 - The *declarative face* of a program is what it states: its types, laws and definitions. The
   *executive face* is what the demands ask of it.
+- A program lives in two places. The *mind* holds the definitions and their universe `U`: timeless,
+  copied, compared, memoized. The *world* `W` is where actions act: one world, each value of it used
+  once, never memoized (D-2026-10-13-b). The declarative face is the mind's; the executive face acts
+  on the world.
 
 - An *object* is a type with its equality, the word for what C++ calls a regular type: the base
   theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author
@@ -176,11 +180,18 @@ the separation of the second structure is the model's proposal.
   [settled]
 - L4.11 An action on Luthier's own state, writing a certificate or running a test, is idempotent and
   memoizable; an action on the world never is: the world is an opaque, unique value, so an action on
-  it is never served from the memo (D-2026-10-12-m, O3). [proposed]
+  it is never served from the memo (D-2026-10-12-m, O3). Unique is meant literally: the world is `W`,
+  a primitive of the core beside `U`, with no introduction (it enters at `main` or the session), no
+  `==`, and each value of it used once (D-2026-10-13-b). [proposed]
+- L4.12 There is one world. Its parts, a file or a clock, are parts of Luthier's representation of
+  it, and whether two of them are independent is a theory of that representation, written in a library
+  and certified like any law; the language imposes no partition. Two actions on the world commute only
+  where such a certified law says so, and only over what can be read back (clause 10)
+  (D-2026-10-13-a). [proposed]
 Example: after `x <- 1`, `y := x + 10`, `x <- 2`, y is 11, as the session answers (clause 2).
 References: spec 4.R12, spec 4.R8; D-2026-10-11-i, D-2026-10-12-m.
 Rests on: O3 (the world as a value).
-Status: settled; clause 11 proposed.
+Status: settled; clauses 11 and 12 proposed.
 
 **L5. The demand determines the computation and the types produced; the meaning of a program, its
 realization under a plan and its evidence are three objects, never one.**
@@ -301,13 +312,16 @@ clause).
   implementation into the planner's graph (D-2026-10-11-m); the agreement test of W5 between native
   and extern is this law, and the reference formula of a law evaluated over `Rational` is one more
   specimen, with grade exact, checked by the same law. [candidate]
+- L6.12 An importer sees a module only through the theory it gives the module as type, so the
+  module's representation stays private and another model of the same theory can take its place
+  without the importer noticing; privacy is ascription, not a keyword (D-2026-10-13-c). [proposed]
 Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
 there (clause 9).
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5.
 Rests on: O1 (the sensitivity), O2.
 Status: settled; statement in his words, 2026-10-12, with "specimens" and "along certified
 identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7 proposed; clause
-11 candidate, from L3.
+11 candidate, from L3; clause 12 proposed (D-2026-10-13-c).
 
 **L7. The core is minimal, executable by hand, and its programs are data.**
 From: G0 (a type theory is a few rules whose judgments a person checks; a small trusted kernel) and
@@ -324,8 +338,11 @@ classifier when it means G2's truth values).
   planner, advice that the plan records. [settled]
 - L7.4 A Luthier program is an element of Luthier; programs build, inspect and run other programs,
   and the interpreter is meant to be written in the language it interprets. [settled]
+- L7.5 What a library can decide, the core does not: the core asks of each library the fewest
+  operations and laws it uses (for costs, spec 6.S5), and the open choices of the library are taken
+  when it is implemented and its invariants are found (D-2026-10-12-al, P16). [proposed]
 Rests on: O11 (the kernel's theory stated in Luthier).
-Status: settled.
+Status: settled; clause 5 proposed (D-2026-10-12-al).
 
 **L14. What can be written in Luthier is written in Luthier.**
 From: G0 (a type theory states its own rules in its own terms; L7, programs are data and the
@@ -478,13 +495,16 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   accepts a sampled path is its evidence cutoff, a parameter (P11). [proposed]
 - L10.9 No operation on certificates raises a grade, lowers an evidence cost or widens a domain
   without new evidence. [settled]
+- L10.10 Only a certifier builds a certificate: the constructor of `Certificate` is in no interface
+  outside the theory of certification (L6.12), so clause 9 is enforced by the language and not left to
+  good conduct (D-2026-10-13-c). [proposed]
 Example: with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
 lookup table equal to the native on a grid is certified on the grid and nowhere else (clause 7).
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t; P3, P11.
 Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax).
 Status: proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4 to 6
 settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7 carries his correction
-of draft 7 in grades.
+of draft 7 in grades; clause 10 proposed (D-2026-10-13-c).
 
 **L11. Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
 does not follow Luthier's way lives in a world.**

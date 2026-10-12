@@ -155,6 +155,10 @@ Each term has one category and is defined here and nowhere else; the principles 
   that runs, and plans the decorated type the demand asks for.
 - The *declarative face* of a program is what it states: its types, laws and definitions. The
   *executive face* is what the demands ask of it.
+- A program lives in two places. The *mind* holds the definitions and their universe `U`: timeless,
+  copied, compared, memoized. The *world* `W` is where actions act: one world, each value of it used
+  once, never memoized (D-2026-10-13-b). The declarative face is the mind's; the executive face acts
+  on the world.
 
 - An *object* is a type with its equality, the word for what C++ calls a regular type: the base
   theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author
@@ -581,7 +585,14 @@ L4.10  An observation is itself an action, so this stops where the world can be 
        verified. [settled]
 L4.11  An action on Luthier's own state, writing a certificate or running a test, is idempotent and
        memoizable; an action on the world never is: the world is an opaque, unique value, so an
-       action on it is never served from the memo (D-2026-10-12-m, O3). [proposed]
+       action on it is never served from the memo (D-2026-10-12-m, O3). Unique is meant literally:
+       the world is `W`, a primitive of the core beside `U`, with no introduction (it enters at
+       `main` or the session), no `==`, and each value of it used once (D-2026-10-13-b). [proposed]
+L4.12  There is one world. Its parts, a file or a clock, are parts of Luthier's representation of
+       it, and whether two of them are independent is a theory of that representation, written in
+       a library and certified like any law; the language imposes no partition. Two actions on the
+       world commute only where such a certified law says so, and only over what can be read back
+       (clause 10) (D-2026-10-13-a). [proposed]
 Example:    after `x <- 1`, `y := x + 10`, `x <- 2`, y is 11, as the session answers (clause 2)
 References: spec 4.R12, spec 4.R8; D-2026-10-11-i, D-2026-10-12-m
 Rests on:   O3 (the world as a value)
@@ -590,7 +601,7 @@ Source:     (L9) Luciano, 2026-05-29 (note:2026-05-29T14.46.22:contexto-como-dag
             of definitions already in 2023-03-13 (written:2023-03-13_hacia-luthier); the two
             structures and the mutable parameters 2026-10-10 (chat; D-2026-10-10-e) (L18) Luciano,
             2026-10-10 (chat; D-2026-10-10-c); his annotation on draft 8, bcdac41
-Status:     settled; clause 11 proposed
+Status:     settled; clauses 11 and 12 proposed
 History:    (L9) draft 0 (6d9dbd3): stated. draft 2 (cd24137): the two structures. draft 5
             (5b1446c): inside a block the text fixes the binding (D-2026-10-11-i). (L18) draft 1
             (5769005): stated. draft 4 (c7c6396): `Confluent` as the law a dataflow is certified
@@ -819,6 +830,10 @@ L6.11  The identity law between two specimens, with its distance, is what admits
        implementation into the planner's graph (D-2026-10-11-m); the agreement test of W5 between
        native and extern is this law, and the reference formula of a law evaluated over `Rational`
        is one more specimen, with grade exact, checked by the same law. [candidate]
+L6.12  An importer sees a module only through the theory it gives the module as type, so the
+       module's representation stays private and another model of the same theory can take its place
+       without the importer noticing; privacy is ascription, not a keyword (D-2026-10-13-c).
+       [proposed]
 Example:    γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
             there (clause 9)
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5
@@ -829,7 +844,7 @@ Source:     Luciano, 2022-06-28 (written:2022-06-28_luciano-code-style:choose-ef
             equivalencias-para-clasificar-y-separar-decoraciones)
 Status:     settled; statement in his words, 2026-10-12, with "specimens" and "along certified
             identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7
-            proposed; clause 11 candidate, from L3
+            proposed; clause 11 candidate, from L3; clause 12 proposed (D-2026-10-13-c)
 History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137): stated as a quotient. draft 4 (c7c6396),
             D-2026-10-11-m: exact in the theory, a ball in the model; substitution only along a
             certified equivalence. draft 5 (5b1446c): a weighted graph, not a class; a lone
@@ -868,11 +883,15 @@ L7.3   Four layers, each trusted differently: the kernel, checked by hand; the l
        the planner, advice that the plan records. [settled]
 L7.4   A Luthier program is an element of Luthier; programs build, inspect and run other programs,
        and the interpreter is meant to be written in the language it interprets. [settled]
+L7.5   What a library can decide, the core does not: the core asks of each library the fewest
+       operations and laws it uses (for costs, spec 6.S5), and the open choices of the library are
+       taken when it is implemented and its invariants are found (D-2026-10-12-al, P16).
+       [proposed]
 Rests on:   O11 (the kernel's theory stated in Luthier)
 Quote:      (L7) "Luthier tendría que ser ejecutable a mano" (2026-05-29)
 Source:     (L6) Luciano, 2022-06-15 (written:2022-06-15_sin-titulo-2:codigo-es-dato) (L7) Luciano,
             2026-05-29
-Status:     settled
+Status:     settled; clause 5 proposed (D-2026-10-12-al)
 History:    (L6) draft 1 (5769005): stated. (L7) draft 0 (6d9dbd3): stated. Draft 0 of the
             generative plan proposed moving it to the way of working; withdrawn (D3). draft 4
             (c7c6396): hand execution is of the kernel given a plan. draft 6 (8809e20): the four
@@ -1113,6 +1132,9 @@ L10.8  Links sampled over different distributions do not compose without a law r
        (P11). [proposed]
 L10.9  No operation on certificates raises a grade, lowers an evidence cost or widens a domain
        without new evidence. [settled]
+L10.10 Only a certifier builds a certificate: the constructor of `Certificate` is in no interface
+       outside the theory of certification (L6.12), so clause 9 is enforced by the language and not
+       left to good conduct (D-2026-10-13-c). [proposed]
 Example:    with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
             lookup table equal to the native on a grid is certified on the grid and nowhere else
             (clause 7)
@@ -1130,7 +1152,7 @@ Source:     the critiques of draft 10 (`record/IA/principles 2026 10 12/`, 1429f
             from L10.7, L10.10, L10.13, L10.5 and L14.5 of draft 11 step 3
 Status:     proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4
             to 6 settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7
-            carries his correction of draft 7 in grades
+            carries his correction of draft 7 in grades; clause 10 proposed (D-2026-10-13-c)
 History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 11 (2026-10-12), his
             marks: clause 2 elaborated with the two kinds of assumption (D-2026-10-12-t); clauses 3
             and 9 marked ok (D-2026-10-12-w). draft 11 (2026-10-12): renumbered from L16 of draft 10
