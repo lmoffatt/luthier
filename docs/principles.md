@@ -4,7 +4,7 @@ Draft 9, 2026-10-12, unapproved. Draft 8 (4f6beef) was annotated by Luciano (bcd
 draft 9 applies them in place, each retouch marked "(draft 9)", with the answers in
 `record/answers-annotations-principles-2026-10-12.md` §5: the holotype paragraphs removed and his
 words put in their place (the item is settled); the lift from Bool to Cost explicit and named (G3);
-G4 retired as an organizer, its content a candidate L22, his mark pending; L3 widened to the theory;
+G4 retired as an organizer (D-2026-10-12-c), its content L22; L3 widened to the theory;
 L8, L11, L18 completed in his words; L20 absorbed into G2; L21 restated as graded transport,
 replacing two clauses of draft 7, his mark pending. Where a retouch is his decision it says so;
 where it is the model's proposal on his doubt it is marked *Proposed* and he corrects it here.
@@ -64,7 +64,7 @@ The check of P13 (a principle is worth the decisions it guides), over the 56 ent
 | G1 demand | 5 |
 | G2 description | 8 |
 | G3 cost | 1 (D-2026-10-10-g) |
-| G4 expressive | 4 |
+| G4 expressive, retired in draft 9 | 4, none depending on it |
 
 G3 guides one decision so far and is marked candidate, as D5 says; the section on how the organizers depend on each other says why it is
 load-bearing anyway.
@@ -85,7 +85,7 @@ tiempo y costo en memoria o por error." (note, fa3f972); "la guía es la te[o]r�
 *Proposed* formulation: a type is a proposition and a value its proof; a law is a proposition
 over terms, so it defines a mathematical object and a quotient, and inside a class the
 representative is free; (draft 5) free in the theory, where the law is exact; in a model the
-planner's freedom is what L10 states. What follows departs from type theory in four places, each
+planner's freedom is what L10 states. What follows departs from type theory in three places, each
 named below
 by what type theory lacks.
 
@@ -180,26 +180,16 @@ what the Boolean way costs: a tolerance fixed in each law, worst-case bounds tha
 condition numbers, and nothing to say about data (`record/organizing-principles-2026-10-11.md`,
 addendum 2). Articulated in `docs/rationale/11-cost-valued-laws.md`, draft 0 (D6). Candidate by
 the P13 check, in his words a wish.
-**G4. Expressive over restrictive; it decides between designs.** (Draft 9, *Proposed* on his doubt,
-his mark pending: retired as an organizer. His words: "Mi idea era otra: si hay una forma 'no
-luthieriana' de definir o implementar algo, luthier deberia dar la posibilidad de hacerlo con un
-world especifico ... me da que es una declaracion de buenas intenciones nomas". What cites it: four
-decisions by their Kind lines (D-2026-10-11-k, -m, -n and one more), L10's "every path expressible"
-and the tie-breaker of D8; none reverses without it, k is taste, m follows from L10 and G0, n is his
-escape hatch. What survives is the concrete content, as candidate L22 under G1: a non-Luthier way of
-defining or implementing something is allowed inside a named world (L12), its certificates `assumed`
-(D-2026-10-11-n), visible in the plan. "The law that makes two ways equivalent" is L21 and needs no
-principle; P5 stays in `record/principles.md`. The text below is kept until his mark.) Source:
-"Luthier debe ser expresivo
-mas que restrictivo: si hay
-mas de una forma de hacer las cosas, todas deberian poder ser expresadas en Luthier" (note).
-*Proposed* formulation: when the language could forbid or allow, it allows and asks for the law
-that makes the alternatives equivalent; a free choice among equivalents is legitimate (P5). It
-decides between designs rather than describing the language: when G0 to G3 allow two designs
-equally, G4 chooses the one that allows both and asks for the law that makes them equivalent, so
-it generates no L of its own and appears as the reason behind decisions (section 2, last part) and
-inside L10.
-What type theory lacks: one canonical form per value.
+**G4. Retired (draft 9, D-2026-10-12-c).** It read "Expressive over restrictive; it decides between
+designs", from his note "Luthier debe ser expresivo mas que restrictivo: si hay mas de una forma de
+hacer las cosas, todas deberian poder ser expresadas en Luthier". Retired on his doubt ("me da que
+es una declaracion de buenas intenciones nomas") and the model's recommendation: in four drafts it
+generated no L, the four decisions that cite it (D-2026-10-11-c, -b, -k, -m, -n by their Kind lines)
+stand on L10 and G0 without it, and what he meant by it is concrete and is a rule, L22 (a
+non-Luthier way is allowed inside a named world). "The law that makes two ways equivalent" is L21;
+P5 (a free choice is a legitimate principle) stays in `record/principles.md`. The tag stays so that
+the record's citations resolve.
+
 ### How the organizers depend on each other (*Proposed*, D8)
 
 1. G0's quotient needs G1 and G3 where the carrier carries a distance: there two implementations
@@ -336,8 +326,8 @@ an hour at 48 kHz) and is void where they fail. The
 author's free choice among the inhabitants of
 an under-determined function
 (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared. From G0
-(the quotient), G3 (the choice by cost and the database of runs) and G4 (every path expressible,
-the reason behind the decision). Source: Luciano,
+(the quotient), G3 (the choice by cost and the database of runs) and, before its retirement, G4
+(every path expressible; now L10's own clause). Source: Luciano,
 2022-06-28 (`written:2022-06-28_luciano-code-style:choose-efficient-path-after-validity`); the
 quotient 2026-10-10 (`WhatsApp Ptt 2026-10-10 at 16.49.14.md`, 00:04 to 01:39), the same idea
 without the word 2026-05-30
@@ -355,7 +345,8 @@ and audited, never verified.
 Retouched (addenda 7 and 8): every function induces an equivalence on its domain, its kernel, so
 computing f(x) is placing x in its class and the value is the class's name, (draft 5) an
 interpretation of computation, not the evaluator's mechanism, and a name exists only where a
-normal form does, the decidable fragment (G4 refuses a canonical form elsewhere); a predicate is the
+normal form does, the decidable fragment (no canonical form elsewhere; formerly G4); a predicate is
+the
 two-class case and `Maybe T` places x in one of them. This equivalence on the domain is distinct
 from the equivalence between terms that a law induces, which is L10's quotient. From G0 (identity
 is the first proposition; his "path equivalence is the fundamental concept", 2026-05-29); the
@@ -433,7 +424,7 @@ declaration says whether it is a definition or an action (L12, L18). (Draft 4,
 D-2026-10-11-n) This is the default for every value: demanding a value demands every certificate
 in its dependency cone, paid once through the memo, unless the demand asks otherwise by a
 mechanism to be named, which leaves a certificate of grade `assumed` (draft 5), since what could
-be done Luthier gives a way to do (G4); `test` is the action that demands certificates without
+be done Luthier gives a way to do (L22); `test` is the action that demands certificates without
 values (L19). Luthier is in use
 a coupling language: the joint between two libraries is a theory of which each is a model, the
 bridges between representations live at the joint with their cost and error, and no coupling
@@ -609,6 +600,14 @@ becomes its `main` block (D-2026-10-11-i). Source: Luciano, 2026-10-10 (`WhatsAp
 at 17.28.45.md`; D-2026-10-10-d, f, h). The three cases at the leaves and the memo key are the
 model's, accepted.
 
+**L22. The escape hatch is a world.** *Proposed*, candidate (draft 9, from his words on G4: "si hay
+una forma 'no luthieriana' de definir o implementar algo, luthier deberia dar la posibilidad de
+hacerlo con un world especifico"). A definition or an implementation that does not follow Luthier's
+way, an extern with no law yet, a foreign algorithm taken as is, is allowed inside a named world
+(L12): its certificates are `assumed` (D-2026-10-11-n), the plan shows the world it ran in, and
+nothing from it enters the planner's graph (L10) until a law is certified. From G1 (the demand names
+the world it runs in) with L12 and L14. Source: his annotation on draft 8 (bcdac41).
+
 ### From cost, G3
 
 **L15. The ideal world is realized with a guarantee.** Code is written over ideal objects (Real)
@@ -628,11 +627,12 @@ Luciano, 2026-05-29; the floats note of 2026-10-11 (5cc41fa); the functor 2026-1
 (annotation: "un functor que va de Real--> Float64 y que ahi vemos algunas propiedades de Real
 proyectadas en Float").
 
-### Decided by G4
+### Formerly decided by G4 (retired, draft 9)
 
-G4 generates no L of its own and decides between designs: `:=` once and `<-` for rebinding with
-default arguments (D-2026-10-11-c), `if` without `else` as a guarded value (D-2026-10-11-b), many
-paths expressible (L10), accumulating laws rather than required characterization (D-2026-10-11-d).
+`:=` once and `<-` for rebinding with default arguments (D-2026-10-11-c), `if` without `else` as a
+guarded value (D-2026-10-11-b), many paths expressible (L10), accumulating laws rather than required
+characterization (D-2026-10-11-d): each stands on L10, G0 or his own decision, and none needed the
+tie-breaker.
 
 ## 3. What is open
 

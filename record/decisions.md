@@ -1062,3 +1062,19 @@ Source:     chat, 2026-10-12
 Kind:       documents (docs/). For P12 (what reaches him is one question per screen; the W were a
             third of the file and guide no L), P7 (each document self-contained)
 Status:     current; split at 0db35c2
+
+D-2026-10-12-c  G4 (expressive over restrictive) is retired as an organizer. Its concrete content
+                is L22, candidate: a non-Luthier way of defining or implementing something is
+                allowed inside a named world, its certificates assumed, outside the planner's graph
+                until a law is certified. The tag G4 stays for the record's citations.
+Author:     Luciano for the doubt and the content of L22; Claude for the recommendation to retire
+            and the wording of L22. Taken by the model: one commit undoes it and nothing depends on
+            it (the four decisions citing G4 stand on L10 and G0)
+Quote:      "Mi idea era otra era que, si hay una forma 'no luthieriana' de definir o implementar
+            algo, luthier deberia dar la posibilidad de hacerlo con un world especifico ...
+            Evaluemos si se pierde algo retirando este principio ... me da que es una declaracion
+            de buenas intenciones nomas" (bcdac41); "Decime que opinas" (chat)
+Source:     record/answers-annotations-principles-2026-10-12.md §5 (G4)
+Kind:       organizers. For P13 (in four drafts G4 generated no L and guided no decision that
+            needed it), P8 (no more bureaucracy than it pays for)
+Status:     current; docs/principles.md draft 9; reversible by him in one line
