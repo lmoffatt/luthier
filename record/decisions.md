@@ -1366,10 +1366,14 @@ D-2026-10-12-x  A new principle, L14: what can be written in Luthier is written 
 Author:     Luciano for the principle and for Term as data in version 0; Claude for the four
             clauses' wording, proposed
 Quote:      "todas las especificaciones de como se corre luthier tienen que estar escritas en
-            luthier, de ser esto posible. La implementacion puede ser en python, of course y
-            podemos intentar ambos caminos" (a066adc) "Y podemos agregar el principle de que si se
-            puede se escribe en Luthier" "eso es el boostrap no?" (chat, 2026-10-12)
-Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D8 (a066adc); chat 2026-10-12
+            luthier, de ser esto posible."
+            "La implementacion puede ser en python, of course y podemos intentar ambos caminos"
+            "Y podemos agregar el principle de que si se puede se escribe en Luthier"
+            "eso es el boostrap no?"
+Source:     luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:85
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:86
+            chat:4f7f0dc5:1046
+            chat:4f7f0dc5:1056
 Kind:       principles (L14 new, under G0; L7, W2, W5 as precedents). For G0, L7, P13 (the decisions
             it already guided: D8 of the spec plan, W5's restatement, Term as data in version 0)
 Status:     current; L14 in record/principles-language.md, its clauses proposed, his mark pending
@@ -1384,18 +1388,30 @@ D-2026-10-12-y  His marks on the wave 1 decisions of the specification (D1 to D1
                 answered) a cone with a `provisional` extern is refused like an uncertified
                 one; D8 accepted with a theory of libraries written in Luthier, which became L14.
 Author:     Luciano; Claude for the reading of D7 on provisional externs
-Quote:      "fist option" "ok" "yes" "I am not sure if this is a matter for the specification or
-            for different libraries, I think it is something we will learn by doing. so as a
-            general rule, lets do the thing that it is easier to build from." "esta no puede ser
-            una decision irreversible, todo lo que tenga que ver con epsilon lo iremos
-            descubriendo along the way" "no, empecemos siendo estrictos, sino es un viva la pepa
-            y no testeamos Luthier nunca." "si, confio en tu criterio" "dale" (a066adc; chat)
-Source:     record/plan-spec-2026-10-12-decisions.md (a066adc); chat 2026-10-12
+Quote:      "fist option"
+            "ok"
+            "yes"
+            "I am not sure if this is a matter for the specification or for different libraries, I
+            think it is something we will learn by doing."
+            "so as a general rule, lets do the thing that it is easier to build from."
+            "esta no puede ser una decision irreversible, todo lo que tenga que ver con epsilon lo
+            iremos descubriendo along the way"
+            "no, empecemos siendo estrictos, sino es un viva la pepa y no testeamos Luthier nunca."
+            "si, confio en tu criterio"
+Source:     luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:21
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:32
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:41
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:53
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:54
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:70
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:77
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:96
 Kind:       document and principles (L10.6, O3: the opt-out of D-2026-10-11-n reversed in its
             opt-out part; the certificate's grades; the specification's layout). For P16, P11,
             W4 (strictness is the application paying for certification)
 Status:     current; D-2026-10-11-n stands for certification by default and is reversed on the
-            opt-out, which waits for a real case (O3)
+            opt-out, which waits for a real case (O3); the "dale" the entry quoted at first
+            is in no transcript of the day and was dropped (2026-10-12)
 
 D-2026-10-12-z  The term *object*: anything a name defines, a theory or a value, a function or a
                 datum, with or without laws, the word for what C++ calls a regular type; a
@@ -1406,8 +1422,8 @@ Author:     Luciano for the two uses; Claude for keeping the one-symbol case ins
             the link to O2 (a regular type is one that comes with its equality)
 Quote:      "Yo propuse que Object se use para englobar a theoria y funcion y dato (no tenemos
             nombre para lo que seria un tipo regular de c++), y dejar teoria para varias cosas se
-            definen interrelacionadamente." (a066adc)
-Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D5 (a066adc)
+            definen interrelacionadamente."
+Source:     luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:61
 Kind:       terms (Terms of docs/principles.md; O7; chapter 4 of the spec). For P12, D-2026-10-12-f
 Status:     current; Terms updated, O7 closed
 
@@ -1417,13 +1433,14 @@ D-2026-10-12-aa A principle of the method, P16: between designs that satisfy wha
 Author:     Luciano, from a text he brought ("aquí hay una idea interesante": last responsible
             moment, two-way doors, "good architecture makes change cheap") and his marks on D4 and
             D6; the statement's wording the model's
-Quote:      "so as a general rule, lets do the thing that it is easier to build from." "esta no
-            puede ser una decision irreversible" (a066adc)
-Source:     chat 2026-10-12; record/plan-spec-2026-10-12-decisions.md (a066adc)
+Quote:      "so as a general rule, lets do the thing that it is easier to build from."
+            "esta no puede ser una decision irreversible"
+Source:     luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:54
+            luthier@a066adc:record/plan-spec-2026-10-12-decisions.md:70
 Kind:       principles of the method (record/principles.md P16). For P13 (the decisions it guided
             before it was named: D-2026-10-12-q, -r, L10.2, D4 and D6 of the spec plan), P8 (the
             brake: flexibility has a cost), P6
-Status:     current; P16 in record/principles.md, proposed wording, his mark pending
+Status:     current; P16 in record/principles.md, proposed wording, his mark pending; the text he brought is at chat:4f7f0dc5:981
 
 D-2026-10-12-ab The reserved words. Keywords: `data`, `match`, `if`, `then`, `else`, `U` (his
                 correction: the universe is a kernel former), and possibly `operator`. Everything
@@ -1435,13 +1452,25 @@ D-2026-10-12-ab The reserved words. Keywords: `data`, `match`, `if`, `then`, `el
                 Luthier (L14). Modules are values. `extern` is an action, since it opens a file.
                 Implicit arguments inferred from the expected type (bidirectional) are needed.
 Author:     Luciano; the one-by-one analysis and the classification the model's (chat)
-Quote:      "test justamente va a ser una de las funciones con mas parameterizaciones de modo que
-            la alternativa, usar posicional, no es buena. Yo creo que todo lo que pueda ser luthier
-            debe ser luthier. el extern es una accion no? porque abre un file. necesitamos el tipo
-            de implicitos creo. If then else match data--> keywords. operator -> podria ser
-            keyword... Igual sean o no keyword, su semantica debiera ser expresable por luthier no?
-            los modulos son valores." "U me parece que es keyword no?" (chat, 2026-10-12)
-Source:     chat 2026-10-12, on the analysis of the reserved words of spec 2.S2
+Quote:      "test justamente va a ser una de las funciones con mas parameterizaciones de modo que la
+            alternativa, usar posicional, no es buena."
+            "Yo creo que todo lo que pueda ser luthier debe ser luthier."
+            "el extern es una accion no? porque abre un file"
+            "necesitamos el tipo de implicitos creo."
+            "If then else match data--> keywords"
+            "operator -> podria ser keyword..."
+            "Igual sean o no keyword, su semantica debiera ser expresable por luthier no?"
+            "los modulos son valores."
+            "U me parece que es keyword no?"
+Source:     chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1508
+            chat:4f7f0dc5:1591
 Kind:       language (spec 2, 3, 10, 12; L14, L4, L11). For L14, P16
 Status:     current; the question of extern and import as actions inside definitions (against
             L4.7) open, one question to him
@@ -1457,15 +1486,24 @@ D-2026-10-12-ac When a file is read. An `extern` is a definition like any other:
                 until a demand reaches them. One rule: a file is read when some demand needs it;
                 the checker demands names and types, `run` and `test` demand values.
 Author:     Luciano; the unifying rule and the consequences for certification the model's
-Quote:      "todo tiene o no tiene efecto sobre el mundo depende cuando. extern tiene efecto cuando
-            se ejecuta el programa. ... debemos ejecutar extern si la funcion no es usada por la
-            demanda? yo creo que no. SOlo se registrarian los tipos de la variables y su inclusion
-            en el compilation tree pero no se abriria el archivo ni nada (habria que definir si el
-            archivo debiera existir, calculo que no debiera). ... declaras la ruta para llegar a la
-            funcion." "import es otro costal porque import te agrega nombres que si no los
-            importas no sabes que existen entonces import seria de ejecucion inmediata en cuanto a
-            la lectura, pero no en cuanto a cargar las funciones." (chat, 2026-10-12)
-Source:     chat 2026-10-12, after D-2026-10-12-ab
+Quote:      "todo tiene o no tiene efecto sobre el mundo depende cuando."
+            "extern tiene efecto cuando se ejecuta el programa."
+            "debemos ejecutar extern si la funcion no es usada por la demanda? yo creo que no."
+            "SOlo se registrarian los tipos de la variables y su inclusion en el compilation tree
+            pero no se abriria el archivo ni nada (habria que definir si el archivo debiera existir,
+            calculo que no debiera)."
+            "declaras la ruta para llegar a la funcion."
+            "import es otro costal porque import te agrega nombres que si no los importas no sabes
+            que existen"
+            "entonces import seria de ejecucion inmediata en cuanto a la lectura, pero no en cuanto
+            a cargar las funciones."
+Source:     chat:4f7f0dc5:1526
+            chat:4f7f0dc5:1526
+            chat:4f7f0dc5:1526
+            chat:4f7f0dc5:1526
+            chat:4f7f0dc5:1526
+            chat:4f7f0dc5:1539
+            chat:4f7f0dc5:1539
 Kind:       language (L11, L5, L10.6; spec 3, 10, 12). The interpreter does otherwise today: the
             checker imports the Python module of every extern when it checks the file
             (`src/luthier/checker.py`, the `importlib.import_module` in the registration of an
@@ -1483,12 +1521,16 @@ D-2026-10-12-ad Import is lazy too, and `test` of a module is the total demand. 
                 read `import` at once; that reason holds only for a flat import, whose names cannot
                 be traced to their file.
 Author:     Luciano; the correction of -ac and the flat-import caveat the model's
-Quote:      "en realidad yo solo importo linear_algebra.lut cuando necesito una funcion de la... con
-            lo que import tampoco seria una accion. Esto dejaria muchos muertos latentes, con lo que
-            deberia haber un comando que inicialize todo para chequear que las cosas estan
-            definidas." "si yo hago test "linear_algebra.lut" por ejemplo seria una accion y ahi
-            inicializo todo." (chat, 2026-10-12)
-Source:     chat 2026-10-12, after D-2026-10-12-ac
+Quote:      "en realidad yo solo importo linear_algebra.lut cuando necesito una funcion de la..."
+            "con lo que import tampoco seria una accion."
+            "Esto dejaria muchos muertos latentes, con lo que deberia haber un comando que
+            inicialize todo para chequear que las cosas estan definidas."
+            "si yo hago test "linear_algebra.lut" por ejemplo seria una accion y ahi inicializo
+            todo."
+Source:     chat:4f7f0dc5:1646
+            chat:4f7f0dc5:1646
+            chat:4f7f0dc5:1646
+            chat:4f7f0dc5:1657
 Kind:       language (L11.7, L5; spec 12.S21, 12.S22; 7.S20). For L5 (only what the demand needs is
             produced), L14
 Status:     current; -ac partly reversed (import); open, his: whether a flat import survives (as an
@@ -1504,8 +1546,8 @@ D-2026-10-12-ae No names are imported into a namespace. A module is reached only
 Author:     Luciano for no imported names; Claude for the importer naming the module and for core
             as the enclosing scope, both proposed
 Quote:      "o sea que no habria nombres importados al namespace, lo cual hace que sepamos donde
-            buscar los nombres!!!" (chat, 2026-10-12)
-Source:     chat 2026-10-12, answering the open question of D-2026-10-12-ad
+            buscar los nombres!!!"
+Source:     chat:4f7f0dc5:1687
 Kind:       language (spec 12.S3, 12.S6, 12.S21, 12.S22; spec 2 §6). For L14, P16
 Status:     current; closes the flat-import question of -ad
 
@@ -1523,12 +1565,17 @@ D-2026-10-12-af Import names what enters the environment. `import "linear_algebr
 Author:     Luciano for the selective import with `as`; Claude for the translation into an alias
             and the ban on `*`
 Quote:      "there is not such a thing as a flat import, seria y lo bueno de eso es que permite la
-            laziness en importar! ... queremos escribir algo como import "linear_algebra.lut"
-            Linear_Algebra ... y podriamos hacer import "linear_algebra.lut" Linear_Algebra as LA a
-            la python ... Entonces cuando hacemos import decimos que nombres entran al environment y
-            con eso podemos buscar. Luego, con core es como que hacermo import "core.lut" Int Bool
-            List algo asi" (chat, 2026-10-12)
-Source:     chat 2026-10-12, after D-2026-10-12-ae
+            laziness en importar!"
+            "import "linear_algebra.lut" Linear_Algebra as LA"
+            "Entonces cuando hacemos import decimos que nombres entran al environment y con eso
+            podemos buscar."
+            "import "core.lut" Int Bool List"
+            "si, core ahi si incluiria esos tipos."
+Source:     chat:4f7f0dc5:1714
+            chat:4f7f0dc5:1714
+            chat:4f7f0dc5:1714
+            chat:4f7f0dc5:1714
+            chat:4f7f0dc5:1729
 Kind:       language (spec 2, 12.S22). For L14, P16
 Status:     current; amends -ae (names enter the environment, but only those listed). Core, his
             answer ("si, core ahi si incluiria esos tipos"): `core.lut` encloses the outermost block of
