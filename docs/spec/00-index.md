@@ -33,7 +33,7 @@ principles.
 | [4. Static semantics](04-static-semantics.md) | L2, L8 | draft 0, 2026-10-12, lint findings pending |
 | [5. Laws](05-laws.md) | L12, L3 | wave 2 |
 | [6. Certification](06-certification.md) | L9, L10 | wave 2 |
-| [7. Tests and generators](07-tests.md) | L10.3, L5.18 | the file `08-tests.md` of 2026-10-07 stands until rewritten |
+| [7. Tests and generators](07-tests.md) | L10.3, L5.18 | draft 0, 2026-10-12, lint findings pending |
 | [8. The demand and the plan](08-demand.md) | L5 | wave 3 |
 | [9. Specimens and the planner](09-planner.md) | L6 | wave 3 |
 | [10. Actions and the world](10-world.md) | L4, L11 | wave 3 |
