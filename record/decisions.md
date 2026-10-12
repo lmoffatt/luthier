@@ -1262,3 +1262,48 @@ Source:     same, §2.4
 Kind:       principles (G2, L6). For G2
 Status:     current; which combination is parameterizable and which is forced by soundness is D1
             of the plan decisions
+
+D-2026-10-12-q  Sampled links compose along a path when sampled over the same distribution:
+                distance summed, failure fraction summed (the union bound), confidence summed in
+                δ; the evidence cost of a sampled link, in nats, sums as the distance does. L13's
+                "never summed into a path" is deleted; refusing sampled paths is a demand with
+                evidence cost zero, a parameter. Luthier supports any composition algebra one
+                might think of, starting with the simplest, the sum; the algebra belongs to the
+                theory's cost type, the cutoff and the weights to the demand.
+Author:     Luciano for the decision and the correction (any algebra, the simplest first); Claude
+            for the elaboration (D1 of the plan) and for the reading that the algebra is the
+            theory's and the cutoff the demand's
+Quote:      "But the idea would be that Luthier should support any algebra that we might think on,
+            we should start with the simplest" "ok"
+Source:     record/plan-principles-draft-11-2026-10-12-decisions.md D1 (57a0023)
+Kind:       principles (L5, L13, the certificate entry, G2). For P11 (the composition algebra a
+            parameter), G2 (one logic extended to cost). Against DeepSeek, Kimi and GPT sp, who
+            kept L13's prohibition
+Status:     current; to apply in step 4 of the execution plan
+
+D-2026-10-12-r  The conversion from the statistics of a sampled certificate to a cost is a
+                dedicated function with a declared shape (input: the sample's statistics and the
+                demand's level; output: a cost), filled differently on different theories;
+                −log(1 − ε̂(n, δ)) in nats is the first instance. The grade becomes derived from
+                domain and evidence cost; `assumed` carries the evidence cost the demand assigns,
+                with no default.
+Author:     Luciano for the function with a declared shape per theory; Claude for the first
+            instance and for `assumed` as the demand's parameter (proposed in D2, not objected)
+Quote:      "The same, the conversion is expressed by a dedicated function and we might choose
+            different functions on different theories. Luthier would ask for some input output
+            shape, that the particular function is filled on each case."
+Source:     record/plan-principles-draft-11-2026-10-12-decisions.md D2 (57a0023)
+Kind:       principles (L7, the certificate entry, Terms). For P11, P10 (the invariant of the
+            type: the conversion is the theory's), D-2026-10-12-j
+Status:     current; to apply in step 4
+
+D-2026-10-12-s  The organizers keep their numbers, G0, G1, G2, carry two sentences each, no
+                status and no mechanics, and head the sections the Ls are listed under; the
+                precedence line: the statement decides over its clauses, the G between its Ls, G0
+                between Gs. The eureka history and the P13 count go to the record.
+Author:     Luciano
+Quote:      "Ok"
+Source:     record/plan-principles-draft-11-2026-10-12-decisions.md D3 (57a0023)
+Kind:       document (docs/principles.md). For P12, P13 (a G earns its place by the conflicts it
+            decides); refines D-2026-10-12-g
+Status:     current; step 3 of the execution plan

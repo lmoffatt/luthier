@@ -1,6 +1,12 @@
 # Draft 11 of the principles: the execution
 
-Draft 0, 2026-10-12. Written for the sessions that carry it out. The choices it rests on are
+Draft 0, 2026-10-12. Written for the sessions that carry it out. Status 2026-10-12: his answers to
+D1 to D3 are in (57a0023; D-2026-10-12-q, -r, -s), so no step assumes anything; step 1 done
+(1f02311): the record at draft 10, `--check` passing, with two deviations from the letter of the
+step: the projection shows the From and Tier lines draft 10 had lost and no longer the
+"(was …)" in the headings, which the record's Numbering table carries; and
+`docs/principles-for-readers.md` had its citations renumbered (draft 3), since `--check` reads
+them. Written by `scripts/migrate_record_draft10.py`. The choices it rests on are
 D-2026-10-12-g to -p in `record/decisions.md` (6b729dc) and D1 to D3 of
 `plan-principles-draft-11-2026-10-12-decisions.md`; where a step depends on one of the latter it
 says which, and what it assumes until Luciano answers. Inputs: `docs/principles.md` draft 10
