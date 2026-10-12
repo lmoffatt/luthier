@@ -60,7 +60,7 @@ by f up to ε" (addendum 8).
 ## 4. Judgments
 
 a : A stays a judgment, which answers Deepseek's second question: typing does not relax into a
-probability. What changes is its evidence: the certificate carries the grade (`05 §7`), and for a
+probability. What changes is its evidence: the certificate carries the grade (spec 6), and for a
 law into `Cost` the worst cost seen with the input that reached it, as Hypothesis prints and
 discards (G §2). The demand supplies the tolerance, so one certificate serves every demand whose
 tolerance is above the worst cost recorded, and a stricter demand asks for more cases or a better
@@ -79,7 +79,7 @@ records its constant, `f : A ⊸_L B`, and application multiplies (Reed and Pier
 the types grow stronger", 2010). Quantitative equational logic has the same as an axiom: operations
 are nonexpansive, so s =_ε t gives f s =_ε f t. In Luthier the constant is a law of the function,
 `Lipschitz L f`, Boolean with L as a parameter in version 0, and the certificate of a chain
-multiplies the constants it finds, as it takes the weakest grade today (`05 §7`).
+multiplies the constants it finds, as it takes the weakest grade today (spec 6).
 
 As likelihood. With cost = −log p, costs add under independence: a chain of judgments costs the
 sum, which is the Bayesian composition Luciano named ("usar estadistica bayesiana para
@@ -98,7 +98,7 @@ IEEE arithmetic and for linear algebra by condition numbers, and a sampled cost 
 Over integers a law's value is computed exactly. Over floats it is not available: the ideal value
 (the real sum) is not in hand, so the residual is estimated by a bound, an interval, or a reference
 at higher precision on sampled inputs; Luthier's reference is `Rational` ("what the doubles are
-compared against", `06 §8`, `rational.lut`). The value of the law is then a random variable, not a
+compared against", spec 11, `rational.lut`). The value of the law is then a random variable, not a
 number, and that, not a preference, is why Bayes is needed: G2 is cost-valued laws whose costs are
 themselves uncertain (addendum 2). The certificate records the summary of what was seen (worst,
 mean, the number of cases, the generators, the seed), and composition of uncertain costs is the
@@ -121,7 +121,7 @@ the representative by the cost at this κ(A). Linear algebra libraries publish b
 booleans (Luciano's note), and this is where they enter.
 
 **A probability that integrates to one.** A sampled density gives an estimate of ∫p with error
-about 1/√n; the Boolean version is the statistical test at a declared level and power (`08`, a
+about 1/√n; the Boolean version is the statistical test at a declared level and power (spec 7, a
 statistical law declares its level and its power); the cost version is the −log-likelihood of the
 estimate under the sampling distribution, with n from the demand (P11). Two estimators of the same
 density are equivalent up to the tolerance the demand sets, which is L6 again, for data.

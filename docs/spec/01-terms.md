@@ -95,17 +95,9 @@ correspondence. What an `assumed` certificate records is D-2026-10-12-t.
 
 ## §5 Tests and certificates
 
-**1.S13. Words of tests.** [implemented] Each is used and defined in full by `spec 7`.
-`Gen T` is the type of generators of T (G1). A case gives a value to each parameter of a law, its
-parameters being the variables it quantifies over. The size `s : Nat` bounds lengths and depths. A
-seed is a value of `Seed`, an integer in [0, 2^31). The support of a generator is the set of values
-it gives with nonzero probability, and its measure says how likely each part of the support is. A
-binding maps parameters, or types, to generators, and a profile is a binding with a name. A census
-is a finite list of values given explicitly. The reach of a certificate entry is what its
-generators covered, parameter by parameter: one value, the k values of a census, a whole finite
-type, or an interval with its measure. A cost `c : T -> Float64` used as a weight is the density of
-a measure, with respect to counting on a finite support and to length on an interval of numbers,
-and C is the total cost of a support.
+**1.S13. Words of tests.** [implemented] `Gen T`, case, size, seed, support, measure, binding,
+profile, census, reach and the weight of a measure are the words of tests; `spec 7 §1` defines
+each where it is used.
 
 **1.S14. Words of the world.** [implemented] A pointer is a value that designates a part of the
 world; a token is the value of a pointer after an operation on it, carrying the order of the

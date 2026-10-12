@@ -104,7 +104,7 @@ definition written with `match` and recursion, the fold of the structure; `k_rec
 defines it for the natural numbers. A proof layer that made it primitive and forbade general
 recursion is not part of version 0 [proposed].
 
-**3.S12. Laws as terms.** [implemented] A law is a term of type `Bool` or `Law`, a function into
+**3.S12. Laws as terms.** [implemented] A law has type `Bool` or `Law`, a function into
 one of these whose parameters are quantified, or a conjunction `p & q`; the interpreter also takes
 `Failures E` (the failures a check finds). What a law is and how laws combine is `spec 5`; this
 chapter keeps only that a law is a term of one of those types. `Law` is the type of what a test
@@ -146,7 +146,7 @@ reduces one; `r5_extern_value.accept.lut` only checks one.
 **3.S19. Terms with holes.** [implemented] A term that contains a hole where the reduction needs a
 value does not reduce.
 
-**3.S20. Equality in the kernel.** [implemented] Binding is exact: the name denotes the term and
+**3.S20. Equality in the kernel.** [implemented] As L3.2 states, binding is exact and
 reduction depends on no tolerance (L3.2). Definitional equality is the reduction of this section;
 the other levels of equality belong to the object (L3.1, `spec 5`).
 
@@ -156,7 +156,7 @@ the other levels of equality belong to the object (L3.1, `spec 5`).
 kernel has it: the formers of §2 and the primitives of `spec 11`. Every other structure is defined
 natively from them (`spec 4.R5`). A value is primitive for performance when it is an extern, computed
 by the host because it is faster there. A numpy array is not a primitive structure: with
-`Fin n = { k : Int | 0 <= k and k < n }`, a vector of length `n` is the function type
+`Fin n = { …}` of `spec 11`, a vector of length `n` is the function type
 `Fin n -> Float64`, a matrix is `Fin m -> Fin n -> Float64`, and a numpy array is a value of that
 type. Nothing is converted and nothing about the representation needs certifying. Example:
 `n5_arrays.accept.lut`.

@@ -14,7 +14,7 @@ Luciano, 2026-06-03 (`day:2026-06-03:primero-sintaxis-y-semantica-despues-implem
 **W2. No rule enters without a worked example.** Each principle is tried by hand in the candidate
 notation before it enters, and each rule of the specification is written as accept/reject pairs,
 so the specification is an executable suite; (draft 6) a pair over a law into `Cost` carries its
-parameters (tolerance, level, seed, distribution) as the test does (`08`), so the suite stays
+parameters (tolerance, level, seed, distribution) as the test does (spec 7), so the suite stays
 Boolean at a declared tolerance. (Draft 3) "El ejercicio clears the mind": a worked
 example shows contradictions that are not obvious. Source: the model from Luciano's audios,
 2026-08-31

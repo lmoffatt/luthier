@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 d4a8523d5332, commit cd9369e (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 3808857edf39, commit d12b554 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -19,7 +19,7 @@ Status: settled; the purpose, not a design rule, so it heads the document.
 
 Each term has one category and is defined here and nowhere else; the principles cite Terms.
 
-- A *structure* is a type in the kernel's language (`04`), built from four forms: a product, a
+- A *structure* is a type in the kernel's language (spec 3), built from four forms: a product, a
   value made of several named fields (a record, a tuple); a sum, a value that is one of several
   cases, each tagged (a variant, an enumeration, `Maybe`); a function type `A -> B`; and a
   recursive type, one defined in terms of itself (a list, a tree). Each form may hold the others.
@@ -113,8 +113,8 @@ demanded).
 - L2.4 `extern` is the operation that inhabits a hole with a body in another language, naming the
   language; a theoretical module (types, functions, laws, no values) is a module of holes. [settled]
 - L2.5 (His words) A declared name is assumed to have its declared type, and its use where that type
-  is incompatible is an error (`05` R1, the checker). [settled]
-References: `05` R1.
+  is incompatible is an error (spec 4.R1, the checker). [settled]
+References: spec 4.R1.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
 Status: settled.
 
@@ -147,8 +147,8 @@ the separation of the second structure is the model's proposal.
   (D-2026-10-11-i), and then dependencies give the only order. [settled]
 - L4.3 (His annotation) The binding acts are two, `:=` once and `<-` rebinding, and they share one
   law: after the act the name equals the term in the equality its type has, structural `==` where it
-  exists (`05` R8), observational otherwise, a distance under G2; after `:=` for all time, after `<-`
-  until the next `<-` (`05` R12). [settled]
+  exists (spec 4.R8), observational otherwise, a distance under G2; after `:=` for all time, after
+  `<-` until the next `<-` (spec 4.R12). [settled]
 - L4.4 Operations are declared before their laws, so a law that binds two operations is a node with
   two parents, not a cycle. [settled]
 - L4.5 A mutable parameter is two variables, before and after, so it is not an effect, the
@@ -176,7 +176,7 @@ the separation of the second structure is the model's proposal.
   memoizable; an action on the world never is: the world is an opaque, unique value, so an action on
   it is never served from the memo (D-2026-10-12-m, O3). [proposed]
 Example: after `x <- 1`, `y := x + 10`, `x <- 2`, y is 11, as the session answers (clause 2).
-References: `05` R12, `05` R8; D-2026-10-11-i, D-2026-10-12-m.
+References: spec 4.R12, spec 4.R8; D-2026-10-11-i, D-2026-10-12-m.
 Rests on: O3 (the world as a value).
 Status: settled; clause 11 proposed.
 
@@ -221,8 +221,8 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
   `Confluent` (L4), the law the session block is certified against. [settled]
 - L5.12 The program is the synthesis and is kept, the computation is the expansion and is redone.
   Script and interpreter are the same under this L, one batch of demands or demands one at a time with
-  the memo between them (`04` §7, O8); a session is a block and a file is never one, so a session
-  saved to a file becomes its `main` block (D-2026-10-11-i). [settled]
+  the memo between them (spec 8, O8); a session is a block and a file is never one, so a session saved
+  to a file becomes its `main` block (D-2026-10-11-i). [settled]
 - L5.13 What is produced, and which types, is what the demanded value needs; what it does not need,
   the complement of its dependency cone, is not produced, so the choice is canonical, one per demand,
   and the types being spoken are what was asked for. [settled]
@@ -250,7 +250,7 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
   [settled]
 Example: doubling positives is positive only when positivity is demanded and derivable, sin of
 positives is only Real because no law composes (clause 15).
-References: `04`; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
+References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
 Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12.
 Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed.
 
@@ -414,11 +414,11 @@ its type).
   that the implementation has not changed; checking it against its laws, by chosen or sampled cases,
   certifies the description. Both are kept, apart. [settled]
 - L9.9 (His annotation) The certificate of the law travels by the certificate of identity (L10.7):
-  exactly where the identity is boolean (`==` structural, `05` R8: integers, decidable types, the same
-  implementation rerun), and with the observed distance added where it is a cost (G2), since two
+  exactly where the identity is boolean (`==` structural, spec 4.R8: integers, decidable types, the
+  same implementation rerun), and with the observed distance added where it is a cost (G2), since two
   implementations over floats are almost never bit-identical; the type of the identity law's result
   says which (`Bool` or `Cost`). [settled]
-References: `05` R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k.
+References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
 Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark.
 
@@ -578,9 +578,9 @@ blocks; the done and implemented items are in the record's drafts table.
   L3.3, L12, L13.3, L13.4, L5.4, L6.6, L6.8, L10.3, L10.8.
 - **O2** (language) The type with its equality as the base case of every theory (a setoid; a
   metric space where the equality is a cost), the kernel's structural `==` its model for the
-  decidable types (`05` R8), the equality of functions extensional and derived from it (L3), the
+  decidable types (spec 4.R8), the equality of functions extensional and derived from it (L3), the
   equality of models componentwise; and whether a type names its equality as it names its model
-  (`05` R13). Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his note of
+  (spec 4.R13). Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his note of
   the same day on Terms goes the same way ("podríamos suponer que A viene con su Setoid", `K` with
   its `Field`); the syntax, how a type names its setoid and its field, is the open part. Blocks
   Terms (dependences), L3, L9, L6.
@@ -598,18 +598,18 @@ blocks; the done and implemented items are in the record's drafts table.
   the whole a graded algebra; addition inside a dimension, multiplication across (second round
   §18). Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
   speed of sound). Blocks nothing.
-- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z) by the term *object* in Terms; `05 §3` reads
+- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z) by the term *object* in Terms; spec 4 §4 reads
   "theories are cycles" in chapter 4 of the specification. Blocks nothing.
 - **O8** (spec) The session as a block over the dataflow of L5: `<-` to explore, `:=` to lock, a
   file may contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the
-  spec's `04 §7` and a section on the session; the memo between the items of a session. Blocks
+  spec's spec 8 and a section on the session; the memo between the items of a session. Blocks
   L5.12.
 - **O9** (spec) The kind of a hole in the elaborated form (L2.3). Blocks L2.3.
 - **O10** (spec) `proved` by citation: the citation a `.bib` key with a resolved DOI, ISBN or URL,
   and who checked (human, ai+human, none) recorded; syntax `cite name bibkey checked ai+human`
-  proposed, allowed in user code (D-2026-10-11-f as amended; to `05 §7`). Blocks L9.7.
+  proposed, allowed in user code (D-2026-10-11-f as amended; to spec 6). Blocks L9.7.
 - **O11** (spec) The kernel's theory stated in Luthier: `src/luthier/lib/kernel_laws.lut`, tested
-  on `Fin 3`, `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (`05`
+  on `Fin 3`, `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (spec 4
   R8), functions over `Fin n` not enumerated by `exhaustive` (to fix). Blocks L7.
 - **O12** (spec) The identity of a result in the memo (L5.6) and `plan.lut` as its carrier.
   Blocks L5.6.
@@ -635,9 +635,9 @@ blocks; the done and implemented items are in the record's drafts table.
 - D-2026-10-11-n and the like: decisions, in `record/decisions.md`.
 - P1 to P15: the principles of the method, `record/principles.md`.
 - W1 to W15: the way of working, `docs/way-of-working.md`.
-- `02` to `08`: the specification, `docs/spec/02-grammar.md` to `08-tests.md`; R1 to R13 the rules
-  of `05`, the static semantics; `11`: `docs/rationale/11-cost-valued-laws.md`, and `01`, `07`,
-  `09`, `10` the other rationale documents.
+- spec 1 to spec 12: the chapters of the specification, `docs/spec/`, index `00-index.md`; spec 4.R8
+  is rule 8 of chapter 4. `07`, `09`, `10`, `11` in backticks: the rationale documents of
+  `docs/rationale/`, `11` the cost-valued laws.
 - His words, his annotation, his correction, his reading, his formula: Luciano's; a clause without
   such a mark is the model's.
 

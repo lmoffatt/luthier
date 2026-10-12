@@ -72,12 +72,8 @@ the environment (Python) gives values, never types. Products, sums and functions
 structural; `data` is for recursive types. A vector is a function `Fin n -> Float64`, and a numpy array
 is a value of that type as it is.
 
-The specification: `docs/spec/04-kernel.md` (the kernel: type formers, terms, reduction, the
-surface forms and their translation) and `docs/spec/05-static-semantics.md` (states of a name,
-objects, the rules R1 to R8, certification). `docs/spec/` also holds the grammar (`02`), the
-libraries (`03`), the numbers (`06`) and the tests (`08`). `docs/guide/00-fundamental-elements.md`
-is the reading guide, with a program executed by hand. `docs/rationale/` holds the construction
-pattern (`01`), the characterizations of the key objects (`07`) and a survey of prior art.
+The specification: `docs/spec/`, twelve chapters with an index, `docs/spec/00-index.md`; each rule
+carries its status (implemented, decided, proposed) and its accept and reject programs in `tests/spec/`.
 
 ## Install and run
 
@@ -99,7 +95,7 @@ pytest
   `generators.py`, `testing.py`, `certify.py`, `cli.py`, `api.py` (loading a program from Python).
 - `src/luthier/core.lut`: the kernel's own definitions, loaded implicitly: `Unit`, `Empty`, `Bool`,
   `Int`, `Float64`, `String`, `Maybe`, `List`, `Nat`, `Fin`.
-- `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/spec/03-libraries.md`).
+- `src/luthier/lib/`: libraries in Luthier, imported on demand (`docs/spec/12-files-and-tools.md`).
 - `tests/spec/`: one program the checker must accept and one it must reject per rule of 05, and the
   kernel's type formers. `tests/test_kernel.py`: the mechanisms.
 - `examples/`, `docs/guide/`, `docs/spec/`, `docs/rationale/`.

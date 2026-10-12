@@ -26,8 +26,7 @@ A dotted name `m.f` is one token, a qualified name or a projection that the chec
 `provisional`, `test`, `with`, `exhaustive`, `import`, `forget`, `U`, `operator`, `if`, `then`,
 `else`, `cite`, `let`, `in`, `primitive` and `axiom`. The last two bodies are allowed only in
 `core.lut` and the libraries of the distribution (spec 11). `as`, `checked`, `size`, `sampled`,
-`under`, `where` and `profile` are ordinary names that act as keywords in their position. The act
-`gen` and its word are removed from the language [proposed] (spec 2.S19); the parser still reads
+`under`, `where` and `profile` are ordinary names that act as keywords in their position. Here `gen` goes from the language [proposed] (spec 2.S19); the parser still reads
 it today. `and`, `or` and `mod` are ordinary names written infix; `Bool`, `Int`, `Float64`,
 `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat` and `Fin` are definitions of `core.lut`, not
 words of the grammar.
@@ -95,11 +94,10 @@ Files: r12_defaults.accept.lut, r12_named_unknown.reject.lut.
 left side is a type and implication when it is a `Bool`; `*` is the product type or
 multiplication, `+` the sum type or addition, by the type of the left operand; `&` is the
 conjunction of laws (spec 5). An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the
-argument types of a function, and a type names its model (D-2026-10-11-j): `i : Int` adds with
-the ring of `Int`, `j : Z7` with the ring of `Z7`.
+argument types of a function, and a type names its model (D-2026-10-11-j): `the model a type names gives its operators (`spec 4.R13`), as the ring of `Z7`.
 
 **2.R2. A type names its model.** [implemented] An operator is resolved by the type of its
-operands; a carrier with two models is two types, converted explicitly, and a type with two
+operands; two models of a carrier are two types (`spec 4.R13`), and a type with two
 models for one operator is rejected.
 Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 
@@ -146,7 +144,7 @@ or a label of its sum if it names one, and a variable otherwise. A label of a su
 a comparison.
 
 **2.S11. The dangling else.** [implemented] An `else` belongs to the nearest `if` without one:
-`if a then if b then x else y` is `if a then (if b then x else y)` (D-2026-10-11-b).
+in `if a then if b then x else y` the `else` is the inner `if`'s (D-2026-10-11-b).
 
 ## §4 Translations into the kernel
 
@@ -244,8 +242,7 @@ consumer is an error in a file ("unused binding"), and is allowed and reported i
 Files: r12_block.accept.lut, r12_unused_rebinding.reject.lut.
 
 **2.S18. The session.** [implemented] `luthier session [files]` (2026-10-11) types a block one item
-at a time: `x := t` defines once, `x <- t` binds and rebinds, a bare term is evaluated and printed
-with its type, and an unused rebinding is reported. Each line re-evaluates the block so far; what
+at a time: `the items are those of a block (§8) and a bare term, which `spec 12` says how the command prints, and an unused rebinding is reported. Each line re-evaluates the block so far; what
 a line re-evaluates and the memo between lines are `spec 8` and O8. The world as the implicit `w`
 of the session block waits for actions (spec 10). In a session `w` is the world of the session
 block; in a file, of `main`.
@@ -279,7 +276,7 @@ its value, stays open (spec 8).
 
 ## Open
 
-- O8: the session as a block over the dataflow, the memo between its items (spec 2.S18).
-- O9: the kind of a hole in the elaborated form (L2.3).
+- O8: the session (O8), the memo between its items (spec 2.S18).
+- O9 (L2.3).
 - O10: the syntax of `cite` with the bib key and who checked (spec 2.S6).
 - O11: the kernel's theory stated in Luthier, which a statement of this grammar would join.

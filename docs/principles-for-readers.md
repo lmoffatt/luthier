@@ -165,7 +165,9 @@ theory until a law is certified for it (L11).
 The core is a handful of primitives, small enough that a program can be run with pencil and paper
 given a plan of execution; everything else is a library whose translation to the core is
 mechanical. A Luthier program is itself a value of Luthier, so programs can build, inspect and run
-other programs, and the interpreter is meant to be written in Luthier (L7).
+other programs, and the interpreter is meant to be written in Luthier (L7). More generally, what can be written in Luthier is written in
+Luthier: how Luthier runs is itself stated as theories in Luthier, and the Python that runs it today
+is one implementation checked against them (L14).
 
 ## What is still open
 

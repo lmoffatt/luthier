@@ -9,31 +9,17 @@ in Luthier). It states what the checker decides about a program before anything 
 
 ## §1 Notation
 
-**4.S1. Symbols of this chapter.** [implemented] The notation of the kernel, `x : T`, `x : T := t`,
-`x = t`, `U` and `≡`, is that of `spec 1`; a *hole* is a declared name with no body (L2.1). `Bool`
-is `< true : Unit | false : Unit >`. `Failures E` is `List E`: the failures a check finds, empty
-when it holds (`spec 5`, Checks). `Law` is the type of a conjunction of quantified Bool- or
-Failures-valued laws (`spec 5`). A *name* is the name of a top-level act, qualified by its module
-prefix (`spec 2`). `D(n)` is the set of names that occur in the declared type of the name `n`;
-`B(n)` is the set that occur in its body. Occurrence is syntactic, after elaboration and after
-expanding aliases; constructors and labels stand for their type; a projection `e.f` counts the
-names in `e`.
+**4.S1. Symbols of this chapter.** [implemented] The notation, `D(n)`, `B(n)` and the hole are
+`spec 1`'s; `Bool`, `Failures E` and `Law` are `spec 5`'s.
 
-**4.S2. Type position and term position.** [implemented] An occurrence is *in type position* when
-the occurring term has type `U` or is a type operator: the declared type of a definition, the
-annotation of a binder, the base of a subtype, the parts of a product, sum or exponential, the
-arguments of a type operator. Every other occurrence is *in term position*.
+**4.S2. Type position and term position.** [implemented] As `spec 1 §3` defines them; the
+rules below use both.
 
-**4.S3. The dependency graph.** [implemented] The *dependency graph* is directed: its nodes are
-the names, and `n -> m` is an edge whenever `m` belongs to `D(n)` or to `B(n)`. A *theory* is a
-strongly connected component of this graph, a maximal set of names each reachable from each other
-(D-2026-10-12-z: the object several names define together). A name no cycle passes through is a
-theory of one name. A *branch* of a theory `O` is a name outside `O` with an edge into `O`.
+**4.S3. The dependency graph.** [implemented] The graph, theories as its strongly connected
+components and branches are `spec 1 §3`'s (D-2026-10-12-z).
 
-**4.S4. Laws and labels.** [implemented] A *law* here is a Bool-, Failures- or Law-valued
-definition, or one conjunct (split at `&`) of the predicate of a subtype. A law *touches* the names
-and labels that occur free in it. A *labeled base* is a product with named components,
-`{ x : A, y : B }`; its *labels* are the component names.
+**4.S4. Laws and labels.** [implemented] What a law touches and what a labeled base is are
+`spec 1 §3`'s.
 
 ## §2 One relation, three states
 
@@ -45,8 +31,7 @@ reduces, but it is a difference in how far a name is determined, not in kind (L8
 **4.S6. The three states of a name.** [implemented] A name is in one of three states. It is
 *declared* when its base is known, `x : T`, by a declaration. It is *defined* when its body is
 known, by a definition in the same file or in another. It is *certified* when some of its laws
-passed `test`, each with a grade of the five of Terms (proved, exhaustive, cases, sampled,
-assumed; D-2026-10-12-y). What a certificate records is `spec 6`. Certification is about a law
+passed `test`, each with a grade of the five grades of Terms (; D-2026-10-12-y). What a certificate records is `spec 6`. Certification is about a law
 applied to particular values, never about a name alone.
 
 **4.S7. The body decides, and no marker distinguishes.** [implemented] The body says what is
@@ -204,11 +189,11 @@ Files: r7_alias.accept.lut, r7_alias_defined.reject.lut.
 from types that have it. Not on exponentials, and not on anything containing one. A law that
 compares values of such a type takes the equality it uses as a parameter or as a component of its
 theory: the observational equality of the presentation. `algebra.lut` already does so (each
-structure carries its `eq`). Whether a type names its equality as it names its model is O2 (the
+structure carries its `eq`). How a type names its equality (O2) is O2 (the
 setoid as base case).
 Files: r8_equality_parameter.accept.lut, r8_equality_function.reject.lut.
 
-**4.R9. Function types are contravariant in the domain and covariant in the codomain**
+**4.R9. Function types are contravariant in the domain and covariant in the codomain.** [implemented]
 (`spec 3`). [implemented] A function `A -> B` passes where `A' -> B'` is expected when `A'`
 refines `A` and `B` refines `B'`.
 Files: r9_variance.accept.lut, r9_variance.reject.lut.
@@ -232,7 +217,6 @@ its obligations and not laws stated apart on a copy. And a law has one name: it 
 second declaration (commutativity is `Symmetric` with result type equal to the argument type;
 associativity of an operation is the law of an action of a set on itself). Structures are built by
 inclusion of the ones below them; `algebra` is imported by every library that states a property.
-Files: none yet, to be written with the implementation.
 
 **4.R11. A condition refines in its branch.** [proposed] Decided 2026-10-06 without a decision id
 (`00`, *What types are for*, of the old numbering); not implemented. In `if p x then a else b`,
@@ -245,24 +229,21 @@ any other; usually it is a law the program already states about `q`, as `Reports
 `a` knows `m == just y`. The rule replaces the precondition that only weakens an obligation raised
 in a branch (`spec 6`), and the textual discharge the interpreter does today (an obligation equal
 to the condition of its branch). `refine` of `spec 5` is typable by this rule.
-Files: none yet, to be written with the implementation.
 
 **4.R12. `:=` defines once; `<-` rebinds.** [implemented] Decided 2026-10-11 (D-2026-10-11-c;
 blocks, defaults, named arguments and the session implemented the same day). A name bound with
 `:=` is defined once, and a second definition of it is an error ("x is defined twice"). A name
 bound with `<-` may be bound again with `<-`: each binding is a fresh name in the core, as in
-static single assignment, and every later use means the latest (D-2026-10-10-e, a mutable
-parameter is two variables, before and after). A name first bound with `:=` cannot be rebound with
-`<-`. Rebinding needs an order, so `<-` is allowed in a block, in a parameter's default and in a
-named argument, and is an error at the top level of a file, which is a set of acts without order
+static single assignment, and every later use means the latest (D-2026-10-10-e, L4.5). A name first bound with `:=` cannot be rebound with
+`<-`. Rebinding needs an order, so `<-` is allowed in the three places `spec 2.R5` names, and is an error at the top level of a file, which is a set of acts without order
 (4.S11). A default is the first binding of its parameter and the call rebinds it before the body
 runs; the elaborated call, which is what is hashed and certified, carries the value the body sees.
 A law of a function is quantified over a defaulted parameter, not tested at its default. Blocks
 (D-2026-10-11-i; `spec 2`): a brace term with a final expression is a block, the body of a lambda
-is one; a name bound in a block is visible to the end of that block and in nested blocks; `:=` of
+is one; a block's names are visible to the end of that block and in nested blocks; `:=` of
 a name already defined in an enclosing scope is an error, not a shadowing; `<-` rebinds only
 block-local `<-` names and the parameters of the enclosing definition; a `<-` whose previous
-binding has no consumer is an error in a file and reported in a session (O8); actions take and
+binding has no consumer is rejected in a file (`spec 2.R6`) and reported in a session (O8); actions take and
 return the world, so their order is the dependency through it (`spec 10`). Three kinds of block: a
 body, `main` in a file, the session.
 Files: r12_block.accept.lut, r12_defined_twice.reject.lut.
@@ -327,29 +308,31 @@ compares the results is a comparison. Characterization proper is a judgement the
 **4.S21. R1 to R13 as the laws of `WellFormed`.** [proposed] L14 asks for the rules in Luthier.
 Rules 4.R1 to 4.R13 are the laws of a theory `WellFormed : Program -> Failures E`, over the
 `Program` data of `spec 3`, to be written in `lib/program.lut` (not yet present), each law one
-rule and the accept and reject programs of the suite its cases. Until it exists the checker in
+rule and its accept and reject programs its cases. Until it exists the checker in
 `src/luthier/checker.py` is the specimen, and the suite is its certificate (`spec 7`).
 
 ## §10 Example
 
 **4.S22. A theory, its branches and the rules applied.** [implemented]
 
-    -- a concrete type, defined natively: a table is a function from a column and a row to a cell
-    Cell = < int : Int | real : Float64 | text : String >
-    Table = { columns : List String, nRows : Int, cell : String -> Int -> Maybe Cell }
+```
+-- a concrete type, defined natively: a table is a function from a column and a row to a cell
+Cell = < int : Int | real : Float64 | text : String >
+Table = { columns : List String, nRows : Int, cell : String -> Int -> Maybe Cell }
 
-    -- a theory, declared, its laws, then defined: the cycle Codec -> laws -> Codec is the theory
-    Codec : { parse : String -> Maybe Table, render : Table -> String, eq : Table -> Table -> Bool }
-    RoundTrip (c : Codec) (t : Table) : Bool :=
-      match c.parse (c.render t) { nothing -> false ; just u -> c.eq t u }
-    Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b { nothing -> true ; just t -> false }
-    Codec := RoundTrip & Rejects
+-- a theory, declared, its laws, then defined: the cycle Codec -> laws -> Codec is the theory
+Codec : { parse : String -> Maybe Table, render : Table -> String, eq : Table -> Table -> Bool }
+RoundTrip (c : Codec) (t : Table) : Bool :=
+  match c.parse (c.render t) { nothing -> false ; just u -> c.eq t u }
+Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b { nothing -> true ; just t -> false }
+Codec := RoundTrip & Rejects
 
-    -- a model: a value of the theory, built from externs over defined types (4.R5); a branch of Codec
-    csv : Codec := { parse := extern "python:luthier.tables.parse",
-                     render := extern "python:luthier.tables.render",
-                     eq := sameTable }
-    test csv with 200
+-- a model: a value of the theory, built from externs over defined types (4.R5); a branch of Codec
+csv : Codec := { parse := extern "python:luthier.tables.parse",
+                 render := extern "python:luthier.tables.render",
+                 eq := sameTable }
+test csv with 200
+```
 
 `Table` here is an alias (4.R4: a product with no laws is not a new type). If tables had
 invariants (the cells of a column all of one kind, rows below `nRows`), `Table` would be declared
@@ -358,8 +341,8 @@ over this base and defined by them. `Codec` carries its equality as a component 
 
 ## Open
 
-- O2, the type with its equality as the base case of every theory (4.R8).
-- O9, the kind of a hole in the elaborated form (4.S7, 4.R2, 4.R5).
+- O2, which 4.R8 rests on.
+- O9 (4.S7, 4.R2, 4.R5).
 - O8, the session as a block (4.R12).
 - Decided without an id, to be assigned by the integrator: 4.R10 (a law characterizes, 2026-10-05),
   4.R11 (a condition refines in its branch, 2026-10-06), and 4.S20 (consistent, not characterized,
