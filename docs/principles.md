@@ -63,7 +63,7 @@ this mapping.
 proposition over terms, so it defines a mathematical object and a quotient, and inside the class
 the representative is free. Type theory guides what is declared. What governs execution is the
 demand (G3), read in the same theory: a demanded type is a judgment to inhabit, execution is the
-search for an inhabitant, and cost ranks the candidates (G2); where type theory normalizes a
+search for an inhabitant, and cost or execution time ranks the candidates (G2); where type theory normalizes a
 given term, Luthier searches for one.
 Status: settled, marked OK by him on 2026-10-12.
 
