@@ -1,6 +1,6 @@
 # The way of working on Luthier
 
-Split from `docs/principles.md` (draft 8, bcdac41) on 2026-10-12 at Luciano's instruction: the principles of the language and the way of working are two documents (D-2026-10-12-b). The W numbers and statements are those of draft 8, unchanged; each W keeps its source and its draft marks. The record of the working method, its plan and his bites are `record/working-method.md` and `record/plan-working-method-*.md`; decisions cite a W by number and its statement is here.
+Split from `docs/principles.md` (draft 8, bcdac41) on 2026-10-12 at Luciano's instruction: the principles of the language and the way of working are two documents (D-2026-10-12-b). The W numbers and statements are those of draft 8, unchanged; each W keeps its source and its draft marks. On 2026-10-12 the citations of organizers and principles were moved to draft 11 of `docs/principles.md` (G0, G1 theory and model, G2 cost; L1 to L13; the Numbering table there maps the old tags), the statements untouched, and W15's order of precedence replaced by the one D-2026-10-12-s settled. The record of the working method, its plan and his bites are `record/working-method.md` and `record/plan-working-method-*.md`; decisions cite a W by number and its statement is here.
 
 Unchanged from draft 1 except W5, restated.
 
@@ -30,17 +30,17 @@ is its brake. Source: Luciano, 2026-09-21
 **W3. Start minimal and add only what is used.** Begin from zero with the indispensable, do each
 step in detail before scaling, and reduce until removing more would break something needed. (Draft
 3) Its job is to stop the proliferation of abstractions; a brake, not a motor, and in his words
-not often invoked. The order of work, not a limit on the language (G4). Source: Luciano, 2026-10-02
+not often invoked. The order of work, not a limit on the language (every path expressible is L6's own clause). Source: Luciano, 2026-10-02
 (`dialogue:51cca364:empezar-de-cero-con-luthier-liviano`).
 
 **W5. Concepts live in Luthier, execution in the host; native against extern is bootstrapping.**
 The `.lut` is designed before the Python; each concept is written native (slow, conceptual) and
 extern (fast, pragmatic) with the test that they agree, and work has gone astray whenever something
-that belongs in Luthier sits in Python. Restated (D-2026-10-11-d, G2): the native definition is
+that belongs in Luthier sits in Python. Restated (D-2026-10-11-d, G1): the native definition is
 not an oracle, since "agrees with the native" would be a law that copies an implementation; it is
-one more specimen (L5), the agreement test is a consistency check between specimens, (draft 4) which
+one more specimen (L9), the agreement test is a consistency check between specimens, (draft 4) which
 is the identity
-law of L21 that admits the second specimen into the planner's class (D-2026-10-11-m), and the
+law of L6.11 that admits the second specimen into the planner's graph (D-2026-10-11-m), and the
 practice holds while a function has too few laws to be known by description. Source: Luciano,
 2026-09-30.
 
@@ -54,7 +54,7 @@ negative controls on the input and, to implement (D-2026-10-11-h), by mutation o
 implementation: a law that no mutation fails is not diagnostic; (draft 5) mutation cannot tell a
 law transcribed from the implementation from a description, since every mutation fails the
 transcription; what tells them apart is that a law is stated over the theory's signature and
-cannot transcribe a model's code (G2, L20). For G2. Source: Luciano, 2025-09-27
+cannot transcribe a model's code (G1). For G1. Source: Luciano, 2025-09-27
 (snapshots
 before tests); the control stated 2026-10-02 (`dialogue:51cca364:a-test-needs-a-negative-control`).
 
@@ -88,7 +88,7 @@ words, "muy importante para la interacción con la IA". Source: Luciano, 2026-09
 
 **W13. The foundations are rethought, the reasonable version first.** The language has been remade
 many times (quimulun, tapp, macror, Luthier), each time deeper; the method is to work out the
-reasonable version and then look for the wild one. G0 is the reasonable version; G1 to G3 the
+reasonable version and then look for the wild one. G0 is the reasonable version; G1 and G2 the
 wild one. (Draft 3, his words) This is the meta-method: it destabilizes the system and makes it
 grow, and the art is not to destabilize it before its time. Source: Luciano, 2022-06-15
 (`written:2022-06-15_sin-titulo-2:rehacer-desde-las-bases`)
@@ -106,9 +106,10 @@ cheap to compute (P15, proposed in his words, `record/principles.md`). Source: L
 revisits the same decision twice without new evidence, or exceeds what one screen can carry, the
 session stops and reports which it is: a delicate question, or a conflict between principles,
 naming them; either goes to Luciano as one question (P12), and the second is the signal that a
-principle is missing or two must be ordered (P4, P13). (Draft 6, proposed, his mark pending) The
-order among the organizers is the order of his tiers: the guide, then the two eurekas, then good
-use; G0 before G1 and G2, those before G3, G3 before G4; inside a tier the conflict goes to him.
+principle is missing or two must be ordered (P4, P13). (Draft 6, proposed; settled by D-2026-10-12-s on 2026-10-12) The
+order is the precedence of `docs/principles.md`: a statement decides over its clauses, the organizer
+decides between the principles under it, G0 decides between organizers; inside an organizer the
+conflict goes to him.
 Source: Luciano, 2026-10-11 (annotation on
 W14: "deadlocks ... legitimos ... o ilegitimos: hay una contradiccion entre los principios"; reply:
 "agree"); the trigger is the model's.

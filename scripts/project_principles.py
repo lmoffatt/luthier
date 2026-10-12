@@ -19,7 +19,8 @@ names the record's content hash, the record's last commit, this script's version
 the projection carries how it was derived (P2).
 
 `--check` exits 1 when `docs/principles.md` differs from the projection of the record (compared
-below the header, which carries the date), when `docs/principles-for-readers.md` cites a G or L the
+below the header, which carries the date), when `docs/principles-for-readers.md`,
+`docs/way-of-working.md` or `docs/rationale/11-cost-valued-laws.md` cites a G, L or L.n the
 record does not define, and it lists, as information, the entries the readers' document does not
 cite. It also runs the two lints of D-2026-10-12-o over the projected text: every reference
 resolves (a G, L or L.n tag to an entry or clause; a D id to `record/decisions.md`; a P to
@@ -46,6 +47,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 RECORD = REPO_ROOT / "record" / "principles-language.md"
 PROJECTION = REPO_ROOT / "docs" / "principles.md"
 READERS = REPO_ROOT / "docs" / "principles-for-readers.md"
+CITING_DOCS = ("docs/way-of-working.md", "docs/rationale/11-cost-valued-laws.md")
 
 HEAD_RE = re.compile(r"^([GL]\d+)\s+(.*)$")
 CLAUSE_RE = re.compile(r"^([GL]\d+)\.(\d+)\s+(.*)$")
@@ -387,18 +389,23 @@ def check(record_text: str, strict: bool = False) -> int:
             rc = 1
     else:
         print(f"{PROJECTION.relative_to(REPO_ROOT)} missing"); rc = 1
-    if READERS.exists():
-        cited = set(TAG_RE.findall(READERS.read_text(encoding="utf-8")))
+    clauses = {f"{e['tag']}.{c['n']}" for k, e in items if k == "entry" for c in e["clauses"]}
+    for doc in (READERS, *(REPO_ROOT / d for d in CITING_DOCS)):
+        if not doc.exists():
+            print(f"{doc.relative_to(REPO_ROOT)} missing (not written yet)")
+            continue
+        text = doc.read_text(encoding="utf-8")
+        cited = set(TAG_RE.findall(text))
         undefined = sorted(cited - set(tags), key=lambda t: (t[0], int(t[1:])))
-        if undefined:
-            print(f"{READERS.relative_to(REPO_ROOT)} cites what the record does not define: "
-                  f"{', '.join(undefined)}")
+        bad_clauses = sorted(f"{t}.{n}" for t, n in REF_RE.findall(text) if n and f"{t}.{n}" not in clauses)
+        if undefined or bad_clauses:
+            print(f"{doc.relative_to(REPO_ROOT)} cites what the record does not define: "
+                  f"{', '.join(undefined + bad_clauses)}")
             rc = 1
-        uncited = [t for t in tags if t not in cited]
-        print(f"{READERS.relative_to(REPO_ROOT)}: {len(cited & set(tags))} of {len(tags)} entries cited"
-              + (f"; not cited: {', '.join(uncited)}" if uncited else ""))
-    else:
-        print(f"{READERS.relative_to(REPO_ROOT)} missing (not written yet)")
+        if doc is READERS:
+            uncited = [t for t in tags if t not in cited]
+            print(f"{doc.relative_to(REPO_ROOT)}: {len(cited & set(tags))} of {len(tags)} entries cited"
+                  + (f"; not cited: {', '.join(uncited)}" if uncited else ""))
     for p in lint_clauses(items):
         print(f"clauses: {p}"); rc = 1
     refs = lint_references(items, record_text, REPO_ROOT)
