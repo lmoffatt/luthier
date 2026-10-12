@@ -28,6 +28,10 @@ worth the decisions it guides). Mark as usual: "ok", "no" or a comment under a l
   done (`W`), what is certified. A certifier is the one action on Luthier's own state whose result
   comes back to the declarative face as a trusted value. Not a keyword: its five kernel forms are
   names of core (D-2026-10-13-d).
+        Aca hay sutilezas, cualquier lectura del mundo cambia el estado interno de Luthier, 
+        lo que cambia aqui es la creencia de que un valor pertenece a un tipo. 
+
+
 - L7.3, completed: the five certifiers of L9.1 belong to the kernel layer, names the checker
   recognizes as it does `extern` and `axiom`, checked by hand (D-2026-10-13-d).
 - L9.10, new: a certifier is a value, as a generator is; beyond the five primitive ones, a
@@ -38,3 +42,4 @@ worth the decisions it guides). Mark as usual: "ok", "no" or a comment under a l
 
 The spec follows: 2.S21 lists `W` among the keywords; 10.S4 and 10.S5 say one world and `W` the
 core's; chapter 12 proposes the private part by ascription (2f3435b).
+OK

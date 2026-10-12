@@ -49,8 +49,18 @@ could manage.
 
 - 8.S1, a demand is a value: entry, cutoff, δ, the cost of assumptions, limits on resources;
   nothing else is a parameter of it.
+          Justamente la demand es una compuerta por la cual pasar parametros que modifiquen el comportamiento del programa, porque cerrar los parametros sin razon?
+          La forma de setear los parametros es simple: al pedir un determinado tipo de entrada a la funcion  f: (t: P T)->W , yo se que necesito que t sea un P T y entonces veo si el cono de t permite construir un P T y lo construyo. 
+          Ahora esto implica que todo el cono que trabajaba para hace T ahora tiene que hacer P T y eso deberia ser posible. 
+          Una forma es que sea un codigo generico sobre (G T) (donde G puede ser Identity ) y entonces reemplazo G por P. 
+
+
 - 8.S11, `lib/plan.lut` gains the memo key, a function from a demand and a program to a plan, and
-  the law that the key changes when any input changes.
+  the law that the key changes when any input changes. 
+          No se que es el memo key, elabora
+   
+
+
 - 8.S15, a trace library would offer `record d p r`, append-only.
 - Question of the agent: may a result computed under a tighter tolerance serve a looser demand?
   8.S9 asks for equal keys for now. Mine: keep equal keys until a case asks (P8, no more
