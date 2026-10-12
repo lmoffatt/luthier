@@ -35,9 +35,9 @@ principles.
 | [5. Laws](05-laws.md) | L12, L3 | draft 0, 2026-10-13 |
 | [6. Certification](06-certification.md) | L9, L10 | draft 0, 2026-10-12 |
 | [7. Tests and generators](07-tests.md) | L10.3, L5.18 | draft 0, 2026-10-12 |
-| [8. The demand and the plan](08-demand.md) | L5 | wave 3 |
-| [9. Specimens and the planner](09-planner.md) | L6 | wave 3 |
-| [10. Actions and the world](10-world.md) | L4, L11 | wave 3 |
+| [8. The demand and the plan](08-demand.md) | L5 | draft 0, 2026-10-13 |
+| [9. Specimens and the planner](09-planner.md) | L6 | draft 0, 2026-10-13 |
+| [10. Actions and the world](10-world.md) | L4, L11 | draft 0, 2026-10-13 |
 | [11. Numbers](11-numbers.md) | L13 | draft 0, 2026-10-12 |
 | [12. Files and tools](12-files-and-tools.md) | L5, L10, L14 | draft 0, 2026-10-12 |
 

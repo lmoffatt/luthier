@@ -169,3 +169,9 @@ token, the ranking, the trace), the rest syntax or placement.
   over a cost type taken as a parameter, the five operations it asks of the library (6.S5) proposed.
   Next: his marks on 6.S5 above all, since that interface is what the library of costs cannot change
   later; then chapter 5, the laws, over the same parameter.
+- 2026-10-13: chapter 5 written (cbc0f7f); chapters 8, 9 and 10 written by three Sonnet agents on
+  the briefs of e8409ef and integrated (the twelve chapters now exist, all draft 0). Found in the
+  integration: `Failures E` is not in the interpreter (3.S12, 4.R6 corrected); 6.S5 lacks the law
+  that `⊤ ≤ 0` is false (proposed in 5.S5); settled principle clauses have no decision id, so a
+  chapter restating them can only mark them proposed. Next: his marks on the interfaces asked of
+  libraries (8.S2, 9.S14, 10.S5, 5.S3) and the agents' questions, in one document.
