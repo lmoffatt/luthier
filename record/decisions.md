@@ -1533,3 +1533,111 @@ Kind:       language (spec 2, 12.S22). For L14, P16
 Status:     current; amends -ae (names enter the environment, but only those listed). Core, his
             answer ("si, core ahi si incluiria esos tipos"): `core.lut` encloses the outermost block of
             every file, its names (`Int`, `Bool`, `List` and the rest) visible unqualified
+
+D-2026-10-05-a  A law characterizes; a second implementation is not a law. The laws of an object
+                state the mathematical properties that determine its operations, up to the
+                equality of the presentation; a native definition is one model certified against
+                them, an extern another, and their agreement (`Agrees`) a corollary, never the law.
+                A law has one name, written once in its most general form, and structures are
+                built by inclusion.
+Author:     Luciano for the diagnosis and the principle; the model for the rule's wording (four
+            points, accepted)
+Quote:      "Aparecen leyes ad hoc que lo que hacen es reproducir la implementacion de las
+            funciones en lugar de decir sus invariantes matematicas que las caracterizan."
+            "Si, avanza con eso."
+            "el principio es no declarar lo mismo con dos nombres distintos"
+Source:     chat:52d3e68e:2536
+            chat:52d3e68e:2603
+            chat:52d3e68e:2679
+Kind:       language (spec 4.R10; rationale 07). For P10, which the same exchange gave
+            (chat:52d3e68e:2760, 2772)
+Status:     current. Taken 2026-10-05 and carried out in luthier@61a7487; entered 2026-10-12 by
+            the session integrating wave 1 of the spec, which found it without an id. The model's
+            four points are at chat:52d3e68e:2542
+
+D-2026-10-05-b  `check -v` reports, for each operation with laws, whether they characterize it or
+                only compare it with another implementation: *consistent, not characterized*.
+Author:     the model (point 3 of its proposal, "unicidad como reporte"), accepted by Luciano
+Quote:      "Si, avanza con eso."
+Source:     chat:52d3e68e:2603
+Kind:       tool (spec 4.S20). For D-2026-10-05-a, P10
+Status:     current; not implemented. Entered 2026-10-12 by the same session
+
+D-2026-10-05-c  `toFloat64` stays `Int -> Float64`, the nearest double to an integer, where its 37
+                uses are; the specification follows the code, and the rounding of a `Real` waits
+                for a `Real` that computes.
+Author:     the model, departing from item 3.4 of record/plan-2026-10-05.md (which renamed it),
+            accepted by Luciano with the rest of phase 3
+Quote:      "arranca la Fase 3 como recomendaste"
+Source:     chat:aa680014:1057
+Kind:       language (spec 11.S5). For P16 (cheaper to revise: no rename of 37 uses for a
+            conversion with no use yet)
+Status:     current; implemented in luthier@aee30cc. The departure is stated at
+            chat:aa680014:1048. Entered 2026-10-12 by the same session
+
+D-2026-10-06-aa A condition refines in its branch: inside `if p x then a else b`, `x` has the type
+                `{ x : T | p x }` in `a` and `{ x : T | not (p x) }` in `b`; under another
+                condition `q x` the coercion owes `q x -> p x`. The same for a pattern. It is
+                Luciano's principle, a check is made once and recorded in the type of the value
+                it checked, applied to branches; `refine` is typable by it.
+Author:     Luciano for the principle; the model for the rule (occurrence typing), accepted
+Quote:      "un cosa que odio es cuando un programa chequea dos o mas veces lo mismo."
+            "Me cierra asi, pero por las dudas  fijate si hay contextos que pidan otra cosa"
+            "Es importante implementar estas nuevas especificaciones, discutamos si lo haces vos o
+            quien las escribio."
+Source:     sonolocalizacion@6485d1a:Lucianos ideas dir/funcion de los tipos en Luthier.txt:3
+            chat:aa680014:3939
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:69
+Kind:       language (spec 4.R11; checks as data, spec 5). For L2, P10
+Status:     current; not implemented. Written in luthier@ae67242 (05 R11); the rule is proposed at
+            chat:aa680014:3925 and 3932. Entered 2026-10-12 by the same session
+
+D-2026-10-06-ab Generators and certificates, his answers on record/generators-2026-10-06.md. A
+                test says which generators it used, binding by parameter as the base and named
+                profiles as an abbreviation, and its certificate records the choices expanded.
+                Generators are values of Luthier; the random source is an extern whose laws of
+                stochasticity are stated in Luthier. Generators are functors over a type
+                (`exhaustive`, a static error on an infinite type; `sampled` with a linear or a
+                logarithmic metric), with sampling by a cumulative cost as a candidate to unify
+                numbers and lists. There are generators only of defined types; drawing over `U`
+                is a static error. The bounds of a number are part of its type. A certificate of
+                a function covers what its generators drew, and a run must stay inside it; a
+                result is checked once, when produced. A statistical law declares its level,
+                repeats a failure with an independent seed and measures its power on controls.
+                The matrix families of the analysis stand.
+Author:     Luciano; the bindings, the certificate of results and the three parts of 5.5 the
+            model's proposals, accepted
+Quote:      "Los generadores son Luthier citizens como cualquier otro."
+            "O sea en realidad la idea es solo tengo generadores  sobre tipos definidos."
+            "Listo."
+            "la tolerancia de Levenberg-Marquardt no puede ser cualquiera, tiene limites"
+            "OK"
+            "OK"
+            "Si, exacto."
+            "Estoy evaluando si los generadores deberian ser propiedad del tipo o functores sobre
+            el tipo"
+            "Los geradores de matrices ya los planteaste bien."
+Source:     sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:62
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0703.txt:54
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:32
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:36
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:45
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:62
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:66
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:71
+            sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:72
+Kind:       language and tool (spec 7; the decisions listed at the head of the old 08, d12b554).
+            For L10.3, L5.18, P11
+Status:     current; the functors and the cumulative cost were "estoy evaluando" (his leaning,
+            "creo que es lo segundo"), the rest answered. Entered 2026-10-12 by the same session
+
+D-2026-10-06-ac The grammar of D-2026-10-06-ab (old 08 §12): `test name [with n | exhaustive]
+                [sampled metric] [size k] [under profile] [where { bindings }]`, a new act
+                `profile name := { bindings }`, and the act `gen` removed, since no type owns a
+                generator.
+Author:     the model, writing the specification he asked for
+Quote:      "Ok, esta en tus manos. Esta todo especificado? Escribi la especificacion."
+Source:     sonolocalizacion@6485d1a:Lucianos feedbacks/oct 6 0734.txt:80
+Kind:       language (spec 2.S19, 7.R1). For D-2026-10-06-ab
+Status:     replaced in its syntax by D-2026-10-12-ab (`test` a function with named arguments, the
+            profile a record value); `gen` removed stands. Entered 2026-10-12 by the same session
