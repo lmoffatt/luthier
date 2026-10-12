@@ -78,7 +78,7 @@ The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder pl
 | retired | G4 | retired in draft 9 (D-2026-10-12-c); its content became L22, now in L14 |
 | L1 | L1 | kept; the Purpose section since draft 11 |
 | L2 | L2 | kept |
-| L3 | L4 | renumbered; "from a law" his correction |
+| L3 | L4 | renumbered; "from a law" his correction; merged into L2 in draft 11 |
 | L4 | L8 | renumbered |
 | L5 | L16, L21 | merged: equality has levels, with the identity clauses of L21 |
 | L6 | new | how laws combine, the lift and the cutoff, from the former G3 |
@@ -797,7 +797,7 @@ L13.7  A sampled edge is admissible on the distribution it sampled; it composes 
 L13.8  The tolerance charged at a node is the demand's pulled back through the sensitivity of the
        cone from the node to the demand (`11` §5), and where no sensitivity is known there is no
        substitution. [settled]
-L13.9  A link certified on a subtype is a link only at inputs certified (L3) in that subtype, so a
+L13.9  A link certified on a subtype is a link only at inputs certified (L2) in that subtype, so a
        path exists at x only where every link does; a `proved` link by citation carries the
        theorem's hypotheses as parameters and is void where they fail. [settled]
 L13.10 The author's free choice among the inhabitants of an under-determined function
@@ -869,31 +869,57 @@ History:    (L6) draft 1 (5769005): stated. (L7) draft 0 (6d9dbd3): stated. Draf
 ### Under G1, theory and model
 
 ```
-L2  A type is a proposition, and membership is a guarantee.
+L2  A type is a proposition, membership is a guarantee, and the certified subtype from a law is the
+    fundamental construction pattern.
 From:       G0 directly; the second clause is the step to G1
 L2.1   Belonging to a type asserts the propositions, laws included, that the value satisfies;
        function types carry their laws the same way. [settled]
-L2.2   `a : A` is one judgment, structural and decidable for the kernel's types; it asserts the
-       structural proposition outright and the laws through the certificate, at the grade the
+L2.2   `a : A` is one judgment, structural and decidable for the kernel's structures; it asserts the
+       structural proposition outright and the laws through the certificate, with the evidence the
        certificate has. [settled]
-L2.3   "Guarantee" means what the grade (Terms) says: proved or exhaustive, a guarantee; sampled,
-       evidence at a level; assumed, a hole that says so. [settled]
-L2.4   What a law adds is evidence, and the certificate of the law carries its grade and, for a law
-       into `Cost`, the worst cost seen (`11` §4). [settled]
-L2.5   The guarantee is what the certificate says and no more, and what leaves the program carries
-       one (L10, D-2026-10-11-n). [settled]
-References: `11`; D-2026-10-11-n
-Rests on:   O1 (the worst cost seen, and how the uncertainty of a cost sits in a certificate)
+L2.3   A value with a sampled or assumed certificate is a model of its theory with the cost its
+       certificate records (D-2026-10-12-j); "guarantee" means what the evidence says, and the word
+       model promises the evidence, not exactness. [proposed]
+L2.4   What a law adds is evidence, recorded in a certificate (L16); what leaves the program carries
+       one (L16.6, D-2026-10-11-n). [settled]
+L2.5   From a material type and a law, a predicate or a cost with its tolerance, come the certified
+       type, its only constructor and the forgetful projection; the same pattern builds values,
+       functions and programs. [settled]
+L2.6   A law gives the three at once: the type, the constructor with Maybe, the membership function.
+       [settled]
+L2.7   Where the law is into `Cost`, the certificate records the bound it observed, and the demand's
+       cutoff decides whether it serves (L16.5, D-2026-10-12-h); the constructor takes no tolerance.
+       [proposed]
+L2.8   Types are verified before they are constructed: Luthier starts from types by verification,
+       and types by construction may come in later. [settled]
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-j
+Rests on:   O1 (the bound in a certificate)
 Source:     Luciano, 2022-08-03 (written:2022-08-03_haskell:proposicion-que-cada-tipo-cumple);
             restated 2026-05-26 (day:2026-05-26:tipos-como-conceptos-y-proposiciones)
-Status:     settled
+Status:     settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); "from a law" is his correction
+            of 2026-10-12
 History:    draft 1 (5769005): stated. draft 4 (c7c6396): one judgment, structural; the certificate
             carries the grade and the worst cost; what leaves the program carries a certificate
             (D-2026-10-11-n). draft 6 (8809e20): what "guarantee" means at each grade. draft 10
             (72cc7be, 81c1794, 25f9c5e, b7a7e23): number kept. draft 11, step 3 (2026-10-12): the
             formulation split into numbered clauses with the status each sentence had in draft 10,
             the examples into Example, the provenance phrases into this History, the wording
-            otherwise as draft 10 had it. the grade list deleted here, defined in Terms.
+            otherwise as draft 10 had it. the grade list deleted here, defined in Terms. draft 11,
+            step 4 (2026-10-12): L3 (the certified subtype from a law) merged in as clauses 5 to 8;
+            clause 3 written on D-2026-10-12-j; the grade meanings of draft 10's clause 3 are now
+            L16.2; the tolerance left the constructor (D-2026-10-12-h) (absorbed L3) From: G0 (a law
+            is a proposition; its subtype is the type of its proofs) with G1 (verified, not
+            constructed) Source: Luciano, 2022-08-03
+            (written:2022-08-03_haskell:subtipos-con-predicado); named fundamental 2026-09-29
+            (record/distillation/2026-10-09_find_principles_v2_claude-code_ opus.md, C3); the three
+            things and the scope 2026-10-10 (WhatsApp Ptt 2026-10-10 at 10.12.21.md, 05:24 to 08:10)
+            Status: settled; "from a law" is his correction of 2026-10-12 History: draft 1
+            (5769005): stated. draft 4 (c7c6396): the tolerance a parameter of the constructor,
+            recorded in the certificate. draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): renumbered
+            from L4; "from a law" is his correction of 2026-10-12. draft 11, step 3 (2026-10-12):
+            the formulation split into numbered clauses with the status each sentence had in draft
+            10, the examples into Example, the provenance phrases into this History, the wording
+            otherwise as draft 10 had it.
 
 L7  A law characterizes; a certifier produces its evidence, exact or statistical; and the
     certificate of identity is not the certificate of the law.
@@ -1215,6 +1241,15 @@ criterion is a parameter. 1. Thresholds, budgets, limits and statistical levels 
 in code; they are declared, passed and recorded. [settled] 2. The outermost demand, an action with
 no caller, carries its tolerance as a declared default argument (D-2026-10-11-c), recorded with the
 call, so there is a root and it is a parameter. [settled])
+(History: L3 at draft 11 step 3, merged into L2 in step 4: L3 The certified subtype from a law is
+the fundamental construction pattern. 1. From a material type and a law, a predicate or a cost with
+its tolerance, come the certified type, its only constructor and the forgetful projection; the same
+pattern builds values, functions and programs. [settled] 2. A law gives the three at once: the type,
+the constructor with Maybe, the membership function. [settled] 3. Where the law is into `Cost`, the
+constructor takes the tolerance as a parameter (L12) and the certificate records the tolerance it
+was checked at, so a stricter demand asks for a new check (`11` §4). [settled] 4. Types are verified
+before they are constructed: Luthier starts from types by verification, and types by construction
+may come in later. [settled])
 
 ## What is open
 

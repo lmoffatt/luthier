@@ -65,7 +65,7 @@ theorem or by delegating to a software library that carries its own guarantee (d
 correction), exhaustive over every case, checked on chosen cases, sampled statistically at a stated
 level, or merely assumed (L2, L7). The basic building block is a type carved out of a bigger one
 by a predicate, which gives three things at once: the new type, its only constructor, and the
-function that says whether a value belongs (L3). A law characterizes an operation
+function that says whether a value belongs (L2). A law characterizes an operation
 mathematically; it does not re-run a second copy of the code and compare (L7). And checking that
 an implementation still gives the same bits as yesterday is a different thing from checking that
 it satisfies its laws; Luthier keeps the two certificates apart, and lets a certificate of the
