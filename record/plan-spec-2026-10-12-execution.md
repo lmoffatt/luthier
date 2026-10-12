@@ -141,3 +141,13 @@ token, the ranking, the trace), the rest syntax or placement.
   question the agents left (in `record/spec-drafts.md`); (4) after his marks, the decisions of wave 2
   (chapters 5 and 6: `Cost` in the kernel or a library, the default conjunction among the two
   candidate algebras of D-2026-10-12-p, the names lift/exact/within, the place of `Failures E`).
+- 2026-10-12, Opus session, steps (1) to (3) of the line above done. (1) Ids from their sources in
+  chat and in his feedback of 2026-10-06: D-2026-10-05-a (R10), -b ("consistent, not
+  characterized"), -c (`toFloat64`), D-2026-10-06-aa (R11), -ab (his answers on generators and
+  certificates), -ac (the test grammar, its syntax replaced by D-2026-10-12-ab) (99c2613, eb417a5);
+  2.S19, 4.R10, 4.R11, 4.S20, 11.S5 cite them (d84904b). (2) Chapter 7: sixteen items decided on
+  -ab, S7 implemented, S2, S6, S12, S14 proposed, the parts that run marked `[implemented]` inline
+  after reading the code (96d5ecf). (3) `record/spec-wave-1-for-his-marks.md` (bcc388f): every
+  `[proposed]` item and the agents' questions, with the model's reading where it has one; it also
+  flags δ used twice (confidence in 1.S11 and 7.S11, rounding defect in 11.S16). Next: his marks,
+  committed verbatim, then applied; then step (4), the decisions of wave 2.
