@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 7e5a908a6987, commit bd4537e (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 69018bd30951, commit 07930da (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -50,7 +50,10 @@ Each term has one category and is defined here and nowhere else; the principles 
 - The *declarative face* of a program is what it states: its types, laws and definitions. The
   *executive face* is what the demands ask of it.
 
-*Object* (`05 §3`) is not a term (O7).
+- An *object* is anything a name defines: a theory, or a value, a function or a datum, with or
+  without laws; the word for what C++ calls a regular type, whose counterpart here is a type that
+  comes with its equality (O2). A *theory* is the object several names define together, a cycle
+  of the dependency graph, the one-symbol function type included (D-2026-10-12-z).
 
 ## The organizers
 
@@ -451,8 +454,9 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   demand only if the cached cone meets it, checked at the hit and not only when the certificate was
   issued. [settled]
 - L10.6 Certification is the default: demanding a value demands every certificate in its dependency
-  cone, paid once through the memo, unless the demand opts out by a mechanism to be named (O3), which
-  leaves a certificate of grade `assumed` (D-2026-10-11-n); what never reaches an output needs no
+  cone, paid once through the memo, with no opt-out at the start (D-2026-10-12-y: a cone with an
+  uncertified or provisional name is refused); an exception, if a real case asks for one, is O3 and
+  would leave a certificate of grade `assumed` (D-2026-10-11-n); what never reaches an output needs no
   certificate, and what reaches one carries its cone's; `test` is the action that demands certificates
   without values (L5). [settled]
 - L10.7 Certification transports along identity: if B is certified on inputs X with bound b and
@@ -580,9 +584,10 @@ blocks; the done and implemented items are in the record's drafts table.
   the same day on Terms goes the same way ("podríamos suponer que A viene con su Setoid", `K` with
   its `Field`); the syntax, how a type names its setoid and its field, is the open part. Blocks
   Terms (dependences), L3, L9, L6.
-- **O3** (language) The opt-out of certification in a demand (D-2026-10-11-n, syntax open); the
-  world as an opaque, unique value so that an action is never served from the memo (L4, L5);
-  actions and the world as a value, designed and not implemented. Blocks L4.11, L5.6, L11.6, L10.6.
+- **O3** (language) An opt-out of certification in a demand, if a real case asks for one
+  (D-2026-10-11-n; none at the start, D-2026-10-12-y); the world as an opaque, unique value so that
+  an action is never served from the memo (L4, L5); actions and the world as a value, designed and
+  not implemented. Blocks L4.11, L5.6, L11.6, L10.6.
 - **O4** (language) The composition of invariances (G1's derived route): which laws compose and how
   the demand selects them (audio 08.58, 32:01 to 34:07; audio 09.21). Blocks L5.15.
 - **O5** (language) The decorated output (L5.4): the derivative by dual numbers as a model of the
@@ -593,11 +598,9 @@ blocks; the done and implemented items are in the record's drafts table.
   the whole a graded algebra; addition inside a dimension, multiplication across (second round
   §18). Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
   speed of sound). Blocks nothing.
-- **O7** (spec) *Object* in the spec (`05 §3`, a strongly connected component of the dependency
-  graph): not among the terms; in them it is a theory written in one cycle of names with its
-  models, never a function. Proposed: `05 §3` becomes "theories are cycles" and the word survives
-  only in "object classifier"; one commit over `04` and `05`; his decision (D-2026-10-12-f). Blocks
-  Terms.
+- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z): *object* is anything a name defines and a
+  theory is the object several names define together; `05 §3` reads "theories are cycles" in chapter
+  4 of the specification. Blocks nothing.
 - **O8** (spec) The session as a block over the dataflow of L5: `<-` to explore, `:=` to lock, a
   file may contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the
   spec's `04 §7` and a section on the session; the memo between the items of a session. Blocks

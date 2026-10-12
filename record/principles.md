@@ -154,3 +154,18 @@ Assumption: a principle that costs more to apply than the decision it guides is 
             the form of the principles (few organizers, derivations written) is part of their
             content.
 Status:     proposed by Luciano 2026-10-11, wording the model's, awaiting his mark
+
+P16 Between designs that satisfy what is required today, the one cheaper to revise tomorrow;
+    reversibility breaks ties, and what is expensive to change is what deserves to be a principle.
+Quote:      "so as a general rule, lets do the thing that it is easier to build from."
+            "esta no puede ser una decision irreversible, todo lo que tenga que ver con epsilon lo
+            iremos descubriendo along the way"
+Source:     record/plan-spec-2026-10-12-decisions.md, his marks on D4 and D6 (a066adc); the text
+            he brought in chat on 2026-10-12 (last responsible moment, two-way doors, "good
+            architecture makes change cheap"); D-2026-10-12-aa
+Assumption: flexibility has a cost, and the brake is P8 with the rule that a mechanism enters
+            only after a real case; the trigger for deciding is also a real case, so deferring is
+            not procrastination. The decisions it guided before it was named: D-2026-10-12-q (any
+            algebra, the simplest first), -r (the conversion as a function per theory), L10.2
+            (grades derived from domain and evidence), D4 and D6 of the spec plan.
+Status:     proposed by Luciano 2026-10-12, wording the model's, awaiting his mark

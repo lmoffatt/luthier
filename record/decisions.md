@@ -1373,3 +1373,54 @@ Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D8 (a066adc
 Kind:       principles (L14 new, under G0; L7, W2, W5 as precedents). For G0, L7, P13 (the decisions
             it already guided: D8 of the spec plan, W5's restatement, Term as data in version 0)
 Status:     current; L14 in record/principles-language.md, its clauses proposed, his mark pending
+
+D-2026-10-12-y  His marks on the wave 1 decisions of the specification (D1 to D10 of
+                record/plan-spec-2026-10-12-decisions.md): D1 a directory of chapters; D2, D3,
+                D9, D10 as proposed; D4 resolved by the rule "do the thing that is easier to
+                build from", which is the derived representation of the grades (domain and
+                evidence cost, the five names a view); D6 kept reversible, the rounding
+                correction proposed and parameterized, nothing about epsilon fixed; D7 inverted:
+                `run` is strict from the start, no opt-out, and (the model's reading, not
+                answered) a cone with a `provisional` extern is refused like an uncertified
+                one; D8 accepted with a theory of libraries written in Luthier, which became L14.
+Author:     Luciano; Claude for the reading of D7 on provisional externs
+Quote:      "fist option" "ok" "yes" "I am not sure if this is a matter for the specification or
+            for different libraries, I think it is something we will learn by doing. so as a
+            general rule, lets do the thing that it is easier to build from." "esta no puede ser
+            una decision irreversible, todo lo que tenga que ver con epsilon lo iremos
+            descubriendo along the way" "no, empecemos siendo estrictos, sino es un viva la pepa
+            y no testeamos Luthier nunca." "si, confio en tu criterio" "dale" (a066adc; chat)
+Source:     record/plan-spec-2026-10-12-decisions.md (a066adc); chat 2026-10-12
+Kind:       document and principles (L10.6, O3: the opt-out of D-2026-10-11-n reversed in its
+            opt-out part; the certificate's grades; the specification's layout). For P16, P11,
+            W4 (strictness is the application paying for certification)
+Status:     current; D-2026-10-11-n stands for certification by default and is reversed on the
+            opt-out, which waits for a real case (O3)
+
+D-2026-10-12-z  The term *object*: anything a name defines, a theory or a value, a function or a
+                datum, with or without laws, the word for what C++ calls a regular type; a
+                *theory* is the object several names define together, a cycle of the dependency
+                graph, the one-symbol function type included (D-2026-10-12-e stands). O7 closes:
+                `05 §3` reads "theories are cycles".
+Author:     Luciano for the two uses; Claude for keeping the one-symbol case inside theory and for
+            the link to O2 (a regular type is one that comes with its equality)
+Quote:      "Yo propuse que Object se use para englobar a theoria y funcion y dato (no tenemos
+            nombre para lo que seria un tipo regular de c++), y dejar teoria para varias cosas se
+            definen interrelacionadamente." (a066adc)
+Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D5 (a066adc)
+Kind:       terms (Terms of docs/principles.md; O7; chapter 4 of the spec). For P12, D-2026-10-12-f
+Status:     current; Terms updated, O7 closed
+
+D-2026-10-12-aa A principle of the method, P16: between designs that satisfy what is required
+                today, the one cheaper to revise tomorrow; reversibility breaks ties, and what is
+                expensive to change is what deserves to be a principle.
+Author:     Luciano, from a text he brought ("aquí hay una idea interesante": last responsible
+            moment, two-way doors, "good architecture makes change cheap") and his marks on D4 and
+            D6; the statement's wording the model's
+Quote:      "so as a general rule, lets do the thing that it is easier to build from." "esta no
+            puede ser una decision irreversible" (a066adc)
+Source:     chat 2026-10-12; record/plan-spec-2026-10-12-decisions.md (a066adc)
+Kind:       principles of the method (record/principles.md P16). For P13 (the decisions it guided
+            before it was named: D-2026-10-12-q, -r, L10.2, D4 and D6 of the spec plan), P8 (the
+            brake: flexibility has a cost), P6
+Status:     current; P16 in record/principles.md, proposed wording, his mark pending
