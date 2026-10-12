@@ -68,11 +68,11 @@ given term, Luthier searches for one.
 Status: settled, marked OK by him on 2026-10-12.
 
 **G1. A type is a theory and its values are its models.** If a type is a proposition, then a
-proposition can say that a structure follows the rules of a theory; so "this structure satisfies
-the laws of the theory" is said, in the language of types, as "it is of the type of the theory": it is a model of the theory, and Luthier verifies that it is. Types thereby carry a
-strong semantic meaning, and coding and testing are one act: to declare `m : T` is to declare the
-tests `m` will pass (L3). What type
-theory lacks: it knows a value by its term; Luthier knows it by the law it satisfies.
+proposition can say that a structure follows the rules of a theory; so "this structure satisfies the
+laws of the theory" is said, in the language of types, as "it is of the type of the theory": it is a
+model of the theory, and Luthier verifies that it is. Types thereby carry a strong semantic meaning,
+and coding and testing are one act: to declare `m : T` is to declare the tests `m` will pass (L3).
+What type theory lacks: it knows a value by its term; Luthier knows it by the law it satisfies.
 Status: settled; this wording is his note of 2026-10-12 put in order; the long form in the record.
 
 **G2. Laws are valued in cost: one logic, extended to the non-negative reals.** Not every theory
