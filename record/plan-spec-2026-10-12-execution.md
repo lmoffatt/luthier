@@ -16,6 +16,7 @@ sources (`docs/rationale/09-extern-and-the-world.md`, `11-cost-valued-laws.md`,
 
 - 2026-10-12: plan written; decisions D1 to D10 with Luciano; nothing started.
 - 2026-10-12, on his observation that the other principle documents carried past decisions: `docs/way-of-working.md` (4eb914e), `docs/rationale/11-cost-valued-laws.md` (d953792) and `docs/principles-for-readers.md` draft 6 (5076a6d) brought to draft 11, and the citation check of `project_principles.py --check` now covers the three; an agent of wave 1 may cite any of them.
+- 2026-10-12, later: his marks on D1 to D10 taken (D-2026-10-12-y, -z, -aa; L14 and Term as data, -x). Step 0 done: `docs/spec/00-index.md`, `record/spec-drafts.md`, `record/spec-brief-template.md`, the briefs in `record/spec-briefs/` (3445ad8); `scripts/check_spec.py` being written by a Sonnet agent in a worktree (not yet merged). Step 1 started: seven Sonnet agents (all Sonnet, not Opus for 4 and 7, to spare tokens) launched in worktrees at 3445ad8, one chapter each (1, 2, 3, 4, 7, 11, 12); none committed. Next, for whoever integrates: find the worktrees (`git worktree list`), read each chapter whole, run `scripts/check_spec.py` on it once merged, compare against its source by a word-level diff, commit chapter by chapter with its row in `record/spec-drafts.md`, delete the old file it replaces, update the index; then step 2.
 
 ## Rules for every step
 
