@@ -91,7 +91,7 @@ actions over the names they need, then runs forward over that live subgraph, eac
 test is an action too, so verifying is a form of demanding (L10). What the demanded value does
 not need is forgotten, which is how Luthier avoids carrying the whole history of a computation in
 its types (L10). Every threshold, budget and statistical level is a parameter passed with the
-demand, never a constant hidden in the code (L12).
+demand, never a constant hidden in the code (L10).
 
 Evaluation is verification: Luthier checks equivalences rather than executing instructions.
 Execution proper is an action on the world, and an action is verifiable too (draft 1, his word), by

@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 0819e6f2a073, commit e2ff85d (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 87c2a842d873, commit 595d2be (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -177,16 +177,17 @@ References: `05` R12, `05` R8; D-2026-10-11-i, D-2026-10-12-m.
 Rests on: O3 (the world as a value).
 Status: settled; clause 11 proposed.
 
-**L10. The demand determines the computation and the types produced.**
+**L10. The demand determines the computation and the types produced; the meaning of a program, its
+realization under a plan and its evidence are three objects, never one.**
 From: G0, the demand directly; the audio of 08.58 (15:35 to 17:12, 30:37 to 31:21) adds the
 iteration step, read every demand, run, collapse to the outputs, write, and asks whether the code
 object is consumed or stable: kept; with G1 for what is derived (the former L13).
 - L10.1 The declarative face states what is known, universal and minimally processed; the executive
   face is a demand from outside, and the demanded type fixes the path, the types and the tolerances
   actually produced. [settled]
-- L10.2 The evaluation strategy is a parameter separate from the program (L12); by default, a plan
-  backward from the actions over names, evaluating nothing, then a strict forward run over the live
-  subgraph, each node once and whole: forward on demand. [settled]
+- L10.2 The evaluation strategy is a parameter separate from the program (clause 18); by default, a
+  plan backward from the actions over names, evaluating nothing, then a strict forward run over the
+  live subgraph, each node once and whole: forward on demand. [settled]
 - L10.3 What the action asks for flows backward along the plan and is produced forward: the value,
   its error, its derivative, its test, the type of its result; at the leaves a value lifts on its own,
   takes a mark given with the demand, or is a hole. [settled]
@@ -195,59 +196,60 @@ object is consumed or stable: kept; with G1 for what is derived (the former L13)
   cost it gives its error; the demand choosing the output type is the demand choosing the model, and
   the planner inserts the bridges (L13). The derivative needs nothing new; the error waits for the
   algebra of costs (O1, O5). [proposed]
-- L10.5 The tests are actions, so verifying is demanding. What never reaches an output needs no
-  certificate, and what reaches one carries its cone's certificates (D-2026-10-11-n; `test` demands
-  certificates without values). [settled]
+- L10.5 The tests are actions, so verifying is demanding; what a demand requires of the certificates
+  in its cone, and when a certificate serves it, is L16.5 and L16.6. [settled]
 - L10.6 A result is identified by code, inputs, mode, the demanded type and tolerance, the model its
   type names, the seed, the plan that produced it, the plan being a value (`lib/plan.lut`), and the
   hashes of the certificates in its live cone, so a host library or platform that changed is a new
   result. [settled]
-- L10.7 The grade the demand states is in the identity too, and a memo hit serves a demand only if
-  the cached cone meets that grade, checked at the hit and not only when the certificate was issued.
-  [settled]
-- L10.8 The runtime includes the thread count and scheduling of the host, and an extern whose bits
+- L10.7 The runtime includes the thread count and scheduling of the host, and an extern whose bits
   depend on scheduling is not bit-identical to itself, so its identity law is `Cost`, never `Bool`
   (L5). [settled]
-- L10.9 The run database is what the planner reads to choose the plan and is not an input of the
+- L10.8 The run database is what the planner reads to choose the plan and is not an input of the
   result once the plan is fixed; evidence accumulates by a separate action with its own record, so
   "each node once" and G2's "kept across runs" never meet on one node. [settled]
-- L10.10 A test is an action whose result is a certificate, memoized by the certificate's identity
-  (code, cases, seed, the distribution and level sampled, L7) and rerun when asked or when that
-  identity changed; the demand states the grade it requires (P11), and a certificate serves every
-  demand whose tolerance and grade it meets (`11` §4). [settled]
-- L10.11 "Each node once" is once per plan: a stricter demand on the same definition is another node
-  of another plan, and the looser certificate still serves what it met. [settled]
-- L10.12 Three objects, never one: the meaning of a program, the class its laws fix; a realization,
-  the result under a plan; the evidence, its certificates. [settled]
-- L10.13 A certificate is a frozen snapshot by hash; a later test does not change it, it issues a
-  new one that supersedes it, both kept, the latest in front (P3), so progress is the chain of
-  certificates. [settled]
-- L10.14 Two sessions that differ only in the order of independent bindings are equivalent by
+- L10.9 A test is an action whose result is a certificate (L16.4), rerun when asked or when the
+  certificate's identity changed; "each node once" is once per plan: a stricter demand on the same
+  definition is another node of another plan, and the looser certificate still serves what it met.
+  [settled]
+- L10.10 The meaning of a program is the class its laws fix; a realization is the result under a
+  plan; the evidence is its certificates (L16): three objects, never one. [settled]
+- L10.11 Two sessions that differ only in the order of independent bindings are equivalent by
   `Confluent` (L9), the law the session block is certified against. [settled]
-- L10.15 The program is the synthesis and is kept, the computation is the expansion and is redone.
+- L10.12 The program is the synthesis and is kept, the computation is the expansion and is redone.
   Script and interpreter are the same under this L, one batch of demands or demands one at a time with
   the memo between them (`04` §7, O8); a session is a block and a file is never one, so a session
   saved to a file becomes its `main` block (D-2026-10-11-i). [settled]
-- L10.16 What is produced, and which types, is what the demanded value needs; what it does not need,
+- L10.13 What is produced, and which types, is what the demanded value needs; what it does not need,
   the complement of its dependency cone, is not produced, so the choice is canonical, one per demand,
   and the types being spoken are what was asked for. [settled]
-- L10.17 Not producing at run time (a node freed after its last consumer) and not carrying in the
+- L10.14 Not producing at run time (a node freed after its last consumer) and not carrying in the
   type (how much history a certificate keeps) are one; the program is always kept, only what leaves
   scope is lost; not producing is not materializing a derived value, never erasing what reconstructs
   or recertifies it (code, inputs, model, seed, plan, tolerance), which the memo's identity keeps.
   [settled]
-- L10.18 A function on a type applied to a subtype does not produce one overload per subtype; the
+- L10.15 A function on a type applied to a subtype does not produce one overload per subtype; the
   demanded return type selects which law to derive by composition (G1, O4), and the rest is not
   produced. [settled]
-- L10.19 What is derivable is a property of the expression, independent of the demand; the demand
+- L10.16 What is derivable is a property of the expression, independent of the demand; the demand
   chooses which of it is derived, certified and carried, so the elaboration (types, derivable laws)
   does not depend on the observer; the memo of results does, and they are two caches. [settled]
+- L10.17 The demand carries the cutoff: the minimal cutoff for a specimen to be considered, applied
+  to the composed bound and the composed evidence cost of a path (D-2026-10-12-h, L16.5); a cutoff
+  does not compose (L6.3), so it lives in the demand and is passed down from it, and no law carries
+  one. [proposed]
+- L10.18 No unrecorded policy constants: thresholds, budgets, limits, statistical levels and the
+  planner's default policies are never constants in code; they are declared, passed and recorded. The
+  kernel's primitives (0, ∞, `lift`, `exact`) and mathematical constants are not policies
+  (D-2026-10-12-n). [proposed]
+- L10.19 The outermost demand, an action with no caller, carries its tolerance as a declared default
+  argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
+  [settled]
 Example: doubling positives is positive only when positivity is demanded and derivable, sin of
-positives is only Real because no law composes (clause 18).
-References: `04`, `11`; D-2026-10-11-i, D-2026-10-11-n; P3, P11.
-Rests on: O1 (the error decoration), O3 (the world as a value, so that an action is never served
-from the memo), O5, O8, O12.
-Status: settled; clause 4 proposed on his note on Terms.
+positives is only Real because no law composes (clause 15).
+References: `04`; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
+Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12.
+Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed.
 
 **L13. One function, many paths, chosen by maximizing the performance the demander chooses.**
 From: G0 (the quotient), G2 (the choice by cost and the database of runs) and, before its retirement
@@ -524,9 +526,9 @@ blocks; the done and implemented items are in the record's drafts table.
   extension of Boolean logic to Lawvere and Bayes, which he names as another motivator or eureka;
   whether it is the third eureka or a principle of good use is his to mark after that analysis.
   Until it exists the application runs on a Boolean interim: laws of the form d(f x, g x) ≤ tol
-  with tol a parameter (L12), every law returning `Bool` or `Cost` with the result type saying
-  which (`11` §2, L5), no composition of tolerances along a chain, no run database. Blocks L2.4,
-  L3.3, L5.5, L6, L8.3, L8.4, L10.4, L13.7, L13.9.
+  with tol a parameter (L10), every law returning `Bool` or `Cost` with the result type saying
+  which (`11` §2, L5), no composition of tolerances along a chain, no run database. Blocks L2.7,
+  L5.3, L6, L8.3, L8.4, L10.4, L13.6, L13.8, L16.3, L16.8.
 - **O2** (language) The type with its equality as the base case of every theory (a setoid; a
   metric space where the equality is a cost), the kernel's structural `==` its model for the
   decidable types (`05` R8), the equality of functions extensional and derived from it (L5), the
@@ -537,9 +539,9 @@ blocks; the done and implemented items are in the record's drafts table.
   Terms (dependences), L5, L7, L13.
 - **O3** (language) The opt-out of certification in a demand (D-2026-10-11-n, syntax open); the
   world as an opaque, unique value so that an action is never served from the memo (L9, L10);
-  actions and the world as a value, designed and not implemented. Blocks L10.6, L11, L14.5, L14.7.
+  actions and the world as a value, designed and not implemented. Blocks L9.11, L10.6, L14.6, L16.6.
 - **O4** (language) The composition of invariances (G1's derived route): which laws compose and how
-  the demand selects them (audio 08.58, 32:01 to 34:07; audio 09.21). Blocks L10.18.
+  the demand selects them (audio 08.58, 32:01 to 34:07; audio 09.21). Blocks L10.15.
 - **O5** (language) The decorated output (L10.4): the derivative by dual numbers as a model of the
   theory, the error by intervals or value-and-cost pairs once O1 exists; what in the planner
   chooses the model and inserts the bridges. Blocks L10.4.
@@ -556,11 +558,11 @@ blocks; the done and implemented items are in the record's drafts table.
 - **O8** (spec) The session as a block over the dataflow of L10: `<-` to explore, `:=` to lock, a
   file may contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the
   spec's `04 §7` and a section on the session; the memo between the items of a session. Blocks
-  L10.15.
+  L10.12.
 - **O9** (spec) The kind of a hole in the elaborated form (L4.3). Blocks L4.3.
 - **O10** (spec) `proved` by citation: the citation a `.bib` key with a resolved DOI, ISBN or URL,
   and who checked (human, ai+human, none) recorded; syntax `cite name bibkey checked ai+human`
-  proposed, allowed in user code (D-2026-10-11-f as amended; to `05 §7`). Blocks L14.8.
+  proposed, allowed in user code (D-2026-10-11-f as amended; to `05 §7`). Blocks L7.7.
 - **O11** (spec) The kernel's theory stated in Luthier: `src/luthier/lib/kernel_laws.lut`, tested
   on `Fin 3`, `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (`05`
   R8), functions over `Fin n` not enumerated by `exhaustive` (to fix). Blocks L15.
@@ -569,13 +571,16 @@ blocks; the done and implemented items are in the record's drafts table.
 
 ## His marks pending
 
-- L5.5, the composition of identities as paths (his note of 2026-10-12 put in words).
+- L16.7 and L16.8, the composition of identities as paths (his note of 2026-10-12 put in
+  words, with D-2026-10-12-q).
 - L6, the names lift, exact and within (his to rename), and clauses 1 and 5.
 - L8.3 and L8.4, the correction on rounding.
 - L10.4, the decorated output as another model.
 - L13.3, the wording of his formula for the efficiency.
-- L14.7, the world as a candidate; L14.8, delegation as citation; L14.9, the wording of the graded
+- L14.6, the world as a candidate; L7.7, delegation as citation; L16.7, the wording of the graded
   transport (his correction).
+- L16, the certificate entry; L2.3, what `a : A` asserts; L9.11, actions on Luthier's own state;
+  L10.17 and L10.18, the cutoff and the policy constants; L13.3, 5, 6, 7; L6.2, 3, 5; L7.1.
 - The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
 
 ## Keys
@@ -613,7 +618,7 @@ The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder pl
 | L9 | L9, L18 | merged: a DAG of definitions without effects |
 | L10 | L19, L13 | merged: the demand determines the computation and the types produced |
 | L11 | L12 | renumbered and shortened; merged into L9 in draft 11 |
-| L12 | L17 | renumbered; statement in his words |
+| L12 | L17 | renumbered; statement in his words; merged into L10 in draft 11 |
 | L13 | L10 | renumbered; statement in his words |
 | L14 | L14, L22, L11 (delegation), L21 (transport) | merged |
 | L15 | L6, L7 | merged: the core is minimal and its programs are data |
