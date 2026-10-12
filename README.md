@@ -1,7 +1,9 @@
 # Luthier
 
 A language that verifies models of theories. A theory is a type with its laws; a model is a value
-of it, and defining a model defines its test. A function is the case of a theory with one symbol.
+of it, and defining a model defines its test. The common case is a function type with its laws, a
+theory of one symbol over types already modelled with their equality; a function is a model of it
+and has sense only in that context.
 What runs is decided by a demand from outside, which picks among the models of a theory by cost.
 Version 0 tests; it does not prove.
 

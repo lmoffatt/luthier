@@ -1,16 +1,39 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 ba19dc368eb5, commit 43d7796) by `scripts/project_principles.py` (project_principles v1) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 0d58df8db238, commit 43d7796 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v1) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Terms
 
-A *theory* is a type with laws, usually parameterized; a *model* is a value of a theory; a
-*function* is the case of a theory with one symbol; a *module* is a file as a namespace today and a
-value by design; an *object* is the cycle of a type and its laws (`05 §3`); a *certificate* is the
-record of a law checked, with its grade (proved, exhaustive, cases, sampled at a level, assumed)
-and, for a law into `Cost`, the worst cost seen; the *planner* is what chooses, among the models
-certified equivalent, the one that runs; the *demand* is a request for a value from outside the
-program, an action, which carries the type and the tolerance it wants.
+His list (2026-10-12, `docs/principles_corr.md` at d5e81e3, D-2026-10-12-f), in his order; where he
+left a question mark the name is the model's proposal and says so.
+
+- A *structure* (proposed; his candidates structure, object, data) is a type in the kernel's
+  language (`04`): products, sums, function types and recursive types, built from each other.
+- A *predicate* is a function into `Bool`. A *cost* (proposed) is a function into `Cost`, the
+  non-negative reals with infinity, 0 true and ∞ false (G3).
+- A *law* is a predicate or a cost over the symbols of a structure; both are laws and coexist (G3).
+- A *theory* is a structure with its laws.
+- A *model* is an inhabitant of a theory: a value of its structure whose laws are certified.
+- A *function* is a value of a function type `A -> B`, in the standard sense (his correction). A
+  function type with its laws is a theory of one symbol, and a function that satisfies them is a
+  model of it; this is the common case in practice (D-2026-10-12-e), and a function has sense only
+  in that context.
+- A *certificate* (proposed; his "validation or proof") is the record that a law was checked, with
+  its grade (proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst
+  value seen; a proof is a certificate of grade proved. To *certify* is to produce one.
+- *Evaluation* computes a value, or the value of a law, and has no effect (L18). *Execution* is an
+  action on the world (print, save). On his doubt, whether checking a law is an execution since it
+  changes state (proposed): checking the law is evaluation; recording that it was checked writes a
+  certificate into the store Luthier owns, with the memo, and that is an action, verified by
+  reading the store back (L12) and never an action on the world outside; `test` is that action
+  (L19).
+- The *demand* is a request for a value from outside the program, an action, carrying the type and
+  the tolerance it wants. The *planner* is what chooses, among the models certified equivalent,
+  the one that runs.
+
+The spec's *object* (`05 §3`, a strongly connected component of the dependency graph, the names a
+cycle of laws joins) is not among his terms; in them it is a theory written in one cycle of names
+with its models. Whether `05` renames it is open.
 
 ## The organizers
 
@@ -30,32 +53,38 @@ function is known by description.** A theory is a signature with its laws, writt
 language (`04`, a bicartesian closed category: this is where G0 is used); a model is a value of a
 theory, and declaring `m : T` records the obligation to satisfy the laws of `T`; a law relates
 several symbols (`inverse x * x = unit`), which no single function can carry, so the unit declared
-is the theory and the unit valued is the model; an isolated function is a theory of one symbol over
-the theories its laws import, and the eureka of 09.19 is this case, where he saw it first. Luthier
-verifies models of theories; what it verifies about a function is the case of one symbol. The
-function: the laws are what is known of a function, and the implementation, native or extern, is the
-specimen under observation. A description is derived by composition of the laws of the parts when
-such a law exists, and observed otherwise; laws accumulate, and a set of laws that determines the
-function up to its equality is the limit a definition may reach, not what it must reach
-(D-2026-10-11-d). (His words) A law is written as an implementation of itself, a program that
-returns its Bool or Cost; a theory is written as an object classifier made of laws, the map that
-sends a structure over the signature to the cost of its being a model, which is where G3 enters G2;
-the implementation of a model is then verified against the laws. What type theory lacks: it knows a
-function by acquaintance, as its term. What model theory lacks: a grade and a demand; a model of
-Luthier satisfies its theory up to a cost, certified at a grade and progressively (G3), and is
-chosen for execution by a demand (G1); naming it "model" must not promise exactness. What follows
-from G2 as its definition rather than by derivation: L20 (a function is declared in a theory and is
-universal over its models), the object of `05 §3` (the names a cycle of laws joins), D-2026-10-07-e
-(no loose functions: a definition at a bare exponential is not a defined type) and D-2026-10-11-j (a
-carrier with two models is two types); and three L read in its terms: L10 is many models of one
-theory, interchangeable in the quotient; L21 is the difference between two models being identified
-and both satisfying the theory; L14's extern is a model whose carrier is foreign. The precedent in
-programming is algebraic specification, the module systems of ML and the lawful type classes of
-Haskell, where the mechanism exists without being the organizing idea (references to be checked
-before they are cited).
+is the theory and the unit valued is the model. The common case in practice is not the smallest
+theory but one that adds a single symbol, a function type with its laws, to structures already
+modelled with their equality: every law is an equality, and the equality of a carrier is itself a
+function with laws (reflexive, symmetric, transitive, or those of a distance) that the new symbol
+must respect; the model of such a theory is a function in the standard sense, and the eureka of
+09.19 is this case, where he saw it first. (His words, D-2026-10-12-e) An isolated function has no
+sense; it has sense in a context, and what looks like a lone function is one whose inverse and whose
+theory nobody took the trouble to find. Luthier verifies models of theories; what it verifies about
+a function is that it is a model of its type's laws. The function: the laws are what is known of a
+function, and the implementation, native or extern, is the specimen under observation. A description
+is derived by composition of the laws of the parts when such a law exists, and observed otherwise;
+laws accumulate, and a set of laws that determines the function up to its equality is the limit a
+definition may reach, not what it must reach (D-2026-10-11-d). (His words) A law is written as an
+implementation of itself, a program that returns its Bool or Cost; a theory is written as an object
+classifier made of laws, the map that sends a structure over the signature to the cost of its being
+a model, which is where G3 enters G2; the implementation of a model is then verified against the
+laws. What type theory lacks: it knows a function by acquaintance, as its term. What model theory
+lacks: a grade and a demand; a model of Luthier satisfies its theory up to a cost, certified at a
+grade and progressively (G3), and is chosen for execution by a demand (G1); naming it "model" must
+not promise exactness. What follows from G2 as its definition rather than by derivation: L20 (a
+function is declared in a theory and is universal over its models), the object of `05 §3` (the names
+a cycle of laws joins), D-2026-10-07-e (no loose functions: a definition at a bare exponential is
+not a defined type) and D-2026-10-11-j (a carrier with two models is two types); and three L read in
+its terms: L10 is many models of one theory, interchangeable in the quotient; L21 is the difference
+between two models being identified and both satisfying the theory; L14's extern is a model whose
+carrier is foreign. The precedent in programming is algebraic specification, the module systems of
+ML and the lawful type classes of Haskell, where the mechanism exists without being the organizing
+idea (references to be checked before they are cited).
 Tier: eureka, the first (the trigger, audio 09.19, 00:00 to 00:14), printed first (D-2026-10-12-a).
-Status: settled (the widening, the order and the removal of the holotype are his decisions); the
-formulation is the model's except the paragraph marked his; the precedent's references unchecked.
+Status: settled (the widening, the order, the removal of the holotype and the function as the common
+case are his decisions); the formulation is the model's except the paragraph marked his; the
+precedent's references unchecked.
 
 **G1. The demand defines what is computed.** The declarative face states what is known, universal
 and minimally processed; the executive face is a demand from outside, and the demanded type fixes
@@ -266,8 +295,8 @@ invariantes de los calculos", note), with P14 (a type is a concept).
 Status: settled.
 
 **L3. Defining a model defines its test.** Declaring a model of a theory, `m : T`, declares the
-tests it will be run on, so definition and verification are one act; a function is the one-symbol
-case.
+tests it will be run on, so definition and verification are one act; a function type with its laws
+is the one-symbol case, and its model a function.
 From: G2 directly: the eureka of 09.19 in its 2022 form.
 Status: settled (the widening is his mark).
 
@@ -519,6 +548,14 @@ Status: settled in its statement; the correction on rounding is proposed, his ma
   graded algebra; addition inside a dimension, multiplication across (second round §18).
   Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
   speed of sound).
+- The type with its equality as the base case of every theory (a setoid; a metric space where
+  the equality is a cost), the kernel's structural `==` its model for the decidable types
+  (`05` R8), the equality of functions extensional and derived from it (L21), the equality of
+  models componentwise; and whether a type names its equality as it names its model (`05` R13).
+  Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his mark pending.
+- The names he left with a question mark in his list of terms (structure, cost, certificate) and
+  the three-level answer to his doubt on validation as execution; and whether `05 §3` renames
+  *object* (D-2026-10-12-f).
 - His marks pending on this record: L21's wording (graded transport), L15's correction on
   rounding, L11's delegation as citation, the names lift, exact and within (G3), L22 as a
   candidate.

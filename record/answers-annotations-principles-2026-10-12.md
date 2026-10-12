@@ -256,3 +256,40 @@ where the link is, on the grid, and nowhere else. So the two draft 7 clauses ("n
 node's grade", "only beside a certified law") are replaced by the transport rule, which implies
 both. *Proposed*: L21 reworded as transport. Asks: ok; it reverses two clauses of draft 7 taken
 from the third round.
+
+## 6. His annotations on the projection, 2026-10-12 (`docs/principles_corr.md`, d5e81e3)
+
+**"A function is the case of a theory with one symbol": "esto no es cierto, dame un ejemplo (unit
+es una funcion? ...). Pensa un poco que es una funcion. Una funcion tiene una definicion
+estandard."** Accepted. The sentence mixed two levels. A function is a value of a function type
+`A -> B`, the standard definition, a term of an exponential in the kernel's category. What has one
+symbol is a theory: a function type with its laws, such as `Exp Float64 m := { f : Float64 ->
+Float64 | Homomorphic m f & AtZero m f }` in `examples/exp.lut`; `expTaylor` and `expPy` are its
+models, and each is a function. `unit : A` in `Monoid` is a symbol and not a function, which is
+why "one symbol" and "one function" must not be confused. Terms, G2 and L3 now say: a function
+type with its laws is a theory of one symbol, and a function that satisfies them is a model of it.
+With D-2026-10-12-e of the same morning: that theory always extends structures already modelled
+with their equality, so the function has sense only in that context.
+
+**"Los terminos son confusos ... Los unicos terminos necesarios son ..."** Accepted as the list
+of Terms, in his order (D-2026-10-12-f). Where he left a question mark the model proposes:
+*structure* for the CCC type (his candidates structure, object, data; "structure" because a theory
+is then "structure + laws" in his own formula, and because a value of it is a structure in the
+sense of model theory); *cost* for a function into `Cost`, parallel to *predicate*; *certificate*
+for "validation or proof", because the spec and the `.cert.json` files already use it and a proof
+is a certificate of grade proved. *Object* is not in his list; in the spec it is a cycle of names
+in the dependency graph (`05 §3`), a syntactic unit, which in his terms is a theory written in one
+cycle with its models. What distinguishes it from a model: an object is in the program's graph, a
+model is a value. Whether `05` renames it is left open; nothing in the principles depends on the
+word.
+
+**"El acto de validar las leyes conlleva una modificacion de estado y seria una ejecucion? Esto
+no lo tengo super claro."** Proposed reading, from L12, L18 and L19 as they stand: three levels,
+not two. Checking a law is evaluation: a predicate or a cost applied to values, no effect (L18).
+Recording that it was checked writes a certificate into the store Luthier owns, with the memo:
+that is a change of state, so it is an action, and L19 already says so ("a test is an action
+whose result is a certificate"); but it is an action on state Luthier can read back, verified the
+way L12 verifies actions, by the store before and after, and it never touches the world outside.
+Execution proper is the action on the world: print, save. So `eval` and `execute` are his two
+terms, and certification sits between them as an action on Luthier's own state. If he prefers two
+terms only, certification is an execution whose world is Luthier's store.

@@ -1,7 +1,10 @@
 # Luthier: the ideas behind it
 
-Draft 1, 2026-10-12, unapproved. Draft 0 (f3fb261) received five corrections from Luciano
-(afdd7c7); draft 1 writes them into the text, each marked "(draft 1)". Written for a reader who programs or does science and wants to
+Draft 2, 2026-10-12, unapproved. Draft 0 (f3fb261) received five corrections from Luciano
+(afdd7c7); draft 1 (43d7796) wrote them into the text, each marked "(draft 1)"; draft 2 applies
+his decisions of the same day (D-2026-10-12-e, -f): the common case is a theory of one symbol
+whose model is a function, and a function has sense only in a context, marked "(draft 2)".
+Written for a reader who programs or does science and wants to
 know what Luthier is for, without the apparatus. The prose is the model's; Luciano's own words,
 the sources and the history of each idea are in `record/principles-language.md`, and every
 paragraph here names, in parentheses, the entry it rests on. The version for the people writing
@@ -11,11 +14,13 @@ the specification is `docs/principles.md`.
 
 Luthier is a language for saying what a computation must satisfy, and then checking that an
 implementation satisfies it. A theory is a type together with its laws. A model is a value of that
-theory, something that claims to satisfy the laws. Luthier verifies models of theories. A single
-function is the smallest case: a theory with one symbol, whose laws say what the function must do
-(G2). (Draft 1, his correction) A type here is not a bare set of values. It has structure: the
-data it holds and the functions defined on that data, and the laws are statements about those
-functions (G2). Version 0 tests; it does not prove.
+theory, something that claims to satisfy the laws. Luthier verifies models of theories. (Draft 1,
+his correction) A type here is not a bare set of values. It has structure: the data it holds and
+the functions defined on that data, and the laws are statements about those functions (G2).
+(Draft 2, his decision) The common case is a theory with a single symbol: a function type with its
+laws, over types that are already modelled, with their equality. Its model is a function in the
+ordinary sense, and the laws say what that function must do with respect to what was there (G2).
+Version 0 tests; it does not prove.
 
 Here is the whole idea in one example. The integers modulo 7 form a ring. In Luthier you declare
 the type `Z7`, write addition, multiplication and negation on it, and then declare
@@ -42,6 +47,12 @@ Often, though, a law speaks of several functions at once: associativity needs an
 inverse law needs the operation, the inverse and the unit. Such functions are not isolated; together
 they form a model of a theory. So the unit of Luthier is the pair, a model of a theory: the claim,
 backed by evidence of some grade, that a set of functions on a data type satisfies the theory's laws
+(G2). (Draft 2, his decision) Even a function that seems to stand alone does not: every law is an
+equality, and the equality of the type it returns is itself a function with laws, which the new
+function must respect. An isolated function has no sense; it has sense in a context, and a function
+that looks isolated is one whose inverse and whose theory nobody has yet taken the trouble to find.
+The exponential looks like a lone function until you ask for its inverse, the logarithm, and for the
+theory it belongs to: it carries addition to multiplication, and that law is what Luthier checks
 (G2). A function is declared inside a theory and is written once for every model of that theory, so
 the code that works for one ring works for every ring (L20).
 

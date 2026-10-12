@@ -63,13 +63,36 @@ organizers depend on each other says why it is load-bearing anyway.
 
 ## Terms
 
-A *theory* is a type with laws, usually parameterized; a *model* is a value of a theory; a
-*function* is the case of a theory with one symbol; a *module* is a file as a namespace today and a
-value by design; an *object* is the cycle of a type and its laws (`05 §3`); a *certificate* is the
-record of a law checked, with its grade (proved, exhaustive, cases, sampled at a level, assumed)
-and, for a law into `Cost`, the worst cost seen; the *planner* is what chooses, among the models
-certified equivalent, the one that runs; the *demand* is a request for a value from outside the
-program, an action, which carries the type and the tolerance it wants.
+His list (2026-10-12, `docs/principles_corr.md` at d5e81e3, D-2026-10-12-f), in his order; where he
+left a question mark the name is the model's proposal and says so.
+
+- A *structure* (proposed; his candidates structure, object, data) is a type in the kernel's
+  language (`04`): products, sums, function types and recursive types, built from each other.
+- A *predicate* is a function into `Bool`. A *cost* (proposed) is a function into `Cost`, the
+  non-negative reals with infinity, 0 true and ∞ false (G3).
+- A *law* is a predicate or a cost over the symbols of a structure; both are laws and coexist (G3).
+- A *theory* is a structure with its laws.
+- A *model* is an inhabitant of a theory: a value of its structure whose laws are certified.
+- A *function* is a value of a function type `A -> B`, in the standard sense (his correction). A
+  function type with its laws is a theory of one symbol, and a function that satisfies them is a
+  model of it; this is the common case in practice (D-2026-10-12-e), and a function has sense only
+  in that context.
+- A *certificate* (proposed; his "validation or proof") is the record that a law was checked, with
+  its grade (proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst
+  value seen; a proof is a certificate of grade proved. To *certify* is to produce one.
+- *Evaluation* computes a value, or the value of a law, and has no effect (L18). *Execution* is an
+  action on the world (print, save). On his doubt, whether checking a law is an execution since it
+  changes state (proposed): checking the law is evaluation; recording that it was checked writes a
+  certificate into the store Luthier owns, with the memo, and that is an action, verified by
+  reading the store back (L12) and never an action on the world outside; `test` is that action
+  (L19).
+- The *demand* is a request for a value from outside the program, an action, carrying the type and
+  the tolerance it wants. The *planner* is what chooses, among the models certified equivalent,
+  the one that runs.
+
+The spec's *object* (`05 §3`, a strongly connected component of the dependency graph, the names a
+cycle of laws joins) is not among his terms; in them it is a theory written in one cycle of names
+with its models. Whether `05` renames it is open.
 
 ## The organizers
 
@@ -104,10 +127,17 @@ Formulation: a theory is a signature with its laws, written in the kernel's lang
             bicartesian closed category: this is where G0 is used); a model is a value of a
             theory, and declaring `m : T` records the obligation to satisfy the laws of `T`; a law
             relates several symbols (`inverse x * x = unit`), which no single function can carry,
-            so the unit declared is the theory and the unit valued is the model; an isolated
-            function is a theory of one symbol over the theories its laws import, and the eureka
-            of 09.19 is this case, where he saw it first. Luthier verifies models of theories;
-            what it verifies about a function is the case of one symbol.
+            so the unit declared is the theory and the unit valued is the model. The common case
+            in practice is not the smallest theory but one that adds a single symbol, a function
+            type with its laws, to structures already modelled with their equality: every law is
+            an equality, and the equality of a carrier is itself a function with laws (reflexive,
+            symmetric, transitive, or those of a distance) that the new symbol must respect; the
+            model of such a theory is a function in the standard sense, and the eureka of 09.19
+            is this case, where he saw it first. (His words, D-2026-10-12-e) An isolated function
+            has no sense; it has sense in a context, and what looks like a lone function is one
+            whose inverse and whose theory nobody took the trouble to find. Luthier verifies
+            models of theories; what it verifies about a function is that it is a model of its
+            type's laws.
             The function: the laws are what is known of a function, and the implementation,
             native or extern, is the specimen under observation. A description is derived by
             composition of the laws of the parts when such a law exists, and observed otherwise;
@@ -147,12 +177,26 @@ Quote:      "el disparador es darme cuenta de eso, que los tipos de funciones so
             presentamos como verificador de modelos de teorias? Al tomar elementos de CCC como
             estructuras donde se escriben las leyes, las teorias y modelos pasarian a ser los
             elementos de Luthier" (chat, 2026-10-12, D-2026-10-12-a)
+            "me parece que es muy difcil encontrar un caso en que verifiques una funcion
+            relevante aislada, siempre viene con un tipo asociado al menos, y siempre tiene la
+            igualdad asociada tambien... Y las igualdades vienen asociadas con funciones
+            tambien" (chat, 2026-10-12, D-2026-10-12-e)
+            "Si, lo comun es extender una teoria con un caso. Lo que pasa es que yo sospecho que
+            son funciones porque no nos tomamos el trabajo de pensar cual es su inversa o a que
+            teoria pertenecen. una funcion sola, aislada no tendria sentido, tiene sentido en un
+            contexto, a eso voy." (chat, 2026-10-12, D-2026-10-12-e)
+            "Pensa un poco que es una funcion. Una funcion tiene una definicion estandard."
+            (docs/principles_corr.md, d5e81e3)
 Source:     WhatsApp Ptt 2026-10-11 at 09.19.36.md, 00:00 to 00:14; record/Lucianos ideas/
             principios organizadores.txt; the composition of invariances as "la parte Tarski",
             WhatsApp Ptt 2026-10-11 at 08.58.46.md, 32:01 to 34:07; his observation on draft 7,
             66f0bef; chat 2026-10-12, D-2026-10-12-a; his words on laws and theories,
-            record/answers-annotations-principles-2026-10-12.md §5 (bcdac41)
-Status:     settled (the widening, the order and the removal of the holotype are his decisions);
+            record/answers-annotations-principles-2026-10-12.md §5 (bcdac41); the function as
+            the common case, chat 2026-10-12 (D-2026-10-12-e), after a survey of the .lut files
+            (58 certified functions, each with an imported equality; 12 models; 341 definitions
+            without a law); his annotation on the projection, d5e81e3 (§6 of the answers)
+Status:     settled (the widening, the order, the removal of the holotype and the function as
+            the common case are his decisions);
             the formulation is the model's except the paragraph marked his; the precedent's
             references unchecked
 History:    draft 2 (cd24137): "a function is known by description", the second eureka, printed
@@ -164,6 +208,9 @@ History:    draft 2 (cd24137): "a function is known by description", the second 
             lacks added; the derivations that follow directly named.
             draft 9 (0636378): the holotype removed, settled; his words put in its place (a law an
             implementation of itself, a theory an object classifier made of laws).
+            record (2026-10-12), D-2026-10-12-e and his annotation d5e81e3: the common case is a
+            theory of one symbol whose model is a function in the standard sense; an isolated
+            function has sense only in a context.
 ```
 
 ```
@@ -535,7 +582,8 @@ History:    draft 0 (6d9dbd3): stated.
 L3  Defining a model defines its test.
 From:       G2 directly: the eureka of 09.19 in its 2022 form
 Formulation: declaring a model of a theory, `m : T`, declares the tests it will be run on, so
-            definition and verification are one act; a function is the one-symbol case.
+            definition and verification are one act; a function type with its laws is the
+            one-symbol case, and its model a function.
 Source:     Luciano, 2022-08-03 (written:2022-08-03_haskell:declarar-funcion-es-declarar-su-test)
 Status:     settled (the widening is his mark)
 History:    draft 0 (6d9dbd3): stated as "defining a function defines its test".
@@ -934,6 +982,14 @@ History:    draft 0 (6d9dbd3): stated.
   graded algebra; addition inside a dimension, multiplication across (second round §18).
   Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
   speed of sound).
+- The type with its equality as the base case of every theory (a setoid; a metric space where
+  the equality is a cost), the kernel's structural `==` its model for the decidable types
+  (`05` R8), the equality of functions extensional and derived from it (L21), the equality of
+  models componentwise; and whether a type names its equality as it names its model (`05` R13).
+  Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his mark pending.
+- The names he left with a question mark in his list of terms (structure, cost, certificate) and
+  the three-level answer to his doubt on validation as execution; and whether `05 §3` renames
+  *object* (D-2026-10-12-f).
 - His marks pending on this record: L21's wording (graded transport), L15's correction on
   rounding, L11's delegation as citation, the names lift, exact and within (G3), L22 as a
   candidate.

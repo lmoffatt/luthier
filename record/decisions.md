@@ -1126,4 +1126,33 @@ Kind:       organizers (G2, its presentation). For P14 (no loose functions: a fu
             belongs to the object), P13 (one idea now explains the 58 certified functions and the
             341 without a law alike)
 Status:     current; record/principles-language.md G2, docs/principles.md reprojected,
-            docs/principles-for-readers.md draft 2, README first paragraph
+            docs/principles-for-readers.md draft 2, README first paragraph. Restated the same
+            day on his annotation (D-2026-10-12-f): the common case is a theory of one symbol, a
+            function type with its laws; the function is its model, in the standard sense
+
+D-2026-10-12-f  The terms of the principles are his list and no more: structure (a type in the
+                kernel's language), predicate (into Bool), cost (into Cost), law (a predicate or
+                a cost over a structure), theory (a structure with its laws), model (an
+                inhabitant of a theory), function (a value of a function type, in the standard
+                sense), certificate (the record of a validation or a proof, with its grade),
+                evaluation (checking laws, no effect) and execution (modifying the world). The
+                names where he left a question mark (structure, cost, certificate) are the
+                model's proposals, his to change; "object" (05 §3) is not among the terms and its
+                renaming in the spec is open.
+Author:     Luciano for the list and the correction on "function"; Claude for the names marked
+            proposed and for the three-level reading of his doubt (checking a law is evaluation,
+            writing its certificate is an action on Luthier's own state, execution is an action on
+            the world)
+Quote:      "esto no es cierto, dame un ejemplo (unit es una funcion? ... Pensa un poco que es
+            una funcion. Una funcion tiene una definicion estandard."
+            "Los terminos son confusos: que diferencia a object de un model, por ejemplo? Los
+            unicos terminos necesarios son ... Theory -> Struc + Law, model como habitante de una
+            theory ... El acto de validar las leyes conlleva una modificacion de estado y seria
+            una ejecucion? Esto no lo tengo super claro."
+Source:     docs/principles_corr.md (d5e81e3), his annotations on the projection 47c8f34
+Kind:       terms (G2, L3, Terms). For P12 (ten terms instead of a glossary that mixed syntax and
+            semantics), P1 (his list, the model's names marked), L12 and L18 (the reading of his
+            doubt uses them as they stand)
+Status:     current; record/principles-language.md Terms, docs/principles.md reprojected; the
+            spec's "object" unchanged; answers in
+            record/answers-annotations-principles-2026-10-12.md §6
