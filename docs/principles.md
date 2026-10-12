@@ -1,104 +1,51 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 0d58df8db238, commit 43d7796 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v1) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Draft 10, 2026-10-12, unapproved; written by hand from the projection of 44df5a7 and Luciano's
+corrections on it (`docs/principles_corr.md` d5e81e3, his notes e3fa339, `docs/principles_cont.md`
+323bda0, `docs/principles_3.md` 59ea8e9), every one of them applied; what the model added on his
+notes is marked *proposed* in the entry's Status. Written for the agent that builds the
+specification: each entry gives its statement, its formulation, what it derives from, and its
+status. His quotes, the sources and the history by draft are in `record/principles-language.md`,
+which is to be updated from this draft once he marks it, after which `docs/principles.md` is again
+the projection of the record (D-2026-10-12-d; `scripts/project_principles.py --check` fails until
+then). The way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Terms
 
-His list (2026-10-12, `docs/principles_corr.md` at d5e81e3, D-2026-10-12-f), in his order; where he
-left a question mark the name is the model's proposal and says so.
-
-- A *structure* (proposed; his candidates structure, object, data) is a type in the kernel's
-  language (`04`): products, sums, function types and recursive types, built from each other.  OK
-- A *predicate* is a function into `Bool`. A *cost* (proposed) is a function into `Cost`, the
-  non-negative reals with infinity, 0 true and ∞ false (G3). OK
-- A *law* is a predicate or a cost over the symbols of a structure; both are laws and coexist (G3). 
-No, a Law is either a predicate or a function of predicates that is a predicate, or a cost, or a function of costs that is a cost or a function of costs and predicates that is a cost.  [lo escribi largo para que entiendas lo que digo, quizas encuentres la forma elegante de decirlo]
-
-> **Claude (2026-10-12):** Accepted. The short form: laws are closed under combination. A law is a predicate or a cost, or any
-> combination of laws by the operations of `Bool` (and, or, not, implies, a quantifier over a
-> carrier) and of `Cost` (sum, max, a weighted sum); the combination is a predicate when everything
-> in it is, and a cost as soon as one cost enters, the predicates lifted by G3's `lift`. In algebra:
-> laws form a two-sorted algebra, `Bool` a retract of `Cost`, and a law is a term of that algebra over
-> the structure's symbols. The quantifier over a carrier is one of the operations, and it is where
-> the grades come from: exhaustive when the carrier is enumerated, sampled when it is not. I will put
-> this wording in the record if you mark it.
-
-
-- A *theory* is a structure with its law.  (singular porque es una funcion compuesta de laws, pero la forma de unirlas puede variar no tiene porque ser un and, pueden ser otras cosas)
-
-> **Claude (2026-10-12):** Accepted, singular. Today every theory in the libraries joins its laws with `&`
-> (`Objective := GradIsGradient & StepMatrixPositive`, `Exp ... | Homomorphic R m f & AtZero R m f`),
-> which is the Boolean join and one combination among those the algebra above allows; under `Cost`
-> the join is a sum, a max, or a weighted sum, which is Bayes composing evidence (G3). Two
-> consequences I would write down: the certificate of a theory is the certificate of one law, and
-> its grade is the composition of the grades of the parts (with `&`, the weakest; with a sum of
-> costs, the costs summed, each with its grade); and `&` in the spec becomes one operator of the
-> law algebra, no longer the only way to state a theory.
-
+- A *structure* is a type in the kernel's language (`04`): products, sums, function types and
+  recursive types, built from each other.
+- A *predicate* is a function into `Bool`. A *cost* is a function into `Cost`, the non-negative
+  reals with infinity, 0 true and ∞ false.
+- A *law* is a predicate or a cost, or a combination of laws that is again a predicate or a cost;
+  how laws combine is stated under G3.
+- A *theory* is a structure with its law.
 - A *model* is an inhabitant of a theory: a value of its structure whose law is certified.
-- A *function* is a value of a function type `A -> B`, in the standard sense (his correction). A
-  function type with its laws is a theory of one symbol, and a function that satisfies them is a
-  model of it; this is the common case in practice (D-2026-10-12-e), and a function has sense only
-  in that context. (aqui habria que aclarar que es un dependent theory, porque es una teoria que se cuelga de otras teorias, puede ser el setoide u otra cosa)
-
-> **Claude (2026-10-12):** Agreed, and it belongs in Terms. Proposed: a *dependent theory* is a theory whose
-> structure and law take models of other theories as parameters: `Monoid (A : U) (eq : Setoid A)`,
-> `VectorSpace (K : U) (F : Field K)`, `Exp (R : U) (m : NumberModel R)`. Every theory in the
-> libraries is one, and a function type with its laws is the one-symbol case, dependent at least on
-> the setoids of its carriers, since its law uses their equality. L20 already states the rule ("a
-> theory over a model of another theory is a theory"); what is new is the name and that the
-> dependence is never empty. In type theory's terms it is a Π over models, which is why the demand
-> can later choose the model (the next note).
-
-- A *certificate* (proposed; his "validation or proof") is the record that a law was checked, with
-  its grade (proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst
-  value seen; a proof is a certificate of grade proved. To *certify* is to produce one.  OK 
+- A *function* is a value of a function type `A -> B`, in the standard sense. A function type with
+  its law is a theory of one symbol, and a function that satisfies it is a model of that theory;
+  this is the common case in practice, and a function has sense only in that context.
+- The *dependences* of a theory are the theories whose models its structure and law take as
+  parameters (`Monoid A eq` depends on `Setoid A`; `VectorSpace K F V` on `Field K`). Every theory
+  has dependences; a function type has at least the setoids of its carriers, since its law uses
+  their equality.
+- A *certificate* is the record that a law was checked, with its grade (proved, exhaustive, cases,
+  sampled at a level, assumed) and, for a cost, the worst value seen; a proof is a certificate of
+  grade proved. To *certify* is to produce one.
 - *Evaluation* computes a value, or the value of a law, and has no effect (L18). *Execution* is an
-  action on the world (print, save). On his doubt, whether checking a law is an execution since it
-  changes state (proposed): checking the law is evaluation; recording that it was checked writes a
-  certificate into the store Luthier owns, with the memo, and that is an action, verified by
-  reading the store back (L12) and never an action on the world outside; `test` is that action
-  (L19).  
+  action on the world (print, save). Writing a certificate into the store Luthier owns is an action
+  on Luthier's own state, verified by reading the store back (L12), never an action on the world;
+  `test` is that action (L19).
 - The *demand* is a request for a value from outside the program, an action, carrying the type and
-  the tolerance it wants. The *planner* is what chooses, among the models certified equivalent,
-  the one that runs, and it plans the type of the output too, it might be the with an error, or the derivative or some type decoration (algo asi mejor dicho. Esta idea de que la demanda determina el tipo del output, es algo que me parece no tiene aun las herramientas teoricas como para implementarlo)
+  the tolerance it wants, the type possibly decorated: the value with its error, its derivative,
+  its certificate. The *planner* is what chooses, among the models certified equivalent, the one
+  that runs, and plans the decorated type the demand asks for.
 
-> **Claude (2026-10-12):** Yes: the demand names the decorated type, the value with its error, its derivative, its
-> certificate, and the planner produces that (L19 says it; Terms should). On the tools, a
-> proposal, since it is the part you doubt: a decoration is a different model of the same theory.
-> Code written over `Real` (L20, universal over models) run over the model of dual numbers gives the
-> derivative; run over intervals, or over pairs (value, cost), gives the error. The demand choosing
-> the output type is then the demand choosing the model the code runs in (D-2026-10-11-j, the type
-> names its model), and the planner's work is to insert the bridges between representations
-> (L10, L20). Forward-mode differentiation by dual numbers is standard and needs nothing new; what
-> is missing is the algebra of costs for the error (G3, `11` §5), which is the open item. So the
-> theory exists for the derivative and not yet for the error. Not to be implemented until you mark
-> it.
-
-
-The spec's *object* (`05 §3`, a strongly connected component of the dependency graph, the names a
-cycle of laws joins) is not among his terms; in them it is a theory written in one cycle of names
-with its models. Whether `05` renames it is open. 
-aqui estaria: yo creo que ese strongly connected component seria o una teoria que no es una funcion o no usamos el termino, 
-igual me da la sensacion que Object es mas teoria o function que al reves.
-
-> **Claude (2026-10-12):** Agreed. What `05 §3` calls an object is a cycle of names: a type, the operations on it and
-> the law that ties them (`Codec` and `RoundTrip` in the spec's example; `Z7`, `eqZ7`, `addZ7`,
-> `ringZ7`), which in your terms is a theory with its model written together, never a function.
-> Proposal: drop the term; `05 §3` becomes "theories are cycles", the graph fact stays as the rule
-> that decides where a theory ends, and *object* survives only in "object classifier", your other
-> sense. Cost: one commit over `05` and `04`, nothing else depends on the word. Your decision.
- 
-
+Status of the terms: his list (D-2026-10-12-f); the names structure, cost and certificate are the
+model's where he left a question mark, marked OK by him on 2026-10-12; *dependences* replaces the
+model's "dependent theory" on his note (every theory is one, so the emphasis goes on what it
+depends on); the reading of certification as an action on Luthier's own state is proposed, not
+yet marked. *Object* (`05 §3`) is not a term; see What is open.
 
 ## The organizers
-
-> **Claude (2026-10-12), on your notes in `principles_cont.md`:** rewritten here as you asked.
-> G0 names what governs execution; G2 is cut to the length of G1; G3 is printed with G2, as how a
-> law is validated, with the two kinds of law and how they combine; your quotes are out of this
-> file (they stay in the record, which is where tracking lives); G4 is out (it stays in the record
-> as retired); the Tier lines are gone and Status is one line. The record is untouched until you
-> mark this; then it takes these wordings and the projection is regenerated.
 
 The guide, then the two eurekas; G3 goes with G2.
 
@@ -108,22 +55,23 @@ the representative is free. Type theory guides what is declared. What governs ex
 demand (G1), read in the same theory: a demanded type is a judgment to inhabit, execution is the
 search for an inhabitant, and cost ranks the candidates (G3); where type theory normalizes a
 given term, Luthier searches for one.
-Status: settled; the clause on execution is proposed on your note.
+Status: settled; the clause on execution is proposed on his note.
 
 **G2. A type with its law is a theory; a value of it is a model.** Declaring `m : T` is the
 obligation that `m` satisfy the law of `T`, and Luthier verifies it. A function type with its law
 is the theory of one symbol, its model a function; it has sense only over the theories it depends
 on. What type theory lacks: it knows a function by its term; Luthier knows it by its law.
-Status: settled; this wording proposed on your note, the long form in the record.
+Status: settled; this wording proposed on his note, the long form in the record.
 
 **G3. How a law is validated.** A law is a predicate or a cost: a function into `Bool`, or into
 `Cost`, the interval [0,∞) with 0 true and ∞ false. Laws combine by and, or, then, and a
 quantifier over a carrier; a combination of predicates is a predicate, and a cost as soon as one
-cost enters. A law is validated by a certificate with a grade (proved, exhaustive, cases, sampled
-at a level, assumed) and, for a cost, the worst cost seen; the demand supplies the tolerance; what
-a run teaches is kept.
-Status: candidate (one decision guided so far); printed with G2 on your note; the algebra of
-costs open (`11`).
+cost enters; `&`, the only join the libraries use today, is one operator among these, and under
+cost the join is a sum, a max or a weighted sum. A law is validated by a certificate with a grade
+(proved, exhaustive, cases, sampled at a level, assumed) and, for a cost, the worst cost seen; the
+demand supplies the tolerance; what a run teaches is kept.
+Status: candidate (one decision guided so far); printed with G2 on his note; the combinations are
+proposed on his note on Terms; the algebra of costs open (`11`).
 
 **G1. The demand defines what is computed.** The declarative face states what is known, universal
 and minimally processed; the executive face is a demand from outside, and the demanded type fixes
@@ -318,7 +266,9 @@ practice of property-based testing). Verification by a theorem is `proved` by ci
 (D-2026-10-11-f); verification by delegation is the same mechanism with the host library's guarantee
 as the theorem cited (LAPACK's backward-error bounds, the condition number their hypothesis) and the
 library's version and platform as hypotheses the certificate carries (L14); no new grade
-(*Proposed*, on his mark).
+(*Proposed*, on his mark). The law of a theory is one law, so its certificate is one certificate,
+and its grade is composed from the grades of the parts: with `&`, the weakest; with a sum of costs,
+the costs summed, each at its grade (proposed, on his note on Terms).
 From: G2 (observation is how a description is verified) and G3 (the grade is the uncertainty of the
 cost).
 Status: settled; the reading of delegation as citation is proposed, his mark pending; he restated
@@ -450,9 +400,13 @@ Status: settled.
 **L19. The demand determines the computation.** The evaluation strategy is a parameter separate from
 the program (L17); by default, a plan backward from the actions over names, evaluating nothing, then
 a strict forward run over the live subgraph, each node once and whole: forward on demand. What the
-action asks for flows backward along the plan and is produced forward: the value, its error, its
-derivative, its test, the type of its result; at the leaves a value lifts on its own, takes a mark
-given with the demand, or is a hole. The tests are actions, so verifying is demanding. What never
+action asks for flows backward along the plan and is produced forward: the value, its error, its derivative, its test, the type of its result; at the leaves a value lifts on
+its own, takes a mark given with the demand, or is a hole. A decoration of the output is another
+model of the theory the code was written over (L20): run over dual numbers the code gives its
+derivative, run over intervals or over pairs of value and cost it gives its error; the demand
+choosing the output type is the demand choosing the model, and the planner inserts the bridges
+(L10). The derivative needs nothing new; the error waits for the algebra of costs (proposed, on his
+note on Terms). The tests are actions, so verifying is demanding. What never
 reaches an output needs no certificate, and what reaches one carries its cone's certificates
 (D-2026-10-11-n; `test` demands certificates without values). A result is identified by code,
 inputs, mode, the demanded type and tolerance, the model its type names, the seed, the plan that
@@ -550,6 +504,13 @@ Status: settled in its statement; the correction on rounding is proposed, his ma
 - `proved` by citation: the citation a `.bib` key with a resolved DOI, ISBN or URL, and who
   checked (human, ai+human, none) recorded; syntax `cite name bibkey checked ai+human` proposed,
   allowed in user code (D-2026-10-11-f as amended; to `05 §7`).
+- *Object* in the spec (`05 §3`, a strongly connected component of the dependency graph): not among
+  the terms; in them it is a theory written in one cycle of names with its models, never a
+  function. Proposed: `05 §3` becomes "theories are cycles" and the word survives only in "object
+  classifier"; one commit over `04` and `05`; his decision.
+- The decorated output (L19): the derivative by dual numbers as a model of the theory, the error
+  by intervals or value-and-cost pairs once the algebra of costs exists; what in the planner
+  chooses the model and inserts the bridges.
 - Units as a candidate L under G0: a dimension is a proposition, dimensions form a group under
   multiplication, the quantities of one dimension a one-dimensional vector space, the whole a
   graded algebra; addition inside a dimension, multiplication across (second round §18).
