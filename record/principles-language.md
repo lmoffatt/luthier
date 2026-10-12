@@ -95,6 +95,7 @@ The tags of draft 11 (contiguous, in document order, D-2026-10-12-v) against tho
 | L7 | L15 | L6, L7 | merged: the core is minimal and its programs are data |
 | — | absorbed | L3 | into G1 (draft 10) |
 | L10 | L16 | new | certificates, draft 11 (step 4) |
+| L14 | new | new | what can be written in Luthier is written in Luthier, his principle of 2026-10-12; under G0 after L7, to take its place by document order at the next renumbering |
 | — | absorbed | L20 | into G1 (draft 9) |
 
 ## Purpose
@@ -875,6 +876,46 @@ History:    (L6) draft 1 (5769005): stated. (L7) draft 0 (6d9dbd3): stated. Draf
             the status each sentence had in draft 10, the examples into Example, the provenance
             phrases into this History, the wording otherwise as draft 10 had it. draft 11
             (2026-10-12): renumbered from L15 of draft 10 (D-2026-10-12-v).
+
+L14 What can be written in Luthier is written in Luthier.
+From:       G0 (a type theory states its own rules in its own terms; L7, programs are data and the
+            interpreter is written in the language it interprets) with G1 (the host's implementation
+            is a specimen certified against the statement in Luthier); his principle, on his comment
+            on D8 of the specification plan
+L14.1  The specification of how Luthier runs is written in Luthier where the kernel can express it:
+       a theory with its laws, whose models and counter-models are the accept and reject programs of
+       the suite; the prose explains, it does not define. [proposed]
+L14.2  The libraries' theories, the generators, the plan, the certificate and the program itself
+       (`Program`, `Term` as data) are values of Luthier, stated with their laws before they are
+       implemented. [proposed]
+L14.3  The host implements what Luthier states and is a specimen of it, certified against the
+       statement like any other model (L7.3, L9); two orders of bootstrapping are two paths to the
+       same theory, a minimal kernel in Python with the rest in Luthier, or theory and testing in
+       Luthier with everything implemented in Python, and the agreement of the two is the law W5
+       names. [proposed]
+L14.4  What the kernel cannot yet express is written in the host and marked as such, a hole of the
+       theory it belongs to (L2), so that the boundary of "where it can" is visible and shrinks with
+       each version. [proposed]
+Rests on:   O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
+            version 0 in chat on 2026-10-12, to be specified in chapter 3
+Quote:      "necesitamos una teoria de librerias, la iremos haciendo a medida que la necesitemos.
+            Pero tiene que ser una teoria escrita en luthier. Aqui algo que es un principio de
+            luthier: todas las especificaciones de como se corre luthier tienen que estar escritas
+            en luthier, de ser esto posible. La implementacion puede ser en python, of course y
+            podemos intentar ambos caminos: nucleo minimo en python e implementacion en luthier y lo
+            contrario, solo teoria y testeo en luthier y todo implementado en python." (his comment
+            on D8, a066adc) "Y podemos agregar el principle de que si se puede se escribe en
+            Luthier" (chat, 2026-10-12)
+Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D8 (a066adc); chat 2026-10-12;
+            the precedents W2 (the specification is an executable suite), W5 (concepts live in
+            Luthier, execution in the host), L7.4, `lib/kernel_laws.lut`, `lib/plan.lut`, 08
+            (generators are values)
+Status:     his principle, stated in his words; the clauses are the model's wording, proposed, his
+            mark pending; placed under G0 after L7 and numbered L14 until the next renumbering by
+            document order (D-2026-10-12-v)
+History:    draft 11 (2026-10-12): new, on his comments on the specification plan (D8) and his
+            request in chat; the decisions it already guided: D8 of the spec plan, W5's restatement,
+            the decision to put `Program` and `Term` as data in version 0.
 ```
 
 ### Under G1, theory and model

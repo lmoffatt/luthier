@@ -1354,3 +1354,22 @@ Quote:      "2-> bien" "3-> ok" "5->ok" (chat, 2026-10-12)
 Source:     chat 2026-10-12, on record/draft-11-for-his-marks-2026-10-12.md items 2, 3, 5
 Kind:       principles (the certificate entry, laws combine). For G2
 Status:     current; the three clauses settled in draft 11
+
+D-2026-10-12-x  A new principle, L14: what can be written in Luthier is written in Luthier. The
+                specification of how Luthier runs is a theory in Luthier where the kernel can
+                express it; the libraries' theories, the generators, the plan, the certificate and
+                the program itself (`Program`, `Term` as data) are values of Luthier; the host
+                implements and is a specimen certified against the statement; two orders of
+                bootstrapping are two paths to one theory; what the kernel cannot express yet is
+                written in the host and marked as a hole. `Program` and `Term` as data enter version
+                0.
+Author:     Luciano for the principle and for Term as data in version 0; Claude for the four
+            clauses' wording, proposed
+Quote:      "todas las especificaciones de como se corre luthier tienen que estar escritas en
+            luthier, de ser esto posible. La implementacion puede ser en python, of course y
+            podemos intentar ambos caminos" (a066adc) "Y podemos agregar el principle de que si se
+            puede se escribe en Luthier" "eso es el boostrap no?" (chat, 2026-10-12)
+Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D8 (a066adc); chat 2026-10-12
+Kind:       principles (L14 new, under G0; L7, W2, W5 as precedents). For G0, L7, P13 (the decisions
+            it already guided: D8 of the spec plan, W5's restatement, Term as data in version 0)
+Status:     current; L14 in record/principles-language.md, its clauses proposed, his mark pending

@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 ac48afc2eb6c, commit 83066a7 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 7e5a908a6987, commit bd4537e (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -321,6 +321,30 @@ classifier when it means G2's truth values).
   and the interpreter is meant to be written in the language it interprets. [settled]
 Rests on: O11 (the kernel's theory stated in Luthier).
 Status: settled.
+
+**L14. What can be written in Luthier is written in Luthier.**
+From: G0 (a type theory states its own rules in its own terms; L7, programs are data and the
+interpreter is written in the language it interprets) with G1 (the host's implementation is a
+specimen certified against the statement in Luthier); his principle, on his comment on D8 of the
+specification plan.
+- L14.1 The specification of how Luthier runs is written in Luthier where the kernel can express it:
+  a theory with its laws, whose models and counter-models are the accept and reject programs of the
+  suite; the prose explains, it does not define. [proposed]
+- L14.2 The libraries' theories, the generators, the plan, the certificate and the program itself
+  (`Program`, `Term` as data) are values of Luthier, stated with their laws before they are
+  implemented. [proposed]
+- L14.3 The host implements what Luthier states and is a specimen of it, certified against the
+  statement like any other model (L7.3, L9); two orders of bootstrapping are two paths to the same
+  theory, a minimal kernel in Python with the rest in Luthier, or theory and testing in Luthier with
+  everything implemented in Python, and the agreement of the two is the law W5 names. [proposed]
+- L14.4 What the kernel cannot yet express is written in the host and marked as such, a hole of the
+  theory it belongs to (L2), so that the boundary of "where it can" is visible and shrinks with each
+  version. [proposed]
+Rests on: O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
+version 0 in chat on 2026-10-12, to be specified in chapter 3.
+Status: his principle, stated in his words; the clauses are the model's wording, proposed, his mark
+pending; placed under G0 after L7 and numbered L14 until the next renumbering by document order
+(D-2026-10-12-v).
 
 ### Under G1, theory and model
 
@@ -644,4 +668,5 @@ The tags of draft 11 (contiguous, in document order, D-2026-10-12-v) against tho
 | L7 | L15 | L6, L7 | merged: the core is minimal and its programs are data |
 | — | absorbed | L3 | into G1 (draft 10) |
 | L10 | L16 | new | certificates, draft 11 (step 4) |
+| L14 | new | new | what can be written in Luthier is written in Luthier, his principle of 2026-10-12; under G0 after L7, to take its place by document order at the next renumbering |
 | — | absorbed | L20 | into G1 (draft 9) |
