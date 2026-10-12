@@ -33,14 +33,14 @@ exists:
 | Chapter | Replaces | Sources | Written by | Draft 0 | Later drafts |
 |---|---|---|---|---|---|
 | 1 Terms and notation | the §0 of 04, 05, 06, 08, 09 | bd4537e | | | |
-| 2 Grammar | 02 | 02, 08 §12 at bd4537e | | | |
-| 3 Kernel | 04 | 04 at bd4537e; D-2026-10-12-x (Term as data) | | | |
-| 4 Static semantics | 05 §1 to §6, §8 | 05 at bd4537e; D-2026-10-12-z | | | |
+| 2 Grammar | 02 | 02, 08 §12 at bd4537e | Sonnet, brief at 3445ad8 | 2026-10-12: 6 rules, ~20 statements; 2.S19 (test extended, profile, gen removed) and 2.S20 (quote, eval) proposed; `let`, negation, implicit parameters added from the parser; questions: the metric after `sampled` as a plain name; primitive and axiom bodies kept in 2.S5 | |
+| 3 Kernel | 04 | 04 at bd4537e; D-2026-10-12-x (Term as data) | Sonnet, brief at 3445ad8 | 2026-10-12: 3 rules, ~38 statements; 3.S29 Term/Program as data and 3.S35 no self-modification decided; 3.S30 to 3.S34 (the four choices, canonical form), 3.S38 `lib/term.lut`, 3.S12 `Cost` proposed; questions: does `Failures E` stay a law type; is the kernel described as a theory; weak points: beta/delta/iota/prim marked implemented on checked-only programs | |
+| 4 Static semantics | 05 §1 to §6, §8 | 05 at bd4537e; D-2026-10-12-z | Sonnet, brief at 3445ad8 | 2026-10-12: 13 rules, ~21 statements; R10, R11, S16, S20, S21 (`WellFormed` in `lib/program.lut`) proposed; decided without an id: R10 (2026-10-05), R11 (2026-10-06), consistent-not-characterized, the R5/R7 details of 2026-10-05; 4.S17 names files not written; question: does 4.S9 keep concrete type against theory as two kinds | |
 | 5 Laws | 05 §9 | 05 §9, 11 §2 and §5 | | | |
 | 6 Certification | 05 §7, 03 §4 | 05 §7, 03 §4, 08 §8 and §9 | | | |
 | 7 Tests and generators | 08 | 08 at bd4537e; D-2026-10-12-y (grades), -r | | | |
 | 8 The demand and the plan | | 02 §8 and §9 | | | |
 | 9 Specimens and the planner | | 04 §6, 05 R10 | | | |
 | 10 Actions and the world | | 05 R5 and R12, 02 §9, 09 | | | |
-| 11 Numbers | 06 | 06 at bd4537e; D-2026-10-12-y (D6) | | | |
+| 11 Numbers | 06 | 06 at bd4537e; D-2026-10-12-y (D6) | Sonnet, brief at 3445ad8 | 2026-10-12: 4 rules, 19 statements; S3, S10, S11, S16 to S19 proposed; decided without an id: `toFloat64` stays with the integers (2026-10-05); 11.R3 borrows `n5_arrays.accept.lut` | |
 | 12 Files and tools | 03 §1 to §4 | 03, 05 §7 as implemented; D-2026-10-12-y (D7) | Sonnet, brief `record/spec-briefs/12-files-and-tools.md` at 3445ad8 | 2026-10-12: 20 statements, 1 rule; S1 (a file denotes a dependent record type, `lib/library.lut`) and S9 (the pure file plus `_python` file pattern) proposed; S17 strict `run` decided; two questions for Luciano: do `--checked` and `--no-record` stay, and does `eval` refuse an uncertified cone as `run` does; the old 03 kept until step 2 | |

@@ -28,16 +28,16 @@ principles.
 | Chapter | Realizes | Status |
 |---|---|---|
 | [1. Terms and notation](01-terms.md) | Terms of the principles | not written |
-| [2. Grammar](02-grammar.md) | L7 | the file of 2026-10-11 stands until rewritten |
-| [3. Kernel](03-kernel.md) | L7, L14 | the file `04-kernel.md` of 2026-10-11 stands until rewritten |
-| [4. Static semantics](04-static-semantics.md) | L2, L8 | the file `05-static-semantics.md` of 2026-10-11 stands until rewritten |
+| [2. Grammar](02-grammar.md) | L7 | draft 0, 2026-10-12, lint findings pending |
+| [3. Kernel](03-kernel.md) | L7, L14 | draft 0, 2026-10-12, lint findings pending |
+| [4. Static semantics](04-static-semantics.md) | L2, L8 | draft 0, 2026-10-12, lint findings pending |
 | [5. Laws](05-laws.md) | L12, L3 | wave 2 |
 | [6. Certification](06-certification.md) | L9, L10 | wave 2 |
 | [7. Tests and generators](07-tests.md) | L10.3, L5.18 | the file `08-tests.md` of 2026-10-07 stands until rewritten |
 | [8. The demand and the plan](08-demand.md) | L5 | wave 3 |
 | [9. Specimens and the planner](09-planner.md) | L6 | wave 3 |
 | [10. Actions and the world](10-world.md) | L4, L11 | wave 3 |
-| [11. Numbers](11-numbers.md) | L13 | the file `06-numbers.md` of 2026-10-07 stands until rewritten |
+| [11. Numbers](11-numbers.md) | L13 | draft 0, 2026-10-12, lint findings pending |
 | [12. Files and tools](12-files-and-tools.md) | L5, L10, L14 | draft 0, 2026-10-12 |
 
 Until a chapter is written, the file it replaces is the specification of that part, under the

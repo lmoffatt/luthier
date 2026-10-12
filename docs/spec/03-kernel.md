@@ -1,0 +1,272 @@
+# 3. The kernel
+
+Chapter 3 of the specification, draft 0, 2026-10-12. Sources: `docs/spec/04-kernel.md` at d12b554
+(sections 1 to 4 and 6), `src/luthier/syntax.py`, `evaluator.py`, `machine.py`,
+`src/luthier/core.lut` and `src/luthier/lib/kernel_laws.lut` at 3445ad8, and the chat decision
+recorded as D-2026-10-12-x. Written by Claude Sonnet 5.5. It realizes L7 (the core is minimal and
+its programs are data), L14 (what can be written in Luthier is written in Luthier), L2 (holes) and
+L3 (levels of equality). Notation is `spec 1`; the translation of sugar into the kernel is
+`spec 2`.
+
+## §1 Acts
+
+**3.S1. Three acts.** [implemented] A program is a set of top-level acts with no order. A
+declaration `x : T` introduces `x` with its base `T` and no body, which is a hole (L2.1). A
+definition `x : T := t`, or `x := t` filling an earlier declaration, gives `x` a body. An alias
+`x = t` makes `x` stand for `t`; it is expanded before checking and has no states.
+
+**3.S2. Bodies.** [implemented] The body of a definition is a term, a `data` term (§2), or
+`extern "target"` (§3). Two further bodies exist, `primitive "..."` and `axiom "..."`; what they
+mean and where they are allowed is `spec 11`.
+
+**3.S3. Directives.** [implemented] Directives are not definitions and have no states. They are
+`import` (`spec 12`), `test` and `gen` (`spec 7`), `operator` (`spec 4`) and `cite` (`spec 6`). The
+`profile` directive (`spec 7`) is [proposed] here: it is on the brief's list but not in
+`syntax.py`.
+
+## §2 Type formers
+
+The kernel has the formers below. Each is a statement with its status.
+
+| former | anonymous | with names | introduction | elimination |
+|---|---|---|---|---|
+| universe | `U` | | every type | |
+| exponential (Pi) | `A -> B` | `(x : A) -> B`, `B` may mention `x` | `\ x { t }` | application `f a` |
+| product (Sigma) | `A * B` | `(x : A) * (y : B)`; n-ary `{ x : A, y : B }` | `(a, b)`; `{ x := a, y := b }` | pattern `(x, y)` in `match`; projection `e.x` |
+| sum | `A + B` | `(x : A) + (y : B)`; n-ary `< x : A \| y : B >` | `x a`, by label | `match` on labels |
+| empty | `Empty` | | none | `match e { }`, at any type |
+| unit | `Unit` | | `unit` | none needed |
+| subtype | `{ x : T \| p }` | `{ x : A, y : B \| p }` | a term of `T` with `p` holding (an obligation) | a term of the subtype is a term of `T` |
+| recursive structure | `data { c1 : ... ; c2 : ... }` | constructors are named | the constructors | `match` on constructors, with recursion |
+| primitives | `Int`, `Real`, `Float64`, `Rational`, `String` | | literals | `spec 11` |
+
+**3.R1. Names of positions are binders.** [implemented] In the named forms of the exponential,
+the product and the sum, the names are binders like the parameter names of a function and are not
+part of the identity of the structure. `{ n : Int, b : Bool }`, `(n : Int) * (b : Bool)` and
+`Int * Bool` are one structure. Positions are ordered: swapping two components gives a different,
+isomorphic structure, and a program that passes one for the other is rejected. The reading where
+labels are the identity is a translation, not an equality (L3.1).
+Files: k_named_product.accept.lut, k_label_order.reject.lut.
+
+**3.R2. A sum is identified by shape.** [implemented] A sum of two units with any labels is the
+same structure as `Bool`, since labels are binders; a value of such a sum is accepted where a
+`Bool` is expected. `Bool` itself is a sum of two units, defined in `core.lut`.
+Files: k_bool_is_sum.accept.lut, k_label_order.reject.lut.
+
+**3.R3. Recursive structures are recursive.** [implemented] A `data` definition has at least one
+constructor that mentions the structure being defined. A non-recursive sum of products is written
+with the structural formers and named by an alias (`spec 4.R4`). A recursive structure is freely
+generated: distinct constructors give distinct values and every constructor is injective, by
+construction and not by axiom.
+Files: r4_recursive_data.accept.lut, r4_data_nonrecursive.reject.lut.
+
+**3.S4. Anonymous sums and products.** [implemented] `A + B` is `< left : A | right : B >`.
+Sums and products of more than two components associate to the right, so `A * B * C` is
+`A * (B * C)` and `(a, b, c)` is `(a, (b, c))`. An alternative of type `Unit` is injected by its
+label alone: in `< true : Unit | false : Unit >`, `true` is `true unit`. Examples: `k_sum.accept.lut`,
+`k_union.accept.lut`.
+
+**3.S5. Dependence.** [implemented] In `(x : A) -> B` and `(x : A) * (y : B)` the second part may
+mention `x`. A sum has no dependent form: a value holds one alternative only, so none can depend on
+another. Example: `k_dependent_product.accept.lut`.
+
+**3.S6. The subtype.** [implemented] `{ x : T | p }` has the inhabitants of `T` for which `p`
+holds. Here `p` has `x` free and is a term of type `Bool` or `Law` (§3). A term of `T` used
+where the subtype is expected creates an obligation (`spec 4`); a term of the subtype is accepted
+where `T` is expected with no marker, the forgetting being implicit. The subtype is primitive
+although derivable: the criterion for the kernel's presentation is that the rules of `spec 4` state
+directly on it, and minimality is not the criterion.
+
+**3.S7. Empty and unit.** [implemented] `Empty` has no introduction and an elimination `match e { }`
+at any type; `Unit` has the one value `unit`. Both are defined in `core.lut` as `data`. Example:
+`k_empty_unit.accept.lut`.
+
+**3.S8. The kernel as a category.** [implemented] With these formers the kernel is a bicartesian
+closed category (products, sums, exponentials, a terminal and an initial structure) with the
+dependent forms of the product and the exponential, recursive structures and subtypes. Where the
+older source says "type" for a kernel type, this chapter writes "structure" (D-2026-10-12-l);
+"type" stays where any type is meant.
+
+## §3 Terms
+
+**3.S9. Names.** [implemented] A defined name stands for its body. A declared name is a hole and
+does not reduce (L2.1).
+
+**3.S10. Match.** [implemented] `match t { p1 -> t1 ; ... }` has one branch per constructor or
+label of the type of `t`, none repeated and none missing, unless a variable or `_` branch takes the
+rest. A pattern is a constructor or label applied to patterns, a tuple `(p, q)`, a literal, a
+variable, or `_`.
+
+**3.S11. Recursion and the recursor.** [implemented] A definition with a declared type may mention
+itself, and definitions may mention each other. Recursion is general: nothing guarantees
+termination, and evaluation runs under a step budget (fuel). The recursor of a `data` is a library
+definition written with `match` and recursion, the fold of the structure; `k_recursor.accept.lut`
+defines it for the natural numbers. A proof layer that made it primitive and forbade general
+recursion is not part of version 0 [proposed].
+
+**3.S12. Laws as terms.** [implemented] A law is a term of type `Bool` or `Law`, a function into
+one of these whose parameters are quantified, or a conjunction `p & q`; the interpreter also takes
+`Failures E` (the failures a check finds). What a law is and how laws combine is `spec 5`; this
+chapter keeps only that a law is a term of one of those types. `Law` is the type of what a test
+runs (`spec 7`). That a law may also be a term of `Cost` is [proposed] here, pending `spec 5`:
+the interpreter has no `Cost` yet.
+
+**3.S13. Extern.** [implemented] `extern "python:module.function"` is a value the host provides,
+with the type its context gives it; `extern provisional "..."` is the same value marked as debt.
+Its validation is `spec 10`, and the rule that it needs a declared type is `spec 4.R5`.
+Examples: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`.
+
+## §4 Reduction
+
+Evaluation reduces terms by five rules, each a definitional equality (`≡`, `spec 1`). The programs
+named are those of `tests/spec/` that contain the redex; the suite runs them through the checker,
+and reduction proper is exercised by the library tests.
+
+**3.S14. Beta.** [implemented] `(\ x { t }) a ≡ t[a/x]`. In `k_recursor.accept.lut` the lambda
+`\k r { succ r }` is applied by `recN`.
+
+**3.S15. Delta.** [implemented] A defined name reduces to its body. Aliases are expanded before
+checking and never reach evaluation. A name is unfolded in head position only when that makes
+progress, so a recursive function applied to an argument that does not reduce stays folded
+(`evaluator.py`). Program: `k_recursor.accept.lut`, with the unfolding of `recN` and `add`.
+
+**3.S16. Iota.** [implemented] A `match` on a constructor, a label injection or a pair reduces to
+the matching branch with pattern variables substituted. Programs: `k_sum.accept.lut`,
+`k_union.accept.lut`, `k_empty_unit.accept.lut`, `k_recursor.accept.lut`.
+
+**3.S17. Prim.** [implemented] Arithmetic and comparisons on literals of `Int`, `Float64` and
+`String`, and `==` on values of structures with structural equality (`spec 4.R8`). Programs:
+`k_union.accept.lut` (arithmetic on `Float64`), `k_dependent_product.accept.lut` (comparisons on
+`Int`).
+
+**3.S18. Extern.** [implemented] An extern applied to as many closed arguments as its type has
+parameters calls the host and converts the result back (`spec 10`). No k program of `tests/spec/`
+reduces one; `r5_extern_value.accept.lut` only checks one.
+
+**3.S19. Terms with holes.** [implemented] A term that contains a hole where the reduction needs a
+value does not reduce.
+
+**3.S20. Equality in the kernel.** [implemented] Binding is exact: the name denotes the term and
+reduction depends on no tolerance (L3.2). Definitional equality is the reduction of this section;
+the other levels of equality belong to the object (L3.1, `spec 5`).
+
+## §5 Primitive versus derived, native versus extern
+
+**3.S21. Two senses of primitive.** [implemented] A structure is semantically primitive when the
+kernel has it: the formers of §2 and the primitives of `spec 11`. Every other structure is defined
+natively from them (`spec 4.R5`). A value is primitive for performance when it is an extern, computed
+by the host because it is faster there. A numpy array is not a primitive structure: with
+`Fin n = { k : Int | 0 <= k and k < n }`, a vector of length `n` is the function type
+`Fin n -> Float64`, a matrix is `Fin m -> Fin n -> Float64`, and a numpy array is a value of that
+type. Nothing is converted and nothing about the representation needs certifying. Example:
+`n5_arrays.accept.lut`.
+
+A value of a function type with a finite domain can be a Luthier lambda or a host object. Four
+rules govern the bridge.
+
+**3.S22. Bridge 1, applying a host object.** [implemented] If `v : Fin n -> A` came from the host,
+`v i` evaluates as `v[i]`. The interpreter checks `0 <= i < n` itself, since that is the obligation
+of `Fin n` and the host would accept `v[-1]` silently.
+
+**3.S23. Bridge 2, passing a lambda to the host.** [implemented] A host function that expects an
+array and receives a lambda over `Fin n` gets the array of its `n` values: the interpreter
+evaluates the lambda at every index (it materializes it), possible only because the domain is
+finite. The cost is `n` evaluations.
+
+**3.S24. Bridge 3, representation by type.** [implemented] `Fin n -> Float64` is a one-dimensional
+ndarray, `Fin m -> Fin n -> Float64` a two-dimensional one, `Fin n -> A` for a non-numeric `A` a
+list, and a vector of unknown length `(n : Int) * (Fin n -> Float64)` is the pair
+`(arr.shape[0], arr)`. The shape is checked when the value crosses: an array declared of length 3
+must have shape `(3,)`.
+
+**3.S25. Bridge 4, each entry once.** [implemented] A lambda over `Fin n` is a table: each entry is
+computed at most once, as each argument is computed once under call by need. The semantics does not
+change, since functions are pure. Without it an iterative algorithm written with lambdas
+recomputes its whole history at each read.
+
+**3.S26. Observational equality across the bridge.** [implemented] A lambda and an array of one
+function type are compared point by point over `Fin n` (`spec 4.R8`); the domain is finite, so the
+comparison is exhaustive.
+
+**3.S27. The order of a sum is part of its rounding.** [implemented] `sumTo n f` is
+`f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`, the fold over the additive monoid of `Float64`, which
+associates to the right. Written the other way it differs in the last bits. The order belongs to the
+definition of the function, and any specimen of it keeps the order (`spec 9`).
+
+**3.S28. What is certified at the bridge.** [implemented] What needs certifying is that the
+operations the host provides satisfy the laws that characterize them (`spec 4.R10`). A function may
+be given natively, as an extern, or both; each is a model of the same laws. Giving both adds a
+corollary, that the two agree, which tightens the tolerance. The libraries name such laws `Agrees`,
+a local name; the two implementations are two specimens of one theory (`spec 9`).
+
+## §6 Programs as data
+
+**3.S29. Term and Program as data.** [decided D-2026-10-12-x] `Term`, `Pattern`, `Act` and
+`Program` are `data` in `core.lut`, so that a program is a value of Luthier (L7.4, L14.2). They are
+not in `core.lut` yet; the host's classes in `syntax.py` are their model. The constructors:
+
+| `data` | constructors |
+|---|---|
+| `Term` | `Var`, `Lit`, `U`, `Lam`, `App`, `Pi`, `Sigma`, `Pair`, `Match`, `Inj`, `Sum`, `Data`, `Subtype`, `Extern`, `Primitive`, `Axiom`, `Hole` |
+| `Pattern` | variable, wildcard, constructor, pair, literal, injection (`PVar`, `PWild`, `PCon`, `PPair`, `PLit`, `PInj` in `syntax.py`) |
+| `Act` | declaration, definition, alias, and the directives of §1 |
+| `Program` | a list of `Act` |
+
+In `Term`, `Var` is a name, `Lit` a literal, `U` the universe, `Lam` and `App` the exponential,
+`Pi` and `Sigma` the dependent forms, `Pair` the product introduction, `Match` the eliminator,
+`Inj` and `Sum` the sum, `Data` a recursive structure, `Subtype` the subtype, `Extern`,
+`Primitive` and `Axiom` the three provided bodies, and `Hole` a declaration with no body. The
+constructors of `Pattern` and the fields of `Act` are [proposed]; the decision names the four
+data and not their fields.
+
+**3.S30. Term is the kernel term.** [proposed] `Term` is the kernel term after elaboration, with the
+sugar of `spec 2` translated away, not the surface term. The hashes of the certificates (`spec 6`)
+are computed over it. Not decided; the model's choice in the chat of 2026-10-12.
+
+**3.S31. Names are strings.** [proposed] Variables and labels are strings. Alpha-equivalence, two
+terms equal up to renaming of bound variables, is a law of the theory of `Term` (L3.3), and not a
+property of a representation by de Bruijn indices.
+
+**3.S32. Quote and eval.** [proposed] `quote { t }` gives the `Term` of the term `t` with no
+obligation. `eval A t : Maybe A` checks `t` against `A` at evaluation time and gives `nothing` when
+it does not check. Neither is in the interpreter.
+
+**3.S33. Reduction as a function.** [proposed] The rules of §4 (beta, delta, iota, prim, extern)
+are stated as a function `reduce : Term -> Term` in `lib/term.lut`, the interpreter written in
+Luthier, certified against the host's evaluator as two specimens of one theory (L14.3, `spec 9`).
+The file is not written.
+
+**3.S34. Canonical form.** [proposed] The canonical form of a `Term` renames bound variables
+canonically and removes module prefixes. The hashes of `spec 6` are computed over this form, so two
+programs that differ in the names of their bound variables or in the module that holds a definition
+have one hash.
+
+**3.S35. No self-modification.** [decided D-2026-10-12-x] A `Program` value is data. Evaluating
+cannot change the running program: defining is an action on the world, and an action on a world
+belongs to `spec 10` (L7.4, L4).
+
+## §7 The kernel's theory in Luthier
+
+**3.S36. `lib/kernel_laws.lut`.** [implemented] The file states the laws every structure of the
+kernel satisfies by construction, as the theory `KernelLaws A B`: `Beta`, `PairFst`, `PairSnd` and
+`Pairing` for the exponential and the product; `IfTrue`, `IfFalse`, `CaseNothing` and `CaseJust`
+for sums (stated on `Bool` and `Maybe`); `FoldNil` and `FoldCons` for the recursion principle of
+`List`. It is the theory the host is certified against today: `luthier test` checks its models at
+`Fin 3` and `Fin 2` (`examples/kernel_finite.lut`, sampled). The reduction of the host is thereby a
+specimen of this theory (L14.3).
+
+**3.S37. What it cannot state.** [implemented] Eta, `\ y { f y } == f`, is not statable, since
+equality of functions is not structural (`spec 4.R8`); observed pointwise it is beta. Functions over
+`Fin n` are not enumerated by `exhaustive`. Both are O11. The recursion principle is stated over
+lists with the algebra fixed, until functions of two arguments have generators.
+
+**3.S38. `lib/term.lut`.** [proposed] The theory of `Term`: the data of §6, alpha-equivalence, the
+canonical form of 3.S34, substitution, and `reduce` of 3.S33 with the laws that relate it to
+`KernelLaws`. Not written.
+
+## Open
+
+- O11 (the kernel's theory stated in Luthier): §7 of this chapter, `lib/kernel_laws.lut` and
+  `lib/term.lut`.
+- The four choices of §6, pending his mark: 3.S30 (`Term` is the elaborated term), 3.S31 (names
+  are strings), 3.S32 (`quote` and `eval`), 3.S33 (`reduce` in Luthier).
