@@ -35,6 +35,10 @@ order of dependent components, the reuse of a passed certificate), checked again
   correspondence chapter 1's or chapter 6's (certification, wave 2)? Mine: chapter 6's once it is
   written; it stays in 1 until then.
 
+this question will be solved when we determine the laws of the certification in luthier terms. 
+When these laws are formulated, then we will backdetermine the principles. 
+
+
 ## Chapter 2. Grammar
 
 - 2.S20, quote and unquote, one candidate syntax: `quote { t }` gives the term `t` as a value of
@@ -43,6 +47,8 @@ order of dependent components, the reuse of a passed certificate), checked again
   arguments; `primitive` and `axiom` names of core): the metric after `sampled` becomes the value of
   a named argument, and the primitive and axiom bodies of 2.S5 are applications of core's names.
   Nothing to mark.
+ok
+
 
 ## Chapter 3. Kernel
 
@@ -72,6 +78,7 @@ data):
 - Wave 2, not now: whether a law may be a term of `Cost` (3.S12) and whether `Failures E` stays a
   law type are chapter 5's. Whether the kernel is described as a theory is O11 (the kernel's
   theory stated in Luthier), open as before.
+ok
 
 ## Chapter 4. Static semantics
 
@@ -87,6 +94,10 @@ data):
   are its models). D-2026-10-12-z defines a theory as a cycle of the dependency graph instead. Do
   the two kinds stay, or does 4.S9 restate them in the terms of -z? Mine: restate; the cycle is the
   criterion you chose, and form becomes how the checker finds it.
+
+  my proposal: 
+  Object is one of concrete type, subtype (law involving a single name)  o theory type (law involving more than a name)
+
 
 ## Chapter 7. Tests and generators
 
@@ -118,6 +129,8 @@ Your decisions of 2026-10-06 cover the chapter's frame; what follows are the mod
 - Question of the agent: grades (7.S10) and the evidence cost (7.S11) as two items. Mine: keep two;
   both are decided and chapter 6 will hold them.
 
+ok
+
 ## Chapter 11. Numbers
 
 - 11.S3, a definition meant for every realization is generic in its number type, through a hole
@@ -140,6 +153,8 @@ Your decisions of 2026-10-06 cover the chapter's frame; what follows are the mod
 - 11.S19, which of these theories exist in Luthier: `lib/rational.lut` yes; `number_model.lut` and
   the theory of 11.S16, no.
 
+ok
+
 ## Chapter 12. Files and tools
 
 - 12.S1, a file denotes a value of a dependent record type: its fields are its definitions, the
@@ -158,3 +173,5 @@ Your decisions of 2026-10-06 cover the chapter's frame; what follows are the mod
   as it crosses) and `run --no-record` stay? Mine: `--checked` stays, it is the bridge check of
   L11.2 (an extern is validated against the laws of its type before it is applied); `--no-record` goes, since a run of a program writes its record (P2, everything derived
   carries how it was derived) and `eval` is the probe that records nothing.
+
+ok
