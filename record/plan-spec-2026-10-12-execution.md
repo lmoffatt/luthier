@@ -124,3 +124,20 @@ token, the ranking, the trace), the rest syntax or placement.
   retired, superseded by `check_spec.py`; every lint finding fixed in the chapter that does not own the
   text, by a citation of the one that does; `check_spec.py`, `project_principles.py --check --strict` and
   the suites green. Next: step 2's document for his marks, `record/spec-wave-1-for-his-marks.md`.
+- 2026-10-12, Opus session, later: decisions on the surface and on modules taken in chat and written
+  into the chapters as `[decided]` statements, the older items marked "Replaced:":
+  D-2026-10-12-ab (keywords are `data`, `match`, `if`, `then`, `else`, `U`, maybe `operator`;
+  everything else a name of core or of a library, `test` a function with named arguments; L14.5),
+  -ac and -ad (a file is read when a demand needs it: extern and import both lazy; `test` of a module
+  is the total demand; L11.7), -ae and -af (no flat import; `import "x.lut" Name as Alias` names what
+  enters, sugar for an alias of a projection; core encloses the outermost block of every file). No
+  `.lut` touched: Luciano asked to change documents only for now.
+  Next, in this order: (1) assign decision ids to the decisions the wave 1 agents found without one
+  (R10 of 2026-10-05, R11 of 2026-10-06, "consistent, not characterized" of 2026-10-05, the changes of
+  the old 08 §12 of 2026-10-06, `toFloat64` with the integers of 2026-10-05), citing their sources,
+  and move the rules that rest on them from `[proposed]` to `[decided ...]`; (2) correct chapter 7's
+  statuses (it under-claims: see its row in `record/spec-drafts.md`); (3) write
+  `record/spec-wave-1-for-his-marks.md`, one screen per chapter, every `[proposed]` item and every
+  question the agents left (in `record/spec-drafts.md`); (4) after his marks, the decisions of wave 2
+  (chapters 5 and 6: `Cost` in the kernel or a library, the default conjunction among the two
+  candidate algebras of D-2026-10-12-p, the names lift/exact/within, the place of `Failures E`).
