@@ -73,8 +73,8 @@ from, so the checker knows where to look and reads the file only when a name is 
 (12.S21). There is no import of every name and no `open` (D-2026-10-12-ae), and the file carries no
 name of its own. The selective form is sugar for an alias of a projection, `LA = (import
 "linear_algebra.lut").Linear_Algebra`, so the alias's certificates are the original's (`spec 4.R7`;
-this reading proposed). Whether `core.lut` is imported by an explicit list or encloses the outermost
-block of every file is open.
+this reading proposed). `core.lut` encloses the outermost block of every file, so its names (`Int`, `Bool`, `List`
+and the rest) are visible unqualified; a name with no import is local or core's.
 
 ## Open
 
