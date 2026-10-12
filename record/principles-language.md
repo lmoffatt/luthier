@@ -1063,8 +1063,8 @@ Status:     proposed in draft 11; clauses 4 to 6 settled, moved from L10 and L14
             his correction of draft 7 in grades
 History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7.
 
-L14 Luthier orchestrates other languages; what does not follow its way lives in a world; a foreign
-    function is certified by delegation, and certification transports along equality.
+L14 Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
+    does not follow Luthier's way lives in a world.
 From:       G1: an absorbed library is a specimen known by its description, and its code is not
             needed ("que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones
             con sus propias invarianzas", audio 08.58, 31:25 to 32:00); the world from G0, the
@@ -1083,30 +1083,15 @@ L14.3  A function with no laws at all is not a function to run but a hole of a t
        (L4). [settled]
 L14.4  The extern's certificate binds the host library's version and the platform (W10), and its
        declaration says whether it is a definition or an action (L9). [settled]
-L14.5  Certification is the default for every value: demanding a value demands every certificate in
-       its dependency cone, paid once through the memo, unless the demand asks otherwise by a
-       mechanism to be named (O3), which leaves a certificate of grade `assumed` (D-2026-10-11-n),
-       since what could be done Luthier gives a way to do; `test` is the action that demands
-       certificates without values (L10). [settled]
-L14.6  Luthier is in use a coupling language: the joint between two libraries is a theory of which
+L14.5  Luthier is in use a coupling language: the joint between two libraries is a theory of which
        each is a model, the bridges between representations live at the joint with their cost and
        error, and no coupling without a law. [settled]
-L14.7  A definition or an implementation that does not follow Luthier's way, an extern with no law
-       yet, a foreign algorithm taken as is, is allowed inside a named world (L11): its certificates
-       are `assumed` (D-2026-10-11-n), the plan shows the world it ran in, and nothing from it
-       enters the planner's graph (L13) until a law is certified. [candidate]
-L14.8  Verification by a theorem is `proved` by citation (D-2026-10-11-f); verification by
-       delegation is the same mechanism with the host library's guarantee as the theorem cited
-       (LAPACK's backward-error bounds, the condition number their hypothesis) and the library's
-       version and platform as hypotheses the certificate carries; no new grade. A function known
-       correct by a theorem outside Luthier is certified this way, and the chain law, citation,
-       native, identity, extern is carried by hash. [proposed]
-L14.9  (His correction) Certification transports along identity: if B is certified at grade g on
-       inputs X and the identity A ≡ B is certified at grade h on inputs Y, then A is certified at
-       the weaker of g and h on X ∩ Y, and by nothing else. [mark pending]
-Example:    with B's laws only `assumed` the transport gives A `assumed`, nothing; a lookup table
-            equal to the native on a grid is certified on the grid and nowhere else (clause 9)
-References: D-2026-10-11-f, D-2026-10-11-m, D-2026-10-11-n; W5, W10
+L14.6  A definition or an implementation that does not follow Luthier's way, an extern with no law
+       yet, a foreign algorithm taken as is, may execute inside a named world (L9): its certificates
+       carry the cost of an assumption (L16.2), the plan shows the world it ran in, and nothing from
+       it enters the planner's graph (L13) nor a certified theory until a law is certified.
+       [candidate]
+References: D-2026-10-11-m; W5, W10
 Rests on:   O3 (the opt-out's syntax; the world as a value)
 Quote:      (L14) "si el tipo no sigue la ley no se aplica el calculo" (chat, 2026-10-10) "que la IA
             pueda ... extraer de librerías ajenas, chuparlas y usar las funciones con sus propias
@@ -1126,8 +1111,7 @@ Source:     (L14) Luciano, 2026-05-26 (note:2026-05-26T12.32.24:lenguaje-no-atad
             bcdac41 (L21, the graded transport) Luciano, 2026-10-11 (WhatsApp Ptt 2026-10-11 at
             08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his annotation on
             draft 8 (bcdac41)
-Status:     settled by his correction of draft 7; clause 7 candidate, clause 8 proposed on his mark,
-            clause 9 his correction, his mark on the wording pending
+Status:     settled by his correction of draft 7; clause 6 candidate, reworded
 History:    (L14) draft 0 (6d9dbd3): stated. Draft 0 of the generative plan proposed moving its
             orchestration half to the way of working; withdrawn (D3). draft 4 (c7c6396),
             D-2026-10-11-n: certification the default, the opt-out in the demand. draft 5 (5b1446c):
@@ -1154,7 +1138,11 @@ History:    (L14) draft 0 (6d9dbd3): stated. Draft 0 of the generative plan prop
             before application, which said it twice; clause 8 joins the two on `proved` by citation;
             the two counterexamples of the example are Kimi's and Claude's, from the third round;
             delegation (clause 8) is from the former L11 and transport (clause 9) from the former
-            L21, placed here on his note of 2026-10-12.
+            L21, placed here on his note of 2026-10-12. draft 11, step 4 (2026-10-12): certification
+            by default (5) moved to L16.6, delegation (8) to L7.7, the graded transport (9, his
+            correction) to L16.7 with its example; clause 6 reworded so that an extern without a law
+            executes in a world and enters neither the planner's graph nor a certified theory
+            (DeepSeek, GPT en, GPT sp).
 ```
 
 ### Under G2, cost

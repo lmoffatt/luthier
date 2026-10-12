@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 8acf590bd58f, commit 6444301 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 15e696e35fd8, commit 0b9ab95 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -444,8 +444,8 @@ Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax).
 Status: proposed in draft 11; clauses 4 to 6 settled, moved from L10 and L14; clause 7 carries his
 correction of draft 7 in grades.
 
-**L14. Luthier orchestrates other languages; what does not follow its way lives in a world; a
-foreign function is certified by delegation, and certification transports along equality.**
+**L14. Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
+does not follow Luthier's way lives in a world.**
 From: G1: an absorbed library is a specimen known by its description, and its code is not needed
 ("que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones con sus propias
 invarianzas", audio 08.58, 31:25 to 32:00); the world from G0, the demand (the demand names the
@@ -464,33 +464,16 @@ G1.
   (L4). [settled]
 - L14.4 The extern's certificate binds the host library's version and the platform (W10), and its
   declaration says whether it is a definition or an action (L9). [settled]
-- L14.5 Certification is the default for every value: demanding a value demands every certificate in
-  its dependency cone, paid once through the memo, unless the demand asks otherwise by a mechanism to
-  be named (O3), which leaves a certificate of grade `assumed` (D-2026-10-11-n), since what could be
-  done Luthier gives a way to do; `test` is the action that demands certificates without values (L10).
-  [settled]
-- L14.6 Luthier is in use a coupling language: the joint between two libraries is a theory of which
+- L14.5 Luthier is in use a coupling language: the joint between two libraries is a theory of which
   each is a model, the bridges between representations live at the joint with their cost and error,
   and no coupling without a law. [settled]
-- L14.7 A definition or an implementation that does not follow Luthier's way, an extern with no law
-  yet, a foreign algorithm taken as is, is allowed inside a named world (L11): its certificates are
-  `assumed` (D-2026-10-11-n), the plan shows the world it ran in, and nothing from it enters the
-  planner's graph (L13) until a law is certified. [candidate]
-- L14.8 Verification by a theorem is `proved` by citation (D-2026-10-11-f); verification by
-  delegation is the same mechanism with the host library's guarantee as the theorem cited (LAPACK's
-  backward-error bounds, the condition number their hypothesis) and the library's version and platform
-  as hypotheses the certificate carries; no new grade. A function known correct by a theorem outside
-  Luthier is certified this way, and the chain law, citation, native, identity, extern is carried by
-  hash. [proposed]
-- L14.9 (His correction) Certification transports along identity: if B is certified at grade g on
-  inputs X and the identity A ≡ B is certified at grade h on inputs Y, then A is certified at the
-  weaker of g and h on X ∩ Y, and by nothing else. [mark pending]
-Example: with B's laws only `assumed` the transport gives A `assumed`, nothing; a lookup table equal
-to the native on a grid is certified on the grid and nowhere else (clause 9).
-References: D-2026-10-11-f, D-2026-10-11-m, D-2026-10-11-n; W5, W10.
+- L14.6 A definition or an implementation that does not follow Luthier's way, an extern with no law
+  yet, a foreign algorithm taken as is, may execute inside a named world (L9): its certificates carry
+  the cost of an assumption (L16.2), the plan shows the world it ran in, and nothing from it enters
+  the planner's graph (L13) nor a certified theory until a law is certified. [candidate]
+References: D-2026-10-11-m; W5, W10.
 Rests on: O3 (the opt-out's syntax; the world as a value).
-Status: settled by his correction of draft 7; clause 7 candidate, clause 8 proposed on his mark,
-clause 9 his correction, his mark on the wording pending.
+Status: settled by his correction of draft 7; clause 6 candidate, reworded.
 
 ### Under G2, cost
 
