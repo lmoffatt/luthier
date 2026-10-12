@@ -776,9 +776,11 @@ L13.1  A function has many equivalent implementations, its specimens, each with 
        [settled]
 L13.2  The cost of a law and the resources of a run, time and memory, are not one scalar, and the
        trade-off among them is a parameter of the demand (L10), never the planner's own. [settled]
-L13.3  (His formula) What the planner ranks is an efficiency, exp(−w·cost) over the resources used,
-       so that a specimen of cost zero has efficiency 1/resources and not zero, with w, the weight
-       between cost and resources, the demand's parameter. [proposed]
+L13.3  (His formula) What the planner ranks is an efficiency, exp(−cost) over the resources used, so
+       that a specimen of cost zero has efficiency 1/resources and not zero; the weight between cost
+       and resources, w, the demand's parameter, may enter as log(resources) added to the cost, so
+       that the rank is cost + w·log resources, minimized, the same as exp(−cost)/resources^w
+       (D-2026-10-12-u). [candidate]
 L13.4  Two regimes: on a decidable carrier (`Int`, `Fin n`) two implementations compute the same
        function or not, the quotient is exact, there is no precision to trade and the Boolean kernel
        stands on its own; on a carrier with a distance (`Float64`) they are interchangeable only up
@@ -813,14 +815,15 @@ L13.11 The identity law between two specimens, with its distance, is what admits
        is one more specimen, with grade exact, checked by the same law. [candidate]
 Example:    γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
             there (clause 9)
-References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q; W5; P5
+References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5
 Rests on:   O1 (the sensitivity), O2
 Source:     Luciano, 2022-06-28 (written:2022-06-28_luciano-code-style:choose-efficient-path-
             after-validity); the quotient 2026-10-10 (WhatsApp Ptt 2026-10-10 at 16.49.14.md, 00:04
             to 01:39), the same idea without the word 2026-05-30 (note:2026-05-30T18.01.53:
             equivalencias-para-clasificar-y-separar-decoraciones)
 Status:     settled; statement in his words, 2026-10-12, with "specimens" and "along certified
-            identities" added; clauses 3, 5, 6, 7 proposed; clause 11 candidate, from L5
+            identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7
+            proposed; clause 11 candidate, from L5
 History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137): stated as a quotient. draft 4 (c7c6396),
             D-2026-10-11-m: exact in the theory, a ball in the model; substitution only along a
             certified equivalence. draft 5 (5b1446c): a weighted graph, not a class; a lone
@@ -839,7 +842,9 @@ History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137): stated as a quotient. 
             (D-2026-10-12-q); the quotient and the ball joined into clause 5 with GPT sp's wording;
             the sum now a bound with its evidence cost (clause 6); cost reserved for the law and
             resources for time and memory (D-2026-10-12-l); the weight named in his formula; the
-            identity-law clause of L5.4 joined as clause 11.
+            identity-law clause of L5.4 joined as clause 11. draft 11 (2026-10-12), his mark: clause
+            3 a candidate, with log(resources) added to the cost as the better form
+            (D-2026-10-12-u).
 
 L15 The core is minimal, executable by hand, and its programs are data.
 From:       G0 (a type theory is a few rules whose judgments a person checks; a small trusted
@@ -1012,15 +1017,19 @@ L16.1  A certificate (Terms) names the law it records as checked, the domain the
        sample's statistics converted to an evidence cost (D-2026-10-12-r). [proposed]
 L16.2  The grade is derived from the domain and the evidence cost: proved and exhaustive have
        evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the
-       finite cost of its statistics on the distribution sampled; assumed, the evidence cost the
-       demand assigns to assumptions, a parameter with no default, so that a demand that names none
-       refuses assumed values (D-2026-10-11-n, D-2026-10-12-r). The five names stay in the
+       finite cost of its statistics on the distribution sampled. An `assumed` certificate carries
+       what is asserted and no check: a Boolean law asserted true, with bound 0, or a cost law
+       asserted with a formula of the inputs, a library's documented bound such as p(n)·ε·κ(A), with
+       the formula evaluated at the input as its bound; its evidence cost is the demand's parameter
+       for assumptions, with no default, so that a demand that names none refuses assumed values
+       (D-2026-10-11-n, D-2026-10-12-t). When the formula is a cited guarantee with its hypotheses,
+       the certificate is proved by delegation (L7.7), not assumed. The five names stay in the
        certificate for the reader; the planner reads the costs. [proposed]
 L16.3  The conversion from statistics to an evidence cost is a function with a declared shape, the
        sample's statistics and the demand's level in, a cost out, filled per theory
        (D-2026-10-12-r); the first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the
        fraction of the distribution where the law's bound fails, from n samples at confidence 1 − δ,
-       and δ the demand's parameter. [proposed]
+       and δ the demand's parameter. [settled]
 L16.4  A certificate is identified by a hash over its dependency cone (code, cases, seed, the
        distribution and level sampled); it is a frozen snapshot, and a later check does not change
        it but issues a new one that supersedes it, both kept, the latest in front (P3), so progress
@@ -1047,11 +1056,11 @@ L16.8  Links sampled over different distributions do not compose without a law r
        first instance; whether a demand accepts a sampled path is its evidence cutoff, a parameter
        (P11). [proposed]
 L16.9  No operation on certificates raises a grade, lowers an evidence cost or widens a domain
-       without new evidence. [proposed]
+       without new evidence. [settled]
 Example:    with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
             lookup table equal to the native on a grid is certified on the grid and nowhere else
             (clause 7)
-References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r; P3, P11
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t; P3, P11
 Rests on:   O1 (the conversion and the algebra), O3 (the opt-out's syntax)
 Quote:      "a is model of A with cost C, we pass the statistics to cost, we need a convertion.
             might be we work with logCost in nat." "The same, the conversion is expressed by a
@@ -1063,9 +1072,12 @@ Source:     the critiques of draft 10 (`record/IA/principles 2026 10 12/`, 1429f
             GPT en, the calculus of evidence scope and the rule that no operation increases grade or
             domain without new evidence); his decisions D-2026-10-12-j, -q, -r; clauses 4 to 6 moved
             from L10.7, L10.10, L10.13, L10.5 and L14.5 of draft 11 step 3
-Status:     proposed in draft 11; clauses 4 to 6 settled, moved from L10 and L14; clause 7 carries
-            his correction of draft 7 in grades
-History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7.
+Status:     proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4
+            to 6 settled, moved from L10 and L14; clause 2 reworded on D-2026-10-12-t; clause 7
+            carries his correction of draft 7 in grades
+History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 11 (2026-10-12), his
+            marks: clause 2 elaborated with the two kinds of assumption (D-2026-10-12-t); clauses 3
+            and 9 marked ok (D-2026-10-12-w).
 
 L14 Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
     does not follow Luthier's way lives in a world.
@@ -1162,7 +1174,7 @@ L6.2   The lift is explicit and named: `lift : Bool -> Cost` sends true to 0 and
        : Cost -> Bool` is c == 0, with `exact ∘ lift = id`, so `Bool` is a retract of `Cost`, not a
        subtype, and the planner inserts the lift as a bridge of cost zero; whether the two are
        homomorphisms waits for the algebra (O1), since Boolean or has no counterpart among the
-       operations of `Cost` yet. [proposed]
+       operations of `Cost` yet. [settled]
 L6.3   The cutoff is the demand's (L10.17), passed down from it; it does not compose (two links
        within ε are within 2ε), so no law carries one. [proposed]
 L6.4   `&`, the only join the libraries use today, is the Boolean and. [settled]
@@ -1175,7 +1187,8 @@ References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q
 Rests on:   O1 (the algebra of costs; the two candidate models, D-2026-10-12-p)
 Source:     his note of 2026-10-12 on the reorder plan (14ea9f0)
 Status:     proposed on his note of 2026-10-12; the names lift, exact and within his to rename;
-            clauses 2, 3, 5 reworded on D-2026-10-12-h, -i, -p, -q
+            clause 2 settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded on D-2026-10-12-h,
+            -i, -p, -q
 History:    draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): new, on his note of 2026-10-12 on the
             plan ("faltan las leyes de los costos y de los predicates y cómo se lift a costos"); the
             text is the record's G3 of draft 9 (lift, exact, within) and the paragraph that stood in
@@ -1188,6 +1201,7 @@ History:    draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): new, on his note of 2
             "homomorphisms" withdrawn until the algebra exists (GPT en, GPT sp); "only in the
             demand" became "the demand's, passed down" (D-2026-10-12-h); the grade of a sum
             parameterizable (D-2026-10-12-i); the two candidate algebras named (D-2026-10-12-p).
+            draft 11 (2026-10-12), his mark: clause 2, the retraction, ok (D-2026-10-12-w).
 
 L8  The ideal world is realized with a guarantee.
 From:       G2 directly: the realization's distance to the ideal law is the law's value, and the
@@ -1313,8 +1327,8 @@ blocks; the done and implemented items are in the record's drafts table.
 - L13.3, the wording of his formula for the efficiency.
 - L14.6, the world as a candidate; L7.7, delegation as citation; L16.7, the wording of the graded
   transport (his correction).
-- L16, the certificate entry; L2.3, what `a : A` asserts; L9.11, actions on Luthier's own state;
-  L10.17 and L10.18, the cutoff and the policy constants; L13.3, 5, 6, 7; L6.2, 3, 5; L7.1.
+- L16.1, L16.2, L16.7, L16.8, the certificate entry; L2.3, what `a : A` asserts; L9.11, actions on Luthier's own state;
+  L10.17 and L10.18, the cutoff and the policy constants; L13.5, 6, 7; L6.3, 5; L7.1.
 - The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
 
 ## Keys

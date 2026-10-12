@@ -18,7 +18,7 @@ pp = importlib.util.module_from_spec(spec); spec.loader.exec_module(pp)
 RECORD = ROOT / "record/principles-language.md"
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--upto", type=int, default=12)
+ap.add_argument("--upto", type=int, default=13)
 UPTO = ap.parse_args().upto
 
 text = RECORD.read_text(encoding="utf-8")
@@ -396,7 +396,44 @@ def edit12():
                     for t, s in f["clauses"]]
     assert "(clause 5)." in " ".join(t for t, _ in f["clauses"]) and "(L13, D-2026" not in " ".join(t for t, _ in e["clauses"])
 
-EDITS = [edit1, edit2, edit3, edit4, edit5, edit6, edit7, edit8, edit9, edit10, edit11, edit12]
+# ---- edit 13: his marks on the five new items (D-2026-10-12-t, -u, -w) -------------------------------
+def edit13():
+    e = E["L16"]
+    c = list(e["clauses"])
+    c[1] = ("The grade is derived from the domain and the evidence cost: proved and exhaustive have "
+            "evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the "
+            "finite cost of its statistics on the distribution sampled. An `assumed` certificate carries "
+            "what is asserted and no check: a Boolean law asserted true, with bound 0, or a cost law "
+            "asserted with a formula of the inputs, a library's documented bound such as p(n)·ε·κ(A), "
+            "with the formula evaluated at the input as its bound; its evidence cost is the demand's "
+            "parameter for assumptions, with no default, so that a demand that names none refuses "
+            "assumed values (D-2026-10-11-n, D-2026-10-12-t). When the formula is a cited guarantee "
+            "with its hypotheses, the certificate is proved by delegation (L7.7), not assumed. The five "
+            "names stay in the certificate for the reader; the planner reads the costs.", "proposed")
+    c[2] = (c[2][0], "settled")
+    c[8] = (c[8][0], "settled")
+    e["clauses"] = c
+    e["Status"] = ("proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses "
+                   "4 to 6 settled, moved from L10 and L14; clause 2 reworded on D-2026-10-12-t; clause 7 "
+                   "carries his correction of draft 7 in grades")
+    e["hist_add"].append("draft 11 (2026-10-12), his marks: clause 2 elaborated with the two kinds of "
+                         "assumption (D-2026-10-12-t); clauses 3 and 9 marked ok (D-2026-10-12-w).")
+    f = E["L6"]
+    f["clauses"][1] = (f["clauses"][1][0], "settled")
+    f["Status"] = f["Status"].replace("clauses 2, 3, 5 reworded", "clause 2 settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded")
+    f["hist_add"].append("draft 11 (2026-10-12), his mark: clause 2, the retraction, ok (D-2026-10-12-w).")
+    g = E["L13"]
+    g["clauses"][2] = ("(His formula) What the planner ranks is an efficiency, exp(−cost) over the "
+                       "resources used, so that a specimen of cost zero has efficiency 1/resources and "
+                       "not zero; the weight between cost and resources, w, the demand's parameter, may "
+                       "enter as log(resources) added to the cost, so that the rank is cost + w·log "
+                       "resources, minimized, the same as exp(−cost)/resources^w (D-2026-10-12-u).",
+                       "candidate")
+    g["Status"] = g["Status"].replace("clauses 3, 5, 6, 7 proposed", "clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7 proposed")
+    g["hist_add"].append("draft 11 (2026-10-12), his mark: clause 3 a candidate, with log(resources) added "
+                         "to the cost as the better form (D-2026-10-12-u).")
+
+EDITS = [edit1, edit2, edit3, edit4, edit5, edit6, edit7, edit8, edit9, edit10, edit11, edit12, edit13]
 for f in EDITS[:UPTO]:
     f()
 
@@ -523,6 +560,8 @@ if UPTO >= 4:
                       "- L16.7 and L16.8, the composition of identities as paths (his note of 2026-10-12 put in\n  words, with D-2026-10-12-q).")
     res = res.replace("- L14.7, the world as a candidate; L14.8, delegation as citation; L14.9, the wording of the graded\n  transport (his correction).",
                       "- L14.6, the world as a candidate; L7.7, delegation as citation; L16.7, the wording of the graded\n  transport (his correction).\n- L16, the certificate entry; L2.3, what `a : A` asserts; L9.11, actions on Luthier's own state;\n  L10.17 and L10.18, the cutoff and the policy constants; L13.3, 5, 6, 7; L6.2, 3, 5; L7.1.")
-    res = res.replace("- L10.4, the decorated output as another model.\n", "- L10.4, the decorated output as another model.\n")
+    if UPTO >= 13:
+        res = res.replace("L16, the certificate entry; L2.3, what `a : A` asserts;", "L16.1, L16.2, L16.7, L16.8, the certificate entry; L2.3, what `a : A` asserts;")
+        res = res.replace("L13.3, 5, 6, 7; L6.2, 3, 5; L7.1.", "L13.5, 6, 7; L6.3, 5; L7.1.")
 RECORD.write_text(res, encoding="utf-8")
 print(f"edits 1..{UPTO} applied; record {len(res.splitlines())} lines")
