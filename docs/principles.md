@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 8a6ba163d3d5, commit 1f02311 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 fd63e9942abc, commit 9c066a6 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -243,32 +243,6 @@ Rests on: O1 (the error decoration), O3 (the world as a value, so that an action
 from the memo), O5, O8, O12.
 Status: settled; clause 4 proposed on his note on Terms.
 
-**L11. An action is verified by observing the world before and after it.**
-From: G0 (identity is the first proposition; his "path equivalence is the fundamental concept",
-2026-05-29); the two faces are G0, the demand's statement; the verification of actions from G1
-(observation) and G0, the demand.
-- L11.1 (His annotation) Executing is the executive face: an action changes the state of the world,
-  and it is verified too, by observing the world before and after it; the laws over actions are stated
-  over those two observations, as a mutable parameter is two variables (L9). [settled]
-- L11.2 An observation is itself an action, so this stops where the world can be read back (a file
-  written and reread), and says nothing beyond; an effect on state Luthier owns is verified this way,
-  an irreversible or concurrent effect outside it is typed, logged and audited, never verified.
-  [settled]
-Rests on: O3 (actions and the world as a value, not implemented).
-Status: settled.
-
-**L12. No hardcoded constants: every criterion is a parameter.**
-From: G0, the demand (the tolerance belongs to the demand) and G2 (a law states a distance, not a
-threshold), so a constant in the code has no place to live; restates P11 (every criterion is a
-parameter, never a constant in the code).
-- L12.1 Thresholds, budgets, limits and statistical levels are never constants in code; they are
-  declared, passed and recorded. [settled]
-- L12.2 The outermost demand, an action with no caller, carries its tolerance as a declared default
-  argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
-  [settled]
-References: D-2026-10-11-c.
-Status: settled; statement in his words, 2026-10-12.
-
 **L13. One function, many paths, chosen by maximizing the performance the demander chooses.**
 From: G0 (the quotient), G2 (the choice by cost and the database of runs) and, before its retirement
 in draft 9, the organizer "expressive over restrictive" (every path expressible; now L13's own
@@ -353,23 +327,6 @@ References: `11`; D-2026-10-11-n.
 Rests on: O1 (the worst cost seen, and how the uncertainty of a cost sits in a certificate).
 Status: settled.
 
-**L3. The certified subtype from a law is the fundamental construction pattern.**
-From: G0 (a law is a proposition; its subtype is the type of its proofs) with G1 (verified, not
-constructed).
-- L3.1 From a material type and a law, a predicate or a cost with its tolerance, come the certified
-  type, its only constructor and the forgetful projection; the same pattern builds values, functions
-  and programs. [settled]
-- L3.2 A law gives the three at once: the type, the constructor with Maybe, the membership function.
-  [settled]
-- L3.3 Where the law is into `Cost`, the constructor takes the tolerance as a parameter (L12) and
-  the certificate records the tolerance it was checked at, so a stricter demand asks for a new check
-  (`11` §4). [settled]
-- L3.4 Types are verified before they are constructed: Luthier starts from types by verification,
-  and types by construction may come in later. [settled]
-References: `11`.
-Rests on: O1.
-Status: settled; "from a law" is his correction of 2026-10-12.
-
 **L7. A law characterizes; it is verified by one operation, exact or statistical; and the
 certificate of identity is not the certificate of the law.**
 From: G0 (a law defines the object) and G1 (a law that transcribes the specimen is acquaintance, not
@@ -402,6 +359,58 @@ its type).
 References: `05` R8; D-2026-10-11-d.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
 Status: settled.
+
+**L16. A certificate records what is known of a law, its domain, its bound and its evidence; it is
+frozen, it serves every demand it meets, and it transports along identity.**
+From: G1 (a model is known by the law it satisfies, with the evidence it has) with G2 (evidence is a
+cost) and G0, the demand (what the demand requires of the evidence is its own).
+- L16.1 A certificate (Terms) names the law it records as checked, the domain the check covered (a
+  subtype, the cases listed, or the distribution sampled), the bound observed (for a law into `Cost`,
+  the worst cost seen), and the evidence: its grade and, for a sampled check, the sample's statistics
+  converted to an evidence cost (D-2026-10-12-r). [proposed]
+- L16.2 The grade is derived from the domain and the evidence cost: proved and exhaustive have
+  evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the finite
+  cost of its statistics on the distribution sampled; assumed, the evidence cost the demand assigns to
+  assumptions, a parameter with no default, so that a demand that names none refuses assumed values
+  (D-2026-10-11-n, D-2026-10-12-r). The five names stay in the certificate for the reader; the planner
+  reads the costs. [proposed]
+- L16.3 The conversion from statistics to an evidence cost is a function with a declared shape, the
+  sample's statistics and the demand's level in, a cost out, filled per theory (D-2026-10-12-r); the
+  first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the fraction of the distribution
+  where the law's bound fails, from n samples at confidence 1 − δ, and δ the demand's parameter.
+  [proposed]
+- L16.4 A certificate is identified by a hash over its dependency cone (code, cases, seed, the
+  distribution and level sampled); it is a frozen snapshot, and a later check does not change it but
+  issues a new one that supersedes it, both kept, the latest in front (P3), so progress is the chain
+  of certificates. [settled]
+- L16.5 A certificate serves every demand whose cutoff it meets, on the bound and on the evidence
+  cost alike (D-2026-10-12-h); the demand states what it requires (P11), and a memo hit serves a
+  demand only if the cached cone meets it, checked at the hit and not only when the certificate was
+  issued. [settled]
+- L16.6 Certification is the default: demanding a value demands every certificate in its dependency
+  cone, paid once through the memo, unless the demand opts out by a mechanism to be named (O3), which
+  leaves a certificate of grade `assumed` (D-2026-10-11-n); what never reaches an output needs no
+  certificate, and what reaches one carries its cone's; `test` is the action that demands certificates
+  without values (L10). [settled]
+- L16.7 Certification transports along identity: if B is certified on inputs X with bound b and
+  evidence cost e, and the identity A ≡ B is certified on inputs Y with distance d and evidence cost
+  e′, then A is certified on X ∩ Y with bound b + d and evidence cost e + e′, and by nothing else; a
+  path of identities composes the same way, link by link, the distances summed and the evidence summed
+  (D-2026-10-12-q). (His correction, in grades) A is certified at the weaker of the two grades on X ∩
+  Y. [proposed]
+- L16.8 Links sampled over different distributions do not compose without a law relating the
+  distributions; links sampled over the same distribution compose by the union bound, the failure
+  fractions summed, which is the probabilistic bound the planner waited for (D-2026-10-12-q). The
+  composition algebra belongs to the theory's cost type, the sum its first instance; whether a demand
+  accepts a sampled path is its evidence cutoff, a parameter (P11). [proposed]
+- L16.9 No operation on certificates raises a grade, lowers an evidence cost or widens a domain
+  without new evidence. [proposed]
+Example: with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
+lookup table equal to the native on a grid is certified on the grid and nowhere else (clause 7).
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r; P3, P11.
+Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax).
+Status: proposed in draft 11; clauses 4 to 6 settled, moved from L10 and L14; clause 7 carries his
+correction of draft 7 in grades.
 
 **L14. Luthier orchestrates other languages; what does not follow its way lives in a world; a
 foreign function is certified by delegation, and certification transports along equality.**
@@ -580,7 +589,7 @@ blocks; the done and implemented items are in the record's drafts table.
 
 The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder plan, 14ea9f0).
 
-| Draft 10 and 11 | Before | What happened |
+| Draft 11 | Before | What happened |
 |---|---|---|
 | G0 | G0 | kept |
 | G1 | G2 | theory and model, printed first since draft 8; the former L3 and L20 absorbed |
@@ -603,4 +612,5 @@ The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder pl
 | L14 | L14, L22, L11 (delegation), L21 (transport) | merged |
 | L15 | L6, L7 | merged: the core is minimal and its programs are data |
 | absorbed | L3 | into G1 (draft 10) |
+| L16 | new | certificates, draft 11 (step 4) |
 | absorbed | L20 | into G1 (draft 9) |

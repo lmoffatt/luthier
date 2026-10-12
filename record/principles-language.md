@@ -69,7 +69,7 @@ organizers depend on each other says why it is load-bearing anyway.
 
 The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder plan, 14ea9f0).
 
-| Draft 10 and 11 | Before | What happened |
+| Draft 11 | Before | What happened |
 |---|---|---|
 | G0 | G0 | kept |
 | G1 | G2 | theory and model, printed first since draft 8; the former L3 and L20 absorbed |
@@ -92,6 +92,7 @@ The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder pl
 | L14 | L14, L22, L11 (delegation), L21 (transport) | merged |
 | L15 | L6, L7 | merged: the core is minimal and its programs are data |
 | absorbed | L3 | into G1 (draft 10) |
+| L16 | new | certificates, draft 11 (step 4) |
 | absorbed | L20 | into G1 (draft 9) |
 
 ## Purpose
@@ -201,7 +202,9 @@ History:    draft 2 (cd24137): stated from his note and the audio, formulation p
             executive clause of G3 (the demand defines what is computed) read into it, as G3's own
             status asked; "cost or execution time ranks the candidates" dropped, since the ranking
             is L13's; the Ls under it listed in its section.
+```
 
+```
 G1  A type is a theory and its values are its models.
 Tier:       eureka, the first (the trigger, audio 09.19, 00:00 to 00:14)
 Formulation: If a type is a proposition, then a proposition can say that a structure follows the
@@ -335,7 +338,9 @@ History:    draft 2 (cd24137): "a function is known by description", the second 
             (2026-10-12): cut to two sentences, no status, no mechanics (D-2026-10-12-s); "what type
             theory lacks: it knows a value by its term; Luthier knows it by the law it satisfies"
             kept here; the Ls under it listed in its section.
+```
 
+```
 G2  Laws are valued in cost: one logic, extended to the non-negative reals.
 Tier:       the second eureka on his note of 2026-10-12
 Formulation: Not every theory is easily described by Booleans; many are represented better by costs.
@@ -690,74 +695,6 @@ History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration st
             23:35; the former L13 restated without the forgetful functor on his note of 2026-10-12
             (16 to 19).
 
-L11 An action is verified by observing the world before and after it.
-From:       G0 (identity is the first proposition; his "path equivalence is the fundamental
-            concept", 2026-05-29); the two faces are G0, the demand's statement; the verification of
-            actions from G1 (observation) and G0, the demand
-L11.1  (His annotation) Executing is the executive face: an action changes the state of the world,
-       and it is verified too, by observing the world before and after it; the laws over actions are
-       stated over those two observations, as a mutable parameter is two variables (L9). [settled]
-L11.2  An observation is itself an action, so this stops where the world can be read back (a file
-       written and reread), and says nothing beyond; an effect on state Luthier owns is verified
-       this way, an irreversible or concurrent effect outside it is typed, logged and audited, never
-       verified. [settled]
-Rests on:   O3 (actions and the world as a value, not implemented)
-Quote:      "la matemática no ejecuta ... la ejecución en Luthier sería esa verificación de
-            equivalencias" (2026-05-30) "una funcion genera equivalencias f(a)==f(b) ==> a~b y mas
-            si f(a)=true" (chat, 2026-10-11) "las ejecuciones tambien se verifican observando el
-            mundo antes y despues del acto" (annotation on draft 2, 2c18c41)
-Source:     Luciano, 2026-05-30; the kernel reading 2026-10-11 (chat); the actions 2026-10-11
-            (annotation on draft 2, 2c18c41)
-Status:     settled
-History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137), addenda 7 and 8: the kernel of a function
-            as the equivalence on its domain. draft 3 (c085ba4), his annotation: actions verified by
-            observing the world before and after. draft 4 (c7c6396): an observation is an action;
-            stops where the world can be read back. draft 5 (5b1446c): the kernel reading is an
-            interpretation, not the mechanism; a name only where a normal form exists (formerly
-            under G4). draft 6 (8809e20): effects outside Luthier typed, logged and audited. draft
-            10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): renumbered from L12; shortened on his note of
-            2026-10-12: evaluation and execution are in Terms, the reading of computation as the
-            kernel of a function stays in this record (History below). the reading dropped from the
-            projection at draft 10: Luthier first describes the problem and its equivalences;
-            evaluating is checking them, as mathematics verifies rather than runs. (His annotation)
-            Executing is the executive face: an action changes the state of the world, and it is
-            verified too, by observing the world before and after it; the laws over actions are
-            stated over those two observations, as a mutable parameter is two variables (L9). An
-            observation is itself an action, so this stops where the world can be read back (a file
-            written and reread), and says nothing beyond; an effect on state Luthier owns is
-            verified this way, an irreversible or concurrent effect outside it is typed, logged and
-            audited, never verified. Every function induces an equivalence on its domain, its
-            kernel, so computing f(x) is placing x in its class and the value is the class's name:
-            an interpretation of computation, not the evaluator's mechanism, and a name exists only
-            where a normal form does, the decidable fragment (no canonical form elsewhere); a
-            predicate is the two-class case and `Maybe T` places x in one of them. This equivalence
-            on the domain is distinct from the equivalence between terms that a law induces, which
-            is L10's quotient. draft 11, step 3 (2026-10-12): the formulation split into numbered
-            clauses with the status each sentence had in draft 10, the examples into Example, the
-            provenance phrases into this History, the wording otherwise as draft 10 had it.
-            shortened at draft 10 on his note of 2026-10-12: evaluation and execution are in Terms,
-            the reading of computation as the kernel of a function stays in this History.
-
-L12 No hardcoded constants: every criterion is a parameter.
-From:       G0, the demand (the tolerance belongs to the demand) and G2 (a law states a distance,
-            not a threshold), so a constant in the code has no place to live; restates P11 (every
-            criterion is a parameter, never a constant in the code)
-L12.1  Thresholds, budgets, limits and statistical levels are never constants in code; they are
-       declared, passed and recorded. [settled]
-L12.2  The outermost demand, an action with no caller, carries its tolerance as a declared default
-       argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
-       [settled]
-References: D-2026-10-11-c
-Source:     P11, in force; first applied as a rule of the language 2026-10-05
-            (dialogue:c7437496:lmmaxiter-should-be-a-parameter)
-Status:     settled; statement in his words, 2026-10-12
-History:    draft 0 (6d9dbd3): stated. Draft 0 of the generative plan proposed moving it to the way
-            of working; withdrawn (D3). draft 6 (8809e20): the outermost demand's default argument.
-            draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): renumbered from L17; statement in his
-            words, 2026-10-12. draft 11, step 3 (2026-10-12): the formulation split into numbered
-            clauses with the status each sentence had in draft 10, the examples into Example, the
-            provenance phrases into this History, the wording otherwise as draft 10 had it.
-
 L13 One function, many paths, chosen by maximizing the performance the demander chooses.
 From:       G0 (the quotient), G2 (the choice by cost and the database of runs) and, before its
             retirement in draft 9, the organizer "expressive over restrictive" (every path
@@ -883,33 +820,6 @@ History:    draft 1 (5769005): stated. draft 4 (c7c6396): one judgment, structur
             the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it. the grade list deleted here, defined in Terms.
 
-L3  The certified subtype from a law is the fundamental construction pattern.
-From:       G0 (a law is a proposition; its subtype is the type of its proofs) with G1 (verified,
-            not constructed)
-L3.1   From a material type and a law, a predicate or a cost with its tolerance, come the certified
-       type, its only constructor and the forgetful projection; the same pattern builds values,
-       functions and programs. [settled]
-L3.2   A law gives the three at once: the type, the constructor with Maybe, the membership function.
-       [settled]
-L3.3   Where the law is into `Cost`, the constructor takes the tolerance as a parameter (L12) and
-       the certificate records the tolerance it was checked at, so a stricter demand asks for a new
-       check (`11` §4). [settled]
-L3.4   Types are verified before they are constructed: Luthier starts from types by verification,
-       and types by construction may come in later. [settled]
-References: `11`
-Rests on:   O1
-Source:     Luciano, 2022-08-03 (written:2022-08-03_haskell:subtipos-con-predicado); named
-            fundamental 2026-09-29 (record/distillation/2026-10-09_find_principles_v2_claude-code_
-            opus.md, C3); the three things and the scope 2026-10-10 (WhatsApp Ptt 2026-10-10 at
-            10.12.21.md, 05:24 to 08:10)
-Status:     settled; "from a law" is his correction of 2026-10-12
-History:    draft 1 (5769005): stated. draft 4 (c7c6396): the tolerance a parameter of the
-            constructor, recorded in the certificate. draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23):
-            renumbered from L4; "from a law" is his correction of 2026-10-12. draft 11, step 3
-            (2026-10-12): the formulation split into numbered clauses with the status each sentence
-            had in draft 10, the examples into Example, the provenance phrases into this History,
-            the wording otherwise as draft 10 had it.
-
 L7  A law characterizes; it is verified by one operation, exact or statistical; and the certificate
     of identity is not the certificate of the law.
 From:       G0 (a law defines the object) and G1 (a law that transcribes the specimen is
@@ -973,6 +883,72 @@ History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d
             it. the generators of clause 2 are the model's addition; clause 5 is the model's
             correction, from the practice of property-based testing; the grade list deleted here,
             defined in Terms.
+
+L16 A certificate records what is known of a law, its domain, its bound and its evidence; it is
+    frozen, it serves every demand it meets, and it transports along identity.
+From:       G1 (a model is known by the law it satisfies, with the evidence it has) with G2
+            (evidence is a cost) and G0, the demand (what the demand requires of the evidence is its
+            own)
+L16.1  A certificate (Terms) names the law it records as checked, the domain the check covered (a
+       subtype, the cases listed, or the distribution sampled), the bound observed (for a law into
+       `Cost`, the worst cost seen), and the evidence: its grade and, for a sampled check, the
+       sample's statistics converted to an evidence cost (D-2026-10-12-r). [proposed]
+L16.2  The grade is derived from the domain and the evidence cost: proved and exhaustive have
+       evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the
+       finite cost of its statistics on the distribution sampled; assumed, the evidence cost the
+       demand assigns to assumptions, a parameter with no default, so that a demand that names none
+       refuses assumed values (D-2026-10-11-n, D-2026-10-12-r). The five names stay in the
+       certificate for the reader; the planner reads the costs. [proposed]
+L16.3  The conversion from statistics to an evidence cost is a function with a declared shape, the
+       sample's statistics and the demand's level in, a cost out, filled per theory
+       (D-2026-10-12-r); the first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the
+       fraction of the distribution where the law's bound fails, from n samples at confidence 1 − δ,
+       and δ the demand's parameter. [proposed]
+L16.4  A certificate is identified by a hash over its dependency cone (code, cases, seed, the
+       distribution and level sampled); it is a frozen snapshot, and a later check does not change
+       it but issues a new one that supersedes it, both kept, the latest in front (P3), so progress
+       is the chain of certificates. [settled]
+L16.5  A certificate serves every demand whose cutoff it meets, on the bound and on the evidence
+       cost alike (D-2026-10-12-h); the demand states what it requires (P11), and a memo hit serves
+       a demand only if the cached cone meets it, checked at the hit and not only when the
+       certificate was issued. [settled]
+L16.6  Certification is the default: demanding a value demands every certificate in its dependency
+       cone, paid once through the memo, unless the demand opts out by a mechanism to be named (O3),
+       which leaves a certificate of grade `assumed` (D-2026-10-11-n); what never reaches an output
+       needs no certificate, and what reaches one carries its cone's; `test` is the action that
+       demands certificates without values (L10). [settled]
+L16.7  Certification transports along identity: if B is certified on inputs X with bound b and
+       evidence cost e, and the identity A ≡ B is certified on inputs Y with distance d and evidence
+       cost e′, then A is certified on X ∩ Y with bound b + d and evidence cost e + e′, and by
+       nothing else; a path of identities composes the same way, link by link, the distances summed
+       and the evidence summed (D-2026-10-12-q). (His correction, in grades) A is certified at the
+       weaker of the two grades on X ∩ Y. [proposed]
+L16.8  Links sampled over different distributions do not compose without a law relating the
+       distributions; links sampled over the same distribution compose by the union bound, the
+       failure fractions summed, which is the probabilistic bound the planner waited for
+       (D-2026-10-12-q). The composition algebra belongs to the theory's cost type, the sum its
+       first instance; whether a demand accepts a sampled path is its evidence cutoff, a parameter
+       (P11). [proposed]
+L16.9  No operation on certificates raises a grade, lowers an evidence cost or widens a domain
+       without new evidence. [proposed]
+Example:    with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
+            lookup table equal to the native on a grid is certified on the grid and nowhere else
+            (clause 7)
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r; P3, P11
+Rests on:   O1 (the conversion and the algebra), O3 (the opt-out's syntax)
+Quote:      "a is model of A with cost C, we pass the statistics to cost, we need a convertion.
+            might be we work with logCost in nat." "The same, the conversion is expressed by a
+            dedicated function and we might choose different functions on different theories.
+            Luthier would ask for some input output shape, that the particular function is filled on
+            each case." (his marks, e8d7db1, 57a0023)
+Source:     the critiques of draft 10 (`record/IA/principles 2026 10 12/`, 1429f35: Claude, the
+            certificate as the object every L leans on, scattered over L2, L5, L7, L10, L13, L14;
+            GPT en, the calculus of evidence scope and the rule that no operation increases grade or
+            domain without new evidence); his decisions D-2026-10-12-j, -q, -r; clauses 4 to 6 moved
+            from L10.7, L10.10, L10.13, L10.5 and L14.5 of draft 11 step 3
+Status:     proposed in draft 11; clauses 4 to 6 settled, moved from L10 and L14; clause 7 carries
+            his correction of draft 7 in grades
+History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7.
 
 L14 Luthier orchestrates other languages; what does not follow its way lives in a world; a foreign
     function is certified by delegation, and certification transports along equality.
