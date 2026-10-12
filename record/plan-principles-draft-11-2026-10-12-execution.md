@@ -6,7 +6,14 @@ D1 to D3 are in (57a0023; D-2026-10-12-q, -r, -s), so no step assumes anything; 
 step: the projection shows the From and Tier lines draft 10 had lost and no longer the
 "(was …)" in the headings, which the record's Numbering table carries; and
 `docs/principles-for-readers.md` had its citations renumbered (draft 3), since `--check` reads
-them. Written by `scripts/migrate_record_draft10.py`. The choices it rests on are
+them. Written by `scripts/migrate_record_draft10.py`. Step 2 done: `scripts/project_principles.py` v2
+(clauses `L10.1  text [status]` inside an entry, the fields Example, References and Rests on, the
+record's Numbering section appended to the projection, the two lints, `--strict`); on the record at
+draft 10 the lints report nine unresolved references (the former L21 cited from L5, L7, L14; G4 from
+L13; the old numbers in the introduction of the principles) and two literal repeats (the grade list
+in Terms and L7; "a law is a predicate or a cost" in Terms and L6). The redundancy the critiques
+named (the transport rule in L5, L13, L14; D-2026-10-11-n in five entries) is paraphrase, not copy,
+so the lint does not see it and step 3 removes it by hand. The choices it rests on are
 D-2026-10-12-g to -p in `record/decisions.md` (6b729dc) and D1 to D3 of
 `plan-principles-draft-11-2026-10-12-decisions.md`; where a step depends on one of the latter it
 says which, and what it assumes until Luciano answers. Inputs: `docs/principles.md` draft 10

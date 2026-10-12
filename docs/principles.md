@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 ee03b6fd2cd4, commit 44df5a7 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v1) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 ee03b6fd2cd4, commit 1f02311) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Terms
 
@@ -500,3 +500,32 @@ Status: settled.
 - His marks pending on this record: L5's wording (graded transport), L8's correction on
   rounding, L7's delegation as citation, the names lift, exact and within (G2), L14 as a
   candidate.
+
+## Numbering
+
+The tags of draft 10 against those of drafts 1 to 9 (his marks on the reorder plan, 14ea9f0).
+
+| Draft 10 | Before | What happened |
+|---|---|---|
+| G0 | G0 | kept |
+| G1 | G2 | theory and model, printed first since draft 8; the former L3 and L20 absorbed |
+| G2 | G3 | cost, the second eureka on his note; lift, exact and within moved to L6 |
+| G3 | G1 | the demand, printed third |
+| retired | G4 | retired in draft 9 (D-2026-10-12-c); its content became L22, now in L14 |
+| L1 | L1 | kept |
+| L2 | L2 | kept |
+| L3 | L4 | renumbered; "from a law" his correction |
+| L4 | L8 | renumbered |
+| L5 | L16, L21 | merged: equality has levels, with the identity clauses of L21 |
+| L6 | new | how laws combine, the lift and the cutoff, from the former G3 |
+| L7 | L5, L11, L21 | merged: a law characterizes, verified by one operation; identity is not the law |
+| L8 | L15 | renumbered |
+| L9 | L9, L18 | merged: a DAG of definitions without effects |
+| L10 | L19, L13 | merged: the demand determines the computation and the types produced |
+| L11 | L12 | renumbered and shortened |
+| L12 | L17 | renumbered; statement in his words |
+| L13 | L10 | renumbered; statement in his words |
+| L14 | L14, L22, L11 (delegation), L21 (transport) | merged |
+| L15 | L6, L7 | merged: the core is minimal and its programs are data |
+| absorbed | L3 | into G1 (draft 10) |
+| absorbed | L20 | into G1 (draft 9) |
