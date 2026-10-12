@@ -177,3 +177,82 @@ by the planner. `Cost` enters `core.lut` over `ExtendedReal`. Nothing implicit, 
 the kernel.
 
 For his mark: this instead of the subtype of §3. ok / no.
+
+## 5. His annotations on draft 8 (bcdac41)
+
+Nine marks, plus one edit in the *Proposed* text of G2 ("an isolated function is a theory of one
+symbol"), kept. Each answer ends with what it asks of him. The way of working is split off by
+D-2026-10-12-b (0db35c2), as he asked; not an item here.
+
+**Holotype (G2).** His words: "Sqr no es un ejemplo de ley, lo que quise decir es que las leyes
+las tenes que escribir con una implementacion de las mismas, las teorias las escribis con un
+object classifier (hecho de leyes). Luego verificas que la implementacion de los modelos
+verifiquen las leyes"; "Lo del holotipo me parece que blow out of proportion, era una metafora
+para decir algo que en Cocientes se usa que vos elegis un elemento del cociente como el
+representante de la clase de equivalencia." Answer: the two holotype paragraphs of G2 (draft 3's
+reading and draft 5's correction) were the model's elaboration of a metaphor; both go. What
+replaces them, in his words: a law is written as an implementation (a program that returns its
+Bool or Cost); a theory is written as an object classifier made of laws, the map that sends a
+structure over the signature to the cost of its being a model (which is also where G3 enters G2);
+a model's implementation is verified against the laws. The representative of the class is L10's
+business, chosen by cost. This settles the item "holotype, his mark pending" of drafts 5 to 8.
+Asks: ok to remove and replace.
+
+**G3, the lift.** "no podes promover booleans a cost a troche y moche, confunde ... dos tipos de
+leyes o leyes y costos conviviendo (y ahi si, los boolean se promueven (lift?) a cost)." Agreed,
+and it is §4 above: two kinds of laws coexist, Bool-valued and Cost-valued; the lift is explicit
+and named. Names proposed: `lift : Bool -> Cost` (i), `exact : Cost -> Bool` (p₀, c == 0),
+`within ε : Cost -> Bool` (p_ε, only in the demand). G3's formulation to be reworded: "a Cost-valued
+law and a Bool-valued law are both laws; a Bool law enters a cost by `lift`, inserted by the
+planner as a bridge of cost zero; the demand's tolerance is the only `within`." Asks: the names.
+
+**G4, retire?** "si hay una forma 'no luthieriana' de definir o implementar algo, luthier deberia
+dar la posibilidad de hacerlo con un world especifico ... Evaluemos si se pierde algo retirando
+este principio." What cites G4: four decisions by their Kind lines (D-2026-10-11-k separators,
+"nothing gained by a mandatory `;`"; D-2026-10-11-m, "every path is written"; D-2026-10-11-n, the
+opt-out of certification; one more), L10's "every path expressible" and the tie-breaker of D8.
+None of the four reverses without it: k is taste, m follows from L10 and G0, n is exactly his
+escape hatch. What survives of G4 is narrower and concrete, and it is what he describes: a
+non-Luthier way of doing something is allowed inside a named world (L12), its certificates
+`assumed` (D-2026-10-11-n), visible in the plan. *Proposed*: retire G4 as an organizer; its
+content becomes a candidate L under G1, "the escape hatch is a world"; "the law that makes two
+ways equivalent" is already L21 and needs no principle; P5 stays in `record/principles.md`. Lost:
+one tie-breaker that four decisions name and none needs. Asks: retire, yes or no.
+
+**L3.** "Quizas lo debamos ampliar a Theory aqui?" Yes: "Declaring a model of a theory declares
+the tests it will be run on; a function is the one-symbol case" (what the README now says). Asks
+nothing; done in draft 9 unless he objects.
+
+**L8.** "al ser declarado, asumimos que es del tipo declarado y si se usa en un contexto donde el
+tipo es incompatible, hay un error." Yes; one sentence added to L8, and it is `05` R1 and the
+checker as they are. Done in draft 9.
+
+**L11, delegation.** "Tambien podria haber verificacion externa por teoremas o por delegacion
+(creo en Lapack)." Theorems are there (`proved` by citation, D-2026-10-11-f). Delegation is the
+same mechanism with the library's guarantee as the theorem cited (LAPACK's backward-error bounds
+with the condition number as hypothesis) and the library's version and platform as hypotheses the
+certificate carries (L14 already binds them). *Proposed*: no new grade; `cite` over an extern,
+hypotheses as parameters, as γ_n in L10. Asks: ok.
+
+**L18.** "No tiene efectos en el mundo exterior, pero tiene efectos en el mundo interior: se ocupa
+el identificador y se guarda la definicion en el mapa de definiciones." Yes; L18 reworded: no
+effect on the world; its one effect is on the program, it takes its name once and enters the map
+of definitions (D-2026-10-11-i, `:=` once, `<-` only in a block). Done in draft 9.
+
+**L20.** "no entiendo porque hacerlo un principio. Surge solo." Agreed; draft 8 already calls it
+the definition of G2. *Proposed*: L20 is absorbed into G2's formulation; its paragraph on
+specializations and bridges goes to L10, where it belongs; "modules are values by design, a
+parametrized module is a function from models to definitions" goes to the spec (`03`). The tag
+L20 stays in the record as "absorbed into G2, draft 9". Asks: ok.
+
+**L21.** "La idea era que si vos tenes que B esta certificado y A es identico a B por transporte
+A esta certificado, aca decis algo negativo, no entiendo." He is right and the draft 7 clauses are
+a negative wording of what he says. Transport, stated positively and graded: if B is certified at
+grade g on inputs X and A ≡ B is certified at grade h on inputs Y, then A is certified at the
+weaker of g and h on X ∩ Y. Kimi's counterexample (B's laws only `assumed`, the identity
+`sampled`) is then handled by the rule itself: A receives `assumed`, nothing. Claude's (a lookup
+table equal to the native on the grid) is handled by the coverage: the table is certified exactly
+where the link is, on the grid, and nowhere else. So the two draft 7 clauses ("never raises a
+node's grade", "only beside a certified law") are replaced by the transport rule, which implies
+both. *Proposed*: L21 reworded as transport. Asks: ok; it reverses two clauses of draft 7 taken
+from the third round.
