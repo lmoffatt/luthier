@@ -1493,3 +1493,18 @@ Kind:       language (L11.7, L5; spec 12.S21, 12.S22; 7.S20). For L5 (only what 
             produced), L14
 Status:     current; -ac partly reversed (import); open, his: whether a flat import survives (as an
             explicit `open`, read at once) or not, and whether a module carries its own name
+
+D-2026-10-12-ae No names are imported into a namespace. A module is reached only through the name
+                its importer gives it (`la.f`), so every name says where to look for it; there is no
+                flat import and no `open`. The importer names the module; the file carries no name
+                of its own (the model's proposal, implied by the decision). The one enclosing scope
+                every file has is core's: the names of `core.lut` are visible unqualified in the
+                outermost block of every file, as the names of an enclosing block are visible in a
+                nested one (the model's reading, proposed).
+Author:     Luciano for no imported names; Claude for the importer naming the module and for core
+            as the enclosing scope, both proposed
+Quote:      "o sea que no habria nombres importados al namespace, lo cual hace que sepamos donde
+            buscar los nombres!!!" (chat, 2026-10-12)
+Source:     chat 2026-10-12, answering the open question of D-2026-10-12-ad
+Kind:       language (spec 12.S3, 12.S6, 12.S21, 12.S22; spec 2 §6). For L14, P16
+Status:     current; closes the flat-import question of -ad

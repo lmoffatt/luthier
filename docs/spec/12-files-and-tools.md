@@ -16,7 +16,7 @@ Chapter 12 of the specification, draft 0, 2026-10-12. Sources: `docs/spec/03-lib
 
 **12.S5. Importing twice, and cycles.** [implemented] Importing a file twice under one prefix does nothing; one file may be loaded under two prefixes. A cycle of imports is an error.
 
-**12.S6. Name resolution inside a module.** [implemented] Inside a module `m`, the name `x` is looked up as `m.x` first, then as `x` among core and what the root imported flat. A module does not see the definitions of the file that imports it. Constructors, data types and the labels of sums named by an alias are prefixed like functions.
+**12.S6. Name resolution inside a module.** [implemented] Inside a module `m`, the name `x` is looked up as `m.x` first, then as `x` among core and what the root imported flat. A module does not see the definitions of the file that imports it. Constructors, data types and the labels of sums named by an alias are prefixed like functions. Replaced: 12.S22.
 
 **12.S7. Order inside a file and between files.** [implemented] Inside a file the order of definitions is free: the file is read whole and checked object by object (spec 4). Between files order matters in the one sense import allows, a file sees what it imports.
 
@@ -61,12 +61,16 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 **12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ad] Per L11.7, a module is read at the first demand for one of its names: the checker meeting `la.f`, or `run` needing its value;
 an import no demand reaches is never read. An extern's file is read only when `run` or `test`
 reaches its node (`spec 3 §8`). `test "x.lut"` is the action that demands everything in the module:
-every name, every import, every law, so it is where latent errors appear (`spec 7`). A flat import,
-whose names cannot be traced to their file, is open (D-2026-10-12-ad).
+every name, every import, every law, so it is where latent errors appear (`spec 7`). There is no flat
+import (12.S22).
 
-**12.S22. Modules are values.** [decided D-2026-10-12-ab] `import` is a function whose value is a
-module, a value of the record type of 12.S1; the form by which a module's names enter the importer's
-namespace is to be specified.
+**12.S22. Modules are values, and no names are imported.** [decided D-2026-10-12-ae] `import` is a
+function whose value is a module, a value of the record type of 12.S1, bound to the name its
+importer gives it: `la := import "linear_algebra.lut"`. A name of a module is reached only through
+that name, `la.f`, a projection (`spec 2 §6`), so every name says where to look for it; there is no
+flat import and no `open`, and the file carries no name of its own. The names of `core.lut` are
+visible unqualified in the outermost block of every file, core being the scope that encloses it, as
+an enclosing block's names are visible in a nested one (this last sentence proposed).
 
 ## Open
 
