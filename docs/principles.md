@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 87c2a842d873, commit 595d2be (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 294bfac2341f, commit c6a9bc0 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -251,52 +251,55 @@ References: `04`; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n
 Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12.
 Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed.
 
-**L13. One function, many paths, chosen by maximizing the performance the demander chooses.**
+**L13. One function, many specimens, chosen by maximizing the performance the demander chooses,
+along certified identities.**
 From: G0 (the quotient), G2 (the choice by cost and the database of runs) and, before its retirement
 in draft 9, the organizer "expressive over restrictive" (every path expressible; now L13's own
 clause).
-- L13.1 A function has many equivalent implementations, each with its precision, speed, memory and
-  place of execution; equivalence is established first, and the choice among paths follows expected
-  loss and cost, estimated from a database of measured runs. [settled]
-- L13.2 Error, time and memory are not one scalar, and the trade-off among them is a parameter of
-  the demand (L12), never the planner's own. [settled]
-- L13.3 (His formula) What the planner ranks is an efficiency, exp(−cost) over the resources used
-  (time, memory), so that a model of cost zero has efficiency 1/resources and not zero, with the
-  weight between cost and resources the demand's parameter. [proposed]
+- L13.1 A function has many equivalent implementations, its specimens, each with its precision,
+  speed, memory and place of execution; equivalence is established first, and the choice among paths
+  follows expected loss and resources, estimated from a database of measured runs. [settled]
+- L13.2 The cost of a law and the resources of a run, time and memory, are not one scalar, and the
+  trade-off among them is a parameter of the demand (L10), never the planner's own. [settled]
+- L13.3 (His formula) What the planner ranks is an efficiency, exp(−w·cost) over the resources used,
+  so that a specimen of cost zero has efficiency 1/resources and not zero, with w, the weight between
+  cost and resources, the demand's parameter. [proposed]
 - L13.4 Two regimes: on a decidable carrier (`Int`, `Fin n`) two implementations compute the same
   function or not, the quotient is exact, there is no precision to trade and the Boolean kernel stands
   on its own; on a carrier with a distance (`Float64`) they are interchangeable only up to a distance
   within the demanded tolerance, and precision can be traded for resources, which is where cost (G2)
   and the demand enter G0's quotient. [settled]
-- L13.5 Stated as a quotient: the implementations of a function are the quotient by "compute the
-  same function up to the law's equality", one class per mathematical function, and inside the class
-  the fibre of what differs; the class is chosen by law, the representative by cost. [settled]
-- L13.6 The class is exact in the theory (`Real`); in a model that carries a distance it is the ball
-  of the demanded radius (`11` §3), and closeness is not transitive, so the planner substitutes one
-  implementation for another only along a certified equivalence between the two, the identity law of
-  L5 with its result `Bool` or `Cost` (D-2026-10-11-m). [settled]
-- L13.7 The law gives the candidates; the identity certificates say which the planner may exchange,
-  and they form a weighted graph, not a class: a substitution is a path whose summed distance (`11`
-  §2) is within the demanded tolerance, so two specimens joined through a third may each replace it
-  and not each other; the sum is a bound only when every link is one (proved, exhaustive), otherwise
-  an estimate with the weakest grade and the samples it was seen on; a lone implementation is never
-  replaced. [settled]
-- L13.8 A sampled edge is admissible only on inputs the distribution it sampled covers, and only as
-  a direct edge, never summed into a path, until a probabilistic bound exists as a law. [settled]
-- L13.9 The tolerance charged at a node is the demand's pulled back through the sensitivity of the
+- L13.5 Semantic equivalence forms classes; certified substitutability forms a graph. In the theory
+  the specimens of a function are the quotient by "compute the same function up to the law's
+  equality", one class per mathematical function, the class chosen by law; in a model that carries a
+  distance closeness is not transitive, there is no class, only the ball of the demanded radius (`11`
+  §3), and the planner substitutes one specimen for another only along a certified identity between
+  the two, the identity law of L5 with its result `Bool` or `Cost` (D-2026-10-11-m). [proposed]
+- L13.6 The law gives the candidates; the identity certificates say which the planner may exchange,
+  and they form a weighted graph: a substitution is a path whose summed distance (`11` §2) and summed
+  evidence cost (L16.7) are within the demand's cutoff, so two specimens joined through a third may
+  each replace it and not each other; a lone specimen is never replaced. [proposed]
+- L13.7 A sampled edge is admissible on the distribution it sampled; it composes with edges sampled
+  over the same distribution, the failure fractions summed, and not with others; the demand's evidence
+  cutoff says whether it accepts the path (L16.8, D-2026-10-12-q). [proposed]
+- L13.8 The tolerance charged at a node is the demand's pulled back through the sensitivity of the
   cone from the node to the demand (`11` §5), and where no sensitivity is known there is no
   substitution. [settled]
-- L13.10 A link certified on a subtype is a link only at inputs certified (L3) in that subtype, so a
+- L13.9 A link certified on a subtype is a link only at inputs certified (L3) in that subtype, so a
   path exists at x only where every link does; a `proved` link by citation carries the theorem's
   hypotheses as parameters and is void where they fail. [settled]
-- L13.11 The author's free choice among the inhabitants of an under-determined function
+- L13.10 The author's free choice among the inhabitants of an under-determined function
   (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared. [settled]
+- L13.11 The identity law between two specimens, with its distance, is what admits a second
+  implementation into the planner's graph (L13, D-2026-10-11-m); the agreement test of W5 between
+  native and extern is this law, and the reference formula of a law evaluated over `Rational` is one
+  more specimen, with grade exact, checked by the same law. [candidate]
 Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
-there (clause 10).
-References: `11`; D-2026-10-11-d, D-2026-10-11-m; P5.
-Rests on: O1 (the sum as a bound, the sensitivity), O2.
-Status: settled; statement in his words, 2026-10-12; clause 3 is the proposed wording of his chat
-note.
+there (clause 9).
+References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q; W5; P5.
+Rests on: O1 (the sensitivity), O2.
+Status: settled; statement in his words, 2026-10-12, with "specimens" and "along certified
+identities" added; clauses 3, 5, 6, 7 proposed; clause 11 candidate, from L5.
 
 **L15. The core is minimal, executable by hand, and its programs are data.**
 From: G0 (a type theory is a few rules whose judgments a person checks; a small trusted kernel) and
