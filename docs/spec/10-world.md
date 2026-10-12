@@ -16,13 +16,13 @@ The notation common to all chapters is in `spec 1`. Here, `W` is a type, the wor
 
 ## §3 The world
 
-**10.S4. The world is a token threaded through actions.** [proposed] The sources fix that an action on the world is never served from the memo (D-2026-10-12-m) and leave the form to O3: an opaque, unique value. The proposal follows the rationale (its section 3): an action takes the token before and returns the token after, so two readings of one place, before and after a write, are two terms with a dependency between them, and the number and order of operations are in the graph (L4.5 does the same for a mutable parameter). The token has no `==` (spec 4.R8). Whether the world has one token or one per part (a file, a clock), giving independent chains, is left to the library.
+**10.S4. The world is a token threaded through actions.** [proposed] The sources fix that an action on the world is never served from the memo (D-2026-10-12-m) and leave the form to O3: an opaque, unique value. The proposal follows the rationale (its section 3): an action takes the token before and returns the token after, so two readings of one place, before and after a write, are two terms with a dependency between them, and the number and order of operations are in the graph (L4.5 does the same for a mutable parameter). The token has no `==` (spec 4.R8). There is one world (D-2026-10-13-a): its parts exist in Luthier's representation of it, and their independence, if any, is a theory of that representation in a library, never a second token.
 
 **10.S5. What the core asks of a world.** [proposed] Under D-2026-10-12-al the form of the world is a library's, as `Cost` is (spec 6.S4). The core uses the following and nothing more; it chooses no representation, no names and no set of parts of the world.
 
 | operation | used for | laws |
 |---|---|---|
-| `W` | the token an action takes and gives | no `==` (spec 4.R8); a program does not construct one, it enters at `main` or the session |
+| `W` | the token an action takes and gives; a keyword of the core beside `U` (D-2026-10-13-b), the library gives its representation and observations | no `==` (spec 4.R8); a program does not construct one, it enters at `main` or the session |
 | `act` | applying an action to a token | gives a new token each time, so two applications to one token are two nodes the memo never merges |
 | `own` | saying that an action concerns Luthier's own store | a predicate on actions; an action with `own` is idempotent (10.S6) |
 

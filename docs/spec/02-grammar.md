@@ -277,7 +277,7 @@ its value, stays open (spec 8).
 
 ## §11 The keywords, and what becomes Luthier
 
-**2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `data`, `match`, `if`,
+**2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `W` (D-2026-10-13-b), `data`, `match`, `if`,
 `then`, `else`, `U`, and possibly `operator`. Everything else is a core or library
 name: `let` and `in` give way to blocks (§8); `forget` is a function of core; `extern`,
 `primitive` and `axiom` are names of core whose application the checker recognizes (`spec 3 §8`),

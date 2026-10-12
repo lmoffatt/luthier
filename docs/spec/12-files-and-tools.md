@@ -87,7 +87,7 @@ Questions of `docs/principles.md` this chapter depends on:
 Carried from `docs/spec/03-libraries.md` §6, decided without an id (all of 2026-10-04):
 
 - Modules as values (`fft : FFTLib := import "fft.lut"`): decided since, D-2026-10-12-ad and -af (12.S22). Explicit functors: [proposed], waits on 12.S1.
-- Visibility: everything is public in version 0 [implemented]; a private part is [proposed] and undecided.
+- Visibility: everything is public in version 0 [implemented]; a private part is [proposed] by ascription to a theory (D-2026-10-13-c, L6.12).
 - The Python packages an extern depends on are declared nowhere; today the certificate's hash covers the installed package and its version (12.S11). A declared dependency is [proposed].
 - Whether a file that imports a provisional definition may itself be certified: [proposed] no, since a cone with a provisional name is not certified (12.S17).
 - Whether an importer may require a minimum grade of a certificate it accepts: answered by the demand's cutoff (L10.5, D-2026-10-12-h); the importer states no grade of its own.
