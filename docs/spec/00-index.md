@@ -32,7 +32,7 @@ principles.
 | [2. Grammar](02-grammar.md) | L7 | draft 0, 2026-10-12 |
 | [3. Kernel](03-kernel.md) | L7, L14 | draft 0, 2026-10-12 |
 | [4. Static semantics](04-static-semantics.md) | L2, L8 | draft 0, 2026-10-12 |
-| [5. Laws](05-laws.md) | L12, L3 | wave 2 |
+| [5. Laws](05-laws.md) | L12, L3 | draft 0, 2026-10-13 |
 | [6. Certification](06-certification.md) | L9, L10 | draft 0, 2026-10-12 |
 | [7. Tests and generators](07-tests.md) | L10.3, L5.18 | draft 0, 2026-10-12 |
 | [8. The demand and the plan](08-demand.md) | L5 | wave 3 |

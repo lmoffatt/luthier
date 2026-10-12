@@ -105,11 +105,10 @@ defines it for the natural numbers. A proof layer that made it primitive and for
 recursion is not part of version 0 [decided D-2026-10-12-ah].
 
 **3.S12. Laws as terms.** [implemented] A law has type `Bool` or `Law`, a function into
-one of these whose parameters are quantified, or a conjunction `p & q`; the interpreter also takes
-`Failures E` (the failures a check finds). What a law is and how laws combine is `spec 5`; this
+one of these whose parameters are quantified, or a conjunction `p & q`. A law into `Failures E`
+(the failures a check finds) is designed (spec 5.S9) and not taken by the checker today. What a law is and how laws combine is `spec 5`; this
 chapter keeps only that a law is a term of one of those types. `Law` is the type of what a test
-runs (`spec 7`). That a law may also be a term of `Cost` is [proposed] here, pending `spec 5`:
-the interpreter has no `Cost` yet.
+runs (`spec 7`). A law may also be valued in the cost type of `spec 5.S2`, which the interpreter does not have yet.
 
 **3.S13. Extern.** [implemented] `extern "python:module.function"` is a value the host provides,
 with the type its context gives it; `extern provisional "..."` is the same value marked as debt.

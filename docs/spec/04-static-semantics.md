@@ -175,7 +175,8 @@ Files: r5_extern_value.accept.lut, r5_extern_type.reject.lut.
 **4.R6. The body of a declared name is an inhabitant or a predicate.** [implemented] If `x` is
 declared `x : T` and later given a body, the body has type `T`, or `T -> Bool`, or
 `T -> Failures E`, or is a `Law` over `T`. Any other type is an error, reported against the
-declaration.
+declaration. The form with `Failures E` is designed (spec 5.S9); the checker accepts the other
+three today.
 Files: r6_predicate_body.accept.lut, r6_body_type.reject.lut.
 
 **4.R7. An alias is written with `=` and has no state.** [implemented] `AB = A * B` makes `AB`
