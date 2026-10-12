@@ -58,8 +58,7 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 ## §6 When a file is read
 
-**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ad] A module's file is read
-when a demand first needs one of its names: the checker meeting `la.f`, or `run` needing its value;
+**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ad] Per L11.7, a module is read at the first demand for one of its names: the checker meeting `la.f`, or `run` needing its value;
 an import no demand reaches is never read. An extern's file is read only when `run` or `test`
 reaches its node (`spec 3 §8`). `test "x.lut"` is the action that demands everything in the module:
 every name, every import, every law, so it is where latent errors appear (`spec 7`). A flat import,
