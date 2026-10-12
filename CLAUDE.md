@@ -26,6 +26,9 @@
   undone)". Records (`record/decisions.md`, `record/principles.md`) may be terse.
 - A mechanism with a recurring cost (per commit, per session, or on Luciano's attention) is added
   only after a real case it would have caught.
+- `docs/principles.md` is projected from `record/principles-language.md` by
+  `scripts/project_principles.py --write`; edit the record, never the projection.
+  `--check` lints the three principles documents (D-2026-10-12-d).
 - Push only tagged milestones.
 - Written material is in English; chat with Luciano is in Spanish.
 - Luciano runs scripts that process data or the record of the project. Lints, luthier check and
