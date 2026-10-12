@@ -159,3 +159,9 @@ token, the ranking, the trace), the rest syntax or placement.
   puts a function with a law on itself alone among subtypes, while Terms (-z) count the one-symbol
   function type among theories. D-2026-10-12-x to -af now quote their sources in the grammar
   (21fc94e). Next: step (4), the decisions of wave 2.
+- 2026-10-12, same session, later: D-2026-10-12-aj (a theory is a type with its law, in one name or
+  several), -ak (an object is a type with its equality, the base theory; structure, object,
+  theory), -al (`Cost` is a library; its algebra and the questions of wave 3 are settled when the
+  libraries are implemented). Step (4) changes shape: no decisions document for wave 2. Next,
+  chapter 6 states certification in Luthier over a `Cost` taken as a parameter, and chapter 5 the
+  interface it asks of the library; the open choices go to the libraries.

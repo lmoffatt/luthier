@@ -1785,3 +1785,27 @@ Source:     chat:f15ae1b6:878
 Kind:       terms (Terms of docs/principles.md; spec 3.S36, 4.S9; O2, L3). For L3, L14, O2
 Status:     current; refines D-2026-10-12-z (object no longer "anything a name defines") and
             D-2026-10-12-aj. His remark: it follows category theory in some way
+
+D-2026-10-12-al `Cost` is a library. Its algebra, the default conjunction, the conversion of a
+                sample's statistics to a cost and the names lift, exact and within are decided when
+                the library is implemented, its invariants found then. What the specification fixes
+                is what the core asks of it, and that is precised when the certification of types
+                is written in Luthier. The same holds for the questions of wave 3 (the form of the
+                demand, the world's token, the ranking, the trace): libraries, their invariants found
+                by implementing them. The rule: advance as far as possible by handing such work to
+                the libraries that do it.
+Author:     Luciano; the list of what moves the model's
+Quote:      "Cost es una libreria."
+            "por lo cual todas las decisiones se toman cuando esa libreria se implemente."
+            "Ahora, cuando se defina el codigo Luthier para certificar los tipos hay podriemos
+            precisar que se le va a pedir a esa libreria."
+            "lo mismo, como va a ser una libreria, recien al implementarla vamos a descubrir sus
+            invariantes."
+            "O sea el tema es avanazar todo lo que se pueda tirando la pelota a las librerias que
+            hagan estos trabajos."
+Source:     chat:f15ae1b6:937
+Kind:       language and method (O1; spec 5, 6, 8, 9, 10; the wave 2 plan). For L14, P16
+Status:     current. Wave 2 changes shape: chapter 6 states certification in Luthier over a `Cost`
+            it takes as a parameter, and the interface it asks of the library is what chapter 5
+            fixes; the two candidate algebras of D-2026-10-12-p can be two models of that
+            interface. The rule may be a principle of the method; his mark pending

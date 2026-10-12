@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 f1d87903ddb2, commit be40c7b (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 b21d98841a59, commit d3a5ed2 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -580,7 +580,10 @@ blocks; the done and implemented items are in the record's drafts table.
   interface of `Cost` in a certificate (a multiplicative constant where it exists, an additive
   defect where rounding enters, the grade as a lattice, the worst cost seen; `11` §5, §6); worked
   examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to
-  one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum. The
+  one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum.
+  `Cost` is a library (D-2026-10-12-al): its algebra is settled when it is implemented, and the
+  certification written in Luthier says what it asks of it; the two candidates can be two of its
+  models. The
   extension of Boolean logic to Lawvere and Bayes, which he names as another motivator or eureka;
   whether it is the third eureka or a principle of good use is his to mark after that analysis.
   Until it exists the application runs on a Boolean interim: laws of the form d(f x, g x) ≤ tol

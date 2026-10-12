@@ -1336,7 +1336,10 @@ blocks; the done and implemented items are in the record's drafts table.
   interface of `Cost` in a certificate (a multiplicative constant where it exists, an additive
   defect where rounding enters, the grade as a lattice, the worst cost seen; `11` §5, §6); worked
   examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to
-  one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum. The
+  one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum.
+  `Cost` is a library (D-2026-10-12-al): its algebra is settled when it is implemented, and the
+  certification written in Luthier says what it asks of it; the two candidates can be two of its
+  models. The
   extension of Boolean logic to Lawvere and Bayes, which he names as another motivator or eureka;
   whether it is the third eureka or a principle of good use is his to mark after that analysis.
   Until it exists the application runs on a Boolean interim: laws of the form d(f x, g x) ≤ tol
