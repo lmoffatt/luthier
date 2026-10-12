@@ -2,7 +2,8 @@
 
 Draft 10, 2026-10-12, unapproved; written by hand from the projection of 44df5a7 and Luciano's
 corrections on it (`docs/principles_corr.md` d5e81e3, his notes e3fa339, `docs/principles_cont.md`
-323bda0, `docs/principles_3.md` 59ea8e9, `docs/principles copy.md` 01ba854), every one of them applied; the
+323bda0, `docs/principles_3.md` 59ea8e9, `docs/principles copy.md` 01ba854, `docs/principles copy 2.md` 660b019), every one of them
+applied; the
 organizers renumbered on the last (G1 theory and model, G2 cost, G3 the demand; the record keeps
 the old tags until it is updated); what the model added on his
 notes is marked *proposed* in the entry's Status. Written for the agent that builds the
@@ -23,19 +24,19 @@ then). The way of working, W1 to W15, is `docs/way-of-working.md`.
 - A *theory* is a structure with its law.
 - A *model* is an inhabitant of a theory: a value of its structure whose law is certified.
 - A *function* is a value of a function type `A -> B`, in the standard sense. A function type with
-  its law is a theory, and a function that satisfies it is a model of that theory; a function has
-  sense only in the context of that theory and its dependences.
-- The *dependences* of a theory are the theories whose models its structure and law take as
-  parameters (`Monoid A eq` depends on `Setoid A`; `VectorSpace K F V` on `Field K`). Every theory
-  has dependences; a function type has at least the setoids of its carriers, since its law uses
-  their equality.
+  its law is a theory, and a function that satisfies it is a model of that theory.
+- The *dependences* of a theory are the theories whose models its structure and law use
+  (`Monoid A` depends on `Setoid A`; `VectorSpace K V` on `Field K`). A carrier is assumed to come
+  with the models it names, `A` with its setoid, `K` with its field, so a theory reads them from
+  the type (his note of 2026-10-12; today the libraries pass them as parameters). Every theory has
+  dependences; a function type has at least the setoids of its carriers, since its law uses their
+  equality.
 - A *certificate* is the record that a law was checked, with its grade (proved, exhaustive, cases,
-  sampled at a level, assumed) and, for a cost, the worst value seen; a proof is a certificate of
-  grade proved. To *certify* is to produce one.
-- *Evaluation* computes a value, or the value of a law, and has no effect (L18). *Execution* is an
-  action on the world (print, save). Writing a certificate into the store Luthier owns is an action
-  on Luthier's own state, verified by reading the store back (L12), never an action on the world;
-  `test` is that action (L19).
+  sampled at a level, assumed); a proof is a certificate of grade proved. To *certify* is to
+  produce one.
+- *Evaluation* computes a function, and has no effect (L18). *Execution* is an action on the world
+  (print, save). Writing a certificate into the store Luthier owns is an action on Luthier's own
+  state, verified by reading the store back (L12); `test` is that action (L19).
 - The *demand* is a request for a value from outside the program, an action, carrying the type and
   the tolerance it wants, the type possibly decorated: the value with its error, its derivative,
   its certificate. The *planner* is what chooses, among the models certified equivalent, the one
@@ -44,8 +45,10 @@ then). The way of working, W1 to W15, is `docs/way-of-working.md`.
 Status of the terms: his list (D-2026-10-12-f); the names structure, cost and certificate are the
 model's where he left a question mark, marked OK by him on 2026-10-12; *dependences* replaces the
 model's "dependent theory" on his note (every theory is one, so the emphasis goes on what it
-depends on); the reading of certification as an action on Luthier's own state is proposed, not
-yet marked. *Object* (`05 §3`) is not a term; see What is open.
+depends on); the reading of certification as an action on Luthier's own state is proposed, kept
+by him on 2026-10-12 with the clause "never an action on the world" removed as obscuring; the
+carrier coming with its setoid and its field is his note of the same day. *Object* (`05 §3`) is
+not a term; see What is open.
 
 ## The organizers
 
@@ -65,8 +68,9 @@ Status: settled, marked OK by him on 2026-10-12.
 **G1. A type is a theory and its values are its models.** The first eureka, in his words: a type
 is a proposition; a proposition can say that a structure follows the rules of a theory; so "this
 structure satisfies the laws" is said, in the language of types, as "it is of the type of the
-theory": it is a model of the theory. Types thereby carry a strong semantic meaning, and coding
-and testing are one act: to declare `m : T` is to declare the tests `m` will pass (L3). What type
+theory": it is a model of the theory, and Luthier verifies that it is. Types thereby carry a
+strong semantic meaning, and coding and testing are one act: to declare `m : T` is to declare the
+tests `m` will pass (L3). What type
 theory lacks: it knows a value by its term; Luthier knows it by the law it satisfies.
 Status: settled; this wording is his note of 2026-10-12 put in order; the long form in the record.
 
@@ -78,9 +82,8 @@ a law is a predicate or a cost, a function into `Bool` or into `Cost`, [0,∞) w
 false. Laws combine by and, or, then, and a quantifier over a carrier; a combination of predicates
 is a predicate, and a cost as soon as one cost enters; `&`, the only join the libraries use today,
 is one operator among these, and under cost the join is a sum, a max or a weighted sum. A law is
-validated by a certificate with a grade (proved, exhaustive, cases, sampled at a level, assumed)
-and, for a cost, the worst cost seen; the demand supplies the tolerance; what a run teaches is
-kept.
+validated by a certificate with a grade (proved, exhaustive, cases, sampled at a level, assumed);
+the demand supplies the tolerance; what a run teaches is kept.
 Status: the second eureka on his note of 2026-10-12 (candidate by the P13 count, one decision
 guided so far); the combinations are proposed on his note on Terms; the algebra of costs open
 (`11`), the analysis he announced pending.
@@ -533,7 +536,9 @@ Status: proposed, candidate; the wording is the model's.
   the equality is a cost), the kernel's structural `==` its model for the decidable types
   (`05` R8), the equality of functions extensional and derived from it (L21), the equality of
   models componentwise; and whether a type names its equality as it names its model (`05` R13).
-  Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his mark pending.
+  Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his note of the same
+  day on Terms goes the same way ("podríamos suponer que A viene con su Setoid", `K` with its
+  `Field`); the syntax, how a type names its setoid and its field, is the open part.
 - The names he left with a question mark in his list of terms (structure, cost, certificate) and
   the three-level answer to his doubt on validation as execution; and whether `05 §3` renames
   *object* (D-2026-10-12-f).
