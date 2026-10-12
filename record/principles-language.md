@@ -155,10 +155,10 @@ Each term has one category and is defined here and nowhere else; the principles 
   that runs, and plans the decorated type the demand asks for.
 - The *declarative face* of a program is what it states: its types, laws and definitions. The
   *executive face* is what the demands ask of it.
-- A program lives in two places. The *mind* holds the definitions and their universe `U`: timeless,
-  copied, compared, memoized. The *world* `W` is where actions act: one world, each value of it used
-  once, never memoized (D-2026-10-13-b). The declarative face is the mind's; the executive face acts
-  on the world.
+- The two faces live apart. The declarative face has no time: its definitions live in the
+  universe `U`, and are copied, compared and memoized. The executive face acts on the world `W`,
+  one world, each value of it used once, never memoized (D-2026-10-13-b). (A metaphor, not a term:
+  mind and world, as in McDowell's *Mind and World*, 1994.)
 
 - An *object* is a type with its equality, the word for what C++ calls a regular type: the base
   theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author

@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 cb86fa4e566b, commit 2b79c02 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 4b626743b696, commit ba8b9ed (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -49,10 +49,10 @@ Each term has one category and is defined here and nowhere else; the principles 
   that runs, and plans the decorated type the demand asks for.
 - The *declarative face* of a program is what it states: its types, laws and definitions. The
   *executive face* is what the demands ask of it.
-- A program lives in two places. The *mind* holds the definitions and their universe `U`: timeless,
-  copied, compared, memoized. The *world* `W` is where actions act: one world, each value of it used
-  once, never memoized (D-2026-10-13-b). The declarative face is the mind's; the executive face acts
-  on the world.
+- The two faces live apart. The declarative face has no time: its definitions live in the
+  universe `U`, and are copied, compared and memoized. The executive face acts on the world `W`,
+  one world, each value of it used once, never memoized (D-2026-10-13-b). (A metaphor, not a term:
+  mind and world, as in McDowell's *Mind and World*, 1994.)
 
 - An *object* is a type with its equality, the word for what C++ calls a regular type: the base
   theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author

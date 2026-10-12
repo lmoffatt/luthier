@@ -4,10 +4,10 @@ At ba8b9ed. All six are `[proposed]` in `record/principles-language.md` and proj
 `docs/principles.md`. Each one already guided a chapter of the specification (P13: a principle is
 worth the decisions it guides). Mark as usual: "ok", "no" or a comment under a line.
 
-- Terms, the mind and the world: a program lives in two places, the mind (the definitions and their
-  universe `U`: timeless, copied, compared, memoized) and the world `W` (one world, each value of it
-  used once, never memoized). The declarative face is the mind's; the executive face acts on the
-  world. From your M and W; `U` keeps its name (D-2026-10-13-b).
+- Terms, the two faces apart: the declarative face has no time, its definitions live in `U` and
+  are copied, compared and memoized; the executive face acts on the world `W`, one world, each
+  value used once, never memoized. Mind and world (McDowell) stays as a metaphor in parentheses, not
+  as a term, on your reading of 2026-10-13 (D-2026-10-13-b).
 - L4.11, completed: the world's uniqueness is meant literally. `W` is a primitive beside `U`, with
   no introduction (it enters at `main` or the session), no `==`, and each value used once. The
   three rules are the model's (D-2026-10-13-b).
