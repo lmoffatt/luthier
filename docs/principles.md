@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 15e696e35fd8, commit 0b9ab95 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 24da015d5528, commit 85aebba (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-12; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -199,9 +199,9 @@ object is consumed or stable: kept; with G1 for what is derived (the former L13)
 - L10.5 The tests are actions, so verifying is demanding; what a demand requires of the certificates
   in its cone, and when a certificate serves it, is L16.5 and L16.6. [settled]
 - L10.6 A result is identified by code, inputs, mode, the demanded type and tolerance, the model its
-  type names, the seed, the plan that produced it, the plan being a value (`lib/plan.lut`), and the
-  hashes of the certificates in its live cone, so a host library or platform that changed is a new
-  result. [settled]
+  type names (Terms), the seed, the plan that produced it, the plan being a value (`lib/plan.lut`),
+  and the hashes of the certificates in its live cone, so a host library or platform that changed is a
+  new result. [settled]
 - L10.7 The runtime includes the thread count and scheduling of the host, and an extern whose bits
   depend on scheduling is not bit-identical to itself, so its identity law is `Cost`, never `Bool`
   (L5). [settled]

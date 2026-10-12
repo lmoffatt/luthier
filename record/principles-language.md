@@ -657,9 +657,9 @@ L10.4  A decoration of the output is another model of the theory the code was wr
 L10.5  The tests are actions, so verifying is demanding; what a demand requires of the certificates
        in its cone, and when a certificate serves it, is L16.5 and L16.6. [settled]
 L10.6  A result is identified by code, inputs, mode, the demanded type and tolerance, the model its
-       type names, the seed, the plan that produced it, the plan being a value (`lib/plan.lut`), and
-       the hashes of the certificates in its live cone, so a host library or platform that changed
-       is a new result. [settled]
+       type names (Terms), the seed, the plan that produced it, the plan being a value
+       (`lib/plan.lut`), and the hashes of the certificates in its live cone, so a host library or
+       platform that changed is a new result. [settled]
 L10.7  The runtime includes the thread count and scheduling of the host, and an extern whose bits
        depend on scheduling is not bit-identical to itself, so its identity law is `Cost`, never
        `Bool` (L5). [settled]
@@ -759,7 +759,10 @@ History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration st
             renumbered from L17; statement in his words, 2026-10-12. draft 11, step 3 (2026-10-12):
             the formulation split into numbered clauses with the status each sentence had in draft
             10, the examples into Example, the provenance phrases into this History, the wording
-            otherwise as draft 10 had it.
+            otherwise as draft 10 had it. draft 11, step 4 (2026-10-12): vocabulary pass
+            (D-2026-10-12-l): structure for a kernel type, theory for a Luthier type, cost for the
+            law and resources for time and memory, model for what a type names and specimen for the
+            planner's candidates; applied where the old word stood.
 
 L13 One function, many specimens, chosen by maximizing the performance the demander chooses, along
     certified identities.
