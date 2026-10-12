@@ -27,7 +27,7 @@ principles.
 
 | Chapter | Realizes | Status |
 |---|---|---|
-| [1. Terms and notation](01-terms.md) | Terms of the principles | not written |
+| [1. Terms and notation](01-terms.md) | Terms of the principles | draft 0, 2026-10-12, lint findings pending |
 | [2. Grammar](02-grammar.md) | L7 | draft 0, 2026-10-12, lint findings pending |
 | [3. Kernel](03-kernel.md) | L7, L14 | draft 0, 2026-10-12, lint findings pending |
 | [4. Static semantics](04-static-semantics.md) | L2, L8 | draft 0, 2026-10-12, lint findings pending |
