@@ -46,7 +46,7 @@ A generic generator takes a type and builds a generator of it by following the t
 | `Int`, `Nat` without bounds | error (spec 7.R3) | the metric over [-s, s] or [0, s] |
 | `Float64`, `Rational` | error (spec 7.R3) | the metric over the bounds, continuous; without bounds, error (spec 7.S4) |
 | product, record | the product of the components | each component, dependent ones in order (spec 7.S7) |
-| sum | each constructor with each payload | a constructor by weight, then its payload |
+| sum | each constructor with each payload | a constructor by weight, then its payload; [proposed] on a recursive `data` the size bounds the depth: at size 0 only constructors with no recursive argument, otherwise the size less one is split among the recursive arguments, as Feat counts by size (spec 7.S2) |
 | `List A`, `Vec A` | every length up to the size, entries exhaustive | a length (spec 7.S5), then that many entries |
 | function over `Fin n` | every table, when the codomain is finite | a table, each entry from the codomain |
 | function over an infinite domain | error: bind a census (spec 7.R4) | error: bind a census (spec 7.R4) |

@@ -114,7 +114,7 @@ argument types of a function, and a type names its model (D-2026-10-11-j): the m
 
 | level | forms | associativity |
 |---|---|---|
-| 1 | the open forms: `(x : A) ->`, `(x : A) *`, `if c then a else`, each taking the whole term to its right; an open form is never an operand, except on the right of `->` and `&` | (prefix) |
+| 1 | the open forms: `(x : A) ->`, `(x : A) *`, `if c then a else`, each taking the whole term to its right; an open form is never an operand, except as the last operand of a chain of `->` and `&`, and nothing follows it | (prefix) |
 | 2 | `&` | right |
 | 3 | `->` | right |
 | 4 | `or` | left |
@@ -127,7 +127,8 @@ argument types of a function, and a type names its model (D-2026-10-11-j): the m
 | 11 | `.field` | left |
 
 So `(n : Nat) * Vec n` is `(n : Nat) * (Vec n)`, `if c then a else b + 1` is `if c then a else (b + 1)`,
-and the dangling `else` of 2.S11 belongs to the nearest `if`, all by the table. A lambda and a
+`U -> (a : A) * b & C` is `U -> (a : A) * (b & C)`, and the dangling `else` of 2.S11 belongs to
+the nearest `if`, all by the table. A lambda and a
 `match` are closed by their braces and are atoms. `and`, `or` and `mod`
 are operators like `+`, not names (D-2026-10-13-p), and the `operator` act gives each its meaning
 on a type, as for `+`, `-`, `*`, `/`. The table is stated in `src/luthier/lib/grammar.lth`, whose
@@ -173,15 +174,17 @@ holds.
 
     sep     ::= "," | ";" | line break
     item    ::= name ":=" term | name "<-" term                                           -- in a block
-    lparam  ::= name | "(" name { name } ":" term ")" | "(" pattern { "," pattern } ")"
+    lparam  ::= name | "(" name { name } ":" term ")" | "(" pattern "," pattern { "," pattern } ")"
     pattern ::= "_" | name { patom } | patom
     patom   ::= name | number | string | "(" pattern { "," pattern } ")"
 
 [decided D-2026-10-13-o] In the language designed: `let` is retired, replaced by blocks
 (2.S21). Negation is not an atom but a level of its own, above application and below `*`, so
 `-f x` is `-(f x)` and `f -x` is `f - x` (2.S15). A single labeled field with a law,
-`{ x : T | p }`, is the subtype with the pattern `x`; the labeled forms take two or more names,
-`{ x : A, y : B }` or `{ x y : A }`, with an optional law; so each text has one tree. A field may
+`{ x : T | p }`, is the subtype with the pattern `x`; a single labeled field without a law,
+`{ x : A }`, is a record type; a record type with a law has two or more names,
+`{ x : A, y : B | p }` or `{ x y : A | p }`; so each text has one tree. A parenthesized lambda
+parameter that is not a typed name is a tuple of two or more patterns. A field may
 carry several names, `{ x y : A, z : B }`. `quote` is a keyword (2.S21) and `eval` a name of core, so
 `eval A t` is an application (2.S20).
 
@@ -192,7 +195,10 @@ or a label of its sum if it names one, and a variable otherwise. A label of a su
 a comparison.
 
 **2.S11. The dangling else.** [implemented] An `else` belongs to the nearest `if` without one:
-in `if a then if b then x else y` the `else` is the inner `if`'s (D-2026-10-11-b).
+in `if a then if b then x else y` the `else` is the inner `if`'s (D-2026-10-11-b). The rule is the
+parser's, on texts: a tree keeps no parentheses, so `if c then (if d then u) else v` gives the tree
+the rule denies to the text without them, and the printer writes those parentheses back
+(`grammar.lth`, `PrintParenthesizesOpenIf`).
 
 ## §4 Translations into the kernel
 
