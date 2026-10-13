@@ -369,6 +369,10 @@ CanonIdempotent (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool := m.canon (
 CanonOfName (a : Alpha) (m : CanonicalForm a) (x : String) : Bool := m.canon (Var x) == Var (m.unqualify x)
 UnqualifyIdempotent (a : Alpha) (m : CanonicalForm a) (x : String) : Bool :=
   m.unqualify (m.unqualify x) == m.unqualify x
+-- and it does remove a prefix: without this, `unqualify` the identity passed (review of layers 0-1,
+-- A); stated on names of each shape
+UnqualifyRemoves (a : Alpha) (m : CanonicalForm a) : Bool :=
+  m.unqualify "m.f" == "f" and m.unqualify "a.b.c" == "c" and m.unqualify "f" == "f"
 -- the canonical form of a term without module prefixes means the same term: alpha-equal to it
 CanonKeepsTerm (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool :=
   not (allUnqualified m.unqualify (freeVars t)) or a.alphaEq (m.canon t) t
@@ -376,7 +380,7 @@ allUnqualified (u : String -> String) (xs : List String) : Bool :=
   match xs { nil -> true ; cons x rest -> u x == x and allUnqualified u rest }
 
 CanonicalForm (a : Alpha) := CanonOfAlpha a & CanonIdempotent a & CanonOfName a & UnqualifyIdempotent a
-  & CanonKeepsTerm a
+  & CanonKeepsTerm a & UnqualifyRemoves a
 
 -- ---------------------------------------------------------------- §5 Reduction
 
@@ -505,8 +509,9 @@ Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a s
 
 -- `quote { t }` is the `Term` of `t`, after elaboration, with no obligation; `eval A t` checks the
 -- term `t` against the type `A` when it runs, and gives `just` its value or `nothing` (3.S32). The
--- model is core's `eval`; that `quote` gives the elaborated term is the translation's (2.S12), so
--- these are case laws on terms whose translation is fixed: a constant and an application of `+`.
+-- model is core's `eval`; that `quote` gives the elaborated term is the translation's (2.S12).
+-- `eval` gives the value the term reduces to, so its laws quantify over the terms whose value is
+-- known, not over a few cases a lookup table could pass (review of layers 0-1, A).
 Evaluation : { evalAt : (A : U) -> Term -> Maybe A }
 
 QuoteGivesTheTerm (e : Evaluation) : Bool :=
@@ -515,5 +520,9 @@ EvalOfConstant (e : Evaluation) (i : Int) (s : String) : Bool :=
   e.evalAt Int (Lit (IntConst i)) == just i and e.evalAt String (Lit (StringConst s)) == just s
 EvalChecks (e : Evaluation) (s : String) : Bool := e.evalAt Int (Lit (StringConst s)) == nothing
 EvalOfQuote (e : Evaluation) : Bool := e.evalAt Int (quote { 1 + 2 }) == just 3
+EvalComputes (e : Evaluation) (i j : Int) (x : String) : Bool :=
+  e.evalAt Int (App (App (Var "+") (Lit (IntConst i))) (Lit (IntConst j))) == just (i + j)
+  and e.evalAt Int (App (Lam x (Var "Int") (Var x)) (Lit (IntConst i))) == just i
+  and e.evalAt Int (Let x (Var "Int") (Lit (IntConst i)) (Var x)) == just i
 
-Evaluation := QuoteGivesTheTerm & EvalOfConstant & EvalChecks & EvalOfQuote
+Evaluation := QuoteGivesTheTerm & EvalOfConstant & EvalChecks & EvalOfQuote & EvalComputes
