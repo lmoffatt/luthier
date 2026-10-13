@@ -75,20 +75,26 @@ modeCoverage (m : Mode) (size : Nat) (s : Seed) : Coverage := match m {
   ExhaustiveMode -> Bounded size ; SampledMode k -> Drawn s }
 bindingsCoverage (bs : List Binding) (c : Coverage) : Coverage :=
   match bs { nil -> c ; cons b rest -> bindingsCoverage rest (weaker b.coverage c) }
--- the coverage a spec reaches: the mode's, exhaustive up to the size (the whole type when the
--- types are finite and the size reaches them, which the tester knows and this theory does not),
--- weakened by every binding (7.S10: the entry lists the reach of each parameter, and the grade is
--- summarized by the weakest)
+-- the coverage a spec reaches: the mode's, exhaustive up to the size, weakened by every binding
+-- (7.S10: the entry lists the reach of each parameter, and the grade is summarized by the weakest)
 specCoverage (s : TestSpec) : Coverage :=
   bindingsCoverage s.profile (bindingsCoverage s.whereBindings (modeCoverage s.mode s.size s.seed))
+-- and when the types are finite and enumerated whole, which the tester knows and this theory does
+-- not (tester.py refuses an infinite type under `ExhaustiveMode`, 7.R3), the whole type, weakened
+-- by the bindings likewise
+wholeCoverage (s : TestSpec) : Coverage :=
+  bindingsCoverage s.profile (bindingsCoverage s.whereBindings Exhaustive)
 
 -- a run is points of the law, or not run with a reason (test.1)
 RunIsPointsOrNotRun (t : Tester) (s : TestSpec) : Bool :=
   match t.run s { Points A pts c -> true ; NotRun r -> true ; _ -> false }
--- the coverage of a run is at most the spec's, and an exhaustive one is the spec's exactly
+-- the coverage of a sampled run is at most the spec's; an exhaustive run's is the spec's, bounded
+-- by the size, or the whole type's, both weakened by the bindings (the coordinator, 2026-10-14:
+-- the law asked `Bounded size` where tester.py and laws.lth's `ForallOnPoints` give `Exhaustive`)
 CoverageIsTheWeakest (t : Tester) (s : TestSpec) : Bool :=
   match coverageOf (t.run s) { nothing -> true ;
-    just c -> rankOf c <= rankOf (specCoverage s) and (match s.mode { ExhaustiveMode -> c == specCoverage s ; _ -> true }) }
+    just c -> match s.mode { ExhaustiveMode -> c == specCoverage s or c == wholeCoverage s ;
+                             _ -> rankOf c <= rankOf (specCoverage s) } }
 -- a sampled run that ran has exactly the cases asked, counting the cases evaluated (7.S12); fewer
 -- is not run, with the reason (test.2: an empty sample is no evidence)
 CountsCases (t : Tester) (s : TestSpec) : Bool :=
