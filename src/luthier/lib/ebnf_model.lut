@@ -55,4 +55,4 @@ hasEmpty (rs : List (List TokenView)) : Bool :=
   match rs { nil -> false ; cons r rest -> match r { nil -> true ; cons t more -> hasEmpty rest } }
 
 -- the model: a right-hand side derives a list when matching it can leave nothing
-backtrack : Derives := { derivesRhs := \ (e : Ebnf) (r : Rhs) (ts : List TokenView) { hasEmpty (remainders e r ts) } }
+backtrack : Derives := { derivesRhs := fn (e : Ebnf) (r : Rhs) (ts : List TokenView) { hasEmpty (remainders e r ts) } }

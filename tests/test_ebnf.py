@@ -54,7 +54,7 @@ def test_the_dangling_else_derives_twice_and_the_parser_chooses():
 
 
 def test_what_does_not_derive():
-    for text in ["x := { a : A || b : B, c : C }", "x := \\ ( y ) { y }", "x := a + if c then a else b",
+    for text in ["x := { a : A || b : B, c : C }", "x := fn ( y ) { y }", "x := a + if c then a else b",
                  "operator == := eqZ7", "x <- 1"]:
         assert count_derivations(G, views(text)) == 0, text
 
