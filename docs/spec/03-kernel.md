@@ -47,6 +47,11 @@ part of the identity of the structure. `{ n : Int, b : Bool }`, `(n : Int) * (b 
 isomorphic structure, and a program that passes one for the other is rejected. The reading where
 labels are the identity is a translation, not an equality (L3.1).
 Files: k_named_product.accept.lut, k_label_order.reject.lut.
+[decided D-2026-10-13-x] In the language designed the names of a record and the labels of a sum are
+its projections and its injections, the arrows of the product and of the coproduct, so they are
+part of the structure: the kernel term keeps them (`Record`, `RecordValue`, `Proj`, `Sum`, `Inj` in
+`src/luthier/lib/term.lth`) and the hash covers them; a record and the bare product of its types are
+isomorphic structures, not one. `kernel_laws.lth` states them as named products and coproducts.
 
 **3.R2. A sum is identified by shape.** [implemented] A sum of two units with any labels is the
 same structure as `Bool`, since labels are binders; a value of such a sum is accepted where a
@@ -215,6 +220,13 @@ a local name; the two implementations are two specimens of one theory (`spec 9`)
 **3.S29. Term and Program as data.** [decided D-2026-10-12-x] `Term`, `Pattern`, `Act` and
 `Program` are `data` in `core.lut`, so that a program is a value of Luthier (L7.4, L14.2). They are
 not in `core.lut` yet; the host's classes in `syntax.py` are their model. The constructors:
+[decided D-2026-10-13-aa] As written in `src/luthier/lib/term.lth` §1, which this item now follows:
+`Term` has `Var`, `Lit` (a `Constant`: integer, double or string), `Universe` (for `U`, a keyword),
+`World`, `Lam`, `App`, `Pi`, `Sigma`, `Pair`, `Match`, `Inj`, `Sum`, `Data`, `Subtype`, `Extern`,
+`Primitive`, `Axiom`, `Hole`, `Record`, `RecordValue`, `Proj` and `Let` (a local definition, which a
+block elaborates to); `Pattern` has `PVar`, `PWild`, `PCon`, `PPair`, `PLit`, `PInj`; `Act` has
+`Declare`, `Define` and `Datum`: aliases are expanded before checking and leave no act, imports are
+resolved into qualified names, and the directives are functions (3.S39, spec 2.S21).
 
 | `data` | constructors |
 |---|---|
@@ -246,6 +258,12 @@ it does not check. Neither is in the interpreter.
 are stated as a function `reduce : Term -> Term` in `lib/term.lut`, the interpreter written in
 Luthier, certified against the host's evaluator as two specimens of one theory (L14.3, `spec 9`).
 The file is not written.
+[decided D-2026-10-13-aa] As written in `term.lth` §5: the rules are stated on one weak-head step,
+`step : Program -> Term -> Maybe Term` (`nothing` when the term is in weak head normal form), and
+evaluation under fuel (3.S11) is its iteration, `reduce`, a definition; so running out of fuel is
+not a verdict of any law. The model is `term_model.lut`, the host's evaluator `kernel.py` a second
+specimen. The strategy is weak head: the head of an application, the scrutinee of a match and the
+record of a projection step first, and nothing steps under a binder.
 
 **3.S34. Canonical form.** [decided D-2026-10-12-ah] The canonical form of a `Term` renames bound variables
 canonically and removes module prefixes. The hashes of `spec 6` are computed over this form, so two
@@ -271,6 +289,14 @@ substitutive), which make a concrete type an object, are to be stated in the sam
 transitive; `Structural` adds substitutivity over every function, which only a structural `==`
 has; an observational equality is an `Object` respected by its theory's operations as congruences
 (`AlphaCongruent` in `term.lth`).
+[decided D-2026-10-13-aa] `src/luthier/lib/kernel_laws.lth` states the kernel's structures as
+theories: an object with its equality (§1), terminal and initial objects (`Unit`, `Empty`), a Boolean
+algebra (`Bool`), the free monoid (`List`), an ordered commutative semiring (`Nat`), the
+exponential, the product and the coproduct, and records and labeled sums as named products and
+coproducts. `Beta`, `PairFst`, `PairSnd`, `Pairing` are laws of those theories; `IfTrue`, `IfFalse`,
+`CaseNothing`, `CaseJust` are the coproduct's `CaseLeft` and `CaseRight` at the models `ifThenElse`
+and `maybes` of `kernel_models.lut`; the roles of the core's constructors are these models
+(D-2026-10-13-t).
 
 **3.S37. What it cannot state.** [implemented] Eta, `fn y { f y } == f`, is not statable, since
 equality of functions is not structural (`spec 4.R8`); observed pointwise it is beta. Functions over
@@ -280,6 +306,7 @@ lists with the algebra fixed, until functions of two arguments have generators.
 **3.S38. `lib/term.lut`.** [decided D-2026-10-12-ah] The theory of `Term`: the data of §6, alpha-equivalence, the
 canonical form of 3.S34, substitution, and `reduce` of 3.S33 with the laws that relate it to
 `KernelLaws`. Not written.
+[decided D-2026-10-13-aa] Written as `src/luthier/lib/term.lth`, with its models in `term_model.lut`.
 
 
 ## §8 Constructs as names, and when a file is read
