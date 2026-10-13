@@ -2343,3 +2343,15 @@ Source:     luthier@3d8f912:record/questions-for-luciano-2026-10-13-layers-0-1-r
 Kind:       spec (3.S15, 3.S29, 3.S36, 3, 4.R3, 4.R10, 5.S1) and term.lth, program.lth, laws.lth,
             checks.lth
 Status:     current; Q1 reverses the kernel half of D-2026-10-13-x Q2
+
+D-2026-10-13-ab No second external round on layers 0 and 1: once the review's fixes are in, the
+                Python specimens are written against the theories (`elaborate.py` of
+                translation.lth with `luthier eval`, then `check.py` of program.lth with
+                `luthier check`), since writing a specimen tests a theory better than reading it
+                (kernel.py found four defects of term.lth on 2026-10-13). Cost: a design error left
+                shows as failing tests, not as a reviewer's finding.
+Author:     Luciano, on the model's recommendation
+Quote:      "si, pasemos directo."
+Source:     chat:52b10bff:4579
+Kind:       plan (steps 2.5 and 4.1 of record/plan-from-zero-2026-10-13-execution.md)
+Status:     current
