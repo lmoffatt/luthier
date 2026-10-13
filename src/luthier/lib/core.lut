@@ -13,7 +13,8 @@
 -- here only; library.lth's policies anchor on the path); it is read as a model file by its
 -- extension (library.lth, `KindByExtension`), which is its kind: it holds the interpreter's
 -- values, not laws. Its laws live in theory files: kernel_laws.lth states what `Unit`, `Empty`,
--- `Bool`, `List` and `Nat` are, with kernel_models.lut naming them as models; numbers.lth states
+-- `Bool`, `Maybe` and `List` are, and core claims those theories for its data below
+-- (D-2026-10-14-b); kernel_models.lut names `Nat` and the kernel's forms as models; numbers.lth states
 -- what `Int`, `Float64` and `String` are, with numbers_model.lut naming the operations below as
 -- models (12.S23, Z8). [proposed] That core is a `.lut` under `lib/` and not a third kind of
 -- file; one commit undoes it.
@@ -26,6 +27,8 @@
 -- `==` is one operation on every concrete type (4.R8). [proposed] So the comparisons are named
 -- here in this comment and nowhere else; the arithmetic is named below and bound by `operator`.
 
+import "kernel_laws.lth" Terminal Initial TheBooleans Coproduct Lists Monoid
+
 -- ---------------------------------------------------------------- the core's data (3.S7, 3.R3)
 
 -- the terminal and the initial structure, as data (3.S7; D-2026-10-13-t gives their roles in
@@ -34,7 +37,7 @@ Unit : U := data { unit : Unit }
 Empty : U := data { }
 
 -- `Bool`: a sum of two units written as a `data` without recursion (3.R3, D-2026-10-13-o); its
--- role, a Boolean algebra with `true` its top, is kernel_laws.lth §3 and kernel_models.lut.
+-- role, a Boolean algebra with `true` its top, is kernel_laws.lth §3, claimed below.
 -- [proposed] `data` and not the labeled sum `{ true : Unit || false : Unit }` of 2.S12: 3.R3 is
 -- the later decision, and the kernel represents `true` as the constructor `Var "true"`
 -- (term.lth, `truth`), not as an injection.
@@ -51,10 +54,40 @@ operator and := conj
 operator or := disj
 
 -- `Maybe` and `List`, as data (3.R3, 3.S36); their roles: a coproduct with `Unit`
--- (kernel_models.lut `maybes`) and the free monoid (kernel_laws.lth §4, `lists`). `[a, b, c]`
+-- and the free monoid (kernel_laws.lth §4), claimed below. `[a, b, c]`
 -- is `cons a (cons b (cons c nil))` (2.S12).
 Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
 List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
+
+-- The roles of the data above (L2.7; D-2026-10-14-b: 4.R3 is read per file, and a data's role
+-- laws live in the file that defines it, without repeating a law). Each data is the model of a
+-- structure of kernel_laws.lth, and core claims that structure here: the law is kernel_laws.lth's,
+-- applied to core's model written with the constructors. `unit` is the point of a terminal
+-- object; `true` and `false` the top and bottom of a Boolean algebra, `true` where `if` takes its
+-- first branch; `nothing` and `just` the injections of a coproduct with `Unit`; `nil` the neutral
+-- element of the free monoid and `cons` the injection combined. `Empty` has no constructor to
+-- give a role to; it is initial, its elimination `match e { }` the map out. Moved from
+-- kernel_models.lut. [proposed] Importing kernel_laws.lth from core is a cycle of files and not of
+-- names: kernel_laws.lth sees core's names unqualified (12.S22) and core names its theories, but
+-- no definition reaches itself through the other file (the theories mention `Bool` and `List`, the
+-- data mention no theory), and a demand reads definitions, not files (3.S1, 12.S22).
+UnitIsTerminal : Bool := Terminal Unit { point := unit }
+EmptyIsInitial : Bool := Initial Empty { absurd := fn (A : U) (e : Empty) { match e { } } }
+BoolIsTheBooleans : Bool := TheBooleans { algebra := { top := true, bottom := false, complement := fn b { not b },
+                                                      meet := fn a b { conj a b }, join := fn a b { disj a b } } }
+BoolIsACoproduct : Bool := Coproduct Unit Unit Bool {
+  left := fn u { true }, right := fn u { false },
+  cases := fn (C : U) f g b { if b then f unit else g unit } }
+MaybeIsACoproduct (A : U) : Bool := Coproduct Unit A (Maybe A) {
+  left := fn u { nothing }, right := fn a { just a },
+  cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } } }
+ListIsTheFreeMonoid (A : U) : Bool := Lists A { free := {
+  neutral := nil, combine := fn xs ys { appendList A xs ys }, inject := fn a { cons a nil },
+  fold := fn (N : U) (n : Monoid N) (f : A -> N) (xs : List A) { foldInto A N n f xs } } }
+appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
+foldInto (A N : U) (n : Monoid N) (f : A -> N) (xs : List A) : N :=
+  match xs { nil -> n.neutral ; cons a rest -> n.combine (f a) (foldInto A N n f rest) }
+CoreData := UnitIsTerminal & EmptyIsInitial & BoolIsTheBooleans & BoolIsACoproduct & MaybeIsACoproduct & ListIsTheFreeMonoid
 
 -- ---------------------------------------------------------------- the primitive types (11.R1, 11.S4)
 
