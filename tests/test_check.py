@@ -247,3 +247,33 @@ def test_R9_named_subtype_bases_and_cycles():
     assert c.base(q, t.Var('A')) in {t.Var('A'), t.Var('B')}
     q = c.Typing(program('A = Int'))
     assert c.base(q, t.Var('A')) == t.Var('A')
+
+
+def test_R9_theory_head_passes_where_the_theory_is_expected():
+    # library.lth, reading 6: a helper taking the whole loader `(l : Loader)` was refused, since
+    # elaborate.theory_domains reads the domain `Loader` as its record and the argument stayed `Loader`
+    theory = ('T : { op : Int -> Int }\nT := law\nlaw (m : T) : Bool := m.op 1 == 1\n'
+              'S : { other : String }\nS := lawS\nlawS (m : S) : Bool := m.other == m.other\n'
+              'helper (m : T) (n : Int) : Bool := m.op n == n and helper m n\n')
+    p = program(theory + 'user (m : T) : Bool := helper m 1')
+    assert not c.violatesR9(p, 'helper')
+    assert not c.violatesR9(p, 'user')
+    assert c.violatesR9(program(theory + 'user (m : S) : Bool := helper m 1'), 'user')
+    assert c.violatesR9(program(theory + 'user (m : Int) : Bool := helper m 1'), 'user')
+    p = program('P (k : Int) : { op : Int }\nP (k : Int) := lawP k\nlawP (k : Int) (m : P k) : Bool := m.op == k\n'
+                'h (k : Int) (m : P k) : Bool := m.op == k\nuser (m : P 1) : Bool := h 1 m')
+    assert not c.violatesR9(p, 'user')
+
+
+def test_R9_arrow_over_an_imported_name_is_an_arrow():
+    # library.lth, reading 6: `f2 okAll` was refused and `f2 l.admitsAt` passed, since elaborate.py
+    # reads `P -> Bool` as `implies P Bool` when `P` is imported (imports are not loaded)
+    head = 'import "x.lth" P\nf2 (g : String -> P -> Bool) : Bool := true\n'
+    p = program(head + 'okAll (s : String) (x : P) : Bool := true\nuse : Bool := f2 okAll')
+    assert not c.violatesR9(p, 'use')
+    assert c.violatesR9(program(head + 'bad (s : Int) (x : P) : Bool := true\nuse : Bool := f2 bad'), 'use')
+    from luthier import term as t
+    implies = t.App(t.App(t.Var('implies'), t.Var('P')), t.Var('Bool'))
+    assert c.arrows(implies) == t.Pi('_', t.Var('P'), t.Var('Bool'))
+    law = t.Subtype('x', t.Var('Int'), implies)
+    assert c.arrows(law) == law

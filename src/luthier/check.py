@@ -7,7 +7,7 @@ R10 is author judgement, R11 a typing law, S23 is an elaboration law.
 from functools import lru_cache
 from dataclasses import dataclass, fields, is_dataclass
 from . import surface as s, term as t
-from .elaborate import elaborate_program, context_of, walk, infer, parameters, curry, ElaborationError
+from .elaborate import elaborate_program, context_of, walk, infer, parameters, curry, theory_domains, ElaborationError
 from .kernel import alpha_equal, substitute, reduce, free_names
 
 
@@ -267,6 +267,25 @@ def violatesR12(p, n):
     return len(acts(p, n, s.Define)) > 1 or any(isinstance(a.body, s.TermBody) and block_fault(a.body.term, {x.name for x in p if hasattr(x, 'name')}) for a in acts(p, n, s.Define))
 
 
+def arrows(u):
+    """Read `implies A B` in type position as the arrow `A -> B`.
+
+    elaborate.py reads `A -> B` as the Bool implication when it cannot infer that `A` is a type,
+    as for a name brought in by an import (imports are not loaded). An implication is never a
+    type, so where a type is expected it can only be that arrow. Predicates of subtypes and terms
+    are not entered: there `implies` is the implication.
+    """
+    if isinstance(u, t.App) and isinstance(u.function, t.App) and u.function.function == t.Var('implies'):
+        return t.Pi('_', arrows(u.function.argument), arrows(u.argument))
+    if isinstance(u, t.Pi): return t.Pi(u.name, arrows(u.domain), arrows(u.codomain))
+    if isinstance(u, t.Sigma): return t.Sigma(u.name, arrows(u.domain), arrows(u.codomain))
+    if isinstance(u, t.Record): return t.Record(tuple((n, arrows(x)) for n, x in u.fields))
+    if isinstance(u, t.Sum): return t.Sum(tuple((n, arrows(x)) for n, x in u.alternatives))
+    if isinstance(u, t.Subtype): return t.Subtype(u.name, arrows(u.type), u.predicate)
+    if isinstance(u, t.App): return t.App(arrows(u.function), arrows(u.argument))
+    return u
+
+
 class Typing:
     """Small rules-needed typing; no unification or complete dependent checking."""
     def __init__(self, p):
@@ -280,9 +299,9 @@ class Typing:
                 inner = self.context.child()
                 ps = parameters(a.binders, inner)
                 declarations[a.name] = curry(t.Pi, ps, walk(a.type, inner))
-        self.program = tuple(t.Declare(a.name, declarations[a.name])
+        self.program = tuple(t.Declare(a.name, arrows(declarations[a.name]))
                              if isinstance(a, t.Declare) else a for a in self.program)
-        self.types = {a.name: a.type for a in self.program if isinstance(a, (t.Declare, t.Define))}
+        self.types = {a.name: arrows(a.type) for a in self.program if isinstance(a, (t.Declare, t.Define))}
 
     def same(self, a, b):
         # Reduction is bounded; recursive definitions cannot hang checking.
@@ -304,7 +323,13 @@ class Typing:
     def typeOf(self, u, ctx=None):
         c = self.context.child(); c.types.update(self.types); c.types.update(ctx or {})
         ty = infer(u, c)
-        return None if isinstance(ty, t.Hole) else ty
+        return None if isinstance(ty, t.Hole) else arrows(ty)
+
+    def theory_record(self, u):
+        """The record a theory head stands for, as elaborate.theory_domains reads a domain."""
+        c = self.context.child(); c.types.update(self.types)
+        domain = theory_domains(t.Pi('_', u, t.Var('Bool')), c).domain
+        return domain if isinstance(domain, t.Record) else None
 
     def branchContext(self, ctx, condition, truth):
         law = condition if truth else t.App(t.Var('not'), condition)
@@ -386,12 +411,21 @@ def violatesR8(p, n):
 
 
 def base(q, u, fuel=None):
-    """Look through literal subtypes and names defined directly as subtypes."""
+    """Look through literal subtypes, names defined directly as subtypes, and theory heads.
+
+    A theory head `T : { ... }` defined by laws is its record refined by them (4.R6: the body is a
+    predicate over the record), and elaborate.theory_domains already reads a domain `T` (or `T a
+    b`) as that record; the argument side is read the same way, so `(l : T)` passes where `T` is
+    expected (library.lth, reading 6 of the file-policies report).
+    """
     if fuel is None: fuel = len(q.program)
     if isinstance(u, t.Subtype): return base(q, u.type, fuel)
     if isinstance(u, t.Var) and fuel:
         body = q.body(u.name)
         if isinstance(body, t.Subtype): return base(q, body.type, fuel - 1)
+    if isinstance(u, (t.Var, t.App)):
+        record = q.theory_record(u)
+        if record is not None: return record
     return u
 
 
