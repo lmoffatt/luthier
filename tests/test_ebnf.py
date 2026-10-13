@@ -53,3 +53,12 @@ def test_what_does_not_derive():
     for text in ["x := f < a : A | b : B >", "x := \\ ( y ) { y }", "x := a + if c then a else b",
                  "operator == := eqZ7", "x <- 1"]:
         assert count_derivations(G, views(text)) == 0, text
+
+
+def test_a_program_derives_act_by_act():
+    from luthier.ebnf import derives, derives_program
+    text = views("x := A -> B") + views("y := f a")
+    assert derives_program(G, text) == derives(G, text)
+    assert derives_program(G, [])
+    assert not derives_program(G, views("x := f < a : A | b : B >") + views("y := a"))
+    assert not derives_program(G, views("x := a")[:-1])

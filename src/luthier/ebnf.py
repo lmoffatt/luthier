@@ -221,3 +221,19 @@ def count_derivations(e: Ebnf, tokens: list[TokenView], start: str | None = None
 def derives(e: Ebnf, tokens: list[TokenView], start: str | None = None) -> bool:
     """`derives`: whether the grammar derives the token list."""
     return count_derivations(e, tokens, start) > 0
+
+
+def derives_program(e: Ebnf, tokens: list[TokenView], act: str = "act", end: TokenView = ("literal", "\n")) -> bool:
+    """`derives` for a whole laid-out file of `luthierSyntax`, act by act. Since
+    `program ::= { act newline }` and the newline token occurs nowhere else, a file derives iff it
+    ends in a newline (or is empty) and each segment up to a newline derives `act`. The whole-file
+    count is cubic in the number of tokens; this is linear in the number of acts."""
+    segment: list[TokenView] = []
+    for t in tokens:
+        if t == end:
+            if not derives(e, segment, act):
+                return False
+            segment = []
+        else:
+            segment.append(t)
+    return not segment
