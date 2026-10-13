@@ -140,11 +140,18 @@ knownWhole (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
 -- injection, and so a constructor here; check.py, step 4.1)
 constructors (p : SurfaceProgram) : List String := match p { nil -> nil ;
   cons a rest -> match a {
-    define x bs t b -> concat (bodyConstructors b) (constructors rest) ;
+    define x bs t b -> concat (bodyConstructors b) (concat (typeLabels t) (constructors rest)) ;
     alias x bs t -> concat (sumLabels t) (constructors rest) ;
+    declare x bs t -> concat (sumLabels t) (concat (binderLabels bs) (constructors rest)) ;
     _ -> constructors rest } }
-sumLabels (t : Surface) : List String := match t { sum kvs -> pairNames kvs ; _ -> nil }
-bodyConstructors (b : Body) : List String := match b { dataBody cs -> pairNames cs ; termBody t -> sumLabels t ; _ -> nil }
+-- the labels of a labeled sum anywhere in a term are its injections, used as constructors where
+-- the sum is written in a type: `{ one : A || two : B }` in a field's type (check.py, bite 2)
+sumLabels (t : Surface) : List String := concat (match t { sum kvs -> pairNames kvs ; _ -> nil }) (sumLabelsIn (children t))
+sumLabelsIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t rest -> concat (sumLabels t) (sumLabelsIn rest) }
+typeLabels (t : Maybe Surface) : List String := match t { nothing -> nil ; just u -> sumLabels u }
+binderLabels (bs : List Binder) : List String := match bs { nil -> nil ;
+  cons b rest -> concat (match b { explicit xs t d -> sumLabels t ; implicit xs t -> sumLabels t }) (binderLabels rest) }
+bodyConstructors (b : Body) : List String := match b { dataBody cs -> pairNames cs ; termBody t -> sumLabels t ; clausesBody cs -> nil }
 pairNames (kvs : List (String * Surface)) : List String := match kvs { nil -> nil ; cons (k, v) rest -> cons k (pairNames rest) }
 
 -- the variables a pattern binds, given the constructors `k`
@@ -305,8 +312,24 @@ suffixes (ns : List String) : List String := match ns { nil -> nil ; cons n rest
 fieldsOfDeclared (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons act rest -> match act {
   declare x bs t -> if x == n then (match t { record fs law -> fieldLabels fs ; _ -> nil }) else fieldsOfDeclared rest n ;
   _ -> fieldsOfDeclared rest n } }
+-- the fields a term reads: the part after the `.` of every dotted name and every projection,
+-- bound or not, since a law reads a field through its model parameter, `m.parse` (check.py, bite 2:
+-- `lawNames` removes what a binder binds, so the reads through `m` were lost)
+fieldsRead (t : Surface) : List String := concat (match t {
+    name s -> if namePrefix s == s then nil else [nameSuffix s] ;
+    proj a x -> [x] ;
+    _ -> nil }) (fieldsReadIn (children t))
+fieldsReadIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t rest -> concat (fieldsRead t) (fieldsReadIn rest) }
+lawReads (p : SurfaceProgram) : List String := lawReadsIn (claimedLaws p) p
+lawReadsIn (laws : List String) (acts : SurfaceProgram) : List String := match acts { nil -> nil ;
+  cons act rest -> match act {
+    define x bs t b -> if member x laws then concat (bodyReads b) (lawReadsIn laws rest) else lawReadsIn laws rest ;
+    _ -> lawReadsIn laws rest } }
+bodyReads (b : Body) : List String := match b {
+  termBody u -> fieldsRead u ; clausesBody cs -> clausesReads cs ; dataBody cs -> nil }
+clausesReads (cs : List Clause) : List String := match cs { nil -> nil ; cons c rest -> concat (fieldsRead c.body) (clausesReads rest) }
 untouchedFields (p : SurfaceProgram) (n : String) : Bool :=
-  isDeclared p n and isDefined p n and anyNotIn (fieldsOfDeclared p n) (suffixes (lawNames p))
+  isDeclared p n and isDefined p n and anyNotIn (fieldsOfDeclared p n) (lawReads p)
 anyNotIn (xs ys : List String) : Bool := match xs { nil -> false ; cons x rest -> not (member x ys) or anyNotIn rest ys }
 violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
   untouchedFields p n
@@ -646,11 +669,16 @@ violatesR8 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
 -- 4.R9: an argument passes where its function's domain is expected only if its base refines the
 -- domain's base; a refinement the argument does not carry is an obligation (4.R5, 4.R11), not a
 -- failure (review of layers 0-1, B)
-base (ty : Term) : Term := match ty { Subtype x d q -> base d ; _ -> ty }
+-- (a name defined as a subtype is looked through to its base; check.py, bite 2: `WellFormedEbnf`
+-- passed where `Ebnf` is expected)
+base (ep : Program) (fuel : Nat) (ty : Term) : Term := match ty {
+  Subtype x d q -> base ep fuel d ;
+  Var x -> if fuel == 0 then ty else (match definedBody ep x { just (Subtype y d q) -> base ep (fuel - 1) d ; _ -> ty }) ;
+  _ -> ty }
 mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap : Application) : Bool :=
   match t.typeOf ep ap.context ap.function { nothing -> false ;
     just ft -> match ft { Pi x d c -> (match t.typeOf ep ap.context ap.argument { nothing -> false ;
-                                          just at -> not (t.refines (base at) (base d)) }) ;
+                                          just at -> not (t.refines (base ep (actCount ep) at) (base ep (actCount ep) d)) }) ;
                           _ -> false } }
 violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
   anyApp (fn ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications a e p n)
