@@ -2079,3 +2079,38 @@ Kind:       principles (G2 read as the logic of distances; L10.1, L12) and spec 
 Status:     current; the two interfaces to be refined when certification.lth and cost.lth are
             written. His `not c = 1/c` for min and max (chat:f15ae1b6:2292) waits for a case
             on distances, where negation is in doubt
+
+D-2026-10-13-n  His marks on the plan from zero and on the nine clauses of the second screen. The
+                plan: Z1 (Luthier's own theories first, those that allow bootstrapping first), Z3
+                (a parser first), Z4 (retire the old code), Z5 (import names what enters with its
+                theory, the theory itself imported from a `.lth` first), Z6, Z7, and Z8 enforced
+                (a theory file is a `.lth`, and the checker rejects an extern, an action or a model
+                value in it); Z2 unmarked, taken as recommended. The principles: L2.6, L6.13,
+                L6.14, L9.11, L9.12, L12.7 settled; L8.9 settled with his note that `W` has a
+                thousand laws associated with it, none of which defines it; L14.6 settled with his
+                note that a theory is refined when its specimens show it wrong, a false positive for
+                one; L12.6 rewritten on his correction: Bayesian evidence is a likelihood, a density
+                of any value, and not this; what sampling gives is the probability of a
+                counterexample not yet seen.
+Author:     Luciano
+Quote:      "Yes, Luthiers own first, specially the ones that allow bootstrapping"
+            "OK, of course LinearAlgebra had to be imported from a .lth first"
+            "Yes, enforced"
+            "pensaba si el W no tiene laws, pero si, tiene miles de laws asociadas a el, pero no lo
+            definen."
+            "Si, pero luego las teorias se podrian refinar, por ejemplo al detectar falsos
+            positivos."
+            "el tema es que evidence en realidad no va de 0 a 1, la evidence bayesiana es una
+            likelihood y puede tener cualquier valor, es una densidad de probabilidad."
+            "otra cosa es la probabilidad de encontrar un contraejemplo, ahi si tiene mas sentido
+            hablar de probabilidad"
+Source:     luthier@93be21b:record/plan-from-zero-2026-10-13-decisions.md:25
+            luthier@93be21b:record/plan-from-zero-2026-10-13-decisions.md:83
+            luthier@93be21b:record/plan-from-zero-2026-10-13-decisions.md:131
+            luthier@93be21b:record/principles-2026-10-13-b-for-his-marks.md:26
+            luthier@93be21b:record/principles-2026-10-13-b-for-his-marks.md:31
+            luthier@93be21b:record/principles-2026-10-13-b-for-his-marks.md:52
+            luthier@93be21b:record/principles-2026-10-13-b-for-his-marks.md:53
+Kind:       plan and principles (Z1 to Z8; L2, L6, L8, L9, L12, L14; spec 12). For P13
+Status:     current; amends D-2026-10-12-ad (no `la := import "x.lut"`) and -af (the import line
+            carries the theory), and D-2026-10-13-m (the probability is of a counterexample)

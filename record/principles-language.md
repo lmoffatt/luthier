@@ -494,14 +494,14 @@ L2.6   The theoretical module of clause 4 is a file of its own: a theory file ho
        declarations and laws, and is what the checker reads; each model of it, or each algorithm
        written against it, lives in a file of its own, read only when a demand needs it and
        certified against the theory. What a file imports has its theory in a theory file
-       (D-2026-10-13-i, -j). [proposed]
+       (D-2026-10-13-i, -j). [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j
 Rests on:   O9 (the kind of a hole in the elaborated form, for the spec)
 Source:     Luciano, 2026-05-29 (dialogue:20260529T1400:tipos-no-definidos-y-forward-reference); the
             hole named 2026-09-29; `external` and the theoretical module 2026-10-10 (WhatsApp Ptt
             2026-10-10 at 17.41.53.md; WhatsApp Ptt 2026-10-10 at 17.25.23.md, 00:00 to 00:40); his
             annotation on draft 8, bcdac41
-Status:     settled; clause 6 proposed (D-2026-10-13-i, -j)
+Status:     settled; clause 6 settled (D-2026-10-13-i, -j, -n)
 History:    draft 0 (6d9dbd3): stated. draft 4 (c7c6396): the elaborated form records which of the
             five it is. draft 5 (5b1446c): `assumed` has one meaning. draft 6 (8809e20): an axiom is
             not a value. draft 9 (0636378): his words on a declared name's type. draft 10 (72cc7be,
@@ -847,10 +847,11 @@ L6.12  An importer sees a module only through the theory it gives the module as 
        [settled]
 L6.13  An algorithm is written against a theory, never against a model: it is a functor that takes
        any model of the theory, so each specimen can stand in for another, and it is certified per
-       instance unless a cited proof covers every model (D-2026-10-13-j). [proposed]
+       instance unless a cited proof covers every model (D-2026-10-13-j). [settled]
 L6.14  An import line names what enters with its theory, `import "x.lut" M : T`, so the importer is
        checked against `T` without reading `x.lut`, and the ascription of clause 12 happens there
-       (Z5 of the plan from zero, his mark pending). [proposed]
+       (Z5 of the plan from zero; the theory itself imported from a theory file first,
+       D-2026-10-13-n). [settled]
 Example:    γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
             there (clause 9)
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5
@@ -862,7 +863,7 @@ Source:     Luciano, 2022-06-28 (written:2022-06-28_luciano-code-style:choose-ef
 Status:     settled; statement in his words, 2026-10-12, with "specimens" and "along certified
             identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7
             proposed; clause 11 candidate, from L3; clause 12 settled (D-2026-10-13-c, -e); clauses
-            13 and 14 proposed (D-2026-10-13-j, Z5)
+            13 and 14 settled (D-2026-10-13-j, -n)
 History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137): stated as a quotient. draft 4 (c7c6396),
             D-2026-10-11-m: exact in the theory, a ball in the model; substitution only along a
             certified equivalence. draft 5 (5b1446c): a weighted graph, not a class; a lone
@@ -948,7 +949,9 @@ L14.5  (His words) Keyword or not, the semantics of every construct is expressib
 L14.6  Of the two orders of bootstrapping, the theory comes first: Luthier's theories are written
        in Luthier before any implementation, they are the authority, and the host's files and later
        the Luthier implementations are their specimens, written after them and certified against
-       them (D-2026-10-13-h). [proposed]
+       them (D-2026-10-13-h). The theory is not frozen: a specimen that shows it wrong, a false
+       positive for one, is evidence against it, and the theory is refined (D-2026-10-13-n).
+       [settled]
 Rests on:   O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
             version 0 in chat on 2026-10-12, to be specified in chapter 3
 Quote:      "necesitamos una teoria de librerias, la iremos haciendo a medida que la necesitemos.
@@ -965,7 +968,7 @@ Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D8 (a066adc
             (generators are values)
 Status:     his principle, stated in his words; the clauses are the model's wording, proposed, his
             mark pending; placed under G0 after L7 and numbered L14 until the next renumbering by
-            document order (D-2026-10-12-v); clause 6 proposed (D-2026-10-13-h)
+            document order (D-2026-10-12-v); clause 6 settled (D-2026-10-13-h, -n)
 History:    draft 11 (2026-10-12): new, on his comments on the specification plan (D8) and his
             request in chat; the decisions it already guided: D8 of the spec plan, W5's restatement,
             the decision to put `Program` and `Term` as data in version 0.
@@ -1000,13 +1003,15 @@ L8.8   Types are verified before they are constructed: Luthier starts from types
 L8.9   Everything has laws, at the least those of its equality (D-2026-10-12-ak): there is no data
        without them. What comes from the world enters as bytes or a `String`, whose laws are the
        kernel's, and a check refines it once into its lawful type (spec 5.S9, 5.S12;
-       D-2026-10-06-aa, D-2026-10-13-j). [proposed]
+       D-2026-10-06-aa, D-2026-10-13-j). `W`, which has no `==`, is a structure: a thousand laws
+       are associated with it, the observations of what actions do, and none of them defines it
+       (D-2026-10-13-n). [settled]
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-j
 Rests on:   O1 (the bound in a certificate)
 Source:     Luciano, 2022-08-03 (written:2022-08-03_haskell:proposicion-que-cada-tipo-cumple);
             restated 2026-05-26 (day:2026-05-26:tipos-como-conceptos-y-proposiciones)
-Status:     settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); clause 9 proposed
-            (D-2026-10-13-j); "from a law" is his correction
+Status:     settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); clause 9 settled
+            (D-2026-10-13-j, -n); "from a law" is his correction
             of 2026-10-12
 History:    draft 1 (5769005): stated. draft 4 (c7c6396): one judgment, structural; the certificate
             carries the grade and the worst cost; what leaves the program carries a certificate
@@ -1080,11 +1085,11 @@ L9.11  A law is a theory: its predicate presents it, `forall` and `exists` and t
        it, and its models are its evidence, which follows its form: a case is evaluated, a `forall`
        is covered exhaustively, by listed cases or by a sample, an `exists` by a witness with its
        cost, `and` by both sides and `or` by one; a citation or an assumption covers any part whole
-       (D-2026-10-13-l). [proposed]
+       (D-2026-10-13-l). [settled]
 L9.12  The two quantifiers are dual in their evidence: a `forall` is refuted exactly by a
        counterexample and, over an infinite domain, confirmed only by statistics; an `exists` is
        confirmed by a witness whose cost is determinate rather than statistical, though over the
-       reals not zero (D-2026-10-13-l). [proposed]
+       reals not zero (D-2026-10-13-l). [settled]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
@@ -1100,7 +1105,7 @@ Source:     (L5) Luciano, 2026-10-05 (chat:52d3e68e:2760); the puzzle 2026-10-10
             at 08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his annotation on
             draft 8 (bcdac41)
 Status:     settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
-            settled (D-2026-10-13-d, -e); clauses 11 and 12 proposed (D-2026-10-13-l)
+            settled (D-2026-10-13-d, -e); clauses 11 and 12 settled (D-2026-10-13-l, -n)
 History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d: laws accumulate
             and need not determine the operation. (L11) draft 0 (6d9dbd3): stated. draft 4
             (c7c6396): the four methods and the grade in the certificate; the dependence on the
@@ -1315,23 +1320,25 @@ L12.5  The law of a theory is one law, so its certificate is one certificate; ho
        (D-2026-10-12-i); how the costs of its parts combine is the theory's algebra, with two
        candidate models, min and max, or 1/n log-sum-exp and 1/n sum (D-2026-10-12-p); the
        composition along a path is the sum (L10.7, D-2026-10-12-q). [proposed]
-L12.6  Cost is two things (D-2026-10-13-m). A distance says how far an approximate value is from
-       the ideal; it composes by the triangle inequality, or by the worst link where it is
+L12.6  Cost is two things (D-2026-10-13-m, -n). A distance says how far an approximate value is
+       from the ideal; it composes by the triangle inequality, or by the worst link where it is
        ultrametric, and it is the one logic of G2: a law's value is a distance, and the demand's
-       cutoff says whether it is enough. A probability says how sure a sample makes us; it is the
-       evidence, and how evidences combine is an assumption about the dependence of what fails:
-       nested (max), independent and rare (sum, log-sum-exp), or the joint known (the chain rule,
-       exact). The two candidate models of clause 5 are models of evidence. [proposed]
+       cutoff says whether it is enough. A probability, in a certificate, is that of a
+       counterexample not yet seen: having drawn a million cases and found none, how likely one
+       is; how such probabilities combine is an assumption about the dependence of what fails,
+       nested (max) or independent and rare (sum, log-sum-exp). Bayesian evidence is neither: it is
+       a likelihood, a density of any value, and its logarithm is not a cost in [0, ∞]. [proposed]
 L12.7  `then` is material, `not (p and not q)`; conditioning is not a connective, since no
        connective has the conditional probability as its probability (Lewis, 1976), but an
        operation on a measure whose law is the chain rule. For distances, `then` is the triangle
-       inequality, which is transport along an identity (L10.7) (D-2026-10-13-l, -m). [proposed]
+       inequality, which is transport along an identity (L10.7) (D-2026-10-13-l, -m). [settled]
 References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q
 Rests on:   O1 (the algebra of costs; the two candidate models, D-2026-10-12-p)
 Source:     his note of 2026-10-12 on the reorder plan (14ea9f0)
 Status:     proposed on his note of 2026-10-12; the names lift, exact and within his to rename;
             clause 2 settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded on D-2026-10-12-h,
-            -i, -p, -q; clauses 6 and 7 proposed (D-2026-10-13-l, -m)
+            -i, -p, -q; clause 6 proposed, rewritten on his correction, and clause 7
+            settled (D-2026-10-13-l, -m, -n)
 History:    draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): new, on his note of 2026-10-12 on the
             plan ("faltan las leyes de los costos y de los predicates y cómo se lift a costos"); the
             text is the record's G3 of draft 9 (lift, exact, within) and the paragraph that stood in

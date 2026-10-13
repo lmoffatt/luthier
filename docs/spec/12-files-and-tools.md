@@ -58,23 +58,31 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 ## §6 When a file is read
 
-**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ad] Per L11.7, a module is read at the first demand for one of its names: the checker meeting `la.f`, or `run` needing its value;
+**12.S21. A file is read when a demand needs it.** [decided D-2026-10-12-ad] Per L11.7, a model file is read at the first demand for one of its names, the checker needing it or `run` needing its value, and a theory file whenever the checker needs its names (12.S23);
 an import no demand reaches is never read. An extern's file is read only when `run` or `test`
 reaches its node (`spec 3 §8`). `test "x.lut"` is the action that demands everything in the module:
 every name, every import, every law, so it is where latent errors appear (`spec 7`). There is no flat
 import (12.S22).
 
-**12.S22. Modules are values, and an import names what enters.** [decided D-2026-10-12-af] `import`
-is a function whose value is a module, a value of the record type of 12.S1. A module is reached
-through a name its importer gives it, `la := import "linear_algebra.lut"` and then `la.f`, or by
-naming the names that enter the environment: `import "linear_algebra.lut" Linear_Algebra`, or
-`import "linear_algebra.lut" Linear_Algebra as LA`. The import line says which file each name comes
-from, so the checker knows where to look and reads the file only when a name is first needed
-(12.S21). There is no import of every name and no `open` (D-2026-10-12-ae), and the file carries no
-name of its own. The selective form is sugar for an alias of a projection, `LA = (import
-"linear_algebra.lut").Linear_Algebra`, so the alias's certificates are the original's (`spec 4.R7`;
-this reading proposed). `core.lut` encloses the top-level scope of every file (a scope, not a block: spec 2.S17), so its names (`Int`, `Bool`, `List`
-and the rest) are visible unqualified; a name with no import is local or core's.
+**12.S22. An import names what enters, with its theory.** [decided D-2026-10-13-n] A theory is
+imported by name from a theory file, `import "linear_algebra.lth" LinearAlgebra`, and a model by name
+with the theory it is a model of, `import "linear_algebra_numpy.lut" Numpy : LinearAlgebra`,
+optionally `as LA`. The importer is checked against the theory alone, without reading the model's
+file; when a demand first needs the model (12.S21), the file is read and the checker verifies that
+it defines that name as a model of that theory, an error otherwise; and the importer sees only what
+the theory names, which is the private part (L6.12, L6.14). There is no import without names, no
+`la := import "x.lut"` (which D-2026-10-12-ad had, retired), no import of every name and no `open`
+(D-2026-10-12-ae); the file carries no name of its own. `core.lut` encloses the top-level scope of
+every file (a scope, not a block: spec 2.S17), so its names (`Int`, `Bool`, `List` and the rest) are
+visible unqualified; a name with no import is local or core's.
+
+**12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
+holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in
+it, since the checker reads theory files to check and laziness rests on a theory file never
+touching the world (L2.6). A model file, `.lut`, holds models of theories, each a value or a functor
+written against a theory (L6.13), with its own dependencies and its own certificate; different
+models of one theory live in different files (D-2026-10-13-i, -j). What another file imports has its
+theory in a `.lth`; what no file imports (a `main`, a local helper) may live whole in a `.lut`.
 
 ## Open
 

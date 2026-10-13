@@ -8,6 +8,9 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 ## Status
 
 - 2026-10-13: plan written; Z1 to Z7 with Luciano; nothing started.
+- 2026-10-13: his marks (D-2026-10-13-n): Z1, Z3 to Z8 ok, Z8 enforced (`.lth`), Z2 as recommended;
+  spec 12.S22 and 12.S23 written on Z5 and Z8. Theory files are `.lth`: read `lib/*.lut` below as
+  `lib/*.lth` for every theory. Next: step 0.
 
 ## Rules for every step
 

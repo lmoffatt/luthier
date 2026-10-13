@@ -373,3 +373,10 @@ Yo haría ahora una poda bastante agresiva:
 Y antes de añadir ningún principio nuevo resolvería cuatro cosas: **`Type/Structure/Theory`, composición de sampled evidence, semántica de extern/world, y class vs graph**.
 
 Después de eso, el documento probablemente quedaría no sólo más corto sino **mucho más formalizable**. La idea central de separar *meaning / realization / evidence* puede convertirse, además, en el eje que organice casi todo Luthier.
+
+
+
+
+
+
+
