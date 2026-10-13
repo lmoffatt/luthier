@@ -50,6 +50,10 @@ by Luciano.
   sum in parentheses (proposed), brackets known from the tokens before them (2.S4, proposed).
   D-2026-10-13-t: the roles of the core's `data`. Next: step 4.2 brought forward (the 50 programs,
   Codex, `record/IA/spec-programs-2026-10-13/prompt.md`); then 1.1.d and step 2 by the session.
+- 2026-10-13: step 2.1 done: `kernel_laws.lth` (f048999 to eb80544), the kernel's structures as
+  theories (object, terminal and initial, Boolean algebra, free monoid and the recursion of `List`,
+  ordered semiring, exponential, product, coproduct), and `kernel_models.lut`, the core's types as
+  their models. Next: step 2.2, `term.lth`.
 
 ## Rules for every step
 
