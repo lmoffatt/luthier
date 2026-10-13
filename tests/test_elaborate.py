@@ -221,3 +221,50 @@ def test_fresh_names_avoid_capture():
 
 def test_extern_remains_stuck():
     eq('extern "host.route" 3', t.App(t.Extern('host.route'), num(3)))
+
+
+@pytest.mark.parametrize('binders,args', [('', ''), ('(A : U)', ' A')])
+def test_theory_conjunction_keeps_declared_record(binders, args):
+    from luthier.check import violatesR6
+    source = (f'T {binders} : {{ value : Int }}\n'
+              f'L1 {binders} (m : T{args}) (x : Int) : Bool := x == m.value\n'
+              f'L2 {binders} (m : T{args}) : Bool := m.value == 0\n'
+              f'T {binders} := L1{args} & L2{args} & L1{args}')
+    p = program(source)
+    result = elaborate_program(p)
+    assert alpha_equal(result[0].type, result[-1].type)
+    assert not violatesR6(p, 'T')
+    from luthier.elaborate import context_of, infer
+    assert not isinstance(infer(result[-1].body, context_of(p)), t.Hole)
+
+
+def test_single_theory_law_keeps_declared_record():
+    from luthier.check import violatesR6
+    p = program('Codec : { parse : String -> Maybe Int, render : Int -> String }\n'
+                'RoundTrip (c : Codec) (n : Int) : Bool := true\n'
+                'Codec := RoundTrip')
+    result = elaborate_program(p)
+    assert alpha_equal(result[0].type, result[-1].type)
+    assert not violatesR6(p, 'Codec')
+
+
+def test_recursive_constructor_arrow_and_recursor_argument():
+    from luthier.elaborate import context_of, infer
+    p = program('N : U := data { zero : N; succ : N -> N }\n'
+                'recN (P : U) (z : P) (s : N -> P -> P) (n : N) : P\n'
+                'add (m n : N) : N := recN N m (fn k r { succ r }) n')
+    c = context_of(p)
+    assert c.types['succ'] == t.Pi('_', V('N'), V('N'))
+    body = elaborate_program(p)[-1].body.body.body
+    step = body.function.argument
+    assert alpha_equal(step, t.Lam('k', V('N'), t.Lam('r', V('N'), t.App(V('succ'), V('r')))))
+    assert alpha_equal(infer(step, c), t.Pi('k', V('N'), t.Pi('r', V('N'), V('N'))))
+
+
+def test_conjunction_combines_model_subtypes():
+    from luthier.elaborate import Context, infer
+    a = t.Subtype('x', V('T'), t.App(V('L1'), V('x')))
+    b = t.Subtype('y', V('T'), t.App(V('L2'), V('y')))
+    c = Context(types={'a': a, 'b': b})
+    expected = t.Subtype('x', V('T'), bin('&', t.App(V('L1'), V('x')), t.App(V('L2'), V('x'))))
+    assert alpha_equal(infer(bin('&', V('a'), V('b')), c), expected)

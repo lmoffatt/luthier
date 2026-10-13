@@ -15,7 +15,7 @@ import json
 from dataclasses import dataclass, field
 
 from . import surface as s, term as t
-from .kernel import substitute
+from .kernel import alpha_equal, substitute
 
 
 class ElaborationError(ValueError):
@@ -69,7 +69,8 @@ def infer(v, c):
         case t.Var(n):
             if n in {'List', 'Maybe', 'Failures'}:
                 return t.Pi('_', t.Universe(), t.Universe())
-            return c.types.get(n, t.Universe() if n in {'Int', 'Float64', 'Bool', 'String', 'Nat', 'Unit'} else t.Hole('type'))
+            ty = c.types.get(n, t.Universe() if n in {'Int', 'Float64', 'Bool', 'String', 'Nat', 'Unit'} else t.Hole('type'))
+            return theory_domains(ty, c)
         case t.Lit(k):
             return t.Var({t.IntConst: 'Int', t.FloatConst: 'Float64', t.StringConst: 'String'}[type(k)])
         case t.Universe() | t.World() | t.Pi() | t.Sigma() | t.Sum() | t.Record() | t.Data() | t.Subtype():
@@ -78,6 +79,23 @@ def infer(v, c):
             inner = c.child(); inner.types[n] = a
             return t.Pi(n, a, infer(b, inner))
         case t.App(f, a):
+            if isinstance(f, t.App) and f.function == t.Var('&'):
+                left = infer(f.argument, c)
+                right = infer(a, c)
+                if (isinstance(left, t.Subtype) and isinstance(right, t.Subtype)
+                        and alpha_equal(left.type, right.type)):
+                    law = substitute(right.name, t.Var(left.name), right.predicate)
+                    return t.Subtype(left.name, left.type,
+                                     apps(t.Var('&'), [left.predicate, law]))
+                # Laws may quantify different arguments after their model.
+                # Their conjunction is still a predicate over that model.
+                if isinstance(left, t.Pi) and isinstance(right, t.Pi):
+                    if (boolean_law(left) and boolean_law(right)
+                            and alpha_equal(left.domain, right.domain)):
+                        return theory_domains(t.Pi(left.name, left.domain, t.Var('Bool')), c)
+                if left == right:
+                    return left
+                return t.Hole('type')
             ty = infer(f, c)
             if isinstance(ty, t.Pi):
                 return substitute(ty.name, a, ty.codomain)
@@ -103,6 +121,30 @@ def infer(v, c):
         case t.Pair(a, b):
             return t.Sigma('_', infer(a, c), infer(b, c))
     return t.Hole('type')
+
+
+def theory_domains(ty, c):
+    """Keep a law's model domain tied to the declared theory record."""
+    if isinstance(ty, t.Pi):
+        domain = ty.domain
+        head = domain
+        args = []
+        while isinstance(head, t.App):
+            args.append(head.argument); head = head.function
+        if isinstance(head, t.Var):
+            declared = c.types.get(head.name)
+            for arg in reversed(args):
+                declared = substitute(declared.name, arg, declared.codomain) if isinstance(declared, t.Pi) else None
+            if isinstance(declared, t.Record):
+                domain = declared
+        return t.Pi(ty.name, domain, theory_domains(ty.codomain, c))
+    return ty
+
+
+def boolean_law(ty):
+    while isinstance(ty, t.Pi):
+        ty = ty.codomain
+    return ty == t.Var('Bool')
 
 
 def pattern(p, c):
@@ -315,6 +357,7 @@ def context_of(program):
             if act.type is not None or act.name not in c.types:
                 c.types[act.name] = curry(t.Pi, ps, annotation)
             if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
+                inner.types[act.name] = c.types[act.name]
                 for n, ty in act.body.constructors: c.types[n] = walk(ty, inner)
     for act in program:
         if isinstance(act, s.OperatorAct):
@@ -358,7 +401,14 @@ def elaborate_program(surface_program: s.SurfaceProgram) -> t.Program:
                         arms.append((pairs(pats, t.PPair), walk(clause.body, local)))
                     body = t.Match(pairs([t.Var(n) for n, _ in ps]), tuple(arms))
             body = curry(t.Lam, ps, body)
-            if act.type is None: annotation = infer(body, c); c.types[act.name] = annotation
+            if act.type is None:
+                inferred = infer(body, c)
+                # A theory's declaration supplies its record, while its body
+                # supplies the laws (4.R6, 4.S9).
+                declared = expected
+                if not isinstance(declared, t.Record):
+                    annotation = inferred
+                c.types[act.name] = annotation
             result.append(t.Define(act.name, annotation, body))
         elif isinstance(act, s.Datum): result.append(t.Datum(walk(act.value, c)))
     return tuple(result)
