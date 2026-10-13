@@ -9,6 +9,7 @@ remain values. This module neither translates surface trees nor calls the host.
 """
 
 # Update: fe3bdab, user request v4; audit codex-4.md.
+# Update: 23d23f4, 048cd55, 1c521a7, reference b1582ca; user request v5; codex-5.md.
 
 from __future__ import annotations
 
@@ -173,7 +174,7 @@ def _pattern_bindings(p: Pattern, q: Pattern) -> Env | None:
 
 
 def alpha_equal(a: Term, b: Term) -> bool:
-    """Compare both trees with a stack of nearest paired bindings (including patterns; Data names are fixed)."""
+    """Compare both trees with a stack of nearest paired bindings (including patterns and Data names)."""
     pending: list[tuple[Term, Term, Env]] = [(a, b, ())]
     while pending:
         s, t, env = pending.pop()
@@ -213,12 +214,12 @@ def alpha_equal(a: Term, b: Term) -> bool:
                         return False
                     pending.append((c, d, env))
             case Data(x, ps), Data(y, qs):
-                if x != y or len(ps) != len(qs):
+                if len(ps) != len(qs):
                     return False
                 for (k, c), (l, d) in zip(ps, qs):
                     if k != l:
                         return False
-                    pending.append((c, d, env))
+                    pending.append((c, d, ((x, y),) + env))
             case _ if isinstance(s, _LEAVES):
                 if s != t:
                     return False
@@ -438,7 +439,7 @@ def canonical(t: Term) -> Term:
             case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
                 inner = env
                 if isinstance(node, Data):
-                    y = node.name
+                    y = binder()
                     inner = ((node.name, y),) + env
                 result = []
                 for k, b in kvs:
@@ -675,4 +676,20 @@ def reduce(program: Program, fuel: int, t: Term) -> Term | None:
             return t
         t = value
         fuel -= 1
+    return None
+
+
+def eval_at(expected: type, t: Term, *, fuel: int = 1000) -> int | float | str | None:
+    """Evaluate scalar terms, checking their resulting constant type (term.lth §6).
+
+    Core arithmetic names are definitions of primitives. Fuel exhaustion, stuck
+    terms and type mismatch give None; fuel is a caller-selectable parameter.
+    """
+    constants = {int: IntConst, float: FloatConst, str: StringConst}
+    if expected not in constants:
+        raise TypeError("expected must be int, float or str")
+    program = tuple(Define(op, Universe(), Primitive(op)) for op in sorted(_OPERATORS))
+    value = reduce(program, fuel, t)
+    if isinstance(value, Lit) and type(value.constant) is constants[expected]:
+        return value.constant.value
     return None

@@ -8,6 +8,7 @@ while reduce uses None for fuel exhaustion. Lists are tuples; constructors retai
 """
 
 # Update: fe3bdab, user request v4; audit codex-4.md.
+# Update: 23d23f4, 048cd55, 1c521a7; user request v5; audit codex-5.md.
 
 from __future__ import annotations
 
@@ -172,7 +173,7 @@ class Primitive:
 
 @dataclass(frozen=True)
 class Axiom:
-    pass
+    text: str
 
 
 @dataclass(frozen=True)

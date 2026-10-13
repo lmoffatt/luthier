@@ -9,6 +9,8 @@ is split among its children (matching the prompt's size-zero convention).
 Update prompt: user request v2, recorded in codex-2.md.
 Update prompt: user request v3; source commits cc2542d and 2409c59, codex-3.md.
 Update: fe3bdab, user request v4; generator v3 adds Let; same seed and budgets.
+Update: user request v5, 23d23f4/048cd55/1c521a7, reference b1582ca;
+generator v4 carries Axiom text, same seed and budgets.
 Tests are finite law evidence, not a universal semantic certificate.
 """
 
@@ -19,7 +21,7 @@ import random
 import pytest
 
 from luthier.kernel import (
-    alpha_equal, canonical, free_names, head, pattern_names, step, reduce, substitute, swap, unqualify,
+    alpha_equal, canonical, eval_at, free_names, head, pattern_names, step, reduce, substitute, swap, unqualify,
 )
 from luthier.term import (
     Act, App, Axiom, Constant, Data, Datum, Declare, Define, Extern, FloatConst,
@@ -77,9 +79,9 @@ def term(rng: random.Random, size: int) -> Term:
     """At zero only non-recursive Term constructors; otherwise split size-1."""
     leaves = (Var, Lit, Universe, World, Extern, Primitive, Axiom, Hole)
     cls = rng.choice(leaves if size == 0 else leaves + BINDERS + (App, Pair, Match, Inj, Sum, Data, Record, RecordValue, Proj, Let))
-    if cls in (Universe, World, Axiom):
+    if cls in (Universe, World):
         return cls()
-    if cls in (Var, Hole, Extern, Primitive):
+    if cls in (Var, Hole, Extern, Primitive, Axiom):
         return cls(rng.choice(NAMES))
     if cls is Lit:
         return Lit(constant(rng))
@@ -121,7 +123,7 @@ def corpus() -> tuple[Term, ...]:
     ty = Universe()
     return (
         *(Var(x) for x in NAMES), Lit(IntConst(-2)), Lit(FloatConst(1.25)), Lit(StringConst("中文")),
-        ty, World(), Extern("host.fn"), Primitive("+"), Axiom(), Hole("m.h"),
+        ty, World(), Extern("host.fn"), Primitive("+"), Axiom("axiom text"), Hole("m.h"),
         Lam("x", Var("x"), Lam("x", Var("x"), Var("x"))),
         Let("x", Var("x"), Var("x"), Pair(Var("x"), Var("y"))),
         Let("y", ty, Var("x"), Let("y", Var("y"), Var("y"), Var("y"))),
@@ -195,7 +197,8 @@ def alpha_variant(t: Term) -> Term:
             case Proj(a, l):
                 return Proj(walk(a, env), l)
             case Data(x, kvs):
-                return Data(x, tuple((k, walk(b, env | {x: x})) for k, b in kvs))
+                y = fresh()
+                return Data(y, tuple((k, walk(b, env | {x: y})) for k, b in kvs))
             case Match(a, arms):
                 value = walk(a, env)
                 result = []
@@ -257,7 +260,6 @@ def test_free_variables_are_names(rng):
         assert alpha_equal(Var(x), Var(y)) == (x == y)
 
 
-@pytest.mark.xfail(strict=True, reason="RenameBound swaps Data names that AlphaPartsAgree requires fixed")
 def test_rename_bound(samples, rng):
     failures = []
     for b in samples:
@@ -325,17 +327,26 @@ def parts_agree(eq, s, t):
             return eq(f, g) and eq(x, y)
         case (Inj(l, u), Inj(k, v)) | (Proj(u, l), Proj(v, k)):
             return l == k and eq(u, v)
-        case (Sum(xs), Sum(ys)) | (Record(xs), Record(ys)) | (RecordValue(xs), RecordValue(ys)) | (Data(_, xs), Data(_, ys)):
-            return (not isinstance(s, Data) or s.name == t.name) and len(xs) == len(ys) and all(k == j and eq(u, v) for (k, u), (j, v) in zip(xs, ys))
+        case (Sum(xs), Sum(ys)) | (Record(xs), Record(ys)) | (RecordValue(xs), RecordValue(ys)):
+            return len(xs) == len(ys) and all(k == j and eq(u, v) for (k, u), (j, v) in zip(xs, ys))
+        case Data(x, xs), Data(y, ys):
+            def pairs_agree(ds):
+                return len(xs) == len(ds) and all(k == j and eq(u, v) for (k, u), (j, v) in zip(xs, ds))
+            return (x == y and pairs_agree(ys)) or (
+                all(x not in free_names(v) for _, v in ys)
+                and pairs_agree(tuple((k, v if x == y else swap(y, x, v)) for k, v in ys)))
         case Match(u, xs), Match(v, ys):
             if not eq(u, v) or len(xs) != len(ys):
                 return False
             for (p, b), (q, c) in zip(xs, ys):
                 if pattern_shape(p) != pattern_shape(q):
                     return False
-                for x, y in zip(pattern_names(p), pattern_names(q)):
+                remaining = list(pattern_names(q))
+                for x in pattern_names(p):
+                    y = remaining.pop(0)
                     if x != y:
                         c = swap(y, x, c)
+                        remaining = [x if n == y else y if n == x else n for n in remaining]
                 if not eq(b, c):
                     return False
             return True
@@ -374,7 +385,7 @@ def test_alpha_parts_agree(samples):
         u = alpha_variant(t)
         assert alpha_equal(t, u)
         assert parts_agree(alpha_equal, t, u)
-    for s, t in ((Lit(IntConst(1)), Lit(IntConst(2))), (Primitive("+"), Primitive("*")), (Inj("l", Universe()), Inj("r", Universe())), (Data("D", ()), Data("E", ())), (App(Var("x"), Var("y")), App(Var("y"), Var("x")))):
+    for s, t in ((Lit(IntConst(1)), Lit(IntConst(2))), (Primitive("+"), Primitive("*")), (Inj("l", Universe()), Inj("r", Universe())), (App(Var("x"), Var("y")), App(Var("y"), Var("x")))):
         assert not alpha_equal(s, t)
 
 
@@ -385,8 +396,7 @@ def test_weak_alpha_fails_parts_agree():
     assert not parts_agree(weak, s, t)
 
 
-@pytest.mark.xfail(strict=True, reason="AlphaPartsAgree sequential renameAll fails on permuted linear binders")
-def test_alpha_parts_agree_permuted_pattern_counterexample():
+def test_alpha_parts_agree_permuted_pattern():
     s = Match(Var("v"), ((PPair(PVar("x"), PVar("y")), Var("x")),))
     t = Match(Var("v"), ((PPair(PVar("y"), PVar("x")), Var("y")),))
     assert alpha_equal(s, t)
@@ -438,7 +448,6 @@ def test_subst_passes_binder(samples, rng):
         assert x == y or alpha_equal(substitute(x, s, Let(y, ty, ty, b)), Let(y, substitute(x, s, ty), substitute(x, s, ty), substitute(x, s, b)))
 
 
-@pytest.mark.xfail(strict=True, reason="CaptureCase allows a fresh z that renames a fixed Data name")
 def test_subst_avoids_capture(samples, rng):
     cases = [("y", "z", Var("y"), Data("y", ()))]
     for source in samples:
@@ -553,7 +562,7 @@ def test_holes_stay(samples, rng):
         assert step(p, Match(Var(f), ((PLit(constant(rng)), b), (PWild(), c)))) is None
         assert steps_to(step(p, Match(Var(f), ((PWild(), c),))), c)
         assert step((), Hole(f)) is None
-        assert step((), Axiom()) is None
+        assert step((), Axiom(f)) is None
 
 
 def test_iota(samples, rng):
@@ -786,3 +795,45 @@ def test_let_scope_traversal_and_capture():
     assert not alpha_equal(t, Let("z", Var("x"), Var("z"), Pair(Var("z"), Var("y"))))
     assert substitute("x", Var("y"), Let("y", Var("x"), Var("x"), Pair(Var("x"), Var("y")))) == Let("y'", Var("y"), Var("y"), Pair(Var("y"), Var("y'")))
     assert step((), Let("x", Hole("ty"), Var("loop"), Universe())) == Universe()
+
+
+def test_unqualify_removes():
+    assert unqualify("m.f") == "f"
+    assert unqualify("a.b.c") == "c"
+    assert unqualify("f") == "f"
+
+
+def test_axiom_text_stays_literal():
+    for text in ("", "x", "m.f", "axiom 中文"):
+        t = Axiom(text)
+        assert free_names(t) == set()
+        assert head(t) == "Axiom"
+        assert swap("x", "y", t) == t
+        assert substitute("x", Var("y"), t) == t
+        assert canonical(t) == t
+        assert step((), t) is None
+        assert reduce((), 1, t) == t
+        assert alpha_equal(t, Axiom(text))
+        assert not alpha_equal(t, Axiom(text + "!"))
+
+
+def test_eval_computes(rng):
+    cases = [(0, 0, ""), (-10**40, 10**40 + 1, "+")]
+    cases += [(rng.randint(-10**20, 10**20), rng.randint(-10**20, 10**20), rng.choice(NAMES)) for _ in range(CASES)]
+    for i, j, x in cases:
+        value = Lit(IntConst(i))
+        assert eval_at(int, App(App(Var("+"), value), Lit(IntConst(j)))) == i + j
+        assert eval_at(int, App(Lam(x, Var("Int"), Var(x)), value)) == i
+        assert eval_at(int, Let(x, Var("Int"), value, Var(x))) == i
+
+
+def test_eval_constants_and_checks(rng):
+    for _ in range(CASES):
+        i, s = rng.randint(-10**20, 10**20), rng.choice(("", "text", "中文"))
+        assert eval_at(int, Lit(IntConst(i))) == i
+        assert eval_at(str, Lit(StringConst(s))) == s
+        assert eval_at(int, Lit(StringConst(s))) is None
+    assert eval_at(int, App(App(Var("+"), Lit(IntConst(1))), Lit(IntConst(2)))) == 3
+    assert eval_at(int, Axiom("unproved")) is None
+    assert eval_at(int, Lit(IntConst(1)), fuel=0) is None
+    assert eval_at(int, Lit(FloatConst(1.0))) is None
