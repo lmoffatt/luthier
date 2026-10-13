@@ -28,7 +28,8 @@ reference to a Luthier value beyond the call.
 
 Alternative: forbid (c) and rewrite `sampleFull` on the Luthier side; keep (a) and (b).
 
-Answer: 
+Answer (Luciano, 2026-10-14 ~10:20, verbatim): "1--> admitir (suena caro pero necesario de ultima
+como control)"
 
 ## Q2. 4.R3 read over a library or per file (unblocks a clean checker and the tag v0.2)
 
@@ -46,7 +47,13 @@ self-contained: the importers are in the repository) and L2.7 (a definition is a
 concept may be completed by its users). Alternative: repeat the role laws in the defining file
 (four short laws in core.lut and laws.lth; no code change), at the cost of saying things twice.
 
-Answer: 
+Answer (Luciano, verbatim): "2--> la verdad prefiero que las construcciones tengan su ley en su
+archivo. pero es peor repetir cosas. No se puede definir el rol en core, que seria lo correcto?"
+The coordinator's reading, taken as the decision: the role stays in the defining file and
+nothing is repeated: core.lut claims the theories of kernel_laws.lth for its own data (the
+bindings of `Unit`, `Bool`, `Maybe`, `List` move from kernel_models.lut into core.lut), and the
+law that gives `Coverage`'s constructors their roles moves from test.lth into laws.lth. 4.R3 and
+the checker unchanged.
 
 ## Not asked here, already decided by the night as reversible defaults
 
