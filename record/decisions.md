@@ -2230,6 +2230,8 @@ D-2026-10-13-t  The laws of role of the core's `data` (L2.7, 4.R3): `Bool` has `
                 `fold` gives `cons` its role), the model's proposal, accepted ("Si, dale").
 Author:     Luciano
 Quote:      "Bool tiene not, and y todas las leyes booleanas, Nat tiene las suyas. Unit y Empty son first y terminal object"
+            "Ves que todo tiene leyes, es cuestion de buscarlas."
 Source:     chat:da165104:3712
-Kind:       spec (3.S7, 3.S36) and the plan (step 2.1)
+            chat:da165104:3733
+Kind:       spec (3.S7, 3.S36), the plan (step 2.1), principles (L2.7, his words added)
 Status:     current
