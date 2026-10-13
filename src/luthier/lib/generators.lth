@@ -1,0 +1,34 @@
+-- generators.lth: generators as values, the generic ones over a type's form, sizes, subtypes,
+-- censuses and budgets; and the generators of programs the checker's laws are tested on.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (layer 2 of
+-- record/plan-from-zero-2026-10-13-execution.md, step 5.1). Sources: spec 7.S1 to 7.S8, 7.R1 to
+-- 7.R4 (generators are values; sampling inverts a cumulative weight; the functors over a type;
+-- numbers, subtypes, dependent records; budgets); 7.S3's proposed sized rule for recursive `data`;
+-- program.lth's `Violating` and `Clean` domains (review of layers 0-1, B); L2.7; L5.18 (every
+-- budget an argument). Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+--
+-- What this file states. A generator of `T` is a value of `Gen T`: from a size and a seed, a
+-- value and the next seed (7.S1). Its validity is its type: every value it gives belongs to `T`,
+-- which for a subtype is the obligation of its predicate. What else a generator promises (to reach
+-- every value of a finite type, to keep a value's size within the size asked, to be determined by
+-- its seed) is a theory each generator is a model of. Types are not inspected here (no generator
+-- gives a type, 7.R2), so the functors of 7.S3 are stated per form, with the instances the core's
+-- types need, and the rest is the certifier's.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones, checks it with
+-- `luthier parse src/luthier/lib/generators.lth`, sets its status to done here, and commits.
+--
+--   §1 Seeds and generators: `Seed`, `Gen T`, the random source and its laws (7.S1).        todo
+--   §2 Sampling by weight: the cumulative inversion over a list and an interval, the two
+--      metrics of numbers (7.S2, 7.S4).                                                     todo
+--   §3 Exhaustive and sized generators: every value of a finite type up to the size; the
+--      size of a recursive `data` bounding its depth (7.S3, 7.R3).                           todo
+--   §4 Subtypes and dependent records: bounds or a filter with its budget; components in
+--      order (7.S6, 7.S7).                                                                  todo
+--   §5 Censuses: a function over an infinite domain or a model of a theory from an explicit
+--      list (7.R4); bindings by parameter and by type (7.R1).                                todo
+--   §6 Budgets, every one an argument (7.S8).                                               todo
+--   §7 The programs a rule of the checker is tested on: generators of `Violating` and `Clean`
+--      for each rule, the census of tests/spec/ first, then one-edit mutations (program.lth). todo
