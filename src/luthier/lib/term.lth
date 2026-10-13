@@ -276,6 +276,11 @@ agree (a : Alpha) (r s : Maybe Term) : Bool := match r {
   nothing -> true ;
   just u -> match s { nothing -> true ; just v -> a.alphaEq u v } }
 isJust (r : Maybe Term) : Bool := match r { nothing -> false ; just u -> true }
+-- whether the program gives a name a definition or a declaration: a law about a name used as a
+-- constructor or an operator holds only where the program does not redefine it (Codex, writing
+-- the models); the first act naming a name is the one that counts, 4.R12 rejecting a second
+defines (p : Program) (x : String) : Bool := match p { nil -> false ;
+  cons a rest -> (match a { Declare y t -> y == x ; Define y t b -> y == x ; Datum t -> false }) or defines rest x }
 
 -- 3.S14, beta: a lambda applied is its body with the argument for its variable
 Beta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (x : String) (ty body arg : Term) : Bool :=
@@ -294,7 +299,7 @@ HolesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (
 -- matches, with the pattern's variables substituted; an arm that does not match is passed over
 Iota (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l : String) (y : String) (v b : Term) : Bool :=
   agree a (m.reduce p n (Match (Inj l v) [(PInj l (PVar y), b)])) (m.reduce p n (sb.subst y v b))
-  and agree a (m.reduce p n (Match (App (Var l) v) [(PCon l [PVar y], b)])) (m.reduce p n (sb.subst y v b))
+  and (defines p l or agree a (m.reduce p n (Match (App (Var l) v) [(PCon l [PVar y], b)])) (m.reduce p n (sb.subst y v b)))
   and agree a (m.reduce p n (Match v [(PWild, b)])) (m.reduce p n b)
 IotaPair (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (y : String) (f : NotFreeIn) (b : Term) : Bool :=
   y == f.y or agree a (m.reduce p n (Match (Pair f.s (Var y)) [(PPair (PVar y) (PVar f.y), b)]))
@@ -307,7 +312,7 @@ IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (
 -- operators being the names `+`, `*` and `==` that 2.S12 translates the infix forms into, and
 -- `true`, `false` the constructors of `Bool`
 Prim (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (i j : Int) : Bool :=
-  agree a (m.reduce p n (App (App (Var "+") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i + j))))
+  defines p "+" or defines p "*" or defines p "==" or defines p "true" or defines p "false" or agree a (m.reduce p n (App (App (Var "+") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i + j))))
   and agree a (m.reduce p n (App (App (Var "*") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i * j))))
   and agree a (m.reduce p n (App (App (Var "==") (Lit (IntConst i))) (Lit (IntConst j))))
               (just (Var (if i == j then "true" else "false")))
