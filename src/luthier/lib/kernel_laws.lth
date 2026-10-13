@@ -102,7 +102,7 @@ Terminal (T : U) := OnlyThePoint T
 -- holds because no case exists: an exhaustive test finds none, and its certificate says the law
 -- holds vacuously (7.S12), which here is the claim itself.
 Initial (T : U) : { absurd : (A : U) -> T -> A }
-NoValue (T : U) (i : Initial T) (x : T) : Bool := false
+NoValue (T : U) (i : Initial T) (x : T) : Bool := i.absurd Bool x and not (i.absurd Bool x)
 Initial (T : U) := NoValue T
 
 -- ---------------------------------------------------------------- §3 Boolean algebra
