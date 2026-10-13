@@ -5,6 +5,7 @@
 -- Records/law update: term.lth at f421684 and 9a89873; user request v2, recorded in codex.md.
 -- After-review sources: cc2542d and 2409c59; user request v3, recorded in codex.md.
 -- Let/binder update: fe3bdab, 048cd55 and 23d23f4; user request v4, recorded in codex.md.
+-- Constructor update: term.lth at 66d5cae; user request v5, recorded in codex.md.
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
@@ -245,13 +246,22 @@ stepPattern (env : Program) (p : Pattern) (v : Term) : PatternStep := match p {
     Hit bs -> Hit bs ; Miss -> Miss ; Blocked -> Blocked ; Demand b -> Demand (Inj k b) }
     else Miss ; _ -> demandHead env v } ;
   PCon c ps -> stepConstructorPattern env c ps v }
--- A constructor spine needs at least one argument and a name not declared/defined.
--- A bare unresolved Var is always a hole, never a nullary constructor.
+-- Data constructor keys are values, bare or applied; explicit acts keep priority.
+-- Free applied names remain admissible for Iota; other bare names remain holes.
+dataConstructor (env : Program) (x : String) : Bool := match env {
+  nil -> false ; cons act rest -> match act {
+    Define t ty (Data self cs) -> constructorKey cs x or dataConstructor rest x ;
+    _ -> dataConstructor rest x } }
+constructorKey (cs : List (String * Term)) (x : String) : Bool := match cs {
+  nil -> false ; cons (c, ty) rest -> c == x or constructorKey rest x }
 constructorTerms (env : Program) (v : Term) (args : List Term) : Maybe (String * List Term) := match v {
-  Var x -> match args { nil -> nothing ; cons a rest -> if free env x then just (x, args) else nothing } ;
+  Var x -> if not (free env x) then nothing
+    else if dataConstructor env x then just (x, args)
+    else match args { nil -> nothing ; cons a rest -> just (x, args) } ;
   App f a -> constructorTerms env f (cons a args) ; _ -> nothing }
 knownHead (env : Program) (v : Term) : Bool := match v {
-  Var x -> false ; Hole x -> false ; Axiom r -> false ; Match s arms -> false ; Proj r l -> false ;
+  Var x -> free env x and dataConstructor env x ;
+  Hole x -> false ; Axiom r -> false ; Match s arms -> false ; Proj r l -> false ;
   App f a -> match constructorTerms env v nil { just cs -> true ; nothing -> false } ; _ -> true }
 demandHead (env : Program) (v : Term) : PatternStep := match stepHead env v {
   Next w -> Demand w ; Done w -> if knownHead env v then Miss else Blocked }
