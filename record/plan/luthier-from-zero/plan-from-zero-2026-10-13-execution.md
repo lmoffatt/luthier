@@ -380,3 +380,9 @@ check` and `luthier certify` here.
   places and what an action changes, externs as routes, print and reading a file); §5 named worlds
   waits for evidence, §6 the slice's externs for the inventory. Step 1.1.d (the lexer as a grammar)
   is the coordinator's subagent's, in grammar.lth.
+- 2026-10-13, night: the internal review of layers 2 and 3 (record/IA/opus-2026-10-13/
+  review-layers-2-3-report.md) applied: world.lth draft 1 (0c920f0, laws over the representation
+  and descriptions, D-2026-10-13-a), generators.lth draft 1 (6dae811), test.lth draft 1
+  (33447ea), library.lth (ac29b54), chapters 7, 10, 12; the reply with each commit in
+  review-layers-2-3-reply.md. The hello world runs (`luthier run examples/hello.lut`); its host
+  side follows world.lth draft 1 (the coordinator's). D-2026-10-13-ag applied (87d6091).
