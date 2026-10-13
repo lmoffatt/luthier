@@ -147,7 +147,7 @@ freeVars (t : Term) : List String := match t {
   Match s arms -> concat (freeVars s) (armsFree arms) ;
   Sum kvs -> pairsFree kvs ;
   Data n cs -> remove n (pairsFree cs) ;
-  Record kvs -> pairsFree kvs ; RecordValue kvs -> pairsFree kvs ;
+  Record kvs -> telescopeFree kvs ; RecordValue kvs -> pairsFree kvs ;
   Proj r x -> freeVars r ;
   Let x ty v b -> concat (freeVars ty) (concat (freeVars v) (remove x (freeVars b))) ;
 }
@@ -155,6 +155,11 @@ armsFree (arms : List (Pattern * Term)) : List String := match arms { nil -> nil
   cons (p, b) rest -> concat (removeAll (patternVars p) (freeVars b)) (armsFree rest) }
 pairsFree (kvs : List (String * Term)) : List String :=
   match kvs { nil -> nil ; cons (k, v) rest -> concat (freeVars v) (pairsFree rest) }
+-- a record type is a telescope (7.S7's dependent records, 12.S1, arrays.lth's `Mat`): a label binds
+-- in the types of the later fields, never in its own or in an earlier one; a `RecordValue`'s labels
+-- bind nothing (kernel.py bite 11, aa198f2, by a Sonnet agent; stated here by luthier-03)
+telescopeFree (kvs : List (String * Term)) : List String :=
+  match kvs { nil -> nil ; cons (k, v) rest -> concat (freeVars v) (remove k (telescopeFree rest)) }
 
 swapName (x y n : String) : String := if n == x then y else if n == y then x else n
 swapPattern (x y : String) (p : Pattern) : Pattern := match p {
@@ -328,16 +333,23 @@ SubstStopsAtShadow (a : Alpha) (m : Substitution a) (x : String) (s ty b : Term)
   and a.alphaEq (m.subst x s (Subtype x ty b)) (Subtype x (m.subst x s ty) b)
   and a.alphaEq (m.subst x s (Let x ty s b)) (Let x (m.subst x s ty) (m.subst x s s) b)
   and a.alphaEq (m.subst x s (Match ty [(PVar x, b)])) (Match (m.subst x s ty) [(PVar x, b)])
+  and a.alphaEq (m.subst x s (Record [(x, ty), ("later", b)])) (Record [(x, m.subst x s ty), ("later", b)])
 -- under a binder whose name is not free in `s`, substitution goes in
 SubstPassesBinder (a : Alpha) (m : Substitution a) (x : String) (f : NotFreeIn) (ty b : Term) : Bool :=
   x == f.y or (a.alphaEq (m.subst x f.s (Lam f.y ty b)) (Lam f.y (m.subst x f.s ty) (m.subst x f.s b))
                and a.alphaEq (m.subst x f.s (Pi f.y ty b)) (Pi f.y (m.subst x f.s ty) (m.subst x f.s b))
                and a.alphaEq (m.subst x f.s (Sigma f.y ty b)) (Sigma f.y (m.subst x f.s ty) (m.subst x f.s b))
                and a.alphaEq (m.subst x f.s (Subtype f.y ty b)) (Subtype f.y (m.subst x f.s ty) (m.subst x f.s b))
-               and a.alphaEq (m.subst x f.s (Let f.y ty ty b)) (Let f.y (m.subst x f.s ty) (m.subst x f.s ty) (m.subst x f.s b)))
+               and a.alphaEq (m.subst x f.s (Let f.y ty ty b)) (Let f.y (m.subst x f.s ty) (m.subst x f.s ty) (m.subst x f.s b))
+               and a.alphaEq (m.subst x f.s (Record [(f.y, ty), ("later", b)])) (Record [(f.y, m.subst x f.s ty), ("later", m.subst x f.s b)]))
 -- and under a binder whose name is free in `s`, without capture: the result is the binder renamed
 -- to a name fresh for both, then substituted into (review of layers 0-1, A: the capture case was
--- never drawn). Its domain is drawn from `s`'s free names, so the case is not rare.
+-- never drawn). Its domain is drawn from `s`'s free names, so the case is not rare. A record's
+-- label is not renamed, since it is part of the type (D-2026-10-13-x), so a label free in `s` is
+-- captured by the later fields: no law states that case, and neither specimen avoids it (kernel.py
+-- notes the limit). Avoiding it needs a binder apart from the labels, as `Data` binds its own name
+-- over its constructors; that changes 3.S29's `Record`, and is Luciano's (asked through the
+-- coordinator, 2026-10-14).
 capturable (y z : String) (s b : Term) : Bool :=
   member y (freeVars s) and not (member z (freeVars s)) and not (member z (freeVars b)) and not (y == z)
 CaptureCase : U := { y z : String, s b : Term | capturable y z s b }
