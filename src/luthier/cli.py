@@ -15,7 +15,38 @@ def main(argv: list[str] | None = None) -> int:
     p_parse = sub.add_parser("parse", help="parse Luthier source files")
     p_parse.add_argument("--tree", action="store_true", help="print each parsed act")
     p_parse.add_argument("files", nargs="+")
+    p_eval = sub.add_parser("eval", help="reduce a definition to weak head normal form")
+    p_eval.add_argument("file")
+    p_eval.add_argument("name")
+    p_eval.add_argument("--fuel", type=int, default=10000)
     ns = parser.parse_args(argv)
+
+    if ns.command == "eval":
+        from .elaborate import ElaborationError, elaborate_program, show_term
+        from .kernel import reduce
+        from . import term as t
+        try:
+            result = parse(Path(ns.file).read_text(encoding="utf-8"))
+            if isinstance(result, ParseFailed):
+                for error in result.errors:
+                    print(f"{ns.file}:{error.line}:{error.column}: {error.message}")
+                return 1
+            program = elaborate_program(result.program)
+            if not any(isinstance(a, t.Define) and a.name == ns.name for a in program):
+                print(f"unknown definition: {ns.name}")
+                return 1
+            # Bootstrap core arithmetic, retaining user definitions as overrides.
+            program += tuple(t.Define(op, t.Universe(), t.Primitive(op))
+                             for op in ("+", "-", "*", "==", "<"))
+            value = reduce(program, ns.fuel, t.Var(ns.name))
+            if value is None:
+                print(f"fuel spent ({ns.fuel})")
+                return 1
+            print(show_term(value))
+            return 0
+        except (OSError, ElaborationError, ValueError) as exc:
+            print(f"{ns.file}: {exc}")
+            return 1
 
     failed = False
     for raw_path in ns.files:

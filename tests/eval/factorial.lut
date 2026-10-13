@@ -1,0 +1,4 @@
+Nat : U := data { zero : Nat; succ : Nat -> Nat }
+factorial (n : Nat) : Int := match n { zero -> 1; succ k -> (count n) * (factorial k) }
+count (n : Nat) : Int := match n { zero -> 0; succ k -> 1 + count k }
+answer : Int := factorial (succ (succ (succ (succ zero))))
