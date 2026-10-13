@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 f6f23fd4505f, commit 548b320 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 e4c494c126ca, commit 903b29e (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -138,7 +138,9 @@ demanded).
   it one is a law it must follow, stating the role of each part. Distinct constructors are free and
   state no role; an observer that only lists them is an automatic accessor, not a law; a `data` with
   no law of its constructors' roles is a collection and is written as an alias (D-2026-10-13-p,
-  D-2026-10-07-e). It costs thought, and that is its purpose. [settled]
+  D-2026-10-07-e). It costs thought, and that is its purpose. Everything has laws; it is a matter of
+  finding them, usually in the place the thing holds in a known structure (`Unit` terminal, `List` the
+  free monoid, D-2026-10-13-t). [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
 Status: settled; clause 6 settled (D-2026-10-13-i, -j, -n); clause 7 his (D-2026-10-13-p).

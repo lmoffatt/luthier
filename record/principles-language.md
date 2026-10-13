@@ -504,7 +504,9 @@ L2.7   (His words) A definition is a concept, and a collection of types is not. 
        constructors are free and state no role; an observer that only lists them is an automatic
        accessor, not a law; a `data` with no law of its constructors' roles is a collection and is
        written as an alias (D-2026-10-13-p, D-2026-10-07-e). It costs thought, and that is its
-       purpose. [settled]
+       purpose. Everything has laws; it is a matter of finding them, usually in the place the thing
+       holds in a known structure (`Unit` terminal, `List` the free monoid, D-2026-10-13-t).
+       [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j
 Rests on:   O9 (the kind of a hole in the elaborated form, for the spec)
 Source:     Luciano, 2026-05-29 (dialogue:20260529T1400:tipos-no-definidos-y-forward-reference); the
