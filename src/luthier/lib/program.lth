@@ -269,8 +269,13 @@ violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
 -- `Failures E` or with parameters (review of layers 0-1, B). Whether the law states the
 -- constructor's role, and not only lists it, a test cannot decide (4.S19 reports it). A rule
 -- violated by any constructor without such a law rejects (D-2026-10-13-aa, Q3).
+-- 4.R3 with 1.S7: "a projection `e.f` counts what e contains", so a dotted name `v.n` touches `v`
+-- (`namesIn` gives `v.n` whole). [proposed] Reading 1.S7's occurrence as 4.R3's touch: arrays.lth's
+-- `VecOf`, `{ v : Vec A | v.n == k }`, touches `v` (report of the leftovers agent, f8c5f40).
 untouched (k : List String) (labels : List String) (law : Surface) : Bool :=
-  match labels { nil -> false ; cons l rest -> not (member l (namesIn k law)) or untouched k rest law }
+  match labels { nil -> false ; cons l rest -> not (touchesName l (namesIn k law)) or untouched k rest law }
+touchesName (l : String) (ns : List String) : Bool :=
+  match ns { nil -> false ; cons m rest -> m == l or namePrefix m == l or touchesName l rest }
 predicateUntouched (k : List String) (isPredicate : Bool) (t : Surface) : Bool := match t {
   record fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
   subtype q a law -> (match patternBinds k q { nil -> true ; vs -> untouched k vs law }) ;
@@ -372,8 +377,16 @@ fieldsReadIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t
 lawReads (p : SurfaceProgram) : List String := lawReadsIn (claimedLaws p) p
 lawReadsIn (laws : List String) (acts : SurfaceProgram) : List String := match acts { nil -> nil ;
   cons act rest -> match act {
-    define x bs t b -> if member x laws then concat (bodyReads b) (lawReadsIn laws rest) else lawReadsIn laws rest ;
+    define x bs t b -> if member x laws then concat (bindersReads bs) (concat (bodyReads b) (lawReadsIn laws rest))
+                       else lawReadsIn laws rest ;
     _ -> lawReadsIn laws rest } }
+-- 4.R3 with 1.S7: "the annotation of a binder" is an occurrence (in type position), so a law reads
+-- the fields its binders' types and defaults name, as it reads those of its body. [proposed]
+-- Reading 1.S7 for 4.R3's reads: tables.lth's `NoCellsOffSchema (t : Table) (c : String) (r : Fin
+-- t.nRows)` reads `nRows` (report of the leftovers agent, f8c5f40).
+bindersReads (bs : List Binder) : List String := match bs { nil -> nil ;
+  cons b rest -> concat (match b { explicit xs t d -> concat (fieldsRead t) (match d { nothing -> nil ; just e -> fieldsRead e }) ;
+                                   implicit xs t -> fieldsRead t }) (bindersReads rest) }
 bodyReads (b : Body) : List String := match b {
   termBody u -> fieldsRead u ; clausesBody cs -> clausesReads cs ; dataBody cs -> nil }
 clausesReads (cs : List Clause) : List String := match cs { nil -> nil ; cons c rest -> concat (fieldsRead c.body) (clausesReads rest) }
@@ -397,10 +410,13 @@ atUniverse (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Bool := typeO
 
 -- 4.R4: a definition at `U` makes a new type only if its body is a subtype with a predicate, a
 -- record with a law, or a `data` (a whitelist, as the rule reads); any other body at `U`, an
--- anonymous structure or a type already named, is to be an alias. An extern is 4.R5's.
+-- anonymous structure or a type already named, is to be an alias. An extern is 4.R5's. A
+-- `primitive` makes a type as 11.R1 prescribes: "`Int : U := primitive "integer"`, `Real : U :=
+-- primitive "real"`, ... `String : U := primitive "unicode"`"; that it is allowed only in
+-- `core.lut` (11.R2) is a rule on files, not read here.
 makesAType (b : Body) : Bool := match b {
   dataBody cs -> true ;
-  termBody u -> (match u { subtype q a law -> true ; record fs law -> not (law == nothing) ; _ -> isExtern u }) ;
+  termBody u -> (match u { subtype q a law -> true ; record fs law -> not (law == nothing) ; _ -> isExtern u or isPrimitive u }) ;
   clausesBody cs -> false ;
 }
 violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
@@ -408,6 +424,8 @@ violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
 
 -- 4.R5: an extern gives a value, never a type, unless it is provisional
 isExtern (t : Surface) : Bool := match t { app f a -> isExtern f ; name s -> s == "extern" ; _ -> false }
+-- 11.R1: a body `primitive "..."` states what the interpreter provides
+isPrimitive (t : Surface) : Bool := match t { app f a -> isPrimitive f ; name s -> s == "primitive" ; _ -> false }
 isProvisional (t : Surface) : Bool :=
   match t { app f a -> (match a { namedArg x v -> x == "provisional" ; _ -> false }) or isProvisional f ; _ -> false }
 -- and its type must be defined (4.R2 applies to an extern as to any body)
@@ -478,12 +496,26 @@ violatesR2R6 (p : SurfaceProgram) (n : String) : Bool :=
 
 -- 4.R13: one meaning of an operator per argument types: two `operator` acts that bind one symbol
 -- to two functions of the same declared type are two models of one type (D-2026-10-11-j); reported
--- under the name of each function (check.py, step 4.1)
+-- under the name of each function (check.py, step 4.1). 4.R13: "a second meaning of an operator on
+-- the same types refused". The declared type is `typeOfAct`'s, the one the definition writes or else
+-- its declaration's: `declaredSurface` alone is `nothing` whenever the type is written on the
+-- definition, so any two such functions looked alike (core.lut's `intPlus` and `floatPlus`; report
+-- of the leftovers agent, f8c5f40). [proposed] The types of a definition's binders are part of its
+-- declared type, compared in order; two spellings of one type (`(a : Int) : Int` and `: Int ->
+-- Int`) still differ on the surface, which the checker, comparing elaborated types, does not.
+signatureOf (p : SurfaceProgram) (n : String) : List Surface * Maybe Surface := signatureIn p p n
+signatureIn (whole acts : SurfaceProgram) (n : String) : List Surface * Maybe Surface := match acts {
+  nil -> (nil, declaredSurface whole n) ;
+  cons act rest -> match act { define x bs t b -> if x == n then (binderTypes bs, typeOfAct whole n t) else signatureIn whole rest n ;
+                               _ -> signatureIn whole rest n } }
+binderTypes (bs : List Binder) : List Surface := match bs { nil -> nil ;
+  cons b rest -> concat (match b { explicit xs t d -> repeatFor xs t ; implicit xs t -> repeatFor xs t }) (binderTypes rest) }
+repeatFor (xs : List String) (t : Surface) : List Surface := match xs { nil -> nil ; cons x rest -> cons t (repeatFor rest t) }
 operatorBindings (p : SurfaceProgram) : List (String * String) := match p { nil -> nil ; cons act rest -> match act {
   operatorAct o t -> (match t { name f -> cons (o, f) (operatorBindings rest) ; _ -> operatorBindings rest }) ;
   _ -> operatorBindings rest } }
 rivalModel (p : SurfaceProgram) (n : String) (bs : List (String * String)) (o : String) : Bool := match bs { nil -> false ;
-  cons (o2, g) rest -> (o2 == o and not (g == n) and declaredSurface p g == declaredSurface p n) or rivalModel p n rest o }
+  cons (o2, g) rest -> (o2 == o and not (g == n) and signatureOf p g == signatureOf p n) or rivalModel p n rest o }
 violatesR13 (p : SurfaceProgram) (n : String) : Bool := bindsTwice p n (operatorBindings p) (operatorBindings p)
 bindsTwice (p : SurfaceProgram) (n : String) (all bs : List (String * String)) : Bool := match bs { nil -> false ;
   cons (o, f) rest -> (f == n and rivalModel p n all o) or bindsTwice p n all rest }
