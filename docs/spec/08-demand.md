@@ -8,19 +8,22 @@ Beyond `spec 1`, this chapter writes: `C` is the type of costs of `spec 6.S4`, w
 
 ## §2 What a demand is
 
-**8.S1. A demand is a value.** [proposed] An action asks for something; the ask has an entry `e`, a cutoff (a bound and an evidence cost, both in `C`, `spec 6.S15`), a confidence δ for sampled evidence (D-2026-10-12-r), the evidence cost it assigns to assumptions, with no default (`spec 6.S10`), and, if the action wants one, limits on resources. Nothing else is a parameter of the demand: every threshold or level a certificate needs comes from it and is recorded with it (L5.18). The first demand of all, made by an action nobody called, takes these as declared default arguments, so the root is a parameter too (L5.19). A demand made inside another is passed down from the caller and not recomputed from the cone, because a cutoff does not compose (L12.3).
+**8.S1. A demand is open, and the type demanded reinterprets the cone.** [decided D-2026-10-13-f] A demand is the gate through which parameters change what the program does, and it is not closed: whatever the program declares as a parameter, the demand may set. It carries an entry `e`; the type demanded of it; a cutoff, a bound and an evidence cost in `C` (`spec 6.S15`); a confidence δ for sampled evidence (D-2026-10-12-r); the evidence cost it assigns to assumptions, with no default (`spec 6.S10`); limits on resources if the action wants them; and the values of the program's holes, which `run --set` gives today (`spec 12.S18`). Every threshold or level a certificate needs comes from it and is recorded with it (L5.18). The first demand of all, made by an action nobody called, takes these as declared default arguments, so the root is a parameter too (L5.19). A demand made inside another is passed down from the caller and not recomputed from the cone, because a cutoff does not compose (L12.3). Asking for `t : P T` where the program computes a `T` asks the cone of `t` to build a `P T` instead: a value with its derivative, with an interval that encloses it, with a distribution, or exact in `Rational`, the decorated output of O5. The cone is written generic over a type operator `G`, with `G` the identity by default, and the demand replaces `G` by `P`; spec 11.S3, generic in the number type, is the first instance. [proposed] Whether the generic form is written by hand or derived by Luthier from the cone, which as data can be reinterpreted (L7.4), is open. A certificate obtained at the identity carries over to `P` by parametricity for the laws that hold of any `G` (Wadler, *Theorems for free!*, 1989) when `P` satisfies the laws of the table below; a law over numbers, stated with a distance, is certified again at `P` or carries the distance `P` adds.
 
-**8.S2. What the core asks of a demand.** [proposed] The core uses these operations of a library of demands, and no others. A library may add to them.
+**8.S2. What the core asks of a demand and of a decoration.** [proposed] The core uses these operations, and no others; a library may add to them.
 
 | operation | used for | laws |
 |---|---|---|
 | `entry d` | the name or term to evaluate | none |
+| `type d` | the type demanded, possibly `P T` (8.S1) | none |
 | `cutoff d` | a pair in `C`, compared with a certificate by `≤` (`spec 6.S15`) | none |
 | `delta d` | the confidence of sampled evidence | a value of the type the library's conversion takes (`spec 7.S11`) |
 | `assumed d` | the evidence cost of an assumption | none; an absent value refuses every assumed name |
-| `key d` | the part of a demand that enters the identity of a result (8.S8) | equal demands give equal keys; the key is a hash of a canonical form |
+| `key d` | the part of a demand that enters the identity of a result (8.S8) | equal demands give equal keys; the key is a hash of a canonical form, and includes `type d` |
+| `map` of `P` | carrying a function of the cone into `P` | the functor laws: `map id = id`, `map (g ∘ f) = map g ∘ map f` |
+| `pure` and the product of `P` | carrying constants and functions of several arguments | the applicative laws, so that every operation of the cone has its image in `P` |
 
-Whether the cutoff is a pair or two operations is the library's. The theory that states this table is `lib/demand.lut`, `[proposed]` and not written.
+Whether the cutoff is a pair or two operations is the library's. The theories that state this table are `lib/demand.lut` and, for the decorations, the library of each `P`; neither is written.
 
 ## §3 The plan
 

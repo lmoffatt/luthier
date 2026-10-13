@@ -1905,3 +1905,24 @@ Source:     luthier@24a0615:record/principles-2026-10-13-for-his-marks.md:31
 Kind:       principles (Terms; L4.11, L4.12, L6.12, L7.3, L7.5, L9.10, L10.10). For P13
 Status:     current; the clauses settled, the triad reworded on his correction; D-2026-10-13-b's three
             rules on W and D-2026-10-13-c are current with them
+
+D-2026-10-13-f  The demand is open: a gate through which parameters change what the program does,
+                not a closed list. The type demanded is one of them: asking for `t : P T` asks the
+                cone of `t` to build a `P T`, so the cone that built a `T` must be able to build a
+                `P T`; one way is code generic over `G T`, with `G` the identity by default, and the
+                demand replacing `G` by `P` (a derivative by dual numbers, an error by intervals,
+                the decorated output of O5).
+Author:     Luciano; the reading through parametricity and the interface asked of `P` the model's
+Quote:      "Justamente la demand es una compuerta por la cual pasar parametros que modifiquen el
+            comportamiento del programa, porque cerrar los parametros sin razon?"
+            "Ahora esto implica que todo el cono que trabajaba para hace T ahora tiene que hacer P T y
+            eso deberia ser posible."
+            "Una forma es que sea un codigo generico sobre (G T) (donde G puede ser Identity ) y
+            entonces reemplazo G por P."
+            "Si reescribi"
+Source:     luthier@24a0615:record/spec-wave-2-3-for-his-marks.md:52
+            luthier@24a0615:record/spec-wave-2-3-for-his-marks.md:54
+            luthier@24a0615:record/spec-wave-2-3-for-his-marks.md:55
+            chat:f15ae1b6:1734
+Kind:       language (spec 8.S1, 8.S2, 8.S8; L5, O5; spec 11.S3 as the first instance). For L5, L14
+Status:     current; the interface asked of `P` proposed
