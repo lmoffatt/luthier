@@ -19,13 +19,93 @@
 -- `luthier parse src/luthier/lib/translation.lth`, sets its status to done here, and commits.
 --
 --   §1 The theory `Elaboration`, its helpers, and the acts: a definition with binders
---      curried, a declaration, a datum, an alias expanded (2.S12 rows 1, 2).           todo
+--      curried, a declaration, a datum, an alias expanded (2.S12 rows 1, 2).           done
 --   §2 Terms without types: names, constants, `U`, `W`, application, lambdas with
 --      typed parameters, `match` with its patterns, lists, sums, record types,
---      `data` (2.S12; 3.S4).                                                           todo
+--      `data` (2.S12; 3.S4).                                                           done
 --   §3 Terms by type: `->`, `*`, `+` on types and on numbers; `and`, `or`,
 --      implication; negation; `if` on `Bool` and on `Failures E`; the operators of a
 --      type's model (4.R13).                                                         todo
 --   §4 Terms by context: record values, projection, named arguments and defaults,
 --      implicit arguments (4.S23), blocks and `<-`, tuple parameters, clauses.        todo
 --   §5 `Elaboration :=` the conjunction.                                             todo
+
+import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal Field Item Body Clause Binder
+  LambdaParam declare define alias datum operatorAct explicit implicit termBody dataBody clausesBody name
+  literal universe world app binop neg tuple pi sigma record subtype recordValue block sum list lambda
+  matchOf namedArg ifThen proj intLit floatLit stringLit pWild pApp pLit pTuple plainParam typedParam
+  shapeParam bind rebind
+import "term.lth" Term Program Act Pattern Constant Alpha Var Lit Universe World Lam App Pi Sigma Pair
+  Match Inj Sum Data Subtype Declare Define Datum IntConst FloatConst StringConst PVar PWild PCon PPair PLit
+
+-- ---------------------------------------------------------------- §1 The theory and the acts
+
+-- An elaborator: a program's acts in the kernel, and a term in the context of a program, whose
+-- declarations and definitions give the names their types; `nothing` when the term does not
+-- elaborate (it does not type). Results are compared up to alpha-equivalence.
+Elaboration (a : Alpha) : {
+  elaborate : SurfaceProgram -> Program,
+  term : SurfaceProgram -> Surface -> Maybe Term,
+}
+
+gives (a : Alpha) (r : Maybe Term) (u : Term) : Bool := match r { nothing -> false ; just v -> a.alphaEq v u }
+sameAct (a : Alpha) (x y : Act) : Bool := match x {
+  Declare n t -> (match y { Declare m u -> n == m and a.alphaEq t u ; _ -> false }) ;
+  Define n t b -> (match y { Define m u c -> n == m and a.alphaEq t u and a.alphaEq b c ; _ -> false }) ;
+  Datum t -> (match y { Datum u -> a.alphaEq t u ; _ -> false }) ;
+}
+sameProgram (a : Alpha) (xs ys : Program) : Bool := match xs {
+  nil -> (match ys { nil -> true ; cons y rest -> false }) ;
+  cons x rest -> match ys { nil -> false ; cons y more -> sameAct a x y and sameProgram a rest more } }
+nm (s : String) : Surface := name s
+pvar (s : String) : SurfacePattern := pApp s []
+aType (s : String) : SurfaceAct := declare s [] universe
+of (x t : String) : SurfaceAct := declare x [] (nm t)
+
+-- 2.S12 rows 1 and 2: a definition with binders is a curried lambda at a dependent function type;
+-- `(x y : A)` is two binders; a default changes no type (it is the call's, §4)
+ActsCurried (a : Alpha) (e : Elaboration a) : Bool :=
+  sameProgram a (e.elaborate [define "f" [explicit ["x"] (nm "A") nothing, explicit ["y", "z"] (nm "B") (just (nm "w"))]
+                                       (just (nm "C")) (termBody (nm "x"))])
+    [Define "f" (Pi "x" (Var "A") (Pi "y" (Var "B") (Pi "z" (Var "B") (Var "C"))))
+                (Lam "x" (Var "A") (Lam "y" (Var "B") (Lam "z" (Var "B") (Var "x"))))]
+-- a declaration is a hole of its type, a datum is kept, and an alias is expanded and leaves no act
+-- (3.S15, 4.R7); an operator act and an import leave none either, being resolved (§3, spec 12)
+ActsKept (a : Alpha) (e : Elaboration a) : Bool :=
+  sameProgram a (e.elaborate [aType "A", aType "B", alias "P" [] (binop "*" (nm "A") (nm "B")), of "x" "P",
+                              datum (app (nm "test") (nm "x"))])
+    [Declare "A" Universe, Declare "B" Universe, Declare "x" (Sigma "_" (Var "A") (Var "B")),
+     Datum (App (Var "test") (Var "x"))]
+
+-- ---------------------------------------------------------------- §2 Terms without types
+
+-- names, constants, the universe and the world, application
+Atoms (a : Alpha) (e : Elaboration a) : Bool :=
+  gives a (e.term [] (nm "x")) (Var "x") and gives a (e.term [] (literal (intLit 3))) (Lit (IntConst 3))
+  and gives a (e.term [] (literal (stringLit "s"))) (Lit (StringConst "s"))
+  and gives a (e.term [] universe) Universe and gives a (e.term [] world) World
+  and gives a (e.term [] (app (nm "f") (nm "x"))) (App (Var "f") (Var "x"))
+-- a lambda with typed parameters is nested lambdas (2.S12; its body a block, §4)
+Lambdas (a : Alpha) (e : Elaboration a) : Bool :=
+  gives a (e.term [] (lambda [typedParam ["x", "y"] (nm "A")] [] (nm "x"))) (Lam "x" (Var "A") (Lam "y" (Var "A") (Var "x")))
+-- a `match` and its patterns: a name applied, or a constructor of the program's `data`, is a
+-- constructor pattern; a bare name otherwise a variable (2.S10, 2.S13); a tuple a pair
+Patterns (a : Alpha) (e : Elaboration a) : Bool :=
+  gives a (e.term [define "C" [] (just universe) (dataBody [("r", nm "C"), ("s", nm "C")]), of "m" "C"]
+                  (matchOf (nm "m") [(pvar "r", literal (intLit 1)), (pWild, literal (intLit 2))]))
+          (Match (Var "m") [(PCon "r" [], Lit (IntConst 1)), (PWild, Lit (IntConst 2))])
+  and gives a (e.term [] (matchOf (nm "m") [(pApp "just" [pvar "y"], nm "y"), (pTuple [pvar "p", pvar "q"], nm "p"),
+                                           (pLit (intLit 0), nm "z"), (pvar "w", nm "w")]))
+          (Match (Var "m") [(PCon "just" [PVar "y"], Var "y"), (PPair (PVar "p") (PVar "q"), Var "p"),
+                            (PLit (IntConst 0), Var "z"), (PVar "w", Var "w")])
+-- a list is `cons` and `nil` (2.S12)
+Lists (a : Alpha) (e : Elaboration a) : Bool :=
+  gives a (e.term [] (list [nm "x", nm "y"])) (App (App (Var "cons") (Var "x")) (App (App (Var "cons") (Var "y")) (Var "nil")))
+-- a sum, a record type, a `data` (2.S12; 3.S4). The kernel's `Sigma` names its first component;
+-- the record's other names are the elaborator's to keep for projections (§4).
+TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
+  gives a (e.term [] (sum [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
+  and gives a (e.term [] (record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
+          (Sigma "x" (Var "A") (Var "B"))
+  and sameProgram a (e.elaborate [define "C" [] (just universe) (dataBody [("r", nm "C"), ("s", app (nm "List") (nm "C"))])])
+          [Define "C" Universe (Data "C" [("r", Var "C"), ("s", App (Var "List") (Var "C"))])]
