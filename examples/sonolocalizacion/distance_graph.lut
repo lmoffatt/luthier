@@ -142,10 +142,12 @@ ReportsValidity (f : DistanceGraph -> Maybe Violation) (g : DistanceGraph) : Boo
   match f g { nothing -> ValidGraph g ; just v -> not (ValidGraph g) }
 
 -- ---------------------------------------------------------------- the report of a violation
--- whole numbers and doubles as text, as Python writes them (v0.1 used the same route for
--- `intToString`; `row_text` wrote a double with Python's `str`)
-intToString : Int -> String := extern "python:builtins.str"
-realToString : Float64 -> String := extern "python:builtins.str"
+-- whole numbers and doubles as text, as Python writes them. v0.1 routed `intToString` to
+-- `builtins.str` and `row_text` wrote a double with `str`; `repr` gives the same text for an int
+-- and a float, and the run needs a route with a signature (`str` is a type and has none). Written
+-- with the parameter so that the argument crosses at its declared type (run.py, TypedExtern).
+intToString (k : Int) : String := extern "python:builtins.repr" k
+realToString (x : Float64) : String := extern "python:builtins.repr" x
 
 -- row r of a table as text, `name=value` for each column in order, joined by ", "
 -- (v0.1's extern row_text, src/distance_graph.py:202, written here)
