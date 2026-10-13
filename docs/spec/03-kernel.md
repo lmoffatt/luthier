@@ -263,8 +263,11 @@ for sums (stated on `Bool` and `Maybe`); `FoldNil` and `FoldCons` for the recurs
 `Fin 3` and `Fin 2` (`examples/kernel_finite.lut`, sampled). The reduction of the host is thereby a
 specimen of this theory (L14.3).
 [decided D-2026-10-12-ak] The laws of a structural `==` (reflexive, symmetric, transitive,
-substitutive), which make a concrete type an object, are to be stated in the same file; they are
-not there yet.
+substitutive), which make a concrete type an object, are to be stated in the same file.
+[decided D-2026-10-13-z] `kernel_laws.lth` §1 states them: `Object` is reflexive, symmetric and
+transitive; `Structural` adds substitutivity over every function, which only a structural `==`
+has; an observational equality is an `Object` respected by its theory's operations as congruences
+(`AlphaCongruent` in `term.lth`).
 
 **3.S37. What it cannot state.** [implemented] Eta, `fn y { f y } == f`, is not statable, since
 equality of functions is not structural (`spec 4.R8`); observed pointwise it is beta. Functions over

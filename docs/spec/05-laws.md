@@ -20,7 +20,7 @@ Chapter 5 of the specification, draft 0, 2026-10-13. Sources: `docs/spec/05-stat
 
 A law into a type with no `verdict` is not a law. The theory `LawValue V` that states this would live in `lib/laws.lut`, beside the laws of relations (D-2026-10-11-l), and is not written.
 
-**5.S4. Equality is a law of the object.** [decided D-2026-10-11-f] The identity of two values is a law, and the type of its result says what kind: `Bool` where equality is decidable and structural (spec 4.R8), `C` where the carrier has a distance, the distance observed being the cost. An object's equality is the base of every theory over it (D-2026-10-12-ak), and its laws (reflexive, symmetric, transitive, substitutive) are stated in Luthier: for a structural `==`, in `lib/kernel_laws.lut` (spec 3.S36); for an observational one, by the author of the object, with the relations of `lib/laws.lut`.
+**5.S4. Equality is a law of the object.** [decided D-2026-10-11-f] The identity of two values is a law, and the type of its result says what kind: `Bool` where equality is decidable and structural (spec 4.R8), `C` where the carrier has a distance, the distance observed being the cost. An object's equality is the base of every theory over it (D-2026-10-12-ak), and its laws (reflexive, symmetric, transitive) are stated in Luthier. [decided D-2026-10-13-z] Substitutivity over every function belongs to a structural `==` only (`Structural` in `lib/kernel_laws.lth`, spec 3.S36); an observational equality, such as alpha-equivalence or doubles within a tolerance, is always told apart by some function, and is respected by the operations of its own theory, each stating it as a congruence, by the author of the object, with the relations of `lib/laws.lth`.
 
 ## §3 Lifting and combining
 

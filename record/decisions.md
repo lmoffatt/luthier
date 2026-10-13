@@ -2308,3 +2308,17 @@ Quote:      "si fn en lugar de \  no return"
 Source:     chat:52b10bff:4061
 Kind:       spec (2.S9, 2.S12, 2.S21) and grammar.lth; every file with a lambda
 Status:     current
+
+D-2026-10-13-z  An object's laws are reflexive, symmetric, transitive; substitutivity over every
+                function is the structural equality's (`Structural` in kernel_laws.lth §1); an
+                observational equality, such as alpha-equivalence of terms or doubles within a
+                tolerance, is respected by the operations of its own theory, each stating it as a
+                congruence (`AlphaCongruent` in term.lth). Refines D-2026-10-12-ak; 3.S36 and 5.S4.
+                Q5 of record/questions-for-luciano-2026-10-13-layers-0-1.md, raised by the Codex
+                writing kernel.py (`fn x { x }` and `fn y { y }` are alpha-equal, and a function
+                reading the binder's name tells them apart).
+Author:     Luciano, on the sessions' recommendation
+Quote:      "si, que sea alfacongruente"
+Source:     chat:52b10bff:4255
+Kind:       spec (3.S36, 5.S4) and kernel_laws.lth, term.lth
+Status:     current; refines D-2026-10-12-ak
