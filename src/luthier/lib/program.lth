@@ -110,10 +110,17 @@ isDefined (p : SurfaceProgram) (n : String) : Bool :=
   match p { nil -> false ; cons a rest -> match a { define x bs t b -> x == n or isDefined rest n ; _ -> isDefined rest n } }
 isAlias (p : SurfaceProgram) (n : String) : Bool :=
   match p { nil -> false ; cons a rest -> match a { alias x bs t -> x == n or isAlias rest n ; _ -> isAlias rest n } }
--- a name is known when the program introduces it, imports it, or core gives it (`core` the list of
--- core's names, a parameter of the rules: core is not written yet, 12.S21)
+-- a name is known when the program introduces it, imports it, makes it a constructor, or core
+-- gives it (`core` the list of core's names: core is not written yet, 12.S21). A dotted name
+-- `m.f` is known when the whole name is, or its first part (2.S14: a qualified name, or a
+-- projection of a variable or definition); `namePrefix` gives the part before the first `.`, and
+-- the name itself when it has none (a function of core's `String`, 11, declared here until core
+-- names it; review of layers 0-1, B).
+namePrefix : String -> String
 known (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
-  member n (actNames p) or member n (importedNames p) or member n core
+  knownWhole core p n or knownWhole core p (namePrefix n)
+knownWhole (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
+  member n (actNames p) or member n (importedNames p) or member n (constructors p) or member n core
 
 -- The constructors of the `data` of a program: a pattern `name` is one of them if it names one,
 -- and a variable otherwise (2.S10, 2.S13).
@@ -141,7 +148,7 @@ namesIn (k : List String) (t : Surface) : List String := match t {
   tuple ts -> namesInAll k ts ; list ts -> namesInAll k ts ;
   pi xs a b -> concat (namesIn k a) (removeAll xs (namesIn k b)) ;
   sigma xs a b -> concat (namesIn k a) (removeAll xs (namesIn k b)) ;
-  sigmaNamed x a y b -> concat (namesIn k a) (remove x (remove y (namesIn k b))) ;
+  sigmaNamed x a y b -> concat (namesIn k a) (remove x (namesIn k b)) ;
   record fs law -> concat (fieldsNames k fs) (match law { nothing -> nil ; just l -> removeAll (fieldLabels fs) (namesIn k l) }) ;
   subtype q a law -> concat (namesIn k a) (removeAll (patternBinds k q) (namesIn k law)) ;
   recordValue kvs -> pairsNames k kvs ; sum kvs -> pairsNames k kvs ;
@@ -155,28 +162,32 @@ namesInAll (k : List String) (ts : List Surface) : List String :=
 pairsNames (k : List String) (kvs : List (String * Surface)) : List String :=
   match kvs { nil -> nil ; cons (x, v) rest -> concat (namesIn k v) (pairsNames k rest) }
 fieldLabels (fs : List Field) : List String := match fs { nil -> nil ; cons f rest -> concat f.names (fieldLabels rest) }
+-- a field's names are in scope in the fields after it (a dependent record, 2.S14)
 fieldsNames (k : List String) (fs : List Field) : List String :=
-  match fs { nil -> nil ; cons f rest -> concat (namesIn k f.type) (fieldsNames k rest) }
+  match fs { nil -> nil ; cons f rest -> concat (namesIn k f.type) (removeAll f.names (fieldsNames k rest)) }
 -- a block's items bind in what follows them
 itemsNames (k : List String) (items : List Item) (e : Surface) : List String := match items {
   nil -> namesIn k e ;
   cons it rest -> match it {
     bind x t -> concat (namesIn k t) (remove x (itemsNames k rest e)) ;
-    rebind x t -> concat (namesIn k t) (itemsNames k rest e) } }
+    rebind x t -> concat (namesIn k t) (remove x (itemsNames k rest e)) } }
 paramsBind (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
   cons q rest -> concat (match q { plainParam x -> [x] ; typedParam xs t -> xs ; shapeParam qs -> patternsBind k qs })
                         (paramsBind k rest) }
+-- a parameter's names are in scope in the parameters after it
 paramsNames (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
-  cons q rest -> concat (match q { typedParam xs t -> namesIn k t ; _ -> nil }) (paramsNames k rest) }
+  cons q rest -> concat (match q { typedParam xs t -> namesIn k t ; _ -> nil }) (removeAll (paramsBind k [q]) (paramsNames k rest)) }
 armsNames (k : List String) (arms : List (SurfacePattern * Surface)) : List String := match arms { nil -> nil ;
   cons (q, b) rest -> concat (removeAll (patternBinds k q) (namesIn k b)) (armsNames k rest) }
 
 -- D(n) and B(n) of 1.S7: the names in the declared type of `n` (its binders included) and in its
 -- body, each less the binders' own names
+-- a binder's names are in scope in the binders after it: `(a : Alpha) (sb : Substitution a)`, a
+-- default mentioning an earlier parameter, `{A : U} (x : A)` (2.S7, 2.S16)
 binderNames (k : List String) (bs : List Binder) : List String := match bs { nil -> nil ;
   cons b rest -> concat (match b { explicit xs t d -> concat (namesIn k t) (match d { nothing -> nil ; just e -> namesIn k e }) ;
                                    implicit xs t -> namesIn k t })
-                        (binderNames k rest) }
+                        (removeAll (binderBound [b]) (binderNames k rest)) }
 binderBound (bs : List Binder) : List String := match bs { nil -> nil ;
   cons b rest -> concat (match b { explicit xs t d -> xs ; implicit xs t -> xs }) (binderBound rest) }
 bodyNames (k : List String) (b : Body) : List String := match b {
