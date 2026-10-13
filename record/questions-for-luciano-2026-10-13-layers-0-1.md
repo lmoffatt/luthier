@@ -65,3 +65,21 @@ between `x` and `x + 1`) with `ZeroLeast` says every natural is reached from `0`
 Induction itself quantifies over predicates and cannot be tested, the same limit as `List`'s fold.
 
 Ok
+
+
+## Q5. Substitutivity belongs to the structural equality
+
+Raised by the session writing the theories, from a counterexample of the Codex writing `kernel.py`:
+`\ x { x }` and `\ y { y }` are alpha-equal, yet a function that reads the binder's name tells
+them apart. It is not peculiar to alpha: no observational equality (alpha-equivalence of terms,
+doubles within a tolerance) is substitutive over every function. Your D-2026-10-12-ak says an
+object is a type with its equality, whose laws (reflexive, symmetric, transitive, substitutive)
+the kernel guarantees for a structural `==` and the author states for an observational one.
+
+Recommended, as `kernel_laws.lth` §1 now reads (9a89873): an object's laws are reflexive,
+symmetric, transitive; substitutivity over every function is the structural equality's; an
+observational equality is respected by the operations of its own theory, each stating it as a
+congruence (`AlphaCongruent` in `term.lth`). 3.S36 and 5.S4 would say so. No cost in code; the
+setoid of O2 becomes the textbook one, an equivalence with congruence for the theory's operations.
+
+
