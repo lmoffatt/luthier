@@ -185,6 +185,10 @@ by Luciano.
   three lints green, `check_quotes.py` fails on old entries (his question); (e) the flips applied
   from the audit (342b757). The tag and the push wait for him. The slice's first stage runs end
   to end (examples/sonolocalizacion/validate_graph.lut, 14c9b98).
+- 2026-10-14, 08:15: step 5.2 begun by the order after v0.2: `src/luthier/tester.py` and `luthier
+  test` (48d2c5d, an Opus agent), exhaustive and sampled over test.lth, censuses as bindings, no
+  entry store yet; numbers.lth's laws run, nothing refuted. Step 5.2's "Codex" reads "a Claude
+  agent" (Codex is gone since 2026-10-13 22:30).
 
 
 ## Rules for every step
