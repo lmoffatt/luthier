@@ -1967,3 +1967,23 @@ Source:     chat:f15ae1b6:2032
 Kind:       method and architecture (L14, L7; the plan of 2026-10-13). For L14, P16
 Status:     current; supersedes the five phases of record/plan-implementation-2026-10-13-execution.md
             (draft 1), whose D4, D8 and D9 still apply; the new plan to be written
+
+D-2026-10-13-i  Theories and models live in separate files, in the spirit of C++ headers and
+                implementations: a theory file holds types, declarations, laws and the definitions
+                generic over the theory; a model file holds one value of a theory, its
+                representation and operations, native or extern. Different models of one theory
+                live in different files. The checker reads theory files to check; a model file is
+                read only when a demand needs its model (D-2026-10-12-ac), and it is certified
+                against its theory, so the drift between a header and its implementation that C++
+                leaves unchecked is caught. The model's proposal, for his mark: the separation is
+                enforced, a theory file has its own extension and the checker rejects an `extern`,
+                an action or a model value inside it.
+Author:     Luciano for the separation and its reason; the model for what each file holds and for
+            the enforcement
+Quote:      "we might separate files with theories and files with models."
+            "the advantage is that you can write different models in different files..."
+Source:     chat:f15ae1b6:2113
+            chat:f15ae1b6:2128
+Kind:       language and architecture (spec 12.S1, 12.S9, Z5 of the plan from zero; L2, L6). For
+            L2, L6, D-2026-10-12-ac
+Status:     current for the separation; the enforcement by extension proposed (Z8)

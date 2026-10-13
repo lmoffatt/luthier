@@ -90,3 +90,25 @@ generators, the cost model) by agents.
 Recommended: `v0.2` when layers 0 and 1 have their theories and their Python checker, and the 50
 programs of `tests/spec/`, rewritten, pass; `v0.3` with layer 2 (certification and tests);
 `v0.4` with layer 3 (run, session, world). Push only tags.
+
+## Z8. Theory files and model files
+
+Your proposal (D-2026-10-13-i): theories and models in separate files, as C++ headers and
+implementations, so that different models of one theory live in different files. A theory file
+holds types, declarations, laws and the definitions generic over the theory (`norm` from `dot`);
+a model file holds one value of a theory, native or extern. The checker reads theory files; a
+model file is read only when a demand needs its model, and is certified against its theory. This
+is where the theory named in an import line (Z5) comes from:
+
+    import "linear_algebra.lth" LinearAlgebra
+    import "linear_algebra_numpy.lut" Numpy : LinearAlgebra
+
+Each model brings its own dependencies (numpy, Python) and its own certificate; the planner sees
+them as specimens of one theory (L6). Today's `array.lut` mixes the theory with its native model;
+`array_python.lut` is a second model; this makes the pattern of 12.S9 a rule.
+
+Recommended: enforced, not a convention. A theory file has its own extension, `.lth`, and the
+checker rejects an `extern`, an action or a model value inside it, because laziness rests on a
+theory file never touching the world. In the plan, step 3's `library.lut` states the two kinds,
+and every theory of Luthier is written as a `.lth`.
+
