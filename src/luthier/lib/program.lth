@@ -26,7 +26,8 @@
 --   §2 Names: the acts' names, D(n) and B(n) on the surface tree (1.S7). Type and
 --      term position (4.S2) still to add, for 4.R2.                                 done
 --   §3 The rules that read names and forms: 4.R1, 4.R2, 4.R3 (with L2.7 on `data`),
---      4.R4, 4.R5, 4.R6, 4.R7, 4.R12, 4.S14 (a law no type claims), 4.S17.          todo
+--      4.R4, 4.R5, 4.R7, 4.R12 (top level), 4.S14; 4.R6 needs types (§5); 4.R2
+--      past existence and 4.R12 in blocks still to add; 4.S17 a report (§6).           done
 --   §4 Typing: a theory `Typing` giving the type of an elaborated term, held to
 --      the formers of 3 §2; what the rules below need of it, nothing more.           todo
 --   §5 The rules that read types: 4.R8, 4.R9, 4.R11, 4.R13, 4.S23 (implicit
@@ -182,3 +183,92 @@ bOf (p : SurfaceProgram) (a : SurfaceAct) : List String := match a {
   define x bs t b -> removeAll (binderBound bs) (bodyNames (constructors p) b) ;
   _ -> nil ;
 }
+
+-- ---------------------------------------------------------------- §3 The rules that read names and forms
+
+-- core's names: core encloses every file (12.S21) and is not written yet, so its names are a hole
+coreNames : List String
+
+actsNamed (p : SurfaceProgram) (n : String) : List SurfaceAct := match p { nil -> nil ;
+  cons a rest -> match actName a { just x -> if x == n then cons a (actsNamed rest n) else actsNamed rest n ;
+                                   nothing -> actsNamed rest n } }
+anyUnknown (p : SurfaceProgram) (ms : List String) : Bool :=
+  match ms { nil -> false ; cons m rest -> not (known coreNames p m) or anyUnknown p rest }
+anyAct (f : SurfaceAct -> Bool) (acts : List SurfaceAct) : Bool :=
+  match acts { nil -> false ; cons a rest -> f a or anyAct f rest }
+count (n : String) (xs : List String) : Nat := match xs { nil -> 0 ; cons x rest -> (if x == n then 1 else 0) + count n rest }
+definedNames (p : SurfaceProgram) : List String :=
+  match p { nil -> nil ; cons a rest -> match a { define x bs t b -> cons x (definedNames rest) ; _ -> definedNames rest } }
+
+-- 4.R1: a declaration mentions only names that exist, declared or defined (or imported, or core's)
+violatesR1 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ a { match a { declare x bs t -> anyUnknown p (dOf p a) ; _ -> false } }) (actsNamed p n)
+
+-- 4.R2, the part that reads names: the names a definition mentions exist. That a name in type
+-- position is defined unless it is in the definition's own theory needs type position (4.S2) and
+-- the theories (4.S3, the strongly connected components): todo, §2.
+violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ a { match a { define x bs t b -> anyUnknown p (concat (dOf p a) (bOf p a)) ; _ -> false } }) (actsNamed p n)
+
+-- 4.R3: a predicate touches what it is over: every label of a record with a law, the variables of
+-- a subtype's pattern; and (L2.7, D-2026-10-13-p) every constructor of a `data` is mentioned by
+-- some law. A law is read here as a definition whose declared type is `Bool`, until typing (§4)
+-- can say which definitions are laws; whether the law states the constructor's role, and not
+-- only lists it, a test cannot decide (4.S19 reports it).
+untouched (k : List String) (labels : List String) (law : Surface) : Bool :=
+  match labels { nil -> false ; cons l rest -> not (member l (namesIn k law)) or untouched k rest law }
+predicateUntouched (k : List String) (t : Surface) : Bool := match t {
+  record fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
+  subtype q a law -> untouched k (patternBinds k q) law ;
+  _ -> false ;
+}
+lawNames (p : SurfaceProgram) : List String := match p { nil -> nil ; cons a rest -> match a {
+  define x bs t b -> (match t { just (name "Bool") -> concat (bOf p a) (lawNames rest) ; _ -> lawNames rest }) ;
+  _ -> lawNames rest } }
+anyUnclaimed (p : SurfaceProgram) (cs : List String) : Bool :=
+  match cs { nil -> false ; cons c rest -> not (member c (lawNames p)) or anyUnclaimed p rest }
+violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ a { match a {
+    define x bs t b -> (match b { termBody u -> predicateUntouched (constructors p) u ;
+                                  dataBody cs -> anyUnclaimed p (pairNames cs) ; _ -> false }) ;
+    _ -> false } }) (actsNamed p n)
+
+-- 4.R4: a definition at `U` makes a new type only with laws or a `data`; an anonymous structural
+-- body (a product, an exponential, a sum, a record without a law) is to be an alias
+structural (t : Surface) : Bool := match t {
+  binop o a b -> o == "*" or o == "->" or o == "+" ;
+  pi xs a b -> true ; sigma xs a b -> true ; sigmaNamed x a y b -> true ; sumNamed x a y b -> true ;
+  sum kvs -> true ; record fs law -> law == nothing ;
+  _ -> false ;
+}
+violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ a { match a { define x bs t b -> t == just universe and (match b { termBody u -> structural u ; _ -> false }) ;
+                          _ -> false } }) (actsNamed p n)
+
+-- 4.R5: an extern gives a value, never a type, unless it is provisional
+isExtern (t : Surface) : Bool := match t { app f a -> isExtern f ; name s -> s == "extern" ; _ -> false }
+isProvisional (t : Surface) : Bool :=
+  match t { app f a -> (match a { namedArg x v -> x == "provisional" ; _ -> false }) or isProvisional f ; _ -> false }
+violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ a { match a { define x bs t b -> t == just universe
+                            and (match b { termBody u -> isExtern u and not (isProvisional u) ; _ -> false }) ;
+                          _ -> false } }) (actsNamed p n)
+
+-- 4.R7: an alias is neither declared nor defined
+violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclared p n or isDefined p n)
+
+-- 4.R12 at the top level: `:=` defines once (a `<-` there does not parse, 2.R5). Inside blocks,
+-- `:=` of a name already bound and `<-` of a name bound with `:=`: todo, a walk of the bodies.
+violatesR12 (p : SurfaceProgram) (n : String) : Bool := count n (definedNames p) >= 2
+
+-- 4.S14: a law no type claims defines nothing; read, as in 4.R3, as a definition at `Bool` that
+-- no other definition's body mentions
+otherBodies (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons a rest -> match a {
+  define x bs t b -> if x == n then otherBodies rest n else concat (bOf p a) (otherBodies rest n) ;
+  _ -> otherBodies rest n } }
+violatesS14 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ a { match a { define x bs t b -> t == just (name "Bool") and not (member n (otherBodies p n)) ; _ -> false } })
+         (actsNamed p n)
+
+-- 4.S17, no loose functions, rejects only once local definitions exist; until then it is a report
+-- (§6), and the theory files themselves hold such helpers, as 12.S23 allows.
