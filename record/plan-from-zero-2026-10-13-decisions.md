@@ -93,10 +93,16 @@ programs of `tests/spec/`, rewritten, pass; `v0.3` with layer 2 (certification a
 
 ## Z8. Theory files and model files
 
-Your proposal (D-2026-10-13-i): theories and models in separate files, as C++ headers and
-implementations, so that different models of one theory live in different files. A theory file
-holds types, declarations, laws and the definitions generic over the theory (`norm` from `dot`);
-a model file holds one value of a theory, native or extern. The checker reads theory files; a
+Your proposal (D-2026-10-13-i, refined by D-2026-10-13-j): theories and models in separate files,
+as C++ headers and implementations, so that different models of one theory live in different files.
+A theory file holds types, declarations and laws. A model file holds one value of a theory, native
+or extern, or a functor: an algorithm written against a theory without naming a model
+(`gramSchmidt (M : LinearAlgebra) : Orthonormalizer M`), instantiated with any model and certified
+per instance. There is no duplication between the two files, since laws and implementation are
+different things, except where something is defined by its implementation. Every type has laws,
+at the least those of its equality (D-2026-10-12-ak); data enters from the world as a `String` and
+a check refines it into its lawful type once (spec 5.S9, 5.S12). What another file imports has its
+theory in a `.lth`; what no file imports (a `main`, a local helper) may live whole in a `.lut`. The checker reads theory files; a
 model file is read only when a demand needs its model, and is certified against its theory. This
 is where the theory named in an import line (Z5) comes from:
 

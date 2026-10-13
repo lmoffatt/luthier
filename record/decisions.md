@@ -1987,3 +1987,28 @@ Source:     chat:f15ae1b6:2113
 Kind:       language and architecture (spec 12.S1, 12.S9, Z5 of the plan from zero; L2, L6). For
             L2, L6, D-2026-10-12-ac
 Status:     current for the separation; the enforcement by extension proposed (Z8)
+
+D-2026-10-13-j  Theory and model files, refined. An algorithm is written against a theory without
+                naming a model (an algorithm of linear algebra against `LinearAlgebra`): a model
+                parameterized by a model of another theory, a functor in ML's sense, instantiated
+                with any model and certified per instance unless a proof cited covers all. It still
+                takes two files, its theory (the laws) and its implementation; since those are two
+                different things there is no duplication, except where something is defined by its
+                implementation. Every type has laws, at the least those of its equality
+                (D-2026-10-12-ak); data enters from the world as bytes or a `String` and is refined
+                by a check (spec 5.S9, 5.S12) into its lawful type, once. Rule of files (the
+                model's): what another file imports has its theory in a `.lth`; what no file
+                imports (a `main`, a local helper) may live whole in a `.lut`.
+Author:     Luciano for the functor, the two files and that everything has laws; the model for
+            reading data through a check and for the rule of files
+Quote:      "una teoria puede funcionar como un functor."
+            "igual, vos tenes que hacer dos archivos uno para la teoria y otro para la implementacion."
+            "Table tiene leyes, todo tiene leyes. No hay datos sin leyes, como los lees?"
+            "si"
+Source:     chat:f15ae1b6:2159
+            chat:f15ae1b6:2159
+            chat:f15ae1b6:2159
+            chat:f15ae1b6:2159
+Kind:       language and architecture (Z8; spec 12.S1, 12.S9, 5.S12, 7.R4). For L2, L6, G1
+Status:     current; refines D-2026-10-13-i (generic definitions belong to implementation files,
+            not to theory files)
