@@ -507,6 +507,24 @@ PrimStructural (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Progr
   and stepsTo a (m.step p (bin "==" (Pair (Lit (IntConst i)) (Lit (IntConst j))) (Pair (Lit (IntConst j)) (Lit (IntConst i))))) (truth (i == j))
   and stepsTo a (m.step p (bin "==" (RecordValue [(x, Lit (IntConst i))]) (RecordValue [(x, Lit (IntConst j))]))) (truth (i == j))
   and stepsTo a (m.step p (bin "==" (Inj x (Lit (IntConst i))) (Inj y (Lit (IntConst i))))) (truth (x == y))
+  and stepsTo a (m.step p (bin "==" (Lit (FloatConst 1.5)) (Lit (FloatConst 1.5)))) (truth true)
+-- constructors of a `data` of the program compare by constructor, then part by part (lists among
+-- them: `cons`, `nil` of core); stated on the data of `IotaConstructors`
+PrimConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g : String) (i j : Int) : Bool :=
+  not (distinctNames [t, c, k, f, g]) or not (allFree p [t, c, k, f, g])
+  or (stepsTo a (m.step (withData t c k f g p) (bin "==" (Var c) (Var c))) (truth true)
+      and stepsTo a (m.step (withData t c k f g p) (bin "==" (Var c) (Var k))) (truth false)
+      and stepsTo a (m.step (withData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var f) (Lit (IntConst j)))))
+                    (truth (i == j))
+      and stepsTo a (m.step (withData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var g) (Lit (IntConst i)))))
+                    (truth false))
+-- and `==` does not step where equality is not structural (4.R8) or a part is not a value: a
+-- lambda, an extern, a hole, an open term
+EqualityStuck (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (x f : String) (ty b : Term) (i : Int) : Bool :=
+  isNormal (m.step [] (bin "==" (Lam x ty b) (Lam x ty b)))
+  and isNormal (m.step [] (bin "==" (Extern f) (Extern f)))
+  and isNormal (m.step [Declare f ty] (bin "==" (Var f) (Lit (IntConst i))))
+  and isNormal (m.step [Declare f ty] (bin "==" (Pair (Var f) (Lit (IntConst i))) (Pair (Lit (IntConst i)) (Lit (IntConst i)))))
 
 -- 3.S18, extern: an extern is a value until applied to as many closed arguments as its type has
 -- parameters; then the host is called (spec 10), which this theory does not state: the answer is
@@ -529,7 +547,7 @@ DatumIsInert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program
   m.step (cons (Datum d) p) t == m.step p t
 
 Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
-  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimStructural a sb & ExternIsValue a sb & ValuesStay a sb
+  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimStructural a sb & PrimConstructors a sb & EqualityStuck a sb & ExternIsValue a sb & ValuesStay a sb
   & DatumIsInert a sb
 
 -- ---------------------------------------------------------------- §6 Quote and eval
