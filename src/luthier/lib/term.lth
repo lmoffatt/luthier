@@ -31,7 +31,7 @@
 --   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  done
 --   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternIsValue`, `HolesStay`,
 --      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         done
---   §6 Quote and eval (3.S32): cases on literals and closed terms.                      todo
+--   §6 Quote and eval (3.S32): cases on literals and closed terms.                      done
 --   §7 The models, to write in term_model.lut: `reduce` (the interpreter in Luthier),
 --      `alpha`, `substitute`, `canon`. Not in this step's first pass.                todo
 
@@ -333,3 +333,20 @@ Final (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : 
 
 Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & HolesStay a sb & Iota a sb & IotaPair a sb
   & IotaSkips a sb & Prim a sb & ExternIsValue a sb & ValuesStay a sb & Final a sb
+
+-- ---------------------------------------------------------------- §6 Quote and eval
+
+-- `quote { t }` is the `Term` of `t`, after elaboration, with no obligation; `eval A t` checks the
+-- term `t` against the type `A` when it runs, and gives `just` its value or `nothing` (3.S32). The
+-- model is core's `eval`; that `quote` gives the elaborated term is the translation's (2.S12), so
+-- these are case laws on terms whose translation is fixed: a constant and an application of `+`.
+Evaluation : { evalAt : (A : U) -> Term -> Maybe A }
+
+QuoteGivesTheTerm (e : Evaluation) : Bool :=
+  quote { 1 + 2 } == App (App (Var "+") (Lit (IntConst 1))) (Lit (IntConst 2))
+EvalOfConstant (e : Evaluation) (i : Int) (s : String) : Bool :=
+  e.evalAt Int (Lit (IntConst i)) == just i and e.evalAt String (Lit (StringConst s)) == just s
+EvalChecks (e : Evaluation) (s : String) : Bool := e.evalAt Int (Lit (StringConst s)) == nothing
+EvalOfQuote (e : Evaluation) : Bool := e.evalAt Int (quote { 1 + 2 }) == just 3
+
+Evaluation := QuoteGivesTheTerm & EvalOfConstant & EvalChecks & EvalOfQuote
