@@ -50,3 +50,10 @@ parse; the report records the exact error. This is a syntax rejection, not a par
 A future runner must treat that case as an expected syntax failure, use the explicit
 verdict override, and distinguish current diagnostic fragments from historical ones.
 No suite runner or semantic checker for these programs is present yet.
+
+Sum syntax migration: D-2026-10-13-w, grammar commit
+`4c105e31b2004fb882e5ca2bbaa77a1c00a092b1`; Codex sums migration v1,
+deterministic textual edits, no seed or parameters. Current labeled sums use
+`{ a : A || b : B }`. The former one-alternative `Z7` sums are one-field
+records, constructed with `{ z7 := k }` and read with `a.z7`, preserving the
+operator-resolution cases. The retired `v0.1/` evidence remains unchanged.

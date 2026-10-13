@@ -18,7 +18,7 @@ from .surface import (
     IntLit, Lambda, LexError, LexFailed, Lexed, List, Literal, MatchOf, Name,
     NamedArg, Neg, OperatorAct, PApp, PLit, PTuple, PWild, ParseError, ParseFailed,
     Parsed, Pi, PlainParam, Proj, Quoted, Rebind, Record, RecordValue, ShapeParam,
-    Sigma, SigmaNamed, StringLit, Subtype, Sum, SumNamed, Surface, SurfaceAct,
+    Sigma, SigmaNamed, StringLit, Subtype, Sum, Surface, SurfaceAct,
     SurfacePattern, TermBody, Token, TokenView, Tuple, TypedParam, Universe, World,
 )
 
@@ -162,7 +162,7 @@ class _Frame:
 
 
 def _continuation_start(text: str) -> bool:
-    return text in {"then", "else"} or text in _BINARY_OPERATORS
+    return text in {"then", "else", "||"} or text in _BINARY_OPERATORS
 
 
 def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
@@ -183,14 +183,14 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
     # shield their own braces; the first brace back at this level opens arms.
     root_match_pending = False
     prev: Token | None = None
-    for idx, tok in enumerate(tokens):
+    for tok in tokens:
         if prev is not None and tok.line > prev.line:
             next_text = tok.text
             prev_text = prev.text
 
             if stack:
                 top = stack[-1]
-                if top.opener in {"(", "[", "<"} or top.kind == "ignoring":
+                if top.opener in {"(", "["} or top.kind == "ignoring":
                     pass
                 elif top.opener == "{" and top.kind == "separating":
                     first_col = top.first_item_column
@@ -208,13 +208,7 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
                     root_match_pending = False
                 # An indented line continues the act.
 
-        opens_angle = (
-            tok.text == "<"
-            and idx + 2 < len(tokens)
-            and tokens[idx + 1].kind == "name"
-            and tokens[idx + 2].text == ":"
-        )
-        if tok.text in {"(", "[", "{"} or opens_angle:
+        if tok.text in {"(", "[", "{"}:
             kind = "ignoring"
             if tok.text == "{":
                 pending = stack[-1].match_pending if stack else root_match_pending
@@ -226,10 +220,10 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
                         root_match_pending = False
             append_token(tok)
             stack.append(_Frame(tok.text, kind))
-        elif tok.text in {")", "]", ">", "}"}:
+        elif tok.text in {")", "]", "}"}:
             append_token(tok)
             if stack:
-                want = {")": "(", "]": "[", ">": "<", "}": "{"}[tok.text]
+                want = {")": "(", "]": "[", "}": "{"}[tok.text]
                 # Mismatches are left for the parser; pop only a matching opener.
                 if stack[-1].opener == want:
                     stack.pop()
@@ -313,7 +307,7 @@ class _Parser:
     def _name(self) -> str:
         return self._take(kind="name").text
 
-    def _starts_arg_atom(self) -> bool:
+    def _starts_atom(self) -> bool:
         if self.i >= len(self.tokens):
             return False
         t = self.tokens[self.i]
@@ -502,7 +496,7 @@ class _Parser:
             return self.ampTerm()
 
     def openForm(self) -> Surface:
-        """openForm ::= dependent pi | dependent sigma | named sigma | named sum | if-form"""
+        """openForm ::= dependent pi | dependent sigma | named sigma | if-form"""
         if self._peek("if"):
             self._take("if")
             condition = self.term()
@@ -546,15 +540,6 @@ class _Parser:
                     pass
                 self.i = save
             return Sigma(tuple(names), domain, self.term())
-
-        if self._peek("+") and len(names) == 1:
-            self._take("+")
-            self._take("(")
-            right_name = self._name()
-            self._take(":")
-            right_type = self.term()
-            self._take(")")
-            return SumNamed(first, domain, right_name, right_type)
 
         self.i = start
         self._fail("open form")
@@ -640,12 +625,12 @@ class _Parser:
         return self.appTerm()
 
     def appTerm(self) -> Surface:
-        """appTerm ::= projTerm { argTerm }"""
+        """appTerm ::= projTerm { projTerm }"""
         value = self.projTerm()
-        while self._starts_arg_atom():
+        while self._starts_atom():
             start = self.i
             try:
-                arg = self.argTerm()
+                arg = self.projTerm()
             except _NoParse:
                 self.i = start
                 break
@@ -659,37 +644,6 @@ class _Parser:
             self._take(".")
             value = Proj(value, self._name())
         return value
-
-    def argTerm(self) -> Surface:
-        """argTerm ::= argAtom { "." name }"""
-        value = self.argAtom()
-        while self._peek("."):
-            self._take(".")
-            value = Proj(value, self._name())
-        return value
-
-    def sumAlt(self) -> Surface:
-        left = self.sumArrow()
-        if self._peek("&"):
-            self._take("&")
-            return Binop("&", left, self.sumAlt())
-        return left
-
-    def sumArrow(self) -> Surface:
-        left = self.sumOr()
-        if self._peek("->"):
-            self._take("->")
-            return Binop("->", left, self.sumArrow())
-        return left
-
-    def sumOr(self) -> Surface:
-        return self._left_chain(self.sumAnd, {"or"})
-
-    def sumAnd(self) -> Surface:
-        return self._left_chain(self.sumCmp, {"and"})
-
-    def sumCmp(self) -> Surface:
-        return self._left_chain(self.addTerm, {"==", "/=", "<", "<=", ">="})
 
     def scrutinee(self) -> Surface:
         return self._left_chain(self.sAnd, {"or"})
@@ -714,8 +668,8 @@ class _Parser:
 
     def sApp(self) -> Surface:
         value = self.sProj()
-        while self._starts_s_arg_atom():
-            value = App(value, self.sArg())
+        while self._starts_s_atom():
+            value = App(value, self.sProj())
         return value
 
     def sProj(self) -> Surface:
@@ -725,45 +679,19 @@ class _Parser:
             value = Proj(value, self._name())
         return value
 
-    def sArg(self) -> Surface:
-        value = self.sArgAtom()
-        while self._peek("."):
-            self._take(".")
-            value = Proj(value, self._name())
-        return value
-
-    def sAtom(self) -> Surface:
-        return self.atom() if self._peek("<") else self.sArgAtom()
-
-    def _starts_s_arg_atom(self) -> bool:
+    def _starts_s_atom(self) -> bool:
         return self.i < len(self.tokens) and (
             self.tokens[self.i].kind in {"name", "number", "string"}
             or self.tokens[self.i].text in {"U", "W", "(", "["}
         )
 
-    def sArgAtom(self) -> Surface:
-        if not self._starts_s_arg_atom():
+    def sAtom(self) -> Surface:
+        if not self._starts_s_atom():
             self._fail("scrutinee atom")
-        return self.argAtom()
+        return self.atom()
 
     def atom(self) -> Surface:
-        """atom ::= argAtom | '<' name ':' sumAlt { '|' name ':' sumAlt } '>'"""
-        if self._peek("<"):
-            self._take("<")
-            alternatives = []
-            while True:
-                name = self._name()
-                self._take(":")
-                alternatives.append((name, self.sumAlt()))
-                if not self._peek("|"):
-                    break
-                self._take("|")
-            self._take(">")
-            return Sum(tuple(alternatives))
-        return self.argAtom()
-
-    def argAtom(self) -> Surface:
-        """argAtom ::= name | number | string | U | W | parenthesized/tuple/named-arg | braces | list | lambda | match | quote"""
+        """atom ::= name | number | string | U | W | parenthesized/tuple/named-arg | braces | list | lambda | match | quote"""
         if self._peek(kind="name"):
             return Name(self._name())
         if self._peek(kind="number"):
@@ -863,6 +791,7 @@ class _Parser:
         start = self.i
         for fn in (
             self._record_atom,
+            self._sum_atom,
             self._subtype_atom,
             self._record_value_atom,
             self._block_atom,
@@ -880,6 +809,21 @@ class _Parser:
         fields, law = self.recordFields()
         self._take("}")
         return Record(fields, law)
+
+    def _sum_atom(self) -> Surface:
+        self._take("{")
+        alternatives = []
+        while True:
+            name = self._name()
+            self._take(":")
+            alternatives.append((name, self.term()))
+            if not self._peek("||"):
+                break
+            self._take("||")
+        if len(alternatives) < 2:
+            self._fail("at least two sum alternatives")
+        self._take("}")
+        return Sum(tuple(alternatives))
 
     def _subtype_atom(self) -> Surface:
         self._take("{")
@@ -1180,7 +1124,7 @@ _RIGHT_ASSOC = {"&", "->"}
 
 
 def _precedence(t: Surface) -> int:
-    if isinstance(t, (Pi, Sigma, SigmaNamed, SumNamed, IfThen)):
+    if isinstance(t, (Pi, Sigma, SigmaNamed, IfThen)):
         return 1
     if isinstance(t, Binop):
         return _PREC[t.operator]
@@ -1194,7 +1138,7 @@ def _precedence(t: Surface) -> int:
 
 
 def _open_ending(t: Surface) -> bool:
-    if isinstance(t, (Pi, Sigma, SigmaNamed, SumNamed, IfThen)):
+    if isinstance(t, (Pi, Sigma, SigmaNamed, IfThen)):
         return True
     if isinstance(t, Binop) and t.operator in {"&", "->"}:
         return _open_ending(t.right)
@@ -1212,6 +1156,7 @@ def _is_arg_atom(t: Surface) -> bool:
             Tuple,
             NamedArg,
             Record,
+            Sum,
             Subtype,
             RecordValue,
             Block,
@@ -1298,20 +1243,7 @@ def _scrutinee_needs_parens(t: Surface) -> bool:
         return _scrutinee_needs_parens(t.function) or _scrutinee_needs_parens(t.argument)
     if isinstance(t, Proj):
         return _scrutinee_needs_parens(t.value)
-    return not isinstance(t, (Name, Literal, Universe, World, Tuple, NamedArg, List, Sum))
-
-
-def _sum_alt_needs_parens(t: Surface) -> bool:
-    if isinstance(t, Binop):
-        return t.operator == ">" or (
-            _sum_alt_needs_parens(t.left) or _sum_alt_needs_parens(t.right)
-        )
-    return _precedence(t) == 1
-
-
-def _print_sum_alt(t: Surface) -> str:
-    text = _print_term(t)
-    return f"({text})" if _sum_alt_needs_parens(t) else text
+    return not isinstance(t, (Name, Literal, Universe, World, Tuple, NamedArg, List))
 
 
 def _print_term(t: Surface) -> str:
@@ -1357,11 +1289,6 @@ def _print_term(t: Surface) -> str:
             f"({t.left_name} : {_print_term(t.left_type)}) * "
             f"({t.right_name} : {_print_term(t.right_type)})"
         )
-    if isinstance(t, SumNamed):
-        return (
-            f"({t.left_name} : {_print_term(t.left_type)}) + "
-            f"({t.right_name} : {_print_term(t.right_type)})"
-        )
     if isinstance(t, Record):
         fs = ", ".join(
             f"{' '.join(f.names)} : {_print_term(f.type)}" for f in t.fields
@@ -1381,9 +1308,9 @@ def _print_term(t: Surface) -> str:
         parts = [_print_item(x) for x in t.items] + [_print_term(t.value)]
         return "{ " + " ; ".join(parts) + " }"
     if isinstance(t, Sum):
-        return "< " + " | ".join(
-            f"{k} : {_print_sum_alt(v)}" for k, v in t.alternatives
-        ) + " >"
+        return "{ " + " || ".join(
+            f"{k} : {_print_term(v)}" for k, v in t.alternatives
+        ) + " }"
     if isinstance(t, List):
         return "[" + ", ".join(_print_term(x) for x in t.values) + "]"
     if isinstance(t, Lambda):

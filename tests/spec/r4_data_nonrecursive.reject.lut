@@ -1,7 +1,7 @@
 -- spec 4.R3, spec 4.R4, spec 3.R3, L2.7: a `data` whose constructors no law gives a role is a
 -- collection, written as an alias of a sum; recursive or not makes no difference.
--- expect (proposed): Color: no law gives red, green a role; write Color = < red : Unit | green : Unit >
--- expect (v0.1): Color is not recursive; write Color = < red : Unit | green : Unit >
+-- expect (proposed): Color: no law gives red, green a role; write Color = { red : Unit || green : Unit }
+-- expect (v0.1): Color is not recursive; write Color = { red : Unit || green : Unit }
 -- Source: tests/spec/v0.1/r4_data_nonrecursive.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
 -- sha256: 49bd9ba12ec7df38b7a08c3c37aa18e11c8709841f6b20c7d6ebae7f4d6e634f. Migration: spec-programs v1,
 -- then the session (Codex had flipped it to accept with a made-up `next`, which states no role).

@@ -201,14 +201,6 @@ class SigmaNamed:
 
 
 @dataclass(frozen=True)
-class SumNamed:
-    left_name: str
-    left_type: Surface
-    right_name: str
-    right_type: Surface
-
-
-@dataclass(frozen=True)
 class Record:
     fields: tuple[Field, ...]
     law: Surface | None
@@ -281,7 +273,7 @@ class Quoted:
 
 Surface: TypeAlias = (
     Name | Literal | Universe | World | App | Binop | Neg | Tuple | Pi | Sigma |
-    SigmaNamed | SumNamed | Record | Subtype | RecordValue | Block | Sum | List |
+    SigmaNamed | Record | Subtype | RecordValue | Block | Sum | List |
     Lambda | MatchOf | NamedArg | IfThen | Proj | Quoted
 )
 

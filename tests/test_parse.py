@@ -14,7 +14,7 @@ from luthier.surface import (
     IntLit, Lambda, LexFailed, Lexed, List, Literal, MatchOf, Name, NamedArg, Neg,
     OperatorAct, PApp, PLit, PTuple, PWild, ParseFailed, Parsed, Pi, PlainParam,
     Proj, Quoted, Rebind, Record, RecordValue, ShapeParam, Sigma, SigmaNamed,
-    StringLit, Subtype, Sum, SumNamed, TermBody, Tuple, TypedParam, Universe, World,
+    StringLit, Subtype, Sum, TermBody, Tuple, TypedParam, Universe, World,
 )
 
 G = luthier_syntax()
@@ -57,7 +57,7 @@ CASE_TEXTS = [
     'f (a : Int) : Bool := a < -1', 'f (a : Int) : Bool := a < (-1)',
     'f (a : Int) : Int :=\n  a + 1', 'f (a : Int) : Int := a + 1',
     'x := f (a,\n  b)', 'x := f (a, b)', 'x := [a,\n  b]', 'x := [a, b]',
-    'x := < a : A\n  | b : B >', 'x := < a : A | b : B >',
+    'x := { a : A\n  || b : B }', 'x := { a : A || b : B }',
     'x := match m {\n  a -> b ;\n  c -> e }', 'x := match m { a -> b ; c -> e }',
     'f := {\n  a := 1\n  b := 2\n  a + b\n}', 'f := { a := 1 ; b := 2 ; a + b }',
     'x := {\n  a := 1\n  b := 2\n}', 'x := { a := 1 ; b := 2 }',
@@ -88,7 +88,7 @@ CASE_TEXTS = [
     'x := A -> if c then a', 'x := a + if c then a else b',
     'x := U -> (a : A) * b & C', 'x := A -> (b : B) -> C & D',
     'x := if c then (if d then y) else b', 'x := if a then if b then p else q',
-    'x := f (< a : A | b : B >)', 'x := f < a : A | b : B >',
+    'x := f ({ a : A || b : B })', 'x := f { a : A || b : B }',
     'f (a : Int) : Int', 'x : Int := 1', 'f (a b : Int) (t : Int <- 1) : Int := t',
     'id {A : U} (y : A) : A := y', 'Pair (A : U) = A * A',
     'Color : U := data { red : Color ; green : Color }', 'Empty : U := data { }',
@@ -99,7 +99,7 @@ CASE_TEXTS = [
     'import "linear_algebra.lth" LinearAlgebra',
     'import "la_numpy.lut" Numpy : LinearAlgebra as LA Helpers', 'import "x.lut"',
     'test f', 'eval A t', 'x <- 1', 'x := 3', 'x := 3.5', 'x := "a"',
-    'x := (a b : Int) -> Int', 'x := (a : A) * (b : B)', 'x := (a : A) + (b : B)',
+    'x := (a b : Int) -> Int', 'x := (a : A) * (b : B)',
     'x := { a : Int }', 'x := { a b : Int, c : Float64 }', 'x := { a : Int, b : Int | a < b }',
     'x := { a : Int | 0 <= a }', 'x := { a b : Int | a < b }', 'x := { (p, q) : P | p < q }',
     'x := { _ : T | p }', 'x := { a := 1 ; a }', 'x := { a := 1 }',
@@ -419,8 +419,8 @@ def test_column_zero_starts_act():
     assert parse("x := a\n-b") == Parsed((
         Define("x", (), None, TermBody(nm("a"))), Datum(Neg(nm("b"))),
     ))
-    assert parse("x := a\n< c : U >") == Parsed((
-        Define("x", (), None, TermBody(nm("a"))), Datum(Sum((("c", Universe()),))),
+    assert parse("x := a\n{ c : U || e : W }") == Parsed((
+        Define("x", (), None, TermBody(nm("a"))), Datum(Sum((("c", Universe()), ("e", World())))),
     ))
 
 
@@ -445,10 +445,6 @@ def test_brackets_ignore_breaks():
     same_layout("x := f (a,\n  b)", "x := f (a, b)")
     same_layout("x := [a,\n  b]", "x := [a, b]")
     same_layout(
-        "x := < a : A\n  | b : B >",
-        "x := < a : A | b : B >",
-    )
-    same_layout(
         "x := match m {\n  a -> b ;\n  c -> e }",
         "x := match m { a -> b ; c -> e }",
     )
@@ -464,11 +460,7 @@ def test_layout_classifies_brackets_from_the_prefix():
         "x := match [match m {\n p -> q\n}] {\n r -> s\n}",
         "x := match [match m { p -> q }] { r -> s }",
     )
-    same_layout(
-        "x := < a : (A >\n b)\n > b > c\ny := d",
-        "x := < a : (A > b) > b > c\ny := d",
-    )
-    lr = lex("x := < a : A > b > c\ny := d")
+    lr = lex("x := a < b and c > e\ny := d")
     assert isinstance(lr, Lexed)
     assert sum(text == "\n" for _, text in layout(lr.tokens)) == 2
     # Match arms suppress the break; a following block inserts a separator.
@@ -501,6 +493,7 @@ def test_break_separates_constructors():
 
 
 def test_continuation_lines():
+    same_layout("S = { a : A\n || b : B }", "S = { a : A || b : B }")
     same_layout(
         "f := {\n  a := 1\n    + 2\n  a }",
         "f := { a := 1 + 2 ; a }",
@@ -638,8 +631,8 @@ def test_open_form_ends_its_term():
 def test_print_parenthesizes():
     trees = [
         MatchOf(App(nm("f"), Block((), nm("a"))), ((PApp("p", ()), nm("q")),)),
-        Sum((("a", Binop(">", nm("A"), nm("b"))),)),
-        Sum((("a", Pi(("x",), nm("A"), nm("B"))),)),
+        Sum((("a", Binop(">", nm("A"), nm("b"))), ("b", nm("B")))),
+        Sum((("a", Pi(("x",), nm("A"), nm("B"))), ("b", nm("B")))),
         IfThen(nm("c"), IfThen(nm("d"), nm("y"), None), nm("b")),
         IfThen(
             nm("c"),
@@ -666,30 +659,31 @@ def test_dangling_else():
     )
 
 
-def test_sum_as_argument():
-    assert parse("x := f (< a : A | b : B >)") == defx(
-        App(nm("f"), Sum((("a", nm("A")), ("b", nm("B")))))
-    )
-    assert isinstance(parse("x := f < a : A | b : B >"), ParseFailed)
-    assert parse("x := < a : A > b > c") == defx(
-        Binop(">", App(Sum((("a", nm("A")),)), nm("b")), nm("c"))
-    )
-    assert parse("x := < a : (A > b) >") == defx(
-        Sum((("a", Binop(">", nm("A"), nm("b"))),))
-    )
+def test_sum_tree():
+    tokens = lex("|| | < <= > >=")
+    assert isinstance(tokens, Lexed)
+    assert [t.text for t in tokens.tokens] == ["||", "|", "<", "<=", ">", ">="]
+    summed = Sum((("a", nm("A")), ("b", nm("B"))))
+    assert parse("x := { a : A || b : B }") == defx(summed)
+    assert parse("x := { a : A || b : B || c : C }") == defx(
+        Sum(summed.alternatives + (("c", nm("C")),)))
+    assert parse("x := f { a : A || b : B }") == defx(App(nm("f"), summed))
+    assert parse("x := { s : { a : A || b : B }, d : D }") == defx(
+        Record((Field(("s",), summed), Field(("d",), nm("D"))), None))
+    assert isinstance(parse("x := { a : A || b : B, c : C }"), ParseFailed)
+    assert parse("x := a < b and c > e") == defx(
+        Binop("and", Binop("<", nm("a"), nm("b")), Binop(">", nm("c"), nm("e"))))
 
 
-def test_sum_alternative_precedence_and_parentheses():
-    for value in [
-        "A & B -> C or D and E == F + G * H",
-        "(if c then A else B)", "((x : A) -> B)", "(A > b)",
-    ]:
-        text = f"x := < a : {value} >"
+def test_sum_alternative_terms():
+    for value in ["A & B -> C or D and E == F + G * H",
+                  "if c then A else B", "(x : A) -> B", "A > b"]:
+        text = f"x := {{ a : {value} || b : B }}"
         assert _derives_by_acts(text)
         result = parsed(text)
         assert parse(print_program(result.program)) == result
-    for value in ["if c then A else B", "(x : A) -> B"]:
-        text = f"x := < a : {value} >"
+    for text in ["x := < a : A | b : B >", "x := (a : A) + (b : B)",
+                 "x := { a : A, b : B || c : C }", "x := { a : A || }"]:
         assert isinstance(parse(text), ParseFailed)
         assert not _derives_by_acts(text)
 
@@ -880,9 +874,7 @@ def test_sigma_named_tree():
     assert parse("x := (a : A) * (b : B)") == defx(
         SigmaNamed("a", nm("A"), "b", nm("B"))
     )
-    assert parse("x := (a : A) + (b : B)") == defx(
-        SumNamed("a", nm("A"), "b", nm("B"))
-    )
+
 
 
 def test_record_tree():

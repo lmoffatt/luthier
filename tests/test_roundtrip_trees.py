@@ -67,8 +67,10 @@ def wf(node):
             pattern_ok = (is_name(pattern.name) and not pattern.patterns
                           if isinstance(pattern, s.PApp) else wf(pattern))
             return pattern_ok and wf(typ) and wf(law)
-        case s.RecordValue(pairs) | s.Sum(pairs):
+        case s.RecordValue(pairs):
             return bool(pairs) and all(is_name(k) and wf(v) for k, v in pairs)
+        case s.Sum(pairs):
+            return len(pairs) >= 2 and all(is_name(k) and wf(v) for k, v in pairs)
         case s.DataBody(pairs):
             return all(is_name(k) and wf(v) for k, v in pairs)
         case s.Lambda(params, items, body):
@@ -87,7 +89,7 @@ def wf(node):
             return is_name(name) and all(map(wf, binders)) and maybe_wf(typ) and wf(body)
         case s.Alias(name, binders, value):
             return is_name(name) and all(map(wf, binders)) and wf(value)
-        case s.SigmaNamed(x, a, y, b) | s.SumNamed(x, a, y, b):
+        case s.SigmaNamed(x, a, y, b):
             return is_name(x) and is_name(y) and wf(a) and wf(b)
         case s.NamedArg(name, value) | s.Bind(name, value) | s.Rebind(name, value):
             return is_name(name) and wf(value)
@@ -190,8 +192,8 @@ class Trees:
                     p, a, law = self.children(size, ['subpattern', 'surface', 'surface'])
                     return s.Subtype(p, a, law)
 
-                def pairs(cls):
-                    values = self.children(size, ['surface'] * rng.randint(1, 2))
+                def pairs(cls, minimum=1):
+                    values = self.children(size, ['surface'] * rng.randint(minimum, 2))
                     return cls(tuple((self.name(), value) for value in values))
 
                 def block():
@@ -219,9 +221,9 @@ class Trees:
                             lambda: sequence(s.Tuple, 2),
                             lambda: s.Pi(self.names(), *self.children(size, ['surface'] * 2)),
                             lambda: s.Sigma(self.names(), *self.children(size, ['surface'] * 2)),
-                            lambda: named_pair(s.SigmaNamed), lambda: named_pair(s.SumNamed),
+                            lambda: named_pair(s.SigmaNamed),
                             record, subtype, lambda: pairs(s.RecordValue), block,
-                            lambda: pairs(s.Sum), lambda: sequence(s.List, 0), lambda_, match,
+                            lambda: pairs(s.Sum, 2), lambda: sequence(s.List, 0), lambda_, match,
                             lambda: s.NamedArg(self.name(), self.children(size, ['surface'])[0]),
                             if_, lambda: s.Proj(self.children(size, ['surface'])[0], self.name()),
                             lambda: s.Quoted(self.children(size, ['surface'])[0])]
@@ -443,6 +445,7 @@ def test_wf_shape_constraints():
     assert wf(s.Subtype(s.PTuple((s.PApp('a', (s.PWild(),)), s.PWild())), a, a))
     assert not wf(s.RecordValue(()))
     assert not wf(s.Sum(()))
+    assert not wf(s.Sum((("a", a),)))
     assert wf(s.DataBody(()))
     assert not wf(s.ClausesBody(()))
     assert not wf(s.Clause((), a))

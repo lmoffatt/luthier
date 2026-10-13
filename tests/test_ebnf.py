@@ -45,7 +45,7 @@ def test_keywords_and_operators_are_derived():
 def test_one_tree_where_round_3_found_two():
     for text in ["x := U -> ( a : A ) * b & C", "x := A -> if c then y & z",
                  "x := A -> ( b : B ) -> C & D", "x := P & ( y : A ) -> Q", "x := A -> B & C",
-                 "x := ( n : Nat ) * Vec n", "x := f a + g b", "x := if c then ( if d then y ) else b"]:
+                 "x := ( n : Nat ) * Vec n", "x := f a + g b", "x := f { a : A || b : B }", "x := if c then ( if d then y ) else b"]:
         assert count_derivations(G, views(text)) == 1, text
 
 
@@ -54,7 +54,7 @@ def test_the_dangling_else_derives_twice_and_the_parser_chooses():
 
 
 def test_what_does_not_derive():
-    for text in ["x := f < a : A | b : B >", "x := \\ ( y ) { y }", "x := a + if c then a else b",
+    for text in ["x := { a : A || b : B, c : C }", "x := \\ ( y ) { y }", "x := a + if c then a else b",
                  "operator == := eqZ7", "x <- 1"]:
         assert count_derivations(G, views(text)) == 0, text
 
@@ -64,7 +64,7 @@ def test_a_program_derives_act_by_act():
     text = views("x := A -> B") + views("y := f a")
     assert derives_program(G, text) == derives(G, text)
     assert derives_program(G, [])
-    assert not derives_program(G, views("x := f < a : A | b : B >") + views("y := a"))
+    assert not derives_program(G, views("x := { a : A || b : B, c : C }") + views("y := a"))
     assert not derives_program(G, views("x := a")[:-1])
 
 
