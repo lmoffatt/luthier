@@ -1,0 +1,94 @@
+-- library.lth: files, imports and when a file is read, as a theory of the loader.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 3.4 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 12.S1 (a file denotes a value of a
+-- record type), 12.S21 (a file is read when a demand needs it), 12.S22 (an import names what
+-- enters, with its theory), 12.S23 (theory files and model files); L6.12 (privacy is ascription),
+-- L11.7; Z5, Z8 of the plan from zero. Pattern of ebnf.lth.
+--
+-- What this file states. A loader resolves what a file sees and reads the files a demand reaches.
+-- Its laws are case laws over a small set of files given as data (a path with its parsed program),
+-- since reading a file is the world's and a theory file does not touch it (12.S23). The Python
+-- loader of the checker (step 4) is a specimen.
+--
+-- Index (all sections written in this draft):
+--   §1 Files and their kinds: a theory file admits no extern and no top-level action
+--      (12.S23); the kind of a file is its extension.                                 done
+--   §2 What a file sees: its own names, what its imports name (under their alias), and
+--      core's; an imported model is seen through its theory only (12.S22, L6.12).       done
+--   §3 What is read: nothing without a demand; a demand for an imported name reads its
+--      file (12.S21).                                                                 done
+
+import "grammar.lth" SurfaceProgram SurfaceAct Surface ImportName declare define importAct name app termBody
+import "program.lth" actNames member coreNames
+
+-- ---------------------------------------------------------------- §1 Files and their kinds
+
+-- A file's kind (12.S23, Z8). Roles: `KindByExtension` and the laws of `admits`.
+FileKind : U := data {
+  TheoryFile : FileKind ;
+  ModelFile : FileKind ;
+}
+FileSystem = List (String * SurfaceProgram)
+
+-- A loader: the kind of a path, whether a kind admits a program, the names a file sees, and the
+-- files read when given names of a file are demanded.
+Loader : {
+  kind : String -> FileKind,
+  admits : FileKind -> SurfaceProgram -> Bool,
+  visible : FileSystem -> String -> List String,
+  reads : FileSystem -> String -> List String -> List String,
+}
+
+-- an `extern` body: the application of the core name `extern` (3.S39)
+externBody (t : Surface) : Bool := match t { app f a -> externBody f ; name s -> s == "extern" ; _ -> false }
+hasExtern (p : SurfaceProgram) : Bool := match p { nil -> false ;
+  cons act rest -> (match act { define x bs t b -> (match b { termBody u -> externBody u ; _ -> false }) ; _ -> false })
+                   or hasExtern rest }
+
+-- the kind is the extension: `.lth` a theory file, `.lut` a model file
+KindByExtension (l : Loader) : Bool := l.kind "a.lth" == TheoryFile and l.kind "dir/b.lut" == ModelFile
+-- a theory file admits no extern, so that reading it never touches the world (12.S23, L2.6); a
+-- model file admits any act. (Whether a theory file holds a model of another theory, which it may
+-- not, needs the types: the checker's, program.lth.)
+TheoryFileNoExtern (l : Loader) (p : SurfaceProgram) : Bool := l.admits TheoryFile p == not (hasExtern p)
+ModelFileAdmits (l : Loader) (p : SurfaceProgram) : Bool := l.admits ModelFile p
+
+-- ---------------------------------------------------------------- §2 What a file sees
+
+-- the names an import line brings in: each name, or its alias (12.S22)
+importLineNames (ns : List ImportName) : List String := match ns { nil -> nil ;
+  cons i rest -> cons (match i.asName { nothing -> i.name ; just y -> y }) (importLineNames rest) }
+allIn (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> member x ys and allIn rest ys }
+
+-- a small set of files: a theory file and a model of it, imported by a third under an alias
+sample : FileSystem := [
+  ("la.lth", [declare "LinearAlgebra" [] (name "U")]),
+  ("la_numpy.lut", [define "Numpy" [] nothing (termBody (name "v")), define "helper" [] nothing (termBody (name "w"))]),
+  ("main.lut", [importAct "la.lth" [{ name := "LinearAlgebra", theory := nothing, asName := nothing }],
+               importAct "la_numpy.lut" [{ name := "Numpy", theory := just "LinearAlgebra", asName := just "LA" }],
+               define "x" [] nothing (termBody (name "LA"))])]
+
+-- a file sees its own names, what its imports name, and core's (12.S21: core encloses every file)
+SeesOwnImportedAndCore (l : Loader) : Bool :=
+  allIn (concatNames (actNames [define "x" [] nothing (termBody (name "LA"))]) ["LinearAlgebra", "LA"]) (l.visible sample "main.lut")
+  and allIn coreNames (l.visible sample "main.lut")
+concatNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concatNames rest ys) }
+-- an imported model is seen through its theory only: its alias, never the model's other names nor
+-- its own name (privacy is ascription, L6.12, 12.S22)
+SeesModelThroughTheory (l : Loader) : Bool :=
+  not (member "helper" (l.visible sample "main.lut")) and not (member "Numpy" (l.visible sample "main.lut"))
+
+-- ---------------------------------------------------------------- §3 What is read
+
+-- nothing is read without a demand; a demand for an imported name reads the file it comes from,
+-- and so does a demand for a name whose body needs it (`x` is `LA`); a demand for a theory reads
+-- no model file (12.S21, L11.7)
+NothingWithoutDemand (l : Loader) : Bool := l.reads sample "main.lut" nil == nil
+DemandReadsItsFile (l : Loader) : Bool :=
+  member "la_numpy.lut" (l.reads sample "main.lut" ["LA"]) and member "la_numpy.lut" (l.reads sample "main.lut" ["x"])
+ADemandForATheoryReadsNoModel (l : Loader) : Bool :=
+  not (member "la_numpy.lut" (l.reads sample "main.lut" ["LinearAlgebra"]))
+
+Loader := KindByExtension & TheoryFileNoExtern & ModelFileAdmits & SeesOwnImportedAndCore & SeesModelThroughTheory
+  & NothingWithoutDemand & DemandReadsItsFile & ADemandForATheoryReadsNoModel

@@ -1,0 +1,384 @@
+-- term.lth: the kernel term as data, and the theories of its names, substitution, canonical form
+-- and reduction.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 2.2 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 3 §4 (3.S14 to 3.S20, the five
+-- rules of reduction), §6 (3.S29 to 3.S35, programs as data), 3.S38 (this file), 3.S11 (fuel);
+-- L2.7 (each constructor has a law of its role); D-2026-10-12-x, D-2026-10-12-ah. The pattern is
+-- that of ebnf.lth: a theory is a record type of its operations, laws over a model, `T := laws`;
+-- its model is a value in a `.lut`. Here the main model is `reduce`, the interpreter written in
+-- Luthier (3.S33), in term_model.lut; the host's evaluator is a second specimen of the same theory
+-- (L14.3), as `backtrack` and the Python recognizer are of `Derives`.
+--
+-- On meaning (L2.7). The constructors of `Term` that compute get their roles from the laws of
+-- `Reduction` (§5): `Lam` and `App` from `Beta`, `Var` from `Delta`, `Match`, `Inj` and `Pair`
+-- from `Iota`, `RecordValue` and `Proj` from `ProjOfRecord`, `Lit` from `Prim`, `Extern` from `ExternIsValue`, `Hole` from `HolesStay`. The type
+-- formers (`Universe`, `World`, `Pi`, `Sigma`, `Sum`, `Data`, `Subtype`) are values for reduction
+-- (`ValuesStay`); their roles are the checker's, laws of `WellFormed` in program.lth (step 3.1).
+--
+-- Names: the constructors are 3.S29's, capitalized as there, so that they do not clash with the
+-- surface tree of grammar.lth when the translation of 2.S12 imports both; `U` is a keyword, so the
+-- universe is `Universe`; `World` is added for `W` (D-2026-10-13-b), which 3.S29 predates.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones and of kernel_laws.lth,
+-- checks it with `luthier parse src/luthier/lib/term.lth`, sets its status to done here, commits.
+--
+--   §1 The data: `Constant`, `Pattern`, `Term`, `Act`, `Program` (3.S29 to 3.S31).     done
+--   §2 Names: free variables, renaming, alpha-equivalence as an object with the
+--      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     done
+--   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               done
+--   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  done
+--   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternIsValue`, `HolesStay`,
+--      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         done
+--   §6 Quote and eval (3.S32): cases on literals and closed terms.                      done
+--   §7 The models, to write in term_model.lut: `reduce` (the interpreter in Luthier),
+--      `alpha`, `substitute`, `canonical`; by Codex (record/IA/term-2026-10-13/
+--      codex-models.md, its report codex.md).                                      done
+
+import "kernel_laws.lth" Object
+
+-- ---------------------------------------------------------------- §1 The data
+
+-- A constant of the kernel: an integer, a double or a string (3.S17, spec 11). Named apart from
+-- the surface `Literal` of grammar.lth, which is unsigned; after elaboration a constant may be
+-- negative. Roles: `Prim` (§5).
+Constant : U := data {
+  IntConst : Int -> Constant ;
+  FloatConst : Float64 -> Constant ;
+  StringConst : String -> Constant ;
+}
+
+-- A pattern of a `match` (3.S10, 3.S29): a variable, `_`, a constructor applied to patterns, a
+-- pair, a constant, a label's injection. Roles: `Iota` (§5).
+Pattern : U := data {
+  PVar : String -> Pattern ;
+  PWild : Pattern ;
+  PCon : String -> List Pattern -> Pattern ;
+  PPair : Pattern -> Pattern -> Pattern ;
+  PLit : Constant -> Pattern ;
+  PInj : String -> Pattern -> Pattern ;
+}
+
+-- The kernel term after elaboration (3.S29, 3.S30): the sugar of spec 2 translated away, names as
+-- strings (3.S31), a qualified name `m.f` as one string. A constructor of a `data` is a `Var`
+-- applied to its arguments. `Lam`, `Pi`, `Sigma` and `Subtype` bind their string in their last
+-- term; `Lam` and `Pi` carry the variable's type. A record is a product whose projections are
+-- named (D-2026-10-13-x): `Record` its type, `RecordValue` its introduction, `Proj` the projection
+-- by name, an arrow of the product, so the names are part of the term and of its hash; the labels
+-- of a `Sum` are likewise its injections (`Inj`). Roles: the laws of §5 and, for the type formers,
+-- of `WellFormed` (program.lth).
+Term : U := data {
+  Var : String -> Term ;
+  Lit : Constant -> Term ;
+  Universe : Term ;
+  World : Term ;
+  Lam : String -> Term -> Term -> Term ;
+  App : Term -> Term -> Term ;
+  Pi : String -> Term -> Term -> Term ;
+  Sigma : String -> Term -> Term -> Term ;
+  Pair : Term -> Term -> Term ;
+  Match : Term -> List (Pattern * Term) -> Term ;
+  Inj : String -> Term -> Term ;
+  Sum : List (String * Term) -> Term ;
+  Data : String -> List (String * Term) -> Term ;
+  Subtype : String -> Term -> Term -> Term ;
+  Extern : String -> Term ;
+  Primitive : String -> Term ;
+  Axiom : Term ;
+  Hole : String -> Term ;
+  Record : List (String * Term) -> Term ;
+  RecordValue : List (String * Term) -> Term ;
+  Proj : Term -> String -> Term ;
+}
+
+-- An act of an elaborated program (3.S1, 3.S29, D-2026-10-13-o): a declaration is a name with its
+-- type and no body, a hole (3.S9); a definition a name with its type and its body; a datum a term
+-- the module keeps. Aliases are expanded before checking and never reach evaluation (3.S15), and
+-- imports are resolved into qualified names, so neither is an act here. Roles: `Delta` and
+-- `HolesStay` (§5).
+Act : U := data {
+  Declare : String -> Term -> Act ;
+  Define : String -> Term -> Term -> Act ;
+  Datum : Term -> Act ;
+}
+
+-- A program is its acts, a structure (3.S29); its role is the environment of `Delta`.
+Program = List Act
+
+-- ---------------------------------------------------------------- §2 Names
+
+-- definitions the laws need: names as lists, the free variables of a term, and the swap of two
+-- names everywhere in a term (binders included), the nominal way to rename without capture
+member (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or member x rest }
+remove (x : String) (xs : List String) : List String :=
+  match xs { nil -> nil ; cons y rest -> if x == y then remove x rest else cons y (remove x rest) }
+concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
+removeAll (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeAll rest (remove x ys) }
+
+patternVars (p : Pattern) : List String := match p {
+  PVar x -> [x] ; PWild -> nil ; PLit c -> nil ;
+  PCon c ps -> patternsVars ps ;
+  PPair a b -> concat (patternVars a) (patternVars b) ;
+  PInj l q -> patternVars q ;
+}
+patternsVars (ps : List Pattern) : List String :=
+  match ps { nil -> nil ; cons p rest -> concat (patternVars p) (patternsVars rest) }
+
+-- spec 3.S9, 3.S31: the variables a term mentions and does not bind. A `Hole` names a declaration,
+-- not a variable; a `Data` binds its own name in its constructors' types.
+freeVars (t : Term) : List String := match t {
+  Var x -> [x] ;
+  Lit c -> nil ; Universe -> nil ; World -> nil ; Extern r -> nil ; Primitive r -> nil ; Axiom -> nil ;
+  Hole x -> nil ;
+  Lam x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  Pi x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  Sigma x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  Subtype x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  App f a -> concat (freeVars f) (freeVars a) ;
+  Pair a b -> concat (freeVars a) (freeVars b) ;
+  Inj l a -> freeVars a ;
+  Match s arms -> concat (freeVars s) (armsFree arms) ;
+  Sum kvs -> pairsFree kvs ;
+  Data n cs -> remove n (pairsFree cs) ;
+  Record kvs -> pairsFree kvs ; RecordValue kvs -> pairsFree kvs ;
+  Proj r x -> freeVars r ;
+}
+armsFree (arms : List (Pattern * Term)) : List String := match arms { nil -> nil ;
+  cons (p, b) rest -> concat (removeAll (patternVars p) (freeVars b)) (armsFree rest) }
+pairsFree (kvs : List (String * Term)) : List String :=
+  match kvs { nil -> nil ; cons (k, v) rest -> concat (freeVars v) (pairsFree rest) }
+
+swapName (x y n : String) : String := if n == x then y else if n == y then x else n
+swapPattern (x y : String) (p : Pattern) : Pattern := match p {
+  PVar n -> PVar (swapName x y n) ; PWild -> PWild ; PLit c -> PLit c ;
+  PCon c ps -> PCon c (swapPatterns x y ps) ;
+  PPair a b -> PPair (swapPattern x y a) (swapPattern x y b) ;
+  PInj l q -> PInj l (swapPattern x y q) ;
+}
+swapPatterns (x y : String) (ps : List Pattern) : List Pattern :=
+  match ps { nil -> nil ; cons p rest -> cons (swapPattern x y p) (swapPatterns x y rest) }
+swap (x y : String) (t : Term) : Term := match t {
+  Var n -> Var (swapName x y n) ;
+  Lam n a b -> Lam (swapName x y n) (swap x y a) (swap x y b) ;
+  Pi n a b -> Pi (swapName x y n) (swap x y a) (swap x y b) ;
+  Sigma n a b -> Sigma (swapName x y n) (swap x y a) (swap x y b) ;
+  Subtype n a b -> Subtype (swapName x y n) (swap x y a) (swap x y b) ;
+  App f a -> App (swap x y f) (swap x y a) ;
+  Pair a b -> Pair (swap x y a) (swap x y b) ;
+  Inj l a -> Inj l (swap x y a) ;
+  Match s arms -> Match (swap x y s) (swapArms x y arms) ;
+  Sum kvs -> Sum (swapPairs x y kvs) ;
+  Data n cs -> Data (swapName x y n) (swapPairs x y cs) ;
+  Record kvs -> Record (swapPairs x y kvs) ; RecordValue kvs -> RecordValue (swapPairs x y kvs) ;
+  Proj r l -> Proj (swap x y r) l ;
+  _ -> t ;
+}
+swapArms (x y : String) (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms { nil -> nil ;
+  cons (p, b) rest -> cons (swapPattern x y p, swap x y b) (swapArms x y rest) }
+swapPairs (x y : String) (kvs : List (String * Term)) : List (String * Term) :=
+  match kvs { nil -> nil ; cons (k, v) rest -> cons (k, swap x y v) (swapPairs x y rest) }
+
+-- Alpha-equivalence (3.S31, L3.3): two terms equal up to the names of their bound variables. A
+-- model says when; its laws: it is an object (kernel_laws.lth §1), reflexive, symmetric and
+-- transitive, carried by `alphaObject`, whose type owes those laws, and not substitutive over every
+-- function (a function may read a binder's name), but a congruence (`AlphaCongruent`); a free variable is its own name; a bound one may be renamed to a
+-- name fresh for the body; alpha-equal terms have one head and one set of free variables.
+Alpha : { alphaEq : Term -> Term -> Bool }
+alphaObject (a : Alpha) : Object Term := { eq := a.alphaEq }
+
+-- the head constructor of a term, so that equal heads can be compared
+head (t : Term) : String := match t {
+  Var x -> "Var" ; Lit c -> "Lit" ; Universe -> "Universe" ; World -> "World" ; Lam x a b -> "Lam" ;
+  App f a -> "App" ; Pi x a b -> "Pi" ; Sigma x a b -> "Sigma" ; Pair a b -> "Pair" ;
+  Match s arms -> "Match" ; Inj l a -> "Inj" ; Sum kvs -> "Sum" ; Data n cs -> "Data" ;
+  Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom -> "Axiom" ;
+  Hole x -> "Hole" ; Record kvs -> "Record" ; RecordValue kvs -> "RecordValue" ; Proj r x -> "Proj" ;
+}
+sameNames (xs ys : List String) : Bool := removeAll xs ys == nil and removeAll ys xs == nil
+
+-- a name and a term in which it is not free: the fresh names a binder may be renamed to; random
+-- names are almost always fresh, so drawing them is cheap
+Fresh : U := { y : String, t : Term | not (member y (freeVars t)) }
+AlphaPair (a : Alpha) : U := { s t : Term | a.alphaEq s t }
+
+FreeVariablesAreNames (a : Alpha) (x y : String) : Bool := a.alphaEq (Var x) (Var y) == (x == y)
+RenameBound (a : Alpha) (x : String) (ty : Term) (f : Fresh) : Bool :=
+  a.alphaEq (Lam x ty f.t) (Lam f.y ty (swap x f.y f.t))
+  and a.alphaEq (Pi x ty f.t) (Pi f.y ty (swap x f.y f.t))
+AlphaKeepsHead (a : Alpha) (p : AlphaPair a) : Bool := head p.s == head p.t
+AlphaKeepsFree (a : Alpha) (p : AlphaPair a) : Bool := sameNames (freeVars p.s) (freeVars p.t)
+-- a congruence: alpha-equal parts give alpha-equal wholes, for every constructor with parts; a
+-- binder keeps its name on both sides (renaming it is `RenameBound`)
+AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
+  a.alphaEq (App p.s q.s) (App p.t q.t) and a.alphaEq (Pair p.s q.s) (Pair p.t q.t)
+  and a.alphaEq (Lam x p.s q.s) (Lam x p.t q.t) and a.alphaEq (Pi x p.s q.s) (Pi x p.t q.t)
+  and a.alphaEq (Sigma x p.s q.s) (Sigma x p.t q.t) and a.alphaEq (Subtype x p.s q.s) (Subtype x p.t q.t)
+  and a.alphaEq (Inj l p.s) (Inj l p.t) and a.alphaEq (Proj p.s l) (Proj p.t l)
+  and a.alphaEq (Sum [(l, p.s)]) (Sum [(l, p.t)]) and a.alphaEq (Data x [(l, p.s)]) (Data x [(l, p.t)])
+  and a.alphaEq (Record [(l, p.s)]) (Record [(l, p.t)]) and a.alphaEq (RecordValue [(l, p.s)]) (RecordValue [(l, p.t)])
+  and a.alphaEq (Match p.s [(PWild, q.s)]) (Match p.t [(PWild, q.t)])
+
+Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent
+
+-- ---------------------------------------------------------------- §3 Substitution
+
+-- `subst x s t` is `t[s/x]` of 3.S14: `t` with `s` in place of the free occurrences of `x`, with
+-- no capture. Results are compared up to alpha-equivalence, so the model is held to an `Alpha`.
+-- Random names almost never coincide, so the laws that need two names distinct state it as an
+-- alternative (`x == y or ...`) rather than a premise.
+Substitution (a : Alpha) : { subst : String -> Term -> Term -> Term }
+
+-- a name and a term in which it is not free, for the binder that substitution passes under
+NotFreeIn : U := { y : String, s : Term | not (member y (freeVars s)) }
+
+SubstHits (a : Alpha) (m : Substitution a) (x : String) (s : Term) : Bool := a.alphaEq (m.subst x s (Var x)) s
+SubstMisses (a : Alpha) (m : Substitution a) (x y : String) (s : Term) : Bool :=
+  x == y or a.alphaEq (m.subst x s (Var y)) (Var y)
+SubstGoesInside (a : Alpha) (m : Substitution a) (x : String) (s f b : Term) (l : String) : Bool :=
+  a.alphaEq (m.subst x s (App f b)) (App (m.subst x s f) (m.subst x s b))
+  and a.alphaEq (m.subst x s (Pair f b)) (Pair (m.subst x s f) (m.subst x s b))
+  and a.alphaEq (m.subst x s (Inj l f)) (Inj l (m.subst x s f))
+-- a binder of the same name shadows: the body is left alone, the binder's type is not
+SubstStopsAtShadow (a : Alpha) (m : Substitution a) (x : String) (s ty b : Term) : Bool :=
+  a.alphaEq (m.subst x s (Lam x ty b)) (Lam x (m.subst x s ty) b)
+-- under a binder whose name is not free in `s`, substitution goes in: no capture
+SubstPassesBinder (a : Alpha) (m : Substitution a) (x : String) (f : NotFreeIn) (ty b : Term) : Bool :=
+  x == f.y or a.alphaEq (m.subst x f.s (Lam f.y ty b)) (Lam f.y (m.subst x f.s ty) (m.subst x f.s b))
+-- a name not free in `t` changes nothing
+SubstNotFree (a : Alpha) (m : Substitution a) (f : NotFreeIn) (s : Term) : Bool :=
+  a.alphaEq (m.subst f.y s f.s) f.s
+-- alpha-equal terms give alpha-equal results
+SubstRespectsAlpha (a : Alpha) (m : Substitution a) (x : String) (s : Term) (p : AlphaPair a) : Bool :=
+  a.alphaEq (m.subst x s p.s) (m.subst x s p.t)
+
+Substitution (a : Alpha) := SubstHits a & SubstMisses a & SubstGoesInside a & SubstStopsAtShadow a
+  & SubstPassesBinder a & SubstNotFree a & SubstRespectsAlpha a
+
+-- ---------------------------------------------------------------- §4 Canonical form
+
+-- The canonical form (3.S34) renames bound variables canonically and removes module prefixes, so
+-- that alpha-equal terms, and terms that differ only in the module holding a definition, have one
+-- form and so one hash (spec 6). `unqualify` takes a name to its name without module prefix (`m.f`
+-- to `f`); what a prefix is, is the model's, by the lexical form of a dotted name (2.S1).
+CanonicalForm (a : Alpha) : { canon : Term -> Term, unqualify : String -> String }
+
+-- one form for alpha-equal terms, compared by structural equality: that is what makes it canonical
+CanonOfAlpha (a : Alpha) (m : CanonicalForm a) (p : AlphaPair a) : Bool := m.canon p.s == m.canon p.t
+CanonIdempotent (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool := m.canon (m.canon t) == m.canon t
+-- a name loses its module prefix, once
+CanonOfName (a : Alpha) (m : CanonicalForm a) (x : String) : Bool := m.canon (Var x) == Var (m.unqualify x)
+UnqualifyIdempotent (a : Alpha) (m : CanonicalForm a) (x : String) : Bool :=
+  m.unqualify (m.unqualify x) == m.unqualify x
+-- the canonical form of a term without module prefixes means the same term: alpha-equal to it
+CanonKeepsTerm (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool :=
+  not (allUnqualified m.unqualify (freeVars t)) or a.alphaEq (m.canon t) t
+allUnqualified (u : String -> String) (xs : List String) : Bool :=
+  match xs { nil -> true ; cons x rest -> u x == x and allUnqualified u rest }
+
+CanonicalForm (a : Alpha) := CanonOfAlpha a & CanonIdempotent a & CanonOfName a & UnqualifyIdempotent a
+  & CanonKeepsTerm a
+
+-- ---------------------------------------------------------------- §5 Reduction
+
+-- `reduce p n t` evaluates `t` in the program `p` with fuel `n` (3.S11: recursion is general, and
+-- evaluation runs under a budget), giving `just` its weak normal form, or `nothing` when the fuel
+-- runs out. Its laws are the five rules of 3.S14 to 3.S18, each a definitional equality, and they
+-- give the computing constructors of `Term` their roles (L2.7). Two results agree when both are
+-- alpha-equal values or either ran out of fuel: a case that runs out is not evidence either way
+-- (7.S12), and a certifier counts it apart. The model is `reduce` of term_model.lut (3.S33); the
+-- host's evaluator is a second specimen (L14.3).
+Reduction (a : Alpha) (sb : Substitution a) : { reduce : Program -> Nat -> Term -> Maybe Term }
+
+agree (a : Alpha) (r s : Maybe Term) : Bool := match r {
+  nothing -> true ;
+  just u -> match s { nothing -> true ; just v -> a.alphaEq u v } }
+isJust (r : Maybe Term) : Bool := match r { nothing -> false ; just u -> true }
+-- whether the program gives a name a definition or a declaration: a law about a name used as a
+-- constructor or an operator holds only where the program does not redefine it (Codex, writing
+-- the models); the first act naming a name is the one that counts, 4.R12 rejecting a second
+defines (p : Program) (x : String) : Bool := match p { nil -> false ;
+  cons a rest -> (match a { Declare y t -> y == x ; Define y t b -> y == x ; Datum t -> false }) or defines rest x }
+
+-- 3.S14, beta: a lambda applied is its body with the argument for its variable
+Beta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (x : String) (ty body arg : Term) : Bool :=
+  agree a (m.reduce p n (App (Lam x ty body) arg)) (m.reduce p n (sb.subst x arg body))
+
+-- 3.S15, delta: a defined name in head position is its body; a declared name is a hole and does
+-- not reduce (3.S9, 3.S19), applied or not
+Delta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (f : String) (ty b arg : Term) : Bool :=
+  agree a (m.reduce (cons (Define f ty b) p) n (App (Var f) arg)) (m.reduce (cons (Define f ty b) p) n (App b arg))
+HolesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (f : String) (ty : Term) : Bool :=
+  agree a (m.reduce (cons (Declare f ty) p) n (Var f)) (just (Var f))
+  and agree a (m.reduce p n (Hole f)) (just (Hole f))
+  and agree a (m.reduce p n Axiom) (just Axiom)
+
+-- 3.S16, iota: a match on an injection, a pair or a constructor takes the first arm whose pattern
+-- matches, with the pattern's variables substituted; an arm that does not match is passed over
+Iota (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l : String) (y : String) (v b : Term) : Bool :=
+  agree a (m.reduce p n (Match (Inj l v) [(PInj l (PVar y), b)])) (m.reduce p n (sb.subst y v b))
+  and (defines p l or agree a (m.reduce p n (Match (App (Var l) v) [(PCon l [PVar y], b)])) (m.reduce p n (sb.subst y v b)))
+  and agree a (m.reduce p n (Match v [(PWild, b)])) (m.reduce p n b)
+IotaPair (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (y : String) (f : NotFreeIn) (b : Term) : Bool :=
+  y == f.y or agree a (m.reduce p n (Match (Pair f.s (Var y)) [(PPair (PVar y) (PVar f.y), b)]))
+                      (m.reduce p n (sb.subst f.y (Var y) (sb.subst y f.s b)))
+-- (stated with an arm that matches after the one passed over: a `match` left with no arm is stuck,
+-- and two stuck terms need not be alike; Codex, writing kernel.py)
+IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l k y : String) (v b c : Term) : Bool :=
+  l == k or agree a (m.reduce p n (Match (Inj l v) [(PInj k PWild, b), (PInj l (PVar y), c)])) (m.reduce p n (sb.subst y v c))
+
+-- the projection of a record value by a name is the value at that name (D-2026-10-13-x): the
+-- projections are the product's arrows, as `PairFst` and `PairSnd` in kernel_laws.lth
+ProjOfRecord (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (x y : String) (u v : Term) : Bool :=
+  x == y or (agree a (m.reduce p n (Proj (RecordValue [(x, u), (y, v)]) x)) (m.reduce p n u)
+             and agree a (m.reduce p n (Proj (RecordValue [(x, u), (y, v)]) y)) (m.reduce p n v))
+
+-- 3.S17, prim: arithmetic and comparison on constants are the host's, here on integers, the
+-- operators being the names `+`, `*` and `==` that 2.S12 translates the infix forms into, and
+-- `true`, `false` the constructors of `Bool`
+Prim (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (i j : Int) : Bool :=
+  defines p "+" or defines p "*" or defines p "==" or defines p "true" or defines p "false" or agree a (m.reduce p n (App (App (Var "+") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i + j))))
+  and agree a (m.reduce p n (App (App (Var "*") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i * j))))
+  and agree a (m.reduce p n (App (App (Var "==") (Lit (IntConst i))) (Lit (IntConst j))))
+              (just (Var (if i == j then "true" else "false")))
+
+-- 3.S18, extern: an extern is a value until applied to as many closed arguments as its type has
+-- parameters; then the host is called (spec 10), and what it answers is the specimen's, not this
+-- theory's
+ExternIsValue (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (r : String) : Bool :=
+  agree a (m.reduce p n (Extern r)) (just (Extern r))
+
+-- values reduce to themselves: lambdas (no reduction under a binder), constants, and the type
+-- formers, whose roles are the checker's (program.lth)
+ValuesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (x : String) (c : Constant)
+           (ty b : Term) (kvs : List (String * Term)) : Bool :=
+  agree a (m.reduce p n (Lam x ty b)) (just (Lam x ty b)) and agree a (m.reduce p n (Lit c)) (just (Lit c))
+  and agree a (m.reduce p n Universe) (just Universe) and agree a (m.reduce p n World) (just World)
+  and agree a (m.reduce p n (Pi x ty b)) (just (Pi x ty b)) and agree a (m.reduce p n (Sigma x ty b)) (just (Sigma x ty b))
+  and agree a (m.reduce p n (Sum kvs)) (just (Sum kvs)) and agree a (m.reduce p n (Data x kvs)) (just (Data x kvs))
+  and agree a (m.reduce p n (Subtype x ty b)) (just (Subtype x ty b))
+  and agree a (m.reduce p n (Record kvs)) (just (Record kvs)) and agree a (m.reduce p n (RecordValue kvs)) (just (RecordValue kvs))
+
+-- a result is final, and more fuel does not change it
+Final (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (t : Term) : Bool :=
+  match m.reduce p n t { nothing -> true ; just v -> agree a (m.reduce p n v) (just v) and agree a (m.reduce p (n + 1) t) (just v) }
+
+Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & HolesStay a sb & Iota a sb & IotaPair a sb
+  & IotaSkips a sb & ProjOfRecord a sb & Prim a sb & ExternIsValue a sb & ValuesStay a sb & Final a sb
+
+-- ---------------------------------------------------------------- §6 Quote and eval
+
+-- `quote { t }` is the `Term` of `t`, after elaboration, with no obligation; `eval A t` checks the
+-- term `t` against the type `A` when it runs, and gives `just` its value or `nothing` (3.S32). The
+-- model is core's `eval`; that `quote` gives the elaborated term is the translation's (2.S12), so
+-- these are case laws on terms whose translation is fixed: a constant and an application of `+`.
+Evaluation : { evalAt : (A : U) -> Term -> Maybe A }
+
+QuoteGivesTheTerm (e : Evaluation) : Bool :=
+  quote { 1 + 2 } == App (App (Var "+") (Lit (IntConst 1))) (Lit (IntConst 2))
+EvalOfConstant (e : Evaluation) (i : Int) (s : String) : Bool :=
+  e.evalAt Int (Lit (IntConst i)) == just i and e.evalAt String (Lit (StringConst s)) == just s
+EvalChecks (e : Evaluation) (s : String) : Bool := e.evalAt Int (Lit (StringConst s)) == nothing
+EvalOfQuote (e : Evaluation) : Bool := e.evalAt Int (quote { 1 + 2 }) == just 3
+
+Evaluation := QuoteGivesTheTerm & EvalOfConstant & EvalChecks & EvalOfQuote

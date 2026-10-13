@@ -1,0 +1,79 @@
+-- checks.lth: a check written once, in the form that explains its failures, and its projections.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 3.3 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 5.S9 (a check is written once,
+-- explaining; the poorer forms are projections), 5.S10 (checks belong to this library), 5.S11 (how
+-- checks compose), 2.S12 (`Failures E` is `List E`; `if` on a check); L2.7. Pattern of ebnf.lth.
+--
+-- What this file states. A check of `T` with failures `E` gives the list of failures it finds in a
+-- value, empty exactly when the value passes (5.S9). Its projections (whether it holds, the first
+-- `n` failures, the reason of the first, the refined value) are chosen by the demand and never
+-- written by hand: a model of `Projections` gives them, and its laws tie each to the failures.
+-- Composition (5.S11): `and` concatenates the failures of independent checks, `or` keeps both
+-- lists when neither holds. The models are checks_model.lut's.
+--
+-- Index (all sections written in this draft):
+--   §1 `Failures E`, `Reason`, and the projections of a check (5.S9).                    done
+--   §2 Composition of checks, `and` and `or` (5.S11).                                    done
+
+-- ---------------------------------------------------------------- §1 Failures and projections
+
+-- the failures a check finds, empty when it holds (2.S12); a list, the free monoid of
+-- kernel_laws.lth, whose concatenation is the `and` of §2
+Failures (E : U) = List E
+
+-- the reason form (5.S9): the value, or the first failure. Roles: `ReasonOfFirst`.
+Reason (T E : U) : U := data {
+  ok : T -> Reason T E ;
+  failed : E -> Reason T E ;
+}
+
+-- A check with its projections: `failures` is the check as written; the rest are its poorer
+-- forms. `refine` gives the value back when it passes; its type in 5.S9 is the subtype
+-- `Maybe { x : T | holds x }`, which a field cannot name before `holds` is given, so here it is
+-- `Maybe T` with the law `RefineIsHolds`.
+Projections (T E : U) : {
+  failures : T -> Failures E,
+  holds : T -> Bool,
+  first : Nat -> T -> Failures E,
+  reason : T -> Reason T E,
+  refine : T -> Maybe T,
+}
+
+isEmpty (E : U) (fs : Failures E) : Bool := match fs { nil -> true ; cons f rest -> false }
+take (E : U) (n : Nat) (fs : Failures E) : Failures E :=
+  if n == 0 then nil else match fs { nil -> nil ; cons f rest -> cons f (take E (n - 1) rest) }
+
+-- `holds` is whether the list is empty; `Bool` is the check that explains nothing
+HoldsIsEmpty (T E : U) (c : Projections T E) (x : T) : Bool := c.holds x == isEmpty E (c.failures x)
+-- the first `n` failures are a prefix of the failures, cut at `n`
+FirstIsPrefix (T E : U) (c : Projections T E) (n : Nat) (x : T) : Bool := c.first n x == take E n (c.failures x)
+-- the reason is the value when the check holds, and the first failure otherwise
+ReasonOfFirst (T E : U) (c : Projections T E) (x : T) : Bool :=
+  match c.failures x { nil -> c.reason x == ok x ; cons f rest -> c.reason x == failed f }
+-- the refined value is the value exactly when the check holds
+RefineIsHolds (T E : U) (c : Projections T E) (x : T) : Bool :=
+  c.refine x == (if c.holds x then just x else nothing)
+
+Projections (T E : U) := HoldsIsEmpty T E & FirstIsPrefix T E & ReasonOfFirst T E & RefineIsHolds T E
+
+-- ---------------------------------------------------------------- §2 Composition
+
+-- `both c d` checks independent conditions and reports every failure of each, in order; `either`
+-- holds when one holds and otherwise keeps both lists (5.S11). `not` has nothing to explain when
+-- the check holds, so it is taken on `holds`, a `Bool`, and is not a field. Checks chained along
+-- a dependency compose by the reason form and stop at the first failure (5.S11); that is the
+-- elaboration of a block of checks (spec 8), not a field here.
+Composition (T E : U) : {
+  both : (T -> Failures E) -> (T -> Failures E) -> T -> Failures E,
+  either : (T -> Failures E) -> (T -> Failures E) -> T -> Failures E,
+}
+concatFailures (E : U) (xs ys : Failures E) : Failures E :=
+  match xs { nil -> ys ; cons x rest -> cons x (concatFailures E rest ys) }
+
+BothConcatenates (T E : U) (m : Composition T E) (c d : T -> Failures E) (x : T) : Bool :=
+  m.both c d x == concatFailures E (c x) (d x)
+EitherKeepsBoth (T E : U) (m : Composition T E) (c d : T -> Failures E) (x : T) : Bool :=
+  m.either c d x == (if isEmpty E (c x) or isEmpty E (d x) then nil else concatFailures E (c x) (d x))
+
+Composition (T E : U) := BothConcatenates T E & EitherKeepsBoth T E
