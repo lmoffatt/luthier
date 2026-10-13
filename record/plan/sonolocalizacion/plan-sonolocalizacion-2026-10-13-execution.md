@@ -9,7 +9,10 @@ writes theories; Codex what must run and iterate; a web model small bites).
 
 - 2026-10-13: written; nothing started.
 - 2026-10-13, night: S1 accepted (D-2026-10-13-ac); step 1, the inventory, running (Codex, read
-  only; brief record/IA/sonolocalizacion-inventory-2026-10-13/). The plan from zero is at step 2.2 (`term.lth`, another
+  only; brief record/IA/sonolocalizacion-inventory-2026-10-13/).
+- 2026-10-13, night: S5's minimal VS Code extension done by Codex (`tools/vscode-luthier/`): colours
+  from `luthierSyntax`, parse errors as diagnostics; run from source, see its README. Luciano has
+  not marked S5; one commit undoes it. The plan from zero is at step 2.2 (`term.lth`, another
   session) with `kernel.py` next (D-2026-10-13-u).
 
 ## Steps
