@@ -203,9 +203,14 @@ Fresh : U := { y : String, t : Term | not (member y (freeVars t)) }
 AlphaPair (a : Alpha) : U := { s t : Term | a.alphaEq s t }
 
 FreeVariablesAreNames (a : Alpha) (x y : String) : Bool := a.alphaEq (Var x) (Var y) == (x == y)
-RenameBound (a : Alpha) (x : String) (ty : Term) (f : Fresh) : Bool :=
+-- every binder may be renamed to a fresh name: the four binding formers, and a pattern variable
+-- (Fable, review of layers 0-1)
+RenameBound (a : Alpha) (x : String) (ty s : Term) (f : Fresh) : Bool :=
   a.alphaEq (Lam x ty f.t) (Lam f.y ty (swap x f.y f.t))
   and a.alphaEq (Pi x ty f.t) (Pi f.y ty (swap x f.y f.t))
+  and a.alphaEq (Sigma x ty f.t) (Sigma f.y ty (swap x f.y f.t))
+  and a.alphaEq (Subtype x ty f.t) (Subtype f.y ty (swap x f.y f.t))
+  and a.alphaEq (Match s [(PVar x, f.t)]) (Match s [(PVar f.y, swap x f.y f.t)])
 AlphaKeepsHead (a : Alpha) (p : AlphaPair a) : Bool := head p.s == head p.t
 AlphaKeepsFree (a : Alpha) (p : AlphaPair a) : Bool := sameNames (freeVars p.s) (freeVars p.t)
 -- a congruence: alpha-equal parts give alpha-equal wholes, for every constructor with parts; a
@@ -219,7 +224,50 @@ AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
   and a.alphaEq (Record [(l, p.s)]) (Record [(l, p.t)]) and a.alphaEq (RecordValue [(l, p.s)]) (RecordValue [(l, p.t)])
   and a.alphaEq (Match p.s [(PWild, q.s)]) (Match p.t [(PWild, q.t)])
 
-Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent
+-- and the converse: alpha-equal wholes have the same head, the same constants, labels and names
+-- that are not binders, and alpha-equal parts, a binder's body compared after renaming its
+-- variable to the other's. Without it every law above holds of a model that equates far too much
+-- (`head s == head t` and the same free names equates `Lit 1` with `Lit 2`), and every theory
+-- below, stated up to alpha, weakens with it (Fable, review of layers 0-1).
+renamedTo (x y : String) (t : Term) : Term := if x == y then t else swap x y t
+underBinder (a : Alpha) (x y : String) (b c : Term) : Bool :=
+  (x == y and a.alphaEq b c) or (not (member x (freeVars c)) and a.alphaEq b (renamedTo y x c))
+pairsAgree (a : Alpha) (xs ys : List (String * Term)) : Bool := match xs {
+  nil -> (match ys { nil -> true ; cons y rest -> false }) ;
+  cons (k, u) rest -> match ys { nil -> false ; cons (j, v) more -> k == j and a.alphaEq u v and pairsAgree a rest more } }
+-- a pattern's shape with its variables in order: two arms agree when their patterns have one shape
+-- and their bodies agree after renaming the variables positionally (patterns are linear, 3.S10)
+patternShape (q : Pattern) : Pattern := match q {
+  PVar x -> PVar "_" ; PWild -> PWild ; PLit c -> PLit c ;
+  PCon c qs -> PCon c (shapes qs) ; PPair l r -> PPair (patternShape l) (patternShape r) ;
+  PInj l r -> PInj l (patternShape r) }
+shapes (qs : List Pattern) : List Pattern := match qs { nil -> nil ; cons q rest -> cons (patternShape q) (shapes rest) }
+renameAll (xs ys : List String) (t : Term) : Term := match xs { nil -> t ;
+  cons x rest -> match ys { nil -> t ; cons y more -> renameAll rest more (renamedTo y x t) } }
+armsAgree (a : Alpha) (xs ys : List (Pattern * Term)) : Bool := match xs {
+  nil -> (match ys { nil -> true ; cons y rest -> false }) ;
+  cons (p, b) rest -> match ys { nil -> false ;
+    cons (q, c) more -> patternShape p == patternShape q
+                        and a.alphaEq b (renameAll (patternVars p) (patternVars q) c) and armsAgree a rest more } }
+partsAgree (a : Alpha) (s t : Term) : Bool := match s {
+  Var x -> t == Var x ; Lit c -> t == Lit c ; Universe -> t == Universe ; World -> t == World ;
+  Axiom -> t == Axiom ; Hole x -> t == Hole x ; Extern r -> t == Extern r ; Primitive r -> t == Primitive r ;
+  App f x -> (match t { App g y -> a.alphaEq f g and a.alphaEq x y ; _ -> false }) ;
+  Pair u v -> (match t { Pair w z -> a.alphaEq u w and a.alphaEq v z ; _ -> false }) ;
+  Inj l u -> (match t { Inj k v -> l == k and a.alphaEq u v ; _ -> false }) ;
+  Proj u l -> (match t { Proj v k -> l == k and a.alphaEq u v ; _ -> false }) ;
+  Lam x d b -> (match t { Lam y e c -> a.alphaEq d e and underBinder a x y b c ; _ -> false }) ;
+  Pi x d b -> (match t { Pi y e c -> a.alphaEq d e and underBinder a x y b c ; _ -> false }) ;
+  Sigma x d b -> (match t { Sigma y e c -> a.alphaEq d e and underBinder a x y b c ; _ -> false }) ;
+  Subtype x d b -> (match t { Subtype y e c -> a.alphaEq d e and underBinder a x y b c ; _ -> false }) ;
+  Sum kvs -> (match t { Sum jws -> pairsAgree a kvs jws ; _ -> false }) ;
+  Record kvs -> (match t { Record jws -> pairsAgree a kvs jws ; _ -> false }) ;
+  RecordValue kvs -> (match t { RecordValue jws -> pairsAgree a kvs jws ; _ -> false }) ;
+  Data n cs -> (match t { Data m ds -> n == m and pairsAgree a cs ds ; _ -> false }) ;
+  Match u arms -> (match t { Match v brs -> a.alphaEq u v and armsAgree a arms brs ; _ -> false }) }
+AlphaPartsAgree (a : Alpha) (p : AlphaPair a) : Bool := partsAgree a p.s p.t
+
+Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent & AlphaPartsAgree
 
 -- ---------------------------------------------------------------- §3 Substitution
 
