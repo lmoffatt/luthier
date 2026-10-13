@@ -15,14 +15,13 @@ declaration `x : T` introduces `x` with its base `T` and no body, which is a hol
 definition `x : T := t`, or `x := t` filling an earlier declaration, gives `x` a body. An alias
 `x = t` makes `x` stand for `t`; it is expanded before checking and has no states.
 
-**3.S2. Bodies.** [implemented] The body of a definition is a term, a `data` term (§2), or
-`extern "target"` (§3). Two further bodies exist, `primitive "..."` and `axiom "..."`; what they
-mean and where they are allowed is `spec 11`. Replaced: 3.S39, 3.S40.
+**3.S2. Bodies.** [decided D-2026-10-12-ab] The body of a definition is a term, a `data` term (§2), or
+`extern "target"` (§3). `primitive "..."` and `axiom "..."` are applications of names of core
+(3.S39), what they mean and where they are allowed is `spec 11`.
 
-**3.S3. Directives.** [implemented] Directives are not definitions and have no states. They are
-`import` (`spec 12`), `test` and `gen` (`spec 7`), `operator` (`spec 4`) and `cite` (`spec 6`). The
-`profile` directive (`spec 7`) is [proposed] here: it is on the brief's list but not in
-`syntax.py`. Replaced: 3.S39, 3.S40.
+**3.S3. Directives.** [decided D-2026-10-12-ab] Directives are not definitions and have no states.
+`import` (`spec 12`) and `operator` (`spec 4`) are acts of `luthierSyntax` (`spec 2.S9`); `test`
+(`spec 7`) and `cite` (`spec 6`) are functions (3.S39); `gen` and `profile` are gone (`spec 2.S19`).
 
 ## §2 Type formers
 
@@ -109,7 +108,7 @@ does not reduce (L2.1).
 **3.S10. Match.** [implemented] `match t { p1 -> t1 ; ... }` has one branch per constructor or
 label of the type of `t`, none repeated and none missing, unless a variable or `_` branch takes the
 rest. A pattern is a constructor or label applied to patterns, a tuple `(p, q)`, a literal, a
-variable, or `_`.
+variable, or `_`. The checker has no coverage predicate yet: nothing rejects a repeated or a missing branch.
 
 **3.S11. Recursion and the recursor.** [implemented] A definition with a declared type may mention
 itself, and definitions may mention each other. Recursion is general: nothing guarantees
@@ -120,7 +119,7 @@ recursion is not part of version 0 [decided D-2026-10-12-ah].
 
 **3.S12. Laws as terms.** [implemented] A law has type `Bool` or `Law`, a function into
 one of these whose parameters are quantified, or a conjunction `p & q`. A law into `Failures E`
-(the failures a check finds) is designed (spec 5.S9) and not taken by the checker today. What a law is and how laws combine is `spec 5`; this
+(the failures a check finds, spec 5.S9) is taken by the checker (`verdict_type` in `check.py`). What a law is and how laws combine is `spec 5`; this
 chapter keeps only that a law is a term of one of those types. `Law` is the type of what a test
 runs (`spec 7`). A law may also be valued in the cost type of `spec 5.S2`, which the interpreter does not have yet.
 
@@ -133,31 +132,35 @@ Examples: `r5_extern_value.accept.lut`, `r5_extern_provisional.accept.lut`. Repl
 
 Evaluation reduces terms by five rules, each a definitional equality (`≡`, `spec 1`). The programs
 named are those of `tests/spec/` that contain the redex; the suite runs them through the checker,
-and reduction proper is exercised by the library tests. A rule of evaluation counts as implemented
-only with a program whose value is compared (D-2026-10-12-ah); 3.S14 to 3.S18 have none yet, and
-their mark stays `[implemented]` for the interpreter until those programs exist.
+and reduction proper is exercised by `tests/test_kernel.py`. A rule of evaluation counts as implemented
+only with a program whose value is compared (D-2026-10-12-ah); 3.S14 to 3.S18 name those of
+`tests/eval/` (run by `luthier eval` in `test_elaborate.py::test_eval`) and of `tests/run/` (run by
+`luthier run` in `test_run.py`).
 
 **3.S14. Beta.** [implemented] `(fn x { t }) a ≡ t[a/x]`. In `k_recursor.accept.lut` the lambda
-`\k r { succ r }` is applied by `recN`.
+`fn k r { succ r }` is applied by `recN`; `tests/eval/lambda.lut` computes 5 by it.
 
 **3.S15. Delta.** [implemented] A defined name reduces to its body. Aliases are expanded before
 checking and never reach evaluation. [decided D-2026-10-13-aa] A defined name in head position is
 unfolded; a term reduction cannot advance is stuck, the same for every specimen, and folding a
 name back for display is the printer's (in `v0.1-final` a recursive function on an argument that
-did not reduce stayed folded, `evaluator.py`, which made the normal form depend on the specimen). Program: `k_recursor.accept.lut`, with the unfolding of `recN` and `add`.
+did not reduce stayed folded, `evaluator.py`, which made the normal form depend on the specimen). Programs: `k_recursor.accept.lut`, with the unfolding of `recN` and `add`; `tests/eval/factorial.lut` (24) and `tests/eval/arithmetic.lut`.
 
 **3.S16. Iota.** [implemented] A `match` on a constructor, a label injection or a pair reduces to
 the matching branch with pattern variables substituted. Programs: `k_sum.accept.lut`,
-`k_union.accept.lut`, `k_empty_unit.accept.lut`, `k_recursor.accept.lut`.
+`k_union.accept.lut`, `k_empty_unit.accept.lut`, `k_recursor.accept.lut`; and with their values
+compared, `tests/eval/data.lut` (2) and `tests/eval/factorial.lut` (24).
 
 **3.S17. Prim.** [implemented] Arithmetic and comparisons on literals of `Int`, `Float64` and
-`String`, and `==` on values of structures with structural equality (`spec 4.R8`). Programs:
-`k_union.accept.lut` (arithmetic on `Float64`), `k_dependent_product.accept.lut` (comparisons on
-`Int`).
+`String`, and `==` on values of structures with structural equality (`spec 4.R8`). Program with
+its value compared: `tests/eval/arithmetic.lut` (19); `k_union.accept.lut` (arithmetic on
+`Float64`) and `k_dependent_product.accept.lut` (comparisons on `Int`) are only checked.
 
 **3.S18. Extern.** [implemented] An extern applied to as many closed arguments as its type has
 parameters calls the host and converts the result back (`spec 10`). No k program of `tests/spec/`
-reduces one; `r5_extern_value.accept.lut` only checks one.
+reduces one, and `r5_extern_value.accept.lut` only checks one; the programs of `tests/run/`
+(`read_first_line.lut`, `table_cell.lut`, `record_externs.lut`, `vector_norm.lut`) run them, with
+their output compared in `test_run.py`.
 
 **3.S19. Terms with holes.** [implemented] A term that contains a hole where the reduction needs a
 value does not reduce.
@@ -200,7 +203,7 @@ computed at most once, as each argument is computed once under call by need. The
 change, since functions are pure. Without it an iterative algorithm written with lambdas
 recomputes its whole history at each read.
 
-**3.S26. Observational equality across the bridge.** [implemented] A lambda and an array of one
+**3.S26. Observational equality across the bridge.** [proposed] A lambda and an array of one
 function type are compared point by point over `Fin n` (`spec 4.R8`); the domain is finite, so the
 comparison is exhaustive.
 
@@ -217,9 +220,10 @@ a local name; the two implementations are two specimens of one theory (`spec 9`)
 
 ## §6 Programs as data
 
-**3.S29. Term and Program as data.** [decided D-2026-10-12-x] `Term`, `Pattern`, `Act` and
-`Program` are `data` in `core.lut`, so that a program is a value of Luthier (L7.4, L14.2). They are
-not in `core.lut` yet; the host's classes in `syntax.py` are their model. The constructors:
+**3.S29. Term and Program as data.** [implemented] [decided D-2026-10-12-x] `Term`, `Pattern`, `Act` and
+`Program` are `data`, so that a program is a value of Luthier (L7.4, L14.2). They are written in
+`src/luthier/lib/term.lth`, with their model in `term_model.lut`, and `kernel.py` and `term.py`
+are the host's. The constructors:
 [decided D-2026-10-13-aa] As written in `src/luthier/lib/term.lth` §1, which this item now follows:
 `Term` has `Var`, `Lit` (a `Constant`: integer, double or string), `Universe` (for `U`, a keyword),
 `World`, `Lam`, `App`, `Pi`, `Sigma`, `Pair`, `Match`, `Inj`, `Sum`, `Data`, `Subtype`, `Extern`,
@@ -230,9 +234,9 @@ resolved into qualified names, and the directives are functions (3.S39, spec 2.S
 
 | `data` | constructors |
 |---|---|
-| `Term` | `Var`, `Lit`, `U`, `Lam`, `App`, `Pi`, `Sigma`, `Pair`, `Match`, `Inj`, `Sum`, `Data`, `Subtype`, `Extern`, `Primitive`, `Axiom`, `Hole` |
-| `Pattern` | variable, wildcard, constructor, pair, literal, injection (`PVar`, `PWild`, `PCon`, `PPair`, `PLit`, `PInj` in `syntax.py`) |
-| `Act` | declaration, definition, alias, and the directives of §1 |
+| `Term` | `Var`, `Lit`, `Universe`, `World`, `Lam`, `App`, `Pi`, `Sigma`, `Pair`, `Match`, `Inj`, `Sum`, `Data`, `Subtype`, `Extern`, `Primitive`, `Axiom`, `Hole`, `Record`, `RecordValue`, `Proj`, `Let` |
+| `Pattern` | variable, wildcard, constructor, pair, literal, injection (`PVar`, `PWild`, `PCon`, `PPair`, `PLit`, `PInj` in `term.lth`) |
+| `Act` | declaration, definition and datum (`Declare`, `Define`, `Datum`) |
 | `Program` | a list of `Act` |
 
 In `Term`, `Var` is a name, `Lit` a literal, `U` the universe, `Lam` and `App` the exponential,
@@ -242,22 +246,21 @@ In `Term`, `Var` is a name, `Lit` a literal, `U` the universe, `Lam` and `App` t
 constructors of `Pattern` and the fields of `Act` are as listed [decided D-2026-10-12-ah]; D-2026-10-12-x named the
 four data and not their fields.
 
-**3.S30. Term is the kernel term.** [decided D-2026-10-12-ah] `Term` is the kernel term after elaboration, with the
+**3.S30. Term is the kernel term.** [implemented] [decided D-2026-10-12-ah] `Term` is the kernel term after elaboration, with the
 sugar of `spec 2` translated away, not the surface term. The hashes of the certificates (`spec 6`)
 are computed over it.
 
-**3.S31. Names are strings.** [decided D-2026-10-12-ah] Variables and labels are strings. Alpha-equivalence, two
+**3.S31. Names are strings.** [implemented] [decided D-2026-10-12-ah] Variables and labels are strings. Alpha-equivalence, two
 terms equal up to renaming of bound variables, is a law of the theory of `Term` (L3.3), and not a
 property of a representation by de Bruijn indices.
 
 **3.S32. Quote and eval.** [decided D-2026-10-12-ah] `quote { t }` gives the `Term` of the term `t` with no
 obligation. `eval A t : Maybe A` checks `t` against `A` at evaluation time and gives `nothing` when
-it does not check. Neither is in the interpreter.
+it does not check. `quote` elaborates to an application of the name `quote` (`elaborate.py`) and `kernel.eval_at` evaluates a quoted term at a type (`test_eval_computes`, `test_eval_constants_and_checks`); `eval` as a core name of type `Maybe A` is not a program yet.
 
-**3.S33. Reduction as a function.** [decided D-2026-10-12-ah] The rules of §4 (beta, delta, iota, prim, extern)
-are stated as a function `reduce : Term -> Term` in `lib/term.lut`, the interpreter written in
+**3.S33. Reduction as a function.** [implemented] [decided D-2026-10-12-ah] The rules of §4 (beta, delta, iota, prim, extern)
+are stated as a function `reduce : Term -> Term` in `lib/term.lth`, the interpreter written in
 Luthier, certified against the host's evaluator as two specimens of one theory (L14.3, `spec 9`).
-The file is not written.
 [decided D-2026-10-13-aa] As written in `term.lth` §5: the rules are stated on one weak-head step,
 `step : Program -> Term -> Maybe Term` (`nothing` when the term is in weak head normal form), and
 evaluation under fuel (3.S11) is its iteration, `reduce`, a definition; so running out of fuel is
@@ -265,7 +268,7 @@ not a verdict of any law. The model is `term_model.lut`, the host's evaluator `k
 specimen. The strategy is weak head: the head of an application, the scrutinee of a match and the
 record of a projection step first, and nothing steps under a binder.
 
-**3.S34. Canonical form.** [decided D-2026-10-12-ah] The canonical form of a `Term` renames bound variables
+**3.S34. Canonical form.** [implemented] [decided D-2026-10-12-ah] The canonical form of a `Term` renames bound variables
 canonically and removes module prefixes. The hashes of `spec 6` are computed over this form, so two
 programs that differ in the names of their bound variables or in the module that holds a definition
 have one hash.
@@ -276,13 +279,12 @@ belongs to `spec 10` (L7.4, L4).
 
 ## §7 The kernel's theory in Luthier
 
-**3.S36. `lib/kernel_laws.lut`.** [implemented] The file states the laws every structure of the
-kernel satisfies by construction, as the theory `KernelLaws A B`: `Beta`, `PairFst`, `PairSnd` and
-`Pairing` for the exponential and the product; `IfTrue`, `IfFalse`, `CaseNothing` and `CaseJust`
-for sums (stated on `Bool` and `Maybe`); `FoldNil` and `FoldCons` for the recursion principle of
-`List`. It is the theory the host is certified against today: `luthier test` checks its models at
-`Fin 3` and `Fin 2` (`examples/kernel_finite.lut`, sampled). The reduction of the host is thereby a
-specimen of this theory (L14.3).
+**3.S36. `lib/kernel_laws.lth`.** [implemented] The file states the laws every structure of the
+kernel satisfies by construction: `Beta`, `PairFst`, `PairSnd` and `Pairing` for the exponential
+and the product; `IfTrue`, `IfFalse`, `CaseNothing` and `CaseJust` for sums (stated on `Bool` and
+`Maybe`); `FoldNeutral`, `FoldInject` and `FoldCombine` for the recursion principle of `List`, the free monoid. Its models are in
+`kernel_models.lut`, and `tests/test_kernel.py` checks `kernel.py` against them: the reduction of
+the host is thereby a specimen of this theory (L14.3).
 [decided D-2026-10-12-ak] The laws of a structural `==` (reflexive, symmetric, transitive,
 substitutive), which make a concrete type an object, are to be stated in the same file.
 [decided D-2026-10-13-z] `kernel_laws.lth` §1 states them: `Object` is reflexive, symmetric and
@@ -303,9 +305,9 @@ equality of functions is not structural (`spec 4.R8`); observed pointwise it is 
 `Fin n` are not enumerated by `exhaustive`. Both are O11. The recursion principle is stated over
 lists with the algebra fixed, until functions of two arguments have generators.
 
-**3.S38. `lib/term.lut`.** [decided D-2026-10-12-ah] The theory of `Term`: the data of §6, alpha-equivalence, the
+**3.S38. `lib/term.lth`.** [implemented] [decided D-2026-10-12-ah] The theory of `Term`: the data of §6, alpha-equivalence, the
 canonical form of 3.S34, substitution, and `reduce` of 3.S33 with the laws that relate it to
-`KernelLaws`. Not written.
+`kernel_laws.lth`.
 [decided D-2026-10-13-aa] Written as `src/luthier/lib/term.lth`, with its models in `term_model.lut`.
 
 
@@ -316,16 +318,16 @@ and `axiom` are names of `core.lut`; a body is their application, recognized by 
 restriction of `primitive` and `axiom` to core and the libraries becomes a law over `Program` (`spec
 4 §9`). The directives `test`, `cite` and `import` are functions (`spec 7`, `spec 6`, `spec 12`).
 
-**3.S40. An extern is a route.** [decided D-2026-10-12-ac] An extern is a definition like any other:
+**3.S40. An extern is a route.** [implemented] [decided D-2026-10-12-ac] An extern is a definition like any other:
 its name, its declared type and the route to the host's function, a datum. Reading the host's file
 is the evaluation of that node, done when a demand reaches it, once per plan, with the hash of what
 was read entering the identity of the result (L5.6); a file no demand reaches is never read, and it
-need not exist when the program is checked (L11.7). Today the checker resolves every extern when it
-checks the file.
+need not exist when the program is checked (L11.7). `run.py` reads it on demand and `check.py`
+imports no host module (`test_unused_extern_is_not_resolved`, `test_extern_in_a_record_is_read_when_projected`).
 
 ## Open
 
-- O11 (the kernel's theory stated in Luthier): §7 of this chapter, `lib/kernel_laws.lut` and
-  `lib/term.lut`.
+- O11 (the kernel's theory stated in Luthier): §7 of this chapter, `lib/kernel_laws.lth` and
+  `lib/term.lth`.
 - The four choices of §6, pending his mark: 3.S30 (`Term` is the elaborated term), 3.S31 (names
   are strings), 3.S32 (`quote` and `eval`), 3.S33 (`reduce` in Luthier).
