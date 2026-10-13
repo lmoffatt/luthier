@@ -259,13 +259,24 @@ by Luciano.
 
 ## Step 4. The Python checker and evaluator (layers 0 and 1)
 
-1. Next: `src/luthier/check.py` (the specimen of `program.lth`), by Codex; `luthier check files`.
+1. Running: `src/luthier/check.py` (the specimen of `program.lth`), by Codex; `luthier check files`.
 2. Done, brought forward (55708f2, by Codex): the 48 programs of `tests/spec/v0.1/` in the new
    syntax in `tests/spec/`, each keeping its rule and its `-- expect:` line; `tests/test_spec.py`
    checks them at the level of syntax, with a hook for the checker's verdicts.
 3. The theories of steps 1 to 3 pass the checker; the programs pass; the items of chapters 2 to 4
    flip to `[implemented]` as their programs pass.
-4. Milestone `v0.2` (Z7).
+4. Milestone `v0.2` (Z7), when all of these hold, checked by the coordinating session:
+   a. `luthier check` reports no failure on the theory files of `src/luthier/lib/` (layers 0 and
+      1, and those of layer 2 already written);
+   b. every program of `tests/spec/` (48) gets its expected verdict from `luthier check`, with its
+      `-- expect:` fragment where the specification gives one, and no case left as an xfail;
+   c. `luthier eval` runs the programs of `tests/eval/` to their stated results;
+   d. the whole suite passes (`python3 -m pytest tests/ -q`), with the lints (`check_spec.py`,
+      `project_principles.py --check --strict`, `check_quotes.py`, `render_grammar.py --check`);
+   e. the items of chapters 2 to 4 whose programs pass are marked `[implemented]` (now meaning
+      `v0.2`, not `v0.1-final`), and `check_spec.py` reads them so;
+   then the tag `v0.2` and its push, the first push since `v0.1-final` (push only tagged
+   milestones).
 
 ## Step 5. Evidence (layer 2)
 
