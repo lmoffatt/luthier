@@ -2206,3 +2206,17 @@ Quote:      "de acuerdo. Tambien podemos usar IAs externas porque mi limite esta
 Source:     chat:da165104:3026
 Kind:       plan (Z6, Z9 of record/plan-from-zero-2026-10-13-decisions.md)
 Status:     current
+
+D-2026-10-13-s  Braces inside the scrutinee of a `match` go in parentheses: the first `{` after
+                `match` and its scrutinee opens the arms. Found by ChatGPT writing the parser:
+                `match f { p -> q } { r -> s }` had two trees, the match on `f` applied to the block
+                `{ r -> s }`, or the match on `f { p -> q }` with the arm `r -> s`. Chosen over
+                forbidding a `match` to be applied without parentheses (one rule less in the
+                grammar, but the scrutinee would swallow a block). The scrutinee is a term of the
+                levels `or` to `.field` whose atoms carry no braces outside brackets; open forms,
+                `->` and `&` there go in parentheses too.
+Author:     Luciano, on the model's recommendation (A of two)
+Quote:      "A"
+Source:     chat:da165104:3515
+Kind:       spec (2.S9) and grammar.lth
+Status:     current

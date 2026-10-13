@@ -161,7 +161,9 @@ isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es
 -- two kinds: `arrowTerm`, closed, which `&` may follow, and `arrowOpen`, ending in an open form,
 -- which nothing follows (Claude, round 3: `U -> (a : A) * b & C` had two trees). Each level of the table is one nonterminal, a right
 -- associativity a right recursion, a left one a repetition. A sum `< ... >` heads an application
--- but is not an argument (2.S10). Its coercion to `WellFormedEbnf` owes that it has no left
+-- but is not an argument (2.S10). The scrutinee of a `match` is the chain from `or` down whose
+-- atoms carry no braces outside brackets, so the first `{` opens the arms (D-2026-10-13-s; ChatGPT,
+-- writing the parser: `match f { p -> q } { r -> s }` had two trees). Its coercion to `WellFormedEbnf` owes that it has no left
 -- recursion and every nonterminal is defined, an obligation `test` discharges.
 luthierSyntax : WellFormedEbnf := { start := "program", rules := [
   { lhs := "program",     rhs := rep (seq [ref "act", lit "\n"]) },
@@ -215,8 +217,25 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
       seq [lit "{", ref "block", lit "}"],
       seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"]), opt (lit ",")]), lit "]"],
       seq [lit "\\", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
-      seq [lit "match", ref "term", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"]), opt (lit ";")]), lit "}"],
+      seq [lit "match", ref "scrutinee", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"]), opt (lit ";")]), lit "}"],
       seq [lit "quote", lit "{", ref "term", lit "}"]] },
+  { lhs := "scrutinee",   rhs := seq [ref "sAnd", rep (seq [lit "or", ref "sAnd"])] },
+  { lhs := "sAnd",        rhs := seq [ref "sCmp", rep (seq [lit "and", ref "sCmp"])] },
+  { lhs := "sCmp",        rhs := seq [ref "sAdd", rep (seq [alt [lit "==", lit "/=", lit "<", lit "<=", lit ">", lit ">="], ref "sAdd"])] },
+  { lhs := "sAdd",        rhs := seq [ref "sMul", rep (seq [alt [lit "+", lit "-"], ref "sMul"])] },
+  { lhs := "sMul",        rhs := seq [ref "sNeg", rep (seq [alt [lit "*", lit "/", lit "mod"], ref "sNeg"])] },
+  { lhs := "sNeg",        rhs := alt [seq [lit "-", ref "sNeg"], ref "sApp"] },
+  { lhs := "sApp",        rhs := seq [ref "sProj", rep (ref "sArg")] },
+  { lhs := "sProj",       rhs := seq [ref "sAtom", rep (seq [lit ".", cat "name"])] },
+  { lhs := "sArg",        rhs := seq [ref "sArgAtom", rep (seq [lit ".", cat "name"])] },
+  { lhs := "sAtom",       rhs := alt [ref "sArgAtom",
+      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"]] },
+  { lhs := "sArgAtom",    rhs := alt [
+      cat "name", cat "number", cat "string", lit "U", lit "W",
+      seq [lit "(", ref "term", lit ")"],
+      seq [lit "(", ref "term", lit ",", ref "term", rep (seq [lit ",", ref "term"]), lit ")"],
+      seq [lit "(", cat "name", lit "<-", ref "term", lit ")"],
+      seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"]), opt (lit ",")]), lit "]"]] },
   { lhs := "recordFields", rhs := alt [
       seq [ref "fieldOne", opt (ref "sep")],
       seq [ref "fieldsTwo", opt (seq [lit "|", ref "term"]), opt (ref "sep")]] },
@@ -529,6 +548,7 @@ PrintParenthesizes (d : Derives) (g : Grammar d) : Bool :=
   printsBack d g (ifThen (nm "c") (ifThen (nm "d") (nm "y") nothing) (just (nm "b")))
   and printsBack d g (ifThen (nm "c") (ifThen (nm "d") (nm "y") (just (ifThen (nm "e") (nm "z") nothing))) (just (nm "b")))
   and printsBack d g (binop "&" (binop "->" universe (sigma ["a"] (nm "A") (nm "b"))) (nm "C"))
+  and printsBack d g (matchOf (app (nm "f") (block [] (nm "a"))) [(pvar "p", nm "q")])
   and parsesX d g "x := if c then (if d then y) else b" (ifThen (nm "c") (ifThen (nm "d") (nm "y") nothing) (just (nm "b")))
 -- 2.S11: the dangling else belongs to the nearest if
 DanglingElse (d : Derives) (g : Grammar d) : Bool :=
@@ -629,6 +649,14 @@ PatternTree (d : Derives) (g : Grammar d) : Bool :=
                        (pTuple [pvar "a", pvar "b"], nm "a"), (pApp "cons" [pWild, pvar "rest"], nm "rest")])
   and parsesX d g "x := match m { (y) -> y }" (matchOf (nm "m") [(pvar "y", nm "y")])
   and parsesX d g "x := match e { }" (matchOf (nm "e") [])
+-- D-2026-10-13-s: the first brace after the scrutinee opens the arms
+ScrutineeTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := match g.lex s { a -> b }" (matchOf (app (nm "g.lex") (nm "s")) [(pvar "a", nm "b")])
+  and parsesX d g "x := match f { p -> q } { r -> s }"
+    (app (matchOf (nm "f") [(pvar "p", nm "q")]) (block [] (binop "->" (nm "r") (nm "s"))))
+  and parsesX d g "x := match (f { a := 1 ; a }) { r -> s }"
+    (matchOf (app (nm "f") (block [bind "a" (numeral 1)] (nm "a"))) [(pvar "r", nm "s")])
+  and not (isParsed (g.parse "x := match f { a := 1 ; a } { r -> s }"))
 NamedArgTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := f (tol <- 1)" (app (nm "f") (namedArg "tol" (numeral 1)))
 IfTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := if c then a" (ifThen (nm "c") (nm "a") nothing)
@@ -655,5 +683,5 @@ Grammar (d : Derives) := RoundTrip d & Canonical d & ParsedIsWritten d & ParsesW
   & DeclarationTree d & DefinitionTree d & DefaultTree d & ImplicitTree d & AliasTree d & DataTree d
   & ClauseTree d & OperatorTree d & ImportTree d & DatumTree d & LiteralTree d & PiTree d
   & SigmaNamedTree d & RecordTree d & SubtypeTree d & BlockOrRecordValue d & TupleTree d & ListTree d
-  & LambdaTree d & PatternTree d & NamedArgTree d & IfTree d & ProjectionTree d & QuoteTree d
+  & LambdaTree d & PatternTree d & ScrutineeTree d & NamedArgTree d & IfTree d & ProjectionTree d & QuoteTree d
   & UniverseWorldAmp d & NegationTree d & BrokenTextFails d

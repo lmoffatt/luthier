@@ -147,7 +147,7 @@ holds.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: e0e7bc61350d89667090cb809a012080e70e59ec994b2bb1796ae6c065a4f76a).
+(v1; sha256: f32b34c28f98f3f3df0429e9bfd9c0116144cd1998906714e735ab412369a414).
 
     program ::= { act newline }
 
@@ -242,8 +242,40 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
         | "{" block "}"
         | "[" [ term { "," term } [ "," ] ] "]"
         | "\\" lparam { lparam } "{" block "}"
-        | "match" term "{" [ arm { ";" arm } [ ";" ] ] "}"
+        | "match" scrutinee "{" [ arm { ";" arm } [ ";" ] ] "}"
         | "quote" "{" term "}"
+
+    scrutinee ::= sAnd { "or" sAnd }
+
+    sAnd ::= sCmp { "and" sCmp }
+
+    sCmp ::= sAdd { ( "==" | "/=" | "<" | "<=" | ">" | ">=" ) sAdd }
+
+    sAdd ::= sMul { ( "+" | "-" ) sMul }
+
+    sMul ::= sNeg { ( "*" | "/" | "mod" ) sNeg }
+
+    sNeg ::= "-" sNeg
+        | sApp
+
+    sApp ::= sProj { sArg }
+
+    sProj ::= sAtom { "." name }
+
+    sArg ::= sArgAtom { "." name }
+
+    sAtom ::= sArgAtom
+        | "<" name ":" term { "|" name ":" term } ">"
+
+    sArgAtom ::= name
+        | number
+        | string
+        | "U"
+        | "W"
+        | "(" term ")"
+        | "(" term "," term { "," term } ")"
+        | "(" name "<-" term ")"
+        | "[" [ term { "," term } [ "," ] ] "]"
 
     recordFields ::= fieldOne [ sep ]
         | fieldsTwo [ "|" term ] [ sep ]
@@ -330,7 +362,9 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 `{ x : A }`, is a record type; a record type with a law has two or more names,
 `{ x : A, y : B | p }` or `{ x y : A | p }`; so each text has one tree. A parenthesized lambda
 parameter that is not a typed name is a tuple of two or more patterns. A field may
-carry several names, `{ x y : A, z : B }`. `quote` is a keyword (2.S21) and `eval` a name of core, so
+carry several names, `{ x y : A, z : B }`. [decided D-2026-10-13-s] Braces inside the scrutinee of a `match`
+go in parentheses, so the first `{` after the scrutinee opens the arms: `match f { p -> q } { r -> s }`
+is the match on `f` applied to a block, and a match on `f { ... }` is written `match (f { ... }) { ... }`. `quote` is a keyword (2.S21) and `eval` a name of core, so
 `eval A t` is an application (2.S20).
 
 **2.S10. Patterns.** [implemented] A pattern `name` is a constructor of the scrutinee's data type
