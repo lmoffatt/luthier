@@ -1,6 +1,6 @@
 # Luthier from zero: the decisions
 
-Draft 0, 2026-10-13, at 23792d3. D-2026-10-13-h: Luthier starts again from zero; first its
+Draft 1, 2026-10-13 (draft 0 at 23792d3; draft 1 adds Z9). D-2026-10-13-h: Luthier starts again from zero; first its
 theories, written in Luthier, then the Python files that implement them, then Luthier
 implementations where the kernel can say them. The specification (`docs/spec/`) is the authority
 for both. This document holds what is yours to choose; `plan-from-zero-2026-10-13-execution.md`
@@ -129,3 +129,22 @@ theory file never touching the world. In the plan, step 3's `library.lut` states
 and every theory of Luthier is written as a `.lth`.
 
 Yes, enforced
+
+## Z9. Who writes and who reviews the theories (amends Z6)
+
+Added in draft 1, after three rounds of review of the first three files
+(`record/IA/first-code-review-2026-10-13/`). Those files were written with care by the session, and
+still needed three rounds of four external models and your principle L2.7 (a definition is a
+concept); round 3 still found an ambiguity in a rule the model had chosen. A Sonnet agent writing a
+theory alone would not reach that standard, and a design error in a theory shows late, when its
+specimen fails to certify.
+
+Recommended: the session writes the theories; Sonnet agents or external models write the Python
+specimens and the fenced mechanical tasks, since those are certified against their theories and
+their errors show; one round of the four external models per layer, not per file, stopping when a
+round finds only local defects. Costs you a round to send per layer, about four in the plan, and
+the theories are written one after another, not in parallel.
+
+de acuerdo. Tambien podemos usar IAs externas porque mi limite esta en 83% y se resetea en 1d (no se cuando es ese dia)
+
+(His answer in chat, chat:da165104:3026, copied here; D-2026-10-13-r.)
