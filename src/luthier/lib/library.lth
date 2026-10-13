@@ -4,7 +4,9 @@
 -- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md). Sources: spec 12.S1 (a file denotes a value of a
 -- record type), 12.S21 (a file is read when a demand needs it), 12.S22 (an import names what
 -- enters, with its theory), 12.S23 (theory files and model files); L6.12 (privacy is ascription),
--- L11.7; Z5, Z8 of the plan from zero. Pattern of ebnf.lth.
+-- L11.7; Z5, Z8 of the plan from zero. Pattern of ebnf.lth. §4 written 2026-10-13 by Claude Opus 5.5
+-- on record/IA/opus-2026-10-13/library-file-policies-brief.md; sources 11.R1 to 11.R3, 3.S39,
+-- D-2026-10-13-ae.
 --
 -- What this file states. A loader resolves what a file sees and reads the files a demand reaches.
 -- Its laws are case laws over a small set of files given as data (a path with its parsed program),
@@ -21,10 +23,12 @@
 --      (12.S21, 12.S22).                                                              done
 --   §4 File policies: `primitive` only in core, `axiom` only in core and the libraries, `R`
 --      no type (11.R1 to 11.R3; D-2026-10-13-ae: laws of the loader, not of WellFormed, since
---      they need the file's kind and the library set). Waits for core.lut.                 todo
+--      they need the file's kind and the library set). Which paths are core and the
+--      libraries is the model's until core.lut exists.                                    done
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface ImportName declare define importAct name app termBody
-  record recordValue
+  record recordValue alias dataBody Binder explicit implicit Field literal stringLit floatLit universe binop tuple
+  pi sigma sigmaNamed subtype sum list proj
 import "program.lth" actNames member coreNames
 
 -- ---------------------------------------------------------------- §1 Files and their kinds
@@ -48,7 +52,9 @@ Purpose : U := data {
 
 -- A loader: the kind of a path; whether a kind admits a program; the names a file sees; the
 -- fields of an imported name it sees; the files read for given names of a file and a purpose; and
--- whether a model file, once read, defines a name as a model of a theory.
+-- whether a model file, once read, defines a name as a model of a theory. For §4: whether a path
+-- is core, whether it is a library of the distribution, and whether the file at a path admits a
+-- program (`admits` sees only the kind, and core.lut and a user's model file share one).
 Loader : {
   kind : String -> FileKind,
   admits : FileKind -> SurfaceProgram -> Bool,
@@ -56,6 +62,9 @@ Loader : {
   fieldsOf : FileSystem -> String -> String -> List String,
   reads : FileSystem -> String -> Purpose -> List String -> List String,
   verifies : FileSystem -> String -> String -> String -> Bool,
+  isCore : String -> Bool,
+  isLibrary : String -> Bool,
+  admitsAt : String -> SurfaceProgram -> Bool,
 }
 
 -- an `extern` body: the application of the core name `extern` (3.S39), found anywhere in a body
@@ -124,5 +133,83 @@ VerifiesTheModel (l : Loader) : Bool :=
   and not (l.verifies sample "la_numpy.lut" "helper" "LinearAlgebra")
   and not (l.verifies sample "other.lut" "Numpy" "LinearAlgebra")
 
+-- ---------------------------------------------------------------- §4 File policies
+
+-- a body that applies the core name `s` (3.S39: `primitive "..."` and `axiom "..."` are such
+-- applications), read as `externBody` reads `extern`; a program has one when a definition's body is one
+hasBodyOf (s : String) (t : Surface) : Bool := match t { app f a -> hasBodyOf s f ; name x -> x == s ; _ -> false }
+programHasBodyOf (s : String) (p : SurfaceProgram) : Bool := match p { nil -> false ;
+  cons act rest -> (match act { define x bs t b -> (match b { termBody u -> hasBodyOf s u ; _ -> false }) ; _ -> false })
+                   or programHasBodyOf s rest }
+hasPrimitive (p : SurfaceProgram) : Bool := programHasBodyOf "primitive" p
+hasAxiom (p : SurfaceProgram) : Bool := programHasBodyOf "axiom" p
+
+-- the name `s` in type position, through the type formers; a refinement's law, a record's law and
+-- a binder's default are terms, not types, and are not looked into; `e.s` is a field, not the name
+typeMentions (s : String) (t : Surface) : Bool := match t {
+  name x -> x == s ;
+  app f a -> typeMentions s f or typeMentions s a ;
+  binop o a b -> typeMentions s a or typeMentions s b ;
+  tuple ts -> anyMentions s ts ;
+  pi xs a b -> typeMentions s a or typeMentions s b ;
+  sigma xs a b -> typeMentions s a or typeMentions s b ;
+  sigmaNamed x a y b -> typeMentions s a or typeMentions s b ;
+  record fs law -> fieldsMention s fs ;
+  subtype q a law -> typeMentions s a ;
+  sum kvs -> pairsMention s kvs ;
+  list ts -> anyMentions s ts ;
+  proj a x -> typeMentions s a ;
+  _ -> false ;
+}
+anyMentions (s : String) (ts : List Surface) : Bool := match ts { nil -> false ; cons t rest -> typeMentions s t or anyMentions s rest }
+fieldsMention (s : String) (fs : List Field) : Bool := match fs { nil -> false ; cons f rest -> typeMentions s f.type or fieldsMention s rest }
+pairsMention (s : String) (kvs : List (String * Surface)) : Bool :=
+  match kvs { nil -> false ; cons (k, v) rest -> typeMentions s v or pairsMention s rest }
+bindersMention (s : String) (bs : List Binder) : Bool := match bs { nil -> false ;
+  cons b rest -> (match b { explicit xs t dft -> typeMentions s t ; implicit xs t -> typeMentions s t }) or bindersMention s rest }
+-- a program mentions `R` in a type: a declared type, a binder's type, an alias's right side, or a
+-- constructor's type in a `data` body (11.R1)
+mentionsR (p : SurfaceProgram) : Bool := match p { nil -> false ;
+  cons act rest -> (match act {
+    declare x bs t -> bindersMention "R" bs or typeMentions "R" t ;
+    define x bs mt b -> bindersMention "R" bs or (match mt { nothing -> false ; just t -> typeMentions "R" t })
+                        or (match b { dataBody kvs -> pairsMention "R" kvs ; _ -> false }) ;
+    alias x bs t -> bindersMention "R" bs or typeMentions "R" t ;
+    _ -> false }) or mentionsR rest }
+
+-- a small set of files: a primitive and an axiom where they belong (core, a library), the reject
+-- programs of 11.R1 to 11.R3 (n2, n3, n4 of tests/spec/), a primitive in a library, and `R` in a
+-- binder's type and inside an arrow. Which of these paths is core or a library is the model's.
+policyFiles : FileSystem := [
+  ("core.lut", [define "Int" [] (just universe) (termBody (app (name "primitive") (literal (stringLit "integer"))))]),
+  ("lib/algebra.lut", [define "realField" [] (just (app (name "CompleteOrderedField") (name "Real")))
+                         (termBody (app (name "axiom") (literal (stringLit "complete ordered field"))))]),
+  ("lib/money.lut", [define "Money" [] (just universe) (termBody (app (name "primitive") (literal (stringLit "decimal"))))]),
+  ("n3_primitive_outside_core.lut", [define "Money" [] (just universe) (termBody (app (name "primitive") (literal (stringLit "decimal"))))]),
+  ("n4_axiom_outside_lib.lut", [define "everything" [] (just (name "Flat")) (termBody (app (name "axiom") (literal (stringLit "it holds"))))]),
+  ("n2_r_gone.lut", [define "x" [] (just (name "R")) (termBody (literal (floatLit 1.0)))]),
+  ("r_binder.lut", [define "f" [explicit ["y"] (name "R") nothing] (just (name "Real")) (termBody (name "y"))]),
+  ("r_arrow.lth", [declare "g" [] (binop "->" (app (name "Fin") (name "n")) (name "R"))])]
+
+-- only the core says what the interpreter provides: a `primitive` body outside core is refused
+-- (11.R2); one direction only, as `TheoryFileRejectsExtern`
+PrimitiveOnlyInCore (l : Loader) : Bool := primitiveRefused l.isCore l.admitsAt policyFiles
+-- an axiom outside core and the libraries of the distribution is refused (11.R3); one direction
+AxiomOnlyInCoreAndLibraries (l : Loader) : Bool := axiomRefused l.isCore l.isLibrary l.admitsAt policyFiles
+-- `R` names no type (11.R1; `Real` and `Float64` do), in any file; one direction
+RNamesNoType (l : Loader) : Bool := rRefused l.admitsAt policyFiles
+
+-- the three laws file by file, over the loader's operations (today's checker refuses, 4.R9, a helper
+-- that takes the whole loader, so these take the operations they use)
+primitiveRefused (isCore : String -> Bool) (admitsAt : String -> SurfaceProgram -> Bool) (fs : FileSystem) : Bool :=
+  match fs { nil -> true ; cons (path, p) rest ->
+    (not (hasPrimitive p) or isCore path or not (admitsAt path p)) and primitiveRefused isCore admitsAt rest }
+axiomRefused (isCore isLibrary : String -> Bool) (admitsAt : String -> SurfaceProgram -> Bool) (fs : FileSystem) : Bool :=
+  match fs { nil -> true ; cons (path, p) rest ->
+    (not (hasAxiom p) or isCore path or isLibrary path or not (admitsAt path p)) and axiomRefused isCore isLibrary admitsAt rest }
+rRefused (admitsAt : String -> SurfaceProgram -> Bool) (fs : FileSystem) : Bool :=
+  match fs { nil -> true ; cons (path, p) rest -> (not (mentionsR p) or not (admitsAt path p)) and rRefused admitsAt rest }
+
 Loader := KindByExtension & TheoryFileRejectsExtern & ModelFileTakesExtern & SeesExactly & SeesTheTheorysFields
   & NothingWithoutDemand & CheckingReadsTheories & RunningReadsWhatItReaches & VerifiesTheModel
+  & PrimitiveOnlyInCore & AxiomOnlyInCoreAndLibraries & RNamesNoType
