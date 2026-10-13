@@ -1166,3 +1166,34 @@ def test_parameterized_data_constructors():
     assert reduce(p, 20, m) == num(5)
     # without the data, a constructor is not comparable
     assert step((), bin_("==", just(num(1)), just(num(1)))) is None
+
+
+# 3.S31 [proposed]: a record type's label binds in the later fields' types.
+def _mat():
+    from luthier.term import Pi
+    fin = lambda v: App(Var("Fin"), Var(v))
+    return Record((("m", Var("Nat")), ("n", Var("Nat")),
+                   ("f", Pi("_", fin("m"), Pi("_", fin("n"), Var("Float64"))))))
+
+
+def test_record_labels_bind_later_fields():
+    mat = _mat()
+    assert free_names(mat) == frozenset({"Nat", "Fin", "Float64"})
+    assert free_names(Record((("a", Var("n")), ("b", Var("a"))))) == frozenset({"n"})
+    assert free_names(RecordValue((("a", Var("n")), ("b", Var("a"))))) == frozenset({"n", "a"})
+
+
+def test_substitute_does_not_capture_a_record_field():
+    from luthier.term import Pi
+    # identity (n : Nat) : Mat Float64, with Mat inlined: the field n is not the parameter
+    assert substitute("n", Var("k"), _mat()) == _mat()
+    # the parameter is replaced where no label shadows it
+    r = Record((("m", Var("n")), ("n", Var("Nat")), ("f", App(Var("Fin"), Var("n")))))
+    got = substitute("n", Var("k"), r)
+    assert got == Record((("m", Var("k")), ("n", Var("Nat")), ("f", App(Var("Fin"), Var("n")))))
+    # a later field reading an earlier one keeps reading it
+    r2 = Record((("a", Var("Nat")), ("b", App(Var("Fin"), Var("a"))), ("c", Var("x"))))
+    assert substitute("x", Var("a"), r2).fields[2] == ("c", Var("a"))
+    assert substitute("a", Var("q"), r2) == r2
+    v = RecordValue((("n", Var("n")),))
+    assert substitute("n", Var("k"), v) == RecordValue((("n", Var("k")),))

@@ -84,7 +84,15 @@ def free_names(t: Term) -> frozenset[str]:
             case Match(a, arms):
                 pending.append((a, bound))
                 pending.extend((b, bound | set(pattern_names(p))) for p, b in arms)
-            case Sum(kvs) | Record(kvs) | RecordValue(kvs):
+            case Record(kvs):
+                # [proposed] (3.S31; term.lth's freeVars says `Record kvs -> pairsFree kvs`, silent
+                # on scope): a dependent record type's label binds in the LATER fields' types, never
+                # in its own or in earlier ones. A `RecordValue`'s labels are labels, not names.
+                inner = bound
+                for k, b in kvs:
+                    pending.append((b, inner))
+                    inner = inner | {k}
+            case Sum(kvs) | RecordValue(kvs):
                 pending.extend((b, bound) for _, b in kvs)
             case Data(x, kvs):
                 pending.extend((b, bound | {x}) for _, b in kvs)
@@ -351,7 +359,19 @@ def _substitute(x: str, s: Term, t: Term):
         case Proj(a, l):
             value = yield _substitute(x, s, a)
             return Proj(value, l)
-        case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
+        case Record(kvs):
+            # [proposed] (3.S31): a label binds in the later fields' types, as in `free_names`. A
+            # label is part of the term and cannot be renamed, so once x is a label the later
+            # fields are left alone; a label free in `s` is not avoided (it would be captured).
+            result = []
+            shadowed = False
+            for k, b in kvs:
+                if not shadowed:
+                    b = yield _substitute(x, s, b)
+                result.append((k, b))
+                shadowed = shadowed or k == x
+            return Record(tuple(result))
+        case Sum(kvs) | RecordValue(kvs) | Data(_, kvs):
             if isinstance(t, Data):
                 y = t.name
                 if x == y:
@@ -441,7 +461,15 @@ def canonical(t: Term) -> Term:
             case Proj(a, l):
                 value = yield walk(a, env)
                 return Proj(value, l)
-            case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
+            case Record(kvs):
+                inner = env
+                result = []
+                for k, b in kvs:
+                    body = yield walk(b, inner)
+                    result.append((k, body))
+                    inner = ((k, k),) + inner  # [proposed] (3.S31): a label shadows an outer binder
+                return Record(tuple(result))
+            case Sum(kvs) | RecordValue(kvs) | Data(_, kvs):
                 inner = env
                 if isinstance(node, Data):
                     y = binder()
