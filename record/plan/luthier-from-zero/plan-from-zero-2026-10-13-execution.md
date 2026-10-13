@@ -141,6 +141,12 @@ by Luciano.
 - 2026-10-13, night: execution before evidence, in part (D-2026-10-13-ad): see "Order after
   v0.2" below.
 
+- 2026-10-13, night: step 4.1 landed (e0b79c4): `check.py` and `luthier check`; 28 of the 48
+  programs of `tests/spec/` get their verdict, 20 strict xfails with reasons; the theory files fail
+  329 times, mostly one defect of `program.lth` (bound dotted names, 2.S14), sent to luthier-03 with
+  the rest (theoryHeads, alias-sum labels, 4.R5 arrows, rules with no predicate). `elaborate.py`
+  bite 2 (lambda domains from the expected type) running. `v0.2`'s criteria (4.4) are not met yet.
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
@@ -267,7 +273,8 @@ by Luciano.
 
 ## Step 4. The Python checker and evaluator (layers 0 and 1)
 
-1. Running: `src/luthier/check.py` (the specimen of `program.lth`), by Codex; `luthier check files`.
+1. Done (e0b79c4), first version: `src/luthier/check.py` (the specimen of `program.lth`), by Codex;
+   `luthier check files`. Follows `program.lth` as it is fixed.
 2. Done, brought forward (55708f2, by Codex): the 48 programs of `tests/spec/v0.1/` in the new
    syntax in `tests/spec/`, each keeping its rule and its `-- expect:` line; `tests/test_spec.py`
    checks them at the level of syntax, with a hook for the checker's verdicts.
