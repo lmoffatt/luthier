@@ -2322,3 +2322,24 @@ Quote:      "si, que sea alfacongruente"
 Source:     chat:52b10bff:4255
 Kind:       spec (3.S36, 5.S4) and kernel_laws.lth, term.lth
 Status:     current; refines D-2026-10-12-ak
+
+D-2026-10-13-aa Answers on the review of layers 0 and 1 (record/questions-for-luciano-2026-10-13-layers-0-1-review.md), all as recommended. Q1: the kernel
+                gains `Let` (name, type, value, body; the name equal to its value inside the
+                body), a block becomes nested `Let`s; reverses the kernel half of
+                D-2026-10-13-x's Q2 (a block as a lambda applied), the surface unchanged. Q2:
+                `Act` as in term.lth (`Declare`, `Define`, `Datum`), chapter 3 brought up to the
+                files. Q3: a `data` with any constructor lacking a law of its role is rejected,
+                the table of observers reported besides (4.R3, L2.7). Q4: version 0 keeps `U : U`,
+                a known limit stated in chapter 3. Q5: a theory with a single model becomes a
+                definition with laws only for what characterizes it (4.R10). Q6: `Law` stays
+                Boolean until the cost library, when there is a use case. Q7: reduction unfolds a
+                defined name in head position, "stays folded" retired from 3.S15, folding back for
+                display is the printer's.
+Author:     Luciano, on the sessions' recommendations
+Quote:      "OK"
+            "OK, lets wait for the Cost Library, when we have a use case."
+Source:     luthier@3d8f912:record/questions-for-luciano-2026-10-13-layers-0-1-review.md:18
+            luthier@3d8f912:record/questions-for-luciano-2026-10-13-layers-0-1-review.md:66
+Kind:       spec (3.S15, 3.S29, 3.S36, 3, 4.R3, 4.R10, 5.S1) and term.lth, program.lth, laws.lth,
+            checks.lth
+Status:     current; Q1 reverses the kernel half of D-2026-10-13-x Q2
