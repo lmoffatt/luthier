@@ -67,8 +67,10 @@ WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
 
 member (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or member x rest }
 concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
+-- removing a bound name removes the dotted names it prefixes: `c.parse` with `c` a binder is the
+-- projection of a bound variable, not a free name (2.S14; check.py, step 4.1)
 remove (x : String) (xs : List String) : List String :=
-  match xs { nil -> nil ; cons y rest -> if x == y then remove x rest else cons y (remove x rest) }
+  match xs { nil -> nil ; cons y rest -> if x == y or namePrefix y == x then remove x rest else cons y (remove x rest) }
 removeAll (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeAll rest (remove x ys) }
 
 reported (fs : List Failure) (rule n : String) : Bool :=
@@ -134,9 +136,15 @@ knownWhole (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
 
 -- The constructors of the `data` of a program: a pattern `name` is one of them if it names one,
 -- and a variable otherwise (2.S10, 2.S13).
+-- (a label of a labeled sum, `{ a : A || b : B }`, named by an alias or a definition, is its
+-- injection, and so a constructor here; check.py, step 4.1)
 constructors (p : SurfaceProgram) : List String := match p { nil -> nil ;
-  cons a rest -> match a { define x bs t b -> concat (bodyConstructors b) (constructors rest) ; _ -> constructors rest } }
-bodyConstructors (b : Body) : List String := match b { dataBody cs -> pairNames cs ; _ -> nil }
+  cons a rest -> match a {
+    define x bs t b -> concat (bodyConstructors b) (constructors rest) ;
+    alias x bs t -> concat (sumLabels t) (constructors rest) ;
+    _ -> constructors rest } }
+sumLabels (t : Surface) : List String := match t { sum kvs -> pairNames kvs ; _ -> nil }
+bodyConstructors (b : Body) : List String := match b { dataBody cs -> pairNames cs ; termBody t -> sumLabels t ; _ -> nil }
 pairNames (kvs : List (String * Surface)) : List String := match kvs { nil -> nil ; cons (k, v) rest -> cons k (pairNames rest) }
 
 -- the variables a pattern binds, given the constructors `k`
@@ -272,11 +280,14 @@ conjuncts (t : Surface) : List String := match t {
 isConjunction (t : Surface) : Bool := match t { binop o l r -> o == "&" ; _ -> false }
 -- the definitions that define a theory by laws: a conjunction, or the definition of a name
 -- declared as a theory (`T : { ... }` then `T := L`)
-theoryHeads (p : SurfaceProgram) : List SurfaceAct := match p { nil -> nil ; cons act rest -> match act {
-  define x bs t b -> (match b { termBody u -> if isConjunction u or isDeclared p x then cons act (theoryHeads rest) else theoryHeads rest ;
-                                _ -> theoryHeads rest }) ;
-  _ -> theoryHeads rest } }
-claimedLaws (p : SurfaceProgram) : List String := claimedBy (theoryHeads p)
+-- (a declaration anywhere in the program makes a definition of that name a head; check.py found the
+-- search ran on what followed the definition only)
+theoryHeads (whole acts : SurfaceProgram) : List SurfaceAct := match acts { nil -> nil ; cons act rest -> match act {
+  define x bs t b -> (match b { termBody u -> if isConjunction u or isDeclared whole x then cons act (theoryHeads whole rest)
+                                              else theoryHeads whole rest ;
+                                _ -> theoryHeads whole rest }) ;
+  _ -> theoryHeads whole rest } }
+claimedLaws (p : SurfaceProgram) : List String := claimedBy (theoryHeads p p)
 claimedBy (hs : List SurfaceAct) : List String := match hs { nil -> nil ;
   cons h rest -> concat (match h { define x bs t b -> (match b { termBody u -> conjuncts u ; _ -> nil }) ; _ -> nil }) (claimedBy rest) }
 -- the names the claimed laws' bodies mention
@@ -331,9 +342,14 @@ isProvisional (t : Surface) : Bool :=
 violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
   anyAct (fn act { match act { define x bs t b ->
     (match b { termBody u -> isExtern u and not (isProvisional u) ; _ -> false })
-    and (atUniverse p n t or (match typeOfAct p n t { just (name m) -> not (isDefined p m) and not (member m coreNames) ;
-                                                        _ -> false })) ;
+    and (atUniverse p n t or (match typeOfAct p n t { just ty -> anyUndefined p (namesIn (constructors p) ty) ;
+                                                        nothing -> false })) ;
     _ -> false } }) (actsNamed p n)
+
+-- a name of a type that is neither defined nor core's: what an extern's type may not mention, in
+-- an arrow or anywhere in it (check.py, step 4.1)
+anyUndefined (p : SurfaceProgram) (ms : List String) : Bool := match ms { nil -> false ;
+  cons m rest -> not (isDefined p m or isAlias p m or member m coreNames or member m (constructors p)) or anyUndefined p rest }
 
 -- 4.R7: an alias is neither declared nor defined
 violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclared p n or isDefined p n)
