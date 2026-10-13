@@ -21,27 +21,30 @@
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/program.lth`, sets its status to done here, and commits.
 --
---   §1 Failures and the theory: `Failure`, `WellFormed`, the generic law
---      `ReportsExactly` (4.S21; 5.S9; checks.lth will hold `Failures E`, 5.S10).        done
+--   §1 Failures and the theory: `Failure`, `Report`, `Elaboration` (declared; its laws
+--      are 2.S12's, step 2.4), `WellFormed` over an alpha, a substitution, an elaboration
+--      and a typing, the generic law `ReportsExactly` (4.S21, 5.S9).                   done
 --   §2 Names: the acts' names, D(n) and B(n) on the surface tree (1.S7). Type and
 --      term position (4.S2) still to add, for 4.R2.                                 done
---   §3 The rules that read names and forms: 4.R1, 4.R2, 4.R3 (with L2.7 on `data`),
---      4.R4, 4.R5, 4.R7, 4.R12 (top level), 4.S14; 4.R6 needs types (§5); 4.R2
---      past existence and 4.R12 in blocks still to add; 4.S17 a report (§6).           done
---   §4 Typing: a theory `Typing` giving the type of an elaborated term, held to
---      the formers of 3 §2; what the rules below need of it, nothing more.           todo
---   §5 The rules that read types: 4.R8, 4.R9, 4.R11, 4.R13, 4.S23 (implicit
---      arguments).                                                                   todo
---   §6 What a test cannot decide: 4.R10 (a law characterizes) and 4.S20 are
---      reports, not failures (4.S19, 4.S20); stated as such.                          todo
---   §7 `WellFormed :=` the conjunction, one `ReportsExactly` per rule; written with
---      §3's rules, §5's to join it.                                               done
+--   §3 The rules that read names and forms: 4.R1, 4.R2 (existence), 4.R3 with L2.7,
+--      4.R4, 4.R5, 4.R7, 4.R12 (top level), 4.S14. Still to add: 4.R2 by position and
+--      theory, 4.R12 inside blocks.                                                 done
+--   §4 Typing: variables, constants, lambda and application, the universe; refinement
+--      with variance (4.R9); the branch of a condition (4.R11).                       done
+--   §5 The rules that read types: 4.R6, 4.R8, 4.R9. 4.R11 is a law of the typing;
+--      4.R13 and 4.S23 are laws of the elaboration (step 2.4).                        done
+--   §6 Reports: provisional externs, loose functions (4.S17); 4.R10 and 4.S20 by name
+--      only, the author's judgement.                                                  done
+--   §7 `WellFormed :=` the conjunction.                                               done
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaParam Item Field Binder Body
   Clause ImportName declare define alias importAct operatorAct datum explicit implicit termBody dataBody
   clausesBody name literal universe world app binop neg tuple pi sigma sigmaNamed sumNamed record
   subtype recordValue block sum list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
   plainParam typedParam shapeParam bind rebind
+import "term.lth" Term Program Act Constant Pattern Alpha Substitution Var Lit Universe World Lam App Pi
+  Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Declare Define Datum IntConst FloatConst
+  StringConst PCon
 
 -- ---------------------------------------------------------------- §1 Failures and the theory
 
@@ -50,8 +53,18 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaPara
 -- checks.lth's (5.S10, step 3.3).
 Failure = { rule : String, name : String, message : String }
 
--- A checker: the failures it finds in a program (4.S21).
-WellFormed : { check : SurfaceProgram -> List Failure }
+-- The elaboration of a surface program into the kernel's `Program` (2.S12, 3.S30): its laws are
+-- the translation table of 2.S12, a theory to write (step 2.4); declared here so that the rules
+-- on types can read what a definition elaborates to.
+Elaboration : { elaborate : SurfaceProgram -> Program }
+
+-- A checker, held to an elaboration and a typing (§4): the failures it finds in a program
+-- (4.S21), and what it reports without rejecting (4.S19, §6).
+Report = { kind : String, name : String, message : String }
+WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) : {
+  check : SurfaceProgram -> List Failure,
+  report : SurfaceProgram -> List Report,
+}
 
 member (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or member x rest }
 concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
@@ -69,10 +82,12 @@ NamedIn : U := { p : SurfaceProgram, n : String | member n (actNames p) }
 -- The one law: for each rule, the checker reports a failure of that rule for a name exactly when
 -- the name violates the rule. The rule and its predicate come first, so `ReportsExactly "4.R1"
 -- violatesR1` is the law of 4.R1 (§7).
-ReportsExactly (rule : String) (violates : SurfaceProgram -> String -> Bool) (w : WellFormed) (c : NamedIn) : Bool :=
+ReportsExactly (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (rule : String)
+               (violates : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : NamedIn) : Bool :=
   reported (w.check c.p) rule c.n == violates c.p c.n
 -- and it reports nothing about names the program does not introduce
-ReportsOnItsNames (w : WellFormed) (p : SurfaceProgram) : Bool := failuresNamed (w.check p) (actNames p)
+ReportsOnItsNames (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (w : WellFormed a sb e t)
+                  (p : SurfaceProgram) : Bool := failuresNamed (w.check p) (actNames p)
 failuresNamed (fs : List Failure) (ns : List String) : Bool :=
   match fs { nil -> true ; cons f rest -> member f.name ns and failuresNamed rest ns }
 
@@ -274,11 +289,161 @@ violatesS14 (p : SurfaceProgram) (n : String) : Bool :=
 -- 4.S17, no loose functions, rejects only once local definitions exist; until then it is a report
 -- (§6), and the theory files themselves hold such helpers, as 12.S23 allows.
 
+
+-- ---------------------------------------------------------------- §4 Typing
+
+-- The type of an elaborated term in a program and a context of typed variables, if it has one;
+-- `same`, the definitional equality of types (3.S20); `refines`, that a value of the first type
+-- passes where the second is expected (3.S6, 4.R9); `branchContext`, the context inside the
+-- `true` or `false` branch of a condition (4.R11). Only what the rules of §5 need is stated; the
+-- type formers of 3 §2 get their roles here, as the computing constructors got theirs from
+-- `Reduction` (term.lth).
+Context = List (String * Term)
+Typing (a : Alpha) (sb : Substitution a) : {
+  typeOf : Program -> Context -> Term -> Maybe Term,
+  same : Term -> Term -> Bool,
+  refines : Term -> Term -> Bool,
+  branchContext : Context -> Term -> Bool -> Context,
+}
+
+typed (a : Alpha) (sb : Substitution a) (t : Typing a sb) (r : Maybe Term) (ty : Term) : Bool :=
+  match r { nothing -> false ; just u -> t.same u ty }
+lookup (x : String) (ctx : Context) : Maybe Term :=
+  match ctx { nil -> nothing ; cons (y, ty) rest -> if x == y then just ty else lookup x rest }
+
+-- a variable has the type its context gives it; a constant the type of its kind (spec 11)
+TypeOfVar (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (ty : Term) : Bool :=
+  typed a sb t (t.typeOf p (cons (x, ty) ctx) (Var x)) ty
+TypeOfConstant (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (i : Int) (s : String) : Bool :=
+  typed a sb t (t.typeOf p ctx (Lit (IntConst i))) (Var "Int") and typed a sb t (t.typeOf p ctx (Lit (StringConst s))) (Var "String")
+-- the exponential: a lambda has the dependent function type of its body; applied to an argument
+-- of its domain, the type of the body with the argument for the variable (3 §2, 3.S5)
+TypeOfLam (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (ty b : Term) : Bool :=
+  match t.typeOf p (cons (x, ty) ctx) b { nothing -> true ; just bt -> typed a sb t (t.typeOf p ctx (Lam x ty b)) (Pi x ty bt) }
+TypeOfApp (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (b : Term) (i : Int) : Bool :=
+  match t.typeOf p (cons (x, Var "Int") ctx) b { nothing -> true ;
+    just bt -> typed a sb t (t.typeOf p ctx (App (Lam x (Var "Int") b) (Lit (IntConst i)))) (sb.subst x (Lit (IntConst i)) bt) }
+-- the universe is a type, and the world (D-2026-10-13-b)
+TypeOfUniverse (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) : Bool :=
+  typed a sb t (t.typeOf p ctx Universe) Universe and typed a sb t (t.typeOf p ctx World) Universe
+
+-- refinement: reflexive; a subtype refines its base (3.S6); functions contravariant in the
+-- domain and covariant in the codomain (4.R9), over pairs it relates
+RefinePair (a : Alpha) (sb : Substitution a) (t : Typing a sb) : U := { small big : Term | t.refines small big }
+RefinesItself (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty : Term) : Bool := t.refines ty ty
+SubtypeRefinesBase (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) (ty q : Term) : Bool :=
+  t.refines (Subtype x ty q) ty
+RefinesFunctions (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) (d c : RefinePair a sb t) : Bool :=
+  t.refines (Pi x d.big c.small) (Pi x d.small c.big)
+
+-- 4.R11: inside the branch of a condition `q x` on a variable `x : T`, `x` has the subtype
+-- `{ x : T | q x }`, and inside the other `{ x : T | not (q x) }`
+BranchRefines (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ctx : Context) (x q : String) (ty : Term) : Bool :=
+  lookup x (t.branchContext (cons (x, ty) ctx) (App (Var q) (Var x)) true) == just (Subtype x ty (App (Var q) (Var x)))
+  and lookup x (t.branchContext (cons (x, ty) ctx) (App (Var q) (Var x)) false)
+      == just (Subtype x ty (App (Var "not") (App (Var q) (Var x))))
+
+Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb & TypeOfLam a sb & TypeOfApp a sb
+  & TypeOfUniverse a sb & RefinesItself a sb & SubtypeRefinesBase a sb & RefinesFunctions a sb & BranchRefines a sb
+
+-- ---------------------------------------------------------------- §5 The rules that read types
+
+-- the elaborated acts of a name, and every application in a term with the context it sits in
+declaredType (ep : Program) (n : String) : Maybe Term := match ep { nil -> nothing ;
+  cons act rest -> match act { Declare x ty -> if x == n then just ty else declaredType rest n ; _ -> declaredType rest n } }
+definedBody (ep : Program) (n : String) : Maybe Term := match ep { nil -> nothing ;
+  cons act rest -> match act { Define x ty b -> if x == n then just b else definedBody rest n ; _ -> definedBody rest n } }
+Application = { context : Context, function : Term, argument : Term }
+applications (ctx : Context) (u : Term) : List Application := match u {
+  App f x -> cons { context := ctx, function := f, argument := x } (appendApps (applications ctx f) (applications ctx x)) ;
+  Lam x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
+  Pi x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
+  Sigma x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
+  Subtype x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
+  Pair x y -> appendApps (applications ctx x) (applications ctx y) ;
+  Inj l x -> applications ctx x ;
+  Match s arms -> appendApps (applications ctx s) (armsApplications ctx arms) ;
+  _ -> nil ;
+}
+armsApplications (ctx : Context) (arms : List (Pattern * Term)) : List Application :=
+  match arms { nil -> nil ; cons (q, b) rest -> appendApps (applications ctx b) (armsApplications ctx rest) }
+appendApps (xs ys : List Application) : List Application := match xs { nil -> ys ; cons x rest -> cons x (appendApps rest ys) }
+anyApp (f : Application -> Bool) (xs : List Application) : Bool := match xs { nil -> false ; cons x rest -> f x or anyApp f rest }
+bodyApplications (e : Elaboration) (p : SurfaceProgram) (n : String) : List Application :=
+  match definedBody (e.elaborate p) n { nothing -> nil ; just b -> applications nil b }
+
+-- 4.R6: the body of a declared name has its type `T`, or `T -> Bool`, `T -> Failures E`, `Law T`
+fits (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty : Term) (r : Maybe Term) : Bool := match r {
+  nothing -> false ;
+  just bt -> t.same bt ty or t.same bt (Pi "_" ty (Var "Bool")) or t.same bt (App (Var "Law") ty)
+             or (match bt { Pi x d c -> t.same d ty and (match c { App f arg -> f == Var "Failures" ; _ -> false }) ; _ -> false }) }
+violatesR6 (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+  isDeclared p n and isDefined p n and (match declaredType (e.elaborate p) n { nothing -> false ;
+    just ty -> match definedBody (e.elaborate p) n { nothing -> false ;
+      just b -> not (fits a sb t ty (t.typeOf (e.elaborate p) nil b)) } })
+
+-- 4.R8: `==` only where equality is structural: never on a type that contains an exponential,
+-- looked through the program's definitions of type names (fuel: the number of acts, so a
+-- recursive `data` is looked through once)
+containsArrow (ep : Program) (fuel : Nat) (ty : Term) : Bool := match ty {
+  Pi x d c -> true ;
+  Sigma x d c -> containsArrow ep fuel d or containsArrow ep fuel c ;
+  Subtype x d q -> containsArrow ep fuel d ;
+  Sum kvs -> anyArrow ep fuel kvs ; Data x kvs -> anyArrow ep fuel kvs ;
+  App f x -> containsArrow ep fuel f or containsArrow ep fuel x ;
+  Var x -> fuel > 0 and (match definedBody ep x { nothing -> false ; just b -> containsArrow ep (fuel - 1) b }) ;
+  _ -> false ;
+}
+anyArrow (ep : Program) (fuel : Nat) (kvs : List (String * Term)) : Bool :=
+  match kvs { nil -> false ; cons (k, v) rest -> containsArrow ep fuel v or anyArrow ep fuel rest }
+actCount (ep : Program) : Nat := match ep { nil -> 0 ; cons act rest -> 1 + actCount rest }
+eqOnArrow (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap : Application) : Bool :=
+  match ap.function { App f x -> f == Var "==" and (match t.typeOf ep ap.context x { nothing -> false ;
+    just ty -> containsArrow ep (actCount ep) ty }) ; _ -> false }
+violatesR8 (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+  anyApp (\ ap { eqOnArrow a sb t (e.elaborate p) ap }) (bodyApplications e p n)
+
+-- 4.R9: an argument passes where its function's domain is expected only if its type refines it
+mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap : Application) : Bool :=
+  match t.typeOf ep ap.context ap.function { nothing -> false ;
+    just ft -> match ft { Pi x d c -> (match t.typeOf ep ap.context ap.argument { nothing -> false ;
+                                          just at -> not (t.refines at d) }) ;
+                          _ -> false } }
+violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+  anyApp (\ ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications e p n)
+
+-- 4.R11 is a law of the typing (`BranchRefines`): a checker that types branches by it rejects no
+-- program the rule accepts. 4.R13 (an operator resolved by the type, one meaning per types) and
+-- 4.S23 (implicit arguments from the expected type) are laws of the elaboration (step 2.4).
+
+-- ---------------------------------------------------------------- §6 Reports
+
+-- What does not reject is reported (4.S19, 4.S20): a provisional extern (4.R5), a loose function
+-- (4.S17: a top-level definition at a bare exponential, until local definitions exist), and a
+-- `data` whose constructors no law mentions (4.R3, reported besides). Whether a law characterizes
+-- or only compares (4.R10, 4.S20) is the author's judgement, reported by name only.
+reportedAs (rs : List Report) (kind n : String) : Bool :=
+  match rs { nil -> false ; cons r rest -> (r.kind == kind and r.name == n) or reportedAs rest kind n }
+provisionalExtern (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ act { match act { define x bs t b -> (match b { termBody u -> isExtern u and isProvisional u ; _ -> false }) ;
+                              _ -> false } }) (actsNamed p n)
+looseFunction (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (\ act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;
+                              _ -> false } }) (actsNamed p n)
+nonEmptyBinders (bs : List Binder) : Bool := match bs { nil -> false ; cons b rest -> true }
+ReportsExactlyAs (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (kind : String)
+                 (holds : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : NamedIn) : Bool :=
+  reportedAs (w.report c.p) kind c.n == holds c.p c.n
+
 -- ---------------------------------------------------------------- §7 WellFormed
 
--- A checker reports exactly the failures of each rule, and only about the program's names. The
--- rules of §5 (types) join this conjunction as they are written.
-WellFormed := ReportsExactly "4.R1" violatesR1 & ReportsExactly "4.R2" violatesR2Exists
-  & ReportsExactly "4.R3" violatesR3 & ReportsExactly "4.R4" violatesR4 & ReportsExactly "4.R5" violatesR5
-  & ReportsExactly "4.R7" violatesR7 & ReportsExactly "4.R12" violatesR12 & ReportsExactly "4.S14" violatesS14
-  & ReportsOnItsNames
+-- A checker reports exactly the failures of each rule, only about the program's names, and
+-- reports exactly what does not reject.
+WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) :=
+  ReportsExactly a sb e t "4.R1" violatesR1 & ReportsExactly a sb e t "4.R2" violatesR2Exists
+  & ReportsExactly a sb e t "4.R3" violatesR3 & ReportsExactly a sb e t "4.R4" violatesR4
+  & ReportsExactly a sb e t "4.R5" violatesR5 & ReportsExactly a sb e t "4.R6" (violatesR6 a sb e t)
+  & ReportsExactly a sb e t "4.R7" violatesR7 & ReportsExactly a sb e t "4.R8" (violatesR8 a sb e t)
+  & ReportsExactly a sb e t "4.R9" (violatesR9 a sb e t) & ReportsExactly a sb e t "4.R12" violatesR12
+  & ReportsExactly a sb e t "4.S14" violatesS14 & ReportsOnItsNames a sb e t
+  & ReportsExactlyAs a sb e t "provisional" provisionalExtern & ReportsExactlyAs a sb e t "loose" looseFunction
