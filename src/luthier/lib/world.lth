@@ -33,8 +33,8 @@
 --      only the places its declaration names (10.S7); what is assumed (10.S13).        done
 --   §3 Externs as routes: read at the first demand with the hash of what was read in the
 --      identity, validated against the type's laws, refused if they fail, provisional as
---      debt (10.S8 to 10.S10, L11.2, L11.7).                                           todo
---   §4 The actions the first slice needs: `print`, reading a file (10.S2; D8).          todo
+--      debt (10.S8 to 10.S10, L11.2, L11.7).                                           done
+--   §4 The actions the first slice needs: `print`, reading a file (10.S2; D8).          done
 --   §5 Named worlds: an extern with no law runs in one, priced as an assumption (10.S12,
 --      L11.6). Waits for evidence (certification.lth).                                 todo
 --   §6 The externs of sonolocalización (numpy and its data formats). Waits for the
@@ -102,3 +102,63 @@ WriteChangesOnlyItsPlace (R : U) (s : Persistence R) (w : R) (p c : String) : Bo
 Persistence (R : U) := WriteThenRead R & WriteChangesOnlyItsPlace R
 
 World (R : U) := OwnIsIdempotent R & ChangesOnlyDeclared R
+
+import "test.lth" TestSpec Tester
+import "laws.lth" Evidence Verdict Refuted Confirmed Supported Unsettled Cites Assumes
+
+-- ---------------------------------------------------------------- §3 Externs as routes
+
+-- An extern is a name, a declared type and a route to a host function: data (3.S40, 10.S8). Its
+-- file is read when a demand reaches the node, once per plan, and may be absent while the program
+-- is checked (L11.7); the hash of the bytes read, computed by the core, enters the identity of what
+-- the extern produces and of its certificate (10.S9). `hash` is the core's (spec 6.S8), declared
+-- here until core names it.
+hash : String -> String
+Route = { name : String, route : String, provisional : Bool }
+
+-- The first time an action asks for an extern, before it is applied, it is tested against the
+-- laws of its declared type like any function, and refused if it fails (10.S10, L11.2): the
+-- validation is a test of test.lth, its verdict read from the evidence by laws.lth's `Settling`;
+-- a refutation refuses, and an extern whose type has no law to validate against is not applied
+-- (L11.3), unless it is provisional, which is applied, recorded as debt and never certified
+-- (4.R5). The certificate stays by hash: a second demand with the same hash does not test again.
+Externs (R : U) : {
+  read : R -> Route -> Maybe String * R,
+  verdictOf : Route -> Verdict,
+  applied : Route -> Bool,
+  identity : Route -> String -> String,
+}
+-- refused when its type's laws are refuted; not applied when nothing settles them, unless provisional
+RefusedWhenRefuted (R : U) (e : Externs R) (r : Route) : Bool :=
+  not (e.verdictOf r == Refuted) or not (e.applied r)
+NotAppliedWithoutLaw (R : U) (e : Externs R) (r : Route) : Bool :=
+  r.provisional or not (e.verdictOf r == Unsettled) or not (e.applied r)
+ProvisionalIsApplied (R : U) (e : Externs R) (r : Route) : Bool := not r.provisional or e.applied r
+-- the identity of what it produces carries the hash of what was read, so two reads of different
+-- bytes are two identities
+IdentityCarriesHash (R : U) (e : Externs R) (r : Route) (bytes other : String) : Bool :=
+  bytes == other or not (e.identity r (hash bytes) == e.identity r (hash other))
+Externs (R : U) := RefusedWhenRefuted R & NotAppliedWithoutLaw R & ProvisionalIsApplied R & IdentityCarriesHash R
+
+-- ---------------------------------------------------------------- §4 The actions the first slice needs
+
+-- `print` appends its text to the standard output, a place of the world, and changes nothing
+-- else; reading a file gives what is at its place, and changes nothing (10.S2, D8: `print` is the
+-- first action). Both are models of `Declared`, the first naming its place and the second none.
+Console (R : U) : {
+  world : World R,
+  print : String -> Action R Unit,
+  readFile : String -> Action R (Maybe String),
+  stdout : String,
+}
+appendStr : String -> String -> String
+PrintAppends (R : U) (c : Console R) (w : R) (s : String) : Bool :=
+  c.world.read (after R Unit (c.print s w)) c.stdout
+    == (match c.world.read w c.stdout { nothing -> just s ; just prior -> just (appendStr prior s) })
+PrintChangesOnlyStdout (R : U) (c : Console R) (w : R) (s : String) : Bool :=
+  sameAt R c.world w (after R Unit (c.print s w)) (except c.world.places [c.stdout])
+ReadGivesThePlace (R : U) (c : Console R) (w : R) (p : String) : Bool :=
+  result R (Maybe String) (c.readFile p w) == c.world.read w p
+ReadChangesNothing (R : U) (c : Console R) (w : R) (p : String) : Bool :=
+  sameAt R c.world w (after R (Maybe String) (c.readFile p w)) c.world.places
+Console (R : U) := PrintAppends R & PrintChangesOnlyStdout R & ReadGivesThePlace R & ReadChangesNothing R
