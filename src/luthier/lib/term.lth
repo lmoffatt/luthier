@@ -456,6 +456,26 @@ IotaPair (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (y
 IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (l k y : String) (v b c : Term) : Bool :=
   l == k or stepsTo a (m.step p (Match (Inj l v) [(PInj k PWild, b), (PInj l (PVar y), c)])) (sb.subst y v c)
 
+-- a match on a constructor of a `data` of the program, alone or applied, takes the arm of that
+-- constructor and passes over the arms of the others: two constructors of one `data` are
+-- distinct values, so an arm of another constructor does not match (3.S16, 3.R3). Stated on a
+-- `data` `t` with two nullary constructors and two unary ones, added to the program; the names are
+-- distinct and the program does not define them otherwise (the specimens, writing kernel.py: a
+-- constructor that differed from an arm's was read as a name the program might define, and a match
+-- on a `data` stayed stuck)
+IotaConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g y : String) (v b d : Term) : Bool :=
+  not (distinctNames [t, c, k, f, g]) or not (allFree p [t, c, k, f, g])
+  or (stepsTo a (m.step (withData t c k f g p) (Match (Var c) [(PCon c [], b)])) b
+      and stepsTo a (m.step (withData t c k f g p) (Match (Var c) [(PCon k [], b), (PCon c [], d)])) d
+      and stepsTo a (m.step (withData t c k f g p) (Match (Var k) [(PCon c [], b), (PWild, d)])) d
+      and stepsTo a (m.step (withData t c k f g p) (Match (App (Var f) v) [(PCon g [PVar y], b), (PCon f [PVar y], d)]))
+                    (sb.subst y v d))
+-- the program with a `data` `t` whose constructors are `c`, `k` (nullary) and `f`, `g` (unary)
+withData (t c k f g : String) (p : Program) : Program :=
+  cons (Define t Universe (Data t [(c, Var t), (k, Var t), (f, Pi "_" (Var t) (Var t)), (g, Pi "_" (Var t) (Var t))])) p
+distinctNames (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (member x rest) and distinctNames rest }
+allFree (p : Program) (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> free p x and allFree p rest }
+
 -- a local definition steps to its body with the value for its name (zeta; D-2026-10-13-aa, Q1)
 Zeta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty v b : Term) : Bool :=
   stepsTo a (m.step p (Let x ty v b)) (sb.subst x v b)
@@ -502,7 +522,7 @@ DatumIsInert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program
   m.step (cons (Datum d) p) t == m.step p t
 
 Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
-  & IotaPair a sb & IotaSkips a sb & ProjOfRecord a sb & Prim a sb & ExternIsValue a sb & ValuesStay a sb
+  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & ExternIsValue a sb & ValuesStay a sb
   & DatumIsInert a sb
 
 -- ---------------------------------------------------------------- §6 Quote and eval
