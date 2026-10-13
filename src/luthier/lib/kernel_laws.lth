@@ -25,8 +25,8 @@
 -- `luthier parse src/luthier/lib/kernel_laws.lth`, sets its status to done here, and commits.
 --
 --   §1 Object: a type with its equality; reflexive, symmetric, transitive,
---      substitutive (D-2026-10-12-ak, 3.S36).                                   todo
---   §2 Terminal and initial objects: `Unit`, `Empty` (3.S7, 3.S8, D-2026-10-13-t).    todo
+--      substitutive (D-2026-10-12-ak, 3.S36).                                   done
+--   §2 Terminal and initial objects: `Unit`, `Empty` (3.S7, 3.S8, D-2026-10-13-t).    done
 --   §3 Boolean algebra: `Bool`'s `true`, `false`, with `not`, `and`, `or`
 --      (D-2026-10-13-t); Huntington's laws.                                    todo
 --   §4 Monoid and free monoid: `List`'s `nil`, `cons`, `append`; the recursion
@@ -38,3 +38,42 @@
 --   §7 The models, to write in kernel_models.lut: `==` of each concrete type as an
 --      `Object`; `Unit` a `Terminal`, `Empty` an `Initial`; `Bool` a `BooleanAlgebra`;
 --      `List A` a `FreeMonoid A`; `Nat` a `CommutativeSemiring`.                 todo
+
+-- ---------------------------------------------------------------- §1 Object
+
+-- An object is a type with its equality (D-2026-10-12-ak: the base theory, a setoid, O2). The
+-- kernel's structural `==` is its model on every concrete type (4.R8, §7); an observational
+-- equality is its author's and satisfies the same laws.
+Object (A : U) : { eq : A -> A -> Bool }
+
+-- the pairs and chains an equality relates: two values drawn at random are rarely equal, so the
+-- laws that need equal values quantify over these, whose generators are the model's (7.S12)
+EqualPair (A : U) (o : Object A) : U := { x y : A | o.eq x y }
+EqualChain (A : U) (o : Object A) : U := { x y z : A | o.eq x y and o.eq y z }
+
+-- spec 3.S36, D-2026-10-12-ak: reflexive, symmetric, transitive, substitutive
+Reflexive (A : U) (o : Object A) (x : A) : Bool := o.eq x x
+Symmetric (A : U) (o : Object A) (p : EqualPair A o) : Bool := o.eq p.y p.x
+Transitive (A : U) (o : Object A) (c : EqualChain A o) : Bool := o.eq c.x c.z
+-- a function gives equal results on equal arguments, observed by the structural `==` of its
+-- codomain (4.R8)
+Substitutive (A : U) (o : Object A) (B : U) (f : A -> B) (p : EqualPair A o) : Bool := f p.x == f p.y
+
+Object (A : U) := Reflexive A & Symmetric A & Transitive A & Substitutive A
+
+-- ---------------------------------------------------------------- §2 Terminal and initial objects
+
+-- A terminal object: one map into it from every type, so it has exactly one value, its point
+-- (3.S8, D-2026-10-13-t). `Unit` is the model (§7): the role of `unit` is to be that point. That
+-- the map into it is unique follows: two functions into it agree at every argument.
+Terminal (T : U) : { point : T }
+OnlyThePoint (T : U) (t : Terminal T) (x : T) : Bool := x == t.point
+Terminal (T : U) := OnlyThePoint T
+
+-- An initial object: one map out of it to every type, so it has no value (3.S8, D-2026-10-13-t).
+-- `Empty` is the model (§7), and its elimination `match e { }` is the map out (3.S7). The law
+-- holds because no case exists: an exhaustive test finds none, and its certificate says the law
+-- holds vacuously (7.S12), which here is the claim itself.
+Initial (T : U) : { absurd : (A : U) -> T -> A }
+NoValue (T : U) (i : Initial T) (x : T) : Bool := false
+Initial (T : U) := NoValue T
