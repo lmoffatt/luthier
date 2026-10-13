@@ -415,6 +415,25 @@ def test_layout_ends():
             assert not v or v[-1][0] == "newline"
 
 
+def test_column_zero_starts_act():
+    assert parse("x := a\n-b") == Parsed((
+        Define("x", (), None, TermBody(nm("a"))), Datum(Neg(nm("b"))),
+    ))
+    assert parse("x := a\n< c : U >") == Parsed((
+        Define("x", (), None, TermBody(nm("a"))), Datum(Sum((("c", Universe()),))),
+    ))
+
+
+def test_zero_float_prints_without_a_sign():
+    for value in (0.0, -0.0):
+        program = (Datum(Literal(FloatLit(value))),)
+        assert print_program(program) == "0.0\n"
+        assert parse(print_program(program)) == Parsed(program)
+        pattern_program = (Datum(MatchOf(nm("a"), ((PLit(FloatLit(value)), nm("b")),))),)
+        assert print_program(pattern_program) == "match a { 0.0 -> b }\n"
+        assert parse(print_program(pattern_program)) == Parsed(pattern_program)
+
+
 def test_indent_continues_act():
     same_layout(
         "f (a : Int) : Int :=\n  a + 1",

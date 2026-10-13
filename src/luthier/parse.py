@@ -203,7 +203,7 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
                     if not drop:
                         append_token(Token("literal", ";", tok.line, tok.column))
             else:
-                if tok.column == 0 and next_text != "}" and not _continuation_start(next_text):
+                if tok.column == 0:
                     append_token(Token("newline", "\n", tok.line, tok.column))
                     root_match_pending = False
                 # An indented line continues the act.
@@ -1224,6 +1224,8 @@ def _is_arg_atom(t: Surface) -> bool:
 
 
 def _format_float(x: float) -> str:
+    if x == 0.0:
+        return "0.0"
     if math.isinf(x):
         return "1e999"
     s = repr(x)

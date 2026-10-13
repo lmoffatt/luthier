@@ -1,6 +1,7 @@
-"""Direct WrittenProgram census: grammar.lth wf*, generator v1, seeds 0..999, sizes 0..6."""
+"""Direct WrittenProgram census: grammar.lth wf*, generator v2, seeds 0..999, sizes 0..6."""
 
 from dataclasses import fields, is_dataclass, replace
+import math
 import random
 
 import pytest
@@ -28,10 +29,15 @@ def is_name(text):
 def wf(node):
     """Literal transcription of wfPattern, wf, wfBody, wfAct and their helpers.
 
-    No parser/printer success or semantic typing constraint is part of this predicate.
+    Literal fields first satisfy their declared Nat/NonNegativeFloat domains;
+    no parser/printer success or checker verdict is part of this predicate.
     """
     match node:
-        case s.IntLit() | s.FloatLit() | s.StringLit() | s.PWild() | s.Universe() | s.World():
+        case s.IntLit(value):
+            return type(value) is int and value >= 0
+        case s.FloatLit(value):
+            return type(value) is float and math.isfinite(value) and value >= 0.0
+        case s.StringLit() | s.PWild() | s.Universe() | s.World():
             return True
         case s.Name(name) | s.PlainParam(name):
             return is_name(name)
@@ -139,8 +145,8 @@ class Trees:
         return tuple(self.name() for _ in range(self.rng.randint(1, 2)))
 
     def literal(self):
-        return self.rng.choice((s.IntLit(0), s.IntLit(1), s.IntLit(-1),
-                               s.FloatLit(0.5), s.FloatLit(-0.5), s.FloatLit(-0.0),
+        return self.rng.choice((s.IntLit(0), s.IntLit(1), s.IntLit(2),
+                               s.FloatLit(0.5), s.FloatLit(1.5), s.FloatLit(-0.0),
                                s.StringLit(''), s.StringLit('a"\\\nb')))
 
     def children(self, size, categories):
@@ -395,14 +401,7 @@ def test_names_are_lexical_names():
     assert all(map(is_name, NAMES))
 
 
-@pytest.mark.parametrize('size', [
-    0,
-    *[pytest.param(size, marks=pytest.mark.xfail(
-        strict=True,
-        reason='RoundTrip counterexamples: signed Literal/PLit and act-start continuation; '
-               'see record/IA/roundtrip-and-runner-2026-10-13/codex.md',
-    )) for size in range(1, 7)],
-])
+@pytest.mark.parametrize('size', SIZES)
 def test_random_written_programs(size):
     failures = []
     for seed in SEEDS:
@@ -451,6 +450,9 @@ def test_wf_shape_constraints():
     assert not wf(s.Lambda((), (), a))
     assert not wf(s.Binop(':=', a, a))
     assert not wf(s.OperatorAct('==', a))
-    assert wf(s.Literal(s.IntLit(-1)))
-    assert wf(s.PLit(s.FloatLit(-0.5)))
+    assert not wf(s.Literal(s.IntLit(-1)))
+    assert not wf(s.PLit(s.FloatLit(-0.5)))
+    assert not wf(s.Literal(s.FloatLit(float('inf'))))
+    assert not wf(s.Literal(s.FloatLit(float('nan'))))
+    assert wf(s.Literal(s.FloatLit(-0.0)))
     assert wf_program(())
