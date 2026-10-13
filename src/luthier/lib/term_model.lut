@@ -1,13 +1,15 @@
--- term_model.lut: nominal alpha, capture-avoiding substitution, canonical names and WHNF.
+-- term_model.lut: structural alpha, capture-avoiding substitution, canonical names and WHNF.
 -- Sources: term.lth, kernel_models.lut, ebnf_model.lut and spec 3/11 at
 -- 9fcc7e7096c72eae1b07d2f2b6aa51e14f4c8e05; prompt: record/IA/term-2026-10-13/codex-models.md.
 -- Author: Codex, 2026-10-13. Deterministic, no seed; choices and law audit in codex.md.
 -- Records/law update: term.lth at f421684 and 9a89873; user request v2, recorded in codex.md.
+-- After-review sources: cc2542d and 2409c59; user request v3, recorded in codex.md.
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
   Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj
   Declare Define Datum member remove concat removeAll freeVars patternVars patternsVars swap swapPattern
+  partsAgree sameNames free
 
 -- Spec 11 gives String equality but no text decomposition, concatenation or Nat rendering.
 -- Parameters (holes), not invented core primitives. Required contracts: Unicode scalar sequence
@@ -40,52 +42,22 @@ armNames (xs : List (Pattern * Term)) : List String := match xs {
 pairNames (xs : List (String * Term)) : List String := match xs {
   nil -> nil ; cons (k, b) rest -> concat (allNames b) (pairNames rest) }
 
--- The nearest binding on either side must be the same pair: shadowing is significant.
-nameEq (env : List (String * String)) (x y : String) : Bool := match env {
-  nil -> x == y ; cons (a, b) rest ->
-    if x == a or y == b then x == a and y == b else nameEq rest x y }
-patternBindings (p q : Pattern) : List (String * String) := match (p, q) {
-  (PVar x, PVar y) -> [(x, y)] ;
-  (PCon c ps, PCon d qs) -> patternsBindings ps qs ;
-  (PPair a b, PPair c d) -> appendEnv (patternBindings a c) (patternBindings b d) ;
-  (PInj l a, PInj k b) -> patternBindings a b ; _ -> nil ; }
-patternsBindings (ps qs : List Pattern) : List (String * String) := match (ps, qs) {
-  (cons p ps1, cons q qs1) -> appendEnv (patternBindings p q) (patternsBindings ps1 qs1) ; _ -> nil ; }
+-- Exact recursive parts, with per-arm free-name agreement to prevent capture.
+-- For multiple pattern variables, retain their literal names: §2's successive
+-- swaps are not a simultaneous permutation. This conservative restriction keeps
+-- alpha an equivalence while meeting AlphaPartsAgree; see the report.
 appendEnv (xs ys : List (String * String)) : List (String * String) := match xs {
   nil -> ys ; cons x rest -> cons x (appendEnv rest ys) }
-patternEq (env : List (String * String)) (p q : Pattern) : Bool := match (p, q) {
-  (PVar x, PVar y) -> nameEq env x y ; (PWild, PWild) -> true ;
-  (PLit c, PLit d) -> c == d ;
-  (PCon c ps, PCon d qs) -> c == d and patternsEq env ps qs ;
-  (PPair a b, PPair c d) -> patternEq env a c and patternEq env b d ;
-  (PInj l a, PInj k b) -> l == k and patternEq env a b ; _ -> false ; }
-patternsEq (env : List (String * String)) (ps qs : List Pattern) : Bool := match (ps, qs) {
-  (nil, nil) -> true ; (cons p ps1, cons q qs1) -> patternEq env p q and patternsEq env ps1 qs1 ; _ -> false ; }
-alphaWalk (env : List (String * String)) (s t : Term) : Bool := match (s, t) {
-  (Var x, Var y) -> nameEq env x y ;
-  (Lam x a b, Lam y c d) -> alphaWalk env a c and alphaWalk (cons (x, y) env) b d ;
-  (Pi x a b, Pi y c d) -> alphaWalk env a c and alphaWalk (cons (x, y) env) b d ;
-  (Sigma x a b, Sigma y c d) -> alphaWalk env a c and alphaWalk (cons (x, y) env) b d ;
-  (Subtype x a b, Subtype y c d) -> alphaWalk env a c and alphaWalk (cons (x, y) env) b d ;
-  (App a b, App c d) -> alphaWalk env a c and alphaWalk env b d ;
-  (Pair a b, Pair c d) -> alphaWalk env a c and alphaWalk env b d ;
-  (Inj l a, Inj k b) -> l == k and alphaWalk env a b ;
-  (Match a ps, Match b qs) -> alphaWalk env a b and alphaArms env ps qs ;
-  (Sum ps, Sum qs) -> alphaPairs env ps qs ;
-  (Record ps, Record qs) -> alphaPairs env ps qs ;
-  (RecordValue ps, RecordValue qs) -> alphaPairs env ps qs ;
-  (Proj r x, Proj s y) -> x == y and alphaWalk env r s ;
-  (Data x ps, Data y qs) -> alphaPairs (cons (x, y) env) ps qs ;
-  _ -> s == t ; }
-alphaPairs (env : List (String * String)) (ps qs : List (String * Term)) : Bool := match (ps, qs) {
-  (nil, nil) -> true ; (cons (k, a) ps1, cons (l, b) qs1) ->
-    k == l and alphaWalk env a b and alphaPairs env ps1 qs1 ; _ -> false ; }
-alphaArms (env : List (String * String)) (ps qs : List (Pattern * Term)) : Bool := match (ps, qs) {
-  (nil, nil) -> true ; (cons (p, a) ps1, cons (q, b) qs1) ->
-    alphaArm env p q a b and alphaArms env ps1 qs1 ; _ -> false ; }
-alphaArm (env : List (String * String)) (p q : Pattern) (a b : Term) : Bool :=
-  patternEq (patternBindings p q) p q and alphaWalk (appendEnv (patternBindings p q) env) a b
-alpha : Alpha := { alphaEq := alphaWalk nil }
+armScopesAgree (ps qs : List (Pattern * Term)) : Bool := match (ps, qs) {
+  (nil, nil) -> true ; (cons (p, b) rest, cons (q, c) more) ->
+    sameNames (removeAll (patternVars p) (freeVars b)) (removeAll (patternVars q) (freeVars c))
+    and patternNamesAgree p q and armScopesAgree rest more ; _ -> false }
+patternNamesAgree (p q : Pattern) : Bool := match patternVars p {
+  cons x (cons y rest) -> p == q ; _ -> true }
+alphaParts (s t : Term) : Bool :=
+  sameNames (freeVars s) (freeVars t) and partsAgree alpha s t
+  and (match (s, t) { (Match u ps, Match v qs) -> armScopesAgree ps qs ; _ -> true })
+alpha : Alpha := { alphaEq := alphaParts }
 
 -- Substitution short-circuits when absent; types are outside their binder's scope.
 substTerm (x : String) (s t : Term) : Term :=
@@ -188,98 +160,117 @@ canonArms (avoid : List String) (env : List (String * String)) (n : Nat) (xs : L
 canonicalTerm (t : Term) : Term := match canonTerm (freeCanonical (freeVars t)) nil 0 t { (b, n) -> b }
 canonical : CanonicalForm alpha := { canon := canonicalTerm, unqualify := unqualified }
 
--- One WHNF step. Fuel counts transitions, shared by head/scrutinee/operand evaluation.
--- Blocked terms are final neutral forms; no reduction under binders, pairs or injections.
+-- One exact weak-head transition; Done is a value or a stuck term.
 HeadStep : U := data { Done : Term -> HeadStep ; Next : Term -> HeadStep ; }
 lookupBody (p : Program) (x : String) : Maybe Term := match p {
   nil -> nothing ; cons act rest -> match act {
     Define y ty b -> if x == y then just b else lookupBody rest x ;
-    Declare y ty -> if x == y then nothing else lookupBody rest x ;
-    Datum t -> lookupBody rest x ; } }
+    _ -> lookupBody rest x } }
 Bindings = List (String * Term)
 appendBindings (xs ys : Bindings) : Bindings := match xs {
   nil -> ys ; cons x rest -> cons x (appendBindings rest ys) }
-consistentBindings (xs : Bindings) : Bool := match xs {
-  nil -> true ; cons (x, v) rest -> agreesBinding x v rest and consistentBindings rest }
-agreesBinding (x : String) (v : Term) (xs : Bindings) : Bool := match xs {
-  nil -> true ; cons (y, w) rest -> (not (x == y) or alpha.alphaEq v w) and agreesBinding x v rest }
--- Left-to-right sequential substitution is the order explicitly required by IotaPair.
+bindingNames (xs : Bindings) : List String := match xs {
+  nil -> nil ; cons (x, v) rest -> cons x (bindingNames rest) }
+bindingTermNames (xs : Bindings) : List String := match xs {
+  nil -> nil ; cons (x, v) rest -> concat (allNames v) (bindingTermNames rest) }
+linearBindings (xs : Bindings) : Bool := match xs {
+  nil -> true ; cons (x, v) rest -> not (member x (bindingNames rest)) and linearBindings rest }
+-- Rename every bound occurrence to a distinct temporary absent from the body and
+-- every replacement, then substitute replacements. No replacement is revisited.
 applyBindings (xs : Bindings) (b : Term) : Term := match xs {
-  nil -> b ; cons (x, v) rest -> applyBindings rest (substTerm x v b) }
-operatorName (t : Term) : Maybe String := match t {
-  Var x -> if isOperator x then just x else nothing ;
-  Primitive x -> if isOperator x then just x else nothing ; _ -> nothing ; }
-isOperator (x : String) : Bool := x == "+" or x == "*" or x == "==" or x == "<"
-integerPrim (op : String) (i j : Int) : Term :=
-  if op == "+" then Lit (IntConst (i + j)) else if op == "*" then Lit (IntConst (i * j))
-  else Var (if (if op == "==" then i == j else i < j) then "true" else "false")
+  nil -> b ; cons (x, v) nil -> substTerm x v b ;
+  _ -> stageBindings xs b (concat (allNames b) (concat (bindingNames xs) (bindingTermNames xs))) nil }
+stageBindings (xs : Bindings) (b : Term) (avoid : List String) (ready : Bindings) : Term := match xs {
+  nil -> finishBindings ready b ; cons (x, v) rest ->
+    stageBinding x v rest b avoid ready (freshName x avoid) }
+stageBinding (x : String) (v : Term) (rest : Bindings) (b : Term)
+             (avoid : List String) (ready : Bindings) (z : String) : Term :=
+  stageBindings rest (substTerm x (Var z) b) (cons z avoid) (cons (z, v) ready)
+finishBindings (xs : Bindings) (b : Term) : Term := match xs {
+  nil -> b ; cons (x, v) rest -> finishBindings rest (substTerm x v b) }
+truthTerm (b : Bool) : Term := Var (if b then "true" else "false")
+primitiveResult (op : String) (i j : Term) : Maybe Term := match (i, j) {
+  (Lit (IntConst a), Lit (IntConst b)) ->
+    if op == "+" then just (Lit (IntConst (a + b)))
+    else if op == "*" then just (Lit (IntConst (a * b)))
+    else if op == "-" then just (Lit (IntConst (a - b)))
+    else if op == "<" then just (truthTerm (a < b))
+    else if op == "==" then just (truthTerm (a == b)) else nothing ;
+  (Lit (FloatConst a), Lit (FloatConst b)) ->
+    if op == "+" then just (Lit (FloatConst (a + b))) else nothing ;
+  (Lit (StringConst a), Lit (StringConst b)) ->
+    if op == "==" then just (truthTerm (a == b)) else nothing ; _ -> nothing }
 stepHead (p : Program) (t : Term) : HeadStep := match t {
   Var x -> match lookupBody p x { nothing -> Done t ; just b -> Next b } ;
   App f a -> stepApplication p f a ; Match s arms -> stepMatch p s arms ;
-  Proj r x -> stepProjection p r x ;
-  Record kvs -> Done t ; RecordValue kvs -> Done t ; _ -> Done t ; }
+  Proj r x -> stepProjection p r x ; _ -> Done t }
 -- Field names are literal and ordered; duplicate names select the first occurrence.
 lookupField (kvs : List (String * Term)) (x : String) : Maybe Term := match kvs {
   nil -> nothing ; cons (y, v) rest -> if x == y then just v else lookupField rest x }
-stepProjection (p : Program) (r : Term) (x : String) : HeadStep := match r {
-  RecordValue kvs -> match lookupField kvs x { just v -> Next v ; nothing -> Done (Proj r x) } ;
-  _ -> match stepHead p r { Next s -> Next (Proj s x) ; Done s -> Done (Proj s x) } }
-stepApplication (p : Program) (f a : Term) : HeadStep := match f {
-  Lam x ty b -> Next (substTerm x a b) ;
-  App op i -> match operatorName op {
-    just name -> stepPrimitive p name op i a ; nothing -> stepFunction p f a } ;
-  _ -> stepFunction p f a ; }
-stepFunction (p : Program) (f a : Term) : HeadStep := match stepHead p f {
-  Next g -> Next (App g a) ; Done g -> Done (App g a) }
-stepPrimitive (p : Program) (name : String) (op i j : Term) : HeadStep := match i {
-  Lit (IntConst a) -> match j {
-    Lit (IntConst b) -> Next (integerPrim name a b) ;
-    _ -> match stepHead p j { Next k -> Next (App (App op i) k) ; Done k -> Done (App (App op i) k) } } ;
-  _ -> match stepHead p i { Next k -> Next (App (App op k) j) ; Done k -> Done (App (App op k) j) } ; }
--- A refutable arm may demand a head step before a later wildcard can be considered.
--- PatternStep preserves that order and threads every demanded step through the same fuel.
-PatternStep : U := data { Hit : Bindings -> PatternStep ; Miss : PatternStep ; Demand : Term -> PatternStep ; }
+stepProjection (p : Program) (r : Term) (x : String) : HeadStep := match stepHead p r {
+  Next s -> Next (Proj s x) ; Done s -> match s {
+    RecordValue kvs -> match lookupField kvs x { just v -> Next v ; nothing -> Done (Proj r x) } ;
+    _ -> Done (Proj r x) } }
+stepApplication (p : Program) (f a : Term) : HeadStep := match stepHead p f {
+  Next g -> Next (App g a) ; Done g -> match g {
+    Lam x ty b -> Next (substTerm x a b) ;
+    App (Primitive name) i -> stepPrimitive p name i a ; _ -> Done (App f a) } }
+stepPrimitive (p : Program) (name : String) (i j : Term) : HeadStep :=
+  match primitiveResult name i j { just v -> Next v ; nothing -> match stepHead p i {
+    Next k -> Next (App (App (Primitive name) k) j) ; Done k -> match i {
+      Lit c -> match stepHead p j {
+        Next l -> Next (App (App (Primitive name) i) l) ; Done l -> Done (App (App (Primitive name) i) j) } ;
+      _ -> Done (App (App (Primitive name) i) j) } } }
+-- Blocked is distinct from Miss: an inspecting arm cannot skip a hole.
+PatternStep : U := data {
+  Hit : Bindings -> PatternStep ; Miss : PatternStep ; Blocked : PatternStep ; Demand : Term -> PatternStep ; }
 stepPattern (env : Program) (p : Pattern) (v : Term) : PatternStep := match p {
   PVar x -> Hit [(x, v)] ; PWild -> Hit nil ;
   PLit c -> match v { Lit d -> if c == d then Hit nil else Miss ; _ -> demandHead env v } ;
   PPair a b -> match v { Pair c d -> stepPairPattern env a b c d ; _ -> demandHead env v } ;
   PInj l q -> match v { Inj k a -> if l == k then match stepPattern env q a {
-    Hit bs -> Hit bs ; Miss -> Miss ; Demand b -> Demand (Inj k b) } else Miss ; _ -> demandHead env v } ;
-  PCon c ps -> stepConstructorPattern env c ps v ; }
+    Hit bs -> Hit bs ; Miss -> Miss ; Blocked -> Blocked ; Demand b -> Demand (Inj k b) }
+    else Miss ; _ -> demandHead env v } ;
+  PCon c ps -> stepConstructorPattern env c ps v }
+-- A constructor spine needs at least one argument and a name not declared/defined.
+-- A bare unresolved Var is always a hole, never a nullary constructor.
+constructorTerms (env : Program) (v : Term) (args : List Term) : Maybe (String * List Term) := match v {
+  Var x -> match args { nil -> nothing ; cons a rest -> if free env x then just (x, args) else nothing } ;
+  App f a -> constructorTerms env f (cons a args) ; _ -> nothing }
+knownHead (env : Program) (v : Term) : Bool := match v {
+  Var x -> false ; Hole x -> false ; Axiom -> false ; Match s arms -> false ; Proj r l -> false ;
+  App f a -> match constructorTerms env v nil { just cs -> true ; nothing -> false } ; _ -> true }
 demandHead (env : Program) (v : Term) : PatternStep := match stepHead env v {
-  Done w -> Miss ; Next w -> Demand w }
+  Next w -> Demand w ; Done w -> if knownHead env v then Miss else Blocked }
 stepPairPattern (env : Program) (a b : Pattern) (c d : Term) : PatternStep := match stepPattern env a c {
-  Miss -> Miss ; Demand e -> Demand (Pair e d) ; Hit xs -> match stepPattern env b d {
-    Miss -> Miss ; Demand e -> Demand (Pair c e) ; Hit ys -> Hit (appendBindings xs ys) } }
--- Constructor applications are inspected before delta (as the literal Iota law requires).
--- Non-constructor heads can still reduce to constructors.
+  Miss -> Miss ; Blocked -> Blocked ; Demand e -> Demand (Pair e d) ; Hit xs -> match stepPattern env b d {
+    Miss -> Miss ; Blocked -> Blocked ; Demand e -> Demand (Pair c e) ; Hit ys -> Hit (appendBindings xs ys) } }
 stepConstructorPattern (env : Program) (c : String) (ps : List Pattern) (v : Term) : PatternStep :=
-  match constructorTerms v nil { nothing -> demandHead env v ; just (d, vs) ->
+  match constructorTerms env v nil { nothing -> demandHead env v ; just (d, vs) ->
     if c == d then match stepPatternList env ps vs {
-      ListHit bs -> Hit bs ; ListMiss -> Miss ; ListDemand ws -> Demand (rebuildConstructor d ws) }
-    else demandHead env v }
-constructorTerms (v : Term) (args : List Term) : Maybe (String * List Term) := match v {
-  Var x -> just (x, args) ; App f a -> constructorTerms f (cons a args) ; _ -> nothing }
+      ListHit bs -> Hit bs ; ListMiss -> Miss ; ListBlocked -> Blocked ;
+      ListDemand ws -> Demand (rebuildConstructor d ws) } else Miss }
 PatternListStep : U := data {
-  ListHit : Bindings -> PatternListStep ; ListMiss : PatternListStep ; ListDemand : List Term -> PatternListStep ; }
+  ListHit : Bindings -> PatternListStep ; ListMiss : PatternListStep ; ListBlocked : PatternListStep ;
+  ListDemand : List Term -> PatternListStep ; }
 stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternListStep := match (ps, vs) {
   (nil, nil) -> ListHit nil ;
   (cons p rest, cons v more) -> match stepPattern env p v {
-    Miss -> ListMiss ; Demand w -> ListDemand (cons w more) ; Hit xs -> match stepPatternList env rest more {
-      ListMiss -> ListMiss ; ListDemand ws -> ListDemand (cons v ws) ; ListHit ys -> ListHit (appendBindings xs ys) } } ;
-  _ -> ListMiss ; }
+    Miss -> ListMiss ; Blocked -> ListBlocked ; Demand w -> ListDemand (cons w more) ;
+    Hit xs -> match stepPatternList env rest more {
+      ListMiss -> ListMiss ; ListBlocked -> ListBlocked ; ListDemand ws -> ListDemand (cons v ws) ;
+      ListHit ys -> ListHit (appendBindings xs ys) } } ; _ -> ListMiss }
 rebuildConstructor (c : String) (args : List Term) : Term := applyArguments (Var c) args
 applyArguments (f : Term) (args : List Term) : Term := match args {
   nil -> f ; cons a rest -> applyArguments (App f a) rest }
 ArmStep : U := data { Selected : Term -> ArmStep ; ScrutineeNext : Term -> ArmStep ; NoArm : ArmStep ; }
 chooseArm (p : Program) (s : Term) (arms : List (Pattern * Term)) : ArmStep := match arms {
   nil -> NoArm ; cons (pat, b) rest -> match stepPattern p pat s {
-    Demand v -> ScrutineeNext v ; Miss -> chooseArm p s rest ;
-    Hit bs -> if consistentBindings bs then Selected (applyBindings bs b) else chooseArm p s rest } }
-stepMatch (p : Program) (s : Term) (arms : List (Pattern * Term)) : HeadStep := match chooseArm p s arms {
-  Selected b -> Next b ; ScrutineeNext v -> Next (Match v arms) ;
-  NoArm -> match stepHead p s { Done v -> Done (Match v arms) ; Next v -> Next (Match v arms) } }
-reduceFuel (p : Program) (n : Nat) (t : Term) : Maybe Term :=
-  if n == 0 then nothing else match stepHead p t {
-    Done v -> just v ; Next v -> reduceFuel p (n - 1) v }
-reduce : Reduction alpha substitute := { reduce := reduceFuel }
+    Demand v -> ScrutineeNext v ; Miss -> chooseArm p s rest ; Blocked -> NoArm ;
+    Hit bs -> if linearBindings bs then Selected (applyBindings bs b) else NoArm } }
+stepMatch (p : Program) (s : Term) (arms : List (Pattern * Term)) : HeadStep := match stepHead p s {
+  Next v -> Next (Match v arms) ; Done v -> match chooseArm p s arms {
+    Selected b -> Next b ; ScrutineeNext w -> Next (Match w arms) ; NoArm -> Done (Match s arms) } }
+stepTerm (p : Program) (t : Term) : Maybe Term := match stepHead p t {
+  Done v -> nothing ; Next v -> just v }
+stepper : Reduction alpha substitute := { step := stepTerm }
