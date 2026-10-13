@@ -9,12 +9,14 @@
 -- Equality update: term.lth at 360b4d4 and 051e6aa; user request v6, recorded in codex.md.
 -- Equality demands parts: term.lth at 924df6b; Claude Sonnet agent, recorded in codex.md.
 -- Record telescope: term.lth at the commit of 2026-10-14 stating it; Claude Opus 5.5 (luthier-03).
+-- PrimInt, PrimFloat, PrimString, PrimConvert, NotEqualNegates: term.lth at 6b1e14d
+-- (681742e's operations, then luthier-03's /= law); Claude Opus 5.5 (luthier-03).
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
   Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let
   Declare Define Datum member remove concat removeAll freeVars patternVars patternsVars swap swapPattern
-  partsAgree sameNames free
+  partsAgree sameNames free negateAnswer
 
 -- Spec 11 gives String equality but no text decomposition, concatenation or Nat rendering.
 -- Parameters (holes), not invented core primitives. Required contracts: Unicode scalar sequence
@@ -223,12 +225,32 @@ primitiveResult (op : String) (i j : Term) : Maybe Term := match (i, j) {
     if op == "+" then just (Lit (IntConst (a + b)))
     else if op == "*" then just (Lit (IntConst (a * b)))
     else if op == "-" then just (Lit (IntConst (a - b)))
+    else if op == "/" and b /= 0 then just (Lit (IntConst (a / b)))
+    else if op == "mod" and b /= 0 then just (Lit (IntConst (a mod b)))
     else if op == "<" then just (truthTerm (a < b))
+    else if op == "<=" then just (truthTerm (a <= b))
+    else if op == ">" then just (truthTerm (a > b))
+    else if op == ">=" then just (truthTerm (a >= b))
     else if op == "==" then just (truthTerm (a == b)) else nothing ;
   (Lit (FloatConst a), Lit (FloatConst b)) ->
-    if op == "+" then just (Lit (FloatConst (a + b))) else nothing ;
+    if op == "+" then just (Lit (FloatConst (a + b)))
+    else if op == "-" then just (Lit (FloatConst (a - b)))
+    else if op == "*" then just (Lit (FloatConst (a * b)))
+    else if op == "/" and b /= 0.0 then just (Lit (FloatConst (a / b)))
+    else if op == "<" then just (truthTerm (a < b))
+    else if op == "<=" then just (truthTerm (a <= b))
+    else if op == ">" then just (truthTerm (a > b))
+    else if op == ">=" then just (truthTerm (a >= b)) else nothing ;
   (Lit (StringConst a), Lit (StringConst b)) ->
-    if op == "==" then just (truthTerm (a == b)) else nothing ; _ -> nothing }
+    if op == "+" then just (Lit (StringConst (a + b)))
+    else if op == "==" then just (truthTerm (a == b)) else nothing ; _ -> nothing }
+-- one-argument primitives: `toFloat64` on an integer constant (PrimConvert), after its argument
+-- has reached its head; any other primitive applied once waits for its second argument
+stepUnary (p : Program) (r : String) (a : Term) : HeadStep :=
+  if r == "toFloat64" then (match stepHead p a {
+    Next b -> Next (App (Primitive r) b) ;
+    Done b -> match b { Lit (IntConst i) -> Next (Lit (FloatConst (toFloat64 i))) ; _ -> Done (App (Primitive r) a) } })
+  else Done (App (Primitive r) a)
 -- Equality has its own closed-value domain; the permissive Iota classifier is not enough.
 -- Check both entire values before comparing, even when an outer label already differs.
 constructorType (env : Program) (x : String) : Maybe Term := match env {
@@ -312,9 +334,12 @@ stepProjection (p : Program) (r : Term) (x : String) : HeadStep := match stepHea
 stepApplication (p : Program) (f a : Term) : HeadStep := match stepHead p f {
   Next g -> Next (App g a) ; Done g -> match g {
     Lam x ty b -> Next (substTerm x a b) ;
-    App (Primitive name) i -> stepPrimitive p name i a ; _ -> Done (App f a) } }
+    App (Primitive name) i -> stepPrimitive p name i a ; Primitive r -> stepUnary p r a ; _ -> Done (App f a) } }
 stepPrimitive (p : Program) (name : String) (i j : Term) : HeadStep :=
-  if name == "==" then stepEquality p i j else match primitiveResult name i j { just v -> Next v ; nothing -> match stepHead p i {
+  if name == "==" then stepEquality p i j
+  else if name == "/=" then (match stepEquality p i j {
+    Next w -> Next (negateAnswer w) ; Done k -> Done (App (App (Primitive name) i) j) })
+  else match primitiveResult name i j { just v -> Next v ; nothing -> match stepHead p i {
     Next k -> Next (App (App (Primitive name) k) j) ; Done k -> match i {
       Lit c -> match stepHead p j {
         Next l -> Next (App (App (Primitive name) i) l) ; Done l -> Done (App (App (Primitive name) i) j) } ;
