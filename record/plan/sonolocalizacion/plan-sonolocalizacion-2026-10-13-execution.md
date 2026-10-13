@@ -23,6 +23,14 @@ writes theories; Codex what must run and iterate; a web model small bites).
   the run reads the graph and stops in run.py (bite 5 running). Codex is gone: specimens by Claude
   agents.
 
+- 2026-10-14, 07:00: step 3's first stage done: `validate_graph.lut` (port at
+  examples/sonolocalizacion/, run.py bite 5 and kernel bite 10) runs end to end on session A's old
+  graph and prints its summary line (21 distinct pairs, 14 unseen directions) in about five
+  minutes, uncertified. Step 4 waits for Luciano: a v0.1 run of validate_graph.lut on the same
+  graph as the reference, and the corrected graph (prepare_experiment_zero.py). The second stage,
+  `experiment_zero.lut`, needs functions across the bridge (inventory §6 item 6), unstated in the
+  spec: his question.
+
 ## Steps
 
 1. Inventory, read only (Luciano runs any script there): in `~/Projects/sonolocalizacion`, which
