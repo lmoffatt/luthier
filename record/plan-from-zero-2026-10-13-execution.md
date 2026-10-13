@@ -91,6 +91,19 @@ by Luciano.
   file (an axiom is allowed only in `lib/`, so no program of `tests/spec/` can be its accept case).
   Z10 (D-2026-10-13-v): the destination is Luthier but a core in Rust.
 
+- 2026-10-13, evening (the coordinating session): syntax decided and applied everywhere: sums
+  braced with `||` (D-2026-10-13-w), lambdas with `fn` (-y). External review of layers 0 and 1
+  done (record/IA/layers-0-1-review-2026-10-13/: ten replies, summary.md, reply.md); his answers
+  D-2026-10-13-x (records as named products), -z (substitutivity structural), -aa (`Let` in the
+  kernel, 4.R3 rejects, `U : U`, names unfold); all fixes in the theories (reply.md). No second
+  round (-ab): the specimens test the theories. `kernel.py` follows term.lth bite by bite (1b, 1c
+  committed; 1d `Let` running; 1e queued). Next, in order: `elaborate.py` with `luthier eval`
+  (brief record/IA/elaborate-2026-10-13/), then `check.py` with `luthier check`, then `v0.2` (the 48
+  programs of `tests/spec/` with their verdicts). Beside it, layer 2 by luthier-03: `generators.lth`
+  (091ed44), then `test.lth`. Codex is launched by the coordinating session (`codex exec`); the two
+  Claude sessions coordinate by message (file owners: see the coordinator's first message, and
+  record/IA/*/prompt*.md for every brief).
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
