@@ -60,6 +60,8 @@ by Luciano.
   models write the Python specimens and fenced mechanical tasks. An external model gets a brief
   and a bundle that Luciano sends; its reply is committed verbatim, read whole, checked, and only
   then integrated. Choose the external route when the Claude quota is short.
+  A web model gets small bites, one piece that fits one answer; work that must run the repository's
+  tests and iterate goes to Codex in the repository (his lesson, 2026-10-13, after the parser brief).
 - Review: when a layer's theories are written, one round of the four external models (the
   prompt and bundle as in `record/IA/first-code-review-2026-10-13/`), its findings summarized for
   Luciano before anything is acted on; further rounds until one finds only local defects.
