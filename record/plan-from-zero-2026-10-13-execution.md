@@ -13,8 +13,13 @@ until Luciano marks them, every step assumes them as recommended and says so in 
   `lib/*.lth` for every theory.
 - 2026-10-13: step 0 done: tag `v0.1-final` at fd3cba9; the old interpreter, libraries, examples
   and their tests removed; `tests/spec/` moved to `tests/spec/v0.1/`; `[implemented]` read as
-  `v0.1-final` until step 4 (index legend, `check_spec.py`). Next: step 1, `grammar.lth` and the
-  parser.
+  `v0.1-final` until step 4 (index legend, `check_spec.py`).
+- 2026-10-13: step 1.1, `src/luthier/lib/grammar.lth` draft 0 (f69d7de), by Fable in the session,
+  for his reading before the parser agent is launched. Choices in it, reversible: constructors
+  curried as core's `cons`; lawless records as aliases (4.R4); the tree without positions;
+  `operator` a keyword, `quote` a form (a question for 2.S21); a bare top-level term is the act
+  `datum` (D9); string escapes added to 2.S1; the §4 translations left to `term.lth`. Next: the
+  parser (1.2).
 
 ## Rules for every step
 
