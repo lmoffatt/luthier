@@ -15,6 +15,8 @@ status is one of:
 - `[implemented]`: in the interpreter, with its two programs passing; a rule of evaluation also
   needs a program whose value is compared (D-2026-10-12-ah);
 - `[decided D-YYYY-MM-DD-x]`: taken by that entry of `record/decisions.md`, not yet implemented;
+- `[decided Ln.k]`: stated by a clause of `docs/principles.md` marked settled, not yet implemented
+  (D-2026-10-13-g);
 - `[proposed]`: the model's, awaiting Luciano's mark.
 
 Citations: `spec 4.R3` is rule 3 of chapter 4, `spec 8 §2` section 2 of chapter 8; `L5`, `L5.3`,

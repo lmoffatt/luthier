@@ -4,8 +4,9 @@
 For each chapter file given (or every `docs/spec/NN-*.md` except `00-index.md`): the first line
 is `# N. Title` with N the chapter's number; sections are `## §k Title` numbered from 1 and the
 last one is `## Open`; every item `**N.Rk. Title.**` (rule) or `**N.Sk. Title.**` (statement)
-carries exactly one status (`[implemented]`, `[decided D-YYYY-MM-DD-x]`, `[proposed]`) and R and S
-are numbered 1..n; a decided id exists in `record/decisions.md`; a rule ends with a `Files:` line
+carries exactly one status (`[implemented]`, `[decided D-YYYY-MM-DD-x]`, `[decided Ln.k]`, `[proposed]`)
+and R and S are numbered 1..n; a decided id exists in `record/decisions.md`, and a decided clause
+`Ln.k` is a clause of `docs/principles.md` marked `[settled]` (D-2026-10-13-g); a rule ends with a `Files:` line
 naming programs of `tests/spec/` (an implemented rule needs an accept and a reject one, a
 statement has no Files line); citations resolve (`spec M §k`, `spec M.Rk`, `spec M.Sk`, `G/L/O`
 entries of `docs/principles.md`, `D-` ids, `W` of `docs/way-of-working.md`, `P` of
@@ -36,6 +37,7 @@ SECTION_RE = re.compile(r"^##\s+§(\d+)\s+\S")
 ITEM_RE = re.compile(r"^\*\*(\d+)\.([RS])(\d+)\.\s*(.*?)\*\*\s*(.*)$")
 STATUS_RE = re.compile(r"^\[([^\]]*)\]")
 DECIDED_RE = re.compile(r"^decided (D-\d{4}-\d{2}-\d{2}-[a-z]+)$")
+DECIDED_CLAUSE_RE = re.compile(r"^decided (L\d+\.\d+)$")
 DECISION_LINE_RE = re.compile(r"^(D-\d{4}-\d{2}-\d{2}-[a-z]+)\s")
 FILES_RE = re.compile(r"^Files:\s*(.*)$")
 CHAPTER_NAME_RE = re.compile(r"^(\d\d)-.+\.md$")
@@ -197,12 +199,35 @@ def label_of(item: Item) -> str:
     return f"{item.chapter}.{item.kind}{item.number}"
 
 
-def check_status(item: Item, decisions: set[str]) -> list[Finding]:
+def clause_status(principles: list[str], clause: str) -> str | None:
+    """The status in brackets at the end of clause `Ln.k` of the projected principles, "" when the
+    clause has none, None when there is no such clause."""
+    start = next((i for i, l in enumerate(principles) if l.startswith(f"- {clause} ")), None)
+    if start is None:
+        return None
+    text = principles[start]
+    for l in principles[start + 1:]:
+        if not l.startswith("  ") or not l.strip():
+            break
+        text += " " + l.strip()
+    m = re.search(r"\[([a-z ]+)\]\s*$", text)
+    return m.group(1) if m else ""
+
+
+def check_status(item: Item, decisions: set[str], principles: list[str] | None = None) -> list[Finding]:
     s = item.status
     if not s:
         return [(item.line, f"{label_of(item)} has no status (`[implemented]`, "
                             "`[decided D-...]` or `[proposed]`)")]
     if s in ("implemented", "proposed"):
+        return []
+    c = DECIDED_CLAUSE_RE.match(s)
+    if c:
+        status = clause_status(principles or [], c.group(1))
+        if status is None:
+            return [(item.line, f"{label_of(item)}: {c.group(1)} is not a clause of docs/principles.md")]
+        if status != "settled":
+            return [(item.line, f"{label_of(item)}: {c.group(1)} is not settled in docs/principles.md")]
         return []
     m = DECIDED_RE.match(s)
     if not m:
@@ -423,7 +448,7 @@ def check_chapter(ch: Chapter, refs: Refs,
                   others: dict[str, list[Block]]) -> tuple[list[Finding], list[Finding]]:
     found = check_title(ch) + check_sections(ch) + check_numbering(ch)
     for item in ch.items:
-        found += check_status(item, refs.decisions) + check_files(item, refs.tests_dir)
+        found += check_status(item, refs.decisions, refs.principles) + check_files(item, refs.tests_dir)
     bad, info = check_citations(ch, refs)
     found += bad + check_duplicates(ch, others)
     return sorted(set(found)), sorted(set(info))

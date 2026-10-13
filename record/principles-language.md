@@ -1206,7 +1206,7 @@ L11.7  (His words) A file is read when some demand needs it: an extern is a rout
        program is checked; a module is a value, and its file is read when a demand first needs one
        of its names, so an import is not an action either; `test` of a module is the action that
        demands everything in it, the one that finds what is latent and ill defined (D-2026-10-12-ac,
-       -ad). [proposed]
+       -ad). [settled]
 References: D-2026-10-11-m; W5, W10
 Rests on:   O3 (the opt-out's syntax; the world as a value)
 Quote:      (L14) "si el tipo no sigue la ley no se aplica el calculo" (chat, 2026-10-10) "que la IA
@@ -1227,7 +1227,8 @@ Source:     (L14) Luciano, 2026-05-26 (note:2026-05-26T12.32.24:lenguaje-no-atad
             bcdac41 (L21, the graded transport) Luciano, 2026-10-11 (WhatsApp Ptt 2026-10-11 at
             08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his annotation on
             draft 8 (bcdac41)
-Status:     settled by his correction of draft 7; clause 6 candidate, reworded
+Status:     settled by his correction of draft 7; clause 6 candidate, reworded; clause 7 settled
+            (D-2026-10-13-g)
 History:    (L14) draft 0 (6d9dbd3): stated. Draft 0 of the generative plan proposed moving its
             orchestration half to the way of working; withdrawn (D3). draft 4 (c7c6396),
             D-2026-10-11-n: certification the default, the opt-out in the demand. draft 5 (5b1446c):

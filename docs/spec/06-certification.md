@@ -18,13 +18,13 @@ Notation shared by every chapter is `spec 1`. Here: `C` is a type of costs, the 
 
 **6.S4. Certification takes its cost type as a parameter.** [decided D-2026-10-12-al] The theory of this chapter is written over a type `C` and the operations of §1, not over a fixed `Cost`. A library of costs supplies models of `C`; which algebra it uses, how a sample's statistics become a cost and what its operations are called are decided when that library is implemented. This chapter fixes only what it uses.
 
-**6.S5. Five operations and their laws.** [decided D-2026-10-12-am] Certification uses exactly these, and asks of them these laws, so that a library of costs is a model of them:
+**6.S5. Five operations and their laws.** [decided D-2026-10-12-am] Certification uses exactly these (the sixth law of `⊤` added by D-2026-10-13-g), and asks of them these laws, so that a library of costs is a model of them:
 
 | operation | used for | laws |
 |---|---|---|
 | `≤` | comparing a certificate with a cutoff (§7) | a preorder |
 | `0` | a check with no error and no doubt: exhaustive, proved | least element |
-| `⊤` | a failed check, refused by every cutoff | greatest element, absorbing for `⊕` |
+| `⊤` | a failed check, refused by every cutoff | greatest element, absorbing for `⊕`, and `⊤ ≤ 0` is false (D-2026-10-13-g; spec 5.S5) |
 | `⊕` | composing bounds and evidence along a path (§6) | associative, unit `0`, monotone in each argument |
 | `lift` | a law valued in `Bool` | `lift true = 0`, `lift false = ⊤` |
 
@@ -32,18 +32,18 @@ No subtraction, product or inverse is asked: nothing in certification takes evid
 
 ## §4 The certificate
 
-**6.S6. What a certificate holds.** [proposed] As a value of a record type `Certificate C`: the law; the domain it covered; the bound observed (for a law into `C`, the worst cost seen; for a Boolean law, `lift` of its verdict); the evidence, an evidence cost in `C` (D-2026-10-12-r) with the grade derived from it (6.S7); and the identity, the hash `h` of the cone with the binding of spec 7.S9. [implemented] Today an entry of `x.cert.json` (spec 12.S10) holds the law's label, its outcome, the mode and count it ran with, the generators and their fingerprints, the seed, the first cases, the time each law took, and `h`; the bound and the evidence cost are not recorded.
+**6.S6. What a certificate holds.** [decided D-2026-10-13-g] As a value of a record type `Certificate C`: the law; the domain it covered; the bound observed (for a law into `C`, the worst cost seen; for a Boolean law, `lift` of its verdict); the evidence, an evidence cost in `C` (D-2026-10-12-r) with the grade derived from it (6.S7); and the identity, the hash `h` of the cone with the binding of spec 7.S9. [implemented] Today an entry of `x.cert.json` (spec 12.S10) holds the law's label, its outcome, the mode and count it ran with, the generators and their fingerprints, the seed, the first cases, the time each law took, and `h`; the bound and the evidence cost are not recorded.
 
-**6.S7. The grade is a view of domain and evidence.** [decided D-2026-10-12-r] The grade is computed, not stored apart. A proof or a run of every case gives evidence `0` over the whole domain. A run of listed cases gives `0` at those cases and `⊤` at every other value. A sample gives the cost the library converts its statistics to. An assumption gives the cost the demand assigns to assumptions (6.S10). A person reads the five names; the planner reads the costs. [proposed] The correspondence of the older names (point, census of k, bounded, witnessed) to these five is a function of `lib/certification.lut` (6.S16), so that spec 1.S12 cites it; D-2026-10-12-ag left its place to be settled when these laws are written, and this is the proposal.
+**6.S7. The grade is a view of domain and evidence.** [decided D-2026-10-12-r] The grade is computed, not stored apart. A proof or a run of every case gives evidence `0` over the whole domain. A run of listed cases gives `0` at those cases and `⊤` at every other value. A sample gives the cost the library converts its statistics to. An assumption gives the cost the demand assigns to assumptions (6.S10). A person reads the five names; the planner reads the costs. [decided D-2026-10-13-g] The correspondence of the older names (point, census of k, bounded, witnessed) to these five is a function of `lib/certification.lut` (6.S16), so that spec 1.S12 cites it; this settles the place D-2026-10-12-ag left open.
 
-**6.S8. A certificate is identified by its cone and frozen.** [implemented] The hash covers the code of the cone in canonical form, the host code behind each extern it calls (the source files of the module's directory, or the installed package and its version) and the interpreter; any change to one of them makes the entry stale (spec 12.S11). An entry is kept per filling of the holes its cone depends on, up to four. [proposed] A new check never edits an entry: it writes a new one, and both are kept, the latest in front (L10.4). Today the new entry replaces the old one with the same hash in the file, and the chain exists only in the history of the repository.
+**6.S8. A certificate is identified by its cone and frozen.** [implemented] The hash covers the code of the cone in canonical form, the host code behind each extern it calls (the source files of the module's directory, or the installed package and its version) and the interpreter; any change to one of them makes the entry stale (spec 12.S11). An entry is kept per filling of the holes its cone depends on, up to four. [decided D-2026-10-13-g] A new check never edits an entry: it writes a new one, and both are kept, the latest in front (L10.4). Today the new entry replaces the old one with the same hash in the file, and the chain exists only in the history of the repository.
 
 ## §5 Certifiers that run nothing
 
 **6.R1. Proved by citation.** [implemented] `cite name ref checked who` records a certificate of grade proved for the laws of `name`: `ref` must be a value of `Reference`, read from a `.bib` file (spec 12.R1), and `who` says who checked that the theorem cited matches the laws, `human`, `ai+human` or `none` (D-2026-10-11-f). It is allowed in user code. The certificate holds the reference and who checked; `test` runs no case for a cited name. In the language designed `cite` is a function of core with named arguments (spec 2.S21), and its syntax is O10.
 Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
-**6.S9. Proved by delegation.** [proposed] A host library's documented guarantee is cited as the theorem, with its hypotheses (a condition number, the library's version and the platform) carried by the certificate: LAPACK's backward-error bound for a solve, say. This is citation with a theorem outside Luthier, and adds no grade (L9.7).
+**6.S9. Proved by delegation.** [decided D-2026-10-13-g] A host library's documented guarantee is cited as the theorem, with its hypotheses (a condition number, the library's version and the platform) carried by the certificate: LAPACK's backward-error bound for a solve, say. This is citation with a theorem outside Luthier, and adds no grade (L9.7).
 
 **6.S10. Assumed.** [decided D-2026-10-12-t] Nothing is checked; the certificate records the assertion itself. For a Boolean law the assertion is that it holds, and the bound is `0`. For a law into `C` it is a formula of the inputs, and the bound is that formula's value at the input. The demand sets the evidence cost of assumptions, with no default, so a demand that names none refuses every assumed value. A formula that some source guarantees, cited with the conditions it needs, makes the certificate 6.S9 instead. [implemented] The laws of an `axiom` (spec 11.R3) are assumed: stated, never tested, and `check -v` says so (spec 4.S19).
 
@@ -53,7 +53,7 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 **6.S12. Along a path, and sampled links.** [decided D-2026-10-12-q] A path of identities composes link by link with `⊕`. Two links sampled over one distribution compose by the union bound, their failure fractions and their δ summed; two links sampled from different distributions need a law that relates those distributions before they compose. A demand that refuses sampled paths says so by its evidence cutoff.
 
-**6.S13. No evidence for free.** [proposed] As a law of the theory of 6.S16: every operation on certificates is monotone, so a better grade, a smaller evidence cost or a wider domain comes only from a new check (L10.9). It is the reason 6.S5 asks `⊕` to be monotone and asks for nothing that subtracts.
+**6.S13. No evidence for free.** [decided D-2026-10-13-g] As a law of the theory of 6.S16: every operation on certificates is monotone, so a better grade, a smaller evidence cost or a wider domain comes only from a new check (L10.9). It is the reason 6.S5 asks `⊕` to be monotone and asks for nothing that subtracts.
 
 ## §7 The demand
 
@@ -63,7 +63,7 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 ## §8 Certification in Luthier
 
-**6.S16. `lib/certification.lut`.** [proposed] The theory of this chapter, written over a parameter `C`: the theory `CostAlgebra C` with the operations and laws of 6.S5; the record `Certificate C` of 6.S6; the function `grade` of 6.S7; `transport` of 6.S11 and `compose` of 6.S12; `serves` of 6.S15; and their laws, among them monotonicity (6.S13) and that `serves` is monotone in the cutoff. The file is not written. The host's `certify.py` and `testing.py` are its specimen, certified against it (L14.3), and each library of costs gives a model of `CostAlgebra`. Once its laws are written, L9 and L10 are read back from them (D-2026-10-12-ag).
+**6.S16. `lib/certification.lut`.** [decided D-2026-10-13-g] The theory of this chapter, written over a parameter `C`: the theory `CostAlgebra C` with the operations and laws of 6.S5; the record `Certificate C` of 6.S6; the function `grade` of 6.S7; `transport` of 6.S11 and `compose` of 6.S12; `serves` of 6.S15; and their laws, among them monotonicity (6.S13) and that `serves` is monotone in the cutoff. The file is not written. The host's `certify.py` and `testing.py` are its specimen, certified against it (L14.3), and each library of costs gives a model of `CostAlgebra`. Once its laws are written, L9 and L10 are read back from them (D-2026-10-12-ag).
 
 ## Open
 

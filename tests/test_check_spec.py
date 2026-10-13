@@ -106,6 +106,22 @@ def test_bad_decision_id(tmp_path):
     expect(out, "docs/spec/01-alpha.md", line_of(ch, "**1.R1."), "D-2026-01-01-z is not in record/decisions.md")
 
 
+def test_decided_by_a_settled_clause(tmp_path):
+    prin = PRINCIPLES.replace("- L1.2 A clause of the entry.", "- L1.2 A clause of the entry. [settled]\n- L1.3 Another\n  clause. [proposed]")
+    ch = CHAPTER_1.replace("[implemented]", "[decided L1.2]", 1)
+    build(tmp_path, ch)
+    (tmp_path / "docs/principles.md").write_text(prin, encoding="utf-8")
+    code, out = run(tmp_path, str(tmp_path / "docs/spec/01-alpha.md"))
+    assert not any("1.R1" in l and "settled" in l for l in out)
+    for clause, msg in (("L1.3", "L1.3 is not settled"), ("L1.9", "L1.9 is not a clause")):
+        bad = CHAPTER_1.replace("[implemented]", f"[decided {clause}]", 1)
+        build(tmp_path, bad)
+        (tmp_path / "docs/principles.md").write_text(prin, encoding="utf-8")
+        code, out = run(tmp_path, str(tmp_path / "docs/spec/01-alpha.md"))
+        assert code == 1
+        expect(out, "docs/spec/01-alpha.md", line_of(bad, "**1.R1."), msg)
+
+
 def test_missing_accept_file(tmp_path):
     ch = CHAPTER_1.replace("Files: a.accept.lut, a.reject.lut.", "Files: a.reject.lut, b.accept.lut.")
     build(tmp_path, ch)

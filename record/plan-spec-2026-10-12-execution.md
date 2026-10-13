@@ -175,3 +175,9 @@ token, the ranking, the trace), the rest syntax or placement.
   that `⊤ ≤ 0` is false (proposed in 5.S5); settled principle clauses have no decision id, so a
   chapter restating them can only mark them proposed. Next: his marks on the interfaces asked of
   libraries (8.S2, 9.S14, 10.S5, 5.S3) and the agents' questions, in one document.
+- 2026-10-13: his OK on waves 2 and 3 applied (D-2026-10-13-g): every item the marks document
+  showed is decided; 9.S8 and 9.S11 cite settled clauses, a status `check_spec.py` now accepts;
+  L11.7 settled; the key of a result holds only the parameters its cone reads (8.S8). His
+  annotation on 8.S1 opened the demand (D-2026-10-13-f). Proposed and not yet shown to him: the
+  method of 8.S1, 8.S13, and from wave 1 1.S11, the rename to η, 4.S16, 4.S21. The specification
+  is complete as draft 1 in substance; what remains is implementation.

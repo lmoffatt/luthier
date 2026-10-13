@@ -1926,3 +1926,25 @@ Source:     luthier@24a0615:record/spec-wave-2-3-for-his-marks.md:52
             chat:f15ae1b6:1734
 Kind:       language (spec 8.S1, 8.S2, 8.S8; L5, O5; spec 11.S3 as the first instance). For L5, L14
 Status:     current; the interface asked of `P` proposed
+
+D-2026-10-13-g  His mark on waves 2 and 3 of the specification: ok on every item of
+                record/spec-wave-2-3-for-his-marks.md, the model's readings of the agents' questions
+                included. So: the interfaces asked of libraries (5.S3, 8.S2, 9.S14, 10.S5) and the
+                sixth law of 6.S5, `⊤ ≤ 0` false; checks to a library (5.S10); 5.S12, 5.S13; the
+                fields of a certificate, the kept chain, delegation, no free evidence and
+                `lib/certification.lut` with the grade correspondence (6.S6 to 6.S16, which settles
+                D-2026-10-12-ag); 8.S11, 8.S15, equal keys for results (8.S9), L5.6 as extending
+                D-2026-10-10-d; 9.S3 to 9.S17; 10.S3 to 10.S14; L11.7 settled; the validation of an
+                extern left under D-2026-10-11-n; and a chapter may cite a settled clause as its
+                status, `[decided L6.4]`, checked by `check_spec.py`. With it, on his "Si,
+                agregalo": the key of a result holds only the parameters of the demand its cone
+                reads.
+Author:     Luciano; the items the model's and the agents'
+Quote:      "OK"
+            "Si, agregalo."
+Source:     luthier@582e4bd:record/spec-wave-2-3-for-his-marks.md:98
+            chat:f15ae1b6:1793
+Kind:       language and tool (spec 1, 5, 6, 8, 9, 10; principles L11.7; scripts/check_spec.py).
+            For P13, P8
+Status:     current; left proposed because the document did not show them: the method of 8.S1
+            (by hand or derived), 8.S13 (a session line re-evaluates only what changed)
