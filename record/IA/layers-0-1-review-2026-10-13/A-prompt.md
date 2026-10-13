@@ -15,7 +15,13 @@ term as data and the theories of alpha-equivalence, substitution, canonical form
 fuel, and quote/eval; `term_model.lut` is the interpreter written in Luthier. One point is pending
 the designer's mark: kernel_laws §1 makes substitutivity over every function a law of the
 structural equality only, an observational equality being respected by its theory's operations
-(question Q5 to him); review it as written.
+(question Q5 to him); review it as written. A second model of `term.lth`'s theories, `kernel.py`
+in Python, already passes the laws of §2 to §5 on seeded random cases, and what that testing found
+is folded in (substitutivity under alpha, `IotaSkips` on stuck matches, `AlphaCongruent` for every
+constructor). So look for what testing cannot find: laws that do not determine what they claim,
+missing roles, fidelity to chapter 3. Known limits, stated in the files and not findings:
+induction over `Nat` and the uniqueness of the free monoid's `fold` are not statable by tests;
+`Prim` and `Iota` hold only where the program does not redefine the operator or constructor.
 
 Answer in this order, numbered, as briefly as each allows, quoting the line you mean:
 1. **Laws that are wrong**: false of the intended model, or unsatisfiable together.

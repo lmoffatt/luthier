@@ -4,7 +4,7 @@ Written 2026-10-13 by Claude Opus 5.5 for Luciano, who sends each prompt, with i
 same four models (GPT, DeepSeek, Claude, Kimi); the replies go to `A/`, `B/`, `C/`, one file per
 model (`<model>.md`), unedited (P3). Agreed with the coordinating session (plan from zero, Z9: one
 external round per layer). Three small prompts rather than one large, since web models answer
-small bites better (his lesson of 2026-10-13). The bundles are frozen by `freeze.sh` once every
+small bites better (his lesson of 2026-10-13). The bundles are frozen by `freeze.py` once every
 file parses.
 
 The common opening, at the head of each prompt:
@@ -19,4 +19,5 @@ The common opening, at the head of each prompt:
 > quantifies over the subtype it means rather than over an implication whose premise random cases
 > rarely meet. The files parse with the project's parser; nothing yet type-checks or certifies
 > them, so you are the first check of their meaning. Grammar files were reviewed in earlier rounds
-> and are not in scope.
+> and are not in scope. Do not reopen a decision listed in `decisions-cited.md` unless a file
+> contradicts it; where you disagree with the specification itself, say so as a separate item.
