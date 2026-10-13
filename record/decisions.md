@@ -2012,3 +2012,16 @@ Source:     chat:f15ae1b6:2159
 Kind:       language and architecture (Z8; spec 12.S1, 12.S9, 5.S12, 7.R4). For L2, L6, G1
 Status:     current; refines D-2026-10-13-i (generic definitions belong to implementation files,
             not to theory files)
+
+D-2026-10-13-k  The reflections of the plan from zero enter the principles, as five proposed
+                clauses: L2.6 (theory files and model files), L6.13 (an algorithm is written against
+                a theory, a functor), L6.14 (the import line names what enters with its theory),
+                L8.9 (everything has laws; data enters by a check) and L14.6 (the theory first, its
+                implementations after, as specimens).
+Author:     Luciano for bringing them in; the model for the clauses
+Quote:      "yo creo que algo de estas reflexiones deberia retropermear en principles no?"
+            "Si, escribilo"
+Source:     chat:f15ae1b6:2179
+            chat:f15ae1b6:2196
+Kind:       principles (L2, L6, L8, L14). For P13 (they guide the theories about to be written)
+Status:     current; the five clauses proposed, his mark pending

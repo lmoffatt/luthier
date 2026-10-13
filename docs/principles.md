@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 f8c90be181b5, commit 4b8ed33 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 a339bf8cce6d, commit ee8e9ad (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -126,9 +126,13 @@ demanded).
   language; a theoretical module (types, functions, laws, no values) is a module of holes. [settled]
 - L2.5 (His words) A declared name is assumed to have its declared type, and its use where that type
   is incompatible is an error (spec 4.R1, the checker). [settled]
-References: spec 4.R1.
+- L2.6 The theoretical module of clause 4 is a file of its own: a theory file holds types,
+  declarations and laws, and is what the checker reads; each model of it, or each algorithm written
+  against it, lives in a file of its own, read only when a demand needs it and certified against the
+  theory. What a file imports has its theory in a theory file (D-2026-10-13-i, -j). [proposed]
+References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
-Status: settled.
+Status: settled; clause 6 proposed (D-2026-10-13-i, -j).
 
 **L3. Equality has levels and belongs to the object.**
 From: G0 (the identity type and its levels) with G2 (under cost, the identity proposition acquires a
@@ -321,13 +325,20 @@ clause).
 - L6.12 An importer sees a module only through the theory it gives the module as type, so the
   module's representation stays private and another model of the same theory can take its place
   without the importer noticing; privacy is ascription, not a keyword (D-2026-10-13-c). [settled]
+- L6.13 An algorithm is written against a theory, never against a model: it is a functor that takes
+  any model of the theory, so each specimen can stand in for another, and it is certified per instance
+  unless a cited proof covers every model (D-2026-10-13-j). [proposed]
+- L6.14 An import line names what enters with its theory, `import "x.lut" M : T`, so the importer is
+  checked against `T` without reading `x.lut`, and the ascription of clause 12 happens there (Z5 of
+  the plan from zero, his mark pending). [proposed]
 Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
 there (clause 9).
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5.
 Rests on: O1 (the sensitivity), O2.
 Status: settled; statement in his words, 2026-10-12, with "specimens" and "along certified
 identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7 proposed; clause
-11 candidate, from L3; clause 12 settled (D-2026-10-13-c, -e).
+11 candidate, from L3; clause 12 settled (D-2026-10-13-c, -e); clauses 13 and 14 proposed
+(D-2026-10-13-j, Z5).
 
 **L7. The core is minimal, executable by hand, and its programs are data.**
 From: G0 (a type theory is a few rules whose judgments a person checks; a small trusted kernel) and
@@ -373,11 +384,15 @@ specification plan.
   keyword is surface syntax, and what it means is stated as a theory in Luthier (`match` and `data` by
   the laws of the kernel, `if` as a `match` on `Bool`); every other construct is a name of core or of
   a library, with named arguments for its options (D-2026-10-12-ab). [proposed]
+- L14.6 Of the two orders of bootstrapping, the theory comes first: Luthier's theories are written
+  in Luthier before any implementation, they are the authority, and the host's files and later the
+  Luthier implementations are their specimens, written after them and certified against them
+  (D-2026-10-13-h). [proposed]
 Rests on: O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
 version 0 in chat on 2026-10-12, to be specified in chapter 3.
 Status: his principle, stated in his words; the clauses are the model's wording, proposed, his mark
 pending; placed under G0 after L7 and numbered L14 until the next renumbering by document order
-(D-2026-10-12-v).
+(D-2026-10-12-v); clause 6 proposed (D-2026-10-13-h).
 
 ### Under G1, theory and model
 
@@ -404,10 +419,14 @@ From: G0 directly; the second clause is the step to G1.
   [proposed]
 - L8.8 Types are verified before they are constructed: Luthier starts from types by verification,
   and types by construction may come in later. [settled]
+- L8.9 Everything has laws, at the least those of its equality (D-2026-10-12-ak): there is no data
+  without them. What comes from the world enters as bytes or a `String`, whose laws are the kernel's,
+  and a check refines it once into its lawful type (spec 5.S9, 5.S12; D-2026-10-06-aa,
+  D-2026-10-13-j). [proposed]
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-j.
 Rests on: O1 (the bound in a certificate).
-Status: settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); "from a law" is his correction of
-2026-10-12.
+Status: settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); clause 9 proposed (D-2026-10-13-j);
+"from a law" is his correction of 2026-10-12.
 
 **L9. A law characterizes; a certifier produces its evidence, exact or statistical; and the
 certificate of identity is not the certificate of the law.**

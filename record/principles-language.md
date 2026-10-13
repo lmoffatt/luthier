@@ -490,13 +490,18 @@ L2.4   `extern` is the operation that inhabits a hole with a body in another lan
        [settled]
 L2.5   (His words) A declared name is assumed to have its declared type, and its use where that type
        is incompatible is an error (spec 4.R1, the checker). [settled]
-References: spec 4.R1
+L2.6   The theoretical module of clause 4 is a file of its own: a theory file holds types,
+       declarations and laws, and is what the checker reads; each model of it, or each algorithm
+       written against it, lives in a file of its own, read only when a demand needs it and
+       certified against the theory. What a file imports has its theory in a theory file
+       (D-2026-10-13-i, -j). [proposed]
+References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j
 Rests on:   O9 (the kind of a hole in the elaborated form, for the spec)
 Source:     Luciano, 2026-05-29 (dialogue:20260529T1400:tipos-no-definidos-y-forward-reference); the
             hole named 2026-09-29; `external` and the theoretical module 2026-10-10 (WhatsApp Ptt
             2026-10-10 at 17.41.53.md; WhatsApp Ptt 2026-10-10 at 17.25.23.md, 00:00 to 00:40); his
             annotation on draft 8, bcdac41
-Status:     settled
+Status:     settled; clause 6 proposed (D-2026-10-13-i, -j)
 History:    draft 0 (6d9dbd3): stated. draft 4 (c7c6396): the elaborated form records which of the
             five it is. draft 5 (5b1446c): `assumed` has one meaning. draft 6 (8809e20): an axiom is
             not a value. draft 9 (0636378): his words on a declared name's type. draft 10 (72cc7be,
@@ -840,6 +845,12 @@ L6.12  An importer sees a module only through the theory it gives the module as 
        module's representation stays private and another model of the same theory can take its place
        without the importer noticing; privacy is ascription, not a keyword (D-2026-10-13-c).
        [settled]
+L6.13  An algorithm is written against a theory, never against a model: it is a functor that takes
+       any model of the theory, so each specimen can stand in for another, and it is certified per
+       instance unless a cited proof covers every model (D-2026-10-13-j). [proposed]
+L6.14  An import line names what enters with its theory, `import "x.lut" M : T`, so the importer is
+       checked against `T` without reading `x.lut`, and the ascription of clause 12 happens there
+       (Z5 of the plan from zero, his mark pending). [proposed]
 Example:    γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
             there (clause 9)
 References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5
@@ -850,7 +861,8 @@ Source:     Luciano, 2022-06-28 (written:2022-06-28_luciano-code-style:choose-ef
             equivalencias-para-clasificar-y-separar-decoraciones)
 Status:     settled; statement in his words, 2026-10-12, with "specimens" and "along certified
             identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7
-            proposed; clause 11 candidate, from L3; clause 12 settled (D-2026-10-13-c, -e)
+            proposed; clause 11 candidate, from L3; clause 12 settled (D-2026-10-13-c, -e); clauses
+            13 and 14 proposed (D-2026-10-13-j, Z5)
 History:    draft 0 (6d9dbd3): stated. draft 2 (cd24137): stated as a quotient. draft 4 (c7c6396),
             D-2026-10-11-m: exact in the theory, a ball in the model; substitution only along a
             certified equivalence. draft 5 (5b1446c): a weighted graph, not a class; a lone
@@ -933,6 +945,10 @@ L14.5  (His words) Keyword or not, the semantics of every construct is expressib
        `data` by the laws of the kernel, `if` as a `match` on `Bool`); every other construct is a
        name of core or of a library, with named arguments for its options (D-2026-10-12-ab).
        [proposed]
+L14.6  Of the two orders of bootstrapping, the theory comes first: Luthier's theories are written
+       in Luthier before any implementation, they are the authority, and the host's files and later
+       the Luthier implementations are their specimens, written after them and certified against
+       them (D-2026-10-13-h). [proposed]
 Rests on:   O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
             version 0 in chat on 2026-10-12, to be specified in chapter 3
 Quote:      "necesitamos una teoria de librerias, la iremos haciendo a medida que la necesitemos.
@@ -949,7 +965,7 @@ Source:     record/plan-spec-2026-10-12-decisions.md, his comment on D8 (a066adc
             (generators are values)
 Status:     his principle, stated in his words; the clauses are the model's wording, proposed, his
             mark pending; placed under G0 after L7 and numbered L14 until the next renumbering by
-            document order (D-2026-10-12-v)
+            document order (D-2026-10-12-v); clause 6 proposed (D-2026-10-13-h)
 History:    draft 11 (2026-10-12): new, on his comments on the specification plan (D8) and his
             request in chat; the decisions it already guided: D8 of the spec plan, W5's restatement,
             the decision to put `Program` and `Term` as data in version 0.
@@ -981,11 +997,16 @@ L8.7   Where the law is into `Cost`, the certificate records the bound it observ
        [proposed]
 L8.8   Types are verified before they are constructed: Luthier starts from types by verification,
        and types by construction may come in later. [settled]
+L8.9   Everything has laws, at the least those of its equality (D-2026-10-12-ak): there is no data
+       without them. What comes from the world enters as bytes or a `String`, whose laws are the
+       kernel's, and a check refines it once into its lawful type (spec 5.S9, 5.S12;
+       D-2026-10-06-aa, D-2026-10-13-j). [proposed]
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-j
 Rests on:   O1 (the bound in a certificate)
 Source:     Luciano, 2022-08-03 (written:2022-08-03_haskell:proposicion-que-cada-tipo-cumple);
             restated 2026-05-26 (day:2026-05-26:tipos-como-conceptos-y-proposiciones)
-Status:     settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); "from a law" is his correction
+Status:     settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); clause 9 proposed
+            (D-2026-10-13-j); "from a law" is his correction
             of 2026-10-12
 History:    draft 1 (5769005): stated. draft 4 (c7c6396): one judgment, structural; the certificate
             carries the grade and the worst cost; what leaves the program carries a certificate
