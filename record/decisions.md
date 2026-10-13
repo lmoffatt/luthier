@@ -2226,7 +2226,8 @@ D-2026-10-13-t  The laws of role of the core's `data` (L2.7, 4.R3): `Bool` has `
                 operations); `Unit` is the terminal object (one map into it from every type) and
                 `Empty` the initial one (one map out of it to every type). They are stated in
                 `kernel_laws.lth` (step 2.1 of the plan from zero). The model's reading of "first"
-                is initial.
+                is initial. `List` is the free monoid (`nil` the unit of `append`, associative;
+                `fold` gives `cons` its role), the model's proposal, accepted ("Si, dale").
 Author:     Luciano
 Quote:      "Bool tiene not, and y todas las leyes booleanas, Nat tiene las suyas. Unit y Empty son first y terminal object"
 Source:     chat:da165104:3712
