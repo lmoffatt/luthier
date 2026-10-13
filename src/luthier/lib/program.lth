@@ -246,24 +246,60 @@ violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
   anyAct (fn a { match a { define x bs t b -> anyUnknown p (concat (dOf p a) (bOf p a)) ; _ -> false } }) (actsNamed p n)
 
 -- 4.R3: a predicate touches what it is over: every label of a record with a law, the variables of
--- a subtype's pattern; and (L2.7, D-2026-10-13-p) every constructor of a `data` is mentioned by
--- some law. A law is read here as a definition whose declared type is `Bool`, until typing (§4)
--- can say which definitions are laws; whether the law states the constructor's role, and not
--- only lists it, a test cannot decide (4.S19 reports it).
+-- a subtype's pattern (a pattern that binds nothing constrains nothing: `{ _ : T | true }`), the
+-- parameter of a lambda predicate; every field of a theory declared by its record and defined by
+-- a conjunction of laws; and (L2.7, D-2026-10-13-p) every constructor of a `data`, mentioned by
+-- some law. A law is a definition a theory claims: one named in the `&`-conjunction that defines
+-- a theory (4.S14), not any definition at `Bool`, which would count helpers and miss laws at
+-- `Failures E` or with parameters (review of layers 0-1, B). Whether the law states the
+-- constructor's role, and not only lists it, a test cannot decide (4.S19 reports it). A rule
+-- violated by any constructor without such a law rejects (D-2026-10-13-aa, Q3).
 untouched (k : List String) (labels : List String) (law : Surface) : Bool :=
   match labels { nil -> false ; cons l rest -> not (member l (namesIn k law)) or untouched k rest law }
 predicateUntouched (k : List String) (t : Surface) : Bool := match t {
   record fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
-  subtype q a law -> untouched k (patternBinds k q) law ;
+  subtype q a law -> (match patternBinds k q { nil -> true ; vs -> untouched k vs law }) ;
+  lambda ps items e -> untouched k (paramsBind k ps) (block items e) ;
   _ -> false ;
 }
-lawNames (p : SurfaceProgram) : List String := match p { nil -> nil ; cons a rest -> match a {
-  define x bs t b -> (match t { just (name "Bool") -> concat (bOf p a) (lawNames rest) ; _ -> lawNames rest }) ;
-  _ -> lawNames rest } }
+-- the names a conjunction of laws claims: each conjunct's head name
+conjuncts (t : Surface) : List String := match t {
+  binop o l r -> if o == "&" then concat (conjuncts l) (conjuncts r) else nil ;
+  app f x -> conjuncts f ;
+  name s -> [s] ;
+  _ -> nil ;
+}
+isConjunction (t : Surface) : Bool := match t { binop o l r -> o == "&" ; _ -> false }
+-- the definitions that define a theory by laws: a conjunction, or the definition of a name
+-- declared as a theory (`T : { ... }` then `T := L`)
+theoryHeads (p : SurfaceProgram) : List SurfaceAct := match p { nil -> nil ; cons act rest -> match act {
+  define x bs t b -> (match b { termBody u -> if isConjunction u or isDeclared p x then cons act (theoryHeads rest) else theoryHeads rest ;
+                                _ -> theoryHeads rest }) ;
+  _ -> theoryHeads rest } }
+claimedLaws (p : SurfaceProgram) : List String := claimedBy (theoryHeads p)
+claimedBy (hs : List SurfaceAct) : List String := match hs { nil -> nil ;
+  cons h rest -> concat (match h { define x bs t b -> (match b { termBody u -> conjuncts u ; _ -> nil }) ; _ -> nil }) (claimedBy rest) }
+-- the names the claimed laws' bodies mention
+lawNames (p : SurfaceProgram) : List String := lawBodies p (claimedLaws p) p
+lawBodies (p : SurfaceProgram) (laws : List String) (acts : SurfaceProgram) : List String := match acts { nil -> nil ;
+  cons act rest -> match act {
+    define x bs t b -> if member x laws then concat (bOf p act) (lawBodies p laws rest) else lawBodies p laws rest ;
+    _ -> lawBodies p laws rest } }
 anyUnclaimed (p : SurfaceProgram) (cs : List String) : Bool :=
   match cs { nil -> false ; cons c rest -> not (member c (lawNames p)) or anyUnclaimed p rest }
+-- a field of a declared theory is touched when a claimed law reads it as `m.field`; `nameSuffix`
+-- gives the part after the last `.` (a function of core's `String`, declared until core names it)
+nameSuffix : String -> String
+suffixes (ns : List String) : List String := match ns { nil -> nil ; cons n rest -> cons (nameSuffix n) (suffixes rest) }
+fieldsOfDeclared (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons act rest -> match act {
+  declare x bs t -> if x == n then (match t { record fs law -> fieldLabels fs ; _ -> nil }) else fieldsOfDeclared rest n ;
+  _ -> fieldsOfDeclared rest n } }
+untouchedFields (p : SurfaceProgram) (n : String) : Bool :=
+  isDeclared p n and isDefined p n and anyNotIn (fieldsOfDeclared p n) (suffixes (lawNames p))
+anyNotIn (xs ys : List String) : Bool := match xs { nil -> false ; cons x rest -> not (member x ys) or anyNotIn rest ys }
 violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (fn a { match a {
+  untouchedFields p n
+  or anyAct (fn a { match a {
     define x bs t b -> (match b { termBody u -> predicateUntouched (constructors p) u ;
                                   dataBody cs -> anyUnclaimed p (pairNames cs) ; _ -> false }) ;
     _ -> false } }) (actsNamed p n)
@@ -302,9 +338,39 @@ violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
 -- 4.R7: an alias is neither declared nor defined
 violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclared p n or isDefined p n)
 
--- 4.R12 at the top level: `:=` defines once (a `<-` there does not parse, 2.R5). Inside blocks,
--- `:=` of a name already bound and `<-` of a name bound with `:=`: todo, a walk of the bodies.
-violatesR12 (p : SurfaceProgram) (n : String) : Bool := count n (definedNames p) >= 2
+-- 4.R12: `:=` defines once, at the top level and in blocks: a `:=` of a name already defined in
+-- an enclosing scope is an error, and so is a `<-` of a name first bound with `:=`; a parameter of
+-- the enclosing definition, or of a lambda, may be rebound (2.S17; review of layers 0-1, B)
+violatesR12 (p : SurfaceProgram) (n : String) : Bool :=
+  count n (definedNames p) >= 2
+  or anyAct (fn act { match act {
+       define x bs t b -> (match b { termBody u -> blockFault (actNames p) (binderBound bs) u ; _ -> false }) ;
+       _ -> false } }) (actsNamed p n)
+-- `defined`: the names bound with `:=` in scope; `params`: parameters, which `<-` may rebind
+blockFault (defined params : List String) (t : Surface) : Bool := match t {
+  block items e -> itemsFault defined params items e ;
+  lambda ps items e -> itemsFault defined (concat (paramsBind nil ps) params) items e ;
+  app f x -> blockFault defined params f or blockFault defined params x ;
+  binop o l r -> blockFault defined params l or blockFault defined params r ;
+  neg x -> blockFault defined params x ; quoted x -> blockFault defined params x ;
+  namedArg y x -> blockFault defined params x ; proj x y -> blockFault defined params x ;
+  ifThen c x m -> blockFault defined params c or blockFault defined params x
+                  or (match m { nothing -> false ; just y -> blockFault defined params y }) ;
+  matchOf s arms -> blockFault defined params s or armsFault defined params arms ;
+  tuple ts -> anyFault defined params ts ; list ts -> anyFault defined params ts ;
+  recordValue kvs -> anyFault defined params (pairValues kvs) ;
+  _ -> false ;
+}
+itemsFault (defined params : List String) (items : List Item) (e : Surface) : Bool := match items {
+  nil -> blockFault defined params e ;
+  cons it rest -> match it {
+    bind x v -> member x defined or blockFault defined params v or itemsFault (cons x defined) params rest e ;
+    rebind x v -> member x defined or blockFault defined params v or itemsFault defined (cons x params) rest e } }
+armsFault (defined params : List String) (arms : List (SurfacePattern * Surface)) : Bool :=
+  match arms { nil -> false ; cons (q, b) rest -> blockFault defined params b or armsFault defined params rest }
+anyFault (defined params : List String) (ts : List Surface) : Bool :=
+  match ts { nil -> false ; cons x rest -> blockFault defined params x or anyFault defined params rest }
+pairValues (kvs : List (String * Surface)) : List Surface := match kvs { nil -> nil ; cons (k, v) rest -> cons v (pairValues rest) }
 
 -- 4.S14: a law no type claims defines nothing; it is a branch, and 4.R2 applies to it, so it is
 -- reported, not rejected (§6; review of layers 0-1, B). Read, as in 4.R3, as a definition at
