@@ -1,9 +1,10 @@
 # Luthier from zero: the execution
 
-Draft 0, 2026-10-13, at 23792d3. Written for the sessions that carry it out, including one with no
+Draft 1, 2026-10-13 (draft 0 at 23792d3; draft 1 after the review of the first code, on
+D-2026-10-13-p to -r). Written for the sessions that carry it out, including one with no
 memory of the chat: everything it needs is in files, and the status lines below are updated at each
-step. It rests on D-2026-10-13-h and on Z1 to Z7 of `plan-from-zero-2026-10-13-decisions.md`;
-until Luciano marks them, every step assumes them as recommended and says so in its commit.
+step. It rests on D-2026-10-13-h and on Z1 to Z9 of `plan-from-zero-2026-10-13-decisions.md`, all marked
+by Luciano.
 
 ## Status
 
@@ -34,6 +35,10 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 - 2026-10-13: round 2's replies; his principle L2.7, a definition is a concept (D-2026-10-13-p);
   draft 3 (14cff68): no enumerations, the precedence table, wf exact; round 3 prepared. Next:
   round 3 if he sends it, then the parser (1.2).
+- 2026-10-13: round 3's replies (d81e7bc, 59ef714, 429863a, dfae66a): only local defects, so no
+  round 4. D-2026-10-13-q (2.S1 escapes, 2.S4 layout readings, `_` decided), D-2026-10-13-r (Z9:
+  the session writes the theories, agents or external models the specimens, one external round
+  per layer). Plan draft 1. Next: draft 4 of the three files (step 1.1.c), then 1.2.
 
 ## Rules for every step
 
@@ -47,6 +52,20 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 - From step 1 on, every theory passes the parser; from step 4 on, the checker.
 - An item of `docs/spec/` moves to `[implemented]` only when its Python specimen runs it and its
   programs in `tests/spec/` pass.
+- Who writes (Z9, D-2026-10-13-r): the session writes every theory; Sonnet agents or external
+  models write the Python specimens and fenced mechanical tasks. An external model gets a brief
+  and a bundle that Luciano sends; its reply is committed verbatim, read whole, checked, and only
+  then integrated. Choose the external route when the Claude quota is short.
+- Review: when a layer's theories are written, one round of the four external models (the
+  prompt and bundle as in `record/IA/first-code-review-2026-10-13/`), its findings summarized for
+  Luciano before anything is acted on; further rounds until one finds only local defects.
+- The pattern of a theory, from the first three files: a theory is a record type with its
+  operations as fields, its laws over a model `(m : T)`, and `T := Law1 & ...`; a parameterized
+  theory repeats its binders. A model is a named value in a `.lut`. Every constructor of a `data`
+  has a law of its role (L2.7); an observer that only lists constructors does not count. When the
+  laws are meant to determine a function, the file states the domain on which they do and the
+  argument. A law quantifies over the subtype it means, with its generator, never over a type
+  with an implication whose premise random cases rarely meet (7.S12, L9.6).
 - Agents: Sonnet, in a worktree, with a brief from `record/spec-brief-template.md` adapted (goal,
   the chapters and items to state, the theories it may cite, what not to touch, the parser or
   checker that closes it, the report). The worktree starts at an older commit; the agent
@@ -70,24 +89,45 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 
 ## Step 1. The grammar and the parser (Z3; layer 0)
 
-1. `src/luthier/lib/grammar.lut`: chapter 2 as a theory, the surface syntax as `data` (L14),
-   with the keywords of 2.S21 and `W`, the import of Z5, blocks (2.S17), the translations of §4.
-   By the session.
-2. *Agent.* `src/luthier/parse.py`: a parser for that grammar, syntax only, producing the surface
-   tree; `luthier parse files` prints errors with lines; tests with the examples of chapter 2.
-   It is the specimen of `grammar.lut`, certified against it once the checker exists.
+1. The grammar, by the session.
+   a. Done: `src/luthier/lib/ebnf.lth` (EBNF grammars as data, `Derives`, `Recognizer`),
+      `src/luthier/lib/ebnf_model.lut` (`backtrack`), `src/luthier/lib/grammar.lth` (chapter 2 as
+      a theory: the surface tree, `luthierSyntax`, `Grammar` with its laws), draft 3, reviewed in
+      three rounds.
+   b. Spec edits from round 3, before the files: 2.S8 (an open form is the last operand of its
+      term, nothing follows it), 2.S9 (the stale two-names sentence; a parenthesized lambda
+      parameter takes two or more patterns), 2.S11 (the nearest-`if` rule is the parser's; the
+      printer parenthesizes), 2.S21 (only the grammar's literals are reserved), 7.S3 (on a
+      recursive `data` the size bounds the depth, [proposed]).
+   c. Draft 4 of the files on round 3: `endsInOpenIf` out of `wf`, into a law of the printer; the
+      `->`/`&` chain split so an open form ends its term, with a law; `RoundTrip` and
+      `LiteralsAreNotNames` over subtypes, the second exhaustive over `litsOf luthierSyntax`; a law
+      that a word outside the literals lexes as a name; `literalLexes` by the shape of the
+      literal; `NonNegativeFloat` finite; the cases Claude listed (clauses of several patterns,
+      `\ (a b : A)`, `{ _ : T | p }`, `lexFailed`); the uniqueness sentences; the reply to round 3.
+   d. Later, before the parser is certified: the lexer as an `Ebnf` over characters, so that
+      `lex` is characterized by a grammar and not by cases.
+   e. A test that chapter 2's EBNF (2.S9) and `luthierSyntax` agree, until the chapter's EBNF is
+      generated from the value (R6 of round 2).
+2. *Agent or external model.* `src/luthier/parse.py`: a parser for `luthierSyntax`, syntax only,
+   producing the surface tree of `grammar.lth`; `luthier parse files` prints errors with lines;
+   tests with the case laws of `grammar.lth` and the three files themselves. It is the specimen of
+   `Grammar`, certified against it once the checker and the generators exist (step 5); until then
+   the case laws are its tests.
 
 ## Step 2. The kernel's theories (layer 0, by the session)
 
-1. `src/luthier/lib/kernel_laws.lut`: the laws every structure satisfies by construction (3.S36),
+1. `src/luthier/lib/kernel_laws.lth`: the laws every structure satisfies by construction (3.S36),
    with the laws of structural `==` (reflexive, symmetric, transitive, substitutive;
    D-2026-10-12-ak).
-2. `src/luthier/lib/term.lut`: `Term`, `Pattern`, `Act`, `Program` as `data` (3.S29),
+2. `src/luthier/lib/term.lth`: `Term`, `Pattern`, `Act`, `Program` as `data` (3.S29), each
+   constructor's role given by the laws of `reduce` (L2.7), as `Derives` gives `Rhs` its roles;
    alpha-equivalence (3.S31), the canonical form (3.S34), substitution, `reduce` with beta, delta,
    iota, prim, extern (3.S33, §4 of chapter 3), `quote` and `eval` (3.S32).
-3. Both pass the parser.
+3. Both pass the parser. Then the external review of layer 0 (`grammar.lth` was reviewed already).
+4. The translation table of 2.S12, surface tree to `Term`, in `term.lth` or its own theory.
 
-## Step 3. The checker's theories (layer 1, agents in parallel)
+## Step 3. The checker's theories (layer 1, by the session, Z9)
 
 1. `src/luthier/lib/program.lut`: `WellFormed : Program -> Failures E` with one law per rule of
    chapter 4 (4.R1 to 4.R13, 4.R14 for `W` with D4 and D8, 4.R11, 4.S17, 4.S23, 4.S24), each law
@@ -98,13 +138,13 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 3. `src/luthier/lib/checks.lut`: `Failures E`, the projections, composition (5.S9 to 5.S11).
 4. `src/luthier/lib/library.lut`: a file as a record type (12.S1), modules, the import of Z5, core
    enclosing every file, laziness (12.S21), ascription (L6.12).
-5. All pass the parser; the session reads each whole and reconciles names across them.
+5. All pass the parser; the names are reconciled across them; then the external review of layer 1.
 
 ## Step 4. The Python checker and evaluator (layers 0 and 1)
 
-1. `src/luthier/kernel.py` (terms and reduction, the specimen of `term.lut`) and
-   `src/luthier/check.py` (the specimen of `program.lut`), by the session; `luthier check files`.
-2. *Agent.* Rewrite the 50 programs of `tests/spec/v0.1/` into the new syntax in `tests/spec/`,
+1. `src/luthier/kernel.py` (terms and reduction, the specimen of `term.lth`) and
+   `src/luthier/check.py` (the specimen of `program.lth`), by the session or an agent with a brief; `luthier check files`.
+2. *Agent or external model.* Rewrite the 50 programs of `tests/spec/v0.1/` into the new syntax in `tests/spec/`,
    each keeping its rule and its `-- expect:` line; `tests/test_spec.py` anew.
 3. The theories of steps 1 to 3 pass the checker; the programs pass; the items of chapters 2 to 4
    flip to `[implemented]` as their programs pass.
@@ -112,23 +152,25 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 
 ## Step 5. Evidence (layer 2)
 
-1. *Agents.* Two cost types, `Distance` for the values of laws and `Evidence` for what samples
+1. *By the session* (Z9). Two cost types, `Distance` for the values of laws and `Evidence` for what samples
    give (D-2026-10-13-m), with the interface of 6.S5 split between them and refined here.
    `src/luthier/lib/certification.lut` (6.S16: `CostAlgebra C` with its six laws,
    `Certificate C`, `grade`, `transport`, `compose`, `serves`); `src/luthier/lib/cost.lut`, a first
    model (`⊕` the sum over [0, ∞]); `src/luthier/lib/test.lut` (7.S20, `TestSpec` of D9) and
-   `src/luthier/lib/generators.lut` (7.S1 to 7.S8).
-2. Their Python specimens: the certifier (certificates by hash of the canonical cone, 6.S8, with the
+   `src/luthier/lib/generators.lut` (7.S1 to 7.S8, with sized generators of recursive `data`).
+   Then the external review of layer 2.
+2. *Agents or external models.* Their Python specimens: the certifier (certificates by hash of the canonical cone, 6.S8, with the
    chain kept), the tester, the generators; `luthier test`, `luthier certify`; the statistical laws
    (7.S17 to 7.S19).
 3. Milestone `v0.3`.
 
 ## Step 6. Execution (layer 3)
 
-1. *Agents.* `src/luthier/lib/demand.lut` (8.S1, 8.S2), `src/luthier/lib/plan.lut` (8.S4, 8.S8,
-   8.S11), `src/luthier/lib/world.lut` with `print` (10.S5, 10.S13, D8),
-   `src/luthier/lib/number_model.lut` and `src/luthier/lib/rational.lut` (11).
-2. Their Python specimens: `run` (strict, 12.S17), `eval`, `session`, the result store keyed by what
+1. *By the session* (Z9). `src/luthier/lib/demand.lut` (8.S1, 8.S2), `src/luthier/lib/plan.lut`
+   (8.S4, 8.S8, 8.S11), `src/luthier/lib/world.lut` with `print` (10.S5, 10.S13, D8),
+   `src/luthier/lib/number_model.lut` and `src/luthier/lib/rational.lut` (11); then the external
+   review of layer 3.
+2. *Agents or external models.* Their Python specimens: `run` (strict, 12.S17), `eval`, `session`, the result store keyed by what
    the cone reads; externs read when a demand reaches them, validated at the first action (10.S8 to
    10.S10), calling the host modules kept in step 0.
 3. Milestone `v0.4`.
@@ -142,7 +184,7 @@ redone by Luciano.
 ## If the session that reads this has no memory of the chat
 
 The specification in `docs/spec/` is the authority; `record/decisions.md` holds why, the latest of
-2026-10-13 (-a to -h). The old interpreter is at the tag `v0.1-final` and is not a source: read it
+2026-10-13 (-a to -r). The old interpreter is at the tag `v0.1-final` and is not a source: read it
 only to learn what a host function did. Luciano reads Spanish in chat; written material is in
 English. He runs the scripts that process data; the model may run the lints, the parser, `luthier
 check` and `luthier certify` here.
