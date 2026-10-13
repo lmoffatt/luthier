@@ -1948,3 +1948,22 @@ Kind:       language and tool (spec 1, 5, 6, 8, 9, 10; principles L11.7; scripts
             For P13, P8
 Status:     current; left proposed because the document did not show them: the method of 8.S1
             (by hand or derived), 8.S13 (a session line re-evaluates only what changed)
+
+D-2026-10-13-h  Luthier starts again from zero. The Python interpreter of v0.1 was written for
+                another Luthier, the one before the specification, and is not modified into the new
+                one. The order: first the theories of Luthier, written in Luthier, for everything
+                the specification states; then the Python files that implement them, each a
+                specimen certified against its theory; and, where the kernel can say it, Luthier
+                implementations too (L14, the two orders of bootstrapping).
+Author:     Luciano
+Quote:      "Yo me olvidaria de todo el codigo python que tenemos escrito"
+            "fue escrito con otro Luthier, empecemos de cero."
+            "Y primero hay que escribir las teorias de Luthier para todo."
+            "Y luego los archivos de python que lo hacen y cuando se pueda los luthier tambien."
+Source:     chat:f15ae1b6:2032
+            chat:f15ae1b6:2050
+            chat:f15ae1b6:2050
+            chat:f15ae1b6:2050
+Kind:       method and architecture (L14, L7; the plan of 2026-10-13). For L14, P16
+Status:     current; supersedes the five phases of record/plan-implementation-2026-10-13-execution.md
+            (draft 1), whose D4, D8 and D9 still apply; the new plan to be written
