@@ -2275,3 +2275,23 @@ Source:     chat:52b10bff:3663
             chat:52b10bff:3676
 Kind:       spec (2.S4, 2.S8, 2.S9, 2.S10, 2.S12, 3.S3, 3.S4, 4, 11) and grammar.lth
 Status:     current; reverses the proposed `>` rule of 4bc59f4
+
+D-2026-10-13-x  Answers on layers 0 and 1 (record/questions-for-luciano-2026-10-13-layers-0-1.md).
+                Q1: a record is a product whose projections are named, `.x` and `.y` the arrows
+                `first` and `second` of the categorical product, so they are part of the product;
+                a labeled sum likewise, its labels the injections. The kernel gains a record former
+                whose names are part of the term, with the laws of the product on named projections
+                (as `PairFst`, `PairSnd`, `Pairing`), and the sum its named injections. Q3: helper
+                functions in theory files keep being reported, not rejected, since everything is to
+                have an underlying law. Q4: `Nat`'s laws accepted as written (0381962). Q2 (blocks
+                and the notation of lambdas) is under discussion.
+Author:     Luciano (Q1 his framing; the record former the sessions' recommendation)
+Quote:      "en teoria de categorias un producto tiene las flechas first y second, aqui las flechas
+            serian   .x  y .y  o sea forman parte del product."
+            "yes because we want that everything has an underlying law."
+            "Ok"
+Source:     luthier@39b0fa5:record/questions-for-luciano-2026-10-13-layers-0-1.md:20
+            luthier@39b0fa5:record/questions-for-luciano-2026-10-13-layers-0-1.md:51
+            luthier@39b0fa5:record/questions-for-luciano-2026-10-13-layers-0-1.md:67
+Kind:       spec (3.S3, 2.S12) and the theories term.lth, kernel_laws.lth, program.lth
+Status:     current; Q2 open
