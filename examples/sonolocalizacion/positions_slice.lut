@@ -1,0 +1,67 @@
+-- positions_slice.lut: the part of sonolocalización's positions.lut that validate_graph.lut needs:
+-- positions as one vector, the horizontal distance between two nodes, its Jacobian, the layout of
+-- the tables as that vector, and the design of a graph.
+--
+-- Ported 2026-10-14 by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/slice-port-2026-10-14/prompt.md, from prototipo-cero/luthier/positions.lut of
+-- sonolocalización at its commit 5ffc36ef70e16e11182bc09e4a927c381e35df1c (v0.1 syntax), lines
+-- 1-10, 17-79 for the definitions kept. Left out: `PositionsOf`, `pairDistances`, `nodesOf`,
+-- `positionsModel` (the mean model, which needs probability.lut, not ported), `unflatten` and
+-- `layout` (the `Iso` certified by distance_graph_python.lut). The changes from v0.1: `fn` for
+-- `\` (2.S9, D-2026-10-13-y), `vec`/`mat` for the tuple literals `(n, \ k { ... })` (arrays.lth
+-- §1: a vector is a record, not a pair, D-2026-10-13-x), a block for the chain of one-arm
+-- `match`es in `distanceJacobian` (2.S17, 2.S21), named imports (12.S22). The names are v0.1's.
+--
+-- From positions.lut's header, kept: positions of N nodes in space are one vector, node by node:
+-- entry 3 n + a is coordinate a of node n, so the length is a multiple of three (Positions). The
+-- distance between two nodes is the one the tape measures, on the floor between the feet of the
+-- stands (Luciano, 2026-10-06: every distance of experiment zero was measured on the floor): the
+-- horizontal distance, of the first two coordinates. The heights, coordinate 2, enter the prior
+-- only; no distance moves them. The tables keep the positions as a 3 x N matrix, coordinate by
+-- node; `flatten` makes it the vector.
+
+import "arrays.lth" Vec Mat MatRows vec mat forallBelow distance
+
+-- positions as one vector, three coordinates for each node
+Positions : U := { p : Vec Float64 | p.n mod 3 == 0 }
+
+-- the nodes of the positions p, and node n as a point of the space
+Node (p : Positions) = Fin (p.n / 3)
+point (p : Positions) (n : Node p) : Vec Float64 := vec Float64 3 (fn a { p.f (3 * n + a) })
+
+-- the foot of a point, one with at least two coordinates: the two horizontal ones, where the tape runs
+foot (v : { w : Vec Float64 | 2 <= w.n }) : Vec Float64 := vec Float64 2 (fn a { v.f a })
+
+-- the distance between nodes i and j: the horizontal one, the metric of the floor
+pairDistance (p : Positions) (i j : Node p) : Float64 := distance (foot (point p i)) (foot (point p j))
+
+-- pairs of nodes of p: the first and the second node of each, as two vectors of one length
+Pairs (p : Positions) (i : Vec (Node p)) : U := { j : Vec (Node p) | j.n == i.n }
+
+-- the pairs whose two nodes are apart in p: where the distance between them has a derivative
+Separated (p : Positions) (i : Vec (Node p)) (j : Pairs p i) : Bool := forallBelow i.n (fn k { pairDistance p (i.f k) (j.f k) > 0.0 })
+SeparatedPairs (p : Positions) (i : Vec (Node p)) : U := { j : Pairs p i | Separated p i j }
+
+-- The Jacobian of the distances with respect to the positions, K x 3N, column 3 n + a for
+-- coordinate a of node n: on the horizontal coordinates of node i k the unit vector on the floor
+-- from node j k to node i k, on those of node j k its negative, zero on every height and elsewhere.
+-- It exists where the pairs are apart, which its type asks: each row divides by its distance. A
+-- row's nodes and distance are bound once for the row, outside the function of its column, so the
+-- distance is computed once per row and not once per entry.
+distanceJacobian (p : Positions) (i : Vec (Node p)) (j : SeparatedPairs p i) : Mat Float64 :=
+  mat Float64 i.n p.n (fn k {
+    a := i.f k
+    b := j.f k
+    h := pairDistance p a b
+    fn c {
+      if c mod 3 == 2 then 0.0
+      else if c / 3 == a then (p.f c - p.f (3 * b + c mod 3)) / h
+      else if c / 3 == b then (p.f c - p.f (3 * a + c mod 3)) / h
+      else 0.0 } })
+
+-- A design: n nodes and the pairs measured among them, node i k with node j k.
+PairsAmong (n : Int) (i : Vec (Fin n)) : U := { j : Vec (Fin n) | j.n == i.n }
+Design = { nodes : Nat, i : Vec (Fin nodes), j : PairsAmong nodes i }
+
+-- the 3 x N layout of the tables as the vector of positions
+flatten (m : MatRows 3) : Vec Float64 := vec Float64 (m.m * m.n) (fn c { m.f (c mod 3) (c / 3) })
