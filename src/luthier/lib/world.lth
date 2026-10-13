@@ -65,7 +65,7 @@ World (S : Concrete) : { read : S -> String -> Maybe String }
 -- An action's description: what it does to the representation, a function `S -> S * A`, with
 -- whether it concerns Luthier's own store (10.S6, `own`, from the declaration and not from the
 -- effect; what declares nothing is a world action, the safer reading) and the places it declares
--- it changes (10.S7). The token is used exactly once (D4): an action whose new token nobody uses is
+-- it changes or reads (10.S7; what `agreement` observes). The token is used exactly once (D4): an action whose new token nobody uses is
 -- not demanded; that is the checker's over blocks (program.lth), not a law here.
 Described (S : Concrete) (A : U) (m : World S) : {
   describe : S -> S * A,
@@ -169,19 +169,22 @@ Console (S : Concrete) := PrintAppendsALine S & PrintChangesOnlyStdout S & ReadG
 -- ---------------------------------------------------------------- §5 Certifying a host action
 
 -- A host action is certified against its description along one chain of tokens (D-2026-10-13-a):
--- observe the representation, act once, observe again, and compare what the description says
--- with what the host did. Each token is used once. The protocol threads the token, so it is an
+-- observe the representation at the places the action declares, act once, observe them again, and
+-- compare what the description says with what the host did. Each token is used once. The
+-- observation takes the places, since the host cannot read the whole world: a representation
+-- stands for the world at the places observed (the coordinator's point on `files`: a read of a
+-- file not yet observed looked like a change). The protocol threads the token, so it is an
 -- action and not a law of this file: the certifier runs it, and its Bool is the evidence
 -- (`Evaluated`, laws.lth) for the law "the host agrees with its description" on that chain.
 -- the host's side of the console: the actions, routes to the host (world_model.lut), and the
 -- observation of the representation
 Host (S : Concrete) = {
-  observe : W -> W * S,
+  observe : W -> List String -> W * S,
   print : W -> String -> W * Unit,
   readFile : W -> String -> W * Maybe String,
 }
 agreement (S : Concrete) (A : Concrete) (m : World S) (o : Host S) (d : Described S A m) (host : Action A) (w0 : W) : W * Bool :=
-  match o.observe w0 { (w1, before) ->
+  match o.observe w0 d.places { (w1, before) ->
   match host w1 { (w2, x) ->
-  match o.observe w2 { (w3, after) ->
+  match o.observe w2 d.places { (w3, after) ->
     (w3, d.describe before == (after, x)) } } }

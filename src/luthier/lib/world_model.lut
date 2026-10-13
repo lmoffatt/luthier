@@ -2,9 +2,10 @@
 -- actions over it, and the host's actions as externs.
 --
 -- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1; draft 0 at 1f8c61c). The
--- representation `State` is what the host observes of the world in one run: the standard output
--- and the files read, each a place (10.S5: the library gives the representation and the
--- observations). `console` describes `print` and `readFile` over it, pure functions that world.lth's
+-- representation `State` is what the host observes of the world at the places it is asked for:
+-- the standard output, and the files at the paths observed (10.S5: the library gives the
+-- representation and the observations). `observe w places` reads those places from the world; a
+-- path with no file is absent from `files`, so `readFile` of it gives `nothing`. `console` describes `print` and `readFile` over it, pure functions that world.lth's
 -- laws test by sampling `State`; `host` is the actions themselves, routes to host functions
 -- (10.S8), certified against `console` by the protocol of world.lth §5 along one chain of tokens.
 
@@ -30,7 +31,7 @@ console : Console State := {
 }
 
 -- the host's actions, routes to Python: the token comes first and goes back unchanged (run.py
--- makes it once per run), the state is read by `observe`
+-- makes it once per run); `observe w places` reads the standard output and the files at `places`
 HostConsole = Host State
 host : HostConsole := {
   observe := extern "python:luthier.host.observe",
