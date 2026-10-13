@@ -26,7 +26,7 @@
 --
 --   §1 The data: `Constant`, `Pattern`, `Term`, `Act`, `Program` (3.S29 to 3.S31).     done
 --   §2 Names: free variables, renaming, alpha-equivalence as an object with the
---      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     todo
+--      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     done
 --   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               todo
 --   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  todo
 --   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternCall`, `HolesStay`,
@@ -98,3 +98,106 @@ Act : U := data {
 
 -- A program is its acts, a structure (3.S29); its role is the environment of `Delta`.
 Program = List Act
+
+-- ---------------------------------------------------------------- §2 Names
+
+-- definitions the laws need: names as lists, the free variables of a term, and the swap of two
+-- names everywhere in a term (binders included), the nominal way to rename without capture
+member (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or member x rest }
+remove (x : String) (xs : List String) : List String :=
+  match xs { nil -> nil ; cons y rest -> if x == y then remove x rest else cons y (remove x rest) }
+concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
+removeAll (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeAll rest (remove x ys) }
+
+patternVars (p : Pattern) : List String := match p {
+  PVar x -> [x] ; PWild -> nil ; PLit c -> nil ;
+  PCon c ps -> patternsVars ps ;
+  PPair a b -> concat (patternVars a) (patternVars b) ;
+  PInj l q -> patternVars q ;
+}
+patternsVars (ps : List Pattern) : List String :=
+  match ps { nil -> nil ; cons p rest -> concat (patternVars p) (patternsVars rest) }
+
+-- spec 3.S9, 3.S31: the variables a term mentions and does not bind. A `Hole` names a declaration,
+-- not a variable; a `Data` binds its own name in its constructors' types.
+freeVars (t : Term) : List String := match t {
+  Var x -> [x] ;
+  Lit c -> nil ; Universe -> nil ; World -> nil ; Extern r -> nil ; Primitive r -> nil ; Axiom -> nil ;
+  Hole x -> nil ;
+  Lam x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  Pi x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  Sigma x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  Subtype x a b -> concat (freeVars a) (remove x (freeVars b)) ;
+  App f a -> concat (freeVars f) (freeVars a) ;
+  Pair a b -> concat (freeVars a) (freeVars b) ;
+  Inj l a -> freeVars a ;
+  Match s arms -> concat (freeVars s) (armsFree arms) ;
+  Sum kvs -> pairsFree kvs ;
+  Data n cs -> remove n (pairsFree cs) ;
+}
+armsFree (arms : List (Pattern * Term)) : List String := match arms { nil -> nil ;
+  cons (p, b) rest -> concat (removeAll (patternVars p) (freeVars b)) (armsFree rest) }
+pairsFree (kvs : List (String * Term)) : List String :=
+  match kvs { nil -> nil ; cons (k, v) rest -> concat (freeVars v) (pairsFree rest) }
+
+swapName (x y n : String) : String := if n == x then y else if n == y then x else n
+swapPattern (x y : String) (p : Pattern) : Pattern := match p {
+  PVar n -> PVar (swapName x y n) ; PWild -> PWild ; PLit c -> PLit c ;
+  PCon c ps -> PCon c (swapPatterns x y ps) ;
+  PPair a b -> PPair (swapPattern x y a) (swapPattern x y b) ;
+  PInj l q -> PInj l (swapPattern x y q) ;
+}
+swapPatterns (x y : String) (ps : List Pattern) : List Pattern :=
+  match ps { nil -> nil ; cons p rest -> cons (swapPattern x y p) (swapPatterns x y rest) }
+swap (x y : String) (t : Term) : Term := match t {
+  Var n -> Var (swapName x y n) ;
+  Lam n a b -> Lam (swapName x y n) (swap x y a) (swap x y b) ;
+  Pi n a b -> Pi (swapName x y n) (swap x y a) (swap x y b) ;
+  Sigma n a b -> Sigma (swapName x y n) (swap x y a) (swap x y b) ;
+  Subtype n a b -> Subtype (swapName x y n) (swap x y a) (swap x y b) ;
+  App f a -> App (swap x y f) (swap x y a) ;
+  Pair a b -> Pair (swap x y a) (swap x y b) ;
+  Inj l a -> Inj l (swap x y a) ;
+  Match s arms -> Match (swap x y s) (swapArms x y arms) ;
+  Sum kvs -> Sum (swapPairs x y kvs) ;
+  Data n cs -> Data (swapName x y n) (swapPairs x y cs) ;
+  _ -> t ;
+}
+swapArms (x y : String) (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms { nil -> nil ;
+  cons (p, b) rest -> cons (swapPattern x y p, swap x y b) (swapArms x y rest) }
+swapPairs (x y : String) (kvs : List (String * Term)) : List (String * Term) :=
+  match kvs { nil -> nil ; cons (k, v) rest -> cons (k, swap x y v) (swapPairs x y rest) }
+
+-- Alpha-equivalence (3.S31, L3.3): two terms equal up to the names of their bound variables. A
+-- model says when; its laws: it is an object (kernel_laws.lth §1), carried by `alphaObject`, whose
+-- type owes the laws of `Object`; a free variable is its own name; a bound one may be renamed to a
+-- name fresh for the body; alpha-equal terms have one head and one set of free variables.
+Alpha : { alphaEq : Term -> Term -> Bool }
+alphaObject (a : Alpha) : Object Term := { eq := a.alphaEq }
+
+-- the head constructor of a term, so that equal heads can be compared
+head (t : Term) : String := match t {
+  Var x -> "Var" ; Lit c -> "Lit" ; Universe -> "Universe" ; World -> "World" ; Lam x a b -> "Lam" ;
+  App f a -> "App" ; Pi x a b -> "Pi" ; Sigma x a b -> "Sigma" ; Pair a b -> "Pair" ;
+  Match s arms -> "Match" ; Inj l a -> "Inj" ; Sum kvs -> "Sum" ; Data n cs -> "Data" ;
+  Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom -> "Axiom" ;
+  Hole x -> "Hole" ;
+}
+sameNames (xs ys : List String) : Bool := removeAll xs ys == nil and removeAll ys xs == nil
+
+-- a name and a term in which it is not free: the fresh names a binder may be renamed to; random
+-- names are almost always fresh, so drawing them is cheap
+Fresh : U := { y : String, t : Term | not (member y (freeVars t)) }
+AlphaPair (a : Alpha) : U := { s t : Term | a.alphaEq s t }
+
+FreeVariablesAreNames (a : Alpha) (x y : String) : Bool := a.alphaEq (Var x) (Var y) == (x == y)
+RenameBound (a : Alpha) (x : String) (ty : Term) (f : Fresh) : Bool :=
+  a.alphaEq (Lam x ty f.t) (Lam f.y ty (swap x f.y f.t))
+  and a.alphaEq (Pi x ty f.t) (Pi f.y ty (swap x f.y f.t))
+AlphaKeepsHead (a : Alpha) (p : AlphaPair a) : Bool := head p.s == head p.t
+AlphaKeepsFree (a : Alpha) (p : AlphaPair a) : Bool := sameNames (freeVars p.s) (freeVars p.t)
+-- a congruence: alpha-equal parts give alpha-equal wholes, stated on application and pairing
+AlphaCongruent (a : Alpha) (p q : AlphaPair a) : Bool :=
+  a.alphaEq (App p.s q.s) (App p.t q.t) and a.alphaEq (Pair p.s q.s) (Pair p.t q.t)
+
+Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent
