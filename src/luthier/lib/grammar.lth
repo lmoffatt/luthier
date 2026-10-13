@@ -1,8 +1,8 @@
 -- grammar.lth: chapter 2 of the specification, the grammar of Luthier, as a theory.
 --
--- Draft 3, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on two
+-- Draft 4, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on three
 -- rounds of review by four models (record/IA/first-code-review-2026-10-13) and Luciano's answers
--- D-2026-10-13-o and -p. Drafts 0 and 1 were by Claude Fable 5.1. Source: docs/spec/02-grammar.md;
+-- D-2026-10-13-o to -q. Drafts 0 and 1 were by Claude Fable 5.1. Source: docs/spec/02-grammar.md;
 -- by L14.6 and D-2026-10-13-p this file states the grammar and the chapter explains it (2.S9). A
 -- theory file (spec 12.S23): types, laws, and the definitions and the one value the laws need.
 --
@@ -21,17 +21,16 @@
 -- `luthierSyntax` takes as literals, the binary operators are the literals of its precedence
 -- levels, the token kinds are its categories, and the laws below give each its role.
 --
--- Additions of this file to the chapter, marked: a string's escapes `\"`, `\\`, `\n` (2.S1,
--- proposed there); `_` as a pattern atom, so that `cons _ rest` can be written; a trailing comma in
--- a list, beside the trailing separators D-2026-10-13-o allows.
+-- Additions of this file to the chapter: a string's escapes `\"`, `\\`, `\n` (2.S1) and `_` as a
+-- pattern atom, decided (D-2026-10-13-q); a trailing comma in a list, proposed in 2.S5.
 
 import "ebnf.lth" Ebnf WellFormedEbnf Rhs TokenView Derives derives litsOf catsOf litsOfNames
   memberString append eps lit cat ref seq alt opt rep
 
 -- ---------------------------------------------------------------- tokens (spec 2 §1)
 
--- A token: its kind, one of the categories of the grammar or "keyword", "symbol" or "newline"; its
--- text, a string keeping its quotes; its place. A record of what the lexer reports, an alias.
+-- A token: its kind, one of the categories of the grammar, "literal" (a word or symbol the grammar
+-- takes as a literal) or "newline"; its text, a string keeping its quotes; its place. A record of what the lexer reports, an alias.
 Token = { kind : String, text : String, line : Nat, column : Nat }
 
 tokenView (t : Token) : TokenView := { kind := t.kind, text := t.text }
@@ -45,7 +44,7 @@ LexResult = < lexed : List Token | lexFailed : LexError >
 
 -- spec 2.S1: a number is an integer or a double by its spelling (a point or an exponent makes a
 -- double); it has no sign, which is negation, so a literal is never negative. Roles: `LiteralTree`.
-NonNegativeFloat : U := { x : Float64 | 0.0 <= x }
+NonNegativeFloat : U := { x : Float64 | 0.0 <= x }   -- finite, as every Float64 (11.R1)
 Literal : U := data {
   intLit : Nat -> Literal ;
   floatLit : NonNegativeFloat -> Literal ;
@@ -158,7 +157,9 @@ isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es
 
 -- spec 2.S5, 2.S8 (the table of D-2026-10-13-p), 2.S9, 2.S10, 2.S16, 12.S22, as productions. The
 -- open forms are a `term` of their own and never an operand: they take the whole term to their
--- right, or stand on the right of `->` and `&`. Each level of the table is one nonterminal, a right
+-- right, or close a chain of `->` and `&`, and nothing follows them. So a chain of `->` comes in
+-- two kinds: `arrowTerm`, closed, which `&` may follow, and `arrowOpen`, ending in an open form,
+-- which nothing follows (Claude, round 3: `U -> (a : A) * b & C` had two trees). Each level of the table is one nonterminal, a right
 -- associativity a right recursion, a left one a repetition. A sum `< ... >` heads an application
 -- but is not an argument (2.S10). Its coercion to `WellFormedEbnf` owes that it has no left
 -- recursion and every nonterminal is defined, an obligation `test` discharges.
@@ -188,8 +189,10 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
       seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "*", lit "(", cat "name", lit ":", ref "term", lit ")"],
       seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "+", lit "(", cat "name", lit ":", ref "term", lit ")"],
       seq [lit "if", ref "term", lit "then", ref "term", opt (seq [lit "else", ref "term"])]] },
-  { lhs := "ampTerm",     rhs := seq [ref "arrowTerm", opt (seq [lit "&", alt [ref "openForm", ref "ampTerm"]])] },
-  { lhs := "arrowTerm",   rhs := seq [ref "orTerm", opt (seq [lit "->", alt [ref "openForm", ref "arrowTerm"]])] },
+  { lhs := "ampTerm",     rhs := alt [seq [ref "arrowTerm", opt (seq [lit "&", alt [ref "openForm", ref "ampTerm"]])],
+      ref "arrowOpen"] },
+  { lhs := "arrowTerm",   rhs := seq [ref "orTerm", opt (seq [lit "->", ref "arrowTerm"])] },
+  { lhs := "arrowOpen",   rhs := seq [ref "orTerm", lit "->", alt [ref "openForm", ref "arrowOpen"]] },
   { lhs := "orTerm",      rhs := seq [ref "andTerm", rep (seq [lit "or", ref "andTerm"])] },
   { lhs := "andTerm",     rhs := seq [ref "cmpTerm", rep (seq [lit "and", ref "cmpTerm"])] },
   { lhs := "cmpTerm",     rhs := seq [ref "addTerm", rep (seq [alt [lit "==", lit "/=", lit "<", lit "<=", lit ">", lit ">="], ref "addTerm"])] },
@@ -284,21 +287,15 @@ isEmptyViews (ts : List TokenView) : Bool := match ts { nil -> true ; cons t res
 -- ---------------------------------------------------------------- the trees a text can give
 
 -- `RoundTrip` and `ParsedIsWritten` quantify over the trees a text can give; `ok` says what a name
--- is (the lexer's names, `isName`). Two rules beyond shapes: a single labeled field carries no law
--- (that is a subtype), and the then-branch of an `if` with an `else` does not end in an `if` without
--- one, since the table gives that `else` to the nearest `if` (2.S11).
+-- is (the lexer's names, `isName`). One rule beyond shapes: a single labeled field carries no law
+-- (that is a subtype). Parentheses are not in the tree, so every tree of an `if` is written by
+-- some text: `if c then (if d then y) else b` gives the tree that 2.S11 denies to the text without
+-- them (GPT, Claude, round 3), and the printer writes them back (`PrintParenthesizes`).
 nonEmpty (A : U) (xs : List A) : Bool := match xs { nil -> false ; cons x rest -> true }
 atLeastTwo (A : U) (xs : List A) : Bool := match xs { nil -> false ; cons x rest -> nonEmpty A rest }
 allNames (ok : String -> Bool) (ss : List String) : Bool := match ss { nil -> true ; cons s rest -> ok s and allNames ok rest }
 namesCount (fs : List Field) : Nat := match fs { nil -> 0 ; cons f rest -> namesLength f.names + namesCount rest }
 namesLength (ss : List String) : Nat := match ss { nil -> 0 ; cons s rest -> 1 + namesLength rest }
-
-endsInOpenIf (t : Surface) : Bool := match t {
-  ifThen c a b -> match b { nothing -> true ; just e -> endsInOpenIf e } ;
-  pi xs a b -> endsInOpenIf b ; sigma xs a b -> endsInOpenIf b ;
-  binop o a b -> (o == "->" or o == "&") and endsInOpenIf b ;
-  _ -> false ;
-}
 
 wfPattern (ok : String -> Bool) (p : SurfacePattern) : Bool := match p {
   pWild -> true ; pLit l -> true ;
@@ -333,8 +330,7 @@ wf (ok : String -> Bool) (t : Surface) : Bool := match t {
   lambda ps items e -> nonEmpty LambdaParam ps and allParams ok ps and allItems ok items and wf ok e ;
   matchOf s arms -> wf ok s and allArms ok arms ;
   namedArg x a -> ok x and wf ok a ;
-  ifThen c a b -> wf ok c and wf ok a and maybeWf ok b
-                  and (b == nothing or not (endsInOpenIf a)) ;
+  ifThen c a b -> wf ok c and wf ok a and maybeWf ok b ;
   proj a x -> wf ok a and ok x ;
   quoted a -> wf ok a ;
 }
@@ -381,12 +377,18 @@ wfAct (ok : String -> Bool) (a : SurfaceAct) : Bool := match a {
 wfProgram (ok : String -> Bool) (p : SurfaceProgram) : Bool :=
   match p { nil -> true ; cons a rest -> wfAct ok a and wfProgram ok rest }
 
+-- The trees a text of model `g` can give, as a type, so that a law over them is not an implication
+-- whose premise a random tree rarely meets (7.S12; Claude, round 3). A test draws them with names
+-- from a census of names, not by filtering random trees (7.S6).
+WrittenProgram (d : Derives) (g : Grammar d) : U := { p : SurfaceProgram | wfProgram (isName d g) p }
+
 -- ---------------------------------------------------------------- the general laws
 
 -- The printer and the parser are inverse on the trees a text can give (2.S9, 2.S13). The printer
--- writes a projection as `(a).b`, a negation of a negation as `-(-a)`, a string with its escapes.
-RoundTrip (d : Derives) (g : Grammar d) (p : SurfaceProgram) : Bool :=
-  wfProgram (isName d g) p -> g.parse (g.print p) == parsed p
+-- writes a projection as `(a).b`, a negation of a negation as `-(-a)`, a string with its escapes,
+-- and parentheses wherever the table would read the text otherwise (`PrintParenthesizes`).
+RoundTrip (d : Derives) (g : Grammar d) (p : WrittenProgram d g) : Bool :=
+  g.parse (g.print p) == parsed p
 
 -- Parsing is canonical: printing a parsed text and parsing again changes nothing (2.S4, 2.S13).
 Canonical (d : Derives) (g : Grammar d) (s : String) : Bool :=
@@ -409,17 +411,25 @@ ErrorsHaveLines (d : Derives) (g : Grammar d) (s : String) : Bool :=
 
 -- ---------------------------------------------------------------- lexical laws (spec 2 §1)
 
--- The role of a reserved word (2.S21, L2.7): every word the grammar takes as a literal lexes as a
--- keyword and is never a name; every other literal lexes as one symbol.
+-- The role of a reserved word (2.S21, L2.7): every word or symbol the grammar takes as a literal
+-- lexes as one literal token of its own text, and so is never a name; the line break is the
+-- layout's. Checked on every literal of the grammar, not on random strings (Claude, round 3).
 literalLexes (d : Derives) (g : Grammar d) (w : String) : Bool :=
-  w == "\n" or viewsOf d g w == just [tv "keyword" w] or viewsOf d g w == just [tv "symbol" w]
-LiteralsAreNotNames (d : Derives) (g : Grammar d) (w : String) : Bool :=
-  memberString w (litsOf luthierSyntax) -> literalLexes d g w and not (isName d g w)
+  w == "\n" or viewsOf d g w == just [tv "literal" w]
+allLiteralsLex (d : Derives) (g : Grammar d) (ws : List String) : Bool :=
+  match ws { nil -> true ; cons w rest -> literalLexes d g w and allLiteralsLex d g rest }
+LiteralsAreNotNames (d : Derives) (g : Grammar d) : Bool := allLiteralsLex d g (litsOf luthierSyntax)
+-- and only they are reserved: a word the grammar does not take as a literal is a name, the retired
+-- keywords and the names of core that act like keywords among them (2.S21)
+OtherWordsAreNames (d : Derives) (g : Grammar d) : Bool :=
+  isName d g "let" and isName d g "in" and isName d g "test" and isName d g "with"
+  and isName d g "extern" and isName d g "primitive" and isName d g "axiom" and isName d g "forget"
+  and isName d g "cite" and isName d g "eval" and isName d g "provisional" and isName d g "Bool"
 
--- The role of a token kind: the lexer produces only the grammar's categories, keywords, symbols
--- and newlines.
+-- The role of a token kind: the lexer produces only the grammar's categories, literals and
+-- newlines.
 kindKnown (k : String) : Bool :=
-  memberString k (catsOf luthierSyntax) or k == "keyword" or k == "symbol" or k == "newline"
+  memberString k (catsOf luthierSyntax) or k == "literal" or k == "newline"
 allKindsKnown (ts : List TokenView) : Bool := match ts { nil -> true ; cons t rest -> kindKnown t.kind and allKindsKnown rest }
 KindsAreTheGrammars (d : Derives) (g : Grammar d) (s : String) : Bool :=
   match viewsOf d g s { just ts -> allKindsKnown ts ; nothing -> true }
@@ -431,14 +441,20 @@ NameTokens (d : Derives) (g : Grammar d) : Bool :=
 -- 2.S1: numbers by their spelling.
 NumberTokens (d : Derives) (g : Grammar d) : Bool :=
   viewsOf d g "42 3.5 1e3 2.0e-1" == just [tv "number" "42", tv "number" "3.5", tv "number" "1e3", tv "number" "2.0e-1"]
--- 2.S1: a string keeps its quotes in its text, and one left open does not lex.
+-- 2.S1: a string keeps its quotes in its text, and one left open does not lex; its escapes
+-- (D-2026-10-13-q) are kept as written in the token and read by the parser.
 StringTokens (d : Derives) (g : Grammar d) : Bool :=
   viewsOf d g "\"a b\"" == just [tv "string" "\"a b\""] and not (lexes d g "\"abc")
+  and viewsOf d g "\"a\\\"b\"" == just [tv "string" "\"a\\\"b\""]
+  and parsesX d g "x := \"a\\\"b\\\\c\\nd\"" (literal (stringLit "a\"b\\c\nd"))
+-- a text that does not lex says where
+LexErrorsHaveLines (d : Derives) (g : Grammar d) (s : String) : Bool :=
+  match g.lex s { lexed ts -> true ; lexFailed e -> e.line >= 1 }
 -- 2.S1: a comment is not a token.
 CommentDropped (d : Derives) (g : Grammar d) : Bool := viewsOf d g "x -- a comment" == viewsOf d g "x"
 -- 2.S3: `<-` is one token.
 ArrowIsOneToken (d : Derives) (g : Grammar d) : Bool :=
-  viewsOf d g "a<-1" == just [tv "name" "a", tv "symbol" "<-", tv "number" "1"]
+  viewsOf d g "a<-1" == just [tv "name" "a", tv "literal" "<-", tv "number" "1"]
   and sameParse d g "f (a : Int) : Bool := a < -1" "f (a : Int) : Bool := a < (-1)"
 
 -- ---------------------------------------------------------------- layout laws (spec 2.S4)
@@ -499,7 +515,21 @@ OpenForms (d : Derives) (g : Grammar d) : Bool :=
   and parsesX d g "x := (a : A) * (b : B) * C" (sigma ["a"] (nm "A") (sigma ["b"] (nm "B") (nm "C")))
   and parsesX d g "x := if c then a else b + 1" (ifThen (nm "c") (nm "a") (just (binop "+" (nm "b") (numeral 1))))
   and parsesX d g "x := A -> (b : B) -> C" (binop "->" (nm "A") (pi ["b"] (nm "B") (nm "C")))
+  and parsesX d g "x := P & (y : A) -> Q" (binop "&" (nm "P") (pi ["y"] (nm "A") (nm "Q")))
+  and parsesX d g "x := A -> if c then a" (binop "->" (nm "A") (ifThen (nm "c") (nm "a") nothing))
   and not (isParsed (g.parse "x := a + if c then a else b"))
+-- an open form ends its term: what follows belongs to it (Claude, round 3)
+OpenFormEndsItsTerm (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := U -> (a : A) * b & C" (binop "->" universe (sigma ["a"] (nm "A") (binop "&" (nm "b") (nm "C"))))
+  and parsesX d g "x := A -> (b : B) -> C & D" (binop "->" (nm "A") (pi ["b"] (nm "B") (binop "&" (nm "C") (nm "D"))))
+-- the printer writes the parentheses the table needs: an `if` without `else` in the then-branch of
+-- one with an `else`, and an open form before `&` (GPT, Claude, round 3)
+printsBack (d : Derives) (g : Grammar d) (t : Surface) : Bool := g.parse (g.print (defX t)) == parsed (defX t)
+PrintParenthesizes (d : Derives) (g : Grammar d) : Bool :=
+  printsBack d g (ifThen (nm "c") (ifThen (nm "d") (nm "y") nothing) (just (nm "b")))
+  and printsBack d g (ifThen (nm "c") (ifThen (nm "d") (nm "y") (just (ifThen (nm "e") (nm "z") nothing))) (just (nm "b")))
+  and printsBack d g (binop "&" (binop "->" universe (sigma ["a"] (nm "A") (nm "b"))) (nm "C"))
+  and parsesX d g "x := if c then (if d then y) else b" (ifThen (nm "c") (ifThen (nm "d") (nm "y") nothing) (just (nm "b")))
 -- 2.S11: the dangling else belongs to the nearest if
 DanglingElse (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := if a then if b then p else q"
@@ -535,6 +565,10 @@ ClauseTree (d : Derives) (g : Grammar d) : Bool :=
     == parsed [define "neg" [explicit ["b"] (nm "Bool") nothing] (just (nm "Bool"))
                  (clausesBody [{ patterns := [pvar "true"], body := nm "false" },
                                { patterns := [pvar "false"], body := nm "true" }])]
+  and g.parse "f (a b : Bool) : Bool\n  | true, _ := a\n  | _, y := y"
+    == parsed [define "f" [explicit ["a", "b"] (nm "Bool") nothing] (just (nm "Bool"))
+                 (clausesBody [{ patterns := [pvar "true", pWild], body := nm "a" },
+                               { patterns := [pWild, pvar "y"], body := nm "y" }])]
   and not (isParsed (g.parse "f (b : Bool) : Bool := b\n  | true := false"))
 -- 2.S6, D-2026-10-13-p: the operator act binds `+ - * /` and `and or mod`, and nothing else.
 OperatorTree (d : Derives) (g : Grammar d) : Bool :=
@@ -575,6 +609,7 @@ SubtypeTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := { a : Int | 0 <= a }" (subtype (pvar "a") (nm "Int") (binop "<=" (numeral 0) (nm "a")))
   and parsesX d g "x := { a b : Int | a < b }" (record [{ names := ["a", "b"], type := nm "Int" }] (just (binop "<" (nm "a") (nm "b"))))
   and parsesX d g "x := { (p, q) : P | p < q }" (subtype (pTuple [pvar "p", pvar "q"]) (nm "P") (binop "<" (nm "p") (nm "q")))
+  and parsesX d g "x := { _ : T | p }" (subtype pWild (nm "T") (nm "p"))
 -- 2.S17: block, record value, items.
 BlockOrRecordValue (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := { a := 1 ; a }" (block [bind "a" (numeral 1)] (nm "a"))
@@ -586,6 +621,8 @@ ListTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := [1, 2]" (list
 LambdaTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := \\ y (z : Int) { w := y ; z }" (lambda [plainParam "y", typedParam ["z"] (nm "Int")] [bind "w" (nm "y")] (nm "z"))
   and parsesX d g "x := \\ (p, q) { p }" (lambda [shapeParam [pvar "p", pvar "q"]] [] (nm "p"))
+  and parsesX d g "x := \\ (a b : A) { a }" (lambda [typedParam ["a", "b"] (nm "A")] [] (nm "a"))
+  and not (isParsed (g.parse "x := \\ (y) { y }"))
 PatternTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := match m { just y -> y ; _ -> 0 ; 1 -> 2 ; (a, b) -> a ; cons _ rest -> rest }"
     (matchOf (nm "m") [(pApp "just" [pvar "y"], nm "y"), (pWild, numeral 0), (pLit (intLit 1), numeral 2),
@@ -606,13 +643,15 @@ BrokenTextFails (d : Derives) (g : Grammar d) : Bool := not (isParsed (g.parse "
 
 -- A grammar is a lexer, a layout pass, a parser and a printer that satisfy all of the above.
 Grammar (d : Derives) := RoundTrip d & Canonical d & ParsedIsWritten d & ParsesWhatDerives d & ErrorsHaveLines d
-  & LiteralsAreNotNames d & KindsAreTheGrammars d & NameTokens d & NumberTokens d & StringTokens d
+  & LiteralsAreNotNames d & OtherWordsAreNames d & KindsAreTheGrammars d & NameTokens d & NumberTokens d
+  & StringTokens d & LexErrorsHaveLines d
   & CommentDropped d & ArrowIsOneToken d
   & LayoutEnds d & IndentContinuesAct d & BracketsIgnoreBreaks d & BreakSeparatesItems d
   & BreakSeparatesConstructors d & ContinuationLines d & BlankAndCommentLinesDropped d & TrailingSeparators d
   & PlusBeforeTimes d & ComparisonBeforeAnd d & AndBeforeOr d & OrBeforeArrow d & ArrowBeforeAmp d
   & EqualityBeforePlus d & RightAssociative d & LeftAssociative d & ApplicationTightest d
-  & ProjectionTightest d & Negation d & OpenForms d & DanglingElse d & SumAsArgument d
+  & ProjectionTightest d & Negation d & OpenForms d & OpenFormEndsItsTerm d & PrintParenthesizes d
+  & DanglingElse d & SumAsArgument d
   & DeclarationTree d & DefinitionTree d & DefaultTree d & ImplicitTree d & AliasTree d & DataTree d
   & ClauseTree d & OperatorTree d & ImportTree d & DatumTree d & LiteralTree d & PiTree d
   & SigmaNamedTree d & RecordTree d & SubtypeTree d & BlockOrRecordValue d & TupleTree d & ListTree d

@@ -1,8 +1,8 @@
 -- ebnf.lth: grammars in extended Backus-Naur form, as data, and the laws of what they derive.
 --
--- Draft 3, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on two
--- rounds of review by four models (record/IA/first-code-review-2026-10-13) and D-2026-10-13-o, -p. A theory file
--- (spec 12.S23): the data, the theory `Derives` and its laws, and the definitions the laws need.
+-- Draft 4, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on three
+-- rounds of review by four models (record/IA/first-code-review-2026-10-13) and D-2026-10-13-o, -p.
+-- A theory file (spec 12.S23): the data, the theory `Derives` and its laws, and the definitions the laws need.
 -- It is generic: Luthier's own grammar (grammar.lth) is one value of `Ebnf`, and the grammars of
 -- the texts Luthier reads, a `.bib` file or a CSV, are others (L14: a grammar is data).
 --
@@ -205,11 +205,15 @@ RepRounds (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : B
 
 -- On a well-formed grammar the laws have one solution, by induction on the length of the list,
 -- in three steps (Kimi and Claude, round 2). First the empty list: there `derivesRhs e r nil` is
--- `nullable e r`, by structural descent into `r` and, at a `ref`, into its rules, and a cycle of
--- such descents would be a left-call cycle, which `noneLeftRecursive` excludes. Then a longer list,
--- assuming every shorter one settled: `SeqSplits` splits it into a first part and a rest; when the
--- first part is empty its value is settled by the first step and the rest is a structural
--- subterm at the same list; when it is not, both parts are shorter. `RepRounds` asks the first
+-- `nullable e r`, by structural descent into `r` and, at a `ref`, into its rules. A `seq` is
+-- descended only as far as its first element that is not nullable: that element is false at the
+-- empty list and settles the conjunction, which is `leftCallsSeq`'s rule (Claude, round 3). So a
+-- cycle of such descents would be a left-call cycle, which `noneLeftRecursive` excludes. Then a
+-- longer list, assuming every shorter one settled: `SeqSplits` splits it into a first part and a
+-- rest. When the first part is empty, `a` at the empty list is settled by the first step and the
+-- rest is a structural subterm at the same list; when the first part is the whole list, the rest at
+-- the empty list is settled and `a` is a structural subterm at the same list (GPT, round 3);
+-- otherwise both parts are shorter. `RepRounds` asks the first
 -- round to consume, so its rest is shorter. `RefUnion` replaces a nonterminal by its rules at the
 -- same list, and a chain of such replacements with no token consumed is a chain of left calls,
 -- finite on this domain. So within one length the descent is by structure and by left calls, both
