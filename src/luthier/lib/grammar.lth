@@ -44,7 +44,9 @@ LexResult = < lexed : List Token | lexFailed : LexError >
 
 -- spec 2.S1: a number is an integer or a double by its spelling (a point or an exponent makes a
 -- double); it has no sign, which is negation, so a literal is never negative. Roles: `LiteralTree`.
-NonNegativeFloat : U := { x : Float64 | 0.0 <= x }   -- finite, as every Float64 (11.R1)
+-- Finite, as every Float64 (11.R1). It holds -0.0, which equals 0.0 (11.S12's `nearest (toQ x) == x`
+-- needs it), so the printer writes either as `0.0` (Codex, random trees).
+NonNegativeFloat : U := { x : Float64 | 0.0 <= x }
 Literal : U := data {
   intLit : Nat -> Literal ;
   floatLit : NonNegativeFloat -> Literal ;
@@ -156,7 +158,10 @@ isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es
 -- block and a `data` (the last this file's reading of 2.S4, which is silent there), a line break is
 -- ";" unless the next line is indented deeper than the first item, begins with `then`, `else` or a
 -- binary operator, or follows "{", "," or ";", or precedes "}"; outside braces, a line break before
--- an indented line is dropped. The layout laws below observe it directly.
+-- an indented line is dropped. A token at column 0 outside brackets starts an act whatever it is,
+-- an operator such as `-` or `<` included: continuation by an operator is inside braces only (Codex,
+-- random trees: `x := a` then `-b` on the next line was read as one act). The layout laws below
+-- observe it directly.
 
 -- spec 2.S5, 2.S8 (the table of D-2026-10-13-p), 2.S9, 2.S10, 2.S16, 12.S22, as productions. The
 -- open forms are a `term` of their own and never an operand: they take the whole term to their
@@ -491,6 +496,9 @@ ArrowIsOneToken (d : Derives) (g : Grammar d) : Bool :=
 -- A text with an act ends its layout with a newline; an empty text lays out to nothing.
 LayoutEnds (d : Derives) (g : Grammar d) (s : String) : Bool :=
   match layoutOf d g s { just ts -> isEmptyViews ts or lastIsNewline ts ; nothing -> true }
+ColumnZeroStartsAct (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "x := a\n-b" == parsed [define "x" [] nothing (termBody (nm "a")), datum (neg (nm "b"))]
+  and g.parse "x := a\n< c : U >" == parsed [define "x" [] nothing (termBody (nm "a")), datum (sum [("c", universe)])]
 IndentContinuesAct (d : Derives) (g : Grammar d) : Bool :=
   sameLayout d g "f (a : Int) : Int :=\n  a + 1" "f (a : Int) : Int := a + 1"
 BracketsIgnoreBreaks (d : Derives) (g : Grammar d) : Bool :=
@@ -686,7 +694,7 @@ Grammar (d : Derives) := RoundTrip d & Canonical d & ParsedIsWritten d & ParsesW
   & LiteralsAreNotNames d & OtherWordsAreNames d & KindsAreTheGrammars d & NameTokens d & NumberTokens d
   & StringTokens d & LexErrorsHaveLines d
   & CommentDropped d & ArrowIsOneToken d
-  & LayoutEnds d & IndentContinuesAct d & BracketsIgnoreBreaks d & BreakSeparatesItems d
+  & LayoutEnds d & ColumnZeroStartsAct d & IndentContinuesAct d & BracketsIgnoreBreaks d & BreakSeparatesItems d
   & BreakSeparatesConstructors d & ContinuationLines d & BlankAndCommentLinesDropped d & TrailingSeparators d
   & PlusBeforeTimes d & ComparisonBeforeAnd d & AndBeforeOr d & OrBeforeArrow d & ArrowBeforeAmp d
   & EqualityBeforePlus d & RightAssociative d & LeftAssociative d & ApplicationTightest d

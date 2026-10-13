@@ -149,7 +149,7 @@ holds.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: 9f7b092dafae33acc6423eb643e1d90af2b5c4e21fc72aabe32a2572046fab04).
+(v1; sha256: 2707de381bf18aba8d9b2a5d7a93b62ab92e36f1e8b9c0715cc7f207ee0d4e2a).
 
     program ::= { act newline }
 
