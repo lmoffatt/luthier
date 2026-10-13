@@ -273,11 +273,6 @@ def test_R9_arrow_over_an_imported_name_is_an_arrow():
     p = program(head + 'okAll (s : String) (x : P) : Bool := true\nuse : Bool := f2 okAll')
     assert not c.violatesR9(p, 'use')
     assert c.violatesR9(program(head + 'bad (s : Int) (x : P) : Bool := true\nuse : Bool := f2 bad'), 'use')
-    from luthier import term as t
-    implies = t.App(t.App(t.Var('implies'), t.Var('P')), t.Var('Bool'))
-    assert c.arrows(implies) == t.Pi('_', t.Var('P'), t.Var('Bool'))
-    law = t.Subtype('x', t.Var('Int'), implies)
-    assert c.arrows(law) == law
 
 
 def test_rebind_binds_its_pattern_names():
@@ -478,10 +473,22 @@ def test_R8_a_recursive_data_type_is_unfolded_once():
     assert c.violatesR8(program(src), 'same')
 
 
-def test_an_operator_whose_function_is_not_typed_as_a_function_is_left_out():
-    # core.lut: `Float64 : Real`, so elaborate.py reads `Float64 -> Float64` as an implication and
-    # the operator bound to `floatNeg` has no function type; the rest is typed
+def test_an_operator_whose_function_is_not_typed_as_a_function_is_typed_now():
+    # core.lut: `Float64 : Real` with a primitive body is a type (elaborate 6, 11.R1), so
+    # `Float64 -> Float64` is the arrow and the operator typed; the 4.R9 on `bad` still shows
     p = program('Real : U := primitive "real"\nFloat64 : Real := primitive "d"\nfloatNeg : Float64 -> Float64 := primitive "-"\n'
                 'operator - := floatNeg\nf (x : Int) : Int := x\nbad := f "s"\n')
-    assert c.report(p)[0] == c.Report('typed', '5 of 6 acts', 'not typed: operator - := floatNeg (operator needs a declared function type)')
+    assert c.report(p)[0] == c.Report('typed', '6 of 6 acts', 'the whole file elaborates.')
     assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))
+
+
+def test_an_operator_whose_function_has_no_declared_type_is_left_out():
+    p = program('f (x : Int) : Int := x\noperator - := g\ng := f\nbad := f "s"\n')
+    assert c.report(p)[0] == c.Report('typed', '3 of 4 acts', 'not typed: operator - := g (operator needs a declared function type)')
+    assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))
+
+
+def test_Law_is_a_verdict():
+    # 4.R6, 5.S6: a body typed `(F : U) -> Law` fits a declared Law
+    p = program(open('src/luthier/lib/algebra.lth').read())
+    assert not any(x.rule == '4.R6' for x in c.check(p))

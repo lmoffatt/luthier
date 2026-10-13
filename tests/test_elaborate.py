@@ -350,3 +350,12 @@ def test_an_implication_in_type_position_is_the_arrow():
     assert g.type == t.Record((('h', t.Pi('_', V('P'), V('Bool'))),))
     # in a term, `->` on Booleans stays the implication
     assert b.body.body.body == apps(V('implies'), [V('c'), V('q')])
+
+
+def test_as_type_reads_implies_as_the_arrow():
+    # moved from test_check.py (`arrows`)
+    from luthier.elaborate import as_type
+    implies = t.App(t.App(t.Var('implies'), t.Var('P')), t.Var('Bool'))
+    assert as_type(implies) == t.Pi('_', t.Var('P'), t.Var('Bool'))
+    law = t.Subtype('x', t.Var('Int'), implies)
+    assert as_type(law) == law

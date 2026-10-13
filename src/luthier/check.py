@@ -7,7 +7,7 @@ R10 is author judgement, R11 a typing law, S23 is an elaboration law.
 from functools import lru_cache
 from dataclasses import dataclass, fields, is_dataclass
 from . import surface as s, term as t
-from .elaborate import elaborate_program, context_of, walk, infer, parameters, curry, theory_domains, ElaborationError
+from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError
 from .kernel import alpha_equal, substitute, reduce, free_names
 
 
@@ -350,25 +350,6 @@ def violatesR12(p, n):
     return len(acts(p, n, s.Define)) > 1 or any(isinstance(a.body, s.TermBody) and block_fault(a.body.term, {x.name for x in p if hasattr(x, 'name')}) for a in acts(p, n, s.Define))
 
 
-def arrows(u):
-    """Read `implies A B` in type position as the arrow `A -> B`.
-
-    elaborate.py reads `A -> B` as the Bool implication when it cannot infer that `A` is a type,
-    as for a name brought in by an import (imports are read for typing only, given the file's path). An implication is never a
-    type, so where a type is expected it can only be that arrow. Predicates of subtypes and terms
-    are not entered: there `implies` is the implication.
-    """
-    if isinstance(u, t.App) and isinstance(u.function, t.App) and u.function.function == t.Var('implies'):
-        return t.Pi('_', arrows(u.function.argument), arrows(u.argument))
-    if isinstance(u, t.Pi): return t.Pi(u.name, arrows(u.domain), arrows(u.codomain))
-    if isinstance(u, t.Sigma): return t.Sigma(u.name, arrows(u.domain), arrows(u.codomain))
-    if isinstance(u, t.Record): return t.Record(tuple((n, arrows(x)) for n, x in u.fields))
-    if isinstance(u, t.Sum): return t.Sum(tuple((n, arrows(x)) for n, x in u.alternatives))
-    if isinstance(u, t.Subtype): return t.Subtype(u.name, arrows(u.type), u.predicate)
-    if isinstance(u, t.App): return t.App(arrows(u.function), arrows(u.argument))
-    return u
-
-
 class Typing:
     """Small rules-needed typing; no unification or complete dependent checking."""
     untyped = {}; untyped_names = frozenset(); acts = ()  # set by `typed`: the acts left untyped
@@ -382,10 +363,10 @@ class Typing:
             if isinstance(a, s.Declare):
                 inner = self.context.child()
                 ps = parameters(a.binders, inner)
-                declarations[a.name] = curry(t.Pi, ps, walk(a.type, inner))
-        self.program = tuple(t.Declare(a.name, arrows(declarations[a.name]))
+                declarations[a.name] = curry(t.Pi, ps, walk_type(a.type, inner))
+        self.program = tuple(t.Declare(a.name, declarations[a.name])
                              if isinstance(a, t.Declare) else a for a in self.program)
-        self.types = {a.name: arrows(a.type) for a in self.program if isinstance(a, (t.Declare, t.Define))}
+        self.types = {a.name: a.type for a in self.program if isinstance(a, (t.Declare, t.Define))}
 
     def same(self, a, b):
         # Reduction is bounded; recursive definitions cannot hang checking.
@@ -412,7 +393,7 @@ class Typing:
     def typeOf(self, u, ctx=None):
         c = self.context.child(); c.types.update(self.types); c.types.update(ctx or {})
         ty = infer(u, c)
-        return None if isinstance(ty, t.Hole) else arrows(ty)
+        return None if isinstance(ty, t.Hole) else as_type(ty)
 
     def theory_record(self, u):
         """The record a theory head stands for, as elaborate.theory_domains reads a domain."""
@@ -587,7 +568,8 @@ def coverage(q):
 
 
 def verdict_type(u):
-    return u == t.Var('Bool') or isinstance(u, t.App) and u.function == t.Var('Failures') or isinstance(u, t.Pi) and verdict_type(u.codomain)
+    # 4.R6, 5.S6: a verdict is Bool, Failures E or Law (laws.lth's, no argument)
+    return u in (t.Var('Bool'), t.Var('Law')) or isinstance(u, t.App) and u.function == t.Var('Failures') or isinstance(u, t.Pi) and verdict_type(u.codomain)
 
 
 def fits(typing, ty, bt):
@@ -657,12 +639,12 @@ def base(q, u, fuel=None):
     expected (library.lth, reading 6 of the file-policies report).
     """
     if fuel is None: fuel = len(q.program)
-    # A subtype's base is read in type position (`arrows`): inside it, an alias's `Fin n -> A` is
+    # A subtype's base is read in type position (`as_type`): inside it, an alias's `Fin n -> A` is
     # elaborated as `implies (Fin n) A` (cause b of the leftovers report, as in bite 3b part 1).
-    if isinstance(u, t.Subtype): return base(q, arrows(u.type), fuel)
+    if isinstance(u, t.Subtype): return base(q, as_type(u.type), fuel)
     if isinstance(u, t.Var) and fuel:
         body = q.body(u.name)
-        if isinstance(body, t.Subtype): return base(q, arrows(body.type), fuel - 1)
+        if isinstance(body, t.Subtype): return base(q, as_type(body.type), fuel - 1)
     if isinstance(u, t.App) and fuel:
         # a name defined as a subtype with parameters, applied (`LexedText d g`, grammar.lth): its
         # body under the parameters is a subtype, looked through as the bare name is
@@ -672,7 +654,7 @@ def base(q, u, fuel=None):
         while isinstance(body, t.Lam): body = body.body
         if isinstance(body, t.Subtype):
             unfolded = reduce(q.program, len(q.program) + 1, u)
-            if isinstance(unfolded, t.Subtype): return base(q, arrows(unfolded.type), fuel - 1)
+            if isinstance(unfolded, t.Subtype): return base(q, as_type(unfolded.type), fuel - 1)
     if isinstance(u, (t.Var, t.App)) and core_subtype_base(q, u) is not None: return core_subtype_base(q, u)
     if isinstance(u, (t.Var, t.App)):
         record = q.theory_record(u)
