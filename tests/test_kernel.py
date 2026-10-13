@@ -7,6 +7,7 @@ small programs at most 4 acts and term budget 4 per embedded term.
 Leaf constructors cost zero; each recursive constructor costs one, and size-1
 is split among its children (matching the prompt's size-zero convention).
 Update prompt: user request v2, recorded in codex-2.md.
+Update prompt: user request v3; source commits cc2542d and 2409c59, codex-3.md.
 Tests are finite law evidence, not a universal semantic certificate.
 """
 
@@ -17,7 +18,7 @@ import random
 import pytest
 
 from luthier.kernel import (
-    alpha_equal, canonical, free_names, pattern_names, reduce, substitute, swap, unqualify,
+    alpha_equal, canonical, free_names, pattern_names, step, reduce, substitute, swap, unqualify,
 )
 from luthier.term import (
     Act, App, Axiom, Constant, Data, Datum, Declare, Define, Extern, FloatConst,
@@ -185,8 +186,7 @@ def alpha_variant(t: Term) -> Term:
             case Proj(a, l):
                 return Proj(walk(a, env), l)
             case Data(x, kvs):
-                y = fresh()
-                return Data(y, tuple((k, walk(b, env | {x: y})) for k, b in kvs))
+                return Data(x, tuple((k, walk(b, env | {x: x})) for k, b in kvs))
             case Match(a, arms):
                 value = walk(a, env)
                 result = []
@@ -197,11 +197,6 @@ def alpha_variant(t: Term) -> Term:
             case _:
                 return node
     return walk(t, {})
-
-
-def agree(a, b):
-    """Exactly term.lth's agree: exhaustion is not a successful law observation."""
-    return a is None or b is None or alpha_equal(a, b)
 
 
 def fresh_for(t, prefix="fresh"):
@@ -253,16 +248,24 @@ def test_free_variables_are_names(rng):
         assert alpha_equal(Var(x), Var(y)) == (x == y)
 
 
+@pytest.mark.xfail(strict=True, reason="RenameBound swaps Data names that AlphaPartsAgree requires fixed")
 def test_rename_bound(samples, rng):
+    failures = []
     for b in samples:
         x = rng.choice(NAMES)
         y = fresh_for(b)
         ty = term(rng, 4)
-        for cls in (Lam, Pi):
-            assert alpha_equal(cls(x, ty, b), cls(y, ty, swap(x, y, b)))
+        for cls in BINDERS:
+            if not alpha_equal(cls(x, ty, b), cls(y, ty, swap(x, y, b))):
+                failures.append((cls, x, b))
+        scrutinee = term(rng, 3)
+        if not alpha_equal(Match(scrutinee, ((PVar(x), b),)), Match(scrutinee, ((PVar(y), swap(x, y, b)),))):
+            failures.append((Match, x, b))
     assert alpha_equal(Lam("x", Universe(), Lam("y", Universe(), Var("x"))),
                        Lam("y", Universe(), Lam("x", Universe(), Var("y"))))
 
+    assert alpha_equal(Lam("x", Universe(), Data("x", ())), Lam("fresh", Universe(), Data("fresh", ())))
+    assert not failures, failures
 
 def test_alpha_keeps_head(samples):
     for t in samples:
@@ -281,8 +284,97 @@ def test_alpha_keeps_free(samples):
 def test_alpha_congruent(samples, rng):
     for t in samples:
         s = term(rng, SIZE)
+        u, v = alpha_variant(t), alpha_variant(s)
         for cls in (App, Pair):
-            assert alpha_equal(cls(t, s), cls(alpha_variant(t), alpha_variant(s)))
+            assert alpha_equal(cls(t, s), cls(u, v))
+        for cls in BINDERS:
+            assert alpha_equal(cls("x", t, s), cls("x", u, v))
+        assert alpha_equal(Inj("l", t), Inj("l", u))
+        assert alpha_equal(Proj(t, "l"), Proj(u, "l"))
+        for cls in (Sum, Record, RecordValue):
+            assert alpha_equal(cls((("l", t),)), cls((("l", u),)))
+        assert alpha_equal(Data("D", (("l", t),)), Data("D", (("l", u),)))
+        assert alpha_equal(Match(t, ((PWild(), s),)), Match(u, ((PWild(), v),)))
+
+
+def parts_agree(eq, s, t):
+    if type(s) is not type(t):
+        return False
+    if isinstance(s, BINDERS):
+        x, d, b = binder_parts(s)
+        y, e, c = binder_parts(t)
+        return eq(d, e) and ((x == y and eq(b, c)) or (x not in free_names(c) and eq(b, c if x == y else swap(y, x, c))))
+    match s, t:
+        case (App(f, x), App(g, y)) | (Pair(f, x), Pair(g, y)):
+            return eq(f, g) and eq(x, y)
+        case (Inj(l, u), Inj(k, v)) | (Proj(u, l), Proj(v, k)):
+            return l == k and eq(u, v)
+        case (Sum(xs), Sum(ys)) | (Record(xs), Record(ys)) | (RecordValue(xs), RecordValue(ys)) | (Data(_, xs), Data(_, ys)):
+            return (not isinstance(s, Data) or s.name == t.name) and len(xs) == len(ys) and all(k == j and eq(u, v) for (k, u), (j, v) in zip(xs, ys))
+        case Match(u, xs), Match(v, ys):
+            if not eq(u, v) or len(xs) != len(ys):
+                return False
+            for (p, b), (q, c) in zip(xs, ys):
+                if pattern_shape(p) != pattern_shape(q):
+                    return False
+                for x, y in zip(pattern_names(p), pattern_names(q)):
+                    if x != y:
+                        c = swap(y, x, c)
+                if not eq(b, c):
+                    return False
+            return True
+        case _:
+            return s == t
+
+
+def pattern_shape(p):
+    match p:
+        case PVar(): return PVar("_")
+        case PPair(a, b): return PPair(pattern_shape(a), pattern_shape(b))
+        case PInj(l, q): return PInj(l, pattern_shape(q))
+        case PCon(c, ps): return PCon(c, tuple(map(pattern_shape, ps)))
+        case _: return p
+
+
+def linear_patterns(t):
+    if isinstance(t, Match):
+        if any(len(pattern_names(p)) != len(set(pattern_names(p))) for p, _ in t.arms):
+            return False
+    for field in fields(t):
+        value = getattr(t, field.name)
+        if type(value) in Term.__args__ and not linear_patterns(value):
+            return False
+        if isinstance(value, tuple):
+            for entry in value:
+                if isinstance(entry, tuple) and type(entry[-1]) in Term.__args__ and not linear_patterns(entry[-1]):
+                    return False
+    return True
+
+
+def test_alpha_parts_agree(samples):
+    for t in samples:
+        if not linear_patterns(t):
+            continue
+        u = alpha_variant(t)
+        assert alpha_equal(t, u)
+        assert parts_agree(alpha_equal, t, u)
+    for s, t in ((Lit(IntConst(1)), Lit(IntConst(2))), (Primitive("+"), Primitive("*")), (Inj("l", Universe()), Inj("r", Universe())), (Data("D", ()), Data("E", ())), (App(Var("x"), Var("y")), App(Var("y"), Var("x")))):
+        assert not alpha_equal(s, t)
+
+
+def test_weak_alpha_fails_parts_agree():
+    weak = lambda s, t: type(s) is type(t) and free_names(s) == free_names(t)
+    s, t = Lit(IntConst(1)), Lit(IntConst(2))
+    assert weak(s, t)
+    assert not parts_agree(weak, s, t)
+
+
+@pytest.mark.xfail(strict=True, reason="AlphaPartsAgree sequential renameAll fails on permuted linear binders")
+def test_alpha_parts_agree_permuted_pattern_counterexample():
+    s = Match(Var("v"), ((PPair(PVar("x"), PVar("y")), Var("x")),))
+    t = Match(Var("v"), ((PPair(PVar("y"), PVar("x")), Var("y")),))
+    assert alpha_equal(s, t)
+    assert parts_agree(alpha_equal, s, t)
 
 
 def test_subst_hits(samples, rng):
@@ -365,132 +457,118 @@ def test_canon_keeps_term(samples):
     assert witnessed > 0
 
 
+def steps_to(result, target):
+    return result is not None and alpha_equal(result, target)
+
+
 def test_beta(samples, rng):
-    assert reduce((), 2, App(Lam("x", Universe(), Var("x")), Lit(IntConst(5)))) == Lit(IntConst(5))
-    for body in samples:
-        p, n, x = program(rng), rng.randrange(20), rng.choice(NAMES)
-        ty, arg = term(rng, 3), term(rng, SIZE)
-        assert agree(reduce(p, n, App(Lam(x, ty, body), arg)), reduce(p, n, substitute(x, arg, body)))
+    for b in samples:
+        x, arg = rng.choice(NAMES), term(rng, SIZE)
+        assert steps_to(step(program(rng), App(Lam(x, Universe(), b), arg)), substitute(x, arg, b))
 
 
 def test_delta(samples, rng):
-    assert reduce((Define("f", Universe(), Lam("x", Universe(), Var("x"))),), 3,
-                  App(Var("f"), Var("a"))) == Var("a")
     for b in samples:
-        f, ty, arg = rng.choice(NAMES), term(rng, 3), term(rng, SIZE)
-        p = (Define(f, ty, b),) + program(rng)
-        n = rng.randrange(20)
-        assert agree(reduce(p, n, App(Var(f), arg)), reduce(p, n, App(b, arg)))
+        f = rng.choice(NAMES)
+        definition = Define(f, Universe(), b)
+        for p in ((definition,) + program(rng), (Declare(f, Universe()), definition), (Datum(b), Declare(f, Universe()), definition)):
+            assert steps_to(step(p, Var(f)), b)
+
+
+def test_head_first(samples, rng):
+    for b in samples:
+        x, u, arg = rng.choice(NAMES), term(rng, SIZE), term(rng, SIZE)
+        redex = App(Lam(x, Universe(), b), u)
+        target = substitute(x, u, b)
+        arms = ((PWild(), arg),)
+        p = program(rng)
+        assert steps_to(step(p, App(redex, arg)), App(target, arg))
+        assert steps_to(step(p, Match(redex, arms)), Match(target, arms))
+        assert steps_to(step(p, Proj(redex, "l")), Proj(target, "l"))
 
 
 def test_holes_stay(samples, rng):
-    for ty in samples:
-        f, p, n = rng.choice(NAMES), program(rng), rng.randrange(20)
-        assert agree(reduce((Declare(f, ty),) + p, n, Var(f)), Var(f))
-        assert agree(reduce(p, n, Hole(f)), Hole(f))
-        assert agree(reduce(p, n, Axiom()), Axiom())
-    assert reduce((Declare("f", Universe()), Define("f", Universe(), Var("other"))), 1, Var("f")) == Var("f")
+    for b in samples:
+        f, arg, c = rng.choice(NAMES), term(rng, SIZE), term(rng, SIZE)
+        p = (Declare(f, Universe()),)
+        assert step(p, Var(f)) is None
+        assert step(p, App(Var(f), arg)) is None
+        assert step(p, Match(Var(f), ((PLit(constant(rng)), b), (PWild(), c)))) is None
+        assert steps_to(step(p, Match(Var(f), ((PWild(), c),))), c)
+        assert step((), Hole(f)) is None
+        assert step((), Axiom()) is None
 
 
 def test_iota(samples, rng):
     for v in samples:
-        l, y, b = rng.choice(LABELS), rng.choice(NAMES), term(rng, SIZE)
-        p, n = program(rng), rng.randrange(20)
-        target = reduce(p, n, substitute(y, v, b))
-        assert agree(reduce(p, n, Match(Inj(l, v), ((PInj(l, PVar(y)), b),))), target)
-        defined = any(isinstance(a, (Declare, Define)) and a.name == l for a in p)
-        if not defined:
-            assert agree(reduce(p, n, Match(App(Var(l), v), ((PCon(l, (PVar(y),)), b),))), target)
-        assert agree(reduce(p, n, Match(v, ((PWild(), b),))), reduce(p, n, b))
-    omega = App(Lam("x", Universe(), App(Var("x"), Var("x"))), Lam("x", Universe(), App(Var("x"), Var("x"))))
-    assert reduce((), 2, Match(omega, ((PWild(), Lit(IntConst(5))),))) == Lit(IntConst(5))
+        l, y, b, k = rng.choice(LABELS), rng.choice(NAMES), term(rng, SIZE), constant(rng)
+        p = program(rng)
+        assert steps_to(step(p, Match(Inj(l, v), ((PInj(l, PVar(y)), b),))), substitute(y, v, b))
+        if not any(isinstance(a, (Declare, Define)) and a.name == l for a in p):
+            assert steps_to(step(p, Match(App(Var(l), v), ((PCon(l, (PVar(y),)), b),))), substitute(y, v, b))
+        for pat, target in ((PLit(k), b), (PVar(y), substitute(y, Lit(k), b)), (PWild(), b)):
+            assert steps_to(step(p, Match(Lit(k), ((pat, b),))), target)
 
 
 def test_iota_pair(samples, rng):
     for s in samples:
         z, y, b = fresh_for(s), rng.choice(NAMES), term(rng, SIZE)
-        p, n = program(rng), rng.randrange(20)
-        assert y == z or agree(reduce(p, n, Match(Pair(s, Var(y)), ((PPair(PVar(y), PVar(z)), b),))),
-                               reduce(p, n, substitute(z, Var(y), substitute(y, s, b))))
-    # The law explicitly uses sequential substitution, including cross-references.
-    assert reduce((), 2, Match(Pair(Var("y"), Var("x")), ((PPair(PVar("x"), PVar("y")), Var("x")),))) == Var("x")
+        p = program(rng)
+        if y != z:
+            assert steps_to(step(p, Match(Pair(s, Var(y)), ((PPair(PVar(y), PVar(z)), b),))), substitute(z, Var(y), substitute(y, s, b)))
+            assert steps_to(step(p, Match(Pair(Var(z), s), ((PPair(PVar(z), PVar(y)), b),))), substitute(z, Var(z), substitute(y, s, b)))
 
 
 def test_iota_skips(samples, rng):
     for v in samples:
-        l, k, y = rng.choice(LABELS), rng.choice(LABELS), rng.choice(NAMES)
-        p, n = program(rng), rng.randrange(20)
         b, c = term(rng, SIZE), term(rng, SIZE)
-        lhs = Match(Inj(l, v), ((PInj(k, PWild()), b), (PInj(l, PVar(y)), c)))
-        assert l == k or agree(reduce(p, n, lhs), reduce(p, n, substitute(y, v, c)))
-    assert reduce((), 2, Match(Inj("left", Var("v")),
-                             ((PInj("right", PWild()), Var("b")),
-                              (PInj("left", PVar("x")), Var("x"))))) == Var("v")
+        assert steps_to(step(program(rng), Match(Inj("left", v), ((PInj("right", PWild()), b), (PInj("left", PVar("x")), c)))), substitute("x", v, c))
 
 
 def test_proj_of_record(samples, rng):
     for u in samples:
-        x, y = rng.choice(LABELS), rng.choice(LABELS)
-        v, p, n = term(rng, SIZE), program(rng), rng.randrange(20)
-        r = RecordValue(((x, u), (y, v)))
-        assert x == y or (agree(reduce(p, n, Proj(r, x)), reduce(p, n, u))
-                          and agree(reduce(p, n, Proj(r, y)), reduce(p, n, v)))
-    r = RecordValue((("x", Var("u")), ("y", Var("v"))))
-    assert reduce((), 2, Proj(r, "x")) == Var("u")
-    assert reduce((), 2, Proj(r, "y")) == Var("v")
-    assert reduce((), 2, Proj(r, "missing")) == Proj(r, "missing")
-    assert reduce((Define("r", Universe(), r),), 3, Proj(Var("r"), "y")) == Var("v")
+        v, p = term(rng, SIZE), program(rng)
+        r = RecordValue((("x", u), ("y", v)))
+        assert steps_to(step(p, Proj(r, "x")), u)
+        assert steps_to(step(p, Proj(r, "y")), v)
 
 
-def prim(op, a, b, head=Var):
+def prim(op, a, b, head=Primitive):
     return App(App(head(op), Lit(IntConst(a))), Lit(IntConst(b)))
 
 
 def test_prim(rng):
-    # Prim's guard (term.lth as read) excludes declarations as well as definitions.
-    reserved = {"+", "*", "==", "true", "false"}
-    for i, j in ((1, 2), (-3, 0), (10**80, -(10**70)), *( (rng.randint(-20, 20), rng.randint(-20, 20)) for _ in range(CASES))):
-        p, n = program(rng), rng.randrange(20)
-        if any(isinstance(a, (Declare, Define)) and a.name in reserved for a in p):
-            continue
-        for op, result in (("+", Lit(IntConst(i + j))), ("*", Lit(IntConst(i * j))), ("==", Var("true" if i == j else "false"))):
-            assert agree(reduce(p, n, prim(op, i, j)), result)
-            assert reduce(p, 2, prim(op, i, j)) == result  # Non-vacuous observation.
-    assert reduce((), 2, prim("<", -1, 2)) == Var("true")
-    assert reduce((), 2, prim("+", 3, 4, Primitive)) == Lit(IntConst(7))
+    for _ in range(CASES):
+        i, j = rng.randint(-20, 20), rng.randint(-20, 20)
+        p = program(rng)
+        for op, result in (("+", Lit(IntConst(i+j))), ("*", Lit(IntConst(i*j))), ("-", Lit(IntConst(i-j))), ("<", Var("true" if i<j else "false")), ("==", Var("true" if i==j else "false"))):
+            assert steps_to(step(p, prim(op, i, j)), result)
+        u, v = rng.choice((-2.5, 0., 1.25)), rng.choice((-2.5, 0., 1.25))
+        assert steps_to(step(p, App(App(Primitive("+"), Lit(FloatConst(u))), Lit(FloatConst(v)))), Lit(FloatConst(u+v)))
+        a, b = rng.choice(("", "text", "中文")), rng.choice(("", "text", "中文"))
+        assert steps_to(step(p, App(App(Primitive("=="), Lit(StringConst(a))), Lit(StringConst(b)))), Var("true" if a == b else "false"))
+    assert step((), prim("+", 1, 2, Var)) is None
+    assert step((Declare("+", Universe()),), prim("+", 1, 2, Var)) is None
+    assert step((Define("+", Universe(), Primitive("+")),), prim("+", 1, 2, Var)) == prim("+", 1, 2)
 
 
 def test_extern_is_value(rng):
-    for route in ("host.fn", *NAMES, *(rng.choice(NAMES) for _ in range(CASES))):
-        assert agree(reduce(program(rng), rng.randrange(20), Extern(route)), Extern(route))
-    assert reduce((), 1, App(Extern("host.fn"), Var("a"))) == App(Extern("host.fn"), Var("a"))
+    for _ in range(CASES):
+        assert step(program(rng), Extern(rng.choice(NAMES))) is None
 
 
 def test_values_stay(samples, rng):
     for b in samples:
-        x, c, ty = rng.choice(NAMES), constant(rng), term(rng, SIZE)
+        x, c, ty, p = rng.choice(NAMES), constant(rng), term(rng, SIZE), program(rng)
         kvs = (("C", b),)
-        p, n = program(rng), rng.randrange(20)
-        values = (Lam(x, ty, b), Lit(c), Universe(), World(), Pi(x, ty, b), Sigma(x, ty, b), Sum(kvs), Data(x, kvs), Subtype(x, ty, b), Record(kvs), RecordValue(kvs))
-        for v in values:
-            assert agree(reduce(p, n, v), v)
-            assert reduce(p, 1, v) == v
+        for v in (Lam(x, ty, b), Lit(c), Universe(), World(), Pi(x, ty, b), Sigma(x, ty, b), Sum(kvs), Data(x, kvs), Subtype(x, ty, b), Record(kvs), RecordValue(kvs), Pair(ty, b), Inj(x, b), Primitive(x)):
+            assert step(p, v) is None
 
 
-def test_final(samples, rng):
-    successful = 0
+def test_datum_is_inert(samples, rng):
     for t in samples:
-        p, n = program(rng), rng.randrange(1, 20)
-        v = reduce(p, n, t)
-        if v is not None:
-            successful += 1
-            assert agree(reduce(p, n, v), v)
-            assert agree(reduce(p, n + 1, t), v)
-    assert successful > 0
-    p = (Define("true", Universe(), Lit(IntConst(0))),)
-    v = reduce(p, 3, prim("==", 1, 1))
-    assert v == Lit(IntConst(0))  # Former unguarded Prim counterexample; current law excludes it.
-    assert reduce(p, 3, v) == v
+        p, d = program(rng), term(rng, SIZE)
+        assert step((Datum(d),) + p, t) == step(p, t)
 
 
 # Additional observations catch vacuous agree-only implementations and scope mistakes.

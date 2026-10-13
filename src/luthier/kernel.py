@@ -3,7 +3,8 @@
 Sources: 9a89873dad71493a72ca885585fdc7b5a8ff527d; synthesis prompt v1:
 record/IA/kernel-2026-10-13/prompt.md. Law caveats and deviations: its codex.md.
 Update derivation: user request v2; current audit: codex-2.md.
-Reduction uses an explicit generator stack and a shared transition budget; externs
+Update derivation: user request v3; codex-3.md records source hashes and choices.
+Reduction uses an explicit generator stack for each weak-head step; externs
 remain values. This module neither translates surface trees nor calls the host.
 """
 
@@ -13,7 +14,7 @@ from collections.abc import Generator
 
 from .term import (
     App, Axiom, Data, Datum, Declare, Define, Extern, Hole, Inj, IntConst, Lam,
-    Lit, Match, Pair, Pattern, PCon, PInj, PLit, PPair, Primitive, Program, PVar,
+    Lit, FloatConst, StringConst, Match, Pair, Pattern, PCon, PInj, PLit, PPair, Primitive, Program, PVar,
     PWild, Pi, Proj, Record, RecordValue, Sigma, Subtype, Sum, Term, Universe, Var, World,
 )
 
@@ -160,7 +161,7 @@ def _pattern_bindings(p: Pattern, q: Pattern) -> Env | None:
 
 
 def alpha_equal(a: Term, b: Term) -> bool:
-    """Compare both trees with a stack of nearest paired bindings (including patterns/Data)."""
+    """Compare both trees with a stack of nearest paired bindings (including patterns; Data names are fixed)."""
     pending: list[tuple[Term, Term, Env]] = [(a, b, ())]
     while pending:
         s, t, env = pending.pop()
@@ -198,12 +199,12 @@ def alpha_equal(a: Term, b: Term) -> bool:
                         return False
                     pending.append((c, d, env))
             case Data(x, ps), Data(y, qs):
-                if len(ps) != len(qs):
+                if x != y or len(ps) != len(qs):
                     return False
                 for (k, c), (l, d) in zip(ps, qs):
                     if k != l:
                         return False
-                    pending.append((c, d, ((x, y),) + env))
+                    pending.append((c, d, env))
             case _ if isinstance(s, _LEAVES):
                 if s != t:
                     return False
@@ -402,7 +403,7 @@ def canonical(t: Term) -> Term:
             case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
                 inner = env
                 if isinstance(node, Data):
-                    y = binder()
+                    y = node.name
                     inner = ((node.name, y),) + env
                 result = []
                 for k, b in kvs:
@@ -425,7 +426,7 @@ def canonical(t: Term) -> Term:
 
 
 # Generators request another generator's result. The explicit stack replaces
-# recursive head evaluation and recursive pattern demands, sharing one fuel budget.
+# recursive head evaluation and recursive pattern demands within one step.
 _Work = Generator["_Work", object, object]
 
 
@@ -444,21 +445,26 @@ def _run(work: _Work):
     return value
 
 
-_OPERATORS = {"+", "*", "==", "<"}
+_OPERATORS = {"+", "*", "-", "==", "<"}
 
 
 def _operator(t: Term) -> str | None:
-    if isinstance(t, (Var, Primitive)) and t.name in _OPERATORS:
-        return t.name
+    return t.name if isinstance(t, Primitive) and t.name in _OPERATORS else None
+
+
+def _primitive(op: str, a, b) -> Term | None:
+    if type(a) is not type(b):
+        return None
+    if isinstance(a, IntConst):
+        if op in {"+", "*", "-"}:
+            value = a.value + b.value if op == "+" else a.value * b.value if op == "*" else a.value - b.value
+            return Lit(IntConst(value))
+        return Var("true" if (a.value == b.value if op == "==" else a.value < b.value) else "false")
+    if isinstance(a, FloatConst) and op == "+":
+        return Lit(FloatConst(a.value + b.value))
+    if isinstance(a, StringConst) and op == "==":
+        return Var("true" if a.value == b.value else "false")
     return None
-
-
-def _primitive(op: str, a: int, b: int) -> Term:
-    if op == "+":
-        return Lit(IntConst(a + b))
-    if op == "*":
-        return Lit(IntConst(a * b))
-    return Var("true" if (a == b if op == "==" else a < b) else "false")
 
 
 def _constructor(t: Term) -> tuple[str, tuple[Term, ...]] | None:
@@ -479,6 +485,10 @@ def _apply_args(name: str, args: tuple[Term, ...]) -> Term:
 
 
 # Pattern answers: None is a definite mismatch, bindings a match, Demand a head step.
+class _Blocked:
+    pass
+
+
 class _Demand:
     def __init__(self, value: Term):
         self.value = value
@@ -486,7 +496,7 @@ class _Demand:
 
 def _demand(env: dict[str, Term | None], v: Term) -> _Work:
     changed, w = yield _step(env, v)
-    return _Demand(w) if changed else None
+    return _Demand(w) if changed else _Blocked()
 
 
 def _pattern(env: dict[str, Term | None], p: Pattern, v: Term) -> _Work:
@@ -500,13 +510,13 @@ def _pattern(env: dict[str, Term | None], p: Pattern, v: Term) -> _Work:
                 return () if c == v.constant else None
         case PPair(a, b) if isinstance(v, Pair):
             xs = yield _pattern(env, a, v.left)
-            if xs is None:
-                return None
+            if xs is None or isinstance(xs, _Blocked):
+                return xs
             if isinstance(xs, _Demand):
                 return _Demand(Pair(xs.value, v.right))
             ys = yield _pattern(env, b, v.right)
-            if ys is None:
-                return None
+            if ys is None or isinstance(ys, _Blocked):
+                return ys
             if isinstance(ys, _Demand):
                 return _Demand(Pair(v.left, ys.value))
             return xs + ys
@@ -524,8 +534,8 @@ def _pattern(env: dict[str, Term | None], p: Pattern, v: Term) -> _Work:
                 bs: Bindings = ()
                 for i, (q, a) in enumerate(zip(ps, args)):
                     xs = yield _pattern(env, q, a)
-                    if xs is None:
-                        return None
+                    if xs is None or isinstance(xs, _Blocked):
+                        return xs
                     if isinstance(xs, _Demand):
                         return _Demand(_apply_args(c, args[:i] + (xs.value,) + args[i + 1:]))
                     bs += xs
@@ -554,9 +564,10 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
         case App(Lam(x, _, b), a):
             return True, substitute(x, a, b)
         case App(App(op, i), j) if _operator(op) is not None:
-            if isinstance(i, Lit) and isinstance(i.constant, IntConst):
-                if isinstance(j, Lit) and isinstance(j.constant, IntConst):
-                    return True, _primitive(_operator(op), i.constant.value, j.constant.value)
+            if isinstance(i, Lit):
+                if isinstance(j, Lit):
+                    result = _primitive(_operator(op), i.constant, j.constant)
+                    return result is not None, t if result is None else result
                 changed, k = yield _step(env, j)
                 return changed, App(App(op, i), k)
             changed, k = yield _step(env, i)
@@ -573,13 +584,27 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
             changed, value = yield _step(env, r)
             return changed, Proj(value, label)
         case Match(s, arms):
+            changed, value = yield _step(env, s)
+            if changed:
+                return True, Match(value, arms)
             for p, b in arms:
                 bs = yield _pattern(env, p, s)
+                if isinstance(bs, _Blocked):
+                    return False, t
                 if isinstance(bs, _Demand):
                     return True, Match(bs.value, arms)
                 if bs is not None and _consistent(bs):
-                    for x, v in bs:  # Sequential order is part of IotaPair's law.
-                        b = substitute(x, v, b)
+                    fresh = []
+                    avoid = _all_names(b) | {x for x, _ in bs}
+                    for _, v in bs:
+                        avoid.update(_all_names(v))
+                    for x, v in bs:
+                        z = _fresh_name(x, avoid)
+                        avoid.add(z)
+                        b = substitute(x, Var(z), b)
+                        fresh.append((z, v))
+                    for z, v in fresh:
+                        b = substitute(z, v, b)
                     return True, b
             changed, v = yield _step(env, s)
             return changed, Match(v, arms)
@@ -588,29 +613,29 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
     raise TypeError(f"unknown term: {type(t).__name__}")
 
 
-def reduce(program: Program, fuel: int, t: Term) -> Term | None:
-    """WHNF under a transition budget, with the model's extra final observation unit.
-
-    Zero fuel returns None, including for values. Declarations block later
-    definitions of their name. Arithmetic uses exact Python integers; no extern
-    calls are performed. Exhaustion is distinct from a final neutral term.
-    """
-    if type(fuel) is not int or fuel < 0:
-        raise ValueError("fuel must be a non-negative integer")
+def step(program: Program, t: Term) -> Term | None:
+    """One weak-head transition; None means weak head normal form."""
     env: dict[str, Term | None] = {}
     for act in program:
         match act:
             case Define(x, _, b):
                 env.setdefault(x, b)
-            case Declare(x, _):
-                env.setdefault(x, None)
-            case Datum():
+            case Declare() | Datum():
                 pass
             case _:
                 raise TypeError(f"unknown act: {type(act).__name__}")
+    changed, value = _run(_step(env, t))
+    return value if changed else None
+
+
+def reduce(program: Program, fuel: int, t: Term) -> Term | None:
+    """Exactly term.lth's fuelled iteration, including the final observation unit."""
+    if type(fuel) is not int or fuel < 0:
+        raise ValueError("fuel must be a non-negative integer")
     while fuel:
-        changed, t = _run(_step(env, t))
-        if not changed:
+        value = step(program, t)
+        if value is None:
             return t
+        t = value
         fuel -= 1
     return None

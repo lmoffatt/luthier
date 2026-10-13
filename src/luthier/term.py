@@ -3,7 +3,8 @@
 Source revision: 9a89873dad71493a72ca885585fdc7b5a8ff527d.
 Derivation: record/IA/kernel-2026-10-13/prompt.md v1; Codex, 2026-10-13.
 Update derivation: user request v2, recorded in codex-2.md.
-Lists are tuples, Maybe is None; constructors retain the theory's argument order.
+Update derivation: user request v3, codex-3.md; step uses None for normal form,
+while reduce uses None for fuel exhaustion. Lists are tuples; constructors retain the theory's argument order.
 """
 
 from __future__ import annotations
