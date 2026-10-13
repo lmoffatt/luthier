@@ -70,9 +70,14 @@ Object (A : U) := Reflexive A & Symmetric A & Transitive A
 --
 -- `Concrete` is the types with a structural `==` (4.R8): `Int`, `Float64`, `String`, `Unit`,
 -- `Empty`, and products, sums, `data` and subtypes built from them; never a function type. Which
--- type is concrete the checker decides (4.R8), so it is declared here and not defined. The structural
+-- type is concrete the checker decides (4.R8), so that predicate, `hasStructuralEquality`, is
+-- declared here and not defined. [proposed] `Concrete` is the subtype of `U` it cuts out, so a
+-- concrete type passes where a type is expected (3.S6: the forgetting is implicit; 4.R9). Spec 3
+-- has one universe, `U : U` (3.S8), and no sub-universe; a subtype of `U` is the reading that
+-- needs nothing new (group 3 of record/IA/check-2026-10-13/opus-3b.md, part 2). The structural
 -- equality and its substitutivity range over it, codomain included (review of layers 0-1, A).
-Concrete : U
+hasStructuralEquality : U -> Bool
+Concrete : U := { A : U | hasStructuralEquality A }
 Structural (A : Concrete) : { eq : A -> A -> Bool }
 asObject (A : Concrete) (s : Structural A) : Object A := { eq := s.eq }
 -- each law of an object on its own, so that an equality that relates nothing does not pass by
@@ -258,10 +263,14 @@ Coproduct (A B S : U) := CaseLeft A B S & CaseRight A B S & CasesAreAll A B S
 -- that projection, and an injection is told by its name (review of layers 0-1, A: names
 -- constrained only to differ could be any names). Stated for two fields; the kernel's `Record`
 -- keeps any number flat (term.lth), each pair of its fields a model of this.
+-- what `select` gives: the value of the field selected, injected by which of the two it is; named,
+-- so that a model in another file can name its labels in an import (group 4 of
+-- record/IA/check-2026-10-13/opus-3b.md, part 2)
+Selected (A B : U) = { one : A || two : B }
 NamedProduct (A B P : U) : {
   pair : A -> B -> P, first : P -> A, second : P -> B,
   firstName : String, secondName : String,
-  select : String -> P -> Maybe { one : A || two : B },
+  select : String -> P -> Maybe (Selected A B),
 }
 asProduct (A B P : U) (r : NamedProduct A B P) : Product A B P := { pair := r.pair, first := r.first, second := r.second }
 NamedPairs (A B P : U) (r : NamedProduct A B P) (a : A) (b : B) (q : P) : Bool :=
