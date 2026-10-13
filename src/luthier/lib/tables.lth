@@ -105,12 +105,12 @@ sameTable (t u : Table) : Bool :=
 
 -- ---------------------------------------------------------------- §4 The codec (4.S8, 4.S22)
 
--- a parse and a render between text and tables, with the equality of tables it is judged by
+-- a parse and a render between text and tables, with the equality of tables it is judged by. Each
+-- law compares a parse with a table through `c.eq` itself: by 4.S15 a law depends on the names in
+-- it "without unfolding definitions", and the helper `sameParse` that compared them left `eq`
+-- unread (report of the leftovers agent, f8c5f40). The parse compared is always with a table
+-- (`just t`), so a failed parse is `false`.
 Codec : { parse : String -> Maybe Table, render : Table -> String, eq : Table -> Table -> Bool }
-
-sameParse (c : Codec) (a b : Maybe Table) : Bool :=
-  match a { nothing -> (match b { nothing -> true ; just y -> false })
-          ; just x -> (match b { nothing -> false ; just y -> c.eq x y }) }
 
 -- A table and a text with the same content written differently (spaces around a number or a
 -- header cell, CRLF line endings, a missing or an extra final newline, a double with more digits
@@ -125,12 +125,12 @@ Perturbed = { table : Table, text : String }
 BrokenText = { s : String }
 
 -- spec 4.S8: reading what was written gives back the table
-RoundTrip (c : Codec) (t : Table) : Bool := sameParse c (c.parse (c.render t)) (just t)
+RoundTrip (c : Codec) (t : Table) : Bool := match c.parse (c.render t) { nothing -> false ; just x -> c.eq x t }
 -- a text that parses renders to a text that parses to the same table: writing is canonical
 Canonical (c : Codec) (p : Perturbed) : Bool :=
-  match c.parse p.text { nothing -> true ; just t -> sameParse c (c.parse (c.render t)) (just t) }
+  match c.parse p.text { nothing -> true ; just t -> (match c.parse (c.render t) { nothing -> false ; just x -> c.eq x t }) }
 -- a text written differently but with the same content reads the same
-Tolerant (c : Codec) (p : Perturbed) : Bool := sameParse c (c.parse p.text) (just p.table)
+Tolerant (c : Codec) (p : Perturbed) : Bool := match c.parse p.text { nothing -> false ; just x -> c.eq x p.table }
 -- a text with a defect is not read: the negative control
 Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b.s { nothing -> true ; just t -> false }
 
