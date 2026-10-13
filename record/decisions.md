@@ -2403,3 +2403,18 @@ Quote:      "Si"
 Source:     chat:52b10bff:5385
 Kind:       plan (v0.2's criteria)
 Status:     current
+
+D-2026-10-13-ag In a block, the left of `<-` is a pattern against the action's `W * A`,
+                `(w1, s) <- readFile w0 "f"`; a bare name is allowed when `A` is `Unit`,
+                `w1 <- print w0 "x"`, binding the token and dropping the unit (sugar: the
+                elaboration adds the projection). Every action keeps the one shape `W -> ... ->
+                W * A` (D8), `Unit` being the result that carries nothing, so that laws, the
+                planner and the certifier treat all actions alike; `W * Unit` is isomorphic to `W`
+                (`Unit` terminal, D-2026-10-13-t). Changes 2.S17 (`item ::= pattern "<-" term`),
+                grammar.lth, the parser, translation.lth.
+Author:     Luciano, on the model's recommendation; he asked whether it was the only way and what
+            `Unit` is for (answered: uniformity of the action's shape)
+Quote:      "OK, es la unica forma?"
+Source:     chat:52b10bff:5433
+Kind:       spec (2.S17, 2.S9, 10.S2) and grammar.lth, translation.lth, parse.py
+Status:     current
