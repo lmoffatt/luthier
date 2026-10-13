@@ -31,7 +31,7 @@
 --   §5 `Elaboration :=` the conjunction.                                             done
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal Field Item Body Clause Binder
-  LambdaParam declare define alias datum operatorAct explicit implicit termBody dataBody clausesBody name
+  LambdaParam declare define alias datum operatorAct importAct explicit implicit termBody dataBody clausesBody name
   literal universe world app binop neg tuple pi sigma record subtype recordValue block sum list lambda
   matchOf namedArg ifThen proj intLit floatLit stringLit pWild pApp pLit pTuple plainParam typedParam
   shapeParam bind rebind
@@ -80,36 +80,51 @@ ActsKept (a : Alpha) (e : Elaboration a) : Bool :=
 
 -- ---------------------------------------------------------------- §2 Terms without types
 
--- names, constants, the universe and the world, application
+-- the context of this section: every name a law elaborates is declared, since an elaborator gives
+-- `nothing` for a term that does not type (review of layers 0-1, B)
+scope : SurfaceProgram := [aType "A", aType "B", of "x" "Int", of "y" "Int",
+  declare "f" [] (binop "->" (nm "Int") (nm "Int")), declare "m" [] (app (nm "Maybe") (nm "Int")),
+  declare "n" [] (binop "*" (nm "Int") (nm "Int")), of "k" "Int"]
+
+-- names, constants, the universe and the world, application; a name of an imported module is
+-- kept qualified, the canonical form removes the prefix (2.S12, 3.S34)
 Atoms (a : Alpha) (e : Elaboration a) : Bool :=
-  gives a (e.term [] (nm "x")) (Var "x") and gives a (e.term [] (literal (intLit 3))) (Lit (IntConst 3))
-  and gives a (e.term [] (literal (stringLit "s"))) (Lit (StringConst "s"))
-  and gives a (e.term [] universe) Universe and gives a (e.term [] world) World
-  and gives a (e.term [] (app (nm "f") (nm "x"))) (App (Var "f") (Var "x"))
+  gives a (e.term scope (nm "x")) (Var "x") and gives a (e.term scope (literal (intLit 3))) (Lit (IntConst 3))
+  and gives a (e.term scope (literal (stringLit "s"))) (Lit (StringConst "s"))
+  and gives a (e.term scope universe) Universe and gives a (e.term scope world) World
+  and gives a (e.term scope (app (nm "f") (nm "x"))) (App (Var "f") (Var "x"))
+  and gives a (e.term [importAct "m.lut" [{ name := "mod", theory := nothing, asName := nothing }]] (nm "mod.g")) (Var "mod.g")
 -- a lambda with typed parameters is nested lambdas (2.S12; its body a block, §4)
 Lambdas (a : Alpha) (e : Elaboration a) : Bool :=
-  gives a (e.term [] (lambda [typedParam ["x", "y"] (nm "A")] [] (nm "x"))) (Lam "x" (Var "A") (Lam "y" (Var "A") (Var "x")))
+  gives a (e.term scope (lambda [typedParam ["x", "y"] (nm "A")] [] (nm "x"))) (Lam "x" (Var "A") (Lam "y" (Var "A") (Var "x")))
 -- a `match` and its patterns: a name applied, or a constructor of the program's `data`, is a
 -- constructor pattern; a bare name otherwise a variable (2.S10, 2.S13); a tuple a pair
 Patterns (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [define "C" [] (just universe) (dataBody [("r", nm "C"), ("s", nm "C")]), of "m" "C"]
                   (matchOf (nm "m") [(pvar "r", literal (intLit 1)), (pWild, literal (intLit 2))]))
           (Match (Var "m") [(PCon "r" [], Lit (IntConst 1)), (PWild, Lit (IntConst 2))])
-  and gives a (e.term [] (matchOf (nm "m") [(pApp "just" [pvar "y"], nm "y"), (pTuple [pvar "p", pvar "q"], nm "p"),
-                                           (pLit (intLit 0), nm "z"), (pvar "w", nm "w")]))
-          (Match (Var "m") [(PCon "just" [PVar "y"], Var "y"), (PPair (PVar "p") (PVar "q"), Var "p"),
-                            (PLit (IntConst 0), Var "z"), (PVar "w", Var "w")])
+  and gives a (e.term scope (matchOf (nm "m") [(pApp "just" [pvar "y"], nm "y"), (pvar "w", nm "k")]))
+          (Match (Var "m") [(PCon "just" [PVar "y"], Var "y"), (PVar "w", Var "k")])
+  and gives a (e.term scope (matchOf (nm "n") [(pTuple [pvar "p", pvar "q"], nm "p")]))
+          (Match (Var "n") [(PPair (PVar "p") (PVar "q"), Var "p")])
+  and gives a (e.term scope (matchOf (nm "k") [(pLit (intLit 0), nm "x"), (pWild, nm "y")]))
+          (Match (Var "k") [(PLit (IntConst 0), Var "x"), (PWild, Var "y")])
 -- a list is `cons` and `nil` (2.S12)
 Lists (a : Alpha) (e : Elaboration a) : Bool :=
-  gives a (e.term [] (list [nm "x", nm "y"])) (App (App (Var "cons") (Var "x")) (App (App (Var "cons") (Var "y")) (Var "nil")))
+  gives a (e.term scope (list [nm "x", nm "y"])) (App (App (Var "cons") (Var "x")) (App (App (Var "cons") (Var "y")) (Var "nil")))
 -- a sum, a record type, a `data` (2.S12; 3.S4). A record type keeps its names in the kernel: it is
 -- a product whose projections are named (D-2026-10-13-x).
 TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
-  gives a (e.term [] (sum [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
-  and gives a (e.term [] (record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
+  gives a (e.term scope (sum [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
+  and gives a (e.term scope (record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
           (Record [("x", Var "A"), ("y", Var "B")])
-  and sameProgram a (e.elaborate [define "C" [] (just universe) (dataBody [("r", nm "C"), ("s", app (nm "List") (nm "C"))])])
-          [Define "C" Universe (Data "C" [("r", Var "C"), ("s", App (Var "List") (Var "C"))])]
+  and sameProgram a (e.elaborate [define "C" [] (just universe)
+                                    (dataBody [("r", nm "C"), ("s", binop "->" (app (nm "List") (nm "C")) (nm "C"))])])
+          [Define "C" Universe (Data "C" [("r", Var "C"), ("s", Pi "_" (App (Var "List") (Var "C")) (Var "C"))])]
+  -- an alias with binders is expanded with its arguments for its parameters
+  and sameProgram a (e.elaborate [aType "A", alias "P" [explicit ["T"] universe nothing] (binop "*" (nm "T") (nm "T")),
+                                  declare "z" [] (app (nm "P") (nm "A"))])
+          [Declare "A" Universe, Declare "z" (Sigma "_" (Var "A") (Var "A"))]
 
 -- ---------------------------------------------------------------- §3 Terms by type
 
@@ -132,6 +147,7 @@ OperatorsByType (a : Alpha) (e : Elaboration a) : Bool :=
 -- negation is subtraction from zero, of the operand's type (2.S12)
 Negation (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term typesAndValues (neg (nm "i"))) (bin "-" (Lit (IntConst 0)) (Var "i"))
+  and gives a (e.term [of "r" "Float64"] (neg (nm "r"))) (bin "-" (Lit (FloatConst 0.0)) (Var "r"))
 
 -- `if` on a `Bool` is a `match` on `true` and `false`; without `else` it gives a `Maybe`
 -- (D-2026-10-11-b); on `Failures E` the condition is first projected by `holds`, and without
@@ -187,6 +203,10 @@ Arguments (a : Alpha) (e : Elaboration a) : Bool :=
 Blocks (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [] (block [bind "x" (literal (intLit 1))] (nm "x")))
           (Let "x" (Var "Int") (Lit (IntConst 1)) (Var "x"))
+  -- an action in a block is an ordinary binding: it takes and returns the world (2.S12, spec 10)
+  and gives a (e.term [declare "act" [] (binop "->" world world), declare "w0" [] world]
+                      (block [rebind "w1" (app (nm "act") (nm "w0"))] (nm "w1")))
+          (Let "w1" World (App (Var "act") (Var "w0")) (Var "w1"))
   and gives a (e.term [] (block [rebind "y" (literal (intLit 1)), rebind "y" (binop "+" (nm "y") (literal (intLit 1)))] (nm "y")))
           (Let "y0" (Var "Int") (Lit (IntConst 1)) (Let "y1" (Var "Int") (bin "+" (Var "y0") (Lit (IntConst 1))) (Var "y1")))
 
@@ -199,6 +219,14 @@ Shapes (a : Alpha) (e : Elaboration a) : Bool :=
     [Declare "A" Universe, Declare "B" Universe,
      Define "h" (Pi "_" (Sigma "_" (Var "A") (Var "B")) (Var "A"))
                 (Lam "p" (Sigma "_" (Var "A") (Var "B")) (Match (Var "p") [(PPair (PVar "x") (PVar "y"), Var "x")]))]
+  -- clauses over two parameters match their tuple
+  and sameProgram a (e.elaborate [define "both2" [explicit ["b", "c"] (nm "Bool") nothing] (just (nm "Bool"))
+                                    (clausesBody [{ patterns := [pvar "true", pvar "d"], body := nm "d" },
+                                                  { patterns := [pWild, pWild], body := nm "false" }])])
+    [Define "both2" (Pi "b" (Var "Bool") (Pi "c" (Var "Bool") (Var "Bool")))
+                    (Lam "b" (Var "Bool") (Lam "c" (Var "Bool")
+                       (Match (Pair (Var "b") (Var "c")) [(PPair (PCon "true" []) (PVar "d"), Var "d"),
+                                                          (PPair PWild PWild, Var "false")])))]
   and sameProgram a (e.elaborate [define "nt" [explicit ["b"] (nm "Bool") nothing] (just (nm "Bool"))
                                     (clausesBody [{ patterns := [pvar "true"], body := nm "false" },
                                                   { patterns := [pvar "false"], body := nm "true" }])])
