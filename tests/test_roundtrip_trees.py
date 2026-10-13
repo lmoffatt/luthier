@@ -91,8 +91,10 @@ def wf(node):
             return is_name(name) and all(map(wf, binders)) and wf(value)
         case s.SigmaNamed(x, a, y, b):
             return is_name(x) and is_name(y) and wf(a) and wf(b)
-        case s.NamedArg(name, value) | s.Bind(name, value) | s.Rebind(name, value):
+        case s.NamedArg(name, value) | s.Bind(name, value):
             return is_name(name) and wf(value)
+        case s.Rebind(pattern, value):
+            return wf(pattern) and wf(value)
         case s.Proj(value, field):
             return wf(value) and is_name(field)
         case s.App(f, a):
@@ -242,7 +244,16 @@ class Trees:
         elif kind == 'item':
             # Items have a recursive argument, so callers may not request them at zero.
             assert size > 0
-            return rng.choice((s.Bind, s.Rebind))(self.name(), self.children(size, ['surface'])[0])
+            if rng.randrange(2):
+                return s.Bind(self.name(), self.children(size, ['surface'])[0])
+            # Rebind's left is a pattern (D-2026-10-13-ag); half of those with room are a tuple,
+            # the action's `W * A`, which the uniform pattern choice would rarely give.
+            pattern_size, value_size = self.child_budgets(size, ['pattern', 'surface'])
+            if pattern_size and rng.randrange(2):
+                pattern = s.PTuple(tuple(self.children(pattern_size, ['pattern'] * rng.randint(2, 3))))
+            else:
+                pattern = self.node('pattern', pattern_size)
+            return s.Rebind(pattern, self.node('surface', value_size))
         elif kind == 'binder':
             assert size > 0
             values = self.children(size, ['surface'] * rng.randint(1, 2))
@@ -415,6 +426,23 @@ def test_random_written_programs(size):
             failures.append((seed, size, minimal, *outcome(minimal)))
     # Complete the entire seed census even when an earlier tree failed.
     assert not failures, '\n'.join(map(repr, failures))
+
+
+def test_random_items_round_trip():
+    """Items are rare in whole programs, so the item generator gets a census of its own:
+    each item, first in a block, written and read back (the tuple case of BlockOrRecordValue)."""
+    failures, tuples = [], 0
+    for size in range(1, 7):
+        for seed in SEEDS:
+            item = Trees(seed).node('item', size)
+            tuples += isinstance(item, s.Rebind) and isinstance(item.pattern, s.PTuple)
+            program = (s.Datum(s.Block((item,), s.Name('a'))),)
+            assert wf_program(program), f'seed={seed}, size={size}, tree={program!r}'
+            text, result = outcome(program)
+            if result != s.Parsed(program):
+                failures.append((seed, size, program, text, result))
+    assert not failures, '\n'.join(map(repr, failures))
+    assert tuples
 
 
 def test_generator_wf_and_canonical_without_expected_failure():

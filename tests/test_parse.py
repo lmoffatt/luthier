@@ -35,6 +35,10 @@ def defx(t):
     return Parsed((Define("x", (), None, TermBody(t)),))
 
 
+def pvar(s: str):
+    return PApp(s, ())
+
+
 def parsed(text: str):
     r = parse(text)
     assert isinstance(r, Parsed), (text, r)
@@ -937,11 +941,66 @@ def test_block_or_record_value():
     assert parse("x := { a <- 1, a <- a + 1, a }") == defx(
         Block(
             (
-                Rebind("a", numeral(1)),
-                Rebind("a", Binop("+", nm("a"), numeral(1))),
+                Rebind(pvar("a"), numeral(1)),
+                Rebind(pvar("a"), Binop("+", nm("a"), numeral(1))),
             ),
             nm("a"),
         )
+    )
+    # D-2026-10-13-ag: the left of `<-` is a pattern against the action's `W * A`
+    assert parse("x := { (w1, s) <- f w0 ; s }") == defx(
+        Block(
+            (Rebind(PTuple((pvar("w1"), pvar("s"))), App(nm("f"), nm("w0"))),),
+            nm("s"),
+        )
+    )
+
+
+def test_rebind_pattern_bare_name():
+    """A bare name on the left of `<-`, the action whose result is `Unit` (D-2026-10-13-ag)."""
+    assert parse('x := { w1 <- print w0 "x" ; w1 }') == defx(
+        Block(
+            (Rebind(pvar("w1"), App(App(nm("print"), nm("w0")), Literal(StringLit("x")))),),
+            nm("w1"),
+        )
+    )
+
+
+def test_rebind_pattern_nested():
+    """A nested pattern parses; whether it is refutable is the checker's question."""
+    assert parse("x := { (w, just x) <- f w0 ; x }") == defx(
+        Block(
+            (Rebind(PTuple((pvar("w"), PApp("just", (pvar("x"),)))), App(nm("f"), nm("w0"))),),
+            nm("x"),
+        )
+    )
+
+
+def test_rebind_pattern_in_layout_block():
+    """The tuple pattern in a block written with newlines, as an action's body is."""
+    text = (
+        "f (w : W) : W * Unit := {\n"
+        "  (w, x) <- console.read w\n"
+        "  w <- console.print w x\n"
+        "  (w, x)\n"
+        "}\n"
+    )
+    block = Block(
+        (
+            Rebind(PTuple((pvar("w"), pvar("x"))), App(nm("console.read"), nm("w"))),
+            Rebind(pvar("w"), App(App(nm("console.print"), nm("w")), nm("x"))),
+        ),
+        Tuple((nm("w"), nm("x"))),
+    )
+    r = parsed(text)
+    assert r.program[0].body == TermBody(block)
+    assert parse(print_program(r.program)) == r
+
+
+def test_tuple_at_item_start_without_rebind_is_the_value():
+    """A parenthesised tuple at the start of an item is a pattern only when `<-` follows it."""
+    assert parse("x := { a := 1 ; (a, b) }") == defx(
+        Block((Bind("a", numeral(1)),), Tuple((nm("a"), nm("b"))))
     )
 
 

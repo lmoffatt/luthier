@@ -974,15 +974,18 @@ class _Parser:
         return tuple(items), value
 
     def item(self):
-        """item ::= name ( ":=" | "<-" ) term"""
-        name = self._name()
-        if self._peek(":="):
-            self._take(":=")
-            return Bind(name, self.term())
-        if self._peek("<-"):
-            self._take("<-")
-            return Rebind(name, self.term())
-        self._fail("':=' or '<-'")
+        """item ::= name ":=" term | pattern "<-" term"""
+        start = self.i
+        if self._peek(kind="name"):
+            name = self._name()
+            if self._peek(":="):
+                self._take(":=")
+                return Bind(name, self.term())
+            self._mark("':='")
+            self.i = start
+        pattern = self.pattern()
+        self._take("<-")
+        return Rebind(pattern, self.term())
 
     def arm(self) -> tuple[SurfacePattern, Surface]:
         """arm ::= pattern "->" term"""
@@ -1345,7 +1348,7 @@ def _print_item(item) -> str:
     if isinstance(item, Bind):
         return f"{item.name} := {_print_term(item.value)}"
     if isinstance(item, Rebind):
-        return f"{item.name} <- {_print_term(item.value)}"
+        return f"{_print_pattern(item.pattern)} <- {_print_term(item.value)}"
     raise TypeError(item)
 
 
