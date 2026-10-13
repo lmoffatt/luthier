@@ -34,7 +34,8 @@
 --      arguments).                                                                   todo
 --   §6 What a test cannot decide: 4.R10 (a law characterizes) and 4.S20 are
 --      reports, not failures (4.S19, 4.S20); stated as such.                          todo
---   §7 `WellFormed :=` the conjunction, one `ReportsExactly` per rule.                 todo
+--   §7 `WellFormed :=` the conjunction, one `ReportsExactly` per rule; written with
+--      §3's rules, §5's to join it.                                               done
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaParam Item Field Binder Body
   Clause ImportName declare define alias importAct operatorAct datum explicit implicit termBody dataBody
@@ -272,3 +273,12 @@ violatesS14 (p : SurfaceProgram) (n : String) : Bool :=
 
 -- 4.S17, no loose functions, rejects only once local definitions exist; until then it is a report
 -- (§6), and the theory files themselves hold such helpers, as 12.S23 allows.
+
+-- ---------------------------------------------------------------- §7 WellFormed
+
+-- A checker reports exactly the failures of each rule, and only about the program's names. The
+-- rules of §5 (types) join this conjunction as they are written.
+WellFormed := ReportsExactly "4.R1" violatesR1 & ReportsExactly "4.R2" violatesR2Exists
+  & ReportsExactly "4.R3" violatesR3 & ReportsExactly "4.R4" violatesR4 & ReportsExactly "4.R5" violatesR5
+  & ReportsExactly "4.R7" violatesR7 & ReportsExactly "4.R12" violatesR12 & ReportsExactly "4.S14" violatesS14
+  & ReportsOnItsNames

@@ -57,6 +57,11 @@ by Luciano.
 - 2026-10-13: step 2.2, `term.lth` §1 to §6 (892fbf3 to b7dfb6d): `Constant`, `Pattern`, `Term`,
   `Act`, `Program`; alpha-equivalence, substitution, canonical form, reduction with fuel, quote and
   eval. Its models, `term_model.lut` (§7), to Codex (`record/IA/term-2026-10-13/codex-models.md`).
+- 2026-10-13: step 3.1 begun: `program.lth` (1d9caa0 to this commit), the rules as predicates held
+  by one law `ReportsExactly`; §1 to §3 and §7 written (4.R1, 4.R2 existence, 4.R3 with L2.7,
+  4.R4, 4.R5, 4.R7, 4.R12 top level, 4.S14). Todo, in its index: §4 typing, §5 the rules on types
+  (4.R6, 4.R8, 4.R9, 4.R11, 4.R13, 4.S23), §6 reports (4.R10, 4.S17, 4.S20), type position for
+  4.R2, blocks for 4.R12. Codex can continue it (`record/IA/program-2026-10-13/codex-continue.md`).
 
 - 2026-10-13: step 4.2 brought forward, by Codex (55708f2): the 48 programs of `tests/spec/` in
   the new syntax, 47 parse, `r12_toplevel_arrow` is a syntax rejection by design (a runner must
