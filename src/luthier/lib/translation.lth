@@ -132,6 +132,9 @@ TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
 typesAndValues : SurfaceProgram := [aType "A", aType "B", of "i" "Int", of "j" "Int", of "c" "Bool", of "q" "Bool",
   declare "f" [] (app (nm "Failures") (nm "E"))]
 bin (o : String) (x y : Term) : Term := App (App (Var o) x) y
+-- a type declared at a type, with a primitive body as in core.lut, and a value of it
+primitiveTypes : SurfaceProgram := [aType "R",
+  define "F" [] (just (nm "R")) (termBody (app (nm "primitive") (literal (stringLit "ieee754-binary64")))), of "r" "F"]
 
 -- `->`, `*`, `+` on types are the dependent forms with an unused name and the anonymous sum
 -- (3.S4); on numbers they are the operators; `->` on Booleans is implication (2.S12, 2.S13)
@@ -144,6 +147,12 @@ OperatorsByType (a : Alpha) (e : Elaboration a) : Bool :=
   and gives a (e.term typesAndValues (binop "->" (nm "c") (nm "q"))) (bin "implies" (Var "c") (Var "q"))
   and gives a (e.term typesAndValues (binop "and" (nm "c") (nm "q"))) (bin "and" (Var "c") (Var "q"))
   and gives a (e.term typesAndValues (binop "or" (nm "c") (nm "q"))) (bin "or" (Var "c") (Var "q"))
+  -- a name declared at a type and given a `primitive` body is a type (11.R1: `Float64 : Real :=
+  -- primitive "ieee754-binary64"`), so `->` between two is the arrow; a name declared at it with no
+  -- such body is a value, and `*` on two of those is the operator [proposed: elaborate.py bite 6,
+  -- 0984440; stated by luthier-03]
+  and gives a (e.term primitiveTypes (binop "->" (nm "F") (nm "F"))) (Pi "_" (Var "F") (Var "F"))
+  and gives a (e.term primitiveTypes (binop "*" (nm "r") (nm "r"))) (bin "*" (Var "r") (Var "r"))
 -- negation is subtraction from zero, of the operand's type (2.S12)
 Negation (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term typesAndValues (neg (nm "i"))) (bin "-" (Lit (IntConst 0)) (Var "i"))
