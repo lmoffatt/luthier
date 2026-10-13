@@ -66,7 +66,7 @@ Object (A : U) := Reflexive A & Symmetric A & Transitive A
 -- an observational equality is respected by the functions of its own theory, each of whose
 -- operations states it as a congruence (as `AlphaCongruent` in term.lth). Found by Codex writing
 -- kernel.py: `Lam "x" Universe (Var "x")` and `Lam "y" Universe (Var "y")` are alpha-equal and a
--- function reading the binder separates them.
+-- function reading the binder separates them. Decided by D-2026-10-13-z.
 Structural (A : U) : { eq : A -> A -> Bool }
 asObject (A : U) (s : Structural A) : Object A := { eq := s.eq }
 StructuralIsObject (A : U) (s : Structural A) (x : A) (p : EqualPair A (asObject A s)) (c : EqualChain A (asObject A s)) : Bool :=

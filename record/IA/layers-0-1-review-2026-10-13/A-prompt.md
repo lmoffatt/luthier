@@ -12,10 +12,9 @@ Boolean algebra; the free monoid and the recursion of lists; an ordered commutat
 `Nat`; exponential, product and coproduct, with records and labeled sums as named products and
 coproducts), and `kernel_models.lut` says which core type is which. `term.lth` states the kernel
 term as data and the theories of alpha-equivalence, substitution, canonical form, reduction with
-fuel, and quote/eval; `term_model.lut` is the interpreter written in Luthier. One point is pending
-the designer's mark: kernel_laws §1 makes substitutivity over every function a law of the
-structural equality only, an observational equality being respected by its theory's operations
-(question Q5 to him); review it as written. A second model of `term.lth`'s theories, `kernel.py`
+fuel, and quote/eval; `term_model.lut` is the interpreter written in Luthier. kernel_laws §1
+makes substitutivity over every function a law of the structural equality only, an observational
+equality being respected by its theory's operations as congruences (decided, D-2026-10-13-z). A second model of `term.lth`'s theories, `kernel.py`
 in Python, already passes the laws of §2 to §5 on seeded random cases, and what that testing found
 is folded in (substitutivity under alpha, `IotaSkips` on stuck matches, `AlphaCongruent` for every
 constructor). So look for what testing cannot find: laws that do not determine what they claim,
