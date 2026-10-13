@@ -1,0 +1,20 @@
+-- tables_model.lut: the host's codec of tables (src/luthier/tables.py) as the model of `Codec`
+-- (tables.lth).
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 3; inventory row 5). A model file
+-- (12.S23): one value of the theory, its parse and render routes to the host (3.S40, 10.S8),
+-- certified against the four laws of tables.lth §4; v0.1's table_python.lut bound the same
+-- routes (tag v0.1-final). The host's table crosses as a value of `Table` as it is: its `nRows`,
+-- `names` and `kinds` are the record's fields and its `cell` the function (tables.py, `Table`
+-- and `as_table`). The equality is the theory's `sameTable`, native. The generators of
+-- `Table`, `Perturbed` and `BrokenText` are tables.py's `gen_table`, `gen_perturbed` and
+-- `gen_broken`, the bindings a test of `csv` names (7.R1).
+
+import "tables.lth" Codec Table sameTable
+
+csv : Codec := {
+  parse := extern "python:luthier.tables.parse",
+  render := extern "python:luthier.tables.render",
+  eq := sameTable,
+}
