@@ -392,10 +392,10 @@ translation; spec 3 cites it.
 | `if c then a`, `c : Failures E` | `match c { nil -> ok a ; cons e es -> failed e }`, the reason form; a demand for `Maybe A` forgets `e` |
 | `a and b`, `a or b`, `p -> q` with `p : Bool` | `and a b`, `or a b`, `implies p q` |
 | `[a, b, c]` | `cons a (cons b (cons c nil))`, element type from the expected type |
-| `{ x := a, y := b }` | `(a, b)`, checked against a type with components `x`, `y` |
-| `e.y` | a one-branch `match` on the component pattern of the type of `e` |
+| `{ x := a, y := b }` | `RecordValue [(x, a), (y, b)]`, the introduction of the named product (D-2026-10-13-x) |
+| `e.y` | `Proj e y`, the arrow `y` of the named product (D-2026-10-13-x) |
 | `m.f`, `m` an imported module | the definition `f` of module `m`; a module is a record of its definitions (spec 12) |
-| `{ x : A, y : B }` | `(x : A) * B`, with the last component also named |
+| `{ x : A, y : B }` | `Record [(x, A), (y, B)]`, the named product, its projections part of it (D-2026-10-13-x) |
 | `{ x : A \|\| y : B }` | the labeled sum of `x : A` and `y : B` (spec 3.S3) |
 | `Bool` | `{ true : Unit \|\| false : Unit }`, in `core.lut` |
 | `Maybe A` | `{ nothing : Unit \|\| just : A }` |
@@ -419,8 +419,8 @@ before it checks any of them (spec 4).
 ## §6 Dotted names
 
 **2.S14. Projection and qualification.** [implemented] `e.position` is the component `position` of
-a value whose type names its components; it elaborates to a one-branch `match` on the type's
-component pattern, works after a parenthesis, `(f x).field`, and through refinements (`{ s : Scene
+a value whose type names its components; [decided D-2026-10-13-x] it elaborates to `Proj e position`, the
+named arrow of the product (it was a one-branch `match` on the type's component pattern), works after a parenthesis, `(f x).field`, and through refinements (`{ s : Scene
 | p }` has the components of `Scene`). A module imported `as m` is a record of its definitions, so
 `m.f` is the same dot. The resolution takes the whole name as a qualified name first; otherwise
 the longest prefix that is a variable or a definition, and one projection per remaining segment.
