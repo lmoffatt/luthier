@@ -28,9 +28,9 @@
 -- `luthier parse src/luthier/lib/world.lth`, sets its status to done here, and commits.
 --
 --   §1 The token and actions: an action's type says it is one; `act`; `own`; state
---      actions idempotent, world actions never (10.S3 to 10.S6; D4, D8).               todo
+--      actions idempotent, world actions never (10.S3 to 10.S6; D4, D8).               done
 --   §2 Places and observations: the world as the library represents it; an action changes
---      only the places its declaration names (10.S7); what is assumed (10.S13).        todo
+--      only the places its declaration names (10.S7); what is assumed (10.S13).        done
 --   §3 Externs as routes: read at the first demand with the hash of what was read in the
 --      identity, validated against the type's laws, refused if they fail, provisional as
 --      debt (10.S8 to 10.S10, L11.2, L11.7).                                           todo
@@ -39,3 +39,66 @@
 --      L11.6). Waits for evidence (certification.lth).                                 todo
 --   §6 The externs of sonolocalización (numpy and its data formats). Waits for the
 --      inventory, record/IA/sonolocalizacion-inventory-2026-10-13/.                     todo
+
+-- ---------------------------------------------------------------- §1 The token and actions
+
+-- The library's representation of the world, the model of `W`: a type `R` the core never names.
+-- An action is a function that takes the token and gives its result with the token after (10.S3,
+-- 10.S4): its type says it is an action, and a function that mentions no `W` holds no effect
+-- (10.S1). `act` applies it. The token has no `==` (4.R8); a program constructs none, it enters at
+-- `main` or in the session (D8: `W` optional in `main`, a `main` without it a pure script).
+Action (R A : U) = R -> A * R
+act (R A : U) (a : Action R A) (w : R) : A * R := a w
+after (R A : U) (p : A * R) : R := match p { (x, w) -> w }
+result (R A : U) (p : A * R) : A := match p { (x, w) -> x }
+
+-- Two kinds of action (10.S6): one on Luthier's own store (writing a certificate, recording a
+-- test) is idempotent and may be served from the memo; one on the world runs each time it is
+-- demanded. `own` says which, from the action's declaration and not from its effect; an action
+-- that declares nothing is a world action, the safer reading. The token is used exactly once
+-- (D4): an action whose new token nobody uses is not demanded, so every action lies on the chain
+-- that reaches the output; that is a rule of the checker over blocks (program.lth, 4.R12), not a
+-- law here.
+Declared (R A : U) = { run : Action R A, own : Bool, places : List String }
+
+-- An observable world: the library says what a place is (a file path, the standard output, the
+-- clock) and what is read at one; two tokens are told apart by what is read at the places. The
+-- laws a world owes: an own action done twice leaves what is read everywhere as once (10.S6); an
+-- action changes only the places its declaration names (10.S7, §2).
+World (R : U) : {
+  places : List String,
+  read : R -> String -> Maybe String,
+}
+sameAt (R : U) (m : World R) (w v : R) (ps : List String) : Bool :=
+  match ps { nil -> true ; cons p rest -> m.read w p == m.read v p and sameAt R m w v rest }
+-- an own action is idempotent: running it on its own result reads the same everywhere
+OwnIsIdempotent (R : U) (m : World R) (A : U) (a : Declared R A) (w : R) : Bool :=
+  not a.own or sameAt R m (after R A (a.run w)) (after R A (a.run (after R A (a.run w)))) m.places
+
+-- ---------------------------------------------------------------- §2 Places and what an action changes
+
+-- An action may change the world and Luthier's store, and nothing else (10.S7): not a definition,
+-- not a binding of another block. In the world, it changes only the places its declaration names:
+-- at every other place, what is read after is what was read before. That is the law of the world's
+-- library over the observations it defines, certified as any law (D-2026-10-13-a).
+except (ps xs : List String) : List String :=
+  match ps { nil -> nil ; cons p rest -> if memberStr p xs then except rest xs else cons p (except rest xs) }
+memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
+ChangesOnlyDeclared (R : U) (m : World R) (A : U) (a : Declared R A) (w : R) : Bool :=
+  sameAt R m w (after R A (a.run w)) (except m.places a.places)
+
+-- What cannot be tested is assumed, so that the certificate of a run says under what hypotheses it
+-- holds (10.S13, 6.S10): what is written at a place is read back at it (the disk persists); a
+-- place no action touched reads the same after the program was off. Stated as laws, their
+-- evidence is a citation or an assumption (laws.lth, `Assumed`), never a sample.
+Persistence (R : U) : {
+  world : World R,
+  write : R -> String -> String -> R,
+}
+WriteThenRead (R : U) (s : Persistence R) (w : R) (p c : String) : Bool :=
+  not (memberStr p s.world.places) or s.world.read (s.write w p c) p == just c
+WriteChangesOnlyItsPlace (R : U) (s : Persistence R) (w : R) (p c : String) : Bool :=
+  sameAt R s.world w (s.write w p c) (except s.world.places [p])
+Persistence (R : U) := WriteThenRead R & WriteChangesOnlyItsPlace R
+
+World (R : U) := OwnIsIdempotent R & ChangesOnlyDeclared R
