@@ -1,7 +1,7 @@
 -- ebnf.lth: grammars in extended Backus-Naur form, as data, and the laws of what they derive.
 --
--- Draft 2, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on the
--- review of four models (record/IA/first-code-review-2026-10-13) and D-2026-10-13-o. A theory file
+-- Draft 3, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on two
+-- rounds of review by four models (record/IA/first-code-review-2026-10-13) and D-2026-10-13-o, -p. A theory file
 -- (spec 12.S23): the data, the theory `Derives` and its laws, and the definitions the laws need.
 -- It is generic: Luthier's own grammar (grammar.lth) is one value of `Ebnf`, and the grammars of
 -- the texts Luthier reads, a `.bib` file or a CSV, are others (L14: a grammar is data).
@@ -13,8 +13,8 @@
 -- recursion and no undefined nonterminal; and repetition asks its first round to consume, so that
 -- the laws have one solution on that domain instead of a fixed-point equation with many.
 --
--- A token, as a grammar sees it, is a kind (the lexer's class: "name", "keyword", "infix",
--- "number", "string", "symbol", "newline") and a text. A string token's text keeps its quotes, so
+-- A token, as a grammar sees it, is a kind (the lexer's class: "name", "keyword", "number",
+-- "string", "symbol", "newline") and a text. A string token's text keeps its quotes, so
 -- `lit "import"` never matches the string "import"; a newline token's text is "\n".
 
 -- ---------------------------------------------------------------- the data
@@ -61,6 +61,24 @@ prefixed (A : U) (t : A) (ps : List (List A * List A)) : List (List A * List A) 
   match ps { nil -> nil ; cons (xs, ys) more -> cons (cons t xs, ys) (prefixed A t more) }
 
 isEmpty (A : U) (xs : List A) : Bool := match xs { nil -> true ; cons x rest -> false }
+
+-- the texts a grammar takes as literals, and the kinds it takes as categories: what a lexer for it
+-- must reserve and must produce (grammar.lth derives its keywords from them, L2.7)
+litsOf (e : Ebnf) : List String := litsAll (rhsOf e.rules)
+litsIn (r : Rhs) : List String := match r {
+  eps -> nil ; lit s -> [s] ; cat c -> nil ; ref n -> nil ;
+  seq rs -> litsAll rs ; alt rs -> litsAll rs ; opt a -> litsIn a ; rep a -> litsIn a ;
+}
+litsAll (rs : List Rhs) : List String := match rs { nil -> nil ; cons r rest -> append String (litsIn r) (litsAll rest) }
+catsOf (e : Ebnf) : List String := catsAll (rhsOf e.rules)
+catsIn (r : Rhs) : List String := match r {
+  eps -> nil ; lit s -> nil ; cat c -> [c] ; ref n -> nil ;
+  seq rs -> catsAll rs ; alt rs -> catsAll rs ; opt a -> catsIn a ; rep a -> catsIn a ;
+}
+catsAll (rs : List Rhs) : List String := match rs { nil -> nil ; cons r rest -> append String (catsIn r) (catsAll rest) }
+-- the literals of some nonterminals only, as the operators of the precedence levels
+litsOfNames (e : Ebnf) (ns : List String) : List String :=
+  match ns { nil -> nil ; cons n rest -> append String (litsAll (rulesOf e n)) (litsOfNames e rest) }
 
 -- ---------------------------------------------------------------- well-formed grammars
 
@@ -122,8 +140,12 @@ refsDefined (e : Ebnf) : Bool :=
   memberString e.start (lhsNames e.rules) and allDefined (refsAll (rhsOf e.rules)) (lhsNames e.rules)
 rhsOf (ps : List Production) : List Rhs := match ps { nil -> nil ; cons p rest -> cons p.rhs (rhsOf rest) }
 
--- The domain of the laws and of a model's certificate (L10.1): the grammars whose meaning the
--- laws determine and a recognizer can compute.
+-- The domain of the laws and of a model's certificate (L10.1). `noneLeftRecursive` is what the
+-- uniqueness below needs and what the backtracking model needs to end; `refsDefined` is hygiene, a
+-- grammar mentioning an undefined nonterminal being a mistake, though `RefUnion` would give it
+-- nothing to derive. Left-recursive grammars have a meaning too, the least solution, which other
+-- recognizers compute; they are outside this domain because these equations and this model do not
+-- pin and compute it (GPT, round 2), not because they mean nothing.
 WellFormedEbnf : U := { e : Ebnf | refsDefined e and noneLeftRecursive e (lhsNames e.rules) }
 
 -- ---------------------------------------------------------------- the theory
@@ -181,11 +203,18 @@ OptEmptyOrOne (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView)
 RepRounds (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
   d.derivesRhs e (rep a) ts == (isEmpty TokenView ts or anySplit d e true a (rep a) (splits TokenView ts))
 
--- On a well-formed grammar the laws have one solution: each one gives `derivesRhs e r ts` from
--- the values at a shorter list, or at the same list and a right-hand side reached without
--- consuming, which no left recursion makes a well-founded order. So any two models of `Derives`
--- agree on well-formed grammars, and the backtracking recognizer of ebnf_model.lut is one of them.
--- The argument is the model's, written here for a later proof or citation; it is not checked.
+-- On a well-formed grammar the laws have one solution, by induction on the length of the list,
+-- in three steps (Kimi and Claude, round 2). First the empty list: there `derivesRhs e r nil` is
+-- `nullable e r`, by structural descent into `r` and, at a `ref`, into its rules, and a cycle of
+-- such descents would be a left-call cycle, which `noneLeftRecursive` excludes. Then a longer list,
+-- assuming every shorter one settled: `SeqSplits` splits it into a first part and a rest; when the
+-- first part is empty its value is settled by the first step and the rest is a structural
+-- subterm at the same list; when it is not, both parts are shorter. `RepRounds` asks the first
+-- round to consume, so its rest is shorter. `RefUnion` replaces a nonterminal by its rules at the
+-- same list, and a chain of such replacements with no token consumed is a chain of left calls,
+-- finite on this domain. So within one length the descent is by structure and by left calls, both
+-- well founded, and any two models of `Derives` agree on well-formed grammars; outside the domain
+-- they may differ. The argument is the model's, written for a later proof or citation, not checked.
 -- An alternative statement, by finite derivations as witnesses (`derives` as an `exists` over
 -- them, L9.11), would make the uniqueness definitional; it waits for a case that needs it.
 Derives := EpsEmpty & LitOne & CatOne & RefUnion & SeqEmpty & SeqSplits & AltUnion

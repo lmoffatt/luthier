@@ -42,7 +42,10 @@ the braces of a record type, a record value and a block (a lambda's body include
 separates items and `;` is equivalent to it, so several items may share a line
 (D-2026-10-11-k). A line indented deeper than the block's first item continues the item above it,
 and so does a line that cannot start an item: one beginning with `else`, `then`, `in` or an
-infix operator.
+infix operator. [proposed] Two readings `grammar.lth` takes where this is silent: the braces of a
+`data` behave as those of a record type (a line break separates constructors), and a `}` at
+column 0 closes its brace and does not start an act; blank lines and lines holding only a comment
+are dropped with their line breaks.
 
 ## §2 Acts
 
@@ -68,7 +71,8 @@ Clauses under a header with parameters are a `match` on the tuple of the paramet
 the module keeps, such as a `test` line or a citation (2.S21 makes `test` and `cite` functions);
 which terms may stand there is the checker's, and no `<-` does (2.R5). A trailing separator is
 allowed after the last constructor of a `data`, the last arm of a `match` and the last item of a
-record or a block. [decided D-2026-10-13-p] A definition has a body or clauses, never both:
+record or a block; [proposed] also after the last element of a list, and `_` is a pattern atom so
+that `cons _ rest` can be written (`grammar.lth`). [decided D-2026-10-13-p] A definition has a body or clauses, never both:
 `definition ::= name { binder } [ ":" term ] ( ":=" body | clause { clause } )`; a definition by
 clauses is the `match` of its clauses on the tuple of its parameters (2.S12). Between the
 constructors of a `data` on one line, `;` is required (a line break gives it, 2.S4). A name may be
@@ -110,7 +114,7 @@ argument types of a function, and a type names its model (D-2026-10-11-j): the m
 
 | level | forms | associativity |
 |---|---|---|
-| 1 | the open forms: `(x : A) ->`, `(x : A) *`, `\ params { }`, `if c then a else`, each taking the whole term to its right | (prefix) |
+| 1 | the open forms: `(x : A) ->`, `(x : A) *`, `if c then a else`, each taking the whole term to its right; an open form is never an operand, except on the right of `->` and `&` | (prefix) |
 | 2 | `&` | right |
 | 3 | `->` | right |
 | 4 | `or` | left |
@@ -123,7 +127,8 @@ argument types of a function, and a type names its model (D-2026-10-11-j): the m
 | 11 | `.field` | left |
 
 So `(n : Nat) * Vec n` is `(n : Nat) * (Vec n)`, `if c then a else b + 1` is `if c then a else (b + 1)`,
-and the dangling `else` of 2.S11 belongs to the nearest `if`, all by the table. `and`, `or` and `mod`
+and the dangling `else` of 2.S11 belongs to the nearest `if`, all by the table. A lambda and a
+`match` are closed by their braces and are atoms. `and`, `or` and `mod`
 are operators like `+`, not names (D-2026-10-13-p), and the `operator` act gives each its meaning
 on a type, as for `+`, `-`, `*`, `/`. The table is stated in `src/luthier/lib/grammar.lth`, whose
 `luthierSyntax` is the grammar (2.S9).
@@ -329,7 +334,8 @@ its value, stays open (spec 8).
 `then`, `else`, `U`, `operator`, `quote`, `import` and `as` (D-2026-10-13-o, -p): `operator` binds a
 symbol, which no function can take as an argument; `quote` captures a term unevaluated; `import`
 binds names (12.S22) and `as` renames one on that line. They are the words `luthierSyntax` takes as
-literals, so the keyword set is derived from the grammar and not listed apart (D-2026-10-13-p). Everything else is a core or library
+literals, so the keyword set is derived from the grammar and not listed apart (D-2026-10-13-p);
+the operators `and`, `or` and `mod` are such words too, so they are reserved as well. Everything else is a core or library
 name: `let` and `in` give way to blocks (§8); `forget` is a function of core; `extern`,
 `primitive` and `axiom` are names of core whose application the checker recognizes (`spec 3 §8`),
 with `provisional` a named argument of `extern`; `test` and `cite` are functions whose options

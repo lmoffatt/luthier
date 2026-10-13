@@ -198,7 +198,7 @@ names the generator (`spec 7`).
 Files: r7_alias.accept.lut, r7_alias_defined.reject.lut.
 
 **4.R8. `==` exists only where equality is structural.** [implemented] `==` is defined on `Int`,
-`Float64`, `String`, `Unit`, `Empty`, and on products, sums, recursive `data` and subtypes built
+`Float64`, `String`, `Unit`, `Empty`, and on products, sums, `data` (recursive or not, D-2026-10-13-o) and subtypes built
 from types that have it. Not on exponentials, and not on anything containing one. A law that
 compares values of such a type takes the equality it uses as a parameter or as a component of its
 theory: the observational equality of the presentation. `algebra.lut` already does so (each
