@@ -30,7 +30,10 @@ until Luciano marks them, every step assumes them as recommended and says so in 
   (92924e6). The first theory file and model file apart (Z8).
 - 2026-10-13: the three files reviewed by four models (record/IA/first-code-review-2026-10-13);
   his answers D-2026-10-13-o changed the specification (548b320); the files rewritten as draft 2
-  (51eca81); round 2 sent (596abaf). Next: round 2's replies, then the parser (1.2).
+  (51eca81); round 2 sent (596abaf).
+- 2026-10-13: round 2's replies; his principle L2.7, a definition is a concept (D-2026-10-13-p);
+  draft 3 (14cff68): no enumerations, the precedence table, wf exact; round 3 prepared. Next:
+  round 3 if he sends it, then the parser (1.2).
 
 ## Rules for every step
 

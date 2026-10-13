@@ -1,0 +1,776 @@
+# The principles of Luthier
+
+Projected from `record/principles-language.md` (sha256 f6f23fd4505f, commit 548b320 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+
+## Purpose
+
+One sentence, which is L1, heads the document: the language exists so that the invariances of a
+discipline can be stated in it. Everything below says how.
+
+**L1. Luthier expresses the invariances of the disciplines.**
+From: G1 (what is known of a thing is its description; "la idea de luthier es ayudar a descubrir las
+invariantes de los calculos", note), with P14 (a type is a concept).
+- L1.1 What moves the language: a species mates within itself, electrons are fermions, a probability
+  integrates to one. A definition states the invariances that determine a concept, and the language
+  exists so that stating them is natural. [settled]
+Status: settled; the purpose, not a design rule, so it heads the document.
+
+## Terms
+
+Each term has one category and is defined here and nowhere else; the principles cite Terms.
+
+- A *structure* is a type in the kernel's language (spec 3), built from four forms: a product, a
+  value made of several named fields (a record, a tuple); a sum, a value that is one of several
+  cases, each tagged (a variant, an enumeration, `Maybe`); a function type `A -> B`; and a
+  recursive type, one defined in terms of itself (a list, a tree). Each form may hold the others.
+  An *alias* names a structure: a shape used before what it is for is known (D-2026-10-13-p).
+- A *predicate* is a function into `Bool`. A *cost* is a function into `Cost`, the non-negative
+  reals with infinity, 0 true and ∞ false.
+- A *law* is a predicate or a cost, or a combination of laws that is again a predicate or a cost;
+  how laws combine is L12.
+- A *theory* is a structure with its law.
+- A *model* is an inhabitant of a theory: a value of its structure whose law is certified.
+- A *function* is a value of a function type `A -> B`, in the standard sense. A function type with
+  its law is a theory, and a function that satisfies it is a model of that theory.
+- The *dependences* of a theory are the theories whose models its structure and law use
+  (`Monoid A` depends on `Setoid A`; `VectorSpace K V` on `Field K`). A carrier is assumed to come
+  with the models it names, `A` with its setoid, `K` with its field, so a theory reads them from
+  the type (O2 for the syntax). Every theory has dependences; a function type has at least the
+  setoids of its carriers, since its law uses their equality.
+- A *certificate* is the record that a law was checked, with its *grade*: *proved*, by a theorem
+  cited or by delegation to a library's guarantee; *exhaustive*, over every case; *cases*, over
+  chosen cases; *sampled at a level*, over a sample drawn from a stated distribution; *assumed*,
+  not checked. A proof is a certificate of grade proved. To *certify* is to produce one.
+- *Evaluation* computes a function, and has no effect (L4). *Execution* is an action on the world
+  (print, save). Writing a certificate into the store Luthier owns is an action on Luthier's own
+  state, verified by reading the store back (L4); `test` is that action (L5).
+- The *demand* is a request for a value from outside the program, an action, carrying the type and
+  the tolerance it wants, the type possibly decorated: the value with its error, its derivative,
+  its certificate. The *planner* is what chooses, among the models certified equivalent, the one
+  that runs, and plans the decorated type the demand asks for.
+- The *declarative face* of a program is what it states: its types, laws and definitions. The
+  *executive face* is what the demands ask of it.
+- The two faces live apart. The declarative face has no time: its definitions live in the
+  universe `U`, and are copied, compared and memoized. The executive face acts on the world `W`,
+  one world, each value of it used once, never memoized (D-2026-10-13-b). (A metaphor, not a term:
+  mind and world, as in McDowell's *Mind and World*, 1994.)
+- Three things make the language: what is said (the definitions, `U`), what is done (the actions,
+  `W`), and what is certified. Every reading of the world changes Luthier's representation of it; a
+  *certifier* changes something else, the belief that a value belongs to a type, and its result
+  comes back to the declarative face as that belief with its evidence: the passage from
+  acquaintance to description (G1). It is not a keyword; its five kernel forms are names of core
+  (D-2026-10-13-d, D-2026-10-13-e).
+
+- An *object* is a type with its equality, the word for what C++ calls a regular type: the base
+  theory (a setoid, O2), whose laws the kernel guarantees for a structural `==` and the author
+  states for an observational one; a kernel type with no equality is a *structure*
+  (D-2026-10-12-ak). A *theory* is an object with its further laws, written in one name or in
+  several (then a cycle of the dependency graph); the number of names is its presentation
+  (D-2026-10-12-aj).
+
+## The organizers
+
+The guide and the two eurekas, in his order. An organizer is two sentences: what it says and what
+it decides; it carries no mechanics and no status, and the principles under it are its section
+below. The history of the eurekas and the P13 count are in the record.
+
+**G0. Type theory is the guide.** A type is a proposition and a value its proof; a law is a
+proposition over terms, so it defines a mathematical object and a quotient, and inside the class the
+representative is free. Type theory guides what is declared, and what governs execution is the
+demand, read in the same theory: a demanded type is a judgment to inhabit, execution is the search
+for an inhabitant, and where type theory normalizes a given term, Luthier searches for one.
+Tier: the guide.
+
+**G1. A type is a theory and its values are its models.** If a type is a proposition, then a
+proposition can say that a structure follows the rules of a theory, so "this structure satisfies the
+laws of the theory" is said, in the language of types, as "it is of the type of the theory": it is a
+model of the theory, and Luthier verifies that it is. Types thereby carry a strong semantic meaning,
+and coding and testing are one act: to declare `m : T` is to declare the tests `m` will pass.
+Tier: eureka, the first (the trigger, audio 09.19, 00:00 to 00:14).
+
+**G2. Laws are valued in cost: one logic, extended to the non-negative reals.** Not every theory is
+easily described by Booleans; many are represented better by costs. Since object classifiers exist
+that extend logic to the non-negative reals, with the Booleans as a special case, the composition of
+errors in numerical libraries can be attacked with this one unified logic.
+Tier: the second eureka on his note of 2026-10-12.
+
+## Precedence
+
+When two statements conflict, the organizer they derive from decides; when two organizers
+conflict, G0 decides; within an entry, the statement decides over its clauses. A clause marked
+proposed, candidate or mark pending yields to one marked settled.
+
+## The principles of the language
+
+Fifteen principles, each under the organizer it derives from, in the order of his six topics.
+Each is a statement, the fixed part, and numbered clauses, each with its own status: settled,
+proposed (the model's, awaiting his mark), candidate, or mark pending (his words, the wording
+awaiting his mark). Where a clause has a worked example, the example follows the clauses; what
+each entry rests on among the open questions is named. The Numbering table at the end maps the
+numbers of drafts 1 to 10.
+
+### Under G0, the guide
+
+**L2. Declare, then define, then inhabit.**
+From: G0 (a hole is a hypothesis of the context) with G0, the demand (nothing is produced until
+demanded).
+- L2.1 A declaration without a body is a first-class hole: at once axiom, program input, external
+  function, pending definition and dead code; nothing executes until it is defined, and no value
+  inhabits an undefined type. [settled]
+- L2.2 An axiom is not a value but a law with grade `assumed`, so it does not inhabit; `assumed` has
+  one meaning, the grade. [settled]
+- L2.3 To the type checker the five are one, and the elaborated form records which it is, since the
+  demand treats them differently: an input asks for a value, an external calls the host, a pending
+  definition is an error, an axiom is a law with grade `assumed`, reasoned with and never run (O9).
+  [settled]
+- L2.4 `extern` is the operation that inhabits a hole with a body in another language, naming the
+  language; a theoretical module (types, functions, laws, no values) is a module of holes. [settled]
+- L2.5 (His words) A declared name is assumed to have its declared type, and its use where that type
+  is incompatible is an error (spec 4.R1, the checker). [settled]
+- L2.6 The theoretical module of clause 4 is a file of its own: a theory file holds types,
+  declarations and laws, and is what the checker reads; each model of it, or each algorithm written
+  against it, lives in a file of its own, read only when a demand needs it and certified against the
+  theory. What a file imports has its theory in a theory file (D-2026-10-13-i, -j). A theory file may
+  hold the definitions its laws need and a value that is part of the theory, never a model of a theory
+  declared elsewhere (D-2026-10-13-o). [settled]
+- L2.7 (His words) A definition is a concept, and a collection of types is not. An alias names a
+  structure we use before we know what it is for; a definition promotes it to a theory, and what makes
+  it one is a law it must follow, stating the role of each part. Distinct constructors are free and
+  state no role; an observer that only lists them is an automatic accessor, not a law; a `data` with
+  no law of its constructors' roles is a collection and is written as an alias (D-2026-10-13-p,
+  D-2026-10-07-e). It costs thought, and that is its purpose. [settled]
+References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j.
+Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
+Status: settled; clause 6 settled (D-2026-10-13-i, -j, -n); clause 7 his (D-2026-10-13-p).
+
+**L3. Equality has levels and belongs to the object.**
+From: G0 (the identity type and its levels) with G2 (under cost, the identity proposition acquires a
+distance); clause 4 from G1 (the specimen can be recognized as the same specimen, or described).
+- L3.1 Definition (`:=`), the identity proposition (`=`), decidable equality (`==`) and definitional
+  equality by reduction (`≡`) are different things, and each object carries the observational equality
+  that fits it. [settled]
+- L3.2 In the kernel the binding is exact: the name denotes the term, and reduction does not depend
+  on a tolerance; the distance enters when the planner realizes the term by another representative,
+  which it does only along a certified equivalence carrying its distance (L6, D-2026-10-11-m).
+  [settled]
+- L3.3 Equality is a law of the object: Boolean where the carrier is decidable, a distance where it
+  carries one, and the type of the identity law's result, `Bool` or `Cost`, says which (L9); how a
+  certified identity composes along a path is L10.7. [proposed]
+References: D-2026-10-11-m.
+Rests on: O2 (the equality a type comes with).
+Status: settled; clause 3 proposed.
+
+**L4. A program is a DAG of definitions without effects, and statements commute; actions have
+effects, and are verified by observing the world before and after.**
+From: G0, the demand (the DAG is what the demand walks backward) with G2 (the second structure's
+metric); a definition without effects is G0, the demand's precondition rather than its consequence:
+the declarative face can be universal and minimally processed only if definitions have no effects;
+the separation of the second structure is the model's proposal.
+- L4.1 The unit is the definition; dependencies give the only order there is, and time is
+  reconstructed from them rather than from the text. [settled]
+- L4.2 Inside a block the text fixes which binding a name means, each `<-` a fresh name
+  (D-2026-10-11-i), and then dependencies give the only order. [settled]
+- L4.3 (His annotation) The binding acts are two, `:=` once and `<-` rebinding, and they share one
+  law: after the act the name equals the term in the equality its type has, structural `==` where it
+  exists (spec 4.R8), observational otherwise, a distance under G2; after `:=` for all time, after
+  `<-` until the next `<-` (spec 4.R12). [settled]
+- L4.4 Operations are declared before their laws, so a law that binds two operations is a node with
+  two parents, not a cycle. [settled]
+- L4.5 A mutable parameter is two variables, before and after, so it is not an effect, the
+  dependence is an edge, and mutation in place is the planner's optimization when the earlier one has
+  no other consumer; what is forbidden is what the graph does not show. [settled]
+- L4.6 The DAG says what depends on what; the structure the laws generate over terms (an equivalence
+  when laws are boolean, a metric space when they carry a distance) is a second structure, where L6
+  and the verification of actions (clause 9) live. [settled]
+- L4.7 A definition's result depends only on its inputs; effects live only in the actions (print,
+  save). It is the one assumption under which every evaluation strategy gives the same result; over a
+  carrier with a distance, a result in the same class at a distance the plan records, and for the
+  Boolean case this is `Confluent` in `lib/plan.lut`, a law a dataflow is certified against rather
+  than a theorem assumed. [settled]
+- L4.8 (His words) No effect on the world; its one effect is on the program: it takes its name,
+  once, and enters the map of definitions, so the same name is not defined twice (`:=` once; `<-` only
+  in a block, D-2026-10-11-i). [settled]
+- L4.9 (His annotation) Executing is the executive face: an action changes the state of the world,
+  and it is verified too, by observing the world before and after it; the laws over actions are stated
+  over those two observations, as a mutable parameter is two variables (clause 5). [settled]
+- L4.10 An observation is itself an action, so this stops where the world can be read back (a file
+  written and reread), and says nothing beyond; an effect on state Luthier owns is verified this way,
+  an irreversible or concurrent effect outside it is typed, logged and audited, never verified.
+  [settled]
+- L4.11 An action on Luthier's own state, writing a certificate or running a test, is idempotent and
+  memoizable; an action on the world never is: the world is an opaque, unique value, so an action on
+  it is never served from the memo (D-2026-10-12-m, O3). Unique is meant literally: the world is `W`,
+  a primitive of the core beside `U`, with no introduction (it enters at `main` or the session), no
+  `==`, and each value of it used once (D-2026-10-13-b). [settled]
+- L4.12 There is one world. Its parts, a file or a clock, are parts of Luthier's representation of
+  it, and whether two of them are independent is a theory of that representation, written in a library
+  and certified like any law; the language imposes no partition. Two actions on the world commute only
+  where such a certified law says so, and only over what can be read back (clause 10)
+  (D-2026-10-13-a). [settled]
+Example: after `x <- 1`, `y := x + 10`, `x <- 2`, y is 11, as the session answers (clause 2).
+References: spec 4.R12, spec 4.R8; D-2026-10-11-i, D-2026-10-12-m.
+Rests on: O3 (the world as a value).
+Status: settled; clauses 11 and 12 on his mark (D-2026-10-13-e).
+
+**L5. The demand determines the computation and the types produced; the meaning of a program, its
+realization under a plan and its evidence are three objects, never one.**
+From: G0, the demand directly; the audio of 08.58 (15:35 to 17:12, 30:37 to 31:21) adds the
+iteration step, read every demand, run, collapse to the outputs, write, and asks whether the code
+object is consumed or stable: kept; with G1 for what is derived (the former L6).
+- L5.1 The declarative face states what is known, universal and minimally processed; the executive
+  face is a demand from outside, and the demanded type fixes the path, the types and the tolerances
+  actually produced. [settled]
+- L5.2 The evaluation strategy is a parameter separate from the program (clause 18); by default, a
+  plan backward from the actions over names, evaluating nothing, then a strict forward run over the
+  live subgraph, each node once and whole: forward on demand. [settled]
+- L5.3 What the action asks for flows backward along the plan and is produced forward: the value,
+  its error, its derivative, its test, the type of its result; at the leaves a value lifts on its own,
+  takes a mark given with the demand, or is a hole. [settled]
+- L5.4 A decoration of the output is another model of the theory the code was written over (G1): run
+  over dual numbers the code gives its derivative, run over intervals or over pairs of value and cost
+  it gives its error; the demand choosing the output type is the demand choosing the model, and the
+  planner inserts the bridges (L6). The derivative needs nothing new; the error waits for the algebra
+  of costs (O1, O5). [proposed]
+- L5.5 The tests are actions, so verifying is demanding; what a demand requires of the certificates
+  in its cone, and when a certificate serves it, is L10.5 and L10.6. [settled]
+- L5.6 A result is identified by code, inputs, mode, the demanded type and tolerance, the model its
+  type names (Terms), the seed, the plan that produced it, the plan being a value (`lib/plan.lut`),
+  and the hashes of the certificates in its live cone, so a host library or platform that changed is a
+  new result. [settled]
+- L5.7 The runtime includes the thread count and scheduling of the host, and an extern whose bits
+  depend on scheduling is not bit-identical to itself, so its identity law is `Cost`, never `Bool`
+  (L3). [settled]
+- L5.8 The run database is what the planner reads to choose the plan and is not an input of the
+  result once the plan is fixed; evidence accumulates by a separate action with its own record, so
+  "each node once" and G2's "kept across runs" never meet on one node. [settled]
+- L5.9 A test is an action whose result is a certificate (L10.4), rerun when asked or when the
+  certificate's identity changed; "each node once" is once per plan: a stricter demand on the same
+  definition is another node of another plan, and the looser certificate still serves what it met.
+  [settled]
+- L5.10 The meaning of a program is the class its laws fix; a realization is the result under a
+  plan; the evidence is its certificates (L10): three objects, never one. [settled]
+- L5.11 Two sessions that differ only in the order of independent bindings are equivalent by
+  `Confluent` (L4), the law the session block is certified against. [settled]
+- L5.12 The program is the synthesis and is kept, the computation is the expansion and is redone.
+  Script and interpreter are the same under this L, one batch of demands or demands one at a time with
+  the memo between them (spec 8, O8); a session is a block and a file is never one, so a session saved
+  to a file becomes its `main` block (D-2026-10-11-i). [settled]
+- L5.13 What is produced, and which types, is what the demanded value needs; what it does not need,
+  the complement of its dependency cone, is not produced, so the choice is canonical, one per demand,
+  and the types being spoken are what was asked for. [settled]
+- L5.14 Not producing at run time (a node freed after its last consumer) and not carrying in the
+  type (how much history a certificate keeps) are one; the program is always kept, only what leaves
+  scope is lost; not producing is not materializing a derived value, never erasing what reconstructs
+  or recertifies it (code, inputs, model, seed, plan, tolerance), which the memo's identity keeps.
+  [settled]
+- L5.15 A function on a type applied to a subtype does not produce one overload per subtype; the
+  demanded return type selects which law to derive by composition (G1, O4), and the rest is not
+  produced. [settled]
+- L5.16 What is derivable is a property of the expression, independent of the demand; the demand
+  chooses which of it is derived, certified and carried, so the elaboration (types, derivable laws)
+  does not depend on the observer; the memo of results does, and they are two caches. [settled]
+- L5.17 The demand carries the cutoff: the minimal cutoff for a specimen to be considered, applied
+  to the composed bound and the composed evidence cost of a path (D-2026-10-12-h, L10.5); a cutoff
+  does not compose (L12.3), so it lives in the demand and is passed down from it, and no law carries
+  one. [proposed]
+- L5.18 No unrecorded policy constants: thresholds, budgets, limits, statistical levels and the
+  planner's default policies are never constants in code; they are declared, passed and recorded. The
+  kernel's primitives (0, ∞, `lift`, `exact`) and mathematical constants are not policies
+  (D-2026-10-12-n). [proposed]
+- L5.19 The outermost demand, an action with no caller, carries its tolerance as a declared default
+  argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
+  [settled]
+Example: doubling positives is positive only when positivity is demanded and derivable, sin of
+positives is only Real because no law composes (clause 15).
+References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
+Rests on: O1 (the error decoration), O3 (the world as a value), O5, O8, O12.
+Status: settled; clause 4 proposed on his note on Terms; clauses 17 and 18 proposed.
+
+**L6. One function, many specimens, chosen by maximizing the performance the demander chooses, along
+certified identities.**
+From: G0 (the quotient), G2 (the choice by cost and the database of runs) and, before its retirement
+in draft 9, the organizer "expressive over restrictive" (every path expressible; now L6's own
+clause).
+- L6.1 A function has many equivalent implementations, its specimens, each with its precision,
+  speed, memory and place of execution; equivalence is established first, and the choice among paths
+  follows expected loss and resources, estimated from a database of measured runs. [settled]
+- L6.2 The cost of a law and the resources of a run, time and memory, are not one scalar, and the
+  trade-off among them is a parameter of the demand (L5), never the planner's own. [settled]
+- L6.3 (His formula) What the planner ranks is an efficiency, exp(−cost) over the resources used, so
+  that a specimen of cost zero has efficiency 1/resources and not zero; the weight between cost and
+  resources, w, the demand's parameter, may enter as log(resources) added to the cost, so that the
+  rank is cost + w·log resources, minimized, the same as exp(−cost)/resources^w (D-2026-10-12-u).
+  [candidate]
+- L6.4 Two regimes: on a decidable carrier (`Int`, `Fin n`) two implementations compute the same
+  function or not, the quotient is exact, there is no precision to trade and the Boolean kernel stands
+  on its own; on a carrier with a distance (`Float64`) they are interchangeable only up to a distance
+  within the demanded tolerance, and precision can be traded for resources, which is where cost (G2)
+  and the demand enter G0's quotient. [settled]
+- L6.5 Semantic equivalence forms classes; certified substitutability forms a graph. In the theory
+  the specimens of a function are the quotient by "compute the same function up to the law's
+  equality", one class per mathematical function, the class chosen by law; in a model that carries a
+  distance closeness is not transitive, there is no class, only the ball of the demanded radius (`11`
+  §3), and the planner substitutes one specimen for another only along a certified identity between
+  the two, the identity law of L3 with its result `Bool` or `Cost` (D-2026-10-11-m). [proposed]
+- L6.6 The law gives the candidates; the identity certificates say which the planner may exchange,
+  and they form a weighted graph: a substitution is a path whose summed distance (`11` §2) and summed
+  evidence cost (L10.7) are within the demand's cutoff, so two specimens joined through a third may
+  each replace it and not each other; a lone specimen is never replaced. [proposed]
+- L6.7 A sampled edge is admissible on the distribution it sampled; it composes with edges sampled
+  over the same distribution, the failure fractions summed, and not with others; the demand's evidence
+  cutoff says whether it accepts the path (L10.8, D-2026-10-12-q). [proposed]
+- L6.8 The tolerance charged at a node is the demand's pulled back through the sensitivity of the
+  cone from the node to the demand (`11` §5), and where no sensitivity is known there is no
+  substitution. [settled]
+- L6.9 A link certified on a subtype is a link only at inputs certified (L8) in that subtype, so a
+  path exists at x only where every link does; a `proved` link by citation carries the theorem's
+  hypotheses as parameters and is void where they fail. [settled]
+- L6.10 The author's free choice among the inhabitants of an under-determined function
+  (D-2026-10-11-d, P5) stays; the planner's choice is only among what has been compared. [settled]
+- L6.11 The identity law between two specimens, with its distance, is what admits a second
+  implementation into the planner's graph (D-2026-10-11-m); the agreement test of W5 between native
+  and extern is this law, and the reference formula of a law evaluated over `Rational` is one more
+  specimen, with grade exact, checked by the same law. [candidate]
+- L6.12 An importer sees a module only through the theory it gives the module as type, so the
+  module's representation stays private and another model of the same theory can take its place
+  without the importer noticing; privacy is ascription, not a keyword (D-2026-10-13-c). [settled]
+- L6.13 An algorithm is written against a theory, never against a model: it is a functor that takes
+  any model of the theory, so each specimen can stand in for another, and it is certified per instance
+  unless a cited proof covers every model (D-2026-10-13-j). [settled]
+- L6.14 An import line names what enters with its theory, `import "x.lut" M : T`, so the importer is
+  checked against `T` without reading `x.lut`, and the ascription of clause 12 happens there (Z5 of
+  the plan from zero; the theory itself imported from a theory file first, D-2026-10-13-n). [settled]
+Example: γ_n needs n·u < 1, false for float32 over an hour at 48 kHz, so the cited bound is void
+there (clause 9).
+References: `11`; D-2026-10-11-d, D-2026-10-11-m, D-2026-10-12-q, D-2026-10-12-u; W5; P5.
+Rests on: O1 (the sensitivity), O2.
+Status: settled; statement in his words, 2026-10-12, with "specimens" and "along certified
+identities" added; clause 3 candidate on his mark (D-2026-10-12-u); clauses 5, 6, 7 proposed; clause
+11 candidate, from L3; clause 12 settled (D-2026-10-13-c, -e); clauses 13 and 14 settled
+(D-2026-10-13-j, -n).
+
+**L7. The core is minimal, executable by hand, and its programs are data.**
+From: G0 (a type theory is a few rules whose judgments a person checks; a small trusted kernel) and
+G1 (the paper semantics is the description, and every interpreter is a specimen certified against
+it); programs as data from G0 through the universe, the type of types (the object classifier of
+HoTT; the note's "object classifier" names this when it means types as values, and the subobject
+classifier when it means G2's truth values).
+- L7.1 A handful of well-specified primitives, so that a program can be run with pencil and paper;
+  everything else is a library whose translation to the core is mechanical. [settled]
+- L7.2 Hand execution is of the kernel given a plan, an order of execution that is a value
+  (`lib/plan.lut`); the planner's choice among plans is outside the kernel. [settled]
+- L7.3 Four layers, each trusted differently: the kernel, checked by hand; the libraries and the
+  interpreter in Luthier, certified against the kernel's laws; the host runtime, a specimen; the
+  planner, advice that the plan records. The five certifiers of L9.1 are kernel: names of core the
+  checker recognizes, as `extern` and `axiom`, checked by hand (D-2026-10-13-d, -e). [settled]
+- L7.4 A Luthier program is an element of Luthier; programs build, inspect and run other programs,
+  and the interpreter is meant to be written in the language it interprets. [settled]
+- L7.5 What a library can decide, the core does not: the core asks of each library the fewest
+  operations and laws it uses (for costs, spec 6.S5), and the open choices of the library are taken
+  when it is implemented and its invariants are found (D-2026-10-12-al, P16). [settled]
+Rests on: O11 (the kernel's theory stated in Luthier).
+Status: settled; clause 5 on his mark (D-2026-10-13-e).
+
+**L14. What can be written in Luthier is written in Luthier.**
+From: G0 (a type theory states its own rules in its own terms; L7, programs are data and the
+interpreter is written in the language it interprets) with G1 (the host's implementation is a
+specimen certified against the statement in Luthier); his principle, on his comment on D8 of the
+specification plan.
+- L14.1 The specification of how Luthier runs is written in Luthier where the kernel can express it:
+  a theory with its laws, whose models and counter-models are the accept and reject programs of the
+  suite; the prose explains, it does not define. [proposed]
+- L14.2 The libraries' theories, the generators, the plan, the certificate and the program itself
+  (`Program`, `Term` as data) are values of Luthier, stated with their laws before they are
+  implemented. [proposed]
+- L14.3 The host implements what Luthier states and is a specimen of it, certified against the
+  statement like any other model (L7.3, L9); two orders of bootstrapping are two paths to the same
+  theory, a minimal kernel in Python with the rest in Luthier, or theory and testing in Luthier with
+  everything implemented in Python, and the agreement of the two is the law W5 names. [proposed]
+- L14.4 What the kernel cannot yet express is written in the host and marked as such, a hole of the
+  theory it belongs to (L2), so that the boundary of "where it can" is visible and shrinks with each
+  version. [proposed]
+- L14.5 (His words) Keyword or not, the semantics of every construct is expressible in Luthier: a
+  keyword is surface syntax, and what it means is stated as a theory in Luthier (`match` and `data` by
+  the laws of the kernel, `if` as a `match` on `Bool`); every other construct is a name of core or of
+  a library, with named arguments for its options (D-2026-10-12-ab). [proposed]
+- L14.6 Of the two orders of bootstrapping, the theory comes first: Luthier's theories are written
+  in Luthier before any implementation, they are the authority, and the host's files and later the
+  Luthier implementations are their specimens, written after them and certified against them
+  (D-2026-10-13-h). The theory is not frozen: a specimen that shows it wrong, a false positive for
+  one, is evidence against it, and the theory is refined (D-2026-10-13-n). [settled]
+Rests on: O11 (the kernel's theory stated in Luthier); `Program` and `Term` as data, decided for
+version 0 in chat on 2026-10-12, to be specified in chapter 3.
+Status: his principle, stated in his words; the clauses are the model's wording, proposed, his mark
+pending; placed under G0 after L7 and numbered L14 until the next renumbering by document order
+(D-2026-10-12-v); clause 6 settled (D-2026-10-13-h, -n).
+
+### Under G1, theory and model
+
+**L8. A type is a proposition, membership is a guarantee, and the certified subtype from a law is
+the fundamental construction pattern.**
+From: G0 directly; the second clause is the step to G1.
+- L8.1 Belonging to a type asserts the propositions, laws included, that the value satisfies;
+  function types carry their laws the same way. [settled]
+- L8.2 `a : A` is one judgment, structural and decidable for the kernel's structures; it asserts the
+  structural proposition outright and the laws through the certificate, with the evidence the
+  certificate has. [settled]
+- L8.3 A value with a sampled or assumed certificate is a model of its theory with the cost its
+  certificate records (D-2026-10-12-j); "guarantee" means what the evidence says, and the word model
+  promises the evidence, not exactness. [proposed]
+- L8.4 What a law adds is evidence, recorded in a certificate (L10); what leaves the program carries
+  one (L10.6, D-2026-10-11-n). [settled]
+- L8.5 From a material type and a law, a predicate or a cost with its tolerance, come the certified
+  type, its only constructor and the forgetful projection; the same pattern builds values, functions
+  and programs. [settled]
+- L8.6 A law gives the three at once: the type, the constructor with Maybe, the membership function.
+  [settled]
+- L8.7 Where the law is into `Cost`, the certificate records the bound it observed, and the demand's
+  cutoff decides whether it serves (L10.5, D-2026-10-12-h); the constructor takes no tolerance.
+  [proposed]
+- L8.8 Types are verified before they are constructed: Luthier starts from types by verification,
+  and types by construction may come in later. [settled]
+- L8.9 Everything has laws, at the least those of its equality (D-2026-10-12-ak): there is no data
+  without them. What comes from the world enters as bytes or a `String`, whose laws are the kernel's,
+  and a check refines it once into its lawful type (spec 5.S9, 5.S12; D-2026-10-06-aa,
+  D-2026-10-13-j). `W`, which has no `==`, is a structure: a thousand laws are associated with it, the
+  observations of what actions do, and none of them defines it (D-2026-10-13-n). [settled]
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-j.
+Rests on: O1 (the bound in a certificate).
+Status: settled; clauses 3 and 7 proposed (D-2026-10-12-j, -h); clause 9 settled (D-2026-10-13-j,
+-n); "from a law" is his correction of 2026-10-12.
+
+**L9. A law characterizes; a certifier produces its evidence, exact or statistical; and the
+certificate of identity is not the certificate of the law.**
+From: G0 (a law defines the object) and G1 (a law that transcribes the specimen is acquaintance, not
+description; observation is how a description is verified) with G2 (the grade is the uncertainty of
+the cost); extends P10 (the mathematical object that best represents a concept is the invariant of
+its type).
+- L9.1 A law is the proposition; a certifier is a method that produces evidence for it, and one law
+  may have several: a theorem cited, an exhaustive run, chosen cases, a sample, an assumption
+  (D-2026-10-12-k). The law is not the procedure that checks it, and a universal law over an infinite
+  carrier has no certifier that runs it. [proposed]
+- L9.2 A law states a mathematical property of an operation; a second implementation checked against
+  the first is consistency, and the native definition is one more model certified against the law.
+  [settled]
+- L9.3 A law over several functions is tested on the values actually computed, as a puzzle whose
+  pieces must fit; the cases to test are chosen by the law, its arity (three elements for
+  associativity) and the distribution sampled, never every path. [settled]
+- L9.4 Laws accumulate, and a law need not determine the operation; when the laws do determine it up
+  to the presentation's equality, that is the limit (D-2026-10-11-d). [settled]
+- L9.5 The certifier is chosen by what the law admits: what is known by a theorem is cited, what can
+  be enumerated is checked exhaustively, what has chosen cases is checked on them, what can only be
+  sampled is checked statistically; the evidence travels with the value in a certificate (L10). The
+  line is the method, since associativity over `Int` is computable and cannot be checked by running.
+  [settled]
+- L9.6 The grade of a sampled certificate depends on the distribution sampled, not only on the
+  number of samples, because errors concentrate at the edges. [settled]
+- L9.7 Verification by a theorem is `proved` by citation (D-2026-10-11-f); verification by
+  delegation is the same certifier with the host library's guarantee as the theorem cited (LAPACK's
+  backward-error bounds, the condition number their hypothesis) and the library's version and platform
+  as hypotheses the certificate carries; no new grade. A function known correct by a theorem outside
+  Luthier is certified this way, and the chain law, citation, native, identity, extern is carried by
+  hash. [proposed]
+- L9.8 Checking that an implementation gives the same bits as before, with the same seed, certifies
+  that the implementation has not changed; checking it against its laws, by chosen or sampled cases,
+  certifies the description. Both are kept, apart. [settled]
+- L9.9 (His annotation) The certificate of the law travels by the certificate of identity (L10.7):
+  exactly where the identity is boolean (`==` structural, spec 4.R8: integers, decidable types, the
+  same implementation rerun), and with the observed distance added where it is a cost (G2), since two
+  implementations over floats are almost never bit-identical; the type of the identity law's result
+  says which (`Bool` or `Cost`). [settled]
+- L9.10 A certifier is a value, as a generator is (D-2026-10-06-ab): the five of clause 1 are
+  primitive, and any other is a value of the theory `Certifier`, certified against its own law, its
+  level on laws that hold and its power on controls (spec 7.S17 to 7.S19); a certificate it emits
+  carries the certifier's own certificate in its cone, and the evidence composes (spec 6.S12).
+  Certification is not a keyword (D-2026-10-13-d). [settled]
+- L9.11 A law is a theory: its predicate presents it, `forall` and `exists` and the connectives form
+  it, and its models are its evidence, which follows its form: a case is evaluated, a `forall` is
+  covered exhaustively, by listed cases or by a sample, an `exists` by a witness with its cost, `and`
+  by both sides and `or` by one; a citation or an assumption covers any part whole (D-2026-10-13-l).
+  [settled]
+- L9.12 The two quantifiers are dual in their evidence: a `forall` is refuted exactly by a
+  counterexample and, over an infinite domain, confirmed only by statistics; an `exists` is confirmed
+  by a witness whose cost is determinate rather than statistical, though over the reals not zero
+  (D-2026-10-13-l). [settled]
+References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d.
+Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
+Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
+settled (D-2026-10-13-d, -e); clauses 11 and 12 settled (D-2026-10-13-l, -n).
+
+**L10. A certificate records what is known of a law, its domain, its bound and its evidence; it is
+frozen, it serves every demand it meets, and it transports along identity.**
+From: G1 (a model is known by the law it satisfies, with the evidence it has) with G2 (evidence is a
+cost) and G0, the demand (what the demand requires of the evidence is its own).
+- L10.1 A certificate (Terms) names the law it records as checked, the domain the check covered (a
+  subtype, the cases listed, or the distribution sampled), the bound observed (for a law into `Cost`,
+  the distance its `forall` gives over the costs seen, D-2026-10-13-m), and the evidence: its grade
+  and, for a sampled check, the sample's statistics converted to an evidence cost (D-2026-10-12-r).
+  [proposed]
+- L10.2 The grade is derived from the domain and the evidence cost: proved and exhaustive have
+  evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the finite
+  cost of its statistics on the distribution sampled. An `assumed` certificate carries what is
+  asserted and no check: a Boolean law asserted true, with bound 0, or a cost law asserted with a
+  formula of the inputs, a library's documented bound such as p(n)·ε·κ(A), with the formula evaluated
+  at the input as its bound; its evidence cost is the demand's parameter for assumptions, with no
+  default, so that a demand that names none refuses assumed values (D-2026-10-11-n, D-2026-10-12-t).
+  When the formula is a cited guarantee with its hypotheses, the certificate is proved by delegation
+  (L9.7), not assumed. The five names stay in the certificate for the reader; the planner reads the
+  costs. [proposed]
+- L10.3 The conversion from statistics to an evidence cost is a function with a declared shape, the
+  sample's statistics and the demand's level in, a cost out, filled per theory (D-2026-10-12-r); the
+  first instance is −log(1 − ε̂(n, δ)) in nats, with ε̂ the bound on the fraction of the distribution
+  where the law's bound fails, from n samples at confidence 1 − δ, and δ the demand's parameter.
+  [settled]
+- L10.4 A certificate is identified by a hash over its dependency cone (code, cases, seed, the
+  distribution and level sampled); it is a frozen snapshot, and a later check does not change it but
+  issues a new one that supersedes it, both kept, the latest in front (P3), so progress is the chain
+  of certificates. [settled]
+- L10.5 A certificate serves every demand whose cutoff it meets, on the bound and on the evidence
+  cost alike (D-2026-10-12-h); the demand states what it requires (P11), and a memo hit serves a
+  demand only if the cached cone meets it, checked at the hit and not only when the certificate was
+  issued. [settled]
+- L10.6 Certification is the default: demanding a value demands every certificate in its dependency
+  cone, paid once through the memo, with no opt-out at the start (D-2026-10-12-y: a cone with an
+  uncertified or provisional name is refused); an exception, if a real case asks for one, is O3 and
+  would leave a certificate of grade `assumed` (D-2026-10-11-n); what never reaches an output needs no
+  certificate, and what reaches one carries its cone's; `test` is the action that demands certificates
+  without values (L5). [settled]
+- L10.7 Certification transports along identity: if B is certified on inputs X with bound b and
+  evidence cost e, and the identity A ≡ B is certified on inputs Y with distance d and evidence cost
+  e′, then A is certified on X ∩ Y with bound b + d and evidence cost e + e′, and by nothing else; a
+  path of identities composes the same way, link by link, the distances summed and the evidence summed
+  (D-2026-10-12-q). (His correction, in grades) A is certified at the weaker of the two grades on X ∩
+  Y. [proposed]
+- L10.8 Links sampled over different distributions do not compose without a law relating the
+  distributions; links sampled over the same distribution compose by the union bound, the failure
+  fractions summed, which is the probabilistic bound the planner waited for (D-2026-10-12-q). The
+  composition algebra belongs to the theory's cost type, the sum its first instance; whether a demand
+  accepts a sampled path is its evidence cutoff, a parameter (P11). [proposed]
+- L10.9 No operation on certificates raises a grade, lowers an evidence cost or widens a domain
+  without new evidence. [settled]
+- L10.10 Only a certifier builds a certificate: the constructor of `Certificate` is in no interface
+  outside the theory of certification (L6.12), so clause 9 is enforced by the language and not left to
+  good conduct (D-2026-10-13-c); the precedent is the abstract type `thm` of the LCF provers, which
+  only the kernel's rules build. [settled]
+Example: with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
+lookup table equal to the native on a grid is certified on the grid and nowhere else (clause 7).
+References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t; P3, P11.
+Rests on: O1 (the conversion and the algebra), O3 (the opt-out's syntax).
+Status: proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-10-12-w); clauses 4 to 6
+settled, moved from L5 and L11; clause 2 reworded on D-2026-10-12-t; clause 7 carries his correction
+of draft 7 in grades; clause 10 settled (D-2026-10-13-c, -e).
+
+**L11. Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
+does not follow Luthier's way lives in a world.**
+From: G1: an absorbed library is a specimen known by its description, and its code is not needed
+("que la IA pueda ... extraer de librerías ajenas, chuparlas y usar las funciones con sus propias
+invarianzas", audio 08.58, 31:25 to 32:00); the world from G0, the demand (the demand names the
+world it runs in) with L4; delegation (now L9.7) from G1 and G2; transport (now L10.7) from G1.
+- L11.1 Types and laws are native; values may come through `extern` from Python or any host,
+  declared over what they really receive and return, with description and verification kept on
+  Luthier's side. [settled]
+- L11.2 (His words, "si el tipo no sigue la ley no se aplica el calculo") An extern is declared over
+  a type, a type carries its laws (L8), and the extern is validated against them, like any other
+  function, the first time an action asks for it, before it is applied, and refused if it fails; its
+  certificate stays by hash; without a type with a law to validate against it is not applied; the
+  agreement test with the native is in addition (W5), and the planner's substitution is
+  D-2026-10-11-m. [settled]
+- L11.3 A function with no laws at all is not a function to run but a hole of a theory being defined
+  (L2). [settled]
+- L11.4 The extern's certificate binds the host library's version and the platform (W10), and its
+  declaration says whether it is a definition or an action (L4). [settled]
+- L11.5 Luthier is in use a coupling language: the joint between two libraries is a theory of which
+  each is a model, the bridges between representations live at the joint with their cost and error,
+  and no coupling without a law. [settled]
+- L11.6 A definition or an implementation that does not follow Luthier's way, an extern with no law
+  yet, a foreign algorithm taken as is, may execute inside a named world (L4): its certificates carry
+  the cost of an assumption (L10.2), the plan shows the world it ran in, and nothing from it enters
+  the planner's graph (L6) nor a certified theory until a law is certified. [candidate]
+- L11.7 (His words) A file is read when some demand needs it: an extern is a route to a function,
+  its file opened only when a demand reaches the node, and not even required to exist when the program
+  is checked; a module is a value, and its file is read when a demand first needs one of its names, so
+  an import is not an action either; `test` of a module is the action that demands everything in it,
+  the one that finds what is latent and ill defined (D-2026-10-12-ac, -ad). [settled]
+References: D-2026-10-11-m; W5, W10.
+Rests on: O3 (the opt-out's syntax; the world as a value).
+Status: settled by his correction of draft 7; clause 6 candidate, reworded; clause 7 settled
+(D-2026-10-13-g).
+
+### Under G2, cost
+
+**L12. Laws combine, and a predicate lifts to a cost.**
+From: G2 directly (lift, exact and within were named under it on his mark, draft 9) with G0, the
+demand (the cutoff lives in the demand).
+- L12.1 Predicates combine by and, or, then, and by a quantifier over a carrier, and the result is a
+  predicate; costs combine by sum, max and weighted sum, and the result is a cost; a combination that
+  mixes the two is a cost, each predicate lifted. [proposed]
+- L12.2 The lift is explicit and named: `lift : Bool -> Cost` sends true to 0 and false to ∞, `exact
+  : Cost -> Bool` is c == 0, with `exact ∘ lift = id`, so `Bool` is a retract of `Cost`, not a
+  subtype, and the planner inserts the lift as a bridge of cost zero; whether the two are
+  homomorphisms waits for the algebra (O1), since Boolean or has no counterpart among the operations
+  of `Cost` yet. [settled]
+- L12.3 The cutoff is the demand's (L5.17), passed down from it; it does not compose (two links
+  within ε are within 2ε), so no law carries one. [proposed]
+- L12.4 `&`, the only join the libraries use today, is the Boolean and. [settled]
+- L12.5 The law of a theory is one law, so its certificate is one certificate; how the grades of its
+  parts combine is the demand's parameter, the vector of grades or the weakest (D-2026-10-12-i); how
+  the costs of its parts combine is the theory's algebra, with two candidate models, min and max, or
+  1/n log-sum-exp and 1/n sum (D-2026-10-12-p); the composition along a path is the sum (L10.7,
+  D-2026-10-12-q). [proposed]
+- L12.6 Cost is two things (D-2026-10-13-m, -n). A distance says how far an approximate value is
+  from the ideal; it composes by the triangle inequality, or by the worst link where it is
+  ultrametric, and it is the one logic of G2: a law's value is a distance, and the demand's cutoff
+  says whether it is enough. A probability, in a certificate, is that of a counterexample not yet
+  seen: having drawn a million cases and found none, how likely one is; how such probabilities combine
+  is an assumption about the dependence of what fails, nested (max) or independent and rare (sum,
+  log-sum-exp). Bayesian evidence is neither: it is a likelihood, a density of any value, and its
+  logarithm is not a cost in [0, ∞]. [proposed]
+- L12.7 `then` is material, `not (p and not q)`; conditioning is not a connective, since no
+  connective has the conditional probability as its probability (Lewis, 1976), but an operation on a
+  measure whose law is the chain rule. For distances, `then` is the triangle inequality, which is
+  transport along an identity (L10.7) (D-2026-10-13-l, -m). [settled]
+References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q.
+Rests on: O1 (the algebra of costs; the two candidate models, D-2026-10-12-p).
+Status: proposed on his note of 2026-10-12; the names lift, exact and within his to rename; clause 2
+settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded on D-2026-10-12-h, -i, -p, -q; clause 6
+proposed, rewritten on his correction, and clause 7 settled (D-2026-10-13-l, -m, -n).
+
+**L13. The ideal world is realized with a guarantee.**
+From: G2 directly: the realization's distance to the ideal law is the law's value, and the tolerance
+is the demand's (G0, the demand).
+- L13.1 Code is written over ideal objects (Real) and realized by concrete ones (Float64); the
+  realization's laws hold within a stated tolerance, and the error of each step is itself a law rather
+  than a false claim of exactness. [settled]
+- L13.2 (His reading) Rounding `Real -> Float64` is a functor in Lawvere's sense, and each law of
+  `Real` is projected onto `Float64` with its cost; it is not a homomorphism, and the exact map is the
+  inclusion the other way. [settled]
+- L13.3 Rounding does not expand distances by at most a constant: two reals astride a rounding
+  boundary land one ulp apart at any distance, so no multiplicative constant exists; rounding is
+  non-expansive up to an additive defect of about ε|x|, and for subtraction and division the
+  sensitivity is per input, the condition number (`11` §7). [mark pending]
+- L13.4 The functor reading stands with "non-expansive plus an additive term", and the cost algebra
+  needs both parts: a multiplicative one where a Lipschitz constant exists and an additive one where
+  rounding enters (`11` §5). [mark pending]
+References: `11`.
+Rests on: O1 (the two parts of the algebra).
+Status: settled in its statement; clauses 3 and 4 are the correction proposed, his mark pending.
+
+## What is open
+
+Only questions whose answer changes the language or the specification, each with the entries it
+blocks; the done and implemented items are in the record's drafts table.
+
+- **O1** (language) The algebra of costs. Its articulation is `docs/rationale/11-cost-valued-laws.md`
+  draft 0: Ω replaced by [0,∞), quantitative equality, graded judgments, cost as −log p or as
+  distance, how the uncertainty of a cost is represented in a certificate; the composition: a
+  Lipschitz constant per function type where known (sensitivity types, Reed and Pierce 2010;
+  condition numbers), a sampled cost where not, costs adding as −log p under independence; the
+  interface of `Cost` in a certificate (a multiplicative constant where it exists, an additive
+  defect where rounding enters, the grade as a lattice, the worst cost seen; `11` §5, §6); worked
+  examples the sum of n floats, a matrix inverse with κ(A), a sampled probability integrating to
+  one. Two candidate models (D-2026-10-12-p): min and max, or 1/n log-sum-exp with 1/n sum.
+  `Cost` is a library (D-2026-10-12-al): its algebra is settled when it is implemented, and the
+  certification written in Luthier says what it asks of it; the two candidates can be two of its
+  models. The
+  extension of Boolean logic to Lawvere and Bayes, which he names as another motivator or eureka;
+  whether it is the third eureka or a principle of good use is his to mark after that analysis.
+  Until it exists the application runs on a Boolean interim: laws of the form d(f x, g x) ≤ tol
+  with tol a parameter (L5), every law returning `Bool` or `Cost` with the result type saying
+  which (`11` §2, L3), no composition of tolerances along a chain, no run database. Blocks L8.7,
+  L3.3, L12, L13.3, L13.4, L5.4, L6.6, L6.8, L10.3, L10.8.
+- **O2** (language) The type with its equality as the base case of every theory (a setoid; a
+  metric space where the equality is a cost), the kernel's structural `==` its model for the
+  decidable types (spec 4.R8), the equality of functions extensional and derived from it (L3), the
+  equality of models componentwise; and whether a type names its equality as it names its model
+  (spec 4.R13). Proposed by the model on his observation of 2026-10-12 (D-2026-10-12-e); his note of
+  the same day on Terms goes the same way ("podríamos suponer que A viene con su Setoid", `K` with
+  its `Field`); the syntax, how a type names its setoid and its field, is the open part. Blocks
+  Terms (dependences), L3, L9, L6.
+- **O3** (language) An opt-out of certification in a demand, if a real case asks for one
+  (D-2026-10-11-n; none at the start, D-2026-10-12-y); the world as an opaque, unique value so that
+  an action is never served from the memo (L4, L5); actions and the world as a value, designed and
+  not implemented. Blocks L4.11, L5.6, L11.6, L10.6.
+- **O4** (language) The composition of invariances (G1's derived route): which laws compose and how
+  the demand selects them (audio 08.58, 32:01 to 34:07; audio 09.21). Blocks L5.15.
+- **O5** (language) The decorated output (L5.4): the derivative by dual numbers as a model of the
+  theory, the error by intervals or value-and-cost pairs once O1 exists; what in the planner
+  chooses the model and inserts the bridges. Blocks L5.4.
+- **O6** (language) Units as a candidate L under G0: a dimension is a proposition, dimensions form
+  a group under multiplication, the quantities of one dimension a one-dimensional vector space,
+  the whole a graded algebra; addition inside a dimension, multiplication across (second round
+  §18). Precedent quimulun (his repository); pressure from sonolocalización (metres, seconds, the
+  speed of sound). Blocks nothing.
+- **O7** (spec) Closed on 2026-10-12 (D-2026-10-12-z) by the term *object* in Terms; spec 4 §4 reads
+  "theories are cycles" in chapter 4 of the specification. Blocks nothing.
+- **O8** (spec) The session as a block over the dataflow of L5: `<-` to explore, `:=` to lock, a
+  file may contain a block, `<-` banned at the top level of a file (decided, D-2026-10-11-i); the
+  spec's spec 8 and a section on the session; the memo between the items of a session. Blocks
+  L5.12.
+- **O9** (spec) The kind of a hole in the elaborated form (L2.3). Blocks L2.3.
+- **O10** (spec) `proved` by citation: the citation a `.bib` key with a resolved DOI, ISBN or URL,
+  and who checked (human, ai+human, none) recorded; syntax `cite name bibkey checked ai+human`
+  proposed, allowed in user code (D-2026-10-11-f as amended; to spec 6). Blocks L9.7.
+- **O11** (spec) The kernel's theory stated in Luthier: `src/luthier/lib/kernel_laws.lut`, tested
+  on `Fin 3`, `Fin 2` (`examples/kernel_finite.lut`, 10 laws, sampled); eta not statable (spec 4
+  R8), functions over `Fin n` not enumerated by `exhaustive` (to fix). Blocks L7.
+- **O12** (spec) The identity of a result in the memo (L5.6) and `plan.lut` as its carrier.
+  Blocks L5.6.
+
+## His marks pending
+
+- L10.7 and L10.8, the composition of identities as paths (his note of 2026-10-12 put in
+  words, with D-2026-10-12-q).
+- L12, the names lift, exact and within (his to rename), and clauses 1 and 5.
+- L13.3 and L13.4, the correction on rounding.
+- L5.4, the decorated output as another model.
+- L6.3, the wording of his formula for the efficiency.
+- L11.6, the world as a candidate; L9.7, delegation as citation; L10.7, the wording of the graded
+  transport (his correction).
+- L10.1, L10.2, L10.7, L10.8, the certificate entry; L8.3, what `a : A` asserts; L4.11, actions on Luthier's own state;
+  L5.17 and L5.18, the cutoff and the policy constants; L6.5, 6, 7; L12.3, 5; L9.1.
+- The two faces defined in Terms, and the shape of this draft (D-2026-10-12-g, -s).
+
+## Keys
+
+- G0, G1, G2: the organizers above; L1 to L7: the principles; L5.4: clause 4 of L5.
+- O1 to O12: the open questions above.
+- D-2026-10-11-n and the like: decisions, in `record/decisions.md`.
+- P1 to P15: the principles of the method, `record/principles.md`.
+- W1 to W15: the way of working, `docs/way-of-working.md`.
+- spec 1 to spec 12: the chapters of the specification, `docs/spec/`, index `00-index.md`; spec 4.R8
+  is rule 8 of chapter 4. `07`, `09`, `10`, `11` in backticks: the rationale documents of
+  `docs/rationale/`, `11` the cost-valued laws.
+- His words, his annotation, his correction, his reading, his formula: Luciano's; a clause without
+  such a mark is the model's.
+
+## Numbering
+
+The tags of draft 11 (contiguous, in document order, D-2026-10-12-v) against those of draft 10
+(his marks on the reorder plan, 14ea9f0) and of drafts 1 to 9.
+
+| Draft 11 | Draft 10 | Before | What happened |
+|---|---|---|---|
+| G0 | G0 | G0 | kept |
+| G1 | G1 | G2 | theory and model, printed first since draft 8; the former L3 and L20 absorbed |
+| G2 | G2 | G3 | cost, the second eureka on his note; lift, exact and within moved to L6 |
+| dissolved | G3 | G1 | the demand, printed third in draft 10; dissolved in draft 11 into G0's second sentence and L10.1 |
+| — | retired | G4 | retired in draft 9 (D-2026-10-12-c); its content became L22, now in L14 |
+| L1 | L1 | L1 | kept; the Purpose section since draft 11 |
+| L8 | L2 | L2 | kept |
+| merged into L8 | L3 | L4 | renumbered; "from a law" his correction; merged into L2 in draft 11 |
+| L2 | L4 | L8 | renumbered |
+| L3 | L5 | L16, L21 | merged: equality has levels, with the identity clauses of L21 |
+| L12 | L6 | new | how laws combine, the lift and the cutoff, from the former G3 |
+| L9 | L7 | L5, L11, L21 | merged: a law characterizes, verified by one operation; identity is not the law |
+| L13 | L8 | L15 | renumbered |
+| L4 | L9 | L9, L18 | merged: a DAG of definitions without effects |
+| L5 | L10 | L19, L13 | merged: the demand determines the computation and the types produced |
+| merged into L4 | L11 | L12 | renumbered and shortened; merged into L9 in draft 11 |
+| merged into L5 | L12 | L17 | renumbered; statement in his words; merged into L10 in draft 11 |
+| L6 | L13 | L10 | renumbered; statement in his words |
+| L11 | L14 | L14, L22, L11 (delegation), L21 (transport) | merged |
+| L7 | L15 | L6, L7 | merged: the core is minimal and its programs are data |
+| — | absorbed | L3 | into G1 (draft 10) |
+| L10 | L16 | new | certificates, draft 11 (step 4) |
+| L14 | new | new | what can be written in Luthier is written in Luthier, his principle of 2026-10-12; under G0 after L7, to take its place by document order at the next renumbering |
+| — | absorbed | L20 | into G1 (draft 9) |
