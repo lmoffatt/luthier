@@ -500,6 +500,42 @@ Prim (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i j :
   and stepsTo a (m.step p (bin "==" (Lit (IntConst i)) (Lit (IntConst j)))) (truth (i == j))
   and stepsTo a (m.step p (bin "+" (Lit (FloatConst u)) (Lit (FloatConst v)))) (Lit (FloatConst (u + v)))
   and stepsTo a (m.step p (bin "==" (Lit (StringConst s)) (Lit (StringConst t)))) (truth (s == t))
+-- The rest of 3.S17, which the slice of sonolocalización needs computed (inventory row 9;
+-- record/IA/slice-theories-2026-10-14/, appended to `Prim` by its agent with the owner paused):
+-- what each operation is, is numbers.lth's; here only that the kernel steps to it. On integers,
+-- the quotient and the remainder of the host's floor division (`IntegerDivision`) and the four
+-- other comparisons; a zero divisor does not step, the error being the host's (11.S7) and no
+-- term [proposed: the model answers `nothing`, the host raises].
+PrimInt (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i j : Int) : Bool :=
+  (j == 0 or (stepsTo a (m.step p (bin "/" (Lit (IntConst i)) (Lit (IntConst j)))) (Lit (IntConst (i / j)))
+              and stepsTo a (m.step p (bin "mod" (Lit (IntConst i)) (Lit (IntConst j)))) (Lit (IntConst (i mod j)))))
+  and stepsTo a (m.step p (bin "<=" (Lit (IntConst i)) (Lit (IntConst j)))) (truth (i <= j))
+  and stepsTo a (m.step p (bin ">" (Lit (IntConst i)) (Lit (IntConst j)))) (truth (i > j))
+  and stepsTo a (m.step p (bin ">=" (Lit (IntConst i)) (Lit (IntConst j)))) (truth (i >= j))
+  and stepsTo a (m.step p (bin "/=" (Lit (IntConst i)) (Lit (IntConst j)))) (truth (i /= j))
+  and isNormal (m.step p (bin "/" (Lit (IntConst i)) (Lit (IntConst 0))))
+  and isNormal (m.step p (bin "mod" (Lit (IntConst i)) (Lit (IntConst 0))))
+-- on doubles of moderate size, where the result of an operation of two is finite (11.S7: NaN and
+-- an overflow are errors, and no constant is one; the range of 11.S13), the three other
+-- operations, rounded by the machine (11.S4), and the comparisons; division by zero does not step
+ModerateDouble : U := { x : Float64 | x == 0.0 or (1.0e-150 <= x and x <= 1.0e150) or (-1.0e150 <= x and x <= -1.0e-150) }
+PrimFloat (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (u v : ModerateDouble) : Bool :=
+  stepsTo a (m.step p (bin "-" (Lit (FloatConst u)) (Lit (FloatConst v)))) (Lit (FloatConst (u - v)))
+  and stepsTo a (m.step p (bin "*" (Lit (FloatConst u)) (Lit (FloatConst v)))) (Lit (FloatConst (u * v)))
+  and (v == 0.0 or stepsTo a (m.step p (bin "/" (Lit (FloatConst u)) (Lit (FloatConst v)))) (Lit (FloatConst (u / v))))
+  and stepsTo a (m.step p (bin "<" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u < v))
+  and stepsTo a (m.step p (bin "<=" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u <= v))
+  and stepsTo a (m.step p (bin ">" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u > v))
+  and stepsTo a (m.step p (bin ">=" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u >= v))
+  and stepsTo a (m.step p (bin "/=" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u /= v))
+  and isNormal (m.step p (bin "/" (Lit (FloatConst u)) (Lit (FloatConst 0.0))))
+-- `+` on strings is concatenation (core.lut `stringAppend`; the monoid of numbers_model.lut)
+PrimString (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (s t : String) : Bool :=
+  stepsTo a (m.step p (bin "+" (Lit (StringConst s)) (Lit (StringConst t)))) (Lit (StringConst (s + t)))
+-- `toFloat64` (11.S5, core.lut): a `Primitive` applied to an integer constant steps to the
+-- nearest double
+PrimConvert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i : Int) : Bool :=
+  stepsTo a (m.step p (App (Primitive "toFloat64") (Lit (IntConst i)))) (Lit (FloatConst (toFloat64 i)))
 -- and `==` on values of structures with structural equality (3.S17, 4.R8): pairs, records,
 -- injections and constructors of concrete parts compare part by part, labels included
 PrimStructural (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i j : Int) (x y : String) : Bool :=
@@ -554,7 +590,8 @@ DatumIsInert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program
   m.step (cons (Datum d) p) t == m.step p t
 
 Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
-  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimStructural a sb & PrimConstructors a sb & EqualityDemandsParts a sb & EqualityStuck a sb & ExternIsValue a sb & ValuesStay a sb
+  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimInt a sb & PrimFloat a sb
+  & PrimString a sb & PrimConvert a sb & PrimStructural a sb & PrimConstructors a sb & EqualityDemandsParts a sb & EqualityStuck a sb & ExternIsValue a sb & ValuesStay a sb
   & DatumIsInert a sb
 
 -- ---------------------------------------------------------------- §6 Quote and eval
