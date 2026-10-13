@@ -11,7 +11,7 @@ import pytest
 from luthier import term as t
 from luthier.surface import Parsed, TermBody
 from luthier.parse import parse
-from luthier.elaborate import elaborate_program, elaborate_term, apps
+from luthier.elaborate import ElaborationError, elaborate_program, elaborate_term, apps
 from luthier.kernel import alpha_equal
 
 
@@ -177,6 +177,40 @@ def test_Blocks():
     eq('{ x := 1; x }', t.Let('x', I, num(1), V('x')))
     eq('{ w1 <- act w0; w1 }', t.Let('w1', t.World(), t.App(V('act'), V('w0')), V('w1')), 'act : W -> W\nw0 : W')
     eq('{ y <- 1; y <- y + 1; y }', t.Let('y0', I, num(1), t.Let('y1', I, bin('+', V('y0'), num(1)), V('y1'))))
+
+
+WORLD = 'print : W -> String -> W * Unit\nreadFile : W -> String -> W * Maybe String\nw0 : W'
+def text(x): return t.Lit(t.StringConst(x))
+
+
+def test_Blocks_action_pattern():
+    # translation.lth (87d6091) law Blocks, its second gives (D-2026-10-13-ag): a pattern on an action's W * A
+    eq('{ (w1, s) <- readFile w0 "f"; s }',
+       t.Match(apps(V('readFile'), [V('w0'), text('f')]), ((t.PPair(pv('w1'), pv('s')), V('s')),)), WORLD)
+
+
+def test_Blocks_action_unit():
+    # its third gives: a bare name on W * Unit binds the token and drops the unit
+    eq('{ w1 <- print w0 "x"; w1 }',
+       t.Match(apps(V('print'), [V('w0'), text('x')]), ((t.PPair(pv('w1'), t.PWild()), V('w1')),)), WORLD)
+
+
+def test_Blocks_action_chain_rebinds_the_token():
+    # each binding of `w` is a fresh name, as for a value (4.R12); the value sees the previous one
+    def arm(value, q, rest): return t.Match(value, ((q, rest),))
+    def unit(n): return t.PPair(pv(n), t.PWild())
+    eq('{ w <- print w0 "a"; (w, s) <- readFile w "f"; w <- print w "b"; (w, s) }',
+       arm(apps(V('print'), [V('w0'), text('a')]), unit('a'),
+           arm(apps(V('readFile'), [V('a'), text('f')]), t.PPair(pv('b'), pv('c')),
+               arm(apps(V('print'), [V('b'), text('b')]), unit('d'), t.Pair(V('d'), V('c'))))),
+       WORLD)
+
+
+def test_Blocks_pattern_on_a_value_refused():
+    # translation.lth does not say what a pattern that is not a bare name gives on a value that is
+    # not an action; the elaborator refuses it, naming the item
+    with pytest.raises(ElaborationError, match=r'\(a, b\) <- '):
+        term('{ (a, b) <- n; a }', SCOPE)
 
 
 def test_Shapes():

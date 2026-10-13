@@ -147,17 +147,77 @@ def boolean_law(ty):
     return ty == t.Var('Bool')
 
 
-def pattern(p, c):
+def pattern(p, c, fresh=False):
+    """A surface pattern as in a `match` arm; `fresh` renames its variables, as a block item does."""
     match p:
         case s.PWild(): return t.PWild()
         case s.PLit(k): return t.PLit(constant(k))
-        case s.PTuple(ps): return pairs([pattern(x, c) for x in ps], t.PPair)
+        case s.PTuple(ps): return pairs([pattern(x, c, fresh) for x in ps], t.PPair)
         case s.PApp(n, ps):
             if ps or n in c.constructors:
-                return t.PCon(n, tuple(pattern(x, c) for x in ps))
-            c.names[n] = n
-            return t.PVar(n)
+                return t.PCon(n, tuple(pattern(x, c, fresh) for x in ps))
+            m = c.fresh(n) if fresh else n
+            c.names[n] = m
+            return t.PVar(m)
     raise ElaborationError(f'unsupported pattern {p!r}')
+
+
+def bare_name(p, c):
+    """The name of a pattern that is a bare variable, else None."""
+    if isinstance(p, s.PApp) and not p.patterns and p.name not in c.constructors:
+        return p.name
+    return None
+
+
+def pattern_types(q, ty, c):
+    """Give the variables of `q` the components of `ty` where its shape follows the pattern."""
+    match q:
+        case t.PVar(n): c.types[n] = ty
+        case t.PPair(a, b) if isinstance(ty, t.Sigma):
+            pattern_types(a, ty.domain, c)
+            pattern_types(b, ty.codomain if ty.name == '_' else t.Hole('type'), c)
+
+
+def is_action(ty):
+    """An action's result: `W * A` for the world `W` (D8, D-2026-10-13-ag)."""
+    return isinstance(ty, t.Sigma) and isinstance(ty.domain, t.World)
+
+
+def block(items, body, c, expected):
+    """translation.lth (87d6091) law `Blocks`: each item in order, the rest of the block under it.
+
+    `x := t` and a bare name on a value that is not an action are a `Let` on a fresh name (4.R12);
+    a pattern on an action's `W * A` is a `match` with one arm, a bare name on `W * Unit` binding
+    the token and dropping the unit (D-2026-10-13-ag). A value whose type the bootstrap inference
+    cannot tell (a Hole) is read as an action when the pattern is not a bare name.
+    """
+    if not items:
+        return walk(body, c, expected)
+    item, rest = items[0], items[1:]
+    name = item.name if isinstance(item, s.Bind) else bare_name(item.pattern, c)
+    if name is not None:
+        previous = walk(s.Name(name), c)
+        value = walk(item.value, c, infer(previous, c))
+    else:
+        value = walk(item.value, c)
+    ty = infer(value, c)
+    if isinstance(item, s.Rebind) and (is_action(ty) or name is None and isinstance(ty, t.Hole)):
+        inner = c.child()
+        if name is not None and ty.codomain == t.Var('Unit'):
+            n = inner.fresh(name); inner.names[name] = n
+            q = t.PPair(t.PVar(n), t.PWild())
+        else:
+            q = pattern(item.pattern, inner, fresh=True)
+        pattern_types(q, ty, inner)
+        return t.Match(value, ((q, block(rest, body, inner, expected)),))
+    if name is None:
+        raise ElaborationError(
+            f'block item {show_pattern(pattern(item.pattern, c.child()))} <- {show_term(value)}: '
+            f'a pattern that is not a bare name on a value of type {show_term(ty)}, which is not '
+            f'an action W * A; translation.lth (law Blocks) does not say what it elaborates to')
+    inner = c.child()
+    n = inner.fresh(name); inner.names[name] = n; inner.types[n] = ty
+    return t.Let(n, ty, value, block(rest, body, inner, expected))
 
 
 def parameters(binders, c):
@@ -290,16 +350,7 @@ def walk(v, c, expected=None):
             for x in reversed(xs): result = apps(t.Var('cons'), [walk(x, c), result])
             return result
         case s.Proj(x, n): return t.Proj(walk(x, c), n)
-        case s.Block(items, body):
-            inner = c.child(); bindings = []
-            for item in items:
-                previous = walk(s.Name(item.name), inner)
-                value = walk(item.value, inner, infer(previous, inner)); ty = infer(value, inner)
-                n = inner.fresh(item.name)
-                bindings.append((n, ty, value)); inner.names[item.name] = n; inner.types[n] = ty
-            result = walk(body, inner, expected)
-            for n, a, x in reversed(bindings): result = t.Let(n, a, x, result)
-            return result
+        case s.Block(items, body): return block(tuple(items), body, c.child(), expected)
         case s.Lambda(params, items, body):
             inner = c.child(); ps = []; shapes = []; exp = expected
             for p in params:
