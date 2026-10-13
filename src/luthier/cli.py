@@ -15,6 +15,9 @@ def main(argv: list[str] | None = None) -> int:
     p_parse = sub.add_parser("parse", help="parse Luthier source files")
     p_parse.add_argument("--tree", action="store_true", help="print each parsed act")
     p_parse.add_argument("files", nargs="+")
+    p_check = sub.add_parser("check", help="check static semantics")
+    p_check.add_argument("-v", "--verbose", action="store_true")
+    p_check.add_argument("files", nargs="+")
     p_eval = sub.add_parser("eval", help="reduce a definition to weak head normal form")
     p_eval.add_argument("file")
     p_eval.add_argument("name")
@@ -61,7 +64,21 @@ def main(argv: list[str] | None = None) -> int:
         if isinstance(result, ParseFailed):
             failed = True
             for error in result.errors:
-                print(f"{path}:{error.line}:{error.column}: {error.message}")
+                print(f"{path}:{error.line}: syntax <parse>: {error.message}" if ns.command == "check"
+                      else f"{path}:{error.line}:{error.column}: {error.message}")
+        elif ns.command == "check":
+            from .check import check, report
+            import re
+            def line_of(name):
+                return next((i for i, line in enumerate(text.splitlines(), 1)
+                             if re.match(r"^" + re.escape(name) + r"(?:\s|:|=|$)", line)), 1)
+            failures = check(result.program)
+            failed |= bool(failures)
+            for failure in failures:
+                print(f"{path}:{line_of(failure.name)}: {failure.rule} {failure.name}: {failure.message}")
+            if ns.verbose:
+                for item in report(result.program):
+                    print(f"{path}:{line_of(item.name)}: {item.kind} {item.name}: {item.message}")
         elif ns.tree and isinstance(result, Parsed):
             for act in result.program:
                 print(act)
