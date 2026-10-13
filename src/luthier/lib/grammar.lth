@@ -22,10 +22,11 @@
 -- levels, the token kinds are its categories, and the laws below give each its role.
 --
 -- Additions of this file to the chapter: a string's escapes `\"`, `\\`, `\n` (2.S1) and `_` as a
--- pattern atom, decided (D-2026-10-13-q); a trailing comma in a list, proposed in 2.S5.
+-- pattern atom, decided (D-2026-10-13-q); a trailing comma in a list, proposed in 2.S5; the lexicon as a
+-- grammar over characters, `luthierLexicon`, with its readings of 2.S1 marked proposed (step 1.1.d).
 
 import "ebnf.lth" Ebnf WellFormedEbnf Rhs TokenView Derives derives litsOf catsOf litsOfNames
-  memberString append eps lit cat ref seq alt opt rep
+  memberString append splits eps lit cat ref seq alt opt rep
 
 -- ---------------------------------------------------------------- tokens (spec 2 §1)
 
@@ -267,6 +268,104 @@ precedenceLevels : List String := ["ampTerm", "arrowTerm", "orTerm", "andTerm", 
 binaryOperators : List String := litsOfNames luthierSyntax precedenceLevels
 boundOperators : List String := litsOfNames luthierSyntax ["opSymbol"]
 
+-- ---------------------------------------------------------------- the lexicon as data (spec 2 §1)
+
+-- The lexer stated as `luthierSyntax` states the parser (L14): a grammar over characters,
+-- `luthierLexicon`. Its token views are single characters, the text the character itself and the
+-- kind its class, one of "letter", "digit", "space", "newline", "quote", "backslash" and "other"
+-- (`classOf`). One nonterminal per token of 2.S1 (`name` with its dotted form, 2.S14; `number`;
+-- `string` with the escapes of D-2026-10-13-q; `comment`), one per blank (`blank`, `lineBreak`),
+-- and `literal`: the words and symbols `luthierSyntax` takes as literals, each as the sequence of
+-- its characters (`litsOf luthierSyntax`, L2.7, 2.S21; the line break among them is the layout's
+-- and is left out). `lexeme` is any of these and `text`, the start, a sequence of lexemes. How
+-- `lex` reads a derivation is `tokenize`: maximal munch, the longest lexeme at each point, a blank,
+-- a line break and a comment dropped, a word "literal" when the grammar takes it and "name"
+-- otherwise; `LexesWhatDerives` holds `lex` to it.
+--
+-- Readings taken where 2.S1 is silent, each keeping the files of lib/ lexing as they do:
+-- [proposed, 2.S1] a `letter` is one of the 52 ASCII letters and a `digit` one of the ten ASCII
+-- digits (2.S1 names both and defines neither); [proposed, 2.S1] the blanks between tokens are the
+-- space, the tab and the carriage return, of which 2.S1 says nothing; [proposed, 2.S1] the
+-- backslash is a class of its own, since inside a string it begins an escape and nothing else, and
+-- a category cannot take one character out of "other" (so `\t` inside a string does not lex, the
+-- escapes of D-2026-10-13-q being three); a comment runs to the line break and does not take it.
+
+-- The kernel has no operation on the characters of a `String` (11.R1: `primitive "unicode"`), so
+-- two are holes of this theory, filled by the host (L2.1, L14.4): a string as the list of its
+-- characters, each a string of one character, the inverse of concatenation; and the code point of
+-- a one-character string, used only for the two blanks the escapes cannot spell.
+characters : String -> List String
+codePoint : String -> Nat
+
+letterChars : List String := characters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+digitChars : List String := characters "0123456789"
+isBlank (c : String) : Bool := c == " " or codePoint c == 9 or codePoint c == 13
+classOf (c : String) : String :=
+  if c == "\n" then "newline"
+  else if c == "\"" then "quote"
+  else if c == "\\" then "backslash"
+  else if isBlank c then "space"
+  else if memberString c letterChars then "letter"
+  else if memberString c digitChars then "digit"
+  else "other"
+charView (c : String) : TokenView := { kind := classOf c, text := c }
+charViews (cs : List String) : List TokenView := match cs { nil -> nil ; cons c rest -> cons (charView c) (charViews rest) }
+
+-- a word or symbol as the sequence of its characters; the literals of a grammar as alternatives
+charSeq (cs : List String) : List Rhs := match cs { nil -> nil ; cons c rest -> cons (lit c) (charSeq rest) }
+literalAlternatives (ws : List String) : List Rhs := match ws { nil -> nil ;
+  cons w rest -> if w == "\n" then literalAlternatives rest else cons (seq (charSeq (characters w))) (literalAlternatives rest) }
+
+luthierLexicon : WellFormedEbnf := { start := "text", rules := [
+  { lhs := "text",      rhs := rep (ref "lexeme") },
+  { lhs := "lexeme",    rhs := alt [ref "blank", ref "lineBreak", ref "comment", ref "name", ref "number", ref "string", ref "literal"] },
+  { lhs := "blank",     rhs := cat "space" },
+  { lhs := "lineBreak", rhs := cat "newline" },
+  { lhs := "comment",   rhs := seq [lit "-", lit "-", rep (ref "inLine")] },
+  { lhs := "inLine",    rhs := alt [cat "letter", cat "digit", cat "space", cat "quote", cat "backslash", cat "other"] },
+  { lhs := "name",      rhs := seq [ref "word", rep (seq [lit ".", ref "word"])] },
+  { lhs := "word",      rhs := seq [cat "letter", rep (alt [cat "letter", cat "digit", lit "_", lit "'"])] },
+  { lhs := "number",    rhs := seq [ref "digits", opt (seq [lit ".", ref "digits"]),
+      opt (seq [alt [lit "e", lit "E"], opt (alt [lit "+", lit "-"]), ref "digits"])] },
+  { lhs := "digits",    rhs := seq [cat "digit", rep (cat "digit")] },
+  { lhs := "string",    rhs := seq [cat "quote", rep (alt [ref "plain", ref "escape"]), cat "quote"] },
+  { lhs := "plain",     rhs := alt [cat "letter", cat "digit", cat "space", cat "other"] },
+  { lhs := "escape",    rhs := seq [cat "backslash", alt [cat "quote", cat "backslash", lit "n"]] },
+  { lhs := "literal",   rhs := alt (literalAlternatives (litsOf luthierSyntax)) } ] }
+
+-- a token as the lexicon sees it: its kind and its characters (a string's with its quotes)
+Lexeme = { kind : String, chars : List String }
+lexemeOf (t : TokenView) : Lexeme := { kind := t.kind, chars := characters t.text }
+lexemesOf (ts : List TokenView) : List Lexeme := match ts { nil -> nil ; cons t rest -> cons (lexemeOf t) (lexemesOf rest) }
+textsOf (cs : List TokenView) : List String := match cs { nil -> nil ; cons c rest -> cons c.text (textsOf rest) }
+
+derivesIn (d : Derives) (n : String) (cs : List TokenView) : Bool := d.derivesRhs luthierLexicon (ref n) cs
+-- the longest non-empty prefix that `n` derives, with the rest; `splits` lists prefixes shortest first
+longestPrefix (d : Derives) (n : String) (ps : List (List TokenView * List TokenView)) : Maybe (List TokenView * List TokenView) :=
+  match ps { nil -> nothing ; cons (xs, ys) more -> match longestPrefix d n more {
+    just p -> just p ;
+    nothing -> if nonEmpty TokenView xs and derivesIn d n xs then just (xs, ys) else nothing } }
+memberChars (cs : List String) (ws : List String) : Bool :=
+  match ws { nil -> false ; cons w rest -> characters w == cs or memberChars cs rest }
+-- the kind the lexer gives a lexeme, or nothing when it drops it (a blank, a line break, a comment)
+kindOf (d : Derives) (xs : List TokenView) : Maybe String :=
+  if derivesIn d "string" xs then just "string"
+  else if derivesIn d "number" xs then just "number"
+  else if derivesIn d "name" xs then just (if memberChars (textsOf xs) (litsOf luthierSyntax) then "literal" else "name")
+  else if derivesIn d "literal" xs then just "literal"
+  else nothing
+-- the tokens of a text by maximal munch: at each point the longest lexeme, dropped or kept with its
+-- kind; nothing where no lexeme starts (an unknown character, a string left open or with an unknown
+-- escape). Every round consumes, so the length of the text is fuel enough.
+tokenizeWithin (d : Derives) (fuel : Nat) (cs : List TokenView) : Maybe (List Lexeme) :=
+  match cs { nil -> just nil ; cons c rest ->
+    if fuel == 0 then nothing
+    else match longestPrefix d "lexeme" (splits TokenView cs) { nothing -> nothing ; just (xs, ys) ->
+      match tokenizeWithin d (fuel - 1) ys { nothing -> nothing ; just ls ->
+        match kindOf d xs { nothing -> just ls ; just k -> just (cons { kind := k, chars := textsOf xs } ls) } } } }
+tokenize (d : Derives) (s : String) : Maybe (List Lexeme) :=
+  tokenizeWithin d (namesLength (characters s)) (charViews (characters s))
+
 -- ---------------------------------------------------------------- the theory
 
 -- A model of the grammar: a lexer, the layout pass, a parser from text and a printer back to text,
@@ -431,6 +530,17 @@ ErrorsHaveLines (d : Derives) (g : Grammar d) (s : String) : Bool :=
   match g.parse s { parsed p -> true ; parseFailed es -> nonEmpty ParseError es and linesPositive es }
 
 -- ---------------------------------------------------------------- lexical laws (spec 2 §1)
+
+-- The lexer reads a text as the lexicon derives it (2.S1, 2.S21, L14): on a text that lexes, the
+-- tokens are the lexemes of the maximal munch, kind and characters; on one that does not, no
+-- maximal munch exists. Two laws, each on the subtype it means (7.S12, L9.6); together they make
+-- `lex` a function of `luthierLexicon`, and the case laws below are its examples.
+LexedText (d : Derives) (g : Grammar d) : U := { s : String | lexes d g s }
+UnlexedText (d : Derives) (g : Grammar d) : U := { s : String | not (lexes d g s) }
+LexesWhatDerives (d : Derives) (g : Grammar d) (s : LexedText d g) : Bool :=
+  match g.lex s { lexed ts -> just (lexemesOf (tokenViews ts)) == tokenize d s ; lexFailed e -> false }
+LexFailsWhatDerivesNot (d : Derives) (g : Grammar d) (s : UnlexedText d g) : Bool :=
+  tokenize d s == nothing
 
 -- The role of a reserved word (2.S21, L2.7): every word or symbol the grammar takes as a literal
 -- lexes as one literal token of its own text, and so is never a name; the line break is the
@@ -681,7 +791,7 @@ BrokenTextFails (d : Derives) (g : Grammar d) : Bool := not (isParsed (g.parse "
 -- A grammar is a lexer, a layout pass, a parser and a printer that satisfy all of the above.
 Grammar (d : Derives) := RoundTrip d & Canonical d & ParsedIsWritten d & ParsesWhatDerives d & ErrorsHaveLines d
   & LiteralsAreNotNames d & OtherWordsAreNames d & KindsAreTheGrammars d & NameTokens d & NumberTokens d
-  & StringTokens d & LexErrorsHaveLines d
+  & LexesWhatDerives d & LexFailsWhatDerivesNot d & StringTokens d & LexErrorsHaveLines d
   & CommentDropped d & ArrowIsOneToken d
   & LayoutEnds d & ColumnZeroStartsAct d & IndentContinuesAct d & BracketsIgnoreBreaks d & BreakSeparatesItems d
   & BreakSeparatesConstructors d & ContinuationLines d & BlankAndCommentLinesDropped d & TrailingSeparators d
