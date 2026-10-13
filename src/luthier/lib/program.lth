@@ -21,8 +21,8 @@
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/program.lth`, sets its status to done here, and commits.
 --
---   §1 Failures and the theory: `Failure`, `Report`, `Elaboration` (declared; its laws
---      are 2.S12's, step 2.4), `WellFormed` over an alpha, a substitution, an elaboration
+--   §1 Failures and the theory: `Failure`, `Report`, `Elaboration` (translation.lth),
+--      `WellFormed` over an alpha, a substitution, an elaboration
 --      and a typing, the generic law `ReportsExactly` (4.S21, 5.S9).                   done
 --   §2 Names: the acts' names, D(n) and B(n) on the surface tree (1.S7). Type and
 --      term position (4.S2) still to add, for 4.R2.                                 done
@@ -39,7 +39,7 @@
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaParam Item Field Binder Body
   Clause ImportName declare define alias importAct operatorAct datum explicit implicit termBody dataBody
-  clausesBody name literal universe world app binop neg tuple pi sigma sigmaNamed sumNamed record
+  clausesBody name literal universe world app binop neg tuple pi sigma sigmaNamed record
   subtype recordValue block sum list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
   plainParam typedParam shapeParam bind rebind
 import "term.lth" Term Program Act Constant Pattern Alpha Substitution Var Lit Universe World Lam App Pi
@@ -53,15 +53,14 @@ import "term.lth" Term Program Act Constant Pattern Alpha Substitution Var Lit U
 -- checks.lth's (5.S10, step 3.3).
 Failure = { rule : String, name : String, message : String }
 
--- The elaboration of a surface program into the kernel's `Program` (2.S12, 3.S30): its laws are
--- the translation table of 2.S12, a theory to write (step 2.4); declared here so that the rules
--- on types can read what a definition elaborates to.
-Elaboration : { elaborate : SurfaceProgram -> Program }
+-- The elaboration of a surface program into the kernel's `Program` (2.S12, 3.S30) is
+-- translation.lth's theory; the rules on types read what a definition elaborates to.
+import "translation.lth" Elaboration
 
 -- A checker, held to an elaboration and a typing (§4): the failures it finds in a program
 -- (4.S21), and what it reports without rejecting (4.S19, §6).
 Report = { kind : String, name : String, message : String }
-WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) : {
+WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) : {
   check : SurfaceProgram -> List Failure,
   report : SurfaceProgram -> List Report,
 }
@@ -82,11 +81,11 @@ NamedIn : U := { p : SurfaceProgram, n : String | member n (actNames p) }
 -- The one law: for each rule, the checker reports a failure of that rule for a name exactly when
 -- the name violates the rule. The rule and its predicate come first, so `ReportsExactly "4.R1"
 -- violatesR1` is the law of 4.R1 (§7).
-ReportsExactly (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (rule : String)
+ReportsExactly (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (rule : String)
                (violates : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : NamedIn) : Bool :=
   reported (w.check c.p) rule c.n == violates c.p c.n
 -- and it reports nothing about names the program does not introduce
-ReportsOnItsNames (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (w : WellFormed a sb e t)
+ReportsOnItsNames (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (w : WellFormed a sb e t)
                   (p : SurfaceProgram) : Bool := failuresNamed (w.check p) (actNames p)
 failuresNamed (fs : List Failure) (ns : List String) : Bool :=
   match fs { nil -> true ; cons f rest -> member f.name ns and failuresNamed rest ns }
@@ -143,7 +142,6 @@ namesIn (k : List String) (t : Surface) : List String := match t {
   pi xs a b -> concat (namesIn k a) (removeAll xs (namesIn k b)) ;
   sigma xs a b -> concat (namesIn k a) (removeAll xs (namesIn k b)) ;
   sigmaNamed x a y b -> concat (namesIn k a) (remove x (remove y (namesIn k b))) ;
-  sumNamed x a y b -> concat (namesIn k a) (namesIn k b) ;
   record fs law -> concat (fieldsNames k fs) (match law { nothing -> nil ; just l -> removeAll (fieldLabels fs) (namesIn k l) }) ;
   subtype q a law -> concat (namesIn k a) (removeAll (patternBinds k q) (namesIn k law)) ;
   recordValue kvs -> pairsNames k kvs ; sum kvs -> pairsNames k kvs ;
@@ -253,7 +251,7 @@ violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
 -- body (a product, an exponential, a sum, a record without a law) is to be an alias
 structural (t : Surface) : Bool := match t {
   binop o a b -> o == "*" or o == "->" or o == "+" ;
-  pi xs a b -> true ; sigma xs a b -> true ; sigmaNamed x a y b -> true ; sumNamed x a y b -> true ;
+  pi xs a b -> true ; sigma xs a b -> true ; sigmaNamed x a y b -> true ;
   sum kvs -> true ; record fs law -> law == nothing ;
   _ -> false ;
 }
@@ -369,7 +367,7 @@ armsApplications (ctx : Context) (arms : List (Pattern * Term)) : List Applicati
   match arms { nil -> nil ; cons (q, b) rest -> appendApps (applications ctx b) (armsApplications ctx rest) }
 appendApps (xs ys : List Application) : List Application := match xs { nil -> ys ; cons x rest -> cons x (appendApps rest ys) }
 anyApp (f : Application -> Bool) (xs : List Application) : Bool := match xs { nil -> false ; cons x rest -> f x or anyApp f rest }
-bodyApplications (e : Elaboration) (p : SurfaceProgram) (n : String) : List Application :=
+bodyApplications (e : Elaboration a) (p : SurfaceProgram) (n : String) : List Application :=
   match definedBody (e.elaborate p) n { nothing -> nil ; just b -> applications nil b }
 
 -- 4.R6: the body of a declared name has its type `T`, or `T -> Bool`, `T -> Failures E`, `Law T`
@@ -377,7 +375,7 @@ fits (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty : Term) (r : Maybe 
   nothing -> false ;
   just bt -> t.same bt ty or t.same bt (Pi "_" ty (Var "Bool")) or t.same bt (App (Var "Law") ty)
              or (match bt { Pi x d c -> t.same d ty and (match c { App f arg -> f == Var "Failures" ; _ -> false }) ; _ -> false }) }
-violatesR6 (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+violatesR6 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
   isDeclared p n and isDefined p n and (match declaredType (e.elaborate p) n { nothing -> false ;
     just ty -> match definedBody (e.elaborate p) n { nothing -> false ;
       just b -> not (fits a sb t ty (t.typeOf (e.elaborate p) nil b)) } })
@@ -400,7 +398,7 @@ actCount (ep : Program) : Nat := match ep { nil -> 0 ; cons act rest -> 1 + actC
 eqOnArrow (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap : Application) : Bool :=
   match ap.function { App f x -> f == Var "==" and (match t.typeOf ep ap.context x { nothing -> false ;
     just ty -> containsArrow ep (actCount ep) ty }) ; _ -> false }
-violatesR8 (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+violatesR8 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
   anyApp (\ ap { eqOnArrow a sb t (e.elaborate p) ap }) (bodyApplications e p n)
 
 -- 4.R9: an argument passes where its function's domain is expected only if its type refines it
@@ -409,7 +407,7 @@ mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap 
     just ft -> match ft { Pi x d c -> (match t.typeOf ep ap.context ap.argument { nothing -> false ;
                                           just at -> not (t.refines at d) }) ;
                           _ -> false } }
-violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
   anyApp (\ ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications e p n)
 
 -- 4.R11 is a law of the typing (`BranchRefines`): a checker that types branches by it rejects no
@@ -431,7 +429,7 @@ looseFunction (p : SurfaceProgram) (n : String) : Bool :=
   anyAct (\ act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
 nonEmptyBinders (bs : List Binder) : Bool := match bs { nil -> false ; cons b rest -> true }
-ReportsExactlyAs (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) (kind : String)
+ReportsExactlyAs (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (kind : String)
                  (holds : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : NamedIn) : Bool :=
   reportedAs (w.report c.p) kind c.n == holds c.p c.n
 
@@ -439,7 +437,7 @@ ReportsExactlyAs (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing
 
 -- A checker reports exactly the failures of each rule, only about the program's names, and
 -- reports exactly what does not reject.
-WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration) (t : Typing a sb) :=
+WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) :=
   ReportsExactly a sb e t "4.R1" violatesR1 & ReportsExactly a sb e t "4.R2" violatesR2Exists
   & ReportsExactly a sb e t "4.R3" violatesR3 & ReportsExactly a sb e t "4.R4" violatesR4
   & ReportsExactly a sb e t "4.R5" violatesR5 & ReportsExactly a sb e t "4.R6" (violatesR6 a sb e t)

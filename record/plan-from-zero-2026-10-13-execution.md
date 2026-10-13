@@ -67,6 +67,10 @@ by Luciano.
   elaboration and a typing. Still open in it: 4.R2 by position and theory, 4.R12 in blocks. Next:
   step 2.4, the translation of 2.S12 as the theory `Elaboration` (with 4.R13, 4.S23), then 3.2
   to 3.4 (`laws.lth`, `checks.lth`, `library.lth`) and the external review of layers 0 and 1.
+- 2026-10-13: step 2.4 done: `translation.lth` (27b8de5 to this commit), the table of 2.S12 as case
+  laws of `Elaboration` (acts, terms without types, by type with 4.R13, by context with 4.S23,
+  blocks, shapes, clauses); `program.lth` imports it. Surface's `sumNamed` dropped from
+  `program.lth` after D-2026-10-13-w. Next: 3.2 to 3.4, then the external review of layers 0-1.
 
 - 2026-10-13: step 4.2 brought forward, by Codex (55708f2): the 48 programs of `tests/spec/` in
   the new syntax, 47 parse, `r12_toplevel_arrow` is a syntax rejection by design (a runner must
