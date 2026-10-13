@@ -180,8 +180,9 @@ swapPairs (x y : String) (kvs : List (String * Term)) : List (String * Term) :=
   match kvs { nil -> nil ; cons (k, v) rest -> cons (k, swap x y v) (swapPairs x y rest) }
 
 -- Alpha-equivalence (3.S31, L3.3): two terms equal up to the names of their bound variables. A
--- model says when; its laws: it is an object (kernel_laws.lth §1), carried by `alphaObject`, whose
--- type owes the laws of `Object`; a free variable is its own name; a bound one may be renamed to a
+-- model says when; its laws: it is an object (kernel_laws.lth §1), reflexive, symmetric and
+-- transitive, carried by `alphaObject`, whose type owes those laws, and not substitutive over every
+-- function (a function may read a binder's name), but a congruence (`AlphaCongruent`); a free variable is its own name; a bound one may be renamed to a
 -- name fresh for the body; alpha-equal terms have one head and one set of free variables.
 Alpha : { alphaEq : Term -> Term -> Bool }
 alphaObject (a : Alpha) : Object Term := { eq := a.alphaEq }
@@ -314,9 +315,10 @@ Iota (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : N
 IotaPair (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (y : String) (f : NotFreeIn) (b : Term) : Bool :=
   y == f.y or agree a (m.reduce p n (Match (Pair f.s (Var y)) [(PPair (PVar y) (PVar f.y), b)]))
                       (m.reduce p n (sb.subst f.y (Var y) (sb.subst y f.s b)))
-IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l k : String) (v b : Term)
-          (rest : List (Pattern * Term)) : Bool :=
-  l == k or agree a (m.reduce p n (Match (Inj l v) (cons (PInj k PWild, b) rest))) (m.reduce p n (Match (Inj l v) rest))
+-- (stated with an arm that matches after the one passed over: a `match` left with no arm is stuck,
+-- and two stuck terms need not be alike; Codex, writing kernel.py)
+IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l k y : String) (v b c : Term) : Bool :=
+  l == k or agree a (m.reduce p n (Match (Inj l v) [(PInj k PWild, b), (PInj l (PVar y), c)])) (m.reduce p n (sb.subst y v c))
 
 -- the projection of a record value by a name is the value at that name (D-2026-10-13-x): the
 -- projections are the product's arrows, as `PairFst` and `PairSnd` in kernel_laws.lth

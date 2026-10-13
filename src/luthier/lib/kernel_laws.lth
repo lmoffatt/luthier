@@ -24,8 +24,8 @@
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/kernel_laws.lth`, sets its status to done here, and commits.
 --
---   §1 Object: a type with its equality; reflexive, symmetric, transitive,
---      substitutive (D-2026-10-12-ak, 3.S36).                                   done
+--   §1 Object: a type with its equality, reflexive, symmetric, transitive; the
+--      structural equality also substitutive (D-2026-10-12-ak, 3.S36).                                   done
 --   §2 Terminal and initial objects: `Unit`, `Empty` (3.S7, 3.S8, D-2026-10-13-t).    done
 --   §3 Boolean algebra: `Bool`'s `true`, `false`, with `not`, `and`, `or`
 --      (D-2026-10-13-t); Huntington's laws.                                    done
@@ -57,11 +57,22 @@ EqualChain (A : U) (o : Object A) : U := { x y z : A | o.eq x y and o.eq y z }
 Reflexive (A : U) (o : Object A) (x : A) : Bool := o.eq x x
 Symmetric (A : U) (o : Object A) (p : EqualPair A o) : Bool := o.eq p.y p.x
 Transitive (A : U) (o : Object A) (c : EqualChain A o) : Bool := o.eq c.x c.z
--- a function gives equal results on equal arguments, observed by the structural `==` of its
--- codomain (4.R8)
-Substitutive (A : U) (o : Object A) (B : U) (f : A -> B) (p : EqualPair A o) : Bool := f p.x == f p.y
+Object (A : U) := Reflexive A & Symmetric A & Transitive A
 
-Object (A : U) := Reflexive A & Symmetric A & Transitive A & Substitutive A
+-- Substitutive: every function gives equal results on equal arguments. That holds of the kernel's
+-- structural `==` (4.R8), and of no other equality: an observational one (alpha-equivalence of
+-- terms, a tolerance on doubles) is told apart by some function, one that reads a binder's name or
+-- the last bits. So substitution over every function is the law of the structural equality, and
+-- an observational equality is respected by the functions of its own theory, each of whose
+-- operations states it as a congruence (as `AlphaCongruent` in term.lth). Found by Codex writing
+-- kernel.py: `Lam "x" Universe (Var "x")` and `Lam "y" Universe (Var "y")` are alpha-equal and a
+-- function reading the binder separates them.
+Structural (A : U) : { eq : A -> A -> Bool }
+asObject (A : U) (s : Structural A) : Object A := { eq := s.eq }
+StructuralIsObject (A : U) (s : Structural A) (x : A) (p : EqualPair A (asObject A s)) (c : EqualChain A (asObject A s)) : Bool :=
+  Reflexive A (asObject A s) x and Symmetric A (asObject A s) p and Transitive A (asObject A s) c
+Substitutive (A : U) (s : Structural A) (B : U) (f : A -> B) (p : EqualPair A (asObject A s)) : Bool := f p.x == f p.y
+Structural (A : U) := StructuralIsObject A & Substitutive A
 
 -- ---------------------------------------------------------------- §2 Terminal and initial objects
 

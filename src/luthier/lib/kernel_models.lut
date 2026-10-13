@@ -8,11 +8,11 @@
 -- theories like any model (spec 7); a law that quantifies over maps or monoids gets them from a
 -- census (7.R4). A model file holds models of theories (12.S23); these are the kernel's own.
 
-import "kernel_laws.lth" Object Terminal Initial BooleanAlgebra Monoid FreeMonoid ListAlgebra
+import "kernel_laws.lth" Object Structural Terminal Initial BooleanAlgebra Monoid FreeMonoid ListAlgebra
   foldList OrderedSemiring Exponential Product Coproduct NamedProduct NamedCoproduct
 
 -- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
-structuralEquality (A : U) : Object A := { eq := \ x y { x == y } }
+structuralEquality (A : U) : Structural A := { eq := \ x y { x == y } }
 
 -- `Unit` is terminal, `Empty` initial (3.S7, 3.S8)
 unitTerminal : Terminal Unit := { point := unit }
