@@ -2,10 +2,11 @@
 -- Sources: term.lth, kernel_models.lut, ebnf_model.lut and spec 3/11 at
 -- 9fcc7e7096c72eae1b07d2f2b6aa51e14f4c8e05; prompt: record/IA/term-2026-10-13/codex-models.md.
 -- Author: Codex, 2026-10-13. Deterministic, no seed; choices and law audit in codex.md.
--- These are candidate models: parse does not certify the laws. See the report's counterexamples.
+-- Records/law update: term.lth at f421684 and 9a89873; user request v2, recorded in codex.md.
+-- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
-  Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole
+  Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj
   Declare Define Datum member remove concat removeAll freeVars patternVars patternsVars swap swapPattern
 
 -- Spec 11 gives String equality but no text decomposition, concatenation or Nat rendering.
@@ -32,7 +33,8 @@ allNames (t : Term) : List String := match t {
   Subtype x a b -> cons x (concat (allNames a) (allNames b)) ;
   App a b -> concat (allNames a) (allNames b) ; Pair a b -> concat (allNames a) (allNames b) ;
   Inj l a -> allNames a ; Match a arms -> concat (allNames a) (armNames arms) ;
-  Sum kvs -> pairNames kvs ; Data x cs -> cons x (pairNames cs) ; _ -> nil ; }
+  Sum kvs -> pairNames kvs ; Data x cs -> cons x (pairNames cs) ;
+  Record kvs -> pairNames kvs ; RecordValue kvs -> pairNames kvs ; Proj r x -> allNames r ; _ -> nil ; }
 armNames (xs : List (Pattern * Term)) : List String := match xs {
   nil -> nil ; cons (p, b) rest -> concat (patternVars p) (concat (allNames b) (armNames rest)) }
 pairNames (xs : List (String * Term)) : List String := match xs {
@@ -70,6 +72,9 @@ alphaWalk (env : List (String * String)) (s t : Term) : Bool := match (s, t) {
   (Inj l a, Inj k b) -> l == k and alphaWalk env a b ;
   (Match a ps, Match b qs) -> alphaWalk env a b and alphaArms env ps qs ;
   (Sum ps, Sum qs) -> alphaPairs env ps qs ;
+  (Record ps, Record qs) -> alphaPairs env ps qs ;
+  (RecordValue ps, RecordValue qs) -> alphaPairs env ps qs ;
+  (Proj r x, Proj s y) -> x == y and alphaWalk env r s ;
   (Data x ps, Data y qs) -> alphaPairs (cons (x, y) env) ps qs ;
   _ -> s == t ; }
 alphaPairs (env : List (String * String)) (ps qs : List (String * Term)) : Bool := match (ps, qs) {
@@ -94,6 +99,9 @@ substTerm (x : String) (s t : Term) : Term :=
   Pair a b -> Pair (substTerm x s a) (substTerm x s b) ;
   Inj l a -> Inj l (substTerm x s a) ; Match a arms -> Match (substTerm x s a) (substArms x s arms) ;
   Sum kvs -> Sum (substPairs x s kvs) ;
+  Record kvs -> Record (substPairs x s kvs) ;
+  RecordValue kvs -> RecordValue (substPairs x s kvs) ;
+  Proj r l -> Proj (substTerm x s r) l ;
   Data y cs -> if x == y then t else match freshData x s y cs { (z, ds) -> Data z (substPairs x s ds) } ;
   _ -> t ; }
 substBody (x : String) (s : Term) (y : String) (b : Term) : String * Term :=
@@ -153,6 +161,9 @@ canonTerm (avoid : List String) (env : List (String * String)) (n : Nat) (t : Te
     match canonTerm avoid env n1 b { (d, n2) -> (Pair c d, n2) } } ;
   Inj l a -> match canonTerm avoid env n a { (b, n1) -> (Inj l b, n1) } ;
   Sum kvs -> match canonPairs avoid env n kvs { (cs, n1) -> (Sum cs, n1) } ;
+  Record kvs -> match canonPairs avoid env n kvs { (cs, n1) -> (Record cs, n1) } ;
+  RecordValue kvs -> match canonPairs avoid env n kvs { (cs, n1) -> (RecordValue cs, n1) } ;
+  Proj r x -> match canonTerm avoid env n r { (s, n1) -> (Proj s x, n1) } ;
   Data x kvs -> match nextBinder avoid n { (y, n1) ->
     match canonPairs avoid (cons (x, y) env) n1 kvs { (cs, n2) -> (Data y cs, n2) } } ;
   Match a arms -> match canonTerm avoid env n a { (b, n1) ->
@@ -204,7 +215,15 @@ integerPrim (op : String) (i j : Int) : Term :=
   else Var (if (if op == "==" then i == j else i < j) then "true" else "false")
 stepHead (p : Program) (t : Term) : HeadStep := match t {
   Var x -> match lookupBody p x { nothing -> Done t ; just b -> Next b } ;
-  App f a -> stepApplication p f a ; Match s arms -> stepMatch p s arms ; _ -> Done t ; }
+  App f a -> stepApplication p f a ; Match s arms -> stepMatch p s arms ;
+  Proj r x -> stepProjection p r x ;
+  Record kvs -> Done t ; RecordValue kvs -> Done t ; _ -> Done t ; }
+-- Field names are literal and ordered; duplicate names select the first occurrence.
+lookupField (kvs : List (String * Term)) (x : String) : Maybe Term := match kvs {
+  nil -> nothing ; cons (y, v) rest -> if x == y then just v else lookupField rest x }
+stepProjection (p : Program) (r : Term) (x : String) : HeadStep := match r {
+  RecordValue kvs -> match lookupField kvs x { just v -> Next v ; nothing -> Done (Proj r x) } ;
+  _ -> match stepHead p r { Next s -> Next (Proj s x) ; Done s -> Done (Proj s x) } }
 stepApplication (p : Program) (f a : Term) : HeadStep := match f {
   Lam x ty b -> Next (substTerm x a b) ;
   App op i -> match operatorName op {
