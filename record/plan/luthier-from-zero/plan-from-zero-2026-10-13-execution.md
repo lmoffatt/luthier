@@ -162,6 +162,12 @@ by Luciano.
   sonolocalización, the rest of check.py bite 3 and of `run` wait. Four Opus subagents running
   (review of layers 2-3, audit of chapters 2-4 for v0.2, the guide, library.lth §4). The
   coordination is handed to a fresh session: `record/handoff-2026-10-13.md`.
+- 2026-10-13, 22:20: the coordination is luthier-1b's (Fable 5.1); the former coordinator and
+  luthier-03 stay open as advisers only (his word), every task goes to a subagent (Sonnet, Opus,
+  Fable by its difficulty) or to Codex. library.lth §4 landed (f70ca34, b69f640). `tests/test_run.py`
+  committed (108fb96, Codex had written it): the `run` bite is whole but for its report. Running:
+  an Opus agent on the parser for the pattern `<-`; Codex on check.py bite 3b (prompt-3b.md: the
+  leftovers by cause, the 4.R9 refusals of library.lth) and on the inventory of sonolocalización.
 
 ## Rules for every step
 
