@@ -55,6 +55,14 @@ by Luciano.
   ordered semiring, exponential, product, coproduct), and `kernel_models.lut`, the core's types as
   their models. Next: step 2.2, `term.lth`.
 
+- 2026-10-13: step 4.2 brought forward, by Codex (55708f2): the 48 programs of `tests/spec/` in
+  the new syntax, 47 parse, `r12_toplevel_arrow` is a syntax rejection by design (a runner must
+  count a parse failure as its reject); `r4_data_nonrecursive` kept a reject by L2.7 (70b1c26).
+  Open, for when `program.lth` is written: the checker's messages (`-- expect (v0.1)`), the
+  signature of `cite` and the typed `.bib` import (O10, 12.R1 with 12.S22), and 11.R3's accept
+  file (an axiom is allowed only in `lib/`, so no program of `tests/spec/` can be its accept case).
+  Z10 (D-2026-10-13-v): the destination is Luthier but a core in Rust.
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
