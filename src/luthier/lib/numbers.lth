@@ -90,10 +90,12 @@ NegateTwice (d : Doubles) (x : Moderate) : Bool := d.minus 0.0 (d.minus 0.0 x) =
 -- the strict order, the reversed forms and `/=` are what they say
 LeqPair (d : Doubles) : U := { x y : Moderate | d.leq x y }
 LeqChain (d : Doubles) : U := { x y z : Moderate | d.leq x y and d.leq y z }
-LeqBoth (d : Doubles) : U := { x y : Moderate | d.leq x y and d.leq y x }
 LeqReflexive (d : Doubles) (x : Moderate) : Bool := d.leq x x
 LeqTotal (d : Doubles) (x y : Moderate) : Bool := d.leq x y or d.leq y x
-LeqAntisymmetric (d : Doubles) (p : LeqBoth d) : Bool := p.x == p.y
+-- antisymmetry by its contrapositive, over every pair: two distinct doubles are not each at most
+-- the other. The filter `x <= y and y <= x` it replaces accepted almost no drawn pair, so the law
+-- was not run (7.S6 asks a constructive subtype; 7.S12: no rare premise; the coordinator's item 5)
+LeqAntisymmetric (d : Doubles) (x y : Moderate) : Bool := x == y or not (d.leq x y and d.leq y x)
 LeqTransitive (d : Doubles) (c : LeqChain d) : Bool := d.leq c.x c.z
 LessIsStrict (d : Doubles) (x y : Moderate) : Bool := d.less x y == (d.leq x y and not (x == y))
 GreaterIsLessReversed (d : Doubles) (x y : Moderate) : Bool := d.greater x y == d.less y x
