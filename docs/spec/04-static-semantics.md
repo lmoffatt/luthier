@@ -23,15 +23,15 @@ components and branches are `spec 1 §3`'s (D-2026-10-12-z).
 
 ## §2 One relation, three states
 
-**4.S5. Everything is a type.** [implemented] Everything is a type; a value is a type with exactly
+**4.S5. Everything is a type.** [proposed] Everything is a type; a value is a type with exactly
 one inhabitant. `4` is `{ n : Int | n == 4 }`. `x : T` says that `x` is a refinement of `T`. The
 distinction between types and values stays on the surface, because the reader needs to know what
 reduces, but it is a difference in how far a name is determined, not in kind (L8).
 
-**4.S6. The three states of a name.** [implemented] A name is in one of three states. It is
+**4.S6. The three states of a name.** [decided D-2026-10-12-y] A name is in one of three states. It is
 *declared* when its base is known, `x : T`, by a declaration. It is *defined* when its body is
 known, by a definition in the same file or in another. It is *certified* when some of its laws
-passed `test`, each with a grade of the five grades of Terms (; D-2026-10-12-y). What a certificate records is `spec 6`. Certification is about a law
+have a certificate, each with a grade of the five grades of Terms (; D-2026-10-12-y). What a certificate records is `spec 6`; the specimens have none yet, so they tell the first two states only. Certification is about a law
 applied to particular values, never about a name alone.
 
 **4.S7. The body decides, and no marker distinguishes.** [implemented] The body says what is
@@ -68,14 +68,15 @@ subtype a third kind. [implemented] Today the checker tells the two apart by the
 as a theory in the sense of G1 a subtype of a labeled base, usually parameterized (`Group (A :
 U)`), whose models are given as values of the labeled base.
 
-**4.S10. A body computes; a law only checks.** [implemented] Whether laws pin down a unique
+**4.S10. A body computes; a law only checks.** [proposed] Whether laws pin down a unique
 inhabitant is undecidable and is never asked. Two bodies for one meaning are two names, and their
 agreement is a law to test (`spec 5`).
 
 ## §3 Reading a program
 
-**4.S11. Order of work of the checker.** [implemented] A program is a set of acts without order
-(`spec 2`). The checker reads the whole program, imports included, before it checks any
+**4.S11. Order of work of the checker.** [proposed] A program is a set of acts without order
+(`spec 2`). `check.py` runs each predicate on every name of the file and loads no import; the
+order designed is that the checker reads the whole program, imports included, before it checks any
 definition: (1) parse every file and collect each name with its declared type and body, and expand
 aliases; (2) resolve names and build the dependency graph; (3) compute the theories; (4) check the
 theories in an order compatible with the dependencies, each as a block; inside a block, first every
@@ -83,14 +84,14 @@ declared type, then every law, then every other body. Order in the file is not s
 
 ## §4 Theories are cycles, branches name them
 
-**4.S12. The cycle is the theory.** [implemented] A type is an assembly of other types under laws.
+**4.S12. The cycle is the theory.** [decided D-2026-10-12-z] A type is an assembly of other types under laws.
 The laws mention the type; the type, in its definition, names the laws; that loop is the theory,
 and everything on it is defined together. A definition that mentions the theory without being on
 its loop is a branch: a new entity that names the theory and depends on it one way. `csv` is a
 branch of `Codec`; a function `shape (t : Table) : Int * Int` is a branch of `Table`. This closes
 O7.
 
-**4.S13. Why the cycle and not mere connection.** [implemented] Connection would fuse into one
+**4.S13. Why the cycle and not mere connection.** [decided D-2026-10-12-z] Connection would fuse into one
 theory two types where one only refers to the other (a law of `Codec` mentions `Table`, but
 `Table` does not mention `Codec`). Direction tells a theory from its branches. Two consequences:
 the dependency structure of a program is read off its names, and two theories with the same cycle
@@ -98,9 +99,10 @@ up to renaming (names, signatures, laws) are candidates for an isomorphism befor
 implementation is looked at. The same mathematical object, presented with other primitives, has
 another cycle (`spec 9`): the cycle belongs to the presentation.
 
-**4.S14. A head, and the law no type claims.** [implemented] Every theory defined by laws has a
+**4.S14. A head, and the law no type claims.** [decided D-2026-10-12-z] Every theory defined by laws has a
 head: a type whose body names the laws. A law that no type claims defines nothing; it is a branch
-over the types it mentions, and 4.R2 applies to it.
+over the types it mentions, and 4.R2 applies to it. `check` reports such a law as `unclaimed` and
+does not reject it yet (`r2_unclaimed_laws.reject.lut` is an expected failure in `test_spec.py`).
 
 ## §5 Dependence
 
@@ -130,10 +132,11 @@ declaration exists: declared or defined. A declaration may mention types that ar
 that is what lets a theory's laws and its head refer to each other (L2.5).
 Files: r1_declaration.accept.lut, r1_declaration.reject.lut.
 
-**4.R2. A definition uses defined types.** [implemented] For a definition `n`, every name that
+**4.R2. A definition uses defined types.** [decided D-2026-10-13-ae] For a definition `n`, every name that
 occurs in type position in its declared type or its body is defined, unless it belongs to `n`'s
-own theory. In term position a declared name is allowed: a hole of a defined type is a parameter
-(`sigma : Float64`, set by `luthier run --set`), and what depends on it does not reduce until it
+own theory; the checker tests the existence of the name only (`violatesR2Exists`), and the half by
+strongly connected component waits (D-2026-10-13-ae). In term position a declared name is allowed: a hole of a defined type is a parameter
+(`sigma : Float64`, to be set by `luthier run --set`, which `cli.py` does not have yet), and what depends on it does not reduce until it
 is filled. Code over a type that is only declared, outside that type's theory, must take the type
 as a parameter.
 Files: r2_definition.accept.lut, r2_definition.reject.lut.
@@ -151,10 +154,10 @@ constructor not so bound is rejected: it is a collection, to be written as an al
 table of 4.S19, observers against constructors, is reported besides.
 Files: r3_connected.accept.lut, r3_dangling_label.reject.lut.
 
-**4.R4. Only laws or a `data` make a new type.** [decided D-2026-10-13-o] A definition `x : U := t` makes `x` a
+**4.R4. Only laws or a `data` make a new type.** [implemented] [decided D-2026-10-13-o] A definition `x : U := t` makes `x` a
 type with a name of its own only if `t` is a subtype with a predicate (laws) or a `data`, recursive
 or not (3.R3). A body that is anonymous and structural (a product, an exponential, a sum written
-`< ... >`) introduces a name that claims nothing and is rejected: write `x = t` (an alias, 4.R7), or write
+`A + B` or with labels, `{ a : A || b : B }`) introduces a name that claims nothing and is rejected: write `x = t` (an alias, 4.R7), or write
 the type where it is used, or declare `x : t` and owe it laws.
 Files: r4_product_inline.accept.lut, r4_product_named.reject.lut.
 
@@ -162,7 +165,7 @@ Files: r4_product_inline.accept.lut, r4_product_named.reject.lut.
 `x : T := extern "..."` is accepted when `T` is defined (4.R2 applies to externs as to any body);
 `x : U := extern "..."` is rejected. `extern provisional "..."` lifts both requirements, for
 working in a hurry on a type nobody has defined yet or on a Python type nobody has described: it
-is accepted, recorded in the certificate under `provisional` with the names it builds on, listed
+is accepted, recorded under `provisional` with the names it builds on, listed
 by `luthier check -v`, and never certified (`spec 6`). Every refinement in the type of an extern
 is an obligation on the value it gives (2026-10-05): the predicate of a subtype, the codomain of
 each arrow quantified over its domain (`neg : Float64 -> NonNegative` owes `neg x >= 0.0` for
@@ -172,17 +175,18 @@ and owe nothing. Under a constructor of a sum (the `Table` of a `Maybe Table`) e
 payload becomes `match v { just t -> L t ; _ -> true }`, and a law quantified over something whose
 type depends on the payload (a row `r : Fin t.nRows`) is quantified over the base of that type with
 its refinement as a precondition inside the match. A refinement deeper in a payload (a field of a
-record in a sum) and one under a data type are not entered. `luthier run --checked` tests every
+record in a sum) and one under a data type are not entered. [proposed] `luthier run --checked`, which `cli.py` does not have yet, tests every
 value an extern gives against the Bool laws of its type as it crosses, each entry of an array and
 each component of a record included; a quantified law is left to `test`, and a function an extern
-gives is tested when it is called (`spec 10`). In the language designed the checker does not resolve the target (4.S24).
+gives is tested when it is called (`spec 10`). Today `run.py` checks only the bounds and shapes of
+`Float64`, `Int` and `Fin n` where a value crosses, the entry bound of a declared `Fin` codomain
+included. The checker does not resolve the target (4.S24).
 Files: r5_extern_value.accept.lut, r5_extern_type.reject.lut.
 
 **4.R6. The body of a declared name is an inhabitant or a predicate.** [implemented] If `x` is
 declared `x : T` and later given a body, the body has type `T`, or `T -> Bool`, or
 `T -> Failures E`, or is a `Law` over `T`. Any other type is an error, reported against the
-declaration. The form with `Failures E` is designed (spec 5.S9); the checker accepts the other
-three today. [decided D-2026-10-13-o] A theory with parameters of its own repeats them in its definition by laws,
+declaration. The checker accepts all four (`verdict_type` in `check.py`; spec 5.S9). [decided D-2026-10-13-o] A theory with parameters of its own repeats them in its definition by laws,
 `Recognizer (e : Ebnf) := AcceptsWhatDerives e`, and each law takes the theory's parameters first
 and the model after them.
 Files: r6_predicate_body.accept.lut, r6_body_type.reject.lut.
@@ -191,7 +195,7 @@ Files: r6_predicate_body.accept.lut, r6_body_type.reject.lut.
 stand for the term on the right everywhere; the checker expands it before anything else, so an
 alias is never declared, defined or certified. A name that is an alias and is also declared or
 defined is an error. A generator given to an alias is the generator of the type the alias stands
-for (2026-10-05): `gen FullCoords` with `FullCoords = VecOf (freeDim + 1)` draws every `VecOf 16`,
+for (2026-10-05; how it is given is `spec 7`): a generator of `FullCoords = VecOf (freeDim + 1)` draws every `VecOf 16`,
 and two aliases of one type cannot both have one. A distribution that means something (a broken
 graph, a complete one) is a type with a law, `{ g : DistanceGraph | not (ValidGraph g) }`, and
 every value its generator gives is checked against that law; a value outside is an error that
@@ -202,7 +206,7 @@ Files: r7_alias.accept.lut, r7_alias_defined.reject.lut.
 `Float64`, `String`, `Unit`, `Empty`, and on products, sums, `data` (recursive or not, D-2026-10-13-o) and subtypes built
 from types that have it. Not on exponentials, and not on anything containing one. A law that
 compares values of such a type takes the equality it uses as a parameter or as a component of its
-theory: the observational equality of the presentation. `algebra.lut` already does so (each
+theory: the observational equality of the presentation. `algebra.lth` already does so (each
 structure carries its `eq`). How a type names its equality (O2) is O2 (the
 setoid as base case).
 Files: r8_equality_parameter.accept.lut, r8_equality_function.reject.lut.
@@ -222,12 +226,12 @@ the environment is another model. That two models agree (`Agrees`) is a corollar
 characterizing the theory, useful to tighten a tolerance, and never the law itself. A theory
 whose only laws compare it with a second implementation is reported as *consistent, not
 characterized* (4.S19). The checker does not decide the rule: it is a rule for the one who writes
-the laws, and `check -v` makes the difference visible. Two consequences, from the same discussion.
+the laws, and `check -v` is to make the difference visible (4.S19), and does not yet. Two consequences, from the same discussion.
 Each concept is identified with the mathematical object that best represents it (a vector space,
 a ring, an inner product space, a symmetric bilinear form), and that object is the invariant of its
 type: the leaf, the instance or the value is declared at the structure, so the structure's laws are
 its obligations and not laws stated apart on a copy. And a law has one name: it is written once in
-`lib/algebra.lut`, in its most general form, and a special case is an application of it, never a
+`lib/algebra.lth`, in its most general form, and a special case is an application of it, never a
 second declaration (commutativity is `Symmetric` with result type equal to the argument type;
 associativity of an operation is the law of an action of a set on itself). Structures are built by
 inclusion of the ones below them; `algebra` is imported by every library that states a property.
@@ -244,7 +248,7 @@ in a branch (`spec 6`), and the textual discharge the interpreter does today (an
 to the condition of its branch). `refine` of `spec 5` is typable by this rule.
 
 **4.R12. `:=` defines once; `<-` rebinds.** [implemented] Decided 2026-10-11 (D-2026-10-11-c;
-blocks, defaults, named arguments and the session implemented the same day). A name bound with
+blocks, defaults and named arguments are in the specimens, the session is not yet, 2.S18). A name bound with
 `:=` is defined once, and a second definition of it is an error ("x is defined twice"). A name
 bound with `<-` may be bound again with `<-`: each binding is a fresh name in the core, as in
 static single assignment, and every later use means the latest (D-2026-10-10-e, L4.5). A name first bound with `:=` cannot be rebound with
@@ -272,29 +276,29 @@ through a homomorphism stated and certified as a law: a value of `Z7` uses `Int`
 `forget`, and the law that relates the two is `mod 7` being a ring homomorphism. Where a theory
 does not fix the role of an operator (a function over a bare `Monoid` applied at `Int`, which
 carries two), the model is named in the call. The subtype is the wrong relation for a quotient:
-`examples/z7ring.lut` is rewritten with `Z7` as its own type.
+`Z7` is a type of its own, with its ring as its model.
 Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 
 ## §7 Statements added to the rules
 
 The checks the old chapter added to rules 4.R2, 4.R3, 4.R12 and 4.R13 as further programs.
 
-**4.S17. No loose functions.** [decided D-2026-10-07-e] Added to 4.R2 and 4.R4 on 2026-10-07; not
-implemented. A structural type with no laws, an exponential `A -> B`, a product or a sum, is a
+**4.S17. No loose functions.** [decided D-2026-10-07-e] Added to 4.R2 and 4.R4 on 2026-10-07; reported
+only, not rejected. A structural type with no laws, an exponential `A -> B`, a product or a sum, is a
 *base* and not a defined type for 4.R2. A value is defined at a type that has a name and laws, at
 a `data` or at a primitive; a top-level definition at a bare exponential is a loose function, and
 there are none: a function is a value of a defined function type, a theory (Terms). A helper
 either gets its recursion as its laws or waits for local definitions (`spec 2`). The same holds
 for 4.R4: a lawless `A -> B` is a base, not a type a value is written at. The libraries do not
-comply yet (`exp : Float64 -> Float64` in `real.lut`, the helpers of `array.lut`): `check -v` is
-to report loose functions first, as it reports *consistent, not characterized*, and the rule
+comply yet (`exp : Float64 -> Float64` in `real.lut`, the helpers of `array.lut`): `check -v`
+reports loose functions as the `loose` kind of `report` in `check.py`, and the rule
 rejects once local definitions exist and the certificates are reissued. Files are to be written
 with the implementation: reject `s17_loose_function.reject.lut`, accept `s17_defined_function.accept.lut`
 (neither exists).
 
 **4.S18. R2 and R3 programs beyond the pair.** [implemented] Two further programs belong to the
 rules above: `r2_unclaimed_laws.reject.lut` (a law no type claims, 4.S14, is a branch and 4.R2
-applies to it) and `r3_true_predicate.reject.lut` (a predicate that touches nothing, 4.R3). The
+applies to it; an expected failure in `test_spec.py` until the checker rejects it) and `r3_true_predicate.reject.lut` (a predicate that touches nothing, 4.R3). The
 programs `r12_rebind_defined.reject.lut`, `r12_unused_rebinding.reject.lut`,
 `r12_toplevel_arrow.reject.lut`, `r12_defaults.accept.lut` and `r12_named_unknown.reject.lut` do
 the same for 4.R12, `r4_data_nonrecursive.reject.lut` and `r4_recursive_data.accept.lut` for 4.R4,
@@ -302,13 +306,14 @@ and `r5_extern_provisional.accept.lut` and `r5_extern_over_declared.reject.lut` 
 
 ## §8 Reports that do not reject
 
-**4.S19. What `luthier check -v` reports.** [implemented] Without rejecting, `luthier check -v`
+**4.S19. What `luthier check -v` reports.** [decided D-2026-10-05-b] Without rejecting, `luthier check -v`
 reports (2026-10-05: also the axioms, `spec 6`): every `provisional` extern and what it builds on
 (4.R5); for each concrete type with laws, the table of observers against constructors, and the
 cells with no law: *sufficient completeness* (Guttag, 1977). A full table says everything
 observable about every constructed value. An extensionality law (two values are equal when every
 observer agrees on them) turns "same observations" into "same value"; holes that the entry of
-`luthier run` depends on.
+`luthier run` depends on. Of this list `check.py` builds today the unclaimed laws, the provisional
+externs and the loose functions; the table and the axioms are not built.
 
 **4.S20. Consistent, not characterized.** [decided D-2026-10-05-b] Not implemented. For each operation with laws, `check -v` reports whether they characterize it
 (4.R10) or only compare it with another implementation. Version 0 can only tell the two apart by
@@ -317,15 +322,16 @@ compares the results is a comparison. Characterization proper is a judgement the
 
 ## §9 The rules as a theory
 
-**4.S21. R1 to R13 as the laws of `WellFormed`.** [proposed] L14 asks for the rules in Luthier.
+**4.S21. R1 to R13 as the laws of `WellFormed`.** [implemented] L14 asks for the rules in Luthier.
 Rules 4.R1 to 4.R13 are the laws of a theory `WellFormed : Program -> Failures E`, over the
-`Program` data of `spec 3`, to be written in `lib/program.lut` (not yet present), each law one
-rule and its accept and reject programs its cases. Until it exists the checker in
-`src/luthier/checker.py` is the specimen, and the suite is its certificate (`spec 7`).
+`Program` data of `spec 3`, written in `src/luthier/lib/program.lth` (R10 and R11 are not predicates there), each law one
+rule and its accept and reject programs its cases. The checker `src/luthier/check.py` is its
+specimen (`tests/test_check.py`), and the suite is its certificate (`spec 7`); `check.py` adds the
+predicates of 2.R1, 2.R6 and 6.R1.
 
 ## §10 Example
 
-**4.S22. A theory, its branches and the rules applied.** [implemented]
+**4.S22. A theory, its branches and the rules applied.** [proposed]
 
 ```
 -- a concrete type, defined natively: a table is a function from a column and a row to a cell
@@ -343,7 +349,6 @@ Codec := RoundTrip & Rejects
 csv : Codec := { parse := extern "python:luthier.tables.parse",
                  render := extern "python:luthier.tables.render",
                  eq := sameTable }
-test csv with 200
 ```
 
 `Table` here is an alias (4.R4: a product with no laws is not a new type). If tables had
@@ -354,13 +359,13 @@ over this base and defined by them. `Codec` carries its equality as a component 
 
 ## §11 What the checker infers and what it does not open
 
-**4.S23. Implicit arguments from the expected type.** [decided D-2026-10-12-ab] Implicit arguments
+**4.S23. Implicit arguments from the expected type.** [implemented] [decided D-2026-10-12-ab] Implicit arguments
 are inferred from the type the context expects as well as from the types of the explicit arguments,
 since `extern` and `axiom`, as names of core, take their type from where they are used.
 
-**4.S24. The checker does not open an extern's file.** [decided D-2026-10-12-ac] 4.R5 is checked on
+**4.S24. The checker does not open an extern's file.** [implemented] [decided D-2026-10-12-ac] 4.R5 is checked on
 the declared type alone: the checker records the target of an extern and its type, and does not
-resolve it (`spec 3 §8`). Today it imports the host module and rejects a target it cannot resolve.
+resolve it (`spec 3 §8`). `check.py` imports no host module (`test_unused_extern_is_not_resolved`).
 
 ## Open
 
