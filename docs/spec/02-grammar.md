@@ -45,7 +45,9 @@ and so does a line that cannot start an item: one beginning with `else`, `then`,
 infix operator. [decided D-2026-10-13-q] Three readings `grammar.lth` took where this was silent: the braces of a
 `data` behave as those of a record type (a line break separates constructors), and a `}` at
 column 0 closes its brace and does not start an act; blank lines and lines holding only a comment
-are dropped with their line breaks.
+are dropped with their line breaks. [proposed] The braces of `quote` drop line breaks as those of `match`; which bracket a
+token opens is known from the tokens before it: `<` opens a sum only as `< name :`, the braces of a
+`match` are the first `{` after `match` outside brackets (2.S9), those of `quote` follow `quote`.
 
 ## §2 Acts
 
@@ -147,7 +149,7 @@ holds.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: f32b34c28f98f3f3df0429e9bfd9c0116144cd1998906714e735ab412369a414).
+(v1; sha256: 9f7b092dafae33acc6423eb643e1d90af2b5c4e21fc72aabe32a2572046fab04).
 
     program ::= { act newline }
 
@@ -226,7 +228,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
     argTerm ::= argAtom { "." name }
 
     atom ::= argAtom
-        | "<" name ":" term { "|" name ":" term } ">"
+        | "<" name ":" sumAlt { "|" name ":" sumAlt } ">"
 
     argAtom ::= name
         | number
@@ -244,6 +246,16 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
         | "\\" lparam { lparam } "{" block "}"
         | "match" scrutinee "{" [ arm { ";" arm } [ ";" ] ] "}"
         | "quote" "{" term "}"
+
+    sumAlt ::= sumArrow [ "&" sumAlt ]
+
+    sumArrow ::= sumOr [ "->" sumArrow ]
+
+    sumOr ::= sumAnd { "or" sumAnd }
+
+    sumAnd ::= sumCmp { "and" sumCmp }
+
+    sumCmp ::= addTerm { ( "==" | "/=" | "<" | "<=" | ">=" ) addTerm }
 
     scrutinee ::= sAnd { "or" sAnd }
 
@@ -265,7 +277,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
     sArg ::= sArgAtom { "." name }
 
     sAtom ::= sArgAtom
-        | "<" name ":" term { "|" name ":" term } ">"
+        | "<" name ":" sumAlt { "|" name ":" sumAlt } ">"
 
     sArgAtom ::= name
         | number
@@ -364,7 +376,8 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 parameter that is not a typed name is a tuple of two or more patterns. A field may
 carry several names, `{ x y : A, z : B }`. [decided D-2026-10-13-s] Braces inside the scrutinee of a `match`
 go in parentheses, so the first `{` after the scrutinee opens the arms: `match f { p -> q } { r -> s }`
-is the match on `f` applied to a block, and a match on `f { ... }` is written `match (f { ... }) { ... }`. `quote` is a keyword (2.S21) and `eval` a name of core, so
+is the match on `f` applied to a block, and a match on `f { ... }` is written `match (f { ... }) { ... }`. [proposed] By the same rule, inside `< >` a comparison by `>` and an open
+form go in parentheses, so the first `>` at the sum's level closes it (`< a : A > b > c` had two trees). `quote` is a keyword (2.S21) and `eval` a name of core, so
 `eval A t` is an application (2.S20).
 
 **2.S10. Patterns.** [implemented] A pattern `name` is a constructor of the scrutinee's data type

@@ -149,7 +149,10 @@ isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es
 -- are gone with their line breaks; a line break before a token at column 0, outside every open
 -- bracket, is the newline token that ends an act, and one more ends a text whose last act has
 -- none; a `}` at column 0 closes its brace and does not start an act; inside ( ), [ ], < > and the
--- braces of `match`, line breaks are dropped; inside the braces of a record type, a record value, a
+-- braces of `match` and of `quote`, line breaks are dropped. Which bracket a token opens is known
+-- from the tokens before it: `<` opens a sum only as `< name :`, and closes at the first `>` at its
+-- level; the braces of a `match` are the first `{` after `match` outside brackets (D-2026-10-13-s);
+-- those of `quote` follow `quote`; inside the braces of a record type, a record value, a
 -- block and a `data` (the last this file's reading of 2.S4, which is silent there), a line break is
 -- ";" unless the next line is indented deeper than the first item, begins with `then`, `else` or a
 -- binary operator, or follows "{", "," or ";", or precedes "}"; outside braces, a line break before
@@ -163,7 +166,9 @@ isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es
 -- associativity a right recursion, a left one a repetition. A sum `< ... >` heads an application
 -- but is not an argument (2.S10). The scrutinee of a `match` is the chain from `or` down whose
 -- atoms carry no braces outside brackets, so the first `{` opens the arms (D-2026-10-13-s; ChatGPT,
--- writing the parser: `match f { p -> q } { r -> s }` had two trees). Its coercion to `WellFormedEbnf` owes that it has no left
+-- writing the parser: `match f { p -> q } { r -> s }` had two trees). By the same rule, inside
+-- `< >` a comparison by `>` and an open form go in parentheses, so the first `>` at the sum's
+-- level closes it (`< a : A > b > c` had two trees). Its coercion to `WellFormedEbnf` owes that it has no left
 -- recursion and every nonterminal is defined, an obligation `test` discharges.
 luthierSyntax : WellFormedEbnf := { start := "program", rules := [
   { lhs := "program",     rhs := rep (seq [ref "act", lit "\n"]) },
@@ -205,7 +210,7 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
   { lhs := "projTerm",    rhs := seq [ref "atom", rep (seq [lit ".", cat "name"])] },
   { lhs := "argTerm",     rhs := seq [ref "argAtom", rep (seq [lit ".", cat "name"])] },
   { lhs := "atom",        rhs := alt [ref "argAtom",
-      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"]] },
+      seq [lit "<", cat "name", lit ":", ref "sumAlt", rep (seq [lit "|", cat "name", lit ":", ref "sumAlt"]), lit ">"]] },
   { lhs := "argAtom",     rhs := alt [
       cat "name", cat "number", cat "string", lit "U", lit "W",
       seq [lit "(", ref "term", lit ")"],
@@ -219,6 +224,11 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
       seq [lit "\\", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
       seq [lit "match", ref "scrutinee", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"]), opt (lit ";")]), lit "}"],
       seq [lit "quote", lit "{", ref "term", lit "}"]] },
+  { lhs := "sumAlt",      rhs := seq [ref "sumArrow", opt (seq [lit "&", ref "sumAlt"])] },
+  { lhs := "sumArrow",    rhs := seq [ref "sumOr", opt (seq [lit "->", ref "sumArrow"])] },
+  { lhs := "sumOr",       rhs := seq [ref "sumAnd", rep (seq [lit "or", ref "sumAnd"])] },
+  { lhs := "sumAnd",      rhs := seq [ref "sumCmp", rep (seq [lit "and", ref "sumCmp"])] },
+  { lhs := "sumCmp",      rhs := seq [ref "addTerm", rep (seq [alt [lit "==", lit "/=", lit "<", lit "<=", lit ">="], ref "addTerm"])] },
   { lhs := "scrutinee",   rhs := seq [ref "sAnd", rep (seq [lit "or", ref "sAnd"])] },
   { lhs := "sAnd",        rhs := seq [ref "sCmp", rep (seq [lit "and", ref "sCmp"])] },
   { lhs := "sCmp",        rhs := seq [ref "sAdd", rep (seq [alt [lit "==", lit "/=", lit "<", lit "<=", lit ">", lit ">="], ref "sAdd"])] },
@@ -229,7 +239,7 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
   { lhs := "sProj",       rhs := seq [ref "sAtom", rep (seq [lit ".", cat "name"])] },
   { lhs := "sArg",        rhs := seq [ref "sArgAtom", rep (seq [lit ".", cat "name"])] },
   { lhs := "sAtom",       rhs := alt [ref "sArgAtom",
-      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"]] },
+      seq [lit "<", cat "name", lit ":", ref "sumAlt", rep (seq [lit "|", cat "name", lit ":", ref "sumAlt"]), lit ">"]] },
   { lhs := "sArgAtom",    rhs := alt [
       cat "name", cat "number", cat "string", lit "U", lit "W",
       seq [lit "(", ref "term", lit ")"],
@@ -558,6 +568,8 @@ DanglingElse (d : Derives) (g : Grammar d) : Bool :=
 SumAsArgument (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := f (< a : A | b : B >)" (app (nm "f") (sum [("a", nm "A"), ("b", nm "B")]))
   and not (isParsed (g.parse "x := f < a : A | b : B >"))
+  and parsesX d g "x := < a : A > b > c" (binop ">" (app (sum [("a", nm "A")]) (nm "b")) (nm "c"))
+  and parsesX d g "x := < a : (A > b) >" (sum [("a", binop ">" (nm "A") (nm "b"))])
 
 -- ---------------------------------------------------------------- the role of each constructor
 
