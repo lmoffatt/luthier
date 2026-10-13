@@ -37,7 +37,7 @@
 --      core.lut.                                                                            todo
 
 import "kernel_laws.lth" Concrete
-import "laws.lth" Coverage Exhaustive Listed Drawn Bounded
+import "laws.lth" Coverage Drawn
 
 -- ---------------------------------------------------------------- §1 Seeds and generators
 
@@ -151,11 +151,13 @@ upTo (T : U) (size : T -> Nat) (n : Nat) (xs : List T) : List T :=
 -- those whose size is at most it (7.S3, 7.R3). The size is the type's, one function per form
 -- (7.S3), so it is a parameter and not the model's choice (gen.7); a type with no finite list of
 -- all its values has no model (gen.8: `exhaustive` over an unbounded type is an error, 7.R3).
-Exhaustive (T : Concrete) (size : T -> Nat) : { all : List T }
-ReachesEvery (T : Concrete) (size : T -> Nat) (e : Exhaustive T size) (x : T) : Bool := memberOf T x e.all
-EachOnce (T : Concrete) (size : T -> Nat) (e : Exhaustive T size) : Bool := noDuplicates T e.all
-Exhaustive (T : Concrete) (size : T -> Nat) := ReachesEvery T size & EachOnce T size
-values (T : Concrete) (size : T -> Nat) (e : Exhaustive T size) (n : Nat) : List T := upTo T size n e.all
+-- Named `Enumeration`, apart from laws.lth's coverage `Exhaustive` (one name, two meanings; the
+-- coordinator, 2026-10-14).
+Enumeration (T : Concrete) (size : T -> Nat) : { all : List T }
+ReachesEvery (T : Concrete) (size : T -> Nat) (e : Enumeration T size) (x : T) : Bool := memberOf T x e.all
+EachOnce (T : Concrete) (size : T -> Nat) (e : Enumeration T size) : Bool := noDuplicates T e.all
+Enumeration (T : Concrete) (size : T -> Nat) := ReachesEvery T size & EachOnce T size
+values (T : Concrete) (size : T -> Nat) (e : Enumeration T size) (n : Nat) : List T := upTo T size n e.all
 
 -- A sized generator keeps the size of what it gives within the size asked: for a recursive `data`
 -- the size bounds the depth, so at size 0 only constructors with no recursive argument are drawn
