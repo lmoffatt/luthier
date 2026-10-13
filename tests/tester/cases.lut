@@ -1,0 +1,26 @@
+-- tests/tester/cases.lut: what `luthier test` reports on a case and on a binding
+-- (record/IA/tester-2026-10-14/prompt.md): a host failure on a case, a stuck reduction on a case,
+-- a theory parameter with a census and without one, and two laws of numbers.lth whose names
+-- other libraries also define (LeqTransitive over a refined record, numbers.lth's LeqChain).
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" doubles integerDivision
+import "numbers.lth" LeqTransitive DivisionAlgorithm
+
+root (x : Float64) : Float64 := extern "python:math.sqrt" x
+RootIsNotNegative (x : Float64) : Bool := root x >= 0.0
+Partial (b : Bool) : Bool := match b { true -> true }
+
+census : List Binding := [
+  { parameter := just "m", type := nothing, generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
+
+test "RootIsNotNegative" (SampledMode linear) (cases <- 20)
+test "Partial" ExhaustiveMode
+test "DivisionAlgorithm" (SampledMode linear) (cases <- 30) (whereBindings <- census)
+test "DivisionAlgorithm" (SampledMode linear) (cases <- 30)
+test "LeqTransitive" (SampledMode linear) (cases <- 30) (profile <- census)
+test "DivisionAlgorithm" ExhaustiveMode (whereBindings <- census)

@@ -1,0 +1,87 @@
+-- tests/tester/numbers_laws.lut: the laws of numbers.lth run through `luthier test` on the models
+-- of numbers_model.lut, since neither numbers_model.lut nor tables_model.lut carries `test` lines
+-- (record/IA/tester-2026-10-14/prompt.md). Each model is a census of one value, bound by its type
+-- in the profile (7.R1, 7.R4); the tolerance of the identities of §5 is a census of one, 1e-12,
+-- [proposed] a demand's parameter (11.S18) chosen here, not by numbers.lth.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" doubles integerDivision conversion elementary
+import "numbers.lth" Tolerance PlusCommutes TimesCommutes PlusZero TimesOne DivideOne TimesZero MinusSelf DivideSelf
+  MinusIsPlusNegated NegateTwice LeqReflexive LeqTotal LeqAntisymmetric LeqTransitive LessIsStrict
+  GreaterIsLessReversed GeqIsLeqReversed UnequalIsNotEqual PlusMonotone TimesMonotone EpsilonIsTheUlpOfOne
+  DivisionAlgorithm RemainderOfTheDivisorsSign QuotientOfProduct
+  ConvertZeroAndOne ConvertAddsExactly ConvertSucceeds ConvertKeepsOrder
+  SqrtOfSquares ExpOfZero LogOfOne ErfOfZero SqrtMonotone SqrtOfSquare ExpPositive ErfOdd ErfBounded
+  SqrtSquares ExpOfLog LogOfExp ExpAdds LogMultiplies
+
+tolerance : Tolerance := 1.0e-12
+
+models : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+
+-- §2 the doubles
+test "PlusCommutes" (SampledMode linear) (profile <- models)
+test "TimesCommutes" (SampledMode linear) (profile <- models)
+test "PlusZero" (SampledMode linear) (profile <- models)
+test "TimesOne" (SampledMode linear) (profile <- models)
+test "DivideOne" (SampledMode linear) (profile <- models)
+test "TimesZero" (SampledMode linear) (profile <- models)
+test "MinusSelf" (SampledMode linear) (profile <- models)
+test "DivideSelf" (SampledMode linear) (profile <- models)
+test "MinusIsPlusNegated" (SampledMode linear) (profile <- models)
+test "NegateTwice" (SampledMode linear) (profile <- models)
+test "LeqReflexive" (SampledMode linear) (profile <- models)
+test "LeqTotal" (SampledMode linear) (profile <- models)
+test "LeqAntisymmetric" (SampledMode linear) (profile <- models)
+test "LeqTransitive" (SampledMode linear) (profile <- models)
+test "LessIsStrict" (SampledMode linear) (profile <- models)
+test "GreaterIsLessReversed" (SampledMode linear) (profile <- models)
+test "GeqIsLeqReversed" (SampledMode linear) (profile <- models)
+test "UnequalIsNotEqual" (SampledMode linear) (profile <- models)
+test "PlusMonotone" (SampledMode linear) (profile <- models)
+test "TimesMonotone" (SampledMode linear) (profile <- models)
+test "EpsilonIsTheUlpOfOne" ExhaustiveMode (profile <- models)
+-- the same at a size of a million
+test "PlusCommutes" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "DivideSelf" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "NegateTwice" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "PlusMonotone" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "TimesMonotone" (SampledMode linear) (size <- 1000000) (profile <- models)
+
+-- §3 integer division
+test "DivisionAlgorithm" (SampledMode linear) (profile <- models)
+test "RemainderOfTheDivisorsSign" (SampledMode linear) (profile <- models)
+test "QuotientOfProduct" (SampledMode linear) (profile <- models)
+test "DivisionAlgorithm" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "RemainderOfTheDivisorsSign" (SampledMode linear) (size <- 1000000) (profile <- models)
+
+-- §4 the conversion
+test "ConvertZeroAndOne" ExhaustiveMode (profile <- models)
+test "ConvertAddsExactly" (SampledMode linear) (profile <- models)
+test "ConvertSucceeds" (SampledMode linear) (profile <- models)
+test "ConvertKeepsOrder" (SampledMode linear) (profile <- models)
+
+-- §5 the elementary functions
+test "SqrtOfSquares" ExhaustiveMode (profile <- models)
+test "ExpOfZero" ExhaustiveMode (profile <- models)
+test "LogOfOne" ExhaustiveMode (profile <- models)
+test "ErfOfZero" ExhaustiveMode (profile <- models)
+test "SqrtMonotone" (SampledMode linear) (profile <- models)
+test "SqrtOfSquare" (SampledMode linear) (profile <- models)
+test "ExpPositive" (SampledMode linear) (profile <- models)
+test "ErfOdd" (SampledMode linear) (profile <- models)
+test "ErfBounded" (SampledMode linear) (profile <- models)
+test "SqrtSquares" (SampledMode linear) (profile <- models)
+test "ExpOfLog" (SampledMode linear) (profile <- models)
+test "LogOfExp" (SampledMode linear) (profile <- models)
+test "ExpAdds" (SampledMode linear) (profile <- models)
+test "LogMultiplies" (SampledMode linear) (profile <- models)
+test "SqrtOfSquare" (SampledMode linear) (size <- 1000000) (profile <- models)
+test "ExpOfLog" (SampledMode linear) (size <- 1000000) (profile <- models)

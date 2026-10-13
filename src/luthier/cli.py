@@ -27,7 +27,24 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--main", default="main")
     p_run.add_argument("--fuel", type=int, default=10_000_000,
                        help="reduction fuel [proposed: default 10,000,000, 10,000 was a hundred times too small for validate_graph.lut]")
+    p_test = sub.add_parser("test", help="run the file's test lines (test.lth's Tester)")
+    p_test.add_argument("file")
+    p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
+    p_test.add_argument("--fuel", type=int, default=1_000_000,
+                        help="reduction fuel per case [proposed: default 1,000,000]")
     ns = parser.parse_args(argv)
+
+    if ns.command == "test":
+        from .tester import line, run_tests
+        try:
+            outcomes = run_tests(ns.file, ns.seed, ns.fuel)
+        except (OSError, ValueError, RecursionError) as exc:
+            import sys
+            print(f"{ns.file}: {exc}", file=sys.stderr)
+            return 1
+        for outcome in outcomes:
+            print(line(outcome))
+        return 0 if all(o.grade is not None for o in outcomes) else 1
 
     if ns.command == "run":
         from .run import run_file
