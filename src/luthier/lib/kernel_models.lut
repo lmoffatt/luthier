@@ -12,65 +12,65 @@ import "kernel_laws.lth" Object Structural Terminal Initial BooleanAlgebra Monoi
   foldList OrderedSemiring Exponential Product Coproduct NamedProduct NamedCoproduct
 
 -- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
-structuralEquality (A : U) : Structural A := { eq := \ x y { x == y } }
+structuralEquality (A : U) : Structural A := { eq := fn x y { x == y } }
 
 -- `Unit` is terminal, `Empty` initial (3.S7, 3.S8)
 unitTerminal : Terminal Unit := { point := unit }
-emptyInitial : Initial Empty := { absurd := \ (A : U) (e : Empty) { match e { } } }
+emptyInitial : Initial Empty := { absurd := fn (A : U) (e : Empty) { match e { } } }
 
 -- `Bool` is a Boolean algebra with `not`, `and`, `or`
 booleans : BooleanAlgebra Bool := {
   top := true, bottom := false,
-  complement := \ b { not b },
-  meet := \ a b { a and b },
-  join := \ a b { a or b },
+  complement := fn b { not b },
+  meet := fn a b { a and b },
+  join := fn a b { a or b },
 }
 
 -- `List A` is the free monoid on `A`; its fold is the recursion principle of 3.S36
 appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
 lists (A : U) : FreeMonoid A (List A) := {
   neutral := nil,
-  combine := \ xs ys { appendList A xs ys },
-  inject := \ a { cons a nil },
-  fold := \ (N : U) (n : Monoid N) (f : A -> N) (xs : List A) {
-    foldList A N { onNil := n.neutral, onCons := \ a r { n.combine (f a) r } } xs },
+  combine := fn xs ys { appendList A xs ys },
+  inject := fn a { cons a nil },
+  fold := fn (N : U) (n : Monoid N) (f : A -> N) (xs : List A) {
+    foldList A N { onNil := n.neutral, onCons := fn a r { n.combine (f a) r } } xs },
 }
 
 -- `Nat` is an ordered commutative semiring (11.R1)
 naturals : OrderedSemiring Nat := {
   zero := 0, one := 1,
-  plus := \ a b { a + b },
-  times := \ a b { a * b },
-  leq := \ a b { a <= b },
+  plus := fn a b { a + b },
+  times := fn a b { a * b },
+  leq := fn a b { a <= b },
 }
 
 -- the kernel's application, pairing and match are the exponential, the product and the coproduct
 -- (3.S8, 3.S36); on `Bool` the coproduct's cases are `if` (`IfTrue`, `IfFalse`), on `Maybe` a
 -- match (`CaseNothing`, `CaseJust`)
-application (A B : U) : Exponential A B := { apply := \ f x { f x } }
+application (A B : U) : Exponential A B := { apply := fn f x { f x } }
 pairs (A B : U) : Product A B (A * B) := {
-  pair := \ a b { (a, b) },
-  first := \ p { match p { (a, b) -> a } },
-  second := \ p { match p { (a, b) -> b } },
+  pair := fn a b { (a, b) },
+  first := fn p { match p { (a, b) -> a } },
+  second := fn p { match p { (a, b) -> b } },
 }
 ifThenElse : Coproduct Unit Unit Bool := {
-  left := \ u { true }, right := \ u { false },
-  cases := \ (C : U) f g b { if b then f unit else g unit },
+  left := fn u { true }, right := fn u { false },
+  cases := fn (C : U) f g b { if b then f unit else g unit },
 }
 maybes (A : U) : Coproduct Unit A (Maybe A) := {
-  left := \ u { nothing }, right := \ a { just a },
-  cases := \ (C : U) f g m { match m { nothing -> f unit ; just a -> g a } },
+  left := fn u { nothing }, right := fn a { just a },
+  cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } },
 }
 
 -- a record type is a named product: `.x` and `.y` its projections (D-2026-10-13-x); a labeled sum a
 -- named coproduct, its labels the injections. Instances on the labels `x`, `y` and `a`, `b`.
 recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
-  pair := \ u v { { x := u, y := v } },
-  first := \ r { r.x }, second := \ r { r.y },
+  pair := fn u v { { x := u, y := v } },
+  first := fn r { r.x }, second := fn r { r.y },
   firstName := "x", secondName := "y",
 }
 sumAB (A B : U) : NamedCoproduct A B { a : A || b : B } := {
-  left := \ u { a u }, right := \ v { b v },
-  cases := \ (C : U) f g s { match s { a u -> f u ; b v -> g v } },
+  left := fn u { a u }, right := fn v { b v },
+  cases := fn (C : U) f g s { match s { a u -> f u ; b v -> g v } },
   leftName := "a", rightName := "b",
 }

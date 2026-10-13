@@ -210,10 +210,10 @@ OrderedSemiring (S : U) := PlusAssociative S & PlusCommutes S & PlusZero S & Tim
 -- and the kernel's own application, pairing and `match` are their models (§7). The laws are those
 -- 3.S36 names: `Beta` for the exponential; `PairFst`, `PairSnd`, `Pairing` for the product;
 -- `CaseLeft`, `CaseRight` for the coproduct, whose instances on `Bool` (`if`) and on `Maybe` are
--- 3.S36's `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust`. Eta, `\ y { f y } == f`, is not
+-- 3.S36's `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust`. Eta, `fn y { f y } == f`, is not
 -- statable: equality of functions is not structural (3.S37, 4.R8); observed pointwise it is `Beta`.
 Exponential (A B : U) : { apply : (A -> B) -> A -> B }
-Beta (A B : U) (e : Exponential A B) (f : A -> B) (x : A) : Bool := e.apply (\ y { f y }) x == f x
+Beta (A B : U) (e : Exponential A B) (f : A -> B) (x : A) : Bool := e.apply (fn y { f y }) x == f x
 Exponential (A B : U) := Beta A B
 
 Product (A B P : U) : { pair : A -> B -> P, first : P -> A, second : P -> B }

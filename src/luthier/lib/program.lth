@@ -216,13 +216,13 @@ definedNames (p : SurfaceProgram) : List String :=
 
 -- 4.R1: a declaration mentions only names that exist, declared or defined (or imported, or core's)
 violatesR1 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ a { match a { declare x bs t -> anyUnknown p (dOf p a) ; _ -> false } }) (actsNamed p n)
+  anyAct (fn a { match a { declare x bs t -> anyUnknown p (dOf p a) ; _ -> false } }) (actsNamed p n)
 
 -- 4.R2, the part that reads names: the names a definition mentions exist. That a name in type
 -- position is defined unless it is in the definition's own theory needs type position (4.S2) and
 -- the theories (4.S3, the strongly connected components): todo, §2.
 violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ a { match a { define x bs t b -> anyUnknown p (concat (dOf p a) (bOf p a)) ; _ -> false } }) (actsNamed p n)
+  anyAct (fn a { match a { define x bs t b -> anyUnknown p (concat (dOf p a) (bOf p a)) ; _ -> false } }) (actsNamed p n)
 
 -- 4.R3: a predicate touches what it is over: every label of a record with a law, the variables of
 -- a subtype's pattern; and (L2.7, D-2026-10-13-p) every constructor of a `data` is mentioned by
@@ -242,7 +242,7 @@ lawNames (p : SurfaceProgram) : List String := match p { nil -> nil ; cons a res
 anyUnclaimed (p : SurfaceProgram) (cs : List String) : Bool :=
   match cs { nil -> false ; cons c rest -> not (member c (lawNames p)) or anyUnclaimed p rest }
 violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ a { match a {
+  anyAct (fn a { match a {
     define x bs t b -> (match b { termBody u -> predicateUntouched (constructors p) u ;
                                   dataBody cs -> anyUnclaimed p (pairNames cs) ; _ -> false }) ;
     _ -> false } }) (actsNamed p n)
@@ -256,7 +256,7 @@ structural (t : Surface) : Bool := match t {
   _ -> false ;
 }
 violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ a { match a { define x bs t b -> t == just universe and (match b { termBody u -> structural u ; _ -> false }) ;
+  anyAct (fn a { match a { define x bs t b -> t == just universe and (match b { termBody u -> structural u ; _ -> false }) ;
                           _ -> false } }) (actsNamed p n)
 
 -- 4.R5: an extern gives a value, never a type, unless it is provisional
@@ -264,7 +264,7 @@ isExtern (t : Surface) : Bool := match t { app f a -> isExtern f ; name s -> s =
 isProvisional (t : Surface) : Bool :=
   match t { app f a -> (match a { namedArg x v -> x == "provisional" ; _ -> false }) or isProvisional f ; _ -> false }
 violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ a { match a { define x bs t b -> t == just universe
+  anyAct (fn a { match a { define x bs t b -> t == just universe
                             and (match b { termBody u -> isExtern u and not (isProvisional u) ; _ -> false }) ;
                           _ -> false } }) (actsNamed p n)
 
@@ -281,7 +281,7 @@ otherBodies (p : SurfaceProgram) (n : String) : List String := match p { nil -> 
   define x bs t b -> if x == n then otherBodies rest n else concat (bOf p a) (otherBodies rest n) ;
   _ -> otherBodies rest n } }
 violatesS14 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ a { match a { define x bs t b -> t == just (name "Bool") and not (member n (otherBodies p n)) ; _ -> false } })
+  anyAct (fn a { match a { define x bs t b -> t == just (name "Bool") and not (member n (otherBodies p n)) ; _ -> false } })
          (actsNamed p n)
 
 -- 4.S17, no loose functions, rejects only once local definitions exist; until then it is a report
@@ -399,7 +399,7 @@ eqOnArrow (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap
   match ap.function { App f x -> f == Var "==" and (match t.typeOf ep ap.context x { nothing -> false ;
     just ty -> containsArrow ep (actCount ep) ty }) ; _ -> false }
 violatesR8 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
-  anyApp (\ ap { eqOnArrow a sb t (e.elaborate p) ap }) (bodyApplications e p n)
+  anyApp (fn ap { eqOnArrow a sb t (e.elaborate p) ap }) (bodyApplications e p n)
 
 -- 4.R9: an argument passes where its function's domain is expected only if its type refines it
 mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap : Application) : Bool :=
@@ -408,7 +408,7 @@ mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap 
                                           just at -> not (t.refines at d) }) ;
                           _ -> false } }
 violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
-  anyApp (\ ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications e p n)
+  anyApp (fn ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications e p n)
 
 -- 4.R11 is a law of the typing (`BranchRefines`): a checker that types branches by it rejects no
 -- program the rule accepts. 4.R13 (an operator resolved by the type, one meaning per types) and
@@ -423,10 +423,10 @@ violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
 reportedAs (rs : List Report) (kind n : String) : Bool :=
   match rs { nil -> false ; cons r rest -> (r.kind == kind and r.name == n) or reportedAs rest kind n }
 provisionalExtern (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ act { match act { define x bs t b -> (match b { termBody u -> isExtern u and isProvisional u ; _ -> false }) ;
+  anyAct (fn act { match act { define x bs t b -> (match b { termBody u -> isExtern u and isProvisional u ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
 looseFunction (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (\ act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;
+  anyAct (fn act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
 nonEmptyBinders (bs : List Binder) : Bool := match bs { nil -> false ; cons b rest -> true }
 ReportsExactlyAs (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (kind : String)
