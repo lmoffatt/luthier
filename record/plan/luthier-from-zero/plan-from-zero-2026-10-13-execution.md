@@ -284,7 +284,10 @@ by Luciano.
    a. `luthier check` reports no failure on the theory files of `src/luthier/lib/` (layers 0 and
       1, and those of layer 2 already written);
    b. every program of `tests/spec/` (48) gets its expected verdict from `luthier check`, with its
-      `-- expect:` fragment where the specification gives one, and no case left as an xfail;
+      `-- expect:` fragment where the specification gives one; the only xfails, each with its
+      reason, are `n2_r_gone`, `n3_primitive_outside_core`, `n4_axiom_outside_lib` (11.R1 to 11.R3
+      are the loader's, D-2026-10-13-ae) and `r2_definition.reject` (4.R2's half by strongly
+      connected components, open by design);
    c. `luthier eval` runs the programs of `tests/eval/` to their stated results;
    d. the whole suite passes (`python3 -m pytest tests/ -q`), with the lints (`check_spec.py`,
       `project_principles.py --check --strict`, `check_quotes.py`, `render_grammar.py --check`);

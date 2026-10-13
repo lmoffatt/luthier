@@ -2379,3 +2379,17 @@ Quote:      "Para diseñar los certificados primero tenemos que ver como falla."
 Source:     chat:52b10bff:5037
 Kind:       plan (steps 5 and 6 of record/plan/luthier-from-zero/), with S1 (D-2026-10-13-ac)
 Status:     current
+
+D-2026-10-13-ae 11.R1 to 11.R3 (`R` names no type; `primitive` only in core; `axiom` only in core and
+                the libraries) are policies on which file a body may appear in: they stay out of
+                `program.lth` for `v0.2` and become laws of the loader (`library.lth`) when core
+                exists; their reject programs `n2_r_gone`, `n3_primitive_outside_core`,
+                `n4_axiom_outside_lib` stay xfails until then. So `v0.2`'s criterion b (step 4.4
+                of the plan from zero) reads: every program of `tests/spec/` gets its verdict, except
+                these three and `r2_definition.reject` (4.R2's half by strongly connected
+                components, open by design), each an xfail with its reason.
+Author:     Luciano, on luthier-03's recommendation
+Quote:      "Ok"
+Source:     chat:52b10bff:5180
+Kind:       plan (v0.2's criteria) and program.lth, library.lth
+Status:     current
