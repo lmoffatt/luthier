@@ -1,0 +1,213 @@
+-- arrays.lth: vectors and matrices as functions on indices, the folds over the indices, the
+-- native definitions of the operations, and the laws the host's leaves must meet.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 2 of the inventory's §6) and the answers
+-- of the sonolocalización session (record/IA/sonolocalizacion-inventory-2026-10-13/
+-- answers-2026-10-14.md: the names the first stage uses). Sources: spec 11.S9 (`Array`, `Vec`,
+-- `Mat` as records), 3.S21 to 3.S28 (a numpy array is a value of `Fin n -> Float64`, the four
+-- rules of the bridge, the order of a sum, what is certified at the bridge), 11.S14 (a sum of n
+-- terms is within gamma n of the exact one relative to the sum of the magnitudes; likewise an
+-- inner product), 11.S18 (the tolerance is the demand's: the law takes it, D-2026-10-12-h),
+-- 4.R10 (a law characterizes; agreement with a native definition is a corollary), 12.S9 (the
+-- pattern of a library: native definitions here, the host's leaves as a model), P11 (every
+-- criterion is a parameter: the rank floor). The v0.1 files are `array.lut`, `array_python.lut`
+-- and the folds of `algebra.lut` at the tag v0.1-final; the names below are theirs, so that the
+-- port of positions.lut and distance_graph.lut is a rename at most.
+--
+-- What this file states. A vector is `{ n, f }` and a matrix `{ m, n, f }` (11.S9); a numpy
+-- array is a value of `f` as it is (3.S21). The operations are defined natively through the
+-- entries (`dotDef`, `matMulDef`, ...); `Arrays` is the theory of the leaves the host computes
+-- faster, a record of operations (the pattern of kernel_laws.lth) whose laws are exact where the
+-- operation is entrywise (the host does the same machine operation entry by entry) and within
+-- the demand's tolerance where it sums (11.S14: relative to the sum of the magnitudes of the
+-- terms, never to the result, which can cancel). The retained rank takes its floor as a
+-- parameter (P11; v0.1 wrote `n eps` inside the leaf, inventory row 13) and is characterized on
+-- diagonals, by scale, by a bound, and under rotation; its model is arrays_model.lut. The square
+-- root of `normDef` is the elementary functions' (numbers_model.lut), the one model this theory
+-- names: [proposed], the alternative being a parameter `(e : Elementary)` on every norm.
+--
+-- Index (all sections written in this draft):
+--   §1 The types: `Array`, `Vec`, `Mat`, their constructors, the shapes `Dim`, `VecOf`,
+--      `MatOf`, `MatRows`, `Square`, `Symmetric` (11.S9; v0.1 array.lut:22-33).             done
+--   §2 Folds over the indices: `sumTo` in the order of 3.S27, `sumToInt`, `forallBelow`,
+--      `existsBelow`, `forallPairs`, `countBelow` (v0.1 algebra.lut:188-203).             done
+--   §3 The native definitions, and the comparisons of arrays within a tolerance
+--      (v0.1 array.lut:49-78, 351-352).                                                  done
+--   §4 The leaves: `Arrays`, its laws, exact or within the demand's tolerance (3.S28,
+--      11.S14, 11.S18); the retained rank with its floor (P11).                           done
+
+import "numbers.lth" Tolerance within withinOf abs Positive Elementary
+import "numbers_model.lut" elementary : Elementary
+
+-- ---------------------------------------------------------------- §1 The types (11.S9)
+
+-- spec 11.S9: an array of length n is a function on the n indices; a vector carries its length,
+-- a matrix its two
+Array (A : U) (n : Nat) = Fin n -> A
+Vec (A : U) = { n : Nat, f : Fin n -> A }
+Mat (A : U) = { m : Nat, n : Nat, f : Fin m -> Fin n -> A }
+-- the constructors: a vector from its length and its entries, a matrix from its shape and its
+-- entries (v0.1 wrote the pair `(n, fn k { ... })`; a record is not a pair, D-2026-10-13-x)
+vec (A : U) (n : Nat) (f : Fin n -> A) : Vec A := { n := n, f := f }
+mat (A : U) (m n : Nat) (f : Fin m -> Fin n -> A) : Mat A := { m := m, n := n, f := f }
+
+-- the shapes (v0.1 array.lut:26-33)
+Dim : U := { n : Int | 1 <= n }
+VecOf (k : Int) : U := { v : Vec Float64 | v.n == k }
+MatOf (r c : Int) : U := { a : Mat Float64 | a.m == r and a.n == c }
+MatRows (r : Int) : U := { a : Mat Float64 | a.m == r }
+Square : U := { a : Mat Float64 | a.m == a.n }
+-- symmetric exactly: what the spectral leaves take (the host reads one triangle)
+Symmetric : U := { a : Mat Float64 | if a.m == a.n then forallPairs a.m (fn i j { a.f i j == a.f j i }) else false }
+SymmetricOf (k : Int) : U := { s : Symmetric | s.m == k }
+
+-- ---------------------------------------------------------------- §2 Folds over the indices
+
+-- the fold of an operation with a unit over n terms, associated to the right:
+-- `f 0 op (f 1 op (... op (f (n - 1) op unit)))`; no law claimed of the operation (v0.1
+-- algebra.lut `foldWith`): what the doubles have, since they are not a monoid (11.S15)
+foldFrom (A : U) (op : A -> A -> A) (unit : A) (n : Int) (lo : Nat) (f : Fin n -> A) : A :=
+  if lo >= n then unit else op (f lo) (foldFrom A op unit n (lo + 1) f)
+foldWith (A : U) (op : A -> A -> A) (unit : A) (n : Int) (f : Fin n -> A) : A := foldFrom A op unit n 0 f
+
+-- spec 3.S27: the sum of n doubles is `f 0 + (f 1 + (... + (f (n - 1) + 0.0)))`; the order is
+-- part of the definition, and any specimen keeps it
+sumTo (n : Int) (f : Fin n -> Float64) : Float64 := foldWith Float64 (fn a b { a + b }) 0.0 n f
+sumToInt (n : Int) (f : Fin n -> Int) : Int := foldWith Int (fn a b { a + b }) 0 n f
+-- a law over every index, some index, every pair of indices below n: the closure, evaluated
+forallBelow (n : Int) (p : Fin n -> Bool) : Bool := foldWith Bool (fn a b { a and b }) true n p
+existsBelow (n : Int) (p : Fin n -> Bool) : Bool := foldWith Bool (fn a b { a or b }) false n p
+forallPairs (n : Int) (p : Fin n -> Fin n -> Bool) : Bool := forallBelow n (fn i { forallBelow n (p i) })
+countBelow (n : Int) (p : Fin n -> Bool) : Int := sumToInt n (fn k { if p k then 1 else 0 })
+-- the sum of the magnitudes of n terms: the scale a rounded sum is compared at (11.S14)
+absSumTo (n : Int) (f : Fin n -> Float64) : Float64 := sumTo n (fn k { abs (f k) })
+
+-- ---------------------------------------------------------------- §3 The native definitions
+
+-- vectors (v0.1 array.lut:49-54, 78)
+zeros (n : Nat) : Vec Float64 := vec Float64 n (fn k { 0.0 })
+ones (n : Nat) : Vec Float64 := vec Float64 n (fn k { 1.0 })
+-- the j-th vector of the basis
+basis (n : Nat) (j : Fin n) : Vec Float64 := vec Float64 n (fn k { if k == j then 1.0 else 0.0 })
+dotDef (x : Vec Float64) (y : VecOf x.n) : Float64 := sumTo x.n (fn k { x.f k * y.f k })
+normDef (x : Vec Float64) : Float64 := elementary.sqrt (dotDef x x)
+addDef (x : Vec Float64) (y : VecOf x.n) : Vec Float64 := vec Float64 x.n (fn k { x.f k + y.f k })
+subDef (x : Vec Float64) (y : VecOf x.n) : Vec Float64 := vec Float64 x.n (fn k { x.f k - y.f k })
+scaleDef (c : Float64) (x : Vec Float64) : Vec Float64 := vec Float64 x.n (fn k { c * x.f k })
+-- the metric of the Euclidean space: the norm of the difference (v0.1 array.lut:78)
+distance (x : Vec Float64) (y : VecOf x.n) : Float64 := normDef (subDef x y)
+
+-- matrices (v0.1 array.lut:51, 55-67)
+identity (n : Nat) : Mat Float64 := mat Float64 n n (fn i j { if i == j then 1.0 else 0.0 })
+zeroMat (m n : Nat) : Mat Float64 := mat Float64 m n (fn i j { 0.0 })
+diagonal (d : Vec Float64) : Mat Float64 := mat Float64 d.n d.n (fn i j { if i == j then d.f i else 0.0 })
+row (a : Mat Float64) (i : Fin a.m) : Vec Float64 := vec Float64 a.n (a.f i)
+column (a : Mat Float64) (j : Fin a.n) : Vec Float64 := vec Float64 a.m (fn i { a.f i j })
+matVecDef (a : Mat Float64) (x : VecOf a.n) : Vec Float64 := vec Float64 a.m (fn i { sumTo a.n (fn j { a.f i j * x.f j }) })
+matMulDef (a : Mat Float64) (b : MatRows a.n) : Mat Float64 :=
+  mat Float64 a.m b.n (fn i j { sumTo a.n (fn k { a.f i k * b.f k j }) })
+transposeDef (a : Mat Float64) : Mat Float64 := mat Float64 a.n a.m (fn i j { a.f j i })
+maddDef (a : Mat Float64) (b : MatOf a.m a.n) : Mat Float64 := mat Float64 a.m a.n (fn i j { a.f i j + b.f i j })
+msubDef (a : Mat Float64) (b : MatOf a.m a.n) : Mat Float64 := mat Float64 a.m a.n (fn i j { a.f i j - b.f i j })
+mscaleDef (c : Float64) (a : Mat Float64) : Mat Float64 := mat Float64 a.m a.n (fn i j { c * a.f i j })
+
+-- Functions have no structural equality (4.R8): arrays compare entry by entry, within the
+-- tolerance given, and differ when their shapes do; with tolerance zero the comparison is exact.
+-- Inside the branch the shapes agree, which is what lets `y.f` take `x`'s index (4.R11).
+approxVec (tol : Tolerance) (x y : Vec Float64) : Bool :=
+  if x.n == y.n then forallBelow x.n (fn k { within tol (x.f k) (y.f k) }) else false
+approxMat (tol : Tolerance) (a b : Mat Float64) : Bool :=
+  if a.m == b.m and a.n == b.n then forallPairs2 a.m a.n (fn i j { within tol (a.f i j) (b.f i j) }) else false
+forallPairs2 (m n : Int) (p : Fin m -> Fin n -> Bool) : Bool := forallBelow m (fn i { forallBelow n (p i) })
+exact : Tolerance := 0.0
+
+-- ---------------------------------------------------------------- §4 The leaves (3.S28, 12.S9)
+
+-- The operations the host computes faster, as one record: what a model of it must meet is below,
+-- and arrays_model.lut names numpy's as the model. Each takes and gives the records of §1; the
+-- bridge reads `f` as the array (3.S22 to 3.S24). The rank floor is a parameter of the rank
+-- (P11, 11.S18): the retained eigenvalues of a symmetric matrix are those above the floor times
+-- the largest in magnitude, so the floor is a fraction below one.
+RankFloor : U := { f : Float64 | 0.0 <= f and f < 1.0 }
+Arrays : {
+  add sub : Vec Float64 -> Vec Float64 -> Vec Float64,
+  scale : Float64 -> Vec Float64 -> Vec Float64,
+  dot : Vec Float64 -> Vec Float64 -> Float64,
+  norm : Vec Float64 -> Float64,
+  matVec : Mat Float64 -> Vec Float64 -> Vec Float64,
+  matMul madd msub : Mat Float64 -> Mat Float64 -> Mat Float64,
+  mscale : Float64 -> Mat Float64 -> Mat Float64,
+  transpose : Mat Float64 -> Mat Float64,
+  retainedRank : RankFloor -> Mat Float64 -> Int,
+}
+
+-- entrywise operations are exact: the host applies the machine's operation to each entry, which
+-- is the native definition (11.S4), so the two agree bit for bit and the shape is the definition's
+-- spec 3.S28
+AddPointwise (m : Arrays) (n : Dim) (x y : VecOf n) : Bool := approxVec exact (m.add x y) (addDef x y)
+SubPointwise (m : Arrays) (n : Dim) (x y : VecOf n) : Bool := approxVec exact (m.sub x y) (subDef x y)
+ScalePointwise (m : Arrays) (n : Dim) (c : Float64) (x : VecOf n) : Bool := approxVec exact (m.scale c x) (scaleDef c x)
+TransposePointwise (m : Arrays) (r c : Dim) (a : MatOf r c) : Bool := approxMat exact (m.transpose a) (transposeDef a)
+MaddPointwise (m : Arrays) (r c : Dim) (a b : MatOf r c) : Bool := approxMat exact (m.madd a b) (maddDef a b)
+MsubPointwise (m : Arrays) (r c : Dim) (a b : MatOf r c) : Bool := approxMat exact (m.msub a b) (msubDef a b)
+MscalePointwise (m : Arrays) (r c : Dim) (s : Float64) (a : MatOf r c) : Bool := approxMat exact (m.mscale s a) (mscaleDef s a)
+
+-- the inner product: symmetric exactly (the same products, summed in one order), the basis
+-- orthonormal exactly (one term, the rest exact zeros), and within the demand's tolerance of the
+-- native sum relative to the sum of the magnitudes of the terms (11.S14, 11.S18)
+DotSymmetric (m : Arrays) (n : Dim) (x y : VecOf n) : Bool := m.dot x y == m.dot y x
+DotOnBasis (m : Arrays) (n : Dim) (x : VecOf n) (j : Fin n) : Bool := m.dot x (basis n j) == x.f j
+DotAgrees (m : Arrays) (tol : Tolerance) (n : Dim) (x y : VecOf n) : Bool :=
+  withinOf tol (absSumTo n (fn k { x.f k * y.f k })) (m.dot x y) (dotDef x y)
+-- the norm: the root of the inner product, one on the basis, scaling with the magnitude
+NormOfBasis (m : Arrays) (n : Dim) (j : Fin n) : Bool := m.norm (basis n j) == 1.0
+NormOfDot (m : Arrays) (tol : Tolerance) (n : Dim) (x : VecOf n) : Bool := within tol (m.norm x) (elementary.sqrt (m.dot x x))
+NormScales (m : Arrays) (tol : Tolerance) (n : Dim) (c : Positive) (x : VecOf n) : Bool :=
+  within tol (m.norm (m.scale c x)) (c * m.norm x)
+
+-- a matrix acting: its table on the basis is the matrix, exactly; on any vector it is within
+-- the tolerance of the native sum, row by row relative to the magnitudes of the row's terms
+MatVecOnBasis (m : Arrays) (r c : Dim) (a : MatOf r c) (j : Fin c) : Bool := approxVec exact (m.matVec a (basis c j)) (column a j)
+MatVecAgrees (m : Arrays) (tol : Tolerance) (r c : Dim) (a : MatOf r c) (x : VecOf c) : Bool :=
+  if (m.matVec a x).n == r then
+    forallBelow r (fn i { withinOf tol (absSumTo c (fn j { a.f i j * x.f j })) ((m.matVec a x).f i) ((matVecDef a x).f i) })
+  else false
+-- the product: the identity is neutral exactly, the transpose reverses it, and each entry is
+-- within the tolerance of the native sum relative to the magnitudes of its terms (11.S14)
+MatMulIdentity (m : Arrays) (r c : Dim) (a : MatOf r c) : Bool :=
+  approxMat exact (m.matMul a (identity c)) a and approxMat exact (m.matMul (identity r) a) a
+MatMulTransposes (m : Arrays) (tol : Tolerance) (r k c : Dim) (a : MatOf r k) (b : MatOf k c) : Bool :=
+  approxMat tol (m.transpose (m.matMul a b)) (m.matMul (m.transpose b) (m.transpose a))
+MatMulAgrees (m : Arrays) (tol : Tolerance) (r k c : Dim) (a : MatOf r k) (b : MatOf k c) : Bool :=
+  if (m.matMul a b).m == r and (m.matMul a b).n == c then
+    forallPairs2 r c (fn i j { withinOf tol (absSumTo k (fn l { a.f i l * b.f l j }))
+                                        ((m.matMul a b).f i j) ((matMulDef a b).f i j) })
+  else false
+
+-- The retained rank of a symmetric matrix at a floor: the number of its eigenvalues above the
+-- floor times the largest eigenvalue in magnitude. Characterized where the spectrum is read off
+-- the matrix: a diagonal whose entries are zero or well above the floor has as many retained as
+-- it has positive entries; the zero matrix none, the identity all; the rank is bounded by the
+-- size, is the same at any positive scale (the floor is relative), and under rotation by an
+-- orthogonal matrix (the spectrum is invariant), whose generator is a family of the model's
+-- (7.S5, bound by the test, 7.R1). Agreement with a native spectrum (Jacobi's method, v0.1
+-- array.lut:95-154) is a corollary (4.R10) and is not restated here.
+-- spec 11.S18, P11
+ClearFloor : U := { f : RankFloor | f < 0.001 }
+ClearDiagonal : U := { d : Vec Float64 | forallBelow d.n (fn k { d.f k == 0.0 or (1.0 <= abs (d.f k) and abs (d.f k) <= 1000.0) }) }
+Orthogonal (tol : Tolerance) (k : Int) : U := { q : MatOf k k | approxMat tol (matMulDef (transposeDef q) q) (identity k) }
+RankOfDiagonal (m : Arrays) (fl : ClearFloor) (d : ClearDiagonal) : Bool :=
+  m.retainedRank fl (diagonal d) == countBelow d.n (fn k { 0.0 < d.f k })
+RankOfZeroAndIdentity (m : Arrays) (fl : RankFloor) (k : Dim) : Bool :=
+  m.retainedRank fl (zeroMat k k) == 0 and m.retainedRank fl (identity k) == k
+RankBounded (m : Arrays) (fl : RankFloor) (s : Symmetric) : Bool := 0 <= m.retainedRank fl s and m.retainedRank fl s <= s.m
+RankScales (m : Arrays) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
+  m.retainedRank fl (mscaleDef c s) == m.retainedRank fl s
+RankUnderRotation (m : Arrays) (tol : Tolerance) (fl : RankFloor) (k : Dim) (q : Orthogonal tol k) (s : SymmetricOf k) : Bool :=
+  m.retainedRank fl (m.matMul (m.transpose q) (m.matMul s q)) == m.retainedRank fl s
+
+Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
+  & DotSymmetric & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
+  & MatVecOnBasis & MatVecAgrees & MatMulIdentity & MatMulTransposes & MatMulAgrees
+  & RankOfDiagonal & RankOfZeroAndIdentity & RankBounded & RankScales & RankUnderRotation
