@@ -1,4 +1,4 @@
-"""Runner integration tests derived from user request 2026-10-13, v1."""
+"""Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md)."""
 import os
 from pathlib import Path
 import subprocess
@@ -35,17 +35,24 @@ def test_read_first_line(tmp_path):
     assert (result.returncode, result.stdout, result.stderr) == (0, "first line\n", "")
 
 
-def test_host_token_places_and_reset(tmp_path):
+def test_host_observe_and_reset(tmp_path):
     host.reset()
     token = object()
+    assert host.observe(token) == (token, {"stdout": "", "files": []})
     assert host.print_line(token, "hi") == (token, None)
     path = str(tmp_path / "data")
     Path(path).write_text("data\n", encoding="utf-8")
-    assert host.read_file(token, path) == (token, "data\n")
-    assert host.places() == ["stdout", path]
-    assert host.read_place(path) == "data\n"
+    assert host.read_file(token, path) == (token, host.Just("data\n"))
+    assert host.read_file(token, str(tmp_path / "absent")) == (token, host.NOTHING)
+    assert host.observe(token) == (token, {"stdout": "hi\n", "files": [(path, "data\n")]})
     assert run_file(ROOT / "examples/hello.lut") == "hello, world\n"
-    assert host.places() == ["stdout"]
+    assert host.observe(token) == (token, {"stdout": "hello, world\n", "files": []})
+
+
+def test_observe_through_the_bridge(tmp_path):
+    (tmp_path / "input.txt").write_text("first line\n", encoding="utf-8")
+    result = command(ROOT / "tests/run/observe.lut", cwd=tmp_path)
+    assert (result.returncode, result.stdout, result.stderr) == (0, "one\none\n\nfirst line\n\n", "")
 
 
 @pytest.mark.parametrize("source, args, message", [
@@ -77,11 +84,9 @@ def test_unused_extern_is_not_resolved(tmp_path):
     assert run_file(path) == ""
 
 
-def test_missing_file_extern(tmp_path):
-    path = tmp_path / "read.lut"
-    path.write_text('main (w : W) : W * String := extern "python:luthier.host.read_file" w "does-not-exist"')
-    with pytest.raises(RunError, match="extern.*failed"):
-        run_file(path)
+def test_missing_file_is_nothing(tmp_path):
+    result = command(ROOT / "tests/run/read_first_line.lut", cwd=tmp_path)
+    assert (result.returncode, result.stdout, result.stderr) == (0, "no input.txt\n", "")
 
 
 def test_world_chain_and_undemanded_action(tmp_path):

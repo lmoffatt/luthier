@@ -1,6 +1,9 @@
--- Runner integration fixture, user request 2026-10-13; test_run.py supplies firstLine.
-import "world.lth" Console
-import "world_model.lut" console : Console
+-- Runner integration fixture (prompt-2.md, world_model.lut at 0c920f0): read a file through the
+-- host's `readFile`, a `Maybe String`, and print its first line; test_run.py supplies firstLine.
+import "world_model.lut" HostConsole host : HostConsole
 firstLine (text : String) : String := extern "python:test_run.first_line" text
 main (w : W) : W * Unit :=
-  match console.readFile w "input.txt" { (next, text) -> console.print next (firstLine text) }
+  match host.readFile w "input.txt" {
+    (next, just text) -> host.print next (firstLine text) ;
+    (next, nothing) -> host.print next "no input.txt"
+  }

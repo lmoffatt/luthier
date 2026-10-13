@@ -1,0 +1,13 @@
+-- Runner integration fixture (prompt-2.md, world_model.lut at 0c920f0): the host's `observe`
+-- gives the representation `State`, a record; print once, read a file, observe, then print what
+-- the state holds at the standard output and at the file's place (world_model.lut's lookupFile).
+import "world_model.lut" HostConsole host : HostConsole lookupFile
+main (w : W) : W * Unit :=
+  match host.print w "one" { (w1, u) ->
+  match host.readFile w1 "input.txt" { (w2, read) ->
+  match host.observe w2 { (w3, st) ->
+  match host.print w3 st.stdout { (w4, v) ->
+  match lookupFile st.files "input.txt" {
+    just text -> host.print w4 text ;
+    nothing -> host.print w4 "not observed"
+  } } } } }

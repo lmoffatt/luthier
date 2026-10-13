@@ -1,7 +1,8 @@
-"""Demand-driven host runner. Sources: spec 10.S2–S10, world_model.lut (1f8c61c).
+"""Demand-driven host runner. Sources: spec 10.S2–S10, world_model.lut (0c920f0).
 
-Derivation: user request 2026-10-13, implementation v1; choices in
-record/IA/run-2026-10-13/codex.md. No certification or extern result hashing yet.
+Derivation: user request 2026-10-13, implementation v1 (record/IA/run-2026-10-13/codex.md);
+v2 for world.lth draft 1 (prompt-2.md, choices in opus-2.md): the bridge carries `Maybe`
+(host.Just, host.NOTHING) and records (a dict). No certification or extern result hashing yet.
 """
 from __future__ import annotations
 
@@ -78,8 +79,14 @@ class Runner:
             return value.constant.value
         if value == t.Var("unit"):
             return None
+        if value == t.Var("nothing"):
+            return host.NOTHING
+        if isinstance(value, t.App) and value.function == t.Var("just"):
+            return host.Just(self.to_host(value.argument))
         if isinstance(value, t.Pair):
             return self.to_host(value.left), self.to_host(value.right)
+        if isinstance(value, t.RecordValue):
+            return {label: self.to_host(field) for label, field in value.fields}
         raise RunError(f"unsupported extern argument: {value!r}")
 
     def from_host(self, value):
@@ -87,6 +94,13 @@ class Runner:
             return self.token
         if value is None:
             return t.Var("unit")
+        if value is host.NOTHING:
+            return t.Var("nothing")
+        if isinstance(value, host.Just):
+            return t.App(t.Var("just"), self.from_host(value.value))
+        if isinstance(value, dict):
+            # a record value, its fields in the dict's order (State: stdout, then files)
+            return t.RecordValue(tuple((label, self.from_host(field)) for label, field in value.items()))
         if isinstance(value, str):
             return t.Lit(t.StringConst(value))
         if type(value) in (int, float):
@@ -216,12 +230,13 @@ def runtime_slice(acts, main):
             pending.extend(names(act))
     def projections(value):
         if isinstance(value, s.Name) and "." in value.name and value.name not in by_name:
+            # a dotted name is a projection, whether its root is a definition (host.print) or a
+            # local binder (st.stdout); the elaborator splits neither
             parts = value.name.split(".")
-            if parts[0] in by_name:
-                result = s.Name(parts[0])
-                for part in parts[1:]:
-                    result = s.Proj(result, part)
-                return result
+            result = s.Name(parts[0])
+            for part in parts[1:]:
+                result = s.Proj(result, part)
+            return result
         if isinstance(value, tuple):
             return tuple(projections(item) for item in value)
         if is_dataclass(value):
@@ -245,4 +260,4 @@ def run_file(path, main="main", fuel=10000):
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    return host.read_place("stdout")
+    return host.stdout()
