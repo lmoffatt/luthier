@@ -1,0 +1,54 @@
+# Layers 0 and 1: four questions for Luciano
+
+2026-10-13, by Claude Opus 5.5 (the coordinating session), from the questions the session writing
+the theories (luthier-03) raised on `term.lth`, `translation.lth`, `program.lth` and
+`kernel_laws.lth`, before their external review. Each is undone by one commit; each carries the
+recommendation of both sessions. Mark under each: "ok", "no", or a comment. The answers go to
+`record/decisions.md`.
+
+## Q1. Records in the kernel keep their names
+
+`Term`'s dependent product (`Sigma`) names only its first component, so a record type
+`{ x : A, y : B }` loses the name `y` when it is translated into the kernel, though 2.S12 says the
+last component is named too. Either `Term` gains a record former,
+`Record : List (String * Term) -> Term`, whose names are part of the term and of its hash, or the
+translation keeps the names outside the term.
+
+Recommended: the record former. The names of the fields are part of the type, so they belong in
+the term, not beside it.
+
+
+
+## Q2. A block is a lambda applied
+
+The kernel has no `let`, so `translation.lth` translates the block `{ x := a ; e }` as
+`(\ x { e }) a`. 2.S12 calls a block "a sub-DAG with one output". The alternative is a `Let` in
+`Term`, which makes the sharing explicit for the planner (spec 8).
+
+Recommended: keep the lambda applied, no new kernel construct, by L7 (the core is small); the
+planner sees that `x` is shared all the same.
+
+
+
+## Q3. Helper functions in theory files are reported, not rejected
+
+Every theory file has helper definitions with parameters (`member`, `concat`, `freeVars`), which
+12.S23 allows ("the definitions its laws need"); `program.lth` reports them as loose functions
+(4.S17, D-2026-10-07-e) without rejecting them.
+
+Recommended: keep reporting them; decide, once local definitions exist in the language, whether a
+helper that a law needs is exempt or must become local to the law.
+
+
+
+## Q4. The laws of `Nat`
+
+You said "Nat tiene las suyas" (D-2026-10-13-t). `kernel_laws.lth` §5 states an ordered commutative
+semiring: `+` and `*` with their units, associativity, commutativity and distribution, and the
+order laws (total, compatible with `+`, `0` the least), the order marked proposed.
+
+Recommended: accept as written, on one condition the coordinating session adds: that the
+constructors keep their roles, `succ n == n + 1`, and a law of induction (or of folding) saying
+there are no other naturals, as `List` has. If they are already there, nothing changes.
+
+
