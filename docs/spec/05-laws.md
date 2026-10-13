@@ -8,7 +8,7 @@ Chapter 5 of the specification, draft 0, 2026-10-13. Sources: `docs/spec/05-stat
 
 ## §2 What a law is
 
-**5.S1. A law is a term with a verdict.** [implemented] A law is a term valued in `Bool`, or the type `Law` of what a test runs, possibly a function whose parameters are quantified, or a conjunction of such terms (spec 3.S12). Laws accumulate: a function may carry laws that constrain it without determining it, and the laws that determine it up to its equality are the limit a definition may reach, not a requirement (D-2026-10-11-d). Which laws to write is spec 4.R10: the properties that characterize, never a second implementation.
+**5.S1. A law is a term with a verdict.** [implemented] A law is a term valued in `Bool`, or the type `Law` of what a test runs, possibly a function whose parameters are quantified, or a conjunction of such terms (spec 3.S12). Laws accumulate: a function may carry laws that constrain it without determining it, and the laws that determine it up to its equality are the limit a definition may reach, not a requirement (D-2026-10-11-d). Which laws to write is spec 4.R10: the properties that characterize, never a second implementation. [decided D-2026-10-13-aa] The theory `Law` of `lib/laws.lth` admits Boolean cases only until the cost library exists and a case uses it; `Law C` then gains a case valued in `C` (5.S2).
 
 **5.S2. A law may be valued in `C`.** [decided D-2026-10-12-al] A law whose body is valued in `C` states a degree: `0` holds exactly, `⊤` fails, and what lies between is how far it is from holding. Such a law needs no cutoff to be stated; whether its cost is good enough is the demand's (5.S7). The interpreter has no `C` yet, and every law today is valued in `Bool`.
 

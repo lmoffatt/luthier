@@ -92,7 +92,9 @@ the laws of a Boolean algebra, `Nat` the laws of its operations, and `List` is t
 closed category (products, sums, exponentials, a terminal and an initial structure) with the
 dependent forms of the product and the exponential, recursive structures and subtypes. Where the
 older source says "type" for a kernel type, this chapter writes "structure" (D-2026-10-12-l);
-"type" stays where any type is meant.
+"type" stays where any type is meant. [decided D-2026-10-13-aa] Version 0 has one universe with
+`U : U`, a known limit: it is inconsistent as a logic (Girard's paradox), harmless for testing,
+which proves nothing; a hierarchy of universes waits for the layer of proofs (3.S11).
 
 ## §3 Terms
 
@@ -134,9 +136,10 @@ their mark stays `[implemented]` for the interpreter until those programs exist.
 `\k r { succ r }` is applied by `recN`.
 
 **3.S15. Delta.** [implemented] A defined name reduces to its body. Aliases are expanded before
-checking and never reach evaluation. A name is unfolded in head position only when that makes
-progress, so a recursive function applied to an argument that does not reduce stays folded
-(`evaluator.py`). Program: `k_recursor.accept.lut`, with the unfolding of `recN` and `add`.
+checking and never reach evaluation. [decided D-2026-10-13-aa] A defined name in head position is
+unfolded; a term reduction cannot advance is stuck, the same for every specimen, and folding a
+name back for display is the printer's (in `v0.1-final` a recursive function on an argument that
+did not reduce stayed folded, `evaluator.py`, which made the normal form depend on the specimen). Program: `k_recursor.accept.lut`, with the unfolding of `recN` and `add`.
 
 **3.S16. Iota.** [implemented] A `match` on a constructor, a label injection or a pair reduces to
 the matching branch with pattern variables substituted. Programs: `k_sum.accept.lut`,

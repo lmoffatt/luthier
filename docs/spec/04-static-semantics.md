@@ -146,8 +146,9 @@ The `| true` records of the first libraries disappear. [decided D-2026-10-13-p] 
 (L2.7): each constructor needs a law stating its role in some theory, as the laws of `derives` give
 `eps` and `seq` theirs, or the tree laws of `grammar.lth` give each surface form the text that
 writes it. Distinct constructors are free by construction and state no role, and an observer that
-only lists the constructors is an accessor, not such a law. A `data` with no constructor so bound
-is a collection and is reported, to be written as an alias of a sum (the table of 4.S19 shows it).
+only lists the constructors is an accessor, not such a law. [decided D-2026-10-13-aa] A `data` with any
+constructor not so bound is rejected: it is a collection, to be written as an alias of a sum; the
+table of 4.S19, observers against constructors, is reported besides.
 Files: r3_connected.accept.lut, r3_dangling_label.reject.lut.
 
 **4.R4. Only laws or a `data` make a new type.** [decided D-2026-10-13-o] A definition `x : U := t` makes `x` a
