@@ -301,3 +301,52 @@ def test_conjunction_combines_model_subtypes():
     c = Context(types={'a': a, 'b': b})
     expected = t.Subtype('x', V('T'), bin('&', t.App(V('L1'), V('x')), t.App(V('L2'), V('x'))))
     assert alpha_equal(infer(bin('&', V('a'), V('b')), c), expected)
+
+
+def test_conjunction_with_a_law_part_is_a_law_over_the_model():
+    # algebra.lth `CompleteOrderedField`: `SupIsLeast` gives a `Law` (laws.lth); by spec 5.S6 the
+    # combination lifts the Boolean part, so the conjunction is a `Law` over the theory's record
+    from luthier.elaborate import context_of, infer
+    record = t.Record((('value', V('Int')),))
+    for second, value in (('Law', 'Law'), ('Bool', 'Bool')):
+        p = program('Law : U := data { Case : Bool -> Law }\n'
+                    'T (F : U) : { value : Int }\n'
+                    'L1 (F : U) (m : T F) (x : Int) : Bool := x == m.value\n'
+                    f'L2 (F : U) (m : T F) (s : F -> Bool) : {second} := '
+                    + ('Case (m.value == 0)\n' if second == 'Law' else 'm.value == 0\n')
+                    + 'T (F : U) := L1 F & L2 F')
+        body = elaborate_program(p)[-1].body
+        assert alpha_equal(infer(body, context_of(p)),
+                           t.Pi('F', t.Universe(), t.Pi('m', record, V(value))))
+
+
+CORE = Path(__file__).resolve().parents[1] / 'src' / 'luthier' / 'lib' / 'core.lut'
+
+
+def test_a_primitive_refining_a_type_is_a_type_and_its_arrow_is_the_arrow():
+    # 11.R1: `Float64 : Real := primitive ...` is a type, so `Float64 -> Float64` is the arrow,
+    # and core.lut's four operators on `Float64` get their declared function type (4.R13)
+    from luthier.elaborate import context_of
+    c = context_of(program(CORE.read_text()))
+    f = V('Float64')
+    for name, op in (('floatPlus', '+'), ('floatMinus', '-'), ('floatTimes', '*'), ('floatDivide', '/')):
+        assert c.types[name] == t.Pi('_', f, t.Pi('_', f, f))
+        assert c.operators[(op, f)] == V(name)
+    assert c.operators[('+', V('Int'))] == V('intPlus')
+    eq('x + y', apps(V('floatPlus'), [V('x'), V('y')]), CORE.read_text() + '\nx : Float64\ny : Float64')
+    # a value declared at a type is not a type: `r + s` on `Real` stays the operator
+    eq('r + s', apps(V('+'), [V('r'), V('s')]), 'Real : U := primitive "real"\nr : Real\ns : Real')
+
+
+def test_an_implication_in_type_position_is_the_arrow():
+    # `Fin` and `P` unknown (imported names are not loaded): in an annotation, a binder's type or
+    # a field's, `A -> B` is the arrow (check.py's `arrows`, now read at the source)
+    p = program('f (p : (n : Int) -> Fin n -> Bool) : P -> Bool\n'
+                'g : { h : P -> Bool }\n'
+                'b (c q : Bool) : Bool := c -> q')
+    f, g, b = elaborate_program(p)
+    assert alpha_equal(f.type, t.Pi('p', t.Pi('n', V('Int'), t.Pi('_', t.App(V('Fin'), V('n')), V('Bool'))),
+                                    t.Pi('_', V('P'), V('Bool'))))
+    assert g.type == t.Record((('h', t.Pi('_', V('P'), V('Bool'))),))
+    # in a term, `->` on Booleans stays the implication
+    assert b.body.body.body == apps(V('implies'), [V('c'), V('q')])

@@ -5,7 +5,9 @@ expected lambda types and local structural inference. Unknown types remain Hole;
 this is not the theory's rejection of every ill-typed term. In particular there is
 no unification, dependent checking, overload ambiguity or exhaustiveness check.
 Numbers default to Int/Float64; *, + and -> inspect the left operand's inferred
-type. Implicits infer direct type parameters from explicit argument types.
+type, or whether it names a primitive refining a type (11.R1); where a type is
+expected, an implication is read as the arrow (`as_type`). Implicits infer direct
+type parameters from explicit argument types.
 Imports retain qualified names but do not load modules. Applied externs remain
 stuck kernel terms: no host calls are performed. Fresh names are deterministic.
 """
@@ -51,10 +53,12 @@ class Context:
     constructors: set = field(default_factory=lambda: {'true', 'false', 'nil', 'cons', 'just', 'nothing', 'ok', 'failed'})
     names: dict = field(default_factory=dict)
     used: set = field(default_factory=set)
+    refinements: set = field(default_factory=set)  # names that are types by refining one (`is_type`)
 
     def child(self):
         return Context(self.types.copy(), self.signatures, self.aliases,
-                       self.operators, self.constructors, self.names.copy(), self.used)
+                       self.operators, self.constructors, self.names.copy(), self.used,
+                       self.refinements)
 
     def fresh(self, name):
         candidate = name
@@ -89,10 +93,16 @@ def infer(v, c):
                                      apps(t.Var('&'), [left.predicate, law]))
                 # Laws may quantify different arguments after their model.
                 # Their conjunction is still a predicate over that model.
+                # [proposed] translation.lth states no type for `&`; by spec 5.S6 (a
+                # combination of Boolean laws and laws.lth's `Law` lifts each Boolean part)
+                # a conjunction with a `Law` part is a `Law` over the model, and a
+                # conjunction of Boolean laws stays Boolean.
                 if isinstance(left, t.Pi) and isinstance(right, t.Pi):
-                    if (boolean_law(left) and boolean_law(right)
+                    values = {law_value(left), law_value(right)}
+                    if (values <= {t.Var('Bool'), t.Var('Law')}
                             and alpha_equal(left.domain, right.domain)):
-                        return theory_domains(t.Pi(left.name, left.domain, t.Var('Bool')), c)
+                        value = t.Var('Law') if t.Var('Law') in values else t.Var('Bool')
+                        return theory_domains(t.Pi(left.name, left.domain, value), c)
                 if left == right:
                     return left
                 return t.Hole('type')
@@ -141,10 +151,64 @@ def theory_domains(ty, c):
     return ty
 
 
-def boolean_law(ty):
+def law_value(ty):
+    """What a law's type gives once all its arguments are applied: `Bool`, `Law`, or another."""
     while isinstance(ty, t.Pi):
         ty = ty.codomain
-    return ty == t.Var('Bool')
+    return ty
+
+
+def is_type(v, ty, c):
+    """Whether the term `v`, of inferred type `ty`, is a type: its type is `U`, or it is a name
+    that refines a type (`refining`)."""
+    return isinstance(ty, t.Universe) or isinstance(v, t.Var) and v.name in c.refinements
+
+
+def refining(act, c):
+    """Whether a definition makes its name a type by refining the type it is declared at.
+
+    [proposed] spec 11.R1: `Float64 : Real := primitive "ieee754-binary64"` is a type, the finite
+    doubles, refining `Real`, though its declared type is `Real` and not `U`. A name declared at
+    a type that is not a function type (`Real : U`) and given a `primitive` body is read as such a
+    type. Declaration at a type alone does not make one (`x : Real` is a number), and 11.R2 keeps
+    `primitive` to core.lut, whose primitives at a type other than a function type are all types
+    (`Float64`, `Rational`). A subtype by a predicate body (4.S7) is not read here.
+    """
+    if not (isinstance(act, s.Define) and act.type is not None and not act.binders
+            and isinstance(act.body, s.TermBody)):
+        return False
+    head = act.body.term
+    while isinstance(head, s.App):
+        head = head.function
+    if head != s.Name('primitive'):
+        return False
+    ty = c.types.get(act.name)
+    return ty is not None and not isinstance(ty, t.Pi) and isinstance(infer(ty, c), t.Universe)
+
+
+def as_type(u):
+    """A term in type position: `implies A B` there is the arrow `A -> B`.
+
+    `walk` reads `A -> B` as the Bool implication when it cannot infer that `A` is a type, as for a
+    name brought in by an import (`context_of` does not load imports). An implication is never a
+    type, so where a type is expected it can only be the arrow (check.py's `arrows`, its bite 3b
+    part 1, moved here). Predicates of subtypes are not entered: there `implies` is the
+    implication.
+    """
+    match u:
+        case t.App(t.App(t.Var('implies'), a), b): return t.Pi('_', as_type(a), as_type(b))
+        case t.Pi(n, a, b): return t.Pi(n, as_type(a), as_type(b))
+        case t.Sigma(n, a, b): return t.Sigma(n, as_type(a), as_type(b))
+        case t.Record(fs): return t.Record(tuple((n, as_type(x)) for n, x in fs))
+        case t.Sum(xs): return t.Sum(tuple((n, as_type(x)) for n, x in xs))
+        case t.Subtype(n, a, p): return t.Subtype(n, as_type(a), p)
+        case t.App(f, a): return t.App(as_type(f), as_type(a))
+    return u
+
+
+def walk_type(v, c):
+    """Elaborate `v` where a type is expected (an annotation, a binder's type, a field's)."""
+    return as_type(walk(v, c))
 
 
 def pattern(p, c, fresh=False):
@@ -219,7 +283,7 @@ def block(items, body, c, expected):
 def parameters(binders, c):
     result = []
     for b in binders:
-        a = walk(b.type, c)
+        a = walk_type(b.type, c)
         for n in b.names:
             result.append((n, a)); c.types[n] = a; c.names[n] = n
     return result
@@ -319,7 +383,8 @@ def walk(v, c, expected=None):
         case s.Binop(op, a, b):
             left = walk(a, c); right = walk(b, c)
             ty = infer(left, c)
-            if isinstance(ty, t.Universe) and op in {'->', '*', '+'}:
+            if op in {'->', '*', '+'} and is_type(left, ty, c):
+                left, right = as_type(left), as_type(right)
                 return t.Sum((('left', left), ('right', right))) if op == '+' else (t.Pi if op == '->' else t.Sigma)('_', left, right)
             op = 'implies' if op == '->' else op
             target = c.operators.get((op, ty), t.Var(op))
@@ -330,17 +395,17 @@ def walk(v, c, expected=None):
             return apps(t.Var('-'), [t.Lit(zero), value])
         case s.Tuple(xs): return pairs([walk(x, c) for x in xs])
         case s.Pi(ns, a, b) | s.Sigma(ns, a, b):
-            inner = c.child(); domain = walk(a, c)
+            inner = c.child(); domain = walk_type(a, c)
             for n in ns: inner.types[n] = domain
-            return curry(t.Pi if isinstance(v, s.Pi) else t.Sigma, [(n, domain) for n in ns], walk(b, inner))
+            return curry(t.Pi if isinstance(v, s.Pi) else t.Sigma, [(n, domain) for n in ns], walk_type(b, inner))
         case s.SigmaNamed(n, a, m, b):
-            return t.Record(((n, walk(a, c)), (m, walk(b, c))))
+            return t.Record(((n, walk_type(a, c)), (m, walk_type(b, c))))
         case s.Record(fs, law):
-            result = t.Record(tuple((n, walk(f.type, c)) for f in fs for n in f.names))
+            result = t.Record(tuple((n, walk_type(f.type, c)) for f in fs for n in f.names))
             if law is not None: raise ElaborationError('record refinements require check.py')
             return result
         case s.RecordValue(fs): return t.RecordValue(tuple((n, walk(x, c)) for n, x in fs))
-        case s.Sum(xs): return t.Sum(tuple((n, walk(x, c)) for n, x in xs))
+        case s.Sum(xs): return t.Sum(tuple((n, walk_type(x, c)) for n, x in xs))
         case s.List(xs):
             result = t.Var('nil')
             for x in reversed(xs): result = apps(t.Var('cons'), [walk(x, c), result])
@@ -350,7 +415,7 @@ def walk(v, c, expected=None):
         case s.Lambda(params, items, body):
             inner = c.child(); ps = []; shapes = []; exp = expected
             for p in params:
-                a = walk(p.type, inner) if isinstance(p, s.TypedParam) else exp.domain if isinstance(exp, t.Pi) else t.Hole('type')
+                a = walk_type(p.type, inner) if isinstance(p, s.TypedParam) else exp.domain if isinstance(exp, t.Pi) else t.Hole('type')
                 if isinstance(p, s.ShapeParam):
                     n = inner.fresh('p'); q = pattern(s.PTuple(p.patterns), inner); shapes.append((n, q)); ns = [n]
                 else: ns = p.names if isinstance(p, s.TypedParam) else [p.name]
@@ -375,7 +440,7 @@ def walk(v, c, expected=None):
             b = walk(no, c) if no is not None else t.Var('nothing')
             if no is None: a = t.App(t.Var('just'), a)
             return t.Match(value, ((t.PCon('true', ()), a), (t.PCon('false', ()), b)))
-        case s.Subtype(s.PApp(n, ()), a, law): return t.Subtype(n, walk(a, c), walk(law, c))
+        case s.Subtype(s.PApp(n, ()), a, law): return t.Subtype(n, walk_type(a, c), walk(law, c))
         case s.Quoted(x): return t.App(t.Var('quote'), walk(x, c))
     raise ElaborationError(f'unsupported surface form {v!r}')
 
@@ -397,15 +462,23 @@ def context_of(program):
             c.signatures[act.name] = act.binders
             if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
                 c.constructors.update(n for n, _ in act.body.constructors)
-    for act in program:
-        if isinstance(act, (s.Declare, s.Define)):
-            inner = c.child(); ps = parameters(act.binders, inner)
-            annotation = walk(act.type, inner) if act.type is not None else t.Hole('type')
-            if act.type is not None or act.name not in c.types:
-                c.types[act.name] = curry(t.Pi, ps, annotation)
-            if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
-                inner.types[act.name] = c.types[act.name]
-                for n, ty in act.body.constructors: c.types[n] = walk(ty, inner)
+    def read_types():
+        for act in program:
+            if isinstance(act, (s.Declare, s.Define)):
+                inner = c.child(); ps = parameters(act.binders, inner)
+                annotation = walk_type(act.type, inner) if act.type is not None else t.Hole('type')
+                if act.type is not None or act.name not in c.types:
+                    c.types[act.name] = curry(t.Pi, ps, annotation)
+                if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
+                    inner.types[act.name] = c.types[act.name]
+                    for n, ty in act.body.constructors: c.types[n] = walk_type(ty, inner)
+    read_types()
+    # A name that refines a type is known once the types are read; they are then read again
+    # (11.R1: `floatPlus : Float64 -> Float64 -> Float64` after `Float64 : Real`).
+    refined = {a.name for a in program if refining(a, c)}
+    if refined:
+        c.refinements.update(refined)
+        read_types()
     for act in program:
         if isinstance(act, s.OperatorAct):
             target = walk(act.value, c); ty = infer(target, c)
@@ -440,7 +513,7 @@ def elaborate_program(surface_program: s.SurfaceProgram) -> t.Program:
                 expected = t.Pi('_', expected, t.Var('Bool'))
             match act.body:
                 case s.TermBody(v): body = walk(v, inner, expected)
-                case s.DataBody(xs): body = t.Data(act.name, tuple((n, walk(x, inner)) for n, x in xs))
+                case s.DataBody(xs): body = t.Data(act.name, tuple((n, walk_type(x, inner)) for n, x in xs))
                 case s.ClausesBody(clauses):
                     arms = []
                     for clause in clauses:
