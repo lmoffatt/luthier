@@ -1,6 +1,8 @@
 """Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md);
-v4 for arrays, tables and numbers across the bridge (prompt-4.md)."""
+v4 for arrays, tables and numbers across the bridge (prompt-4.md); v6 for the loader's scopes and the
+externs' arity (prompt-6.md)."""
 import os
+from dataclasses import fields, is_dataclass
 from pathlib import Path
 import subprocess
 import sys
@@ -8,9 +10,9 @@ import sys
 import numpy as np
 import pytest
 
-from luthier import arrays, host
+from luthier import arrays, host, surface as s
 from luthier.cli import main
-from luthier.run import RunError, run_file
+from luthier.run import Loaded, RunError, run_file
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -300,3 +302,99 @@ def test_validate_graph_slow():
     result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut", cwd=ROOT)
     assert result.returncode == 0, result.stderr
     assert result.stdout == EXPECTED_VALIDATE_GRAPH
+
+
+# ---------------------------------------------------------------- the loader scopes names by file
+# (record/IA/run-2026-10-13/prompt-6.md, 12.S22)
+
+SCOPE = ROOT / "tests" / "run" / "scope"
+LIB = ROOT / "src" / "luthier" / "lib"
+
+
+def test_each_file_resolves_its_own_names():
+    # left.lut and right.lut both define `helper`; left.lut's `not` is not core's elsewhere
+    assert run_file(SCOPE / "main.lut") == "3 10 false true\n"
+
+
+@pytest.mark.parametrize("program, message", [
+    ("unlisted.lut", "unlisted.lut: helper is neither defined there, nor imported, nor core's"),
+    ("missing_import.lut", "missing_import.lut imports twice from right.lut, which does not define it"),
+])
+def test_only_the_names_an_import_lists_enter(program, message):
+    with pytest.raises(RunError) as error:
+        run_file(SCOPE / program)
+    assert str(error.value) == message
+
+
+def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
+    loaded = Loaded(SCOPE / "main.lut")
+    top = loaded.top
+    assert loaded.name(top, "twice") == "twice" and loaded.name(top, "ten") == "tenfold"
+    assert loaded.name(top, "helper") is None and loaded.name(top, "tenfold") is None
+    assert loaded.name(top, "not") == "not"  # core's
+    assert loaded.name(SCOPE / "left.lut", "not") == "not@left"
+    assert {loaded.name(SCOPE / f, "helper") for f in ("left.lut", "right.lut")} == {"helper@left", "helper@right"}
+
+
+def _mentions(value, names):
+    """The names of `names` that `value` refers to, as a term or as a pattern."""
+    if isinstance(value, (s.Name, s.PApp)):
+        found = {value.name.partition(".")[0]} & names
+        return found | (_mentions(value.patterns, names) if isinstance(value, s.PApp) else set())
+    if isinstance(value, tuple):
+        return set().union(*(_mentions(v, names) for v in value))
+    if is_dataclass(value) and not isinstance(value, type):
+        return set().union(*(_mentions(getattr(value, f.name), names) for f in fields(value)))
+    return set()
+
+
+# the names the tester found defined by several libraries (record/IA/tester-2026-10-14/report.md,
+# choice 8 and "Findings for others"), with the files that define them, and a file that uses each
+# meaning: test.lth imports laws.lth's `Exhaustive`, generators.lth means its own theory
+CLASHES = {
+    "LeqPair": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
+    "LeqChain": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
+    "LeqBoth": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
+    "PlusCommutes": ("kernel_laws.lth", "numbers.lth"),
+    "NonNegative": ("generators.lth", "numbers.lth"),
+    "Exhaustive": ("laws.lth", "generators.lth"),
+    "Assumed": ("laws.lth", "test.lth"),
+}
+SEEN_FROM = {"Exhaustive": {"test.lth": "laws.lth", "generators.lth": "generators.lth"}}
+
+
+@pytest.fixture(scope="module")
+def numbers_laws():
+    return Loaded(ROOT / "tests" / "tester" / "numbers_laws.lut")
+
+
+@pytest.mark.parametrize("name", CLASHES)
+def test_a_name_several_libraries_define_does_not_collide(numbers_laws, name):
+    loaded, files = numbers_laws, CLASHES[name]
+    own = {f: loaded.internal((LIB / f).resolve(), name) for f in files}
+    assert len(set(own.values())) == len(files), own
+    every = set(own.values())
+    used = 0
+    for f in files:
+        # each definer's references to the name are to its own definition
+        mentioned = _mentions(loaded.by_file[(LIB / f).resolve()], every)
+        assert mentioned <= {own[f]}, (f, mentioned)
+        used += bool(mentioned)
+    for user, definer in SEEN_FROM.get(name, {}).items():
+        assert loaded.name(LIB / user, name) == own[definer]
+        assert _mentions(loaded.by_file[(LIB / user).resolve()], every) == {own[definer]}
+    assert used, f"no file uses {name}"
+
+
+def test_the_numbers_laws_import_resolves_in_numbers_lth(numbers_laws):
+    # the test file imports numbers.lth's PlusCommutes; kernel_laws.lth's is another definition
+    assert numbers_laws.name(numbers_laws.top, "PlusCommutes") == "PlusCommutes@numbers"
+    assert numbers_laws.name(numbers_laws.top, "LeqPair") is None
+
+
+# ---------------------------------------------------------------- an extern's arity from its type
+
+def test_the_arity_of_an_extern_is_its_declared_types():
+    # math.log has no Python signature: typed, one argument by its type; untyped, taken as unary;
+    # math.pi, declared a Float64, is the host's value
+    assert run_file(ROOT / "tests" / "run" / "extern_arity.lut") == "0.0 3.141592653589793 0.0\n"

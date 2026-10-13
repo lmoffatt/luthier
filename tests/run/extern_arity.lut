@@ -1,0 +1,11 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-6.md): an extern's arity comes from its declared
+-- type, not from the host's signature, which `math.log` lacks: `log` takes one argument, `pi`,
+-- declared a Float64, none and is the host's value; `untypedLog`, with no type declared, is read
+-- by its signature, and a builtin without one is taken as unary.
+import "world_model.lut" HostConsole host : HostConsole
+Logs : { log : Float64 -> Float64, pi : Float64 }
+logs : Logs := { log := extern "python:math.log", pi := extern "python:math.pi" }
+untypedLog := extern "python:math.log"
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+main (w : W) : W * Unit :=
+  host.print w (showFloat (logs.log 1.0) + " " + showFloat logs.pi + " " + showFloat (untypedLog 1.0))

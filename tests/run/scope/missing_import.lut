@@ -1,0 +1,7 @@
+-- tests/run/scope/missing_import.lut: an import that lists a name its file does not define is an
+-- error naming both files, when a demand reaches the name (12.S22).
+
+import "world_model.lut" HostConsole host : HostConsole
+import "right.lut" tenfold twice
+
+main (w : W) : W * Unit := host.print w (if twice 1 == 3 then "yes" else "no")

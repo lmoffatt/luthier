@@ -25,7 +25,8 @@ covering arrays (7.R3: above `coveringAbove` cases the test is not run); binding
 makes the law not run (7.S6), so `drawsPerCase` and `redraws` have nothing to bound yet. A case
 whose reduction raises (the host failed, a match stuck, the fuel spent) is not evaluated
 (7.S12); it is reported on that case and leaves the law unsettled unless another case refutes it.
-Names that two libraries define are scoped per file here (`Scope`), not in run.py's `load`.
+A name two libraries define is scoped by its file in run.py's loader (12.S22): a law or a census
+a test line names is the one the test file sees.
 """
 from __future__ import annotations
 
@@ -35,13 +36,14 @@ from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
 
 from . import host, kernel, surface as s, term as t
-from .elaborate import elaborate_program, show_term
+from .elaborate import elaborate_program, show_term as _show_term
 from .parse import parse
-from .run import (Runner, RunError, _applied, _arrow, _core_acts, _instantiate, _primitive_body,
+from .run import (Loaded, Runner, RunError, _applied, _arrow, _instantiate, _primitive_body, core_data,
                   runtime_slice)
 
 TRUE, FALSE = t.Var("true"), t.Var("false")
 _TEST_LTH = (Path(__file__).parent / "lib" / "test.lth").resolve()
+_LAWS_LTH = (Path(__file__).parent / "lib" / "laws.lth").resolve()
 _LETTERS = string.ascii_letters + string.digits + " "  # [proposed] the alphabet of a drawn String
 
 
@@ -51,6 +53,23 @@ class NoGenerator(Exception):
 
 class Unfit(Exception):
     """A filter gave no value within its budget of tries: the law is not run (7.S6)."""
+
+
+def _unqualified(term):
+    """A term with each name as its file writes it, without the `@file` the loader gives a name
+    two files define (run.py's `Loaded`), which the user never sees."""
+    if isinstance(term, t.Var):
+        return t.Var(term.name.partition("@")[0])
+    if isinstance(term, tuple):
+        return tuple(_unqualified(x) for x in term)
+    if is_dataclass(term) and not isinstance(term, type):
+        return replace(term, **{f.name: _unqualified(getattr(term, f.name)) for f in fields(term)
+                                if f.init and not isinstance(getattr(term, f.name), str)})
+    return term
+
+
+def _show(term):
+    return _show_term(_unqualified(term))
 
 
 # ---------------------------------------------------------------------- the spec (test.lth §1)
@@ -152,167 +171,30 @@ def collect_tests(path):
     return lines
 
 
-def _named(act):
-    return act.name if isinstance(act, (s.Define, s.Declare, s.Alias)) else None
-
-
-def _defines(act):
-    """The names an act defines: its own, and a data's constructors."""
-    names = [act.name] if _named(act) is not None else []
-    if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
-        names += [n for n, _ in act.body.constructors]
-    return names
-
-
-_BINDERS = (s.Explicit, s.Implicit, s.TypedParam, s.Field, s.Pi, s.Sigma)
-
-
-def _bound(value, out):
-    """Every name a binder in `value` introduces (conservative: scope is not followed)."""
-    if isinstance(value, tuple):
-        for v in value:
-            _bound(v, out)
-    elif is_dataclass(value) and not isinstance(value, type):
-        if isinstance(value, _BINDERS):
-            out.update(value.names)
-        elif isinstance(value, (s.PlainParam, s.Bind)):
-            out.add(value.name)
-        elif isinstance(value, s.ShapeParam):
-            out.add(value.right_name)
-        elif isinstance(value, s.SigmaNamed):
-            out.update((value.left_name, value.right_name))
-        for f in fields(value):
-            _bound(getattr(value, f.name), out)
-    return out
-
-
-class Scope:
-    """The files a test file reaches, flattened as run.py's `load` flattens them, with each name
-    that two of them define resolved per file: a file's own definition, else the one of the file
-    it imports the name from, else the first file of its imports that defines it. `load` flattens
-    every import whole, so two libraries that define one name (`LeqPair` in kernel_laws.lth,
-    algebra.lth and numbers.lth; `Exhaustive` a theory in generators.lth and a constructor of
-    laws.lth's `Coverage`) would otherwise both reach one program. Such a name is renamed `name@file`
-    in each file that defines it, and so is every reference to it, except in an act where a binder
-    has the same name."""
-
-    def __init__(self, path, seen):
-        self.top = Path(path).resolve()
-        self.pairs, self.imports, self.defined = [], {}, {}
-        self.visit(self.top, set(), seen)
-        definers = {}
-        for f, act in self.pairs:
-            for n in _defines(act):
-                definers.setdefault(n, set()).add(f)
-        self.clashing = {n for n, fs in definers.items() if len(fs) > 1}
-        self.memo = {}
-
-    def visit(self, p, active, seen):
-        p = p.resolve()
-        if p in active:
-            raise RunError(f"cyclic import: {p}")
-        if p in seen:
-            return
-        result = parse(p.read_text(encoding="utf-8"))
-        if isinstance(result, s.ParseFailed):
-            raise RunError("; ".join(f"{p}:{e.line}:{e.column}: {e.message}" for e in result.errors))
-        active.add(p)
-        self.imports[p], self.defined[p] = [], set()
-        for act in result.program:
-            if isinstance(act, s.ImportAct):
-                target = p.parent / act.path
-                if not target.exists():
-                    target = Path(__file__).parent / "lib" / act.path
-                self.visit(target, active, seen)
-                self.imports[p].append((target.resolve(), {n.name for n in act.names}))
-                for name in act.names:
-                    if name.asName:
-                        self.pairs.append((p, s.Alias(name.asName, (), s.Name(name.name))))
-            else:
-                self.pairs.append((p, act))
-                self.defined[p].update(_defines(act))
-        active.remove(p)
-        seen.add(p)
-
-    def owner(self, f, name):
-        """The file whose definition of `name` a reference in `f` means, or None."""
-        key = (f, name)
-        if key not in self.memo:
-            self.memo[key] = None
-            if name in self.defined.get(f, ()):
-                self.memo[key] = f
-            else:
-                found = next((self.owner(g, name) for g, names in self.imports.get(f, ()) if name in names), None)
-                if found is None:
-                    queue, met = [g for g, _ in self.imports.get(f, ())], set()
-                    while queue and found is None:
-                        g = queue.pop(0)
-                        if g in met:
-                            continue
-                        met.add(g)
-                        found = g if name in self.defined.get(g, ()) else None
-                        queue.extend(h for h, _ in self.imports.get(g, ()))
-                self.memo[key] = found
-        return self.memo[key]
-
-    def renamed(self, f, name):
-        if name not in self.clashing:
-            return name
-        owner = self.owner(f, name)
-        return f"{name}@{owner.stem}" if owner is not None else name
-
-    def name(self, name):
-        """A name as the test file writes it (a law, a census), as the program calls it."""
-        return self.renamed(self.top, name)
-
-    def acts(self):
-        out = []
-        for f, act in self.pairs:
-            bound = _bound(act, set()) & self.clashing
-            out.append(self.rename(f, act, bound, top=True))
-        return tuple(out)
-
-    def rename(self, f, value, bound, top=False):
-        if isinstance(value, tuple):
-            return tuple(self.rename(f, v, bound) for v in value)
-        if isinstance(value, s.Name):
-            root, dot, rest = value.name.partition(".")
-            return value if root in bound else s.Name(self.renamed(f, root) + dot + rest)
-        if isinstance(value, s.PApp):
-            name = value.name if value.name in bound else self.renamed(f, value.name)
-            return s.PApp(name, self.rename(f, value.patterns, bound))
-        if isinstance(value, s.DataBody):
-            return s.DataBody(tuple((self.renamed(f, n), self.rename(f, ty, bound)) for n, ty in value.constructors))
-        if not is_dataclass(value) or isinstance(value, type):
-            return value
-        changes = {fl.name: self.rename(f, getattr(value, fl.name), bound) for fl in fields(value)
-                   if not isinstance(getattr(value, fl.name), str)}
-        if top and _named(value) is not None:
-            changes["name"] = self.renamed(f, value.name)
-        return replace(value, **changes)
-
-
 def load_program(path, fuel, extra=()):
-    """The runtime program of the file as `run` loads it (core, imports, the host's routes), its
-    names scoped per file (`Scope`), with each test line as a definition `test%k`, the laws and
-    censuses its string literals name (and `extra`), and test.lth's `grade` as roots; the Runner
-    over it, the names of the test lines and the scope."""
+    """The runtime program of the file as `run` loads it (core, imports scoped by file, the host's
+    routes), with each test line as a definition `test%k`, the laws and censuses its string
+    literals name (and `extra`), and test.lth's `grade` as roots; the Runner over it, the names of
+    the test lines and the loader (whose `name` gives a name of a file as the program calls it)."""
     host.reset()
-    seen = set()
-    scope = Scope(path, seen)
-    own = scope.acts()
-    core = _core_acts(seen, own)
-    lines = collect_tests(path)
-    specs = tuple(s.Define(f"test%{k}", (), None, s.TermBody(scope.rename(scope.top, v, set())))
-                  for k, v in enumerate(lines))
-    named = tuple(dict.fromkeys(scope.name(n) for v in lines for n in _string_literals(v)))
-    data = tuple(a.name for a in core if isinstance(a, s.Define) and isinstance(a.body, s.DataBody))
-    grading = tuple(scope.renamed(_TEST_LTH, n) for n in ("grade", "Coverage", "Verdict", "Grade"))
-    roots = data + tuple(d.name for d in specs) + named + tuple(scope.name(n) for n in extra) + grading
-    acts = _refined_records(runtime_slice(core + own + specs, specs[0].name if specs else "main", roots))
-    program = tuple(_primitive_body(a) for a in elaborate_program(acts))
+    loaded = Loaded(path)
+    top = loaded.top
+    specs = []
+    for k, v in enumerate(collect_tests(path)):
+        missing = []
+        specs.append(s.Define(f"test%{k}", (), None, s.TermBody(loaded.rename(top, v, set(), missing))))
+        if missing:
+            loaded.errors[f"test%{k}"] = missing
+    specs = tuple(specs)
+    named = tuple(dict.fromkeys(loaded.name(top, n) or n for d in specs for n in _string_literals(d)))
+    grading = tuple(_constructor(loaded)(n).name for n in ("grade", "Coverage", "Verdict", "Grade"))
+    roots = (core_data(loaded) + tuple(d.name for d in specs) + named
+             + tuple(loaded.name(top, n) or n for n in extra) + grading)
+    kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots)
+    loaded.demand(kept)
+    program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
     program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
-    return Runner(program, fuel), [d.name for d in specs], scope
+    return Runner(program, fuel), [d.name for d in specs], loaded
 
 
 # ---------------------------------------------------------------------- reading the spec
@@ -320,13 +202,13 @@ def load_program(path, fuel, extra=()):
 def _int(v):
     if isinstance(v, t.Lit) and isinstance(v.constant, t.IntConst):
         return v.constant.value
-    raise RunError(f"not an integer: {show_term(v)}")
+    raise RunError(f"not an integer: {_show(v)}")
 
 
 def _text(v):
     if isinstance(v, t.Lit) and isinstance(v.constant, t.StringConst):
         return v.constant.value
-    raise RunError(f"not a string: {show_term(v)}")
+    raise RunError(f"not a string: {_show(v)}")
 
 
 def _list(runner, v):
@@ -336,7 +218,7 @@ def _list(runner, v):
         items.append(v.function.argument)
         v = runner.whnf(v.argument)
     if v != t.Var("nil"):
-        raise RunError(f"not a list: {show_term(v)}")
+        raise RunError(f"not a list: {_show(v)}")
     return items
 
 
@@ -345,7 +227,7 @@ def _maybe_text(v):
         return None
     if isinstance(v, t.App) and v.function == t.Var("just"):
         return _text(v.argument)
-    raise RunError(f"not a Maybe String: {show_term(v)}")
+    raise RunError(f"not a Maybe String: {_show(v)}")
 
 
 def read_spec(runner, value):
@@ -357,7 +239,7 @@ def read_spec(runner, value):
     elif isinstance(mode, t.App) and _base(mode) == "SampledMode":
         sampled, metric = True, mode.argument
     else:
-        raise RunError(f"not a Mode: {show_term(mode)}")
+        raise RunError(f"not a Mode: {_show(mode)}")
     def bindings(v):
         out = []
         for b in _list(runner, v):
@@ -446,7 +328,7 @@ class Values:
             if r == FALSE:
                 return False
             if r != TRUE:
-                raise RunError(f"a refinement gave {show_term(r)}, not a Bool")
+                raise RunError(f"a refinement gave {_show(r)}, not a Bool")
         return True
 
     def bounds(self, predicates, kind):
@@ -488,7 +370,7 @@ class Values:
         if isinstance(base, t.Var) and base.name == "Int":
             lo, hi = self.bounds(predicates, "Int")
             if lo is None or hi is None:
-                raise NoGenerator(f"{show_term(ty)} is infinite: ExhaustiveMode needs its bounds or a census (7.R3)")
+                raise NoGenerator(f"{_show(ty)} is infinite: ExhaustiveMode needs its bounds or a census (7.R3)")
             values = (t.Lit(t.IntConst(k)) for k in range(lo, hi + 1))
         else:
             values = self.every_base(base, limit)
@@ -520,8 +402,8 @@ class Values:
         if _applied(ty, "List") is not None:
             raise NoGenerator("a list under ExhaustiveMode: its enumeration up to the size is a later bite")
         if _arrow(ty) is not None:
-            raise NoGenerator(f"a function {show_term(ty)}: bind a census (7.R4)")
-        raise NoGenerator(f"{show_term(ty)} has no finite enumeration (7.R3)")
+            raise NoGenerator(f"a function {_show(ty)}: bind a census (7.R4)")
+        raise NoGenerator(f"{_show(ty)} has no finite enumeration (7.R3)")
 
     def every_fields(self, types, limit):
         if not types:
@@ -570,7 +452,7 @@ class Values:
             v = self.draw_base(base, lo, hi)
             if self.holds(predicates, v):
                 return v
-        raise Unfit(f"no value of {show_term(ty)} in {self.budgets.get('tries', 2000)} tries (7.S6)")
+        raise Unfit(f"no value of {_show(ty)} in {self.budgets.get('tries', 2000)} tries (7.S6)")
 
     def draw_base(self, ty, lo, hi):
         rng, n = self.rng, self.size
@@ -609,8 +491,8 @@ class Values:
                 result = t.App(t.App(t.Var("cons"), self.draw(element)), result)
             return result
         if _arrow(ty) is not None:
-            raise NoGenerator(f"a function {show_term(ty)}: bind a census (7.R4)")
-        raise NoGenerator(f"no generator of {show_term(ty)}")
+            raise NoGenerator(f"a function {_show(ty)}: bind a census (7.R4)")
+        raise NoGenerator(f"no generator of {_show(ty)}")
 
 
 # ---------------------------------------------------------------------- running (test.lth §2)
@@ -648,12 +530,12 @@ def evaluate(runner, law, case, fuel):
         return True
     if r == FALSE:
         return False
-    raise RunError(f"the law gave {show_term(r)}, not a Bool")
+    raise RunError(f"the law gave {_show(r)}, not a Bool")
 
 
-def run_spec(runner, spec, fuel, scope=None):
+def run_spec(runner, spec, fuel, loaded=None):
     """test.lth's `Tester.run`: the evidence of the law the spec names, with its verdict and grade."""
-    law = scope.name(spec.law) if scope else spec.law
+    law = _as_called(loaded, spec.law)
     params = parameters(runner, law)
     if params is None:
         return _not_run(spec, f"no definition {spec.law}")
@@ -661,12 +543,12 @@ def run_spec(runner, spec, fuel, scope=None):
     values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel)
     limit = spec.budgets.get("coveringAbove", 20000)
     # each parameter: a census its binding names, or the mode's functor over its type
-    con = _constructor(scope)
+    con = _constructor(loaded)
     plan, coverage = [], (t.App(con("Drawn"), t.Lit(t.IntConst(spec.seed))) if spec.sampled else con("Exhaustive"))
     try:
         for name, ty in params:
             b = resolve_binding(spec, name, _head_name(ty))
-            plan.append(census(runner, b, ty, scope.name(b.generator) if scope else b.generator) if b else None)
+            plan.append(census(runner, b, ty, _as_called(loaded, b.generator)) if b else None)
     except (NoGenerator, RunError) as exc:
         return _not_run(spec, str(exc), names)
     for b in spec.where + spec.profile:  # test.lth's specCoverage: every binding weakens it
@@ -704,7 +586,7 @@ def run_spec(runner, spec, fuel, scope=None):
         verdict = "Unsettled"
     else:
         verdict = "Confirmed" if _base(coverage) == "Exhaustive" else "Supported"
-    return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, scope), len(points), refuting,
+    return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, loaded), len(points), refuting,
                    raised, names)
 
 
@@ -720,7 +602,7 @@ def _every_case(values, params, plan, limit, prefix=()):
     try:
         every = plan[k] if plan[k] is not None else values.every(ty, limit)
     except NoGenerator as exc:
-        raise NoGenerator(f"{params[k][0]} : {show_term(params[k][1])}: {exc}") from exc
+        raise NoGenerator(f"{params[k][0]} : {_show(params[k][1])}: {exc}") from exc
     for v in every:
         out.extend(_every_case(values, params, plan, limit, prefix + (v,)))
         if len(out) > limit:
@@ -737,27 +619,37 @@ def _draw_case(values, params, plan, walked):
         try:
             case.append(plan[k][walked % len(plan[k])] if plan[k] is not None else values.draw(ty))
         except (NoGenerator, Unfit) as exc:
-            raise type(exc)(f"{name} : {show_term(params[k][1])}: {exc}") from exc
+            raise type(exc)(f"{name} : {_show(params[k][1])}: {exc}") from exc
     return tuple(case)
 
 
-def grade_of(runner, verdict, coverage, scope=None):
+def grade_of(runner, verdict, coverage, loaded=None):
     """test.lth's `grade`, reduced: the grade's constructor, or None."""
     runner.fuel = 100000
-    con = _constructor(scope)
+    con = _constructor(loaded)
     g = runner.value(Runner.apply(con("grade"), [con(verdict), t.App(t.Var("just"), coverage)]))
     if isinstance(g, t.App) and g.function == t.Var("just"):
         return _base(g.argument)
     return None
 
 
-def _constructor(scope):
-    """A name of test.lth or laws.lth as the program calls it."""
-    return lambda n: t.Var(scope.renamed(_TEST_LTH, n) if scope else n)
+def _as_called(loaded, n):
+    """A name the test file writes (a law, a census) as the program calls it."""
+    return n if loaded is None else (loaded.name(loaded.top, n) or n)
+
+
+def _constructor(loaded):
+    """A name of test.lth (`grade`, `Grade`'s constructors) or laws.lth (`Verdict`'s and
+    `Coverage`'s) as the program calls it."""
+    def con(n):
+        if loaded is None:
+            return t.Var(n)
+        return t.Var(next((m for f in (_TEST_LTH, _LAWS_LTH) if (m := loaded.name(f, n)) is not None), n))
+    return con
 
 
 def _base(term):
-    """The name at the head of a term, without the file a clash renamed it by (`Scope`)."""
+    """The name at the head of a term, without the file a clash qualified it by (run.py's loader)."""
     while isinstance(term, t.App):
         term = term.function
     return term.name.partition("@")[0] if isinstance(term, t.Var) else None
@@ -774,7 +666,7 @@ _GRADE_WORDS = {"Proved": "proved", "ExhaustiveGrade": "exhaustive", "Cases": "c
 
 
 def show_case(names, case):
-    return ", ".join(f"{n} = {show_term(v)}" for n, v in zip(names, case))
+    return ", ".join(f"{n} = {_show(v)}" for n, v in zip(names, case))
 
 
 def line(outcome):
@@ -795,18 +687,18 @@ def line(outcome):
 
 def run_tests(path, seed=None, fuel=1_000_000):
     """Run every `test` line of the file; the outcomes in order."""
-    runner, names, scope = load_program(path, fuel)
+    runner, names, loaded = load_program(path, fuel)
     specs = [read_spec(runner, t.Var(name)) for name in names]
     # the laws and censuses the specs name, when a definition (a profile) holds their names
     defined = {a.name for a in runner.program if isinstance(a, (t.Define, t.Declare))}
     wanted = {n for spec in specs for n in [spec.law] + [b.generator for b in spec.where + spec.profile]}
-    missing = sorted(n for n in wanted if scope.name(n) not in defined)
+    missing = sorted(n for n in wanted if _as_called(loaded, n) not in defined)
     if missing:
-        runner, names, scope = load_program(path, fuel, missing)
+        runner, names, loaded = load_program(path, fuel, missing)
         specs = [read_spec(runner, t.Var(name)) for name in names]
     outcomes = []
     for spec in specs:
         if seed is not None:
             spec.seed = seed
-        outcomes.append(run_spec(runner, spec, fuel, scope))
+        outcomes.append(run_spec(runner, spec, fuel, loaded))
     return outcomes

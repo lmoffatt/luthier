@@ -8,7 +8,9 @@ bridge reads by the type the extern's definition declares (spec 3.S22 to 3.S26, 
 `Table` as tables.py reads it, sums as `(label, value)`. v5 (prompt-5.md, report-5.md): every
 run loads `lib/core.lut` before the file (12.S22, 11.R2), defines kernel.BOOTSTRAP_PRIMITIVES as
 `eval` does, and the Runner brings the operands of a primitive and of `and`/`or` to weak head
-normal form itself, with the host. No certification or result hashing yet.
+normal form itself, with the host. v6 (prompt-6.md): the loader scopes each file's names by the
+file (12.S22, `Loaded`), and an extern's arity is read from its declared type, the host's signature
+only when no type is declared. No certification or result hashing yet.
 """
 from __future__ import annotations
 
@@ -33,43 +35,339 @@ class RunError(ValueError):
 CORE = Path(__file__).parent / "lib" / "core.lut"
 
 
-def load(path: Path, seen=None, active=None):
-    """Flatten imports before elaboration; local paths precede bundled libraries."""
-    seen = set() if seen is None else seen
-    active = set() if active is None else active
-    path = path.resolve()
-    if path in active:
-        raise RunError(f"cyclic import: {path}")
-    if path in seen:
-        return ()
-    result = parse(path.read_text(encoding="utf-8"))
-    if isinstance(result, s.ParseFailed):
-        raise RunError("; ".join(f"{path}:{e.line}:{e.column}: {e.message}" for e in result.errors))
-    active.add(path)
-    acts = []
-    for act in result.program:
-        if isinstance(act, s.ImportAct):
-            target = path.parent / act.path
-            if not target.exists():
-                target = Path(__file__).parent / "lib" / act.path
-            acts.extend(load(target, seen, active))
-            for name in act.names:
-                if name.asName:
-                    acts.append(s.Alias(name.asName, (), s.Name(name.name)))
-        else:
-            acts.append(act)
-    active.remove(path)
-    seen.add(path)
-    return tuple(acts)
+_FREE = {"extern", "primitive", "axiom", "quote"}
+_BUILTIN_CONSTRUCTORS = {"true", "false", "nil", "cons", "just", "nothing", "ok", "failed"}
+
+
+def _defines(act):
+    """The names an act defines: its own, and a data's constructors."""
+    if not isinstance(act, (s.Define, s.Declare, s.Alias)):
+        return []
+    names = [act.name]
+    if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
+        names += [n for n, _ in act.body.constructors]
+    return names
+
+
+def _sum_labels(value, out):
+    if isinstance(value, s.Sum):
+        out.update(n for n, _ in value.alternatives)
+    if isinstance(value, tuple):
+        for v in value:
+            _sum_labels(v, out)
+    elif is_dataclass(value) and not isinstance(value, type):
+        for f in fields(value):
+            _sum_labels(getattr(value, f.name), out)
+    return out
+
+
+@dataclass
+class _File:
+    path: Path
+    tag: str = ""
+    acts: list = field(default_factory=list)
+    defined: set = field(default_factory=set)
+    constructors: set = field(default_factory=set)
+    imports: dict = field(default_factory=dict)   # the name the file sees -> (file, the name there)
+
+
+class Loaded:
+    """The files a run reads from `path` (and core), each act's names scoped by its file (12.S22).
+
+    A file sees its own definitions, the names its imports list (each under its alias, a model
+    under the name it is imported by), and core's, in that order; nothing else of what it imports
+    or of what they import. A name two files define does not collide: each reference resolves in
+    its own file. Inside the program a definition keeps its name when no other file defines it, or
+    when its file is the one run (then core); otherwise it is called `name@file` (the file's stem),
+    which the user never writes. A reference a file cannot resolve is an error naming the file,
+    raised only when a demand reaches the act that makes it (12.S21)."""
+
+    def __init__(self, path, core=True):
+        self.files = {}
+        self.top = Path(path).resolve()
+        self.core = CORE.resolve() if core else None
+        if core:
+            self.visit(self.core, set())
+        self.visit(self.top, set())
+        definers = {}
+        for f in self.files.values():
+            for n in f.defined:
+                definers.setdefault(n, []).append(f.path)
+        self.plain = {}
+        for n, fs in definers.items():
+            for owner in (self.top, self.core):
+                if owner in fs:
+                    self.plain[n] = owner
+                    break
+            else:
+                if len(fs) == 1:
+                    self.plain[n] = fs[0]
+        stems = {}
+        for f in self.files.values():
+            k = stems.setdefault(f.path.stem, 0)
+            stems[f.path.stem] = k + 1
+            f.tag = f.path.stem if k == 0 else f"{f.path.stem}~{k}"
+        self.labels = _sum_labels(tuple(a for f in self.files.values() for a in f.acts), set())
+        self.memo = {}
+        self.errors = {}   # the internal name of an act -> what it cannot resolve
+        # each file's acts in the program's names, imports before importers, core first
+        self.by_file = {path: tuple(self.scoped(f, a) for a in f.acts) for path, f in self.files.items()}
+        self.acts = tuple(a for acts in self.by_file.values() for a in acts)
+
+    def visit(self, path, active):
+        path = path.resolve()
+        if path in active:
+            raise RunError(f"cyclic import: {path}")
+        if path in self.files:
+            return
+        result = parse(path.read_text(encoding="utf-8"))
+        if isinstance(result, s.ParseFailed):
+            raise RunError("; ".join(f"{path}:{e.line}:{e.column}: {e.message}" for e in result.errors))
+        active.add(path)
+        f = _File(path)
+        for act in result.program:
+            if isinstance(act, s.ImportAct):
+                target = path.parent / act.path
+                if not target.exists():
+                    target = Path(__file__).parent / "lib" / act.path
+                if not target.exists():
+                    raise RunError(f"{path.name}: no file {act.path} to import")
+                self.visit(target, active)
+                for name in act.names:
+                    f.imports[name.asName or name.name] = (target.resolve(), name.name)
+            else:
+                f.acts.append(act)
+                f.defined.update(_defines(act))
+                if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
+                    f.constructors.update(n for n, _ in act.body.constructors)
+        active.remove(path)
+        self.files[path] = f
+
+    def internal(self, path, name):
+        """The program's name of the definition of `name` in the file at `path`."""
+        return name if self.plain.get(name) == path else f"{name}@{self.files[path].tag}"
+
+    def see(self, path, name):
+        """(file, name there) of the definition a reference to `name` in the file means, None when
+        the file neither defines, nor imports, nor finds it in core; RunError when an import lists a
+        name its file does not give."""
+        key = (path, name)
+        if key in self.memo:
+            if self.memo[key] is _VISITING:
+                raise RunError(f"{path.name}: {name} is imported in a cycle")
+            return self.memo[key]
+        self.memo[key] = _VISITING
+        f = self.files[path]
+        try:
+            if name in f.defined:
+                found = (path, name)
+            elif name in f.imports:
+                target, there = f.imports[name]
+                found = self.see(target, there)
+                if found is None and there not in _sum_labels(tuple(self.files[target].acts), set()):
+                    # a label of a sum the file defines is the sum's, global as the elaborator reads it
+                    raise RunError(f"{path.name} imports {there} from {target.name}, which does not define it")
+            elif self.core is not None and path != self.core and name in self.files[self.core].defined:
+                found = (self.core, name)
+            else:
+                found = None
+        except RunError:
+            del self.memo[key]
+            raise
+        self.memo[key] = found
+        return found
+
+    def name(self, path, name):
+        """`name` as the file at `path` writes it, as the program calls it; None when not seen."""
+        path = Path(path).resolve()
+        if path not in self.files:
+            return None
+        try:
+            found = self.see(path, name)
+        except RunError:
+            return None
+        return None if found is None else self.internal(*found)
+
+    def is_constructor(self, path, name):
+        try:
+            found = self.see(path, name)
+        except RunError:
+            return False
+        if found is None:
+            return name in _BUILTIN_CONSTRUCTORS
+        return found[1] in self.files[found[0]].constructors
+
+    # ------------------------------------------------------------------ renaming one act
+
+    def scoped(self, f, act):
+        """An act of the file with each name it defines and each free name it uses in the program's
+        names; a name it cannot resolve is left as written and recorded against the act."""
+        path = f.path
+        missing = []
+        if isinstance(act, (s.Define, s.Declare, s.Alias)):
+            bound = set()
+            binders = []
+            for b in act.binders:
+                b = replace(b, type=self.rename(path, b.type, bound, missing),
+                            **({"default": self.rename(path, b.default, bound, missing)} if isinstance(b, s.Explicit) else {}))
+                binders.append(b)
+                bound |= set(b.names)
+            changes = {"name": self.internal(path, act.name), "binders": tuple(binders)}
+            if isinstance(act, s.Alias):
+                changes["value"] = self.rename(path, act.value, bound, missing)
+            else:
+                changes["type"] = self.rename(path, act.type, bound, missing)
+            if isinstance(act, s.Define):
+                body = act.body
+                if isinstance(body, s.DataBody):
+                    body = s.DataBody(tuple((self.internal(path, n), self.rename(path, ty, bound, missing))
+                                            for n, ty in body.constructors))
+                else:
+                    body = self.rename(path, body, bound, missing)
+                changes["body"] = body
+            result = replace(act, **changes)
+            if missing:
+                self.errors.setdefault(result.name, []).extend(missing)
+            return result
+        return self.rename(path, act, set(), missing)
+
+    def rename(self, path, value, bound, missing):
+        """`value` with its free names resolved in the file at `path`; binders followed as
+        check.py's `names` follows them."""
+        r = lambda v, b=bound: self.rename(path, v, b, missing)
+        if value is None or isinstance(value, (str, int, float, bool)):
+            return value
+        if isinstance(value, tuple):
+            return tuple(r(v) for v in value)
+        if isinstance(value, s.Name):
+            root, dot, rest = value.name.partition(".")
+            if root in bound:
+                return value
+            return s.Name(self.reference(path, root, missing) + dot + rest)
+        if isinstance(value, (s.Pi, s.Sigma)):
+            return replace(value, domain=r(value.domain), codomain=r(value.codomain, bound | set(value.names)))
+        if isinstance(value, s.SigmaNamed):
+            return replace(value, left_type=r(value.left_type), right_type=r(value.right_type, bound | {value.left_name}))
+        if isinstance(value, s.Subtype):
+            pattern, binds = self.pattern(path, value.pattern, missing)
+            return s.Subtype(pattern, r(value.type), r(value.law, bound | binds))
+        if isinstance(value, s.Record):
+            inner, out = set(bound), []
+            for fl in value.fields:
+                out.append(replace(fl, type=r(fl.type, set(inner))))
+                inner |= set(fl.names)
+            return s.Record(tuple(out), r(value.law, inner))
+        if isinstance(value, (s.Block, s.Lambda)):
+            inner = set(bound)
+            params = []
+            if isinstance(value, s.Lambda):
+                for q in value.params:
+                    if isinstance(q, s.TypedParam):
+                        q = replace(q, type=r(q.type, set(inner)))
+                        inner |= set(q.names)
+                    elif isinstance(q, s.PlainParam):
+                        inner.add(q.name)
+                    else:
+                        patterns = []
+                        for p in q.patterns:
+                            p, binds = self.pattern(path, p, missing)
+                            patterns.append(p)
+                            inner |= binds
+                        q = s.ShapeParam(tuple(patterns))
+                    params.append(q)
+            items = []
+            for it in value.items:
+                v = r(it.value, set(inner))
+                if isinstance(it, s.Bind):
+                    items.append(s.Bind(it.name, v))
+                    inner.add(it.name)
+                else:
+                    p, binds = self.pattern(path, it.pattern, missing)
+                    items.append(s.Rebind(p, v))
+                    inner |= binds
+            if isinstance(value, s.Block):
+                return s.Block(tuple(items), r(value.value, inner))
+            return s.Lambda(tuple(params), tuple(items), r(value.body, inner))
+        if isinstance(value, s.MatchOf):
+            arms = []
+            for p, body in value.arms:
+                p, binds = self.pattern(path, p, missing)
+                arms.append((p, r(body, bound | binds)))
+            return s.MatchOf(r(value.value), tuple(arms))
+        if isinstance(value, s.Clause):
+            patterns, binds = [], set()
+            for p in value.patterns:
+                p, b = self.pattern(path, p, missing)
+                patterns.append(p)
+                binds |= b
+            return s.Clause(tuple(patterns), r(value.body, bound | binds))
+        if isinstance(value, s.RecordValue):
+            return s.RecordValue(tuple((label, r(v)) for label, v in value.fields))
+        if isinstance(value, s.Sum):
+            return s.Sum(tuple((label, r(v)) for label, v in value.alternatives))
+        if isinstance(value, s.NamedArg):
+            return s.NamedArg(value.name, r(value.value))
+        if isinstance(value, s.Proj):
+            return s.Proj(r(value.value), value.field)
+        if is_dataclass(value) and not isinstance(value, type):
+            return replace(value, **{fl.name: r(getattr(value, fl.name)) for fl in fields(value)
+                                     if not isinstance(getattr(value, fl.name), str)})
+        return value
+
+    def pattern(self, path, p, missing):
+        """A pattern with its constructors in the program's names, and the names it binds."""
+        if isinstance(p, s.PApp):
+            if p.patterns or self.is_constructor(path, p.name):
+                out, binds = [], set()
+                for q in p.patterns:
+                    q, b = self.pattern(path, q, missing)
+                    out.append(q)
+                    binds |= b
+                name = p.name if p.name in self.labels and not self.is_constructor(path, p.name) else self.reference(path, p.name, missing)
+                return s.PApp(name, tuple(out)), binds
+            return p, {p.name}
+        if isinstance(p, s.PTuple):
+            out, binds = [], set()
+            for q in p.patterns:
+                q, b = self.pattern(path, q, missing)
+                out.append(q)
+                binds |= b
+            return s.PTuple(tuple(out)), binds
+        return p, set()
+
+    def reference(self, path, name, missing):
+        try:
+            found = self.see(path, name)
+        except RunError as exc:
+            missing.append(str(exc))
+            return name
+        if found is not None:
+            return self.internal(*found)
+        if name not in self.labels and name not in _FREE and name not in _BUILTIN_CONSTRUCTORS \
+                and name not in kernel.BOOTSTRAP_PRIMITIVES:
+            missing.append(f"{path.name}: {name} is neither defined there, nor imported, nor core's")
+        return name
+
+    def demand(self, acts):
+        """RunError when an act the run keeps uses a name its file cannot resolve (12.S22)."""
+        for a in acts:
+            for message in self.errors.get(getattr(a, "name", None), ()):
+                raise RunError(message)
+
+
+_VISITING = object()
 
 
 @dataclass(frozen=True)
 class TypedExtern(t.Extern):
     """An extern with the type its definition declares, so the bridge reads its arguments and its
     result by type (11.S6); with `obj`, a host object that crossed into the kernel (3.S22), applied
-    like an extern, its route a name of this run only."""
+    like an extern, its route a name of this run only. `arity`, how many arguments the host's
+    function takes, is read from the declared type (`Runner.typed`); None for a host object, whose
+    arity is its Python signature's."""
     type: object = None
     obj: object = field(default=None, compare=False, hash=False)
+    arity: int | None = field(default=None, compare=False, hash=False)
 
 
 class Entries:
@@ -140,6 +438,14 @@ def _extern_of(body):
     return None
 
 
+def _parameters(body):
+    """How many lambdas a definition's body opens with: the parameters an extern is applied to."""
+    count = 0
+    while isinstance(body, t.Lam):
+        count, body = count + 1, body.body
+    return count
+
+
 def _with_extern(body, typed):
     if isinstance(body, t.Lam):
         return replace(body, body=_with_extern(body.body, typed))
@@ -168,11 +474,12 @@ class Runner:
     def typed(self, act):
         """The definition with each extern it gives carrying its declared type: `f (x : A) : B :=
         extern "..." x`, or a record of a declared theory whose fields are externs (3.S40)."""
-        if not isinstance(act, t.Define) or act.type is None:
-            return act
+        if not isinstance(act, t.Define) or act.type is None or isinstance(act.type, t.Hole):
+            return act  # no type declared (the elaborator's hole): the host's signature decides
         extern = _extern_of(act.body)
         if extern is not None:
-            return replace(act, body=_with_extern(act.body, TypedExtern(extern.route, act.type)))
+            arity = _parameters(act.body) or self.arity_of(act.type)
+            return replace(act, body=_with_extern(act.body, TypedExtern(extern.route, act.type, arity=arity)))
         record = self.resolve(act.type)
         if isinstance(act.body, t.RecordValue) and isinstance(record, t.Record):
             types = dict(record.fields)
@@ -180,10 +487,36 @@ class Runner:
             for label, value in act.body.fields:
                 extern = _extern_of(value)
                 if extern is not None and label in types:
-                    value = _with_extern(value, TypedExtern(extern.route, types[label]))
+                    arity = _parameters(value) or self.arity_of(types[label])
+                    value = _with_extern(value, TypedExtern(extern.route, types[label], arity=arity))
                 items.append((label, value))
             return replace(act, body=t.RecordValue(tuple(items)))
         return act
+
+    def arity_of(self, ty):
+        """The arguments an extern of declared type `ty` takes when its definition binds none
+        (`log := extern "python:math.log"` at `Float64 -> Float64`): the arrows of the type up to
+        the first whose domain is `Fin` (what follows is an array the host gives, 3.S23), every
+        arrow when the first one's is."""
+        count, arrows = 0, []
+        while (arrow := _arrow(self.resolve(ty))) is not None:
+            arrows.append(_applied(self.resolve(arrow[1]), "Fin") is not None)
+            ty = arrow[2]
+        if arrows and not arrows[0]:
+            while count < len(arrows) and not arrows[count]:
+                count += 1
+            return count
+        return len(arrows)
+
+    def arity(self, head, function):
+        """How many arguments the host's function takes: the declared type's (`TypedExtern`);
+        with no type declared, its Python signature; a builtin without one, one."""
+        if getattr(head, "arity", None) is not None:
+            return head.arity
+        try:
+            return len(inspect.signature(function).parameters)
+        except (TypeError, ValueError):
+            return 1
 
     def resolve(self, ty):
         """A type with its names unfolded and its refinements dropped, down to what the bridge
@@ -564,7 +897,7 @@ class Runner:
                 if isinstance(head, t.Extern):
                     try:
                         function = self.route(head)
-                        arity = len(inspect.signature(function).parameters)
+                        arity = self.arity(head, function)
                         if len(args) < arity:
                             return self.apply(head, args)
                         # each argument crosses at its declared type, a later type reading the
@@ -586,7 +919,11 @@ class Runner:
             elif isinstance(value, t.Extern):
                 try:
                     function = self.route(value)
-                    if not inspect.signature(function).parameters:
+                    if getattr(value, "arity", None) == 0:
+                        # a declared value, not a function: the host's object, or what it gives
+                        result = function() if callable(function) else function
+                        return self.from_host(result, value.type)
+                    if getattr(value, "arity", None) is None and callable(function) and self.arity(value, function) == 0:
                         return self.from_host(function(), getattr(value, "type", None))
                 except Exception as exc:
                     raise RunError(f"extern {value.route} failed: {exc}") from exc
@@ -711,14 +1048,13 @@ def runtime_slice(acts, main, roots=()):
                  if a in by_name.get(getattr(a, "name", None), ()) and a.name in needed)
 
 
-def _core_acts(seen, own):
-    """core.lut's acts, those a file of the run defines left out (the file's own shadows the core,
-    12.S22). Its `operator` acts never reach the program: runtime_slice keeps definitions,
-    declarations and aliases only, so `a + b` stays `Var "+"`, bound below to the kernel's
-    primitive, and `a and b` stays `Var "and"`, the kernel's connective."""
-    defined = {a.name for a in own if isinstance(a, (s.Define, s.Declare, s.Alias))}
-    return tuple(a for a in load(CORE, seen)
-                 if not (isinstance(a, (s.Define, s.Declare, s.Alias)) and a.name in defined))
+def core_data(loaded):
+    """The program's names of core's data, a root of every run's slice (`[1, 2]` is `cons`, `if`
+    reads `true`), named or not."""
+    if loaded.core is None:
+        return ()
+    return tuple(loaded.internal(loaded.core, a.name) for a in loaded.files[loaded.core].acts
+                 if isinstance(a, s.Define) and isinstance(a.body, s.DataBody))
 
 
 def _primitive_body(act):
@@ -738,15 +1074,15 @@ def _primitive_body(act):
 
 def run_file(path, main="main", fuel=10000):
     host.reset()
-    seen = set()
-    own = load(Path(path), seen)
-    core = _core_acts(seen, own)
-    # core's data is in every run, named or not (`[1, 2]` is `cons`, `if` reads `true`)
-    data = tuple(a.name for a in core if isinstance(a, s.Define) and isinstance(a.body, s.DataBody))
-    program = tuple(_primitive_body(a) for a in elaborate_program(runtime_slice(core + own, main, data)))
-    definition = next((a for a in program if isinstance(a, t.Define) and a.name == main), None)
+    loaded = Loaded(path)
+    entry = loaded.name(loaded.top, main) or main
+    kept = runtime_slice(loaded.acts, entry, core_data(loaded))
+    loaded.demand(kept)
+    program = tuple(_primitive_body(a) for a in elaborate_program(kept))
+    definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
         raise RunError(f"missing main: {main}")
+    main = entry
     # the kernel's bootstrap of the symbols, as `luthier eval` (cli.py); a file's own come first
     program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
     runner = Runner(program, fuel)

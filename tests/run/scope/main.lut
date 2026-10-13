@@ -1,0 +1,13 @@
+-- tests/run/scope/main.lut: the loader scopes each name by its file (prompt-6.md, 12.S22). Two
+-- libraries define `helper` and neither import lists it, so each library's own is the one its
+-- functions call; left.lut's `not` stays left.lut's, and this file's `not` is core's; `tenfold`
+-- enters under its alias. Prints "3 10 false true".
+
+import "world_model.lut" HostConsole host : HostConsole
+import "left.lut" twice leftNot
+import "right.lut" tenfold as ten
+
+showInt (x : Int) : String := extern "python:builtins.repr" x
+showBool (b : Bool) : String := if b then "true" else "false"
+main (w : W) : W * Unit :=
+  host.print w (showInt (twice 1) + " " + showInt (ten 1) + " " + showBool (not true) + " " + showBool (leftNot true))

@@ -1,11 +1,11 @@
 """`luthier test`, bite 1 (record/IA/tester-2026-10-14/prompt.md): test.lth's Tester over the
-programs under tests/tester/."""
+programs under tests/tester/; names scoped by run.py's loader since run.py bite 6 (prompt-6.md)."""
 import os
 from pathlib import Path
 
 import pytest
 
-from luthier import tester
+from luthier import term as t, tester
 from luthier.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -81,7 +81,25 @@ def test_a_file_without_test_lines(tmp_path, capsys):
     assert lines_of(capsys, path) == (0, [])
 
 
+def test_the_grade_is_test_lth_s_assumed_not_laws_lth_s():
+    # test.lth's Grade and laws.lth's Evidence both have a constructor `Assumed`; the loader keeps
+    # them apart (run.py, prompt-6.md), and `grade` gives test.lth's
+    runner, _, loaded = tester.load_program(LAWS, 100000)
+    con = tester._constructor(loaded)
+    grade = runner.value(t.App(t.App(con("grade"), con("Assumes")), t.App(t.Var("just"), con("Exhaustive"))))
+    assert grade == t.App(t.Var("just"), t.Var(loaded.name(tester._TEST_LTH, "Assumed")))
+    assert loaded.name(tester._TEST_LTH, "Assumed") != loaded.name(tester._LAWS_LTH, "Assumed")
+    assert tester._base(grade.argument) == "Assumed"
+
+
+def test_a_name_is_shown_as_its_file_writes_it():
+    assert tester._show(t.App(t.Var("LeqBoth@numbers"), t.Var("doubles"))) == "(LeqBoth doubles)"
+
+
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="a few minutes; set LUTHIER_SLOW=1")
 def test_the_laws_of_numbers_lth(capsys):
     _, lines = lines_of(capsys, ROOT / "tests" / "tester" / "numbers_laws.lut")
     assert not any("refuted" in line for line in lines), lines
+    # the log laws settle since the extern's arity is its declared type's (run.py, prompt-6.md)
+    assert not any("unsettled" in line for line in lines), lines
+    assert not any("@" in line for line in lines), lines

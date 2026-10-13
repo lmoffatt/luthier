@@ -1,0 +1,9 @@
+-- tests/run/scope/unlisted.lut: a name a library defines and the import does not list does not
+-- enter (12.S22): `helper` here is an error naming this file, raised when `main` demands it, while
+-- `unused`, which no demand reaches, names `tenfold` without an error.
+
+import "world_model.lut" HostConsole host : HostConsole
+import "left.lut" twice
+
+unused : Int := tenfold 1
+main (w : W) : W * Unit := host.print w (if helper (twice 1) == 4 then "yes" else "no")

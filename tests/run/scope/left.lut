@@ -1,0 +1,8 @@
+-- tests/run/scope/left.lut: a library of the loader's fixture (record/IA/run-2026-10-13/prompt-6.md,
+-- 12.S22). It defines `helper`, which right.lut defines too, and its own `not`, which shadows
+-- core's here and nowhere else.
+
+helper (x : Int) : Int := x + 1
+twice (x : Int) : Int := helper (helper x)
+not (b : Bool) : Bool := b
+leftNot (b : Bool) : Bool := not b
