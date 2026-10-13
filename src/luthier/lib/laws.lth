@@ -77,77 +77,126 @@ isHomomorphism (A B : U) (same : B -> B -> Bool) (f : A -> B) (opA : A -> A -> A
 -- ---------------------------------------------------------------- §3 A law as a theory
 
 -- The forms of a law (D-2026-10-13-l): a case, a `forall` (Π) and an `exists` (Σ) over a type, and
--- the connectives; `then` is material, `not (p and not q)` (conditioning is an operation on a
--- measure, not a connective). This is the type `Law` of what a test runs (5.S1, 3.S12).
+-- the connectives; `then` is material, `not (p and not q)`, so `Not` is a form and `Then` is
+-- stated by it (conditioning is an operation on a measure, not a connective). This is the type
+-- `Law` of what a test runs (5.S1, 3.S12); it is Boolean until the cost library (D-2026-10-13-aa,
+-- Q6), when a case valued in `C` joins it. In `U` with constructors over `U`: version 0 keeps
+-- `U : U` (3.S8).
 Law : U := data {
   Case : Bool -> Law ;
   Forall : (A : U) -> (A -> Law) -> Law ;
   Exists : (A : U) -> (A -> Law) -> Law ;
   Both : Law -> Law -> Law ;
   Either : Law -> Law -> Law ;
+  Not : Law -> Law ;
   Then : Law -> Law -> Law ;
 }
 
--- Evidence follows the form of the law (D-2026-10-13-l): a case evaluated; a value of the
--- quantified type with the evidence for the law at it (a witness of an `exists`, a counterexample
--- to a `forall`); the cases listed or drawn, with their evidence; a pair for `and`; one side for
--- `or`; a citation or an assumption, which models any part whole.
+-- How much of a type the cases of a `forall` cover: all of it, a census chosen by hand, or a draw
+-- from a seed (7.R1, 7.S8). Roles: `ForallOnPoints`, `ExistsOnPoints`.
+Coverage : U := data {
+  Exhaustive : Coverage ;
+  Listed : Coverage ;
+  Drawn : Nat -> Coverage ;
+}
+
+-- Evidence follows the form of the law (D-2026-10-13-l): a case evaluated, with the value the
+-- evaluation gave; a value of the quantified type with the evidence for the law at it (a witness
+-- of an `exists`, a counterexample to a `forall`); points of the type with their evidence and how
+-- much they cover; a pair for `and`; one side for `or`; a citation or an assumption, which models
+-- any law whole.
 Evidence : U := data {
   Evaluated : Bool -> Evidence ;
   At : (A : U) -> A -> Evidence -> Evidence ;
-  Listed : List Evidence -> Evidence ;
-  Drawn : Nat -> List Evidence -> Evidence ;
+  Points : (A : U) -> List (A * Evidence) -> Coverage -> Evidence ;
   Pair : Evidence -> Evidence -> Evidence ;
   Side : Bool -> Evidence -> Evidence ;
   Cited : String -> Evidence ;
   Assumed : Evidence ;
 }
 
--- What a piece of evidence settles about a law: confirmed, refuted, supported only statistically,
--- taken on citation or assumption, or nothing. Roles: the laws of `Settling`.
+-- What evidence settles: confirmed, refuted, supported (by a census or a sample, never confirmed),
+-- unsettled, or taken on a citation or on an assumption. Roles: the laws of `Settling`.
 Verdict : U := data {
   Confirmed : Verdict ;
   Refuted : Verdict ;
   Supported : Verdict ;
-  TakenOn : String -> Verdict ;
   Unsettled : Verdict ;
+  Cites : String -> Verdict ;
+  Assumes : Verdict ;
 }
 
--- A model says what evidence settles; the certifier of spec 6 and 7 is one. The laws give each
--- form of law and each kind of evidence its role.
-Settling : { settles : Law -> Evidence -> Verdict }
+-- A model says what evidence settles, and how the verdicts of the parts of a conjunction combine:
+-- that combination is the demand's (5.S8: the vector of grades or the weakest), so it is the
+-- model's, held to the laws every combination keeps. The certifier of spec 6 and 7 is a model.
+Settling : {
+  settles : Law -> Evidence -> Verdict,
+  combine : Verdict -> Verdict -> Verdict,
+}
 
-material (a b : Bool) : Bool := not (a and not b)
-both (u v : Verdict) : Verdict := match u {
-  Refuted -> Refuted ;
-  Confirmed -> v ;
-  _ -> match v { Refuted -> Refuted ; _ -> u } }
+isRefuted (v : Verdict) : Bool := match v { Refuted -> true ; _ -> false }
+isConfirmed (v : Verdict) : Bool := match v { Confirmed -> true ; _ -> false }
+allConfirmed (vs : List Verdict) : Bool := match vs { nil -> true ; cons v rest -> isConfirmed v and allConfirmed rest }
+anyRefuted (vs : List Verdict) : Bool := match vs { nil -> false ; cons v rest -> isRefuted v or anyRefuted rest }
+anyConfirmed (vs : List Verdict) : Bool := match vs { nil -> false ; cons v rest -> isConfirmed v or anyConfirmed rest }
+-- the verdicts of the law at each point
+pointVerdicts (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) : List Verdict :=
+  match pts { nil -> nil ; cons (a, e) rest -> cons (m.settles (p a) e) (pointVerdicts m A p rest) }
+-- a `forall` on points: refuted by any counterexample; confirmed only when the points are all of
+-- the type and each confirms; supported when a census or a sample confirms at every point
+forallVerdict (vs : List Verdict) (c : Coverage) : Verdict :=
+  if anyRefuted vs then Refuted
+  else if allConfirmed vs then (match c { Exhaustive -> Confirmed ; _ -> Supported })
+  else Unsettled
+-- an `exists` on points: confirmed by any witness; refuted only when the points are all of the type
+-- and each refutes
+existsVerdict (vs : List Verdict) (c : Coverage) : Verdict :=
+  if anyConfirmed vs then Confirmed
+  else match c { Exhaustive -> (if allRefutedOf vs then Refuted else Unsettled) ; _ -> Unsettled }
+allRefutedOf (vs : List Verdict) : Bool := match vs { nil -> true ; cons v rest -> isRefuted v and allRefutedOf rest }
+flip (v : Verdict) : Verdict := match v { Confirmed -> Refuted ; Refuted -> Confirmed ; _ -> Unsettled }
 
--- a case is settled by evaluating it
-CaseIsEvaluated (m : Settling) (b : Bool) : Bool :=
-  m.settles (Case b) (Evaluated b) == (if b then Confirmed else Refuted)
--- (the laws below that relate a form to the evidence of its parts are stated on cases: a premise
--- on arbitrary evidence would rarely hold in a sample, 7.S12)
--- a `forall` is refuted exactly by a counterexample, and a sample over it supports and never
--- confirms (over an infinite domain only statistics confirm, 7.S17)
-ForallRefutedByCounterexample (m : Settling) (A : U) (a : A) : Bool :=
-  m.settles (Forall A (fn x { Case false })) (At A a (Evaluated false)) == Refuted
-SampleNeverConfirms (m : Settling) (A : U) (p : A -> Law) (seed : Nat) (es : List Evidence) : Bool :=
-  not (m.settles (Forall A p) (Drawn seed es) == Confirmed)
--- an `exists` is confirmed by a witness whose evidence confirms the law at it
-ExistsConfirmedByWitness (m : Settling) (A : U) (a : A) : Bool :=
-  m.settles (Exists A (fn x { Case true })) (At A a (Evaluated true)) == Confirmed
--- `and` by a pair, `or` by either side
+-- a case is settled by evaluating it, and evidence that does not agree with the case settles
+-- nothing (it cannot lie; review of layers 0-1, C)
+CaseIsEvaluated (m : Settling) (c b : Bool) : Bool :=
+  m.settles (Case c) (Evaluated b) == (if not (b == c) then Unsettled else if c then Confirmed else Refuted)
+-- a `forall` is refuted exactly by a counterexample: evidence at one point refutes it when it
+-- refutes the law there, and otherwise settles nothing
+ForallAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
+  m.settles (Forall A p) (At A a e) == (if isRefuted (m.settles (p a) e) then Refuted else Unsettled)
+ForallOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
+  m.settles (Forall A p) (Points A pts c) == forallVerdict (pointVerdicts m A p pts) c
+-- an `exists` is confirmed by a witness, and a failing instance does not refute it
+ExistsAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
+  m.settles (Exists A p) (At A a e) == (if isConfirmed (m.settles (p a) e) then Confirmed else Unsettled)
+ExistsOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
+  m.settles (Exists A p) (Points A pts c) == existsVerdict (pointVerdicts m A p pts) c
+-- `and` by a pair, its verdicts combined; `or` by either side, which confirms when its side does,
+-- or by a pair of refutations
 BothByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
-  m.settles (Both p q) (Pair e f) == both (m.settles p e) (m.settles q f)
-EitherBySide (m : Settling) (q : Law) : Bool :=
-  m.settles (Either (Case true) q) (Side true (Evaluated true)) == Confirmed
--- `then` is material
-ThenIsMaterial (m : Settling) (a b : Bool) : Bool :=
-  m.settles (Then (Case a) (Case b)) (Evaluated (material a b)) == (if material a b then Confirmed else Refuted)
+  m.settles (Both p q) (Pair e f) == m.combine (m.settles p e) (m.settles q f)
+EitherBySide (m : Settling) (p q : Law) (side : Bool) (e : Evidence) : Bool :=
+  m.settles (Either p q) (Side side e)
+    == (if isConfirmed (m.settles (if side then p else q) e) then Confirmed else Unsettled)
+EitherRefutedByBoth (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
+  m.settles (Either p q) (Pair e f)
+    == (if isRefuted (m.settles p e) and isRefuted (m.settles q f) then Refuted else Unsettled)
+-- `not` exchanges confirmation and refutation; what is only supported or unsettled stays unsettled
+NotFlips (m : Settling) (p : Law) (e : Evidence) : Bool := m.settles (Not p) e == flip (m.settles p e)
+-- `then` is material: settled as `not (p and not q)`, by the same evidence
+ThenIsMaterial (m : Settling) (p q : Law) (e : Evidence) : Bool :=
+  m.settles (Then p q) e == m.settles (Not (Both p (Not q))) e
 -- a citation or an assumption models any law whole, and says on what it is taken
-CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r) == TakenOn r
-AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == TakenOn "assumption"
+CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r) == Cites r
+AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == Assumes
+-- the combination of a conjunction's verdicts: commutative and associative, a refutation absorbs
+-- everything, an unsettled part absorbs all but a refutation, and confirmation is neutral; beyond
+-- that it is the demand's (5.S8)
+CombineCommutes (m : Settling) (u v : Verdict) : Bool := m.combine u v == m.combine v u
+CombineAssociates (m : Settling) (u v w : Verdict) : Bool := m.combine (m.combine u v) w == m.combine u (m.combine v w)
+CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
+  m.combine Refuted v == Refuted and (isRefuted v or m.combine Unsettled v == Unsettled) and m.combine Confirmed v == v
 
-Settling := CaseIsEvaluated & ForallRefutedByCounterexample & SampleNeverConfirms & ExistsConfirmedByWitness
-  & BothByPair & EitherBySide & ThenIsMaterial & CitedWhole & AssumedWhole
+Settling := CaseIsEvaluated & ForallAtOnePoint & ForallOnPoints & ExistsAtOnePoint & ExistsOnPoints & BothByPair
+  & EitherBySide & EitherRefutedByBoth & NotFlips & ThenIsMaterial & CitedWhole & AssumedWhole
+  & CombineCommutes & CombineAssociates & CombineAbsorbs
