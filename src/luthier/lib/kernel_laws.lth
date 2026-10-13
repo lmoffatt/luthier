@@ -28,13 +28,13 @@
 --      substitutive (D-2026-10-12-ak, 3.S36).                                   done
 --   §2 Terminal and initial objects: `Unit`, `Empty` (3.S7, 3.S8, D-2026-10-13-t).    done
 --   §3 Boolean algebra: `Bool`'s `true`, `false`, with `not`, `and`, `or`
---      (D-2026-10-13-t); Huntington's laws.                                    todo
+--      (D-2026-10-13-t); Huntington's laws.                                    done
 --   §4 Monoid and free monoid: `List`'s `nil`, `cons`, `append`; the recursion
---      principle `FoldNil`, `FoldCons` (3.S36, D-2026-10-13-t).                 todo
---   §5 Commutative semiring with its order: `Nat`'s laws (11.R1, D-2026-10-13-t).    todo
+--      principle `FoldNil`, `FoldCons` (3.S36, D-2026-10-13-t).                 done
+--   §5 Commutative semiring with its order: `Nat`'s laws (11.R1, D-2026-10-13-t).    done
 --   §6 The constructions of the kernel: `Beta`, `PairFst`, `PairSnd`, `Pairing`,
 --      `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust` (3.S36); what is not statable
---      (eta, 3.S37).                                                            todo
+--      (eta, 3.S37).                                                            done
 --   §7 The models, to write in kernel_models.lut: `==` of each concrete type as an
 --      `Object`; `Unit` a `Terminal`, `Empty` an `Initial`; `Bool` a `BooleanAlgebra`;
 --      `List A` a `FreeMonoid A`; `Nat` a `CommutativeSemiring`.                 todo
@@ -77,3 +77,140 @@ Terminal (T : U) := OnlyThePoint T
 Initial (T : U) : { absurd : (A : U) -> T -> A }
 NoValue (T : U) (i : Initial T) (x : T) : Bool := false
 Initial (T : U) := NoValue T
+
+-- ---------------------------------------------------------------- §3 Boolean algebra
+
+-- `Bool` is a Boolean algebra (D-2026-10-13-t): the role of `true` is its top, of `false` its
+-- bottom, with `not`, `and`, `or` its complement, meet and join (§7). Huntington's laws (1904):
+-- each operation commutative, each with its identity, each distributive over the other, and the
+-- complement; with top and bottom distinct, so the algebra has two values at least.
+BooleanAlgebra (B : U) : {
+  top : B, bottom : B,
+  complement : B -> B,
+  meet : B -> B -> B, join : B -> B -> B,
+}
+MeetCommutes (B : U) (m : BooleanAlgebra B) (x y : B) : Bool := m.meet x y == m.meet y x
+JoinCommutes (B : U) (m : BooleanAlgebra B) (x y : B) : Bool := m.join x y == m.join y x
+MeetIdentity (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.meet x m.top == x
+JoinIdentity (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.join x m.bottom == x
+MeetDistributes (B : U) (m : BooleanAlgebra B) (x y z : B) : Bool :=
+  m.meet x (m.join y z) == m.join (m.meet x y) (m.meet x z)
+JoinDistributes (B : U) (m : BooleanAlgebra B) (x y z : B) : Bool :=
+  m.join x (m.meet y z) == m.meet (m.join x y) (m.join x z)
+MeetComplement (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.meet x (m.complement x) == m.bottom
+JoinComplement (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.join x (m.complement x) == m.top
+TopIsNotBottom (B : U) (m : BooleanAlgebra B) : Bool := not (m.top == m.bottom)
+
+BooleanAlgebra (B : U) := MeetCommutes B & JoinCommutes B & MeetIdentity B & JoinIdentity B
+  & MeetDistributes B & JoinDistributes B & MeetComplement B & JoinComplement B & TopIsNotBottom B
+
+-- ---------------------------------------------------------------- §4 Monoid, free monoid, lists
+
+-- A monoid: an associative operation with a neutral element.
+Monoid (M : U) : { neutral : M, combine : M -> M -> M }
+LeftNeutral (M : U) (m : Monoid M) (x : M) : Bool := m.combine m.neutral x == x
+RightNeutral (M : U) (m : Monoid M) (x : M) : Bool := m.combine x m.neutral == x
+Associative (M : U) (m : Monoid M) (x y z : M) : Bool := m.combine (m.combine x y) z == m.combine x (m.combine y z)
+Monoid (M : U) := LeftNeutral M & RightNeutral M & Associative M
+
+-- The free monoid on `A` (D-2026-10-13-t): a monoid `M` with `A` injected into it, such that every
+-- map from `A` into a monoid `N` extends by `fold` to a map of monoids, and `M` holds nothing but
+-- what the injections build (folding with itself gives each element back). `List A` is the model
+-- (§7): `nil` the neutral element, `append` the operation, `cons a xs` the injection of `a`
+-- combined with `xs`. That the extension is unique is not statable by tests (it quantifies over
+-- maps); `FoldIsItself` stands for it, as the property that makes the extension determined.
+-- The monoids `N` a test needs are bound by a census (7.R4).
+FreeMonoid (A M : U) : {
+  neutral : M, combine : M -> M -> M,
+  inject : A -> M,
+  fold : (N : U) -> Monoid N -> (A -> N) -> M -> N,
+}
+asMonoid (A M : U) (m : FreeMonoid A M) : Monoid M := { neutral := m.neutral, combine := m.combine }
+IsMonoid (A M : U) (m : FreeMonoid A M) (x y z : M) : Bool :=
+  LeftNeutral M (asMonoid A M m) x and RightNeutral M (asMonoid A M m) x and Associative M (asMonoid A M m) x y z
+FoldNeutral (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) : Bool :=
+  m.fold N n f m.neutral == n.neutral
+FoldInject (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) (a : A) : Bool :=
+  m.fold N n f (m.inject a) == f a
+FoldCombine (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) (x y : M) : Bool :=
+  m.fold N n f (m.combine x y) == n.combine (m.fold N n f x) (m.fold N n f y)
+FoldIsItself (A M : U) (m : FreeMonoid A M) (x : M) : Bool := m.fold M (asMonoid A M m) m.inject x == x
+FreeMonoid (A M : U) := IsMonoid A M & FoldNeutral A M & FoldInject A M & FoldCombine A M & FoldIsItself A M
+
+-- The recursion principle of `List` (3.S36): `nil` and `cons` are the two cases a fold takes, and
+-- that is their role among lists; the free monoid's `fold` is this one with `cons a xs` read as
+-- the injection of `a` combined with `xs`. The algebra of a fold is the model.
+ListAlgebra (A B : U) : { onNil : B, onCons : A -> B -> B }
+foldList (A B : U) (g : ListAlgebra A B) (xs : List A) : B :=
+  match xs { nil -> g.onNil ; cons x rest -> g.onCons x (foldList A B g rest) }
+FoldNil (A B : U) (g : ListAlgebra A B) : Bool := foldList A B g nil == g.onNil
+FoldCons (A B : U) (g : ListAlgebra A B) (x : A) (xs : List A) : Bool :=
+  foldList A B g (cons x xs) == g.onCons x (foldList A B g xs)
+ListAlgebra (A B : U) := FoldNil A B & FoldCons A B
+
+-- ---------------------------------------------------------------- §5 Commutative semiring, ordered
+
+-- `Nat` (11.R1, `{ k : Int | 0 <= k }`) has the laws of its operations (D-2026-10-13-t): a
+-- commutative semiring, `+` and `*` with `0` and `1`, ordered by `<=` totally, the order agreeing
+-- with `+`, and `0` its least element. The order laws are the model's reading of "its laws",
+-- proposed.
+OrderedSemiring (S : U) : {
+  zero : S, one : S,
+  plus : S -> S -> S, times : S -> S -> S,
+  leq : S -> S -> Bool,
+}
+PlusAssociative (S : U) (s : OrderedSemiring S) (x y z : S) : Bool := s.plus (s.plus x y) z == s.plus x (s.plus y z)
+PlusCommutes (S : U) (s : OrderedSemiring S) (x y : S) : Bool := s.plus x y == s.plus y x
+PlusZero (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.plus x s.zero == x
+TimesAssociative (S : U) (s : OrderedSemiring S) (x y z : S) : Bool := s.times (s.times x y) z == s.times x (s.times y z)
+TimesCommutes (S : U) (s : OrderedSemiring S) (x y : S) : Bool := s.times x y == s.times y x
+TimesOne (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.times x s.one == x
+TimesDistributes (S : U) (s : OrderedSemiring S) (x y z : S) : Bool :=
+  s.times x (s.plus y z) == s.plus (s.times x y) (s.times x z)
+TimesZero (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.times x s.zero == s.zero
+-- the order: total, antisymmetric and transitive over the pairs and chains it relates (drawn by
+-- their generators, 7.S12), agreeing
+-- with `+`, with `0` least
+LeqPair (S : U) (s : OrderedSemiring S) : U := { x y : S | s.leq x y }
+LeqChain (S : U) (s : OrderedSemiring S) : U := { x y z : S | s.leq x y and s.leq y z }
+LeqBoth (S : U) (s : OrderedSemiring S) : U := { x y : S | s.leq x y and s.leq y x }
+LeqTotal (S : U) (s : OrderedSemiring S) (x y : S) : Bool := s.leq x y or s.leq y x
+LeqAntisymmetric (S : U) (s : OrderedSemiring S) (p : LeqBoth S s) : Bool := p.x == p.y
+LeqTransitive (S : U) (s : OrderedSemiring S) (c : LeqChain S s) : Bool := s.leq c.x c.z
+PlusMonotone (S : U) (s : OrderedSemiring S) (p : LeqPair S s) (z : S) : Bool := s.leq (s.plus p.x z) (s.plus p.y z)
+ZeroLeast (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.leq s.zero x
+OneIsNotZero (S : U) (s : OrderedSemiring S) : Bool := not (s.one == s.zero)
+
+OrderedSemiring (S : U) := PlusAssociative S & PlusCommutes S & PlusZero S & TimesAssociative S
+  & TimesCommutes S & TimesOne S & TimesDistributes S & TimesZero S & LeqTotal S
+  & LeqAntisymmetric S & LeqTransitive S & PlusMonotone S & ZeroLeast S & OneIsNotZero S
+
+-- ---------------------------------------------------------------- §6 The constructions of the kernel
+
+-- The kernel is a bicartesian closed category (3.S8); its constructions are the structures of one,
+-- and the kernel's own application, pairing and `match` are their models (§7). The laws are those
+-- 3.S36 names: `Beta` for the exponential; `PairFst`, `PairSnd`, `Pairing` for the product;
+-- `CaseLeft`, `CaseRight` for the coproduct, whose instances on `Bool` (`if`) and on `Maybe` are
+-- 3.S36's `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust`. Eta, `\ y { f y } == f`, is not
+-- statable: equality of functions is not structural (3.S37, 4.R8); observed pointwise it is `Beta`.
+Exponential (A B : U) : { apply : (A -> B) -> A -> B }
+Beta (A B : U) (e : Exponential A B) (f : A -> B) (x : A) : Bool := e.apply (\ y { f y }) x == f x
+Exponential (A B : U) := Beta A B
+
+Product (A B P : U) : { pair : A -> B -> P, first : P -> A, second : P -> B }
+PairFst (A B P : U) (p : Product A B P) (a : A) (b : B) : Bool := p.first (p.pair a b) == a
+PairSnd (A B P : U) (p : Product A B P) (a : A) (b : B) : Bool := p.second (p.pair a b) == b
+Pairing (A B P : U) (p : Product A B P) (q : P) : Bool := p.pair (p.first q) (p.second q) == q
+Product (A B P : U) := PairFst A B P & PairSnd A B P & Pairing A B P
+
+Coproduct (A B S : U) : {
+  left : A -> S, right : B -> S,
+  cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C,
+}
+CaseLeft (A B S : U) (s : Coproduct A B S) (C : U) (f : A -> C) (g : B -> C) (a : A) : Bool :=
+  s.cases C f g (s.left a) == f a
+CaseRight (A B S : U) (s : Coproduct A B S) (C : U) (f : A -> C) (g : B -> C) (b : B) : Bool :=
+  s.cases C f g (s.right b) == g b
+-- every value is an injection: casing with the injections gives it back
+CasesAreAll (A B S : U) (s : Coproduct A B S) (v : S) : Bool := s.cases S s.left s.right v == v
+Coproduct (A B S : U) := CaseLeft A B S & CaseRight A B S & CasesAreAll A B S
