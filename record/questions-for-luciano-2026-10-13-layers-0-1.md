@@ -17,6 +17,10 @@ translation keeps the names outside the term.
 Recommended: the record former. The names of the fields are part of the type, so they belong in
 the term, not beside it.
 
+La idea es la siguiente: en teoria de categorias un producto tiene las flechas first y second, aqui las flechas 
+serian   .x  y .y  o sea forman parte del product. 
+lo mismo de la suma pero como funcion inyectiva. 
+Responde eso a tu pregunta?
 
 
 ## Q2. A block is a lambda applied
@@ -28,6 +32,11 @@ The kernel has no `let`, so `translation.lth` translates the block `{ x := a ; e
 Recommended: keep the lambda applied, no new kernel construct, by L7 (the core is small); the
 planner sees that `x` is shared all the same.
 
+ok, aqui estamos hablando de bloques de ejecucion, esta bien, es lo que leo. 
+la pregunta es si no usar la notacion de C++ para los lambdas [](e:X, j:J) { e+j ;} 
+y si no usar el return ? 
+discutime. 
+O sea nos apartamos de lo muy lambda y vamos a algo mas entendible?
 
 
 ## Q3. Helper functions in theory files are reported, not rejected
@@ -38,6 +47,8 @@ Every theory file has helper definitions with parameters (`member`, `concat`, `f
 
 Recommended: keep reporting them; decide, once local definitions exist in the language, whether a
 helper that a law needs is exempt or must become local to the law.
+
+yes because we want that everything has an underlying law. 
 
 
 
@@ -53,4 +64,4 @@ and that no other naturals exist; done at 0381962: `Nat` is `{ k : Int | 0 <= k 
 between `x` and `x + 1`) with `ZeroLeast` says every natural is reached from `0` by successors.
 Induction itself quantifies over predicates and cannot be tested, the same limit as `List`'s fold.
 
-
+Ok
