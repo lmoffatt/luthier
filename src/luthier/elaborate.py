@@ -134,6 +134,14 @@ def curry(cls, params, body):
 
 
 def application(v, c):
+    def apply(result, arguments):
+        ty = infer(result, c)
+        for arg in arguments:
+            value = walk(arg, c, ty.domain if isinstance(ty, t.Pi) else None)
+            result = t.App(result, value)
+            ty = substitute(ty.name, value, ty.codomain) if isinstance(ty, t.Pi) else None
+        return result
+
     arguments = []
     head = v
     while isinstance(head, s.App):
@@ -152,9 +160,9 @@ def application(v, c):
         inner = c.child()
         for n, arg in zip(ns, arguments):
             inner.names[n] = walk(arg, c)
-        return apps(walk(alias.value, inner), [walk(x, c) for x in arguments[len(ns):]])
+        return apply(walk(alias.value, inner), arguments[len(ns):])
     if not isinstance(head, s.Name) or head.name not in c.signatures:
-        return apps(walk(head, c), [walk(x, c) for x in arguments])
+        return apply(walk(head, c), arguments)
     bs = c.signatures[head.name]
     slots = [(n, b) for b in bs for n in b.names]
     named = {x.name: x.value for x in arguments if isinstance(x, s.NamedArg)}
@@ -166,26 +174,33 @@ def application(v, c):
             if arg is None:
                 arg = next(positional, None)
             if arg is not None:
-                given[n] = walk(arg, c)
+                given[n] = arg
     if named:
         raise ElaborationError(f'unknown named argument {next(iter(named))}')
     inner = c.child()
+    # Earlier arguments instantiate dependent parameter types. Infer direct
+    # implicit type arguments while visiting the corresponding explicit slot.
+    implicit_names = {n for n, b in slots if isinstance(b, s.Implicit)}
+    for n, b in slots:
+        if isinstance(b, s.Explicit) and n in given:
+            given[n] = walk(given[n], c, walk(b.type, inner))
+            inner.names[n] = given[n]
+            if isinstance(b.type, s.Name) and b.type.name in implicit_names:
+                given[b.type.name] = infer(given[n], c)
+                inner.names[b.type.name] = given[b.type.name]
     for n, b in slots:
         if isinstance(b, s.Implicit):
-            for en, eb in slots:
-                if isinstance(eb.type, s.Name) and eb.type.name == n and en in given:
-                    given[n] = infer(given[en], c); break
             if n not in given:
                 raise ElaborationError(f'cannot infer implicit {n}')
     complete = all(n in given or isinstance(b, s.Explicit) and b.default is not None for n, b in slots)
     result = walk(head, c)
     for n, b in slots:
         if n not in given and complete and isinstance(b, s.Explicit) and b.default is not None:
-            given[n] = walk(b.default, inner)
+            given[n] = walk(b.default, inner, walk(b.type, inner))
         if n not in given:
             break
         result = t.App(result, given[n]); inner.names[n] = given[n]
-    return apps(result, [walk(x, c) for x in positional])
+    return apply(result, positional)
 
 
 def walk(v, c, expected=None):
@@ -236,7 +251,8 @@ def walk(v, c, expected=None):
         case s.Block(items, body):
             inner = c.child(); bindings = []
             for item in items:
-                value = walk(item.value, inner); ty = infer(value, inner)
+                previous = walk(s.Name(item.name), inner)
+                value = walk(item.value, inner, infer(previous, inner)); ty = infer(value, inner)
                 n = inner.fresh(item.name)
                 bindings.append((n, ty, value)); inner.names[item.name] = n; inner.types[n] = ty
             result = walk(body, inner, expected)
@@ -251,7 +267,7 @@ def walk(v, c, expected=None):
                 else: ns = p.names if isinstance(p, s.TypedParam) else [p.name]
                 for n in ns:
                     ps.append((n, a)); inner.types[n] = a; inner.names[n] = n
-                    if isinstance(exp, t.Pi): exp = exp.codomain
+                    if isinstance(exp, t.Pi): exp = substitute(exp.name, t.Var(n), exp.codomain)
             result = walk(s.Block(items, body), inner, exp) if items else walk(body, inner, exp)
             for n, q in reversed(shapes): result = t.Match(t.Var(n), ((q, result),))
             return curry(t.Lam, ps, result)
@@ -296,7 +312,8 @@ def context_of(program):
         if isinstance(act, (s.Declare, s.Define)):
             inner = c.child(); ps = parameters(act.binders, inner)
             annotation = walk(act.type, inner) if act.type is not None else t.Hole('type')
-            c.types[act.name] = curry(t.Pi, ps, annotation)
+            if act.type is not None or act.name not in c.types:
+                c.types[act.name] = curry(t.Pi, ps, annotation)
             if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
                 for n, ty in act.body.constructors: c.types[n] = walk(ty, inner)
     for act in program:
@@ -326,6 +343,11 @@ def elaborate_program(surface_program: s.SurfaceProgram) -> t.Program:
             expected = annotation
             for _ in ps:
                 if isinstance(expected, t.Pi): expected = expected.codomain
+            # A separate base declaration admits a predicate body (4.R6).
+            if (act.type is None and isinstance(act.body, s.TermBody)
+                    and isinstance(act.body.term, s.Lambda)
+                    and not isinstance(expected, (t.Pi, t.Hole))):
+                expected = t.Pi('_', expected, t.Var('Bool'))
             match act.body:
                 case s.TermBody(v): body = walk(v, inner, expected)
                 case s.DataBody(xs): body = t.Data(act.name, tuple((n, walk(x, inner)) for n, x in xs))

@@ -72,6 +72,55 @@ def test_Lambdas():
     eq('fn (x y : A) { x }', t.Lam('x', V('A'), t.Lam('y', V('A'), V('x'))), SCOPE)
 
 
+def test_lambda_declared_expected_type():
+    predicate = t.Lam('n', I, bin('==', bin('mod', V('n'), num(2)), num(0)))
+    ty = t.Pi('_', I, V('Bool'))
+    peq('Even : Int -> Bool := fn n { n mod 2 == 0 }',
+        [t.Define('Even', ty, predicate)])
+    peq('Even : Int\nEven := fn n { n mod 2 == 0 }',
+        [t.Declare('Even', I), t.Define('Even', ty, predicate)])
+    peq('f : Int -> Int\nf := fn x { x }',
+        [t.Declare('f', t.Pi('_', I, I)),
+         t.Define('f', t.Pi('x', I, I), t.Lam('x', I, V('x')))])
+
+
+@pytest.mark.parametrize('context', [
+    'twice (f : Int -> Int) (r : Int) : Int',
+    'twice : (Int -> Int) -> Int -> Int',
+])
+def test_lambda_argument_expected_type(context):
+    eq('twice (fn k { k + 1 }) 3',
+       apps(V('twice'), [t.Lam('k', I, bin('+', V('k'), num(1))), num(3)]), context)
+
+
+def test_lambda_argument_dependent_expected_type():
+    eq('use Int (fn x { x })', apps(V('use'), [I, t.Lam('x', I, V('x'))]),
+       'use (A : U) (f : A -> A) : A')
+    eq('use 1 (fn x { x })',
+       apps(V('use'), [I, num(1), t.Lam('x', I, V('x'))]),
+       'use {A : U} (a : A) (f : A -> A) : A')
+
+
+def test_lambda_block_item_expected_type():
+    eq('{ f <- fn x { x }; f }',
+       t.Let('g', t.Pi('x', I, I), t.Lam('x', I, V('x')), V('g')),
+       'f : Int -> Int')
+    eq('{ f := fn (x : Int) { x }; f <- fn y { y }; f }',
+       t.Let('a', t.Pi('x', I, I), t.Lam('x', I, V('x')),
+             t.Let('b', t.Pi('y', I, I), t.Lam('y', I, V('y')), V('b'))))
+
+
+def test_lambda_without_expected_type_keeps_hole():
+    eq('fn x { x }', t.Lam('x', t.Hole('type'), V('x')))
+    eq('unknown (fn x { x })', t.App(V('unknown'), t.Lam('x', t.Hole('type'), V('x'))))
+
+
+def test_lambda_expected_type_renames_dependent_binders():
+    peq('f : (A : U) -> A -> A := fn B x { x }',
+        [t.Define('f', t.Pi('A', U, t.Pi('_', V('A'), V('A'))),
+                  t.Lam('B', U, t.Lam('x', V('B'), V('x'))))])
+
+
 def test_Patterns():
     eq('match m { r -> 1; _ -> 2 }', t.Match(V('m'), ((con('r'), num(1)), (t.PWild(), num(2)))), 'C : U := data { r : C; s : C }\nm : C')
     eq('match m { just y -> y; w -> k }', t.Match(V('m'), ((con('just', pv('y')), V('y')), (pv('w'), V('k')))), SCOPE)
