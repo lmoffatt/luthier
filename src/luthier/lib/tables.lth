@@ -1,0 +1,150 @@
+-- tables.lth: tables with named, typed columns, their accessors, and the codec that reads and
+-- writes them as text, by its laws.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 3; inventory row 5) and the answers of the
+-- sonolocalización session (record/IA/sonolocalizacion-inventory-2026-10-13/answers-2026-10-14.md:
+-- the schema of nodes.csv and measurements.csv, the names the first stage uses). Sources: spec
+-- 4.S8 and 4.S22 (`Codec` is the example of a theory: declared, its laws, then defined; a model a
+-- branch of it), 4.R3, 4.R8 (a table holds a function, so it has no `==` and the codec carries
+-- its equality), 5.S12 (a check about the world refines the content it read, not the path),
+-- 12.S9 (the pattern of a library), 7.R1 (the generators are the test's bindings). The v0.1
+-- files are `table.lut` and `table_python.lut` at the tag v0.1-final; the type, the accessors
+-- and the four laws of the codec are taken from table.lut:1-16, 26-70 and 269-281 with their
+-- names, so that the port of distance_graph.lut is a rename at most.
+--
+-- What this file states. A table has `nRows` rows and named, typed columns; its cells are what a
+-- column name and a row give, `cell : String -> Fin nRows -> Maybe Cell`, nothing where the
+-- table has no such column. Its laws are its schema's: the names distinct and as many as the
+-- kinds, each kind known, every cell of its column's kind, and no cell off the schema. The host's
+-- table (src/luthier/tables.py, `Table`) is a value of this type as it is: its components are the
+-- fields and its `cell` the function (tables_model.lut). A codec is a parse and a render between
+-- text and tables, with the equality of tables it is judged by, and four laws pin it down:
+-- `RoundTrip` (reading what was written gives the table back), `Canonical` (read, write, read
+-- again is reading once: writing is canonical), `Tolerant` (a text written differently with the
+-- same content reads the same) and `Rejects` (a text with a defect is not read), the last the
+-- negative control without which a codec that read anything would pass. The format itself, CSV
+-- with `name:kind` header cells and `int`, `float`, `str` kinds, is stated in prose below and as
+-- the host reads it (tables.py's docstring); v0.1 wrote it as a recognizer over characters
+-- (table.lut:72-227) and `ReadsTheFormat`; as a grammar it is an `Ebnf` of ebnf.lth over
+-- characters, which waits for a lexicon of characters (grammar.lth has one for Luthier's).
+--
+-- Index (all sections written in this draft):
+--   §1 Cells, lists and the first failing row (v0.1 table.lut:18-30).                    done
+--   §2 The table and its schema, as laws (v0.1 table.lut:33-50).                         done
+--   §3 The accessors: `nCols`, `hasColumn`, `intAt`, `realAt`, `textAt`, `sameTable`
+--      (v0.1 table.lut:52-70).                                                           done
+--   §4 The codec and its four laws (v0.1 table.lut:1-16, 72-75, 269-281).                done
+--   §5 The format, in prose; its grammar as an `Ebnf`.                                   todo
+
+import "arrays.lth" forallBelow
+
+-- ---------------------------------------------------------------- §1 Cells, lists, rows
+
+-- a cell is a whole number, a double or a text; its kind is the column's, written in the header
+-- as `int`, `float` or `str`
+Cell = { int : Int || real : Float64 || text : String }
+kindOf (c : Maybe Cell) : String :=
+  match c { nothing -> "" ; just v -> match v { int k -> "int" ; real x -> "float" ; text s -> "str" } }
+knownKind (k : String) : Bool := k == "int" or k == "float" or k == "str"
+
+listLength (A : U) (xs : List A) : Int := match xs { nil -> 0 ; cons x rest -> 1 + listLength A rest }
+memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
+distinct (xs : List String) : Bool := match xs { nil -> true ; cons a rest -> not (memberStr a rest) and distinct rest }
+allKnown (ks : List String) : Bool := match ks { nil -> true ; cons k rest -> knownKind k and allKnown rest }
+
+-- the first index from k below n where p fails, or -1: for messages that point at the row
+-- (v0.1 table.lut:30; the row numbers of validate_graph.lut count from 0)
+firstFailing (k : Nat) (n : Int) (p : Fin n -> Bool) : Int :=
+  if k >= n then 0 - 1 else if p k then firstFailing (k + 1) n p else k
+
+-- ---------------------------------------------------------------- §2 The table and its schema
+
+-- the type, its laws stated over its base (4.S8): a theory whose models are the tables
+Table : { nRows : Nat, names : List String, kinds : List String, cell : String -> Fin nRows -> Maybe Cell }
+
+-- the columns are named once each, with one kind each, every kind known
+SchemaWellFormed (t : Table) : Bool := distinct t.names and listLength String t.names == listLength String t.kinds
+KindsKnown (t : Table) : Bool := allKnown t.kinds
+-- every cell of a column is of the column's kind
+columnsOfKind (t : Table) (ns ks : List String) : Bool :=
+  match ns { nil -> true ; cons n rest -> match ks { nil -> false ; cons k more ->
+    forallBelow t.nRows (fn r { kindOf (t.cell n r) == k }) and columnsOfKind t rest more } }
+CellsOfTheirKind (t : Table) : Bool := columnsOfKind t t.names t.kinds
+-- a name that is not a column has no cells
+NoCellsOffSchema (t : Table) (c : String) (r : Fin t.nRows) : Bool := memberStr c t.names or kindOf (t.cell c r) == ""
+
+Table := SchemaWellFormed & KindsKnown & CellsOfTheirKind & NoCellsOffSchema
+
+-- ---------------------------------------------------------------- §3 The accessors
+
+nCols (t : Table) : Int := listLength String t.names
+
+pairIn (ns ks : List String) (n k : String) : Bool :=
+  match ns { nil -> false ; cons a rest -> match ks { nil -> false ; cons b more -> (a == n and b == k) or pairIn rest more n k } }
+-- a column of this name and kind: "int", "float" or "str"
+hasColumn (t : Table) (name kind : String) : Bool := pairIn t.names t.kinds name kind
+
+-- The cells of a column of a kind. The column is a precondition, refined in the argument; by
+-- the laws of `Table` its cells are then of that kind, and the other branches are unreachable
+-- (they give 0, 0.0 and "" only because a match names every case).
+intAt (t : Table) (c : { s : String | hasColumn t s "int" }) (r : Fin t.nRows) : Int :=
+  match t.cell c r { just v -> (match v { int k -> k ; real x -> 0 ; text s -> 0 }) ; nothing -> 0 }
+realAt (t : Table) (c : { s : String | hasColumn t s "float" }) (r : Fin t.nRows) : Float64 :=
+  match t.cell c r { just v -> (match v { int k -> toFloat64 k ; real x -> x ; text s -> 0.0 }) ; nothing -> 0.0 }
+textAt (t : Table) (c : { s : String | hasColumn t s "str" }) (r : Fin t.nRows) : String :=
+  match t.cell c r { just v -> (match v { int k -> "" ; real x -> "" ; text s -> s }) ; nothing -> "" }
+
+-- two tables are the same when they have the same columns and every cell agrees; `cell` is a
+-- function, so a table has no `==` of its own (4.R8) and this is the equality the codec carries.
+-- Inside the branch the row counts agree, which lets `u.cell` take `t`'s row (4.R11).
+sameCells (t u : Table) (ns : List String) : Bool :=
+  match ns { nil -> true ; cons n rest -> forallBelow t.nRows (fn r { t.cell n r == u.cell n r }) and sameCells t u rest }
+sameTable (t u : Table) : Bool :=
+  if t.nRows == u.nRows then t.names == u.names and t.kinds == u.kinds and sameCells t u t.names else false
+
+-- ---------------------------------------------------------------- §4 The codec (4.S8, 4.S22)
+
+-- a parse and a render between text and tables, with the equality of tables it is judged by
+Codec : { parse : String -> Maybe Table, render : Table -> String, eq : Table -> Table -> Bool }
+
+sameParse (c : Codec) (a b : Maybe Table) : Bool :=
+  match a { nothing -> (match b { nothing -> true ; just y -> false })
+          ; just x -> (match b { nothing -> false ; just y -> c.eq x y }) }
+
+-- A table and a text with the same content written differently (spaces around a number or a
+-- header cell, CRLF line endings, a missing or an extra final newline, a double with more digits
+-- or trailing zeros), and a text that is not of the format (an unknown or missing kind, a
+-- repeated column name, a row with the wrong number of cells, a number that does not parse, a
+-- double that is not finite). Each is a type whose values a generator gives and whose law its
+-- type states through the codec's own answer; the generators are the model's, bound by the test
+-- (7.R1; tables.py's `gen_table`, `gen_perturbed`, `gen_broken`). [proposed] Until the format
+-- is a grammar (§5), `BrokenText` is the texts the host rejects, so `Rejects` is tested on what
+-- the generator breaks, one defect at a time, and not against the grammar.
+Perturbed = { table : Table, text : String }
+BrokenText = { s : String }
+
+-- spec 4.S8: reading what was written gives back the table
+RoundTrip (c : Codec) (t : Table) : Bool := sameParse c (c.parse (c.render t)) (just t)
+-- a text that parses renders to a text that parses to the same table: writing is canonical
+Canonical (c : Codec) (p : Perturbed) : Bool :=
+  match c.parse p.text { nothing -> true ; just t -> sameParse c (c.parse (c.render t)) (just t) }
+-- a text written differently but with the same content reads the same
+Tolerant (c : Codec) (p : Perturbed) : Bool := sameParse c (c.parse p.text) (just p.table)
+-- a text with a defect is not read: the negative control
+Rejects (c : Codec) (b : BrokenText) : Bool := match c.parse b.s { nothing -> true ; just t -> false }
+
+Codec := RoundTrip & Canonical & Tolerant & Rejects
+
+-- ---------------------------------------------------------------- §5 The format
+
+-- The text of a table is CSV read strictly (RFC 4180): a record ends at `\n`, `\r\n` or `\r`; a
+-- field is quoted (`"..."`, a quote inside it written twice) or not; an empty line is no record.
+-- The first record is the header, each cell `name:kind`, the name not empty, the kind `int`,
+-- `float` or `str`, the names distinct. Every other record has one cell per column: an int cell
+-- `[+-]digits`, a float cell a decimal `[+-](digits[.digits] | .digits)[(e|E)[+-]digits]` with a
+-- finite value, each with white space around it allowed, a str cell anything. Writing is
+-- canonical: ints as the host writes them, doubles as their shortest text that reads back to the
+-- same double, strings quoted only where CSV needs it (tables.py). As an `Ebnf` of ebnf.lth over
+-- characters, with the law that the codec reads exactly the texts it derives
+-- (v0.1 `ReadsTheFormat`): todo, waits for a lexicon of characters.
