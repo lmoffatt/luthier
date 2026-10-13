@@ -12,5 +12,5 @@ the sessions (CLAUDE.md).
 | The specification, twelve chapters | `specification/` | done in substance (D-2026-10-13-g) |
 | The principles: synthesis from his notes, validation, generative draft, draft 11 | `principles/` | done; draft 11 its last |
 | The way of working | `working-method/` | done (`record/working-method.md`) |
-| Repairs of the v0.1 interpreter | `repair-v0.1/` | closed by the rebuild from zero (tag `v0.1-final`) |
 | Superseded plans, kept for the decisions still in force and his annotations | `archive/` | `plan-implementation-2026-10-13-*`, replaced by the rebuild from zero (D-2026-10-13-h); its D4, D8, D9 still apply |
+| Repairs of the v0.1 interpreter | `archive/repair-v0.1/` | closed by the rebuild from zero (tag `v0.1-final`) |
