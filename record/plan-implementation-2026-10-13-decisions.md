@@ -1,5 +1,7 @@
 # Implementing the specification: the decisions
 
+> Superseded on 2026-10-13 by D-2026-10-13-h (start from zero) and `record/plan-from-zero-2026-10-13-decisions.md`; kept for its D4, D8 and D9 and for Luciano's annotations below, unedited.
+
 Draft 1, 2026-10-13, at a563fd2 (draft 0 reviewed the same day: D8 and D9 added, D3 and D6
 corrected). The specification is decided in substance (D-2026-10-13-g) and
 the interpreter lags it: most of what was decided since 2026-10-11 is not in `src/`. This document

@@ -1,5 +1,7 @@
 # Implementing the specification: the execution
 
+> Superseded on 2026-10-13 by D-2026-10-13-h (start from zero) and `record/plan-from-zero-2026-10-13-decisions.md`; kept for its D4, D8 and D9 and for Luciano's annotations below, unedited.
+
 Draft 1, 2026-10-13, at a563fd2 (draft 0 reviewed the same day). Written for the sessions that carry it out, including one with no
 memory of the chat: everything it needs is in files, and the status lines below are updated at
 each step. The choices it rests on are D1 to D9 of `plan-implementation-2026-10-13-decisions.md`;
