@@ -1,0 +1,193 @@
+-- numbers.lth: the realizations of the numbers: what the core's operations on `Int`, `Float64`
+-- and `String` are, the conversion from an integer, the elementary functions, and comparison
+-- within a tolerance the demand sets.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 1 of the inventory's §6). Sources: spec
+-- 11.S1 (three objects under one name), 11.S2 (a leaf is declared over what it receives), 11.S4
+-- (the operations of `Float64` are the machine's rounded ones: the refinement is of the values,
+-- not of the operations), 11.S5 (`toFloat64`), 11.S7 (NaN and overflow are errors), 11.S13 (each
+-- operation rounds the exact one, stated in `lib/rational.lut`, not written), 11.S15 (the doubles
+-- are not a field), 11.S18 (a tolerance belongs to the demand, D-2026-10-12-h; the law returns
+-- what it measured), 5.S7 (no law carries a cutoff), P11 (every criterion is a parameter);
+-- 3.S17 and term.lth §5 (what the kernel computes); kernel_laws.lth (the pattern, and
+-- `OrderedSemiring` for `Nat`); algebra.lth (the ring of `Int`, the field of `Real`). The v0.1
+-- files are `real.lut` and `real_python.lut` at the tag v0.1-final.
+--
+-- What this file states. The core's operations have one model each, the interpreter's
+-- (core.lut), so by D-2026-10-13-aa Q5 their laws could be plain definitions; they are gathered
+-- in records all the same (`Doubles`, `IntegerDivision`, `Conversion`, `Elementary`), in the
+-- pattern of kernel_laws.lth, so that a generic definition can take the operations of its number
+-- type as one value (11.S3, `NumberModel`) and so that numbers_model.lut names the models. Of
+-- the doubles only what is exact is stated with `==`: the operations commute, the identities
+-- hold, rounding is monotone, the order is total; the rounding law itself needs `Rational`
+-- (11.S13) and waits for rational.lut. Where only a tolerance can be stated (the elementary
+-- functions, which the host's library computes to within a few units in the last place), the law
+-- takes the tolerance as a parameter, `Tolerance`, bound by the demand (11.S18, D-2026-10-12-h,
+-- as `Level` in generators.lth), never written as a constant (P11). `String`'s `+` is a monoid
+-- (kernel_laws.lth), named in numbers_model.lut; `Int` is an ordered ring (algebra.lth), named
+-- there too; here is what the ring does not say, the quotient and the remainder.
+--
+-- Index (all sections written in this draft):
+--   §1 Magnitude and tolerance: `abs`, `Tolerance`, `within`; the doubles of moderate size,
+--      where every operation of two is finite (11.S7, the range of 11.S13).              done
+--   §2 The doubles: the four operations and the comparisons, their exact laws (11.S4).  done
+--   §3 Integer division: the quotient and the remainder of the host (11.S4).            done
+--   §4 The conversion from an integer (11.S5).                                           done
+--   §5 The elementary functions `sqrt`, `exp`, `log`, `erf`: exact cases, bounds,
+--      the identities within a tolerance (11.S2, 11.S18).                                done
+
+-- ---------------------------------------------------------------- §1 Magnitude and tolerance
+
+-- the magnitude: `x` or `-x`, whichever is not negative; exact, negation being exact
+abs (x : Float64) : Float64 := if x < 0.0 then 0.0 - x else x
+
+-- a tolerance is a parameter of the demand (11.S18, D-2026-10-12-h, P11): a law that needs one
+-- takes a `Tolerance`, and the test binds it (7.R1); no law here holds a number of its own
+Tolerance : U := { tol : Float64 | 0.0 <= tol }
+-- equal within a tolerance relative to the size of the values, `|a - b| <= tol (1 + |a| + |b|)`;
+-- with tolerance zero it is exact equality
+within (tol : Tolerance) (a b : Float64) : Bool := abs (a - b) <= tol * (1.0 + abs a + abs b)
+-- the same, with the scale the law names: a sum of terms is compared relative to the sum of their
+-- magnitudes (11.S14), not to its own value, since the terms can cancel
+withinOf (tol : Tolerance) (scale a b : Float64) : Bool := abs (a - b) <= tol * scale
+
+-- the doubles of moderate size, zero or of magnitude between 1e-150 and 1e150: a sum, a product
+-- or a quotient of two is finite (11.S7 makes an overflow an error, so a law over all doubles
+-- would raise on its own cases), and the relative rounding law holds (the range of 11.S13,
+-- `NormalDouble` of rational.lut). The bounds are the range of the doubles, not a criterion.
+Moderate : U := { x : Float64 | x == 0.0 or (1.0e-150 <= x and x <= 1.0e150) or (-1.0e150 <= x and x <= -1.0e-150) }
+NonNegative : U := { x : Moderate | 0.0 <= x }
+Positive : U := { x : Moderate | 0.0 < x }
+
+-- ---------------------------------------------------------------- §2 The doubles (11.S4)
+
+-- The four operations are the machine's, each the IEEE 754 binary64 operation rounded to
+-- nearest, and the comparisons are the order of the finite doubles; `epsilon` is the distance
+-- from one to the next double, 2^-52, twice the unit roundoff `u` of spec 1 (1.S9). The infix
+-- forms of core.lut are the model (numbers_model.lut `doubles`).
+Doubles : {
+  plus minus times divide : Float64 -> Float64 -> Float64,
+  less leq greater geq unequal : Float64 -> Float64 -> Bool,
+  epsilon : Float64,
+}
+
+-- what is exact. Rounding is a function of the exact result, so an operation commutes exactly;
+-- the identities and the negation are exact; and `x / x` is one, `x * 0` is zero.
+-- spec 11.S4
+PlusCommutes (d : Doubles) (x y : Moderate) : Bool := d.plus x y == d.plus y x
+TimesCommutes (d : Doubles) (x y : Moderate) : Bool := d.times x y == d.times y x
+PlusZero (d : Doubles) (x : Moderate) : Bool := d.plus x 0.0 == x
+TimesOne (d : Doubles) (x : Moderate) : Bool := d.times x 1.0 == x
+DivideOne (d : Doubles) (x : Moderate) : Bool := d.divide x 1.0 == x
+TimesZero (d : Doubles) (x : Moderate) : Bool := d.times x 0.0 == 0.0
+MinusSelf (d : Doubles) (x : Moderate) : Bool := d.minus x x == 0.0
+DivideSelf (d : Doubles) (x : Positive) : Bool := d.divide x x == 1.0
+MinusIsPlusNegated (d : Doubles) (x y : Moderate) : Bool := d.minus x y == d.plus x (d.minus 0.0 y)
+NegateTwice (d : Doubles) (x : Moderate) : Bool := d.minus 0.0 (d.minus 0.0 x) == x
+
+-- the order: total, antisymmetric and transitive on the pairs and chains it relates (7.S12);
+-- the strict order, the reversed forms and `/=` are what they say
+LeqPair (d : Doubles) : U := { x y : Moderate | d.leq x y }
+LeqChain (d : Doubles) : U := { x y z : Moderate | d.leq x y and d.leq y z }
+LeqBoth (d : Doubles) : U := { x y : Moderate | d.leq x y and d.leq y x }
+LeqReflexive (d : Doubles) (x : Moderate) : Bool := d.leq x x
+LeqTotal (d : Doubles) (x y : Moderate) : Bool := d.leq x y or d.leq y x
+LeqAntisymmetric (d : Doubles) (p : LeqBoth d) : Bool := p.x == p.y
+LeqTransitive (d : Doubles) (c : LeqChain d) : Bool := d.leq c.x c.z
+LessIsStrict (d : Doubles) (x y : Moderate) : Bool := d.less x y == (d.leq x y and not (x == y))
+GreaterIsLessReversed (d : Doubles) (x y : Moderate) : Bool := d.greater x y == d.less y x
+GeqIsLeqReversed (d : Doubles) (x y : Moderate) : Bool := d.geq x y == d.leq y x
+UnequalIsNotEqual (d : Doubles) (x y : Moderate) : Bool := d.unequal x y == not (x == y)
+
+-- rounding is monotone (11.S4, L13.3): a sum keeps the order of its terms, and so does a product
+-- by a non-negative factor
+PlusMonotone (d : Doubles) (p : LeqPair d) (z : Moderate) : Bool := d.leq (d.plus p.x z) (d.plus p.y z)
+TimesMonotone (d : Doubles) (p : LeqPair d) (z : NonNegative) : Bool := d.leq (d.times p.x z) (d.times p.y z)
+
+-- `epsilon` is the ulp of one: adding it to one is seen and is undone exactly by the subtraction,
+-- adding half of it is not seen (ties to even)
+EpsilonIsTheUlpOfOne (d : Doubles) : Bool :=
+  d.minus (d.plus 1.0 d.epsilon) 1.0 == d.epsilon and d.greater (d.plus 1.0 d.epsilon) 1.0
+  and d.plus 1.0 (d.divide d.epsilon 2.0) == 1.0
+
+Doubles := PlusCommutes & TimesCommutes & PlusZero & TimesOne & DivideOne & TimesZero & MinusSelf & DivideSelf
+  & MinusIsPlusNegated & NegateTwice & LeqReflexive & LeqTotal & LeqAntisymmetric & LeqTransitive & LessIsStrict
+  & GreaterIsLessReversed & GeqIsLeqReversed & UnequalIsNotEqual & PlusMonotone & TimesMonotone & EpsilonIsTheUlpOfOne
+
+-- ---------------------------------------------------------------- §3 Integer division (11.S4)
+
+-- `Int` is exact (11.S4) and an ordered ring (algebra.lth, numbers_model.lut `integers`). What
+-- the ring does not say: `/` and `mod` are the quotient and the remainder of the division
+-- algorithm, `q * b + r == a`, the remainder smaller than the divisor in magnitude and of its
+-- sign. [proposed] Floor division, which is the host's (Python's `//` and `%`); truncation (C's)
+-- is the other reading, and one commit changes the sign law.
+IntegerDivision : { quotient remainder : Int -> Int -> Int }
+NonZeroInt : U := { d : Int | not (d == 0) }
+DivisionAlgorithm (m : IntegerDivision) (a : Int) (b : NonZeroInt) : Bool :=
+  m.quotient a b * b + m.remainder a b == a
+RemainderOfTheDivisorsSign (m : IntegerDivision) (a : Int) (b : NonZeroInt) : Bool :=
+  if 0 < b then 0 <= m.remainder a b and m.remainder a b < b
+  else b < m.remainder a b and m.remainder a b <= 0
+-- a product divided by its factor is exact
+QuotientOfProduct (m : IntegerDivision) (a : Int) (b : NonZeroInt) : Bool := m.quotient (a * b) b == a
+IntegerDivision := DivisionAlgorithm & RemainderOfTheDivisorsSign & QuotientOfProduct
+
+-- ---------------------------------------------------------------- §4 The conversion from an integer (11.S5)
+
+-- `toFloat64` is the nearest double to an integer, exact below 2^53: it keeps zero, one, the
+-- order, and adds exactly while the sum stays below 2^52
+Conversion : { convert : Int -> Float64 }
+Small : U := { i : Int | -4503599627370496 <= i and i <= 4503599627370496 }
+ConvertZeroAndOne (c : Conversion) : Bool := c.convert 0 == 0.0 and c.convert 1 == 1.0
+ConvertAddsExactly (c : Conversion) (i j : Small) : Bool := c.convert (i + j) == c.convert i + c.convert j
+ConvertSucceeds (c : Conversion) (i : Small) : Bool := c.convert (i + 1) == c.convert i + 1.0
+ConvertKeepsOrder (c : Conversion) (i j : Int) : Bool := not (i <= j) or c.convert i <= c.convert j
+Conversion := ConvertZeroAndOne & ConvertAddsExactly & ConvertSucceeds & ConvertKeepsOrder
+
+-- ---------------------------------------------------------------- §5 The elementary functions (11.S2, 11.S18)
+
+-- Leaves of the environment, declared over the doubles they receive (11.S2); their model is the
+-- host's mathematical library (numbers_model.lut `elementary`, routes to Python's `math`). The
+-- square root is correctly rounded by IEEE 754, so its laws are exact; `exp`, `log` and `erf`
+-- are computed to within a few units in the last place by the host's library and no exact law
+-- of them beyond their special values and bounds holds; their identities take the demand's
+-- tolerance (11.S18). The domains keep the results finite (11.S7).
+Elementary : { sqrt exp log erf : Float64 -> Float64 }
+-- where `exp` is finite and `exp (x + y)` too
+ExpDomain : U := { x : Float64 | -300.0 <= x and x <= 300.0 }
+
+-- spec 11.S2: special values, exact
+SqrtOfSquares (e : Elementary) : Bool := e.sqrt 0.0 == 0.0 and e.sqrt 1.0 == 1.0 and e.sqrt 4.0 == 2.0 and e.sqrt 0.25 == 0.5
+ExpOfZero (e : Elementary) : Bool := e.exp 0.0 == 1.0
+LogOfOne (e : Elementary) : Bool := e.log 1.0 == 0.0
+ErfOfZero (e : Elementary) : Bool := e.erf 0.0 == 0.0
+-- the square root is correctly rounded (IEEE 754 §5.4.1), hence monotone; and in radix 2, with
+-- no overflow or underflow, the root of a rounded square is the magnitude [proposed: a theorem of
+-- binary floating point, Muller et al., Handbook of Floating-Point Arithmetic, to cite if kept]
+SqrtMonotone (e : Elementary) (p : LeqPair doublesOrder) : Bool :=
+  not (0.0 <= p.x) or e.sqrt p.x <= e.sqrt p.y
+SqrtOfSquare (e : Elementary) (x : Moderate) : Bool := e.sqrt (x * x) == abs x
+-- `exp` is positive, `erf` is odd and bounded by one in magnitude
+ExpPositive (e : Elementary) (x : ExpDomain) : Bool := 0.0 < e.exp x
+ErfOdd (e : Elementary) (x : Moderate) : Bool := e.erf (0.0 - x) == 0.0 - e.erf x
+ErfBounded (e : Elementary) (x : Moderate) : Bool := -1.0 <= e.erf x and e.erf x <= 1.0
+-- the identities, within the demand's tolerance (11.S18)
+SqrtSquares (e : Elementary) (tol : Tolerance) (x : NonNegative) : Bool := within tol (e.sqrt x * e.sqrt x) x
+ExpOfLog (e : Elementary) (tol : Tolerance) (x : Positive) : Bool := within tol (e.exp (e.log x)) x
+LogOfExp (e : Elementary) (tol : Tolerance) (x : ExpDomain) : Bool := within tol (e.log (e.exp x)) x
+ExpAdds (e : Elementary) (tol : Tolerance) (x y : ExpDomain) : Bool :=
+  within tol (e.exp (x + y)) (e.exp x * e.exp y)
+LogMultiplies (e : Elementary) (tol : Tolerance) (x y : Positive) : Bool :=
+  within tol (e.log (x * y)) (e.log x + e.log y)
+
+-- the order the square root is monotone in: the core's, as `Doubles` reads it
+doublesOrder : Doubles := {
+  plus := fn a b { a + b }, minus := fn a b { a - b }, times := fn a b { a * b }, divide := fn a b { a / b },
+  less := fn a b { a < b }, leq := fn a b { a <= b }, greater := fn a b { a > b }, geq := fn a b { a >= b },
+  unequal := fn a b { a /= b },
+  epsilon := 2.220446049250313e-16,
+}
+
+Elementary := SqrtOfSquares & ExpOfZero & LogOfOne & ErfOfZero & SqrtMonotone & SqrtOfSquare & ExpPositive
+  & ErfOdd & ErfBounded & SqrtSquares & ExpOfLog & LogOfExp & ExpAdds & LogMultiplies
