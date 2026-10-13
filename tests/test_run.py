@@ -38,21 +38,29 @@ def test_read_first_line(tmp_path):
 def test_host_observe_and_reset(tmp_path):
     host.reset()
     token = object()
-    assert host.observe(token) == (token, {"stdout": "", "files": []})
+    assert host.observe(token, []) == (token, {"stdout": "", "files": []})
     assert host.print_line(token, "hi") == (token, None)
     path = str(tmp_path / "data")
+    absent = str(tmp_path / "absent")
     Path(path).write_text("data\n", encoding="utf-8")
-    assert host.read_file(token, path) == (token, host.Just("data\n"))
-    assert host.read_file(token, str(tmp_path / "absent")) == (token, host.NOTHING)
-    assert host.observe(token) == (token, {"stdout": "hi\n", "files": [(path, "data\n")]})
+    places = ["stdout", path, absent]
+    assert host.observe(token, places) == (token, {"stdout": "hi\n", "files": [(path, "data\n")]})
+    # nothing is remembered: no read needed, the disk is read every time, "stdout" only when asked
+    assert host.observe(token, [path]) == (token, {"stdout": "", "files": [(path, "data\n")]})
+    Path(path).write_text("changed\n", encoding="utf-8")
+    assert host.observe(token, places)[1]["files"] == [(path, "changed\n")]
+    Path(absent).write_text("now\n", encoding="utf-8")
+    assert host.observe(token, places)[1]["files"] == [(path, "changed\n"), (absent, "now\n")]
+    assert host.read_file(token, path) == (token, host.Just("changed\n"))
+    assert host.read_file(token, str(tmp_path / "nope")) == (token, host.NOTHING)
     assert run_file(ROOT / "examples/hello.lut") == "hello, world\n"
-    assert host.observe(token) == (token, {"stdout": "hello, world\n", "files": []})
+    assert host.observe(token, ["stdout"]) == (token, {"stdout": "hello, world\n", "files": []})
 
 
 def test_observe_through_the_bridge(tmp_path):
     (tmp_path / "input.txt").write_text("first line\n", encoding="utf-8")
     result = command(ROOT / "tests/run/observe.lut", cwd=tmp_path)
-    assert (result.returncode, result.stdout, result.stderr) == (0, "one\none\n\nfirst line\n\n", "")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "one\none\n\n\nfirst line\n\n", "")
 
 
 @pytest.mark.parametrize("source, args, message", [

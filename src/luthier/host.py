@@ -1,14 +1,13 @@
 """The host side of world_model.lut's `host` (0c920f0): observe, print_line, read_file.
 
 Derivation: brief record/IA/run-2026-10-13/prompt-2.md (bite 2), after prompt.md (bite 1);
-choices in record/IA/run-2026-10-13/opus-2.md. The world of one run is the standard output so
-far and the files read so far, the representation `State` of world_model.lut.
+choices in record/IA/run-2026-10-13/opus-2.md. The host keeps the standard output so far; files
+are read from disk at each observation (bite 3, prompt-3.md: observe takes the places).
 """
 from dataclasses import dataclass
 from pathlib import Path
 
 _stdout = ""
-_files: dict[str, str] = {}
 
 
 @dataclass(frozen=True)
@@ -29,7 +28,6 @@ NOTHING = _Nothing()
 def reset():
     global _stdout
     _stdout = ""
-    _files.clear()
 
 
 def stdout():
@@ -37,9 +35,20 @@ def stdout():
     return _stdout
 
 
-def observe(w):
-    """The representation `State = { stdout : String, files : List (String * String) }`."""
-    return w, {"stdout": _stdout, "files": list(_files.items())}
+def observe(w, places):
+    """`W -> List String -> W * S`, `S = { stdout : String, files : List (String * String) }`, the
+    state standing for the world at `places`: `stdout` is the text printed so far when "stdout" is
+    among them, and "" otherwise; `files` holds (path, text) for each place that is a readable file
+    on disk now (read every time; a missing file is absent), in the order of `places`."""
+    files = []
+    for place in places:
+        if place == "stdout":
+            continue
+        try:
+            files.append((place, Path(place).read_text(encoding="utf-8")))
+        except (FileNotFoundError, IsADirectoryError, NotADirectoryError):
+            pass
+    return w, {"stdout": _stdout if "stdout" in places else "", "files": files}
 
 
 def print_line(w, s):
@@ -54,5 +63,4 @@ def read_file(w, path):
         text = Path(path).read_text(encoding="utf-8")
     except (FileNotFoundError, IsADirectoryError, NotADirectoryError):
         return w, NOTHING
-    _files[path] = text
     return w, Just(text)

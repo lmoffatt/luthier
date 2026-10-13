@@ -83,6 +83,11 @@ class Runner:
             return host.NOTHING
         if isinstance(value, t.App) and value.function == t.Var("just"):
             return host.Just(self.to_host(value.argument))
+        if value == t.Var("nil"):
+            return []
+        if (isinstance(value, t.App) and isinstance(value.function, t.App)
+                and value.function.function == t.Var("cons")):
+            return [self.to_host(value.function.argument)] + self.to_host(value.argument)
         if isinstance(value, t.Pair):
             return self.to_host(value.left), self.to_host(value.right)
         if isinstance(value, t.RecordValue):
