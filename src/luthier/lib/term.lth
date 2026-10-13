@@ -14,7 +14,7 @@
 -- `Reduction` (§5): `Lam` and `App` from `Beta`, `Var` from `Delta`, `Match`, `Inj`, `Pair` and the
 -- patterns from `Iota`, `RecordValue` and `Proj` from `ProjOfRecord`, `Lit` (of every kind) and
 -- `Primitive` from `Prim`, `Extern` from `ExternIsValue`, `Hole` and `Axiom` from `HolesStay`,
--- `Datum` from `DatumIsInert`. The type
+-- `Datum` from `DatumIsInert`, `Let` from `Zeta`. The type
 -- formers (`Universe`, `World`, `Pi`, `Sigma`, `Sum`, `Data`, `Subtype`) are values for reduction
 -- (`ValuesStay`); their roles are the checker's, laws of `WellFormed` in program.lth (step 3.1).
 --
@@ -69,7 +69,10 @@ Pattern : U := data {
 -- named (D-2026-10-13-x): `Record` its type, `RecordValue` its introduction, `Proj` the projection
 -- by name, an arrow of the product, so the names are part of the term and of its hash; the labels
 -- of a `Sum` are likewise its injections (`Inj`). Roles: the laws of §5 and, for the type formers,
--- of `WellFormed` (program.lth).
+-- of `WellFormed` (program.lth). `Let x ty v b` is a local definition: inside `b`, `x` is `v`
+-- definitionally (D-2026-10-13-aa, Q1 of the review of layers 0-1: a block elaborates to nested
+-- `Let`s, since under a lambda applied the body would not know `x ≡ v` and a dependent type such as
+-- `Vec n` with `n := 3` would not check).
 Term : U := data {
   Var : String -> Term ;
   Lit : Constant -> Term ;
@@ -92,6 +95,7 @@ Term : U := data {
   Record : List (String * Term) -> Term ;
   RecordValue : List (String * Term) -> Term ;
   Proj : Term -> String -> Term ;
+  Let : String -> Term -> Term -> Term -> Term ;
 }
 
 -- An act of an elaborated program (3.S1, 3.S29, D-2026-10-13-o): a declaration is a name with its
@@ -145,6 +149,7 @@ freeVars (t : Term) : List String := match t {
   Data n cs -> remove n (pairsFree cs) ;
   Record kvs -> pairsFree kvs ; RecordValue kvs -> pairsFree kvs ;
   Proj r x -> freeVars r ;
+  Let x ty v b -> concat (freeVars ty) (concat (freeVars v) (remove x (freeVars b))) ;
 }
 armsFree (arms : List (Pattern * Term)) : List String := match arms { nil -> nil ;
   cons (p, b) rest -> concat (removeAll (patternVars p) (freeVars b)) (armsFree rest) }
@@ -174,6 +179,7 @@ swap (x y : String) (t : Term) : Term := match t {
   Data n cs -> Data (swapName x y n) (swapPairs x y cs) ;
   Record kvs -> Record (swapPairs x y kvs) ; RecordValue kvs -> RecordValue (swapPairs x y kvs) ;
   Proj r l -> Proj (swap x y r) l ;
+  Let n ty v b -> Let (swapName x y n) (swap x y ty) (swap x y v) (swap x y b) ;
   _ -> t ;
 }
 swapArms (x y : String) (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms { nil -> nil ;
@@ -195,7 +201,7 @@ head (t : Term) : String := match t {
   App f a -> "App" ; Pi x a b -> "Pi" ; Sigma x a b -> "Sigma" ; Pair a b -> "Pair" ;
   Match s arms -> "Match" ; Inj l a -> "Inj" ; Sum kvs -> "Sum" ; Data n cs -> "Data" ;
   Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom -> "Axiom" ;
-  Hole x -> "Hole" ; Record kvs -> "Record" ; RecordValue kvs -> "RecordValue" ; Proj r x -> "Proj" ;
+  Hole x -> "Hole" ; Record kvs -> "Record" ; RecordValue kvs -> "RecordValue" ; Proj r x -> "Proj" ; Let x ty v b -> "Let" ;
 }
 sameNames (xs ys : List String) : Bool := removeAll xs ys == nil and removeAll ys xs == nil
 
@@ -213,6 +219,7 @@ RenameBound (a : Alpha) (x : String) (ty s : Term) (f : Fresh) : Bool :=
   and a.alphaEq (Sigma x ty f.t) (Sigma f.y ty (swap x f.y f.t))
   and a.alphaEq (Subtype x ty f.t) (Subtype f.y ty (swap x f.y f.t))
   and a.alphaEq (Match s [(PVar x, f.t)]) (Match s [(PVar f.y, swap x f.y f.t)])
+  and a.alphaEq (Let x ty s f.t) (Let f.y ty s (swap x f.y f.t))
 AlphaKeepsHead (a : Alpha) (p : AlphaPair a) : Bool := head p.s == head p.t
 AlphaKeepsFree (a : Alpha) (p : AlphaPair a) : Bool := sameNames (freeVars p.s) (freeVars p.t)
 -- a congruence: alpha-equal parts give alpha-equal wholes, for every constructor with parts; a
@@ -225,6 +232,7 @@ AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
   and a.alphaEq (Sum [(l, p.s)]) (Sum [(l, p.t)]) and a.alphaEq (Data x [(l, p.s)]) (Data x [(l, p.t)])
   and a.alphaEq (Record [(l, p.s)]) (Record [(l, p.t)]) and a.alphaEq (RecordValue [(l, p.s)]) (RecordValue [(l, p.t)])
   and a.alphaEq (Match p.s [(PWild, q.s)]) (Match p.t [(PWild, q.t)])
+  and a.alphaEq (Let x p.s p.s q.s) (Let x p.t p.t q.t)
 
 -- and the converse: alpha-equal wholes have the same head, the same constants, labels and names
 -- that are not binders, and alpha-equal parts, a binder's body compared after renaming its
@@ -266,7 +274,8 @@ partsAgree (a : Alpha) (s t : Term) : Bool := match s {
   Record kvs -> (match t { Record jws -> pairsAgree a kvs jws ; _ -> false }) ;
   RecordValue kvs -> (match t { RecordValue jws -> pairsAgree a kvs jws ; _ -> false }) ;
   Data n cs -> (match t { Data m ds -> n == m and pairsAgree a cs ds ; _ -> false }) ;
-  Match u arms -> (match t { Match v brs -> a.alphaEq u v and armsAgree a arms brs ; _ -> false }) }
+  Match u arms -> (match t { Match v brs -> a.alphaEq u v and armsAgree a arms brs ; _ -> false }) ;
+  Let x d v b -> (match t { Let y e w c -> a.alphaEq d e and a.alphaEq v w and underBinder a x y b c ; _ -> false }) }
 AlphaPartsAgree (a : Alpha) (p : AlphaPair a) : Bool := partsAgree a p.s p.t
 
 Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent & AlphaPartsAgree
@@ -285,16 +294,42 @@ NotFreeIn : U := { y : String, s : Term | not (member y (freeVars s)) }
 SubstHits (a : Alpha) (m : Substitution a) (x : String) (s : Term) : Bool := a.alphaEq (m.subst x s (Var x)) s
 SubstMisses (a : Alpha) (m : Substitution a) (x y : String) (s : Term) : Bool :=
   x == y or a.alphaEq (m.subst x s (Var y)) (Var y)
+-- substitution goes into every part of every constructor without a binder (review of layers 0-1,
+-- A: stated before on three constructors only, so a model that skipped the rest passed)
 SubstGoesInside (a : Alpha) (m : Substitution a) (x : String) (s f b : Term) (l : String) : Bool :=
   a.alphaEq (m.subst x s (App f b)) (App (m.subst x s f) (m.subst x s b))
   and a.alphaEq (m.subst x s (Pair f b)) (Pair (m.subst x s f) (m.subst x s b))
   and a.alphaEq (m.subst x s (Inj l f)) (Inj l (m.subst x s f))
--- a binder of the same name shadows: the body is left alone, the binder's type is not
+  and a.alphaEq (m.subst x s (Proj f l)) (Proj (m.subst x s f) l)
+  and a.alphaEq (m.subst x s (Sum [(l, f)])) (Sum [(l, m.subst x s f)])
+  and a.alphaEq (m.subst x s (Record [(l, f)])) (Record [(l, m.subst x s f)])
+  and a.alphaEq (m.subst x s (RecordValue [(l, f)])) (RecordValue [(l, m.subst x s f)])
+  and a.alphaEq (m.subst x s (Match f [(PWild, b)])) (Match (m.subst x s f) [(PWild, m.subst x s b)])
+-- a binder of the same name shadows: the body is left alone, the binder's type (and a `Let`'s
+-- value) are not; for each binding former
 SubstStopsAtShadow (a : Alpha) (m : Substitution a) (x : String) (s ty b : Term) : Bool :=
   a.alphaEq (m.subst x s (Lam x ty b)) (Lam x (m.subst x s ty) b)
--- under a binder whose name is not free in `s`, substitution goes in: no capture
+  and a.alphaEq (m.subst x s (Pi x ty b)) (Pi x (m.subst x s ty) b)
+  and a.alphaEq (m.subst x s (Sigma x ty b)) (Sigma x (m.subst x s ty) b)
+  and a.alphaEq (m.subst x s (Subtype x ty b)) (Subtype x (m.subst x s ty) b)
+  and a.alphaEq (m.subst x s (Let x ty s b)) (Let x (m.subst x s ty) (m.subst x s s) b)
+  and a.alphaEq (m.subst x s (Match ty [(PVar x, b)])) (Match (m.subst x s ty) [(PVar x, b)])
+-- under a binder whose name is not free in `s`, substitution goes in
 SubstPassesBinder (a : Alpha) (m : Substitution a) (x : String) (f : NotFreeIn) (ty b : Term) : Bool :=
-  x == f.y or a.alphaEq (m.subst x f.s (Lam f.y ty b)) (Lam f.y (m.subst x f.s ty) (m.subst x f.s b))
+  x == f.y or (a.alphaEq (m.subst x f.s (Lam f.y ty b)) (Lam f.y (m.subst x f.s ty) (m.subst x f.s b))
+               and a.alphaEq (m.subst x f.s (Pi f.y ty b)) (Pi f.y (m.subst x f.s ty) (m.subst x f.s b))
+               and a.alphaEq (m.subst x f.s (Sigma f.y ty b)) (Sigma f.y (m.subst x f.s ty) (m.subst x f.s b))
+               and a.alphaEq (m.subst x f.s (Subtype f.y ty b)) (Subtype f.y (m.subst x f.s ty) (m.subst x f.s b))
+               and a.alphaEq (m.subst x f.s (Let f.y ty ty b)) (Let f.y (m.subst x f.s ty) (m.subst x f.s ty) (m.subst x f.s b)))
+-- and under a binder whose name is free in `s`, without capture: the result is the binder renamed
+-- to a name fresh for both, then substituted into (review of layers 0-1, A: the capture case was
+-- never drawn). Its domain is drawn from `s`'s free names, so the case is not rare.
+capturable (y z : String) (s b : Term) : Bool :=
+  member y (freeVars s) and not (member z (freeVars s)) and not (member z (freeVars b)) and not (y == z)
+CaptureCase : U := { y z : String, s b : Term | capturable y z s b }
+SubstAvoidsCapture (a : Alpha) (m : Substitution a) (x : String) (c : CaptureCase) (ty : Term) : Bool :=
+  x == c.y or x == c.z
+  or a.alphaEq (m.subst x c.s (Lam c.y ty c.b)) (Lam c.z (m.subst x c.s ty) (m.subst x c.s (swap c.y c.z c.b)))
 -- a name not free in `t` changes nothing
 SubstNotFree (a : Alpha) (m : Substitution a) (f : NotFreeIn) (s : Term) : Bool :=
   a.alphaEq (m.subst f.y s f.s) f.s
@@ -303,7 +338,7 @@ SubstRespectsAlpha (a : Alpha) (m : Substitution a) (x : String) (s : Term) (p :
   a.alphaEq (m.subst x s p.s) (m.subst x s p.t)
 
 Substitution (a : Alpha) := SubstHits a & SubstMisses a & SubstGoesInside a & SubstStopsAtShadow a
-  & SubstPassesBinder a & SubstNotFree a & SubstRespectsAlpha a
+  & SubstPassesBinder a & SubstAvoidsCapture a & SubstNotFree a & SubstRespectsAlpha a
 
 -- ---------------------------------------------------------------- §4 Canonical form
 
@@ -362,8 +397,8 @@ Beta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : S
 
 -- 3.S15, delta: a defined name in head position steps to its body, wherever the program defines
 -- it, a declaration before it included (3.S1: a program has no order, and a definition fills a
--- declaration); whether it unfolds only "when that makes progress" is question 7 of the review of layers 0-1,
--- and this states the recommended reading, unfolding always
+-- declaration); always, in head position (3.S15 as revised, D-2026-10-13-aa, Q7: a stuck term is
+-- what reduction leaves, the same for every specimen)
 Delta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (f : String) (ty b : Term) : Bool :=
   stepsTo a (m.step (cons (Define f ty b) p) (Var f)) b
   and stepsTo a (m.step [Declare f ty, Define f ty b] (Var f)) b
@@ -402,6 +437,10 @@ IotaPair (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (y
                              (sb.subst f.y (Var f.y) (sb.subst y f.s b)))
 IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (l k y : String) (v b c : Term) : Bool :=
   l == k or stepsTo a (m.step p (Match (Inj l v) [(PInj k PWild, b), (PInj l (PVar y), c)])) (sb.subst y v c)
+
+-- a local definition steps to its body with the value for its name (zeta; D-2026-10-13-aa, Q1)
+Zeta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty v b : Term) : Bool :=
+  stepsTo a (m.step p (Let x ty v b)) (sb.subst x v b)
 
 -- the projection of a record value by a name is the value at that name (D-2026-10-13-x)
 ProjOfRecord (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x y : String) (u v : Term) : Bool :=
@@ -444,7 +483,7 @@ ValuesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) 
 DatumIsInert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (d t : Term) : Bool :=
   m.step (cons (Datum d) p) t == m.step p t
 
-Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
+Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
   & IotaPair a sb & IotaSkips a sb & ProjOfRecord a sb & Prim a sb & ExternIsValue a sb & ValuesStay a sb
   & DatumIsInert a sb
 
