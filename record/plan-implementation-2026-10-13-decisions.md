@@ -1,6 +1,7 @@
 # Implementing the specification: the decisions
 
-Draft 0, 2026-10-13, at ee8e9ad. The specification is decided in substance (D-2026-10-13-g) and
+Draft 1, 2026-10-13, at a563fd2 (draft 0 reviewed the same day: D8 and D9 added, D3 and D6
+corrected). The specification is decided in substance (D-2026-10-13-g) and
 the interpreter lags it: most of what was decided since 2026-10-11 is not in `src/`. This document
 holds the choices that are yours; `plan-implementation-2026-10-13-execution.md` holds the steps.
 One bite per screen. Mark under each: "ok", "no", or a comment.
@@ -46,8 +47,11 @@ spec 6.S8). Certifying luthier's libraries takes tens of minutes; sonolocalizaci
 
 Recommended: the libraries of this repository are recertified at the end of each phase, by the
 session (`luthier certify` is among what the model may run); sonolocalización only at a milestone
-(D7), by you. Between milestones its certificates are stale and `run`, strict since
-D-2026-10-12-y, refuses its cones: that repository does not run between milestones.
+(D7), by you. `run` becomes strict in phase 1 (spec 12.S17, your "empecemos siendo estrictos"):
+from then on, between milestones, sonolocalización's certificates are stale and `run` refuses its
+cones, so that repository does not run between milestones. If you need it to run meanwhile, the
+alternative is to make `run` strict only at `v0.3`, when certificates mean what the specification
+says.
 
 ## D4. `W` is used exactly once
 
@@ -78,13 +82,45 @@ lines) where the rules interact; the rest is well fenced by the specification (t
 script, the programs of `tests/spec/` from each rule, the generators, the libraries of costs and
 checks).
 
-Recommended: an Opus session for the checker and the evaluator, phase by phase; Sonnet agents in
-worktrees for the fenced parts, in parallel, with a brief each as for the chapters; the session
-that integrates reads every diff, runs the suites and flips each item of the specification from
-`[decided]` to `[implemented]` only with its accept and reject programs passing.
+Recommended: the session you run, whatever its model, for the checker and the evaluator, phase by
+phase; Sonnet agents in worktrees for the fenced parts (the migration script, the lexer and parser
+change of phase 1, the generators, the libraries of costs and checks, the matrix families), in
+parallel, with a brief each as for the chapters; the session that integrates reads every diff,
+runs the suites and flips each item of the specification from `[decided]` to `[implemented]` only
+with its accept and reject programs passing.
 
 ## D7. Milestones
 
 Push only tagged milestones (working rule). Recommended: `v0.2` after phases 1 and 2 (the new
 surface, files and modules), `v0.3` after phases 3 and 4 (tests and certification), `v0.4` after
 phase 5. At each, sonolocalización is migrated and recertified (D3), and the tag is pushed.
+
+## D8. `main` without actions, and what a `main` with `W` returns
+
+Nearly every `main` today is pure: it computes a value and acts on nothing. If `W` always enters
+`main` and must be used exactly once (D4), a pure `main` would have to pass the token through
+untouched, which is what "exactly once" is meant to forbid.
+
+Recommended: `W` is optional in `main`. A `main` that takes no `W` is a pure script, evaluated and
+printed as today, and no action may occur in it. A `main` that takes `w : W` returns the final
+token with its result, `W * A`; the session is the same with its implicit `w`. Until a library
+defines an action, a `main` with `W` has nothing to call, so phase 1 adds one action, `print`, to
+core, so that the rule of `W` has a real case.
+
+## D9. Where tests live
+
+`test` is a function (7.S20) and an action on Luthier's own state (D-2026-10-12-m), so it takes
+`W`. But an action may not occur at a file's top level (10.S2), and today 116 lines of the form
+`test f with 100` sit at the top level of the files of sonolocalización, and more in the
+libraries. Two readings:
+
+- **(a) The top-level `test` lines are data.** `test f with 100` declares what to test and how,
+  a value of a record type `TestSpec`, kept in the module; the action is `test "x.lut"`
+  (D-2026-10-12-ad), which runs every declared test of the module, and `luthier test` is that
+  action from the command line. The lines keep their place; only their meaning changes.
+- **(b) Tests move into a block**, `tests := { w <- test w f (n := 100) ; ... }`, and the top level
+  holds no `test` line.
+
+Recommended (a): it keeps the files as they are, it fits D-2026-10-12-ad (the module's `test` is
+the total demand), and it separates what a module says about itself (data, declarative face) from
+running it (an action). (b) puts an action chain in every library for no gain.
