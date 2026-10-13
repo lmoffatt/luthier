@@ -28,7 +28,7 @@
 --   §2 Names: free variables, renaming, alpha-equivalence as an object with the
 --      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     done
 --   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               done
---   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  todo
+--   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  done
 --   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternCall`, `HolesStay`,
 --      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         todo
 --   §6 Quote and eval (3.S32): cases on literals and closed terms.                      todo
@@ -235,3 +235,27 @@ SubstRespectsAlpha (a : Alpha) (m : Substitution a) (x : String) (s : Term) (p :
 
 Substitution (a : Alpha) := SubstHits a & SubstMisses a & SubstGoesInside a & SubstStopsAtShadow a
   & SubstPassesBinder a & SubstNotFree a & SubstRespectsAlpha a
+
+-- ---------------------------------------------------------------- §4 Canonical form
+
+-- The canonical form (3.S34) renames bound variables canonically and removes module prefixes, so
+-- that alpha-equal terms, and terms that differ only in the module holding a definition, have one
+-- form and so one hash (spec 6). `unqualify` takes a name to its name without module prefix (`m.f`
+-- to `f`); what a prefix is, is the model's, by the lexical form of a dotted name (2.S1).
+CanonicalForm (a : Alpha) : { canon : Term -> Term, unqualify : String -> String }
+
+-- one form for alpha-equal terms, compared by structural equality: that is what makes it canonical
+CanonOfAlpha (a : Alpha) (m : CanonicalForm a) (p : AlphaPair a) : Bool := m.canon p.s == m.canon p.t
+CanonIdempotent (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool := m.canon (m.canon t) == m.canon t
+-- a name loses its module prefix, once
+CanonOfName (a : Alpha) (m : CanonicalForm a) (x : String) : Bool := m.canon (Var x) == Var (m.unqualify x)
+UnqualifyIdempotent (a : Alpha) (m : CanonicalForm a) (x : String) : Bool :=
+  m.unqualify (m.unqualify x) == m.unqualify x
+-- the canonical form of a term without module prefixes means the same term: alpha-equal to it
+CanonKeepsTerm (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool :=
+  a.alphaEq (m.canon t) (m.canon (m.canon t)) and (not (allUnqualified m.unqualify (freeVars t)) or a.alphaEq (m.canon t) t)
+allUnqualified (u : String -> String) (xs : List String) : Bool :=
+  match xs { nil -> true ; cons x rest -> u x == x and allUnqualified u rest }
+
+CanonicalForm (a : Alpha) := CanonOfAlpha a & CanonIdempotent a & CanonOfName a & UnqualifyIdempotent a
+  & CanonKeepsTerm a
