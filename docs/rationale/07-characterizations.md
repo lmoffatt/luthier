@@ -28,7 +28,7 @@ Every symbol used in this document.
 
 **The object.** `Euclidean n`: a vector space over `Real` with an inner product and a basis of
 `n` vectors that is orthonormal. In Luthier its carrier is `Vec Real n = Fin n -> Real`, so the
-coordinates are application and the basis is `e i = \ k { delta i k }`; both are definitional.
+coordinates are application and the basis is `e i = fn k { delta i k }`; both are definitional.
 
 **The laws.**
 - `VectorSpace` (in `algebra`): `add` associative and commutative with `zero` and `neg`; `scale`

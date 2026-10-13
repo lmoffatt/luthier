@@ -51,10 +51,10 @@ then what the law defines.
   type expressions the formers below build from them. Such an expression claims nothing beyond
   its shape, so it gets a name, if at all, by an **alias**, `x = t`, an abbreviation expanded
   wherever it is used, with no states (`05` R7; voice note 2026-10-04 12:17): `Maybe (A : U) =
-  < nothing : Unit | just : A >`, `sq = \ (x : Float64) { x * x }`.
+  { nothing : Unit || just : A }`, `sq = fn (x : Float64) { x * x }`.
 - **Product, sum, exponential.** `A * B`, `A + B`, `A -> B`, with `Unit` and `Empty` as the
   product and the sum of nothing, and names for positions when wanted: `{ a : A, b : B }`,
-  `< a : A | b : B >`. The structure of a bicartesian closed category, and the bases a type is
+  `{ a : A || b : B }`. The structure of a bicartesian closed category, and the bases a type is
   built on. A function is a value of an exponential, with no separate category: it can be an
   argument and a result. A theory of several operations is a subtype of a labeled product.
 - **Dependent type.** `(x : A) -> B` and `(x : A) * B`, where `B` may mention `x`: the "for all"
@@ -90,7 +90,7 @@ then what the law defines.
   a Taylor sum another, each certified against the same laws; a program writes against `Exp` and
   picks a model by name, or declares `exp : Exp ...` for another file to fill (`03 §3`;
   `examples/exp.lut`; voice note 2026-05-26 12.32.24 [01:26]). A function given by a formula is
-  the model of the singleton theory whose law is that formula, `sqr : Sqr := \ x { x * x }`: the
+  the model of the singleton theory whose law is that formula, `sqr : Sqr := fn x { x * x }`: the
   body satisfies the law by its own reduction, and any other model, `numpy.square`, is checked
   against it. Read as a type, a value is the one with a single inhabitant, `4` as `{ n : Int |
   n == 4 }`: exactly one, because `==` is structural there (`05` R8) and the certificate is outside
@@ -108,7 +108,7 @@ then what the law defines.
   its law, freeness, quantifies over every type and has no generator (`05 §7`), so the recursion
   itself is taken as the definition: an initial algebra.
 - **Apply and reduce.** `f a`, and the rule that replaces the argument in the body,
-  `(\ x { t }) a ≡ t[a/x]`, with the unfolding of a name to its body and the choice of a `match`
+  `(fn x { t }) a ≡ t[a/x]`, with the unfolding of a name to its body and the choice of a `match`
   branch (section 2). As a rule it is an equivalence of terms and belongs to the plan; carrying it
   out is an action of the evaluator, the first element of the execution. A term is reduced until
   a datum, a procedure or a hole is reached (*Declared, defined, computable*, below). Executing by
@@ -244,7 +244,7 @@ three kinds of value.
 - A *procedure*: a body whose normal form is a function over an infinite domain. It answers every
   finite question, and reduces when asked one. A real as a Cauchy sequence of rationals,
   `Cauchy : U := { s : Int -> Rational | Modulus s }`, applied to a precision gives a rational, and
-  the sum of two such reals, `\ n { x (n + 1) + y (n + 1) }`, is defined and reduces at any
+  the sum of two such reals, `fn n { x (n + 1) + y (n + 1) }`, is defined and reduces at any
   precision (`examples/cauchy.lut`). What never computes is its equality: two sequences with the
   same limit are equal by a law that no finite observation decides (`05` R8, `==` only where
   equality is structural).
@@ -283,7 +283,7 @@ Every symbol used in this document.
 - `(x : A) -> B` is the type of dependent functions: to each `x : A` a term of `B`, where `B` may
   mention `x`. Without the dependence it is written `A -> B`.
 - `(x : A) * B` is the type of dependent pairs; `A * B` without the dependence.
-- `\ x { t }` is the function that maps `x` to `t`.
+- `fn x { t }` is the function that maps `x` to `t`.
 - `t[a/x]` is `t` with every free occurrence of `x` replaced by `a`.
 
 ## 1. The unit is the definition
@@ -318,11 +318,11 @@ is the type, "operationally" is the body.
 
 ## 2. Terms and reduction
 
-A term is built from names, abstractions `\ x { t }`, applications `f a`, pairs and their
+A term is built from names, abstractions `fn x { t }`, applications `f a`, pairs and their
 patterns, injections into sums and `match` on them, constructors of recursive types and `match` on
 them. There is one rule of computation, substitution,
 
-    (\ x { t }) a  ≡  t[a/x]
+    (fn x { t }) a  ≡  t[a/x]
 
 together with the unfolding of a defined name to its body and the rule that a `match` on a
 constructor, an injection or a pair picks the branch that fits. `04 §4` lists them. Executing a
@@ -336,7 +336,7 @@ The kernel chosen to start with (`04 §2`): `U`; the exponential, with its depen
 product, with its dependent form; the sum; `Empty` and `Unit`; the subtype; `data` for recursive
 types; and the primitive types `Int`, `Rational`, `Real`, `Float64` and `String` (`06 §2`), of which
 the interpreter fills all but `Real`, the ideal, which stays in effect declared. `Bool` is
-`< true : Unit | false : Unit >`, `Maybe A` is `< nothing : Unit | just : A >`, and `Fin n`, the
+`{ true : Unit || false : Unit }`, `Maybe A` is `{ nothing : Unit || just : A }`, and `Fin n`, the
 type of the n indices `{ k : Int | 0 <= k and k < n }`, is in the core because a vector of length
 n is a function `Fin n -> Float64`.
 
