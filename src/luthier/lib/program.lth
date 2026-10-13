@@ -44,7 +44,7 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaPara
   plainParam typedParam shapeParam bind rebind
 import "term.lth" Term Program Act Constant Pattern Alpha AlphaPair Substitution Var Lit Universe World Lam App Pi
   Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let Declare Define Datum IntConst FloatConst
-  StringConst PCon
+  StringConst PCon PWild
 
 -- ---------------------------------------------------------------- §1 Failures and the theory
 
@@ -271,12 +271,32 @@ violatesR2Exists (p : SurfaceProgram) (n : String) : Bool :=
 -- violated by any constructor without such a law rejects (D-2026-10-13-aa, Q3).
 untouched (k : List String) (labels : List String) (law : Surface) : Bool :=
   match labels { nil -> false ; cons l rest -> not (member l (namesIn k law)) or untouched k rest law }
-predicateUntouched (k : List String) (t : Surface) : Bool := match t {
+predicateUntouched (k : List String) (isPredicate : Bool) (t : Surface) : Bool := match t {
   record fs law -> match law { nothing -> false ; just l -> untouched k (fieldLabels fs) l } ;
   subtype q a law -> (match patternBinds k q { nil -> true ; vs -> untouched k vs law }) ;
-  lambda ps items e -> untouched k (paramsBind k ps) (block items e) ;
+  lambda ps items e -> isPredicate and untouched k (paramsBind k ps) (block items e) ;
   _ -> false ;
 }
+-- 4.R3 is a rule on predicates, so a lambda is held to touch its parameters when it is one: when
+-- the type written on its definition ends in `Bool`, `Law` or `Failures E` (5.S9); with no type
+-- written, when the name is declared at a type that is not a function, whose body a lambda can
+-- only be as its predicate (4.R6: `Tagged := fn p { true }`), or at one that ends so; and when
+-- nothing is written (a type to infer). A function to anything else may leave a parameter unread:
+-- generators.lth's `walk`, a `Gen` that does not read the size, and the grammar has no `_`
+-- parameter for `fn` (group 5 of record/IA/check-2026-10-13/opus-3b.md, part 2). A predicate type
+-- reached through an alias (`P = A -> Bool`) is not seen on the surface; the checker, which
+-- expands aliases first (4.R7), sees it.
+endsInVerdict (t : Surface) : Bool := match t {
+  binop o a b -> o == "->" and endsInVerdict b ;
+  pi xs a b -> endsInVerdict b ;
+  name s -> s == "Bool" or s == "Law" ;
+  app f a -> headName t == just "Failures" or headName t == just "Law" ;
+  _ -> false ;
+}
+isArrow (t : Surface) : Bool := match t { binop o a b -> o == "->" ; pi xs a b -> true ; _ -> false }
+lambdaIsPredicate (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Bool := match t {
+  just u -> endsInVerdict u ;
+  nothing -> (match declaredSurface p n { nothing -> true ; just d -> not (isArrow d) or endsInVerdict d }) }
 -- the names a conjunction of laws claims: each conjunct's head name
 conjuncts (t : Surface) : List String := match t {
   binop o l r -> if o == "&" then concat (conjuncts l) (conjuncts r) else nil ;
@@ -297,26 +317,55 @@ theoryHeads (whole acts : SurfaceProgram) : List SurfaceAct := match acts { nil 
 claimedLaws (p : SurfaceProgram) : List String := claimedBy (theoryHeads p p)
 claimedBy (hs : List SurfaceAct) : List String := match hs { nil -> nil ;
   cons h rest -> concat (match h { define x bs t b -> (match b { termBody u -> conjuncts u ; _ -> nil }) ; _ -> nil }) (claimedBy rest) }
--- the names the claimed laws' bodies mention
+-- the names the claimed laws' bodies mention, and the constructors their own matches name.
+-- [proposed] A match in a law's body states what holds for each constructor it names (test.lth's
+-- `CountsCases`: a sampled run has exactly the cases asked), and for a constructor whose payload
+-- has no `==` it is the only way a law can name it (4.R8: `SampledMode` holds a `Metric`, a record
+-- of functions). A helper the law calls is still not read (4.S15: a law depends on the names in
+-- it, without unfolding definitions), and an observer that only lists the constructors is such a
+-- helper (4.R3). Group 2 of record/IA/check-2026-10-13/opus-3b.md, part 2.
 lawNames (p : SurfaceProgram) : List String := lawBodies p (claimedLaws p) p
 lawBodies (p : SurfaceProgram) (laws : List String) (acts : SurfaceProgram) : List String := match acts { nil -> nil ;
   cons act rest -> match act {
-    define x bs t b -> if member x laws then concat (bOf p act) (lawBodies p laws rest) else lawBodies p laws rest ;
+    define x bs t b -> if member x laws then concat (bOf p act) (concat (bodyMatched (constructors p) b) (lawBodies p laws rest))
+                       else lawBodies p laws rest ;
     _ -> lawBodies p laws rest } }
+-- the constructors named by the patterns of the matches and clauses of a body, given the constructors `k`
+bodyMatched (k : List String) (b : Body) : List String := match b {
+  termBody u -> matchedIn k u ; clausesBody cs -> clausesMatched k cs ; dataBody cs -> nil }
+clausesMatched (k : List String) (cs : List Clause) : List String := match cs { nil -> nil ;
+  cons c rest -> concat (patternsNamed k c.patterns) (concat (matchedIn k c.body) (clausesMatched k rest)) }
+matchedIn (k : List String) (t : Surface) : List String :=
+  concat (match t { matchOf s arms -> armsMatched k arms ; _ -> nil }) (matchedInAll k (children t))
+matchedInAll (k : List String) (ts : List Surface) : List String :=
+  match ts { nil -> nil ; cons t rest -> concat (matchedIn k t) (matchedInAll k rest) }
+armsMatched (k : List String) (arms : List (SurfacePattern * Surface)) : List String := match arms { nil -> nil ;
+  cons (q, b) rest -> concat (patternNamed k q) (armsMatched k rest) }
+patternNamed (k : List String) (q : SurfacePattern) : List String := match q {
+  pWild -> nil ; pLit l -> nil ;
+  pApp n qs -> if member n k then cons n (patternsNamed k qs) else patternsNamed k qs ;
+  pTuple qs -> patternsNamed k qs ;
+}
+patternsNamed (k : List String) (qs : List SurfacePattern) : List String :=
+  match qs { nil -> nil ; cons q rest -> concat (patternNamed k q) (patternsNamed k rest) }
 anyUnclaimed (p : SurfaceProgram) (cs : List String) : Bool :=
   match cs { nil -> false ; cons c rest -> not (member c (lawNames p)) or anyUnclaimed p rest }
--- a field of a declared theory is touched when a claimed law reads it as `m.field`; `nameSuffix`
--- gives the part after the last `.` (a function of core's `String`, declared until core names it)
-nameSuffix : String -> String
-suffixes (ns : List String) : List String := match ns { nil -> nil ; cons n rest -> cons (nameSuffix n) (suffixes rest) }
+-- a field of a declared theory is touched when a claimed law reads it as `m.field`. A law reads
+-- its model through the model's binder, so a dotted name there is rooted at that binder and the
+-- field of the model is the part after the first `.`: `s.world.read` reads the field `world` of
+-- `s`, and `read` is a field of that field's own theory (group 1 of
+-- record/IA/check-2026-10-13/opus-3b.md, part 2: the part after the last `.` counted `read` only).
+-- `nameRest` gives the part after the first `.` (a function of core's `String`, declared until
+-- core names it), and `namePrefix` of it is the field.
+nameRest : String -> String
 fieldsOfDeclared (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons act rest -> match act {
   declare x bs t -> if x == n then (match t { record fs law -> fieldLabels fs ; _ -> nil }) else fieldsOfDeclared rest n ;
   _ -> fieldsOfDeclared rest n } }
--- the fields a term reads: the part after the `.` of every dotted name and every projection,
+-- the fields a term reads: the field after the first `.` of every dotted name, and every projection,
 -- bound or not, since a law reads a field through its model parameter, `m.parse` (check.py, bite 2:
 -- `lawNames` removes what a binder binds, so the reads through `m` were lost)
 fieldsRead (t : Surface) : List String := concat (match t {
-    name s -> if namePrefix s == s then nil else [nameSuffix s] ;
+    name s -> if namePrefix s == s then nil else [namePrefix (nameRest s)] ;
     proj a x -> [x] ;
     _ -> nil }) (fieldsReadIn (children t))
 fieldsReadIn (ts : List Surface) : List String := match ts { nil -> nil ; cons t rest -> concat (fieldsRead t) (fieldsReadIn rest) }
@@ -334,7 +383,7 @@ anyNotIn (xs ys : List String) : Bool := match xs { nil -> false ; cons x rest -
 violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
   untouchedFields p n
   or anyAct (fn a { match a {
-    define x bs t b -> (match b { termBody u -> predicateUntouched (constructors p) u ;
+    define x bs t b -> (match b { termBody u -> predicateUntouched (constructors p) (lambdaIsPredicate p x t) u ;
                                   dataBody cs -> anyUnclaimed p (pairNames cs) ; _ -> false }) ;
     _ -> false } }) (actsNamed p n)
 
