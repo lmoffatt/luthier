@@ -8,6 +8,7 @@ Reduction uses an explicit generator stack for each weak-head step; externs
 remain values. This module neither translates surface trees nor calls the host.
 """
 
+# Update: 66d5cae, user request v6; IotaConstructors; audit codex-6.md.
 # Update: fe3bdab, user request v4; audit codex-4.md.
 # Update: 23d23f4, 048cd55, 1c521a7, reference b1582ca; user request v5; codex-5.md.
 
@@ -530,12 +531,12 @@ class _Demand:
         self.value = value
 
 
-def _demand(env: dict[str, Term | None], v: Term) -> _Work:
-    changed, w = yield _step(env, v)
+def _demand(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], v: Term) -> _Work:
+    changed, w = yield _step(env, constructors, v)
     return _Demand(w) if changed else _Blocked()
 
 
-def _pattern(env: dict[str, Term | None], p: Pattern, v: Term) -> _Work:
+def _pattern(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], p: Pattern, v: Term) -> _Work:
     match p:
         case PVar(x):
             return ((x, v),)
@@ -545,12 +546,12 @@ def _pattern(env: dict[str, Term | None], p: Pattern, v: Term) -> _Work:
             if isinstance(v, Lit):
                 return () if c == v.constant else None
         case PPair(a, b) if isinstance(v, Pair):
-            xs = yield _pattern(env, a, v.left)
+            xs = yield _pattern(env, constructors, a, v.left)
             if xs is None or isinstance(xs, _Blocked):
                 return xs
             if isinstance(xs, _Demand):
                 return _Demand(Pair(xs.value, v.right))
-            ys = yield _pattern(env, b, v.right)
+            ys = yield _pattern(env, constructors, b, v.right)
             if ys is None or isinstance(ys, _Blocked):
                 return ys
             if isinstance(ys, _Demand):
@@ -559,28 +560,30 @@ def _pattern(env: dict[str, Term | None], p: Pattern, v: Term) -> _Work:
         case PInj(l, q) if isinstance(v, Inj):
             if l != v.label:
                 return None
-            xs = yield _pattern(env, q, v.value)
+            xs = yield _pattern(env, constructors, q, v.value)
             return _Demand(Inj(l, xs.value)) if isinstance(xs, _Demand) else xs
         case PCon(c, ps):
             view = _constructor(v)
-            if view is not None and view[0] == c:
+            if view is not None and view[0] not in env and view[0] == c:
                 args = view[1]
                 if len(args) != len(ps):
                     return None
                 bs: Bindings = ()
                 for i, (q, a) in enumerate(zip(ps, args)):
-                    xs = yield _pattern(env, q, a)
+                    xs = yield _pattern(env, constructors, q, a)
                     if xs is None or isinstance(xs, _Blocked):
                         return xs
                     if isinstance(xs, _Demand):
                         return _Demand(_apply_args(c, args[:i] + (xs.value,) + args[i + 1:]))
                     bs += xs
                 return bs
+            if view is not None and view[0] != c and c in constructors.get(view[0], ()):
+                return None
         case PPair() | PInj():
             pass
         case _:
             raise TypeError(f"unknown pattern: {type(p).__name__}")
-    return (yield _demand(env, v))
+    return (yield _demand(env, constructors, v))
 
 
 def _consistent(bs: Bindings) -> bool:
@@ -592,7 +595,7 @@ def _consistent(bs: Bindings) -> bool:
     return True
 
 
-def _step(env: dict[str, Term | None], t: Term) -> _Work:
+def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], t: Term) -> _Work:
     match t:
         case Let(x, _, v, b):
             return True, substitute(x, v, b)
@@ -606,12 +609,12 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
                 if isinstance(j, Lit):
                     result = _primitive(_operator(op), i.constant, j.constant)
                     return result is not None, t if result is None else result
-                changed, k = yield _step(env, j)
+                changed, k = yield _step(env, constructors, j)
                 return changed, App(App(op, i), k)
-            changed, k = yield _step(env, i)
+            changed, k = yield _step(env, constructors, i)
             return changed, App(App(op, k), j)
         case App(f, a):
-            changed, g = yield _step(env, f)
+            changed, g = yield _step(env, constructors, f)
             return changed, App(g, a)
         case Proj(r, label):
             if isinstance(r, RecordValue):
@@ -619,14 +622,14 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
                     if key == label:
                         return True, value
                 return False, t
-            changed, value = yield _step(env, r)
+            changed, value = yield _step(env, constructors, r)
             return changed, Proj(value, label)
         case Match(s, arms):
-            changed, value = yield _step(env, s)
+            changed, value = yield _step(env, constructors, s)
             if changed:
                 return True, Match(value, arms)
             for p, b in arms:
-                bs = yield _pattern(env, p, s)
+                bs = yield _pattern(env, constructors, p, s)
                 if isinstance(bs, _Blocked):
                     return False, t
                 if isinstance(bs, _Demand):
@@ -644,7 +647,7 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
                     for z, v in fresh:
                         b = substitute(z, v, b)
                     return True, b
-            changed, v = yield _step(env, s)
+            changed, v = yield _step(env, constructors, s)
             return changed, Match(v, arms)
         case _ if isinstance(t, _BINDERS + _LEAVES + (Pair, Inj, Sum, Data, Record, RecordValue)):
             return False, t
@@ -662,7 +665,18 @@ def step(program: Program, t: Term) -> Term | None:
                 pass
             case _:
                 raise TypeError(f"unknown act: {type(act).__name__}")
-    changed, value = _run(_step(env, t))
+    # Definitions retain Delta priority over declarations, as in term.lth.
+    # Every act name is excluded from constructor matching, including holes.
+    for act in program:
+        if isinstance(act, Declare):
+            env.setdefault(act.name, None)
+    constructors: dict[str, frozenset[str]] = {}
+    for act in program:
+        if isinstance(act, Define) and isinstance(act.body, Data):
+            names = frozenset(name for name, _ in act.body.constructors if name not in env)
+            for name in names:
+                constructors[name] = names
+    changed, value = _run(_step(env, constructors, t))
     return value if changed else None
 
 

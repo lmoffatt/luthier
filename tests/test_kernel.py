@@ -11,6 +11,7 @@ Update prompt: user request v3; source commits cc2542d and 2409c59, codex-3.md.
 Update: fe3bdab, user request v4; generator v3 adds Let; same seed and budgets.
 Update: user request v5, 23d23f4/048cd55/1c521a7, reference b1582ca;
 generator v4 carries Axiom text, same seed and budgets.
+Update: user request v6, source 66d5cae; IotaConstructors, same seed and budgets.
 Tests are finite law evidence, not a universal semantic certificate.
 """
 
@@ -589,6 +590,42 @@ def test_iota_skips(samples, rng):
     for v in samples:
         b, c = term(rng, SIZE), term(rng, SIZE)
         assert steps_to(step(program(rng), Match(Inj("left", v), ((PInj("right", PWild()), b), (PInj("left", PVar("x")), c)))), substitute("x", v, c))
+
+
+def constructor_data():
+    return Define("T", Universe(), Data("T", (
+        ("c", Var("T")), ("k", Var("T")),
+        ("f", Pi("_", Var("T"), Var("T"))),
+        ("g", Pi("_", Var("T"), Var("T"))),
+    )))
+
+
+def test_iota_constructors(samples, rng):
+    # 66d5cae term.lth IotaConstructors: withData and all four conjuncts.
+    for v in samples:
+        p = (constructor_data(),) + program(rng)
+        b, d = term(rng, SIZE), term(rng, SIZE)
+        assert steps_to(step(p, Match(Var("c"), ((PCon("c", ()), b),))), b)
+        assert steps_to(step(p, Match(Var("c"), ((PCon("k", ()), b), (PCon("c", ()), d)))), d)
+        assert steps_to(step(p, Match(Var("k"), ((PCon("c", ()), b), (PWild(), d)))), d)
+        assert steps_to(step(p, Match(App(Var("f"), v), (
+            (PCon("g", (PVar("y"),)), b), (PCon("f", (PVar("y"),)), d),
+        ))), substitute("y", v, d))
+
+
+def test_constructor_act_names_and_unknown_names():
+    data = constructor_data()
+    arms = ((PCon("k", ()), Var("wrong")), (PCon("c", ()), Var("hit")), (PWild(), Var("fallback")))
+    for p in ((data, Declare("c", Universe())), (Declare("c", Universe()), data)):
+        assert step(p, Match(Var("c"), arms)) is None
+        assert step(p, Match(Var("c"), ((PCon("c", ()), Var("hit")),))) is None
+        assert step(p, Match(App(Var("c"), Universe()), ((PCon("c", (PWild(),)), Var("hit")),))) is None
+    p = (data, Define("c", Universe(), Var("k")))
+    assert step(p, Match(Var("c"), arms)) == Match(Var("k"), arms)
+    assert step((data,), Match(Var("unknown"), arms)) is None
+    assert step((), Match(Var("c"), arms)) is None
+    other = Define("U", Universe(), Data("U", (("u", Var("U")),)))
+    assert step((data, other), Match(Var("u"), arms)) is None
 
 
 def test_proj_of_record(samples, rng):

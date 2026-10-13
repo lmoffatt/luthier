@@ -1,0 +1,5 @@
+# Kernel update v6 — 2026-10-13
+
+Source: `66d5cae05ce4996999313c335a584c487cb844d5`, term.lth §5 `IotaConstructors`; starting HEAD `669f67120059a40388a5fa356f39440eb6a0373e`. Derivation: user request v6 in this session, manual implementation; generator unchanged (seed `0x10132026`, 100 samples, term budget 7, pattern budget 3, program size at most 4 and embedded term budget 4).
+Implementation and own routine decisions: index constructors by their program Data definition, skip distinct constructors of that same Data, and exclude all Declare/Define act names from constructor matching while retaining Delta priority. Transcribed all four law conjuncts, added act-name/unknown-name boundary cases, and removed only the two requested eval xfail marks.
+Validation: system `python3 -m pytest` lacks pytest; with `PATH=/tmp/luthier-grammar-render-venv/bin:$PATH PYTHONPATH=src`, requested focused suite: **81 passed**; full suite: **360 passed**. System Python CLI prints **24** for factorial and **2** for data; scoped `git diff --check` passes. No failures from other files; concurrent edits were left intact. No commits.

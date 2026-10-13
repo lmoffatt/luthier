@@ -143,7 +143,7 @@ def cli(*args):
     return subprocess.run([sys.executable, '-m', 'luthier.cli', 'eval', *map(str, args)], capture_output=True, text=True, env=env)
 
 
-@pytest.mark.parametrize('file,output', [('arithmetic', '19'), pytest.param('factorial', '24', marks=pytest.mark.xfail(strict=True, reason='a match on a different constructor blocks instead of skipping the arm: no law of term.lth states the skip for constructors (IotaSkips covers labels only); kernel.py follows the theory')), pytest.param('data', '2', marks=pytest.mark.xfail(strict=True, reason='a match on a different constructor blocks instead of skipping the arm: no law of term.lth states the skip for constructors (IotaSkips covers labels only); kernel.py follows the theory')), ('record', '7'), ('block', '3'), ('lambda', '5')])
+@pytest.mark.parametrize('file,output', [('arithmetic', '19'), ('factorial', '24'), ('data', '2'), ('record', '7'), ('block', '3'), ('lambda', '5')])
 def test_eval(file, output):
     r = cli(ROOT / 'tests/eval' / (file + '.lut'), 'answer')
     assert r.returncode == 0, r.stdout + r.stderr
