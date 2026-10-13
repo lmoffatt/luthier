@@ -23,7 +23,11 @@ until Luciano marks them, every step assumes them as recommended and says so in 
   theory of EBNF grammars with `derives` (their meaning, a backtracking recognizer, for
   certification and not for parsing) and `Recognizer`; `grammar.lth` gains `luthierSyntax : Ebnf`
   (chapter 2 stratified by precedence, no left recursion), `layout` as a hole of `Grammar`, and
-  the law `ParsesWhatDerives`. Next: the parser (1.2).
+  the law `ParsesWhatDerives`.
+- 2026-10-13, on his observation that no law said `eps` was the empty string (4.R10): `derives`
+  is declared in `ebnf.lth` with the laws of the regular operations (unit, union, fixed point,
+  nonterminals as unions), and its backtracking body moved to `ebnf_model.lut` as a model
+  (92924e6). The first theory file and model file apart (Z8). Next: the parser (1.2).
 
 ## Rules for every step
 
