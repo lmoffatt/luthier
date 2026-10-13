@@ -32,7 +32,8 @@
 --   §4 Monoid and free monoid: `List`'s `nil`, `cons`, `append`; the recursion
 --      principle `FoldNil`, `FoldCons` (3.S36, D-2026-10-13-t).                 done
 --   §5 Commutative semiring with its order: `Nat`'s laws (11.R1, D-2026-10-13-t).    done
---   §6 The constructions of the kernel: `Beta`, `PairFst`, `PairSnd`, `Pairing`,
+--   §6 The constructions of the kernel: `Beta`, `PairFst`, `PairSnd`, `Pairing`, records and
+--      labeled sums as named products and coproducts (D-2026-10-13-x),
 --      `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust` (3.S36); what is not statable
 --      (eta, 3.S37).                                                            done
 --   §7 The models, to write in kernel_models.lut: `==` of each concrete type as an
@@ -221,3 +222,29 @@ CaseRight (A B S : U) (s : Coproduct A B S) (C : U) (f : A -> C) (g : B -> C) (b
 -- every value is an injection: casing with the injections gives it back
 CasesAreAll (A B S : U) (s : Coproduct A B S) (v : S) : Bool := s.cases S s.left s.right v == v
 Coproduct (A B S : U) := CaseLeft A B S & CaseRight A B S & CasesAreAll A B S
+
+-- A record is a product whose projections are named, and a labeled sum a coproduct whose
+-- injections are named (D-2026-10-13-x): `.x` and `.y` are the arrows `first` and `second`, so the
+-- names are part of the structure, not a decoration of it. The laws are the product's and the
+-- coproduct's, with the names distinct. Stated for two fields; a record of more is nested.
+NamedProduct (A B P : U) : {
+  pair : A -> B -> P, first : P -> A, second : P -> B,
+  firstName : String, secondName : String,
+}
+asProduct (A B P : U) (r : NamedProduct A B P) : Product A B P := { pair := r.pair, first := r.first, second := r.second }
+NamedPairs (A B P : U) (r : NamedProduct A B P) (a : A) (b : B) (q : P) : Bool :=
+  PairFst A B P (asProduct A B P r) a b and PairSnd A B P (asProduct A B P r) a b and Pairing A B P (asProduct A B P r) q
+ProjectionNamesDistinct (A B P : U) (r : NamedProduct A B P) : Bool := not (r.firstName == r.secondName)
+NamedProduct (A B P : U) := NamedPairs A B P & ProjectionNamesDistinct A B P
+
+NamedCoproduct (A B S : U) : {
+  left : A -> S, right : B -> S,
+  cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C,
+  leftName : String, rightName : String,
+}
+asCoproduct (A B S : U) (s : NamedCoproduct A B S) : Coproduct A B S := { left := s.left, right := s.right, cases := s.cases }
+NamedCases (A B S : U) (s : NamedCoproduct A B S) (C : U) (f : A -> C) (g : B -> C) (a : A) (b : B) (v : S) : Bool :=
+  CaseLeft A B S (asCoproduct A B S s) C f g a and CaseRight A B S (asCoproduct A B S s) C f g b
+  and CasesAreAll A B S (asCoproduct A B S s) v
+InjectionNamesDistinct (A B S : U) (s : NamedCoproduct A B S) : Bool := not (s.leftName == s.rightName)
+NamedCoproduct (A B S : U) := NamedCases A B S & InjectionNamesDistinct A B S

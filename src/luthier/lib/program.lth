@@ -43,7 +43,7 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaPara
   subtype recordValue block sum list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
   plainParam typedParam shapeParam bind rebind
 import "term.lth" Term Program Act Constant Pattern Alpha Substitution Var Lit Universe World Lam App Pi
-  Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Declare Define Datum IntConst FloatConst
+  Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Declare Define Datum IntConst FloatConst
   StringConst PCon
 
 -- ---------------------------------------------------------------- §1 Failures and the theory
@@ -387,7 +387,7 @@ containsArrow (ep : Program) (fuel : Nat) (ty : Term) : Bool := match ty {
   Pi x d c -> true ;
   Sigma x d c -> containsArrow ep fuel d or containsArrow ep fuel c ;
   Subtype x d q -> containsArrow ep fuel d ;
-  Sum kvs -> anyArrow ep fuel kvs ; Data x kvs -> anyArrow ep fuel kvs ;
+  Sum kvs -> anyArrow ep fuel kvs ; Data x kvs -> anyArrow ep fuel kvs ; Record kvs -> anyArrow ep fuel kvs ;
   App f x -> containsArrow ep fuel f or containsArrow ep fuel x ;
   Var x -> fuel > 0 and (match definedBody ep x { nothing -> false ; just b -> containsArrow ep (fuel - 1) b }) ;
   _ -> false ;

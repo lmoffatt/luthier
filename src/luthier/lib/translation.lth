@@ -36,7 +36,8 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal Fi
   matchOf namedArg ifThen proj intLit floatLit stringLit pWild pApp pLit pTuple plainParam typedParam
   shapeParam bind rebind
 import "term.lth" Term Program Act Pattern Constant Alpha Var Lit Universe World Lam App Pi Sigma Pair
-  Match Inj Sum Data Subtype Declare Define Datum IntConst FloatConst StringConst PVar PWild PCon PPair PLit
+  Match Inj Sum Data Subtype Record RecordValue Proj Declare Define Datum IntConst FloatConst StringConst PVar
+  PWild PCon PPair PLit
 
 -- ---------------------------------------------------------------- §1 The theory and the acts
 
@@ -101,12 +102,12 @@ Patterns (a : Alpha) (e : Elaboration a) : Bool :=
 -- a list is `cons` and `nil` (2.S12)
 Lists (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [] (list [nm "x", nm "y"])) (App (App (Var "cons") (Var "x")) (App (App (Var "cons") (Var "y")) (Var "nil")))
--- a sum, a record type, a `data` (2.S12; 3.S4). The kernel's `Sigma` names its first component;
--- the record's other names are the elaborator's to keep for projections (§4).
+-- a sum, a record type, a `data` (2.S12; 3.S4). A record type keeps its names in the kernel: it is
+-- a product whose projections are named (D-2026-10-13-x).
 TypeForms (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [] (sum [("x", nm "A"), ("y", nm "B")])) (Sum [("x", Var "A"), ("y", Var "B")])
   and gives a (e.term [] (record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing))
-          (Sigma "x" (Var "A") (Var "B"))
+          (Record [("x", Var "A"), ("y", Var "B")])
   and sameProgram a (e.elaborate [define "C" [] (just universe) (dataBody [("r", nm "C"), ("s", app (nm "List") (nm "C"))])])
           [Define "C" Universe (Data "C" [("r", Var "C"), ("s", App (Var "List") (Var "C"))])]
 
@@ -157,14 +158,14 @@ OperatorOfTheModel (a : Alpha) (e : Elaboration a) : Bool :=
 
 -- ---------------------------------------------------------------- §4 Terms by context
 
--- a record value is a pair, checked against a type with those components; a projection is a
--- one-branch `match` on the component pattern of the type of what is projected (2.S12)
+-- a record value is the introduction of its record type, and a projection the arrow of that name
+-- (D-2026-10-13-x, which replaces 2.S12's pair and one-branch `match`)
 pairType : Surface := record [{ names := ["x"], type := nm "A" }, { names := ["y"], type := nm "B" }] nothing
 Records (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [aType "A", aType "B", of "u" "A", of "v" "B"] (recordValue [("x", nm "u"), ("y", nm "v")]))
-          (Pair (Var "u") (Var "v"))
+          (RecordValue [("x", Var "u"), ("y", Var "v")])
   and gives a (e.term [aType "A", aType "B", declare "r" [] pairType] (proj (nm "r") "y"))
-          (Match (Var "r") [(PPair (PVar "x") (PVar "y"), Var "y")])
+          (Proj (Var "r") "y")
 
 -- arguments by name go to their parameter's position, and a parameter not given takes its default
 -- (2.S7, 2.S12); an implicit argument is inferred from the types of the explicit ones and from

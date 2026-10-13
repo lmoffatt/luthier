@@ -9,7 +9,7 @@
 -- census (7.R4). A model file holds models of theories (12.S23); these are the kernel's own.
 
 import "kernel_laws.lth" Object Terminal Initial BooleanAlgebra Monoid FreeMonoid ListAlgebra
-  foldList OrderedSemiring Exponential Product Coproduct
+  foldList OrderedSemiring Exponential Product Coproduct NamedProduct NamedCoproduct
 
 -- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
 structuralEquality (A : U) : Object A := { eq := \ x y { x == y } }
@@ -60,4 +60,17 @@ ifThenElse : Coproduct Unit Unit Bool := {
 maybes (A : U) : Coproduct Unit A (Maybe A) := {
   left := \ u { nothing }, right := \ a { just a },
   cases := \ (C : U) f g m { match m { nothing -> f unit ; just a -> g a } },
+}
+
+-- a record type is a named product: `.x` and `.y` its projections (D-2026-10-13-x); a labeled sum a
+-- named coproduct, its labels the injections. Instances on the labels `x`, `y` and `a`, `b`.
+recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
+  pair := \ u v { { x := u, y := v } },
+  first := \ r { r.x }, second := \ r { r.y },
+  firstName := "x", secondName := "y",
+}
+sumAB (A B : U) : NamedCoproduct A B { a : A || b : B } := {
+  left := \ u { a u }, right := \ v { b v },
+  cases := \ (C : U) f g s { match s { a u -> f u ; b v -> g v } },
+  leftName := "a", rightName := "b",
 }
