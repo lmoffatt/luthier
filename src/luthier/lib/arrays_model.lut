@@ -1,0 +1,58 @@
+-- arrays_model.lut: numpy's leaves as the model of `Arrays` (arrays.lth), and the operators of
+-- vectors and matrices bound to them.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 2 of the inventory's §6). A model file
+-- (12.S23): one value of the theory, its fields routes to the host (3.S40, 10.S8), certified
+-- against arrays.lth §4 like any extern (3.S28). The host code is src/luthier/arrays.py, which
+-- survives from v0.1 (array_python.lut at the tag v0.1-final bound the same routes); an array of
+-- numpy is a value of `f` as it is (3.S21), so nothing here converts. The generators of the
+-- shapes (`gen_vec_of`, `gen_mat_of`, `gen_symmetric` of arrays.py) are the bindings a test
+-- names (7.R1); the orthogonal family of `RankUnderRotation` (7.S5) has none yet.
+
+import "arrays.lth" Arrays Vec Mat RankFloor
+
+numpy : Arrays := {
+  add := extern "python:luthier.arrays.add",
+  sub := extern "python:luthier.arrays.sub",
+  scale := extern "python:luthier.arrays.scale",
+  dot := extern "python:luthier.arrays.dot",
+  norm := extern "python:luthier.arrays.norm",
+  matVec := extern "python:luthier.arrays.mat_vec",
+  matMul := extern "python:luthier.arrays.mat_mul",
+  madd := extern "python:luthier.arrays.madd",
+  msub := extern "python:luthier.arrays.msub",
+  mscale := extern "python:luthier.arrays.mscale",
+  transpose := extern "python:luthier.arrays.transpose",
+  -- [proposed] the floor as the first argument: arrays.py's `retained_rank(a)` holds `n eps`
+  -- inside (inventory row 13); a `retained_rank_at(floor, a)` is the one-line host change
+  retainedRank := extern "python:luthier.arrays.retained_rank_at",
+}
+
+-- the leaves by name, so that `operator` can bind them (4.R13 names a function with its type)
+add : Vec Float64 -> Vec Float64 -> Vec Float64 := numpy.add
+sub : Vec Float64 -> Vec Float64 -> Vec Float64 := numpy.sub
+scale : Float64 -> Vec Float64 -> Vec Float64 := numpy.scale
+dot : Vec Float64 -> Vec Float64 -> Float64 := numpy.dot
+norm : Vec Float64 -> Float64 := numpy.norm
+matVec : Mat Float64 -> Vec Float64 -> Vec Float64 := numpy.matVec
+matMul : Mat Float64 -> Mat Float64 -> Mat Float64 := numpy.matMul
+madd : Mat Float64 -> Mat Float64 -> Mat Float64 := numpy.madd
+msub : Mat Float64 -> Mat Float64 -> Mat Float64 := numpy.msub
+mscale : Float64 -> Mat Float64 -> Mat Float64 := numpy.mscale
+transpose : Mat Float64 -> Mat Float64 := numpy.transpose
+retainedRank : RankFloor -> Mat Float64 -> Int := numpy.retainedRank
+
+-- The arithmetic of vectors and matrices written with `+ - *`, each resolved by the types of its
+-- operands (4.R13, 2.R2; v0.1 array.lut:357-364): `Vec + Vec`, `Mat + Mat`, `Float64 * Vec`,
+-- `Float64 * Mat`, `Mat * Vec`, `Mat * Mat`. [proposed] Bound here, beside the model, since the
+-- type names its model; whether an importer sees an imported file's `operator` acts is not
+-- stated by the specification.
+operator + := add
+operator - := sub
+operator * := scale
+operator + := madd
+operator - := msub
+operator * := mscale
+operator * := matVec
+operator * := matMul
