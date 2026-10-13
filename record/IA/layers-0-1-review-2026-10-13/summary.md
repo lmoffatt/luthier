@@ -1,8 +1,8 @@
 # Review of layers 0 and 1: what the replies say
 
 2026-10-13, by Claude Opus 5.5 (the session that wrote the reviewed files), for the coordinating
-session and Luciano. Read whole: A from GPT, DeepSeek, Gemini (Claude Fable pending; this section
-will be amended); B from Claude Opus, DeepSeek, Gemini; C from GPT, Claude Opus, Gemini. Each
+session and Luciano. Read whole: A from GPT, DeepSeek, Gemini and Claude Fable (section A amended
+with Fable's reply); B from Claude Opus, DeepSeek, Gemini; C from GPT, Claude Opus, Gemini. Each
 finding was checked against the file at the frozen commit (7a7d66e) before it was counted; the
 count is how many models raised it. Nothing has been fixed yet.
 
@@ -18,7 +18,14 @@ more models:
 
 ### Agreed and verified
 
-- **`agree` makes fuel exhaustion a success (GPT, DeepSeek; Gemini calls it sound).** So the
+- **Alpha-equivalence is not pinned down (Fable; GPT and DeepSeek in part).** The model
+  `alphaEq s t := head s == head t and sameNames (freeVars s) (freeVars t)` passes every law of
+  `Alpha`, yet it equates `Lit 1` with `Lit 2` and `App f g` with `App g f`. Verified: every law of
+  §2 says when two terms are alpha-equal, and none says when they are not, except for two `Var`s.
+  Since every later theory compares up to `alpha`, a coarse model weakens them all, and no test of
+  the right model can show it. Fable's first fix: the converse of `AlphaCongruent`, that
+  alpha-equal wholes have alpha-equal parts, head by head, with `RenameBound` for every binder.
+- **`agree` makes fuel exhaustion a success (GPT, DeepSeek, Fable; Gemini calls it sound).** So the
   reducer `reduce p n t = nothing` satisfies every law of `Reduction`, `Final` included. Verified:
   `agree` returns `true` on `nothing`. This is the most serious finding. GPT's fix: state the five
   rules on an exact one-step `step` (no fuel), and define the fuelled `reduce` as its iteration,
@@ -54,6 +61,24 @@ more models:
 - **The model reads a program as ordered (GPT).** `lookupBody` stops at a `Declare` that comes
   before the `Define` of the same name. 3.S1 says a program has no order. Verified.
 - **3.S18: an applied extern calls the host (GPT).** No law and no model step does this.
+- **No reduction strategy is stated (Fable).** No law says that the head of an application, the
+  scrutinee of a match or the record of a projection is reduced first, so a model that fires rules
+  only at the root passes. And no law asks for a value at any fuel: the one-step laws should say
+  `reduce p 1 t == just t`. Verified.
+- **The Boolean algebra is self-dual (Fable).** `{ top := false, bottom := true, meet := or, join
+  := and }` passes all nine laws, so "the role of `true` is its top" is stated by no law. What tells
+  `true` from `false` is `if`; the missing law joins `booleans` to `ifThenElse`
+  (`m.top == c.left unit`). Verified. The same holds of `Coproduct Unit Unit Bool`. Also: no law
+  says `cons a xs == combine (inject a) xs`.
+- **The model reduces a match on a hole (Fable).** `reduce [Declare "z" ty] 3 (Match (Var "z")
+  [(PLit (IntConst 0), a), (PWild, b)])` gives `b`, since a stuck scrutinee is read as a miss and
+  the wildcard takes it. 3.S19 says it does not reduce. `constructorTerms` also takes a declared
+  hole for a nullary constructor, and non-linear patterns become equality tests, which 3.S10 does
+  not have. Verified in term_model.lut.
+- **`Prim` computes on an undefined `Var "+"` (Fable).** 3.S9 makes a name without a body a hole;
+  the primitive rule belongs to the body `Primitive` (3.S2). Verified.
+- **`canonical` cannot run (Fable).** Its string functions are holes, so the form that defines the
+  hash is an uncertified model. Known, and stated in its report.
 
 ### Not taken
 
@@ -66,6 +91,9 @@ more models:
   uses `head`; it does not claim to give constructors their roles.
 - **"Prefixed constructor names in patterns are not unqualified" (Gemini).** True, but a minor gap
   of `canonical`. It is mine to fix, not a finding against a law.
+- **"`structuralEquality` fails reflexivity on NaN, and substitutivity on `0.0` against `-0.0`"
+  (Fable).** By 11.S7 NaN is an error and so is division by zero, so neither case arises. If
+  spec 11 makes `-0.0 == 0.0` hold, the case is left for that chapter.
 
 ### Mine to fix (no question)
 
@@ -89,6 +117,18 @@ more models:
   roles.
 - **`lookupBody`:** prefer a `Define` over a `Declare` in any order.
 - **3.S18:** an extern step through a host field of the model.
+- **`Alpha`:** the converse of congruence for every head, and `Lit c ~ Lit d` only if `c == d`.
+  This one goes first.
+- **The strategy:** state weak head reduction (head, scrutinee and record reduced first), and add
+  the one-step laws at fuel 1.
+- **`Bool`:** join `booleans` to `ifThenElse`; add `cons a xs == combine (inject a) xs`.
+- **The model:** a match on a hole stays stuck; a hole is not a constructor; patterns are linear.
+- **`Prim`:** a rule of `Primitive` bodies, not of a bare name; parenthesize its guard.
+- **`IotaPair`:** add the mirror instance (Fable).
+- **The comment "a record of more is nested":** wrong against the flat `RecordValue` and
+  D-2026-10-13-o.
+- **Chapter 3 lags the files (Fable):** 3.R1, 3.S36's `KernelLaws`, 3.S29's `Act`, and `Axiom`'s
+  string. To update together with question 2.
 
 ## B. The checker (translation, program)
 
@@ -262,6 +302,10 @@ Each with my recommendation; each reversible.
    laws valued in the cost `C`. Recommended: keep `Law` Boolean until the cost library (step 5),
    and say so in 5.S1; `Law C` then gains a cost case.
 
-## Pending
-
-Claude Fable's reply to A: this summary will be amended when it arrives.
+7. **Stuck terms and 3.S15 (A, Fable).** 3.S15 says a recursive function applied to an argument
+   that does not reduce "stays folded": a name is unfolded only when that makes progress. That is
+   a presentation of stuck terms, not a definitional equality. It makes the normal form depend on
+   the specimen, so `Delta` is false of a host that follows it and true of term_model.lut.
+   Recommended: retire "stays folded" from 3.S15. Reduction unfolds a defined name in head
+   position; a stuck term is whatever reduction leaves, the same for every specimen; and folding
+   back for display is the printer's.
