@@ -27,7 +27,10 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 - 2026-10-13, on his observation that no law said `eps` was the empty string (4.R10): `derives`
   is declared in `ebnf.lth` with the laws of the regular operations (unit, union, fixed point,
   nonterminals as unions), and its backtracking body moved to `ebnf_model.lut` as a model
-  (92924e6). The first theory file and model file apart (Z8). Next: the parser (1.2).
+  (92924e6). The first theory file and model file apart (Z8).
+- 2026-10-13: the three files reviewed by four models (record/IA/first-code-review-2026-10-13);
+  his answers D-2026-10-13-o changed the specification (548b320); the files rewritten as draft 2
+  (51eca81); round 2 sent (596abaf). Next: round 2's replies, then the parser (1.2).
 
 ## Rules for every step
 
