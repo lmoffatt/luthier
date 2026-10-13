@@ -1,0 +1,123 @@
+-- core.lut: what the interpreter provides, and nothing else (11.R2): the primitive types, the
+-- core's data, `Nat` and `Fin`, and the operations the kernel computes on constants (3.S17).
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 1 of the inventory's §6). Sources: spec
+-- 11.R1 to 11.R3, 11.S4, 11.S5, 11.S7 (the numbers); 3.S7, 3.R2, 3.R3 (the core's data); 2.S12
+-- (the translations that reach these names), 2.S21 (which words are keywords), 4.R13 (an
+-- operator is resolved by the type of its operands); 12.S22 (`core.lut` encloses the top-level
+-- scope of every file, so its names are visible unqualified); term.lth §5 (`Prim`: what the
+-- kernel computes). The v0.1 file is `src/luthier/core.lut` at the tag v0.1-final.
+--
+-- Its name and its kind. The specification names this file `core.lut` (11.R2 allows `primitive`
+-- here only; library.lth's policies anchor on the path); it is read as a model file by its
+-- extension (library.lth, `KindByExtension`), which is its kind: it holds the interpreter's
+-- values, not laws. Its laws live in theory files: kernel_laws.lth states what `Unit`, `Empty`,
+-- `Bool`, `List` and `Nat` are, with kernel_models.lut naming them as models; numbers.lth states
+-- what `Int`, `Float64` and `String` are, with numbers_model.lut naming the operations below as
+-- models (12.S23, Z8). [proposed] That core is a `.lut` under `lib/` and not a third kind of
+-- file; one commit undoes it.
+--
+-- What is not here. `extern`, `primitive` and `axiom` are names of core whose application the
+-- checker recognizes (3.S39); they have no definition a file could write. The comparisons
+-- `== /= < <= > >=` are the kernel's `Primitive` of the same symbol (3.S17, term.lth `Prim` and
+-- its neighbours): the elaboration of `a < b` reaches `Primitive "<"` directly, since no act of
+-- the grammar binds a comparison symbol (`operator` takes `+ - * / and or mod` only, 2.S9), and
+-- `==` is one operation on every concrete type (4.R8). [proposed] So the comparisons are named
+-- here in this comment and nowhere else; the arithmetic is named below and bound by `operator`.
+
+-- ---------------------------------------------------------------- the core's data (3.S7, 3.R3)
+
+-- the terminal and the initial structure, as data (3.S7; D-2026-10-13-t gives their roles in
+-- kernel_laws.lth: `unit` the point of a terminal object, `Empty` initial)
+Unit : U := data { unit : Unit }
+Empty : U := data { }
+
+-- `Bool`: a sum of two units written as a `data` without recursion (3.R3, D-2026-10-13-o); its
+-- role, a Boolean algebra with `true` its top, is kernel_laws.lth §3 and kernel_models.lut.
+-- [proposed] `data` and not the labeled sum `{ true : Unit || false : Unit }` of 2.S12: 3.R3 is
+-- the later decision, and the kernel represents `true` as the constructor `Var "true"`
+-- (term.lth, `truth`), not as an injection.
+Bool : U := data { true : Bool ; false : Bool }
+
+-- the connectives: `a and b`, `a or b` and `p -> q` on Bools elaborate to these (2.S12); `and`
+-- and `or` are operator words (2.S21), so their functions are named `conj` and `disj` and bound
+-- by `operator` at `Bool` (4.R13)
+not (b : Bool) : Bool := match b { true -> false ; false -> true }
+conj (a b : Bool) : Bool := match a { true -> b ; false -> false }
+disj (a b : Bool) : Bool := match a { true -> true ; false -> b }
+implies (a b : Bool) : Bool := match a { true -> b ; false -> true }
+operator and := conj
+operator or := disj
+
+-- `Maybe` and `List`, as data (3.R3, 3.S36); their roles: a coproduct with `Unit`
+-- (kernel_models.lut `maybes`) and the free monoid (kernel_laws.lth §4, `lists`). `[a, b, c]`
+-- is `cons a (cons b (cons c nil))` (2.S12).
+Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
+List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
+
+-- ---------------------------------------------------------------- the primitive types (11.R1, 11.S4)
+
+-- Each body says what it is (11.R1). `Int` is the integers without bound, realized exactly by
+-- the host's; `Real` the ideal, which nothing computes (its structure is the axiom `realField`
+-- of numbers_model.lut, 11.R3); `Float64` the finite doubles, every one a real number, so it
+-- refines `Real`, with the machine's rounded operations (11.S4: the refinement is of the values,
+-- not of the operations); `Rational` the rationals, exactly, refining `Real`, with no literal
+-- (its values come from `lib/rational.lut`, 11.S4, not written); `String` is text.
+Int      : U := primitive "integer"
+Real     : U := primitive "real"
+Float64  : Real := primitive "ieee754-binary64"
+Rational : Real := primitive "rational"
+String   : U := primitive "unicode"
+
+-- the naturals and the finite type of `n` indices (11.R1): subtypes of `Int`, so neither has a
+-- constructor of its own; `Nat`'s laws are kernel_laws.lth §5
+Nat : U := { k : Int | 0 <= k }
+Fin (n : Int) : U := { k : Int | 0 <= k and k < n }
+
+-- an infinity that means something is asked for in the type (11.S7); nothing else is one
+ExtendedReal = { finite : Float64 || negInf : Unit || posInf : Unit }
+
+-- ---------------------------------------------------------------- the operations (3.S17, 11.S4, 11.S5)
+
+-- The kernel computes these on constants (3.S17; term.lth §5 states each step). Each is a
+-- `primitive` body named by its symbol, as term.lth's `Prim` writes them (`Primitive "+"`), typed
+-- at one type, and the infix symbol is bound to it by `operator` at that type (4.R13, 2.R2: a
+-- type names its model; `Int + Int` and `Float64 + Float64` are two models of one symbol).
+-- What each one is: numbers.lth (`Doubles`, `IntegerDivision`, `Conversion`; the ring of `Int`
+-- in algebra.lth) and kernel_laws.lth (`Monoid` for `String`).
+
+-- the integers: exact (11.S4); the quotient and the remainder are the host's floor division,
+-- `(a / b) * b + a mod b == a` with the remainder taking the sign of the divisor
+-- (numbers.lth `IntegerDivision`); a zero divisor is an error and no term (term.lth `PrimInt`)
+intPlus  : Int -> Int -> Int := primitive "+"
+intMinus : Int -> Int -> Int := primitive "-"
+intTimes : Int -> Int -> Int := primitive "*"
+intDiv   : Int -> Int -> Int := primitive "/"
+intMod   : Int -> Int -> Int := primitive "mod"
+operator + := intPlus
+operator - := intMinus
+operator * := intTimes
+operator / := intDiv
+operator mod := intMod
+
+-- the doubles: the machine's rounded operations (11.S4), each the IEEE 754 operation in
+-- round-to-nearest; NaN and an overflow are errors, never values (11.S7)
+floatPlus   : Float64 -> Float64 -> Float64 := primitive "+"
+floatMinus  : Float64 -> Float64 -> Float64 := primitive "-"
+floatTimes  : Float64 -> Float64 -> Float64 := primitive "*"
+floatDivide : Float64 -> Float64 -> Float64 := primitive "/"
+operator + := floatPlus
+operator - := floatMinus
+operator * := floatTimes
+operator / := floatDivide
+
+-- text: `+` is concatenation, the free monoid on characters (kernel_laws.lth `Monoid`,
+-- numbers_model.lut `strings`)
+stringAppend : String -> String -> String := primitive "+"
+operator + := stringAppend
+
+-- the nearest double to an integer, exact below 2^53; the name stays with the integers
+-- (11.S5, D-2026-10-05-c). Here and not in a library, since every program that draws a double
+-- from an integer needs it (v0.1 real.lut bound it to the host for the same reason).
+toFloat64 : Int -> Float64 := primitive "toFloat64"
