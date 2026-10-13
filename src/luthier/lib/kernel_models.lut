@@ -1,0 +1,63 @@
+-- kernel_models.lut: the core's types as models of the structures of kernel_laws.lth.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 2.1; §7 of kernel_laws.lth). Each
+-- value below says which known structure a core type is, and so gives its constructors their
+-- roles (L2.7, D-2026-10-13-t): `unit` the point of a terminal object, `true` and `false` the top
+-- and bottom of a Boolean algebra, `nil` the neutral element of a free monoid and `cons` the
+-- injection combined, `if` and `match` the cases of a coproduct. They are certified against their
+-- theories like any model (spec 7); a law that quantifies over maps or monoids gets them from a
+-- census (7.R4). A model file holds models of theories (12.S23); these are the kernel's own.
+
+import "kernel_laws.lth" Object Terminal Initial BooleanAlgebra Monoid FreeMonoid ListAlgebra
+  foldList OrderedSemiring Exponential Product Coproduct
+
+-- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
+structuralEquality (A : U) : Object A := { eq := \ x y { x == y } }
+
+-- `Unit` is terminal, `Empty` initial (3.S7, 3.S8)
+unitTerminal : Terminal Unit := { point := unit }
+emptyInitial : Initial Empty := { absurd := \ (A : U) (e : Empty) { match e { } } }
+
+-- `Bool` is a Boolean algebra with `not`, `and`, `or`
+booleans : BooleanAlgebra Bool := {
+  top := true, bottom := false,
+  complement := \ b { not b },
+  meet := \ a b { a and b },
+  join := \ a b { a or b },
+}
+
+-- `List A` is the free monoid on `A`; its fold is the recursion principle of 3.S36
+appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
+lists (A : U) : FreeMonoid A (List A) := {
+  neutral := nil,
+  combine := \ xs ys { appendList A xs ys },
+  inject := \ a { cons a nil },
+  fold := \ (N : U) (n : Monoid N) (f : A -> N) (xs : List A) {
+    foldList A N { onNil := n.neutral, onCons := \ a r { n.combine (f a) r } } xs },
+}
+
+-- `Nat` is an ordered commutative semiring (11.R1)
+naturals : OrderedSemiring Nat := {
+  zero := 0, one := 1,
+  plus := \ a b { a + b },
+  times := \ a b { a * b },
+  leq := \ a b { a <= b },
+}
+
+-- the kernel's application, pairing and match are the exponential, the product and the coproduct
+-- (3.S8, 3.S36); on `Bool` the coproduct's cases are `if` (`IfTrue`, `IfFalse`), on `Maybe` a
+-- match (`CaseNothing`, `CaseJust`)
+application (A B : U) : Exponential A B := { apply := \ f x { f x } }
+pairs (A B : U) : Product A B (A * B) := {
+  pair := \ a b { (a, b) },
+  first := \ p { match p { (a, b) -> a } },
+  second := \ p { match p { (a, b) -> b } },
+}
+ifThenElse : Coproduct Unit Unit Bool := {
+  left := \ u { true }, right := \ u { false },
+  cases := \ (C : U) f g b { if b then f unit else g unit },
+}
+maybes (A : U) : Coproduct Unit A (Maybe A) := {
+  left := \ u { nothing }, right := \ a { just a },
+  cases := \ (C : U) f g m { match m { nothing -> f unit ; just a -> g a } },
+}
