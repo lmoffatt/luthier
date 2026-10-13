@@ -1,41 +1,42 @@
 -- test.lth: a test as data, what running it gives, and the grade of what it gives.
 --
--- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (layer 2 of
--- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, step 5.1). Sources: spec 7.S20 (`test` is a
--- function with named arguments), 7.R1 (a test names its generators), 7.S8 (budgets), 7.S9 (an
--- entry's identity includes its binding), 7.S10 (grades), 7.S12 (`n` counts evaluated cases),
--- 7.S13 (a known outcome is not recomputed); D9 of record/plan/archive/plan-implementation-2026-10-13-decisions.md
--- (top-level `test` lines are data, `test "x.lut"` the action); laws.lth (evidence and what it
--- settles); generators.lth. Pattern of ebnf.lth.
+-- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (layer 2 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, step 5.1); draft 0 at
+-- 163eca2 by Claude Opus 5.5, rewritten on the internal review of layers 2 and 3
+-- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, test.1 to test.7). Sources: spec 7.S20
+-- (`test` is a function with named arguments), 7.R1 (a test names its generators; a census is a
+-- binding, not a mode), 7.S8 (budgets), 7.S9 (an entry's identity includes its binding), 7.S10
+-- (grades; the weakest summarizes), 7.S12 (`n` counts evaluated cases; an entry is accepted only
+-- when they reach `n`), 7.S13; L10.9 (no operation raises a grade without new evidence); L9.12; D9
+-- of record/plan/archive/plan-implementation-2026-10-13-decisions.md (top-level `test` lines are
+-- data, `test "x.lut"` the action); laws.lth; generators.lth. Pattern of ebnf.lth.
 --
 -- What this file states. `test` builds a `TestSpec`, a value the module keeps (D9): what law to
--- test, under which functor and metric, how many cases, at what size, from which seed, with which
--- bindings and budgets. Running it is an action, the module's `test "x.lut"` or `luthier test`;
--- a model of `Tester` runs a spec and gives the evidence of laws.lth, whose coverage is the mode's
--- and whose points number the cases asked unless a budget ran out. The grade is read from the
--- verdict and the evidence.
+-- test, under which mode (every value, or a sample with its metric), how many cases, at what
+-- size, from which seed, with which bindings and budgets. Running it is an action, the module's
+-- `test "x.lut"` or `luthier test`; a model of `Tester` runs a spec and gives the evidence of
+-- laws.lth: the points of the law's domain with their evidence and the coverage the run reached,
+-- which is the weakest of the mode's and of each binding's (7.S10), or `NotRun` with its reason
+-- when a budget gave nothing (7.S12). The grade is read from the verdict and the coverage, and
+-- the grades are ordered, so that "the weakest" means something (test.5).
 --
 -- Index (all sections written in this draft):
 --   §1 The spec: modes, `TestSpec`, `test` with its defaults (7.S20, 7.R1, 7.S8).            done
---   §2 Running: the evidence a run gives, its coverage and its count (7.S12, 7.S13).         done
---   §3 Grades: read from the verdict and the coverage (7.S10).                               done
+--   §2 Running: the evidence a run gives, its coverage the weakest reached, its count the
+--      cases asked or not run (7.S10, 7.S12, 7.S13).                                        done
+--   §3 Grades: read from the verdict and the coverage, ordered (7.S10, L10.2).              done
 
-import "generators.lth" Seed Binding Budgets
-import "laws.lth" Evidence Points At Coverage Exhaustive Listed Drawn Verdict Confirmed Refuted Supported
-  Unsettled Cites Assumes
+import "generators.lth" Seed Binding Budgets Metric
+import "laws.lth" Evidence Points At NotRun Coverage Exhaustive Bounded Listed Drawn Verdict Confirmed Refuted
+  Supported Unsettled Cites Assumes
 
 -- ---------------------------------------------------------------- §1 The spec
 
--- How the cases of a test are chosen (7.R1): every value of a finite type, a census listed by
--- hand, or a sample with a metric. Roles: `ModeGivesCoverage`.
-MetricName : U := data {
-  LinearMetric : MetricName ;
-  LogMetric : MetricName ;
-}
+-- How the cases of a test are chosen (7.R1): every value of the parameters' types, or a sample
+-- with a metric; a census is a binding of a parameter, not a mode. Roles: `CoverageIsTheWeakest`.
 Mode : U := data {
   ExhaustiveMode : Mode ;
-  CensusMode : Mode ;
-  SampledMode : MetricName -> Mode ;
+  SampledMode : Metric -> Mode ;
 }
 
 -- what to test and how (D9: a value the module keeps): the law, the mode, the cases asked, the
@@ -43,11 +44,13 @@ Mode : U := data {
 TestSpec = { law : String, mode : Mode, cases : Nat, size : Nat, seed : Seed,
              whereBindings : List Binding, profile : List Binding, budgets : Budgets }
 
--- `test`: every option a named argument with a default (7.S20); the budgets' defaults are the
--- numbers today's code holds, named here as defaults and not as constants (7.S8, L5.18)
-defaultBudgets : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPerCase := 10, largestSize := 10,
-                              coveringAbove := 20000 }
-test (law : String) (mode : Mode <- SampledMode LinearMetric) (cases : Nat <- 100) (size : Nat <- 10)
+-- `test`: every option a named argument with a default (7.S20). The defaults of the budgets that
+-- today's code holds (the tries of a filter, the redraws, the probes) are those numbers, named
+-- here as defaults and not as constants (7.S8, L5.18); the rest are proposed.
+defaultBudgets : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPerCase := 10, coveringAbove := 20000,
+                              levelRuns := 10, seedsPerControl := 5, distributionDraws := 10000,
+                              specialMass := 0.05, atomAtZero := 0.01 }
+test (law : String) (mode : Mode) (cases : Nat <- 100) (size : Nat <- 10)
      (seed : Seed <- 0) (whereBindings : List Binding <- nil) (profile : List Binding <- nil)
      (budgets : Budgets <- defaultBudgets) : TestSpec :=
   { law := law, mode := mode, cases := cases, size := size, seed := seed, whereBindings := whereBindings,
@@ -56,32 +59,53 @@ test (law : String) (mode : Mode <- SampledMode LinearMetric) (cases : Nat <- 10
 -- ---------------------------------------------------------------- §2 Running
 
 -- A tester runs a spec and gives the evidence of the law it names (laws.lth): points of the law's
--- domain with their evidence and the coverage the mode gives. It is the action `test "x.lut"`
--- (D9); deterministic given the code, the binding, the seed and `n`, so a known outcome is not
--- recomputed (7.S13), which is the store's and not a law here.
+-- domain with their evidence and the coverage reached, or `NotRun` with the reason. It is the
+-- action `test "x.lut"` (D9); deterministic given the code, the binding, the seed and `n`, so a
+-- known outcome is not recomputed (7.S13), which is the store's and not a law here.
 Tester : { run : TestSpec -> Evidence }
 
 coverageOf (e : Evidence) : Maybe Coverage := match e { Points A pts c -> just c ; _ -> nothing }
 pointCount (e : Evidence) : Nat := match e { Points A pts c -> countPoints A pts ; _ -> 0 }
 countPoints (A : U) (pts : List (A * Evidence)) : Nat := match pts { nil -> 0 ; cons x rest -> 1 + countPoints A rest }
-modeCoverage (m : Mode) (s : Seed) : Coverage := match m {
-  ExhaustiveMode -> Exhaustive ; CensusMode -> Listed ; SampledMode k -> Drawn s }
+isNotRun (e : Evidence) : Bool := match e { NotRun r -> true ; _ -> false }
+-- the coverages in order of strength, so that the weakest of several is defined (7.S10)
+rankOf (c : Coverage) : Nat := match c { Exhaustive -> 3 ; Bounded n -> 2 ; Listed -> 1 ; Drawn s -> 0 }
+weaker (c d : Coverage) : Coverage := if rankOf c <= rankOf d then c else d
+modeCoverage (m : Mode) (size : Nat) (s : Seed) : Coverage := match m {
+  ExhaustiveMode -> Bounded size ; SampledMode k -> Drawn s }
+bindingsCoverage (bs : List Binding) (c : Coverage) : Coverage :=
+  match bs { nil -> c ; cons b rest -> bindingsCoverage rest (weaker b.coverage c) }
+-- the coverage a spec reaches: the mode's, exhaustive up to the size (the whole type when the
+-- types are finite and the size reaches them, which the tester knows and this theory does not),
+-- weakened by every binding (7.S10: the entry lists the reach of each parameter, and the grade is
+-- summarized by the weakest)
+specCoverage (s : TestSpec) : Coverage :=
+  bindingsCoverage s.profile (bindingsCoverage s.whereBindings (modeCoverage s.mode s.size s.seed))
 
--- the coverage of a run is its mode's: exhaustive, a census, or a draw from the spec's seed
-ModeGivesCoverage (t : Tester) (s : TestSpec) : Bool :=
-  match coverageOf (t.run s) { nothing -> true ; just c -> c == modeCoverage s.mode s.seed }
--- a sampled run gives at most the cases asked, counting the cases evaluated (7.S12); fewer only
--- when a budget ran out, which the entry records
+-- a run is points of the law, or not run with a reason (test.1)
+RunIsPointsOrNotRun (t : Tester) (s : TestSpec) : Bool :=
+  match t.run s { Points A pts c -> true ; NotRun r -> true ; _ -> false }
+-- the coverage of a run is at most the spec's, and an exhaustive one is the spec's exactly
+CoverageIsTheWeakest (t : Tester) (s : TestSpec) : Bool :=
+  match coverageOf (t.run s) { nothing -> true ;
+    just c -> rankOf c <= rankOf (specCoverage s) and (match s.mode { ExhaustiveMode -> c == specCoverage s ; _ -> true }) }
+-- a sampled run that ran has exactly the cases asked, counting the cases evaluated (7.S12); fewer
+-- is not run, with the reason (test.2: an empty sample is no evidence)
 CountsCases (t : Tester) (s : TestSpec) : Bool :=
-  match s.mode { SampledMode k -> pointCount (t.run s) <= s.cases ; _ -> true }
-Tester := ModeGivesCoverage & CountsCases
+  match s.mode { SampledMode k -> isNotRun (t.run s) or pointCount (t.run s) == s.cases ; _ -> true }
+Tester := RunIsPointsOrNotRun & CoverageIsTheWeakest & CountsCases
 
 -- ---------------------------------------------------------------- §3 Grades
 
 -- The grades of Terms (7.S10): proved, exhaustive, cases, sampled, assumed. A run's grade is read
--- from its verdict and its coverage: a confirmation over all of a finite type is exhaustive, one
--- over a census is cases, a draw is sampled, a citation stands as proved (its source's proof, spec
--- 6), an assumption is assumed; a refutation or nothing settled has no grade.
+-- from its verdict and its coverage: a confirmation over all of a finite type is exhaustive, so is
+-- one bounded on the box the domain names (7.S10), one over a census is cases, a draw is sampled;
+-- a witness is cases whatever the coverage (L9.12: its cost is determinate, test.4); a citation
+-- stands as proved (its source's proof, spec 6), an assumption is assumed; a refutation or nothing
+-- settled has no grade. The grades are ordered by the evidence cost they carry (L10.2: none for
+-- proved and exhaustive on their domain, none on the cases listed and everything outside, finite
+-- for sampled, an assumption's price for assumed), so that the weakest of several is defined and
+-- no operation raises a grade without new evidence (L10.9).
 Grade : U := data {
   Proved : Grade ;
   ExhaustiveGrade : Grade ;
@@ -89,17 +113,25 @@ Grade : U := data {
   Sampled : Grade ;
   Assumed : Grade ;
 }
+gradeRank (g : Grade) : Nat := match g { Proved -> 4 ; ExhaustiveGrade -> 3 ; Cases -> 2 ; Sampled -> 1 ; Assumed -> 0 }
+weakest (g h : Grade) : Grade := if gradeRank g <= gradeRank h then g else h
 grade (v : Verdict) (c : Maybe Coverage) : Maybe Grade := match v {
-  Confirmed -> (match c { just k -> (match k { Exhaustive -> just ExhaustiveGrade ; Listed -> just Cases ; Drawn s -> just Sampled }) ;
+  Confirmed -> (match c { just k -> (match k { Exhaustive -> just ExhaustiveGrade ; Bounded n -> just ExhaustiveGrade ;
+                                               Listed -> just Cases ; Drawn s -> just Cases }) ;
                           nothing -> just Cases }) ;
-  Supported -> (match c { just k -> (match k { Drawn s -> just Sampled ; _ -> just Cases }) ; nothing -> just Cases }) ;
+  Supported -> (match c { just k -> (match k { Bounded n -> just ExhaustiveGrade ; Drawn s -> just Sampled ; _ -> just Cases }) ;
+                          nothing -> just Cases }) ;
   Cites r -> just Proved ;
   Assumes -> just Assumed ;
   _ -> nothing }
--- the roles of the grades: each is the grade of the evidence it names
-Grading : { gradeOf : Verdict -> Maybe Coverage -> Maybe Grade }
-GradesAsTerms (g : Grading) (s : Seed) (r : String) : Bool :=
-  g.gradeOf Confirmed (just Exhaustive) == just ExhaustiveGrade and g.gradeOf Supported (just Listed) == just Cases
-  and g.gradeOf Supported (just (Drawn s)) == just Sampled and g.gradeOf (Cites r) nothing == just Proved
+-- the roles of the grades: each is the grade of the evidence it names, and the order is total,
+-- with proved above exhaustive above cases above sampled above assumed
+Grading : { gradeOf : Verdict -> Maybe Coverage -> Maybe Grade, below : Grade -> Grade -> Bool }
+GradesAsTerms (g : Grading) (s n : Nat) (r : String) : Bool :=
+  g.gradeOf Confirmed (just Exhaustive) == just ExhaustiveGrade and g.gradeOf Supported (just (Bounded n)) == just ExhaustiveGrade
+  and g.gradeOf Supported (just Listed) == just Cases and g.gradeOf Supported (just (Drawn s)) == just Sampled
+  and g.gradeOf Confirmed (just (Drawn s)) == just Cases and g.gradeOf (Cites r) nothing == just Proved
   and g.gradeOf Assumes nothing == just Assumed and g.gradeOf Refuted (just Exhaustive) == nothing
-Grading := GradesAsTerms
+  and g.gradeOf Unsettled (just (Drawn s)) == nothing
+GradesAreOrdered (g : Grading) (x y : Grade) : Bool := g.below x y == (gradeRank x < gradeRank y)
+Grading := GradesAsTerms & GradesAreOrdered

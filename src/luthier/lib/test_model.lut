@@ -1,0 +1,8 @@
+-- test_model.lut: the grading of test.lth, by its reference definition.
+--
+-- Draft 0, 2026-10-13, by Claude Fable 5.1 in the session (layer 2; test.6 of the review). The
+-- tester itself is the certifier's action (spec 6, 7), written with it.
+
+import "test.lth" Grading grade gradeRank
+
+grading : Grading := { gradeOf := grade, below := fn x y { gradeRank x < gradeRank y } }
