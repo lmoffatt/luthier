@@ -129,20 +129,22 @@ both (u v : Verdict) : Verdict := match u {
 -- a case is settled by evaluating it
 CaseIsEvaluated (m : Settling) (b : Bool) : Bool :=
   m.settles (Case b) (Evaluated b) == (if b then Confirmed else Refuted)
+-- (the laws below that relate a form to the evidence of its parts are stated on cases: a premise
+-- on arbitrary evidence would rarely hold in a sample, 7.S12)
 -- a `forall` is refuted exactly by a counterexample, and a sample over it supports and never
 -- confirms (over an infinite domain only statistics confirm, 7.S17)
-ForallRefutedByCounterexample (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
-  not (m.settles (p a) e == Refuted) or m.settles (Forall A p) (At A a e) == Refuted
+ForallRefutedByCounterexample (m : Settling) (A : U) (a : A) : Bool :=
+  m.settles (Forall A (\ x { Case false })) (At A a (Evaluated false)) == Refuted
 SampleNeverConfirms (m : Settling) (A : U) (p : A -> Law) (seed : Nat) (es : List Evidence) : Bool :=
   not (m.settles (Forall A p) (Drawn seed es) == Confirmed)
 -- an `exists` is confirmed by a witness whose evidence confirms the law at it
-ExistsConfirmedByWitness (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
-  not (m.settles (p a) e == Confirmed) or m.settles (Exists A p) (At A a e) == Confirmed
+ExistsConfirmedByWitness (m : Settling) (A : U) (a : A) : Bool :=
+  m.settles (Exists A (\ x { Case true })) (At A a (Evaluated true)) == Confirmed
 -- `and` by a pair, `or` by either side
 BothByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
   m.settles (Both p q) (Pair e f) == both (m.settles p e) (m.settles q f)
-EitherBySide (m : Settling) (p q : Law) (e : Evidence) : Bool :=
-  not (m.settles p e == Confirmed) or m.settles (Either p q) (Side true e) == Confirmed
+EitherBySide (m : Settling) (q : Law) : Bool :=
+  m.settles (Either (Case true) q) (Side true (Evaluated true)) == Confirmed
 -- `then` is material
 ThenIsMaterial (m : Settling) (a b : Bool) : Bool :=
   m.settles (Then (Case a) (Case b)) (Evaluated (material a b)) == (if material a b then Confirmed else Refuted)
