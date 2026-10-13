@@ -2366,3 +2366,16 @@ Quote:      "si S1 aceptado, lanza a codex"
 Source:     chat:52b10bff:5001
 Kind:       plan (S1 of record/plan/sonolocalizacion/, steps 5 and 6 of the plan from zero)
 Status:     current
+
+D-2026-10-13-ad After `v0.2`, execution before evidence, in part: first the world, the externs and
+                `run` (spec 10, `world.lth`), minimal, so that sonolocalización runs uncertified,
+                an extern validated at its first action by a minimal tester over `test.lth`; then
+                evidence and certification, designed on its laws and on how they fail; then the
+                demand and the planner (spec 8), which substitute only along certified equivalences
+                (D-2026-10-11-m) and so need certificates. Reorders steps 5 and 6 of the plan from
+                zero.
+Author:     Luciano (execution first; his reason), the split of layer 3 the model's
+Quote:      "Para diseñar los certificados primero tenemos que ver como falla."
+Source:     chat:52b10bff:5037
+Kind:       plan (steps 5 and 6 of record/plan/luthier-from-zero/), with S1 (D-2026-10-13-ac)
+Status:     current

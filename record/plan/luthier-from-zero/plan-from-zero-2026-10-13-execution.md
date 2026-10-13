@@ -138,6 +138,9 @@ by Luciano.
   running (Codex, read only, record/IA/sonolocalizacion-inventory-2026-10-13/). Whether execution
   goes before evidence: asked of Luciano.
 
+- 2026-10-13, night: execution before evidence, in part (D-2026-10-13-ad): see "Order after
+  v0.2" below.
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
@@ -282,6 +285,15 @@ by Luciano.
       `v0.2`, not `v0.1-final`), and `check_spec.py` reads them so;
    then the tag `v0.2` and its push, the first push since `v0.1-final` (push only tagged
    milestones).
+
+## Order after v0.2 (D-2026-10-13-ac, -ad)
+
+Steps 5 and 6 are not done in order. After `v0.2`: (i) the world, the externs and `run` of step 6
+(`world.lth` with its specimen), minimal, with a tester over `test.lth` enough to validate an
+extern at its first action, so that one analysis of sonolocalización runs uncertified (its plan,
+`record/plan/sonolocalizacion/`); (ii) step 5, evidence and certification, designed on that
+analysis's laws and on how they fail ("para diseñar los certificados primero tenemos que ver como
+falla"); (iii) the rest of step 6, the demand and the planner, which need certificates.
 
 ## Step 5. Evidence (layer 2)
 
