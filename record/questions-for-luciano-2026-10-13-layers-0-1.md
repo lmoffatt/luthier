@@ -70,7 +70,7 @@ Ok
 ## Q5. Substitutivity belongs to the structural equality
 
 Raised by the session writing the theories, from a counterexample of the Codex writing `kernel.py`:
-`\ x { x }` and `\ y { y }` are alpha-equal, yet a function that reads the binder's name tells
+`fn x { x }` and `fn y { y }` are alpha-equal, yet a function that reads the binder's name tells
 them apart. It is not peculiar to alpha: no observational equality (alpha-equivalence of terms,
 doubles within a tolerance) is substitutive over every function. Your D-2026-10-12-ak says an
 object is a type with its equality, whose laws (reflexive, symmetric, transitive, substitutive)
