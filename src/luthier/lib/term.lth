@@ -90,7 +90,7 @@ Term : U := data {
   Subtype : String -> Term -> Term -> Term ;
   Extern : String -> Term ;
   Primitive : String -> Term ;
-  Axiom : Term ;
+  Axiom : String -> Term ;
   Hole : String -> Term ;
   Record : List (String * Term) -> Term ;
   RecordValue : List (String * Term) -> Term ;
@@ -135,7 +135,7 @@ patternsVars (ps : List Pattern) : List String :=
 -- not a variable; a `Data` binds its own name in its constructors' types.
 freeVars (t : Term) : List String := match t {
   Var x -> [x] ;
-  Lit c -> nil ; Universe -> nil ; World -> nil ; Extern r -> nil ; Primitive r -> nil ; Axiom -> nil ;
+  Lit c -> nil ; Universe -> nil ; World -> nil ; Extern r -> nil ; Primitive r -> nil ; Axiom r -> nil ;
   Hole x -> nil ;
   Lam x a b -> concat (freeVars a) (remove x (freeVars b)) ;
   Pi x a b -> concat (freeVars a) (remove x (freeVars b)) ;
@@ -200,7 +200,7 @@ head (t : Term) : String := match t {
   Var x -> "Var" ; Lit c -> "Lit" ; Universe -> "Universe" ; World -> "World" ; Lam x a b -> "Lam" ;
   App f a -> "App" ; Pi x a b -> "Pi" ; Sigma x a b -> "Sigma" ; Pair a b -> "Pair" ;
   Match s arms -> "Match" ; Inj l a -> "Inj" ; Sum kvs -> "Sum" ; Data n cs -> "Data" ;
-  Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom -> "Axiom" ;
+  Subtype x a b -> "Subtype" ; Extern r -> "Extern" ; Primitive r -> "Primitive" ; Axiom r -> "Axiom" ;
   Hole x -> "Hole" ; Record kvs -> "Record" ; RecordValue kvs -> "RecordValue" ; Proj r x -> "Proj" ; Let x ty v b -> "Let" ;
 }
 sameNames (xs ys : List String) : Bool := removeAll xs ys == nil and removeAll ys xs == nil
@@ -261,7 +261,7 @@ armsAgree (a : Alpha) (xs ys : List (Pattern * Term)) : Bool := match xs {
                         and a.alphaEq b (renameAll (patternVars p) (patternVars q) c) and armsAgree a rest more } }
 partsAgree (a : Alpha) (s t : Term) : Bool := match s {
   Var x -> t == Var x ; Lit c -> t == Lit c ; Universe -> t == Universe ; World -> t == World ;
-  Axiom -> t == Axiom ; Hole x -> t == Hole x ; Extern r -> t == Extern r ; Primitive r -> t == Primitive r ;
+  Axiom r -> t == Axiom r ; Hole x -> t == Hole x ; Extern r -> t == Extern r ; Primitive r -> t == Primitive r ;
   App f x -> (match t { App g y -> a.alphaEq f g and a.alphaEq x y ; _ -> false }) ;
   Pair u v -> (match t { Pair w z -> a.alphaEq u w and a.alphaEq v z ; _ -> false }) ;
   Inj l u -> (match t { Inj k v -> l == k and a.alphaEq u v ; _ -> false }) ;
@@ -417,7 +417,7 @@ HolesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (f : String) (t
   isNormal (m.step [Declare f ty] (Var f)) and isNormal (m.step [Declare f ty] (App (Var f) arg))
   and isNormal (m.step [Declare f ty] (Match (Var f) [(PLit k, b), (PWild, c)]))
   and stepsTo a (m.step [Declare f ty] (Match (Var f) [(PWild, c)])) c
-  and isNormal (m.step [] (Hole f)) and isNormal (m.step [] Axiom)
+  and isNormal (m.step [] (Hole f)) and isNormal (m.step [] (Axiom f))
 
 -- 3.S16, iota: a match on an injection, a pair, a constructor or a constant takes the first arm
 -- whose pattern matches, its variables substituted together; a variable arm takes anything; an arm
