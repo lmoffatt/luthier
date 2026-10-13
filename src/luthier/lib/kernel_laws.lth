@@ -153,8 +153,9 @@ ListAlgebra (A B : U) := FoldNil A B & FoldCons A B
 
 -- `Nat` (11.R1, `{ k : Int | 0 <= k }`) has the laws of its operations (D-2026-10-13-t): a
 -- commutative semiring, `+` and `*` with `0` and `1`, ordered by `<=` totally, the order agreeing
--- with `+`, and `0` its least element. The order laws are the model's reading of "its laws",
--- proposed.
+-- with `+`, `0` its least element, and `x + 1` the next value after `x` (the role of the successor:
+-- `Nat` is a subtype of `Int`, 11.R1, so it has no `succ` constructor). The order laws are the
+-- model's reading of "its laws", proposed.
 OrderedSemiring (S : U) : {
   zero : S, one : S,
   plus : S -> S -> S, times : S -> S -> S,
@@ -181,10 +182,15 @@ LeqTransitive (S : U) (s : OrderedSemiring S) (c : LeqChain S s) : Bool := s.leq
 PlusMonotone (S : U) (s : OrderedSemiring S) (p : LeqPair S s) (z : S) : Bool := s.leq (s.plus p.x z) (s.plus p.y z)
 ZeroLeast (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.leq s.zero x
 OneIsNotZero (S : U) (s : OrderedSemiring S) : Bool := not (s.one == s.zero)
+-- the successor `x + 1` is the next value: nothing lies strictly between them, so with `0` least
+-- every value is reached from `0` by successors (no other naturals). Induction itself quantifies
+-- over predicates and is not statable by tests, as the uniqueness of `fold` in §4.
+SuccessorIsNext (S : U) (s : OrderedSemiring S) (p : LeqPair S s) : Bool :=
+  p.x == p.y or s.leq (s.plus p.x s.one) p.y
 
 OrderedSemiring (S : U) := PlusAssociative S & PlusCommutes S & PlusZero S & TimesAssociative S
   & TimesCommutes S & TimesOne S & TimesDistributes S & TimesZero S & LeqTotal S
-  & LeqAntisymmetric S & LeqTransitive S & PlusMonotone S & ZeroLeast S & OneIsNotZero S
+  & LeqAntisymmetric S & LeqTransitive S & PlusMonotone S & ZeroLeast S & OneIsNotZero S & SuccessorIsNext S
 
 -- ---------------------------------------------------------------- §6 The constructions of the kernel
 
