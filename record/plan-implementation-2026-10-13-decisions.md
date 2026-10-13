@@ -40,6 +40,9 @@ breaks on the day of each phase until the script runs there too. Since that repo
 and its runs are yours to make, the question inside the question is whether I may run the
 migration script there (it rewrites code, it processes no data), or you do.
 
+
+a
+
 ## D3. Recertifying
 
 Every change to the interpreter invalidates every certificate (the interpreter is in the hash,
@@ -53,6 +56,9 @@ cones, so that repository does not run between milestones. If you need it to run
 alternative is to make `run` strict only at `v0.3`, when certificates mean what the specification
 says.
 
+OK, first finish luthier transformation, then I will apply it. I have to redo everything anyway.
+
+
 ## D4. `W` is used exactly once
 
 D-2026-10-13-b says each value of `W` is used once. "At most once" (Clean's uniqueness, affine)
@@ -64,6 +70,11 @@ that reaches the output of `main` or of the session.
 Recommended: exactly once, checked by the checker per block; the last token of a block is its
 output or is passed on.
 
+esto es raro. Porque solo una vez? 
+vos podes alterar el mundo secuencialmente, de hecho eso es lo normal, aclarame de que estamos hablando aqui
+
+
+
 ## D5. What a module shows without ascription
 
 D-2026-10-13-c hides what a theory does not name when the importer gives the module a theory as
@@ -74,6 +85,13 @@ Recommended: everything. Ascription is then the way to hide, the migration costs
 library that wants a private part says so by the theory it exports. What must never be built
 outside its theory (a `Certificate`) is protected by the library that holds it being imported
 only through that theory, which phase 4 does for `lib/certification.lut`.
+
+
+Explicame cuidadosamente ascription. 
+Yo desarrolle una logica para no leer los files a menos que haga falta, por lo cual los nombres que estan en el file deben estar accesibles sin leerlo, eso se logra con   import "x.lut" myModel. 
+Si vos haces import "x.lut", no se sabe lo que hay en x.lut hasta que no se leyo y eso genera dudas de que carajo hay en x.lut hasta no verlo, es decir que no tenemos garantias de que hay en cada lado. en este caso vos podes verificar si en x.lut esta MyModel y si esta lo importas cuando te lo pidan y si no esta tiras un error. 
+
+
 
 ## D6. Who writes it
 
@@ -88,6 +106,9 @@ change of phase 1, the generators, the libraries of costs and checks, the matrix
 parallel, with a brief each as for the chapters; the session that integrates reads every diff,
 runs the suites and flips each item of the specification from `[decided]` to `[implemented]` only
 with its accept and reject programs passing.
+
+
+
 
 ## D7. Milestones
 
