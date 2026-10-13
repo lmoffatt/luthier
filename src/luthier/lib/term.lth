@@ -208,9 +208,16 @@ RenameBound (a : Alpha) (x : String) (ty : Term) (f : Fresh) : Bool :=
   and a.alphaEq (Pi x ty f.t) (Pi f.y ty (swap x f.y f.t))
 AlphaKeepsHead (a : Alpha) (p : AlphaPair a) : Bool := head p.s == head p.t
 AlphaKeepsFree (a : Alpha) (p : AlphaPair a) : Bool := sameNames (freeVars p.s) (freeVars p.t)
--- a congruence: alpha-equal parts give alpha-equal wholes, stated on application and pairing
-AlphaCongruent (a : Alpha) (p q : AlphaPair a) : Bool :=
+-- a congruence: alpha-equal parts give alpha-equal wholes, for every constructor with parts; a
+-- binder keeps its name on both sides (renaming it is `RenameBound`)
+AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
   a.alphaEq (App p.s q.s) (App p.t q.t) and a.alphaEq (Pair p.s q.s) (Pair p.t q.t)
+  and a.alphaEq (Lam x p.s q.s) (Lam x p.t q.t) and a.alphaEq (Pi x p.s q.s) (Pi x p.t q.t)
+  and a.alphaEq (Sigma x p.s q.s) (Sigma x p.t q.t) and a.alphaEq (Subtype x p.s q.s) (Subtype x p.t q.t)
+  and a.alphaEq (Inj l p.s) (Inj l p.t) and a.alphaEq (Proj p.s l) (Proj p.t l)
+  and a.alphaEq (Sum [(l, p.s)]) (Sum [(l, p.t)]) and a.alphaEq (Data x [(l, p.s)]) (Data x [(l, p.t)])
+  and a.alphaEq (Record [(l, p.s)]) (Record [(l, p.t)]) and a.alphaEq (RecordValue [(l, p.s)]) (RecordValue [(l, p.t)])
+  and a.alphaEq (Match p.s [(PWild, q.s)]) (Match p.t [(PWild, q.t)])
 
 Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent
 
