@@ -148,3 +148,25 @@ the theories are written one after another, not in parallel.
 de acuerdo. Tambien podemos usar IAs externas porque mi limite esta en 83% y se resetea en 1d (no se cuando es ese dia)
 
 (His answer in chat, chat:da165104:3026, copied here; D-2026-10-13-r.)
+
+## Z10. Where the Python goes: a core, and the rest in Luthier
+
+Added in draft 1, on his question (two modes: everything in Luthier but a core, or everything in
+Python but a shell). The plan as written is the second: Luthier states the theories, Python
+implements the parser, checker, evaluator and certifier, certified against them. His words of
+D-2026-10-13-h ("y cuando se pueda los luthier también") point to the first.
+
+Recommended: the first is the destination, the second the scaffolding up to `v0.3`, since without a
+certifier nothing written in Luthier can be checked. From `v0.3`, piece by piece: each piece's
+Luthier model is written as a second model of its theory, the two certified against each other
+(L14.3), then the Python one retired; the checker first (`program.lth`, no speed needed), then the
+certifier, the parser last (it must be read before it can read). The core that stays outside
+Luthier is the reduction of kernel terms, the primitives and the externs, written in Rust as a
+second model of `term.lth` once it is stable and `kernel.py` certified, with PyO3 to keep the
+Python externs (numpy). Speed: an interpreter in Rust runs about as Python does; the heavy
+computation goes to externs at C speed; a compiler of kernel terms (Cranelift, LLVM), another
+model of `term.lth`, is for after `v0.4`.
+
+Si.
+
+(His answer in chat, chat:52b10bff:3333, copied here; D-2026-10-13-v.)

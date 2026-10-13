@@ -2244,3 +2244,16 @@ Quote:      "podes adelantar el kernel, si"
 Source:     chat:52b10bff:3278
 Kind:       plan (steps 2 and 4 of record/plan-from-zero-2026-10-13-execution.md)
 Status:     current
+
+D-2026-10-13-v  The destination is everything in Luthier but a core (Z10): Python is the scaffolding up
+                to `v0.3`; from then each piece (checker, certifier, parser last) gets a Luthier
+                model certified against the Python one before the Python is retired; the core that
+                stays is the reduction of kernel terms, the primitives and the externs, in Rust as a
+                second model of `term.lth` once it is stable, with PyO3 for the Python externs.
+Author:     Luciano, on the model's recommendation (Rust the model's, after his "C, C++ o rust")
+Quote:      "ahora, el nucleo lo hacemos en C, C++ o rust no?"
+            "Si."
+Source:     chat:52b10bff:3313
+            chat:52b10bff:3333
+Kind:       plan (Z10 of record/plan-from-zero-2026-10-13-decisions.md)
+Status:     current
