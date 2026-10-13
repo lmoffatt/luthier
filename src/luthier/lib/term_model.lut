@@ -6,6 +6,7 @@
 -- After-review sources: cc2542d and 2409c59; user request v3, recorded in codex.md.
 -- Let/binder update: fe3bdab, 048cd55 and 23d23f4; user request v4, recorded in codex.md.
 -- Constructor update: term.lth at 66d5cae; user request v5, recorded in codex.md.
+-- Equality update: term.lth at 360b4d4 and 051e6aa; user request v6, recorded in codex.md.
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
@@ -213,6 +214,52 @@ primitiveResult (op : String) (i j : Term) : Maybe Term := match (i, j) {
     if op == "+" then just (Lit (FloatConst (a + b))) else nothing ;
   (Lit (StringConst a), Lit (StringConst b)) ->
     if op == "==" then just (truthTerm (a == b)) else nothing ; _ -> nothing }
+-- Equality has its own closed-value domain; the permissive Iota classifier is not enough.
+-- Check both entire values before comparing, even when an outer label already differs.
+constructorType (env : Program) (x : String) : Maybe Term := match env {
+  nil -> nothing ; cons act rest -> match act {
+    Define t ty (Data self cs) -> match lookupField cs x {
+      just a -> just a ; nothing -> constructorType rest x } ;
+    _ -> constructorType rest x } }
+saturatedParts (ty : Term) (args : List Term) : Bool := match (ty, args) {
+  (Pi x a b, cons v rest) -> saturatedParts b rest ;
+  (Pi x a b, nil) -> false ; (_, nil) -> true ; _ -> false }
+equalityConstructor (p : Program) (t : Term) : Maybe (String * List Term) :=
+  match constructorTerms p t nil { nothing -> nothing ; just (c, vs) ->
+    match constructorType p c { nothing -> nothing ; just ty ->
+      if saturatedParts ty vs then just (c, vs) else nothing } }
+concreteValue (p : Program) (t : Term) : Bool := match t {
+  Lit c -> true ; Pair a b -> concreteValue p a and concreteValue p b ;
+  Inj l a -> concreteValue p a ; RecordValue fs -> concreteFields p fs ;
+  _ -> match equalityConstructor p t { nothing -> false ; just (c, vs) -> concreteTerms p vs } }
+concreteFields (p : Program) (fs : List (String * Term)) : Bool := match fs {
+  nil -> true ; cons (k, v) rest -> concreteValue p v and concreteFields p rest }
+concreteTerms (p : Program) (vs : List Term) : Bool := match vs {
+  nil -> true ; cons v rest -> concreteValue p v and concreteTerms p rest }
+-- These comparisons are called only after the complete concrete-value check.
+equalValues (p : Program) (s t : Term) : Bool := match (s, t) {
+  (Lit (IntConst a), Lit (IntConst b)) -> a == b ;
+  (Lit (FloatConst a), Lit (FloatConst b)) -> a == b ;
+  (Lit (StringConst a), Lit (StringConst b)) -> a == b ;
+  (Pair a b, Pair c d) -> equalValues p a c and equalValues p b d ;
+  (Inj l a, Inj k b) -> l == k and equalValues p a b ;
+  (RecordValue fs, RecordValue gs) -> equalFields p fs gs and equalFields p gs fs ;
+  _ -> match (equalityConstructor p s, equalityConstructor p t) {
+    (just (c, vs), just (d, ws)) -> c == d and equalTerms p vs ws ; _ -> false } }
+equalTerms (p : Program) (vs ws : List Term) : Bool := match (vs, ws) {
+  (nil, nil) -> true ; (cons v rest, cons w more) -> equalValues p v w and equalTerms p rest more ;
+  _ -> false }
+equalFields (p : Program) (fs gs : List (String * Term)) : Bool := match fs {
+  nil -> true ; cons (k, v) rest -> match lookupField gs k {
+    nothing -> false ; just w -> equalValues p v w and equalFields p rest gs } }
+stepEquality (p : Program) (i j : Term) : HeadStep :=
+  if concreteValue p i and concreteValue p j then Next (truthTerm (equalValues p i j))
+  else match stepHead p i {
+    Next k -> Next (App (App (Primitive "==") k) j) ; Done k ->
+      if concreteValue p i then match stepHead p j {
+        Next l -> Next (App (App (Primitive "==") i) l) ;
+        Done l -> Done (App (App (Primitive "==") i) j) }
+      else Done (App (App (Primitive "==") i) j) }
 stepHead (p : Program) (t : Term) : HeadStep := match t {
   Var x -> match lookupBody p x { nothing -> Done t ; just b -> Next b } ;
   Let x ty v b -> Next (substTerm x v b) ;
@@ -230,7 +277,7 @@ stepApplication (p : Program) (f a : Term) : HeadStep := match stepHead p f {
     Lam x ty b -> Next (substTerm x a b) ;
     App (Primitive name) i -> stepPrimitive p name i a ; _ -> Done (App f a) } }
 stepPrimitive (p : Program) (name : String) (i j : Term) : HeadStep :=
-  match primitiveResult name i j { just v -> Next v ; nothing -> match stepHead p i {
+  if name == "==" then stepEquality p i j else match primitiveResult name i j { just v -> Next v ; nothing -> match stepHead p i {
     Next k -> Next (App (App (Primitive name) k) j) ; Done k -> match i {
       Lit c -> match stepHead p j {
         Next l -> Next (App (App (Primitive name) i) l) ; Done l -> Done (App (App (Primitive name) i) j) } ;
