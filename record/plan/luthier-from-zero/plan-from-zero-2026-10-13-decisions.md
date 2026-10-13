@@ -149,6 +149,9 @@ de acuerdo. Tambien podemos usar IAs externas porque mi limite esta en 83% y se 
 
 (His answer in chat, chat:da165104:3026, copied here; D-2026-10-13-r.)
 
+In practice since the same day: the specimens are written by Codex, launched by the coordinating
+session with `codex exec` on his authorization; Sonnet agents were not used.
+
 ## Z10. Where the Python goes: a core, and the rest in Luthier
 
 Added in draft 1, on his question (two modes: everything in Luthier but a core, or everything in
