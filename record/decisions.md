@@ -2176,3 +2176,15 @@ Kind:       principles (L2.7 new; Terms) and spec (2.S8, 3.R3, 4.R3, 4.R4). For 
             D-2026-10-07-e
 Status:     current; reverses the model's reading of Q1 in D-2026-10-13-o (observers with laws of
             injectivity)
+
+D-2026-10-13-q  Three readings `grammar.lth` took where chapter 2 was silent, which the files of
+                round 3 depend on, are decided: string escapes `\"`, `\\`, `\n` (2.S1); `_` as a
+                pattern atom (2.S5); the layout readings of 2.S4 (the braces of a `data` separate
+                constructors by line breaks, a `}` at column 0 closes its brace, blank and comment
+                lines are dropped with their line breaks). The trailing comma in a list stays
+                proposed.
+Author:     Luciano
+Quote:      "Ok a los tres."
+Source:     chat:da165104:2971
+Kind:       spec (2.S1, 2.S4, 2.S5)
+Status:     current

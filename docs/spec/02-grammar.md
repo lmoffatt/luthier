@@ -21,7 +21,7 @@ alternatives, `[ ]` is optional, `{ }` repeats zero or more times, literals are 
 
 A dotted name `m.f` is one token, a qualified name or a projection that the checker resolves
 (spec 2.S14). Names that start with a capital are types and laws by convention, not by rule.
-[proposed] Inside a string, `\"`, `\\` and `\n` stand for a quote, a backslash and a line break, so
+[decided D-2026-10-13-q] Inside a string, `\"`, `\\` and `\n` stand for a quote, a backslash and a line break, so
 that a law can spell a text of several lines (`grammar.lth`).
 
 **2.S2. Reserved words.** [implemented] The reserved words are `data`, `match`, `extern`,
@@ -42,7 +42,7 @@ the braces of a record type, a record value and a block (a lambda's body include
 separates items and `;` is equivalent to it, so several items may share a line
 (D-2026-10-11-k). A line indented deeper than the block's first item continues the item above it,
 and so does a line that cannot start an item: one beginning with `else`, `then`, `in` or an
-infix operator. [proposed] Two readings `grammar.lth` takes where this is silent: the braces of a
+infix operator. [decided D-2026-10-13-q] Three readings `grammar.lth` took where this was silent: the braces of a
 `data` behave as those of a record type (a line break separates constructors), and a `}` at
 column 0 closes its brace and does not start an act; blank lines and lines holding only a comment
 are dropped with their line breaks.
@@ -71,8 +71,8 @@ Clauses under a header with parameters are a `match` on the tuple of the paramet
 the module keeps, such as a `test` line or a citation (2.S21 makes `test` and `cite` functions);
 which terms may stand there is the checker's, and no `<-` does (2.R5). A trailing separator is
 allowed after the last constructor of a `data`, the last arm of a `match` and the last item of a
-record or a block; [proposed] also after the last element of a list, and `_` is a pattern atom so
-that `cons _ rest` can be written (`grammar.lth`). [decided D-2026-10-13-p] A definition has a body or clauses, never both:
+record or a block; [proposed] also after the last element of a list (`grammar.lth`).
+[decided D-2026-10-13-q] `_` is a pattern atom, so that `cons _ rest` can be written. [decided D-2026-10-13-p] A definition has a body or clauses, never both:
 `definition ::= name { binder } [ ":" term ] ( ":=" body | clause { clause } )`; a definition by
 clauses is the `match` of its clauses on the tuple of its parameters (2.S12). Between the
 constructors of a `data` on one line, `;` is required (a line break gives it, 2.S4). A name may be
