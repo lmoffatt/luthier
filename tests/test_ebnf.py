@@ -1,0 +1,55 @@
+"""The Python specimen of `Derives` (src/luthier/ebnf.py) on `luthierSyntax` read from grammar.lth."""
+
+import re
+
+from luthier.ebnf import cats_of, count_derivations, lits_of, lits_of_names, luthier_syntax
+
+G = luthier_syntax()
+LITS = set(lits_of(G))
+
+
+def views(text: str) -> list[tuple[str, str]]:
+    """Tokens of a text whose tokens are separated by spaces, ended by the act's newline."""
+    out = []
+    for w in text.split():
+        if w in LITS:
+            out.append(("literal", w))
+        elif re.fullmatch(r"[0-9][0-9.e-]*", w):
+            out.append(("number", w))
+        elif w.startswith('"'):
+            out.append(("string", w))
+        else:
+            out.append(("name", w))
+    return out + [("literal", "\n")]
+
+
+def test_the_grammar_is_read_whole():
+    names = {lhs for lhs, _ in G.rules}
+    assert G.start == "program" and "term" in names and "arrowOpen" in names
+    assert set(cats_of(G)) == {"name", "string", "number"}
+
+
+def test_keywords_and_operators_are_derived():
+    words = {w for w in LITS if re.fullmatch(r"[A-Za-z]+", w)}
+    assert words == {"import", "as", "operator", "and", "or", "mod", "data", "if", "then", "else",
+                     "match", "U", "W", "quote"}
+    levels = ["ampTerm", "arrowTerm", "orTerm", "andTerm", "cmpTerm", "addTerm", "mulTerm"]
+    assert lits_of_names(G, levels) == ["&", "->", "or", "and", "==", "/=", "<", "<=", ">", ">=",
+                                        "+", "-", "*", "/", "mod"]
+
+
+def test_one_tree_where_round_3_found_two():
+    for text in ["x := U -> ( a : A ) * b & C", "x := A -> if c then y & z",
+                 "x := A -> ( b : B ) -> C & D", "x := P & ( y : A ) -> Q", "x := A -> B & C",
+                 "x := ( n : Nat ) * Vec n", "x := f a + g b", "x := if c then ( if d then y ) else b"]:
+        assert count_derivations(G, views(text)) == 1, text
+
+
+def test_the_dangling_else_derives_twice_and_the_parser_chooses():
+    assert count_derivations(G, views("x := if a then if b then p else q")) == 2
+
+
+def test_what_does_not_derive():
+    for text in ["x := f < a : A | b : B >", "x := \\ ( y ) { y }", "x := a + if c then a else b",
+                 "operator == := eqZ7", "x <- 1"]:
+        assert count_derivations(G, views(text)) == 0, text
