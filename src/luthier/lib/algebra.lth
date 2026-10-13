@@ -1,0 +1,129 @@
+-- algebra.lth: the algebraic structures the number types are models of, each law written once in
+-- its most general form (4.R10), up to the complete ordered field, which is what `Real` is (11.R3).
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 1 of the inventory's §6). Sources: spec
+-- 11.R3 (`CompleteOrderedField` in `lib/algebra.lut` holds the laws of a field, of a compatible
+-- total order, and completeness, which can be stated and not tested), 11.S4, 11.S15 (the doubles
+-- are not a field), 4.R10 (a law has one name, written once here); kernel_laws.lth §4 and §5
+-- (`Monoid`, and the pattern: a record of operations, laws over a model, `T := laws`); 7.S12
+-- (laws with a premise quantify over the pairs that satisfy it, as kernel_laws.lth §1 does);
+-- 7.R4 (a function over an infinite domain, the predicate of a set, is drawn from a census). The
+-- v0.1 file is `src/luthier/lib/algebra.lut` at the tag v0.1-final.
+--
+-- Its name. The specification says `lib/algebra.lut`; under Z8 a theory is a `.lth`
+-- (12.S23), so this is `algebra.lth`, and its models (`integers`, `realField`) are in
+-- numbers_model.lut. Each structure below is built from the ones before it by inclusion
+-- (4.R10), through a field that holds the smaller structure, and reuses its laws through an
+-- `as...` projection, as kernel_laws.lth's `asMonoid` does. Equality is the structural `==` of
+-- the kernel (4.R8); the doubles, which have no exact ring (11.S15), are not a model of any of
+-- these, and what they have instead is numbers.lth.
+--
+-- Index (all sections written in this draft):
+--   §0 Isomorphism: two maps that undo each other, each side under its own equality
+--      (v0.1 algebra.lut:26; positions.lut's `layout` is one).                           done
+--   §1 Abelian group: a commutative monoid with inverses.                               done
+--   §2 Commutative ring: an abelian group and a monoid joined by distributivity.         done
+--   §3 Field: every element but zero has a reciprocal.                                   done
+--   §4 Ordered ring and ordered field: a total order the operations respect.             done
+--   §5 Complete ordered field: every set bounded above has a least upper bound (11.R3).  done
+
+import "kernel_laws.lth" Monoid LeftNeutral RightNeutral Associative
+import "laws.lth" Law Forall Exists Then Case
+
+-- ---------------------------------------------------------------- §0 Isomorphism
+
+-- two maps that undo each other, each side judged by its own equality (4.R8: a type holding a
+-- function carries the equality it is compared by)
+Iso (A B : U) : { eqA : A -> A -> Bool, eqB : B -> B -> Bool, to : A -> B, from : B -> A }
+FromUndoesTo (A B : U) (i : Iso A B) (a : A) : Bool := i.eqA (i.from (i.to a)) a
+ToUndoesFrom (A B : U) (i : Iso A B) (b : B) : Bool := i.eqB (i.to (i.from b)) b
+Iso (A B : U) := FromUndoesTo A B & ToUndoesFrom A B
+
+-- ---------------------------------------------------------------- §1 Abelian group
+
+-- a monoid whose operation commutes, with an inverse for every element
+AbelianGroup (G : U) : { monoid : Monoid G, inverse : G -> G }
+-- spec 4.R10: the monoid's laws, applied, not restated
+GroupIsMonoid (G : U) (g : AbelianGroup G) (x y z : G) : Bool :=
+  LeftNeutral G g.monoid x and RightNeutral G g.monoid x and Associative G g.monoid x y z
+GroupCommutes (G : U) (g : AbelianGroup G) (x y : G) : Bool := g.monoid.combine x y == g.monoid.combine y x
+GroupInverse (G : U) (g : AbelianGroup G) (x : G) : Bool := g.monoid.combine x (g.inverse x) == g.monoid.neutral
+AbelianGroup (G : U) := GroupIsMonoid G & GroupCommutes G & GroupInverse G
+
+-- ---------------------------------------------------------------- §2 Commutative ring
+
+-- the additive group and the multiplicative monoid, with multiplication distributing over
+-- addition and commuting; `zero` and `one` are the two neutral elements
+CommutativeRing (R : U) : { add : AbelianGroup R, mul : Monoid R }
+zeroOf (R : U) (r : CommutativeRing R) : R := r.add.monoid.neutral
+oneOf (R : U) (r : CommutativeRing R) : R := r.mul.neutral
+plusOf (R : U) (r : CommutativeRing R) (x y : R) : R := r.add.monoid.combine x y
+timesOf (R : U) (r : CommutativeRing R) (x y : R) : R := r.mul.combine x y
+negateOf (R : U) (r : CommutativeRing R) (x : R) : R := r.add.inverse x
+
+RingAdds (R : U) (r : CommutativeRing R) (x y z : R) : Bool :=
+  GroupIsMonoid R r.add x y z and GroupCommutes R r.add x y and GroupInverse R r.add x
+RingMultiplies (R : U) (r : CommutativeRing R) (x y z : R) : Bool :=
+  LeftNeutral R r.mul x and RightNeutral R r.mul x and Associative R r.mul x y z
+TimesCommutes (R : U) (r : CommutativeRing R) (x y : R) : Bool := timesOf R r x y == timesOf R r y x
+Distributes (R : U) (r : CommutativeRing R) (x y z : R) : Bool :=
+  timesOf R r x (plusOf R r y z) == plusOf R r (timesOf R r x y) (timesOf R r x z)
+-- the ring has two elements at least
+OneIsNotZero (R : U) (r : CommutativeRing R) : Bool := not (oneOf R r == zeroOf R r)
+CommutativeRing (R : U) := RingAdds R & RingMultiplies R & TimesCommutes R & Distributes R & OneIsNotZero R
+
+-- ---------------------------------------------------------------- §3 Field
+
+-- every element but zero has a reciprocal; what `reciprocal` gives at zero is not asked
+Field (F : U) : { ring : CommutativeRing F, reciprocal : F -> F }
+Reciprocal (F : U) (f : Field F) (x : F) : Bool :=
+  x == zeroOf F f.ring or timesOf F f.ring x (f.reciprocal x) == oneOf F f.ring
+Field (F : U) := Reciprocal F
+
+-- ---------------------------------------------------------------- §4 Order
+
+-- A total order on a ring that addition respects and that positive multiplication respects.
+-- The pairs and chains the order relates are drawn by their generators (7.S12), as in
+-- kernel_laws.lth §5; `leq` is the order, `x <= y`.
+OrderedRing (R : U) : { ring : CommutativeRing R, leq : R -> R -> Bool }
+LeqPair (R : U) (o : OrderedRing R) : U := { x y : R | o.leq x y }
+LeqChain (R : U) (o : OrderedRing R) : U := { x y z : R | o.leq x y and o.leq y z }
+LeqBoth (R : U) (o : OrderedRing R) : U := { x y : R | o.leq x y and o.leq y x }
+NonNegativePair (R : U) (o : OrderedRing R) : U := { x y : R | o.leq (zeroOf R o.ring) x and o.leq (zeroOf R o.ring) y }
+
+LeqTotal (R : U) (o : OrderedRing R) (x y : R) : Bool := o.leq x y or o.leq y x
+LeqAntisymmetric (R : U) (o : OrderedRing R) (p : LeqBoth R o) : Bool := p.x == p.y
+LeqTransitive (R : U) (o : OrderedRing R) (c : LeqChain R o) : Bool := o.leq c.x c.z
+PlusMonotone (R : U) (o : OrderedRing R) (p : LeqPair R o) (z : R) : Bool :=
+  o.leq (plusOf R o.ring p.x z) (plusOf R o.ring p.y z)
+TimesPositive (R : U) (o : OrderedRing R) (p : NonNegativePair R o) : Bool :=
+  o.leq (zeroOf R o.ring) (timesOf R o.ring p.x p.y)
+OrderedRing (R : U) := LeqTotal R & LeqAntisymmetric R & LeqTransitive R & PlusMonotone R & TimesPositive R
+
+-- an ordered field: a field whose ring is ordered; the order's laws are the ordered ring's
+OrderedField (F : U) : { field : Field F, leq : F -> F -> Bool }
+asOrderedRing (F : U) (o : OrderedField F) : OrderedRing F := { ring := o.field.ring, leq := o.leq }
+FieldIsOrdered (F : U) (o : OrderedField F) (x y : F) (p : LeqPair F (asOrderedRing F o))
+               (c : LeqChain F (asOrderedRing F o)) (b : LeqBoth F (asOrderedRing F o))
+               (q : NonNegativePair F (asOrderedRing F o)) : Bool :=
+  LeqTotal F (asOrderedRing F o) x y and LeqAntisymmetric F (asOrderedRing F o) b
+  and LeqTransitive F (asOrderedRing F o) c and PlusMonotone F (asOrderedRing F o) p x
+  and TimesPositive F (asOrderedRing F o) q
+OrderedField (F : U) := FieldIsOrdered F
+
+-- ---------------------------------------------------------------- §5 Completeness (11.R3)
+
+-- Every set bounded above has a least upper bound: the set is its predicate, the bound `sup`.
+-- That `sup s` bounds `s` is a universal law over `F`. That it is the least bound needs an
+-- existential: below any `y` under `sup s` lies a member of `s`; stated as a `Law` of laws.lth,
+-- which a test cannot run (11.R3: completeness can be stated and not tested), and not tested on
+-- `Real` in any case, whose model is an axiom (11.R3, 11.S5: no law over `Real` is tested). The
+-- set `s` is a function over an infinite domain, drawn from a census (7.R4).
+CompleteOrderedField (F : U) : { ordered : OrderedField F, sup : (F -> Bool) -> F }
+SupIsUpperBound (F : U) (c : CompleteOrderedField F) (s : F -> Bool) (x : F) : Bool :=
+  not (s x) or c.ordered.leq x (c.sup s)
+SupIsLeast (F : U) (c : CompleteOrderedField F) (s : F -> Bool) : Law :=
+  Forall F (fn y { Then (Case (not (c.ordered.leq (c.sup s) y)))
+                        (Exists F (fn x { Case (s x and c.ordered.leq y x) })) })
+CompleteOrderedField (F : U) := SupIsUpperBound F & SupIsLeast F
