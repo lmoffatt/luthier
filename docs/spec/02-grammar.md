@@ -142,7 +142,7 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: 4b0865c2015fe452ea960f9a3c90ff3ce2c7d39697f58376a100c6fb4f8c2994).
+(v1; sha256: 44dae783a10dfeaadad1f81528e6d53811a81664374c220cdf96894c30887586).
 
     program ::= { act newline }
 
