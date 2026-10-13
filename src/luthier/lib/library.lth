@@ -210,6 +210,11 @@ axiomRefused (isCore isLibrary : String -> Bool) (admitsAt : String -> SurfacePr
 rRefused (admitsAt : String -> SurfaceProgram -> Bool) (fs : FileSystem) : Bool :=
   match fs { nil -> true ; cons (path, p) rest -> (not (mentionsR p) or not (admitsAt path p)) and rRefused admitsAt rest }
 
+-- admitting a file at its path admits it for its kind: `admitsAt` refines `admits` by the policies
+-- above and refuses nothing a kind allows for another reason (the subagent's question 1)
+AdmitsAtRefinesAdmits (l : Loader) (path : String) (p : SurfaceProgram) : Bool :=
+  not (l.admitsAt path p) or l.admits (l.kind path) p
+
 Loader := KindByExtension & TheoryFileRejectsExtern & ModelFileTakesExtern & SeesExactly & SeesTheTheorysFields
   & NothingWithoutDemand & CheckingReadsTheories & RunningReadsWhatItReaches & VerifiesTheModel
-  & PrimitiveOnlyInCore & AxiomOnlyInCoreAndLibraries & RNamesNoType
+  & PrimitiveOnlyInCore & AxiomOnlyInCoreAndLibraries & RNamesNoType & AdmitsAtRefinesAdmits
