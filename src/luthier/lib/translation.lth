@@ -1,0 +1,31 @@
+-- translation.lth: the elaboration of the surface program into the kernel term, as a theory.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 2.4 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 2.S12 (the table, one law per
+-- row), 2.S13, 2.S17; 3.S4, 3.S30; 4.R13 (operators by type), 4.S23 (implicit arguments). The
+-- surface tree is grammar.lth's, the kernel term term.lth's; this file reads both and changes
+-- neither. Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+--
+-- What this file states. Elaboration is type-directed: what `->`, `*`, `+` and `if` become
+-- depends on the types of their operands (2.S13 leaves it to the checker), and a block's names,
+-- a lambda's tuple parameter, a projection need a type or a fresh name. So the laws are case laws,
+-- as the tree laws of grammar.lth: each row of 2.S12 is stated on a small program that gives the
+-- names it uses their types, and the result is compared up to alpha-equivalence (term.lth §2),
+-- since fresh names are the model's. A model is the elaborator; the Python checker's is a
+-- specimen (step 4), certified against these laws.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones, checks it with
+-- `luthier parse src/luthier/lib/translation.lth`, sets its status to done here, and commits.
+--
+--   §1 The theory `Elaboration`, its helpers, and the acts: a definition with binders
+--      curried, a declaration, a datum, an alias expanded (2.S12 rows 1, 2).           todo
+--   §2 Terms without types: names, constants, `U`, `W`, application, lambdas with
+--      typed parameters, `match` with its patterns, lists, sums, record types,
+--      `data` (2.S12; 3.S4).                                                           todo
+--   §3 Terms by type: `->`, `*`, `+` on types and on numbers; `and`, `or`,
+--      implication; negation; `if` on `Bool` and on `Failures E`; the operators of a
+--      type's model (4.R13).                                                         todo
+--   §4 Terms by context: record values, projection, named arguments and defaults,
+--      implicit arguments (4.S23), blocks and `<-`, tuple parameters, clauses.        todo
+--   §5 `Elaboration :=` the conjunction.                                             todo
