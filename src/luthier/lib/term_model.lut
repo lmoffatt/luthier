@@ -8,6 +8,7 @@
 -- Constructor update: term.lth at 66d5cae; user request v5, recorded in codex.md.
 -- Equality update: term.lth at 360b4d4 and 051e6aa; user request v6, recorded in codex.md.
 -- Equality demands parts: term.lth at 924df6b; Claude Sonnet agent, recorded in codex.md.
+-- Record telescope: term.lth at the commit of 2026-10-14 stating it; Claude Opus 5.5 (luthier-03).
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
@@ -41,11 +42,14 @@ allNames (t : Term) : List String := match t {
   App a b -> concat (allNames a) (allNames b) ; Pair a b -> concat (allNames a) (allNames b) ;
   Inj l a -> allNames a ; Match a arms -> concat (allNames a) (armNames arms) ;
   Sum kvs -> pairNames kvs ; Data x cs -> cons x (pairNames cs) ;
-  Record kvs -> pairNames kvs ; RecordValue kvs -> pairNames kvs ; Proj r x -> allNames r ; _ -> nil ; }
+  Record kvs -> recordNames kvs ; RecordValue kvs -> pairNames kvs ; Proj r x -> allNames r ; _ -> nil ; }
 armNames (xs : List (Pattern * Term)) : List String := match xs {
   nil -> nil ; cons (p, b) rest -> concat (patternVars p) (concat (allNames b) (armNames rest)) }
 pairNames (xs : List (String * Term)) : List String := match xs {
   nil -> nil ; cons (k, b) rest -> concat (allNames b) (pairNames rest) }
+-- a record type's labels bind in its later fields, so a fresh name avoids them too
+recordNames (xs : List (String * Term)) : List String := match xs {
+  nil -> nil ; cons (k, b) rest -> cons k (concat (allNames b) (recordNames rest)) }
 
 -- Exact recursive parts, with per-arm free-name agreement to prevent capture.
 -- §2 compares Data through underBinderPairs and patterns through simultaneous renameAll.
@@ -82,7 +86,7 @@ substTerm (x : String) (s t : Term) : Term :=
   Pair a b -> Pair (substTerm x s a) (substTerm x s b) ;
   Inj l a -> Inj l (substTerm x s a) ; Match a arms -> Match (substTerm x s a) (substArms x s arms) ;
   Sum kvs -> Sum (substPairs x s kvs) ;
-  Record kvs -> Record (substPairs x s kvs) ;
+  Record kvs -> Record (substTelescope x s kvs) ;
   RecordValue kvs -> RecordValue (substPairs x s kvs) ;
   Proj r l -> Proj (substTerm x s r) l ;
   Data y cs -> if x == y then t else match freshData x s y cs { (z, ds) -> Data z (substPairs x s ds) } ;
@@ -101,6 +105,9 @@ swapLocalPairs (y z : String) (cs : List (String * Term)) : List (String * Term)
   nil -> nil ; cons (k, b) rest -> cons (k, swap y z b) (swapLocalPairs y z rest) }
 substPairs (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) := match cs {
   nil -> nil ; cons (k, b) rest -> cons (k, substTerm x s b) (substPairs x s rest) }
+-- a label of the name substituted shadows it in the later fields (term.lth, `telescopeFree`)
+substTelescope (x : String) (s : Term) (cs : List (String * Term)) : List (String * Term) := match cs {
+  nil -> nil ; cons (k, b) rest -> cons (k, substTerm x s b) (if k == x then rest else substTelescope x s rest) }
 substArms (x : String) (s : Term) (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms {
   nil -> nil ; cons (p, b) rest -> cons (substArm x s p b) (substArms x s rest) }
 substArm (x : String) (s : Term) (p : Pattern) (b : Term) : Pattern * Term :=
@@ -148,7 +155,7 @@ canonTerm (avoid : List String) (env : List (String * String)) (n : Nat) (t : Te
     match canonTerm avoid env n1 b { (d, n2) -> (Pair c d, n2) } } ;
   Inj l a -> match canonTerm avoid env n a { (b, n1) -> (Inj l b, n1) } ;
   Sum kvs -> match canonPairs avoid env n kvs { (cs, n1) -> (Sum cs, n1) } ;
-  Record kvs -> match canonPairs avoid env n kvs { (cs, n1) -> (Record cs, n1) } ;
+  Record kvs -> match canonTelescope avoid env n kvs { (cs, n1) -> (Record cs, n1) } ;
   RecordValue kvs -> match canonPairs avoid env n kvs { (cs, n1) -> (RecordValue cs, n1) } ;
   Proj r x -> match canonTerm avoid env n r { (s, n1) -> (Proj s x, n1) } ;
   Data x kvs -> match nextBinder avoid n { (y, n1) ->
@@ -159,6 +166,10 @@ canonTerm (avoid : List String) (env : List (String * String)) (n : Nat) (t : Te
 canonPairs (avoid : List String) (env : List (String * String)) (n : Nat) (xs : List (String * Term)) : List (String * Term) * Nat := match xs {
   nil -> (nil, n) ; cons (k, a) rest -> match canonTerm avoid env n a { (b, n1) ->
     match canonPairs avoid env n1 rest { (bs, n2) -> (cons (k, b) bs, n2) } } }
+-- a label stays literal and shadows an outer binder of its name in the later fields
+canonTelescope (avoid : List String) (env : List (String * String)) (n : Nat) (xs : List (String * Term)) : List (String * Term) * Nat := match xs {
+  nil -> (nil, n) ; cons (k, a) rest -> match canonTerm avoid env n a { (b, n1) ->
+    match canonTelescope avoid (cons (k, k) env) n1 rest { (bs, n2) -> (cons (k, b) bs, n2) } } }
 canonBindings (avoid : List String) (n : Nat) (xs : List String) : List (String * String) * Nat := match xs {
   nil -> (nil, n) ; cons x rest -> match nextBinder avoid n { (y, n1) ->
     match canonBindings avoid n1 (remove x rest) { (bs, n2) -> (cons (x, y) bs, n2) } } }
