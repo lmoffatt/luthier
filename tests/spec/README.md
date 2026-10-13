@@ -10,10 +10,8 @@ questions are in `record/IA/spec-programs-2026-10-13/codex.md`.
 
 These are cases for the future checker, not evidence that semantic checking passes today.
 An `.accept.lut` program is intended to pass; a `.reject.lut` program is intended to fail
-its cited rule. An explicit `-- verdict:` comment overrides the filename:
-`r4_data_nonrecursive.reject.lut` now expects acceptance under spec 4.R4 and spec 3.R3.
-Its constructors have roles in the laws of alternation, as spec 4.R3 requires. The old
-rejection fragment remains as history, not as the new expected outcome.
+its cited rule. `r4_data_nonrecursive.reject.lut` still rejects, for a new reason: its constructors have
+no law of their role (spec 4.R3, L2.7), not that it lacks recursion.
 
 `-- expect:` carries a diagnostic fragment explicitly specified by the current text
 (the repeated-definition case, spec 4.R12). Where the specification gives no literal
