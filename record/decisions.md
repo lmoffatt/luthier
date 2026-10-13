@@ -2418,3 +2418,33 @@ Quote:      "OK, es la unica forma?"
 Source:     chat:52b10bff:5433
 Kind:       spec (2.S17, 2.S9, 10.S2) and grammar.lth, translation.lth, parse.py
 Status:     current
+
+D-2026-10-14-a  Functions cross the bridge in three more forms than 3.S23 states: a Luthier
+                lambda passed to a host function and called back from the host, its calls
+                counted and recorded in the run's record (P2, 12.S18); a record whose fields are
+                functions, crossing as the record with each function a callback; a host function
+                crossing in as an opaque value, applicable only through the bridge and never
+                reduced by the kernel; and a partial application of an extern, with the arity
+                from its declared type. Needed by the fit of sonolocalización (lm.maximize,
+                Objective, sampleFull; record/IA/sonolocalizacion-inventory-2026-10-13/
+                answers-2-2026-10-14.md). Changes 3.S23 (or a new 3.S41), a law for the callback
+                in world.lth or term.lth, run.py.
+Author:     Luciano, on the model's recommendation (record/plan/questions-2026-10-14.md, Q1)
+Quote:      "1--> admitir (suena caro pero necesario de ultima como control)"
+Source:     luthier@c707f7c:record/plan/questions-2026-10-14.md:31
+Kind:       spec (3.S23) and world.lth or term.lth, run.py
+Status:     current
+
+D-2026-10-14-b  4.R3 stays read per file, and a data's constructors have their role laws in the
+                file that defines the data, without repeating a law: core.lut claims the
+                theories of kernel_laws.lth for its own data (the bindings of Unit, Bool, Maybe,
+                List move from kernel_models.lut into core.lut), and the law that gives
+                Coverage's constructors their roles moves from test.lth into laws.lth. No change
+                to the spec's text of 4.R3 nor to check.py.
+Author:     Luciano; the form (core claims its models) is the model's answer to his question
+            "¿no se puede definir el rol en core?"
+Quote:      "la verdad prefiero que las construcciones tengan su ley en su archivo. pero es peor
+            repetir cosas. No se puede definir el rol en core, que seria lo correcto?"
+Source:     luthier@c707f7c:record/plan/questions-2026-10-14.md:50
+Kind:       theories (core.lut, kernel_models.lut, laws.lth, test.lth)
+Status:     current
