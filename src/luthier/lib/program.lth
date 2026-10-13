@@ -258,26 +258,36 @@ violatesR3 (p : SurfaceProgram) (n : String) : Bool :=
                                   dataBody cs -> anyUnclaimed p (pairNames cs) ; _ -> false }) ;
     _ -> false } }) (actsNamed p n)
 
--- 4.R4: a definition at `U` makes a new type only with laws or a `data`; an anonymous structural
--- body (a product, an exponential, a sum, a record without a law) is to be an alias
-structural (t : Surface) : Bool := match t {
-  binop o a b -> o == "*" or o == "->" or o == "+" ;
-  pi xs a b -> true ; sigma xs a b -> true ; sigmaNamed x a y b -> true ;
-  sum kvs -> true ; record fs law -> law == nothing ;
-  _ -> false ;
+-- the declared type of a name: the one its definition writes, or its declaration's when the
+-- definition writes none (`P : U` then `P := ...`; review of layers 0-1, B)
+typeOfAct (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Maybe Surface :=
+  match t { just u -> just u ; nothing -> declaredSurface p n }
+declaredSurface (p : SurfaceProgram) (n : String) : Maybe Surface := match p { nil -> nothing ;
+  cons act rest -> match act { declare x bs t -> if x == n then just t else declaredSurface rest n ; _ -> declaredSurface rest n } }
+atUniverse (p : SurfaceProgram) (n : String) (t : Maybe Surface) : Bool := typeOfAct p n t == just universe
+
+-- 4.R4: a definition at `U` makes a new type only if its body is a subtype with a predicate, a
+-- record with a law, or a `data` (a whitelist, as the rule reads); any other body at `U`, an
+-- anonymous structure or a type already named, is to be an alias. An extern is 4.R5's.
+makesAType (b : Body) : Bool := match b {
+  dataBody cs -> true ;
+  termBody u -> (match u { subtype q a law -> true ; record fs law -> not (law == nothing) ; _ -> isExtern u }) ;
+  clausesBody cs -> false ;
 }
 violatesR4 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (fn a { match a { define x bs t b -> t == just universe and (match b { termBody u -> structural u ; _ -> false }) ;
-                          _ -> false } }) (actsNamed p n)
+  anyAct (fn act { match act { define x bs t b -> atUniverse p n t and not (makesAType b) ; _ -> false } }) (actsNamed p n)
 
 -- 4.R5: an extern gives a value, never a type, unless it is provisional
 isExtern (t : Surface) : Bool := match t { app f a -> isExtern f ; name s -> s == "extern" ; _ -> false }
 isProvisional (t : Surface) : Bool :=
   match t { app f a -> (match a { namedArg x v -> x == "provisional" ; _ -> false }) or isProvisional f ; _ -> false }
+-- and its type must be defined (4.R2 applies to an extern as to any body)
 violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
-  anyAct (fn a { match a { define x bs t b -> t == just universe
-                            and (match b { termBody u -> isExtern u and not (isProvisional u) ; _ -> false }) ;
-                          _ -> false } }) (actsNamed p n)
+  anyAct (fn act { match act { define x bs t b ->
+    (match b { termBody u -> isExtern u and not (isProvisional u) ; _ -> false })
+    and (atUniverse p n t or (match typeOfAct p n t { just (name m) -> not (isDefined p m) and not (member m coreNames) ;
+                                                        _ -> false })) ;
+    _ -> false } }) (actsNamed p n)
 
 -- 4.R7: an alias is neither declared nor defined
 violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclared p n or isDefined p n)
@@ -286,8 +296,9 @@ violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclar
 -- `:=` of a name already bound and `<-` of a name bound with `:=`: todo, a walk of the bodies.
 violatesR12 (p : SurfaceProgram) (n : String) : Bool := count n (definedNames p) >= 2
 
--- 4.S14: a law no type claims defines nothing; read, as in 4.R3, as a definition at `Bool` that
--- no other definition's body mentions
+-- 4.S14: a law no type claims defines nothing; it is a branch, and 4.R2 applies to it, so it is
+-- reported, not rejected (§6; review of layers 0-1, B). Read, as in 4.R3, as a definition at
+-- `Bool` that no other definition's body mentions.
 otherBodies (p : SurfaceProgram) (n : String) : List String := match p { nil -> nil ; cons a rest -> match a {
   define x bs t b -> if x == n then otherBodies rest n else concat (bOf p a) (otherBodies rest n) ;
   _ -> otherBodies rest n } }
@@ -378,14 +389,23 @@ armsApplications (ctx : Context) (arms : List (Pattern * Term)) : List Applicati
   match arms { nil -> nil ; cons (q, b) rest -> appendApps (applications ctx b) (armsApplications ctx rest) }
 appendApps (xs ys : List Application) : List Application := match xs { nil -> ys ; cons x rest -> cons x (appendApps rest ys) }
 anyApp (f : Application -> Bool) (xs : List Application) : Bool := match xs { nil -> false ; cons x rest -> f x or anyApp f rest }
-bodyApplications (e : Elaboration a) (p : SurfaceProgram) (n : String) : List Application :=
+bodyApplications (a : Alpha) (e : Elaboration a) (p : SurfaceProgram) (n : String) : List Application :=
   match definedBody (e.elaborate p) n { nothing -> nil ; just b -> applications nil b }
 
--- 4.R6: the body of a declared name has its type `T`, or `T -> Bool`, `T -> Failures E`, `Law T`
+-- 4.R6: the body of a declared name has its type `T`, or `T -> Bool`, `T -> Failures E`, `Law T`,
+-- compared under the theory's own parameters: for `T (a : A) : { ... }` and `T (a : A) := L a`,
+-- the parameters are peeled from both before comparing (review of layers 0-1, B); a law may take
+-- further quantified parameters after the model, `T -> X -> Bool`
+fitsAt (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty bt : Term) : Bool :=
+  t.same bt ty or endsIn a sb t ty bt
+endsIn (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty bt : Term) : Bool := match bt {
+  Pi x d c -> t.same d ty and verdictType c ; App f arg -> t.same bt (App (Var "Law") ty) ; _ -> false }
+verdictType (c : Term) : Bool := match c {
+  Var v -> v == "Bool" ; App f arg -> f == Var "Failures" ; Pi x d r -> verdictType r ; _ -> false }
 fits (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty : Term) (r : Maybe Term) : Bool := match r {
   nothing -> false ;
-  just bt -> t.same bt ty or t.same bt (Pi "_" ty (Var "Bool")) or t.same bt (App (Var "Law") ty)
-             or (match bt { Pi x d c -> t.same d ty and (match c { App f arg -> f == Var "Failures" ; _ -> false }) ; _ -> false }) }
+  just bt -> match ty { Pi x d c -> (match bt { Pi y e f -> t.same d e and fits a sb t c (just f) ; _ -> fitsAt a sb t ty bt }) ;
+                        _ -> fitsAt a sb t ty bt } }
 violatesR6 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
   isDeclared p n and isDefined p n and (match declaredType (e.elaborate p) n { nothing -> false ;
     just ty -> match definedBody (e.elaborate p) n { nothing -> false ;
@@ -394,15 +414,25 @@ violatesR6 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
 -- 4.R8: `==` only where equality is structural: never on a type that contains an exponential,
 -- looked through the program's definitions of type names (fuel: the number of acts, so a
 -- recursive `data` is looked through once)
+-- (a `data`'s constructors are arrows into it: what is read is their argument types; a name is
+-- looked through its definition, or its declaration when it is a theory declared by its record;
+-- review of layers 0-1, B)
 containsArrow (ep : Program) (fuel : Nat) (ty : Term) : Bool := match ty {
   Pi x d c -> true ;
   Sigma x d c -> containsArrow ep fuel d or containsArrow ep fuel c ;
   Subtype x d q -> containsArrow ep fuel d ;
-  Sum kvs -> anyArrow ep fuel kvs ; Data x kvs -> anyArrow ep fuel kvs ; Record kvs -> anyArrow ep fuel kvs ;
+  Sum kvs -> anyArrow ep fuel kvs ; Data x kvs -> anyArgumentArrow ep fuel kvs ; Record kvs -> anyArrow ep fuel kvs ;
   App f x -> containsArrow ep fuel f or containsArrow ep fuel x ;
-  Var x -> fuel > 0 and (match definedBody ep x { nothing -> false ; just b -> containsArrow ep (fuel - 1) b }) ;
+  Var x -> fuel > 0 and (match definedBody ep x {
+    just b -> containsArrow ep (fuel - 1) b ;
+    nothing -> match declaredType ep x { just (Record kvs) -> anyArrow ep (fuel - 1) kvs ; _ -> false } }) ;
   _ -> false ;
 }
+arguments (ty : Term) : List Term := match ty { Pi x d c -> cons d (arguments c) ; _ -> nil }
+anyArgumentArrow (ep : Program) (fuel : Nat) (kvs : List (String * Term)) : Bool := match kvs { nil -> false ;
+  cons (k, v) rest -> anyTermArrow ep fuel (arguments v) or anyArgumentArrow ep fuel rest }
+anyTermArrow (ep : Program) (fuel : Nat) (ts : List Term) : Bool :=
+  match ts { nil -> false ; cons u rest -> containsArrow ep fuel u or anyTermArrow ep fuel rest }
 anyArrow (ep : Program) (fuel : Nat) (kvs : List (String * Term)) : Bool :=
   match kvs { nil -> false ; cons (k, v) rest -> containsArrow ep fuel v or anyArrow ep fuel rest }
 actCount (ep : Program) : Nat := match ep { nil -> 0 ; cons act rest -> 1 + actCount rest }
@@ -410,16 +440,19 @@ eqOnArrow (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap
   match ap.function { App f x -> f == Var "==" and (match t.typeOf ep ap.context x { nothing -> false ;
     just ty -> containsArrow ep (actCount ep) ty }) ; _ -> false }
 violatesR8 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
-  anyApp (fn ap { eqOnArrow a sb t (e.elaborate p) ap }) (bodyApplications e p n)
+  anyApp (fn ap { eqOnArrow a sb t (e.elaborate p) ap }) (bodyApplications a e p n)
 
--- 4.R9: an argument passes where its function's domain is expected only if its type refines it
+-- 4.R9: an argument passes where its function's domain is expected only if its base refines the
+-- domain's base; a refinement the argument does not carry is an obligation (4.R5, 4.R11), not a
+-- failure (review of layers 0-1, B)
+base (ty : Term) : Term := match ty { Subtype x d q -> base d ; _ -> ty }
 mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap : Application) : Bool :=
   match t.typeOf ep ap.context ap.function { nothing -> false ;
     just ft -> match ft { Pi x d c -> (match t.typeOf ep ap.context ap.argument { nothing -> false ;
-                                          just at -> not (t.refines at d) }) ;
+                                          just at -> not (t.refines (base at) (base d)) }) ;
                           _ -> false } }
 violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
-  anyApp (fn ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications e p n)
+  anyApp (fn ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications a e p n)
 
 -- 4.R11 is a law of the typing (`BranchRefines`): a checker that types branches by it rejects no
 -- program the rule accepts. 4.R13 (an operator resolved by the type, one meaning per types) and
