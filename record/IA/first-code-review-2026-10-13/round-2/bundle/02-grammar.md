@@ -284,10 +284,13 @@ still reads `gen name ":=" ( term | "extern" string )`.
 one candidate syntax,
 
     atom ::= ... | "quote" "{" term "}"          -- the term, as a value of Term
-           | "eval" term term                    -- eval A t: the value of the quoted t, at type A
+
+and `eval A t`, the value of the quoted `t` at type `A`, is an application of the core name `eval`,
+not a form of the grammar (D-2026-10-13-o; `quote` is a keyword, `eval` is not, since only
+`quote` must keep its argument unevaluated).
 
 The type `Term` itself, and `Program`, belong to `spec 3`. A theory that states this grammar in
-Luthier is `src/luthier/lib/grammar.lth` (L14), draft 0 written 2026-10-13. A saved evaluation, a quoted term together with
+Luthier is `src/luthier/lib/grammar.lth` (L14), draft 2 written 2026-10-13. A saved evaluation, a quoted term together with
 its value, stays open (spec 8).
 
 
