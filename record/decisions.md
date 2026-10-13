@@ -2257,3 +2257,21 @@ Source:     chat:52b10bff:3313
             chat:52b10bff:3333
 Kind:       plan (Z10 of record/plan-from-zero-2026-10-13-decisions.md)
 Status:     current
+
+D-2026-10-13-w  A labeled sum is written in braces with `||` between alternatives,
+                `{ circle : Float64 || square : Float64 }`; `,` and `||` are not mixed at one level,
+                a mixture nests (`{ s : { a : A || b : B }, d : D }`); a sum has two alternatives or
+                more (one is a record); a line beginning with `||` continues inside braces. `< >`
+                for sums is retired, and with it the rule that a comparison by `>` inside `< >` goes
+                in parentheses (2.S9, proposed, never marked) and the form `(a : A) + (b : B)`; the
+                anonymous sum stays `A + B`. `|` keeps its two roles, "such that" in a subtype and
+                the start of a clause. Reasons: `<` and `>` are left with one meaning, comparison;
+                one bracket for all structures, `,` the product and `||` the sum; a sum is a
+                disjunction (Curry-Howard), hence the sign of "or".
+Author:     Luciano (braces, then `||`); no precedence between `,` and `||` the model's
+Quote:      "y si usamos || para la suma  (como C++ para el o)?"
+            "SI, aplicalo asi."
+Source:     chat:52b10bff:3663
+            chat:52b10bff:3676
+Kind:       spec (2.S4, 2.S8, 2.S9, 2.S10, 2.S12, 3.S3, 3.S4, 4, 11) and grammar.lth
+Status:     current; reverses the proposed `>` rule of 4bc59f4
