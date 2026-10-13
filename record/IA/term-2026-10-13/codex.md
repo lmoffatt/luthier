@@ -59,3 +59,60 @@ Manual Reduction audit (each result is one transition, never agreement through f
 Validation: `PYTHONPATH=src python3 -m luthier.cli parse src/luthier/lib/term_model.lut` passed after the final model edit. Parse establishes syntax only. Only term_model.lut and this report were written; concurrent kernel/test changes were left alone. No commit.
 
 Independent decisions: reuse the theory's exact structural decomposition; add per-arm free-name checks and retain literal multi-variable patterns to preserve equivalence; reject nonlinear patterns rather than test bound values; use fresh temporary staging for simultaneous substitution; classify stuck inspection separately from mismatch; ignore declarations during definition lookup; retain first-match behavior for duplicate definitions/fields (well-formedness is the checker's responsibility); supply no applied-extern host implementation beyond the stated laws. These are reversible model choices under P6 (every change can be undone). The conservative pattern restriction trades completeness of nominal renaming for P10 (the invariant of the type represents the concept) as currently stated by AlphaPartsAgree; it assumes the theory remains unchanged in this task.
+
+## Let
+
+Sources: `git show fe3bdab 048cd55 23d23f4 -- src/luthier/lib/term.lth`, namely commits `fe3bdabcf7cd29ed8efdc325dcff1aac129eb0eb`, `048cd552540339b73fd1d4f637e2339710491de1`, and `23d23f42608c793319fde4f1e5a8ebfc42bcb178`; current `term.lth` SHA-256 `a8d4e114ca1f4cbbdfd199c9ba067a2db60abe3d6624b2d7623180f2c3bbb08f`; the preceding model/report and `CLAUDE.md`. Derivation: Codex synthesis and manual law review, user execution prompt v4 (this turn: implement Let and String-bearing Axiom in all four models, remove literal Data and multi-variable-pattern restrictions, check every law in sections 2–5 by hand, parse, append Let, edit only model/report, no commit). Parameters: existing text-hole contracts, global binding preorder, fresh names avoiding all variable/binder names, literal ordered non-binding labels and strings, simultaneous pattern substitutions, exact weak-head transitions; deterministic, no seed. Model output SHA-256 `19ba3fc841a364bfe11e71818f18a2cc2a03637fd17a61f6d570fef14ad3dfb4`. The user's explicit no-commit instruction overrides the commit-before-change rule.
+
+Implementation: imported Let and added it to complete-name collection, substitution, canonical traversal and weak-head reduction. Only its body receives the new binding; its type and value are substituted and canonicalized in the surrounding scope. Zeta returns exactly `substTerm x v b`, without first reducing the type, value or body. Alpha uses the revised imported `partsAgree`, including Let and `underBinderPairs` for Data; Data's self-name is no longer literal. Removed the literal-pattern restriction: every number of linear pattern variables can be renamed positionally, including permutations of overlapping names, through the revised `renameAll`. Per-arm free-name agreement remains to reject capture. For nonlinear raw patterns, an additional positional repetition check preserves the binding alias structure; it imposes no restriction on linear patterns and compares no binder name literally. Axiom's String is compared literally by `partsAgree`; it contributes no variable names, and substitution, canonicalization and reduction leave it unchanged through their existing inert cases. Axiom inspection uses the new arity and remains blocked.
+
+Manual section 2 audit, including the Object obligations of `alphaObject`:
+
+- Reflexive, Symmetric, Transitive: constructor recursion compares the same literal non-binding information and the same binding positions. Single binders and Data use capture-safe nominal swaps. Pattern renaming now updates pending names, realizing one simultaneous positional permutation; per-arm free-name agreement prevents that permutation from capturing a free name. The repetition check preserves alias structure even for nonlinear raw patterns. Reversing or composing these binder correspondences preserves the relation.
+- FreeVariablesAreNames: Var comparison remains exact String equality.
+- RenameBound: Lam, Pi, Sigma, Subtype and Let compare their unchanged outer-scope parts and reverse the body swap; freshness discharges the binder guard. The PVar arm reverses the same swap and has the same free names outside its binding.
+- AlphaKeepsHead: `partsAgree` accepts only identical constructors, including Let and Axiom.
+- AlphaKeepsFree: the explicit global `sameNames` guard; match arms additionally check their own free names outside pattern bindings.
+- AlphaCongruent: each listed constructor recurses on the supplied alpha-equal parts; equal binder names take the direct body branch. Data recurses on constructor types under the same self-binder. PWild binds no names. Let compares both outer-scope occurrences of p and its q body separately.
+- AlphaPartsAgree: every accepted comparison invokes exactly the current imported `partsAgree`; additional scope/alias guards cannot admit a pair rejected by it. Axiom strings, constructor/field/injection labels, holes and routes remain literal.
+
+Manual section 3 audit:
+
+- SubstHits: the Var x branch returns s, including when s itself contains x.
+- SubstMisses: another variable takes the absence guard and stays unchanged.
+- SubstGoesInside: App, Pair, Inj, Proj, Sum, Record, RecordValue and wildcard Match recursively substitute all their term parts and preserve labels. If the outer absence guard fires, each part's substitution is likewise unchanged.
+- SubstStopsAtShadow: Lam, Pi, Sigma, Subtype and Let preserve their shadowed bodies; types and Let's value are still traversed. A PVar x arm is preserved while its scrutinee is traversed. Data likewise shadows its own name throughout its constructor types.
+- SubstPassesBinder: for x distinct from the binder and that binder absent from the replacement's free names, `substBody` recurses without renaming; if x is absent from the body, leaving it alone is exactly its recursive substitution. This covers all five binding formers listed in the law, including both outer-scope Let parts. Pattern and Data helpers use the same capture rule.
+- SubstAvoidsCapture: when x is distinct from both y and z, the law's z is fresh for the free names of s and b. Renaming y to z by swap therefore preserves that binding, even if z occurs at a nested binder. The model's possibly different fresh name avoids all names in s and b as well as x. Substitution into either fresh representative gives alpha-equal results, including the case where x was absent and the model kept the original binder. Both sides substitute the same outer-scope annotation.
+- SubstNotFree: the initial free-variable guard returns the original term exactly.
+- SubstRespectsAlpha: constructor recursion replaces identical free occurrences; shadowing and freshening preserve corresponding binding positions. The chosen fresh strings may differ but are bound, so full nominal alpha equates the results. This includes Data, Let and renamed multi-variable arms. Inert leaves, including String-bearing Axiom, stay identical.
+
+Manual section 4 audit:
+
+- CanonOfAlpha: equal binding positions allocate identical global preorder counters, independently of original binder strings. Data now has its proper self-binding correspondence; pattern permutations retain positional allocation and alias structure. Let allocates its binder before visiting type, value, then body, extending the environment only for the body. Corresponding free names and literal non-binding strings agree, so the results are structurally equal.
+- CanonIdempotent: allocation order and the set of unqualified free names are unchanged by the first pass; the second pass chooses the same names, resolves the same scopes and keeps the same literal tags and Axiom strings.
+- CanonOfName: an empty environment resolves Var x to Var (unqualified x).
+- UnqualifyIdempotent: taking the last dotted component yields a component without a dot; repeating it changes nothing, including empty components.
+- CanonKeepsTerm: when all free names are already unqualified, only bound names change. Allocation skips all free names and gives distinct names to binder positions, so the changed single binders, Data and complete pattern scopes are alpha-equal. Let leaves its binding out of the annotation/value environment. This repairs the previously reported Data and multi-variable-pattern counterexamples.
+
+Manual section 5 audit (all thirteen laws):
+
+- Beta: Done Lam heads produce exactly the model's substitution into the body.
+- Delta: definition lookup returns the first matching Define even after a Declare; defined heads always transition, including recursive self-definitions.
+- Zeta: the new Let branch returns exactly `substTerm x v b` in one transition for every program and annotation.
+- HeadFirst: Next application heads, match scrutinees and projection receivers are rebuilt in context before root rules; this also propagates Zeta in those positions.
+- HolesStay: declaration-only names and their applications remain stuck; literal inspection blocks before a later wildcard, while a first wildcard selects its body. Hole and String-bearing Axiom are inert.
+- Iota: matching injections, free-name unary constructor spines, literals, variables and wildcards yield the specified raw bindings or unchanged bodies. A singleton binding uses exactly substTerm.
+- IotaPair: distinct variables are staged together before insertion. The NotFreeIn premise makes the first sequential expression in the law equivalent to simultaneous substitution; the second expression's substitution of f.y by itself is identity. The formerly reported discrepancy in fresh multi-variable pattern names is now accepted by full alpha.
+- IotaSkips: distinct known injection labels give Miss, then the second arm binds y to v; equal labels satisfy the disjunctive guard.
+- ProjOfRecord: distinct field names select the respective raw term from an inert RecordValue in exactly one transition.
+- Prim: all seven arithmetic/comparison cases dispatch on Primitive and literal operands and return the exact specified Lit or boolean Var, without unfolding the result in the same step.
+- ExternIsValue: a bare Extern is Done; applied host execution is outside these laws.
+- ValuesStay: every listed lambda, literal, universe, world, binder type former, sum, Data, record type/value, pair, injection and bare primitive is Done without traversing components. Let has its separate Zeta rule and is not among these values.
+- DatumIsInert: definition lookup and the constructor free-name predicate ignore Datum; every recursive stepping and pattern-inspection path therefore gives the identical Maybe Term with an extra datum.
+
+**No unmet law found in sections 2–5 for the four models, conditional on the documented String-hole contracts.** This manual audit supersedes the conservative-alpha limitation and the unmet IotaPair/CanonKeepsTerm conclusions in the preceding section; the original record is retained. It is not executable law certification, and section 6 Evaluation is outside this request.
+
+Validation: `PYTHONPATH=src python3 -m luthier.cli parse src/luthier/lib/term_model.lut` exited 0. Parse establishes syntax only. Only term_model.lut and this report were edited; concurrent kernel, term and test work was left alone. No commit.
+
+Independent routine decisions: reuse revised `partsAgree` and its simultaneous `renameAll`; preserve per-arm free-name checks; compare positional alias structure for nonlinear raw patterns while allowing all linear renamings; extend existing body-scoping, freshening, preorder and one-step conventions to Let; preserve Axiom text literally. These are reversible model choices under P6 (every change can be undone), consistent with P10 (the invariant of the type represents the concept); no additional decision for Luciano was introduced.

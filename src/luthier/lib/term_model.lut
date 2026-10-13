@@ -4,10 +4,11 @@
 -- Author: Codex, 2026-10-13. Deterministic, no seed; choices and law audit in codex.md.
 -- Records/law update: term.lth at f421684 and 9a89873; user request v2, recorded in codex.md.
 -- After-review sources: cc2542d and 2409c59; user request v3, recorded in codex.md.
+-- Let/binder update: fe3bdab, 048cd55 and 23d23f4; user request v4, recorded in codex.md.
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
-  Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj
+  Var Lit Universe World Lam App Pi Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let
   Declare Define Datum member remove concat removeAll freeVars patternVars patternsVars swap swapPattern
   partsAgree sameNames free
 
@@ -33,6 +34,7 @@ allNames (t : Term) : List String := match t {
   Pi x a b -> cons x (concat (allNames a) (allNames b)) ;
   Sigma x a b -> cons x (concat (allNames a) (allNames b)) ;
   Subtype x a b -> cons x (concat (allNames a) (allNames b)) ;
+  Let x ty v b -> cons x (concat (allNames ty) (concat (allNames v) (allNames b))) ;
   App a b -> concat (allNames a) (allNames b) ; Pair a b -> concat (allNames a) (allNames b) ;
   Inj l a -> allNames a ; Match a arms -> concat (allNames a) (armNames arms) ;
   Sum kvs -> pairNames kvs ; Data x cs -> cons x (pairNames cs) ;
@@ -43,17 +45,21 @@ pairNames (xs : List (String * Term)) : List String := match xs {
   nil -> nil ; cons (k, b) rest -> concat (allNames b) (pairNames rest) }
 
 -- Exact recursive parts, with per-arm free-name agreement to prevent capture.
--- For multiple pattern variables, retain their literal names: §2's successive
--- swaps are not a simultaneous permutation. This conservative restriction keeps
--- alpha an equivalence while meeting AlphaPartsAgree; see the report.
+-- §2 compares Data through underBinderPairs and patterns through simultaneous renameAll.
+-- Repeated pattern names must occupy the same positions on both sides; linear patterns
+-- always pass this additional check. No pattern variable is compared literally.
 appendEnv (xs ys : List (String * String)) : List (String * String) := match xs {
   nil -> ys ; cons x rest -> cons x (appendEnv rest ys) }
 armScopesAgree (ps qs : List (Pattern * Term)) : Bool := match (ps, qs) {
   (nil, nil) -> true ; (cons (p, b) rest, cons (q, c) more) ->
     sameNames (removeAll (patternVars p) (freeVars b)) (removeAll (patternVars q) (freeVars c))
-    and patternNamesAgree p q and armScopesAgree rest more ; _ -> false }
-patternNamesAgree (p q : Pattern) : Bool := match patternVars p {
-  cons x (cons y rest) -> p == q ; _ -> true }
+    and bindingPositionsAgree (patternVars p) (patternVars q) and armScopesAgree rest more ; _ -> false }
+bindingPositionsAgree (xs ys : List String) : Bool := match (xs, ys) {
+  (nil, nil) -> true ; (cons x rest, cons y more) ->
+    repeatsAgree x y rest more and bindingPositionsAgree rest more ; _ -> false }
+repeatsAgree (x y : String) (xs ys : List String) : Bool := match (xs, ys) {
+  (nil, nil) -> true ; (cons u rest, cons v more) ->
+    (x == u) == (y == v) and repeatsAgree x y rest more ; _ -> false }
 alphaParts (s t : Term) : Bool :=
   sameNames (freeVars s) (freeVars t) and partsAgree alpha s t
   and (match (s, t) { (Match u ps, Match v qs) -> armScopesAgree ps qs ; _ -> true })
@@ -67,6 +73,8 @@ substTerm (x : String) (s t : Term) : Term :=
   Pi y a b -> match substBody x s y b { (z, c) -> Pi z (substTerm x s a) c } ;
   Sigma y a b -> match substBody x s y b { (z, c) -> Sigma z (substTerm x s a) c } ;
   Subtype y a b -> match substBody x s y b { (z, c) -> Subtype z (substTerm x s a) c } ;
+  Let y ty v b -> match substBody x s y b {
+    (z, c) -> Let z (substTerm x s ty) (substTerm x s v) c } ;
   App a b -> App (substTerm x s a) (substTerm x s b) ;
   Pair a b -> Pair (substTerm x s a) (substTerm x s b) ;
   Inj l a -> Inj l (substTerm x s a) ; Match a arms -> Match (substTerm x s a) (substArms x s arms) ;
@@ -127,6 +135,10 @@ canonTerm (avoid : List String) (env : List (String * String)) (n : Nat) (t : Te
   Subtype x a b -> match nextBinder avoid n { (y, n1) ->
     match canonTerm avoid env n1 a { (c, n2) ->
       match canonTerm avoid (cons (x, y) env) n2 b { (d, n3) -> (Subtype y c d, n3) } } } ;
+  Let x ty v b -> match nextBinder avoid n { (y, n1) ->
+    match canonTerm avoid env n1 ty { (d, n2) ->
+      match canonTerm avoid env n2 v { (w, n3) ->
+        match canonTerm avoid (cons (x, y) env) n3 b { (c, n4) -> (Let y d w c, n4) } } } } ;
   App a b -> match canonTerm avoid env n a { (c, n1) ->
     match canonTerm avoid env n1 b { (d, n2) -> (App c d, n2) } } ;
   Pair a b -> match canonTerm avoid env n a { (c, n1) ->
@@ -202,6 +214,7 @@ primitiveResult (op : String) (i j : Term) : Maybe Term := match (i, j) {
     if op == "==" then just (truthTerm (a == b)) else nothing ; _ -> nothing }
 stepHead (p : Program) (t : Term) : HeadStep := match t {
   Var x -> match lookupBody p x { nothing -> Done t ; just b -> Next b } ;
+  Let x ty v b -> Next (substTerm x v b) ;
   App f a -> stepApplication p f a ; Match s arms -> stepMatch p s arms ;
   Proj r x -> stepProjection p r x ; _ -> Done t }
 -- Field names are literal and ordered; duplicate names select the first occurrence.
@@ -238,7 +251,7 @@ constructorTerms (env : Program) (v : Term) (args : List Term) : Maybe (String *
   Var x -> match args { nil -> nothing ; cons a rest -> if free env x then just (x, args) else nothing } ;
   App f a -> constructorTerms env f (cons a args) ; _ -> nothing }
 knownHead (env : Program) (v : Term) : Bool := match v {
-  Var x -> false ; Hole x -> false ; Axiom -> false ; Match s arms -> false ; Proj r l -> false ;
+  Var x -> false ; Hole x -> false ; Axiom r -> false ; Match s arms -> false ; Proj r l -> false ;
   App f a -> match constructorTerms env v nil { just cs -> true ; nothing -> false } ; _ -> true }
 demandHead (env : Program) (v : Term) : PatternStep := match stepHead env v {
   Next w -> Demand w ; Done w -> if knownHead env v then Miss else Blocked }
