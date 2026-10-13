@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 a339bf8cce6d, commit ee8e9ad (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 91092f83d897, commit c82611c (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -472,10 +472,19 @@ its type).
   level on laws that hold and its power on controls (spec 7.S17 to 7.S19); a certificate it emits
   carries the certifier's own certificate in its cone, and the evidence composes (spec 6.S12).
   Certification is not a keyword (D-2026-10-13-d). [settled]
+- L9.11 A law is a theory: its predicate presents it, `forall` and `exists` and the connectives form
+  it, and its models are its evidence, which follows its form: a case is evaluated, a `forall` is
+  covered exhaustively, by listed cases or by a sample, an `exists` by a witness with its cost, `and`
+  by both sides and `or` by one; a citation or an assumption covers any part whole (D-2026-10-13-l).
+  [proposed]
+- L9.12 The two quantifiers are dual in their evidence: a `forall` is refuted exactly by a
+  counterexample and, over an infinite domain, confirmed only by statistics; an `exists` is confirmed
+  by a witness whose cost is determinate rather than statistical, though over the reals not zero
+  (D-2026-10-13-l). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
 Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
-settled (D-2026-10-13-d, -e).
+settled (D-2026-10-13-d, -e); clauses 11 and 12 proposed (D-2026-10-13-l).
 
 **L10. A certificate records what is known of a law, its domain, its bound and its evidence; it is
 frozen, it serves every demand it meets, and it transports along identity.**
@@ -483,8 +492,9 @@ From: G1 (a model is known by the law it satisfies, with the evidence it has) wi
 cost) and G0, the demand (what the demand requires of the evidence is its own).
 - L10.1 A certificate (Terms) names the law it records as checked, the domain the check covered (a
   subtype, the cases listed, or the distribution sampled), the bound observed (for a law into `Cost`,
-  the worst cost seen), and the evidence: its grade and, for a sampled check, the sample's statistics
-  converted to an evidence cost (D-2026-10-12-r). [proposed]
+  the distance its `forall` gives over the costs seen, D-2026-10-13-m), and the evidence: its grade
+  and, for a sampled check, the sample's statistics converted to an evidence cost (D-2026-10-12-r).
+  [proposed]
 - L10.2 The grade is derived from the domain and the evidence cost: proved and exhaustive have
   evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the finite
   cost of its statistics on the distribution sampled. An `assumed` certificate carries what is
@@ -596,10 +606,22 @@ demand (the cutoff lives in the demand).
   the costs of its parts combine is the theory's algebra, with two candidate models, min and max, or
   1/n log-sum-exp and 1/n sum (D-2026-10-12-p); the composition along a path is the sum (L10.7,
   D-2026-10-12-q). [proposed]
+- L12.6 Cost is two things (D-2026-10-13-m). A distance says how far an approximate value is from
+  the ideal; it composes by the triangle inequality, or by the worst link where it is ultrametric, and
+  it is the one logic of G2: a law's value is a distance, and the demand's cutoff says whether it is
+  enough. A probability says how sure a sample makes us; it is the evidence, and how evidences combine
+  is an assumption about the dependence of what fails: nested (max), independent and rare (sum,
+  log-sum-exp), or the joint known (the chain rule, exact). The two candidate models of clause 5 are
+  models of evidence. [proposed]
+- L12.7 `then` is material, `not (p and not q)`; conditioning is not a connective, since no
+  connective has the conditional probability as its probability (Lewis, 1976), but an operation on a
+  measure whose law is the chain rule. For distances, `then` is the triangle inequality, which is
+  transport along an identity (L10.7) (D-2026-10-13-l, -m). [proposed]
 References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q.
 Rests on: O1 (the algebra of costs; the two candidate models, D-2026-10-12-p).
 Status: proposed on his note of 2026-10-12; the names lift, exact and within his to rename; clause 2
-settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded on D-2026-10-12-h, -i, -p, -q.
+settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded on D-2026-10-12-h, -i, -p, -q; clauses 6
+and 7 proposed (D-2026-10-13-l, -m).
 
 **L13. The ideal world is realized with a guarantee.**
 From: G2 directly: the realization's distance to the ideal law is the law's value, and the tolerance

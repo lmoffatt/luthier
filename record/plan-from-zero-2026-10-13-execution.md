@@ -67,7 +67,8 @@ until Luciano marks them, every step assumes them as recommended and says so in 
    chapter 4 (4.R1 to 4.R13, 4.R14 for `W` with D4 and D8, 4.R11, 4.S17, 4.S23, 4.S24), each law
    citing its rule (4.S21).
 2. `src/luthier/lib/laws.lut`: `LawValue` and `verdict` (5.S3), the relations moved from algebra
-   (D-2026-10-11-l), lift and exact (5.S5).
+   (D-2026-10-11-l), lift and exact (5.S5). A law as a theory (D-2026-10-13-l): `Law`, `forall`, `exists` and the
+   connectives, `then` material; the evidence of each form.
 3. `src/luthier/lib/checks.lut`: `Failures E`, the projections, composition (5.S9 to 5.S11).
 4. `src/luthier/lib/library.lut`: a file as a record type (12.S1), modules, the import of Z5, core
    enclosing every file, laziness (12.S21), ascription (L6.12).
@@ -85,7 +86,9 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 
 ## Step 5. Evidence (layer 2)
 
-1. *Agents.* `src/luthier/lib/certification.lut` (6.S16: `CostAlgebra C` with its six laws,
+1. *Agents.* Two cost types, `Distance` for the values of laws and `Evidence` for what samples
+   give (D-2026-10-13-m), with the interface of 6.S5 split between them and refined here.
+   `src/luthier/lib/certification.lut` (6.S16: `CostAlgebra C` with its six laws,
    `Certificate C`, `grade`, `transport`, `compose`, `serves`); `src/luthier/lib/cost.lut`, a first
    model (`⊕` the sum over [0, ∞]); `src/luthier/lib/test.lut` (7.S20, `TestSpec` of D9) and
    `src/luthier/lib/generators.lut` (7.S1 to 7.S8).

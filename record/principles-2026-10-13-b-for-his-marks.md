@@ -1,4 +1,4 @@
-# Principles, 2026-10-13 (second): five clauses for your marks
+# Principles, 2026-10-13 (second): nine clauses for your marks
 
 At the commit that holds this file. The reflections of the plan from zero, brought into the
 principles before the first theory is written (D-2026-10-13-k). All five are `[proposed]` in
@@ -21,3 +21,21 @@ comment under a line.
 - L14.6, new: of the two orders of bootstrapping, the theory comes first; Luthier's theories are
   written in Luthier before any implementation and are the authority, and the host's files and
   later the Luthier implementations are their specimens (D-2026-10-13-h).
+
+Four more, from the conversation on laws and costs (D-2026-10-13-l, -m):
+
+- L9.11, new: a law is a theory; its predicate presents it, `forall`, `exists` and the connectives
+  form it, and its models are its evidence, which follows its form (a case evaluated; a `forall`
+  covered exhaustively, by cases or by a sample; an `exists` by a witness with its cost; `and` by
+  both, `or` by one; a citation or an assumption covers any part whole).
+- L9.12, new: a `forall` is refuted exactly by a counterexample and confirmed over an infinite
+  domain only by statistics; an `exists` is confirmed by a witness whose cost is determinate,
+  though over the reals not zero.
+- L12.6, new: cost is two things. A distance (how far an approximation is from the ideal) is the
+  one logic of G2 and the value of a law; a probability (how sure a sample makes us) is the
+  evidence, and how evidences combine is an assumption about dependence (nested, independent and
+  rare, or the joint known). L10.1 now says the bound is the distance the `forall` gives.
+- L12.7, new: `then` is material, `not (p and not q)`; conditioning is an operation on a measure,
+  with the chain rule, not a connective (Lewis, 1976); for distances, `then` is the triangle
+  inequality, the transport of L10.7.
+

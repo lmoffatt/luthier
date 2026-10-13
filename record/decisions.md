@@ -2025,3 +2025,57 @@ Source:     chat:f15ae1b6:2179
             chat:f15ae1b6:2196
 Kind:       principles (L2, L6, L8, L14). For P13 (they guide the theories about to be written)
 Status:     current; the five clauses proposed, his mark pending
+
+D-2026-10-13-l  A law is a theory: its predicate presents it, `forall` (Π) and `exists` (Σ) and the
+                connectives form it, and its models are its evidence, which follows its form: a case
+                is evaluated; a `forall` is modelled exhaustively, by listed cases or by a sample; an
+                `exists` by a witness with its cost; `and` by a pair, `or` by one side; a citation or
+                an assumption models any part whole. A `forall` is refuted exactly by a
+                counterexample and over an infinite domain confirmed only by statistics; an `exists`
+                is confirmed by a witness whose cost is determinate, not statistical, though over the
+                reals not zero. `then` is material, `not (p and not q)`; conditioning is not a
+                connective (Lewis, 1976) but an operation on a measure, with the chain rule.
+Author:     Luciano for the question, `forall` and `exists`, the certifiers as models of the
+            quantifier and citation of the whole law, and the inexact witness over the reals; the
+            model for the rest
+Quote:      "Las leyes a su vez son teorias o son  modelos?"
+            "Tenes ambos el Forall y el Exist (para optimizacion o inversas por ejemplo)"
+            "yo estoy tentado a pensar que el exhaustive y el sampled son modelos del Forall , el cite
+            es modelo de toda la Ley."
+            "Si, me cierra."
+Source:     chat:f15ae1b6:2245
+            chat:f15ae1b6:2273
+            chat:f15ae1b6:2273
+            chat:f15ae1b6:2311
+Kind:       principles (L9.11, L9.12, L12.1) and spec (5, 6.S7). For L8.1, L9, G2
+Status:     current; the clauses proposed in their wording
+
+D-2026-10-13-m  Cost is two things. A distance models how far an approximate value is from the
+                ideal; it composes by the triangle inequality, or by the worst link where it is
+                ultrametric, and it is the logic of G2, one logic. A probability models sampling; it
+                is the evidence, and how evidences combine is an assumption about the dependence of
+                what failed (nested: max; independent and rare: sum and log-sum-exp; the joint
+                known: the chain rule, exact). A law's value is a distance, and the demand's cutoff
+                says whether it is enough; a statistical test is a law of distance (a distance
+                between distributions) with probabilistic evidence. Better or worse approximations
+                describe a process, the identity of specimens with its distance (L9.9), and are not
+                the fit to a law. A certificate's bound is a `Distance` and its evidence an
+                `Evidence`, two types with two interfaces; they are refined when used.
+Author:     Luciano for the two kinds and their reading; the model for the composition of each and
+            for the two types
+Quote:      "1) distancia,  modela valores aproximados"
+            "2) probabilidad, modela muestreos"
+            "el caso de los test de probabilidad, yo creo que es mas de distancias que de
+            probabilidad"
+            "el primer caso NO es el ajuste a una ley, es una descripcion de un proceso"
+            "Si, esta bien. Cuando las usemos las afinamos."
+Source:     chat:f15ae1b6:2328
+            chat:f15ae1b6:2328
+            chat:f15ae1b6:2328
+            chat:f15ae1b6:2328
+            chat:f15ae1b6:2336
+Kind:       principles (G2 read as the logic of distances; L10.1, L12) and spec (6.S5, 6.S6). For
+            G2, L10, D-2026-10-12-p
+Status:     current; the two interfaces to be refined when certification.lth and cost.lth are
+            written. His `not c = 1/c` for min and max (chat:f15ae1b6:2292) waits for a case
+            on distances, where negation is in doubt

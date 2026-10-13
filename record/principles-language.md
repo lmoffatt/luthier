@@ -1076,6 +1076,15 @@ L9.10  A certifier is a value, as a generator is (D-2026-10-06-ab): the five of 
        its level on laws that hold and its power on controls (spec 7.S17 to 7.S19); a certificate it
        emits carries the certifier's own certificate in its cone, and the evidence composes (spec
        6.S12). Certification is not a keyword (D-2026-10-13-d). [settled]
+L9.11  A law is a theory: its predicate presents it, `forall` and `exists` and the connectives form
+       it, and its models are its evidence, which follows its form: a case is evaluated, a `forall`
+       is covered exhaustively, by listed cases or by a sample, an `exists` by a witness with its
+       cost, `and` by both sides and `or` by one; a citation or an assumption covers any part whole
+       (D-2026-10-13-l). [proposed]
+L9.12  The two quantifiers are dual in their evidence: a `forall` is refuted exactly by a
+       counterexample and, over an infinite domain, confirmed only by statistics; an `exists` is
+       confirmed by a witness whose cost is determinate rather than statistical, though over the
+       reals not zero (D-2026-10-13-l). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
@@ -1091,7 +1100,7 @@ Source:     (L5) Luciano, 2026-10-05 (chat:52d3e68e:2760); the puzzle 2026-10-10
             at 08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his annotation on
             draft 8 (bcdac41)
 Status:     settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
-            settled (D-2026-10-13-d, -e)
+            settled (D-2026-10-13-d, -e); clauses 11 and 12 proposed (D-2026-10-13-l)
 History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d: laws accumulate
             and need not determine the operation. (L11) draft 0 (6d9dbd3): stated. draft 4
             (c7c6396): the four methods and the grade in the certificate; the dependence on the
@@ -1122,7 +1131,7 @@ From:       G1 (a model is known by the law it satisfies, with the evidence it h
             own)
 L10.1  A certificate (Terms) names the law it records as checked, the domain the check covered (a
        subtype, the cases listed, or the distribution sampled), the bound observed (for a law into
-       `Cost`, the worst cost seen), and the evidence: its grade and, for a sampled check, the
+       `Cost`, the distance its `forall` gives over the costs seen, D-2026-10-13-m), and the evidence: its grade and, for a sampled check, the
        sample's statistics converted to an evidence cost (D-2026-10-12-r). [proposed]
 L10.2  The grade is derived from the domain and the evidence cost: proved and exhaustive have
        evidence cost 0 on their domain; cases, 0 on the cases listed and ∞ outside; sampled, the
@@ -1306,12 +1315,23 @@ L12.5  The law of a theory is one law, so its certificate is one certificate; ho
        (D-2026-10-12-i); how the costs of its parts combine is the theory's algebra, with two
        candidate models, min and max, or 1/n log-sum-exp and 1/n sum (D-2026-10-12-p); the
        composition along a path is the sum (L10.7, D-2026-10-12-q). [proposed]
+L12.6  Cost is two things (D-2026-10-13-m). A distance says how far an approximate value is from
+       the ideal; it composes by the triangle inequality, or by the worst link where it is
+       ultrametric, and it is the one logic of G2: a law's value is a distance, and the demand's
+       cutoff says whether it is enough. A probability says how sure a sample makes us; it is the
+       evidence, and how evidences combine is an assumption about the dependence of what fails:
+       nested (max), independent and rare (sum, log-sum-exp), or the joint known (the chain rule,
+       exact). The two candidate models of clause 5 are models of evidence. [proposed]
+L12.7  `then` is material, `not (p and not q)`; conditioning is not a connective, since no
+       connective has the conditional probability as its probability (Lewis, 1976), but an
+       operation on a measure whose law is the chain rule. For distances, `then` is the triangle
+       inequality, which is transport along an identity (L10.7) (D-2026-10-13-l, -m). [proposed]
 References: D-2026-10-12-i, D-2026-10-12-p, D-2026-10-12-q
 Rests on:   O1 (the algebra of costs; the two candidate models, D-2026-10-12-p)
 Source:     his note of 2026-10-12 on the reorder plan (14ea9f0)
 Status:     proposed on his note of 2026-10-12; the names lift, exact and within his to rename;
             clause 2 settled on his mark (D-2026-10-12-w); clauses 3, 5 reworded on D-2026-10-12-h,
-            -i, -p, -q
+            -i, -p, -q; clauses 6 and 7 proposed (D-2026-10-13-l, -m)
 History:    draft 10 (72cc7be, 81c1794, 25f9c5e, b7a7e23): new, on his note of 2026-10-12 on the
             plan ("faltan las leyes de los costos y de los predicates y cómo se lift a costos"); the
             text is the record's G3 of draft 9 (lift, exact, within) and the paragraph that stood in
