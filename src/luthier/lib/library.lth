@@ -19,6 +19,9 @@
 --   §3 What is read, exactly: nothing without a demand; checking reads theory files only;
 --      running reads the model a demand reaches, and verifies it is a model of its theory
 --      (12.S21, 12.S22).                                                              done
+--   §4 File policies: `primitive` only in core, `axiom` only in core and the libraries, `R`
+--      no type (11.R1 to 11.R3; D-2026-10-13-ae: laws of the loader, not of WellFormed, since
+--      they need the file's kind and the library set). Waits for core.lut.                 todo
 
 import "grammar.lth" SurfaceProgram SurfaceAct Surface ImportName declare define importAct name app termBody
   record recordValue
