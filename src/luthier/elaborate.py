@@ -187,9 +187,10 @@ def block(items, body, c, expected):
     """translation.lth (87d6091) law `Blocks`: each item in order, the rest of the block under it.
 
     `x := t` and a bare name on a value that is not an action are a `Let` on a fresh name (4.R12);
-    a pattern on an action's `W * A` is a `match` with one arm, a bare name on `W * Unit` binding
-    the token and dropping the unit (D-2026-10-13-ag). A value whose type the bootstrap inference
-    cannot tell (a Hole) is read as an action when the pattern is not a bare name.
+    a pattern on `<-` is a `match` with one arm (on an action's `W * A`), a bare name on `W * Unit` binding
+    the token and dropping the unit (D-2026-10-13-ag). A pattern that is not a bare name is that
+    one-arm `match` whatever the value's type (1665b9d, 2.S17); only a bare name on a non-action
+    stays a `Let`.
     """
     if not items:
         return walk(body, c, expected)
@@ -201,7 +202,7 @@ def block(items, body, c, expected):
     else:
         value = walk(item.value, c)
     ty = infer(value, c)
-    if isinstance(item, s.Rebind) and (is_action(ty) or name is None and isinstance(ty, t.Hole)):
+    if isinstance(item, s.Rebind) and (is_action(ty) or name is None):
         inner = c.child()
         if name is not None and ty.codomain == t.Var('Unit'):
             n = inner.fresh(name); inner.names[name] = n
@@ -210,11 +211,6 @@ def block(items, body, c, expected):
             q = pattern(item.pattern, inner, fresh=True)
         pattern_types(q, ty, inner)
         return t.Match(value, ((q, block(rest, body, inner, expected)),))
-    if name is None:
-        raise ElaborationError(
-            f'block item {show_pattern(pattern(item.pattern, c.child()))} <- {show_term(value)}: '
-            f'a pattern that is not a bare name on a value of type {show_term(ty)}, which is not '
-            f'an action W * A; translation.lth (law Blocks) does not say what it elaborates to')
     inner = c.child()
     n = inner.fresh(name); inner.names[name] = n; inner.types[n] = ty
     return t.Let(n, ty, value, block(rest, body, inner, expected))

@@ -206,11 +206,10 @@ def test_Blocks_action_chain_rebinds_the_token():
        WORLD)
 
 
-def test_Blocks_pattern_on_a_value_refused():
-    # translation.lth does not say what a pattern that is not a bare name gives on a value that is
-    # not an action; the elaborator refuses it, naming the item
-    with pytest.raises(ElaborationError, match=r'\(a, b\) <- '):
-        term('{ (a, b) <- n; a }', SCOPE)
+def test_Blocks_pattern_on_a_value():
+    # translation.lth (1665b9d) law Blocks, its fourth gives: a pattern against a value that is not
+    # an action is the same one-arm match (2.S17); only a bare name on a non-action stays a Let
+    eq('{ (a, b) <- n; a }', t.Match(V('n'), ((t.PPair(pv('a'), pv('b')), V('a')),)), 'n : Int * Int')
 
 
 def test_Shapes():
