@@ -168,6 +168,9 @@ by Luciano.
   committed (108fb96, Codex had written it): the `run` bite is whole but for its report. Running:
   an Opus agent on the parser for the pattern `<-`; Codex on check.py bite 3b (prompt-3b.md: the
   leftovers by cause, the 4.R9 refusals of library.lth) and on the inventory of sonolocalización.
+- 2026-10-13, 22:30: Codex is gone (his word: its tokens are spent); its two runs killed, nothing
+  kept. check.py bite 3b and the inventory relaunched as Opus agents. From here every specimen
+  bite goes to a Claude agent (Sonnet, Opus or Fable by its difficulty), briefed by the same files.
 
 ## Rules for every step
 
