@@ -7,7 +7,7 @@
 --
 -- What this file states (4.S21). A model of `WellFormed` is a checker: from a program it gives the
 -- failures it finds. Each rule of chapter 4 is a predicate, `violates`, written here as the rule
--- says it, and one generic law, `ReportsExactly`, says the checker reports a failure of that rule
+-- says it, and two generic laws, `ReportsViolations` and `ReportsNoFalseFailure`, say the checker reports a failure of that rule
 -- for a name exactly when the name violates it. So the rule is stated once, as a predicate, and
 -- the checker is held to it; the accept and reject programs of `tests/spec/` are its cases. The
 -- Python checker (step 4) is a specimen.
@@ -23,7 +23,7 @@
 --
 --   §1 Failures and the theory: `Failure`, `Report`, `Elaboration` (translation.lth),
 --      `WellFormed` over an alpha, a substitution, an elaboration
---      and a typing, the generic law `ReportsExactly` (4.S21, 5.S9).                   done
+--      and a typing, the generic laws `ReportsViolations`, `ReportsNoFalseFailure` (4.S21, 5.S9). done
 --   §2 Names: the acts' names, D(n) and B(n) on the surface tree (1.S7). Type and
 --      term position (4.S2) still to add, for 4.R2.                                 done
 --   §3 The rules that read names and forms: 4.R1, 4.R2 (existence), 4.R3 with L2.7,
@@ -74,16 +74,26 @@ removeAll (xs ys : List String) : List String := match xs { nil -> ys ; cons x r
 reported (fs : List Failure) (rule n : String) : Bool :=
   match fs { nil -> false ; cons f rest -> (f.rule == rule and f.name == n) or reported rest rule n }
 
--- a program and one of the names its acts introduce: what a rule is about; drawn from the program,
--- since a random name is almost never one of them (7.S12)
-NamedIn : U := { p : SurfaceProgram, n : String | member n (actNames p) }
-
--- The one law: for each rule, the checker reports a failure of that rule for a name exactly when
--- the name violates the rule. The rule and its predicate come first, so `ReportsExactly "4.R1"
--- violatesR1` is the law of 4.R1 (§7).
-ReportsExactly (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (rule : String)
-               (violates : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : NamedIn) : Bool :=
-  reported (w.check c.p) rule c.n == violates c.p c.n
+-- The programs a rule is tested on, and its two laws (review of layers 0-1, B). A law stated over
+-- every program with one of its names would be vacuous in practice: a random program violates
+-- some rules almost always and others almost never, so only one side of "exactly" would be seen
+-- (L9.6). So each rule has two domains, the programs with a name that violates it and those with
+-- a name that does not, and two laws. Their generators are the certifier's (7.R1): the accept and
+-- reject programs of tests/spec/ as a census, and well-formed programs drawn from a small pool of
+-- names and changed by one edit aimed at the rule. A predicate that states only part of its rule
+-- (4.R2, 4.R12 at the top level, the rules on types until `Typing` is complete) under-approximates
+-- the violations, so only its sound direction, "violates implies reported", is a law: "exactly"
+-- would fail a checker that implements the whole rule.
+Violating (violates : SurfaceProgram -> String -> Bool) : U :=
+  { p : SurfaceProgram, n : String | member n (actNames p) and violates p n }
+Clean (violates : SurfaceProgram -> String -> Bool) : U :=
+  { p : SurfaceProgram, n : String | member n (actNames p) and not (violates p n) }
+ReportsViolations (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (rule : String)
+                  (violates : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : Violating violates) : Bool :=
+  reported (w.check c.p) rule c.n
+ReportsNoFalseFailure (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (rule : String)
+                      (violates : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : Clean violates) : Bool :=
+  not (reported (w.check c.p) rule c.n)
 -- and it reports nothing about names the program does not introduce
 ReportsOnItsNames (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (w : WellFormed a sb e t)
                   (p : SurfaceProgram) : Bool := failuresNamed (w.check p) (actNames p)
@@ -473,19 +483,28 @@ looseFunction (p : SurfaceProgram) (n : String) : Bool :=
   anyAct (fn act { match act { define x bs t b -> nonEmptyBinders bs or (match t { just (binop o l r) -> o == "->" ; _ -> false }) ;
                               _ -> false } }) (actsNamed p n)
 nonEmptyBinders (bs : List Binder) : Bool := match bs { nil -> false ; cons b rest -> true }
-ReportsExactlyAs (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (kind : String)
-                 (holds : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : NamedIn) : Bool :=
-  reportedAs (w.report c.p) kind c.n == holds c.p c.n
+ReportsWhen (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (kind : String)
+            (holds : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : Violating holds) : Bool :=
+  reportedAs (w.report c.p) kind c.n
+ReportsOnlyWhen (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (kind : String)
+                (holds : SurfaceProgram -> String -> Bool) (w : WellFormed a sb e t) (c : Clean holds) : Bool :=
+  not (reportedAs (w.report c.p) kind c.n)
 
 -- ---------------------------------------------------------------- §7 WellFormed
 
--- A checker reports exactly the failures of each rule, only about the program's names, and
--- reports exactly what does not reject.
+-- A checker reports every failure of each rule, and no failure where a complete predicate finds
+-- none (4.R1, 4.R4, 4.R5, 4.R7); the predicates still partial have the first law only. It reports
+-- only about the program's names, and reports what does not reject, an unclaimed law (4.S14)
+-- among it.
 WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) :=
-  ReportsExactly a sb e t "4.R1" violatesR1 & ReportsExactly a sb e t "4.R2" violatesR2Exists
-  & ReportsExactly a sb e t "4.R3" violatesR3 & ReportsExactly a sb e t "4.R4" violatesR4
-  & ReportsExactly a sb e t "4.R5" violatesR5 & ReportsExactly a sb e t "4.R6" (violatesR6 a sb e t)
-  & ReportsExactly a sb e t "4.R7" violatesR7 & ReportsExactly a sb e t "4.R8" (violatesR8 a sb e t)
-  & ReportsExactly a sb e t "4.R9" (violatesR9 a sb e t) & ReportsExactly a sb e t "4.R12" violatesR12
-  & ReportsExactly a sb e t "4.S14" violatesS14 & ReportsOnItsNames a sb e t
-  & ReportsExactlyAs a sb e t "provisional" provisionalExtern & ReportsExactlyAs a sb e t "loose" looseFunction
+  ReportsViolations a sb e t "4.R1" violatesR1 & ReportsNoFalseFailure a sb e t "4.R1" violatesR1
+  & ReportsViolations a sb e t "4.R2" violatesR2Exists & ReportsViolations a sb e t "4.R3" violatesR3
+  & ReportsViolations a sb e t "4.R4" violatesR4 & ReportsNoFalseFailure a sb e t "4.R4" violatesR4
+  & ReportsViolations a sb e t "4.R5" violatesR5 & ReportsNoFalseFailure a sb e t "4.R5" violatesR5
+  & ReportsViolations a sb e t "4.R6" (violatesR6 a sb e t)
+  & ReportsViolations a sb e t "4.R7" violatesR7 & ReportsNoFalseFailure a sb e t "4.R7" violatesR7
+  & ReportsViolations a sb e t "4.R8" (violatesR8 a sb e t) & ReportsViolations a sb e t "4.R9" (violatesR9 a sb e t)
+  & ReportsViolations a sb e t "4.R12" violatesR12 & ReportsOnItsNames a sb e t
+  & ReportsWhen a sb e t "unclaimed" violatesS14 & ReportsOnlyWhen a sb e t "unclaimed" violatesS14
+  & ReportsWhen a sb e t "provisional" provisionalExtern & ReportsOnlyWhen a sb e t "provisional" provisionalExtern
+  & ReportsWhen a sb e t "loose" looseFunction & ReportsOnlyWhen a sb e t "loose" looseFunction
