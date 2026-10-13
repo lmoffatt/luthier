@@ -518,8 +518,15 @@ PrimConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Pro
                     (truth (i == j))
       and stepsTo a (m.step (withData t c k f g p) (bin "==" (App (Var f) (Lit (IntConst i))) (App (Var g) (Lit (IntConst i)))))
                     (truth false))
--- and `==` does not step where equality is not structural (4.R8) or a part is not a value: a
--- lambda, an extern, a hole, an open term
+-- `==` compares values, so it demands its parts as a match demands what its patterns inspect:
+-- when a compared part is not yet a value, the step reduces that part in place, the leftmost
+-- first (the coordinator, running `agreement`: a pair with an unreduced part was read as stuck)
+EqualityDemandsParts (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (x : String) (ty b u v : Term) : Bool :=
+  stepsTo a (m.step p (bin "==" (Pair (App (Lam x ty b) u) v) v)) (bin "==" (Pair (sb.subst x u b) v) v)
+  and stepsTo a (m.step p (bin "==" (Lit (IntConst 1)) (App (Lam x ty b) u))) (bin "==" (Lit (IntConst 1)) (sb.subst x u b))
+  and stepsTo a (m.step p (bin "==" (RecordValue [(x, App (Lam x ty b) u)]) v)) (bin "==" (RecordValue [(x, sb.subst x u b)]) v)
+-- and `==` does not step where equality is not structural (4.R8) or a part cannot become a value:
+-- a lambda, an extern, a hole, an open term
 EqualityStuck (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (x f : String) (ty b : Term) (i : Int) : Bool :=
   isNormal (m.step [] (bin "==" (Lam x ty b) (Lam x ty b)))
   and isNormal (m.step [] (bin "==" (Extern f) (Extern f)))
@@ -547,7 +554,7 @@ DatumIsInert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program
   m.step (cons (Datum d) p) t == m.step p t
 
 Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
-  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimStructural a sb & PrimConstructors a sb & EqualityStuck a sb & ExternIsValue a sb & ValuesStay a sb
+  & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimStructural a sb & PrimConstructors a sb & EqualityDemandsParts a sb & EqualityStuck a sb & ExternIsValue a sb & ValuesStay a sb
   & DatumIsInert a sb
 
 -- ---------------------------------------------------------------- §6 Quote and eval
