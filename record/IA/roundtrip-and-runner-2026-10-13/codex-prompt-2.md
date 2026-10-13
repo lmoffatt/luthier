@@ -25,7 +25,9 @@ Your three failure families, read against `src/luthier/lib/grammar.lth` (amended
 Then remove the strict xfails of `tests/test_roundtrip_trees.py` that these fixes clear. If any
 failure remains, keep it as a strict xfail and report it as before.
 
-Check: `python3 -m pytest tests/ -q` passes whole; `python3 scripts/check_spec.py` and
-`python3 scripts/render_grammar.py --check` pass; `luthier parse src/luthier/lib/*.lth
-src/luthier/lib/*.lut` parses. Do not commit. Report in a few lines to `codex-2.md` in this folder:
+Check: `python3 -m pytest tests/ -q`; `python3 scripts/check_spec.py` and
+`python3 scripts/render_grammar.py --check`; `luthier parse src/luthier/lib/grammar.lth
+src/luthier/lib/ebnf.lth src/luthier/lib/ebnf_model.lut`. Another Codex and another session are
+writing other files in `src/luthier/lib/` (`term.lth`, `term_model.lut`, `program.lth`) while you
+work: a failure that comes from a file you did not touch is theirs; report it, do not fix it. Do not commit. Report in a few lines to `codex-2.md` in this folder:
 what changed, the counts, any failing tree left with its text.
