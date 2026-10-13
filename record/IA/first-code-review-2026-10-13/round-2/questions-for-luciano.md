@@ -16,6 +16,8 @@ Recommended: both keywords, eleven in all; 2.S21's "`import` gives a module valu
 12.S22, goes; and the class of "ordinary names that act as keywords in their position" (2.S2) goes
 with it.
 
+OK
+
 ## R2. A definition has a body or clauses, never both
 
 All four: 2.S5's `":=" body { clause }` does not derive a header followed only by clauses, which
@@ -25,6 +27,8 @@ Recommended: `definition ::= name { binder } [ ":" term ] ( ":=" body | clause {
 tree's `define` carries one or the other (a `Body` gains `clauses : List Clause -> Body`); 2.S12
 gains the row "a definition by clauses is the `match` of its clauses on the tuple of its
 parameters"; a tree law pins it.
+
+accepted
 
 ## R3. Where the law that gives a `data` meaning is written
 
@@ -41,6 +45,11 @@ declaration, and certified as any. 4.R3 reads: every constructor of a `data` is 
 a lawful observer; injectivity is one such law where the observer is meant to tell constructors
 apart, not a requirement (GPT's `eps` and `seq nil`).
 
+esto es cheating. La idea es que haya leyes acerca de los campos de data, algo que obligue a pensar para que uso cada cosa
+y que cada cosa tenga un rol.  si vos le pones un accesor automatico, bueno para eso usa un alias pero no una definicion, como yo ya habia dicho. 
+Un nombre es un concepto, una coleccion de tipos no es un concepto. 
+
+
 ## R4. An open form extends as far right as it can
 
 Claude found texts with two trees, inherited from 2.S9: `(n : Nat) * Vec n` is either
@@ -52,6 +61,9 @@ Recommended: a form that ends in a term (a dependent arrow or product, `if`, `ma
 excepted) takes the longest term that follows; `(n : Nat) * Vec n` is `sigma n Nat (Vec n)`, and a
 law per form pins it.
 
+necesitamos reglas claras y obvias de precedencia de operadores. 
+
+
 ## R5. `and`, `or`, `mod`: names or operators
 
 The rewrite lexes them as operators (kind "infix", constructors of `Op`), which removes the
@@ -62,6 +74,9 @@ parse.
 Recommended: operators, like `+`, given their meaning by core through the `operator` act, which
 then binds `and`, `or`, `mod` besides `+ - * /`; 2.S2 drops "ordinary names".
 
+yes
+
+
 ## R6. Which states the grammar: chapter 2's EBNF or `luthierSyntax`
 
 Claude: 2.S9's EBNF was not updated for what you decided (it still derives `f < a : A | b : B >`,
@@ -71,6 +86,8 @@ separators). Keeping two statements of one grammar in step is the drift L14.6 na
 Recommended: by L14.6 (the theory is the authority), `luthierSyntax` states the grammar; 2.S5 and
 2.S9 keep their prose and their EBNF as an explanation that cites it, and `check_spec` or a test
 compares the two until the chapter's EBNF is generated from the value.
+
+OK
 
 ## Mine to fix, no question
 
