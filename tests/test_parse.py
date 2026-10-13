@@ -104,8 +104,8 @@ CASE_TEXTS = [
     'x := { a : Int | 0 <= a }', 'x := { a b : Int | a < b }', 'x := { (p, q) : P | p < q }',
     'x := { _ : T | p }', 'x := { a := 1 ; a }', 'x := { a := 1 }',
     'x := { a <- 1, a <- a + 1, a }', 'x := (a, b, c)', 'x := [1, 2]', 'x := []',
-    'x := \\ y (z : Int) { w := y ; z }', 'x := \\ (p, q) { p }', 'x := \\ (a b : A) { a }',
-    'x := \\ (y) { y }',
+    'x := fn y (z : Int) { w := y ; z }', 'x := fn (p, q) { p }', 'x := fn (a b : A) { a }',
+    'x := fn (y) { y }',
     'x := match m { just y -> y ; _ -> 0 ; 1 -> 2 ; (a, b) -> a ; cons _ rest -> rest }',
     'x := match m { (y) -> y }', 'x := match e { }', 'x := f (tol <- 1)',
     'x := if c then a', 'x := if c then a else b', 'x := (f y).z', 'x := m.f',
@@ -959,7 +959,7 @@ def test_list_tree():
 
 
 def test_lambda_tree():
-    assert parse("x := \\ y (z : Int) { w := y ; z }") == defx(
+    assert parse("x := fn y (z : Int) { w := y ; z }") == defx(
         Lambda(
             (
                 PlainParam("y"),
@@ -969,21 +969,21 @@ def test_lambda_tree():
             nm("z"),
         )
     )
-    assert parse("x := \\ (p, q) { p }") == defx(
+    assert parse("x := fn (p, q) { p }") == defx(
         Lambda(
             (ShapeParam((PApp("p", ()), PApp("q", ()))),),
             (),
             nm("p"),
         )
     )
-    assert parse("x := \\ (a b : A) { a }") == defx(
+    assert parse("x := fn (a b : A) { a }") == defx(
         Lambda(
             (TypedParam(("a", "b"), nm("A")),),
             (),
             nm("a"),
         )
     )
-    assert isinstance(parse("x := \\ (y) { y }"), ParseFailed)
+    assert isinstance(parse("x := fn (y) { y }"), ParseFailed)
 
 
 def test_pattern_tree():

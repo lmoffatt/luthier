@@ -12,8 +12,8 @@ Reference : U := { r : ReferenceData | Resolvable r }
 import "cite_sources.bib" kantorovich1948 : Reference higham2002 : Reference
 
 double (x : Int) : Int := x + x
-Doubles : U := { f : Int -> Int | \ (x : Int) { f x == x * 2 } }
-twice : Doubles := \ (x : Int) { x + x }
+Doubles : U := { f : Int -> Int | fn (x : Int) { f x == x * 2 } }
+twice : Doubles := fn (x : Int) { x + x }
 
 -- Proposal pending spec 6.R1's O10: cite takes W, then the value and reference,
 -- and returns W * Unit; checked is text. The block threads the token (spec 10.S2).

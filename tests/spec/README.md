@@ -57,3 +57,8 @@ deterministic textual edits, no seed or parameters. Current labeled sums use
 `{ a : A || b : B }`. The former one-alternative `Z7` sums are one-field
 records, constructed with `{ z7 := k }` and read with `a.z7`, preserving the
 operator-resolution cases. The retired `v0.1/` evidence remains unchanged.
+
+Lambda syntax migration: D-2026-10-13-y, grammar commit `5d81039`;
+Codex fn migration v1, deterministic textual edits, no seed or parameters.
+Lambdas use `fn`, for example `fn e (j : J) { e + j }`; the final term
+is the block value, with no `return`.

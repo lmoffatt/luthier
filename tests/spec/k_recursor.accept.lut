@@ -13,4 +13,4 @@ RecSucc (P : U) (r : Recursor P) (z : P) (s : N -> P -> P) (n : N) : Bool :=
 Recursor (P : U) := RecZero P & RecSucc P
 
 recN (P : U) (z : P) (s : N -> P -> P) (n : N) : P := match n { zero -> z ; succ m -> s m (recN P z s m) }
-add (m n : N) : N := recN N m (\ k r { succ r }) n
+add (m n : N) : N := recN N m (fn k r { succ r }) n

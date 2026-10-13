@@ -312,7 +312,7 @@ class _Parser:
             return False
         t = self.tokens[self.i]
         return t.kind in {"name", "number", "string"} or t.text in {
-            "U", "W", "(", "{", "[", "\\", "match", "quote"
+            "U", "W", "(", "{", "[", "fn", "match", "quote"
         }
 
     # Each method below mirrors one nonterminal in luthierSyntax. ----------------
@@ -723,8 +723,8 @@ class _Parser:
                     values.append(self.term())
             self._take("]")
             return List(tuple(values))
-        if self._peek("\\"):
-            self._take("\\")
+        if self._peek("fn"):
+            self._take("fn")
             params = [self.lparam()]
             while not self._peek("{"):
                 params.append(self.lparam())
@@ -1316,7 +1316,7 @@ def _print_term(t: Surface) -> str:
     if isinstance(t, Lambda):
         params = " ".join(_print_lparam(p) for p in t.params)
         parts = [_print_item(x) for x in t.items] + [_print_term(t.body)]
-        return "\\ " + params + " { " + " ; ".join(parts) + " }"
+        return "fn " + params + " { " + " ; ".join(parts) + " }"
     if isinstance(t, MatchOf):
         arms = " ; ".join(
             f"{_print_pattern(p)} -> {_print_term(v)}" for p, v in t.arms
