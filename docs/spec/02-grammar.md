@@ -149,7 +149,7 @@ holds.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: 2707de381bf18aba8d9b2a5d7a93b62ab92e36f1e8b9c0715cc7f207ee0d4e2a).
+(v1; sha256: 889b2e24a25544a8762bd28e11f794f5bc3de29f3426b7202e89db430149a6a1).
 
     program ::= { act newline }
 
@@ -198,7 +198,6 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
     openForm ::= "(" name { name } ":" term ")" "->" term
         | "(" name { name } ":" term ")" "*" term
         | "(" name ":" term ")" "*" "(" name ":" term ")"
-        | "(" name ":" term ")" "+" "(" name ":" term ")"
         | "if" term "then" term [ "else" term ]
 
     ampTerm ::= arrowTerm [ "&" ( openForm | ampTerm ) ]
@@ -221,16 +220,11 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
     negTerm ::= "-" negTerm
         | appTerm
 
-    appTerm ::= projTerm { argTerm }
+    appTerm ::= projTerm { projTerm }
 
     projTerm ::= atom { "." name }
 
-    argTerm ::= argAtom { "." name }
-
-    atom ::= argAtom
-        | "<" name ":" sumAlt { "|" name ":" sumAlt } ">"
-
-    argAtom ::= name
+    atom ::= name
         | number
         | string
         | "U"
@@ -239,6 +233,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
         | "(" term "," term { "," term } ")"
         | "(" name "<-" term ")"
         | "{" recordFields "}"
+        | "{" name ":" term "||" name ":" term { "||" name ":" term } "}"
         | "{" subtypePattern ":" term "|" term "}"
         | "{" name ":=" term { sep name ":=" term } [ sep ] "}"
         | "{" block "}"
@@ -246,16 +241,6 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
         | "\\" lparam { lparam } "{" block "}"
         | "match" scrutinee "{" [ arm { ";" arm } [ ";" ] ] "}"
         | "quote" "{" term "}"
-
-    sumAlt ::= sumArrow [ "&" sumAlt ]
-
-    sumArrow ::= sumOr [ "->" sumArrow ]
-
-    sumOr ::= sumAnd { "or" sumAnd }
-
-    sumAnd ::= sumCmp { "and" sumCmp }
-
-    sumCmp ::= addTerm { ( "==" | "/=" | "<" | "<=" | ">=" ) addTerm }
 
     scrutinee ::= sAnd { "or" sAnd }
 
@@ -270,16 +255,11 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
     sNeg ::= "-" sNeg
         | sApp
 
-    sApp ::= sProj { sArg }
+    sApp ::= sProj { sProj }
 
     sProj ::= sAtom { "." name }
 
-    sArg ::= sArgAtom { "." name }
-
-    sAtom ::= sArgAtom
-        | "<" name ":" sumAlt { "|" name ":" sumAlt } ">"
-
-    sArgAtom ::= name
+    sAtom ::= name
         | number
         | string
         | "U"
