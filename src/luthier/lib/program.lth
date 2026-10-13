@@ -195,7 +195,7 @@ itemsNames (k : List String) (items : List Item) (e : Surface) : List String := 
   nil -> namesIn k e ;
   cons it rest -> match it {
     bind x t -> concat (namesIn k t) (remove x (itemsNames k rest e)) ;
-    rebind x t -> concat (namesIn k t) (remove x (itemsNames k rest e)) } }
+    rebind q t -> concat (namesIn k t) (removeAll (patternBinds k q) (itemsNames k rest e)) } }
 paramsBind (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
   cons q rest -> concat (match q { plainParam x -> [x] ; typedParam xs t -> xs ; shapeParam qs -> patternsBind k qs })
                         (paramsBind k rest) }
@@ -387,7 +387,7 @@ children (t : Surface) : List Surface := match t {
 concatTerms (xs ys : List Surface) : List Surface := match xs { nil -> ys ; cons x rest -> cons x (concatTerms rest ys) }
 fieldTypes (fs : List Field) : List Surface := match fs { nil -> nil ; cons f rest -> cons f.type (fieldTypes rest) }
 itemValues (items : List Item) : List Surface := match items { nil -> nil ;
-  cons it rest -> cons (match it { bind x v -> v ; rebind x v -> v }) (itemValues rest) }
+  cons it rest -> cons (match it { bind x v -> v ; rebind q v -> v }) (itemValues rest) }
 armBodies (arms : List (SurfacePattern * Surface)) : List Surface := match arms { nil -> nil ; cons (q, b) rest -> cons b (armBodies rest) }
 anyTerm (f : Surface -> Bool) (t : Surface) : Bool := f t or anyTerms f (children t)
 anyTerms (f : Surface -> Bool) (ts : List Surface) : Bool := match ts { nil -> false ; cons t rest -> anyTerm f t or anyTerms f rest }
@@ -417,7 +417,9 @@ removeUsed (pending : List String) (v : Surface) : List String := match pending 
 unusedRebinding (pending : List String) (items : List Item) : Bool := match items { nil -> false ;
   cons it rest -> match it {
     bind x v -> unusedRebinding (removeUsed pending v) rest ;
-    rebind x v -> member x (removeUsed pending v) or unusedRebinding (cons x (removeUsed pending v)) rest } }
+    rebind q v -> anyIn (patternBinds nil q) (removeUsed pending v)
+                  or unusedRebinding (concat (patternBinds nil q) (removeUsed pending v)) rest } }
+anyIn (xs ys : List String) : Bool := match xs { nil -> false ; cons x rest -> member x ys or anyIn rest ys }
 blockUnused (params : List String) (t : Surface) : Bool := match t {
   block items e -> unusedRebinding params items ;
   lambda ps items e -> unusedRebinding (paramsBind nil ps) items ;
@@ -467,7 +469,8 @@ itemsFault (defined params : List String) (items : List Item) (e : Surface) : Bo
   nil -> blockFault defined params e ;
   cons it rest -> match it {
     bind x v -> member x defined or blockFault defined params v or itemsFault (cons x defined) params rest e ;
-    rebind x v -> member x defined or blockFault defined params v or itemsFault defined (cons x params) rest e } }
+    rebind q v -> anyIn (patternBinds nil q) defined or blockFault defined params v
+                  or itemsFault defined (concat (patternBinds nil q) params) rest e } }
 armsFault (defined params : List String) (arms : List (SurfacePattern * Surface)) : Bool :=
   match arms { nil -> false ; cons (q, b) rest -> blockFault defined params b or armsFault defined params rest }
 anyFault (defined params : List String) (ts : List Surface) : Bool :=

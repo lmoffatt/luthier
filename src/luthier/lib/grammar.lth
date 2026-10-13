@@ -70,10 +70,12 @@ LambdaParam : U := data {
   shapeParam : List SurfacePattern -> LambdaParam ;
 }
 
--- spec 2.S17: an item of a block. Roles: `BlockOrRecordValue`.
+-- spec 2.S17: an item of a block; `<-` binds a pattern against what it is given, a bare name
+-- when the result is one value or an action's `W * Unit` (D-2026-10-13-ag). Roles:
+-- `BlockOrRecordValue`.
 Item : U := data {
   bind : String -> Surface -> Item ;
-  rebind : String -> Surface -> Item ;
+  rebind : SurfacePattern -> Surface -> Item ;
 }
 
 Field = { names : List String, type : Surface }
@@ -253,7 +255,7 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
       seq [lit "(", ref "pattern", lit ",", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] },
   { lhs := "sep",         rhs := alt [lit ",", lit ";"] },
   { lhs := "block",       rhs := seq [rep (seq [ref "item", ref "sep"]), ref "term", opt (ref "sep")] },
-  { lhs := "item",        rhs := seq [cat "name", alt [lit ":=", lit "<-"], ref "term"] },
+  { lhs := "item",        rhs := alt [seq [cat "name", lit ":=", ref "term"], seq [ref "pattern", lit "<-", ref "term"]] },
   { lhs := "arm",         rhs := seq [ref "pattern", lit "->", ref "term"] },
   { lhs := "lparam",      rhs := alt [cat "name",
       seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")"],
@@ -461,7 +463,7 @@ allFields (ok : String -> Bool) (fs : List Field) : Bool :=
 allPairs (ok : String -> Bool) (kvs : List (String * Surface)) : Bool :=
   match kvs { nil -> true ; cons (k, v) rest -> ok k and wf ok v and allPairs ok rest }
 allItems (ok : String -> Bool) (is : List Item) : Bool := match is { nil -> true ;
-  cons it rest -> match it { bind x t -> ok x and wf ok t ; rebind x t -> ok x and wf ok t } and allItems ok rest }
+  cons it rest -> match it { bind x t -> ok x and wf ok t ; rebind q t -> wfPattern ok q and wf ok t } and allItems ok rest }
 allParams (ok : String -> Bool) (ps : List LambdaParam) : Bool := match ps { nil -> true ;
   cons p rest -> match p {
     plainParam x -> ok x ;
@@ -753,7 +755,9 @@ SubtypeTree (d : Derives) (g : Grammar d) : Bool :=
 BlockOrRecordValue (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := { a := 1 ; a }" (block [bind "a" (numeral 1)] (nm "a"))
   and parsesX d g "x := { a := 1 }" (recordValue [("a", numeral 1)])
-  and parsesX d g "x := { a <- 1, a <- a + 1, a }" (block [rebind "a" (numeral 1), rebind "a" (binop "+" (nm "a") (numeral 1))] (nm "a"))
+  and parsesX d g "x := { a <- 1, a <- a + 1, a }" (block [rebind (pvar "a") (numeral 1), rebind (pvar "a") (binop "+" (nm "a") (numeral 1))] (nm "a"))
+  -- D-2026-10-13-ag: the left of `<-` is a pattern against the action's `W * A`
+  and parsesX d g "x := { (w1, s) <- f w0 ; s }" (block [rebind (pTuple [pvar "w1", pvar "s"]) (app (nm "f") (nm "w0"))] (nm "s"))
 -- 2.S9: the other terms.
 TupleTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a, b, c)" (tuple [nm "a", nm "b", nm "c"])
 ListTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := [1, 2]" (list [numeral 1, numeral 2]) and parsesX d g "x := []" (list [])

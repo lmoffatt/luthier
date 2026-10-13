@@ -149,7 +149,7 @@ holds.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: d919a4f8faf747ca179e4587256a568ba801ba76cb81b7d27fd8e6118a306098).
+(v1; sha256: 4b0865c2015fe452ea960f9a3c90ff3ce2c7d39697f58376a100c6fb4f8c2994).
 
     program ::= { act newline }
 
@@ -292,7 +292,8 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 
     block ::= { item sep } term [ sep ]
 
-    item ::= name ( ":=" | "<-" ) term
+    item ::= name ":=" term
+        | pattern "<-" term
 
     arm ::= pattern "->" term
 
@@ -342,7 +343,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
              | atom "." name                                                              -- projection
 
     sep     ::= "," | ";" | line break
-    item    ::= name ":=" term | name "<-" term                                           -- in a block
+    item    ::= name ":=" term | pattern "<-" term                                        -- in a block
     lparam  ::= name | "(" name { name } ":" term ")" | "(" pattern "," pattern { "," pattern } ")"
     pattern ::= "_" | name { patom } | patom
     patom   ::= name | number | string | "(" pattern { "," pattern } ")"
@@ -448,7 +449,10 @@ operator; one that no argument determines is an error that asks for it explicitl
 that expression is its value; a brace term with no final expression is a record value
 (D-2026-10-11-i). The body of a lambda and the body of a definition written with braces are
 blocks. The items of a block are `x := t` (once), `x <- t` (bind or rebind) and an action with its
-result bound, `w1 <- print w0 "x"`. Translation: each item becomes a definition with a fresh name
+result bound, `w1 <- print w0 "x"`. [decided D-2026-10-13-ag] The left of `<-` is a pattern against
+what the right gives, an action's `W * A` included: `(w1, s) <- readFile w0 "f"`; a bare name is
+allowed when `A` is `Unit`, `w1 <- print w0 "x"`, and binds the token, dropping the unit, as sugar
+the elaboration realizes (`translation.lth`). Actions keep the one shape `W -> ... -> W * A`. Translation: each item becomes a definition with a fresh name
 (spec 2.S12), so after it the block is a sub-DAG with one output, dependencies give the only
 order, and items that do not refer to each other commute (L4, L9). Three kinds of block and no
 other: the body of a definition or lambda; a block named `main` in a file, the script; the

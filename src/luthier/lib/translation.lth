@@ -203,11 +203,20 @@ Arguments (a : Alpha) (e : Elaboration a) : Bool :=
 Blocks (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [] (block [bind "x" (literal (intLit 1))] (nm "x")))
           (Let "x" (Var "Int") (Lit (IntConst 1)) (Var "x"))
-  -- an action in a block is an ordinary binding: it takes and returns the world (2.S12, spec 10)
-  and gives a (e.term [declare "act" [] (binop "->" world world), declare "w0" [] world]
-                      (block [rebind "w1" (app (nm "act") (nm "w0"))] (nm "w1")))
-          (Let "w1" World (App (Var "act") (Var "w0")) (Var "w1"))
-  and gives a (e.term [] (block [rebind "y" (literal (intLit 1)), rebind "y" (binop "+" (nm "y") (literal (intLit 1)))] (nm "y")))
+  -- an action in a block (2.S12, spec 10; D-2026-10-13-ag): the left of `<-` is a pattern against
+  -- the action's `W * A`, a `match` with one arm; a bare name when `A` is `Unit` binds the token
+  -- and drops the unit
+  and gives a (e.term [declare "print" [] (binop "->" world (binop "->" (nm "String") (binop "*" world (nm "Unit")))),
+                       declare "readFile" [] (binop "->" world (binop "->" (nm "String") (binop "*" world (app (nm "Maybe") (nm "String"))))),
+                       declare "w0" [] world]
+                      (block [rebind (pTuple [pvar "w1", pvar "s"]) (app (app (nm "readFile") (nm "w0")) (literal (stringLit "f")))] (nm "s")))
+          (Match (App (App (Var "readFile") (Var "w0")) (Lit (StringConst "f"))) [(PPair (PVar "w1") (PVar "s"), Var "s")])
+  and gives a (e.term [declare "print" [] (binop "->" world (binop "->" (nm "String") (binop "*" world (nm "Unit")))),
+                       declare "w0" [] world]
+                      (block [rebind (pvar "w1") (app (app (nm "print") (nm "w0")) (literal (stringLit "x")))] (nm "w1")))
+          (Match (App (App (Var "print") (Var "w0")) (Lit (StringConst "x"))) [(PPair (PVar "w1") PWild, Var "w1")])
+  -- a bare name bound to a value that is not an action rebinds it: a `Let` on a fresh name
+  and gives a (e.term [] (block [rebind (pvar "y") (literal (intLit 1)), rebind (pvar "y") (binop "+" (nm "y") (literal (intLit 1)))] (nm "y")))
           (Let "y0" (Var "Int") (Lit (IntConst 1)) (Let "y1" (Var "Int") (bin "+" (Var "y0") (Lit (IntConst 1))) (Var "y1")))
 
 -- a tuple parameter is a lambda whose body matches its argument (2.S12); a definition by clauses
