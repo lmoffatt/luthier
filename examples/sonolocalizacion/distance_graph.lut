@@ -1,0 +1,211 @@
+-- distance_graph.lut: a distance graph, the input of the positions MAP, as it is stored, read and
+-- checked: its record, its invariants, the first one a graph breaks, the report of it, and the
+-- directions of the positions its distances do not see.
+--
+-- Ported 2026-10-14 by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/slice-port-2026-10-14/prompt.md, from prototipo-cero/luthier/distance_graph.lut of
+-- sonolocalización at its commit 5ffc36ef70e16e11182bc09e4a927c381e35df1c (v0.1 syntax), with
+-- `describe` from validate_graph.lut:26-30 there, `rowText` written here in place of the extern
+-- `row_text` of src/distance_graph.py:202, and `readGraph` an action in place of the extern
+-- `read_graph_record` (distance_graph_python.lut:57, distance_graph.py:33-43). The names and the
+-- order of the invariants are v0.1's (the answers of the sonolocalización session,
+-- record/IA/sonolocalizacion-inventory-2026-10-13/answers-2026-10-14.md, items 2 and 3). What
+-- changed from v0.1 and every reading the spec left open: the port's report,
+-- record/IA/slice-port-2026-10-14/report.md.
+--
+-- From distance_graph.lut's header, kept: two tables. `nodes` has a row per node: its name, the
+-- prior mean of its position (x, y, z in metres) and the prior standard deviation of each
+-- coordinate (sx, sy, sz). `measurements` has a row per measured distance: the row indices i and j
+-- of the two nodes and the distance d in metres, horizontal, as the tape measures it on the floor
+-- (positions_slice.lut). Repeated pairs are allowed; heights from the ground belong in the prior,
+-- not here. Whatever produces a graph (a script per experiment) is free; what it produces must
+-- satisfy the invariants below, which are checked on the files before a fit. They are written as
+-- Bools over a concrete graph; a row-wise one reads its cells only where the ones it needs hold.
+
+import "world_model.lut" HostConsole host : HostConsole
+import "tables.lth" Table Codec Cell hasColumn intAt realAt textAt firstFailing
+import "tables_model.lut" csv : Codec
+import "arrays.lth" Arrays Vec Mat MatOf MatRows VecOf RankFloor vec mat forallBelow existsBelow sumToInt
+import "arrays_model.lut" numpy : Arrays
+import "positions_slice.lut" Node pairDistance distanceJacobian flatten Design PairsAmong
+
+DistanceGraph = { nodes : Table, measurements : Table }
+
+-- ---------------------------------------------------------------- reading a graph
+-- A graph directory holds its two tables as files, nodes.csv and measurements.csv. Reading it is
+-- an observation of the world, so an action (10.S1, 10.S3): the host reads each file as text
+-- (world_model.lut) and the codec of tables parses it (tables_model.lut). Nothing when a file is
+-- absent or does not parse. (v0.1 typed this as a pure function of a `GraphDir`, a subtype whose
+-- predicate looked at the disk; both are gone.)
+parseTable (text : Maybe String) : Maybe Table := match text { nothing -> nothing ; just s -> csv.parse s }
+graphOf (n m : Maybe Table) : Maybe DistanceGraph :=
+  match n { nothing -> nothing ; just a -> match m { nothing -> nothing ; just b -> just { nodes := a, measurements := b } } }
+readGraph (w : W) (dir : String) : W * Maybe DistanceGraph := {
+  (w1, nodesText) <- host.readFile w (dir + "/nodes.csv")
+  (w2, measurementsText) <- host.readFile w1 (dir + "/measurements.csv")
+  (w2, graphOf (parseTable nodesText) (parseTable measurementsText))
+}
+
+coordName (a : Int) : String := if a == 0 then "x" else if a == 1 then "y" else "z"
+sdName    (a : Int) : String := if a == 0 then "sx" else if a == 1 then "sy" else "sz"
+
+-- ---------------------------------------------------------------- the schema
+-- the columns a graph's tables must have; a graph read from files is checked for them first
+HasNodeColumns (g : DistanceGraph) : Bool :=
+  hasColumn g.nodes "name" "str"
+  and forallBelow 3 (fn a { hasColumn g.nodes (coordName a) "float" and hasColumn g.nodes (sdName a) "float" })
+
+HasMeasurementColumns (g : DistanceGraph) : Bool :=
+  hasColumn g.measurements "i" "int" and hasColumn g.measurements "j" "int" and hasColumn g.measurements "d" "float"
+
+-- a graph whose tables have the columns: what the cells are read from
+GraphWithColumns : U := { g : DistanceGraph | HasNodeColumns g and HasMeasurementColumns g }
+
+iOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Int := intAt g.measurements "i" k
+jOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Int := intAt g.measurements "j" k
+dOf (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Float64 := realAt g.measurements "d" k
+priorAt (g : GraphWithColumns) (a : Int) (n : Fin g.nodes.nRows) : Float64 := realAt g.nodes (coordName a) n
+sdAt (g : GraphWithColumns) (a : Int) (n : Fin g.nodes.nRows) : Float64 := realAt g.nodes (sdName a) n
+nameOf (g : GraphWithColumns) (n : Fin g.nodes.nRows) : String := textAt g.nodes "name" n
+
+-- the prior means as positions, node by node
+priorPositions (g : GraphWithColumns) : Vec Float64 := flatten (mat Float64 3 g.nodes.nRows (fn a n { priorAt g a n }))
+
+-- ---------------------------------------------------------------- the invariants
+indexOk (g : GraphWithColumns) (n : Int) : Bool := 0 <= n and n < g.nodes.nRows
+
+-- each row-wise invariant is a predicate on one row, so a failure can name its row
+rowIndicesInRange (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := indexOk g (iOf g k) and indexOk g (jOf g k)
+rowNoSelfPair (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := iOf g k /= jOf g k
+rowDistancePositive (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool := dOf g k > 0.0
+-- the prior means of two measured nodes differ on the floor: the Jacobian of a distance divides by it
+rowPriorSeparated (g : GraphWithColumns) (k : Fin g.measurements.nRows) : Bool :=
+  if indexOk g (iOf g k) then (if indexOk g (jOf g k) then pairDistance (priorPositions g) (iOf g k) (jOf g k) > 0.0 else false) else false
+rowPriorSdPositive (g : GraphWithColumns) (n : Fin g.nodes.nRows) : Bool := forallBelow 3 (fn a { sdAt g a n > 0.0 })
+rowNameUnique (g : GraphWithColumns) (n : Fin g.nodes.nRows) : Bool := forallBelow n (fn m { nameOf g n /= nameOf g m })
+
+IndicesInRange (g : GraphWithColumns) : Bool := forallBelow g.measurements.nRows (rowIndicesInRange g)
+NoSelfPairs (g : GraphWithColumns) : Bool := forallBelow g.measurements.nRows (rowNoSelfPair g)
+DistancesPositive (g : GraphWithColumns) : Bool := forallBelow g.measurements.nRows (rowDistancePositive g)
+PriorSeparated (g : GraphWithColumns) : Bool := forallBelow g.measurements.nRows (rowPriorSeparated g)
+PriorSdPositive (g : GraphWithColumns) : Bool := forallBelow g.nodes.nRows (rowPriorSdPositive g)
+NamesUnique (g : GraphWithColumns) : Bool := forallBelow g.nodes.nRows (rowNameUnique g)
+
+-- the first failing row of a measurement or node invariant, or -1
+firstBadMeasurement (p : (g : GraphWithColumns) -> Fin g.measurements.nRows -> Bool) (g : GraphWithColumns) : Int :=
+  firstFailing 0 g.measurements.nRows (p g)
+firstBadNode (p : (g : GraphWithColumns) -> Fin g.nodes.nRows -> Bool) (g : GraphWithColumns) : Int :=
+  firstFailing 0 g.nodes.nRows (p g)
+
+-- the schema first: the rows are read only on a graph that has the columns
+ValidGraph (g : DistanceGraph) : Bool :=
+  if HasNodeColumns g and HasMeasurementColumns g
+  then IndicesInRange g and NoSelfPairs g and DistancesPositive g and PriorSdPositive g and NamesUnique g and PriorSeparated g
+  else false
+
+ValidDistanceGraph : U := { g : DistanceGraph | ValidGraph g }
+
+-- ---------------------------------------------------------------- the first violation
+-- What a check of a graph read from files reports: the first invariant that fails, in the order
+-- ValidGraph states them (each may assume the ones before it), with its first failing row; an
+-- invariant of the schema has no row.
+RowViolation = { invariant : String, table : String, row : Int }
+Violation = { schema : String || inRow : RowViolation }
+
+measurementViolation (name : String) (p : (g : GraphWithColumns) -> Fin g.measurements.nRows -> Bool) (g : GraphWithColumns) : Maybe Violation := {
+  k := firstBadMeasurement p g
+  if k >= 0 then just (inRow { invariant := name, table := "measurements", row := k }) else nothing
+}
+nodeViolation (name : String) (p : (g : GraphWithColumns) -> Fin g.nodes.nRows -> Bool) (g : GraphWithColumns) : Maybe Violation := {
+  k := firstBadNode p g
+  if k >= 0 then just (inRow { invariant := name, table := "nodes", row := k }) else nothing
+}
+
+-- the first of two reports that says something
+orElse (a b : Maybe Violation) : Maybe Violation := match a { nothing -> b ; just v -> a }
+
+rowViolation (g : GraphWithColumns) : Maybe Violation :=
+  orElse (measurementViolation "IndicesInRange" rowIndicesInRange g)
+  (orElse (measurementViolation "NoSelfPairs" rowNoSelfPair g)
+  (orElse (measurementViolation "DistancesPositive" rowDistancePositive g)
+  (orElse (nodeViolation "PriorSdPositive" rowPriorSdPositive g)
+  (orElse (nodeViolation "NamesUnique" rowNameUnique g)
+  (measurementViolation "PriorSeparated" rowPriorSeparated g)))))
+
+firstViolation (g : DistanceGraph) : Maybe Violation :=
+  if not (HasNodeColumns g) then just (schema "HasNodeColumns")
+  else if not (HasMeasurementColumns g) then just (schema "HasMeasurementColumns")
+  else rowViolation g
+
+-- a check reports nothing exactly when the graph is valid
+ReportsValidity (f : DistanceGraph -> Maybe Violation) (g : DistanceGraph) : Bool :=
+  match f g { nothing -> ValidGraph g ; just v -> not (ValidGraph g) }
+
+-- ---------------------------------------------------------------- the report of a violation
+-- whole numbers and doubles as text, as Python writes them (v0.1 used the same route for
+-- `intToString`; `row_text` wrote a double with Python's `str`)
+intToString : Int -> String := extern "python:builtins.str"
+realToString : Float64 -> String := extern "python:builtins.str"
+
+-- row r of a table as text, `name=value` for each column in order, joined by ", "
+-- (v0.1's extern row_text, src/distance_graph.py:202, written here)
+cellText (c : Maybe Cell) : String :=
+  match c { nothing -> "" ; just v -> match v { int k -> intToString k ; real x -> realToString x ; text s -> s } }
+rowCells (t : Table) (r : Fin t.nRows) (ns : List String) : String :=
+  match ns {
+    nil -> "" ;
+    cons n rest -> match rest {
+      nil -> n + "=" + cellText (t.cell n r) ;
+      cons m more -> n + "=" + cellText (t.cell n r) + ", " + rowCells t r rest } }
+rowText (t : Table) (r : Int) : String := if 0 <= r and r < t.nRows then rowCells t r t.names else ""
+
+-- the line a check prints for a violation: `FAIL <invariant>`, and for a row-wise one its table,
+-- its row and the row's cells (validate_graph.lut:26-30 of v0.1)
+describe (g : DistanceGraph) (v : Violation) : String :=
+  match v {
+    schema name -> "FAIL " + name ;
+    inRow r -> "FAIL " + r.invariant + ": " + r.table + " row " + intToString r.row + " ("
+               + (if r.table == "nodes" then rowText g.nodes r.row else rowText g.measurements r.row) + ")" }
+
+-- ---------------------------------------------------------------- the pairs measured
+-- the pairs of nodes measured, each counted once whatever its order and however often it is measured
+samePair (g : GraphWithColumns) (k l : Fin g.measurements.nRows) : Bool :=
+  (iOf g k == iOf g l and jOf g k == jOf g l) or (iOf g k == jOf g l and jOf g k == iOf g l)
+distinctPairs (g : GraphWithColumns) : Int :=
+  sumToInt g.measurements.nRows (fn k { if existsBelow k (fn l { samePair g k l }) then 0 else 1 })
+
+-- ---------------------------------------------------------------- the arguments of the MAP
+-- x0 and sdx are 3 x N, coordinate by node; i, j, d have one entry per measurement, and i and j are
+-- nodes: indices of the columns of x0.
+MapInput = { x0 : MatRows 3, sdx : MatOf 3 x0.n, i : Vec (Fin x0.n), j : PairsAmong x0.n i, d : VecOf i.n }
+
+-- a valid graph's indices are in range, which makes them nodes
+toMapInput (g : ValidDistanceGraph) : MapInput := {
+  x0 := mat Float64 3 g.nodes.nRows (fn a n { priorAt g a n }),
+  sdx := mat Float64 3 g.nodes.nRows (fn a n { sdAt g a n }),
+  i := vec (Fin g.nodes.nRows) g.measurements.nRows (fn k { iOf g k }),
+  j := vec (Fin g.nodes.nRows) g.measurements.nRows (fn k { jOf g k }),
+  d := vec Float64 g.measurements.nRows (fn k { dOf g k }),
+}
+
+-- the design a graph measures: its nodes and its pairs
+designOf (m : MapInput) : Design := { nodes := m.x0.n, i := m.i, j := m.j }
+
+-- ---------------------------------------------------------------- what the distances cannot see
+-- Directions of the positions the distances do not move, from the Jacobian of the measured
+-- distances at the prior means: at least the heights, one per node, which a horizontal distance
+-- never moves, and the three rigid motions of the plane; anything above those is a part of the
+-- layout the data leave to the prior. The Jacobian exists there because a valid graph's measured
+-- nodes are apart at the prior (PriorSeparated), which is what its type asks. The vectors of
+-- nodes are rebuilt entry by entry to be read as nodes of the positions. The rank is retained
+-- above `floor` times the largest eigenvalue: a criterion, so a parameter (P11, arrays.lth §4).
+unseenDirections (floor : RankFloor) (g : ValidDistanceGraph) : Int := {
+  m := toMapInput g
+  p := flatten m.x0
+  jac := distanceJacobian p (vec (Node p) m.i.n (fn k { m.i.f k })) (vec (Node p) m.j.n (fn k { m.j.f k }))
+  3 * g.nodes.nRows - numpy.retainedRank floor (numpy.matMul (numpy.transpose jac) jac)
+}
+-- fact: the rigid motions of the plane, two translations and a rotation
+rigidMotions : Int := 3
+-- the directions no horizontal distance can see: the heights of the nodes and the rigid motions
+unseenAlways (g : GraphWithColumns) : Int := g.nodes.nRows + rigidMotions
