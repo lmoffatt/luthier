@@ -1,0 +1,40 @@
+-- kernel_laws.lth: the laws the kernel's structures satisfy, and the roles of the core's `data`.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 2.1 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 3.S7, 3.S8, 3.S36, 3.S37, 4.R8;
+-- D-2026-10-12-ak (an object is a type with its equality, whose laws the kernel guarantees for a
+-- structural `==`); D-2026-10-13-t (the roles of the core's `data`: `Unit` terminal, `Empty`
+-- initial, `Bool` a Boolean algebra, `Nat` its laws, `List` the free monoid); L2.7 (every
+-- constructor has a law of its role; everything has laws, found in the place the thing holds in a
+-- known structure). The v0.1 file is at the tag v0.1-final, src/luthier/lib/kernel_laws.lut.
+--
+-- What this file states. Each section is a known structure as a theory, in the pattern of
+-- ebnf.lth: a record type of its operations, its laws over a model `(m : T)`, and `T := laws`.
+-- The core's types are models of them, which gives each constructor its role: `unit` is the point
+-- of a terminal object, `true` and `false` the top and bottom of a Boolean algebra, `nil` the
+-- neutral element of a free monoid. Those models are values, so they go to kernel_models.lut
+-- (spec 12.S23), not here; the last section lists them. Equality is the structural `==` of the
+-- kernel (4.R8), which §1 states as an object.
+--
+-- Names: `and`, `or`, `not` and `mod` are operators or core names, so fields are named by the
+-- structure's own words (`meet`, `join`, `complement`); `unit` is a constructor of core, so a
+-- monoid's element is `neutral`.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones, checks it with
+-- `luthier parse src/luthier/lib/kernel_laws.lth`, sets its status to done here, and commits.
+--
+--   §1 Object: a type with its equality; reflexive, symmetric, transitive,
+--      substitutive (D-2026-10-12-ak, 3.S36).                                   todo
+--   §2 Terminal and initial objects: `Unit`, `Empty` (3.S7, 3.S8, D-2026-10-13-t).    todo
+--   §3 Boolean algebra: `Bool`'s `true`, `false`, with `not`, `and`, `or`
+--      (D-2026-10-13-t); Huntington's laws.                                    todo
+--   §4 Monoid and free monoid: `List`'s `nil`, `cons`, `append`; the recursion
+--      principle `FoldNil`, `FoldCons` (3.S36, D-2026-10-13-t).                 todo
+--   §5 Commutative semiring with its order: `Nat`'s laws (11.R1, D-2026-10-13-t).    todo
+--   §6 The constructions of the kernel: `Beta`, `PairFst`, `PairSnd`, `Pairing`,
+--      `IfTrue`, `IfFalse`, `CaseNothing`, `CaseJust` (3.S36); what is not statable
+--      (eta, 3.S37).                                                            todo
+--   §7 The models, to write in kernel_models.lut: `==` of each concrete type as an
+--      `Object`; `Unit` a `Terminal`, `Empty` an `Initial`; `Bool` a `BooleanAlgebra`;
+--      `List A` a `FreeMonoid A`; `Nat` a `CommutativeSemiring`.                 todo
