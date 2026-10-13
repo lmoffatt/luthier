@@ -11,6 +11,8 @@ remain values. This module neither translates surface trees nor calls the host.
 # Update: 66d5cae, user request v6; IotaConstructors; audit codex-6.md.
 # Update: fe3bdab, user request v4; audit codex-4.md.
 # Update: 23d23f4, 048cd55, 1c521a7, reference b1582ca; user request v5; codex-5.md.
+# Update: 051e6aa term.lth §5 PrimStructural, PrimConstructors, EqualityStuck;
+# record/IA/kernel-2026-10-13/prompt-7.md; report opus-7.md.
 
 from __future__ import annotations
 
@@ -496,11 +498,9 @@ def _primitive(op: str, a, b) -> Term | None:
         if op in {"+", "*", "-"}:
             value = a.value + b.value if op == "+" else a.value * b.value if op == "*" else a.value - b.value
             return Lit(IntConst(value))
-        return Var("true" if (a.value == b.value if op == "==" else a.value < b.value) else "false")
+        return Var("true" if a.value < b.value else "false")  # `==` is _equal's
     if isinstance(a, FloatConst) and op == "+":
         return Lit(FloatConst(a.value + b.value))
-    if isinstance(a, StringConst) and op == "==":
-        return Var("true" if a.value == b.value else "false")
     return None
 
 
@@ -512,6 +512,88 @@ def _constructor(t: Term) -> tuple[str, tuple[Term, ...]] | None:
     if isinstance(t, Var):
         return t.name, tuple(reversed(args))
     return None
+
+
+class _Constructors(dict):
+    """A constructor's name to the constructors of its data; `arity` counts its type's Pis."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.arity: dict[str, int] = {}
+
+
+def _concrete(constructors: _Constructors, t: Term) -> bool:
+    """A closed value of concrete parts (term.lth §5): constants, pairs, records with distinct
+    labels, injections, and constructors of a data of the program applied to all their parts.
+    A lambda, an extern, a hole, an open term or a part not yet a value is not."""
+    pending = [t]
+    while pending:
+        node = pending.pop()
+        match node:
+            case Lit():
+                pass
+            case Pair(a, b):
+                pending.extend((a, b))
+            case RecordValue(fields):
+                if len({k for k, _ in fields}) != len(fields):
+                    return False
+                pending.extend(v for _, v in fields)
+            case Inj(_, v):
+                pending.append(v)
+            case _:
+                view = _constructor(node)
+                if view is None or view[0] not in constructors or len(view[1]) != constructors.arity[view[0]]:
+                    return False
+                pending.extend(view[1])
+    return True
+
+
+def _equal(constructors: _Constructors, a: Term, b: Term) -> bool | None:
+    """Structural `==` (PrimStructural, PrimConstructors); None where it does not step
+    (EqualityStuck, and the conservative readings of record/IA/kernel-2026-10-13/opus-7.md: two values of different
+    types, records with different labels)."""
+    if not (_concrete(constructors, a) and _concrete(constructors, b)):
+        return None
+    equal = True
+    pending = [(a, b)]
+    while pending:
+        s, t = pending.pop()
+        match s, t:
+            case Lit(c), Lit(d):
+                if type(c) is not type(d):
+                    return None
+                equal = equal and c.value == d.value
+            case Pair(s1, s2), Pair(t1, t2):
+                pending.extend(((s1, t1), (s2, t2)))
+            case RecordValue(ps), RecordValue(qs):
+                fields = dict(qs)
+                if set(fields) != {k for k, _ in ps}:
+                    return None
+                pending.extend((v, fields[k]) for k, v in ps)
+            case Inj(l, v), Inj(k, w):
+                if l == k:
+                    pending.append((v, w))
+                else:
+                    equal = False
+            case _:
+                left, right = _constructor(s), _constructor(t)
+                if left is None or right is None:
+                    return None
+                if left[0] == right[0]:
+                    pending.extend(zip(left[1], right[1]))
+                elif right[0] in constructors[left[0]]:
+                    equal = False
+                else:
+                    return None
+    return equal
+
+
+def _comparable(constructors: _Constructors, t: Term) -> bool:
+    """A weak head normal form whose head `==` may compare: its right operand may then step."""
+    if isinstance(t, (Lit, Pair, RecordValue, Inj)):
+        return True
+    view = _constructor(t)
+    return view is not None and view[0] in constructors
 
 
 def _apply_args(name: str, args: tuple[Term, ...]) -> Term:
@@ -604,6 +686,19 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
             return (False, t) if body is None else (True, body)
         case App(Lam(x, _, b), a):
             return True, substitute(x, a, b)
+        case App(App(op, i), j) if _operator(op) == "==":
+            # PrimStructural, PrimConstructors, EqualityStuck: operands to weak head normal
+            # form, left first; then one step to true or false, or none.
+            changed, k = yield _step(env, constructors, i)
+            if changed:
+                return True, App(App(op, k), j)
+            if not _comparable(constructors, i):
+                return False, t
+            changed, k = yield _step(env, constructors, j)
+            if changed:
+                return True, App(App(op, i), k)
+            result = _equal(constructors, i, j)
+            return (False, t) if result is None else (True, Var("true" if result else "false"))
         case App(App(op, i), j) if _operator(op) is not None:
             if isinstance(i, Lit):
                 if isinstance(j, Lit):
@@ -670,12 +765,17 @@ def step(program: Program, t: Term) -> Term | None:
     for act in program:
         if isinstance(act, Declare):
             env.setdefault(act.name, None)
-    constructors: dict[str, frozenset[str]] = {}
+    constructors = _Constructors()
     for act in program:
         if isinstance(act, Define) and isinstance(act.body, Data):
             names = frozenset(name for name, _ in act.body.constructors if name not in env)
-            for name in names:
-                constructors[name] = names
+            for name, ty in act.body.constructors:
+                if name in names:
+                    constructors[name] = names
+                    constructors.arity[name] = 0
+                    while isinstance(ty, Pi):
+                        constructors.arity[name] += 1
+                        ty = ty.codomain
     changed, value = _run(_step(env, constructors, t))
     return value if changed else None
 

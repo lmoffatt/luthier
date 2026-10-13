@@ -12,6 +12,7 @@ Update: fe3bdab, user request v4; generator v3 adds Let; same seed and budgets.
 Update: user request v5, 23d23f4/048cd55/1c521a7, reference b1582ca;
 generator v4 carries Axiom text, same seed and budgets.
 Update: user request v6, source 66d5cae; IotaConstructors, same seed and budgets.
+Update: prompt-7.md, source 051e6aa; structural ==, same seed and budgets.
 Tests are finite law evidence, not a universal semantic certificate.
 """
 
@@ -654,6 +655,124 @@ def test_prim(rng):
     assert step((Declare("+", Universe()),), prim("+", 1, 2, Var)) is None
     assert step((Define("+", Universe(), Primitive("+")),), prim("+", 1, 2, Var)) == prim("+", 1, 2)
 
+
+
+# 051e6aa term.lth §5: PrimStructural, PrimConstructors, EqualityStuck; prompt-7.md.
+def eq(a, b):
+    return App(App(Primitive("=="), a), b)
+
+
+def num(i):
+    return Lit(IntConst(i))
+
+
+def truth(b):
+    return Var("true" if b else "false")
+
+
+def test_prim_structural(rng):
+    # PrimStructural: each conjunct, over random integers, labels and programs.
+    for _ in range(CASES):
+        i, j = rng.randint(-3, 3), rng.randint(-3, 3)
+        x, y, p = rng.choice(LABELS), rng.choice(LABELS), program(rng)
+        assert steps_to(step(p, eq(Pair(num(i), num(j)), Pair(num(i), num(j)))), truth(True))
+        assert steps_to(step(p, eq(Pair(num(i), num(j)), Pair(num(j), num(i)))), truth(i == j))
+        assert steps_to(step(p, eq(RecordValue(((x, num(i)),)), RecordValue(((x, num(j)),)))), truth(i == j))
+        assert steps_to(step(p, eq(Inj(x, num(i)), Inj(y, num(i)))), truth(x == y))
+        assert steps_to(step(p, eq(Lit(FloatConst(1.5)), Lit(FloatConst(1.5)))), truth(True))
+
+
+def test_prim_constructors(rng):
+    # PrimConstructors: the data of IotaConstructors added to a program that leaves its names free.
+    names = ("T", "c", "k", "f", "g")
+    for _ in range(CASES):
+        i, j = rng.randint(-3, 3), rng.randint(-3, 3)
+        rest = program(rng)
+        if any(isinstance(a, (Declare, Define)) and a.name in names for a in rest):
+            continue
+        p = (constructor_data(),) + rest
+        assert steps_to(step(p, eq(Var("c"), Var("c"))), truth(True))
+        assert steps_to(step(p, eq(Var("c"), Var("k"))), truth(False))
+        assert steps_to(step(p, eq(App(Var("f"), num(i)), App(Var("f"), num(j)))), truth(i == j))
+        assert steps_to(step(p, eq(App(Var("f"), num(i)), App(Var("g"), num(i)))), truth(False))
+
+
+def test_equality_stuck(samples, rng):
+    # EqualityStuck: two lambdas, two externs, a declared name against a literal, a pair with a hole.
+    for b in samples:
+        x, f, ty, i = rng.choice(NAMES), rng.choice(NAMES), term(rng, SIZE), rng.randint(-3, 3)
+        assert step((), eq(Lam(x, ty, b), Lam(x, ty, b))) is None
+        assert step((), eq(Extern(f), Extern(f))) is None
+        assert step((Declare(f, ty),), eq(Var(f), num(i))) is None
+        assert step((Declare(f, ty),), eq(Pair(Var(f), num(i)), Pair(num(i), num(i)))) is None
+
+
+def list_data():
+    # core's List as a data of the program: cons and nil, the same rule as any constructor
+    return Define("List", Universe(), Data("List", (
+        ("nil", Var("List")), ("cons", Pi("_", Var("Int"), Pi("_", Var("List"), Var("List")))),
+    )))
+
+
+def bool_data():
+    return Define("Bool", Universe(), Data("Bool", (("true", Var("Bool")), ("false", Var("Bool")))))
+
+
+def lst(*xs):
+    result = Var("nil")
+    for x in reversed(xs):
+        result = App(App(Var("cons"), x), result)
+    return result
+
+
+def test_equality_nested_values_lists_and_records():
+    p = (list_data(), bool_data(), constructor_data())
+    one, two = num(1), num(2)
+    nested = Pair(RecordValue((("a", lst(one, two)), ("b", Inj("l", App(Var("f"), Var("c")))))), Var("true"))
+    assert step(p, eq(nested, nested)) == truth(True)
+    other = Pair(RecordValue((("a", lst(one, two)), ("b", Inj("l", App(Var("f"), Var("k")))))), Var("true"))
+    assert step(p, eq(nested, other)) == truth(False)
+    assert step(p, eq(lst(one, two), lst(one, two))) == truth(True)
+    assert step(p, eq(lst(one, two), lst(two, one))) == truth(False)
+    assert step(p, eq(lst(one), lst(one, two))) == truth(False)
+    assert step(p, eq(lst(), lst())) == truth(True)
+    # records compare by field, whatever the order of the fields
+    r = RecordValue((("a", one), ("b", two)))
+    assert step(p, eq(r, RecordValue((("b", two), ("a", one))))) == truth(True)
+    assert step(p, eq(r, RecordValue((("b", one), ("a", one))))) == truth(False)
+    # a differing label decides, whatever the parts under it
+    assert step(p, eq(Inj("l", one), Inj("r", Lit(StringConst("x"))))) == truth(False)
+    assert step(p, eq(Lit(FloatConst(1.5)), Lit(FloatConst(2.5)))) == truth(False)
+    assert step(p, eq(Lit(StringConst("a")), Lit(StringConst("a")))) == truth(True)
+
+
+def test_equality_steps_operands_then_compares():
+    p = (Define("x", Universe(), Pair(num(1), num(2))), Define("==", Universe(), Primitive("==")))
+    assert step(p, eq(Var("x"), Pair(num(1), num(2)))) == eq(Pair(num(1), num(2)), Pair(num(1), num(2)))
+    assert step(p, eq(Pair(num(1), num(2)), Var("x"))) == eq(Pair(num(1), num(2)), Pair(num(1), num(2)))
+    assert reduce(p, 10, App(App(Var("=="), Var("x")), Var("x"))) == truth(True)
+
+
+def test_equality_stuck_conservative_readings():
+    # Where term.lth is silent the step is withheld (opus-7.md): a part not yet a value, an
+    # undeclared name, a partial constructor, different types, different record labels.
+    p = (list_data(), bool_data(), constructor_data(), Define("y", Universe(), num(1)))
+    one = num(1)
+    assert step(p, eq(Pair(App(App(Primitive("+"), one), one), one), Pair(num(2), one))) is None
+    assert step(p, eq(Pair(Var("y"), one), Pair(one, one))) is None
+    assert step(p, eq(Var("free"), Var("free"))) is None
+    assert step(p, eq(Var("f"), Var("f"))) is None
+    assert step(p, eq(App(App(Var("f"), one), one), App(App(Var("f"), one), one))) is None
+    assert step(p, eq(one, Lit(FloatConst(1.0)))) is None
+    assert step(p, eq(Pair(one, one), Inj("l", one))) is None
+    assert step(p, eq(Var("c"), Var("true"))) is None
+    assert step(p, eq(RecordValue((("a", one),)), RecordValue((("b", one),)))) is None
+    assert step(p, eq(RecordValue((("a", one), ("a", one))), RecordValue((("a", one), ("a", one))))) is None
+    assert step(p, eq(Hole("h"), Hole("h"))) is None
+    assert step(p, eq(Universe(), Universe())) is None
+    # a constructor the program declares or defines is a name, not a constructor
+    assert step(p + (Declare("c", Universe()),), eq(Var("c"), Var("c"))) is None
+    assert step((), eq(lst(one), lst(one))) is None
 
 def test_extern_is_value(rng):
     for _ in range(CASES):
