@@ -2220,3 +2220,15 @@ Quote:      "A"
 Source:     chat:da165104:3515
 Kind:       spec (2.S9) and grammar.lth
 Status:     current
+
+D-2026-10-13-t  The laws of role of the core's `data` (L2.7, 4.R3): `Bool` has `not`, `and`, `or` and
+                the laws of a Boolean algebra; `Nat` has its own (Peano's, and those of its
+                operations); `Unit` is the terminal object (one map into it from every type) and
+                `Empty` the initial one (one map out of it to every type). They are stated in
+                `kernel_laws.lth` (step 2.1 of the plan from zero). The model's reading of "first"
+                is initial.
+Author:     Luciano
+Quote:      "Bool tiene not, and y todas las leyes booleanas, Nat tiene las suyas. Unit y Empty son first y terminal object"
+Source:     chat:da165104:3712
+Kind:       spec (3.S7, 3.S36) and the plan (step 2.1)
+Status:     current

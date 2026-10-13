@@ -81,7 +81,10 @@ directly on it, and minimality is not the criterion.
 
 **3.S7. Empty and unit.** [implemented] `Empty` has no introduction and an elimination `match e { }`
 at any type; `Unit` has the one value `unit`. Both are defined in `core.lut` as `data`, which 3.R3
-allows since D-2026-10-13-o. Example: `k_empty_unit.accept.lut`.
+allows since D-2026-10-13-o. Example: `k_empty_unit.accept.lut`. [decided D-2026-10-13-t] Their constructors'
+roles (4.R3) are those of objects of the category of 3.S8: `Unit` is terminal, one map into it from
+every type, and `Empty` initial, one map out of it to every type; `Bool` has `not`, `and`, `or` and
+the laws of a Boolean algebra, `Nat` the laws of its operations. `kernel_laws.lth` states them.
 
 **3.S8. The kernel as a category.** [implemented] With these formers the kernel is a bicartesian
 closed category (products, sums, exponentials, a terminal and an initial structure) with the

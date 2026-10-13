@@ -125,7 +125,8 @@ by Luciano.
 
 1. `src/luthier/lib/kernel_laws.lth`: the laws every structure satisfies by construction (3.S36),
    with the laws of structural `==` (reflexive, symmetric, transitive, substitutive;
-   D-2026-10-12-ak).
+   D-2026-10-12-ak); the roles of the core's `data` (D-2026-10-13-t): `Unit` terminal, `Empty`
+   initial, `Bool` a Boolean algebra with `not`, `and`, `or`, `Nat` its laws, `List` likewise).
 2. `src/luthier/lib/term.lth`: `Term`, `Pattern`, `Act`, `Program` as `data` (3.S29), each
    constructor's role given by the laws of `reduce` (L2.7), as `Derives` gives `Rhs` its roles;
    alpha-equivalence (3.S31), the canonical form (3.S34), substitution, `reduce` with beta, delta,
