@@ -15,8 +15,15 @@
 -- pattern mean is the checker's (spec 4), and the translation of each surface form into the
 -- kernel (spec 2.S12) is stated in term.lth as the laws of `desugar`, since `Term` lives there.
 --
+-- The grammar itself is data too: `luthierSyntax` below is a value of `Ebnf` (ebnf.lth), the
+-- productions of chapter 2 stratified by precedence (spec 2.S8), and a parser accepts exactly
+-- what it derives, after the layout pass of spec 2.S4 (`ParsesWhatDerives`). The case laws then
+-- pin which tree each text gives, since a grammar alone does not say that.
+--
 -- Every law cites the item of chapter 2 it states, above its definition. A constructor is
 -- declared with its whole type, curried, as core.lut declares `cons`.
+
+import "ebnf.lth" Ebnf Rhs Production TokenView derives eps lit cat ref seq alt opt rep
 
 -- ---------------------------------------------------------------- lexical (spec 2 §1)
 
@@ -159,15 +166,90 @@ ParseResult = < parsed : SurfaceProgram | parseFailed : List ParseError >
 
 isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es -> false }
 
+-- ---------------------------------------------------------------- the grammar as data
+
+-- spec 2.S4, layout, is a pass between the lexer and the grammar: it reads the line and column of
+-- each token and gives the grammar a token list in which a line break at column 0 is the token
+-- "\n" that ends an act, a line break between the items of a block is ";", and every other line
+-- break is dropped (inside brackets, under an indented continuation, before `then`, `else` or an
+-- infix operator). Its laws are the layout cases below.
+tokenView (t : Token) : TokenView := { kind := kindName t.kind, text := t.text }
+kindName (k : TokenKind) : String := match k {
+  nameToken -> "name" ; keywordToken -> "keyword" ; numberToken -> "number" ; stringToken -> "string" ;
+  symbolToken -> "symbol" ; newlineToken -> "newline" ; endToken -> "end" }
+
+-- spec 2.S5, 2.S6, 2.S9, 2.S10, 2.S16, 12.S22, as productions. Precedence (spec 2.S8) is the
+-- stratification `term` > `ampTerm` > ... > `atom`; associativity to the right is a right
+-- recursion, to the left a repetition.
+luthierSyntax : Ebnf := { start := "program", rules := [
+  { lhs := "program",     rhs := rep (seq [ref "act", lit "\n"]) },
+  { lhs := "act",         rhs := alt [ref "declaration", ref "definition", ref "alias", ref "import", ref "operator", ref "datum"] },
+  { lhs := "declaration", rhs := seq [cat "name", rep (ref "binder"), lit ":", ref "term"] },
+  { lhs := "definition",  rhs := seq [cat "name", rep (ref "binder"), opt (seq [lit ":", ref "term"]), lit ":=", ref "body", rep (ref "clause")] },
+  { lhs := "alias",       rhs := seq [cat "name", rep (ref "binder"), lit "=", ref "term"] },
+  { lhs := "import",      rhs := seq [lit "import", cat "string", ref "importName", rep (ref "importName")] },
+  { lhs := "importName",  rhs := seq [cat "name", opt (seq [lit ":", ref "term"]), opt (seq [lit "as", cat "name"])] },
+  { lhs := "operator",    rhs := seq [lit "operator", ref "opSymbol", lit ":=", ref "term"] },
+  { lhs := "opSymbol",    rhs := alt [lit "+", lit "-", lit "*", lit "/"] },
+  { lhs := "datum",       rhs := ref "term" },
+  { lhs := "binder",      rhs := alt [
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", opt (seq [lit "<-", ref "term"]), lit ")"],
+      seq [lit "{", cat "name", rep (cat "name"), lit ":", ref "term", lit "}"]] },
+  { lhs := "clause",      rhs := seq [lit "|", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ":=", ref "term"] },
+  { lhs := "body",        rhs := alt [ref "term",
+      seq [lit "data", lit "{", opt (seq [cat "name", lit ":", ref "term", rep (seq [lit ";", cat "name", lit ":", ref "term"])]), lit "}"]] },
+  { lhs := "term",        rhs := ref "ampTerm" },
+  { lhs := "ampTerm",     rhs := seq [ref "arrowTerm", opt (seq [lit "&", ref "ampTerm"])] },
+  { lhs := "arrowTerm",   rhs := seq [ref "orTerm", opt (seq [lit "->", ref "arrowTerm"])] },
+  { lhs := "orTerm",      rhs := seq [ref "andTerm", rep (seq [lit "or", ref "andTerm"])] },
+  { lhs := "andTerm",     rhs := seq [ref "cmpTerm", rep (seq [lit "and", ref "cmpTerm"])] },
+  { lhs := "cmpTerm",     rhs := seq [ref "addTerm", rep (seq [alt [lit "==", lit "/=", lit "<", lit "<=", lit ">", lit ">="], ref "addTerm"])] },
+  { lhs := "addTerm",     rhs := seq [ref "mulTerm", rep (seq [alt [lit "+", lit "-"], ref "mulTerm"])] },
+  { lhs := "mulTerm",     rhs := seq [ref "negTerm", rep (seq [alt [lit "*", lit "/", lit "mod"], ref "negTerm"])] },
+  { lhs := "negTerm",     rhs := alt [seq [lit "-", ref "negTerm"], ref "appTerm"] },
+  { lhs := "appTerm",     rhs := seq [ref "projTerm", rep (ref "projTerm")] },
+  { lhs := "projTerm",    rhs := seq [ref "atom", rep (seq [lit ".", cat "name"])] },
+  { lhs := "atom",        rhs := alt [
+      cat "name", cat "number", cat "string", lit "U", lit "W",
+      seq [lit "(", ref "term", lit ")"],
+      seq [lit "(", ref "term", lit ",", ref "term", rep (seq [lit ",", ref "term"]), lit ")"],
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")", lit "->", ref "term"],
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")", lit "*", ref "term"],
+      seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "*", lit "(", cat "name", lit ":", ref "term", lit ")"],
+      seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "+", lit "(", cat "name", lit ":", ref "term", lit ")"],
+      seq [lit "(", cat "name", lit "<-", ref "term", lit ")"],
+      seq [lit "{", ref "field", rep (seq [ref "sep", ref "field"]), opt (seq [lit "|", ref "term"]), lit "}"],
+      seq [lit "{", ref "pattern", lit ":", ref "term", lit "|", ref "term", lit "}"],
+      seq [lit "{", cat "name", lit ":=", ref "term", rep (seq [ref "sep", cat "name", lit ":=", ref "term"]), lit "}"],
+      seq [lit "{", ref "block", lit "}"],
+      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"],
+      seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"])]), lit "]"],
+      seq [lit "\\", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
+      seq [lit "match", ref "term", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"])]), lit "}"],
+      seq [lit "if", ref "term", lit "then", ref "term", opt (seq [lit "else", ref "term"])],
+      seq [lit "quote", lit "{", ref "term", lit "}"]] },
+  { lhs := "field",       rhs := seq [cat "name", rep (cat "name"), lit ":", ref "term"] },
+  { lhs := "sep",         rhs := alt [lit ",", lit ";"] },
+  { lhs := "block",       rhs := seq [rep (seq [ref "item", lit ";"]), ref "term"] },
+  { lhs := "item",        rhs := seq [cat "name", alt [lit ":=", lit "<-"], ref "term"] },
+  { lhs := "arm",         rhs := seq [ref "pattern", lit "->", ref "term"] },
+  { lhs := "lparam",      rhs := alt [cat "name",
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")"],
+      seq [lit "(", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] },
+  { lhs := "pattern",     rhs := alt [lit "_", seq [cat "name", rep (ref "patom")], ref "patom"] },
+  { lhs := "patom",       rhs := alt [cat "name", cat "number", cat "string",
+      seq [lit "(", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] } ] }
+
 -- ---------------------------------------------------------------- the theory
 
--- A model of the grammar: a lexer, a parser from text and a printer back to text. The parser
--- goes from text and not from tokens, so that layout (spec 2.S4), which needs the positions of
--- the tokens, is its own; `lex` is observable on its own for the lexical laws.
+-- A model of the grammar: a lexer, the layout pass, a parser from text and a printer back to
+-- text. The parser goes from text and not from tokens, so that errors keep their positions;
+-- `lex` and `layout` are observable on their own, for the laws that bind them to the grammar.
 Grammar : {
-  lex   : String -> LexResult,
-  parse : String -> ParseResult,
-  print : SurfaceProgram -> String }
+  lex    : String -> LexResult,
+  layout : List Token -> List TokenView,
+  parse  : String -> ParseResult,
+  print  : SurfaceProgram -> String }
 
 -- ---------------------------------------------------------------- the laws
 
@@ -180,6 +262,11 @@ RoundTrip (g : Grammar) (p : SurfaceProgram) : Bool := g.parse (g.print p) == pa
 -- texts, it reaches programs the generator may not. spec 2.S4 (layout), 2.S13.
 Canonical (g : Grammar) (s : String) : Bool :=
   match g.parse s { parsed p -> g.parse (g.print p) == parsed p ; parseFailed es -> true }
+
+-- The parser accepts exactly what the grammar derives from the laid-out tokens; a text the lexer
+-- rejects is not a program. spec 2 §2, §3 as data (`luthierSyntax`), 2.S4 (layout).
+ParsesWhatDerives (g : Grammar) (s : String) : Bool :=
+  isParsed (g.parse s) == match g.lex s { lexed ts -> derives luthierSyntax (g.layout ts) ; lexFailed e -> false }
 
 -- spec 2.S21: a keyword is never a name.
 keywordAsName (k : Keyword) : String := match k {
@@ -282,7 +369,7 @@ ErrorsHaveLines (g : Grammar) (s : String) : Bool :=
 BrokenTextFails (g : Grammar) : Bool := not (isParsed (g.parse "x := )"))
 
 -- A grammar is a lexer, a parser and a printer that satisfy all of the above.
-Grammar := RoundTrip & Canonical & KeywordsReserved & CommentDropped & ArrowIsOneToken
+Grammar := RoundTrip & Canonical & ParsesWhatDerives & KeywordsReserved & CommentDropped & ArrowIsOneToken
   & PlusBeforeTimes & ComparisonBeforeAnd & AndBeforeOr & OrBeforeArrow & ArrowBeforeAmp
   & ArrowAssociatesRight & AmpAssociatesRight & MinusAssociatesLeft & ApplicationTightest
   & ProjectionTightest & NegationLooserThanApplication & DanglingElse & UnionAsArgument

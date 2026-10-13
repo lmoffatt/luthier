@@ -1,0 +1,94 @@
+-- ebnf.lth: grammars in extended Backus-Naur form, as data, and what they derive.
+--
+-- Draft 0, 2026-10-13, written by Claude Fable 5.1 in the session integrating the specification
+-- (step 1 of record/plan-from-zero-2026-10-13-execution.md). A theory file (spec 12.S23). It is
+-- generic: Luthier's own grammar (grammar.lth) is one value of `Ebnf`, and the grammars of the
+-- texts Luthier reads, a `.bib` file or a CSV, are others (L14: a grammar is data).
+--
+-- A grammar is a start symbol and productions over tokens. A token, as a grammar sees it, is a
+-- kind (the lexer's class: "name", "number", "string", "symbol", "keyword", "newline") and a text.
+-- The meaning of a grammar is `derives`: whether a token list is produced from the start symbol.
+-- It is written as a recognizer that returns every remainder a right-hand side can leave, so
+-- that alternatives backtrack; it is a definition by its implementation (D-2026-10-13-j), the law
+-- every parser of a grammar is held to. A grammar written with left recursion makes `derives`
+-- diverge: write repetition with `rep`.
+
+-- ---------------------------------------------------------------- the data
+
+TokenView = { kind : String, text : String }
+
+Rhs : U := data {
+  eps : Rhs ;                            -- the empty string
+  lit : String -> Rhs ;                  -- a token with this text
+  cat : String -> Rhs ;                  -- a token of this kind, any text
+  ref : String -> Rhs ;                  -- a nonterminal
+  seq : List Rhs -> Rhs ;                -- one after another
+  alt : List Rhs -> Rhs ;                -- one of them
+  opt : Rhs -> Rhs ;                     -- [ ]
+  rep : Rhs -> Rhs }                     -- { }, zero or more
+
+Production = { lhs : String, rhs : Rhs }
+
+Ebnf = { start : String, rules : List Production }
+
+-- ---------------------------------------------------------------- what a grammar derives
+
+-- the right-hand sides of a nonterminal, in order
+rulesOf (e : Ebnf) (n : String) : List Rhs := rulesIn e.rules n
+rulesIn (ps : List Production) (n : String) : List Rhs :=
+  match ps { nil -> nil ; cons p rest -> if p.lhs == n then cons p.rhs (rulesIn rest n) else rulesIn rest n }
+
+append (A : U) (xs ys : List A) : List A :=
+  match xs { nil -> ys ; cons x rest -> cons x (append A rest ys) }
+
+concat (A : U) (xss : List (List A)) : List A :=
+  match xss { nil -> nil ; cons xs rest -> append A xs (concat A rest) }
+
+-- every remainder after matching `r` at the front of `ts`
+remainders (e : Ebnf) (r : Rhs) (ts : List TokenView) : List (List TokenView) := match r {
+  eps -> [ts] ;
+  lit s -> match ts { nil -> nil ; cons t rest -> if t.text == s then [rest] else nil } ;
+  cat k -> match ts { nil -> nil ; cons t rest -> if t.kind == k then [rest] else nil } ;
+  ref n -> remaindersAny e (rulesOf e n) ts ;
+  seq rs -> remaindersSeq e rs ts ;
+  alt rs -> remaindersAny e rs ts ;
+  opt r1 -> cons ts (remainders e r1 ts) ;
+  rep r1 -> cons ts (remaindersRep e r1 ts) }
+
+remaindersAny (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : List (List TokenView) :=
+  match rs { nil -> nil ; cons r rest -> append (List TokenView) (remainders e r ts) (remaindersAny e rest ts) }
+
+remaindersSeq (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : List (List TokenView) :=
+  match rs { nil -> [ts] ; cons r rest -> remaindersFrom e rest (remainders e r ts) }
+
+remaindersFrom (e : Ebnf) (rs : List Rhs) (starts : List (List TokenView)) : List (List TokenView) :=
+  match starts { nil -> nil ; cons ts more -> append (List TokenView) (remaindersSeq e rs ts) (remaindersFrom e rs more) }
+
+-- one or more repetitions, each consuming something, so that `rep eps` ends
+remaindersRep (e : Ebnf) (r : Rhs) (ts : List TokenView) : List (List TokenView) :=
+  remaindersRepFrom e r (shorter ts (remainders e r ts))
+
+remaindersRepFrom (e : Ebnf) (r : Rhs) (starts : List (List TokenView)) : List (List TokenView) :=
+  match starts { nil -> nil ; cons ts more ->
+    cons ts (append (List TokenView) (remaindersRepFrom e r (shorter ts (remainders e r ts))) (remaindersRepFrom e r more)) }
+
+-- only the remainders strictly shorter than `ts`
+shorter (ts : List TokenView) (rs : List (List TokenView)) : List (List TokenView) :=
+  match rs { nil -> nil ; cons r rest -> if length r < length ts then cons r (shorter ts rest) else shorter ts rest }
+
+length (ts : List TokenView) : Int := match ts { nil -> 0 ; cons t rest -> 1 + length rest }
+
+hasEmpty (rs : List (List TokenView)) : Bool :=
+  match rs { nil -> false ; cons r rest -> match r { nil -> true ; cons t more -> hasEmpty rest } }
+
+-- the meaning of a grammar: the token list is produced whole from the start symbol
+derives (e : Ebnf) (ts : List TokenView) : Bool := hasEmpty (remainders e (ref e.start) ts)
+
+-- ---------------------------------------------------------------- the theory of a parser
+
+-- A recognizer for a grammar: a model is a function on token lists; its one law is that it
+-- accepts exactly what the grammar derives. A parser that builds a tree is a recognizer with a
+-- result (grammar.lth), and inherits this law through `isParsed`.
+Recognizer (e : Ebnf) : { accepts : List TokenView -> Bool }
+AcceptsWhatDerives (e : Ebnf) (r : Recognizer e) (ts : List TokenView) : Bool := r.accepts ts == derives e ts
+Recognizer := AcceptsWhatDerives

@@ -18,8 +18,12 @@ until Luciano marks them, every step assumes them as recommended and says so in 
   for his reading before the parser agent is launched. Choices in it, reversible: constructors
   curried as core's `cons`; lawless records as aliases (4.R4); the tree without positions;
   `operator` a keyword, `quote` a form (a question for 2.S21); a bare top-level term is the act
-  `datum` (D9); string escapes added to 2.S1; the §4 translations left to `term.lth`. Next: the
-  parser (1.2).
+  `datum` (D9); string escapes added to 2.S1; the §4 translations left to `term.lth`.
+- 2026-10-13, on his question: the grammar itself as data. `src/luthier/lib/ebnf.lth`, a generic
+  theory of EBNF grammars with `derives` (their meaning, a backtracking recognizer, for
+  certification and not for parsing) and `Recognizer`; `grammar.lth` gains `luthierSyntax : Ebnf`
+  (chapter 2 stratified by precedence, no left recursion), `layout` as a hole of `Grammar`, and
+  the law `ParsesWhatDerives`. Next: the parser (1.2).
 
 ## Rules for every step
 
