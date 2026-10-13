@@ -25,7 +25,8 @@ def main(argv: list[str] | None = None) -> int:
     p_run = sub.add_parser("run", help="run a program with the host world")
     p_run.add_argument("file")
     p_run.add_argument("--main", default="main")
-    p_run.add_argument("--fuel", type=int, default=10000)
+    p_run.add_argument("--fuel", type=int, default=10_000_000,
+                       help="reduction fuel [proposed: default 10,000,000, 10,000 was a hundred times too small for validate_graph.lut]")
     ns = parser.parse_args(argv)
 
     if ns.command == "run":
@@ -88,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
             def line_of(name):
                 return next((i for i, line in enumerate(text.splitlines(), 1)
                              if re.match(r"^" + re.escape(name) + r"(?:\s|:|=|$)", line)), 1)
-            failures = check(result.program)
+            failures = check(result.program, path)
             failed |= bool(failures)
             for failure in failures:
                 print(f"{path}:{line_of(failure.name)}: {failure.rule} {failure.name}: {failure.message}")

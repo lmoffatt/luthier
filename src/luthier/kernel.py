@@ -11,6 +11,7 @@ remain values. This module neither translates surface trees nor calls the host.
 # Update: 66d5cae, user request v6; IotaConstructors; audit codex-6.md.
 # Update: fe3bdab, user request v4; audit codex-4.md.
 # Update: 23d23f4, 048cd55, 1c521a7, reference b1582ca; user request v5; codex-5.md.
+# Update: bite 10 (prompt-10.md): `/=` on every concrete type, parameterized data constructors.
 # Update: 051e6aa term.lth §5 PrimStructural, PrimConstructors, EqualityStuck;
 # record/IA/kernel-2026-10-13/prompt-7.md; report opus-7.md.
 
@@ -527,8 +528,10 @@ def _primitive(op: str, a, b) -> Term | None:
                 case "/": return None if y == 0 else _finite(x / y)
         except OverflowError:
             return None
-    elif isinstance(a, StringConst) and op == "+":
-        return Lit(StringConst(x + y))
+    elif isinstance(a, StringConst):
+        match op:
+            case "+": return Lit(StringConst(x + y))
+            case "/=": return _truth(x != y)  # 4.R8, PrimString [proposed]
     if isinstance(a, (IntConst, FloatConst)):
         match op:  # `==` is _equal's
             case "<": return _truth(x < y)
@@ -749,7 +752,7 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
             return (False, t) if body is None else (True, body)
         case App(Lam(x, _, b), a):
             return True, substitute(x, a, b)
-        case App(App(op, i), j) if _operator(op) == "==":
+        case App(App(op, i), j) if _operator(op) in ("==", "/="):
             # PrimStructural, PrimConstructors, EqualityStuck: operands to weak head normal
             # form, left first; then one step to true or false, or none.
             changed, k = yield _step(env, constructors, i)
@@ -769,7 +772,9 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
             if changed:
                 return True, App(App(op, i), k)
             result = _equal(constructors, i, j)
-            return (False, t) if result is None else (True, Var("true" if result else "false"))
+            if result is None:
+                return False, t
+            return True, _truth(result if op.name == "==" else not result)
         case App(App(Var("and" | "or" as conn), i), j) if conn not in env:
             # `and`/`or` on Var "true"/Var "false" (the Bool of core), left operand first,
             # the right one only when the left does not decide
@@ -855,9 +860,12 @@ def step(program: Program, t: Term) -> Term | None:
             env.setdefault(act.name, None)
     constructors = _Constructors()
     for act in program:
-        if isinstance(act, Define) and isinstance(act.body, Data):
-            names = frozenset(name for name, _ in act.body.constructors if name not in env)
-            for name, ty in act.body.constructors:
+        body = act.body if isinstance(act, Define) else None
+        while isinstance(body, Lam):  # a parameterized data: the constructors through its binders
+            body = body.body
+        if isinstance(body, Data):
+            names = frozenset(name for name, _ in body.constructors if name not in env)
+            for name, ty in body.constructors:
                 if name in names:
                     constructors[name] = names
                     constructors.arity[name] = 0

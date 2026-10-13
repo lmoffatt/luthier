@@ -278,3 +278,25 @@ print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line"
 main (w : W) : W * Unit := print w (if not (0 >= 3) and 7 mod 3 /= 0 and "ab" == "a" + "b" then "ok" else "no")
 ''')
     assert run_file(path) == "ok\n"
+
+
+def test_equality_on_strings_and_parameterized_data(tmp_path):
+    # prompt-10.md: `/=` on strings, `==` and `/=` on core's Maybe and List
+    path = tmp_path / "eq.lut"
+    path.write_text('''
+print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
+main (w : W) : W * Unit := print w (if "mic2" /= "mic1" and just 1 == just 1 and [1, 2] == [1, 2] and nothing /= just 1 and not ([1, 2] /= [1, 2]) then "ok" else "no")
+''')
+    assert run_file(path) == "ok\n"
+
+
+EXPECTED_VALIDATE_GRAPH = ("valid: 10 nodes, 22 measurements, 21 distinct pairs; directions the distances do not see: "
+                           "14 (of which 10 are the heights and 3 the rigid motions of the plane)\n")
+
+
+@pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 5 minutes; set LUTHIER_SLOW=1")
+def test_validate_graph_slow():
+    # prompt-10.md item 4: the first full run of the slice
+    result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut", cwd=ROOT)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == EXPECTED_VALIDATE_GRAPH

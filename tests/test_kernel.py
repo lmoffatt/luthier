@@ -1107,3 +1107,62 @@ def test_primitives_through_names_and_and_or():
     assert step((Define("and", Universe(), Lit(IntConst(0))),), App(App(Var("and"), t), t)) is not None
     assert eval_at(float, App(Primitive("toFloat64"), num(2))) == 2.0
     assert eval_at(int, App(App(Var("mod"), num(7)), num(3))) == 1
+
+
+def test_neq_on_strings_and_structures():
+    # bite 10: `/=` on strings (4.R8) and on every pair `==` compares is the negation of `==`'s
+    assert step((), bin_("/=", txt("mic2"), txt("mic1"))) == truth(True)
+    assert step((), bin_("/=", txt("a"), txt("a"))) == truth(False)
+    assert step((), bin_("/=", txt("a"), num(1))) is None
+    pairs = [
+        (Pair(num(1), num(2)), Pair(num(1), num(2))),
+        (Pair(num(1), num(2)), Pair(num(2), num(1))),
+        (RecordValue((("x", num(1)),)), RecordValue((("x", num(2)),))),
+        (Inj("a", num(1)), Inj("b", num(1))),
+        (Inj("a", num(1)), Inj("a", num(1))),
+    ]
+    for s, t in pairs:
+        r = step((), bin_("==", s, t))
+        assert r in (truth(True), truth(False))
+        assert step((), bin_("/=", s, t)) == truth(r == truth(False))
+    # the same demand of parts as `==`, and the same stuck cases
+    redex = App(Lam("x", Var("T"), Var("x")), num(1))
+    assert step((), bin_("/=", Pair(redex, num(2)), Pair(num(1), num(2)))) == \
+        bin_("/=", Pair(num(1), num(2)), Pair(num(1), num(2)))
+    assert step((), bin_("/=", Lam("x", Var("T"), Var("x")), Lam("x", Var("T"), Var("x")))) is None
+    assert step((Declare("f", Var("T")),), bin_("/=", Var("f"), num(1))) is None
+
+
+def maybe_data():
+    return Define("Maybe", Universe(), Lam("A", Universe(), Data("Maybe", (
+        ("nothing", App(Var("Maybe"), Var("A"))),
+        ("just", Pi("_", Var("A"), App(Var("Maybe"), Var("A")))),
+    ))))
+
+
+def plist_data():
+    a = Var("A")
+    return Define("List", Universe(), Lam("A", Universe(), Data("List", (
+        ("nil", App(Var("List"), a)),
+        ("cons", Pi("_", a, Pi("_", App(Var("List"), a), App(Var("List"), a)))),
+    ))))
+
+
+def test_parameterized_data_constructors():
+    # bite 10: constructors read through the definition's binders
+    p = (maybe_data(), plist_data())
+    just = lambda v: App(Var("just"), v)
+    cons = lambda h, t: App(App(Var("cons"), h), t)
+    assert reduce(p, 20, bin_("==", just(num(1)), just(num(1)))) == truth(True)
+    assert reduce(p, 20, bin_("==", just(num(1)), just(num(2)))) == truth(False)
+    assert reduce(p, 20, bin_("/=", Var("nothing"), just(num(1)))) == truth(True)
+    assert reduce(p, 20, bin_("/=", Var("nothing"), Var("nothing"))) == truth(False)
+    l12 = cons(num(1), cons(num(2), Var("nil")))
+    assert reduce(p, 20, bin_("==", l12, l12)) == truth(True)
+    assert reduce(p, 20, bin_("==", l12, cons(num(1), Var("nil")))) == truth(False)
+    assert reduce(p, 20, bin_("/=", l12, l12)) == truth(False)
+    # a match sees them too
+    m = Match(just(num(5)), ((PCon("nothing", ()), num(0)), (PCon("just", (PVar("v"),)), Var("v"))))
+    assert reduce(p, 20, m) == num(5)
+    # without the data, a constructor is not comparable
+    assert step((), bin_("==", just(num(1)), just(num(1)))) is None

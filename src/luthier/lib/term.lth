@@ -529,9 +529,12 @@ PrimFloat (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (
   and stepsTo a (m.step p (bin ">=" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u >= v))
   and stepsTo a (m.step p (bin "/=" (Lit (FloatConst u)) (Lit (FloatConst v)))) (truth (u /= v))
   and isNormal (m.step p (bin "/" (Lit (FloatConst u)) (Lit (FloatConst 0.0))))
--- `+` on strings is concatenation (core.lut `stringAppend`; the monoid of numbers_model.lut)
+-- `+` on strings is concatenation (core.lut `stringAppend`; the monoid of numbers_model.lut);
+-- `/=` on strings is the negation of `==` (4.R8: `==` is one operation on every concrete type,
+-- `/=` its negation there) [proposed: kernel.py bite 10, luthier-03 paused]
 PrimString (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (s t : String) : Bool :=
   stepsTo a (m.step p (bin "+" (Lit (StringConst s)) (Lit (StringConst t)))) (Lit (StringConst (s + t)))
+  and stepsTo a (m.step p (bin "/=" (Lit (StringConst s)) (Lit (StringConst t)))) (truth (s /= t))
 -- `toFloat64` (11.S5, core.lut): a `Primitive` applied to an integer constant steps to the
 -- nearest double
 PrimConvert (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (i : Int) : Bool :=
@@ -544,6 +547,11 @@ PrimStructural (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Progr
   and stepsTo a (m.step p (bin "==" (RecordValue [(x, Lit (IntConst i))]) (RecordValue [(x, Lit (IntConst j))]))) (truth (i == j))
   and stepsTo a (m.step p (bin "==" (Inj x (Lit (IntConst i))) (Inj y (Lit (IntConst i))))) (truth (x == y))
   and stepsTo a (m.step p (bin "==" (Lit (FloatConst 1.5)) (Lit (FloatConst 1.5)))) (truth true)
+-- `/=` on the same pairs of values is the negation of `==`'s answer, under the same demand of
+-- parts (EqualityDemandsParts) and stuck where `==` is (4.R8) [proposed: kernel.py bite 10]
+  and stepsTo a (m.step p (bin "/=" (Pair (Lit (IntConst i)) (Lit (IntConst j))) (Pair (Lit (IntConst j)) (Lit (IntConst i))))) (truth (i /= j))
+  and stepsTo a (m.step p (bin "/=" (RecordValue [(x, Lit (IntConst i))]) (RecordValue [(x, Lit (IntConst j))]))) (truth (i /= j))
+  and stepsTo a (m.step p (bin "/=" (Inj x (Lit (IntConst i))) (Inj y (Lit (IntConst i))))) (truth (x /= y))
 -- constructors of a `data` of the program compare by constructor, then part by part (lists among
 -- them: `cons`, `nil` of core); stated on the data of `IotaConstructors`
 PrimConstructors (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (t c k f g : String) (i j : Int) : Bool :=
