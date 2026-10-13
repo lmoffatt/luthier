@@ -94,8 +94,10 @@ Law : U := data {
 
 -- How much of a type the cases of a `forall` cover: all of it; all of it up to a size, the box
 -- the domain names (7.S10: bounded is exhaustive on that box, and on the whole type a support);
--- a census chosen by hand; or a draw from a seed (7.R1, 7.S8). Roles: `ForallOnPoints`,
--- `ExistsOnPoints`.
+-- a census chosen by hand; or a draw from a seed (7.R1, 7.S8). Roles: `ForallOnPoints` and
+-- `ExistsOnPoints` (only the exhaustive coverage confirms a `forall` or refutes an `exists`), and
+-- the grade each gives, test.lth's `GradesAsTerms` (4.R3: a law of its role in some theory; the
+-- check of this file alone does not see that one).
 Coverage : U := data {
   Exhaustive : Coverage ;
   Bounded : Nat -> Coverage ;
@@ -147,12 +149,6 @@ anyConfirmed (vs : List Verdict) : Bool := match vs { nil -> false ; cons v rest
 -- the verdicts of the law at each point
 pointVerdicts (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) : List Verdict :=
   match pts { nil -> nil ; cons (a, e) rest -> cons (m.settles (p a) e) (pointVerdicts m A p rest) }
--- a `forall` on points: refuted by any counterexample; confirmed only when the points are all of
--- the type and each confirms; supported when a census or a sample confirms at every point
-forallVerdict (vs : List Verdict) (c : Coverage) : Verdict :=
-  if anyRefuted vs then Refuted
-  else if allConfirmed vs then (match c { Exhaustive -> Confirmed ; _ -> Supported })
-  else Unsettled
 -- an `exists` on points: confirmed by any witness; refuted only when the points are all of the type
 -- and each refutes
 existsVerdict (vs : List Verdict) (c : Coverage) : Verdict :=
@@ -169,8 +165,15 @@ CaseIsEvaluated (m : Settling) (c b : Bool) : Bool :=
 -- refutes the law there, and otherwise settles nothing
 ForallAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
   m.settles (Forall A p) (At A a e) == (if isRefuted (m.settles (p a) e) then Refuted else Unsettled)
+-- a `forall` on points: refuted by any counterexample; confirmed only when the points are all of
+-- the type and each confirms; supported when a census or a sample confirms at every point. Written
+-- out in the law, not through a helper, since it is the role of `Supported` (4.R3, L2.7: a law
+-- depends on the names in its body, 4.S15)
 ForallOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
-  m.settles (Forall A p) (Points A pts c) == forallVerdict (pointVerdicts m A p pts) c
+  m.settles (Forall A p) (Points A pts c)
+    == (if anyRefuted (pointVerdicts m A p pts) then Refuted
+        else if allConfirmed (pointVerdicts m A p pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
+        else Unsettled)
 -- an `exists` is confirmed by a witness, and a failing instance does not refute it
 ExistsAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
   m.settles (Exists A p) (At A a e) == (if isConfirmed (m.settles (p a) e) then Confirmed else Unsettled)
