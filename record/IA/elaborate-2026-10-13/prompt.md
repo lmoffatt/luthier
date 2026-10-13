@@ -15,7 +15,13 @@ a failure from another file is someone else's, report it, do not fix it.
 the kernel term (`term.lth`'s `Term`, `Act`, `Program`; in Python `src/luthier/term.py`, reduced by
 `luthier.kernel.step` and `reduce`) as the theory `Elaboration`, one case law per row of the table
 2.S12 of `docs/spec/02-grammar.md`, results compared up to alpha (`luthier.kernel.alpha_equal`).
-Write its Python specimen.
+Write its Python specimen. The theory is stable at 5d7963b; its interface is
+`Elaboration (a : Alpha) : { elaborate : SurfaceProgram -> Program, term : SurfaceProgram -> Surface
+-> Maybe Term }`: `term` gives `nothing` for a term that does not type; fresh names are free (the
+laws compare up to alpha); `true` and `false` are constructor patterns; records go to `Record`,
+`RecordValue`, `Proj`; `A + B` to `Sum [("left", A), ("right", B)]`. Left open by the theory on
+purpose, to be reported as your choices and not chased as laws: the host call of an applied extern
+(spec 10), and the typing beyond what the rules need.
 
 1. `src/luthier/elaborate.py`: `elaborate_program(surface_program) -> Program` and
    `elaborate_term(surface, context) -> Term`, following each law of `translation.lth`; where a row
