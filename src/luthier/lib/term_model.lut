@@ -176,7 +176,10 @@ canonicalTerm (t : Term) : Term := match canonTerm (freeCanonical (freeVars t)) 
 canonical : CanonicalForm alpha := { canon := canonicalTerm, unqualify := unqualified }
 
 -- One exact weak-head transition; Done is a value or a stuck term.
-HeadStep : U := data { Done : Term -> HeadStep ; Next : Term -> HeadStep ; }
+-- The step results here are the model's own bookkeeping: no law states a role for their
+-- alternatives, so they are aliases of sums and not `data` (4.R3, L2.7, D-2026-10-13-aa); an
+-- alternative of type `Unit` is injected by its label alone (3.S4).
+HeadStep = { Done : Term || Next : Term }
 lookupBody (p : Program) (x : String) : Maybe Term := match p {
   nil -> nothing ; cons act rest -> match act {
     Define y ty b -> if x == y then just b else lookupBody rest x ;
@@ -306,8 +309,7 @@ stepPrimitive (p : Program) (name : String) (i j : Term) : HeadStep :=
         Next l -> Next (App (App (Primitive name) i) l) ; Done l -> Done (App (App (Primitive name) i) j) } ;
       _ -> Done (App (App (Primitive name) i) j) } } }
 -- Blocked is distinct from Miss: an inspecting arm cannot skip a hole.
-PatternStep : U := data {
-  Hit : Bindings -> PatternStep ; Miss : PatternStep ; Blocked : PatternStep ; Demand : Term -> PatternStep ; }
+PatternStep = { Hit : Bindings || Miss : Unit || Blocked : Unit || Demand : Term }
 stepPattern (env : Program) (p : Pattern) (v : Term) : PatternStep := match p {
   PVar x -> Hit [(x, v)] ; PWild -> Hit nil ;
   PLit c -> match v { Lit d -> if c == d then Hit nil else Miss ; _ -> demandHead env v } ;
@@ -343,9 +345,7 @@ stepConstructorPattern (env : Program) (c : String) (ps : List Pattern) (v : Ter
     if c == d then match stepPatternList env ps vs {
       ListHit bs -> Hit bs ; ListMiss -> Miss ; ListBlocked -> Blocked ;
       ListDemand ws -> Demand (rebuildConstructor d ws) } else Miss }
-PatternListStep : U := data {
-  ListHit : Bindings -> PatternListStep ; ListMiss : PatternListStep ; ListBlocked : PatternListStep ;
-  ListDemand : List Term -> PatternListStep ; }
+PatternListStep = { ListHit : Bindings || ListMiss : Unit || ListBlocked : Unit || ListDemand : List Term }
 stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternListStep := match (ps, vs) {
   (nil, nil) -> ListHit nil ;
   (cons p rest, cons v more) -> match stepPattern env p v {
@@ -356,7 +356,7 @@ stepPatternList (env : Program) (ps : List Pattern) (vs : List Term) : PatternLi
 rebuildConstructor (c : String) (args : List Term) : Term := applyArguments (Var c) args
 applyArguments (f : Term) (args : List Term) : Term := match args {
   nil -> f ; cons a rest -> applyArguments (App f a) rest }
-ArmStep : U := data { Selected : Term -> ArmStep ; ScrutineeNext : Term -> ArmStep ; NoArm : ArmStep ; }
+ArmStep = { Selected : Term || ScrutineeNext : Term || NoArm : Unit }
 chooseArm (p : Program) (s : Term) (arms : List (Pattern * Term)) : ArmStep := match arms {
   nil -> NoArm ; cons (pat, b) rest -> match stepPattern p pat s {
     Demand v -> ScrutineeNext v ; Miss -> chooseArm p s rest ; Blocked -> NoArm ;
