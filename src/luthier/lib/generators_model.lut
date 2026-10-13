@@ -1,0 +1,11 @@
+-- generators_model.lut: the models of generators.lth.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (layer 2). The two metrics of numbers
+-- (7.S2, 7.S4), and the instances of the sections that follow as they are written.
+
+import "generators.lth" Metric power
+
+-- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
+linear : Metric := { place := fn lo hi v { lo + v * (hi - lo) } }
+-- `log`: uniform in the logarithm, for a quantity whose meaning does not change when scaled
+logarithmic : Metric := { place := fn lo hi v { lo * power (hi / lo) v } }

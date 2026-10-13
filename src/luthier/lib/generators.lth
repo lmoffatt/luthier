@@ -20,9 +20,9 @@
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/generators.lth`, sets its status to done here, and commits.
 --
---   §1 Seeds and generators: `Seed`, `Gen T`, the random source and its laws (7.S1).        todo
+--   §1 Seeds and generators: `Seed`, `Gen T`, the random source and its laws (7.S1).        done
 --   §2 Sampling by weight: the cumulative inversion over a list and an interval, the two
---      metrics of numbers (7.S2, 7.S4).                                                     todo
+--      metrics of numbers (7.S2, 7.S4).                                                     done
 --   §3 Exhaustive and sized generators: every value of a finite type up to the size; the
 --      size of a recursive `data` bounding its depth (7.S3, 7.R3).                           todo
 --   §4 Subtypes and dependent records: bounds or a filter with its budget; components in
@@ -32,3 +32,67 @@
 --   §6 Budgets, every one an argument (7.S8).                                               todo
 --   §7 The programs a rule of the checker is tested on: generators of `Violating` and `Clean`
 --      for each rule, the census of tests/spec/ first, then one-edit mutations (program.lth). todo
+
+import "kernel_laws.lth" Concrete
+
+-- ---------------------------------------------------------------- §1 Seeds and generators
+
+-- A seed is an integer in [0, 2^31) (7 §1); a generator of `T` gives, from a size and a seed, a
+-- value of `T` and the next seed (7.S1). Its type is its validity: a generator of a subtype owes
+-- the predicate of every value it gives, an obligation tested as an extern's is (spec 4).
+Seed : U := { k : Int | 0 <= k and k < 2147483648 }
+Gen (T : U) = Nat -> Seed -> T * Seed
+
+-- The random source is an extern that gives seeds and uniform doubles (7.S1); its laws of
+-- stochasticity are stated here, in Luthier, and certified as any extern's. Each value is in
+-- [0, 1); a seed moves on; and the values are uniform, a statistical law with its level (7.S17):
+-- the p-value of a goodness-of-fit test against the uniform law, the host's, is not below `alpha`.
+Random : { next : Seed -> Seed, uniform : Seed -> Float64 }
+uniformPValue : List Float64 -> Float64
+draws (r : Random) (s : Seed) (n : Nat) : List Float64 :=
+  if n == 0 then nil else cons (r.uniform s) (draws r (r.next s) (n - 1))
+UniformInUnit (r : Random) (s : Seed) : Bool := 0.0 <= r.uniform s and r.uniform s < 1.0
+SeedMoves (r : Random) (s : Seed) : Bool := not (r.next s == s)
+UniformAtLevel (r : Random) (s : Seed) (n : Nat) (alpha : Float64) : Bool := uniformPValue (draws r s n) >= alpha
+Random := UniformInUnit & SeedMoves & UniformAtLevel
+
+-- ---------------------------------------------------------------- §2 Sampling by weight
+
+-- To draw from a support with weights, draw `u` uniform in [0, C), `C` the total weight, and give
+-- the first value at which the cumulative weight exceeds `u` (7.S2). Weights are non-negative.
+total (T : U) (ws : List (T * Float64)) : Float64 := match ws { nil -> 0.0 ; cons (x, w) rest -> w + total T rest }
+pick (T : U) (ws : List (T * Float64)) (u : Float64) : Maybe T :=
+  match ws { nil -> nothing ; cons (x, w) rest -> if u < w then just x else pick T rest (u - w) }
+drawWeighted (T : U) (r : Random) (ws : List (T * Float64)) : Seed -> Maybe T * Seed :=
+  fn s { (pick T ws (total T ws * r.uniform s), r.next s) }
+
+-- A support with weights, the model of a census drawn by weight (7.S2). Its laws characterize the
+-- inversion: a value of weight zero is never drawn, a value is drawn for a part of [0, C) as wide
+-- as its weight, and a support of one value always gives it.
+Support (T : Concrete) : { weights : List (T * Float64) }
+weightOf (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
+  match ws { nil -> 0.0 ; cons (y, w) rest -> (if x == y then w else 0.0) + weightOf T rest x }
+NonNegative (T : Concrete) (s : Support T) : Bool := allNonNegative T s.weights
+allNonNegative (T : Concrete) (ws : List (T * Float64)) : Bool := match ws { nil -> true ; cons (x, w) rest -> 0.0 <= w and allNonNegative T rest }
+-- for `u` in [0, C): what is picked has a positive weight
+PickedHasWeight (T : Concrete) (s : Support T) (v : Float64) : Bool :=
+  not (0.0 <= v and v < 1.0)
+  or (match pick T s.weights (total T s.weights * v) { nothing -> total T s.weights == 0.0 ; just x -> 0.0 < weightOf T s.weights x })
+-- one value always gives itself; a value after one of weight zero is the next drawn
+PickOfOne (T : Concrete) (s : Support T) (x : T) (v : Float64) : Bool :=
+  not (0.0 <= v and v < 1.0) or pick T [(x, 1.0)] v == just x
+Support (T : Concrete) := NonNegative T & PickedHasWeight T & PickOfOne T
+
+-- The two metrics of numbers (7.S2, 7.S4): over [lo, hi], `linear` has weight 1, uniform between
+-- the bounds; `log` has weight 1/x, uniform in the logarithm, which needs 0 < lo. A metric maps a
+-- uniform `u` in [0, 1) into the interval; the two metrics are models, in generators_model.lut.
+-- `power` is core's (spec 11), declared until written.
+power : Float64 -> Float64 -> Float64
+Interval : U := { lo hi : Float64 | 0.0 < lo and lo < hi }
+Metric : { place : Float64 -> Float64 -> Float64 -> Float64 }
+-- every metric stays within the bounds and grows with `u`
+WithinBounds (m : Metric) (i : Interval) (v : Float64) : Bool :=
+  not (0.0 <= v and v < 1.0) or (i.lo <= m.place i.lo i.hi v and m.place i.lo i.hi v <= i.hi)
+Grows (m : Metric) (i : Interval) (v w : Float64) : Bool :=
+  not (0.0 <= v and v <= w and w < 1.0) or m.place i.lo i.hi v <= m.place i.lo i.hi w
+Metric := WithinBounds & Grows
