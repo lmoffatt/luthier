@@ -1,0 +1,36 @@
+-- term.lth: the kernel term as data, and the theories of its names, substitution, canonical form
+-- and reduction.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 2.2 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 3 §4 (3.S14 to 3.S20, the five
+-- rules of reduction), §6 (3.S29 to 3.S35, programs as data), 3.S38 (this file), 3.S11 (fuel);
+-- L2.7 (each constructor has a law of its role); D-2026-10-12-x, D-2026-10-12-ah. The pattern is
+-- that of ebnf.lth: a theory is a record type of its operations, laws over a model, `T := laws`;
+-- its model is a value in a `.lut`. Here the main model is `reduce`, the interpreter written in
+-- Luthier (3.S33), in term_model.lut; the host's evaluator is a second specimen of the same theory
+-- (L14.3), as `backtrack` and the Python recognizer are of `Derives`.
+--
+-- On meaning (L2.7). The constructors of `Term` that compute get their roles from the laws of
+-- `Reduction` (§5): `Lam` and `App` from `Beta`, `Var` from `Delta`, `Match`, `Inj` and `Pair`
+-- from `Iota`, `Lit` from `Prim`, `Extern` from `ExternCall`, `Hole` from `HolesStay`. The type
+-- formers (`Universe`, `World`, `Pi`, `Sigma`, `Sum`, `Data`, `Subtype`) are values for reduction
+-- (`ValuesStay`); their roles are the checker's, laws of `WellFormed` in program.lth (step 3.1).
+--
+-- Names: the constructors are 3.S29's, capitalized as there, so that they do not clash with the
+-- surface tree of grammar.lth when the translation of 2.S12 imports both; `U` is a keyword, so the
+-- universe is `Universe`; `World` is added for `W` (D-2026-10-13-b), which 3.S29 predates.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones and of kernel_laws.lth,
+-- checks it with `luthier parse src/luthier/lib/term.lth`, sets its status to done here, commits.
+--
+--   §1 The data: `Literal`, `Term`, `Pattern`, `Act`, `Program` (3.S29, 3.S30, 3.S31).     todo
+--   §2 Names: free variables, renaming, alpha-equivalence as an object with the
+--      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     todo
+--   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               todo
+--   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  todo
+--   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternCall`, `HolesStay`,
+--      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         todo
+--   §6 Quote and eval (3.S32): cases on literals and closed terms.                      todo
+--   §7 The models, to write in term_model.lut: `reduce` (the interpreter in Luthier),
+--      `alpha`, `substitute`, `canon`. Not in this step's first pass.                todo
