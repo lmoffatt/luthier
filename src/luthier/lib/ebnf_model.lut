@@ -1,16 +1,20 @@
--- ebnf_model.lut: a model of `derives` (ebnf.lth), a recognizer by backtracking.
+-- ebnf_model.lut: `backtrack`, a model of `Derives` (ebnf.lth), a recognizer by backtracking.
 --
--- Draft 0, 2026-10-13, written by Claude Fable 5.1 in the session integrating the specification.
--- A model file (spec 12.S23): one value of the theory of ebnf.lth, certified against its laws. It
--- was the body of `derives` in draft 0 of ebnf.lth, moved here on Luciano's observation that no
--- law said `eps` was the empty string (4.R10: a law characterizes; an implementation is a model).
+-- Draft 1, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on the
+-- review of four models. A model file (spec 12.S23): one named value of a theory, certified
+-- against its laws on their domain, the well-formed grammars. Draft 0 redefined the name
+-- `derives`, which the theory file had already defined; now the theory declares a field and this
+-- file gives a value of the theory, imported by name with it (12.S22).
 --
 -- The model: a right-hand side, matched at the front of a token list, leaves a list of possible
 -- remainders; alternatives contribute all of theirs, a sequence threads them, a repetition
--- iterates while something is consumed. A list derives when some remainder is empty. A
--- left-recursive grammar makes it diverge, which fuel stops (3.S11) and the laws do not see.
+-- iterates while each round consumes. A list derives when some remainder is empty. On a grammar
+-- with left recursion `ref n` expands before consuming and the recognizer does not end; the laws
+-- do not quantify over such grammars, and a test draws only well-formed ones. Where fuel stops it
+-- the case is not run, never counted as false (spec 7.S12): with fuel it would answer false where
+-- the laws can force true (Kimi's `start -> seq [ref "start", lit "x"] | eps`).
 
-import "ebnf.lth" Ebnf Rhs TokenView derives rulesOf append eps lit cat ref seq alt opt rep
+import "ebnf.lth" Ebnf Rhs TokenView Derives rulesOf append eps lit cat ref seq alt opt rep
 
 -- every remainder after matching `r` at the front of `ts`
 remainders (e : Ebnf) (r : Rhs) (ts : List TokenView) : List (List TokenView) := match r {
@@ -20,8 +24,9 @@ remainders (e : Ebnf) (r : Rhs) (ts : List TokenView) : List (List TokenView) :=
   ref n -> remaindersAny e (rulesOf e n) ts ;
   seq rs -> remaindersSeq e rs ts ;
   alt rs -> remaindersAny e rs ts ;
-  opt r1 -> cons ts (remainders e r1 ts) ;
-  rep r1 -> cons ts (remaindersRep e r1 ts) }
+  opt a -> cons ts (remainders e a ts) ;
+  rep a -> cons ts (remaindersRep e a ts) ;
+}
 
 remaindersAny (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : List (List TokenView) :=
   match rs { nil -> nil ; cons r rest -> append (List TokenView) (remainders e r ts) (remaindersAny e rest ts) }
@@ -32,22 +37,22 @@ remaindersSeq (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : List (List Toke
 remaindersFrom (e : Ebnf) (rs : List Rhs) (starts : List (List TokenView)) : List (List TokenView) :=
   match starts { nil -> nil ; cons ts more -> append (List TokenView) (remaindersSeq e rs ts) (remaindersFrom e rs more) }
 
--- one or more repetitions, each consuming something, so that `rep eps` ends
-remaindersRep (e : Ebnf) (r : Rhs) (ts : List TokenView) : List (List TokenView) :=
-  remaindersRepFrom e r (shorter ts (remainders e r ts))
+-- one or more rounds, each consuming something: the model of `RepRounds`
+remaindersRep (e : Ebnf) (a : Rhs) (ts : List TokenView) : List (List TokenView) :=
+  remaindersRepFrom e a (shorter ts (remainders e a ts))
 
-remaindersRepFrom (e : Ebnf) (r : Rhs) (starts : List (List TokenView)) : List (List TokenView) :=
+remaindersRepFrom (e : Ebnf) (a : Rhs) (starts : List (List TokenView)) : List (List TokenView) :=
   match starts { nil -> nil ; cons ts more ->
-    cons ts (append (List TokenView) (remaindersRepFrom e r (shorter ts (remainders e r ts))) (remaindersRepFrom e r more)) }
+    cons ts (append (List TokenView) (remaindersRepFrom e a (shorter ts (remainders e a ts))) (remaindersRepFrom e a more)) }
 
 -- only the remainders strictly shorter than `ts`
 shorter (ts : List TokenView) (rs : List (List TokenView)) : List (List TokenView) :=
-  match rs { nil -> nil ; cons r rest -> if length r < length ts then cons r (shorter ts rest) else shorter ts rest }
+  match rs { nil -> nil ; cons r rest -> if tokenCount r < tokenCount ts then cons r (shorter ts rest) else shorter ts rest }
 
-length (ts : List TokenView) : Int := match ts { nil -> 0 ; cons t rest -> 1 + length rest }
+tokenCount (ts : List TokenView) : Nat := match ts { nil -> 0 ; cons t rest -> 1 + tokenCount rest }
 
 hasEmpty (rs : List (List TokenView)) : Bool :=
   match rs { nil -> false ; cons r rest -> match r { nil -> true ; cons t more -> hasEmpty rest } }
 
--- the model: the token list is produced whole from the start symbol
-derives := \ (e : Ebnf) (ts : List TokenView) { hasEmpty (remainders e (ref e.start) ts) }
+-- the model: a right-hand side derives a list when matching it can leave nothing
+backtrack : Derives := { derivesRhs := \ (e : Ebnf) (r : Rhs) (ts : List TokenView) { hasEmpty (remainders e r ts) } }

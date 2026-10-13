@@ -1,58 +1,84 @@
 -- grammar.lth: chapter 2 of the specification, the grammar of Luthier, as a theory.
 --
--- Draft 0, 2026-10-13, written by Claude Fable 5.1 in the session integrating the specification
--- (step 1 of record/plan-from-zero-2026-10-13-execution.md). Source: docs/spec/02-grammar.md at
--- dcd27fd, with D-2026-10-12-ab (the keywords), D-2026-10-13-b (`W`), D-2026-10-13-n (an import
--- names what enters with its theory; theory files are `.lth`) and D9 of the superseded plan (a
--- top-level `test` line is data). A theory file: types, declarations and laws, nothing that
--- touches the world (spec 12.S23).
+-- Draft 2, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on the
+-- review of four models (record/IA/first-code-review-2026-10-13) and D-2026-10-13-o. Draft 0 and
+-- 1 were by Claude Fable 5.1. Source: docs/spec/02-grammar.md, with D-2026-10-12-ab and
+-- D-2026-10-13-o (the keywords), D-2026-10-13-b (`W`), D-2026-10-13-n (an import names what
+-- enters with its theory; theory files are `.lth`) and D-2026-10-13-o (a bare term is an act; a
+-- trailing separator is allowed; a single labeled field with a law is a subtype). A theory file
+-- (spec 12.S23): types, laws, and the definitions and the one value the laws need.
 --
--- What this file states. The surface syntax is data (L14): a text lexes into tokens, tokens parse
--- into a surface program, and a surface program prints back into text. A model of `Grammar` is a
--- lexer, a parser and a printer together; the Python parser of src/luthier/parse.py is its first
--- specimen, certified against the laws below (L14.3). The parser decides little (spec 2.S13): the
--- tree keeps the acts as written and carries no positions; what `->`, `*`, `+` and a name in a
--- pattern mean is the checker's (spec 4), and the translation of each surface form into the
--- kernel (spec 2.S12) is stated in term.lth as the laws of `desugar`, since `Term` lives there.
+-- What this file states. The surface syntax is data (L14): a text lexes into tokens, a layout pass
+-- turns line breaks into separators, a parser builds a surface program, and a printer writes it
+-- back. A model of `Grammar` is the four together; the Python parser of src/luthier/parse.py is to
+-- be its first specimen (L14.3). The grammar itself is a value, `luthierSyntax : WellFormedEbnf`,
+-- and the parser accepts exactly what it derives (`ParsesWhatDerives`); the case laws pin which
+-- tree each text gives, since a grammar says what is accepted and not what tree it makes. The
+-- parser decides little (spec 2.S13): the tree keeps the acts as written and carries no positions
+-- (errors do, D-2026-10-13-o); what `->`, `*`, `+` and a name in a pattern mean is the checker's
+-- (spec 4); the translation of each surface form into the kernel (spec 2.S12) is stated in
+-- term.lth as the laws of `desugar`, since `Term` lives there.
 --
--- The grammar itself is data too: `luthierSyntax` below is a value of `Ebnf` (ebnf.lth), the
--- productions of chapter 2 stratified by precedence (spec 2.S8), and a parser accepts exactly
--- what it derives, after the layout pass of spec 2.S4 (`ParsesWhatDerives`). The case laws then
--- pin which tree each text gives, since a grammar alone does not say that.
+-- Every law cites the item it states. A constructor is declared with its whole type, curried, as
+-- core.lut declares `cons`; a `data` without recursion is a sum (spec 3.R3), and its constructors
+-- mean what the observer bound to them by a law says (spec 4.R3): `keywordText`, `opText`,
+-- `kindName` for the enumerations, the case laws below for the forms of the tree.
 --
--- Every law cites the item of chapter 2 it states, above its definition. A constructor is
--- declared with its whole type, curried, as core.lut declares `cons`.
+-- Two findings of this draft, questions for the specification:
+-- (1) `import` and `as` are keywords here, beyond the nine of 2.S21. The import line binds names,
+--     which no function can do (D-2026-10-13-n), and `as` is read only on that line; with them as
+--     names, `import "x.lut" A` would also be a datum applying the name `import`, and
+--     `Numpy : LinearAlgebra as LA` an application.
+-- (2) 2.S5 writes a definition as `":=" body { clause }`, so a header followed only by clauses,
+--     which 2.S5's prose describes, does not derive; clauses are kept as written and pinned by no
+--     law until the production is settled.
 
-import "ebnf.lth" Ebnf Rhs Production TokenView derives eps lit cat ref seq alt opt rep
+import "ebnf.lth" Ebnf WellFormedEbnf Rhs TokenView Derives derives eps lit cat ref seq alt opt rep
 
 -- ---------------------------------------------------------------- lexical (spec 2 §1)
 
--- spec 2.S1: a name (a dotted name is one token, spec 2.S14), a number, a string, a symbol; a
--- comment is dropped by the lexer; a line break is a token, since layout reads it (spec 2.S4).
--- Added here to 2.S1, proposed: inside a string, `\"`, `\\` and `\n` stand for a quote, a
--- backslash and a line break, so that the laws below can spell texts of several lines.
+-- spec 2.S1: a token is a name (a dotted name is one token, spec 2.S14), a keyword (2.S21), a
+-- name written infix (`and`, `or`, `mod`, 2.S2), a number, a string, a symbol, or a line break,
+-- which the layout pass reads (spec 2.S4); a comment is dropped by the lexer.
 TokenKind : U := data {
-  nameToken    : TokenKind ;
+  nameToken : TokenKind ;
   keywordToken : TokenKind ;
-  numberToken  : TokenKind ;
-  stringToken  : TokenKind ;
-  symbolToken  : TokenKind ;
+  infixToken : TokenKind ;
+  numberToken : TokenKind ;
+  stringToken : TokenKind ;
+  symbolToken : TokenKind ;
   newlineToken : TokenKind ;
-  endToken     : TokenKind }
+}
+
+-- the observer of `TokenKind`: the name a grammar gives the kind (ebnf.lth)
+kindName (k : TokenKind) : String := match k {
+  nameToken -> "name" ; keywordToken -> "keyword" ; infixToken -> "infix" ; numberToken -> "number" ;
+  stringToken -> "string" ; symbolToken -> "symbol" ; newlineToken -> "newline" ;
+}
 
 Token = { kind : TokenKind, text : String, line : Nat, column : Nat }
 
--- spec 2.S21 with D-2026-10-13-b: the keywords. `operator` is kept a keyword (2.S21 says
--- "possibly"): it binds a symbol, which no function can take as an argument. `quote` captures a
--- term unevaluated (spec 2.S20), so it is a form of the grammar and not a name of core; 2.S21
--- does not list it, a question for the specification.
+tokenView (t : Token) : TokenView := { kind := kindName t.kind, text := t.text }
+tokenViews (ts : List Token) : List TokenView := match ts { nil -> nil ; cons t rest -> cons (tokenView t) (tokenViews rest) }
+
+-- spec 2.S21 with D-2026-10-13-b and -o: the keywords, and `import` and `as` (finding (1) above).
 Keyword : U := data {
   kwData : Keyword ; kwMatch : Keyword ; kwIf : Keyword ; kwThen : Keyword ; kwElse : Keyword ;
-  kwU : Keyword ; kwW : Keyword ; kwOperator : Keyword ; kwQuote : Keyword }
+  kwU : Keyword ; kwW : Keyword ; kwOperator : Keyword ; kwQuote : Keyword ;
+  kwImport : Keyword ; kwAs : Keyword ;
+}
 
+-- the observer of `Keyword`: the text of each keyword
 keywordText (k : Keyword) : String := match k {
   kwData -> "data" ; kwMatch -> "match" ; kwIf -> "if" ; kwThen -> "then" ; kwElse -> "else" ;
-  kwU -> "U" ; kwW -> "W" ; kwOperator -> "operator" ; kwQuote -> "quote" }
+  kwU -> "U" ; kwW -> "W" ; kwOperator -> "operator" ; kwQuote -> "quote" ;
+  kwImport -> "import" ; kwAs -> "as" ;
+}
+allKeywords : List Keyword :=
+  [kwData, kwMatch, kwIf, kwThen, kwElse, kwU, kwW, kwOperator, kwQuote, kwImport, kwAs]
+isKeywordText (s : String) : Bool := anyKeywordText s allKeywords
+anyKeywordText (s : String) (ks : List Keyword) : Bool :=
+  match ks { nil -> false ; cons k rest -> keywordText k == s or anyKeywordText s rest }
 
 LexError = { line : Nat, column : Nat, message : String }
 
@@ -60,103 +86,205 @@ LexResult = < lexed : List Token | lexFailed : LexError >
 
 -- ---------------------------------------------------------------- the surface tree (spec 2 §2, §3)
 
--- spec 2.S1: a number is an integer or a double by its spelling (a point or an exponent makes it
--- a double); a string is a string.
+-- spec 2.S1: a number is an integer or a double by its spelling (a point or an exponent makes a
+-- double); it has no sign, which is negation (2.S15), so a literal is never negative.
+NonNegativeFloat = { x : Float64 | 0.0 <= x }
 Literal : U := data {
-  intLit    : Int -> Literal ;
-  floatLit  : Float64 -> Literal ;
-  stringLit : String -> Literal }
+  intLit : Nat -> Literal ;
+  floatLit : NonNegativeFloat -> Literal ;
+  stringLit : String -> Literal ;
+}
 
--- spec 2.S8: the operators written between two terms, from the loosest to the tightest. `and`,
--- `or` and `mod` are names written infix (spec 2.S2) and parse as applications of those names.
+-- spec 2.S8: the operators written between two terms, from the loosest to the tightest; `and`,
+-- `or` and `mod` are names written infix (2.S2) and kept as operators, as written (2.S13).
 Op : U := data {
-  amp : Op ;                                 -- &, the conjunction of laws
-  arrow : Op ;                               -- ->, the function type or implication, by the checker
+  amp : Op ; arrow : Op ; orOp : Op ; andOp : Op ;
   eq : Op ; neq : Op ; lt : Op ; le : Op ; gt : Op ; ge : Op ;
-  plus : Op ; minus : Op ; times : Op ; div : Op }
+  plus : Op ; minus : Op ; times : Op ; div : Op ; modOp : Op ;
+}
 
+-- the observer of `Op`: the text of each operator
 opText (o : Op) : String := match o {
-  amp -> "&" ; arrow -> "->" ; eq -> "==" ; neq -> "/=" ; lt -> "<" ; le -> "<=" ; gt -> ">" ;
-  ge -> ">=" ; plus -> "+" ; minus -> "-" ; times -> "*" ; div -> "/" }
+  amp -> "&" ; arrow -> "->" ; orOp -> "or" ; andOp -> "and" ; eq -> "==" ; neq -> "/=" ; lt -> "<" ;
+  le -> "<=" ; gt -> ">" ; ge -> ">=" ; plus -> "+" ; minus -> "-" ; times -> "*" ; div -> "/" ;
+  modOp -> "mod" ;
+}
+allOps : List Op := [amp, arrow, orOp, andOp, eq, neq, lt, le, gt, ge, plus, minus, times, div, modOp]
 
--- spec 2.S9, 2.S10: a pattern. A name is a constructor, a label or a variable; the checker says
--- which (spec 2.S13).
+-- spec 2.S9, 2.S10: a pattern. A name applied to patterns, possibly none, is a constructor, a
+-- label or a variable; the checker says which (2.S13), so the tree has one form for all three.
 SurfacePattern : U := data {
-  pWild  : SurfacePattern ;
-  pName  : String -> SurfacePattern ;
-  pCon   : String -> List SurfacePattern -> SurfacePattern ;     -- a constructor applied
-  pLit   : Literal -> SurfacePattern ;
-  pTuple : List SurfacePattern -> SurfacePattern }
+  pWild : SurfacePattern ;
+  pApp : String -> List SurfacePattern -> SurfacePattern ;
+  pLit : Literal -> SurfacePattern ;
+  pTuple : List SurfacePattern -> SurfacePattern ;
+}
 
 -- spec 2.S9: a parameter of a lambda.
 LambdaParam : U := data {
   plainParam : String -> LambdaParam ;
   typedParam : List String -> Surface -> LambdaParam ;           -- (x y : A)
-  shapeParam : List SurfacePattern -> LambdaParam }              -- (p, q), a tuple pattern
+  shapeParam : List SurfacePattern -> LambdaParam ;              -- (p, q), a tuple pattern
+}
 
 -- spec 2.S17: an item of a block.
 Item : U := data {
-  bind   : String -> Surface -> Item ;                           -- x := t, once
-  rebind : String -> Surface -> Item }                           -- x <- t; an action's result too
+  bind : String -> Surface -> Item ;                             -- x := t, once
+  rebind : String -> Surface -> Item ;                           -- x <- t; an action's result too
+}
+
+-- spec 2.S9, D-2026-10-13-o: a field of a labeled form may carry several names, { x y : A }.
+Field = { names : List String, type : Surface }
 
 -- spec 2.S9: the terms.
 Surface : U := data {
-  name        : String -> Surface ;                              -- dotted or not (spec 2.S14)
-  literal     : Literal -> Surface ;
-  universe    : Surface ;                                        -- U
-  world       : Surface ;                                        -- W (D-2026-10-13-b)
-  app         : Surface -> Surface -> Surface ;
-  binop       : Op -> Surface -> Surface -> Surface ;
-  neg         : Surface -> Surface ;                             -- -x (spec 2.S15)
-  tuple       : List Surface -> Surface ;                        -- (a, b, c)
-  pi          : List String -> Surface -> Surface -> Surface ;   -- (x y : A) -> B
-  sigma       : List String -> Surface -> Surface -> Surface ;   -- (x y : A) * B
-  sigmaNamed  : String -> Surface -> String -> Surface -> Surface ;  -- (x : A) * (y : B)
-  sumNamed    : String -> Surface -> String -> Surface -> Surface ;  -- (x : A) + (y : B)
-  record      : List (String * Surface) -> Surface ;             -- { x : A, y : B }
-  recordLaw   : List (String * Surface) -> Surface -> Surface ;  -- { x : A, y : B | p }
-  subtype     : SurfacePattern -> Surface -> Surface -> Surface ; -- { p : T | law }
+  name : String -> Surface ;                                     -- dotted or not (2.S14)
+  literal : Literal -> Surface ;
+  universe : Surface ;                                           -- U
+  world : Surface ;                                              -- W (D-2026-10-13-b)
+  app : Surface -> Surface -> Surface ;
+  binop : Op -> Surface -> Surface -> Surface ;
+  neg : Surface -> Surface ;                                     -- -x (2.S15)
+  tuple : List Surface -> Surface ;                              -- (a, b, c), two or more
+  pi : List String -> Surface -> Surface -> Surface ;            -- (x y : A) -> B
+  sigma : List String -> Surface -> Surface -> Surface ;         -- (x y : A) * B
+  sigmaNamed : String -> Surface -> String -> Surface -> Surface ;  -- (x : A) * (y : B)
+  sumNamed : String -> Surface -> String -> Surface -> Surface ;    -- (x : A) + (y : B)
+  record : List Field -> Maybe Surface -> Surface ;              -- { x : A, y : B | p }, two or more names
+  subtype : SurfacePattern -> Surface -> Surface -> Surface ;    -- { p : T | law }
   recordValue : List (String * Surface) -> Surface ;             -- { x := a, y := b }
-  block       : List Item -> Surface -> Surface ;                -- { items ; e } (spec 2.S17)
-  sum         : List (String * Surface) -> Surface ;             -- < x : A | y : B >
-  list        : List Surface -> Surface ;                        -- [a, b]
-  lambda      : List LambdaParam -> Surface -> Surface ;         -- \ params { block }
-  match       : Surface -> List (SurfacePattern * Surface) -> Surface ;
-  namedArg    : String -> Surface -> Surface ;                   -- (x <- t) (spec 2.S7)
-  ifThen      : Surface -> Surface -> Maybe Surface -> Surface ; -- if c then a [else b]
-  proj        : Surface -> String -> Surface ;                   -- (f x).field (spec 2.S14)
-  quote       : Surface -> Surface }                             -- quote { t } (spec 2.S20)
+  block : List Item -> Surface -> Surface ;                      -- { items ; e } (2.S17)
+  sum : List (String * Surface) -> Surface ;                     -- < x : A | y : B >
+  list : List Surface -> Surface ;                               -- [a, b]
+  lambda : List LambdaParam -> List Item -> Surface -> Surface ; -- \ params { items ; e }
+  matchOf : Surface -> List (SurfacePattern * Surface) -> Surface ;
+  namedArg : String -> Surface -> Surface ;                      -- (x <- t) (2.S7)
+  ifThen : Surface -> Surface -> Maybe Surface -> Surface ;      -- if c then a [else b] (2.S11)
+  proj : Surface -> String -> Surface ;                          -- (f x).field (2.S14)
+  quoted : Surface -> Surface ;                                  -- quote { t } (2.S20)
+}
 
 -- spec 2.S5, 2.S16: a binder before the colon of an act; `{A B : U}` is implicit.
 Binder : U := data {
   explicit : List String -> Surface -> Maybe Surface -> Binder ;  -- (x y : A), (x : A <- d)
-  implicit : List String -> Surface -> Binder }                    -- {A B : U}
+  implicit : List String -> Surface -> Binder ;                    -- {A B : U}
+}
 
--- spec 2.S5: a clause under a header with parameters.
+-- spec 2.S5: a clause under a header with parameters (finding (2) above).
 Clause = { patterns : List SurfacePattern, body : Surface }
 
--- spec 2.S5: the body of a definition. `extern`, `primitive` and `axiom` are names of core
--- (spec 2.S21), so their applications are terms and need no form of their own.
+-- spec 2.S5: the body of a definition. `extern`, `primitive`, `axiom` and `eval` are names of core
+-- (2.S21), so their applications are terms and need no form of their own.
 Body : U := data {
   termBody : Surface -> Body ;
-  dataBody : List (String * Surface) -> Body }                   -- data { c : T ; ... }
+  dataBody : List (String * Surface) -> Body ;                   -- data { c : T ; ... }
+}
 
--- spec 12.S22 (D-2026-10-13-n): what an import brings in, each with its theory and its alias.
-ImportName = { name : String, theory : Maybe Surface, alias : Maybe String }
+-- spec 12.S22 (D-2026-10-13-n, -o): what an import brings in, each with its theory and its alias.
+-- the file is kept as its path, without the quotes its token carries
+ImportName = { name : String, theory : Maybe String, asName : Maybe String }
 
--- spec 2.S5, 2.S6 and D9: the acts. A bare term at the top level is a datum the module keeps,
--- such as a `test` line or a `cite` line (D-2026-10-13-n); the checker says which terms may
--- stand there.
+-- spec 2.S5, 2.S6, 12.S22, D-2026-10-13-o: the acts. A bare term is a datum the module keeps, such
+-- as a `test` line or a citation; which terms may stand there is the checker's.
 SurfaceAct : U := data {
-  declare  : String -> List Binder -> Surface -> SurfaceAct ;
-  define   : String -> List Binder -> Maybe Surface -> Body -> List Clause -> SurfaceAct ;
-  alias    : String -> List Binder -> Surface -> SurfaceAct ;
-  import_  : String -> List ImportName -> SurfaceAct ;           -- import "file" names
-  operator : Op -> Surface -> SurfaceAct ;                       -- operator + := term
-  datum    : Surface -> SurfaceAct }
+  declare : String -> List Binder -> Surface -> SurfaceAct ;
+  define : String -> List Binder -> Maybe Surface -> Body -> List Clause -> SurfaceAct ;
+  alias : String -> List Binder -> Surface -> SurfaceAct ;
+  importAct : String -> List ImportName -> SurfaceAct ;          -- import "file" names
+  operatorAct : Op -> Surface -> SurfaceAct ;                    -- operator + := term
+  datum : Surface -> SurfaceAct ;
+}
 
 -- spec 2.S5: a program is its acts, in no order (spec 3.S1).
 SurfaceProgram = List SurfaceAct
+
+-- ---------------------------------------------------------------- the trees a text can give
+
+-- Not every tree is written by some text: a tuple of one, a lambda with no parameter, a record of
+-- one name, a name that is a keyword. `RoundTrip` quantifies over the trees that are (GPT, Claude,
+-- Kimi), so this predicate is its domain (L10.1).
+validName (s : String) : Bool := s /= "" and not (isKeywordText s)
+allValidNames (ss : List String) : Bool := match ss { nil -> true ; cons s rest -> validName s and allValidNames rest }
+nonEmpty (A : U) (xs : List A) : Bool := match xs { nil -> false ; cons x rest -> true }
+atLeastTwo (A : U) (xs : List A) : Bool := match xs { nil -> false ; cons x rest -> nonEmpty A rest }
+countNames (fs : List Field) : Nat := match fs { nil -> 0 ; cons f rest -> namesLength f.names + countNames rest }
+namesLength (ss : List String) : Nat := match ss { nil -> 0 ; cons s rest -> 1 + namesLength rest }
+
+wellFormedPattern (p : SurfacePattern) : Bool := match p {
+  pWild -> true ; pLit l -> true ;
+  pApp n ps -> validName n and allPatterns ps ;
+  pTuple ps -> atLeastTwo SurfacePattern ps and allPatterns ps ;
+}
+allPatterns (ps : List SurfacePattern) : Bool :=
+  match ps { nil -> true ; cons p rest -> wellFormedPattern p and allPatterns rest }
+-- the pattern of a subtype is a name, `_`, a literal or a tuple, never a name applied (2.S9 as
+-- settled by D-2026-10-13-o, so that { x y : A | p } is a record)
+subtypePattern (p : SurfacePattern) : Bool := match p {
+  pWild -> true ; pLit l -> true ; pTuple ps -> wellFormedPattern p ;
+  pApp n ps -> validName n and not (nonEmpty SurfacePattern ps) ;
+}
+
+wellFormed (t : Surface) : Bool := match t {
+  name s -> validName s ;
+  literal l -> true ; universe -> true ; world -> true ;
+  app f a -> wellFormed f and wellFormed a ;
+  binop o a b -> wellFormed a and wellFormed b ;
+  neg a -> wellFormed a ;
+  tuple ts -> atLeastTwo Surface ts and allWellFormed ts ;
+  pi xs a b -> nonEmpty String xs and allValidNames xs and wellFormed a and wellFormed b ;
+  sigma xs a b -> nonEmpty String xs and allValidNames xs and wellFormed a and wellFormed b ;
+  sigmaNamed x a y b -> validName x and validName y and wellFormed a and wellFormed b ;
+  sumNamed x a y b -> validName x and validName y and wellFormed a and wellFormed b ;
+  record fs law -> countNames fs >= 2 and allFields fs and maybeWellFormed law ;
+  subtype p a law -> subtypePattern p and wellFormed a and wellFormed law ;
+  recordValue kvs -> nonEmpty (String * Surface) kvs and allPairs kvs ;
+  block items e -> allItems items and wellFormed e ;
+  sum kvs -> nonEmpty (String * Surface) kvs and allPairs kvs ;
+  list ts -> allWellFormed ts ;
+  lambda ps items e -> nonEmpty LambdaParam ps and allParams ps and allItems items and wellFormed e ;
+  matchOf s arms -> wellFormed s and allArms arms ;
+  namedArg x a -> validName x and wellFormed a ;
+  ifThen c a b -> wellFormed c and wellFormed a and maybeWellFormed b ;
+  proj a x -> wellFormed a and validName x ;
+  quoted a -> wellFormed a ;
+}
+allWellFormed (ts : List Surface) : Bool := match ts { nil -> true ; cons t rest -> wellFormed t and allWellFormed rest }
+maybeWellFormed (m : Maybe Surface) : Bool := match m { nothing -> true ; just t -> wellFormed t }
+allFields (fs : List Field) : Bool :=
+  match fs { nil -> true ; cons f rest -> nonEmpty String f.names and allValidNames f.names and wellFormed f.type and allFields rest }
+allPairs (kvs : List (String * Surface)) : Bool :=
+  match kvs { nil -> true ; cons (k, v) rest -> validName k and wellFormed v and allPairs rest }
+allItems (is : List Item) : Bool := match is { nil -> true ;
+  cons it rest -> match it { bind x t -> validName x and wellFormed t ; rebind x t -> validName x and wellFormed t } and allItems rest }
+allParams (ps : List LambdaParam) : Bool := match ps { nil -> true ;
+  cons p rest -> match p {
+    plainParam x -> validName x ;
+    typedParam xs t -> nonEmpty String xs and allValidNames xs and wellFormed t ;
+    shapeParam qs -> nonEmpty SurfacePattern qs and allPatterns qs } and allParams rest }
+allArms (arms : List (SurfacePattern * Surface)) : Bool :=
+  match arms { nil -> true ; cons (p, t) rest -> wellFormedPattern p and wellFormed t and allArms rest }
+
+wellFormedBinder (b : Binder) : Bool := match b {
+  explicit xs t d -> nonEmpty String xs and allValidNames xs and wellFormed t and maybeWellFormed d ;
+  implicit xs t -> nonEmpty String xs and allValidNames xs and wellFormed t ;
+}
+allBinders (bs : List Binder) : Bool := match bs { nil -> true ; cons b rest -> wellFormedBinder b and allBinders rest }
+allImportNames (ns : List ImportName) : Bool := match ns { nil -> true ;
+  cons n rest -> validName n.name and maybeValidName n.theory and maybeValidName n.asName and allImportNames rest }
+maybeValidName (m : Maybe String) : Bool := match m { nothing -> true ; just s -> validName s }
+
+wellFormedAct (a : SurfaceAct) : Bool := match a {
+  declare x bs t -> validName x and allBinders bs and wellFormed t ;
+  define x bs t b cs -> validName x and allBinders bs and maybeWellFormed t and wellFormedBody b ;
+  alias x bs t -> validName x and allBinders bs and wellFormed t ;
+  importAct f ns -> nonEmpty ImportName ns and allImportNames ns ;
+  operatorAct o t -> wellFormed t ;
+  datum t -> wellFormed t ;
+}
+wellFormedBody (b : Body) : Bool := match b { termBody t -> wellFormed t ; dataBody cs -> allPairs cs }
+wellFormedProgram (p : SurfaceProgram) : Bool := match p { nil -> true ; cons a rest -> wellFormedAct a and wellFormedProgram rest }
+
+WrittenProgram : U := { p : SurfaceProgram | wellFormedProgram p }
 
 -- ---------------------------------------------------------------- errors
 
@@ -166,29 +294,34 @@ ParseResult = < parsed : SurfaceProgram | parseFailed : List ParseError >
 
 isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es -> false }
 
+-- ---------------------------------------------------------------- the layout pass (spec 2.S4)
+
+-- Between the lexer and the grammar. It reads the line and column of each token and gives the
+-- grammar a token list in which: blank lines and lines with only a comment are gone; a line break
+-- before a token at column 0, outside every bracket, is the newline token that ends an act, and
+-- one more ends the text if its last act has none; inside ( ), [ ], < > and the braces of `match`,
+-- line breaks are dropped; inside the braces of a record type, a record value, a block and a
+-- `data` (the last is this file's reading, where 2.S4 is silent), a line break is ";" unless the
+-- next line is indented deeper than the first item, begins with `then`, `else` or an infix
+-- operator, or follows "{", "," or ";", or precedes "}"; outside braces, a line break before an
+-- indented line is dropped. The laws below observe it through `layout` and through `parse`.
+
 -- ---------------------------------------------------------------- the grammar as data
 
--- spec 2.S4, layout, is a pass between the lexer and the grammar: it reads the line and column of
--- each token and gives the grammar a token list in which a line break at column 0 is the token
--- "\n" that ends an act, a line break between the items of a block is ";", and every other line
--- break is dropped (inside brackets, under an indented continuation, before `then`, `else` or an
--- infix operator). Its laws are the layout cases below.
-tokenView (t : Token) : TokenView := { kind := kindName t.kind, text := t.text }
-kindName (k : TokenKind) : String := match k {
-  nameToken -> "name" ; keywordToken -> "keyword" ; numberToken -> "number" ; stringToken -> "string" ;
-  symbolToken -> "symbol" ; newlineToken -> "newline" ; endToken -> "end" }
-
--- spec 2.S5, 2.S6, 2.S9, 2.S10, 2.S16, 12.S22, as productions. Precedence (spec 2.S8) is the
--- stratification `term` > `ampTerm` > ... > `atom`; associativity to the right is a right
--- recursion, to the left a repetition.
-luthierSyntax : Ebnf := { start := "program", rules := [
+-- spec 2.S5, 2.S6, 2.S9, 2.S10, 2.S16, 12.S22 and D-2026-10-13-o, as productions. Precedence (2.S8)
+-- is the stratification `term` > `ampTerm` > ... > `atom`: a right associativity is a right
+-- recursion, a left one a repetition. Negation is a level above application (2.S15). A sum
+-- `< ... >` is an atom at the head of an application but not an argument (2.S10). As a value of
+-- `WellFormedEbnf`, its coercion owes that it has no left recursion and no undefined nonterminal,
+-- an obligation `test` discharges.
+luthierSyntax : WellFormedEbnf := { start := "program", rules := [
   { lhs := "program",     rhs := rep (seq [ref "act", lit "\n"]) },
   { lhs := "act",         rhs := alt [ref "declaration", ref "definition", ref "alias", ref "import", ref "operator", ref "datum"] },
   { lhs := "declaration", rhs := seq [cat "name", rep (ref "binder"), lit ":", ref "term"] },
   { lhs := "definition",  rhs := seq [cat "name", rep (ref "binder"), opt (seq [lit ":", ref "term"]), lit ":=", ref "body", rep (ref "clause")] },
   { lhs := "alias",       rhs := seq [cat "name", rep (ref "binder"), lit "=", ref "term"] },
   { lhs := "import",      rhs := seq [lit "import", cat "string", ref "importName", rep (ref "importName")] },
-  { lhs := "importName",  rhs := seq [cat "name", opt (seq [lit ":", ref "term"]), opt (seq [lit "as", cat "name"])] },
+  { lhs := "importName",  rhs := seq [cat "name", opt (seq [lit ":", cat "name"]), opt (seq [lit "as", cat "name"])] },
   { lhs := "operator",    rhs := seq [lit "operator", ref "opSymbol", lit ":=", ref "term"] },
   { lhs := "opSymbol",    rhs := alt [lit "+", lit "-", lit "*", lit "/"] },
   { lhs := "datum",       rhs := ref "term" },
@@ -197,7 +330,8 @@ luthierSyntax : Ebnf := { start := "program", rules := [
       seq [lit "{", cat "name", rep (cat "name"), lit ":", ref "term", lit "}"]] },
   { lhs := "clause",      rhs := seq [lit "|", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ":=", ref "term"] },
   { lhs := "body",        rhs := alt [ref "term",
-      seq [lit "data", lit "{", opt (seq [cat "name", lit ":", ref "term", rep (seq [lit ";", cat "name", lit ":", ref "term"])]), lit "}"]] },
+      seq [lit "data", lit "{", opt (seq [ref "ctor", rep (seq [lit ";", ref "ctor"]), opt (lit ";")]), lit "}"]] },
+  { lhs := "ctor",        rhs := seq [cat "name", lit ":", ref "term"] },
   { lhs := "term",        rhs := ref "ampTerm" },
   { lhs := "ampTerm",     rhs := seq [ref "arrowTerm", opt (seq [lit "&", ref "ampTerm"])] },
   { lhs := "arrowTerm",   rhs := seq [ref "orTerm", opt (seq [lit "->", ref "arrowTerm"])] },
@@ -207,9 +341,12 @@ luthierSyntax : Ebnf := { start := "program", rules := [
   { lhs := "addTerm",     rhs := seq [ref "mulTerm", rep (seq [alt [lit "+", lit "-"], ref "mulTerm"])] },
   { lhs := "mulTerm",     rhs := seq [ref "negTerm", rep (seq [alt [lit "*", lit "/", lit "mod"], ref "negTerm"])] },
   { lhs := "negTerm",     rhs := alt [seq [lit "-", ref "negTerm"], ref "appTerm"] },
-  { lhs := "appTerm",     rhs := seq [ref "projTerm", rep (ref "projTerm")] },
+  { lhs := "appTerm",     rhs := seq [ref "projTerm", rep (ref "argTerm")] },
   { lhs := "projTerm",    rhs := seq [ref "atom", rep (seq [lit ".", cat "name"])] },
-  { lhs := "atom",        rhs := alt [
+  { lhs := "argTerm",     rhs := seq [ref "argAtom", rep (seq [lit ".", cat "name"])] },
+  { lhs := "atom",        rhs := alt [ref "argAtom",
+      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"]] },
+  { lhs := "argAtom",     rhs := alt [
       cat "name", cat "number", cat "string", lit "U", lit "W",
       seq [lit "(", ref "term", lit ")"],
       seq [lit "(", ref "term", lit ",", ref "term", rep (seq [lit ",", ref "term"]), lit ")"],
@@ -218,161 +355,295 @@ luthierSyntax : Ebnf := { start := "program", rules := [
       seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "*", lit "(", cat "name", lit ":", ref "term", lit ")"],
       seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "+", lit "(", cat "name", lit ":", ref "term", lit ")"],
       seq [lit "(", cat "name", lit "<-", ref "term", lit ")"],
-      seq [lit "{", ref "field", rep (seq [ref "sep", ref "field"]), opt (seq [lit "|", ref "term"]), lit "}"],
-      seq [lit "{", ref "pattern", lit ":", ref "term", lit "|", ref "term", lit "}"],
-      seq [lit "{", cat "name", lit ":=", ref "term", rep (seq [ref "sep", cat "name", lit ":=", ref "term"]), lit "}"],
+      seq [lit "{", ref "recordFields", opt (seq [lit "|", ref "term"]), opt (ref "sep"), lit "}"],
+      seq [lit "{", ref "subtypePattern", lit ":", ref "term", lit "|", ref "term", lit "}"],
+      seq [lit "{", cat "name", lit ":=", ref "term", rep (seq [ref "sep", cat "name", lit ":=", ref "term"]), opt (ref "sep"), lit "}"],
       seq [lit "{", ref "block", lit "}"],
-      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"],
-      seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"])]), lit "]"],
+      seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"]), opt (lit ",")]), lit "]"],
       seq [lit "\\", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
-      seq [lit "match", ref "term", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"])]), lit "}"],
+      seq [lit "match", ref "term", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"]), opt (lit ";")]), lit "}"],
       seq [lit "if", ref "term", lit "then", ref "term", opt (seq [lit "else", ref "term"])],
       seq [lit "quote", lit "{", ref "term", lit "}"]] },
+  { lhs := "recordFields", rhs := alt [
+      seq [ref "fieldMany", rep (seq [ref "sep", ref "field"])],
+      seq [ref "fieldOne", ref "sep", ref "field", rep (seq [ref "sep", ref "field"])]] },
   { lhs := "field",       rhs := seq [cat "name", rep (cat "name"), lit ":", ref "term"] },
+  { lhs := "fieldOne",    rhs := seq [cat "name", lit ":", ref "term"] },
+  { lhs := "fieldMany",   rhs := seq [cat "name", cat "name", rep (cat "name"), lit ":", ref "term"] },
+  { lhs := "subtypePattern", rhs := alt [lit "_", cat "name", cat "number", cat "string",
+      seq [lit "(", ref "pattern", lit ",", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] },
   { lhs := "sep",         rhs := alt [lit ",", lit ";"] },
-  { lhs := "block",       rhs := seq [rep (seq [ref "item", lit ";"]), ref "term"] },
+  { lhs := "block",       rhs := seq [rep (seq [ref "item", ref "sep"]), ref "term", opt (ref "sep")] },
   { lhs := "item",        rhs := seq [cat "name", alt [lit ":=", lit "<-"], ref "term"] },
   { lhs := "arm",         rhs := seq [ref "pattern", lit "->", ref "term"] },
   { lhs := "lparam",      rhs := alt [cat "name",
       seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")"],
       seq [lit "(", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] },
   { lhs := "pattern",     rhs := alt [lit "_", seq [cat "name", rep (ref "patom")], ref "patom"] },
-  { lhs := "patom",       rhs := alt [cat "name", cat "number", cat "string",
+  { lhs := "patom",       rhs := alt [lit "_", cat "name", cat "number", cat "string",
       seq [lit "(", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] } ] }
 
 -- ---------------------------------------------------------------- the theory
 
 -- A model of the grammar: a lexer, the layout pass, a parser from text and a printer back to
--- text. The parser goes from text and not from tokens, so that errors keep their positions;
--- `lex` and `layout` are observable on their own, for the laws that bind them to the grammar.
-Grammar : {
-  lex    : String -> LexResult,
+-- text, held to a model `d` of `Derives`; on `luthierSyntax`, well formed, every model of
+-- `Derives` gives the same answer (ebnf.lth). The parser goes from text, so that errors keep
+-- their positions; `lex` and `layout` are observable on their own.
+Grammar (d : Derives) : {
+  lex : String -> LexResult,
   layout : List Token -> List TokenView,
-  parse  : String -> ParseResult,
-  print  : SurfaceProgram -> String }
+  parse : String -> ParseResult,
+  print : SurfaceProgram -> String,
+}
 
--- ---------------------------------------------------------------- the laws
+-- ---------------------------------------------------------------- definitions the laws use
 
--- The printer and the parser are inverse on programs: what is printed parses back to the same
--- tree. This is the law that reaches every form of the tree, since `SurfaceProgram` is drawn by
--- its generator (spec 7.S3). spec 2.S9, 2.S12 (the tree keeps what was written).
-RoundTrip (g : Grammar) (p : SurfaceProgram) : Bool := g.parse (g.print p) == parsed p
+-- the views of the tokens of a text, or nothing if it does not lex
+viewsOf (d : Derives) (g : Grammar d) (s : String) : Maybe (List TokenView) :=
+  match g.lex s { lexed ts -> just (tokenViews ts) ; lexFailed e -> nothing }
+lexes (d : Derives) (g : Grammar d) (s : String) : Bool :=
+  match g.lex s { lexed ts -> true ; lexFailed e -> false }
+tv (k t : String) : TokenView := { kind := k, text := t }
 
--- Parsing is canonical: printing a parsed text and parsing again changes nothing. Tested on
--- texts, it reaches programs the generator may not. spec 2.S4 (layout), 2.S13.
-Canonical (g : Grammar) (s : String) : Bool :=
+-- two texts parse, and to the same program
+sameParse (d : Derives) (g : Grammar d) (a b : String) : Bool :=
+  isParsed (g.parse a) and g.parse a == g.parse b
+
+-- a text that defines `x` by one term
+defX (t : Surface) : SurfaceProgram := [define "x" [] nothing (termBody t) []]
+parsesX (d : Derives) (g : Grammar d) (s : String) (t : Surface) : Bool := g.parse s == parsed (defX t)
+
+numeral (n : Nat) : Surface := literal (intLit n)
+nm (s : String) : Surface := name s
+pvar (s : String) : SurfacePattern := pApp s []
+
+lastIsNewline (ts : List TokenView) : Bool :=
+  match ts { nil -> false ; cons t rest -> match rest { nil -> t.kind == "newline" ; cons u more -> lastIsNewline rest } }
+
+-- ---------------------------------------------------------------- the general laws
+
+-- The printer and the parser are inverse on the trees a text can give (spec 2.S9, 2.S13). The
+-- printer writes a projection as `(a).b`, a negation of a negation as `-(-a)`, and a string with
+-- its escapes, so that what it writes lexes back to the same tree.
+RoundTrip (d : Derives) (g : Grammar d) (p : WrittenProgram) : Bool := g.parse (g.print p) == parsed p
+
+-- Parsing is canonical: printing a parsed text and parsing again changes nothing (2.S4, 2.S13).
+Canonical (d : Derives) (g : Grammar d) (s : String) : Bool :=
   match g.parse s { parsed p -> g.parse (g.print p) == parsed p ; parseFailed es -> true }
 
--- The parser accepts exactly what the grammar derives from the laid-out tokens; a text the lexer
--- rejects is not a program. spec 2 §2, §3 as data (`luthierSyntax`), 2.S4 (layout).
-ParsesWhatDerives (g : Grammar) (s : String) : Bool :=
-  isParsed (g.parse s) == match g.lex s { lexed ts -> derives luthierSyntax (g.layout ts) ; lexFailed e -> false }
+-- What parses is well formed: the parser gives no tree outside the domain of `RoundTrip`.
+ParsedIsWritten (d : Derives) (g : Grammar d) (s : String) : Bool :=
+  match g.parse s { parsed p -> wellFormedProgram p ; parseFailed es -> true }
 
--- spec 2.S21: a keyword is never a name.
+-- The parser accepts exactly what the grammar derives from the laid-out tokens; a text the lexer
+-- rejects is not a program (spec 2 §2, §3 as `luthierSyntax`; 2.S4).
+ParsesWhatDerives (d : Derives) (g : Grammar d) (s : String) : Bool :=
+  isParsed (g.parse s) == match g.lex s { lexed ts -> derives d luthierSyntax (g.layout ts) ; lexFailed e -> false }
+
+-- The layout pass ends every text that lexes with a newline token (2.S4; the `"\n"` of `program`).
+LayoutEndsWithNewline (d : Derives) (g : Grammar d) (s : String) : Bool :=
+  match g.lex s { lexed ts -> lastIsNewline (g.layout ts) ; lexFailed e -> true }
+
+-- Errors say where (2.S13: the parser reports, the checker decides).
+linesPositive (es : List ParseError) : Bool :=
+  match es { nil -> true ; cons e rest -> e.line >= 1 and linesPositive rest }
+ErrorsHaveLines (d : Derives) (g : Grammar d) (s : String) : Bool :=
+  match g.parse s { parsed p -> true ; parseFailed es -> nonEmpty ParseError es and linesPositive es }
+
+-- ---------------------------------------------------------------- the observers of the enumerations
+
+-- Each keyword, operator and token kind is told apart by its observer (spec 4.R3, D-2026-10-13-o).
+KeywordTextInjective (j k : Keyword) : Bool := keywordText j /= keywordText k or j == k
+OpTextInjective (o p : Op) : Bool := opText o /= opText p or o == p
+KindNameInjective (j k : TokenKind) : Bool := kindName j /= kindName k or j == k
+
+-- ---------------------------------------------------------------- lexical laws (spec 2 §1)
+
+-- 2.S21: the text of a keyword lexes as that keyword, so it is never a name.
+KeywordsLexAsKeywords (d : Derives) (g : Grammar d) (k : Keyword) : Bool :=
+  viewsOf d g (keywordText k) == just [tv "keyword" (keywordText k)]
 keywordAsName (k : Keyword) : String := match k {
   kwData -> "data : U" ; kwMatch -> "match : U" ; kwIf -> "if : U" ; kwThen -> "then : U" ;
   kwElse -> "else : U" ; kwU -> "U : U" ; kwW -> "W : U" ; kwOperator -> "operator : U" ;
-  kwQuote -> "quote : U" }
-KeywordsReserved (g : Grammar) (k : Keyword) : Bool := not (isParsed (g.parse (keywordAsName k)))
+  kwQuote -> "quote : U" ; kwImport -> "import : U" ; kwAs -> "as : U" ;
+}
+KeywordsReserved (d : Derives) (g : Grammar d) (k : Keyword) : Bool := not (isParsed (g.parse (keywordAsName k)))
 
--- spec 2.S1: a comment is not part of the program.
-CommentDropped (g : Grammar) : Bool :=
-  g.parse "x : Int   -- a comment" == g.parse "x : Int"
+-- 2.S2: `and`, `or`, `mod` are names written infix, and lex as such.
+InfixNames (d : Derives) (g : Grammar d) : Bool :=
+  viewsOf d g "and or mod" == just [tv "infix" "and", tv "infix" "or", tv "infix" "mod"]
 
--- spec 2.S3: `<-` is one token, so `a<-1` binds and `a < -1` compares.
-ArrowIsOneToken (g : Grammar) : Bool :=
-  g.parse "f := { a<-1 ; a }" == g.parse "f := { a <- 1 ; a }"
-  and g.parse "f (a : Int) : Bool := a < -1" == g.parse "f (a : Int) : Bool := a < (-1)"
+-- 2.S1, 2.S14: names, with `_` and `'`, and a dotted name as one token.
+NameTokens (d : Derives) (g : Grammar d) : Bool :=
+  viewsOf d g "x_1 a' m.f" == just [tv "name" "x_1", tv "name" "a'", tv "name" "m.f"]
 
--- spec 2.S8: precedence, from the loosest to the tightest, and associativity.
-PlusBeforeTimes (g : Grammar) : Bool :=
-  g.parse "x := a + b * c" == g.parse "x := a + (b * c)"
-ComparisonBeforeAnd (g : Grammar) : Bool :=
-  g.parse "x := a < b and c" == g.parse "x := (a < b) and c"
-AndBeforeOr (g : Grammar) : Bool :=
-  g.parse "x := a or b and c" == g.parse "x := a or (b and c)"
-OrBeforeArrow (g : Grammar) : Bool :=
-  g.parse "x := a or b -> c" == g.parse "x := (a or b) -> c"
-ArrowBeforeAmp (g : Grammar) : Bool :=
-  g.parse "x := A -> B & C" == g.parse "x := (A -> B) & C"
-ArrowAssociatesRight (g : Grammar) : Bool :=
-  g.parse "x := A -> B -> C" == g.parse "x := A -> (B -> C)"
-AmpAssociatesRight (g : Grammar) : Bool :=
-  g.parse "x := A & B & C" == g.parse "x := A & (B & C)"
-MinusAssociatesLeft (g : Grammar) : Bool :=
-  g.parse "x := a - b - c" == g.parse "x := (a - b) - c"
-ApplicationTightest (g : Grammar) : Bool :=
-  g.parse "x := f a + g b" == g.parse "x := (f a) + (g b)"
-ProjectionTightest (g : Grammar) : Bool :=
-  g.parse "x := f (p).field" == g.parse "x := f ((p).field)"
+-- 2.S1: numbers by their spelling.
+NumberTokens (d : Derives) (g : Grammar d) : Bool :=
+  viewsOf d g "42 3.5 1e3 2.0e-1" == just [tv "number" "42", tv "number" "3.5", tv "number" "1e3", tv "number" "2.0e-1"]
 
--- spec 2.S15: negation binds looser than application and needs parentheses as an argument.
-NegationLooserThanApplication (g : Grammar) : Bool :=
-  g.parse "x := -f a" == g.parse "x := -(f a)"
-  and g.parse "x := f -a" == g.parse "x := f - a"
+-- 2.S1: a string keeps its quotes in its text, and one left open does not lex.
+StringTokens (d : Derives) (g : Grammar d) : Bool :=
+  viewsOf d g "\"a b\"" == just [tv "string" "\"a b\""] and not (lexes d g "\"abc")
 
--- spec 2.S11: the dangling else belongs to the nearest if.
-DanglingElse (g : Grammar) : Bool :=
-  g.parse "x := if a then if b then p else q"
-    == g.parse "x := if a then (if b then p else q)"
+-- 2.S1: a comment is not a token.
+CommentDropped (d : Derives) (g : Grammar d) : Bool :=
+  viewsOf d g "x -- a comment" == viewsOf d g "x" and isParsed (g.parse "x : Int -- a comment")
 
--- spec 2.S10: a union as an argument needs parentheses, since `<` after a term compares.
-UnionAsArgument (g : Grammar) : Bool :=
-  g.parse "x := f (< a : A | b : B >)"
-    == parsed [define "x" [] nothing (termBody (app (name "f") (sum [("a", name "A"), ("b", name "B")]))) []]
+-- 2.S3: `<-` is one token, so `a<-1` binds and `a < -1` compares.
+ArrowIsOneToken (d : Derives) (g : Grammar d) : Bool :=
+  viewsOf d g "a<-1" == just [tv "name" "a", tv "symbol" "<-", tv "number" "1"]
+  and sameParse d g "f := { a<-1 ; a }" "f := { a <- 1 ; a }"
+  and sameParse d g "f (a : Int) : Bool := a < -1" "f (a : Int) : Bool := a < (-1)"
+
+-- ---------------------------------------------------------------- precedence (spec 2.S8, 2.S15)
+
+PlusBeforeTimes (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a + b * c" "x := a + (b * c)"
+ComparisonBeforeAnd (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a < b and c" "x := (a < b) and c"
+AndBeforeOr (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a or b and c" "x := a or (b and c)"
+OrBeforeArrow (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a or b -> c" "x := (a or b) -> c"
+ArrowBeforeAmp (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := A -> B & C" "x := (A -> B) & C"
+ArrowAssociatesRight (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := A -> B -> C" "x := A -> (B -> C)"
+AmpAssociatesRight (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := A & B & C" "x := A & (B & C)"
+MinusAssociatesLeft (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a - b - c" "x := (a - b) - c"
+DivAssociatesLeft (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a / b * c" "x := (a / b) * c"
+ComparisonAssociatesLeft (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := a < b == c" "x := (a < b) == c"
+ModWithTimes (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := a mod b" (binop modOp (nm "a") (nm "b")) and sameParse d g "x := a + b mod c" "x := a + (b mod c)"
+ApplicationTightest (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := f a + g b" "x := (f a) + (g b)"
+ProjectionTightest (d : Derives) (g : Grammar d) : Bool := sameParse d g "x := f (p).field" "x := f ((p).field)"
+NegationLooserThanApplication (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "x := -f a" "x := -(f a)" and sameParse d g "x := f -a" "x := f - a"
+  and sameParse d g "x := -a * b" "x := (-a) * b"
+
+-- 2.S11: the dangling else belongs to the nearest if.
+DanglingElse (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "x := if a then if b then p else q" "x := if a then (if b then p else q)"
+
+-- 2.S10: a sum as an argument needs parentheses, since `<` after a term compares.
+SumAsArgument (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := f (< a : A | b : B >)" (app (nm "f") (sum [("a", nm "A"), ("b", nm "B")]))
   and not (isParsed (g.parse "x := f < a : A | b : B >"))
 
--- spec 2.S4: layout. An indented line continues the act; line breaks inside brackets are
--- ignored; in a block a line break separates items and `;` is the same; a line that cannot
--- start an item continues the one above.
-IndentContinuesAct (g : Grammar) : Bool :=
-  g.parse "f (a : Int) : Int :=\n  a + 1" == g.parse "f (a : Int) : Int := a + 1"
-BracketsIgnoreBreaks (g : Grammar) : Bool :=
-  g.parse "x := f (a,\n b)" == g.parse "x := f (a, b)"
-  and g.parse "x := [a,\nb]" == g.parse "x := [a, b]"
-BreakSeparatesItems (g : Grammar) : Bool :=
-  g.parse "f := {\n  a := 1\n  b := 2\n  a + b }" == g.parse "f := { a := 1 ; b := 2 ; a + b }"
-OperatorContinuesLine (g : Grammar) : Bool :=
-  g.parse "x := a\n  + b" == g.parse "x := a + b"
-  and g.parse "x := if c\n  then a\n  else b" == g.parse "x := if c then a else b"
+-- ---------------------------------------------------------------- layout (spec 2.S4)
 
--- spec 2.S17: a brace term with a final bare term is a block, without one a record value.
-BlockOrRecord (g : Grammar) : Bool :=
-  g.parse "x := { a := 1 ; a }"
-    == parsed [define "x" [] nothing (termBody (block [bind "a" (literal (intLit 1))] (name "a"))) []]
-  and g.parse "x := { a := 1 }"
-    == parsed [define "x" [] nothing (termBody (recordValue [("a", literal (intLit 1))])) []]
+IndentContinuesAct (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "f (a : Int) : Int :=\n  a + 1" "f (a : Int) : Int := a + 1"
+BracketsIgnoreBreaks (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "x := f (a,\n  b)" "x := f (a, b)" and sameParse d g "x := [a,\n  b]" "x := [a, b]"
+  and sameParse d g "x := match m {\n  a -> b ;\n  c -> e }" "x := match m { a -> b ; c -> e }"
+BreakSeparatesItems (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "f := {\n  a := 1\n  b := 2\n  a + b\n}" "f := { a := 1 ; b := 2 ; a + b }"
+BreakSeparatesConstructors (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "C : U := data {\n  r : C\n  s : C\n}" "C : U := data { r : C ; s : C }"
+OperatorContinuesLine (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "f := {\n  a := 1\n    + 2\n  a }" "f := { a := 1 + 2 ; a }"
+  and sameParse d g "f := {\n  a := if c\n  then 1\n  else 2\n  a }" "f := { a := if c then 1 else 2 ; a }"
+BlankAndCommentLinesDropped (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "-- a header\n\nx : Int\n\n-- between\ny : Int" "x : Int\ny : Int"
+TrailingSeparators (d : Derives) (g : Grammar d) : Bool :=
+  sameParse d g "x := match m { a -> b ; }" "x := match m { a -> b }"
+  and sameParse d g "C : U := data { r : C ; }" "C : U := data { r : C }"
+  and sameParse d g "x := { a := 1, }" "x := { a := 1 }"
 
--- spec 12.S22 (D-2026-10-13-n): the import line names what enters, with its theory and alias.
-ImportNamesWhatEnters (g : Grammar) : Bool :=
+-- ---------------------------------------------------------------- the tree of each form
+
+-- 2.S5: a declaration, a definition with a default, an implicit binder, an alias with a binder.
+DeclarationTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "f (a : Int) : Int" == parsed [declare "f" [explicit ["a"] (nm "Int") nothing] (nm "Int")]
+DefaultTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "f (a b : Int) (t : Int <- 1) : Int := t"
+    == parsed [define "f" [explicit ["a", "b"] (nm "Int") nothing, explicit ["t"] (nm "Int") (just (numeral 1))]
+                 (just (nm "Int")) (termBody (nm "t")) []]
+ImplicitTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "id {A : U} (y : A) : A := y"
+    == parsed [define "id" [implicit ["A"] universe, explicit ["y"] (nm "A") nothing] (just (nm "A")) (termBody (nm "y")) []]
+AliasTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "Pair (A : U) = A * A" == parsed [alias "Pair" [explicit ["A"] universe nothing] (binop times (nm "A") (nm "A"))]
+
+-- 2.S5, 3.R3: a `data` body.
+DataTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "Color : U := data { red : Color ; green : Color }"
+    == parsed [define "Color" [] (just universe) (dataBody [("red", nm "Color"), ("green", nm "Color")]) []]
+
+-- 2.S6: an operator act.
+OperatorTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "operator + := addZ7" == parsed [operatorAct plus (nm "addZ7")]
+
+-- 12.S22 (D-2026-10-13-n, -o): the import line names what enters, with theory and alias, and
+-- names at least one thing.
+ImportTree (d : Derives) (g : Grammar d) : Bool :=
   g.parse "import \"linear_algebra.lth\" LinearAlgebra"
-    == parsed [import_ "linear_algebra.lth"
-                 [{ name := "LinearAlgebra", theory := nothing, alias := nothing }]]
-  and g.parse "import \"linear_algebra_numpy.lut\" Numpy : LinearAlgebra as LA"
-    == parsed [import_ "linear_algebra_numpy.lut"
-                 [{ name := "Numpy", theory := just (name "LinearAlgebra"), alias := just "LA" }]]
+    == parsed [importAct "linear_algebra.lth" [{ name := "LinearAlgebra", theory := nothing, asName := nothing }]]
+  and g.parse "import \"la_numpy.lut\" Numpy : LinearAlgebra as LA Helpers"
+    == parsed [importAct "la_numpy.lut"
+                 [{ name := "Numpy", theory := just "LinearAlgebra", asName := just "LA" },
+                  { name := "Helpers", theory := nothing, asName := nothing }]]
   and not (isParsed (g.parse "import \"x.lut\""))
 
--- D9 (D-2026-10-13-n): a bare term at the top level is a datum.
-TopLevelDatum (g : Grammar) : Bool :=
-  g.parse "test f (n <- 100)"
-    == parsed [datum (app (app (name "test") (name "f")) (namedArg "n" (literal (intLit 100))))]
+-- D-2026-10-13-o: a bare term is an act; 2.R5: `<-` at the top level is not.
+DatumTree (d : Derives) (g : Grammar d) : Bool :=
+  g.parse "test f" == parsed [datum (app (nm "test") (nm "f"))]
+  and not (isParsed (g.parse "x <- 1"))
 
--- spec 2.R5: `<-` at the top level is not an act.
-NoArrowAtTopLevel (g : Grammar) : Bool := not (isParsed (g.parse "x <- 1"))
+-- 2.S9: the dependent and named forms.
+PiTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a b : Int) -> Int" (pi ["a", "b"] (nm "Int") (nm "Int"))
+SigmaTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (n : Nat) * Vec n" (sigma ["n"] (nm "Nat") (app (nm "Vec") (nm "n")))
+SigmaNamedTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a : A) * (b : B)" (sigmaNamed "a" (nm "A") "b" (nm "B"))
+SumNamedTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a : A) + (b : B)" (sumNamed "a" (nm "A") "b" (nm "B"))
 
--- Errors say where. spec 2.S13: the parser reports; the checker decides.
-linesPositive (es : List ParseError) : Bool :=
-  match es { nil -> true ; cons e rest -> e.line >= 1 and linesPositive rest }
-ErrorsHaveLines (g : Grammar) (s : String) : Bool :=
-  match g.parse s { parsed p -> true ; parseFailed es -> linesPositive es }
-BrokenTextFails (g : Grammar) : Bool := not (isParsed (g.parse "x := )"))
+-- 2.S9 as settled by D-2026-10-13-o: records hold two or more names, with an optional law; one
+-- labeled field with a law is a subtype; one with no law is not a form.
+RecordTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := { a b : Int, c : Float64 }"
+    (record [{ names := ["a", "b"], type := nm "Int" }, { names := ["c"], type := nm "Float64" }] nothing)
+  and parsesX d g "x := { a : Int, b : Int | a < b }"
+    (record [{ names := ["a"], type := nm "Int" }, { names := ["b"], type := nm "Int" }] (just (binop lt (nm "a") (nm "b"))))
+SubtypeTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := { a : Int | 0 <= a }" (subtype (pvar "a") (nm "Int") (binop le (numeral 0) (nm "a")))
+  and parsesX d g "x := { a b : Int | a < b }"
+    (record [{ names := ["a", "b"], type := nm "Int" }] (just (binop lt (nm "a") (nm "b"))))
+  and not (isParsed (g.parse "x := { a : Int }"))
 
--- A grammar is a lexer, a parser and a printer that satisfy all of the above.
-Grammar := RoundTrip & Canonical & ParsesWhatDerives & KeywordsReserved & CommentDropped & ArrowIsOneToken
-  & PlusBeforeTimes & ComparisonBeforeAnd & AndBeforeOr & OrBeforeArrow & ArrowBeforeAmp
-  & ArrowAssociatesRight & AmpAssociatesRight & MinusAssociatesLeft & ApplicationTightest
-  & ProjectionTightest & NegationLooserThanApplication & DanglingElse & UnionAsArgument
-  & IndentContinuesAct & BracketsIgnoreBreaks & BreakSeparatesItems & OperatorContinuesLine
-  & BlockOrRecord & ImportNamesWhatEnters & TopLevelDatum & NoArrowAtTopLevel
-  & ErrorsHaveLines & BrokenTextFails
+-- 2.S17: a brace term with a final bare term is a block, without one a record value.
+BlockOrRecordValue (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := { a := 1 ; a }" (block [bind "a" (numeral 1)] (nm "a"))
+  and parsesX d g "x := { a := 1 }" (recordValue [("a", numeral 1)])
+  and parsesX d g "x := { a <- 1, a <- a + 1, a }" (block [rebind "a" (numeral 1), rebind "a" (binop plus (nm "a") (numeral 1))] (nm "a"))
+
+-- 2.S9: tuples, lists, lambdas, matches, named arguments, if, projection, dotted names, quote, U, W.
+TupleTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a, b, c)" (tuple [nm "a", nm "b", nm "c"])
+ListTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := [1, 2]" (list [numeral 1, numeral 2]) and parsesX d g "x := []" (list [])
+LambdaTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := \\ y (z : Int) { w := y ; z }"
+    (lambda [plainParam "y", typedParam ["z"] (nm "Int")] [bind "w" (nm "y")] (nm "z"))
+MatchTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := match m { just y -> y ; nothing -> 0 }"
+    (matchOf (nm "m") [(pApp "just" [pvar "y"], nm "y"), (pvar "nothing", numeral 0)])
+NamedArgTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := f (tol <- 1)" (app (nm "f") (namedArg "tol" (numeral 1)))
+IfTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := if c then a" (ifThen (nm "c") (nm "a") nothing)
+  and parsesX d g "x := if c then a else b" (ifThen (nm "c") (nm "a") (just (nm "b")))
+ProjectionTree (d : Derives) (g : Grammar d) : Bool :=
+  parsesX d g "x := (f y).z" (proj (app (nm "f") (nm "y")) "z") and parsesX d g "x := m.f" (nm "m.f")
+QuoteTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := quote { a + b }" (quoted (binop plus (nm "a") (nm "b")))
+UniverseAndWorld (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := U -> W" (binop arrow universe world)
+NegationTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := -1" (neg (numeral 1))
+
+BrokenTextFails (d : Derives) (g : Grammar d) : Bool := not (isParsed (g.parse "x := )"))
+
+-- A grammar is a lexer, a layout pass, a parser and a printer that satisfy all of the above.
+Grammar (d : Derives) := RoundTrip d & Canonical d & ParsedIsWritten d & ParsesWhatDerives d
+  & LayoutEndsWithNewline d & ErrorsHaveLines d
+  & KeywordsLexAsKeywords d & KeywordsReserved d & InfixNames d & NameTokens d & NumberTokens d
+  & StringTokens d & CommentDropped d & ArrowIsOneToken d
+  & PlusBeforeTimes d & ComparisonBeforeAnd d & AndBeforeOr d & OrBeforeArrow d & ArrowBeforeAmp d
+  & ArrowAssociatesRight d & AmpAssociatesRight d & MinusAssociatesLeft d & DivAssociatesLeft d
+  & ComparisonAssociatesLeft d & ModWithTimes d & ApplicationTightest d & ProjectionTightest d
+  & NegationLooserThanApplication d & DanglingElse d & SumAsArgument d
+  & IndentContinuesAct d & BracketsIgnoreBreaks d & BreakSeparatesItems d & BreakSeparatesConstructors d
+  & OperatorContinuesLine d & BlankAndCommentLinesDropped d & TrailingSeparators d
+  & DeclarationTree d & DefaultTree d & ImplicitTree d & AliasTree d & DataTree d & OperatorTree d
+  & ImportTree d & DatumTree d & PiTree d & SigmaTree d & SigmaNamedTree d & SumNamedTree d
+  & RecordTree d & SubtypeTree d & BlockOrRecordValue d & TupleTree d & ListTree d & LambdaTree d
+  & MatchTree d & NamedArgTree d & IfTree d & ProjectionTree d & QuoteTree d & UniverseAndWorld d
+  & NegationTree d & BrokenTextFails d

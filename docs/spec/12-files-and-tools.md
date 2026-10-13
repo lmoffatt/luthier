@@ -80,9 +80,9 @@ visible unqualified; a name with no import is local or core's.
 **12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
 holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in
 it, since the checker reads theory files to check and laziness rests on a theory file never
-touching the world (L2.6). It may hold the definitions its laws need to be stated and a value
-that is part of the theory (the grammar of Luthier in `grammar.lth`), never a model of a theory
-declared elsewhere (D-2026-10-13-o). A model file, `.lut`, holds models of theories, each a value or a functor
+touching the world (L2.6). It may hold the definitions its laws need to be stated, and the one value
+the theory is about (the grammar of Luthier in `grammar.lth`); a model of another theory
+belongs to a model file (D-2026-10-13-o). A model file, `.lut`, holds models of theories, each a value or a functor
 written against a theory (L6.13), with its own dependencies and its own certificate; different
 models of one theory live in different files (D-2026-10-13-i, -j). What another file imports has its
 theory in a `.lth`; what no file imports (a `main`, a local helper) may live whole in a `.lut`.

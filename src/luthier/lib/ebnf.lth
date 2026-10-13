@@ -1,19 +1,21 @@
 -- ebnf.lth: grammars in extended Backus-Naur form, as data, and the laws of what they derive.
 --
--- Draft 1, 2026-10-13, written by Claude Fable 5.1 in the session integrating the specification
--- (step 1 of record/plan-from-zero-2026-10-13-execution.md). A theory file (spec 12.S23): the
--- data, the declaration of `derives` and the laws that determine it. Draft 0 defined `derives` by
--- an implementation, against 4.R10 (a law characterizes; a second implementation is not a law);
--- that implementation is now the model in ebnf_model.lut, certified against the laws below. It is
--- generic: Luthier's own grammar (grammar.lth) is one value of `Ebnf`, and the grammars of the
--- texts Luthier reads, a `.bib` file or a CSV, are others (L14: a grammar is data).
+-- Draft 2, 2026-10-13, by Claude Opus 5.5 in the session integrating the specification, on the
+-- review of four models (record/IA/first-code-review-2026-10-13) and D-2026-10-13-o. A theory file
+-- (spec 12.S23): the data, the theory `Derives` and its laws, and the definitions the laws need.
+-- It is generic: Luthier's own grammar (grammar.lth) is one value of `Ebnf`, and the grammars of
+-- the texts Luthier reads, a `.bib` file or a CSV, are others (L14: a grammar is data).
 --
--- A grammar is a start symbol and productions over tokens. A token, as a grammar sees it, is a
--- kind (the lexer's class: "name", "number", "string", "symbol", "keyword") and a text. The
--- meaning of a grammar is `derives`: whether a token list is produced from the start symbol. Its
--- laws are those of the regular operations (Kleene): the empty string is the unit of sequence,
--- alternation is union, repetition is the least fixed point, and a nonterminal stands for the
--- union of its right-hand sides.
+-- Changes from draft 1, each a reviewers' finding: `derives` is the field of a theory and not a
+-- name defined by a conjunction of laws (4.S7 made it a type); the laws speak of a right-hand side
+-- directly, so the fresh start symbol `withStart`, which was not fresh and made the laws
+-- inconsistent, is gone; the laws quantify over well-formed grammars only, those with no left
+-- recursion and no undefined nonterminal; and repetition asks its first round to consume, so that
+-- the laws have one solution on that domain instead of a fixed-point equation with many.
+--
+-- A token, as a grammar sees it, is a kind (the lexer's class: "name", "keyword", "infix",
+-- "number", "string", "symbol", "newline") and a text. A string token's text keeps its quotes, so
+-- `lit "import"` never matches the string "import"; a newline token's text is "\n".
 
 -- ---------------------------------------------------------------- the data
 
@@ -27,26 +29,30 @@ Rhs : U := data {
   seq : List Rhs -> Rhs ;                -- one after another
   alt : List Rhs -> Rhs ;                -- one of them
   opt : Rhs -> Rhs ;                     -- [ ]
-  rep : Rhs -> Rhs }                     -- { }, zero or more
+  rep : Rhs -> Rhs ;                     -- { }, zero or more
+}
 
 Production = { lhs : String, rhs : Rhs }
 
 Ebnf = { start : String, rules : List Production }
 
--- ---------------------------------------------------------------- helpers the laws use
+-- ---------------------------------------------------------------- definitions the laws need
 
 append (A : U) (xs ys : List A) : List A :=
   match xs { nil -> ys ; cons x rest -> cons x (append A rest ys) }
+
+memberString (s : String) (xs : List String) : Bool :=
+  match xs { nil -> false ; cons x rest -> x == s or memberString s rest }
 
 -- the right-hand sides of a nonterminal, in the order written
 rulesOf (e : Ebnf) (n : String) : List Rhs := rulesIn e.rules n
 rulesIn (ps : List Production) (n : String) : List Rhs :=
   match ps { nil -> nil ; cons p rest -> if p.lhs == n then cons p.rhs (rulesIn rest n) else rulesIn rest n }
 
--- the grammar `e` with its start replaced by a fresh nonterminal whose one rule is `r`: how a
--- law speaks of what a right-hand side derives inside `e`
-withStart (e : Ebnf) (r : Rhs) : Ebnf :=
-  { start := "'start", rules := cons { lhs := "'start", rhs := r } e.rules }
+ruleCount (e : Ebnf) : Nat := countProductions e.rules
+countProductions (ps : List Production) : Nat := match ps { nil -> 0 ; cons p rest -> 1 + countProductions rest }
+
+lhsNames (ps : List Production) : List String := match ps { nil -> nil ; cons p rest -> cons p.lhs (lhsNames rest) }
 
 -- every way to split a list in two, in order: (nil, ts), ([t1], rest), ...
 splits (A : U) (ts : List A) : List (List A * List A) :=
@@ -54,69 +60,142 @@ splits (A : U) (ts : List A) : List (List A * List A) :=
 prefixed (A : U) (t : A) (ps : List (List A * List A)) : List (List A * List A) :=
   match ps { nil -> nil ; cons (xs, ys) more -> cons (cons t xs, ys) (prefixed A t more) }
 
-anySplit (e : Ebnf) (a b : Rhs) (ps : List (List TokenView * List TokenView)) : Bool :=
-  match ps { nil -> false ;
-    cons (xs, ys) more -> (derives (withStart e a) xs and derives (withStart e b) ys) or anySplit e a b more }
+isEmpty (A : U) (xs : List A) : Bool := match xs { nil -> true ; cons x rest -> false }
 
-anyRhs (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
-  match rs { nil -> false ; cons r rest -> derives (withStart e r) ts or anyRhs e rest ts }
+-- ---------------------------------------------------------------- well-formed grammars
+
+-- Whether a right-hand side can derive the empty list. A derivation of the empty list need not
+-- repeat a nonterminal along a path, so `ruleCount e` rounds of unfolding suffice.
+nullable (e : Ebnf) (r : Rhs) : Bool := nullableWithin e (ruleCount e) r
+nullableWithin (e : Ebnf) (k : Nat) (r : Rhs) : Bool := match r {
+  eps -> true ;
+  lit s -> false ;
+  cat c -> false ;
+  ref n -> if k == 0 then false else anyNullable e (k - 1) (rulesOf e n) ;
+  seq rs -> allNullable e k rs ;
+  alt rs -> anyNullable e k rs ;
+  opt a -> true ;
+  rep a -> true ;
+}
+anyNullable (e : Ebnf) (k : Nat) (rs : List Rhs) : Bool :=
+  match rs { nil -> false ; cons r rest -> nullableWithin e k r or anyNullable e k rest }
+allNullable (e : Ebnf) (k : Nat) (rs : List Rhs) : Bool :=
+  match rs { nil -> true ; cons r rest -> nullableWithin e k r and allNullable e k rest }
+
+-- The nonterminals a right-hand side can call before it consumes a token.
+leftCalls (e : Ebnf) (r : Rhs) : List String := match r {
+  eps -> nil ;
+  lit s -> nil ;
+  cat c -> nil ;
+  ref n -> [n] ;
+  seq rs -> leftCallsSeq e rs ;
+  alt rs -> leftCallsAll e rs ;
+  opt a -> leftCalls e a ;
+  rep a -> leftCalls e a ;
+}
+leftCallsSeq (e : Ebnf) (rs : List Rhs) : List String :=
+  match rs { nil -> nil ; cons r rest ->
+    if nullable e r then append String (leftCalls e r) (leftCallsSeq e rest) else leftCalls e r }
+leftCallsAll (e : Ebnf) (rs : List Rhs) : List String :=
+  match rs { nil -> nil ; cons r rest -> append String (leftCalls e r) (leftCallsAll e rest) }
+leftCallsOf (e : Ebnf) (n : String) : List String := leftCallsAll e (rulesOf e n)
+
+-- Whether `m` can reach `n` through left calls, within `k` steps; a path need not be longer than
+-- the number of productions.
+reachesLeft (e : Ebnf) (k : Nat) (from to : String) : Bool :=
+  if k == 0 then false else anyReaches e (k - 1) (leftCallsOf e from) to
+anyReaches (e : Ebnf) (k : Nat) (ns : List String) (to : String) : Bool :=
+  match ns { nil -> false ; cons n rest -> n == to or reachesLeft e k n to or anyReaches e k rest to }
+
+noneLeftRecursive (e : Ebnf) (ns : List String) : Bool :=
+  match ns { nil -> true ; cons n rest -> not (reachesLeft e (ruleCount e) n n) and noneLeftRecursive e rest }
+
+-- Every nonterminal a rule mentions has a rule of its own, and so has the start.
+refsOf (r : Rhs) : List String := match r {
+  eps -> nil ; lit s -> nil ; cat c -> nil ; ref n -> [n] ;
+  seq rs -> refsAll rs ; alt rs -> refsAll rs ; opt a -> refsOf a ; rep a -> refsOf a ;
+}
+refsAll (rs : List Rhs) : List String := match rs { nil -> nil ; cons r rest -> append String (refsOf r) (refsAll rest) }
+allDefined (names defined : List String) : Bool :=
+  match names { nil -> true ; cons n rest -> memberString n defined and allDefined rest defined }
+refsDefined (e : Ebnf) : Bool :=
+  memberString e.start (lhsNames e.rules) and allDefined (refsAll (rhsOf e.rules)) (lhsNames e.rules)
+rhsOf (ps : List Production) : List Rhs := match ps { nil -> nil ; cons p rest -> cons p.rhs (rhsOf rest) }
+
+-- The domain of the laws and of a model's certificate (L10.1): the grammars whose meaning the
+-- laws determine and a recognizer can compute.
+WellFormedEbnf : U := { e : Ebnf | refsDefined e and noneLeftRecursive e (lhsNames e.rules) }
 
 -- ---------------------------------------------------------------- the theory
 
--- The meaning of a grammar: declared here, determined by the laws below, given by a model.
-derives : Ebnf -> List TokenView -> Bool
+-- A model of the meaning of grammars: whether a right-hand side derives a token list, inside a
+-- grammar that gives its nonterminals.
+Derives : { derivesRhs : Ebnf -> Rhs -> List TokenView -> Bool }
+
+-- what a grammar derives: the token list is produced from its start symbol
+derives (d : Derives) (e : Ebnf) (ts : List TokenView) : Bool := d.derivesRhs e (ref e.start) ts
+
+anyRhs (d : Derives) (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
+  match rs { nil -> false ; cons r rest -> d.derivesRhs e r ts or anyRhs d e rest ts }
+
+-- some split of `ts` gives its first part to `a` and its second to `b`; with `nonEmptyFirst`,
+-- the first part must not be empty
+anySplit (d : Derives) (e : Ebnf) (nonEmptyFirst : Bool) (a b : Rhs)
+         (ps : List (List TokenView * List TokenView)) : Bool :=
+  match ps { nil -> false ; cons (xs, ys) more ->
+    (not (nonEmptyFirst and isEmpty TokenView xs) and d.derivesRhs e a xs and d.derivesRhs e b ys)
+    or anySplit d e nonEmptyFirst a b more }
 
 -- the empty string derives exactly the empty list: the unit of sequence
-EpsEmpty (e : Ebnf) (ts : List TokenView) : Bool :=
-  derives (withStart e eps) ts == (ts == nil)
+EpsEmpty (d : Derives) (e : WellFormedEbnf) (ts : List TokenView) : Bool :=
+  d.derivesRhs e eps ts == isEmpty TokenView ts
 
 -- a literal derives exactly the one token with that text
-LitOne (e : Ebnf) (s : String) (ts : List TokenView) : Bool :=
-  derives (withStart e (lit s)) ts == match ts { cons t nil -> t.text == s ; _ -> false }
+LitOne (d : Derives) (e : WellFormedEbnf) (s : String) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (lit s) ts == match ts { cons t rest -> isEmpty TokenView rest and t.text == s ; nil -> false }
 
 -- a category derives exactly the one token of that kind
-CatOne (e : Ebnf) (k : String) (ts : List TokenView) : Bool :=
-  derives (withStart e (cat k)) ts == match ts { cons t nil -> t.kind == k ; _ -> false }
+CatOne (d : Derives) (e : WellFormedEbnf) (k : String) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (cat k) ts == match ts { cons t rest -> isEmpty TokenView rest and t.kind == k ; nil -> false }
 
 -- a nonterminal derives what any of its right-hand sides derives
-RefUnion (e : Ebnf) (n : String) (ts : List TokenView) : Bool :=
-  derives (withStart e (ref n)) ts == anyRhs e (rulesOf e n) ts
+RefUnion (d : Derives) (e : WellFormedEbnf) (n : String) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (ref n) ts == anyRhs d e (rulesOf e n) ts
 
--- the start symbol is a nonterminal like any other
-StartIsRef (e : Ebnf) (ts : List TokenView) : Bool :=
-  derives e ts == derives (withStart e (ref e.start)) ts
-
--- an empty sequence is the empty string; a sequence splits the list between its head and its tail
-SeqEmpty (e : Ebnf) (ts : List TokenView) : Bool :=
-  derives (withStart e (seq nil)) ts == derives (withStart e eps) ts
-SeqSplits (e : Ebnf) (a : Rhs) (rs : List Rhs) (ts : List TokenView) : Bool :=
-  derives (withStart e (seq (cons a rs))) ts == anySplit e a (seq rs) (splits TokenView ts)
+-- an empty sequence is the empty string; a longer one splits the list between head and tail
+SeqEmpty (d : Derives) (e : WellFormedEbnf) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (seq nil) ts == isEmpty TokenView ts
+SeqSplits (d : Derives) (e : WellFormedEbnf) (a : Rhs) (rs : List Rhs) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (seq (cons a rs)) ts == anySplit d e false a (seq rs) (splits TokenView ts)
 
 -- alternation is union
-AltUnion (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
-  derives (withStart e (alt rs)) ts == anyRhs e rs ts
+AltUnion (d : Derives) (e : WellFormedEbnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (alt rs) ts == anyRhs d e rs ts
 
--- optional is the empty string or the thing
-OptIsAlt (e : Ebnf) (a : Rhs) (ts : List TokenView) : Bool :=
-  derives (withStart e (opt a)) ts == derives (withStart e (alt [eps, a])) ts
+-- optional is the empty list or the thing
+OptEmptyOrOne (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (opt a) ts == (isEmpty TokenView ts or d.derivesRhs e a ts)
 
--- repetition unfolds: nothing, or the thing and then the repetition again
-RepUnfolds (e : Ebnf) (a : Rhs) (ts : List TokenView) : Bool :=
-  derives (withStart e (rep a)) ts == derives (withStart e (alt [eps, seq [a, rep a]])) ts
+-- repetition is the empty list, or a round that consumes something followed by the repetition
+-- again. Asking the round to consume is what makes the law determine `rep`: the rest is shorter.
+RepRounds (d : Derives) (e : WellFormedEbnf) (a : Rhs) (ts : List TokenView) : Bool :=
+  d.derivesRhs e (rep a) ts == (isEmpty TokenView ts or anySplit d e true a (rep a) (splits TokenView ts))
 
--- A model of `derives` satisfies all of them. The laws quantify over grammars, right-hand sides
--- and token lists; their generators (spec 7) draw small ones. `RepUnfolds` makes `derives` the
--- least fixed point only together with termination, which no sample sees: a model that diverges
--- on a left-recursive grammar does not fail these laws, it fails to answer (3.S11, fuel).
-derives := EpsEmpty & LitOne & CatOne & RefUnion & StartIsRef & SeqEmpty & SeqSplits
-  & AltUnion & OptIsAlt & RepUnfolds
+-- On a well-formed grammar the laws have one solution: each one gives `derivesRhs e r ts` from
+-- the values at a shorter list, or at the same list and a right-hand side reached without
+-- consuming, which no left recursion makes a well-founded order. So any two models of `Derives`
+-- agree on well-formed grammars, and the backtracking recognizer of ebnf_model.lut is one of them.
+-- The argument is the model's, written here for a later proof or citation; it is not checked.
+-- An alternative statement, by finite derivations as witnesses (`derives` as an `exists` over
+-- them, L9.11), would make the uniqueness definitional; it waits for a case that needs it.
+Derives := EpsEmpty & LitOne & CatOne & RefUnion & SeqEmpty & SeqSplits & AltUnion
+  & OptEmptyOrOne & RepRounds
 
 -- ---------------------------------------------------------------- the theory of a recognizer
 
--- A recognizer for a grammar: a function on token lists whose one law is that it accepts exactly
--- what the grammar derives. A parser that builds a tree is a recognizer with a result
--- (grammar.lth) and inherits this law through `isParsed`.
-Recognizer (e : Ebnf) : { accepts : List TokenView -> Bool }
-AcceptsWhatDerives (e : Ebnf) (r : Recognizer e) (ts : List TokenView) : Bool :=
-  r.accepts ts == derives e ts
-Recognizer := AcceptsWhatDerives
+-- A recognizer for a grammar accepts exactly what the grammar derives. It is parameterized by
+-- the model of `Derives` it is held to; on a well-formed grammar every model gives the same.
+Recognizer (d : Derives) (e : WellFormedEbnf) : { accepts : List TokenView -> Bool }
+AcceptsWhatDerives (d : Derives) (e : WellFormedEbnf) (r : Recognizer d e) (ts : List TokenView) : Bool :=
+  r.accepts ts == derives d e ts
+Recognizer (d : Derives) (e : WellFormedEbnf) := AcceptsWhatDerives d e

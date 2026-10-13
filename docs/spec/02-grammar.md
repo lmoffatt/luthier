@@ -149,7 +149,8 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 `-f x` is `-(f x)` and `f -x` is `f - x` (2.S15). A single labeled field with a law,
 `{ x : T | p }`, is the subtype with the pattern `x`; the labeled forms take two or more names,
 `{ x : A, y : B }` or `{ x y : A }`, with an optional law; so each text has one tree. A field may
-carry several names, `{ x y : A, z : B }`, and `"eval" term term` joins `quote` (2.S20).
+carry several names, `{ x y : A, z : B }`. `quote` is a keyword (2.S21) and `eval` a name of core, so
+`eval A t` is an application (2.S20).
 
 **2.S10. Patterns.** [implemented] A pattern `name` is a constructor of the scrutinee's data type
 or a label of its sum if it names one, and a variable otherwise. A label of a sum is an injection:
