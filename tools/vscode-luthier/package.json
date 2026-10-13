@@ -1,0 +1,17 @@
+{
+  "name": "vscode-luthier",
+  "displayName": "Luthier",
+  "description": "Luthier syntax colours and parse diagnostics.",
+  "version": "0.0.1",
+  "engines": {"vscode": "^1.75.0"},
+  "main": "./src/extension.js",
+  "activationEvents": ["onLanguage:luthier"],
+  "contributes": {
+    "languages": [{"id": "luthier", "aliases": ["Luthier"], "extensions": [".lth", ".lut"], "configuration": "./language-configuration.json"}],
+    "grammars": [{"language": "luthier", "scopeName": "source.luthier", "path": "./syntaxes/luthier.tmLanguage.json"}],
+    "configuration": {
+      "title": "Luthier",
+      "properties": {"luthier.pythonPath": {"type": "string", "default": "python3", "description": "Path to the Python interpreter used for parse diagnostics."}}
+    }
+  }
+}
