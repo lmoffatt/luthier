@@ -71,6 +71,11 @@ by Luciano.
   laws of `Elaboration` (acts, terms without types, by type with 4.R13, by context with 4.S23,
   blocks, shapes, clauses); `program.lth` imports it. Surface's `sumNamed` dropped from
   `program.lth` after D-2026-10-13-w. Next: 3.2 to 3.4, then the external review of layers 0-1.
+- 2026-10-13: step 3.3 done: `checks.lth` (`Failures E`, `Reason`, the projections tied to the
+  failures, `both` and `either`) and `checks_model.lut`. Agreed with the coordinating session: the
+  external review of what exists (kernel_laws, term, translation, program, with their models) in
+  two prompts, A (kernel) and B (checker), under record/IA/layers-0-1-review-2026-10-13/, frozen
+  after the parser update and kernel.py land. Next: 3.2 (`laws.lth`) and 3.4 (`library.lth`).
 
 - 2026-10-13: step 4.2 brought forward, by Codex (55708f2): the 48 programs of `tests/spec/` in
   the new syntax, 47 parse, `r12_toplevel_arrow` is a syntax rejection by design (a runner must
