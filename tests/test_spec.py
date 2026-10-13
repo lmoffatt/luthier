@@ -99,6 +99,7 @@ EXPECTED_RULE = {
     'n4_axiom_outside_lib.reject.lut': '11.R3',
     'r12_named_unknown.reject.lut': '2.R1',
     'r12_rebind_defined.reject.lut': '4.R12',
+    'r12_pattern_rebind.reject.lut': '4.R12',
     'r12_unused_rebinding.reject.lut': '2.R6',
     'r12_toplevel_arrow.reject.lut': 'syntax',
     'r13_two_models.reject.lut': '4.R13',

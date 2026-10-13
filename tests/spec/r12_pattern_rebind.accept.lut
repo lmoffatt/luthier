@@ -1,0 +1,9 @@
+-- spec 2.R4, spec 2.R6, spec 4.R12: the left of <- is a pattern (D-2026-10-13-ag); it binds every name the pattern binds, may rebind a parameter of the enclosing definition and bind a new name, and each binding is used before the next rebinding.
+-- New program, not migrated from v0.1: written for check.py bite 4 (record/IA/check-2026-10-13/prompt-4.md).
+
+split (a : Int) : Int * Int := (a + 1, a * 2)
+
+step (a : Int) : Int := {
+  (a, b) <- split a
+  (a, c) <- split (a + b)
+  a + c }

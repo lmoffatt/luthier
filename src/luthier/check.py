@@ -75,6 +75,11 @@ def pattern_binds(q, k):
     return set()
 
 
+def item_binds(it, k):
+    """The names a block item binds: `x := v` binds x, `q <- v` what its pattern binds (itemsNames)."""
+    return {it.name} if isinstance(it, s.Bind) else pattern_binds(it.pattern, k)
+
+
 def param_binds(ps, k):
     result = set()
     for q in ps:
@@ -106,7 +111,7 @@ def names(x, k=frozenset()):
                 if isinstance(q, s.TypedParam): result |= remove_bound(names(q.type, k), bound)
                 bound |= param_binds((q,), k)
         for it in x.items:
-            result |= remove_bound(names(it.value, k), bound); bound.add(it.name)
+            result |= remove_bound(names(it.value, k), bound); bound |= item_binds(it, k)
         return result | remove_bound(names(x.value if isinstance(x, s.Block) else x.body, k), bound)
     if isinstance(x, s.MatchOf):
         return names(x.value, k) | set().union(*(remove_bound(names(b, k), pattern_binds(q, k)) for q, b in x.arms))
@@ -253,7 +258,7 @@ def block_fault(u, defined):
     if isinstance(u, (s.Block, s.Lambda)):
         defined = set(defined)
         for it in u.items:
-            if it.name in defined or block_fault(it.value, defined): return True
+            if item_binds(it, frozenset()) & defined or block_fault(it.value, defined): return True
             if isinstance(it, s.Bind): defined.add(it.name)
         return block_fault(u.value if isinstance(u, s.Block) else u.body, defined)
     if isinstance(u, (s.Record, s.Subtype, s.Sum, s.Pi, s.Sigma, s.SigmaNamed)): return False
@@ -410,8 +415,22 @@ def violatesR8(p, n):
     return any(isinstance(f, t.App) and f.function == t.Var('==') and contains_arrow(q, q.typeOf(f.argument, c), len(q.program)) for c, f, _ in q.applications(q.body(n)))
 
 
+# Spec 11.R1: core's `Nat` is `{ k : Int | 0 <= k }` and `Fin n` is `{ k : Int | 0 <= k and k < n }`.
+# Core is not in the elaborated program, so `base` reads these two subtypes of `Int` from here.
+CORE_SUBTYPE_BASES = {'Nat': t.Var('Int'), 'Fin': t.Var('Int')}
+
+
+def core_subtype_base(q, u):
+    """The base of a core subtype (11.R1) the program does not define itself, or None."""
+    h = u
+    while isinstance(h, t.App): h = h.function
+    if not isinstance(h, t.Var) or h.name not in CORE_SUBTYPE_BASES or q.body(h.name) is not None: return None
+    return CORE_SUBTYPE_BASES[h.name] if (h.name == 'Fin') == isinstance(u, t.App) else None
+
+
 def base(q, u, fuel=None):
-    """Look through literal subtypes, names defined directly as subtypes, and theory heads.
+    """Look through literal subtypes, names defined as subtypes (applied, when they take parameters),
+    core's subtypes, and theory heads.
 
     A theory head `T : { ... }` defined by laws is its record refined by them (4.R6: the body is a
     predicate over the record), and elaborate.theory_domains already reads a domain `T` (or `T a
@@ -423,6 +442,17 @@ def base(q, u, fuel=None):
     if isinstance(u, t.Var) and fuel:
         body = q.body(u.name)
         if isinstance(body, t.Subtype): return base(q, body.type, fuel - 1)
+    if isinstance(u, t.App) and fuel:
+        # a name defined as a subtype with parameters, applied (`LexedText d g`, grammar.lth): its
+        # body under the parameters is a subtype, looked through as the bare name is
+        h = u
+        while isinstance(h, t.App): h = h.function
+        body = q.body(h.name) if isinstance(h, t.Var) else None
+        while isinstance(body, t.Lam): body = body.body
+        if isinstance(body, t.Subtype):
+            unfolded = reduce(q.program, len(q.program) + 1, u)
+            if isinstance(unfolded, t.Subtype): return base(q, unfolded.type, fuel - 1)
+    if isinstance(u, (t.Var, t.App)) and core_subtype_base(q, u) is not None: return core_subtype_base(q, u)
     if isinstance(u, (t.Var, t.App)):
         record = q.theory_record(u)
         if record is not None: return record
@@ -514,8 +544,8 @@ def violatesR2R6(p, n):
             for it in u.items:
                 pending -= names(it.value)
                 if isinstance(it, s.Rebind):
-                    if it.name in pending: return True
-                    pending.add(it.name)
+                    if pattern_binds(it.pattern, frozenset()) & pending: return True
+                    pending |= pattern_binds(it.pattern, frozenset())
     return False
 
 

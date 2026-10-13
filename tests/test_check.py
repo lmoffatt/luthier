@@ -277,3 +277,41 @@ def test_R9_arrow_over_an_imported_name_is_an_arrow():
     assert c.arrows(implies) == t.Pi('_', t.Var('P'), t.Var('Bool'))
     law = t.Subtype('x', t.Var('Int'), implies)
     assert c.arrows(law) == law
+
+
+def test_rebind_binds_its_pattern_names():
+    # program.lth (87d6091): itemsNames, 4.R12 itemsFault and 2.R6 unusedRebinding read `q <- v`
+    # with `q` a pattern, over every name it binds (D-2026-10-13-ag)
+    ok = 'f (w : World) : World := { (w, x) <- readFile w "f" ; print w x }'
+    p = program(ok)
+    assert not c.violatesR12(p, 'f') and not c.violatesR2R6(p, 'f')
+    assert c.dependencies(p, p[0], True) == {'readFile', 'print'}
+    # itemsNames: the names the pattern binds are bound in what follows, not before
+    block = program('g := { (w, x) <- h x ; x }')[0].body.term
+    assert c.names(block) == {'h', 'x'}
+    # 4.R12: `<-` may not rebind a name bound with `:=` in scope, here `x`
+    assert c.violatesR12(program('f (w : World) : World := { x := 1 ; (w, x) <- readFile w "f" ; print w x }'), 'f')
+    # 2.R6: `x` bound by the first `<-` is rebound before it is used
+    assert c.violatesR2R6(program('f (w : World) : World := { (w, x) <- readFile w "f" ; (w, x) <- readFile w "g" ; print w x }'), 'f')
+    assert not c.violatesR2R6(program('f (w : World) : World := { (w, x) <- readFile w "f" ; (w, y) <- readFile w x ; print w y }'), 'f')
+
+
+def test_R9_core_Nat_and_Fin_are_subtypes_of_Int():
+    # term_model.lut, canonicalTerm: `canonTerm ... nil 0` was refused, the literal's `Int` against
+    # `Nat`; spec 11.R1 makes `Nat` and `Fin n` subtypes of `Int`, so their base is `Int` and the
+    # refinement is an obligation (4.R9, program.lth's `base`), not a failure
+    assert not c.violatesR9(program('f (n : Nat) : Int := 1\ng : Int := f 0'), 'g')
+    assert not c.violatesR9(program('h (i : Fin 3) : Int := 1\ng : Int := h 0'), 'g')
+    assert not c.violatesR9(program('f (x : Int) : Int := x\ng (m : Nat) : Int := f m'), 'g')
+    assert c.violatesR9(program('f (n : Nat) : Int := 1\ng : Int := f "a"'), 'g')
+    assert c.violatesR9(program('f (x : String) : Int := 1\ng (m : Nat) : Int := f m'), 'g')
+
+
+def test_R9_applied_subtype_definition_is_looked_through():
+    # grammar.lth, LexesWhatDerives: `tokenize d s` with `s : LexedText d g` was refused, since
+    # `base` looked through a name defined as a subtype only when bare; `LexedText d g` is
+    # `{ s : String | lexes d g s }`, whose base is `String`
+    head = 'Pos (k : Int) : U := { s : String | s == s }\nf (x : String) : Int := 1\nh (k : Int) (y : Pos k) : Int := k\n'
+    assert not c.violatesR9(program(head + 'g (k : Int) (y : Pos k) : Int := f y'), 'g')
+    assert c.violatesR9(program(head + 'g (k : Int) (y : Pos k) : Int := h y k'), 'g')
+    assert not c.violatesR9(program(head + 'g (k : Int) (y : String) : Int := h k y'), 'g')

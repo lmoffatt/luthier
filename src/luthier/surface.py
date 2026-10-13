@@ -87,16 +87,6 @@ class Rebind:
     pattern: SurfacePattern
     value: Surface
 
-    @property
-    def name(self) -> str:
-        """The bound name of a bare-name rebind, for readers written before D-2026-10-13-ag.
-
-        Not part of grammar.lth's `Item`; it goes once elaborate.py and check.py read `pattern`.
-        """
-        if isinstance(self.pattern, PApp) and not self.pattern.patterns:
-            return self.pattern.name
-        raise ValueError(f"Rebind.name: the pattern {self.pattern!r} is not a bare name; read .pattern")
-
 
 Item: TypeAlias = Bind | Rebind
 

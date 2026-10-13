@@ -1,0 +1,10 @@
+-- spec 2.R4, spec 4.R12: a name bound with := cannot be rebound with <-, also when <- binds it through a pattern (D-2026-10-13-ag).
+-- expect (v0.1): cannot be rebound
+-- New program, not migrated from v0.1: written for check.py bite 4 (record/IA/check-2026-10-13/prompt-4.md).
+
+split (a : Int) : Int * Int := (a + 1, a * 2)
+
+step (a : Int) : Int := {
+  b := a
+  (a, b) <- split a
+  a + b }
