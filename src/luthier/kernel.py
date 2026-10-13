@@ -8,12 +8,14 @@ Reduction uses an explicit generator stack for each weak-head step; externs
 remain values. This module neither translates surface trees nor calls the host.
 """
 
+# Update: fe3bdab, user request v4; audit codex-4.md.
+
 from __future__ import annotations
 
 from collections.abc import Generator
 
 from .term import (
-    App, Axiom, Data, Datum, Declare, Define, Extern, Hole, Inj, IntConst, Lam,
+    App, Axiom, Data, Datum, Declare, Define, Extern, Hole, Inj, IntConst, Lam, Let,
     Lit, FloatConst, StringConst, Match, Pair, Pattern, PCon, PInj, PLit, PPair, Primitive, Program, PVar,
     PWild, Pi, Proj, Record, RecordValue, Sigma, Subtype, Sum, Term, Universe, Var, World,
 )
@@ -64,6 +66,8 @@ def free_names(t: Term) -> frozenset[str]:
             pending.extend(((a, bound), (b, bound | {x})))
             continue
         match node:
+            case Let(x, a, v, b):
+                pending.extend(((a, bound), (v, bound), (b, bound | {x})))
             case Var(x):
                 if x not in bound:
                     names.add(x)
@@ -85,6 +89,11 @@ def free_names(t: Term) -> frozenset[str]:
     return frozenset(names)
 
 
+def head(t: Term) -> str:
+    """Constructor name, as in term.lth head (including Let)."""
+    return type(t).__name__
+
+
 def _all_names(t: Term) -> set[str]:
     names: set[str] = set()
     pending = [t]
@@ -96,6 +105,9 @@ def _all_names(t: Term) -> set[str]:
             pending.extend((a, b))
             continue
         match node:
+            case Let(x, a, v, b):
+                names.add(x)
+                pending.extend((a, v, b))
             case Var(x):
                 names.add(x)
             case App(a, b) | Pair(a, b):
@@ -173,6 +185,8 @@ def alpha_equal(a: Term, b: Term) -> bool:
             pending.extend(((a1, a2, env), (b1, b2, ((x, y),) + env)))
             continue
         match s, t:
+            case Let(x, a, v, b), Let(y, c, w, d):
+                pending.extend(((a, c, env), (v, w, env), (b, d, ((x, y),) + env)))
             case Var(x), Var(y):
                 if not _name_equal(env, x, y):
                     return False
@@ -248,6 +262,11 @@ def swap(x: str, y: str, t: Term) -> Term:
             right = yield walk(b)
             return type(node)(name(n), left, right)
         match node:
+            case Let(n, a, v, b):
+                annotation = yield walk(a)
+                value = yield walk(v)
+                body = yield walk(b)
+                return Let(name(n), annotation, value, body)
             case Var(n):
                 return Var(name(n))
             case App(a, b) | Pair(a, b):
@@ -304,6 +323,16 @@ def _substitute(x: str, s: Term, t: Term):
         a = yield _substitute(x, s, a)
         return type(t)(y, a, b)
     match t:
+        case Let(y, a, v, b):
+            if x != y and x in free_names(b):
+                if y in free_names(s):
+                    z = _fresh_name(y, {x} | _all_names(s) | _all_names(b))
+                    b = swap(y, z, b)
+                    y = z
+                b = yield _substitute(x, s, b)
+            a = yield _substitute(x, s, a)
+            v = yield _substitute(x, s, v)
+            return Let(y, a, v, b)
         case Var(y):
             return s if x == y else t
         case App(a, b) | Pair(a, b):
@@ -388,6 +417,12 @@ def canonical(t: Term) -> Term:
             right = yield walk(b, ((x, y),) + env)
             return type(node)(y, left, right)
         match node:
+            case Let(x, a, v, b):
+                y = binder()
+                annotation = yield walk(a, env)
+                value = yield walk(v, env)
+                body = yield walk(b, ((x, y),) + env)
+                return Let(y, annotation, value, body)
             case Var(x):
                 return Var(resolve(env, x))
             case App(a, b) | Pair(a, b):
@@ -558,6 +593,8 @@ def _consistent(bs: Bindings) -> bool:
 
 def _step(env: dict[str, Term | None], t: Term) -> _Work:
     match t:
+        case Let(x, _, v, b):
+            return True, substitute(x, v, b)
         case Var(x):
             body = env.get(x)
             return (False, t) if body is None else (True, body)

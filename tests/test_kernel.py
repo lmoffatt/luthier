@@ -8,6 +8,7 @@ Leaf constructors cost zero; each recursive constructor costs one, and size-1
 is split among its children (matching the prompt's size-zero convention).
 Update prompt: user request v2, recorded in codex-2.md.
 Update prompt: user request v3; source commits cc2542d and 2409c59, codex-3.md.
+Update: fe3bdab, user request v4; generator v3 adds Let; same seed and budgets.
 Tests are finite law evidence, not a universal semantic certificate.
 """
 
@@ -18,11 +19,11 @@ import random
 import pytest
 
 from luthier.kernel import (
-    alpha_equal, canonical, free_names, pattern_names, step, reduce, substitute, swap, unqualify,
+    alpha_equal, canonical, free_names, head, pattern_names, step, reduce, substitute, swap, unqualify,
 )
 from luthier.term import (
     Act, App, Axiom, Constant, Data, Datum, Declare, Define, Extern, FloatConst,
-    Hole, Inj, IntConst, Lam, Lit, Match, Pair, Pattern, PCon, PInj, PLit,
+    Hole, Inj, IntConst, Lam, Let, Lit, Match, Pair, Pattern, PCon, PInj, PLit,
     PPair, Primitive, Program, PVar, PWild, Pi, Sigma, StringConst, Subtype,
     Sum, Proj, Record, RecordValue, Term, Universe, Var, World,
 )
@@ -75,7 +76,7 @@ def pattern(rng: random.Random, size: int) -> Pattern:
 def term(rng: random.Random, size: int) -> Term:
     """At zero only non-recursive Term constructors; otherwise split size-1."""
     leaves = (Var, Lit, Universe, World, Extern, Primitive, Axiom, Hole)
-    cls = rng.choice(leaves if size == 0 else leaves + BINDERS + (App, Pair, Match, Inj, Sum, Data, Record, RecordValue, Proj))
+    cls = rng.choice(leaves if size == 0 else leaves + BINDERS + (App, Pair, Match, Inj, Sum, Data, Record, RecordValue, Proj, Let))
     if cls in (Universe, World, Axiom):
         return cls()
     if cls in (Var, Hole, Extern, Primitive):
@@ -86,6 +87,9 @@ def term(rng: random.Random, size: int) -> Term:
         a, b = split_size(rng, size - 1, 2)
         args = (term(rng, a), term(rng, b))
         return cls(rng.choice(NAMES), *args) if cls in BINDERS else cls(*args)
+    if cls is Let:
+        budgets = split_size(rng, size - 1, 3)
+        return Let(rng.choice(NAMES), *(term(rng, b) for b in budgets))
     if cls is Proj:
         return Proj(term(rng, size - 1), rng.choice(LABELS))
     if cls is Inj:
@@ -119,6 +123,8 @@ def corpus() -> tuple[Term, ...]:
         *(Var(x) for x in NAMES), Lit(IntConst(-2)), Lit(FloatConst(1.25)), Lit(StringConst("中文")),
         ty, World(), Extern("host.fn"), Primitive("+"), Axiom(), Hole("m.h"),
         Lam("x", Var("x"), Lam("x", Var("x"), Var("x"))),
+        Let("x", Var("x"), Var("x"), Pair(Var("x"), Var("y"))),
+        Let("y", ty, Var("x"), Let("y", Var("y"), Var("y"), Var("y"))),
         Pi("x", ty, Var("x")), Sigma("x", ty, Var("x")), Subtype("x", ty, Var("x")),
         Lam("a", ty, Pair(Var("a"), Var("x0"))), Lam("a", ty, Var("m.x0")),
         App(Lam("x", ty, Var("x")), Lit(IntConst(3))), Pair(Var("x"), Var("y")),
@@ -175,6 +181,9 @@ def alpha_variant(t: Term) -> Term:
             y = fresh()
             return type(node)(y, walk(a, env), walk(b, env | {x: y}))
         match node:
+            case Let(x, a, v, b):
+                y = fresh()
+                return Let(y, walk(a, env), walk(v, env), walk(b, env | {x: y}))
             case Var(x):
                 return Var(env.get(x, x))
             case App(a, b) | Pair(a, b):
@@ -258,6 +267,9 @@ def test_rename_bound(samples, rng):
         for cls in BINDERS:
             if not alpha_equal(cls(x, ty, b), cls(y, ty, swap(x, y, b))):
                 failures.append((cls, x, b))
+        value = term(rng, 3)
+        if not alpha_equal(Let(x, ty, value, b), Let(y, ty, value, swap(x, y, b))):
+            failures.append((Let, x, b))
         scrutinee = term(rng, 3)
         if not alpha_equal(Match(scrutinee, ((PVar(x), b),)), Match(scrutinee, ((PVar(y), swap(x, y, b)),))):
             failures.append((Match, x, b))
@@ -271,7 +283,8 @@ def test_alpha_keeps_head(samples):
     for t in samples:
         u = alpha_variant(t)
         assert alpha_equal(t, u)
-        assert type(t) is type(u)
+        assert head(t) == head(u)
+    assert head(Let("x", Universe(), Var("v"), Var("x"))) == "Let"
 
 
 def test_alpha_keeps_free(samples):
@@ -289,6 +302,7 @@ def test_alpha_congruent(samples, rng):
             assert alpha_equal(cls(t, s), cls(u, v))
         for cls in BINDERS:
             assert alpha_equal(cls("x", t, s), cls("x", u, v))
+        assert alpha_equal(Let("x", t, t, s), Let("x", u, u, v))
         assert alpha_equal(Inj("l", t), Inj("l", u))
         assert alpha_equal(Proj(t, "l"), Proj(u, "l"))
         for cls in (Sum, Record, RecordValue):
@@ -305,6 +319,8 @@ def parts_agree(eq, s, t):
         y, e, c = binder_parts(t)
         return eq(d, e) and ((x == y and eq(b, c)) or (x not in free_names(c) and eq(b, c if x == y else swap(y, x, c))))
     match s, t:
+        case Let(x, d, v, b), Let(y, e, w, c):
+            return eq(d, e) and eq(v, w) and ((x == y and eq(b, c)) or (x not in free_names(c) and eq(b, c if x == y else swap(y, x, c))))
         case (App(f, x), App(g, y)) | (Pair(f, x), Pair(g, y)):
             return eq(f, g) and eq(x, y)
         case (Inj(l, u), Inj(k, v)) | (Proj(u, l), Proj(v, k)):
@@ -397,12 +413,19 @@ def test_subst_goes_inside(samples, rng):
         for cls in (App, Pair):
             assert alpha_equal(substitute(x, s, cls(f, b)), cls(substitute(x, s, f), substitute(x, s, b)))
         assert alpha_equal(substitute(x, s, Inj(l, f)), Inj(l, substitute(x, s, f)))
+        assert alpha_equal(substitute(x, s, Proj(f, l)), Proj(substitute(x, s, f), l))
+        for cls in (Sum, Record, RecordValue):
+            assert alpha_equal(substitute(x, s, cls(((l, f),))), cls(((l, substitute(x, s, f)),)))
+        assert alpha_equal(substitute(x, s, Match(f, ((PWild(), b),))), Match(substitute(x, s, f), ((PWild(), substitute(x, s, b)),)))
 
 
 def test_subst_stops_at_shadow(samples, rng):
     for b in samples:
         x, s, ty = rng.choice(NAMES), term(rng, SIZE), term(rng, SIZE)
-        assert alpha_equal(substitute(x, s, Lam(x, ty, b)), Lam(x, substitute(x, s, ty), b))
+        for cls in BINDERS:
+            assert alpha_equal(substitute(x, s, cls(x, ty, b)), cls(x, substitute(x, s, ty), b))
+        assert alpha_equal(substitute(x, s, Let(x, ty, s, b)), Let(x, substitute(x, s, ty), substitute(x, s, s), b))
+        assert alpha_equal(substitute(x, s, Match(ty, ((PVar(x), b),))), Match(substitute(x, s, ty), ((PVar(x), b),)))
     assert substitute("x", Var("y"), Lam("x", Var("x"), Var("x"))) == Lam("x", Var("y"), Var("x"))
 
 
@@ -410,7 +433,33 @@ def test_subst_passes_binder(samples, rng):
     for s in samples:
         y, x = fresh_for(s), rng.choice(NAMES)
         ty, b = term(rng, SIZE), term(rng, SIZE)
-        assert x == y or alpha_equal(substitute(x, s, Lam(y, ty, b)), Lam(y, substitute(x, s, ty), substitute(x, s, b)))
+        for cls in BINDERS:
+            assert x == y or alpha_equal(substitute(x, s, cls(y, ty, b)), cls(y, substitute(x, s, ty), substitute(x, s, b)))
+        assert x == y or alpha_equal(substitute(x, s, Let(y, ty, ty, b)), Let(y, substitute(x, s, ty), substitute(x, s, ty), substitute(x, s, b)))
+
+
+@pytest.mark.xfail(strict=True, reason="CaptureCase allows a fresh z that renames a fixed Data name")
+def test_subst_avoids_capture(samples, rng):
+    cases = [("y", "z", Var("y"), Data("y", ()))]
+    for source in samples:
+        # Draw y from free names, as CaptureCase requires; no rejection sampling.
+        names = sorted(free_names(source))
+        if names:
+            body = term(rng, SIZE)
+            y = rng.choice(names)
+            z = fresh_for(Pair(source, body))
+            cases.append((y, z, source, body))
+    failures = []
+    for y, z, source, body in cases:
+        assert y in free_names(source) and z not in free_names(source) | free_names(body) and y != z
+        x = "x" if source == Var("y") and body == Data("y", ()) else rng.choice(NAMES)
+        ty = term(rng, SIZE)
+        if x != y and x != z:
+            left = substitute(x, source, Lam(y, ty, body))
+            right = Lam(z, substitute(x, source, ty), substitute(x, source, swap(y, z, body)))
+            if not alpha_equal(left, right):
+                failures.append((x, y, z, source, body, ty))
+    assert not failures, failures
 
 
 def test_subst_not_free(samples, rng):
@@ -468,11 +517,19 @@ def test_beta(samples, rng):
 
 
 def test_delta(samples, rng):
+    assert step((Define("f", Universe(), Var("f")),), Var("f")) == Var("f")
+    assert step((Define("f", Universe(), Var("stuck")),), App(Var("f"), Var("a"))) == App(Var("stuck"), Var("a"))
     for b in samples:
         f = rng.choice(NAMES)
         definition = Define(f, Universe(), b)
         for p in ((definition,) + program(rng), (Declare(f, Universe()), definition), (Datum(b), Declare(f, Universe()), definition)):
             assert steps_to(step(p, Var(f)), b)
+
+
+def test_zeta(samples, rng):
+    for body in samples:
+        x, ty, value = rng.choice(NAMES), term(rng, SIZE), term(rng, SIZE)
+        assert steps_to(step(program(rng), Let(x, ty, value, body)), substitute(x, value, body))
 
 
 def test_head_first(samples, rng):
@@ -586,6 +643,8 @@ def test_generator_budget_and_constructor_coverage(rng):
             _, a, b = binder_parts(t)
             return 1 + nodes(a) + nodes(b)
         match t:
+            case Let(_, a, v, b):
+                return 1 + nodes(a) + nodes(v) + nodes(b)
             case App(a, b) | Pair(a, b):
                 return 1 + nodes(a) + nodes(b)
             case Inj(_, a) | Proj(a, _):
@@ -620,6 +679,10 @@ def test_binding_scopes_and_negative_alpha_cases():
 
 
 def test_capture_avoidance_in_every_binding_form():
+    # Non-vacuous CaptureCase with z fresh only in free names (it is bound in b).
+    b = Pair(Var("x"), Lam("z", Universe(), Var("y")))
+    assert alpha_equal(substitute("x", Var("y"), Lam("y", Var("x"), b)),
+                       Lam("z", Var("y"), substitute("x", Var("y"), swap("y", "z", b))))
     for cls in BINDERS:
         result = substitute("x", Var("y"), cls("y", Universe(), Pair(Var("x"), Var("y"))))
         assert result == cls("y'", Universe(), Pair(Var("y"), Var("y'")))
@@ -712,3 +775,14 @@ def test_record_labels_and_traversal():
         assert substitute("x", Var("y"), proj) == Proj(u, "m.x")
         assert canonical(proj) == Proj(canonical(t), "m.x")
         assert swap("x", "z", proj) == Proj(swap("x", "z", t), "m.x")
+
+
+def test_let_scope_traversal_and_capture():
+    t = Let("x", Var("x"), Var("x"), Pair(Var("x"), Var("y")))
+    assert free_names(t) == {"x", "y"}
+    assert swap("x", "z", t) == Let("z", Var("z"), Var("z"), Pair(Var("z"), Var("y")))
+    assert canonical(t) == Let("x0", Var("x"), Var("x"), Pair(Var("x0"), Var("y")))
+    assert not alpha_equal(t, Let("z", Var("z"), Var("x"), Pair(Var("z"), Var("y"))))
+    assert not alpha_equal(t, Let("z", Var("x"), Var("z"), Pair(Var("z"), Var("y"))))
+    assert substitute("x", Var("y"), Let("y", Var("x"), Var("x"), Pair(Var("x"), Var("y")))) == Let("y'", Var("y"), Var("y"), Pair(Var("y"), Var("y'")))
+    assert step((), Let("x", Hole("ty"), Var("loop"), Universe())) == Universe()

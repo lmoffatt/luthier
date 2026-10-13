@@ -7,6 +7,8 @@ Update derivation: user request v3, codex-3.md; step uses None for normal form,
 while reduce uses None for fuel exhaustion. Lists are tuples; constructors retain the theory's argument order.
 """
 
+# Update: fe3bdab, user request v4; audit codex-4.md.
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -91,6 +93,14 @@ class World:
 class Lam:
     name: str
     type: Term
+    body: Term
+
+
+@dataclass(frozen=True)
+class Let:
+    name: str
+    type: Term
+    value: Term
     body: Term
 
 
@@ -187,7 +197,7 @@ class Proj:
 
 
 Term: TypeAlias = (
-    Var | Lit | Universe | World | Lam | App | Pi | Sigma | Pair | Match | Inj |
+    Var | Lit | Universe | World | Lam | Let | App | Pi | Sigma | Pair | Match | Inj |
     Sum | Data | Subtype | Extern | Primitive | Axiom | Hole | Record | RecordValue | Proj
 )
 
