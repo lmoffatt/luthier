@@ -258,3 +258,12 @@ The specification in `docs/spec/` is the authority; `record/decisions.md` holds 
 only to learn what a host function did. Luciano reads Spanish in chat; written material is in
 English. He runs the scripts that process data; the model may run the lints, the parser, `luthier
 check` and `luthier certify` here.
+
+- 2026-10-13: review of layers 0-1 done: nine replies plus Fable's (summary.md), seven questions
+  answered (D-2026-10-13-aa), every fix the session's committed (reply.md, ba322cd); no second
+  round (D-2026-10-13-ab). Layer 2 begun by the session: `generators.lth` (091ed44 to d9e1490:
+  seeds, the random source, weights and metrics, exhaustive and sized generators, filters,
+  censuses and bindings, budgets, the programs each checker rule is tested on) with
+  `generators_model.lut`, and `test.lth` (the spec as data, runs, grades). Next for the session:
+  certification.lth waits for the cost library (Q6); the Python specimens of step 4 are the
+  coordinating session's Codex's.
