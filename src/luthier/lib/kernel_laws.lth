@@ -29,8 +29,8 @@
 --   §2 Terminal and initial objects: `Unit`, `Empty` (3.S7, 3.S8, D-2026-10-13-t).    done
 --   §3 Boolean algebra: `Bool`'s `true`, `false`, with `not`, `and`, `or`
 --      (D-2026-10-13-t); Huntington's laws.                                    done
---   §4 Monoid and free monoid: `List`'s `nil`, `cons`, `append`; the recursion
---      principle `FoldNil`, `FoldCons` (3.S36, D-2026-10-13-t).                 done
+--   §4 Monoid and free monoid: `List`'s `nil`, `cons`, `append`, the free monoid's
+--      fold its recursion principle (3.S36, D-2026-10-13-t).                     done
 --   §5 Commutative semiring with its order: `Nat`'s laws (11.R1, D-2026-10-13-t).    done
 --   §6 The constructions of the kernel: `Beta`, `PairFst`, `PairSnd`, `Pairing`, records and
 --      labeled sums as named products and coproducts (D-2026-10-13-x),
@@ -67,12 +67,21 @@ Object (A : U) := Reflexive A & Symmetric A & Transitive A
 -- operations states it as a congruence (as `AlphaCongruent` in term.lth). Found by Codex writing
 -- kernel.py: `Lam "x" Universe (Var "x")` and `Lam "y" Universe (Var "y")` are alpha-equal and a
 -- function reading the binder separates them. Decided by D-2026-10-13-z.
-Structural (A : U) : { eq : A -> A -> Bool }
-asObject (A : U) (s : Structural A) : Object A := { eq := s.eq }
-StructuralIsObject (A : U) (s : Structural A) (x : A) (p : EqualPair A (asObject A s)) (c : EqualChain A (asObject A s)) : Bool :=
-  Reflexive A (asObject A s) x and Symmetric A (asObject A s) p and Transitive A (asObject A s) c
-Substitutive (A : U) (s : Structural A) (B : U) (f : A -> B) (p : EqualPair A (asObject A s)) : Bool := f p.x == f p.y
-Structural (A : U) := StructuralIsObject A & Substitutive A
+--
+-- `Concrete` is the types with a structural `==` (4.R8): `Int`, `Float64`, `String`, `Unit`,
+-- `Empty`, and products, sums, `data` and subtypes built from them; never a function type. Which
+-- type is concrete the checker decides (4.R8), so it is declared here and not defined. The structural
+-- equality and its substitutivity range over it, codomain included (review of layers 0-1, A).
+Concrete : U
+Structural (A : Concrete) : { eq : A -> A -> Bool }
+asObject (A : Concrete) (s : Structural A) : Object A := { eq := s.eq }
+-- each law of an object on its own, so that an equality that relates nothing does not pass by
+-- leaving the pairs empty (reflexivity has its own cases; review of layers 0-1, A)
+StructuralReflexive (A : Concrete) (s : Structural A) (x : A) : Bool := Reflexive A (asObject A s) x
+StructuralSymmetric (A : Concrete) (s : Structural A) (p : EqualPair A (asObject A s)) : Bool := Symmetric A (asObject A s) p
+StructuralTransitive (A : Concrete) (s : Structural A) (c : EqualChain A (asObject A s)) : Bool := Transitive A (asObject A s) c
+Substitutive (A : Concrete) (s : Structural A) (B : Concrete) (f : A -> B) (p : EqualPair A (asObject A s)) : Bool := f p.x == f p.y
+Structural (A : Concrete) := StructuralReflexive A & StructuralSymmetric A & StructuralTransitive A & Substitutive A
 
 -- ---------------------------------------------------------------- §2 Terminal and initial objects
 
@@ -114,6 +123,15 @@ MeetComplement (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.meet x (m.comp
 JoinComplement (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.join x (m.complement x) == m.top
 TopIsNotBottom (B : U) (m : BooleanAlgebra B) : Bool := not (m.top == m.bottom)
 
+-- The algebra is self-dual: exchanging `top` and `bottom`, `meet` and `join` gives another model,
+-- so the laws above do not say which of `true` and `false` is the top (Fable, review of layers
+-- 0-1). What tells them apart is `if`, which takes its first branch on `true`: `Bool`'s algebra has
+-- its top where `if` takes the first branch.
+TheBooleans : { algebra : BooleanAlgebra Bool }
+TopIsTheFirstBranch (b : TheBooleans) : Bool :=
+  (if b.algebra.top then 1 else 0) == 1 and (if b.algebra.bottom then 1 else 0) == 0
+TheBooleans := TopIsTheFirstBranch
+
 BooleanAlgebra (B : U) := MeetCommutes B & JoinCommutes B & MeetIdentity B & JoinIdentity B
   & MeetDistributes B & JoinDistributes B & MeetComplement B & JoinComplement B & TopIsNotBottom B
 
@@ -150,16 +168,15 @@ FoldCombine (A M : U) (m : FreeMonoid A M) (N : U) (n : Monoid N) (f : A -> N) (
 FoldIsItself (A M : U) (m : FreeMonoid A M) (x : M) : Bool := m.fold M (asMonoid A M m) m.inject x == x
 FreeMonoid (A M : U) := IsMonoid A M & FoldNeutral A M & FoldInject A M & FoldCombine A M & FoldIsItself A M
 
--- The recursion principle of `List` (3.S36): `nil` and `cons` are the two cases a fold takes, and
--- that is their role among lists; the free monoid's `fold` is this one with `cons a xs` read as
--- the injection of `a` combined with `xs`. The algebra of a fold is the model.
-ListAlgebra (A B : U) : { onNil : B, onCons : A -> B -> B }
-foldList (A B : U) (g : ListAlgebra A B) (xs : List A) : B :=
-  match xs { nil -> g.onNil ; cons x rest -> g.onCons x (foldList A B g rest) }
-FoldNil (A B : U) (g : ListAlgebra A B) : Bool := foldList A B g nil == g.onNil
-FoldCons (A B : U) (g : ListAlgebra A B) (x : A) (xs : List A) : Bool :=
-  foldList A B g (cons x xs) == g.onCons x (foldList A B g xs)
-ListAlgebra (A B : U) := FoldNil A B & FoldCons A B
+-- `List A` is the free monoid on `A`: `nil` its neutral element and `cons a xs` the injection of
+-- `a` combined with `xs`, which is the role of each; the free monoid's `fold` is the recursion
+-- principle of lists (3.S36). (A theory of fold algebras, tested against its own definition of
+-- the fold, stated nothing and is gone; review of layers 0-1, A.)
+Lists (A : U) : { free : FreeMonoid A (List A) }
+NilIsNeutral (A : U) (l : Lists A) : Bool := l.free.neutral == nil
+ConsIsInjectionCombined (A : U) (l : Lists A) (a : A) (xs : List A) : Bool :=
+  l.free.combine (l.free.inject a) xs == cons a xs
+Lists (A : U) := NilIsNeutral A & ConsIsInjectionCombined A
 
 -- ---------------------------------------------------------------- §5 Commutative semiring, ordered
 
@@ -237,25 +254,34 @@ Coproduct (A B S : U) := CaseLeft A B S & CaseRight A B S & CasesAreAll A B S
 -- A record is a product whose projections are named, and a labeled sum a coproduct whose
 -- injections are named (D-2026-10-13-x): `.x` and `.y` are the arrows `first` and `second`, so the
 -- names are part of the structure, not a decoration of it. The laws are the product's and the
--- coproduct's, with the names distinct. Stated for two fields; a record of more is nested.
+-- coproduct's, with the names distinct and tied to the arrows: selecting a field by its name gives
+-- that projection, and an injection is told by its name (review of layers 0-1, A: names
+-- constrained only to differ could be any names). Stated for two fields; the kernel's `Record`
+-- keeps any number flat (term.lth), each pair of its fields a model of this.
 NamedProduct (A B P : U) : {
   pair : A -> B -> P, first : P -> A, second : P -> B,
   firstName : String, secondName : String,
+  select : String -> P -> Maybe { one : A || two : B },
 }
 asProduct (A B P : U) (r : NamedProduct A B P) : Product A B P := { pair := r.pair, first := r.first, second := r.second }
 NamedPairs (A B P : U) (r : NamedProduct A B P) (a : A) (b : B) (q : P) : Bool :=
   PairFst A B P (asProduct A B P r) a b and PairSnd A B P (asProduct A B P r) a b and Pairing A B P (asProduct A B P r) q
 ProjectionNamesDistinct (A B P : U) (r : NamedProduct A B P) : Bool := not (r.firstName == r.secondName)
-NamedProduct (A B P : U) := NamedPairs A B P & ProjectionNamesDistinct A B P
+SelectByName (A B P : U) (r : NamedProduct A B P) (a : A) (b : B) : Bool :=
+  r.select r.firstName (r.pair a b) == just (one a) and r.select r.secondName (r.pair a b) == just (two b)
+NamedProduct (A B P : U) := NamedPairs A B P & ProjectionNamesDistinct A B P & SelectByName A B P
 
 NamedCoproduct (A B S : U) : {
   left : A -> S, right : B -> S,
   cases : (C : U) -> (A -> C) -> (B -> C) -> S -> C,
   leftName : String, rightName : String,
+  labelOf : S -> String,
 }
 asCoproduct (A B S : U) (s : NamedCoproduct A B S) : Coproduct A B S := { left := s.left, right := s.right, cases := s.cases }
 NamedCases (A B S : U) (s : NamedCoproduct A B S) (C : U) (f : A -> C) (g : B -> C) (a : A) (b : B) (v : S) : Bool :=
   CaseLeft A B S (asCoproduct A B S s) C f g a and CaseRight A B S (asCoproduct A B S s) C f g b
   and CasesAreAll A B S (asCoproduct A B S s) v
 InjectionNamesDistinct (A B S : U) (s : NamedCoproduct A B S) : Bool := not (s.leftName == s.rightName)
-NamedCoproduct (A B S : U) := NamedCases A B S & InjectionNamesDistinct A B S
+LabelByName (A B S : U) (s : NamedCoproduct A B S) (a : A) (b : B) : Bool :=
+  s.labelOf (s.left a) == s.leftName and s.labelOf (s.right b) == s.rightName
+NamedCoproduct (A B S : U) := NamedCases A B S & InjectionNamesDistinct A B S & LabelByName A B S

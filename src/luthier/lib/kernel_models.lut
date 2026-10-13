@@ -8,11 +8,11 @@
 -- theories like any model (spec 7); a law that quantifies over maps or monoids gets them from a
 -- census (7.R4). A model file holds models of theories (12.S23); these are the kernel's own.
 
-import "kernel_laws.lth" Object Structural Terminal Initial BooleanAlgebra Monoid FreeMonoid ListAlgebra
-  foldList OrderedSemiring Exponential Product Coproduct NamedProduct NamedCoproduct
+import "kernel_laws.lth" Object Concrete Structural Terminal Initial BooleanAlgebra TheBooleans Monoid FreeMonoid
+  Lists OrderedSemiring Exponential Product Coproduct NamedProduct NamedCoproduct
 
 -- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
-structuralEquality (A : U) : Structural A := { eq := fn x y { x == y } }
+structuralEquality (A : Concrete) : Structural A := { eq := fn x y { x == y } }
 
 -- `Unit` is terminal, `Empty` initial (3.S7, 3.S8)
 unitTerminal : Terminal Unit := { point := unit }
@@ -25,6 +25,7 @@ booleans : BooleanAlgebra Bool := {
   meet := fn a b { a and b },
   join := fn a b { a or b },
 }
+theBooleans : TheBooleans := { algebra := booleans }
 
 -- `List A` is the free monoid on `A`; its fold is the recursion principle of 3.S36
 appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
@@ -33,8 +34,11 @@ lists (A : U) : FreeMonoid A (List A) := {
   combine := fn xs ys { appendList A xs ys },
   inject := fn a { cons a nil },
   fold := fn (N : U) (n : Monoid N) (f : A -> N) (xs : List A) {
-    foldList A N { onNil := n.neutral, onCons := fn a r { n.combine (f a) r } } xs },
+    foldInto A N n f xs },
 }
+foldInto (A N : U) (n : Monoid N) (f : A -> N) (xs : List A) : N :=
+  match xs { nil -> n.neutral ; cons a rest -> n.combine (f a) (foldInto A N n f rest) }
+listsOf (A : U) : Lists A := { free := lists A }
 
 -- `Nat` is an ordered commutative semiring (11.R1)
 naturals : OrderedSemiring Nat := {
@@ -68,9 +72,11 @@ recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
   pair := fn u v { { x := u, y := v } },
   first := fn r { r.x }, second := fn r { r.y },
   firstName := "x", secondName := "y",
+  select := fn n r { if n == "x" then just (one r.x) else if n == "y" then just (two r.y) else nothing },
 }
 sumAB (A B : U) : NamedCoproduct A B { a : A || b : B } := {
   left := fn u { a u }, right := fn v { b v },
   cases := fn (C : U) f g s { match s { a u -> f u ; b v -> g v } },
   leftName := "a", rightName := "b",
+  labelOf := fn s { match s { a u -> "a" ; b v -> "b" } },
 }
