@@ -47,6 +47,8 @@ so a parser is a fenced task. Recommended: `grammar.lut` first, then its Python 
 that only reads (no types, no evaluation), run on every theory as it is written. Errors of syntax
 then appear one file at a time; errors of meaning wait for the checker of layer 1.
 
+OK
+
 ## Z4. Retiring the old code
 
 Recommended: tag the present state `v0.1-final`; remove from the tree the old interpreter
@@ -56,6 +58,8 @@ their certificates; git keeps all of it. Kept: the host functions the externs ca
 library) and are specimens of the world (L11), not interpreter; and the 50 programs of
 `tests/spec/`, which encode the rules of the specification and are rewritten into the new syntax
 as the cases of the new checker. Sonolocalización keeps using `v0.1-final` until you redo it.
+
+OK
 
 ## Z5. Import names what enters, with its theory
 
@@ -76,6 +80,8 @@ error otherwise; and the importer sees only what `LinearAlgebra` names, which is
 Recommended: this form, amending D-2026-10-12-ad, -af and D-2026-10-13-c; spec 12.S3, 12.S22 and
 L6.12 follow.
 
+OK, of course LinearAlgebra had to be imported from a .lth first
+
 ## Z6. Who writes the theories
 
 The theories are the specification said in Luthier; each layer has its chapters as source.
@@ -85,11 +91,15 @@ layer, with a brief each; the session integrates, runs the parser and, from laye
 The Python specimens: the checker and the evaluator by the session, the rest (parser, certifier,
 generators, the cost model) by agents.
 
+Ok
+
 ## Z7. Milestones
 
 Recommended: `v0.2` when layers 0 and 1 have their theories and their Python checker, and the 50
 programs of `tests/spec/`, rewritten, pass; `v0.3` with layer 2 (certification and tests);
 `v0.4` with layer 3 (run, session, world). Push only tags.
+
+ok
 
 ## Z8. Theory files and model files
 
@@ -118,3 +128,4 @@ checker rejects an `extern`, an action or a model value inside it, because lazin
 theory file never touching the world. In the plan, step 3's `library.lut` states the two kinds,
 and every theory of Luthier is written as a `.lth`.
 
+Yes, enforced
