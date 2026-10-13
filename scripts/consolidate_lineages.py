@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The map of ideas: the lineages grouped into themes, each idea with its state (step A1 of
-record/plan-synthesis-2026-10-09.md).
+record/plan/principles/plan-synthesis-2026-10-09.md).
 
 Reads the lineages (`link_ideas.py`'s state) and the timeline, and runs the prompt
 `prompts/consolidate_lineages_v1.md`, isolated, in one call: the model sees each lineage's scope,

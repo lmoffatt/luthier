@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The sample of decision cases, its exposure, and Luciano's review (step 5 of
-record/plan-principles-validation-2026-10-09-execution.md). Four subcommands, run in this order:
+record/plan/principles/plan-principles-validation-2026-10-09-execution.md). Four subcommands, run in this order:
 
   draw      draws the sample (D9): from the drafted decisions whose alternative is not constructed and
             that Luciano took (by choice or confirmation), plus every reversal, stratified by area,

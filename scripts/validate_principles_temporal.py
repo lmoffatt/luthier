@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Score Luthier's principles on the approved decision cases (step 6 of
-record/plan-principles-validation-2026-10-09-execution.md). Luciano runs it, after his review.
+record/plan/principles/plan-principles-validation-2026-10-09-execution.md). Luciano runs it, after his review.
 
 Which cases: approved by Luciano, a decision whose alternative is not constructed, and, for each
 principle, only the cases temporally eligible for it whose exposure is `none` (the judge said none,

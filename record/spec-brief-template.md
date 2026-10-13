@@ -1,7 +1,7 @@
 # Brief for a chapter of the specification
 
 The template every agent that writes a chapter receives, filled for its chapter. Written
-2026-10-12 (step 0 of `record/plan-spec-2026-10-12-execution.md`). An agent has nothing but this
+2026-10-12 (step 0 of `record/plan/specification/plan-spec-2026-10-12-execution.md`). An agent has nothing but this
 brief and the files it names.
 
 ## Goal

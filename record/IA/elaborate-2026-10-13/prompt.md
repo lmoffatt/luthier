@@ -2,7 +2,7 @@
 
 Written 2026-10-13 at the commit that holds this file, by Claude Opus 5.5 (the coordinating
 session), launched by it with `codex exec` after kernel bite 1e. Step 2.5, bite 2, of
-`record/plan-from-zero-2026-10-13-execution.md` (D-2026-10-13-u, -ab): with it, Luthier runs a
+`record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md` (D-2026-10-13-u, -ab): with it, Luthier runs a
 file for the first time.
 
 ## The prompt

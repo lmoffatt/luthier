@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The synthesis of Luthier's ideas, rules and principles, in one document for Luciano (step A4 of
-record/plan-synthesis-2026-10-09.md). Mechanical, no model.
+record/plan/principles/plan-synthesis-2026-10-09.md). Mechanical, no model.
 
 Reads the outputs of the night, each by path: the map of themes (`consolidate_lineages.py`), the
 candidates found blind (`find_principles.py`) and their match against the principles in force
@@ -62,7 +62,7 @@ def main(argv: list[str]) -> int:
 
     L = [f"# Synthesis of Luthier's ideas, rules and principles, {args.date}", "",
          f"Written by `scripts/assemble_synthesis.py` ({VERSION}) for Luciano, from the night's outputs (plan:",
-         "`record/plan-synthesis-2026-10-09.md`). Every grouping, state, candidate and trace is a model's reading; who said each",
+         "`record/plan/principles/plan-synthesis-2026-10-09.md`). Every grouping, state, candidate and trace is a model's reading; who said each",
          "idea and when comes from the rows. Nothing here is decided: the candidates have a `Mark:` line for you.", "",
          "## Summary", "",
          f"- **Ideas.** {len(der)} ideas in {len(members)} themes; " + ", ".join(f"{states.get(s, 0)} {s.replace('_', ' ')}" for s in STATES)

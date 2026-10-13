@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Temporal eligibility of the decision units for each principle (step 3 of
-record/plan-principles-validation-2026-10-09-execution.md). Mechanical, no model.
+record/plan/principles/plan-principles-validation-2026-10-09-execution.md). Mechanical, no model.
 
 A pair (unit, principle) is eligible when the unit's time is after the principle's explicit date and
 before the principle became operative for the agent of that unit: the earliest of the first commit

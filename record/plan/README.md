@@ -1,0 +1,15 @@
+# Plans
+
+Every plan of the project, one directory per objective (moved here on 2026-10-13 at Luciano's
+request; the file names are unchanged, so an older reference to `record/<name>` is found here under
+its objective). A plan comes in two documents: the decisions, for Luciano, and the execution, for
+the sessions (CLAUDE.md).
+
+| objective | directory | state |
+|---|---|---|
+| Luthier rebuilt from its theories: grammar, kernel, checker, certification, execution | `luthier-from-zero/` | active: `plan-from-zero-2026-10-13-*` (Z1 to Z10, steps 0 to 6); `plan-implementation-2026-10-13-*` superseded by it |
+| Luthier running sonolocalización, then macroir | `sonolocalizacion/` | written, not started; S1 to S5 await his marks |
+| The specification, twelve chapters | `specification/` | done in substance (D-2026-10-13-g) |
+| The principles: synthesis from his notes, validation, generative draft, draft 11 | `principles/` | done; draft 11 its last |
+| The way of working | `working-method/` | done (`record/working-method.md`) |
+| Repairs of the v0.1 interpreter | `repair-v0.1/` | closed by the rebuild from zero (tag `v0.1-final`) |

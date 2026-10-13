@@ -45,7 +45,7 @@ Rules:
 Failures go to stdout as `<record>:<entry line>: quote: <message>`, warnings to stderr as
 `<record>:<entry line>: warning: <message>`. Exit status: 1 with failures, else 0.
 
-Step 4.1 of record/plan-working-method-execution-2026-10-06.md.
+Step 4.1 of record/plan/working-method/plan-working-method-execution-2026-10-06.md.
 """
 from __future__ import annotations
 

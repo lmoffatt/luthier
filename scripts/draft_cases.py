@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Draft one decision case per candidate unit (step 4 of
-record/plan-principles-validation-2026-10-09-execution.md).
+record/plan/principles/plan-principles-validation-2026-10-09-execution.md).
 
 For each unit of `draft_candidates.json`, the script assembles the moment from the transcript and
 git: the model's text before Luciano's turn, his turn, the model's text after it, and what changed

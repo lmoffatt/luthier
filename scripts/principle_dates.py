@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The dates of each principle, for the validation against real decisions (step 2 of
-record/plan-principles-validation-2026-10-09-execution.md). Mechanical, no model.
+record/plan/principles/plan-principles-validation-2026-10-09-execution.md). Mechanical, no model.
 
 For each principle of `record/principles.md`:
 - explicit: the time of each source its entry cites (a turn of a chat, or a line of a committed

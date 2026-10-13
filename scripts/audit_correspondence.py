@@ -2,7 +2,7 @@
 """Correspondence audit of Luthier: is the specification (docs/spec/) a faithful reflection of
 the implementation (src/luthier/) and of the documentation (README.md, examples/)?
 
-Step 5.3 of record/plan-working-method-execution-2026-10-06.md. Luciano runs it; each unit costs
+Step 5.3 of record/plan/working-method/plan-working-method-execution-2026-10-06.md. Luciano runs it; each unit costs
 model calls.
 
 For each unit of prompts/audit_correspondence_units_v1.json, one call of the `claude` (or `codex`)

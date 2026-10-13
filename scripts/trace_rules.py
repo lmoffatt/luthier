@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The rules of Luthier and the ideas they come from (step A3 of record/plan-synthesis-2026-10-09.md).
+"""The rules of Luthier and the ideas they come from (step A3 of record/plan/principles/plan-synthesis-2026-10-09.md).
 
 Mechanical part: the rules are the bold-numbered statements of the specification (`**R1. ...**` in
 05, `**G1. ...**` and `**C1. ...**` in 08), the numbered sections of the documents that have no such
