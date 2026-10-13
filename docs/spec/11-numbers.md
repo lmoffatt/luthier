@@ -36,7 +36,7 @@ Files: r9_variance.accept.lut, r9_variance.reject.lut.
 
 **11.S6. A value is checked against its declared type when it crosses.** [implemented] An `Int` is a host integer, never a boolean or a float; a `Float64` is a float, or an integer with an exact double, promoted; a `String` is a string; `Unit` is the empty value. An array as a value of `Fin n -> Int` has an integer dtype, and as one of `Fin n -> Float64` a float dtype (an integer array is promoted), with exactly as many dimensions as indices. A number where a record, a pair or a function is expected is an error. `luthier run --set name=value` reads the value by the declared type of the hole (`spec 12`).
 
-**11.S7. NaN and overflow are errors.** [implemented] NaN is not a number and is always an error, at the crossing and in the interpreter's arithmetic, inside arrays as well. An overflow to an infinity is an error. An infinity that means something is asked for in the type: `ExtendedReal = < finite : Float64 | negInf : Unit | posInf : Unit >`, used only where a function needs it, as the log-likelihood of an impossible datum.
+**11.S7. NaN and overflow are errors.** [implemented] NaN is not a number and is always an error, at the crossing and in the interpreter's arithmetic, inside arrays as well. An overflow to an infinity is an error. An infinity that means something is asked for in the type: `ExtendedReal = { finite : Float64 || negInf : Unit || posInf : Unit }`, used only where a function needs it, as the log-likelihood of an impossible datum.
 
 **11.S8. An integer that does not fit in 64 bits is an error when it crosses into the host's arrays.** [implemented] The host would otherwise wrap it silently.
 

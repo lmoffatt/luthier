@@ -33,7 +33,7 @@ The kernel has the formers below. Each is a statement with its status.
 | universe | `U` | | every type | |
 | exponential (Pi) | `A -> B` | `(x : A) -> B`, `B` may mention `x` | `\ x { t }` | application `f a` |
 | product (Sigma) | `A * B` | `(x : A) * (y : B)`; n-ary `{ x : A, y : B }` | `(a, b)`; `{ x := a, y := b }` | pattern `(x, y)` in `match`; projection `e.x` |
-| sum | `A + B` | `(x : A) + (y : B)`; n-ary `< x : A \| y : B >` | `x a`, by label | `match` on labels |
+| sum | `A + B` | `{ x : A \|\| y : B }`, n-ary (D-2026-10-13-w) | `x a`, by label | `match` on labels |
 | empty | `Empty` | | none | `match e { }`, at any type |
 | unit | `Unit` | | `unit` | none needed |
 | subtype | `{ x : T \| p }` | `{ x : A, y : B \| p }` | a term of `T` with `p` holding (an obligation) | a term of the subtype is a term of `T` |
@@ -62,10 +62,10 @@ whose constructors have none states no concept and becomes an alias of a sum.
 `v0.1-final` required a recursive constructor and took a non-recursive sum as an alias.
 Files: r4_recursive_data.accept.lut.
 
-**3.S4. Anonymous sums and products.** [implemented] `A + B` is `< left : A | right : B >`.
+**3.S4. Anonymous sums and products.** [implemented] `A + B` is `{ left : A || right : B }`.
 Sums and products of more than two components associate to the right, so `A * B * C` is
 `A * (B * C)` and `(a, b, c)` is `(a, (b, c))`. An alternative of type `Unit` is injected by its
-label alone: in `< true : Unit | false : Unit >`, `true` is `true unit`. Examples: `k_sum.accept.lut`,
+label alone: in `{ true : Unit || false : Unit }`, `true` is `true unit`. Examples: `k_sum.accept.lut`,
 `k_union.accept.lut`.
 
 **3.S5. Dependence.** [implemented] In `(x : A) -> B` and `(x : A) * (y : B)` the second part may

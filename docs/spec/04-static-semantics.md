@@ -328,7 +328,7 @@ rule and its accept and reject programs its cases. Until it exists the checker i
 
 ```
 -- a concrete type, defined natively: a table is a function from a column and a row to a cell
-Cell = < int : Int | real : Float64 | text : String >
+Cell = { int : Int || real : Float64 || text : String }
 Table = { columns : List String, nRows : Int, cell : String -> Int -> Maybe Cell }
 
 -- a theory, declared, its laws, then defined: the cycle Codec -> laws -> Codec is the theory

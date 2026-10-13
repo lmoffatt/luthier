@@ -46,7 +46,7 @@ infix operator. [decided D-2026-10-13-q] Three readings `grammar.lth` took where
 `data` behave as those of a record type (a line break separates constructors), and a `}` at
 column 0 closes its brace and does not start an act; blank lines and lines holding only a comment
 are dropped with their line breaks. [proposed] The braces of `quote` drop line breaks as those of `match`; which bracket a
-token opens is known from the tokens before it: `<` opens a sum only as `< name :`, the braces of a
+token opens is known from the tokens before it: the braces of a
 `match` are the first `{` after `match` outside brackets (2.S9), those of `quote` follow `quote`.
 
 ## §2 Acts
@@ -80,7 +80,7 @@ clauses is the `match` of its clauses on the tuple of its parameters (2.S12). Be
 constructors of a `data` on one line, `;` is required (a line break gives it, 2.S4). A name may be
 declared in one act and defined in another, in the same file or another; what the body of a
 definition means depends on its type (spec 4). An alias with binders is a function on types:
-`Maybe (A : U) = < nothing : Unit | just : A >`.
+`Maybe (A : U) = { nothing : Unit || just : A }`.
 
 **2.S6. Directives.** [implemented] In `v0.1-final` the directives other than `test` were as below; the language designed keeps only `operator` as an act of its own, `import` takes the form of 12.S22 and `cite` is a function (2.S21). Replaced: 2.S21.
 
@@ -356,15 +356,17 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 parameter that is not a typed name is a tuple of two or more patterns. A field may
 carry several names, `{ x y : A, z : B }`. [decided D-2026-10-13-s] Braces inside the scrutinee of a `match`
 go in parentheses, so the first `{` after the scrutinee opens the arms: `match f { p -> q } { r -> s }`
-is the match on `f` applied to a block, and a match on `f { ... }` is written `match (f { ... }) { ... }`. [proposed] By the same rule, inside `< >` a comparison by `>` and an open
-form go in parentheses, so the first `>` at the sum's level closes it (`< a : A > b > c` had two trees). `quote` is a keyword (2.S21) and `eval` a name of core, so
+is the match on `f` applied to a block, and a match on `f { ... }` is written `match (f { ... }) { ... }`. [decided D-2026-10-13-w] A labeled sum is braced, its alternatives
+separated by `||`: `{ circle : Float64 || square : Float64 }`, two alternatives or more (one is a
+record type). `,` and `||` do not mix at one level; a mixture nests, `{ s : { a : A || b : B }, d : D }`.
+Inside braces a line beginning with `||` continues the item above (2.S4). `< >` and the form
+`(x : A) + (y : B)` are retired, so `<` and `>` are comparisons only; the anonymous sum is `A + B`. `quote` is a keyword (2.S21) and `eval` a name of core, so
 `eval A t` is an application (2.S20).
 
 **2.S10. Patterns.** [implemented] A pattern `name` is a constructor of the scrutinee's data type
 or a label of its sum if it names one, and a variable otherwise. A label of a sum is an injection:
-`circle 2.0` against `< circle : Float64 | square : Float64 >`, `true` against `Bool`. A union
-`< ... >` written as the argument of an application needs parentheses, because `<` after a term is
-a comparison.
+`circle 2.0` against `{ circle : Float64 || square : Float64 }`, `true` against `Bool`. A sum, being
+braced, may be an argument like any atom (D-2026-10-13-w; the parentheses `< >` needed are gone).
 
 **2.S11. The dangling else.** [implemented] An `else` belongs to the nearest `if` without one:
 in `if a then if b then x else y` the `else` is the inner `if`'s (D-2026-10-11-b). The rule is the
@@ -392,9 +394,9 @@ translation; spec 3 cites it.
 | `e.y` | a one-branch `match` on the component pattern of the type of `e` |
 | `m.f`, `m` an imported module | the definition `f` of module `m`; a module is a record of its definitions (spec 12) |
 | `{ x : A, y : B }` | `(x : A) * B`, with the last component also named |
-| `< x : A \| y : B >` | `(x : A) + (y : B)` |
-| `Bool` | `< true : Unit \| false : Unit >`, in `core.lut` |
-| `Maybe A` | `< nothing : Unit \| just : A >` |
+| `{ x : A \|\| y : B }` | the labeled sum of `x : A` and `y : B` (spec 3.S3) |
+| `Bool` | `{ true : Unit \|\| false : Unit }`, in `core.lut` |
+| `Maybe A` | `{ nothing : Unit \|\| just : A }` |
 | `Failures E` | `List E`, the failures of a check, empty when it holds (spec 5) |
 | `f a (tol <- v)`, `f` with `(tol : T <- d)` | `f a v`: arguments by name are placed in their parameter's position, a parameter not given takes its default `d` once every parameter without a default is given (D-2026-10-11-c) |
 | `y <- e` in a block | a fresh name `yk := e`, `k` the count of bindings of `y` so far, and every later `y` means `yk` (spec 2.S17) |
