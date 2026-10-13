@@ -24,12 +24,12 @@
 --   §2 Sampling by weight: the cumulative inversion over a list and an interval, the two
 --      metrics of numbers (7.S2, 7.S4).                                                     done
 --   §3 Exhaustive and sized generators: every value of a finite type up to the size; the
---      size of a recursive `data` bounding its depth (7.S3, 7.R3).                           todo
+--      size of a recursive `data` bounding its depth (7.S3, 7.R3).                           done
 --   §4 Subtypes and dependent records: bounds or a filter with its budget; components in
---      order (7.S6, 7.S7).                                                                  todo
+--      order (7.S6, 7.S7).                                                                  done
 --   §5 Censuses: a function over an infinite domain or a model of a theory from an explicit
---      list (7.R4); bindings by parameter and by type (7.R1).                                todo
---   §6 Budgets, every one an argument (7.S8).                                               todo
+--      list (7.R4); bindings by parameter and by type (7.R1).                                done
+--   §6 Budgets, every one an argument (7.S8).                                               done
 --   §7 The programs a rule of the checker is tested on: generators of `Violating` and `Clean`
 --      for each rule, the census of tests/spec/ first, then one-edit mutations (program.lth). todo
 
@@ -96,3 +96,93 @@ WithinBounds (m : Metric) (i : Interval) (v : Float64) : Bool :=
 Grows (m : Metric) (i : Interval) (v w : Float64) : Bool :=
   not (0.0 <= v and v <= w and w < 1.0) or m.place i.lo i.hi v <= m.place i.lo i.hi w
 Metric := WithinBounds & Grows
+
+-- ---------------------------------------------------------------- §3 Exhaustive and sized generators
+
+memberOf (T : Concrete) (x : T) (xs : List T) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberOf T x rest }
+allOf (T : U) (p : T -> Bool) (xs : List T) : Bool := match xs { nil -> true ; cons x rest -> p x and allOf T p rest }
+firstOf (T : U) (r : T * Seed) : T := match r { (x, s) -> x }
+
+-- An exhaustive generator gives every value of a finite type up to a size (7.S3, 7.R3): each value
+-- is among those of its own size, no value is above the size asked, and the values of one size are
+-- among those of the next.
+Exhaustive (T : Concrete) : { values : Nat -> List T, size : T -> Nat }
+ReachesEvery (T : Concrete) (e : Exhaustive T) (x : T) : Bool := memberOf T x (e.values (e.size x))
+NoneAbove (T : Concrete) (e : Exhaustive T) (n : Nat) : Bool := allOf T (fn x { e.size x <= n }) (e.values n)
+SizesNest (T : Concrete) (e : Exhaustive T) (n : Nat) : Bool := allOf T (fn x { memberOf T x (e.values (n + 1)) }) (e.values n)
+Exhaustive (T : Concrete) := ReachesEvery T & NoneAbove T & SizesNest T
+
+-- A sized generator keeps the size of what it gives within the size asked: for a recursive `data`
+-- the size bounds the depth, so at size 0 only constructors with no recursive argument are drawn
+-- (7.S3, proposed), and drawing ends.
+Sized (T : U) : { gen : Gen T, size : T -> Nat }
+SizeBounded (T : U) (g : Sized T) (n : Nat) (s : Seed) : Bool := g.size (firstOf T (g.gen n s)) <= n
+Sized (T : U) := SizeBounded T
+
+-- ---------------------------------------------------------------- §4 Subtypes and dependent records
+
+-- A subtype with an interval predicate is drawn within its bounds by a metric (§2), with no
+-- rejection; with any other predicate, by its base's generator redrawn while the predicate fails,
+-- up to a budget of tries, after which there is no value and the law is not run, with that reason
+-- (7.S6, 7.S8, 7.S12).
+filtered (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Maybe T * Seed :=
+  if tries == 0 then (nothing, s) else match g n s { (x, s2) -> if p x then (just x, s2) else filtered T g p (tries - 1) n s2 }
+FilterKeepsWhatHolds (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Bool :=
+  match filtered T g p tries n s { (m, s2) -> match m { nothing -> true ; just x -> p x } }
+FilterGivesUp (T : U) (g : Gen T) (p : T -> Bool) (n : Nat) (s : Seed) : Bool :=
+  match filtered T g p 0 n s { (m, s2) -> match m { nothing -> true ; just x -> false } }
+
+-- The components of a dependent pair are drawn in order, the second with the first in its type
+-- (7.S7).
+dependent (A : U) (B : A -> U) (ga : Gen A) (gb : (x : A) -> Gen (B x)) : Gen ((x : A) * B x) :=
+  fn n s { match ga n s { (x, s2) -> match gb x n s2 { (y, s3) -> ((x, y), s3) } } }
+
+-- A filter is the theory these laws are claimed by: a base generator and the predicate it keeps.
+Filter (T : U) : { base : Gen T, keep : T -> Bool }
+FilterKeeps (T : U) (f : Filter T) (tries n : Nat) (s : Seed) : Bool := FilterKeepsWhatHolds T f.base f.keep tries n s
+FilterStops (T : U) (f : Filter T) (n : Nat) (s : Seed) : Bool := FilterGivesUp T f.base f.keep n s
+Filter (T : U) := FilterKeeps T & FilterStops T
+
+-- ---------------------------------------------------------------- §5 Censuses and bindings
+
+-- A function over an infinite domain, or a model of a theory, has no generic generator: a test
+-- binds it to a census, an explicit list of the program's values of that type (7.R4), drawn with
+-- equal weights (§2).
+Census (T : U) = List T
+equalWeights (T : U) (c : Census T) : List (T * Float64) := match c { nil -> nil ; cons x rest -> cons (x, 1.0) (equalWeights T rest) }
+fromCensus (T : U) (r : Random) (c : Census T) : Gen (Maybe T) := fn n s { drawWeighted T r (equalWeights T c) s }
+
+-- A binding names the generator of a parameter, or of every parameter of a type, inline or through
+-- a profile; a parameter binding wins over a type binding, and one in `where` over one in the
+-- profile (7.R1). The generator is named, since generators are values the program defines.
+Binding = { parameter : Maybe String, type : Maybe String, generator : String }
+bindsParameter (x : String) (b : Binding) : Bool := b.parameter == just x
+bindsType (t : String) (b : Binding) : Bool := b.parameter == nothing and b.type == just t
+firstBinding (f : Binding -> Bool) (bs : List Binding) : Maybe String :=
+  match bs { nil -> nothing ; cons b rest -> if f b then just b.generator else firstBinding f rest }
+-- the generator of a parameter `x` of type `t`, from the bindings in `where` and in the profile
+resolve (whereBs profile : List Binding) (x t : String) : Maybe String :=
+  match firstBinding (bindsParameter x) whereBs { just g -> just g ; nothing ->
+  match firstBinding (bindsParameter x) profile { just g -> just g ; nothing ->
+  match firstBinding (bindsType t) whereBs { just g -> just g ; nothing ->
+  firstBinding (bindsType t) profile } } }
+Resolution : { whereBs : List Binding, profile : List Binding }
+ParameterWins (r : Resolution) (x t g h : String) : Bool :=
+  resolve (cons { parameter := just x, type := nothing, generator := g } r.whereBs)
+          (cons { parameter := nothing, type := just t, generator := h } r.profile) x t == just g
+WhereWins (r : Resolution) (x t g h : String) : Bool :=
+  resolve [{ parameter := just x, type := nothing, generator := g }] [{ parameter := just x, type := nothing, generator := h }] x t
+    == just g
+Resolution := ParameterWins & WhereWins
+
+-- ---------------------------------------------------------------- §6 Budgets
+
+-- Every budget is an argument of the test, recorded in the entry (7.S8, L5.18): the tries per
+-- value of a filter, the redraws of a dependent record, the probes of a law quantified inside a
+-- type, the draws per evaluated case (a multiple of `n`), the largest size, and the product of
+-- finite parameters above which a covering array chooses the cases (7.R3). Each is positive; the
+-- defaults are `test`'s (test.lth).
+positiveBudgets (tries redraws probes drawsPerCase coveringAbove : Nat) : Bool :=
+  0 < tries and 0 < redraws and 0 < probes and 0 < drawsPerCase and 0 < coveringAbove
+Budgets : U := { tries redraws probes drawsPerCase largestSize coveringAbove : Nat |
+                    positiveBudgets tries redraws probes drawsPerCase coveringAbove }
