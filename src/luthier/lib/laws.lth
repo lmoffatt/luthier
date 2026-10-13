@@ -92,10 +92,13 @@ Law : U := data {
   Then : Law -> Law -> Law ;
 }
 
--- How much of a type the cases of a `forall` cover: all of it, a census chosen by hand, or a draw
--- from a seed (7.R1, 7.S8). Roles: `ForallOnPoints`, `ExistsOnPoints`.
+-- How much of a type the cases of a `forall` cover: all of it; all of it up to a size, the box
+-- the domain names (7.S10: bounded is exhaustive on that box, and on the whole type a support);
+-- a census chosen by hand; or a draw from a seed (7.R1, 7.S8). Roles: `ForallOnPoints`,
+-- `ExistsOnPoints`.
 Coverage : U := data {
   Exhaustive : Coverage ;
+  Bounded : Nat -> Coverage ;
   Listed : Coverage ;
   Drawn : Nat -> Coverage ;
 }
@@ -104,7 +107,8 @@ Coverage : U := data {
 -- evaluation gave; a value of the quantified type with the evidence for the law at it (a witness
 -- of an `exists`, a counterexample to a `forall`); points of the type with their evidence and how
 -- much they cover; a pair for `and`; one side for `or`; a citation or an assumption, which models
--- any law whole.
+-- any law whole; a run that gave no case, with its reason (a budget spent, a generator that could
+-- not draw; 7.S12), which settles nothing.
 Evidence : U := data {
   Evaluated : Bool -> Evidence ;
   At : (A : U) -> A -> Evidence -> Evidence ;
@@ -113,6 +117,7 @@ Evidence : U := data {
   Side : Bool -> Evidence -> Evidence ;
   Cited : String -> Evidence ;
   Assumed : Evidence ;
+  NotRun : String -> Evidence ;
 }
 
 -- What evidence settles: confirmed, refuted, supported (by a census or a sample, never confirmed),
@@ -189,6 +194,8 @@ ThenIsMaterial (m : Settling) (p q : Law) (e : Evidence) : Bool :=
 -- a citation or an assumption models any law whole, and says on what it is taken
 CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r) == Cites r
 AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == Assumes
+-- a run that did not run settles nothing
+NotRunIsUnsettled (m : Settling) (p : Law) (r : String) : Bool := m.settles p (NotRun r) == Unsettled
 -- the combination of a conjunction's verdicts: commutative and associative, a refutation absorbs
 -- everything, an unsettled part absorbs all but a refutation, and confirmation is neutral; beyond
 -- that it is the demand's (5.S8)
@@ -198,5 +205,5 @@ CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
   m.combine Refuted v == Refuted and (isRefuted v or m.combine Unsettled v == Unsettled) and m.combine Confirmed v == v
 
 Settling := CaseIsEvaluated & ForallAtOnePoint & ForallOnPoints & ExistsAtOnePoint & ExistsOnPoints & BothByPair
-  & EitherBySide & EitherRefutedByBoth & NotFlips & ThenIsMaterial & CitedWhole & AssumedWhole
+  & EitherBySide & EitherRefutedByBoth & NotFlips & ThenIsMaterial & CitedWhole & AssumedWhole & NotRunIsUnsettled
   & CombineCommutes & CombineAssociates & CombineAbsorbs

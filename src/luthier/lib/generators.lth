@@ -1,39 +1,43 @@
 -- generators.lth: generators as values, the generic ones over a type's form, sizes, subtypes,
 -- censuses and budgets; and the generators of programs the checker's laws are tested on.
 --
--- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (layer 2 of
--- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, step 5.1). Sources: spec 7.S1 to 7.S8, 7.R1 to
--- 7.R4 (generators are values; sampling inverts a cumulative weight; the functors over a type;
--- numbers, subtypes, dependent records; budgets); 7.S3's proposed sized rule for recursive `data`;
--- program.lth's `Violating` and `Clean` domains (review of layers 0-1, B); L2.7; L5.18 (every
--- budget an argument). Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+-- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (layer 2 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, step 5.1); draft 0 at
+-- d9e1490 by Claude Opus 5.5, rewritten on the internal review of layers 2 and 3
+-- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, gen.1 to gen.16). Sources: spec 7.S1 to
+-- 7.S8, 7.R1 to 7.R4, 7.S17, 7.S18; 7.S3's proposed sized rule for recursive `data`; program.lth's
+-- `Violating` and `Clean` domains; L2.7; L5.18; L9.6; P10 (the invariant of a metric is what
+-- represents it). Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
 --
 -- What this file states. A generator of `T` is a value of `Gen T`: from a size and a seed, a
 -- value and the next seed (7.S1). Its validity is its type: every value it gives belongs to `T`,
--- which for a subtype is the obligation of its predicate. What else a generator promises (to reach
--- every value of a finite type, to keep a value's size within the size asked, to be determined by
--- its seed) is a theory each generator is a model of. Types are not inspected here (no generator
--- gives a type, 7.R2), so the functors of 7.S3 are stated per form, with the instances the core's
--- types need, and the rest is the certifier's.
+-- which for a subtype is the obligation of its predicate. What else a generator promises is a
+-- theory each generator is a model of, and in each theory the operation the laws speak of is a
+-- field, so that a wrong model is told apart (the review's gen.3: a theory whose operation is a
+-- definition outside it has every value as a model); the definitions here are the reference
+-- models, named in generators_model.lut. Types are not inspected here (7.R2), so what a size is,
+-- one function per form of type (7.S3), is a parameter of the theories that use it. The functors
+-- of 7.S3 over the forms of a type wait for core (gen.9).
 --
 -- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/generators.lth`, sets its status to done here, and commits.
 --
---   §1 Seeds and generators: `Seed`, `Gen T`, the random source and its laws (7.S1).        done
---   §2 Sampling by weight: the cumulative inversion over a list and an interval, the two
---      metrics of numbers (7.S2, 7.S4).                                                     done
---   §3 Exhaustive and sized generators: every value of a finite type up to the size; the
---      size of a recursive `data` bounding its depth (7.S3, 7.R3).                           done
---   §4 Subtypes and dependent records: bounds or a filter with its budget; components in
---      order (7.S6, 7.S7).                                                                  done
---   §5 Censuses: a function over an infinite domain or a model of a theory from an explicit
---      list (7.R4); bindings by parameter and by type (7.R1).                                done
+--   §1 Seeds and generators: `Seed`, `Gen T`, the unit interval; the random source and its
+--      laws, uniform and independent (7.S1, 7.S17).                                         done
+--   §2 Sampling by weight: the cumulative inversion as a field, proportional to the weight;
+--      the metrics of numbers by their invariance (7.S2, 7.S4).                              done
+--   §3 Exhaustive and sized generators, the size the type's (7.S3, 7.R3).                    done
+--   §4 Subtypes and dependent records: a filter with its budget; components in order
+--      (7.S6, 7.S7).                                                                        done
+--   §5 Censuses, walked in turn (7.R4); bindings by parameter and by type (7.R1).             done
 --   §6 Budgets, every one an argument (7.S8).                                               done
---   §7 The programs a rule of the checker is tested on: generators of `Violating` and `Clean`
---      for each rule, the census of tests/spec/ first, then one-edit mutations (program.lth). done
+--   §7 The programs a rule of the checker is tested on (program.lth).                        done
+--   §8 The functors over the forms of a type, with the core's instances (7.S3): waits for
+--      core.lut.                                                                            todo
 
 import "kernel_laws.lth" Concrete
+import "laws.lth" Coverage Exhaustive Listed Drawn Bounded
 
 -- ---------------------------------------------------------------- §1 Seeds and generators
 
@@ -42,150 +46,208 @@ import "kernel_laws.lth" Concrete
 -- the predicate of every value it gives, an obligation tested as an extern's is (spec 4).
 Seed : U := { k : Int | 0 <= k and k < 2147483648 }
 Gen (T : U) = Nat -> Seed -> T * Seed
+-- the unit interval, drawn within its bounds with no rejection (7.S6); the laws below quantify
+-- over it, not over a `Float64` with a guard (gen.14)
+UnitInterval : U := { v : Float64 | 0.0 <= v and v < 1.0 }
+OrderedUnitPair : U := { v w : Float64 | 0.0 <= v and v <= w and w < 1.0 }
 
 -- The random source is an extern that gives seeds and uniform doubles (7.S1); its laws of
--- stochasticity are stated here, in Luthier, and certified as any extern's. Each value is in
--- [0, 1); a seed moves on; and the values are uniform, a statistical law with its level (7.S17):
--- the p-value of a goodness-of-fit test against the uniform law, the host's, is not below `alpha`.
+-- stochasticity are stated here and certified as any extern's. Each value is in [0, 1); a seed
+-- moves on; the values are uniform, and successive values are independent (7.S1). The last two
+-- are statistical laws (7.S17): each returns the p-value of the host's test (goodness of fit to
+-- the uniform law; the pairs of successive draws uniform in the unit square), to be read against
+-- the level the demand sets, and a failure is repeated once (7.S18). As Bool laws they hold on a
+-- fraction `1 - alpha` of seeds, which is what their certificate says (gen.2); the level and the
+-- count are parameters of the certification, `Level`.
 Random : { next : Seed -> Seed, uniform : Seed -> Float64 }
 uniformPValue : List Float64 -> Float64
+serialPValue : List (Float64 * Float64) -> Float64
+Level : U := { alpha : Float64, n : Nat | 0.0 < alpha and alpha < 1.0 and 0 < n }
 draws (r : Random) (s : Seed) (n : Nat) : List Float64 :=
   if n == 0 then nil else cons (r.uniform s) (draws r (r.next s) (n - 1))
+pairs (r : Random) (s : Seed) (n : Nat) : List (Float64 * Float64) :=
+  if n == 0 then nil else cons ((r.uniform s, r.uniform (r.next s))) (pairs r (r.next (r.next s)) (n - 1))
 UniformInUnit (r : Random) (s : Seed) : Bool := 0.0 <= r.uniform s and r.uniform s < 1.0
 SeedMoves (r : Random) (s : Seed) : Bool := not (r.next s == s)
-UniformAtLevel (r : Random) (s : Seed) (n : Nat) (alpha : Float64) : Bool := uniformPValue (draws r s n) >= alpha
-Random := UniformInUnit & SeedMoves & UniformAtLevel
+UniformAtLevel (r : Random) (l : Level) (s : Seed) : Bool := uniformPValue (draws r s l.n) >= l.alpha
+IndependentAtLevel (r : Random) (l : Level) (s : Seed) : Bool := serialPValue (pairs r s l.n) >= l.alpha
+Random := UniformInUnit & SeedMoves & UniformAtLevel & IndependentAtLevel
 
 -- ---------------------------------------------------------------- §2 Sampling by weight
 
 -- To draw from a support with weights, draw `u` uniform in [0, C), `C` the total weight, and give
--- the first value at which the cumulative weight exceeds `u` (7.S2). Weights are non-negative.
+-- the value at which the cumulative weight first exceeds `u` (7.S2). Weights are non-negative.
+-- The reference `pick` gives the last value of positive weight when rounding leaves `u` beyond the
+-- running sum (gen.1: in doubles the sum of the parts need not reach the total).
 total (T : U) (ws : List (T * Float64)) : Float64 := match ws { nil -> 0.0 ; cons (x, w) rest -> w + total T rest }
-pick (T : U) (ws : List (T * Float64)) (u : Float64) : Maybe T :=
-  match ws { nil -> nothing ; cons (x, w) rest -> if u < w then just x else pick T rest (u - w) }
-drawWeighted (T : U) (r : Random) (ws : List (T * Float64)) : Seed -> Maybe T * Seed :=
-  fn s { (pick T ws (total T ws * r.uniform s), r.next s) }
+pick (T : U) (ws : List (T * Float64)) (u : Float64) : Maybe T := match ws { nil -> nothing ;
+  cons (x, w) rest -> if u < w then just x else (match pick T rest (u - w) { nothing -> (if 0.0 < w then just x else nothing) ; r -> r }) }
 
--- A support with weights, the model of a census drawn by weight (7.S2). Its laws characterize the
--- inversion: a value of weight zero is never drawn, a value is drawn for a part of [0, C) as wide
--- as its weight, and a support of one value always gives it.
-Support (T : Concrete) : { weights : List (T * Float64) }
+-- A support with weights and its inversion: `pick` is a field, so that the laws tell a model apart
+-- (gen.3, gen.4). The laws: a value of weight zero is never drawn; a value is drawn exactly on a
+-- part of [0, C) as wide as its weight, the one between the running sum before it and the running
+-- sum through it (7.S2's proportionality); one value of positive weight always gives itself.
+Support (T : Concrete) : { weights : List (T * Float64), pick : Float64 -> Maybe T }
 weightOf (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
   match ws { nil -> 0.0 ; cons (y, w) rest -> (if x == y then w else 0.0) + weightOf T rest x }
+allNonNegative (T : Concrete) (ws : List (T * Float64)) : Bool :=
+  match ws { nil -> true ; cons (x, w) rest -> 0.0 <= w and allNonNegative T rest }
+-- the running sum before the first occurrence of `x`
+before (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
+  match ws { nil -> 0.0 ; cons (y, w) rest -> if x == y then 0.0 else w + before T rest x }
+occurs (T : Concrete) (ws : List (T * Float64)) (x : T) : Bool :=
+  match ws { nil -> false ; cons (y, w) rest -> x == y or occurs T rest x }
 NonNegative (T : Concrete) (s : Support T) : Bool := allNonNegative T s.weights
-allNonNegative (T : Concrete) (ws : List (T * Float64)) : Bool := match ws { nil -> true ; cons (x, w) rest -> 0.0 <= w and allNonNegative T rest }
--- for `u` in [0, C): what is picked has a positive weight
-PickedHasWeight (T : Concrete) (s : Support T) (v : Float64) : Bool :=
-  not (0.0 <= v and v < 1.0)
-  or (match pick T s.weights (total T s.weights * v) { nothing -> total T s.weights == 0.0 ; just x -> 0.0 < weightOf T s.weights x })
--- one value always gives itself; a value after one of weight zero is the next drawn
-PickOfOne (T : Concrete) (s : Support T) (x : T) (v : Float64) : Bool :=
-  not (0.0 <= v and v < 1.0) or pick T [(x, 1.0)] v == just x
-Support (T : Concrete) := NonNegative T & PickedHasWeight T & PickOfOne T
+PickedHasWeight (T : Concrete) (s : Support T) (v : UnitInterval) : Bool :=
+  match s.pick (total T s.weights * v) { nothing -> total T s.weights == 0.0 ; just x -> 0.0 < weightOf T s.weights x }
+-- proportionality: `u` within `x`'s part gives `x`, stated on every value of the support
+ProportionalToWeight (T : Concrete) (s : Support T) (x : T) (v : UnitInterval) : Bool :=
+  not (occurs T s.weights x) or 0.0 == weightOf T s.weights x
+  or s.pick (before T s.weights x + weightOf T s.weights x * v) == just x
+Support (T : Concrete) := NonNegative T & PickedHasWeight T & ProportionalToWeight T
 
--- The two metrics of numbers (7.S2, 7.S4): over [lo, hi], `linear` has weight 1, uniform between
--- the bounds; `log` has weight 1/x, uniform in the logarithm, which needs 0 < lo. A metric maps a
--- uniform `u` in [0, 1) into the interval; the two metrics are models, in generators_model.lut.
--- `power` is core's (spec 11), declared until written.
+-- The metrics of numbers (7.S2, 7.S4): a metric places a uniform `u` in [0, 1) into an interval,
+-- within its bounds and growing with `u`, from the lower bound at `u = 0`. What tells the two
+-- apart is the invariance that represents each (P10, gen.5): `linear` commutes with translation,
+-- for a quantity whose meaning does not change when shifted, and is defined on any interval;
+-- `log` commutes with scaling, for a quantity that is a magnitude, and needs `0 < lo` (7.S4's
+-- atom at 0 and the sign are the generator's, outside this theory). The models are in
+-- generators_model.lut; `power` is core's (spec 11), declared until written.
 power : Float64 -> Float64 -> Float64
-Interval : U := { lo hi : Float64 | 0.0 < lo and lo < hi }
+Interval : U := { lo hi : Float64 | lo < hi }
+PositiveInterval : U := { lo hi : Float64 | 0.0 < lo and lo < hi }
 Metric : { place : Float64 -> Float64 -> Float64 -> Float64 }
--- every metric stays within the bounds and grows with `u`
-WithinBounds (m : Metric) (i : Interval) (v : Float64) : Bool :=
-  not (0.0 <= v and v < 1.0) or (i.lo <= m.place i.lo i.hi v and m.place i.lo i.hi v <= i.hi)
-Grows (m : Metric) (i : Interval) (v w : Float64) : Bool :=
-  not (0.0 <= v and v <= w and w < 1.0) or m.place i.lo i.hi v <= m.place i.lo i.hi w
-Metric := WithinBounds & Grows
+WithinBounds (m : Metric) (i : PositiveInterval) (v : UnitInterval) : Bool :=
+  i.lo <= m.place i.lo i.hi v and m.place i.lo i.hi v <= i.hi
+Grows (m : Metric) (i : PositiveInterval) (p : OrderedUnitPair) : Bool := m.place i.lo i.hi p.v <= m.place i.lo i.hi p.w
+StartsAtLo (m : Metric) (i : PositiveInterval) : Bool := m.place i.lo i.hi 0.0 == i.lo
+Metric := WithinBounds & Grows & StartsAtLo
+-- the linear metric: on any interval, and shifted with it
+Translates (m : Metric) (i : Interval) (c : Float64) (v : UnitInterval) : Bool :=
+  m.place (i.lo + c) (i.hi + c) v == m.place i.lo i.hi v + c
+WithinAnyBounds (m : Metric) (i : Interval) (v : UnitInterval) : Bool :=
+  i.lo <= m.place i.lo i.hi v and m.place i.lo i.hi v <= i.hi
+LinearMetric : { metric : Metric }
+LinearTranslates (l : LinearMetric) (i : Interval) (c : Float64) (v : UnitInterval) : Bool := Translates l.metric i c v
+LinearWithinAny (l : LinearMetric) (i : Interval) (v : UnitInterval) : Bool := WithinAnyBounds l.metric i v
+LinearMetric := LinearTranslates & LinearWithinAny
+-- the log metric: scaled with its interval
+Scales (m : Metric) (i : PositiveInterval) (k : Float64) (v : UnitInterval) : Bool :=
+  not (0.0 < k) or m.place (k * i.lo) (k * i.hi) v == k * m.place i.lo i.hi v
+LogMetric : { metric : Metric }
+LogScales (l : LogMetric) (i : PositiveInterval) (k : Float64) (v : UnitInterval) : Bool := Scales l.metric i k v
+LogMetric := LogScales
 
 -- ---------------------------------------------------------------- §3 Exhaustive and sized generators
 
 memberOf (T : Concrete) (x : T) (xs : List T) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberOf T x rest }
 allOf (T : U) (p : T -> Bool) (xs : List T) : Bool := match xs { nil -> true ; cons x rest -> p x and allOf T p rest }
 firstOf (T : U) (r : T * Seed) : T := match r { (x, s) -> x }
+noDuplicates (T : Concrete) (xs : List T) : Bool := match xs { nil -> true ; cons x rest -> not (memberOf T x rest) and noDuplicates T rest }
+upTo (T : U) (size : T -> Nat) (n : Nat) (xs : List T) : List T :=
+  match xs { nil -> nil ; cons x rest -> if size x <= n then cons x (upTo T size n rest) else upTo T size n rest }
 
--- An exhaustive generator gives every value of a finite type up to a size (7.S3, 7.R3): each value
--- is among those of its own size, no value is above the size asked, and the values of one size are
--- among those of the next.
-Exhaustive (T : Concrete) : { values : Nat -> List T, size : T -> Nat }
-ReachesEvery (T : Concrete) (e : Exhaustive T) (x : T) : Bool := memberOf T x (e.values (e.size x))
-NoneAbove (T : Concrete) (e : Exhaustive T) (n : Nat) : Bool := allOf T (fn x { e.size x <= n }) (e.values n)
-SizesNest (T : Concrete) (e : Exhaustive T) (n : Nat) : Bool := allOf T (fn x { memberOf T x (e.values (n + 1)) }) (e.values n)
-Exhaustive (T : Concrete) := ReachesEvery T & NoneAbove T & SizesNest T
+-- An exhaustive generator lists every value of a finite type, once; its values up to a size are
+-- those whose size is at most it (7.S3, 7.R3). The size is the type's, one function per form
+-- (7.S3), so it is a parameter and not the model's choice (gen.7); a type with no finite list of
+-- all its values has no model (gen.8: `exhaustive` over an unbounded type is an error, 7.R3).
+Exhaustive (T : Concrete) (size : T -> Nat) : { all : List T }
+ReachesEvery (T : Concrete) (size : T -> Nat) (e : Exhaustive T size) (x : T) : Bool := memberOf T x e.all
+EachOnce (T : Concrete) (size : T -> Nat) (e : Exhaustive T size) : Bool := noDuplicates T e.all
+Exhaustive (T : Concrete) (size : T -> Nat) := ReachesEvery T size & EachOnce T size
+values (T : Concrete) (size : T -> Nat) (e : Exhaustive T size) (n : Nat) : List T := upTo T size n e.all
 
 -- A sized generator keeps the size of what it gives within the size asked: for a recursive `data`
 -- the size bounds the depth, so at size 0 only constructors with no recursive argument are drawn
 -- (7.S3, proposed), and drawing ends.
-Sized (T : U) : { gen : Gen T, size : T -> Nat }
-SizeBounded (T : U) (g : Sized T) (n : Nat) (s : Seed) : Bool := g.size (firstOf T (g.gen n s)) <= n
-Sized (T : U) := SizeBounded T
+Sized (T : U) (size : T -> Nat) : { gen : Gen T }
+SizeBounded (T : U) (size : T -> Nat) (g : Sized T size) (n : Nat) (s : Seed) : Bool := size (firstOf T (g.gen n s)) <= n
+Sized (T : U) (size : T -> Nat) := SizeBounded T size
 
 -- ---------------------------------------------------------------- §4 Subtypes and dependent records
 
 -- A subtype with an interval predicate is drawn within its bounds by a metric (§2), with no
 -- rejection; with any other predicate, by its base's generator redrawn while the predicate fails,
 -- up to a budget of tries, after which there is no value and the law is not run, with that reason
--- (7.S6, 7.S8, 7.S12).
+-- (7.S6, 7.S8, 7.S12). `draw` is the field; the laws relate it to the base (gen.3): what it gives
+-- holds; it gives nothing only when none of the base's draws in the budget holds; and what it
+-- gives is the first of them that holds. The reference is `filtered`.
 filtered (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Maybe T * Seed :=
   if tries == 0 then (nothing, s) else match g n s { (x, s2) -> if p x then (just x, s2) else filtered T g p (tries - 1) n s2 }
-FilterKeepsWhatHolds (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Bool :=
-  match filtered T g p tries n s { (m, s2) -> match m { nothing -> true ; just x -> p x } }
-FilterGivesUp (T : U) (g : Gen T) (p : T -> Bool) (n : Nat) (s : Seed) : Bool :=
-  match filtered T g p 0 n s { (m, s2) -> match m { nothing -> true ; just x -> false } }
+Filter (T : U) : { base : Gen T, keep : T -> Bool, draw : Nat -> Nat -> Seed -> Maybe T * Seed }
+firstKept (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Maybe T :=
+  match filtered T g p tries n s { (m, s2) -> m }
+DrawKeeps (T : U) (f : Filter T) (tries n : Nat) (s : Seed) : Bool :=
+  match f.draw tries n s { (m, s2) -> match m { nothing -> true ; just x -> f.keep x } }
+DrawIsTheFirstKept (T : U) (f : Filter T) (tries n : Nat) (s : Seed) : Bool :=
+  match f.draw tries n s { (m, s2) -> m == firstKept T f.base f.keep tries n s }
+Filter (T : U) := DrawKeeps T & DrawIsTheFirstKept T
 
 -- The components of a dependent pair are drawn in order, the second with the first in its type
--- (7.S7).
+-- (7.S7); when the second's type is empty for a first, the first is drawn again, up to the
+-- `redraws` budget (7.S8): that is the generator of a dependent subtype, a filter over the pair.
 dependent (A : U) (B : A -> U) (ga : Gen A) (gb : (x : A) -> Gen (B x)) : Gen ((x : A) * B x) :=
   fn n s { match ga n s { (x, s2) -> match gb x n s2 { (y, s3) -> ((x, y), s3) } } }
-
--- A filter is the theory these laws are claimed by: a base generator and the predicate it keeps.
-Filter (T : U) : { base : Gen T, keep : T -> Bool }
-FilterKeeps (T : U) (f : Filter T) (tries n : Nat) (s : Seed) : Bool := FilterKeepsWhatHolds T f.base f.keep tries n s
-FilterStops (T : U) (f : Filter T) (n : Nat) (s : Seed) : Bool := FilterGivesUp T f.base f.keep n s
-Filter (T : U) := FilterKeeps T & FilterStops T
 
 -- ---------------------------------------------------------------- §5 Censuses and bindings
 
 -- A function over an infinite domain, or a model of a theory, has no generic generator: a test
--- binds it to a census, an explicit list of the program's values of that type (7.R4), drawn with
--- equal weights (§2).
+-- binds it to a census, an explicit list of the program's values of that type (7.R4), walked in
+-- turn, each value once (7.S3's table; gen.10: a draw by weight repeats and misses, and could not
+-- be graded as listed).
 Census (T : U) = List T
-equalWeights (T : U) (c : Census T) : List (T * Float64) := match c { nil -> nil ; cons x rest -> cons (x, 1.0) (equalWeights T rest) }
-fromCensus (T : U) (r : Random) (c : Census T) : Gen (Maybe T) := fn n s { drawWeighted T r (equalWeights T c) s }
+lengthOf (T : U) (xs : List T) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf T rest }
+nth (T : U) (xs : List T) (i : Nat) : Maybe T :=
+  match xs { nil -> nothing ; cons x rest -> if i == 0 then just x else nth T rest (i - 1) }
+nextSeed (s : Seed) : Seed := (s + 1) mod 2147483648
+walk (T : U) (c : Census T) : Gen (Maybe T) :=
+  fn n s { (if lengthOf T c == 0 then nothing else nth T c (s mod lengthOf T c), nextSeed s) }
 
 -- A binding names the generator of a parameter, or of every parameter of a type, inline or through
--- a profile; a parameter binding wins over a type binding, and one in `where` over one in the
--- profile (7.R1). The generator is named, since generators are values the program defines.
-Binding = { parameter : Maybe String, type : Maybe String, generator : String }
+-- a profile, with the coverage that generator gives (every value, a census, a draw); a parameter
+-- binding wins over a type binding, and one in `where` over one in the profile (7.R1). The
+-- resolution is a field (gen.3); the reference is `resolve`.
+Binding = { parameter : Maybe String, type : Maybe String, generator : String, coverage : Coverage }
 bindsParameter (x : String) (b : Binding) : Bool := b.parameter == just x
 bindsType (t : String) (b : Binding) : Bool := b.parameter == nothing and b.type == just t
-firstBinding (f : Binding -> Bool) (bs : List Binding) : Maybe String :=
-  match bs { nil -> nothing ; cons b rest -> if f b then just b.generator else firstBinding f rest }
--- the generator of a parameter `x` of type `t`, from the bindings in `where` and in the profile
-resolve (whereBs profile : List Binding) (x t : String) : Maybe String :=
+firstBinding (f : Binding -> Bool) (bs : List Binding) : Maybe Binding :=
+  match bs { nil -> nothing ; cons b rest -> if f b then just b else firstBinding f rest }
+resolve (whereBs profile : List Binding) (x t : String) : Maybe Binding :=
   match firstBinding (bindsParameter x) whereBs { just g -> just g ; nothing ->
   match firstBinding (bindsParameter x) profile { just g -> just g ; nothing ->
   match firstBinding (bindsType t) whereBs { just g -> just g ; nothing ->
   firstBinding (bindsType t) profile } } }
-Resolution : { whereBs : List Binding, profile : List Binding }
-ParameterWins (r : Resolution) (x t g h : String) : Bool :=
-  resolve (cons { parameter := just x, type := nothing, generator := g } r.whereBs)
-          (cons { parameter := nothing, type := just t, generator := h } r.profile) x t == just g
-WhereWins (r : Resolution) (x t g h : String) : Bool :=
-  resolve [{ parameter := just x, type := nothing, generator := g }] [{ parameter := just x, type := nothing, generator := h }] x t
-    == just g
-Resolution := ParameterWins & WhereWins
+Resolution : { bindingOf : List Binding -> List Binding -> String -> String -> Maybe Binding }
+byParameter (x g : String) : Binding := { parameter := just x, type := nothing, generator := g, coverage := Drawn 0 }
+byType (t g : String) : Binding := { parameter := nothing, type := just t, generator := g, coverage := Drawn 0 }
+generatorOf (b : Maybe Binding) : Maybe String := match b { nothing -> nothing ; just k -> just k.generator }
+ParameterWins (r : Resolution) (whereBs profile : List Binding) (x t g h : String) : Bool :=
+  generatorOf (r.bindingOf (cons (byParameter x g) whereBs) (cons (byType t h) profile) x t) == just g
+WhereWins (r : Resolution) (profile : List Binding) (x t g h : String) : Bool :=
+  generatorOf (r.bindingOf [byParameter x g] (cons (byParameter x h) profile) x t) == just g
+TypeBindsEveryParameter (r : Resolution) (x t g : String) : Bool :=
+  generatorOf (r.bindingOf nil [byType t g] x t) == just g
+NothingBindsNothing (r : Resolution) (x t : String) : Bool := r.bindingOf nil nil x t == nothing
+Resolution := ParameterWins & WhereWins & TypeBindsEveryParameter & NothingBindsNothing
 
 -- ---------------------------------------------------------------- §6 Budgets
 
 -- Every budget is an argument of the test, recorded in the entry (7.S8, L5.18): the tries per
 -- value of a filter, the redraws of a dependent record, the probes of a law quantified inside a
--- type, the draws per evaluated case (a multiple of `n`), the largest size, and the product of
--- finite parameters above which a covering array chooses the cases (7.R3). Each is positive; the
--- defaults are `test`'s (test.lth).
-positiveBudgets (tries redraws probes drawsPerCase coveringAbove : Nat) : Bool :=
+-- type, the draws per evaluated case (a multiple of `n`), the product of finite parameters above
+-- which a covering array chooses the cases (7.R3), the runs that estimate a level, the seeds per
+-- control (7.S19), the draws that certify a generator's distribution (7.S1), and the total
+-- probability of special values and of the atom at 0 of a `log` metric. The largest size is the
+-- spec's (`TestSpec.size`, test.lth). The defaults are `test`'s.
+positiveBudgets (tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws : Nat) : Bool :=
   0 < tries and 0 < redraws and 0 < probes and 0 < drawsPerCase and 0 < coveringAbove
-Budgets : U := { tries redraws probes drawsPerCase largestSize coveringAbove : Nat |
-                    positiveBudgets tries redraws probes drawsPerCase coveringAbove }
+  and 0 < levelRuns and 0 < seedsPerControl and 0 < distributionDraws
+budgetMasses (specialMass atomAtZero : Float64) : Bool :=
+  0.0 <= specialMass and specialMass < 1.0 and 0.0 <= atomAtZero and atomAtZero < 1.0
+Budgets : U := { tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws : Nat,
+                   specialMass atomAtZero : Float64 |
+                   positiveBudgets tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws
+                     and budgetMasses specialMass atomAtZero }
 
 -- ---------------------------------------------------------------- §7 The programs a rule is tested on
 
@@ -195,24 +257,22 @@ import "program.lth" Violating Clean
 -- For each rule of the checker, the programs with a name that violates it and those with a name
 -- that does not (program.lth: `ReportsViolations`, `ReportsNoFalseFailure`; review of layers 0-1,
 -- B). At size 0 each generator walks its census, the programs of tests/spec/ for that rule, one per
--- seed in order; at larger sizes it draws a well-formed program from a small pool of names (act
--- names, core's, imports) and changes it by one edit aimed at the rule (a second `:=` of a name,
--- a body at `U` that is no type, an `==` on a function, a name nothing defines, a constructor no
--- law mentions). What `violating` gives violates the rule because its type says so: that is its
--- obligation, tested as any generator's (7.S1).
+-- seed in order, the next seed the next program (gen.11); at larger sizes it draws a well-formed
+-- program from a small pool of names (act names, core's, imports) and changes it by one edit aimed
+-- at the rule (a second `:=` of a name, a body at `U` that is no type, an `==` on a function, a
+-- name nothing defines, a constructor no law mentions). What `violating` gives violates the rule
+-- because its type says so: that is its obligation, tested as any generator's (7.S1).
 RuleCases (v : SurfaceProgram -> String -> Bool) : {
   violating : Gen (Violating v),
   clean : Gen (Clean v),
   census : List (Violating v),
   cleanCensus : List (Clean v),
 }
-nth (T : U) (xs : List T) (i : Nat) : Maybe T :=
-  match xs { nil -> nothing ; cons x rest -> if i == 0 then just x else nth T rest (i - 1) }
--- at size 0, seed `i` gives the census's `i`-th program, while there is one
-CensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Nat) : Bool :=
-  i >= 2147483648 or (match nth (Violating v) c.census i { nothing -> true ;
-    just w -> (match c.violating 0 i { (x, s) -> x.p == w.p and x.n == w.n }) })
-CleanCensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Nat) : Bool :=
-  i >= 2147483648 or (match nth (Clean v) c.cleanCensus i { nothing -> true ;
-    just w -> (match c.clean 0 i { (x, s) -> x.p == w.p and x.n == w.n }) })
+-- at size 0, seed `i` gives the census's `i`-th program, and the next seed is `i + 1`
+CensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Seed) : Bool :=
+  match nth (Violating v) c.census i { nothing -> true ;
+    just w -> (match c.violating 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
+CleanCensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Seed) : Bool :=
+  match nth (Clean v) c.cleanCensus i { nothing -> true ;
+    just w -> (match c.clean 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
 RuleCases (v : SurfaceProgram -> String -> Bool) := CensusFirst v & CleanCensusFirst v

@@ -1,11 +1,23 @@
 -- generators_model.lut: the models of generators.lth.
 --
--- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (layer 2). The two metrics of numbers
--- (7.S2, 7.S4), and the instances of the sections that follow as they are written.
+-- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (layer 2; draft 0 at 8570a0d). The two
+-- metrics of numbers (7.S2, 7.S4), the reference support, filter and resolution of bindings, from
+-- the definitions of generators.lth; the core's instances of the forms of a type wait for core.
 
-import "generators.lth" Metric power
+import "generators.lth" Metric LinearMetric LogMetric Support Filter Resolution Gen power pick resolve filtered
+import "kernel_laws.lth" Concrete
 
 -- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
 linear : Metric := { place := fn lo hi v { lo + v * (hi - lo) } }
+linearMetric : LinearMetric := { metric := linear }
 -- `log`: uniform in the logarithm, for a quantity whose meaning does not change when scaled
 logarithmic : Metric := { place := fn lo hi v { lo * power (hi / lo) v } }
+logMetric : LogMetric := { metric := logarithmic }
+
+-- a support drawn by the reference inversion
+supportOf (T : Concrete) (ws : List (T * Float64)) : Support T := { weights := ws, pick := fn u { pick T ws u } }
+-- a filter drawn by the reference redraw
+filterOf (T : U) (g : Gen T) (p : T -> Bool) : Filter T :=
+  { base := g, keep := p, draw := fn tries n s { filtered T g p tries n s } }
+-- the reference resolution of bindings
+resolution : Resolution := { bindingOf := resolve }
