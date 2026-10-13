@@ -28,7 +28,9 @@ of the first four theories:
 Each model must satisfy every law of its theory in term.lth; read each law and check your code
 against it by hand, since no checker can run it yet. Keep helpers in the same file. Check with
 `PYTHONPATH=src python3 -m luthier.cli parse src/luthier/lib/term_model.lut` and run
-`python3 -m pytest tests/ -q`. Do not change term.lth or any other file except your report; if a
+`python3 -m pytest tests/test_parse.py tests/test_ebnf.py -q`. Another Codex is writing
+`tests/test_roundtrip_trees.py` and `tests/test_spec.py` at the same time: do not run or touch
+them, and touch nothing outside `term_model.lut` and your report. Do not change term.lth or any other file except your report; if a
 law seems wrong or unsatisfiable, say so. Do not commit. Report in a few lines to
 `record/IA/term-2026-10-13/codex.md`: what you wrote, any law you could not meet, any choice the
 laws left open.
