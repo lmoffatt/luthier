@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 9ce38bf76717, commit 53eee60 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 b223b3483253, commit fd3cba9 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -129,7 +129,9 @@ demanded).
 - L2.6 The theoretical module of clause 4 is a file of its own: a theory file holds types,
   declarations and laws, and is what the checker reads; each model of it, or each algorithm written
   against it, lives in a file of its own, read only when a demand needs it and certified against the
-  theory. What a file imports has its theory in a theory file (D-2026-10-13-i, -j). [settled]
+  theory. What a file imports has its theory in a theory file (D-2026-10-13-i, -j). A theory file may
+  hold the definitions its laws need and a value that is part of the theory, never a model of a theory
+  declared elsewhere (D-2026-10-13-o). [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
 Status: settled; clause 6 settled (D-2026-10-13-i, -j, -n).

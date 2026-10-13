@@ -21,6 +21,8 @@ alternatives, `[ ]` is optional, `{ }` repeats zero or more times, literals are 
 
 A dotted name `m.f` is one token, a qualified name or a projection that the checker resolves
 (spec 2.S14). Names that start with a capital are types and laws by convention, not by rule.
+[proposed] Inside a string, `\"`, `\\` and `\n` stand for a quote, a backslash and a line break, so
+that a law can spell a text of several lines (`grammar.lth`).
 
 **2.S2. Reserved words.** [implemented] The reserved words are `data`, `match`, `extern`,
 `provisional`, `test`, `with`, `exhaustive`, `import`, `forget`, `U`, `operator`, `if`, `then`,
@@ -61,12 +63,17 @@ infix operator.
 
 Binders before the colon are parameters: `f (x : A) (y : B) : C := t` is
 `f : (x : A) -> (y : B) -> C := \ x { \ y { t } }`, and `(x y : A)` is `(x : A) (y : A)`.
-Clauses under a header with parameters are a `match` on the tuple of the parameters. A name may be
+Clauses under a header with parameters are a `match` on the tuple of the parameters.
+[decided D-2026-10-13-o] Two changes to the productions above. A bare term is an act, `act ::= ... | term`: a datum
+the module keeps, such as a `test` line or a citation (2.S21 makes `test` and `cite` functions);
+which terms may stand there is the checker's, and no `<-` does (2.R5). A trailing separator is
+allowed after the last constructor of a `data`, the last arm of a `match` and the last item of a
+record or a block. A name may be
 declared in one act and defined in another, in the same file or another; what the body of a
 definition means depends on its type (spec 4). An alias with binders is a function on types:
 `Maybe (A : U) = < nothing : Unit | just : A >`.
 
-**2.S6. Directives.** [implemented] The directives other than `test` are: Replaced: 2.S21.
+**2.S6. Directives.** [implemented] In `v0.1-final` the directives other than `test` were as below; the language designed keeps only `operator` as an act of its own, `import` takes the form of 12.S22 and `cite` is a function (2.S21). Replaced: 2.S21.
 
     directive   ::= "import" string [ "as" name ]
                   | "operator" op ":=" term
@@ -125,8 +132,8 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
              | "match" term "{" { pattern "->" term [ ";" ] } "}"
              | "(" name "<-" term ")"                                                     -- named argument
              | "if" term "then" term [ "else" term ]                                     -- one arm: a Maybe or a reason
-             | "let" pattern "=" term "in" term
-             | "-" term                                                                   -- negation
+             | "let" pattern "=" term "in" term                                           -- retired (2.S21)
+             | "-" term                                                                   -- negation; see below
              | "extern" [ "provisional" ] string
              | "forget" atom
              | atom "." name                                                              -- projection
@@ -136,6 +143,13 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
     lparam  ::= name | "(" name { name } ":" term ")" | "(" pattern { "," pattern } ")"
     pattern ::= "_" | name { patom } | patom
     patom   ::= name | number | string | "(" pattern { "," pattern } ")"
+
+[decided D-2026-10-13-o] In the language designed: `let` is retired, replaced by blocks
+(2.S21). Negation is not an atom but a level of its own, above application and below `*`, so
+`-f x` is `-(f x)` and `f -x` is `f - x` (2.S15). A single labeled field with a law,
+`{ x : T | p }`, is the subtype with the pattern `x`; the labeled forms take two or more names,
+`{ x : A, y : B }` or `{ x y : A }`, with an optional law; so each text has one tree. A field may
+carry several names, `{ x y : A, z : B }`, and `"eval" term term` joins `quote` (2.S20).
 
 **2.S10. Patterns.** [implemented] A pattern `name` is a constructor of the scrutinee's data type
 or a label of its sum if it names one, and a variable otherwise. A label of a sum is an injection:
@@ -199,7 +213,7 @@ In a dependent product the type of a later component may mention earlier ones, a
 ## §7 Sugar added on 2026-10-05
 
 **2.S15. `let` and negation.** [implemented] `let p = e in body` is `match e { p -> body }`, the
-pattern a name or a tuple. `-x` is negation, an error on a type other than `Int` or `Float64`. It
+pattern a name or a tuple; retired by D-2026-10-13-o, a block does it. `-x` is negation, an error on a type other than `Int` or `Float64`. It
 binds looser than application, so `-f x` is `-(f x)`, and as an argument it needs parentheses,
 `f (-x)`, since `f -x` is `f - x`. Replaced: 2.S21.
 
@@ -259,7 +273,8 @@ extends, the act `profile` is new, and the act `gen` and its word are removed: R
     binding   ::= name ":=" term
 
 Here the name after `sampled` is a metric and the name after `under` a profile; their meaning is
-`spec 7`. The parser today reads `test name [ "with" number | "exhaustive" ] [ "size" number ]` and
+`spec 7`. This syntax is replaced by `test` as a function with named arguments and a profile as a
+record value (D-2026-10-12-ab, 2.S21), so no `profile` act remains. The parser today reads `test name [ "with" number | "exhaustive" ] [ "size" number ]` and
 still reads `gen name ":=" ( term | "extern" string )`.
 
 ## §10 Terms as data
@@ -271,14 +286,15 @@ one candidate syntax,
            | "eval" term term                    -- eval A t: the value of the quoted t, at type A
 
 The type `Term` itself, and `Program`, belong to `spec 3`. A theory that states this grammar in
-Luthier would be `grammar.lut` (L14), not written. A saved evaluation, a quoted term together with
+Luthier is `src/luthier/lib/grammar.lth` (L14), draft 0 written 2026-10-13. A saved evaluation, a quoted term together with
 its value, stays open (spec 8).
 
 
 ## §11 The keywords, and what becomes Luthier
 
 **2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `W` (D-2026-10-13-b), `data`, `match`, `if`,
-`then`, `else`, `U`, and possibly `operator`. Everything else is a core or library
+`then`, `else`, `U`, `operator` and `quote` (D-2026-10-13-o): `operator` binds a symbol, which no
+function can take as an argument, and `quote` captures a term unevaluated. Everything else is a core or library
 name: `let` and `in` give way to blocks (§8); `forget` is a function of core; `extern`,
 `primitive` and `axiom` are names of core whose application the checker recognizes (`spec 3 §8`),
 with `provisional` a named argument of `extern`; `test` and `cite` are functions whose options

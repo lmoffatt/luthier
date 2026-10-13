@@ -494,7 +494,9 @@ L2.6   The theoretical module of clause 4 is a file of its own: a theory file ho
        declarations and laws, and is what the checker reads; each model of it, or each algorithm
        written against it, lives in a file of its own, read only when a demand needs it and
        certified against the theory. What a file imports has its theory in a theory file
-       (D-2026-10-13-i, -j). [settled]
+       (D-2026-10-13-i, -j). A theory file may hold the definitions its laws need and a value that
+       is part of the theory, never a model of a theory declared elsewhere (D-2026-10-13-o).
+       [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j
 Rests on:   O9 (the kind of a hole in the elaborated form, for the spec)
 Source:     Luciano, 2026-05-29 (dialogue:20260529T1400:tipos-no-definidos-y-forward-reference); the

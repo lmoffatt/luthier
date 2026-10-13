@@ -25,7 +25,7 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 ## §3 Declaration in one file, definition in another
 
-**12.S8. A declared value may be defined elsewhere.** [implemented] A file may declare a value with its laws in its type, and another file may give it a body. The type of the definition, if written, must agree with the declaration; if omitted, it is inherited. The laws of the declared type become obligations of the definition, so a specification has as many implementations as files that fill it, all measured against the same laws. A declared type may likewise be defined by its laws in another file. The rules that forbid a definition using a type no file defined, and an extern that gives a type, belong to spec 4 and are not restated here.
+**12.S8. A declared value may be defined elsewhere.** [implemented] Retired by D-2026-10-13-o: a model is a named value of its theory, imported by name with it (12.S22), so no file fills another's hole by repeating its name. As `v0.1-final` did it: a file may declare a value with its laws in its type, and another file may give it a body. The type of the definition, if written, must agree with the declaration; if omitted, it is inherited. The laws of the declared type become obligations of the definition, so a specification has as many implementations as files that fill it, all measured against the same laws. A declared type may likewise be defined by its laws in another file. The rules that forbid a definition using a type no file defined, and an extern that gives a type, belong to spec 4 and are not restated here.
 
 **12.S9. The pattern of a library.** [decided D-2026-10-12-ah] A library with a faster implementation in the host comes as two files. The pure file defines its types natively, gives a native definition of each operation, declares as holes the operations the host computes faster, and states the laws. The `_python` file fills those holes with externs (L11), supplies the generators (spec 7) and has each extern certified against the native definition or the laws of its theory. The pattern is what the libraries do today; it is a rule of the language, stated here since no program can be accepted or rejected by it.
 
@@ -67,7 +67,8 @@ import (12.S22).
 **12.S22. An import names what enters, with its theory.** [decided D-2026-10-13-n] A theory is
 imported by name from a theory file, `import "linear_algebra.lth" LinearAlgebra`, and a model by name
 with the theory it is a model of, `import "linear_algebra_numpy.lut" Numpy : LinearAlgebra`,
-optionally `as LA`. The importer is checked against the theory alone, without reading the model's
+optionally `as LA`; one line may name several things of one file, `import "ebnf.lth" Ebnf Rhs
+derives`, each with its theory and alias where it has them (D-2026-10-13-o). The importer is checked against the theory alone, without reading the model's
 file; when a demand first needs the model (12.S21), the file is read and the checker verifies that
 it defines that name as a model of that theory, an error otherwise; and the importer sees only what
 the theory names, which is the private part (L6.12, L6.14). There is no import without names, no
@@ -79,7 +80,9 @@ visible unqualified; a name with no import is local or core's.
 **12.S23. Theory files and model files.** [decided D-2026-10-13-n] A theory file, extension `.lth`,
 holds types, declarations and laws; the checker rejects an `extern`, an action or a model value in
 it, since the checker reads theory files to check and laziness rests on a theory file never
-touching the world (L2.6). A model file, `.lut`, holds models of theories, each a value or a functor
+touching the world (L2.6). It may hold the definitions its laws need to be stated and a value
+that is part of the theory (the grammar of Luthier in `grammar.lth`), never a model of a theory
+declared elsewhere (D-2026-10-13-o). A model file, `.lut`, holds models of theories, each a value or a functor
 written against a theory (L6.13), with its own dependencies and its own certificate; different
 models of one theory live in different files (D-2026-10-13-i, -j). What another file imports has its
 theory in a `.lth`; what no file imports (a `main`, a local helper) may live whole in a `.lut`.

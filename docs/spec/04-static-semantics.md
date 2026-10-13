@@ -142,13 +142,16 @@ Files: r2_definition.accept.lut, r2_definition.reject.lut.
 labeled base must touch every label; over an unlabeled base it must touch its parameter. A
 predicate that touches nothing (`\ p { true }`) defines nothing. `{ eq, add, mul | Associative A
 eq add }` is rejected: `mul` is a label no law touches, a semigroup juxtaposed to a bare function.
-The `| true` records of the first libraries disappear.
+The `| true` records of the first libraries disappear. [decided D-2026-10-13-o] The same holds for a `data`:
+each constructor is told apart by an observer bound to it by a law, `keywordText kwData == "data"`
+or the laws of `derives` on `eps` and `seq`; a constructor no observer distinguishes means nothing
+and is reported (G1; the table of 4.S19 makes it visible).
 Files: r3_connected.accept.lut, r3_dangling_label.reject.lut.
 
-**4.R4. Only laws or recursion make a new type.** [implemented] A definition `x : U := t` makes
-`x` a type with a name of its own only if `t` is a subtype with a predicate (laws) or a recursive
-`data`. A body that is structural (a product, a sum, an exponential, a non-recursive `data`)
-introduces a name that claims nothing and is rejected: write `x = t` (an alias, 4.R7), or write
+**4.R4. Only laws or a `data` make a new type.** [decided D-2026-10-13-o] A definition `x : U := t` makes `x` a
+type with a name of its own only if `t` is a subtype with a predicate (laws) or a `data`, recursive
+or not (3.R3). A body that is anonymous and structural (a product, an exponential, a sum written
+`< ... >`) introduces a name that claims nothing and is rejected: write `x = t` (an alias, 4.R7), or write
 the type where it is used, or declare `x : t` and owe it laws.
 Files: r4_product_inline.accept.lut, r4_product_named.reject.lut.
 
@@ -176,7 +179,9 @@ Files: r5_extern_value.accept.lut, r5_extern_type.reject.lut.
 declared `x : T` and later given a body, the body has type `T`, or `T -> Bool`, or
 `T -> Failures E`, or is a `Law` over `T`. Any other type is an error, reported against the
 declaration. The form with `Failures E` is designed (spec 5.S9); the checker accepts the other
-three today.
+three today. [decided D-2026-10-13-o] A theory with parameters of its own repeats them in its definition by laws,
+`Recognizer (e : Ebnf) := AcceptsWhatDerives e`, and each law takes the theory's parameters first
+and the model after them.
 Files: r6_predicate_body.accept.lut, r6_body_type.reject.lut.
 
 **4.R7. An alias is written with `=` and has no state.** [implemented] `AB = A * B` makes `AB`
