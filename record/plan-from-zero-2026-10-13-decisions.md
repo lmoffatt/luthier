@@ -20,7 +20,9 @@ modules, certification over costs, tests and generators, the demand and the plan
 number models. About thirteen files. Then the domain libraries (`algebra`, `array`,
 `probability`, `table`, `belief`, `optimization`), which use Luthier and do not define it.
 
-Recommended: Luthier's own first, the domain libraries after, written with the language running.
+Recommended: Luthier's own first, the domain libraries after, written with the language running. 
+
+Yes, Luthiers own first, specially the ones that allow bootstrapping
 
 ## Z2. Layers, so that each theory rests on written ones
 
