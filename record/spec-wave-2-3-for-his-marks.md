@@ -95,3 +95,4 @@ could manage.
   principles while D-2026-10-12-ac, your decision, is current. Mine: mark L11.7 settled.
 - Question of the agent: the validation of an extern at the first action that asks has no decision
   of its own and is cited through D-2026-10-11-n, whose text carries it. Mine: leave it so.
+OK
