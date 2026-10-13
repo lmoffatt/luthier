@@ -13,6 +13,11 @@ runs one analysis of sonolocalización end to end, then fill the layers. Costs: 
 to 3 written twice (a minimal version, then the full one); gains: Luthier is used on real work
 weeks earlier, and what sonolocalización needs shapes what is written first.
 
+Podemos invertir el plan y empezar por la execution antes de la evidence? (si S1 aceptado, lanza a codex)
+
+(His answer in chat, chat:52b10bff:5001, copied here: S1 accepted, D-2026-10-13-ac. His proposal to
+put execution before evidence is answered in chat and decided separately.)
+
 ## S2. The core stays in Python for this
 
 The Rust core (Z10) is not on the path: the heavy computation goes to externs. Recommended: Rust

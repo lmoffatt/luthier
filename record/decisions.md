@@ -2355,3 +2355,14 @@ Quote:      "si, pasemos directo."
 Source:     chat:52b10bff:4579
 Kind:       plan (steps 2.5 and 4.1 of record/plan-from-zero-2026-10-13-execution.md)
 Status:     current
+
+D-2026-10-13-ac S1 of the plan for sonolocalización accepted: after `v0.2`, a vertical slice that runs
+                one analysis of sonolocalización end to end, in place of finishing layers 2 and 3 in
+                order; evidence and certification are designed on that case (as Q6 of
+                D-2026-10-13-aa did for costs). The inventory of what sonolocalización uses is
+                started at once, by Codex, read only.
+Author:     Luciano (his idea: Evidence on a concrete case), S1 the model's
+Quote:      "si S1 aceptado, lanza a codex"
+Source:     chat:52b10bff:5001
+Kind:       plan (S1 of record/plan/sonolocalizacion/, steps 5 and 6 of the plan from zero)
+Status:     current
