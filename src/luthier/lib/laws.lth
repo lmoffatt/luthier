@@ -16,7 +16,7 @@
 --   §2 The laws of relations and operations, as templates a theory applies
 --      (D-2026-10-11-l).                                                              done
 --   §3 A law as a theory: its forms (`forall`, `exists`, and, or, then, a case) and
---      its evidence, with what each kind of evidence settles (D-2026-10-13-l).       todo
+--      its evidence, with what each kind of evidence settles (D-2026-10-13-l).       done
 
 import "checks.lth" Failures isEmpty
 
@@ -76,3 +76,79 @@ isHomomorphism (A B : U) (same : B -> B -> Bool) (f : A -> B) (opA : A -> A -> A
 -- The implications above (symmetric, antisymmetric, transitive) are written as alternatives:
 -- sampled at random, their premises rarely hold (7.S12), so a theory quantifies them over the
 -- pairs its relation relates, as kernel_laws.lth §1 does for equality.
+
+-- ---------------------------------------------------------------- §3 A law as a theory
+
+-- The forms of a law (D-2026-10-13-l): a case, a `forall` (Π) and an `exists` (Σ) over a type, and
+-- the connectives; `then` is material, `not (p and not q)` (conditioning is an operation on a
+-- measure, not a connective). This is the type `Law` of what a test runs (5.S1, 3.S12).
+Law : U := data {
+  Case : Bool -> Law ;
+  Forall : (A : U) -> (A -> Law) -> Law ;
+  Exists : (A : U) -> (A -> Law) -> Law ;
+  Both : Law -> Law -> Law ;
+  Either : Law -> Law -> Law ;
+  Then : Law -> Law -> Law ;
+}
+
+-- Evidence follows the form of the law (D-2026-10-13-l): a case evaluated; a value of the
+-- quantified type with the evidence for the law at it (a witness of an `exists`, a counterexample
+-- to a `forall`); the cases listed or drawn, with their evidence; a pair for `and`; one side for
+-- `or`; a citation or an assumption, which models any part whole.
+Evidence : U := data {
+  Evaluated : Bool -> Evidence ;
+  At : (A : U) -> A -> Evidence -> Evidence ;
+  Listed : List Evidence -> Evidence ;
+  Drawn : Nat -> List Evidence -> Evidence ;
+  Pair : Evidence -> Evidence -> Evidence ;
+  Side : Bool -> Evidence -> Evidence ;
+  Cited : String -> Evidence ;
+  Assumed : Evidence ;
+}
+
+-- What a piece of evidence settles about a law: confirmed, refuted, supported only statistically,
+-- taken on citation or assumption, or nothing. Roles: the laws of `Settling`.
+Verdict : U := data {
+  Confirmed : Verdict ;
+  Refuted : Verdict ;
+  Supported : Verdict ;
+  TakenOn : String -> Verdict ;
+  Unsettled : Verdict ;
+}
+
+-- A model says what evidence settles; the certifier of spec 6 and 7 is one. The laws give each
+-- form of law and each kind of evidence its role.
+Settling : { settles : Law -> Evidence -> Verdict }
+
+material (a b : Bool) : Bool := not (a and not b)
+both (u v : Verdict) : Verdict := match u {
+  Refuted -> Refuted ;
+  Confirmed -> v ;
+  _ -> match v { Refuted -> Refuted ; _ -> u } }
+
+-- a case is settled by evaluating it
+CaseIsEvaluated (m : Settling) (b : Bool) : Bool :=
+  m.settles (Case b) (Evaluated b) == (if b then Confirmed else Refuted)
+-- a `forall` is refuted exactly by a counterexample, and a sample over it supports and never
+-- confirms (over an infinite domain only statistics confirm, 7.S17)
+ForallRefutedByCounterexample (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
+  not (m.settles (p a) e == Refuted) or m.settles (Forall A p) (At A a e) == Refuted
+SampleNeverConfirms (m : Settling) (A : U) (p : A -> Law) (seed : Nat) (es : List Evidence) : Bool :=
+  not (m.settles (Forall A p) (Drawn seed es) == Confirmed)
+-- an `exists` is confirmed by a witness whose evidence confirms the law at it
+ExistsConfirmedByWitness (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
+  not (m.settles (p a) e == Confirmed) or m.settles (Exists A p) (At A a e) == Confirmed
+-- `and` by a pair, `or` by either side
+BothByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
+  m.settles (Both p q) (Pair e f) == both (m.settles p e) (m.settles q f)
+EitherBySide (m : Settling) (p q : Law) (e : Evidence) : Bool :=
+  not (m.settles p e == Confirmed) or m.settles (Either p q) (Side true e) == Confirmed
+-- `then` is material
+ThenIsMaterial (m : Settling) (a b : Bool) : Bool :=
+  m.settles (Then (Case a) (Case b)) (Evaluated (material a b)) == (if material a b then Confirmed else Refuted)
+-- a citation or an assumption models any law whole, and says on what it is taken
+CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r) == TakenOn r
+AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == TakenOn "assumption"
+
+Settling := CaseIsEvaluated & ForallRefutedByCounterexample & SampleNeverConfirms & ExistsConfirmedByWitness
+  & BothByPair & EitherBySide & ThenIsMaterial & CitedWhole & AssumedWhole
