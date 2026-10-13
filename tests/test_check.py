@@ -219,7 +219,8 @@ def test_R3_claimed_laws_read_fields_through_bound_models():
         assert not c.violatesR3(p, 'T')
     p = program('T : { parse : Int, print : Int }\nT := law\nlaw (m : T) : Bool := m.parse == m.parse')
     assert c.violatesR3(p, 'T')
-    assert c.fields_read(program('f := m.a.b')[0].body.term) == {'b'}
+    # the field after the first `.`: `m.a.b` reads the field `a` of `m` (program.lth 5f33db8, group 1)
+    assert c.fields_read(program('f := m.a.b')[0].body.term) == {'a'}
     assert c.law_reads(program('T : { parse : Int }\nT := true\nlaw (m : T) : Bool := m.parse == m.parse')) == set()
 
 
@@ -315,3 +316,104 @@ def test_R9_applied_subtype_definition_is_looked_through():
     assert not c.violatesR9(program(head + 'g (k : Int) (y : Pos k) : Int := f y'), 'g')
     assert c.violatesR9(program(head + 'g (k : Int) (y : Pos k) : Int := h y k'), 'g')
     assert not c.violatesR9(program(head + 'g (k : Int) (y : String) : Int := h k y'), 'g')
+
+
+# check.py bite 5 (record/IA/check-2026-10-13/prompt-5.md and its addendum)
+
+def test_R3_chained_projection_reads_the_first_field():
+    # group 1: `s.w.r` reads the field `w` of `s`, not `r`
+    p = program('Inner = { r : Int }\nT : { w : Inner, k : Int }\nT := L\nL (s : T) : Bool := s.w.r == s.k')
+    assert not c.violatesR3(p, 'T')
+    assert c.violatesR3(program('Inner = { r : Int }\nT : { w : Inner, k : Int }\nT := L\nL (s : T) : Bool := s.k == s.k'), 'T')
+
+
+def test_R3_law_binders_are_reads():
+    # 1.S7, program.lth 02aa8af [proposed]: `r : Fin t.n` in a law's binder reads `n`
+    head = 'T : { n : Nat, k : Int }\nT := L\n'
+    assert not c.violatesR3(program(head + 'L (t : T) (r : Fin t.n) : Bool := t.k == t.k'), 'T')
+    assert c.violatesR3(program(head + 'L (t : T) (r : Int) : Bool := t.k == t.k'), 'T')
+
+
+def test_R3_a_claimed_laws_own_patterns_name_constructors():
+    # group 2, program.lth lawNames [proposed]: a match in the law names `a` and `b`
+    data = 'D : U := data { a : D ; b : D }\nT : { d : D }\nT := L\n'
+    assert not c.violatesR3(program(data + 'L (t : T) : Bool := match t.d { a -> true ; b -> true }'), 'D')
+    # a helper the law calls is not read (4.S15)
+    helper = 'h (d : D) : Bool := match d { a -> true ; b -> true }\nL (t : T) : Bool := h t.d'
+    assert c.violatesR3(program(data + helper), 'D')
+
+
+@pytest.mark.parametrize('source,bad', [
+    ('walk (n : Int) : Int -> Int := fn k { n }', False),  # a function, not a predicate
+    ('P : Int -> Bool := fn k { true }', True),
+    ('Q = Int -> Bool\nP : Q := fn k { true }', True),    # through an alias (4.R7)
+    ('P : Int\nP := fn k { true }', True),                # declared at a non-function type (4.R6)
+    ('P : Int -> Int\nP := fn k { 1 }', False),
+    ('P := fn k { true }', True),                          # nothing written or declared
+])
+def test_R3_lambda_case_on_predicates_only(source, bad):
+    # group 5: lambdaIsPredicate's four clauses
+    name = 'walk' if source.startswith('walk') else 'P'
+    assert c.violatesR3(program(source), name) == bad
+
+
+def test_R3_a_projection_touches_its_variable():
+    # 4.R3 with 1.S7 (program.lth 02aa8af): `v.n == k` touches `v` (arrays.lth's VecOf)
+    p = program('V = { n : Nat, f : Fin n -> Float64 }\nVecOf (k : Int) : U := { v : V | v.n == k }')
+    assert not c.violatesR3(p, 'VecOf')
+    assert c.violatesR3(program('V = { n : Nat }\nVecOf (k : Int) : U := { v : V | k == k }'), 'VecOf')
+
+
+def test_R4_primitive_makes_a_type():
+    # 11.R1: `Int : U := primitive "integer"` (11.R2, which file may say so, is not read here)
+    assert not c.violatesR4(program('Int : U := primitive "integer"'), 'Int')
+    assert c.violatesR4(program('X : U := Int'), 'X')
+
+
+def test_R13_compares_the_types_written_on_the_definitions():
+    # rivalModel by the declared type with the binders' types (program.lth 02aa8af)
+    two = 'intPlus (a b : Int) : Int := a\nfloatPlus (a b : Float64) : Float64 := a\noperator + := intPlus\noperator + := floatPlus'
+    assert not c.violatesR13(program(two), 'intPlus')
+    same = 'f (a b : Int) : Int := a\ng : Int -> Int -> Int := fn x y { x }\noperator + := f\noperator + := g'
+    assert c.violatesR13(program(same), 'f') and c.violatesR13(program(same), 'g')
+
+
+def test_R9_unannotated_lambda_where_an_index_function_is_expected():
+    # cause (a): the hole of `fn k { ... }` is not compared with `Fin n`
+    p = program('sumTo (n : Int) (f : Fin n -> Float64) : Float64 := 0.0\nzeros (n : Nat) : Float64 := sumTo n (fn k { 0.0 })')
+    assert not c.violatesR9(p, 'zeros')
+
+
+def test_R9_subtype_of_an_alias_with_an_arrow_passes_where_the_alias_is_expected():
+    # cause (b): `Fin n -> A` inside the subtype's base is an arrow, not `implies`
+    src = ('Vec (A : U) = { n : Nat, f : Fin n -> A }\nVecOf (k : Int) : U := { v : Vec Float64 | v.n == k }\n'
+           'len (x : Vec Float64) : Nat := x.n\nL (k : Int) (x : VecOf k) : Bool := len x == k')
+    assert not c.violatesR9(program(src), 'L')
+    bad = src.replace('len (x : Vec Float64)', 'len (x : Vec Int)')
+    assert c.violatesR9(program(bad), 'L')
+
+
+def test_R9_substitution_stops_at_a_record_field_of_the_same_name():
+    # cause (c): `identity k` keeps the field `n` of `{ m, n, f : Fin m -> Fin n -> Float64 }`
+    src = ('Mat (A : U) = { m : Nat, n : Nat, f : Fin m -> Fin n -> A }\n'
+           'identity (n : Nat) : Mat Float64 := { m := n, n := n, f := fn i j { 0.0 } }\n'
+           'tr (a : Mat Float64) : Float64 := 0.0\nL (k : Nat) : Bool := tr (identity k) == 0.0')
+    assert not c.violatesR9(program(src), 'L')
+
+
+def test_R9_a_theory_head_is_a_type_at_U():
+    # `Maybe T` with `T` a theory: `T` is at `U`, not its record (tables.lth's former sameParse)
+    src = 'T : { n : Int }\nPos (t : T) : Bool := 0 < t.n\nT := Pos\nsame (a b : Maybe T) : Bool := true'
+    assert not c.violatesR9(program(src), 'same')
+
+
+def test_R9_reads_imported_subtypes(tmp_path):
+    # 12.S22: `base` looks through an imported definition (the port's smallest case)
+    (tmp_path / 'a.lut').write_text('R = { x : Int, y : Int }\nP (r : R) : Bool := r.x < r.y\nS : U := { r : R | P r }\n')
+    b = tmp_path / 'b.lut'
+    b.write_text('import "a.lut" R S\nf (r : R) : Int := r.x\ns (r : S) : Int := f r\n')
+    p = program(b.read_text())
+    assert any(f.rule == '4.R9' and f.name == 's' for f in c.check(p))
+    assert not c.check(p, b)
+    b.write_text('import "a.lut" R S\nf (r : Int) : Int := r\ns (r : S) : Int := f r\n')
+    assert any(f.rule == '4.R9' and f.name == 's' for f in c.check(program(b.read_text()), b))

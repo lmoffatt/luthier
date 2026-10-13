@@ -1,4 +1,4 @@
-"""Specimen of program.lth through dc8a8e5; user brief 2026-10-13, v3.
+"""Specimen of program.lth through 02aa8af; user brief 2026-10-13, v3; bite 5 (prompt-5.md).
 
 Deterministic, no seed. R2 implements existence only; SCC/type-position checking
 is deferred. Typing is deliberately partial, with unknown types kept unknown.
@@ -173,16 +173,46 @@ def claimed_laws(p):
     return claimed
 
 
+def pattern_named(q, k):
+    """patternNamed: the constructors a pattern names, given the constructors `k`."""
+    if isinstance(q, s.PApp):
+        return ({q.name} if q.name in k else set()) | set().union(*(pattern_named(x, k) for x in q.patterns))
+    if isinstance(q, s.PTuple): return set().union(*(pattern_named(x, k) for x in q.patterns))
+    return set()
+
+
+def matched_in(u, k):
+    """matchedIn: the constructors named by the patterns of the matches in a term."""
+    return set().union(*(pattern_named(q, k) for node in term_nodes(u) if isinstance(node, s.MatchOf) for q, _ in node.arms))
+
+
+def body_matched(b, k):
+    """bodyMatched: the constructors the patterns of a body's matches and clauses name."""
+    if isinstance(b, s.TermBody): return matched_in(b.term, k)
+    if isinstance(b, s.ClausesBody):
+        return set().union(*(pattern_named(q, k) | matched_in(c.body, k) for c in b.clauses for q in c.patterns))
+    return set()
+
+
 def law_names(p):
-    claimed = claimed_laws(p)
-    return set().union(*(dependencies(p, a, True) for a in p if isinstance(a, s.Define) and a.name in claimed))
+    """lawNames (program.lth 5f33db8): the names the claimed laws' bodies mention, and [proposed] the
+    constructors named by the patterns of their own matches and clauses (group 2)."""
+    claimed = claimed_laws(p); k = constructors(p)
+    return set().union(*(dependencies(p, a, True) | body_matched(a.body, k)
+                         for a in p if isinstance(a, s.Define) and a.name in claimed))
 
 
 def fields_read(u):
-    """fieldsRead: unscoped dotted suffixes and projections, following children."""
-    return {nameSuffix(node.name) if isinstance(node, s.Name) else node.field
+    """fieldsRead: of a dotted name, the field after the first `.` (`s.world.read` reads `world`,
+    program.lth 5f33db8, group 1); of a projection, its field; following children."""
+    return {namePrefix(node.name.split('.', 1)[1]) if isinstance(node, s.Name) else node.field
             for node in term_nodes(u)
             if isinstance(node, s.Name) and '.' in node.name or isinstance(node, s.Proj)}
+
+
+def binders_reads(bs):
+    """bindersReads (program.lth 02aa8af, [proposed]): a binder's type and default are occurrences (1.S7)."""
+    return set().union(*(fields_read(b.type) | fields_read(getattr(b, 'default', None)) for b in bs))
 
 
 def law_reads(p):
@@ -190,6 +220,7 @@ def law_reads(p):
     result = set()
     for a in p:
         if not isinstance(a, s.Define) or a.name not in claimed: continue
+        result |= binders_reads(a.binders)
         if isinstance(a.body, s.TermBody): result |= fields_read(a.body.term)
         elif isinstance(a.body, s.ClausesBody):
             for clause in a.body.clauses: result |= fields_read(clause.body)
@@ -223,18 +254,53 @@ def violatesR3(p, n):
         if isinstance(u, s.Subtype):
             labels = pattern_binds(u.pattern, constructors(p)); law = u.law
             if not labels: return True
-        if isinstance(u, s.Lambda): labels = param_binds(u.params, constructors(p)); law = s.Block(u.items, u.body)
-        if labels is not None and labels - names(law, constructors(p)): return True
+        if isinstance(u, s.Lambda) and lambda_is_predicate(p, a):
+            labels = param_binds(u.params, constructors(p)); law = s.Block(u.items, u.body)
+        if labels is not None and labels - touched(names(law, constructors(p))): return True
     return False
 
 
+def touched(ns):
+    """4.R3 with 1.S7 (program.lth 02aa8af, [proposed]): a projection `v.n` touches `v`."""
+    return set(ns) | {namePrefix(x) for x in ns}
+
+
+def ends_in_verdict(p, u, fuel=8):
+    """endsInVerdict, with an alias looked through (4.R7: the checker expands aliases first)."""
+    if isinstance(u, s.Binop): return u.operator == '->' and ends_in_verdict(p, u.right, fuel)
+    if isinstance(u, s.Pi): return ends_in_verdict(p, u.codomain, fuel)
+    h = head(u)
+    if isinstance(h, s.Name):
+        if h.name in ('Bool', 'Law') or isinstance(u, s.App) and h.name == 'Failures': return True
+        alias = next((a.value for a in acts(p, h.name, s.Alias)), None)
+        if alias is not None and fuel: return ends_in_verdict(p, alias, fuel - 1)
+    return False
+
+
+def is_arrow(p, u, fuel=8):
+    if isinstance(u, s.Binop): return u.operator == '->'
+    if isinstance(u, s.Pi): return True
+    h = head(u)
+    alias = next((a.value for a in acts(p, h.name, s.Alias)), None) if isinstance(h, s.Name) else None
+    return alias is not None and fuel > 0 and is_arrow(p, alias, fuel - 1)
+
+
+def lambda_is_predicate(p, a):
+    """lambdaIsPredicate (program.lth 5f33db8, group 5): the type written ends in a verdict; with
+    none written, the declared type is not a function, or ends in a verdict; or nothing is written
+    or declared."""
+    if a.type is not None: return ends_in_verdict(p, a.type)
+    d = declared(p, a.name)
+    return d is None or not is_arrow(p, d) or ends_in_verdict(p, d)
+
+
 def violatesR4(p, n):
-    """4.R4: a new type at U is data, a subtype, a record with a law, or an extern."""
+    """4.R4: a new type at U is data, a subtype, a record with a law, an extern or a primitive."""
     for a in acts(p, n, s.Define):
         if type_of_act(p, a) != s.Universe(): continue
         b = a.body
         if isinstance(b, s.DataBody): continue
-        if isinstance(b, s.TermBody) and (isinstance(b.term, s.Subtype) or isinstance(b.term, s.Record) and b.term.law is not None or head(b.term) == s.Name('extern')): continue
+        if isinstance(b, s.TermBody) and (isinstance(b.term, s.Subtype) or isinstance(b.term, s.Record) and b.term.law is not None or head(b.term) in (s.Name('extern'), s.Name('primitive'))): continue
         return True
     return False
 
@@ -276,7 +342,7 @@ def arrows(u):
     """Read `implies A B` in type position as the arrow `A -> B`.
 
     elaborate.py reads `A -> B` as the Bool implication when it cannot infer that `A` is a type,
-    as for a name brought in by an import (imports are not loaded). An implication is never a
+    as for a name brought in by an import (imports are read for typing only, given the file's path). An implication is never a
     type, so where a type is expected it can only be that arrow. Predicates of subtypes and terms
     are not entered: there `implies` is the implication.
     """
@@ -289,6 +355,45 @@ def arrows(u):
     if isinstance(u, t.Subtype): return t.Subtype(u.name, arrows(u.type), u.predicate)
     if isinstance(u, t.App): return t.App(arrows(u.function), arrows(u.argument))
     return u
+
+
+def _map(u, f):
+    """Rebuild a term with `f` applied to each child (tuples and dataclasses), strings kept."""
+    if isinstance(u, tuple): return tuple(f(x) for x in u)
+    if is_dataclass(u) and not isinstance(u, type): return type(u)(*(f(getattr(u, x.name)) for x in fields(u)))
+    return u
+
+
+def field_labels(u):
+    return {n for node in nodes(u) if isinstance(node, t.Record) for n, _ in node.fields}
+
+
+def rename_free(u, old, new):
+    """Rename the free `old` to `new`, stopping at a binder of `old` and at a record field labeled
+    `old`, which binds it for the fields after it."""
+    if isinstance(u, t.Var): return t.Var(new) if u.name == old else u
+    if isinstance(u, (t.Pi, t.Sigma, t.Lam, t.Subtype)):
+        first, second = (u.domain, u.codomain) if isinstance(u, (t.Pi, t.Sigma)) else (u.type, u.body if isinstance(u, t.Lam) else u.predicate)
+        return type(u)(u.name, rename_free(first, old, new), second if u.name == old else rename_free(second, old, new))
+    if isinstance(u, t.Record):
+        result = []; bound = False
+        for n, ty in u.fields:
+            result.append((n, ty if bound else rename_free(ty, old, new))); bound = bound or n == old
+        return t.Record(tuple(result))
+    return _map(u, lambda x: rename_free(x, old, new))
+
+
+def unclash(u):
+    """Rename a Pi or Sigma binder that a record in its codomain also has as a field label, so that
+    substituting an argument for the binder (kernel.substitute, which takes record fields for free
+    names) cannot capture the field: `identity (n : Nat) : Mat Float64` applied to `k` keeps the
+    field `n` of `{ m, n, f : Fin m -> Fin n -> Float64 }` (cause c of the leftovers report)."""
+    if isinstance(u, (t.Pi, t.Sigma)) and u.name in field_labels(u.codomain):
+        taken = {x for node in nodes(u) for x in ([node.name] if isinstance(node, t.Var) else [])} | field_labels(u)
+        fresh = u.name + "'"
+        while fresh in taken: fresh += "'"
+        return type(u)(fresh, unclash(u.domain), unclash(rename_free(u.codomain, u.name, fresh)))
+    return _map(u, unclash)
 
 
 class Typing:
@@ -306,7 +411,7 @@ class Typing:
                 declarations[a.name] = curry(t.Pi, ps, walk(a.type, inner))
         self.program = tuple(t.Declare(a.name, arrows(declarations[a.name]))
                              if isinstance(a, t.Declare) else a for a in self.program)
-        self.types = {a.name: arrows(a.type) for a in self.program if isinstance(a, (t.Declare, t.Define))}
+        self.types = {a.name: arrows(unclash(a.type)) for a in self.program if isinstance(a, (t.Declare, t.Define))}
 
     def same(self, a, b):
         # Reduction is bounded; recursive definitions cannot hang checking.
@@ -318,6 +423,8 @@ class Typing:
         return alpha_equal(a, b)
 
     def refines(self, a, b):
+        # a hole is a type not inferred (an unannotated lambda parameter): unknown, never compared
+        if isinstance(a, t.Hole) or isinstance(b, t.Hole): return True
         if self.same(a, b): return True
         if isinstance(a, t.Subtype): return self.refines(a.type, b)
         if a == t.Var('Float64') and b == t.Var('Real'): return True
@@ -370,6 +477,64 @@ def _typing(p):
     return Typing(p)
 
 
+class Program(tuple):
+    """A file's acts, with the acts its imports bring (12.S22), read for typing only: the rules are
+    still checked on the file's own names, and the surface rules see the file alone."""
+    imported = ()
+    typing = None
+
+
+def resolve(path, name):
+    """12.S4: next to the importing file, then each directory of LUTHIER_PATH, then lib/; the
+    extension `.lut` may be omitted."""
+    import os
+    from pathlib import Path
+    dirs = [Path(path).parent] + [Path(d) for d in os.environ.get('LUTHIER_PATH', '').split(os.pathsep) if d] + [Path(__file__).parent / 'lib']
+    for d in dirs:
+        for candidate in (d / name, d / (name + '.lut')):
+            if candidate.is_file(): return candidate.resolve()
+    return None
+
+
+def load_imports(program, path, seen=None):
+    """The acts that `program`'s imports bring, transitively, as run.py's loader reads them: a name
+    imported `as` another becomes an alias. Unreadable files are skipped (4.R2 names what is
+    missing); operators and data are left out, being the imported file's own business."""
+    from .parse import parse
+    seen = set() if seen is None else seen
+    result = []
+    for act in program:
+        if not isinstance(act, s.ImportAct): continue
+        target = resolve(path, act.path)
+        if target is not None and target not in seen:
+            seen.add(target)
+            try: parsed = parse(target.read_text(encoding='utf-8'))
+            except OSError: parsed = None
+            if isinstance(parsed, s.Parsed):
+                result.extend(load_imports(parsed.program, target, seen))
+                result.extend(a for a in parsed.program if isinstance(a, (s.Declare, s.Define, s.Alias)))
+        result.extend(s.Alias(i.asName, (), s.Name(i.name)) for i in act.names if i.asName)
+    return tuple(result)
+
+
+def elaborates(a):
+    """An imported act the elaborator reads alone (record refinements it does not, `LeqPair`)."""
+    try: elaborate_program((a,)); return True
+    except ElaborationError: return False
+
+
+def typing_of(p):
+    """The typing of a file read with its imports (12.S22, so that `base` sees an imported
+    subtype's definition); of the file alone when the two do not elaborate together."""
+    if not isinstance(p, Program) or not p.imported: return _typing(tuple(p))
+    if p.typing is None:
+        own = {a.name for a in p if hasattr(a, 'name')}
+        imported = tuple(a for a in p.imported if a.name not in own and elaborates(a))
+        try: p.typing = Typing(imported + tuple(p))
+        except ElaborationError: p.typing = _typing(tuple(p))
+    return p.typing
+
+
 def verdict_type(u):
     return u == t.Var('Bool') or isinstance(u, t.App) and u.function == t.Var('Failures') or isinstance(u, t.Pi) and verdict_type(u.codomain)
 
@@ -384,7 +549,7 @@ def fits(typing, ty, bt):
 def violatesR6(p, n):
     """4.R6: a separately declared body's type fits T, a predicate over T, or Law T; peel common parameters."""
     if not acts(p, n, s.Declare) or not acts(p, n, s.Define): return False
-    q = _typing(tuple(p)); ty = next(a.type for a in q.program if isinstance(a, t.Declare) and a.name == n)
+    q = typing_of(p); ty = next(a.type for a in q.program if isinstance(a, t.Declare) and a.name == n)
     return not fits(q, ty, q.typeOf(q.body(n)))
 
 
@@ -411,7 +576,7 @@ def contains_arrow(q, u, fuel):
 
 def violatesR8(p, n):
     """4.R8: structural == is forbidden on a type containing an exponential."""
-    q = _typing(tuple(p))
+    q = typing_of(p)
     return any(isinstance(f, t.App) and f.function == t.Var('==') and contains_arrow(q, q.typeOf(f.argument, c), len(q.program)) for c, f, _ in q.applications(q.body(n)))
 
 
@@ -438,10 +603,12 @@ def base(q, u, fuel=None):
     expected (library.lth, reading 6 of the file-policies report).
     """
     if fuel is None: fuel = len(q.program)
-    if isinstance(u, t.Subtype): return base(q, u.type, fuel)
+    # A subtype's base is read in type position (`arrows`): inside it, an alias's `Fin n -> A` is
+    # elaborated as `implies (Fin n) A` (cause b of the leftovers report, as in bite 3b part 1).
+    if isinstance(u, t.Subtype): return base(q, arrows(u.type), fuel)
     if isinstance(u, t.Var) and fuel:
         body = q.body(u.name)
-        if isinstance(body, t.Subtype): return base(q, body.type, fuel - 1)
+        if isinstance(body, t.Subtype): return base(q, arrows(body.type), fuel - 1)
     if isinstance(u, t.App) and fuel:
         # a name defined as a subtype with parameters, applied (`LexedText d g`, grammar.lth): its
         # body under the parameters is a subtype, looked through as the bare name is
@@ -451,7 +618,7 @@ def base(q, u, fuel=None):
         while isinstance(body, t.Lam): body = body.body
         if isinstance(body, t.Subtype):
             unfolded = reduce(q.program, len(q.program) + 1, u)
-            if isinstance(unfolded, t.Subtype): return base(q, unfolded.type, fuel - 1)
+            if isinstance(unfolded, t.Subtype): return base(q, arrows(unfolded.type), fuel - 1)
     if isinstance(u, (t.Var, t.App)) and core_subtype_base(q, u) is not None: return core_subtype_base(q, u)
     if isinstance(u, (t.Var, t.App)):
         record = q.theory_record(u)
@@ -459,9 +626,17 @@ def base(q, u, fuel=None):
     return u
 
 
+def theory_head(q, u):
+    """A theory head, `T` (or `T a`) declared at a record and defined by laws, used as a type (`Maybe
+    T`): a type, at `U`; its declared record is the type of a model, not of `T` itself."""
+    while isinstance(u, t.App): u = u.function
+    return (isinstance(u, t.Var) and isinstance(q.body(u.name), (t.Lam, t.App, t.Var)) and
+            any(isinstance(a, t.Declare) and a.name == u.name for a in q.program) and q.theory_record(u) is not None)
+
+
 def violatesR9(p, n):
     """4.R9: application argument bases must refine domain bases, with function variance."""
-    q = _typing(tuple(p))
+    q = typing_of(p)
     for a in acts(p, n, s.Define):
         if isinstance(a.type, s.Record):
             expected = q.types.get(n); actual = q.typeOf(q.body(n))
@@ -470,7 +645,7 @@ def violatesR9(p, n):
                 expected = expected.codomain
             if isinstance(actual, t.Record) and isinstance(expected, t.Record) and not q.refines(actual, expected): return True
     for c, f, x in q.applications(q.body(n)):
-        ft = q.typeOf(f, c); at = q.typeOf(x, c)
+        ft = q.typeOf(f, c); at = t.Universe() if theory_head(q, x) else q.typeOf(x, c)
         if isinstance(ft, t.Pi) and at is not None and not q.refines(base(q, at), base(q, ft.domain)): return True
     return False
 
@@ -549,16 +724,31 @@ def violatesR2R6(p, n):
     return False
 
 
+def surface_signature(p, n):
+    """signatureOf (program.lth 02aa8af, [proposed]): the binders' types in order, and the type
+    written on the definition or else declared."""
+    a = next(iter(acts(p, n, s.Define)), None)
+    if a is None: return ((), declared(p, n))
+    return (tuple(b.type for b in a.binders for _ in b.names), type_of_act(p, a))
+
+
 def violatesR13(p, n):
     """4.R13: two functions of the same declared type bind one operator."""
     bindings = [(a.operator, a.value.name) for a in p if isinstance(a, s.OperatorAct) and isinstance(a.value, s.Name)]
-    return any(f == n and o == o2 and g != n and declared(p, g) == declared(p, n)
-               for o, f in bindings for o2, g in bindings)
+    rivals = [g for o, f in bindings for o2, g in bindings if f == n and o == o2 and g != n]
+    if not rivals: return False
+    # The elaborated declared types, binders included (curried), compared up to renaming; the
+    # surface signature when the program does not elaborate.
+    try:
+        q = typing_of(p)
+        return any(n in q.types and g in q.types and alpha_equal(q.types[g], q.types[n]) for g in rivals)
+    except ElaborationError:
+        return any(surface_signature(p, g) == surface_signature(p, n) for g in rivals)
 
 
 def violates6R1(p, n):
     """6.R1: a citation datum's reference must type as Reference."""
-    q = _typing(tuple(p))
+    q = typing_of(p)
     for a in q.program:
         if not isinstance(a, t.Datum): continue
         u = a.value; args = []
@@ -571,9 +761,12 @@ def violates6R1(p, n):
     return False
 
 
-def check(program) -> list[Failure]:
-    """Report each implemented program.lth predicate on each introduced name."""
+def check(program, path=None) -> list[Failure]:
+    """Report each implemented program.lth predicate on each introduced name; with the file's
+    `path`, its imports are read for typing (12.S22)."""
     result = []
+    if path is not None:
+        program = Program(program); program.imported = load_imports(program, path)
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for rule, predicate in [(f'4.R{k}', globals()[f'violatesR{k}']) for k in range(1, 14)] + [('2.R1', violatesR2R1), ('2.R6', violatesR2R6), ('6.R1', violates6R1)]:
             try:
