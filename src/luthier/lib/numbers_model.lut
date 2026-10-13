@@ -1,0 +1,54 @@
+-- numbers_model.lut: the core's numbers as models of algebra.lth and numbers.lth, the structure
+-- of `Real` as an axiom, and the elementary functions as routes to the host's library.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2026-10-14/prompt.md (item 1 of the inventory's §6). A model file
+-- (12.S23): each value names which structure a core type or operation is, and so gives the
+-- operations of core.lut their laws (kernel_models.lut does the same for the core's data). The
+-- axiom is allowed here by 11.R3 (core and the libraries). The externs are routes (3.S40,
+-- 10.S8): Python's `math`, which is what v0.1's real_python.lut bound (tag v0.1-final).
+
+import "kernel_laws.lth" Monoid
+import "algebra.lth" OrderedRing CompleteOrderedField
+import "numbers.lth" Doubles IntegerDivision Conversion Elementary
+
+-- `Int` is an ordered commutative ring, exactly (11.S4), with the core's operations
+integers : OrderedRing Int := {
+  ring := {
+    add := { monoid := { neutral := 0, combine := fn a b { a + b } }, inverse := fn a { 0 - a } },
+    mul := { neutral := 1, combine := fn a b { a * b } },
+  },
+  leq := fn a b { a <= b },
+}
+-- and its quotient and remainder are the host's floor division (numbers.lth §3)
+integerDivision : IntegerDivision := { quotient := fn a b { a / b }, remainder := fn a b { a mod b } }
+
+-- `Real` is the complete ordered field: assumed, since nothing computes its operations (11.R3,
+-- 11.S4); its laws carry the grade `assumed`
+realField : CompleteOrderedField Real := axiom "the real numbers: the complete ordered field"
+
+-- `Rational` is an ordered field, exactly (11.S4); its model waits for rational.lut, which
+-- gives its values (`fromInt`, `ratio`, `toQ`): a `Rational` has no literal to write `0` with
+
+-- `Float64`: the machine's operations and order (11.S4, numbers.lth §2)
+doubles : Doubles := {
+  plus := fn a b { a + b }, minus := fn a b { a - b }, times := fn a b { a * b }, divide := fn a b { a / b },
+  less := fn a b { a < b }, leq := fn a b { a <= b }, greater := fn a b { a > b }, geq := fn a b { a >= b },
+  unequal := fn a b { a /= b },
+  epsilon := 2.220446049250313e-16,
+}
+
+-- the nearest double to an integer (11.S5)
+conversion : Conversion := { convert := toFloat64 }
+
+-- the elementary functions: leaves of the environment, declared over the doubles they receive
+-- (11.S2), routes to Python's `math`, certified against numbers.lth §5 like any extern
+elementary : Elementary := {
+  sqrt := extern "python:math.sqrt",
+  exp := extern "python:math.exp",
+  log := extern "python:math.log",
+  erf := extern "python:math.erf",
+}
+
+-- `String` under `+` is a monoid, the empty text its neutral element (kernel_laws.lth §4)
+strings : Monoid String := { neutral := "", combine := fn a b { a + b } }
