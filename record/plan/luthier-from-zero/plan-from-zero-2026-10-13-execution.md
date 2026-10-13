@@ -124,6 +124,11 @@ by Luciano.
   steps below corrected to what was done (file kinds `.lth`, statuses, who writes). Next: the
   constructor law, then `check.py` (4.1) and `v0.2`.
 
+- 2026-10-13, night: `IotaConstructors` in term.lth (66d5cae) and term_model.lut; kernel bite 1f
+  (the same law in kernel.py, the two eval xfails removed) running; step 4.1 `check.py` with
+  `luthier check` and the verdicts of `tests/spec/` running in parallel (brief
+  record/IA/check-2026-10-13/).
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
@@ -163,6 +168,9 @@ by Luciano.
   touch is reported, not fixed.
 - The lints stay: `scripts/check_spec.py`, `scripts/project_principles.py --check --strict`,
   `scripts/check_quotes.py`; their tests stay in `tests/`.
+- This plan is kept current (his request, 2026-10-13): at every landing a dated Status line, and the
+  text of the step it touches corrected (done, next, file names, who writes); it never states what
+  is no longer true.
 
 ## Step 0. Retire the old code (Z4). Done (tag `v0.1-final` at fd3cba9).
 
