@@ -350,17 +350,17 @@ def _mentions(value, names):
 
 # the names the tester found defined by several libraries (record/IA/tester-2026-10-14/report.md,
 # choice 8 and "Findings for others"), with the files that define them, and a file that uses each
-# meaning: test.lth imports laws.lth's `Exhaustive`, generators.lth means its own theory
+# meaning. Since 993f200 generators.lth's theory is `Enumeration` and since aef8d2c test.lth's
+# grade is `AssumedGrade`, so those two are no longer clashes; `LeqBoth` is gone from numbers.lth
+# (4a158b0).
 CLASHES = {
     "LeqPair": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
     "LeqChain": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
-    "LeqBoth": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
+    "LeqBoth": ("kernel_laws.lth", "algebra.lth"),
     "PlusCommutes": ("kernel_laws.lth", "numbers.lth"),
     "NonNegative": ("generators.lth", "numbers.lth"),
-    "Exhaustive": ("laws.lth", "generators.lth"),
-    "Assumed": ("laws.lth", "test.lth"),
 }
-SEEN_FROM = {"Exhaustive": {"test.lth": "laws.lth", "generators.lth": "generators.lth"}}
+SEEN_FROM = {}
 
 
 @pytest.fixture(scope="module")

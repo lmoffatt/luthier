@@ -87,9 +87,9 @@ def test_the_grade_is_test_lth_s_assumed_not_laws_lth_s():
     runner, _, loaded = tester.load_program(LAWS, 100000)
     con = tester._constructor(loaded)
     grade = runner.value(t.App(t.App(con("grade"), con("Assumes")), t.App(t.Var("just"), con("Exhaustive"))))
-    assert grade == t.App(t.Var("just"), t.Var(loaded.name(tester._TEST_LTH, "Assumed")))
-    assert loaded.name(tester._TEST_LTH, "Assumed") != loaded.name(tester._LAWS_LTH, "Assumed")
-    assert tester._base(grade.argument) == "Assumed"
+    assert grade == t.App(t.Var("just"), t.Var(loaded.name(tester._TEST_LTH, "AssumedGrade")))
+    assert loaded.name(tester._TEST_LTH, "AssumedGrade") != loaded.name(tester._LAWS_LTH, "Assumed")
+    assert tester._base(grade.argument) == "AssumedGrade"
 
 
 def test_a_name_is_shown_as_its_file_writes_it():

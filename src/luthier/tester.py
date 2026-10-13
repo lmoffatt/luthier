@@ -662,7 +662,7 @@ def _not_run(spec, reason, names=()):
 # ---------------------------------------------------------------------- the command
 
 _GRADE_WORDS = {"Proved": "proved", "ExhaustiveGrade": "exhaustive", "Cases": "cases", "Sampled": "sampled",
-                "Assumed": "assumed"}
+                "AssumedGrade": "assumed"}
 
 
 def show_case(names, case):
