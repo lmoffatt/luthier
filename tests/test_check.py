@@ -417,3 +417,71 @@ def test_R9_reads_imported_subtypes(tmp_path):
     assert not c.check(p, b)
     b.write_text('import "a.lut" R S\nf (r : Int) : Int := r\ns (r : S) : Int := f r\n')
     assert any(f.rule == '4.R9' and f.name == 's' for f in c.check(program(b.read_text()), b))
+
+
+def test_typing_rules_run_act_by_act_when_the_file_does_not_elaborate_whole():
+    # check bite 6: a record refinement (elaborate.py: "record refinements require check.py") left
+    # the whole file untyped, so 4.R9 answered "no violation" on every act
+    src = 'Pair : U := { x y : Int | x < y }\nf (x : Int) : Int := x\nbad := f "s"\nok := f 1\n'
+    p = program(src)
+    assert [(x.rule, x.name) for x in c.check(p)] == [('4.R9', 'bad')]
+    line = c.report(p)[0]
+    assert (line.kind, line.name) == ('typed', '3 of 4 acts')
+    assert line.message == 'not typed: Pair (record refinements require check.py)'
+    # a rule on an untyped act answers nothing (its verdict is not covered), as before
+    assert not any(x.name == 'Pair' for x in c.check(p))
+
+
+def test_acts_read_alone_but_not_together_are_kept_one_by_one():
+    # each act elaborates alone, together `A` needs its argument: `x` is left out, named, with why
+    p = program('A (n : Int) = Int\nx : A := 1\nf (y : Int) : Int := y\nbad := f "s"\n')
+    q = c.typing_of(p)
+    assert {c.label(a): m for a, m in q.untyped.items()} == {'x': 'alias A needs arguments'}
+    assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))
+
+
+def test_an_alias_with_a_record_refinement_is_untyped():
+    # read only where it is used; there it is left out and the user typed with `P` as a bare name
+    p = program('P = { x y : Int | x < y }\nf (x : Int) : Int := x\n')
+    assert c.report(p)[0].message == 'the whole file elaborates.'
+    p = program('P = { x y : Int | x < y }\nf (p : P) : Int := p.x\ng (x : Int) : Int := x\nbad := g "s"\n')
+    assert c.report(p)[0] == c.Report('typed', '3 of 4 acts', 'not typed: P (record refinements require check.py)')
+    assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))
+
+
+def test_cli_verbose_says_how_many_acts_are_typed(tmp_path, capsys):
+    path = tmp_path / 'case.lut'
+    path.write_text('Pair : U := { x y : Int | x < y }\nf (x : Int) : Int := x\n')
+    assert main(['check', '-v', str(path)]) == 0
+    assert f'{path}:1: typed 1 of 2 acts: not typed: Pair (record refinements require check.py)' in capsys.readouterr().out
+    path.write_text('x : Int := 1\n')
+    assert main(['check', '-v', str(path)]) == 0
+    assert f'{path}:1: typed 1 of 1 acts: the whole file elaborates.' in capsys.readouterr().out
+
+
+def test_R9_a_record_value_with_fields_not_inferred_passes():
+    # algebra.lth `FieldIsOrdered`: `{ ring := o.field.ring, leq := o.leq }` is `{ ring : ?, leq : ? }`
+    # (a projection through a theory-typed binder is not inferred); a hole is not compared
+    src = ('R : { a : Int, b : Int }\nP (r : R) : Bool := r.a < r.b\nR := P\n'
+           'S : { r : R, c : Int }\nf (x : { a : Int, b : Int }) : Int := x.a\n'
+           'g (s : S) : Int := f { a := s.r.a, b := s.r.b }\nh : Int := f { a := 1, b := "s" }')
+    assert not c.violatesR9(program(src), 'g')
+    assert c.violatesR9(program(src), 'h')
+
+
+def test_R8_a_recursive_data_type_is_unfolded_once():
+    # program.lth, typed act by act: `contains_arrow` recursed through a recursive data type until
+    # Python's stack ran out
+    src = 'T : U := data { leaf : T ; node : T -> T -> T }\nsame (a b : T) : Bool := a == b'
+    assert not c.violatesR8(program(src), 'same')
+    src = 'F : U := data { leaf : F ; wrap : (Int -> Int) -> F }\nsame (a b : F) : Bool := a == b'
+    assert c.violatesR8(program(src), 'same')
+
+
+def test_an_operator_whose_function_is_not_typed_as_a_function_is_left_out():
+    # core.lut: `Float64 : Real`, so elaborate.py reads `Float64 -> Float64` as an implication and
+    # the operator bound to `floatNeg` has no function type; the rest is typed
+    p = program('Real : U := primitive "real"\nFloat64 : Real := primitive "d"\nfloatNeg : Float64 -> Float64 := primitive "-"\n'
+                'operator - := floatNeg\nf (x : Int) : Int := x\nbad := f "s"\n')
+    assert c.report(p)[0] == c.Report('typed', '5 of 6 acts', 'not typed: operator - := floatNeg (operator needs a declared function type)')
+    assert any(x.rule == '4.R9' and x.name == 'bad' for x in c.check(p))

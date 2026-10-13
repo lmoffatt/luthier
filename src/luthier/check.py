@@ -1,4 +1,4 @@
-"""Specimen of program.lth through 02aa8af; user brief 2026-10-13, v3; bite 5 (prompt-5.md).
+"""Specimen of program.lth through 02aa8af; user brief 2026-10-13, v3; bite 6 (prompt-6.md).
 
 Deterministic, no seed. R2 implements existence only; SCC/type-position checking
 is deferred. Typing is deliberately partial, with unknown types kept unknown.
@@ -48,7 +48,19 @@ def nodes(x):
             yield from nodes(getattr(x, f.name))
 
 
+# The program `constructors` last read and its result: the rules call it once per name and act, and
+# on a long file (program.lth) re-reading every term each time took most of `check`'s time.
+_constructors = [None, None]
+
+
 def constructors(p):
+    if _constructors[0] is p: return _constructors[1]
+    result = frozenset(_constructors_of(p))
+    _constructors[:] = [p, result]
+    return result
+
+
+def _constructors_of(p):
     result = set()
     for a in p:
         if isinstance(a, s.Define) and isinstance(a.body, s.DataBody):
@@ -357,47 +369,9 @@ def arrows(u):
     return u
 
 
-def _map(u, f):
-    """Rebuild a term with `f` applied to each child (tuples and dataclasses), strings kept."""
-    if isinstance(u, tuple): return tuple(f(x) for x in u)
-    if is_dataclass(u) and not isinstance(u, type): return type(u)(*(f(getattr(u, x.name)) for x in fields(u)))
-    return u
-
-
-def field_labels(u):
-    return {n for node in nodes(u) if isinstance(node, t.Record) for n, _ in node.fields}
-
-
-def rename_free(u, old, new):
-    """Rename the free `old` to `new`, stopping at a binder of `old` and at a record field labeled
-    `old`, which binds it for the fields after it."""
-    if isinstance(u, t.Var): return t.Var(new) if u.name == old else u
-    if isinstance(u, (t.Pi, t.Sigma, t.Lam, t.Subtype)):
-        first, second = (u.domain, u.codomain) if isinstance(u, (t.Pi, t.Sigma)) else (u.type, u.body if isinstance(u, t.Lam) else u.predicate)
-        return type(u)(u.name, rename_free(first, old, new), second if u.name == old else rename_free(second, old, new))
-    if isinstance(u, t.Record):
-        result = []; bound = False
-        for n, ty in u.fields:
-            result.append((n, ty if bound else rename_free(ty, old, new))); bound = bound or n == old
-        return t.Record(tuple(result))
-    return _map(u, lambda x: rename_free(x, old, new))
-
-
-def unclash(u):
-    """Rename a Pi or Sigma binder that a record in its codomain also has as a field label, so that
-    substituting an argument for the binder (kernel.substitute, which takes record fields for free
-    names) cannot capture the field: `identity (n : Nat) : Mat Float64` applied to `k` keeps the
-    field `n` of `{ m, n, f : Fin m -> Fin n -> Float64 }` (cause c of the leftovers report)."""
-    if isinstance(u, (t.Pi, t.Sigma)) and u.name in field_labels(u.codomain):
-        taken = {x for node in nodes(u) for x in ([node.name] if isinstance(node, t.Var) else [])} | field_labels(u)
-        fresh = u.name + "'"
-        while fresh in taken: fresh += "'"
-        return type(u)(fresh, unclash(u.domain), unclash(rename_free(u.codomain, u.name, fresh)))
-    return _map(u, unclash)
-
-
 class Typing:
     """Small rules-needed typing; no unification or complete dependent checking."""
+    untyped = {}; untyped_names = frozenset(); acts = ()  # set by `typed`: the acts left untyped
     def __init__(self, p):
         self.program = elaborate_program(p)
         self.context = context_of(p)
@@ -411,7 +385,7 @@ class Typing:
                 declarations[a.name] = curry(t.Pi, ps, walk(a.type, inner))
         self.program = tuple(t.Declare(a.name, arrows(declarations[a.name]))
                              if isinstance(a, t.Declare) else a for a in self.program)
-        self.types = {a.name: arrows(unclash(a.type)) for a in self.program if isinstance(a, (t.Declare, t.Define))}
+        self.types = {a.name: arrows(a.type) for a in self.program if isinstance(a, (t.Declare, t.Define))}
 
     def same(self, a, b):
         # Reduction is bounded; recursive definitions cannot hang checking.
@@ -426,6 +400,9 @@ class Typing:
         # a hole is a type not inferred (an unannotated lambda parameter): unknown, never compared
         if isinstance(a, t.Hole) or isinstance(b, t.Hole): return True
         if self.same(a, b): return True
+        # so is a field's (a record value whose fields are not inferred, `{ ring := o.field.ring }`)
+        if isinstance(a, t.Record) and isinstance(b, t.Record) and [n for n, _ in a.fields] == [m for m, _ in b.fields]:
+            return all(isinstance(x, t.Hole) or isinstance(y, t.Hole) or self.same(x, y) for (_, x), (_, y) in zip(a.fields, b.fields))
         if isinstance(a, t.Subtype): return self.refines(a.type, b)
         if a == t.Var('Float64') and b == t.Var('Real'): return True
         if isinstance(a, t.Pi) and isinstance(b, t.Pi):
@@ -474,7 +451,7 @@ class Typing:
 
 @lru_cache(maxsize=8)
 def _typing(p):
-    return Typing(p)
+    return typed(Typing, (), p)
 
 
 class Program(tuple):
@@ -517,22 +494,96 @@ def load_imports(program, path, seen=None):
     return tuple(result)
 
 
+def elaboration_error(acts):
+    """The elaborator's message on these acts, or None when they elaborate together."""
+    try: elaborate_program(acts); return None
+    except ElaborationError as e: return str(e) or 'not elaborated'
+
+
+def alone(a):
+    """An act as the elaborator reads it alone: an alias by its value read as a type under its
+    binders, since elaborate_program reads an alias only where it is used."""
+    return (s.Declare(a.name, a.binders, a.value),) if isinstance(a, s.Alias) else (a,)
+
+
 def elaborates(a):
-    """An imported act the elaborator reads alone (record refinements it does not, `LeqPair`)."""
-    try: elaborate_program((a,)); return True
-    except ElaborationError: return False
+    """An act the elaborator reads alone (record refinements it does not, `LeqPair`)."""
+    return elaboration_error(alone(a)) is None
+
+
+def label(a):
+    """An act's name in the coverage line: its name, or `operator o := f`, or `datum` and its head."""
+    if hasattr(a, 'name'): return a.name
+    if isinstance(a, s.OperatorAct): return f'operator {a.operator} := {a.value.name}' if isinstance(a.value, s.Name) else f'operator {a.operator}'
+    h = head(a.value) if isinstance(a, s.Datum) else None
+    return 'datum ' + h.name if isinstance(h, s.Name) else 'datum'
+
+
+def typed_part(prefix, acts):
+    """The acts of `acts` that elaborate together after `prefix`, and the elaborator's message on
+    each act left out. First every act the elaborator reads alone (an operator cannot be read
+    without its function, so it waits for the rest); if those still do not elaborate together, one
+    by one in order, operators last, each kept when the acts kept so far still elaborate with it."""
+    left = {}
+    kept = []
+    for a in acts:
+        e = None if isinstance(a, (s.OperatorAct, s.ImportAct)) else elaboration_error(alone(a))
+        if e is None: kept.append(a)
+        else: left[a] = e
+    if elaboration_error(prefix + tuple(kept)) is not None:
+        chosen = []
+        for a in [a for a in kept if not isinstance(a, s.OperatorAct)] + [a for a in kept if isinstance(a, s.OperatorAct)]:
+            e = elaboration_error(prefix + tuple(chosen) + (a,))
+            if e is None: chosen.append(a)
+            else: left[a] = e
+        kept = [a for a in kept if a not in left]
+    return tuple(kept), left
+
+
+def typed(make, imported, own):
+    """A typing of the file's own acts after its imported ones (12.S22): of the whole when it
+    elaborates; else of the file alone when that elaborates; else act by act (`typed_part`). It
+    records the acts left untyped with the elaborator's message, so that a rule's clean verdict is
+    known to cover only the typed acts."""
+    def attempt(acts):
+        try: return make(acts)
+        except ElaborationError: return None
+    q = imported and attempt(imported + own) or attempt(own); left = {}
+    if q is None:
+        prefix = imported if imported and elaboration_error(imported) is None else ()
+        kept, left = typed_part(prefix, own)
+        q = make(prefix + kept)
+    q.untyped = {a: m for a, m in left.items() if not isinstance(a, s.ImportAct)}
+    q.untyped_names = {a.name for a in q.untyped if hasattr(a, 'name')}
+    q.acts = tuple(a for a in own if not isinstance(a, s.ImportAct))
+    return q
 
 
 def typing_of(p):
     """The typing of a file read with its imports (12.S22, so that `base` sees an imported
-    subtype's definition); of the file alone when the two do not elaborate together."""
+    subtype's definition; an imported act the elaborator cannot read alone is dropped); see `typed`."""
     if not isinstance(p, Program) or not p.imported: return _typing(tuple(p))
     if p.typing is None:
         own = {a.name for a in p if hasattr(a, 'name')}
         imported = tuple(a for a in p.imported if a.name not in own and elaborates(a))
-        try: p.typing = Typing(imported + tuple(p))
-        except ElaborationError: p.typing = _typing(tuple(p))
+        p.typing = typed(Typing, imported, tuple(p))
     return p.typing
+
+
+def typing_for(p, n):
+    """The typing of a file for a rule on `n`; ElaborationError when an act of `n` is untyped."""
+    q = typing_of(p)
+    if n in q.untyped_names:
+        raise ElaborationError(next(m for a, m in q.untyped.items() if getattr(a, 'name', None) == n))
+    return q
+
+
+def coverage(q):
+    """The `-v` line of a file's typing: how many of its acts are typed, and which are not, why."""
+    typed_count = len(q.acts) - len(q.untyped)
+    detail = '; '.join(f'{label(a)} ({m})' for a, m in q.untyped.items())
+    return Report('typed', f'{typed_count} of {len(q.acts)} acts',
+                  'not typed: ' + detail if detail else 'the whole file elaborates.')
 
 
 def verdict_type(u):
@@ -549,34 +600,37 @@ def fits(typing, ty, bt):
 def violatesR6(p, n):
     """4.R6: a separately declared body's type fits T, a predicate over T, or Law T; peel common parameters."""
     if not acts(p, n, s.Declare) or not acts(p, n, s.Define): return False
-    q = typing_of(p); ty = next(a.type for a in q.program if isinstance(a, t.Declare) and a.name == n)
+    q = typing_for(p, n); ty = next(a.type for a in q.program if isinstance(a, t.Declare) and a.name == n)
     return not fits(q, ty, q.typeOf(q.body(n)))
 
 
-def contains_arrow(q, u, fuel):
+def contains_arrow(q, u, fuel, seen=frozenset()):
+    """Whether a type holds a function; a name is unfolded once on each path (a recursive data
+    type, program.lth's, would otherwise recurse until the fuel or Python's stack runs out)."""
     if isinstance(u, t.Pi): return True
-    if isinstance(u, t.Var) and fuel:
+    if isinstance(u, t.Var) and fuel and u.name not in seen:
+        seen = seen | {u.name}
         body = q.body(u.name)
         if body is None:
             body = q.types.get(u.name)
             if not isinstance(body, t.Record): return False
-        return contains_arrow(q, body, fuel - 1)
+        return contains_arrow(q, body, fuel - 1, seen)
     if isinstance(u, t.Data):
         for _, ty in u.constructors:
             while isinstance(ty, t.Pi):
-                if contains_arrow(q, ty.domain, fuel): return True
+                if contains_arrow(q, ty.domain, fuel, seen): return True
                 ty = ty.codomain
         return False
-    if isinstance(u, t.Subtype): return contains_arrow(q, u.type, fuel)
-    if isinstance(u, t.Sigma): return contains_arrow(q, u.domain, fuel) or contains_arrow(q, u.codomain, fuel)
-    if isinstance(u, (t.Sum, t.Record)): return any(contains_arrow(q, ty, fuel) for _, ty in (u.alternatives if isinstance(u, t.Sum) else u.fields))
-    if isinstance(u, t.App): return contains_arrow(q, u.function, fuel) or contains_arrow(q, u.argument, fuel)
+    if isinstance(u, t.Subtype): return contains_arrow(q, u.type, fuel, seen)
+    if isinstance(u, t.Sigma): return contains_arrow(q, u.domain, fuel, seen) or contains_arrow(q, u.codomain, fuel, seen)
+    if isinstance(u, (t.Sum, t.Record)): return any(contains_arrow(q, ty, fuel, seen) for _, ty in (u.alternatives if isinstance(u, t.Sum) else u.fields))
+    if isinstance(u, t.App): return contains_arrow(q, u.function, fuel, seen) or contains_arrow(q, u.argument, fuel, seen)
     return False
 
 
 def violatesR8(p, n):
     """4.R8: structural == is forbidden on a type containing an exponential."""
-    q = typing_of(p)
+    q = typing_for(p, n)
     return any(isinstance(f, t.App) and f.function == t.Var('==') and contains_arrow(q, q.typeOf(f.argument, c), len(q.program)) for c, f, _ in q.applications(q.body(n)))
 
 
@@ -636,7 +690,7 @@ def theory_head(q, u):
 
 def violatesR9(p, n):
     """4.R9: application argument bases must refine domain bases, with function variance."""
-    q = typing_of(p)
+    q = typing_for(p, n)
     for a in acts(p, n, s.Define):
         if isinstance(a.type, s.Record):
             expected = q.types.get(n); actual = q.typeOf(q.body(n))
@@ -738,17 +792,16 @@ def violatesR13(p, n):
     rivals = [g for o, f in bindings for o2, g in bindings if f == n and o == o2 and g != n]
     if not rivals: return False
     # The elaborated declared types, binders included (curried), compared up to renaming; the
-    # surface signature when the program does not elaborate.
-    try:
-        q = typing_of(p)
-        return any(n in q.types and g in q.types and alpha_equal(q.types[g], q.types[n]) for g in rivals)
-    except ElaborationError:
+    # surface signature when either function is untyped.
+    q = typing_of(p)
+    if q.untyped_names & {n, *rivals}:
         return any(surface_signature(p, g) == surface_signature(p, n) for g in rivals)
+    return any(n in q.types and g in q.types and alpha_equal(q.types[g], q.types[n]) for g in rivals)
 
 
 def violates6R1(p, n):
     """6.R1: a citation datum's reference must type as Reference."""
-    q = typing_of(p)
+    q = typing_for(p, n)
     for a in q.program:
         if not isinstance(a, t.Datum): continue
         u = a.value; args = []
@@ -778,11 +831,19 @@ def check(program, path=None) -> list[Failure]:
                 message = predicate.__doc__.split(': ', 1)[1]
                 if rule == '4.R12': message = 'defined twice: ' + message
                 result.append(Failure(rule, n, message))
+    _checked[:] = [tuple(program), typing_of(program)]
     return result
 
 
+# The file `check` last read and its typing (with its imports), for `report`'s coverage line.
+_checked = [None, None]
+
+
 def report(program) -> list[Report]:
-    result = []
+    """The `-v` reports: the typing's coverage of the file (as `check` read it, with its imports,
+    when it was the last file checked), then each name's reports."""
+    q = _checked[1] if _checked[0] == tuple(program) else typing_of(program)
+    result = [coverage(q)]
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for kind, pred, message in [('unclaimed', violatesS14, 'No other definition claims this Bool law.'), ('provisional', provisionalExtern, 'Provisional extern.'), ('loose', looseFunction, 'Top-level function; reported pending local definitions.')]:
             if pred(program, n): result.append(Report(kind, n, message))
