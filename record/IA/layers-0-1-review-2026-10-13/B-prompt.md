@@ -20,6 +20,9 @@ Answer in this order, numbered, as briefly as each allows, quoting the line you 
    give the program.
 3. **The approximations**: `program.lth` reads a law as a definition at `Bool` until typing exists,
    and reports rather than rejects loose functions (4.S17). Are these sound as stated?
+   And can `ReportsExactly` be met by a checker that reports nothing, because on the programs a
+   random generator gives no name violates any rule, so the law is vacuous in practice (L9.6)? If
+   so, what should its domain or generator be?
 4. **Typing**: are the laws of `Typing` right and enough for the rules that use it (4.R6, 4.R8,
    4.R9, 4.R11)?
 5. **Names**: does `namesIn` compute D(n) and B(n) of 1.S7, binders respected?
