@@ -15,7 +15,7 @@ showed the cost under dependent types: in `(fn n { body }) 3` the body does not 
 inside the body. Recommended: the kernel gains `Let : String -> Term -> Term -> Term -> Term`
 (name, type, value, body), with `n ≡ 3` inside the body, and a block becomes nested `Let`s. Cost:
 one constructor and its laws. The surface (`fn`, blocks) does not change.
-
+OK
 
 
 ## Q2. The acts of the kernel, and chapter 3 brought up to the files
@@ -25,7 +25,7 @@ directives; `term.lth` has `Declare`, `Define` and `Datum`, since aliases are ex
 checking and the directives became functions (3.S39, 2.S21). Fable lists more places where chapter
 3 lags the files (3.R1, 3.S36's `KernelLaws` and `IfTrue` to `CaseJust`, the string of `Axiom`).
 Recommended: `Act` as in `term.lth`, and chapter 3 updated to the files on these points.
-
+OK
 
 
 ## Q3. A `data` with a constructor that has no law of its role is rejected
@@ -34,6 +34,9 @@ Chapter 4 says both "each constructor needs a law of its role" and "a `data` wit
 bound is reported". Recommended, by L2.7 (a definition is a concept): reject when any constructor
 has no law of its role, as `Color` stays a reject in `tests/spec/` (70b1c26), and report the table
 of observers against constructors besides.
+OK
+
+
 
 
 
@@ -43,7 +46,7 @@ of observers against constructors besides.
 That holds only without a hierarchy of universes; it is a known inconsistency (Girard's paradox),
 harmless for testing, which proves nothing. Recommended: version 0 keeps `U : U`, said in chapter 3
 as a known limit; a hierarchy waits for the layer of proofs (3.S11).
-
+OK
 
 
 ## Q5. A theory with a single model becomes a definition
@@ -52,7 +55,7 @@ as a known limit; a hierarchy waits for the layer of proofs (3.S11).
 second implementation written as laws, which 4.R10 forbids (laws characterize, they do not
 implement). Recommended: make them definitions, and keep as laws only what characterizes them,
 such as `holds (both c d) x == (holds c x and holds d x)`.
-
+OK
 
 
 ## Q6. Laws valued in a cost wait for the cost library
@@ -60,7 +63,7 @@ such as `holds (both c d) x == (holds c x and holds d x)`.
 `Law` admits only Boolean cases, while 5.S2 decides laws valued in the cost `C`. Recommended: keep
 `Law` Boolean until the cost library (step 5 of the plan), and say so in 5.S1; `Law C` then gains a
 cost case.
-
+OK, lets wait for the Cost Library, when we have a use case. 
 
 
 ## Q7. Stuck terms: reduction unfolds names, the printer folds them back
@@ -72,4 +75,4 @@ one host and true of `term_model.lut`. Recommended: retire "stays folded" from 3
 unfolds a defined name in head position; a stuck term is whatever reduction leaves, the same for
 every specimen; folding back for display is the printer's.
 
-
+OK
