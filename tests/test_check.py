@@ -210,3 +210,40 @@ def test_R9_inline_record_return_preserves_field_names_and_order():
     assert c.violatesR9(program('f (p : { a : Int, b : Bool }) : { b : Bool, a : Int } := p'), 'f')
     assert c.violatesR9(program('f (p : { a : Int }) : { c : Int } := p'), 'f')
     assert not c.violatesR9(program('f (p : { a : Int, b : Bool }) : { a : Int, b : Bool } := p'), 'f')
+
+
+def test_R3_claimed_laws_read_fields_through_bound_models():
+    for body in ['m.parse == m.parse', '(m).parse == (m).parse']:
+        p = program('T : { parse : Int }\nT := law\nlaw (m : T) : Bool := ' + body)
+        assert c.law_reads(p) == {'parse'}
+        assert not c.violatesR3(p, 'T')
+    p = program('T : { parse : Int, print : Int }\nT := law\nlaw (m : T) : Bool := m.parse == m.parse')
+    assert c.violatesR3(p, 'T')
+    assert c.fields_read(program('f := m.a.b')[0].body.term) == {'b'}
+    assert c.law_reads(program('T : { parse : Int }\nT := true\nlaw (m : T) : Bool := m.parse == m.parse')) == set()
+
+
+@pytest.mark.parametrize('source', [
+    'T = { field : { a : Int || b : String } }',
+    'T := { field : { a : Int || b : String } }',
+    'T : { field : { a : Int || b : String } } := extern "T"',
+    'T : { field : { a : Int || b : String } }',
+    'T (x : { a : Int || b : String }) : Int',
+])
+def test_nested_sum_labels_in_types_are_constructors(source):
+    p = program(source + '\nf := a 1')
+    assert c.constructors(p) == {'a', 'b'}
+    assert not c.violatesR2(p, 'f')
+
+
+def test_R9_named_subtype_bases_and_cycles():
+    from luthier import term as t
+    p = program('Positive : U := { x : Int | x == x }\nf (x : Int) : Int := x\ng (x : Positive) := f x')
+    assert not c.violatesR9(p, 'g')
+    p = program('Positive : U := { x : Int | x == x }\nf (x : Positive) : Int := 1\ng (x : Int) := f x')
+    assert not c.violatesR9(p, 'g')
+    assert c.violatesR9(program('Positive : U := { x : String | x == x }\nf (x : Int) := x\ng (x : Positive) := f x'), 'g')
+    q = c.Typing(program('A : U := { x : B | true }\nB : U := { x : A | true }'))
+    assert c.base(q, t.Var('A')) in {t.Var('A'), t.Var('B')}
+    q = c.Typing(program('A = Int'))
+    assert c.base(q, t.Var('A')) == t.Var('A')

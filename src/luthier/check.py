@@ -1,4 +1,4 @@
-"""Specimen of program.lth at 519bdf3/a73fa4f; user brief 2026-10-13, v2.
+"""Specimen of program.lth through dc8a8e5; user brief 2026-10-13, v3.
 
 Deterministic, no seed. R2 implements existence only; SCC/type-position checking
 is deferred. Typing is deliberately partial, with unknown types kept unknown.
@@ -54,7 +54,12 @@ def constructors(p):
         if isinstance(a, s.Define) and isinstance(a.body, s.DataBody):
             result.update(n for n, _ in a.body.constructors)
         u = a.value if isinstance(a, s.Alias) else a.body.term if isinstance(a, s.Define) and isinstance(a.body, s.TermBody) else None
-        if isinstance(u, s.Sum): result.update(n for n, _ in u.alternatives)
+        roots = [u]
+        if isinstance(a, s.Define): roots.append(a.type)
+        if isinstance(a, s.Declare): roots.extend([a.type, *(b.type for b in a.binders)])
+        for root in roots:
+            for node in term_nodes(root):
+                if isinstance(node, s.Sum): result.update(n for n, _ in node.alternatives)
     return result
 
 
@@ -153,14 +158,37 @@ def conjuncts(x):
     return {x.name} if isinstance(x, s.Name) else set()
 
 
-def law_names(p):
+def claimed_laws(p):
     # theoryHeads searches the whole program.
     claimed = set()
     for a in p:
         if isinstance(a, s.Define) and isinstance(a.body, s.TermBody):
             u = a.body.term
             if isinstance(u, s.Binop) and u.operator == '&' or acts(p, a.name, s.Declare): claimed |= conjuncts(u)
+    return claimed
+
+
+def law_names(p):
+    claimed = claimed_laws(p)
     return set().union(*(dependencies(p, a, True) for a in p if isinstance(a, s.Define) and a.name in claimed))
+
+
+def fields_read(u):
+    """fieldsRead: unscoped dotted suffixes and projections, following children."""
+    return {nameSuffix(node.name) if isinstance(node, s.Name) else node.field
+            for node in term_nodes(u)
+            if isinstance(node, s.Name) and '.' in node.name or isinstance(node, s.Proj)}
+
+
+def law_reads(p):
+    claimed = claimed_laws(p)
+    result = set()
+    for a in p:
+        if not isinstance(a, s.Define) or a.name not in claimed: continue
+        if isinstance(a.body, s.TermBody): result |= fields_read(a.body.term)
+        elif isinstance(a.body, s.ClausesBody):
+            for clause in a.body.clauses: result |= fields_read(clause.body)
+    return result
 
 
 def violatesR1(p, n):
@@ -180,7 +208,7 @@ def violatesR3(p, n):
     """4.R3: predicates touch all labels/binders, theories all fields, data all constructors through claimed laws."""
     laws = law_names(p)
     d = declared(p, n)
-    if isinstance(d, s.Record) and acts(p, n, s.Define) and {x for f in d.fields for x in f.names} - {nameSuffix(x) for x in laws}: return True
+    if isinstance(d, s.Record) and acts(p, n, s.Define) and {x for f in d.fields for x in f.names} - law_reads(p): return True
     for a in acts(p, n, s.Define):
         b = a.body
         if isinstance(b, s.DataBody) and {x for x, _ in b.constructors} - laws: return True
@@ -357,8 +385,14 @@ def violatesR8(p, n):
     return any(isinstance(f, t.App) and f.function == t.Var('==') and contains_arrow(q, q.typeOf(f.argument, c), len(q.program)) for c, f, _ in q.applications(q.body(n)))
 
 
-def base(u):
-    return base(u.type) if isinstance(u, t.Subtype) else u
+def base(q, u, fuel=None):
+    """Look through literal subtypes and names defined directly as subtypes."""
+    if fuel is None: fuel = len(q.program)
+    if isinstance(u, t.Subtype): return base(q, u.type, fuel)
+    if isinstance(u, t.Var) and fuel:
+        body = q.body(u.name)
+        if isinstance(body, t.Subtype): return base(q, body.type, fuel - 1)
+    return u
 
 
 def violatesR9(p, n):
@@ -373,7 +407,7 @@ def violatesR9(p, n):
             if isinstance(actual, t.Record) and isinstance(expected, t.Record) and not q.refines(actual, expected): return True
     for c, f, x in q.applications(q.body(n)):
         ft = q.typeOf(f, c); at = q.typeOf(x, c)
-        if isinstance(ft, t.Pi) and at is not None and not q.refines(base(at), base(ft.domain)): return True
+        if isinstance(ft, t.Pi) and at is not None and not q.refines(base(q, at), base(q, ft.domain)): return True
     return False
 
 
