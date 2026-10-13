@@ -1,7 +1,8 @@
 """Frozen kernel data from term.lth §1 (not the surface syntax trees).
 
-Source revision: 0a497e50b61aad3d04975bcb4ff3157c7db5bc7c.
+Source revision: 9a89873dad71493a72ca885585fdc7b5a8ff527d.
 Derivation: record/IA/kernel-2026-10-13/prompt.md v1; Codex, 2026-10-13.
+Update derivation: user request v2, recorded in codex-2.md.
 Lists are tuples, Maybe is None; constructors retain the theory's argument order.
 """
 
@@ -168,9 +169,25 @@ class Hole:
     name: str
 
 
+@dataclass(frozen=True)
+class Record:
+    fields: tuple[tuple[str, Term], ...]
+
+
+@dataclass(frozen=True)
+class RecordValue:
+    fields: tuple[tuple[str, Term], ...]
+
+
+@dataclass(frozen=True)
+class Proj:
+    record: Term
+    label: str
+
+
 Term: TypeAlias = (
     Var | Lit | Universe | World | Lam | App | Pi | Sigma | Pair | Match | Inj |
-    Sum | Data | Subtype | Extern | Primitive | Axiom | Hole
+    Sum | Data | Subtype | Extern | Primitive | Axiom | Hole | Record | RecordValue | Proj
 )
 
 

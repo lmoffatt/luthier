@@ -1,7 +1,8 @@
 """Python specimen of term.lth §2–§5, following term_model.lut's nominal choices.
 
-Sources: 0a497e50b61aad3d04975bcb4ff3157c7db5bc7c; synthesis prompt v1:
+Sources: 9a89873dad71493a72ca885585fdc7b5a8ff527d; synthesis prompt v1:
 record/IA/kernel-2026-10-13/prompt.md. Law caveats and deviations: its codex.md.
+Update derivation: user request v2; current audit: codex-2.md.
 Reduction uses an explicit generator stack and a shared transition budget; externs
 remain values. This module neither translates surface trees nor calls the host.
 """
@@ -13,7 +14,7 @@ from collections.abc import Generator
 from .term import (
     App, Axiom, Data, Datum, Declare, Define, Extern, Hole, Inj, IntConst, Lam,
     Lit, Match, Pair, Pattern, PCon, PInj, PLit, PPair, Primitive, Program, PVar,
-    PWild, Pi, Sigma, Subtype, Sum, Term, Universe, Var, World,
+    PWild, Pi, Proj, Record, RecordValue, Sigma, Subtype, Sum, Term, Universe, Var, World,
 )
 
 
@@ -67,12 +68,12 @@ def free_names(t: Term) -> frozenset[str]:
                     names.add(x)
             case App(a, b) | Pair(a, b):
                 pending.extend(((a, bound), (b, bound)))
-            case Inj(_, a):
+            case Inj(_, a) | Proj(a, _):
                 pending.append((a, bound))
             case Match(a, arms):
                 pending.append((a, bound))
                 pending.extend((b, bound | set(pattern_names(p))) for p, b in arms)
-            case Sum(kvs):
+            case Sum(kvs) | Record(kvs) | RecordValue(kvs):
                 pending.extend((b, bound) for _, b in kvs)
             case Data(x, kvs):
                 pending.extend((b, bound | {x}) for _, b in kvs)
@@ -98,14 +99,14 @@ def _all_names(t: Term) -> set[str]:
                 names.add(x)
             case App(a, b) | Pair(a, b):
                 pending.extend((a, b))
-            case Inj(_, a):
+            case Inj(_, a) | Proj(a, _):
                 pending.append(a)
             case Match(a, arms):
                 pending.append(a)
                 for p, b in arms:
                     names.update(pattern_names(p))
                     pending.append(b)
-            case Sum(kvs):
+            case Sum(kvs) | Record(kvs) | RecordValue(kvs):
                 pending.extend(b for _, b in kvs)
             case Data(x, kvs):
                 names.add(x)
@@ -176,7 +177,7 @@ def alpha_equal(a: Term, b: Term) -> bool:
                     return False
             case (App(a1, b1), App(a2, b2)) | (Pair(a1, b1), Pair(a2, b2)):
                 pending.extend(((a1, a2, env), (b1, b2, env)))
-            case Inj(l, a1), Inj(k, a2):
+            case (Inj(l, a1), Inj(k, a2)) | (Proj(a1, l), Proj(a2, k)):
                 if l != k:
                     return False
                 pending.append((a1, a2, env))
@@ -189,7 +190,7 @@ def alpha_equal(a: Term, b: Term) -> bool:
                     if bs is None:
                         return False
                     pending.append((c, d, bs + env))
-            case Sum(ps), Sum(qs):
+            case (Sum(ps), Sum(qs)) | (Record(ps), Record(qs)) | (RecordValue(ps), RecordValue(qs)):
                 if len(ps) != len(qs):
                     return False
                 for (k, c), (l, d) in zip(ps, qs):
@@ -255,6 +256,9 @@ def swap(x: str, y: str, t: Term) -> Term:
             case Inj(l, a):
                 value = yield walk(a)
                 return Inj(l, value)
+            case Proj(a, l):
+                value = yield walk(a)
+                return Proj(value, l)
             case Match(a, arms):
                 value = yield walk(a)
                 result = []
@@ -262,12 +266,12 @@ def swap(x: str, y: str, t: Term) -> Term:
                     body = yield walk(b)
                     result.append((_map_pattern(p, name), body))
                 return Match(value, tuple(result))
-            case Sum(kvs) | Data(_, kvs):
+            case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
                 result = []
                 for k, b in kvs:
                     body = yield walk(b)
                     result.append((k, body))
-                return Sum(tuple(result)) if isinstance(node, Sum) else Data(name(node.name), tuple(result))
+                return Data(name(node.name), tuple(result)) if isinstance(node, Data) else type(node)(tuple(result))
             case _ if isinstance(node, _LEAVES):
                 return node
         raise TypeError(f"unknown term: {type(node).__name__}")
@@ -308,7 +312,10 @@ def _substitute(x: str, s: Term, t: Term):
         case Inj(l, a):
             value = yield _substitute(x, s, a)
             return Inj(l, value)
-        case Sum(kvs) | Data(_, kvs):
+        case Proj(a, l):
+            value = yield _substitute(x, s, a)
+            return Proj(value, l)
+        case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
             if isinstance(t, Data):
                 y = t.name
                 if x == y:
@@ -324,7 +331,7 @@ def _substitute(x: str, s: Term, t: Term):
             for k, b in kvs:
                 body = yield _substitute(x, s, b)
                 result.append((k, body))
-            return Sum(tuple(result)) if isinstance(t, Sum) else Data(y, tuple(result))
+            return Data(y, tuple(result)) if isinstance(t, Data) else type(t)(tuple(result))
         case Match(a, arms):
             result = []
             for p, b in arms:
@@ -389,7 +396,10 @@ def canonical(t: Term) -> Term:
             case Inj(l, a):
                 value = yield walk(a, env)
                 return Inj(l, value)
-            case Sum(kvs) | Data(_, kvs):
+            case Proj(a, l):
+                value = yield walk(a, env)
+                return Proj(value, l)
+            case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
                 inner = env
                 if isinstance(node, Data):
                     y = binder()
@@ -398,7 +408,7 @@ def canonical(t: Term) -> Term:
                 for k, b in kvs:
                     body = yield walk(b, inner)
                     result.append((k, body))
-                return Sum(tuple(result)) if isinstance(node, Sum) else Data(y, tuple(result))
+                return Data(y, tuple(result)) if isinstance(node, Data) else type(node)(tuple(result))
             case Match(a, arms):
                 value = yield walk(a, env)
                 result = []
@@ -554,12 +564,15 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
         case App(f, a):
             changed, g = yield _step(env, f)
             return changed, App(g, a)
+        case Proj(r, label):
+            if isinstance(r, RecordValue):
+                for key, value in r.fields:
+                    if key == label:
+                        return True, value
+                return False, t
+            changed, value = yield _step(env, r)
+            return changed, Proj(value, label)
         case Match(s, arms):
-            # term_model.lut retains a failed leading injection arm in a neutral
-            # match, contradicting IotaSkips. Here that explicit law takes priority.
-            if arms and isinstance(s, Inj) and isinstance(arms[0][0], PInj):
-                if s.label != arms[0][0].label:
-                    return True, Match(s, arms[1:])
             for p, b in arms:
                 bs = yield _pattern(env, p, s)
                 if isinstance(bs, _Demand):
@@ -570,7 +583,7 @@ def _step(env: dict[str, Term | None], t: Term) -> _Work:
                     return True, b
             changed, v = yield _step(env, s)
             return changed, Match(v, arms)
-        case _ if isinstance(t, _BINDERS + _LEAVES + (Pair, Inj, Sum, Data)):
+        case _ if isinstance(t, _BINDERS + _LEAVES + (Pair, Inj, Sum, Data, Record, RecordValue)):
             return False, t
     raise TypeError(f"unknown term: {type(t).__name__}")
 

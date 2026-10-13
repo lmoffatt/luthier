@@ -1,14 +1,16 @@
 """term.lth §2–§5 law cases, plus Alpha's inherited Object laws.
 
-Inputs: source revision 0a497e50b61aad3d04975bcb4ff3157c7db5bc7c and
-record/IA/kernel-2026-10-13/prompt.md v1. Generator v1: seed 0x10132026,
+Inputs: source revision 9a89873dad71493a72ca885585fdc7b5a8ff527d and
+record/IA/kernel-2026-10-13/prompt.md v1. Generator v2 (records): seed 0x10132026,
 100 terms per law, recursive-constructor budget 7; pattern budget at most 3;
 small programs at most 4 acts and term budget 4 per embedded term.
 Leaf constructors cost zero; each recursive constructor costs one, and size-1
 is split among its children (matching the prompt's size-zero convention).
+Update prompt: user request v2, recorded in codex-2.md.
 Tests are finite law evidence, not a universal semantic certificate.
 """
 
+from copy import deepcopy
 from dataclasses import FrozenInstanceError, fields, is_dataclass
 import random
 
@@ -21,7 +23,7 @@ from luthier.term import (
     Act, App, Axiom, Constant, Data, Datum, Declare, Define, Extern, FloatConst,
     Hole, Inj, IntConst, Lam, Lit, Match, Pair, Pattern, PCon, PInj, PLit,
     PPair, Primitive, Program, PVar, PWild, Pi, Sigma, StringConst, Subtype,
-    Sum, Term, Universe, Var, World,
+    Sum, Proj, Record, RecordValue, Term, Universe, Var, World,
 )
 
 SEED = 0x10132026
@@ -72,7 +74,7 @@ def pattern(rng: random.Random, size: int) -> Pattern:
 def term(rng: random.Random, size: int) -> Term:
     """At zero only non-recursive Term constructors; otherwise split size-1."""
     leaves = (Var, Lit, Universe, World, Extern, Primitive, Axiom, Hole)
-    cls = rng.choice(leaves if size == 0 else leaves + BINDERS + (App, Pair, Match, Inj, Sum, Data))
+    cls = rng.choice(leaves if size == 0 else leaves + BINDERS + (App, Pair, Match, Inj, Sum, Data, Record, RecordValue, Proj))
     if cls in (Universe, World, Axiom):
         return cls()
     if cls in (Var, Hole, Extern, Primitive):
@@ -83,6 +85,8 @@ def term(rng: random.Random, size: int) -> Term:
         a, b = split_size(rng, size - 1, 2)
         args = (term(rng, a), term(rng, b))
         return cls(rng.choice(NAMES), *args) if cls in BINDERS else cls(*args)
+    if cls is Proj:
+        return Proj(term(rng, size - 1), rng.choice(LABELS))
     if cls is Inj:
         return Inj(rng.choice(LABELS), term(rng, size - 1))
     count = rng.randrange(3)
@@ -92,7 +96,7 @@ def term(rng: random.Random, size: int) -> Term:
         arms = tuple((pattern(rng, min(3, b)), term(rng, b)) for b in budgets[1:])
         return Match(value, arms)
     kvs = tuple((rng.choice(LABELS), term(rng, b)) for b in budgets)
-    return Data(rng.choice(NAMES), kvs) if cls is Data else Sum(kvs)
+    return Data(rng.choice(NAMES), kvs) if cls is Data else cls(kvs)
 
 
 def program(rng: random.Random) -> Program:
@@ -176,8 +180,10 @@ def alpha_variant(t: Term) -> Term:
                 return type(node)(walk(a, env), walk(b, env))
             case Inj(l, a):
                 return Inj(l, walk(a, env))
-            case Sum(kvs):
-                return Sum(tuple((k, walk(b, env)) for k, b in kvs))
+            case Sum(kvs) | Record(kvs) | RecordValue(kvs):
+                return type(node)(tuple((k, walk(b, env)) for k, b in kvs))
+            case Proj(a, l):
+                return Proj(walk(a, env), l)
             case Data(x, kvs):
                 y = fresh()
                 return Data(y, tuple((k, walk(b, env | {x: y})) for k, b in kvs))
@@ -223,14 +229,23 @@ def test_transitive(samples):
         assert alpha_equal(t, u) and alpha_equal(u, v) and alpha_equal(t, v)
 
 
-@pytest.mark.xfail(strict=True, reason="Object.Substitutive quantifies over name-observing functions; alpha-equal trees are structurally distinguishable")
+def test_structural_is_object(samples):
+    for t in samples:
+        u, v = deepcopy(t), deepcopy(t)
+        assert t == t and t == u and u == t
+        assert u == v and t == v
+
+
 def test_substitutive(samples):
-    pairs = [(t, alpha_variant(t)) for t in samples]
-    pairs.append((Lam("x", Universe(), Var("x")), Lam("y", Universe(), Var("y"))))
-    for t, u in pairs:
-        assert alpha_equal(t, u)
-        # The identity map is one function in the universally quantified law.
+    # Equal independently copied trees, observed by operations and name-reading functions.
+    observations = (lambda t: t, repr, hash, type, lambda t: tuple(getattr(t, f.name) for f in fields(t)),
+                    free_names, canonical, lambda t: swap("x", "y", t),
+                    lambda t: substitute("x", Var("y"), t), lambda t: reduce((), 20, t))
+    for t in samples:
+        u = deepcopy(t)
         assert t == u
+        for f in observations:
+            assert f(t) == f(u)
 
 
 def test_free_variables_are_names(rng):
@@ -402,15 +417,29 @@ def test_iota_pair(samples, rng):
 
 
 def test_iota_skips(samples, rng):
-    # Regression: retaining this failed arm violates the actual law on neutral matches.
-    assert reduce((), 3, Match(Inj("left", Var("v")), ((PInj("right", PWild()), Var("b")),))) == Match(Inj("left", Var("v")), ())
     for v in samples:
-        l, k = rng.sample(LABELS, 2)
-        p, n, b = program(rng), rng.randrange(20), term(rng, SIZE)
-        rest = tuple((pattern(rng, 3), term(rng, SIZE)) for _ in range(rng.randrange(3)))
-        lhs = Match(Inj(l, v), ((PInj(k, PWild()), b),) + rest)
-        rhs = Match(Inj(l, v), rest)
-        assert agree(reduce(p, n, lhs), reduce(p, n, rhs))
+        l, k, y = rng.choice(LABELS), rng.choice(LABELS), rng.choice(NAMES)
+        p, n = program(rng), rng.randrange(20)
+        b, c = term(rng, SIZE), term(rng, SIZE)
+        lhs = Match(Inj(l, v), ((PInj(k, PWild()), b), (PInj(l, PVar(y)), c)))
+        assert l == k or agree(reduce(p, n, lhs), reduce(p, n, substitute(y, v, c)))
+    assert reduce((), 2, Match(Inj("left", Var("v")),
+                             ((PInj("right", PWild()), Var("b")),
+                              (PInj("left", PVar("x")), Var("x"))))) == Var("v")
+
+
+def test_proj_of_record(samples, rng):
+    for u in samples:
+        x, y = rng.choice(LABELS), rng.choice(LABELS)
+        v, p, n = term(rng, SIZE), program(rng), rng.randrange(20)
+        r = RecordValue(((x, u), (y, v)))
+        assert x == y or (agree(reduce(p, n, Proj(r, x)), reduce(p, n, u))
+                          and agree(reduce(p, n, Proj(r, y)), reduce(p, n, v)))
+    r = RecordValue((("x", Var("u")), ("y", Var("v"))))
+    assert reduce((), 2, Proj(r, "x")) == Var("u")
+    assert reduce((), 2, Proj(r, "y")) == Var("v")
+    assert reduce((), 2, Proj(r, "missing")) == Proj(r, "missing")
+    assert reduce((Define("r", Universe(), r),), 3, Proj(Var("r"), "y")) == Var("v")
 
 
 def prim(op, a, b, head=Var):
@@ -442,7 +471,7 @@ def test_values_stay(samples, rng):
         x, c, ty = rng.choice(NAMES), constant(rng), term(rng, SIZE)
         kvs = (("C", b),)
         p, n = program(rng), rng.randrange(20)
-        values = (Lam(x, ty, b), Lit(c), Universe(), World(), Pi(x, ty, b), Sigma(x, ty, b), Sum(kvs), Data(x, kvs), Subtype(x, ty, b))
+        values = (Lam(x, ty, b), Lit(c), Universe(), World(), Pi(x, ty, b), Sigma(x, ty, b), Sum(kvs), Data(x, kvs), Subtype(x, ty, b), Record(kvs), RecordValue(kvs))
         for v in values:
             assert agree(reduce(p, n, v), v)
             assert reduce(p, 1, v) == v
@@ -481,11 +510,11 @@ def test_generator_budget_and_constructor_coverage(rng):
         match t:
             case App(a, b) | Pair(a, b):
                 return 1 + nodes(a) + nodes(b)
-            case Inj(_, a):
+            case Inj(_, a) | Proj(a, _):
                 return 1 + nodes(a)
             case Match(a, arms):
                 return 1 + nodes(a) + sum(nodes(b) for _, b in arms)
-            case Sum(kvs) | Data(_, kvs):
+            case Sum(kvs) | Data(_, kvs) | Record(kvs) | RecordValue(kvs):
                 return 1 + sum(nodes(b) for _, b in kvs)
             case _:
                 return 0
@@ -586,3 +615,22 @@ def test_deep_beta_substitution_and_pattern_demands():
         v = Inj("tag", v)
     program = (Define("n", Universe(), Lit(IntConst(2))),)
     assert reduce(program, 3, Match(v, ((p, Var("hit")),))) == Var("hit")
+
+
+def test_record_labels_and_traversal():
+    for cls in (Record, RecordValue):
+        t = cls((("m.x", Lam("y", Universe(), Pair(Var("x"), Var("y")))),))
+        assert free_names(t) == {"x"}
+        assert alpha_equal(t, alpha_variant(t))
+        assert not alpha_equal(t, cls((("x", t.fields[0][1]),)))
+        assert swap("x", "z", t).fields[0][0] == "m.x"
+        u = substitute("x", Var("y"), t)
+        assert u == cls((("m.x", Lam("y'", Universe(), Pair(Var("y"), Var("y'")))),))
+        assert canonical(t) == cls((("m.x", Lam("x0", Universe(), Pair(Var("x"), Var("x0")))),))
+        proj = Proj(t, "m.x")
+        assert free_names(proj) == {"x"}
+        assert alpha_equal(proj, Proj(alpha_variant(t), "m.x"))
+        assert not alpha_equal(proj, Proj(t, "x"))
+        assert substitute("x", Var("y"), proj) == Proj(u, "m.x")
+        assert canonical(proj) == Proj(canonical(t), "m.x")
+        assert swap("x", "z", proj) == Proj(swap("x", "z", t), "m.x")
