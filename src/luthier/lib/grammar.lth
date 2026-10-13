@@ -784,8 +784,10 @@ NamedArgTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := f (tol <-
 IfTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := if c then a" (ifThen (nm "c") (nm "a") nothing)
   and parsesX d g "x := if c then a else b" (ifThen (nm "c") (nm "a") (just (nm "b")))
+-- 2.S14: a dotted name is one name, the role of `name` (written out here, not through `nm`: 4.R3
+-- reads the law's own body)
 ProjectionTree (d : Derives) (g : Grammar d) : Bool :=
-  parsesX d g "x := (f y).z" (proj (app (nm "f") (nm "y")) "z") and parsesX d g "x := m.f" (nm "m.f")
+  parsesX d g "x := (f y).z" (proj (app (nm "f") (nm "y")) "z") and parsesX d g "x := m.f" (name "m.f")
 QuoteTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := quote { a + b }" (quoted (binop "+" (nm "a") (nm "b")))
 UniverseWorldAmp (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := U -> W" (binop "->" universe world) and parsesX d g "x := P & Q" (binop "&" (nm "P") (nm "Q"))
