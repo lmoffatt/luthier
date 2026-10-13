@@ -1028,3 +1028,82 @@ def test_eval_constants_and_checks(rng):
     assert eval_at(int, Axiom("unproved")) is None
     assert eval_at(int, Lit(IntConst(1)), fuel=0) is None
     assert eval_at(int, Lit(FloatConst(1.0))) is None
+
+
+# Bite 9: PrimInt, PrimFloat, PrimString, PrimConvert (term.lth §5 at 681742e), and/or.
+def bin_(op, a, b):
+    return App(App(Primitive(op), a), b)
+
+
+def flt(x):
+    return Lit(FloatConst(x))
+
+
+def txt(s):
+    return Lit(StringConst(s))
+
+
+def test_prim_int_division_and_comparisons():
+    for i in range(-7, 8):
+        for j in (-3, -2, -1, 1, 2, 3):
+            assert step((), bin_("/", num(i), num(j))) == num(i // j)
+            assert step((), bin_("mod", num(i), num(j))) == num(i % j)
+            assert (i // j) * j + i % j == i
+        for j in range(-3, 4):
+            for op, f in (("<=", i <= j), (">", i > j), (">=", i >= j), ("/=", i != j)):
+                assert step((), bin_(op, num(i), num(j))) == truth(f)
+    assert step((), bin_("/", num(-7), num(2))) == num(-4)
+    assert step((), bin_("mod", num(7), num(-2))) == num(-1)
+    for op in ("/", "mod"):  # a zero divisor never steps
+        assert step((), bin_(op, num(5), num(0))) is None
+        assert reduce((), 10, bin_(op, num(5), num(0))) == bin_(op, num(5), num(0))
+    assert step((), bin_("/", num(1), flt(2.0))) is None  # mixed types are stuck
+
+
+def test_prim_float():
+    for u in (-2.5, 0.0, 1.25, 1e100):
+        for v in (-2.5, 0.0, 1.25, 3.0):
+            assert step((), bin_("-", flt(u), flt(v))) == flt(u - v)
+            assert step((), bin_("*", flt(u), flt(v))) == flt(u * v)
+            if v != 0:
+                assert step((), bin_("/", flt(u), flt(v))) == flt(u / v)
+            for op, f in (("<", u < v), ("<=", u <= v), (">", u > v), (">=", u >= v), ("/=", u != v)):
+                assert step((), bin_(op, flt(u), flt(v))) == truth(f)
+    assert step((), bin_("/", flt(1.0), flt(0.0))) is None
+    assert step((), bin_("*", flt(1e200), flt(1e200))) is None  # overflow: no constant (11.S7)
+    assert step((), bin_("+", flt(1e308), flt(1e308))) is None
+    assert step((), bin_("-", flt(-1e308), flt(1e308))) is None
+    assert step((), bin_("<", flt(1.0), num(2))) is None
+
+
+def test_prim_string_and_convert():
+    assert step((), bin_("+", txt("ab"), txt("中"))) == txt("ab中")
+    assert step((), bin_("+", txt(""), txt(""))) == txt("")
+    assert step((), bin_("-", txt("a"), txt("b"))) is None
+    assert step((), bin_("<", txt("a"), txt("b"))) is None
+    assert step((), App(Primitive("toFloat64"), num(3))) == flt(3.0)
+    assert step((), App(Primitive("toFloat64"), num(-(2**53) - 1))) == flt(float(-(2**53) - 1))
+    assert step((), App(Primitive("toFloat64"), num(10**400))) is None
+    assert step((), App(Primitive("toFloat64"), flt(1.0))) is None
+    assert step((), App(Primitive("toFloat64"), Var("x"))) is None
+    assert reduce((), 10, App(Primitive("toFloat64"), bin_("+", num(1), num(2)))) == flt(3.0)
+
+
+def test_primitives_through_names_and_and_or():
+    p = tuple(Define(op, Universe(), Primitive(op)) for op in
+              ("/", "mod", "<=", "toFloat64", "+"))
+    assert reduce(p, 20, App(Var("toFloat64"), App(App(Var("/"), num(7)), num(2)))) == flt(3.0)
+    assert reduce(p, 20, App(App(Var("<="), num(1)), num(2))) == truth(True)
+    t, f = Var("true"), Var("false")
+    for a in (t, f):
+        for b in (t, f):
+            assert reduce((), 10, App(App(Var("and"), a), b)) == truth(a == t and b == t)
+            assert reduce((), 10, App(App(Var("or"), a), b)) == truth(a == t or b == t)
+    # the left operand is reduced first; a stuck one leaves the term stuck
+    assert reduce((), 10, App(App(Var("and"), bin_("<=", num(1), num(2))), t)) == t
+    assert step((), App(App(Var("and"), Var("q")), t)) is None
+    assert step((), App(App(Var("or"), Var("q")), t)) is None
+    # a program's own `and` takes precedence
+    assert step((Define("and", Universe(), Lit(IntConst(0))),), App(App(Var("and"), t), t)) is not None
+    assert eval_at(float, App(Primitive("toFloat64"), num(2))) == 2.0
+    assert eval_at(int, App(App(Var("mod"), num(7)), num(3))) == 1

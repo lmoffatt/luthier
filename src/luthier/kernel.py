@@ -16,6 +16,7 @@ remain values. This module neither translates surface trees nor calls the host.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Generator
 
 from .term import (
@@ -484,24 +485,67 @@ def _run(work: _Work):
     return value
 
 
-_OPERATORS = {"+", "*", "-", "==", "<"}
+_OPERATORS = {"+", "*", "-", "==", "<", "/", "mod", "<=", ">", ">=", "/="}
+# The names core.lut binds to a `primitive` body; a program (cli.py's bootstrap, eval_at) defines
+# each as `Primitive name`. toFloat64 is applied to one argument, the rest to two.
+BOOTSTRAP_PRIMITIVES = tuple(sorted(_OPERATORS)) + ("toFloat64",)
 
 
 def _operator(t: Term) -> str | None:
     return t.name if isinstance(t, Primitive) and t.name in _OPERATORS else None
 
 
+def _finite(x: float) -> Term | None:
+    # 11.S7: NaN and an overflow are errors and no constant; the step does not exist
+    return Lit(FloatConst(x)) if math.isfinite(x) else None
+
+
+def _truth(b: bool) -> Term:
+    return Var("true" if b else "false")
+
+
 def _primitive(op: str, a, b) -> Term | None:
+    """PrimInt, PrimFloat, PrimString on two constants of one type; None is no step."""
     if type(a) is not type(b):
         return None
+    x, y = a.value, b.value
     if isinstance(a, IntConst):
-        if op in {"+", "*", "-"}:
-            value = a.value + b.value if op == "+" else a.value * b.value if op == "*" else a.value - b.value
-            return Lit(IntConst(value))
-        return Var("true" if a.value < b.value else "false")  # `==` is _equal's
-    if isinstance(a, FloatConst) and op == "+":
-        return Lit(FloatConst(a.value + b.value))
+        match op:
+            case "+": return Lit(IntConst(x + y))
+            case "-": return Lit(IntConst(x - y))
+            case "*": return Lit(IntConst(x * y))
+            case "/" | "mod":
+                if y == 0:
+                    return None
+                return Lit(IntConst(x // y if op == "/" else x % y))
+    elif isinstance(a, FloatConst):
+        try:
+            match op:
+                case "+": return _finite(x + y)
+                case "-": return _finite(x - y)
+                case "*": return _finite(x * y)
+                case "/": return None if y == 0 else _finite(x / y)
+        except OverflowError:
+            return None
+    elif isinstance(a, StringConst) and op == "+":
+        return Lit(StringConst(x + y))
+    if isinstance(a, (IntConst, FloatConst)):
+        match op:  # `==` is _equal's
+            case "<": return _truth(x < y)
+            case "<=": return _truth(x <= y)
+            case ">": return _truth(x > y)
+            case ">=": return _truth(x >= y)
+            case "/=": return _truth(x != y)
     return None
+
+
+def _to_float64(c) -> Term | None:
+    if not isinstance(c, IntConst):
+        return None
+    try:
+        return _finite(float(c.value))
+    except OverflowError:
+        return None
 
 
 def _constructor(t: Term) -> tuple[str, tuple[Term, ...]] | None:
@@ -726,6 +770,23 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
                 return True, App(App(op, i), k)
             result = _equal(constructors, i, j)
             return (False, t) if result is None else (True, Var("true" if result else "false"))
+        case App(App(Var("and" | "or" as conn), i), j) if conn not in env:
+            # `and`/`or` on Var "true"/Var "false" (the Bool of core), left operand first,
+            # the right one only when the left does not decide
+            changed, k = yield _step(env, constructors, i)
+            if changed:
+                return True, App(App(Var(conn), k), j)
+            if i == Var("true" if conn == "and" else "false"):
+                return True, j
+            if i == Var("false" if conn == "and" else "true"):
+                return True, i
+            return False, t
+        case App(Primitive("toFloat64") as f, a):
+            if isinstance(a, Lit):
+                result = _to_float64(a.constant)
+                return result is not None, t if result is None else result
+            changed, k = yield _step(env, constructors, a)
+            return changed, App(f, k)
         case App(App(op, i), j) if _operator(op) is not None:
             if isinstance(i, Lit):
                 if isinstance(j, Lit):
@@ -829,7 +890,7 @@ def eval_at(expected: type, t: Term, *, fuel: int = 1000) -> int | float | str |
     constants = {int: IntConst, float: FloatConst, str: StringConst}
     if expected not in constants:
         raise TypeError("expected must be int, float or str")
-    program = tuple(Define(op, Universe(), Primitive(op)) for op in sorted(_OPERATORS))
+    program = tuple(Define(op, Universe(), Primitive(op)) for op in BOOTSTRAP_PRIMITIVES)
     value = reduce(program, fuel, t)
     if isinstance(value, Lit) and type(value.constant) is constants[expected]:
         return value.constant.value

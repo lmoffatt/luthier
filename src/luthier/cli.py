@@ -53,8 +53,10 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"unknown definition: {ns.name}")
                 return 1
             # Bootstrap core arithmetic, retaining user definitions as overrides.
+            # (a reversible choice: the alternative resolves through core.lut's `operator` acts)
+            from .kernel import BOOTSTRAP_PRIMITIVES
             program += tuple(t.Define(op, t.Universe(), t.Primitive(op))
-                             for op in ("+", "-", "*", "==", "<"))
+                             for op in BOOTSTRAP_PRIMITIVES)
             value = reduce(program, ns.fuel, t.Var(ns.name))
             if value is None:
                 print(f"fuel spent ({ns.fuel})")
