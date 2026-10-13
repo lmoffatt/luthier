@@ -1,44 +1,20 @@
 -- kernel_models.lut: the core's types as models of the structures of kernel_laws.lth.
 --
 -- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 2.1; §7 of kernel_laws.lth). Each
--- value below says which known structure a core type is, and so gives its constructors their
--- roles (L2.7, D-2026-10-13-t): `unit` the point of a terminal object, `true` and `false` the top
--- and bottom of a Boolean algebra, `nil` the neutral element of a free monoid and `cons` the
--- injection combined, `if` and `match` the cases of a coproduct. They are certified against their
+-- value below says which known structure a core type or a kernel form is (L2.7,
+-- D-2026-10-13-t). The models of core's data (`Unit`, `Empty`, `Bool`, `Maybe`, `List`) moved to
+-- core.lut on 2026-10-14 (D-2026-10-14-b), where their data are defined. They are certified against their
 -- theories like any model (spec 7); a law that quantifies over maps or monoids gets them from a
 -- census (7.R4). A model file holds models of theories (12.S23); these are the kernel's own.
 
-import "kernel_laws.lth" Object Concrete Structural Terminal Initial BooleanAlgebra TheBooleans Monoid FreeMonoid
-  Lists OrderedSemiring Exponential Product Coproduct NamedProduct NamedCoproduct Selected one two
+import "kernel_laws.lth" Object Concrete Structural
+  OrderedSemiring Exponential Product NamedProduct NamedCoproduct Selected one two
 
 -- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
 structuralEquality (A : Concrete) : Structural A := { eq := fn x y { x == y } }
 
--- `Unit` is terminal, `Empty` initial (3.S7, 3.S8)
-unitTerminal : Terminal Unit := { point := unit }
-emptyInitial : Initial Empty := { absurd := fn (A : U) (e : Empty) { match e { } } }
-
--- `Bool` is a Boolean algebra with `not`, `and`, `or`
-booleans : BooleanAlgebra Bool := {
-  top := true, bottom := false,
-  complement := fn b { not b },
-  meet := fn a b { a and b },
-  join := fn a b { a or b },
-}
-theBooleans : TheBooleans := { algebra := booleans }
-
--- `List A` is the free monoid on `A`; its fold is the recursion principle of 3.S36
-appendList (A : U) (xs ys : List A) : List A := match xs { nil -> ys ; cons x rest -> cons x (appendList A rest ys) }
-lists (A : U) : FreeMonoid A (List A) := {
-  neutral := nil,
-  combine := fn xs ys { appendList A xs ys },
-  inject := fn a { cons a nil },
-  fold := fn (N : U) (n : Monoid N) (f : A -> N) (xs : List A) {
-    foldInto A N n f xs },
-}
-foldInto (A N : U) (n : Monoid N) (f : A -> N) (xs : List A) : N :=
-  match xs { nil -> n.neutral ; cons a rest -> n.combine (f a) (foldInto A N n f rest) }
-listsOf (A : U) : Lists A := { free := lists A }
+-- `Unit`, `Empty`, `Bool`, `Maybe` and `List` are claimed in core.lut, where they are defined
+-- (D-2026-10-14-b); their models moved there.
 
 -- `Nat` is an ordered commutative semiring (11.R1)
 naturals : OrderedSemiring Nat := {
@@ -49,23 +25,13 @@ naturals : OrderedSemiring Nat := {
 }
 
 -- the kernel's application, pairing and match are the exponential, the product and the coproduct
--- (3.S8, 3.S36); on `Bool` the coproduct's cases are `if` (`IfTrue`, `IfFalse`), on `Maybe` a
--- match (`CaseNothing`, `CaseJust`)
+-- (3.S8, 3.S36); on `Bool` and `Maybe` the coproduct is core.lut's
 application (A B : U) : Exponential A B := { apply := fn f x { f x } }
 pairs (A B : U) : Product A B (A * B) := {
   pair := fn a b { (a, b) },
   first := fn p { match p { (a, b) -> a } },
   second := fn p { match p { (a, b) -> b } },
 }
-ifThenElse : Coproduct Unit Unit Bool := {
-  left := fn u { true }, right := fn u { false },
-  cases := fn (C : U) f g b { if b then f unit else g unit },
-}
-maybes (A : U) : Coproduct Unit A (Maybe A) := {
-  left := fn u { nothing }, right := fn a { just a },
-  cases := fn (C : U) f g m { match m { nothing -> f unit ; just a -> g a } },
-}
-
 -- a record type is a named product: `.x` and `.y` its projections (D-2026-10-13-x); a labeled sum a
 -- named coproduct, its labels the injections. Instances on the labels `x`, `y` and `a`, `b`.
 recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
