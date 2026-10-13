@@ -1,0 +1,36 @@
+-- program.lth: the rules of the checker as the laws of `WellFormed`.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 3.1 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 4, its rules 4.R1 to 4.R13 and the
+-- statements 4.S14, 4.S17, 4.S21, 4.S23, 4.S24; spec 1.S7 (D(n), B(n)); spec 5.S9, 5.S10
+-- (`Failures E`); L2.7, L14. The pattern is that of ebnf.lth and term.lth.
+--
+-- What this file states (4.S21). A model of `WellFormed` is a checker: from a program it gives the
+-- failures it finds. Each rule of chapter 4 is a predicate, `violates`, written here as the rule
+-- says it, and one generic law, `ReportsExactly`, says the checker reports a failure of that rule
+-- for a name exactly when the name violates it. So the rule is stated once, as a predicate, and
+-- the checker is held to it; the accept and reject programs of `tests/spec/` are its cases. The
+-- Python checker (step 4) is a specimen.
+--
+-- Which program. The rules read what is written: whether an alias is written with `=` (4.R7),
+-- `:=` against `<-` (4.R12), a body that is an `extern` (4.R5). So `WellFormed` takes the surface
+-- program of grammar.lth; the rules that need the type of a term (4.R8, 4.R9, 4.R11, 4.R13) read
+-- it through a typing, a theory of its own (§4), over the elaborated `Term` of term.lth.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones, checks it with
+-- `luthier parse src/luthier/lib/program.lth`, sets its status to done here, and commits.
+--
+--   §1 Failures and the theory: `Failure`, `WellFormed`, the generic law
+--      `ReportsExactly` (4.S21; 5.S9; checks.lth will hold `Failures E`, 5.S10).        todo
+--   §2 Names: the acts' names, D(n) and B(n) on the surface tree, type and term
+--      position (1.S7, 4.S1 to 4.S4).                                                  todo
+--   §3 The rules that read names and forms: 4.R1, 4.R2, 4.R3 (with L2.7 on `data`),
+--      4.R4, 4.R5, 4.R6, 4.R7, 4.R12, 4.S14 (a law no type claims), 4.S17.          todo
+--   §4 Typing: a theory `Typing` giving the type of an elaborated term, held to
+--      the formers of 3 §2; what the rules below need of it, nothing more.           todo
+--   §5 The rules that read types: 4.R8, 4.R9, 4.R11, 4.R13, 4.S23 (implicit
+--      arguments).                                                                   todo
+--   §6 What a test cannot decide: 4.R10 (a law characterizes) and 4.S20 are
+--      reports, not failures (4.S19, 4.S20); stated as such.                          todo
+--   §7 `WellFormed :=` the conjunction, one `ReportsExactly` per rule.                 todo
