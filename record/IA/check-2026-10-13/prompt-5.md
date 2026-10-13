@@ -37,3 +37,27 @@ examples/sonolocalizacion/*.lut` and list what is left, by cause.
 Check: `PYTHONPATH=src python3 -m pytest tests/test_check.py tests/test_spec.py -q`, then
 `PYTHONPATH=src python3 -m pytest tests -q`. Do not commit. Report to
 `record/IA/check-2026-10-13/report-5.md`.
+
+## Addendum (after the leftovers report, f8c5f40)
+
+`record/IA/theory-leftovers-2026-10-14/report.md` names what check.py must mirror from
+program.lth at 5f33db8, and more of the checker's: read it whole first. In order:
+- group 1: `fields_read` takes the field after the first `.` (`namePrefix(name.split('.', 1)[1])`);
+- group 2: `law_names` counts the constructors named by the patterns of a claimed law's own
+  matches and clauses (program.lth `lawNames`, [proposed]);
+- group 5: the lambda case of `violatesR3` applies only when `lambdaIsPredicate` holds (mirror
+  its four clauses);
+- 4.R3 `untouched`: a projection `e.f` counts as touching `e` (1.S7; count `namePrefix`), which
+  clears arrays.lth's shape refinements (item 1 above is answered: the checker's and program.lth's;
+  a theory agent adds the same to program.lth in parallel, do not touch it);
+- 4.R13 `rivalModel`: compare `typeOfAct`, not `declaredSurface` (clears every `operator` target);
+- 4.R4: `primitive` accepted as `extern` is (11.R1, 11.R2);
+- 4.R9 in arrays.lth, three causes: (a) an unannotated `fn k { ... }` where `Fin n -> T` is
+  expected, the hole must not be compared as a type; (b) a `Fin n -> A` inside a subtype's base
+  elaborated as `implies`, the same `arrows` reading as bite 3b part 1; (c) substituting `n := k`
+  into `{ m, n, f : Fin m -> Fin k -> Float64 }` captured the record's own field `n`;
+- 4.R9 `sameParse` in tables.lth: `Maybe Table` with the theory head read as its record, not `U`;
+- `base` and `Concrete`: read an imported name's definition when computing `base` (12.S22), if
+  the loader gives you the imported file; if check.py loads no imports today, say what it would
+  take and leave group 3's two cases listed.
+Item 2 above (subtypes across imports) belongs with that last point.
