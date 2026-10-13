@@ -39,6 +39,10 @@ by Luciano.
   round 4. D-2026-10-13-q (2.S1 escapes, 2.S4 layout readings, `_` decided), D-2026-10-13-r (Z9:
   the session writes the theories, agents or external models the specimens, one external round
   per layer). Plan draft 1. Next: draft 4 of the three files (step 1.1.c), then 1.2.
+- 2026-10-13: step 1.1.b, the spec on round 3 (d140c01; 2.S21 already said only the literals are
+  reserved). Step 1.1.c, draft 4 (a858291), and the reply to round 3. Next: 1.1.d (the lexer as an
+  `Ebnf` over characters) or 1.2 (the parser, by an external model or an agent, with a brief);
+  1.1.d is needed only before the parser is certified.
 
 ## Rules for every step
 
