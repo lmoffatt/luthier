@@ -36,7 +36,7 @@ def test_the_grammar_is_read_whole():
 def test_keywords_and_operators_are_derived():
     words = {w for w in LITS if re.fullmatch(r"[A-Za-z]+", w)}
     assert words == {"import", "as", "operator", "and", "or", "mod", "data", "if", "then", "else",
-                     "match", "U", "W", "quote"}
+                     "match", "U", "W", "quote", "fn"}
     levels = ["ampTerm", "arrowTerm", "orTerm", "andTerm", "cmpTerm", "addTerm", "mulTerm"]
     assert lits_of_names(G, levels) == ["&", "->", "or", "and", "==", "/=", "<", "<=", ">", ">=",
                                         "+", "-", "*", "/", "mod"]

@@ -67,7 +67,7 @@ token opens is known from the tokens before it: the braces of a
     clause      ::= "|" pattern { "," pattern } ":=" term
 
 Binders before the colon are parameters: `f (x : A) (y : B) : C := t` is
-`f : (x : A) -> (y : B) -> C := \ x { \ y { t } }`, and `(x y : A)` is `(x : A) (y : A)`.
+`f : (x : A) -> (y : B) -> C := fn x { fn y { t } }`, and `(x y : A)` is `(x : A) (y : A)`.
 Clauses under a header with parameters are a `match` on the tuple of the parameters.
 [decided D-2026-10-13-o] Two changes to the productions above. A bare term is an act, `act ::= ... | term`: a datum
 the module keeps, such as a `test` line or a citation (2.S21 makes `test` and `cite` functions);
@@ -149,7 +149,7 @@ holds.
 <!-- luthierSyntax: begin -->
 
 Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
-(v1; sha256: 889b2e24a25544a8762bd28e11f794f5bc3de29f3426b7202e89db430149a6a1).
+(v1; sha256: f05914e2bbc9a6977ee430f28257448375094c41a82ddbe204bbd4c4c78ad1a2).
 
     program ::= { act newline }
 
@@ -238,7 +238,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
         | "{" name ":=" term { sep name ":=" term } [ sep ] "}"
         | "{" block "}"
         | "[" [ term { "," term } [ "," ] ] "]"
-        | "\\" lparam { lparam } "{" block "}"
+        | "fn" lparam { lparam } "{" block "}"
         | "match" scrutinee "{" [ arm { ";" arm } [ ";" ] ] "}"
         | "quote" "{" term "}"
 
@@ -360,7 +360,9 @@ is the match on `f` applied to a block, and a match on `f { ... }` is written `m
 separated by `||`: `{ circle : Float64 || square : Float64 }`, two alternatives or more (one is a
 record type). `,` and `||` do not mix at one level; a mixture nests, `{ s : { a : A || b : B }, d : D }`.
 Inside braces a line beginning with `||` continues the item above (2.S4). `< >` and the form
-`(x : A) + (y : B)` are retired, so `<` and `>` are comparisons only; the anonymous sum is `A + B`. `quote` is a keyword (2.S21) and `eval` a name of core, so
+`(x : A) + (y : B)` are retired, so `<` and `>` are comparisons only; the anonymous sum is `A + B`. [decided D-2026-10-13-y] A lambda is written with `fn`,
+`fn e (j : J) { e + j }`, its parameters as in a definition's header; a block's value is its last
+term, and there is no `return`. `quote` is a keyword (2.S21) and `eval` a name of core, so
 `eval A t` is an application (2.S20).
 
 **2.S10. Patterns.** [implemented] A pattern `name` is a constructor of the scrutinee's data type
@@ -382,7 +384,7 @@ translation; spec 3 cites it.
 
 | surface | kernel |
 |---|---|
-| `f (x : A) (y : B) : C := t` | `f : (x : A) -> (y : B) -> C := \ x { \ y { t } }` |
+| `f (x : A) (y : B) : C := t` | `f : (x : A) -> (y : B) -> C := fn x { fn y { t } }` |
 | `(x y : A)` in a binder | `(x : A) (y : A)` |
 | clauses `\| p, q := t` under a header with parameters | a `match` on the tuple of parameters |
 | `if c then a else b` | `match c { true -> a ; false -> b }`; `c : Failures E` is first projected by `holds` (spec 5) |
@@ -402,9 +404,9 @@ translation; spec 3 cites it.
 | `y <- e` in a block | a fresh name `yk := e`, `k` the count of bindings of `y` so far, and every later `y` means `yk` (spec 2.S17) |
 | `{ i1 ; ... ; in ; e }`, a block | the definitions of its items with fresh names, and `e`; a sub-DAG with one output (D-2026-10-11-i) |
 | `w1 <- act w0 ...`, an action in a block | an ordinary binding: actions take and return the world (spec 10) |
-| `\ (x, y) { t }` | `\ p { match p { (x, y) -> t } }` |
+| `fn (x, y) { t }` | `fn p { match p { (x, y) -> t } }` |
 | `let p = e in body` | `match e { p -> body }` (retired, 2.S21) |
-| a definition by clauses `f (x : A) (y : B) \| p, q := t \| ...` | `f := \ x { \ y { match (x, y) { (p, q) -> t ; ... } } }` (D-2026-10-13-p) |
+| a definition by clauses `f (x : A) (y : B) \| p, q := t \| ...` | `f := fn x { fn y { match (x, y) { (p, q) -> t ; ... } } }` (D-2026-10-13-p) |
 | `-x` | `0 - x` on an `Int`, `0.0 - x` on a `Float64` |
 
 ## §5 What the parser leaves to the checker
@@ -511,7 +513,7 @@ its value, stays open (spec 8).
 ## §11 The keywords, and what becomes Luthier
 
 **2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `W` (D-2026-10-13-b), `data`, `match`, `if`,
-`then`, `else`, `U`, `operator`, `quote`, `import` and `as` (D-2026-10-13-o, -p): `operator` binds a
+`then`, `else`, `U`, `operator`, `quote`, `import`, `as` and `fn` (D-2026-10-13-o, -p, -y): `operator` binds a
 symbol, which no function can take as an argument; `quote` captures a term unevaluated; `import`
 binds names (12.S22) and `as` renames one on that line. They are the words `luthierSyntax` takes as
 literals, so the keyword set is derived from the grammar and not listed apart (D-2026-10-13-p);

@@ -222,7 +222,7 @@ luthierSyntax : WellFormedEbnf := { start := "program", rules := [
       seq [lit "{", cat "name", lit ":=", ref "term", rep (seq [ref "sep", cat "name", lit ":=", ref "term"]), opt (ref "sep"), lit "}"],
       seq [lit "{", ref "block", lit "}"],
       seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"]), opt (lit ",")]), lit "]"],
-      seq [lit "\\", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
+      seq [lit "fn", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
       seq [lit "match", ref "scrutinee", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"]), opt (lit ";")]), lit "}"],
       seq [lit "quote", lit "{", ref "term", lit "}"]] },
   { lhs := "scrutinee",   rhs := seq [ref "sAnd", rep (seq [lit "or", ref "sAnd"])] },
@@ -648,10 +648,10 @@ BlockOrRecordValue (d : Derives) (g : Grammar d) : Bool :=
 TupleTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := (a, b, c)" (tuple [nm "a", nm "b", nm "c"])
 ListTree (d : Derives) (g : Grammar d) : Bool := parsesX d g "x := [1, 2]" (list [numeral 1, numeral 2]) and parsesX d g "x := []" (list [])
 LambdaTree (d : Derives) (g : Grammar d) : Bool :=
-  parsesX d g "x := \\ y (z : Int) { w := y ; z }" (lambda [plainParam "y", typedParam ["z"] (nm "Int")] [bind "w" (nm "y")] (nm "z"))
-  and parsesX d g "x := \\ (p, q) { p }" (lambda [shapeParam [pvar "p", pvar "q"]] [] (nm "p"))
-  and parsesX d g "x := \\ (a b : A) { a }" (lambda [typedParam ["a", "b"] (nm "A")] [] (nm "a"))
-  and not (isParsed (g.parse "x := \\ (y) { y }"))
+  parsesX d g "x := fn y (z : Int) { w := y ; z }" (lambda [plainParam "y", typedParam ["z"] (nm "Int")] [bind "w" (nm "y")] (nm "z"))
+  and parsesX d g "x := fn (p, q) { p }" (lambda [shapeParam [pvar "p", pvar "q"]] [] (nm "p"))
+  and parsesX d g "x := fn (a b : A) { a }" (lambda [typedParam ["a", "b"] (nm "A")] [] (nm "a"))
+  and not (isParsed (g.parse "x := fn (y) { y }"))
 PatternTree (d : Derives) (g : Grammar d) : Bool :=
   parsesX d g "x := match m { just y -> y ; _ -> 0 ; 1 -> 2 ; (a, b) -> a ; cons _ rest -> rest }"
     (matchOf (nm "m") [(pApp "just" [pvar "y"], nm "y"), (pWild, numeral 0), (pLit (intLit 1), numeral 2),

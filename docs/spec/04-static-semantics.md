@@ -140,7 +140,7 @@ Files: r2_definition.accept.lut, r2_definition.reject.lut.
 
 **4.R3. A predicate defines only what it touches.** [implemented] The body of a subtype over a
 labeled base must touch every label; over an unlabeled base it must touch its parameter. A
-predicate that touches nothing (`\ p { true }`) defines nothing. `{ eq, add, mul | Associative A
+predicate that touches nothing (`fn p { true }`) defines nothing. `{ eq, add, mul | Associative A
 eq add }` is rejected: `mul` is a label no law touches, a semigroup juxtaposed to a bare function.
 The `| true` records of the first libraries disappear. [decided D-2026-10-13-p] The same holds for a `data`
 (L2.7): each constructor needs a law stating its role in some theory, as the laws of `derives` give

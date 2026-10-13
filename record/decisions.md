@@ -2295,3 +2295,16 @@ Source:     luthier@39b0fa5:record/questions-for-luciano-2026-10-13-layers-0-1.m
             luthier@39b0fa5:record/questions-for-luciano-2026-10-13-layers-0-1.md:67
 Kind:       spec (3.S3, 2.S12) and the theories term.lth, kernel_laws.lth, program.lth
 Status:     current; Q2 open
+
+D-2026-10-13-y  A lambda is written with the keyword `fn`, `fn e (j : J) { e + j }`, in place of
+                `\`; its parameters are written as in a definition's header; a block's value is its
+                last term, with no `return` (2.S9, 2.S12, 2.S21: twelve keywords). The C++ form
+                `[](e : X, j : J) { ... }` was not taken: the capture list has nothing to decide where
+                values do not change, `[]` is the empty list, and commas in parentheses already make
+                a tuple pattern. Q2 of record/questions-for-luciano-2026-10-13-layers-0-1.md; a block
+                stays a lambda applied in the kernel.
+Author:     Luciano, on the model's recommendation (`fn`, no `return`)
+Quote:      "si fn en lugar de \  no return"
+Source:     chat:52b10bff:4061
+Kind:       spec (2.S9, 2.S12, 2.S21) and grammar.lth; every file with a lambda
+Status:     current

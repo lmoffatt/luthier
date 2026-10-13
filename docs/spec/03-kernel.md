@@ -31,7 +31,7 @@ The kernel has the formers below. Each is a statement with its status.
 | former | anonymous | with names | introduction | elimination |
 |---|---|---|---|---|
 | universe | `U` | | every type | |
-| exponential (Pi) | `A -> B` | `(x : A) -> B`, `B` may mention `x` | `\ x { t }` | application `f a` |
+| exponential (Pi) | `A -> B` | `(x : A) -> B`, `B` may mention `x` | `fn x { t }` | application `f a` |
 | product (Sigma) | `A * B` | `(x : A) * (y : B)`; n-ary `{ x : A, y : B }` | `(a, b)`; `{ x := a, y := b }` | pattern `(x, y)` in `match`; projection `e.x` |
 | sum | `A + B` | `{ x : A \|\| y : B }`, n-ary (D-2026-10-13-w) | `x a`, by label | `match` on labels |
 | empty | `Empty` | | none | `match e { }`, at any type |
@@ -130,7 +130,7 @@ and reduction proper is exercised by the library tests. A rule of evaluation cou
 only with a program whose value is compared (D-2026-10-12-ah); 3.S14 to 3.S18 have none yet, and
 their mark stays `[implemented]` for the interpreter until those programs exist.
 
-**3.S14. Beta.** [implemented] `(\ x { t }) a ≡ t[a/x]`. In `k_recursor.accept.lut` the lambda
+**3.S14. Beta.** [implemented] `(fn x { t }) a ≡ t[a/x]`. In `k_recursor.accept.lut` the lambda
 `\k r { succ r }` is applied by `recN`.
 
 **3.S15. Delta.** [implemented] A defined name reduces to its body. Aliases are expanded before
@@ -266,7 +266,7 @@ specimen of this theory (L14.3).
 substitutive), which make a concrete type an object, are to be stated in the same file; they are
 not there yet.
 
-**3.S37. What it cannot state.** [implemented] Eta, `\ y { f y } == f`, is not statable, since
+**3.S37. What it cannot state.** [implemented] Eta, `fn y { f y } == f`, is not statable, since
 equality of functions is not structural (`spec 4.R8`); observed pointwise it is beta. Functions over
 `Fin n` are not enumerated by `exhaustive`. Both are O11. The recursion principle is stated over
 lists with the algebra fixed, until functions of two arguments have generators.

@@ -27,7 +27,7 @@ act is one of these three, and the name it introduces is qualified by its module
 reduce to the same normal form (`spec 3`). `t[a/x]` is t with every free occurrence of x replaced
 by a. The equality a type comes with, as opposed to `≡`, is O2.
 
-**1.S4. Binders and types.** [implemented] `\ x { t }` is the function with parameter x and body t.
+**1.S4. Binders and types.** [implemented] `fn x { t }` is the function with parameter x and body t.
 `(x : A) -> B` is the dependent function type, B possibly mentioning x, and `A -> B` when it does
 not. `(x : A) * B` is the dependent product, `A * B` when B does not mention x. `{ x : A, y : B }`
 is a product with labels x and y (its labeled base), and `{ x : T | p x }` is the subtype of T
