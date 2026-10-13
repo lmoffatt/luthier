@@ -105,7 +105,7 @@ by Luciano.
   record/IA/*/prompt*.md for every brief).
 
 - 2026-10-13, night (the coordinating session): the plans moved to record/plan/<objective>/
-  (2578abf); this is the plan in force, `plan-implementation-2026-10-13-*` beside it superseded.
+  (2578abf); this is the plan in force, `plan-implementation-2026-10-13-*` superseded and in `record/plan/archive/`.
   Step 2.5 done (`kernel.py`, d111060); step 2.6 (`elaborate.py`, `luthier eval`) running; layer 2's
   `generators.lth` and `test.lth` written by luthier-03, who pauses until the specimens report.
   Next: step 4.1, `check.py` with `luthier check`, then `v0.2`.

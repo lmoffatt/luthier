@@ -6,7 +6,7 @@ implementations where the kernel can say them. The specification (`docs/spec/`) 
 for both. This document holds what is yours to choose; `plan-from-zero-2026-10-13-execution.md`
 holds the steps. One bite per screen; mark "ok", "no" or a comment under each.
 
-From the superseded plan (`plan-implementation-2026-10-13-decisions.md`), still in force: D4 (each
+From the superseded plan (`record/plan/archive/plan-implementation-2026-10-13-decisions.md`), still in force: D4 (each
 token of `W` is consumed exactly once; the world changes as often as one likes, one token after
 another), D8 (`W` optional in `main`; `print` as the first action), D9 (top-level `test` lines are
 data; `test "x.lut"` is the action). Your marks there: D2 (a), D3 ok, to apply in sonolocalización
