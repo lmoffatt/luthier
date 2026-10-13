@@ -1,4 +1,4 @@
-"""Hand-written domains for program.lth laws (ba322cd), brief v1, no seed."""
+"""Hand-written domains for program.lth laws (519bdf3/a73fa4f), brief v2, no seed."""
 import pytest
 from luthier.parse import parse
 from luthier.surface import Parsed
@@ -116,3 +116,97 @@ def test_Typing_laws_on_constructed_terms():
                       t.App(t.App(t.Var('<'), one), t.Var('x'))]:
         assert q.branchContext({'x': integer}, condition, True)['x'] == t.Subtype('x', integer, condition)
         assert q.branchContext({'x': integer}, condition, False)['x'] == t.Subtype('x', integer, t.App(t.Var('not'), condition))
+
+
+@pytest.mark.parametrize('predicate,rule,name,bad,clean', [
+    ('violatesR2R1', '2.R1', 'x',
+     'f (a : Int) : Int := a\nx := f (b <- 1)',
+     'f (a : Int) : Int := a\nx := f (a <- 1)'),
+    ('violatesR2R6', '2.R6', 'f',
+     'f (a : Int) := { y <- a ; y <- a + 1 ; y }',
+     'f (a : Int) := { y <- a ; y <- y + 1 ; y }'),
+    ('violatesR13', '4.R13', 'f',
+     'f : Int -> Int\ng : Int -> Int\noperator + := f\noperator + := g',
+     'f : Int -> Int\ng : String -> String\noperator + := f\noperator + := g'),
+    ('violates6R1', '6.R1', 'x',
+     'Reference : U\nx := 1\ncite x 42',
+     'Reference : U\nr : Reference\nx := 1\ncite x r'),
+])
+def test_new_ReportsViolations(predicate, rule, name, bad, clean):
+    # The new laws require reporting violations; clean domains also exercise
+    # the direction of each predicate without adding a theory biconditional.
+    pred = getattr(c, predicate)
+    assert pred(program(bad), name)
+    assert any(f.rule == rule and f.name == name for f in c.check(program(bad)))
+    assert not pred(program(clean), name)
+    assert not any(f.rule == rule and f.name == name for f in c.check(program(clean)))
+
+
+def test_operator_rivals_report_each_function_and_absent_declarations():
+    p = program('f := 1\ng := 2\noperator + := f\noperator + := g')
+    # declaredSurface returns nothing for both, equal in the literal predicate.
+    assert {f.name for f in c.check(p) if f.rule == '4.R13'} == {'f', 'g'}
+    assert not c.violatesR13(program('f : Int\noperator + := f\noperator + := f'), 'f')
+
+
+def test_rebinding_parameters_lambdas_and_bind_reads():
+    assert c.violatesR2R6(program('f (a : Int) := { a <- 2 ; a }'), 'f')
+    assert not c.violatesR2R6(program('f (a : Int) := { a <- a + 1 ; a }'), 'f')
+    assert c.violatesR2R6(program('f := fn a { a <- 2 ; a }'), 'f')
+    assert not c.violatesR2R6(program('f (a : Int) := { x := a ; a <- 2 ; a }'), 'f')
+
+
+def test_bound_dotted_names_in_scopes():
+    assert c.remove_bound({'p', 'p.x', 'p.x.y', 'other.x'}, {'p'}) == {'other.x'}
+    for source in [
+        'f (p : Int) := p.x', 'f := fn p { p.x }',
+        'f := { p := 1 ; p.x }', 'f := match 1 { p -> p.x }',
+        'f : (p : Int) -> p.x',
+    ]:
+        p = program(source)
+        a = p[0]
+        assert not c.unknown(p, c.dependencies(p, a))
+        if hasattr(a, 'body'): assert not c.unknown(p, c.dependencies(p, a, True))
+
+
+def test_sum_labels_of_aliases_and_definitions_are_constructors():
+    for source in ['T = { a : Int || b : String }', 'T := { a : Int || b : String }']:
+        p = program(source + '\nf := a 1')
+        assert c.constructors(p) == {'a', 'b'}
+        assert not c.violatesR2(p, 'f')
+
+
+def test_theory_heads_find_prior_and_later_declarations():
+    for source in ['T : Int\nT := law\nlaw : Bool := helper\nhelper := true',
+                   'T := law\nT : Int\nlaw : Bool := helper\nhelper := true']:
+        assert 'helper' in c.law_names(program(source))
+
+
+def test_extern_reads_every_type_name_and_accepts_aliases():
+    assert c.violatesR5(program('T : U\nf : Int -> T := extern "f"'), 'f')
+    assert c.violatesR5(program('T : U\nf : List T := extern "f"'), 'f')
+    assert not c.violatesR5(program('T = Int\nf : T -> Int := extern "f"'), 'f')
+    assert not c.violatesR5(program('T : U\nf : Int -> T := extern "f" (provisional <- true)'), 'f')
+
+
+def test_SameSeparates_record_names_and_order():
+    from luthier import term as t
+    q = c.Typing(program('x : Int'))
+    a = t.Record((('a', t.Var('Int')), ('b', t.Var('String'))))
+    assert q.same(a, a)
+    assert not q.same(a, t.Record(tuple(reversed(a.fields))))
+    assert not q.same(t.Record((('a', t.Var('Int')),)), t.Record((('c', t.Var('Int')),)))
+
+
+def test_citation_only_checks_datums_for_the_cited_name():
+    p = program('Reference : U\nx := 1\ny := 2\ncite x 42')
+    assert c.violates6R1(p, 'x')
+    assert not c.violates6R1(p, 'y')
+    assert not c.violates6R1(program('x := 1\ncite x'), 'x')
+    assert not c.violates6R1(program('x := 1\nf := cite x 42'), 'x')
+
+
+def test_R9_inline_record_return_preserves_field_names_and_order():
+    assert c.violatesR9(program('f (p : { a : Int, b : Bool }) : { b : Bool, a : Int } := p'), 'f')
+    assert c.violatesR9(program('f (p : { a : Int }) : { c : Int } := p'), 'f')
+    assert not c.violatesR9(program('f (p : { a : Int, b : Bool }) : { a : Int, b : Bool } := p'), 'f')

@@ -1,8 +1,8 @@
-"""Specimen of program.lth at ba322cd; user brief 2026-10-13, v1.
+"""Specimen of program.lth at 519bdf3/a73fa4f; user brief 2026-10-13, v2.
 
 Deterministic, no seed. R2 implements existence only; SCC/type-position checking
 is deferred. Typing is deliberately partial, with unknown types kept unknown.
-R10 is author judgement, R11 a typing law, R13/S23 elaboration laws.
+R10 is author judgement, R11 a typing law, S23 is an elaboration law.
 """
 from functools import lru_cache
 from dataclasses import dataclass, fields, is_dataclass
@@ -49,7 +49,17 @@ def nodes(x):
 
 
 def constructors(p):
-    return {n for a in p if isinstance(a, s.Define) and isinstance(a.body, s.DataBody) for n, _ in a.body.constructors}
+    result = set()
+    for a in p:
+        if isinstance(a, s.Define) and isinstance(a.body, s.DataBody):
+            result.update(n for n, _ in a.body.constructors)
+        u = a.value if isinstance(a, s.Alias) else a.body.term if isinstance(a, s.Define) and isinstance(a.body, s.TermBody) else None
+        if isinstance(u, s.Sum): result.update(n for n, _ in u.alternatives)
+    return result
+
+
+def remove_bound(ns, bound):
+    return {n for n in ns if n not in bound and namePrefix(n) not in bound}
 
 
 def pattern_binds(q, k):
@@ -75,28 +85,28 @@ def names(x, k=frozenset()):
     if x is None: return set()
     if isinstance(x, s.Name): return {x.name}
     if isinstance(x, (s.Pi, s.Sigma)):
-        return names(x.domain, k) | (names(x.codomain, k) - set(x.names))
+        return names(x.domain, k) | remove_bound(names(x.codomain, k), set(x.names))
     if isinstance(x, s.SigmaNamed):
-        return names(x.left_type, k) | (names(x.right_type, k) - {x.left_name})
-    if isinstance(x, s.Subtype): return names(x.type, k) | (names(x.law, k) - pattern_binds(x.pattern, k))
+        return names(x.left_type, k) | remove_bound(names(x.right_type, k), {x.left_name})
+    if isinstance(x, s.Subtype): return names(x.type, k) | remove_bound(names(x.law, k), pattern_binds(x.pattern, k))
     if isinstance(x, s.Record):
         bound = set(); result = set()
         for f in x.fields:
-            result |= names(f.type, k) - bound; bound.update(f.names)
-        return result | (names(x.law, k) - bound)
+            result |= remove_bound(names(f.type, k), bound); bound.update(f.names)
+        return result | remove_bound(names(x.law, k), bound)
     if isinstance(x, (s.Block, s.Lambda)):
         bound = set(); result = set()
         if isinstance(x, s.Lambda):
             for q in x.params:
-                if isinstance(q, s.TypedParam): result |= names(q.type, k) - bound
+                if isinstance(q, s.TypedParam): result |= remove_bound(names(q.type, k), bound)
                 bound |= param_binds((q,), k)
         for it in x.items:
-            result |= names(it.value, k) - bound; bound.add(it.name)
-        return result | (names(x.value if isinstance(x, s.Block) else x.body, k) - bound)
+            result |= remove_bound(names(it.value, k), bound); bound.add(it.name)
+        return result | remove_bound(names(x.value if isinstance(x, s.Block) else x.body, k), bound)
     if isinstance(x, s.MatchOf):
-        return names(x.value, k) | set().union(*(names(b, k) - pattern_binds(q, k) for q, b in x.arms))
+        return names(x.value, k) | set().union(*(remove_bound(names(b, k), pattern_binds(q, k)) for q, b in x.arms))
     if isinstance(x, s.Clause):
-        return names(x.body, k) - set().union(*(pattern_binds(q, k) for q in x.patterns))
+        return remove_bound(names(x.body, k), set().union(*(pattern_binds(q, k) for q in x.patterns)))
     if isinstance(x, tuple): return set().union(*(names(y, k) for y in x))
     if is_dataclass(x): return set().union(*(names(getattr(x, f.name), k) for f in fields(x)))
     return set()
@@ -105,10 +115,10 @@ def names(x, k=frozenset()):
 def dependencies(p, a, body=False):
     k = constructors(p); bound = set(); result = set()
     for b in a.binders:
-        result |= (names(b.type, k) | names(getattr(b, 'default', None), k)) - bound
+        result |= remove_bound(names(b.type, k) | names(getattr(b, 'default', None), k), bound)
         bound.update(b.names)
-    if body: return names(a.body, k) - bound
-    return result | (names(a.value if isinstance(a, s.Alias) else a.type, k) - bound)
+    if body: return remove_bound(names(a.body, k), bound)
+    return result | remove_bound(names(a.value if isinstance(a, s.Alias) else a.type, k), bound)
 
 
 def acts(p, n, cls=None):
@@ -144,12 +154,12 @@ def conjuncts(x):
 
 
 def law_names(p):
-    # Match theoryHeads' suffix traversal: declaration must occur after head.
+    # theoryHeads searches the whole program.
     claimed = set()
-    for i, a in enumerate(p):
+    for a in p:
         if isinstance(a, s.Define) and isinstance(a.body, s.TermBody):
             u = a.body.term
-            if isinstance(u, s.Binop) and u.operator == '&' or acts(p[i:], a.name, s.Declare): claimed |= conjuncts(u)
+            if isinstance(u, s.Binop) and u.operator == '&' or acts(p, a.name, s.Declare): claimed |= conjuncts(u)
     return set().union(*(dependencies(p, a, True) for a in p if isinstance(a, s.Define) and a.name in claimed))
 
 
@@ -197,11 +207,12 @@ def violatesR4(p, n):
 
 
 def violatesR5(p, n):
-    """4.R5: a nonprovisional extern gives no type and needs a defined named type."""
+    """4.R5: a nonprovisional extern gives no type and mentions only defined, alias, constructor or core types."""
     for a in acts(p, n, s.Define):
         if not isinstance(a.body, s.TermBody) or head(a.body.term) != s.Name('extern') or provisional(a.body.term): continue
         ty = type_of_act(p, a)
-        if ty == s.Universe() or isinstance(ty, s.Name) and not acts(p, ty.name, s.Define) and ty.name not in coreNames: return True
+        known = coreNames | constructors(p) | {a.name for a in p if isinstance(a, (s.Define, s.Alias))}
+        if ty == s.Universe() or names(ty, constructors(p)) - known: return True
     return False
 
 
@@ -249,6 +260,9 @@ class Typing:
         # Reduction is bounded; recursive definitions cannot hang checking.
         a = reduce(self.program, len(self.program) + 1, a) or a
         b = reduce(self.program, len(self.program) + 1, b) or b
+        if isinstance(a, t.Record) and isinstance(b, t.Record):
+            return len(a.fields) == len(b.fields) and all(
+                n == m and self.same(x, y) for (n, x), (m, y) in zip(a.fields, b.fields))
         return alpha_equal(a, b)
 
     def refines(self, a, b):
@@ -350,6 +364,13 @@ def base(u):
 def violatesR9(p, n):
     """4.R9: application argument bases must refine domain bases, with function variance."""
     q = _typing(tuple(p))
+    for a in acts(p, n, s.Define):
+        if isinstance(a.type, s.Record):
+            expected = q.types.get(n); actual = q.typeOf(q.body(n))
+            while isinstance(expected, t.Pi) and isinstance(actual, t.Pi):
+                actual = substitute(actual.name, t.Var(expected.name), actual.codomain)
+                expected = expected.codomain
+            if isinstance(actual, t.Record) and isinstance(expected, t.Record) and not q.refines(actual, expected): return True
     for c, f, x in q.applications(q.body(n)):
         ft = q.typeOf(f, c); at = q.typeOf(x, c)
         if isinstance(ft, t.Pi) and at is not None and not q.refines(base(at), base(ft.domain)): return True
@@ -380,12 +401,83 @@ def looseFunction(p, n):
     return any(a.binders or isinstance(a.type, s.Binop) and a.type.operator == '->' for a in acts(p, n, s.Define))
 
 
+def term_nodes(u):
+    """anyTerm/children: lambda annotations and match patterns are not children."""
+    yield u
+    if isinstance(u, s.Lambda):
+        children = tuple(it.value for it in u.items) + (u.body,)
+    elif isinstance(u, s.MatchOf):
+        children = (u.value,) + tuple(b for _, b in u.arms)
+    elif isinstance(u, tuple): children = u
+    elif is_dataclass(u): children = tuple(getattr(u, f.name) for f in fields(u))
+    else: children = ()
+    for child in children: yield from term_nodes(child)
+
+
+def body_nodes(body):
+    # inBody visits terms and clause bodies, never constructor types/patterns.
+    if isinstance(body, s.TermBody): yield from term_nodes(body.term)
+    elif isinstance(body, s.ClausesBody):
+        for clause in body.clauses: yield from term_nodes(clause.body)
+
+
+def violatesR2R1(p, n):
+    """2.R1: a named argument names a parameter of its head's binders."""
+    introduced = {a.name for a in p if hasattr(a, 'name')}
+    for a in acts(p, n, s.Define):
+        for u in body_nodes(a.body):
+            h = head(u)
+            if not isinstance(h, s.Name) or h.name not in introduced: continue
+            params = next(({x for b in a.binders for x in b.names} for a in p
+                           if getattr(a, 'name', None) == h.name and
+                           (isinstance(a, s.Declare) or isinstance(a, s.Define) and a.binders)), set())
+            while isinstance(u, s.App):
+                if isinstance(u.argument, s.NamedArg) and u.argument.name not in params: return True
+                u = u.function
+    return False
+
+
+def violatesR2R6(p, n):
+    """2.R6: a rebinding whose previous binding was never used is an unused binding."""
+    for a in acts(p, n, s.Define):
+        for u in body_nodes(a.body):
+            if not isinstance(u, (s.Block, s.Lambda)): continue
+            pending = param_binds(u.params, frozenset()) if isinstance(u, s.Lambda) else {x for b in a.binders for x in b.names}
+            for it in u.items:
+                pending -= names(it.value)
+                if isinstance(it, s.Rebind):
+                    if it.name in pending: return True
+                    pending.add(it.name)
+    return False
+
+
+def violatesR13(p, n):
+    """4.R13: two functions of the same declared type bind one operator."""
+    bindings = [(a.operator, a.value.name) for a in p if isinstance(a, s.OperatorAct) and isinstance(a.value, s.Name)]
+    return any(f == n and o == o2 and g != n and declared(p, g) == declared(p, n)
+               for o, f in bindings for o2, g in bindings)
+
+
+def violates6R1(p, n):
+    """6.R1: a citation datum's reference must type as Reference."""
+    q = _typing(tuple(p))
+    for a in q.program:
+        if not isinstance(a, t.Datum): continue
+        u = a.value; args = []
+        while isinstance(u, t.App):
+            args.append(u.argument); u = u.function
+        args.reverse()
+        if u == t.Var('cite') and len(args) >= 2 and args[0] == t.Var(n):
+            ty = q.typeOf(args[1])
+            if ty is None or not q.same(ty, t.Var('Reference')): return True
+    return False
+
+
 def check(program) -> list[Failure]:
     """Report each implemented program.lth predicate on each introduced name."""
     result = []
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
-        for k in range(1, 13):
-            predicate = globals()[f'violatesR{k}']
+        for rule, predicate in [(f'4.R{k}', globals()[f'violatesR{k}']) for k in range(1, 14)] + [('2.R1', violatesR2R1), ('2.R6', violatesR2R6), ('6.R1', violates6R1)]:
             try:
                 bad = predicate(program, n)
             except ElaborationError:
@@ -393,8 +485,8 @@ def check(program) -> list[Failure]:
                 bad = False
             if bad:
                 message = predicate.__doc__.split(': ', 1)[1]
-                if k == 12: message = 'defined twice: ' + message
-                result.append(Failure(f'4.R{k}', n, message))
+                if rule == '4.R12': message = 'defined twice: ' + message
+                result.append(Failure(rule, n, message))
     return result
 
 
