@@ -1,0 +1,31 @@
+You are reviewing theory files written in Luthier, a language whose interpreter is being rebuilt
+from its own theories: a type is a theory (a structure with laws), a value of it is a model, and
+the language certifies models against their theories by testing. A theory file (`.lth`) declares
+a record type of operations, states its laws as Bool-valued definitions over a model (`(m : T)`),
+and defines the theory as their conjunction (`T := Law1 & Law2`); a model file (`.lut`) holds
+values of theories. Every constructor of a `data` must have a law stating its role (principle
+L2.7: a definition is a concept; distinct constructors and accessors state no role). A law
+quantifies over the subtype it means rather than over an implication whose premise random cases
+rarely meet. The files parse with the project's parser; nothing yet type-checks or certifies
+them, so you are the first check of their meaning. Grammar files were reviewed in earlier rounds
+and are not in scope. Do not reopen a decision listed in `decisions-cited.md` unless a file
+contradicts it; where you disagree with the specification itself, say so as a separate item.
+
+This prompt covers three small theories. `laws.lth` states
+what a law's value must give (a verdict in a cost `C`, with `lift` and `exact`), templates of the
+laws of relations, and a law as a theory: its forms (`Case`, `Forall`, `Exists`, the connectives),
+its evidence, and what each kind of evidence settles. `checks.lth` states a check written once in
+the form that explains its failures, and its projections. `library.lth` states the loader: file
+kinds, what a file sees through its imports, what a demand reads.
+
+Answer in this order, numbered, as briefly as each allows, quoting the line you mean:
+1. **Laws that are wrong or unsatisfiable together.**
+2. **Evidence**: does `Settling` say what D-2026-10-13-l says (a `forall` refuted exactly by a
+   counterexample and confirmed over an infinite domain only statistically; an `exists` confirmed
+   by a witness; `then` material; a citation models a law whole)? What is missing?
+3. **Checks**: do the projections and `both`/`either` state 5.S9 and 5.S11?
+4. **The library**: do the laws state 12.S21 to 12.S23 and the privacy by ascription of L6.12?
+   What a loader could do wrong and still pass?
+5. **Roles (L2.7)** in `Law`, `Evidence`, `Verdict`, `Reason`, `FileKind`.
+6. **What you would change first**, one thing, with the reason.
+Do not rewrite the files.
