@@ -351,6 +351,69 @@ violatesR5 (p : SurfaceProgram) (n : String) : Bool :=
 anyUndefined (p : SurfaceProgram) (ms : List String) : Bool := match ms { nil -> false ;
   cons m rest -> not (isDefined p m or isAlias p m or member m coreNames or member m (constructors p)) or anyUndefined p rest }
 
+-- the parts of a surface term, for the rules that look for a form anywhere in a body
+children (t : Surface) : List Surface := match t {
+  app f x -> [f, x] ; binop o l r -> [l, r] ; neg x -> [x] ; quoted x -> [x] ; namedArg y x -> [x] ; proj x y -> [x] ;
+  tuple ts -> ts ; list ts -> ts ; recordValue kvs -> pairValues kvs ; sum kvs -> pairValues kvs ;
+  pi xs a b -> [a, b] ; sigma xs a b -> [a, b] ; sigmaNamed x a y b -> [a, b] ; subtype q a l -> [a, l] ;
+  record fs l -> concatTerms (fieldTypes fs) (match l { nothing -> nil ; just u -> [u] }) ;
+  block items e -> cons e (itemValues items) ; lambda ps items e -> cons e (itemValues items) ;
+  matchOf x arms -> cons x (armBodies arms) ;
+  ifThen c x m -> cons c (cons x (match m { nothing -> nil ; just y -> [y] })) ;
+  _ -> nil }
+concatTerms (xs ys : List Surface) : List Surface := match xs { nil -> ys ; cons x rest -> cons x (concatTerms rest ys) }
+fieldTypes (fs : List Field) : List Surface := match fs { nil -> nil ; cons f rest -> cons f.type (fieldTypes rest) }
+itemValues (items : List Item) : List Surface := match items { nil -> nil ;
+  cons it rest -> cons (match it { bind x v -> v ; rebind x v -> v }) (itemValues rest) }
+armBodies (arms : List (SurfacePattern * Surface)) : List Surface := match arms { nil -> nil ; cons (q, b) rest -> cons b (armBodies rest) }
+anyTerm (f : Surface -> Bool) (t : Surface) : Bool := f t or anyTerms f (children t)
+anyTerms (f : Surface -> Bool) (ts : List Surface) : Bool := match ts { nil -> false ; cons t rest -> anyTerm f t or anyTerms f rest }
+inBody (f : Surface -> Bool) (b : Body) : Bool := match b { termBody u -> anyTerm f u ; clausesBody cs -> anyClause f cs ; _ -> false }
+anyClause (f : Surface -> Bool) (cs : List Clause) : Bool := match cs { nil -> false ; cons c rest -> anyTerm f c.body or anyClause f rest }
+
+-- 2.R1: an argument by name names a parameter of the function it is passed to: the head of the
+-- application is a name of the program, and its binders hold that name (check.py, step 4.1)
+headName (t : Surface) : Maybe String := match t { app f x -> headName f ; name s -> just s ; _ -> nothing }
+namedArgsOf (t : Surface) : List String := match t {
+  app f x -> concat (namedArgsOf f) (match x { namedArg y v -> [y] ; _ -> nil }) ; _ -> nil }
+parametersOf (p : SurfaceProgram) (f : String) : List String := match p { nil -> nil ; cons act rest -> match act {
+  declare x bs t -> if x == f then binderBound bs else parametersOf rest f ;
+  define x bs t b -> if x == f and nonEmptyBinders bs then binderBound bs else parametersOf rest f ;
+  _ -> parametersOf rest f } }
+unknownNamedArg (p : SurfaceProgram) (t : Surface) : Bool := match headName t {
+  nothing -> false ;
+  just f -> member f (actNames p) and anyNotIn (namedArgsOf t) (parametersOf p f) }
+violatesR2R1 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (fn act { match act { define x bs t b -> inBody (unknownNamedArg p) b ; _ -> false } }) (actsNamed p n)
+
+-- 2.R6: in a file, a `<-` whose previous binding of the same name was never used is an error
+-- ("unused binding"); a session allows and reports it (check.py, step 4.1). `pending` holds the
+-- names bound and not yet used, the definition's parameters first.
+removeUsed (pending : List String) (v : Surface) : List String := match pending { nil -> nil ;
+  cons y rest -> if member y (namesIn nil v) then removeUsed rest v else cons y (removeUsed rest v) }
+unusedRebinding (pending : List String) (items : List Item) : Bool := match items { nil -> false ;
+  cons it rest -> match it {
+    bind x v -> unusedRebinding (removeUsed pending v) rest ;
+    rebind x v -> member x (removeUsed pending v) or unusedRebinding (cons x (removeUsed pending v)) rest } }
+blockUnused (params : List String) (t : Surface) : Bool := match t {
+  block items e -> unusedRebinding params items ;
+  lambda ps items e -> unusedRebinding (paramsBind nil ps) items ;
+  _ -> false }
+violatesR2R6 (p : SurfaceProgram) (n : String) : Bool :=
+  anyAct (fn act { match act { define x bs t b -> inBody (blockUnused (binderBound bs)) b ; _ -> false } }) (actsNamed p n)
+
+-- 4.R13: one meaning of an operator per argument types: two `operator` acts that bind one symbol
+-- to two functions of the same declared type are two models of one type (D-2026-10-11-j); reported
+-- under the name of each function (check.py, step 4.1)
+operatorBindings (p : SurfaceProgram) : List (String * String) := match p { nil -> nil ; cons act rest -> match act {
+  operatorAct o t -> (match t { name f -> cons (o, f) (operatorBindings rest) ; _ -> operatorBindings rest }) ;
+  _ -> operatorBindings rest } }
+rivalModel (p : SurfaceProgram) (n : String) (bs : List (String * String)) (o : String) : Bool := match bs { nil -> false ;
+  cons (o2, g) rest -> (o2 == o and not (g == n) and declaredSurface p g == declaredSurface p n) or rivalModel p n rest o }
+violatesR13 (p : SurfaceProgram) (n : String) : Bool := bindsTwice p n (operatorBindings p) (operatorBindings p)
+bindsTwice (p : SurfaceProgram) (n : String) (all bs : List (String * String)) : Bool := match bs { nil -> false ;
+  cons (o, f) rest -> (f == n and rivalModel p n all o) or bindsTwice p n all rest }
+
 -- 4.R7: an alias is neither declared nor defined
 violatesR7 (p : SurfaceProgram) (n : String) : Bool := isAlias p n and (isDeclared p n or isDefined p n)
 
@@ -470,6 +533,10 @@ TypeOfUniverse (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program)
 SameIsAlpha (a : Alpha) (sb : Substitution a) (t : Typing a sb) (q : AlphaPair a) : Bool := t.same q.s q.t
 SameSeparates (a : Alpha) (sb : Substitution a) (t : Typing a sb) : Bool :=
   not (t.same Universe int) and not (t.same int (Var "String")) and not (t.same int (Pi "_" int int))
+  -- the names of a record and their order are part of it (3.R1 with D-2026-10-13-x): swapping two
+  -- fields, or renaming one, gives another type
+  and not (t.same (Record [("a", int), ("b", Var "String")]) (Record [("b", Var "String"), ("a", int)]))
+  and not (t.same (Record [("a", int)]) (Record [("c", int)]))
 
 -- refinement: reflexive; a subtype refines its base (3.S6); functions contravariant in the
 -- domain and covariant in the codomain (4.R9), over pairs it relates; distinct bases do not refine
@@ -588,6 +655,20 @@ mismatch (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (ap 
 violatesR9 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
   anyApp (fn ap { mismatch a sb t (e.elaborate p) ap }) (bodyApplications a e p n)
 
+-- 6.R1: what `cite name ref checked who` cites is a `Reference` (12.R1): a datum citing the name,
+-- whose second argument does not type as `Reference` (check.py, step 4.1)
+spine (u : Term) : List Term := match u { App f x -> appendTerms (spine f) [x] ; _ -> [u] }
+appendTerms (xs ys : List Term) : List Term := match xs { nil -> ys ; cons x rest -> cons x (appendTerms rest ys) }
+badCitation (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ep : Program) (n : String) (u : Term) : Bool :=
+  match spine u { cons h args -> h == Var "cite" and (match args {
+    cons x more -> x == Var n and (match more { cons r rest -> not (typed a sb t (t.typeOf ep nil r) (Var "Reference")) ;
+                                                nil -> false }) ;
+    nil -> false }) ; nil -> false }
+violates6R1 (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a sb) (p : SurfaceProgram) (n : String) : Bool :=
+  anyDatum (badCitation a sb t (e.elaborate p) n) (e.elaborate p)
+anyDatum (f : Term -> Bool) (ep : Program) : Bool := match ep { nil -> false ;
+  cons act rest -> (match act { Datum u -> f u ; _ -> false }) or anyDatum f rest }
+
 -- 4.R11 is a law of the typing (`BranchRefines`): a checker that types branches by it rejects no
 -- program the rule accepts. 4.R13 (an operator resolved by the type, one meaning per types) and
 -- 4.S23 (implicit arguments from the expected type) are laws of the elaboration (step 2.4).
@@ -628,7 +709,9 @@ WellFormed (a : Alpha) (sb : Substitution a) (e : Elaboration a) (t : Typing a s
   & ReportsViolations a sb e t "4.R6" (violatesR6 a sb e t)
   & ReportsViolations a sb e t "4.R7" violatesR7 & ReportsNoFalseFailure a sb e t "4.R7" violatesR7
   & ReportsViolations a sb e t "4.R8" (violatesR8 a sb e t) & ReportsViolations a sb e t "4.R9" (violatesR9 a sb e t)
-  & ReportsViolations a sb e t "4.R12" violatesR12 & ReportsOnItsNames a sb e t
+  & ReportsViolations a sb e t "4.R12" violatesR12 & ReportsViolations a sb e t "2.R1" violatesR2R1
+  & ReportsViolations a sb e t "2.R6" violatesR2R6 & ReportsViolations a sb e t "4.R13" violatesR13
+  & ReportsViolations a sb e t "6.R1" (violates6R1 a sb e t) & ReportsOnItsNames a sb e t
   & ReportsWhen a sb e t "unclaimed" violatesS14 & ReportsOnlyWhen a sb e t "unclaimed" violatesS14
   & ReportsWhen a sb e t "provisional" provisionalExtern & ReportsOnlyWhen a sb e t "provisional" provisionalExtern
   & ReportsWhen a sb e t "loose" looseFunction & ReportsOnlyWhen a sb e t "loose" looseFunction
