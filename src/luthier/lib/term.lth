@@ -24,7 +24,7 @@
 -- this file takes the first todo, writes it in the pattern of the done ones and of kernel_laws.lth,
 -- checks it with `luthier parse src/luthier/lib/term.lth`, sets its status to done here, commits.
 --
---   §1 The data: `Literal`, `Term`, `Pattern`, `Act`, `Program` (3.S29, 3.S30, 3.S31).     todo
+--   §1 The data: `Constant`, `Pattern`, `Term`, `Act`, `Program` (3.S29 to 3.S31).     done
 --   §2 Names: free variables, renaming, alpha-equivalence as an object with the
 --      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     todo
 --   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               todo
@@ -34,3 +34,67 @@
 --   §6 Quote and eval (3.S32): cases on literals and closed terms.                      todo
 --   §7 The models, to write in term_model.lut: `reduce` (the interpreter in Luthier),
 --      `alpha`, `substitute`, `canon`. Not in this step's first pass.                todo
+
+import "kernel_laws.lth" Object
+
+-- ---------------------------------------------------------------- §1 The data
+
+-- A constant of the kernel: an integer, a double or a string (3.S17, spec 11). Named apart from
+-- the surface `Literal` of grammar.lth, which is unsigned; after elaboration a constant may be
+-- negative. Roles: `Prim` (§5).
+Constant : U := data {
+  IntConst : Int -> Constant ;
+  FloatConst : Float64 -> Constant ;
+  StringConst : String -> Constant ;
+}
+
+-- A pattern of a `match` (3.S10, 3.S29): a variable, `_`, a constructor applied to patterns, a
+-- pair, a constant, a label's injection. Roles: `Iota` (§5).
+Pattern : U := data {
+  PVar : String -> Pattern ;
+  PWild : Pattern ;
+  PCon : String -> List Pattern -> Pattern ;
+  PPair : Pattern -> Pattern -> Pattern ;
+  PLit : Constant -> Pattern ;
+  PInj : String -> Pattern -> Pattern ;
+}
+
+-- The kernel term after elaboration (3.S29, 3.S30): the sugar of spec 2 translated away, names as
+-- strings (3.S31), a qualified name `m.f` as one string. A constructor of a `data` is a `Var`
+-- applied to its arguments. `Lam`, `Pi`, `Sigma` and `Subtype` bind their string in their last
+-- term; `Lam` and `Pi` carry the variable's type. Roles: the laws of §5 and, for the type
+-- formers, of `WellFormed` (program.lth).
+Term : U := data {
+  Var : String -> Term ;
+  Lit : Constant -> Term ;
+  Universe : Term ;
+  World : Term ;
+  Lam : String -> Term -> Term -> Term ;
+  App : Term -> Term -> Term ;
+  Pi : String -> Term -> Term -> Term ;
+  Sigma : String -> Term -> Term -> Term ;
+  Pair : Term -> Term -> Term ;
+  Match : Term -> List (Pattern * Term) -> Term ;
+  Inj : String -> Term -> Term ;
+  Sum : List (String * Term) -> Term ;
+  Data : String -> List (String * Term) -> Term ;
+  Subtype : String -> Term -> Term -> Term ;
+  Extern : String -> Term ;
+  Primitive : String -> Term ;
+  Axiom : Term ;
+  Hole : String -> Term ;
+}
+
+-- An act of an elaborated program (3.S1, 3.S29, D-2026-10-13-o): a declaration is a name with its
+-- type and no body, a hole (3.S9); a definition a name with its type and its body; a datum a term
+-- the module keeps. Aliases are expanded before checking and never reach evaluation (3.S15), and
+-- imports are resolved into qualified names, so neither is an act here. Roles: `Delta` and
+-- `HolesStay` (§5).
+Act : U := data {
+  Declare : String -> Term -> Act ;
+  Define : String -> Term -> Term -> Act ;
+  Datum : Term -> Act ;
+}
+
+-- A program is its acts, a structure (3.S29); its role is the environment of `Delta`.
+Program = List Act
