@@ -347,3 +347,9 @@ brief to an external model or to Codex, with its reply, under `record/IA/`. The 
 only to learn what a host function did. Luciano reads Spanish in chat; written material is in
 English. He runs the scripts that process data; the model may run the lints, the parser, `luthier
 check` and `luthier certify` here.
+- 2026-10-13, night: check.py's findings in program.lth fixed (519bdf3, a73fa4f; D-2026-10-13-ae
+  keeps 11.R1 to 11.R3 out of it, loader laws later, library.lth §4 todo). Step 6.1 begun before
+  evidence (D-2026-10-13-ad): `world.lth` §1 to §4 (b954346 to 15cca78: the token and actions,
+  places and what an action changes, externs as routes, print and reading a file); §5 named worlds
+  waits for evidence, §6 the slice's externs for the inventory. Step 1.1.d (the lexer as a grammar)
+  is the coordinator's subagent's, in grammar.lth.
