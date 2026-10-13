@@ -22,9 +22,9 @@
 -- `luthier parse src/luthier/lib/program.lth`, sets its status to done here, and commits.
 --
 --   §1 Failures and the theory: `Failure`, `WellFormed`, the generic law
---      `ReportsExactly` (4.S21; 5.S9; checks.lth will hold `Failures E`, 5.S10).        todo
---   §2 Names: the acts' names, D(n) and B(n) on the surface tree, type and term
---      position (1.S7, 4.S1 to 4.S4).                                                  todo
+--      `ReportsExactly` (4.S21; 5.S9; checks.lth will hold `Failures E`, 5.S10).        done
+--   §2 Names: the acts' names, D(n) and B(n) on the surface tree (1.S7). Type and
+--      term position (4.S2) still to add, for 4.R2.                                 done
 --   §3 The rules that read names and forms: 4.R1, 4.R2, 4.R3 (with L2.7 on `data`),
 --      4.R4, 4.R5, 4.R6, 4.R7, 4.R12, 4.S14 (a law no type claims), 4.S17.          todo
 --   §4 Typing: a theory `Typing` giving the type of an elaborated term, held to
@@ -34,3 +34,151 @@
 --   §6 What a test cannot decide: 4.R10 (a law characterizes) and 4.S20 are
 --      reports, not failures (4.S19, 4.S20); stated as such.                          todo
 --   §7 `WellFormed :=` the conjunction, one `ReportsExactly` per rule.                 todo
+
+import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaParam Item Field Binder Body
+  Clause ImportName declare define alias importAct operatorAct datum explicit implicit termBody dataBody
+  clausesBody name literal universe world app binop neg tuple pi sigma sigmaNamed sumNamed record
+  subtype recordValue block sum list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
+  plainParam typedParam shapeParam bind rebind
+
+-- ---------------------------------------------------------------- §1 Failures and the theory
+
+-- A failure names its rule, the name it is about, and says why (5.S9: a check is written in the
+-- form that explains its failures). `Failures E` of 5.S9 is the list of them; its projections are
+-- checks.lth's (5.S10, step 3.3).
+Failure = { rule : String, name : String, message : String }
+
+-- A checker: the failures it finds in a program (4.S21).
+WellFormed : { check : SurfaceProgram -> List Failure }
+
+member (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or member x rest }
+concat (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (concat rest ys) }
+remove (x : String) (xs : List String) : List String :=
+  match xs { nil -> nil ; cons y rest -> if x == y then remove x rest else cons y (remove x rest) }
+removeAll (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> removeAll rest (remove x ys) }
+
+reported (fs : List Failure) (rule n : String) : Bool :=
+  match fs { nil -> false ; cons f rest -> (f.rule == rule and f.name == n) or reported rest rule n }
+
+-- a program and one of the names its acts introduce: what a rule is about; drawn from the program,
+-- since a random name is almost never one of them (7.S12)
+NamedIn : U := { p : SurfaceProgram, n : String | member n (actNames p) }
+
+-- The one law: for each rule, the checker reports a failure of that rule for a name exactly when
+-- the name violates the rule. The rule and its predicate come first, so `ReportsExactly "4.R1"
+-- violatesR1` is the law of 4.R1 (§7).
+ReportsExactly (rule : String) (violates : SurfaceProgram -> String -> Bool) (w : WellFormed) (c : NamedIn) : Bool :=
+  reported (w.check c.p) rule c.n == violates c.p c.n
+-- and it reports nothing about names the program does not introduce
+ReportsOnItsNames (w : WellFormed) (p : SurfaceProgram) : Bool := failuresNamed (w.check p) (actNames p)
+failuresNamed (fs : List Failure) (ns : List String) : Bool :=
+  match fs { nil -> true ; cons f rest -> member f.name ns and failuresNamed rest ns }
+
+-- ---------------------------------------------------------------- §2 Names
+
+-- the name an act introduces, if any, and the names of a program
+actName (a : SurfaceAct) : Maybe String := match a {
+  declare x bs t -> just x ; define x bs t b -> just x ; alias x bs t -> just x ;
+  importAct f ns -> nothing ; operatorAct o t -> nothing ; datum t -> nothing ;
+}
+actNames (p : SurfaceProgram) : List String :=
+  match p { nil -> nil ; cons a rest -> match actName a { nothing -> actNames rest ; just x -> cons x (actNames rest) } }
+importedNames (p : SurfaceProgram) : List String := match p { nil -> nil ;
+  cons a rest -> match a { importAct f ns -> concat (importNames ns) (importedNames rest) ; _ -> importedNames rest } }
+importNames (ns : List ImportName) : List String := match ns { nil -> nil ;
+  cons i rest -> cons (match i.asName { nothing -> i.name ; just y -> y }) (importNames rest) }
+
+isDeclared (p : SurfaceProgram) (n : String) : Bool :=
+  match p { nil -> false ; cons a rest -> match a { declare x bs t -> x == n or isDeclared rest n ; _ -> isDeclared rest n } }
+isDefined (p : SurfaceProgram) (n : String) : Bool :=
+  match p { nil -> false ; cons a rest -> match a { define x bs t b -> x == n or isDefined rest n ; _ -> isDefined rest n } }
+isAlias (p : SurfaceProgram) (n : String) : Bool :=
+  match p { nil -> false ; cons a rest -> match a { alias x bs t -> x == n or isAlias rest n ; _ -> isAlias rest n } }
+-- a name is known when the program introduces it, imports it, or core gives it (`core` the list of
+-- core's names, a parameter of the rules: core is not written yet, 12.S21)
+known (core : List String) (p : SurfaceProgram) (n : String) : Bool :=
+  member n (actNames p) or member n (importedNames p) or member n core
+
+-- The constructors of the `data` of a program: a pattern `name` is one of them if it names one,
+-- and a variable otherwise (2.S10, 2.S13).
+constructors (p : SurfaceProgram) : List String := match p { nil -> nil ;
+  cons a rest -> match a { define x bs t b -> concat (bodyConstructors b) (constructors rest) ; _ -> constructors rest } }
+bodyConstructors (b : Body) : List String := match b { dataBody cs -> pairNames cs ; _ -> nil }
+pairNames (kvs : List (String * Surface)) : List String := match kvs { nil -> nil ; cons (k, v) rest -> cons k (pairNames rest) }
+
+-- the variables a pattern binds, given the constructors `k`
+patternBinds (k : List String) (q : SurfacePattern) : List String := match q {
+  pWild -> nil ; pLit l -> nil ;
+  pApp n qs -> if member n k then patternsBind k qs else (match qs { nil -> [n] ; _ -> patternsBind k qs }) ;
+  pTuple qs -> patternsBind k qs ;
+}
+patternsBind (k : List String) (qs : List SurfacePattern) : List String :=
+  match qs { nil -> nil ; cons q rest -> concat (patternBinds k q) (patternsBind k rest) }
+
+-- spec 1.S7: the names found in a term, less those it binds; operators are core's and not counted
+namesIn (k : List String) (t : Surface) : List String := match t {
+  name s -> [s] ;
+  literal l -> nil ; universe -> nil ; world -> nil ;
+  app f a -> concat (namesIn k f) (namesIn k a) ;
+  binop o a b -> concat (namesIn k a) (namesIn k b) ;
+  neg a -> namesIn k a ; quoted a -> namesIn k a ; namedArg x a -> namesIn k a ; proj a x -> namesIn k a ;
+  tuple ts -> namesInAll k ts ; list ts -> namesInAll k ts ;
+  pi xs a b -> concat (namesIn k a) (removeAll xs (namesIn k b)) ;
+  sigma xs a b -> concat (namesIn k a) (removeAll xs (namesIn k b)) ;
+  sigmaNamed x a y b -> concat (namesIn k a) (remove x (remove y (namesIn k b))) ;
+  sumNamed x a y b -> concat (namesIn k a) (namesIn k b) ;
+  record fs law -> concat (fieldsNames k fs) (match law { nothing -> nil ; just l -> removeAll (fieldLabels fs) (namesIn k l) }) ;
+  subtype q a law -> concat (namesIn k a) (removeAll (patternBinds k q) (namesIn k law)) ;
+  recordValue kvs -> pairsNames k kvs ; sum kvs -> pairsNames k kvs ;
+  block items e -> itemsNames k items e ;
+  lambda ps items e -> concat (paramsNames k ps) (removeAll (paramsBind k ps) (itemsNames k items e)) ;
+  matchOf s arms -> concat (namesIn k s) (armsNames k arms) ;
+  ifThen c a b -> concat (namesIn k c) (concat (namesIn k a) (match b { nothing -> nil ; just e -> namesIn k e })) ;
+}
+namesInAll (k : List String) (ts : List Surface) : List String :=
+  match ts { nil -> nil ; cons t rest -> concat (namesIn k t) (namesInAll k rest) }
+pairsNames (k : List String) (kvs : List (String * Surface)) : List String :=
+  match kvs { nil -> nil ; cons (x, v) rest -> concat (namesIn k v) (pairsNames k rest) }
+fieldLabels (fs : List Field) : List String := match fs { nil -> nil ; cons f rest -> concat f.names (fieldLabels rest) }
+fieldsNames (k : List String) (fs : List Field) : List String :=
+  match fs { nil -> nil ; cons f rest -> concat (namesIn k f.type) (fieldsNames k rest) }
+-- a block's items bind in what follows them
+itemsNames (k : List String) (items : List Item) (e : Surface) : List String := match items {
+  nil -> namesIn k e ;
+  cons it rest -> match it {
+    bind x t -> concat (namesIn k t) (remove x (itemsNames k rest e)) ;
+    rebind x t -> concat (namesIn k t) (itemsNames k rest e) } }
+paramsBind (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
+  cons q rest -> concat (match q { plainParam x -> [x] ; typedParam xs t -> xs ; shapeParam qs -> patternsBind k qs })
+                        (paramsBind k rest) }
+paramsNames (k : List String) (ps : List LambdaParam) : List String := match ps { nil -> nil ;
+  cons q rest -> concat (match q { typedParam xs t -> namesIn k t ; _ -> nil }) (paramsNames k rest) }
+armsNames (k : List String) (arms : List (SurfacePattern * Surface)) : List String := match arms { nil -> nil ;
+  cons (q, b) rest -> concat (removeAll (patternBinds k q) (namesIn k b)) (armsNames k rest) }
+
+-- D(n) and B(n) of 1.S7: the names in the declared type of `n` (its binders included) and in its
+-- body, each less the binders' own names
+binderNames (k : List String) (bs : List Binder) : List String := match bs { nil -> nil ;
+  cons b rest -> concat (match b { explicit xs t d -> concat (namesIn k t) (match d { nothing -> nil ; just e -> namesIn k e }) ;
+                                   implicit xs t -> namesIn k t })
+                        (binderNames k rest) }
+binderBound (bs : List Binder) : List String := match bs { nil -> nil ;
+  cons b rest -> concat (match b { explicit xs t d -> xs ; implicit xs t -> xs }) (binderBound rest) }
+bodyNames (k : List String) (b : Body) : List String := match b {
+  termBody t -> namesIn k t ;
+  dataBody cs -> pairsNames k cs ;
+  clausesBody cs -> clausesNames k cs ;
+}
+clausesNames (k : List String) (cs : List Clause) : List String := match cs { nil -> nil ;
+  cons c rest -> concat (removeAll (patternsBind k c.patterns) (namesIn k c.body)) (clausesNames k rest) }
+dOf (p : SurfaceProgram) (a : SurfaceAct) : List String := match a {
+  declare x bs t -> concat (binderNames (constructors p) bs) (removeAll (binderBound bs) (namesIn (constructors p) t)) ;
+  define x bs t b -> concat (binderNames (constructors p) bs)
+                            (match t { nothing -> nil ; just u -> removeAll (binderBound bs) (namesIn (constructors p) u) }) ;
+  alias x bs t -> concat (binderNames (constructors p) bs) (removeAll (binderBound bs) (namesIn (constructors p) t)) ;
+  _ -> nil ;
+}
+bOf (p : SurfaceProgram) (a : SurfaceAct) : List String := match a {
+  define x bs t b -> removeAll (binderBound bs) (bodyNames (constructors p) b) ;
+  _ -> nil ;
+}
