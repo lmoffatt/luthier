@@ -42,7 +42,7 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaPara
   clausesBody name literal universe world app binop neg tuple pi sigma sigmaNamed record
   subtype recordValue block sum list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
   plainParam typedParam shapeParam bind rebind
-import "term.lth" Term Program Act Constant Pattern Alpha Substitution Var Lit Universe World Lam App Pi
+import "term.lth" Term Program Act Constant Pattern Alpha AlphaPair Substitution Var Lit Universe World Lam App Pi
   Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let Declare Define Datum IntConst FloatConst
   StringConst PCon
 
@@ -342,44 +342,80 @@ lookup (x : String) (ctx : Context) : Maybe Term :=
   match ctx { nil -> nothing ; cons (y, ty) rest -> if x == y then just ty else lookup x rest }
 
 -- a variable has the type its context gives it; a constant the type of its kind (spec 11)
+-- (Laws stated on terms that type by construction, not as implications whose premise a random
+-- term rarely meets; and `same` and `refines` held apart from the trivial relations, which made
+-- every law hold before; review of layers 0-1, B.)
+int : Term := Var "Int"
+lit (i : Int) : Term := Lit (IntConst i)
+
+-- a variable has the type its context gives it, a global name the type its declaration gives it
+-- (a definition's type, `Define` carrying it, likewise); a constant the type of its kind (spec 11)
 TypeOfVar (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (ty : Term) : Bool :=
   typed a sb t (t.typeOf p (cons (x, ty) ctx) (Var x)) ty
-TypeOfConstant (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (i : Int) (s : String) : Bool :=
-  typed a sb t (t.typeOf p ctx (Lit (IntConst i))) (Var "Int") and typed a sb t (t.typeOf p ctx (Lit (StringConst s))) (Var "String")
--- the exponential: a lambda has the dependent function type of its body; applied to an argument
--- of its domain, the type of the body with the argument for the variable (3 §2, 3.S5)
-TypeOfLam (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (ty b : Term) : Bool :=
-  match t.typeOf p (cons (x, ty) ctx) b { nothing -> true ; just bt -> typed a sb t (t.typeOf p ctx (Lam x ty b)) (Pi x ty bt) }
-TypeOfApp (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (b : Term) (i : Int) : Bool :=
-  match t.typeOf p (cons (x, Var "Int") ctx) b { nothing -> true ;
-    just bt -> typed a sb t (t.typeOf p ctx (App (Lam x (Var "Int") b) (Lit (IntConst i)))) (sb.subst x (Lit (IntConst i)) bt) }
--- a local definition is transparent: its type is that of its body with the value for the name, so
--- inside it the name is the value (D-2026-10-13-aa, Q1)
-TypeOfLet (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) (b : Term) : Bool :=
-  match t.typeOf p ctx (sb.subst x (Lit (IntConst i)) b) { nothing -> true ;
-    just bt -> typed a sb t (t.typeOf p ctx (Let x (Var "Int") (Lit (IntConst i)) b)) bt }
--- the universe is a type, and the world (D-2026-10-13-b)
+  and typed a sb t (t.typeOf [Declare x ty] [] (Var x)) ty
+TypeOfConstant (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (i : Int) (u : Float64) (s : String) : Bool :=
+  typed a sb t (t.typeOf p ctx (lit i)) int and typed a sb t (t.typeOf p ctx (Lit (FloatConst u))) (Var "Float64")
+  and typed a sb t (t.typeOf p ctx (Lit (StringConst s))) (Var "String")
+-- the exponential: a lambda has the dependent function type of its body, applied to an argument
+-- of its domain the type of its body with the argument for the variable (3 §2, 3.S5); an
+-- application of what is not a function has no type
+TypeOfLam (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (ty : Term) : Bool :=
+  typed a sb t (t.typeOf p ctx (Lam x ty (Var x))) (Pi x ty ty)
+TypeOfApp (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) : Bool :=
+  typed a sb t (t.typeOf p ctx (App (Lam x int (Var x)) (lit i))) int
+  and t.typeOf p ctx (App (lit i) (lit i)) == nothing
+-- the product, the record and its projection, the sum's injection, a match's arm (3 §2)
+TypeOfIntroductions (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (i j : Int) (x y : String) : Bool :=
+  typed a sb t (t.typeOf p ctx (Pair (lit i) (lit j))) (Sigma "_" int int)
+  and (x == y or (typed a sb t (t.typeOf p ctx (RecordValue [(x, lit i), (y, lit j)])) (Record [(x, int), (y, int)])
+                  and typed a sb t (t.typeOf p ctx (Proj (RecordValue [(x, lit i), (y, lit j)]) y)) int))
+  and typed a sb t (t.typeOf p ctx (Match (lit i) [(PWild, lit j)])) int
+-- the type formers are types: their role (L2.7) is to form types, of type `U` when their parts are
+TypeOfFormers (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x l : String) : Bool :=
+  typed a sb t (t.typeOf p ctx (Pi x int int)) Universe and typed a sb t (t.typeOf p ctx (Sigma x int int)) Universe
+  and typed a sb t (t.typeOf p ctx (Sum [(l, int)])) Universe and typed a sb t (t.typeOf p ctx (Record [(l, int)])) Universe
+  and typed a sb t (t.typeOf p ctx (Subtype x int (Var "true"))) Universe
+  and typed a sb t (t.typeOf p ctx (Data x [(l, Var x)])) Universe
+-- a local definition is transparent: inside it the name is the value (D-2026-10-13-aa, Q1)
+TypeOfLet (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) : Bool :=
+  typed a sb t (t.typeOf p ctx (Let x int (lit i) (Var x))) int
+-- the universe is a type, and the world (D-2026-10-13-b); version 0 keeps `U : U` (3.S8)
 TypeOfUniverse (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) : Bool :=
   typed a sb t (t.typeOf p ctx Universe) Universe and typed a sb t (t.typeOf p ctx World) Universe
 
+-- `same`, definitional equality of types (3.S20): alpha-equal types are the same, a defined type
+-- name is its body, and distinct heads are not the same
+SameIsAlpha (a : Alpha) (sb : Substitution a) (t : Typing a sb) (q : AlphaPair a) : Bool := t.same q.s q.t
+SameSeparates (a : Alpha) (sb : Substitution a) (t : Typing a sb) : Bool :=
+  not (t.same Universe int) and not (t.same int (Var "String")) and not (t.same int (Pi "_" int int))
+
 -- refinement: reflexive; a subtype refines its base (3.S6); functions contravariant in the
--- domain and covariant in the codomain (4.R9), over pairs it relates
+-- domain and covariant in the codomain (4.R9), over pairs it relates; distinct bases do not refine
+-- one another, and a base does not refine a subtype of it
 RefinePair (a : Alpha) (sb : Substitution a) (t : Typing a sb) : U := { small big : Term | t.refines small big }
 RefinesItself (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ty : Term) : Bool := t.refines ty ty
 SubtypeRefinesBase (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) (ty q : Term) : Bool :=
   t.refines (Subtype x ty q) ty
 RefinesFunctions (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) (d c : RefinePair a sb t) : Bool :=
   t.refines (Pi x d.big c.small) (Pi x d.small c.big)
+RefinesSeparates (a : Alpha) (sb : Substitution a) (t : Typing a sb) (x : String) : Bool :=
+  not (t.refines (Var "String") int) and not (t.refines int (Subtype x int (App (App (Var "<") (lit 0)) (Var x))))
 
--- 4.R11: inside the branch of a condition `q x` on a variable `x : T`, `x` has the subtype
--- `{ x : T | q x }`, and inside the other `{ x : T | not (q x) }`
+-- 4.R11: inside the branch of a condition `c` in which a variable `x : T` occurs, `x` has the
+-- subtype `{ x : T | c }`, and inside the other `{ x : T | not c }`; the same holds of a pattern:
+-- in the arm `just y`, the scrutinee is `just y` (stated by the arm's context, as the variable's)
+branchesRefine (ctx : Context) (t : Context -> Term -> Bool -> Context) (x : String) (c ty : Term) : Bool :=
+  lookup x (t (cons (x, ty) ctx) c true) == just (Subtype x ty c)
+  and lookup x (t (cons (x, ty) ctx) c false) == just (Subtype x ty (App (Var "not") c))
+-- stated on two conditions in which `x` occurs: a predicate applied to it, and `0 < x`
 BranchRefines (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ctx : Context) (x q : String) (ty : Term) : Bool :=
-  lookup x (t.branchContext (cons (x, ty) ctx) (App (Var q) (Var x)) true) == just (Subtype x ty (App (Var q) (Var x)))
-  and lookup x (t.branchContext (cons (x, ty) ctx) (App (Var q) (Var x)) false)
-      == just (Subtype x ty (App (Var "not") (App (Var q) (Var x))))
+  branchesRefine ctx t.branchContext x (App (Var q) (Var x)) ty
+  and branchesRefine ctx t.branchContext x (App (App (Var "<") (lit 0)) (Var x)) ty
 
 Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb & TypeOfLam a sb & TypeOfApp a sb
-  & TypeOfLet a sb & TypeOfUniverse a sb & RefinesItself a sb & SubtypeRefinesBase a sb & RefinesFunctions a sb & BranchRefines a sb
+  & TypeOfIntroductions a sb & TypeOfFormers a sb & TypeOfLet a sb & TypeOfUniverse a sb & SameIsAlpha a sb
+  & SameSeparates a sb & RefinesItself a sb & SubtypeRefinesBase a sb & RefinesFunctions a sb & RefinesSeparates a sb
+  & BranchRefines a sb
 
 -- ---------------------------------------------------------------- §5 The rules that read types
 
