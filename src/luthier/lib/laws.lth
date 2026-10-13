@@ -11,8 +11,8 @@
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/laws.lth`, sets its status to done here, and commits.
 --
---   §1 The verdict: `lift`, `exact`, and `LawValue`, what the core asks of a law's
---      value (5.S2, 5.S3, 5.S5).                                                       done
+--   §1 The verdict: `lift`, `exact`, and the verdicts as definitions, what the core asks
+--      of a law's value (5.S2, 5.S3, 5.S5; D-2026-10-13-aa Q5).                                                       done
 --   §2 The laws of relations and operations, as templates a theory applies
 --      (D-2026-10-11-l).                                                              done
 --   §3 A law as a theory: its forms (`forall`, `exists`, and, or, then, a case) and
@@ -29,7 +29,7 @@ import "checks.lth" Failures isEmpty
 CostScale (C : U) : { zero : C, top : C, leq : C -> C -> Bool }
 ZeroIsExact (C : U) (s : CostScale C) : Bool := s.leq s.zero s.zero
 TopIsNotExact (C : U) (s : CostScale C) : Bool := not (s.leq s.top s.zero)
-CostScale (C : U) := ZeroIsExact C & TopIsNotExact C
+CostScale (C : U) := ZeroIsExact C & TopIsNotExact C & VerdictsAreExact C
 
 -- `lift` reads a Boolean law as a cost, `exact` reads a cost back as whether it holds exactly
 -- (5.S5); `exact (lift b) == b` follows from the two laws above
@@ -37,20 +37,17 @@ lift (C : U) (s : CostScale C) (b : Bool) : C := if b then s.zero else s.top
 exact (C : U) (s : CostScale C) (c : C) : Bool := s.leq c s.zero
 
 -- What the core asks of a law's value (5.S3): a verdict in `C`. For `Bool` it is `lift`; for `C`
--- the identity; for a check, `lift` of whether it holds (5.S9). A law into a type with no verdict
--- is not a law.
-LawValue (C : U) (s : CostScale C) : {
-  ofBool : Bool -> C,
-  ofCost : C -> C,
-  ofCheck : (E : U) -> Failures E -> C,
-}
-VerdictOfBool (C : U) (s : CostScale C) (v : LawValue C s) (b : Bool) : Bool := v.ofBool b == lift C s b
-VerdictOfCost (C : U) (s : CostScale C) (v : LawValue C s) (c : C) : Bool := v.ofCost c == c
-VerdictOfCheck (C : U) (s : CostScale C) (v : LawValue C s) (E : U) (fs : Failures E) : Bool :=
-  v.ofCheck E fs == lift C s (isEmpty E fs)
--- the retraction: reading a Boolean verdict back gives the Boolean
-ExactLift (C : U) (s : CostScale C) (v : LawValue C s) (b : Bool) : Bool := exact C s (v.ofBool b) == b
-LawValue (C : U) (s : CostScale C) := VerdictOfBool C s & VerdictOfCost C s & VerdictOfCheck C s & ExactLift C s
+-- the identity; for a check, `lift` of whether it holds (5.S9). These are definitions, not a
+-- theory with one model whose laws would restate them (D-2026-10-13-aa, Q5; 4.R10). A law into a
+-- type with none of these verdicts is not a law: that is the checker's (4.R6, program.lth).
+verdictOfBool (C : U) (s : CostScale C) (b : Bool) : C := lift C s b
+verdictOfCost (C : U) (s : CostScale C) (c : C) : C := c
+verdictOfCheck (C : U) (s : CostScale C) (E : U) (fs : Failures E) : C := lift C s (isEmpty E fs)
+
+-- What characterizes a verdict is its retraction: reading it back as whether it holds exactly
+-- gives what the law said (5.S5). Claimed by `CostScale`, whose two laws make it hold.
+VerdictsAreExact (C : U) (s : CostScale C) (b : Bool) (E : U) (fs : Failures E) : Bool :=
+  exact C s (verdictOfBool C s b) == b and exact C s (verdictOfCheck C s E fs) == isEmpty E fs
 
 -- ---------------------------------------------------------------- §2 The laws of relations
 
