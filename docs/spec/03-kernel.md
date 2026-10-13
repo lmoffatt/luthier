@@ -190,7 +190,16 @@ of `Fin n` and the host would accept `v[-1]` silently.
 **3.S23. Bridge 2, passing a lambda to the host.** [implemented] A host function that expects an
 array and receives a lambda over `Fin n` gets the array of its `n` values: the interpreter
 evaluates the lambda at every index (it materializes it), possible only because the domain is
-finite. The cost is `n` evaluations.
+finite. The cost is `n` evaluations. [decided D-2026-10-14-a] Three more forms cross: a lambda
+over an infinite domain passed to a host function is a callback, called from the host through
+the bridge, its calls counted and recorded in the run's record (`spec 12.S18`); a record whose
+fields are functions crosses as the record with each function a callback; a host function
+crossing in is an opaque value, applicable only through the bridge and never reduced by the
+kernel; and an extern applied to fewer arguments than its declared type has is a partial
+application, the arity read from that type. Needed by the fit of sonolocalización
+(`record/plan/questions-2026-10-14.md`, Q1). Not implemented: `run.py` crosses by the declared
+type (`record/IA/run-2026-10-13/report-4.md`) and reads the arity (`report-6.md`), the callback
+and the opaque host function are to do.
 
 **3.S24. Bridge 3, representation by type.** [implemented] `Fin n -> Float64` is a one-dimensional
 ndarray, `Fin m -> Fin n -> Float64` a two-dimensional one, `Fin n -> A` for a non-numeric `A` a
