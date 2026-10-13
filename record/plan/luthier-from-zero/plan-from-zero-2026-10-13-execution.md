@@ -129,6 +129,10 @@ by Luciano.
   `luthier check` and the verdicts of `tests/spec/` running in parallel (brief
   record/IA/check-2026-10-13/).
 
+- 2026-10-13, night: kernel bite 1f committed: `luthier eval` runs all six programs of
+  `tests/eval/` (arithmetic 19, block 3, lambda 5, record 7, a match on a data 2, factorial 24),
+  no xfail in the suite. `check.py` running.
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
