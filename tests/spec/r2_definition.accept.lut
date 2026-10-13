@@ -1,0 +1,10 @@
+-- spec 4.R2: the laws of Codec mention Codec, only declared, because they are on its cycle; csv is a branch over a defined Codec; sigma is a hole of a defined type, used in term position.
+-- Source: tests/spec/v0.1/r2_definition.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 3b9aa7bd6e6f9b0a3b382a64bd25e0df54bf6a9e48334c2c7e6faeca40141e73. Migration: spec-programs v1 (see README.md).
+
+Codec : { parse : String -> Maybe Int, render : Int -> String }
+RoundTrip (c : Codec) (n : Int) : Bool := match c.parse (c.render n) { nothing -> false ; just m -> m == n }
+Codec := RoundTrip
+
+sigma : Float64
+scaled (x : Float64) : Float64 := sigma * x

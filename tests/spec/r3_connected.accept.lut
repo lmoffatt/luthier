@@ -1,0 +1,9 @@
+-- spec 4.R3: the laws touch every label of the base: eq, add, zero, neg.
+-- Source: tests/spec/v0.1/r3_connected.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 91c6ad4b669d74968f4c8c91a148971fc1b3142cd04e24169464f796f948995e. Migration: spec-programs v1 (see README.md).
+
+Associative (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (x y z : A) : Bool := eq (f (f x y) z) (f x (f y z))
+RightIdentity (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (x : A) : Bool := eq (f x e) x
+RightInverse (A : U) (eq : A -> A -> Bool) (f : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool := eq (f x (inv x)) e
+
+Group (A : U) : U := { eq : A -> A -> Bool, add : A -> A -> A, zero : A, neg : A -> A | Associative A eq add & RightIdentity A eq add zero & RightInverse A eq add zero neg }

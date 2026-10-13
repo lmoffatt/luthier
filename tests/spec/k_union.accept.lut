@@ -1,0 +1,7 @@
+-- spec 3.S4: the named sum, n-ary; injection by label, elimination by match on labels.
+-- Source: tests/spec/v0.1/k_union.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 93d59bb8ca74099c17d374354ab8797adedd9caf4b116c2c6d47156ba5bec6b8. Migration: spec-programs v1 (see README.md).
+
+Shape = < circle : Float64 | square : Float64 >
+area (s : Shape) : Float64 := match s { circle r -> 3.14159 * r * r ; square a -> a * a }
+c : Shape := circle 1.0

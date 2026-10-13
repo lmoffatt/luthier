@@ -1,0 +1,6 @@
+-- spec 3.R2: Bool is the sum of two units; a value of a sum with the same shape is a Bool, since labels are binders and do not make the identity of a type.
+-- Source: tests/spec/v0.1/k_bool_is_sum.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: d366d4dd8f175c75a8ee3076f533bf9c2fb6d2d446cfa7ea396a5d74119dfd6a. Migration: spec-programs v1 (see README.md).
+
+YesNo = < yes : Unit | no : Unit >
+asBool (x : YesNo) : Bool := x

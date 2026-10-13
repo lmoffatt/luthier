@@ -1,0 +1,7 @@
+-- spec 11.R3: an axiom is allowed only in core.lut and the libraries of the distribution.
+-- expect (v0.1): an axiom is allowed only in core.lut and lib/
+-- Source: tests/spec/v0.1/n4_axiom_outside_lib.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 1134729f347bb935fa6b3ef8779ed9b269c6f0520fba99a20ce89c1bc6f6f095. Migration: spec-programs v1 (see README.md).
+
+Flat : U := { b : Bool | b == b }
+everything : Flat := axiom "it holds"

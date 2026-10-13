@@ -1,0 +1,6 @@
+-- spec 2.R6: a rebinding whose previous value was never used is an error in a file.
+-- expect (v0.1): unused binding
+-- Source: tests/spec/v0.1/r12_unused_rebinding.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: b2763cf6beb93dc757ae1513dc8ec4fbfeec9bba501dd423285c72bffea01cfa. Migration: spec-programs v1 (see README.md).
+
+f (a : Int) : Int := { y <- a ; y <- a + 1 ; y }

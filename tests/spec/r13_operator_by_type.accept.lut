@@ -1,0 +1,14 @@
+-- spec 2.R2, spec 4.R13: an operator is resolved by the type, and a type names its model. Z7 is its own type (a sum over Fin 7), its + is the ring's, and Int keeps its own; the two never mix without `rep`.
+-- Source: tests/spec/v0.1/r13_operator_by_type.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 39bea6490c3cfd6d3daf0fdd64588edf30cd02d433ea908cdbb6c066c5a59d9a. Migration: spec-programs v1 (see README.md).
+
+Z7 = < z7 : Fin 7 >
+rep (a : Z7) : Int := match a { z7 k -> k }
+proj (k : Int) : Z7 := z7 (k mod 7)
+addZ7 (a b : Z7) : Z7 := proj (rep a + rep b)
+operator + := addZ7
+
+five : Z7 := proj 5
+sum : Z7 := five + proj 4
+ten : Int := 3 + 7
+mixed : Int := rep five + ten

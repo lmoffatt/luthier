@@ -1,0 +1,7 @@
+-- spec 3.S4: the anonymous sum is primitive; it injects with left and right.
+-- Source: tests/spec/v0.1/k_sum.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 32269a902a5fd944a025e687c04af522e7cf8fb760e0989260a5a3761063a4c4. Migration: spec-programs v1 (see README.md).
+
+S = Int + Bool
+s : S := left 3
+isInt (x : S) : Bool := match x { left n -> true ; right b -> false }

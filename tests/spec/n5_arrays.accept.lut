@@ -1,0 +1,9 @@
+-- spec 11.R3, spec 11.S9: arrays over any type; indices are whole numbers.
+-- Source: tests/spec/v0.1/n5_arrays.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 31592ff63417060ac7c0d7e2addb547fce7703ca236cc7578c5a2040e2c2b4fb. Migration: spec-programs v1 (see README.md).
+
+-- Minimal array signature from spec 11.S9; no retired array library import.
+Vec (A : U) = { n : Nat, f : Fin n -> A }
+
+idx : Vec Int := (3, \ k { k })
+xs : Vec Float64 := (2, \ k { 0.5 })

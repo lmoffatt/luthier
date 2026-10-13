@@ -1,0 +1,7 @@
+-- spec 4.R7: an alias abbreviates a type and claims nothing.
+-- Source: tests/spec/v0.1/r7_alias.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: fee5273823de6a79fa341a2951ce7c7738d96cc32a655a78b750d66bfdec6fba. Migration: spec-programs v1 (see README.md).
+
+Stats = { mean : Float64, var : Float64 }
+meanVar (x y : Float64) : Stats := (x, y)
+first (s : Stats) : Float64 := s.mean

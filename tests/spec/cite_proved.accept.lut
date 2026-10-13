@@ -1,0 +1,22 @@
+-- spec 6.R1, spec 12.R1: a definition correct by a theorem outside Luthier is cited with a Reference read from a .bib; the grade is proved, and who checked the correspondence is recorded.
+-- Source: tests/spec/v0.1/cite_proved.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: fbf0d097fcd307703808a6c46f1211c3351a38bbd7495f505a54df5f7ee2f76d. Migration: spec-programs v1 (see README.md).
+
+-- Reference's minimal native statement, adapted from v0.1-final:lib/reference.lut
+-- (src/luthier/lib/reference.lut in that tag); retained identifiers and resolvability law.
+ReferenceData = { key : String, doi : String, isbn : String, url : String, title : String, sha256 : String }
+Resolvable (r : ReferenceData) : Bool := not (r.doi == "" and r.isbn == "" and r.url == "")
+Reference : U := { r : ReferenceData | Resolvable r }
+
+-- Proposal: the explicit-name import of spec 12.S22 applied to spec 12.R1's .bib.
+import "cite_sources.bib" kantorovich1948 : Reference higham2002 : Reference
+
+double (x : Int) : Int := x + x
+Doubles : U := { f : Int -> Int | \ (x : Int) { f x == x * 2 } }
+twice : Doubles := \ (x : Int) { x + x }
+
+-- Proposal pending spec 6.R1's O10: cite takes W, then the value and reference,
+-- and returns W * Unit; checked is text. The block threads the token (spec 10.S2).
+main (w : W) : W * Unit := {
+  first <- cite w double kantorovich1948 (checked <- "ai+human")
+  match first { (w1, _) -> cite w1 twice higham2002 (checked <- "human") } }

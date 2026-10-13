@@ -1,0 +1,8 @@
+-- spec 4.R9, spec 11.R4: a function with a smaller domain does not pass where a larger one is expected.
+-- expect (v0.1): but Real -> Float64 was expected
+-- Source: tests/spec/v0.1/r9_variance.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 3a3db85137cdaf038f2477acf30bd2b24dd86ef663099d550cb12f5a33ae30ec. Migration: spec-programs v1 (see README.md).
+
+half (x : Float64) : Float64 := x / 2.0
+applyR (g : Real -> Float64) (x : Real) : Float64 := g x
+z : Float64 := applyR half 3.0

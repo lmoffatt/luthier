@@ -1,0 +1,7 @@
+-- spec 4.S18, spec 4.R5, spec 4.R2: an extern over a type that is only declared.
+-- expect (v0.1): Signal is used as a type but is only declared
+-- Source: tests/spec/v0.1/r5_extern_over_declared.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 1bffb8b1885b7b67a88d15c2a0e9396953390d1e0f8d5fee074bdd36c3e0519b. Migration: spec-programs v1 (see README.md).
+
+Signal : U
+duration : Signal -> Int := extern "python:builtins.len"

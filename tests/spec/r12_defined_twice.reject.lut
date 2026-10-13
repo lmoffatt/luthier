@@ -1,0 +1,7 @@
+-- spec 2.R3, spec 4.R12: `:=` defines a name once; a block may not define a name that is already defined.
+-- expect: defined twice
+-- Source: tests/spec/v0.1/r12_defined_twice.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 2bf1cdb3e040702085ba7d90ef74232afd12a66db6e62fc59c04ea7219c92a55. Migration: spec-programs v1 (see README.md).
+
+x : Int := 1
+f (a : Int) : Int := { x := a ; x }

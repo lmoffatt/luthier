@@ -1,0 +1,16 @@
+-- spec 3.S11: the recursor of a data type is a library definition, written with match and recursion.
+-- Source: tests/spec/v0.1/k_recursor.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: e888ce1f96c27bb63cc4a3f23bce29094c04db0ac8b50fd9440db45e87802f56. Migration: spec-programs v1 (see README.md).
+
+N : U := data { zero : N ; succ : N -> N }
+
+-- The recursor's two equations give the constructors their roles (spec 4.R3).
+Recursor (P : U) : { fold : P -> (N -> P -> P) -> N -> P, eq : P -> P -> Bool }
+RecZero (P : U) (r : Recursor P) (z : P) (s : N -> P -> P) : Bool :=
+  r.eq (r.fold z s zero) z
+RecSucc (P : U) (r : Recursor P) (z : P) (s : N -> P -> P) (n : N) : Bool :=
+  r.eq (r.fold z s (succ n)) (s n (r.fold z s n))
+Recursor (P : U) := RecZero P & RecSucc P
+
+recN (P : U) (z : P) (s : N -> P -> P) (n : N) : P := match n { zero -> z ; succ m -> s m (recN P z s m) }
+add (m n : N) : N := recN N m (\ k r { succ r }) n

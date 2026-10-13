@@ -1,0 +1,6 @@
+-- spec 2.R4: a name bound with := cannot be rebound with <-.
+-- expect (v0.1): cannot be rebound
+-- Source: tests/spec/v0.1/r12_rebind_defined.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 658d84a0fdee52e5004337d717cbe6b1734e534288939773416decf52ec7fbaf. Migration: spec-programs v1 (see README.md).
+
+f (a : Int) : Int := { y := a ; y <- a + 1 ; y }

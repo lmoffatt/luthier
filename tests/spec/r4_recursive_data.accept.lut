@@ -1,0 +1,14 @@
+-- spec 3.R3, spec 4.R4, spec 4.R3: Recursive data defines a new type, with laws of each constructor’s role.
+-- Source: tests/spec/v0.1/r4_recursive_data.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 48f00cc173647fa7bbf31249233ae205eb682f683b7a9f50aacbf28d2140ac40. Migration: spec-programs v1 (see README.md).
+
+Tree (A : U) : U := data { leaf : Tree A ; node : Tree A -> A -> Tree A -> Tree A }
+
+-- The fold equations give leaf and node their roles (spec 4.R3, spec 3.S11).
+TreeFold (A B : U) : { fold : B -> (B -> A -> B -> B) -> Tree A -> B, eq : B -> B -> Bool }
+FoldLeaf (A B : U) (f : TreeFold A B) (z : B) (step : B -> A -> B -> B) : Bool :=
+  f.eq (f.fold z step leaf) z
+FoldNode (A B : U) (f : TreeFold A B) (z : B) (step : B -> A -> B -> B)
+  (left right : Tree A) (value : A) : Bool :=
+  f.eq (f.fold z step (node left value right)) (step (f.fold z step left) value (f.fold z step right))
+TreeFold (A B : U) := FoldLeaf A B & FoldNode A B

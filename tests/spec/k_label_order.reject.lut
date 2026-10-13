@@ -1,0 +1,6 @@
+-- spec 3.R1, spec 3.R2: labels are positional; swapping the components changes the type.
+-- expect (v0.1): p has type { a : Int, b : Bool } but { b : Bool, a : Int } was expected
+-- Source: tests/spec/v0.1/k_label_order.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 12bdf7dc2d781a420f8e513e850358ee5b481aefd8eda1450779ba1ff90a99b7. Migration: spec-programs v1 (see README.md).
+
+swap (p : { a : Int, b : Bool }) : { b : Bool, a : Int } := p

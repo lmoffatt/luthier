@@ -1,0 +1,5 @@
+-- spec 4.R8: a law over functions takes its equality as a parameter.
+-- Source: tests/spec/v0.1/r8_equality_parameter.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 220879b6471042982ea52051b362f3a0c201a31c26dd143a7e996a81ec0c2884. Migration: spec-programs v1 (see README.md).
+
+SameAt (eq : Int -> Int -> Bool) (f g : Int -> Int) (x : Int) : Bool := eq (f x) (g x)

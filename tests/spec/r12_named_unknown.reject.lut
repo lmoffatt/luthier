@@ -1,0 +1,7 @@
+-- spec 2.R1: an argument by name must name a parameter.
+-- expect (v0.1): has no parameter
+-- Source: tests/spec/v0.1/r12_named_unknown.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: efea02129409f7384d96ebd3bb8ad0039a81d1e726eb25fa3405fef87142af4e. Migration: spec-programs v1 (see README.md).
+
+approx (x y : Float64) (tol : Float64 <- 1.0e-6) : Bool := if x > y then x - y <= tol else y - x <= tol
+bad : Bool := approx 1.0 1.0 (eps <- 0.5)

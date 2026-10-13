@@ -1,0 +1,6 @@
+-- spec 4.S18, spec 4.R5: in a hurry, a Python type nobody has described, and a function over it.
+-- Source: tests/spec/v0.1/r5_extern_provisional.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 452de4425d9b2951eccc56e75871f0d2d0da951509a52d533357d5f8d867e294. Migration: spec-programs v1 (see README.md).
+
+Signal : U := extern "python:builtins.list" (provisional <- true)
+duration : Signal -> Int := extern "python:builtins.len" (provisional <- true)

@@ -1,0 +1,12 @@
+-- spec 2.R2, spec 4.R13: a carrier with two models is two types; a second meaning of + on the same types is refused.
+-- expect (v0.1): a carrier with two models is two types
+-- Source: tests/spec/v0.1/r13_two_models.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 6c6c457a973e1fad78a7e9241033d863f239c6e64715a2eb64b0396c9fb2cf9e. Migration: spec-programs v1 (see README.md).
+
+Z7 = < z7 : Fin 7 >
+rep (a : Z7) : Int := match a { z7 k -> k }
+proj (k : Int) : Z7 := z7 (k mod 7)
+addZ7 (a b : Z7) : Z7 := proj (rep a + rep b)
+maxZ7 (a b : Z7) : Z7 := if rep a > rep b then a else b
+operator + := addZ7
+operator + := maxZ7

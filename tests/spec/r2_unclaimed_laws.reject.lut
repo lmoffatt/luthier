@@ -1,0 +1,7 @@
+-- spec 4.S18, spec 4.S14, spec 4.R2: laws written over a declared type that no definition claims are branches over an undefined type: the object has no head.
+-- expect (v0.1): Codec is used as a type but is only declared
+-- Source: tests/spec/v0.1/r2_unclaimed_laws.reject.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 60d844e4ecb49c5c6a6f5adbc87dc89c468454c0131c48a433a991d5ee9c4b71. Migration: spec-programs v1 (see README.md).
+
+Codec : { parse : String -> Maybe Int, render : Int -> String }
+RoundTrip (c : Codec) (n : Int) : Bool := match c.parse (c.render n) { nothing -> false ; just m -> m == n }

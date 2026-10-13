@@ -1,0 +1,7 @@
+-- spec 4.R9, spec 11.R4: a function with a smaller codomain passes where a larger one is expected.
+-- Source: tests/spec/v0.1/r9_variance.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: a81b73f7d417d87a03c3f26a8fa76a96048e1bf571348bd753ffff5501c04a4f. Migration: spec-programs v1 (see README.md).
+
+half (x : Float64) : Float64 := x / 2.0
+apply (g : Float64 -> Real) (x : Float64) : Real := g x
+y : Real := apply half 3.0

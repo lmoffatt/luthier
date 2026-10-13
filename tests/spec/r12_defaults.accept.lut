@@ -1,0 +1,13 @@
+-- spec 2.R1, spec 2.S7: a parameter with a default, `(tol : T <- d)`, is filled once every parameter without a default is given; an argument by name, `f a (tol <- v)`, goes to its parameter's position; a default may mention the parameters before it.
+-- Source: tests/spec/v0.1/r12_defaults.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: b3a428730dedf22c6c25fe57f30d24e225870c8b6c18b2cee7c965e3b3d86123. Migration: spec-programs v1 (see README.md).
+
+approx (x y : Float64) (tol : Float64 <- 1.0e-6) : Bool := if x > y then x - y <= tol else y - x <= tol
+
+a : Bool := approx 1.0 1.0000001
+b : Bool := approx 1.0 1.5 (tol <- 1.0)
+c : Bool := approx (tol <- 0.1) 1.0 1.05
+
+scaled (x : Int) (k : Int <- x * 2) : Int := x + k
+d : Int := scaled 3
+e : Int := scaled 3 (k <- 1)

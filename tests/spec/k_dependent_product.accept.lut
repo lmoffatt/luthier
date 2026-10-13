@@ -1,0 +1,6 @@
+-- spec 3.S5: in a dependent product, a later component's type mentions an earlier one.
+-- Source: tests/spec/v0.1/k_dependent_product.accept.lut at 310a9ba6682e982150584caea8f26dba643aa1e7;
+-- sha256: 7d68b2a09ea213837c2026a389c203bb2fcb8402ceb26fe15ef8c0a9a5a2e2eb. Migration: spec-programs v1 (see README.md).
+
+Bounded = (n : Int) * { k : Int | 0 <= k and k < n }
+b : Bounded := (5, 3)
