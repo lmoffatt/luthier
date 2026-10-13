@@ -27,7 +27,7 @@
 --   §1 The data: `Constant`, `Pattern`, `Term`, `Act`, `Program` (3.S29 to 3.S31).     done
 --   §2 Names: free variables, renaming, alpha-equivalence as an object with the
 --      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     done
---   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               todo
+--   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               done
 --   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  todo
 --   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternCall`, `HolesStay`,
 --      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         todo
@@ -201,3 +201,37 @@ AlphaCongruent (a : Alpha) (p q : AlphaPair a) : Bool :=
   a.alphaEq (App p.s q.s) (App p.t q.t) and a.alphaEq (Pair p.s q.s) (Pair p.t q.t)
 
 Alpha := FreeVariablesAreNames & RenameBound & AlphaKeepsHead & AlphaKeepsFree & AlphaCongruent
+
+-- ---------------------------------------------------------------- §3 Substitution
+
+-- `subst x s t` is `t[s/x]` of 3.S14: `t` with `s` in place of the free occurrences of `x`, with
+-- no capture. Results are compared up to alpha-equivalence, so the model is held to an `Alpha`.
+-- Random names almost never coincide, so the laws that need two names distinct state it as an
+-- alternative (`x == y or ...`) rather than a premise.
+Substitution (a : Alpha) : { subst : String -> Term -> Term -> Term }
+
+-- a name and a term in which it is not free, for the binder that substitution passes under
+NotFreeIn : U := { y : String, s : Term | not (member y (freeVars s)) }
+
+SubstHits (a : Alpha) (m : Substitution a) (x : String) (s : Term) : Bool := a.alphaEq (m.subst x s (Var x)) s
+SubstMisses (a : Alpha) (m : Substitution a) (x y : String) (s : Term) : Bool :=
+  x == y or a.alphaEq (m.subst x s (Var y)) (Var y)
+SubstGoesInside (a : Alpha) (m : Substitution a) (x : String) (s f b : Term) (l : String) : Bool :=
+  a.alphaEq (m.subst x s (App f b)) (App (m.subst x s f) (m.subst x s b))
+  and a.alphaEq (m.subst x s (Pair f b)) (Pair (m.subst x s f) (m.subst x s b))
+  and a.alphaEq (m.subst x s (Inj l f)) (Inj l (m.subst x s f))
+-- a binder of the same name shadows: the body is left alone, the binder's type is not
+SubstStopsAtShadow (a : Alpha) (m : Substitution a) (x : String) (s ty b : Term) : Bool :=
+  a.alphaEq (m.subst x s (Lam x ty b)) (Lam x (m.subst x s ty) b)
+-- under a binder whose name is not free in `s`, substitution goes in: no capture
+SubstPassesBinder (a : Alpha) (m : Substitution a) (x : String) (f : NotFreeIn) (ty b : Term) : Bool :=
+  x == f.y or a.alphaEq (m.subst x f.s (Lam f.y ty b)) (Lam f.y (m.subst x f.s ty) (m.subst x f.s b))
+-- a name not free in `t` changes nothing
+SubstNotFree (a : Alpha) (m : Substitution a) (f : NotFreeIn) (s : Term) : Bool :=
+  a.alphaEq (m.subst f.y s f.s) f.s
+-- alpha-equal terms give alpha-equal results
+SubstRespectsAlpha (a : Alpha) (m : Substitution a) (x : String) (s : Term) (p : AlphaPair a) : Bool :=
+  a.alphaEq (m.subst x s p.s) (m.subst x s p.t)
+
+Substitution (a : Alpha) := SubstHits a & SubstMisses a & SubstGoesInside a & SubstStopsAtShadow a
+  & SubstPassesBinder a & SubstNotFree a & SubstRespectsAlpha a
