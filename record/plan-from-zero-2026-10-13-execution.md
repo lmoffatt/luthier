@@ -76,6 +76,12 @@ by Luciano.
   external review of what exists (kernel_laws, term, translation, program, with their models) in
   two prompts, A (kernel) and B (checker), under record/IA/layers-0-1-review-2026-10-13/, frozen
   after the parser update and kernel.py land. Next: 3.2 (`laws.lth`) and 3.4 (`library.lth`).
+- 2026-10-13: step 3.2 done, `laws.lth` (3edd8c2 to 29d5477): the verdict, the templates of
+  relations, a law as a theory with its evidence. Q1 of D-2026-10-13-x applied (f421684): records
+  as named products in Term, kernel_laws, translation, program; term_model.lut by Codex launched
+  from the session (10b49b5). Kernel Codex's findings fixed (9a89873): substitutivity is the
+  structural equality's (Q5 to Luciano), IotaSkips with a matching arm. Step 3.4 done:
+  `library.lth`, files, what a file sees, what is read. Layer 1 written; Q2 (blocks) open.
 
 - 2026-10-13: step 4.2 brought forward, by Codex (55708f2): the 48 programs of `tests/spec/` in
   the new syntax, 47 parse, `r12_toplevel_arrow` is a syntax rejection by design (a runner must
