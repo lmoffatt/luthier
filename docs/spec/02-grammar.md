@@ -144,6 +144,151 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 below is the one `v0.1-final` read, kept as an explanation, and where the two differ the value
 holds.
 
+<!-- luthierSyntax: begin -->
+
+Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
+(v1; sha256: e0e7bc61350d89667090cb809a012080e70e59ec994b2bb1796ae6c065a4f76a).
+
+    program ::= { act newline }
+
+    act ::= declaration
+        | definition
+        | alias
+        | import
+        | operator
+        | datum
+
+    declaration ::= name { binder } ":" term
+
+    definition ::= name { binder } [ ":" term ] ( ":=" body | clause { clause } )
+
+    alias ::= name { binder } "=" term
+
+    import ::= "import" string importName { importName }
+
+    importName ::= name [ ":" name ] [ "as" name ]
+
+    operator ::= "operator" opSymbol ":=" term
+
+    opSymbol ::= "+"
+        | "-"
+        | "*"
+        | "/"
+        | "and"
+        | "or"
+        | "mod"
+
+    datum ::= term
+
+    binder ::= "(" name { name } ":" term [ "<-" term ] ")"
+        | "{" name { name } ":" term "}"
+
+    clause ::= "|" pattern { "," pattern } ":=" term
+
+    body ::= term
+        | "data" "{" [ ctor { ";" ctor } [ ";" ] ] "}"
+
+    ctor ::= name ":" term
+
+    term ::= openForm
+        | ampTerm
+
+    openForm ::= "(" name { name } ":" term ")" "->" term
+        | "(" name { name } ":" term ")" "*" term
+        | "(" name ":" term ")" "*" "(" name ":" term ")"
+        | "(" name ":" term ")" "+" "(" name ":" term ")"
+        | "if" term "then" term [ "else" term ]
+
+    ampTerm ::= arrowTerm [ "&" ( openForm | ampTerm ) ]
+        | arrowOpen
+
+    arrowTerm ::= orTerm [ "->" arrowTerm ]
+
+    arrowOpen ::= orTerm "->" ( openForm | arrowOpen )
+
+    orTerm ::= andTerm { "or" andTerm }
+
+    andTerm ::= cmpTerm { "and" cmpTerm }
+
+    cmpTerm ::= addTerm { ( "==" | "/=" | "<" | "<=" | ">" | ">=" ) addTerm }
+
+    addTerm ::= mulTerm { ( "+" | "-" ) mulTerm }
+
+    mulTerm ::= negTerm { ( "*" | "/" | "mod" ) negTerm }
+
+    negTerm ::= "-" negTerm
+        | appTerm
+
+    appTerm ::= projTerm { argTerm }
+
+    projTerm ::= atom { "." name }
+
+    argTerm ::= argAtom { "." name }
+
+    atom ::= argAtom
+        | "<" name ":" term { "|" name ":" term } ">"
+
+    argAtom ::= name
+        | number
+        | string
+        | "U"
+        | "W"
+        | "(" term ")"
+        | "(" term "," term { "," term } ")"
+        | "(" name "<-" term ")"
+        | "{" recordFields "}"
+        | "{" subtypePattern ":" term "|" term "}"
+        | "{" name ":=" term { sep name ":=" term } [ sep ] "}"
+        | "{" block "}"
+        | "[" [ term { "," term } [ "," ] ] "]"
+        | "\\" lparam { lparam } "{" block "}"
+        | "match" term "{" [ arm { ";" arm } [ ";" ] ] "}"
+        | "quote" "{" term "}"
+
+    recordFields ::= fieldOne [ sep ]
+        | fieldsTwo [ "|" term ] [ sep ]
+
+    fieldsTwo ::= fieldMany { sep field }
+        | fieldOne sep field { sep field }
+
+    field ::= name { name } ":" term
+
+    fieldOne ::= name ":" term
+
+    fieldMany ::= name name { name } ":" term
+
+    subtypePattern ::= "_"
+        | name
+        | number
+        | string
+        | "(" pattern "," pattern { "," pattern } ")"
+
+    sep ::= ","
+        | ";"
+
+    block ::= { item sep } term [ sep ]
+
+    item ::= name ( ":=" | "<-" ) term
+
+    arm ::= pattern "->" term
+
+    lparam ::= name
+        | "(" name { name } ":" term ")"
+        | "(" pattern "," pattern { "," pattern } ")"
+
+    pattern ::= name patom { patom }
+        | patom
+
+    patom ::= "_"
+        | name
+        | number
+        | string
+        | "(" pattern ")"
+        | "(" pattern "," pattern { "," pattern } ")"
+
+
+<!-- luthierSyntax: end -->
+
     term   ::= term op term
              | term atom                                      -- application
              | atom
