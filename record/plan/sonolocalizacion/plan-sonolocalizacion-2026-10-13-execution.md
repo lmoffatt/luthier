@@ -7,7 +7,9 @@ writes theories; Codex what must run and iterate; a web model small bites).
 
 ## Status
 
-- 2026-10-13: written; nothing started. The plan from zero is at step 2.2 (`term.lth`, another
+- 2026-10-13: written; nothing started.
+- 2026-10-13, night: S1 accepted (D-2026-10-13-ac); step 1, the inventory, running (Codex, read
+  only; brief record/IA/sonolocalizacion-inventory-2026-10-13/). The plan from zero is at step 2.2 (`term.lth`, another
   session) with `kernel.py` next (D-2026-10-13-u).
 
 ## Steps

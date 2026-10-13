@@ -133,6 +133,11 @@ by Luciano.
   `tests/eval/` (arithmetic 19, block 3, lambda 5, record 7, a match on a data 2, factorial 24),
   no xfail in the suite. `check.py` running.
 
+- 2026-10-13, night: S1 accepted (D-2026-10-13-ac): after `v0.2`, the vertical slice for
+  sonolocalización in place of steps 5 and 6 in order, evidence designed on its case; its inventory
+  running (Codex, read only, record/IA/sonolocalizacion-inventory-2026-10-13/). Whether execution
+  goes before evidence: asked of Luciano.
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
