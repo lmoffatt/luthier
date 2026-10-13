@@ -1,0 +1,8 @@
+-- Runner integration fixture (prompt-4.md, arrays_model.lut): a `Vec Float64` built in Luthier
+-- crosses as a float64 ndarray (3.S23, 11.S9); numpy's norm of (3, 4) is printed.
+import "world_model.lut" HostConsole host : HostConsole
+import "arrays.lth" Vec vec
+import "arrays_model.lut" numpy : Arrays
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+v : Vec Float64 := vec Float64 2 (fn k { if k == 0 then 3.0 else 4.0 })
+main (w : W) : W * Unit := host.print w (showFloat (numpy.norm v))

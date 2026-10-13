@@ -1,0 +1,13 @@
+-- Runner integration fixture (prompt-4.md, arrays_model.lut): two `Mat Float64` cross as 2-d
+-- ndarrays, numpy's product comes back as `{ m, n, f }` with `f` the host array applied by
+-- indexing (3.S22); prints entry (1, 0) of [[1, 2], [3, 4]] [[5, 6], [7, 8]], then its rows.
+import "world_model.lut" HostConsole host : HostConsole
+import "arrays.lth" Mat mat
+import "arrays_model.lut" numpy : Arrays matMul
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+showInt (x : Int) : String := extern "python:builtins.repr" x
+a : Mat Float64 := mat Float64 2 2 (fn i j { if i == 0 then (if j == 0 then 1.0 else 2.0) else (if j == 0 then 3.0 else 4.0) })
+b : Mat Float64 := mat Float64 2 2 (fn i j { if i == 0 then (if j == 0 then 5.0 else 6.0) else (if j == 0 then 7.0 else 8.0) })
+main (w : W) : W * Unit :=
+  match host.print w (showFloat ((matMul a b).f 1 0)) { (w1, u) ->
+  host.print w1 (showInt (numpy.matMul a b).m) }

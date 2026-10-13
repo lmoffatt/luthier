@@ -1,0 +1,14 @@
+-- Runner integration fixture (prompt-4.md, 11.S6, 11.S9): an integer the host gives where a
+-- Float64 is declared is promoted; an Int literal passed where a Float64 is declared likewise; a
+-- `Fin n -> Float64` alone crosses both ways (test_run.ramp gives numpy's arange, an int array
+-- promoted, applied by indexing; test_run.total sums a lambda materialized over Fin 3).
+import "world_model.lut" HostConsole host : HostConsole
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+three (u : Unit) : Float64 := extern "python:test_run.three" u
+ramp (n : Int) : Fin n -> Float64 := extern "python:test_run.ramp" n
+total (n : Int) (f : Fin n -> Float64) : Float64 := extern "python:test_run.total" n f
+main (w : W) : W * Unit :=
+  match host.print w (showFloat (three unit)) { (w1, u) ->
+  match host.print w1 (showFloat 2) { (w2, v) ->
+  match host.print w2 (showFloat (ramp 4 3)) { (w3, x) ->
+  host.print w3 (showFloat (total 3 (fn k { if k == 0 then 0.5 else 1.25 }))) } } }

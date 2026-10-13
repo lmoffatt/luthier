@@ -1,0 +1,7 @@
+-- Runner integration fixture (prompt-4.md, 3.S40): an extern inside a record value is a route,
+-- read when the projection is applied; `missing` names a module that does not exist and no
+-- demand reaches it.
+import "world_model.lut" HostConsole host : HostConsole
+Shows : { present : Float64 -> String, missing : Float64 -> String }
+shows : Shows := { present := extern "python:builtins.repr", missing := extern "python:missing_luthier_module.fail" }
+main (w : W) : W * Unit := host.print w (shows.present 2.5)

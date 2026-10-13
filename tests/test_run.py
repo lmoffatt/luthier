@@ -1,12 +1,14 @@
-"""Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md)."""
+"""Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md);
+v4 for arrays, tables and numbers across the bridge (prompt-4.md)."""
 import os
 from pathlib import Path
 import subprocess
 import sys
 
+import numpy as np
 import pytest
 
-from luthier import host
+from luthier import arrays, host
 from luthier.cli import main
 from luthier.run import RunError, run_file
 
@@ -15,6 +17,53 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def first_line(text):
     return text.splitlines()[0] if text.splitlines() else ""
+
+
+# host functions the bridge tests call (python:test_run.*)
+def three(u):
+    return 3
+
+
+def ramp(n):
+    return np.arange(n)
+
+
+def total(n, a):
+    assert isinstance(a, np.ndarray) and a.dtype == np.float64 and a.shape == (n,)
+    return float(a.sum())
+
+
+def total_int(n, a):
+    assert a.dtype == np.int64
+    return int(a.sum())
+
+
+_ticks = []
+
+
+def tick(k):
+    _ticks.append(k)
+    return 1.0
+
+
+def ticks(u):
+    return repr(_ticks)
+
+
+def a_nan(u):
+    return float("nan")
+
+
+def a_bool(u):
+    return True
+
+
+def a_float(u):
+    return 1.5
+
+
+def matrix(u):
+    return np.ones((2, 2))
 
 
 def command(path, *args, cwd=None):
@@ -118,3 +167,92 @@ main (w : W) : W * Unit := match cons (first "one\\ntwo") nil {
 }
 ''')
     assert run_file(path) == "matched\n"
+
+
+def test_vector_norm_through_numpy():
+    result = command(ROOT / "tests/run/vector_norm.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
+
+
+def test_matrix_product_through_numpy():
+    result = command(ROOT / "tests/run/matrix_product.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "43.0\n2\n", "")
+
+
+def test_table_cell_through_csv(tmp_path):
+    (tmp_path / "table.csv").write_text("id:int,name:str,x:float\n1,alpha,0.5\n2,beta,1.5\n", encoding="utf-8")
+    result = command(ROOT / "tests/run/table_cell.lut", cwd=tmp_path)
+    assert (result.returncode, result.stderr) == (0, "")
+    assert result.stdout == "beta\n2\n1.5\na:int,b:str\n0,x\n1,x\n\n"
+
+
+def test_table_not_parsed_is_nothing(tmp_path):
+    (tmp_path / "table.csv").write_text("id:real\n1\n", encoding="utf-8")
+    result = command(ROOT / "tests/run/table_cell.lut", cwd=tmp_path)
+    assert (result.returncode, result.stdout, result.stderr) == (0, "not a table\n", "")
+
+
+def test_extern_in_a_record_is_read_when_projected():
+    result = command(ROOT / "tests/run/record_externs.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "2.5\n", "")
+
+
+def test_numbers_and_fin_functions():
+    result = command(ROOT / "tests/run/numbers.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "3.0\n2.0\n3.0\n3.0\n", "")
+
+
+PRELUDE = '''
+print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+showInt (x : Int) : String := extern "python:builtins.repr" x
+'''
+
+
+@pytest.mark.parametrize("source, message", [
+    ('nan (u : Unit) : Float64 := extern "python:test_run.a_nan" u\n'
+     'main (w : W) : W * Unit := print w (showFloat (nan unit))', "not a Float64"),
+    ('yes (u : Unit) : Int := extern "python:test_run.a_bool" u\n'
+     'main (w : W) : W * Unit := print w (showInt (yes unit))', "where an Int is declared"),
+    ('half (u : Unit) : Int := extern "python:test_run.a_float" u\n'
+     'main (w : W) : W * Unit := print w (showInt (half unit))', "where an Int is declared"),
+    ('ramp (n : Int) : Fin n -> Float64 := extern "python:test_run.ramp" n\n'
+     'main (w : W) : W * Unit := print w (showFloat (ramp 3 3))', "outside Fin 3"),
+    ('ramp (n : Int) : Fin n -> Float64 := extern "python:test_run.ramp" n\n'
+     'main (w : W) : W * Unit := print w (showFloat (ramp 3 (0 - 1)))', "outside Fin 3"),
+    ('ramp (n : Int) : Fin n -> Float64 := extern "python:test_run.ramp" n\n'
+     'main (w : W) : W * Unit := print w (showFloat (ramp 4 0))', ""),
+    ('total (n : Int) (f : Fin n -> Int) : Int := extern "python:test_run.total_int" n f\n'
+     'main (w : W) : W * Unit := print w (showInt (total 2 (fn k { 9223372036854775807 + 1 })))', "64 bits"),
+    ('m (u : Unit) : { n : Nat, f : Fin n -> Float64 } := extern "python:test_run.matrix" u\n'
+     'main (w : W) : W * Unit := print w (showInt (m unit).n)', "dimensions"),
+])
+def test_crossing_errors(tmp_path, source, message):
+    path = tmp_path / "bad.lut"
+    path.write_text(PRELUDE + source, encoding="utf-8")
+    result = command(path, cwd=ROOT / "tests")
+    if not message:  # the control: the same program in range runs
+        assert (result.returncode, result.stdout) == (0, "0.0\n")
+        return
+    assert result.returncode == 1, result.stdout
+    assert message in result.stderr
+
+
+def test_each_entry_once(tmp_path):
+    path = tmp_path / "once.lut"
+    path.write_text(PRELUDE + '''
+tick (k : Int) : Float64 := extern "python:test_run.tick" k
+ticks (u : Unit) : String := extern "python:test_run.ticks" u
+total (n : Int) (f : Fin n -> Float64) : Float64 := extern "python:test_run.total" n f
+main (w : W) : W * Unit :=
+  match print w (showFloat (total 3 (fn k { tick k }))) { (w1, u) -> print w1 (ticks unit) }
+''', encoding="utf-8")
+    result = command(path, cwd=ROOT / "tests")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "3.0\n[0, 1, 2]\n", "")
+
+
+def test_retained_rank_at():
+    assert arrays.retained_rank_at(0.1, np.diag([0.0, 1.0, 5.0])) == 2
+    assert arrays.retained_rank_at(0.5, np.diag([1.0, 3.0])) == 1
+    assert arrays.retained_rank_at(0.1, np.zeros((3, 3))) == 0
+    assert arrays.retained_rank_at(0.1, np.eye(4)) == 4

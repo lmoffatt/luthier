@@ -284,6 +284,13 @@ def retained_rank(a):
     return int(np.sum(_retained(np.linalg.eigvalsh(np.asarray(a)))))
 
 
+def retained_rank_at(floor, a):
+    """`retainedRank` of arrays.lth with its floor a parameter (P11): the eigenvalues of a symmetric
+    matrix above floor * max |eigenvalue|, counted (none for an empty or a zero matrix)."""
+    w = np.linalg.eigvalsh(np.asarray(a))
+    return int(np.sum(w > float(floor) * np.max(np.abs(w)))) if w.size else 0
+
+
 def pinv_sym(a):
     """The pseudo-inverse of a symmetric matrix on its retained subspace."""
     w, V = np.linalg.eigh(np.asarray(a))

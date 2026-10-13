@@ -1,0 +1,23 @@
+-- Runner integration fixture (prompt-4.md, tables_model.lut): `csv.parse` gives a `Maybe Table`;
+-- the host's table crosses as `{ nRows, names, kinds, cell }` with `cell` giving `just (text s)`
+-- and the like. Reads table.csv (written by the test) and prints row 1's text, int and float cells,
+-- then renders a table built in Luthier (crossing as the record tables.as_table reads).
+import "world_model.lut" HostConsole host : HostConsole
+import "tables.lth" Table textAt intAt realAt
+import "tables_model.lut" csv : Codec
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+showInt (x : Int) : String := extern "python:builtins.repr" x
+built : Table := { nRows := 2, names := cons "a" (cons "b" nil), kinds := cons "int" (cons "str" nil),
+  cell := fn c r { if c == "a" then just (int r) else (if c == "b" then just (text "x") else nothing) } }
+main (w : W) : W * Unit :=
+  match host.readFile w "table.csv" {
+    (w1, nothing) -> host.print w1 "no table.csv" ;
+    (w1, just text) -> match csv.parse text {
+      nothing -> host.print w1 "not a table" ;
+      just t ->
+        match host.print w1 (textAt t "name" 1) { (w2, u) ->
+        match host.print w2 (showInt (intAt t "id" 1)) { (w3, v) ->
+        match host.print w3 (showFloat (realAt t "x" 1)) { (w4, x) ->
+        host.print w4 (csv.render built) } } }
+    }
+  }
