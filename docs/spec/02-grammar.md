@@ -24,14 +24,13 @@ A dotted name `m.f` is one token, a qualified name or a projection that the chec
 [decided D-2026-10-13-q] Inside a string, `\"`, `\\` and `\n` stand for a quote, a backslash and a line break, so
 that a law can spell a text of several lines (`grammar.lth`).
 
-**2.S2. Reserved words.** [implemented] The reserved words are `data`, `match`, `extern`,
-`provisional`, `test`, `with`, `exhaustive`, `import`, `forget`, `U`, `operator`, `if`, `then`,
-`else`, `cite`, `let`, `in`, `primitive` and `axiom`. The last two bodies are allowed only in
-`core.lut` and the libraries of the distribution (spec 11). `as`, `checked`, `size`, `sampled`,
-`under`, `where` and `profile` are ordinary names that act as keywords in their position; that class is retired, these being named arguments or keywords now (2.S21, D-2026-10-13-p). Here `gen` goes from the language (D-2026-10-06-ac, spec 2.S19); the parser still reads
-it today. `and`, `or` and `mod` are ordinary names written infix; `Bool`, `Int`, `Float64`,
-`String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat` and `Fin` are definitions of `core.lut`, not
-words of the grammar. Replaced: 2.S21.
+**2.S2. Reserved words.** [decided D-2026-10-12-ab] The reserved words are the keywords of 2.S21,
+the literals `luthierSyntax` takes (2.S9), and `parse.py` reads those and no others
+(`test_literals_are_not_names`). `let`, `in`, `test`, `with`, `exhaustive`, `forget`, `extern`,
+`provisional`, `primitive`, `axiom` and `cite` are ordinary names there, and `gen` is no longer
+read (`test_other_words_are_names`). `and`, `or` and `mod` are operators written infix (2.S8) and
+reserved with them; `Bool`, `Int`, `Float64`, `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat`
+and `Fin` are definitions of `core.lut`, not words of the grammar.
 
 **2.S3. The arrow `<-`.** [implemented] `<-` is one token (D-2026-10-11-c): `a<-1` is a binding,
 and a comparison with a negative number needs a space, `a < -1`.
@@ -45,13 +44,16 @@ and so does a line that cannot start an item: one beginning with `else`, `then`,
 infix operator. [decided D-2026-10-13-q] Three readings `grammar.lth` took where this was silent: the braces of a
 `data` behave as those of a record type (a line break separates constructors), and a `}` at
 column 0 closes its brace and does not start an act; blank lines and lines holding only a comment
-are dropped with their line breaks. [proposed] The braces of `quote` drop line breaks as those of `match`; which bracket a
+are dropped with their line breaks. [implemented] The braces of `quote` drop line breaks as those of `match`; which bracket a
 token opens is known from the tokens before it: the braces of a
 `match` are the first `{` after `match` outside brackets (2.S9), those of `quote` follow `quote`.
 
 ## §2 Acts
 
-**2.S5. Acts.** [implemented]
+**2.S5. Acts.** [implemented] The block below is the production list of `v0.1-final`, kept as an
+explanation; the value of `luthierSyntax` (2.S9) holds where they differ: it has no `directive`
+(only `import`, `operator` and the bare `datum` act), `primitive`, `axiom` and `extern` are
+applications and not bodies (3.S39), and a binder also has the implicit form `{ A B : U }` (2.S16).
 
     program     ::= { act }
     act         ::= declaration | definition | alias | directive
@@ -73,7 +75,7 @@ Clauses under a header with parameters are a `match` on the tuple of the paramet
 the module keeps, such as a `test` line or a citation (2.S21 makes `test` and `cite` functions);
 which terms may stand there is the checker's, and no `<-` does (2.R5). A trailing separator is
 allowed after the last constructor of a `data`, the last arm of a `match` and the last item of a
-record or a block; [proposed] also after the last element of a list (`grammar.lth`).
+record or a block, and after the last element of a list (`grammar.lth`; `test_trailing_separators`).
 [decided D-2026-10-13-q] `_` is a pattern atom, so that `cons _ rest` can be written. [decided D-2026-10-13-p] A definition has a body or clauses, never both:
 `definition ::= name { binder } [ ":" term ] ( ":=" body | clause { clause } )`; a definition by
 clauses is the `match` of its clauses on the tuple of its parameters (2.S12). Between the
@@ -82,14 +84,10 @@ declared in one act and defined in another, in the same file or another; what th
 definition means depends on its type (spec 4). An alias with binders is a function on types:
 `Maybe (A : U) = { nothing : Unit || just : A }`.
 
-**2.S6. Directives.** [implemented] In `v0.1-final` the directives other than `test` were as below; the language designed keeps only `operator` as an act of its own, `import` takes the form of 12.S22 and `cite` is a function (2.S21). Replaced: 2.S21.
-
-    directive   ::= "import" string [ "as" name ]
-                  | "operator" op ":=" term
-                  | "cite" name term [ "checked" ( "human" | "ai+human" | "none" ) ]   -- D-2026-10-11-f
-
-`cite` records a `proved` certificate by citation (L9.7, O10). What `import` makes travel is
-`spec 12`. The directive `test` is spec 2.S19.
+**2.S6. Directives.** [decided D-2026-10-12-ab] The language keeps only `operator` as an act of its
+own (`luthierSyntax`, 2.S9); `import` takes the form of 12.S22 and `cite` and `test` are functions
+(2.S21, 2.S19). `cite` records a `proved` certificate by citation (L9.7, O10). What `import` makes
+travel is `spec 12`.
 
 **2.S7. Defaults and arguments by name.** [implemented] A parameter written `(tol : T <- d)` has
 the default `d`. It is filled once every parameter without a default is given, and a default may
@@ -102,17 +100,13 @@ Files: r12_defaults.accept.lut, r12_named_unknown.reject.lut.
 
 ## §3 Terms
 
-**2.S8. Precedence.** [implemented] From the loosest to the tightest:
-
-    &   ->   or   and   == /= < <= > >=   + -   * / mod   application   .field
-
-`&` and `->` associate to the right, the others to the left. `->` is the function type when its
+**2.S8. Precedence.** [implemented] `->` is the function type when its
 left side is a type and implication when it is a `Bool`; `*` is the product type or
 multiplication, `+` the sum type or addition, by the type of the left operand; `&` is the
-conjunction of laws (spec 5). An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the
+conjunction of laws (spec 5). An `operator` act gives `+`, `-`, `*`, `/` a meaning on the
 argument types of a function, and a type names its model (D-2026-10-11-j): the model a type names gives its operators (`spec 4.R13`), as the ring of `Z7`.
 
-[decided D-2026-10-13-p] One table, the language designed, from the loosest to the tightest:
+[decided D-2026-10-13-p] One table, from the loosest to the tightest:
 
 | level | forms | associativity |
 |---|---|---|
@@ -141,10 +135,9 @@ operands; two models of a carrier are two types (`spec 4.R13`), and a type with 
 models for one operator is rejected.
 Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 
-**2.S9. Terms.** [implemented] [decided D-2026-10-13-p] The grammar of the language designed is the value
-`luthierSyntax` of `src/luthier/lib/grammar.lth` (L14.6: the theory is the authority); the EBNF
-below is the one `v0.1-final` read, kept as an explanation, and where the two differ the value
-holds.
+**2.S9. Terms.** [implemented] [decided D-2026-10-13-p] The grammar is the value
+`luthierSyntax` of `src/luthier/lib/grammar.lth` (L14.6: the theory is the authority), and `parse.py` reads what it derives
+(`test_parses_what_derives`, `test_parses_what_derives_luthier_syntax_act`).
 
 <!-- luthierSyntax: begin -->
 
@@ -314,41 +307,7 @@ Generated from `src/luthier/lib/grammar.lth` by `scripts/render_grammar.py`
 
 <!-- luthierSyntax: end -->
 
-    term   ::= term op term
-             | term atom                                      -- application
-             | atom
-
-    atom   ::= name | number | string | "U"
-             | "(" term ")"
-             | "(" term "," term { "," term } ")"            -- a tuple, associating to the right
-             | "(" name { name } ":" term ")" "->" term       -- dependent function
-             | "(" name { name } ":" term ")" "*" term        -- dependent product
-             | "(" name ":" term ")" "*" "(" name ":" term ")"     -- product with both positions named
-             | "(" name ":" term ")" "+" "(" name ":" term ")"     -- sum with named alternatives
-             | "{" name { name } ":" term { sep name { name } ":" term } "}"            -- labeled product
-             | "{" name { name } ":" term { sep name { name } ":" term } "|" term "}"   -- subtype with labels
-             | "{" pattern ":" term "|" term "}"                                          -- subtype
-             | "{" name ":=" term { sep name ":=" term } "}"                            -- record value
-             | "{" { item sep } term "}"                                                  -- block (spec 2 §8)
-             | "<" name ":" term { "|" name ":" term } ">"                                -- sum, n-ary
-             | "[" [ term { "," term } ] "]"                                              -- list
-             | "\" lparam { lparam } "{" { item sep } term "}"                            -- lambda; its body is a block
-             | "match" term "{" { pattern "->" term [ ";" ] } "}"
-             | "(" name "<-" term ")"                                                     -- named argument
-             | "if" term "then" term [ "else" term ]                                     -- one arm: a Maybe or a reason
-             | "let" pattern "=" term "in" term                                           -- retired (2.S21)
-             | "-" term                                                                   -- negation; see below
-             | "extern" [ "provisional" ] string
-             | "forget" atom
-             | atom "." name                                                              -- projection
-
-    sep     ::= "," | ";" | line break
-    item    ::= name ":=" term | pattern "<-" term                                        -- in a block
-    lparam  ::= name | "(" name { name } ":" term ")" | "(" pattern "," pattern { "," pattern } ")"
-    pattern ::= "_" | name { patom } | patom
-    patom   ::= name | number | string | "(" pattern { "," pattern } ")"
-
-[decided D-2026-10-13-o] In the language designed: `let` is retired, replaced by blocks
+[decided D-2026-10-13-o] `let` is retired, replaced by blocks
 (2.S21). Negation is not an atom but a level of its own, above application and below `*`, so
 `-f x` is `-(f x)` and `f -x` is `f - x` (2.S15). A single labeled field with a law,
 `{ x : T | p }`, is the subtype with the pattern `x`; a single labeled field without a law,
@@ -406,10 +365,11 @@ translation; spec 3 cites it.
 | `{ i1 ; ... ; in ; e }`, a block | the definitions of its items with fresh names, and `e`; a sub-DAG with one output (D-2026-10-11-i) |
 | `w1 <- act w0 ...`, an action in a block | an ordinary binding: actions take and return the world (spec 10) |
 | `fn (x, y) { t }` | `fn p { match p { (x, y) -> t } }` |
-| `let p = e in body` | `match e { p -> body }` (retired, 2.S21) |
 | a definition by clauses `f (x : A) (y : B) \| p, q := t \| ...` | `f := fn x { fn y { match (x, y) { (p, q) -> t ; ... } } }` (D-2026-10-13-p) |
 | `-x` | `0 - x` on an `Int`, `0.0 - x` on a `Float64` |
 
+The rows for `Failures E` (D-2026-10-11-a) and for `m.f` have no test of their own: they are in
+`elaborate.py` and `translation.lth`, and read as decided and as proposed until a test builds them.
 ## §5 What the parser leaves to the checker
 
 **2.S13. The parser decides little.** [implemented] The parser does not decide what `->`, `*` and
@@ -430,10 +390,10 @@ In a dependent product the type of a later component may mention earlier ones, a
 
 ## §7 Sugar added on 2026-10-05
 
-**2.S15. `let` and negation.** [implemented] `let p = e in body` is `match e { p -> body }`, the
-pattern a name or a tuple; retired by D-2026-10-13-o, a block does it. `-x` is negation, an error on a type other than `Int` or `Float64`. It
+**2.S15. `let` and negation.** [implemented] [decided D-2026-10-13-o] `let` is retired, a block does
+it, and it is an ordinary name (`test_other_words_are_names`). `-x` is negation, an error on a type other than `Int` or `Float64`. It
 binds looser than application, so `-f x` is `-(f x)`, and as an argument it needs parentheses,
-`f (-x)`, since `f -x` is `f - x`. Replaced: 2.S21.
+`f (-x)`, since `f -x` is `f - x`.
 
 **2.S16. Implicit parameters.** [implemented] `{A B : U}` before the other parameters of a
 definition makes them implicit. Where the definition is applied they are inferred by matching the
@@ -443,7 +403,7 @@ the others have solved the unknowns. When the first argument of an application i
 the implicit parameters are taken as given explicitly. An implicit parameter is a type or a type
 operator; one that no argument determines is an error that asks for it explicitly.
 
-## §8 Blocks and the session
+## §8 Blocks
 
 **2.S17. Blocks.** [implemented] A brace term whose last item is a bare expression is a block, and
 that expression is its value; a brace term with no final expression is a record value
@@ -473,10 +433,11 @@ and in a named argument; at the top level of a file, where acts have no order, i
 Files: r12_block.accept.lut, r12_toplevel_arrow.reject.lut.
 
 **2.R6. Unused binding.** [implemented] A `<-` whose previous binding of the same name has no
-consumer is an error in a file ("unused binding"), and is allowed and reported in a session.
+consumer is an error in a file ("unused binding"), and is allowed and reported in a session (2.S18).
 Files: r12_block.accept.lut, r12_unused_rebinding.reject.lut.
 
-**2.S18. The session.** [implemented] `luthier session [files]` (2026-10-11) types a block one item
+**2.S18. The session.** [decided D-2026-10-11-i] `luthier session [files]`, which `cli.py` does not have yet
+(it has `parse`, `check`, `eval` and `run`), types a block one item
 at a time: `the items are those of a block (§8) and a bare term, which `spec 12` says how the command prints, and an unused rebinding is reported. Each line re-evaluates the block so far; what
 a line re-evaluates and the memo between lines are `spec 8` and O8. The world as the implicit `w`
 of the session block waits for actions (spec 10). In a session `w` is the world of the session
@@ -495,8 +456,7 @@ extends, the act `profile` is new, and the act `gen` and its word are removed: R
 
 Here the name after `sampled` is a metric and the name after `under` a profile; their meaning is
 `spec 7`. This syntax is replaced by `test` as a function with named arguments and a profile as a
-record value (D-2026-10-12-ab, 2.S21), so no `profile` act remains. The parser today reads `test name [ "with" number | "exhaustive" ] [ "size" number ]` and
-still reads `gen name ":=" ( term | "extern" string )`.
+record value (D-2026-10-12-ab, 2.S21), so no `profile` act remains. `parse.py` reads neither: `test` and `gen` are ordinary names there (`test_other_words_are_names`).
 
 ## §10 Terms as data
 
@@ -510,7 +470,7 @@ not a form of the grammar (D-2026-10-13-o; `quote` is a keyword, `eval` is not, 
 `quote` must keep its argument unevaluated).
 
 The type `Term` itself, and `Program`, belong to `spec 3`. A theory that states this grammar in
-Luthier is `src/luthier/lib/grammar.lth` (L14), draft 2 written 2026-10-13. A saved evaluation, a quoted term together with
+Luthier is `src/luthier/lib/grammar.lth` (L14), whose value `luthierSyntax` the parser is tested against (2.S9). A saved evaluation, a quoted term together with
 its value, stays open (spec 8).
 
 
@@ -526,8 +486,8 @@ name: `let` and `in` give way to blocks (§8); `forget` is a function of core; `
 `primitive` and `axiom` are names of core whose application the checker recognizes (`spec 3 §8`),
 with `provisional` a named argument of `extern`; `test` and `cite` are functions whose options
 (`with`, `exhaustive`, `size`, `sampled`, `under`, `where`, `profile`, `checked`) are named
-arguments and values (`spec 7`, `spec 6`); the import line is 12.S22's. Keyword or not, what each construct means is stated in Luthier (L14.5). The parser reads the
-older forms today, and the statements above that describe them say so.
+arguments and values (`spec 7`, `spec 6`); the import line is 12.S22's. Keyword or not, what each construct means is stated in Luthier (L14.5). `parse.py` reads them as the literals of `luthierSyntax`, and as
+ordinary names every other word (`test_literals_are_not_names`, `test_other_words_are_names`).
 
 ## Open
 
