@@ -1,0 +1,6 @@
+-- Runner fixture (prompt-5.md; the port's first stop, record/IA/slice-port-2026-10-14/report.md):
+-- `and` whose left operand is a match on a list; `cons`/`nil`/`true`/`false` are core's data
+-- (core.lut, loaded in every run).
+import "world_model.lut" HostConsole host : HostConsole
+nonEmpty (xs : List Int) : Bool := match xs { nil -> false ; cons y rest -> true }
+main (w : W) : W * Unit := host.print w (if nonEmpty (cons 1 nil) and true then "yes" else "no")

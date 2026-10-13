@@ -5,7 +5,10 @@ v2 for world.lth draft 1 (prompt-2.md, choices in opus-2.md): the bridge carries
 (host.Just, host.NOTHING) and records (a dict). v4 (prompt-4.md, choices in report-4.md): the
 bridge reads by the type the extern's definition declares (spec 3.S22 to 3.S26, 11.S6 to 11.S9):
 `Vec`/`Mat` records and `Fin n -> Float64`/`Int` as ndarrays, `Float64` and `Int` checked,
-`Table` as tables.py reads it, sums as `(label, value)`. No certification or result hashing yet.
+`Table` as tables.py reads it, sums as `(label, value)`. v5 (prompt-5.md, report-5.md): every
+run loads `lib/core.lut` before the file (12.S22, 11.R2), defines kernel.BOOTSTRAP_PRIMITIVES as
+`eval` does, and the Runner brings the operands of a primitive and of `and`/`or` to weak head
+normal form itself, with the host. No certification or result hashing yet.
 """
 from __future__ import annotations
 
@@ -24,6 +27,10 @@ from .parse import parse
 
 class RunError(ValueError):
     pass
+
+
+# the core encloses the top-level scope of every file (12.S22); its data and `not` are read here
+CORE = Path(__file__).parent / "lib" / "core.lut"
 
 
 def load(path: Path, seen=None, active=None):
@@ -156,6 +163,7 @@ class Runner:
             elif isinstance(act, t.Declare) and isinstance(act.type, t.Record):
                 self.types[act.name] = act.type
         self.program = tuple(self.typed(act) for act in program)
+        self.defined = {act.name for act in program if isinstance(act, (t.Define, t.Declare))}
 
     def typed(self, act):
         """The definition with each extern it gives carrying its declared type: `f (x : A) : B :=
@@ -574,7 +582,7 @@ class Runner:
                         raise
                     except Exception as exc:
                         raise RunError(f"extern {head.route} failed: {exc}") from exc
-                value = self.apply(head, args)
+                value = self.apply(head, self.operands(head, args))
             elif isinstance(value, t.Extern):
                 try:
                     function = self.route(value)
@@ -602,6 +610,37 @@ class Runner:
                 return value
             value = reduced
 
+    def operands(self, head, args):
+        """A primitive's operands, and the left operand of `and`/`or`, brought to weak head normal
+        form by the Runner, with the host, before kernel.step takes the operator's step: the
+        kernel alone neither calls the host nor reads a pattern the host must first give. `==`
+        compares parts, so its operands are reduced in every concrete part (value)."""
+        if isinstance(head, t.Primitive):
+            count = 1 if head.name == "toFloat64" else 2
+            reduce = self.value if head.name == "==" else self.whnf
+            return [reduce(a) for a in args[:count]] + list(args[count:])
+        if isinstance(head, t.Var) and head.name in ("and", "or") and head.name not in self.defined and args:
+            return [self.whnf(args[0])] + list(args[1:])
+        return args
+
+    def value(self, v):
+        """`v` in weak head normal form, and so each part of a pair, a record, an injection or a
+        constructor applied (a head no act defines)."""
+        v = self.whnf(v)
+        if isinstance(v, t.Pair):
+            return t.Pair(self.value(v.left), self.value(v.right))
+        if isinstance(v, t.RecordValue):
+            return t.RecordValue(tuple((label, self.value(f)) for label, f in v.fields))
+        if isinstance(v, t.Inj):
+            return t.Inj(v.label, self.value(v.value))
+        args, head = [], v
+        while isinstance(head, t.App):
+            args.append(head.argument)
+            head = head.function
+        if args and isinstance(head, t.Var) and head.name not in self.defined:
+            return self.apply(head, [self.value(a) for a in reversed(args)])
+        return v
+
     @staticmethod
     def apply(head, args):
         for arg in args:
@@ -609,8 +648,9 @@ class Runner:
         return head
 
 
-def runtime_slice(acts, main):
-    """Keep the entry's dependencies and theory declarations, excluding law bodies.
+def runtime_slice(acts, main, roots=()):
+    """Keep the entry's dependencies (and those of `roots`) and theory declarations, excluding law
+    bodies.
 
     The bootstrap elaborator cannot elaborate all imported certification theories.
     Checking/certification remains a separate responsibility.
@@ -623,10 +663,18 @@ def runtime_slice(acts, main):
                 continue
             by_name.setdefault(act.name, []).append(act)
 
+    # a constructor named (in a term or a pattern) needs its data: core's `true`, `cons`, `just`
+    owner = {n: act.name for act in acts
+             if isinstance(act, s.Define) and isinstance(act.body, s.DataBody)
+             for n, _ in act.body.constructors}
+
     def names(value):
         if isinstance(value, s.Name):
             yield value.name
             yield value.name.split(".")[0]
+        elif isinstance(value, s.PApp):
+            yield value.name
+            yield from names(value.patterns)
         elif isinstance(value, tuple):
             for item in value:
                 yield from names(item)
@@ -635,12 +683,14 @@ def runtime_slice(acts, main):
                 yield from names(getattr(value, field.name))
 
     needed = set()
-    pending = [main]
+    pending = [main, *roots]
     while pending:
         name = pending.pop()
         if name in needed:
             continue
         needed.add(name)
+        if name in owner:
+            pending.append(owner[name])
         for act in by_name.get(name, ()):
             pending.extend(names(act))
     def projections(value):
@@ -661,13 +711,44 @@ def runtime_slice(acts, main):
                  if a in by_name.get(getattr(a, "name", None), ()) and a.name in needed)
 
 
+def _core_acts(seen, own):
+    """core.lut's acts, those a file of the run defines left out (the file's own shadows the core,
+    12.S22). Its `operator` acts never reach the program: runtime_slice keeps definitions,
+    declarations and aliases only, so `a + b` stays `Var "+"`, bound below to the kernel's
+    primitive, and `a and b` stays `Var "and"`, the kernel's connective."""
+    defined = {a.name for a in own if isinstance(a, (s.Define, s.Declare, s.Alias))}
+    return tuple(a for a in load(CORE, seen)
+                 if not (isinstance(a, (s.Define, s.Declare, s.Alias)) and a.name in defined))
+
+
+def _primitive_body(act):
+    """core's `x : A := primitive "name"`: an operation the kernel computes becomes its
+    `Primitive`, a primitive type (`Int`, `Float64`, ...) a declaration the bridge reads by name."""
+    if not isinstance(act, t.Define):
+        return act
+    body = act.body
+    if (isinstance(body, t.App) and body.function == t.Var("primitive")
+            and isinstance(body.argument, t.Lit) and isinstance(body.argument.constant, t.StringConst)):
+        name = body.argument.constant.value
+        if name in kernel.BOOTSTRAP_PRIMITIVES:
+            return replace(act, body=t.Primitive(name))
+        return t.Declare(act.name, act.type)
+    return act
+
+
 def run_file(path, main="main", fuel=10000):
     host.reset()
-    program = elaborate_program(runtime_slice(load(Path(path)), main))
+    seen = set()
+    own = load(Path(path), seen)
+    core = _core_acts(seen, own)
+    # core's data is in every run, named or not (`[1, 2]` is `cons`, `if` reads `true`)
+    data = tuple(a.name for a in core if isinstance(a, s.Define) and isinstance(a.body, s.DataBody))
+    program = tuple(_primitive_body(a) for a in elaborate_program(runtime_slice(core + own, main, data)))
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == main), None)
     if definition is None:
         raise RunError(f"missing main: {main}")
-    program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in ("+", "-", "*", "==", "<"))
+    # the kernel's bootstrap of the symbols, as `luthier eval` (cli.py); a file's own come first
+    program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
     runner = Runner(program, fuel)
     value = t.Var(main)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):

@@ -1,0 +1,7 @@
+-- Runner fixture (prompt-5.md; the port's third stop, record/IA/slice-port-2026-10-14/report.md):
+-- a host cell under a primitive operator crosses before the operator steps.
+import "world_model.lut" HostConsole host : HostConsole
+import "tables.lth" Table intAt
+import "tables_model.lut" csv : Codec
+showInt (x : Int) : String := extern "python:builtins.repr" x
+main (w : W) : W * Unit := host.print w (match csv.parse "a:int\n7\n" { nothing -> "no table" ; just t -> showInt (intAt t "a" 0 + 1) })

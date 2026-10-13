@@ -256,3 +256,25 @@ def test_retained_rank_at():
     assert arrays.retained_rank_at(0.5, np.diag([1.0, 3.0])) == 1
     assert arrays.retained_rank_at(0.1, np.zeros((3, 3))) == 0
     assert arrays.retained_rank_at(0.1, np.eye(4)) == 4
+
+
+def test_connective_on_a_match_reads_core_data():
+    # prompt-5.md: `and` on a match over a list; core.lut's data in every run
+    result = command(ROOT / "tests/run/connective_on_match.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "yes\n", "")
+
+
+def test_host_cell_under_an_operator_crosses_first():
+    # prompt-5.md: the Runner reduces a primitive's operands with the host
+    result = command(ROOT / "tests/run/host_cell_under_operator.lut")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "8\n", "")
+
+
+def test_bootstrap_primitives_and_not(tmp_path):
+    # prompt-5.md: run_file defines kernel.BOOTSTRAP_PRIMITIVES; `not` is core's
+    path = tmp_path / "ops.lut"
+    path.write_text('''
+print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
+main (w : W) : W * Unit := print w (if not (0 >= 3) and 7 mod 3 /= 0 and "ab" == "a" + "b" then "ok" else "no")
+''')
+    assert run_file(path) == "ok\n"
