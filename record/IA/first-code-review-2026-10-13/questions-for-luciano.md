@@ -51,6 +51,8 @@ Recommended (a): under (b) almost no law can be written, since a law over lists 
 The line is "no world, no model of another theory", which is what laziness needs (12.S23). 12.S23
 and L2.6 gain a sentence.
 
+a
+
 ## Q3. How a bare term stands at the top level
 
 2.S21 turns `test` and `cite` into functions, but the act grammar of 2.S5 has no act that is a
@@ -60,6 +62,9 @@ rightly says it is unmarked and belongs in the specification first.
 
 Recommended: 2.S5 gains `act ::= ... | term`, a datum of the module, with 4.R12's rule that no
 `<-` stands there; which terms may stand there (a `TestSpec`, a citation) is the checker's.
+
+ok
+
 
 ## Q4. Trailing separators and several names per import
 
@@ -72,6 +77,8 @@ Recommended: allow both, and say so in 2.S5, 2.S9 and 12.S22. A trailing separat
 every editor leaves one; several names per line is the form the files already use, and one name
 per line would make `grammar.lth` import eleven times.
 
+ok
+
 ## Q5. Positions in the tree
 
 GPT: carry source positions, but outside the structural equality of the tree, or `RoundTrip`
@@ -81,6 +88,8 @@ Recommended: none in the tree for now, errors carry them (as the files do). When
 needs to point at a term, a position map beside the tree, keyed by the path to the node, keeps
 `RoundTrip` as it is. Reversible.
 
+
+ok
 ## Q6. `operator` and `quote`
 
 `grammar.lth` keeps `operator` as a keyword (2.S21 said "possibly") because it binds a symbol,
@@ -91,6 +100,8 @@ cannot name constructors, and the file uses them so (my error, to fix either way
 Recommended: both keywords, 2.S21 updated. Nine keywords in all: `data`, `match`, `if`, `then`,
 `else`, `U`, `W`, `operator`, `quote`.
 
+yes
+
 ## Q7. How a parameterized theory is defined by its laws
 
 `Recognizer (e : Ebnf) : { accepts : ... }` and then `Recognizer := AcceptsWhatDerives` loses the
@@ -100,24 +111,37 @@ parameter is the type itself", and say nothing of a theory with parameters of it
 Recommended: the definition repeats the binders, `Recognizer (e : Ebnf) := AcceptsWhatDerives e`,
 and the law's parameters are the theory's parameters followed by the model; 4.R6 gains a sentence.
 
+
+OK
 ## Q8. Contradictions inside the specification that the reviewers found
 
 Each one yours, since the files must follow the specification and cannot choose:
 
 - `let`: 2.S9 and 2.S15 keep it `[implemented]`, 2.S21 retires it (Kimi). Recommended: retired;
   2.S9 and 2.S15 say "replaced by blocks".
+OK
+
 - `-x`: 2.S9 lists `"-" term` as an atom, so `f -x` would be `f (-x)`; 2.S15 says it is `f - x`
   (Claude). Recommended: 2.S15 stands, 2.S9 moves negation to its own level above application.
+
+ok
 - Two productions of 2.S9 derive `{ x : T | p }`: the one-field labeled subtype and the pattern
   subtype (Claude, Kimi). Recommended: one form, `subtype` with a pattern, and `recordLaw` only
   with two or more fields; or merge `record` and `recordLaw` into one constructor with a `Maybe`
   law, as Kimi and Claude propose.
+
+
 - 12.S8 (a name declared in one file is defined in another, `[implemented]`) and 12.S22 (a model
   is a named value imported with its theory) do not say how a `.lut` names the hole it fills
   (Claude). Recommended: 12.S8 is retired; a model is always a named value of its theory
   (`backtrack : Derives := ...`), and a hole is filled by naming that value in the import.
+yes
+  
 - 2.S6 reads "The directives other than `test` are: Replaced: 2.S21." with its text lost (Kimi);
   2.S19's `profile` act and 2.S20's `grammar.lut` are stale. Editorial; I fix them.
+
+OK
+
 
 ## Mine to fix, no question
 
