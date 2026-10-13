@@ -1,0 +1,53 @@
+-- validate_graph.lut: check a distance graph directory against the invariants of
+-- distance_graph.lut before any fit, and print the first invariant it breaks, with its row, or a
+-- summary of a valid graph (its nodes, its measurements, the pairs measured, and the directions of
+-- the positions the distances do not see, of which one per node is a height, three are the rigid
+-- motions of the plane, and the rest are left to the prior).
+--
+-- Ported 2026-10-14 by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/slice-port-2026-10-14/prompt.md, from prototipo-cero/luthier/validate_graph.lut of
+-- sonolocalización at its commit 5ffc36ef70e16e11182bc09e4a927c381e35df1c (v0.1 syntax). The
+-- lines printed are v0.1's (the answers of the sonolocalización session,
+-- record/IA/sonolocalizacion-inventory-2026-10-13/answers-2026-10-14.md, item 2), plus one for a
+-- graph that cannot be read, where v0.1 stopped with the extern's error.
+--
+-- Run from the root of this repository with
+--   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/validate_graph.lut
+
+import "world_model.lut" HostConsole host : HostConsole
+import "numbers.lth" Doubles
+import "numbers_model.lut" doubles : Doubles
+import "arrays.lth" RankFloor
+import "distance_graph.lut" DistanceGraph ValidDistanceGraph ValidGraph firstViolation describe readGraph distinctPairs unseenDirections rigidMotions intToString
+
+-- The graph directory, relative to where the run starts: session A of experiment zero
+-- (examples/sonolocalizacion/A/graph/SOURCE.md). A run parameter, a declared hole that
+-- `run --set graphDir=...` replaces (3.S9, 8.S1, 12.S18); the new `run` has no `--set` yet, so it is
+-- defined here.
+graphDir : String := "examples/sonolocalizacion/A/graph"
+
+-- The rank floor of the directions the distances see: v0.1's, n eps times the largest eigenvalue,
+-- n the size of the matrix (3 per node) and eps the spacing of the doubles at one
+-- (arrays.py `_retained`). A criterion, so a parameter of the rank (P11, arrays.lth §4); its value
+-- is v0.1's so that the count is the same.
+rankFloor (g : DistanceGraph) : RankFloor := toFloat64 (3 * g.nodes.nRows) * doubles.epsilon
+
+summary (g : ValidDistanceGraph) : String :=
+  "valid: " + intToString g.nodes.nRows + " nodes, " + intToString g.measurements.nRows + " measurements, "
+  + intToString (distinctPairs g) + " distinct pairs; directions the distances do not see: "
+  + intToString (unseenDirections (rankFloor g) g) + " (of which " + intToString g.nodes.nRows + " are the heights and "
+  + intToString rigidMotions + " the rigid motions of the plane)"
+
+-- the first violation, or the summary of a graph that has none; a graph with no violation is valid
+-- by the law of a check (ReportsValidity), which the branch states again
+report (g : DistanceGraph) : String :=
+  match firstViolation g {
+    nothing -> (if ValidGraph g then summary g else "the check reported nothing on a graph that is not valid") ;
+    just v -> describe g v }
+
+main (w : W) : W * Unit := {
+  (w1, read) <- readGraph w graphDir
+  host.print w1 (match read {
+    nothing -> "FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables" ;
+    just g -> report g })
+}
