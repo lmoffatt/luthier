@@ -758,8 +758,6 @@ def test_equality_stuck_conservative_readings():
     # undeclared name, a partial constructor, different types, different record labels.
     p = (list_data(), bool_data(), constructor_data(), Define("y", Universe(), num(1)))
     one = num(1)
-    assert step(p, eq(Pair(App(App(Primitive("+"), one), one), one), Pair(num(2), one))) is None
-    assert step(p, eq(Pair(Var("y"), one), Pair(one, one))) is None
     assert step(p, eq(Var("free"), Var("free"))) is None
     assert step(p, eq(Var("f"), Var("f"))) is None
     assert step(p, eq(App(App(Var("f"), one), one), App(App(Var("f"), one), one))) is None
@@ -773,6 +771,43 @@ def test_equality_stuck_conservative_readings():
     # a constructor the program declares or defines is a name, not a constructor
     assert step(p + (Declare("c", Universe()),), eq(Var("c"), Var("c"))) is None
     assert step((), eq(lst(one), lst(one))) is None
+
+def plus(i, j):
+    return App(App(Primitive("+"), num(i)), num(j))
+
+
+def test_equality_demands_parts():
+    # EqualityDemandsParts (term.lth 924df6b): each case, then the order, then it ends in a value.
+    p = (Define("y", Universe(), num(1)), list_data(), bool_data(), constructor_data())
+    assert step(p, eq(Pair(plus(1, 1), num(1)), Pair(num(2), num(1)))) == eq(Pair(num(2), num(1)), Pair(num(2), num(1)))
+    assert step(p, eq(Pair(num(1), num(1)), Pair(num(1), plus(1, 1)))) == eq(Pair(num(1), num(1)), Pair(num(1), num(2)))
+    assert step(p, eq(num(1), App(Lam("x", Universe(), Var("x")), num(1)))) == eq(num(1), num(1))
+    assert step(p, eq(num(1), Var("y"))) == eq(num(1), num(1))
+    r = lambda a, b: RecordValue((("a", a), ("b", b)))
+    assert step(p, eq(r(num(1), plus(1, 1)), r(num(1), num(2)))) == eq(r(num(1), num(2)), r(num(1), num(2)))
+    assert step(p, eq(r(num(1), num(2)), r(num(1), plus(1, 1)))) == eq(r(num(1), num(2)), r(num(1), num(2)))
+    assert step(p, eq(Pair(Var("y"), num(1)), Pair(num(1), num(1)))) == eq(Pair(num(1), num(1)), Pair(num(1), num(1)))
+    # leftmost first: the left pair's first part, its second, the right operand
+    assert step(p, eq(Pair(plus(1, 1), plus(2, 2)), Pair(plus(3, 3), num(0)))) == eq(Pair(num(2), plus(2, 2)), Pair(plus(3, 3), num(0)))
+    assert step(p, eq(Pair(num(2), plus(2, 2)), Pair(plus(3, 3), num(0)))) == eq(Pair(num(2), num(4)), Pair(plus(3, 3), num(0)))
+    assert step(p, eq(Pair(num(2), num(4)), Pair(plus(3, 3), plus(0, 0)))) == eq(Pair(num(2), num(4)), Pair(num(6), plus(0, 0)))
+    assert step(p, eq(r(plus(1, 1), plus(2, 2)), r(plus(3, 3), num(0)))) == eq(r(num(2), plus(2, 2)), r(plus(3, 3), num(0)))
+    # a stuck part is passed over: a later part still steps; the whole stays stuck once none does
+    stuck = Pair(Hole("h"), plus(1, 1))
+    assert step(p, eq(stuck, stuck)) == eq(Pair(Hole("h"), num(2)), stuck)
+    assert step(p, eq(Pair(Hole("h"), num(2)), Pair(Hole("h"), num(2)))) is None
+    assert step(p, eq(Pair(Lam("x", Universe(), Var("x")), num(1)), Pair(Lam("x", Universe(), Var("x")), num(1)))) is None
+    assert reduce(p, 20, eq(Pair(plus(1, 1), Var("y")), Pair(num(2), plus(0, 1)))) == truth(True)
+    assert reduce(p, 20, eq(Pair(plus(1, 1), Var("y")), Pair(num(2), plus(0, 2)))) == truth(False)
+
+
+def test_agreement_comparison_steps():
+    # world.lth §5 agreement: `d.describe before == (after, x)`, describe returning a pair of redexes
+    describe = Lam("s", Universe(), Pair(App(App(Primitive("+"), Var("s")), num(1)), App(App(Primitive("*"), Var("s")), num(2))))
+    for after, x, want in ((4, 6, True), (4, 7, False)):
+        t = eq(App(describe, num(3)), Pair(num(after), num(x)))
+        assert reduce((), 20, t) == truth(want)
+
 
 def test_extern_is_value(rng):
     for _ in range(CASES):

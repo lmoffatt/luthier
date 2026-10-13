@@ -677,6 +677,25 @@ def _consistent(bs: Bindings) -> bool:
     return True
 
 
+def _demand_parts(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], t: Term) -> _Work:
+    """EqualityDemandsParts: one step in the leftmost part of a pair or record value that steps."""
+    match t:
+        case Pair(a, b):
+            changed, k = yield _demand_parts(env, constructors, a)
+            if changed:
+                return True, Pair(k, b)
+            changed, k = yield _demand_parts(env, constructors, b)
+            return changed, Pair(a, k) if changed else t
+        case RecordValue(fields):
+            for n, (key, v) in enumerate(fields):
+                changed, k = yield _demand_parts(env, constructors, v)
+                if changed:
+                    return True, RecordValue(fields[:n] + ((key, k),) + fields[n + 1:])
+            return False, t
+        case _:
+            return (yield _step(env, constructors, t))
+
+
 def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], t: Term) -> _Work:
     match t:
         case Let(x, _, v, b):
@@ -694,7 +713,15 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
                 return True, App(App(op, k), j)
             if not _comparable(constructors, i):
                 return False, t
+            # EqualityDemandsParts: a part not yet a value is reduced in place, leftmost first
+            # (the parts of the left operand, then the right operand, then its parts)
+            changed, k = yield _demand_parts(env, constructors, i)
+            if changed:
+                return True, App(App(op, k), j)
             changed, k = yield _step(env, constructors, j)
+            if changed:
+                return True, App(App(op, i), k)
+            changed, k = yield _demand_parts(env, constructors, j)
             if changed:
                 return True, App(App(op, i), k)
             result = _equal(constructors, i, j)
