@@ -43,14 +43,15 @@
 
 -- ---------------------------------------------------------------- §1 The token and actions
 
--- An action is a function that takes the token and gives its result with the token after (10.S3,
--- 10.S4): its type says it is an action, and a function that mentions no `W` holds no effect
--- (10.S1). `act` applies it. The token has no `==` (4.R8); a program constructs none, it enters at
+-- An action is a function that takes the token first and gives the token after with its result,
+-- `W * A` (10.S3, 10.S4; D8: a `main` with `W` returns `W * A`; 2.S17 writes `w1 <- print w0 "x"`):
+-- its type says it is an action, and a function that mentions no `W` holds no effect (10.S1).
+-- `act` applies it. The token has no `==` (4.R8); a program constructs none, it enters at
 -- `main` or in the session (D8: `W` optional in `main`, a `main` without it a pure script).
-Action (A : U) = W -> A * W
-act (A : U) (a : Action A) (w : W) : A * W := a w
-after (A : U) (p : A * W) : W := match p { (x, w) -> w }
-result (A : U) (p : A * W) : A := match p { (x, w) -> x }
+Action (A : U) = W -> W * A
+act (A : U) (a : Action A) (w : W) : W * A := a w
+after (A : U) (p : W * A) : W := match p { (w, x) -> w }
+result (A : U) (p : W * A) : A := match p { (w, x) -> x }
 
 -- Two kinds of action (10.S6): one on Luthier's own store (writing a certificate, recording a
 -- test) is idempotent and may be served from the memo; one on the world runs each time it is
@@ -124,7 +125,7 @@ Route = { name : String, route : String, provisional : Bool }
 -- (L11.3), unless it is provisional, which is applied, recorded as debt and never certified
 -- (4.R5). The certificate stays by hash: a second demand with the same hash does not test again.
 Externs : {
-  read : W -> Route -> Maybe String * W,
+  read : W -> Route -> W * Maybe String,
   verdictOf : Route -> Verdict,
   applied : Route -> Bool,
   identity : Route -> String -> String,
@@ -145,21 +146,23 @@ Externs := RefusedWhenRefuted & NotAppliedWithoutLaw & ProvisionalIsApplied & Id
 
 -- `print` appends its text to the standard output, a place of the world, and changes nothing
 -- else; reading a file gives what is at its place, and changes nothing (10.S2, D8: `print` is the
--- first action). Both are models of `Declared`, the first naming its place and the second none.
+-- first action). Both take the token first, as 2.S17 writes them. The model is world_model.lut,
+-- whose operations are externs to the host (10.S8); the first program with an action is
+-- examples/hello.lut.
 Console : {
   world : World,
-  print : String -> Action Unit,
-  readFile : String -> Action (Maybe String),
+  print : W -> String -> W * Unit,
+  readFile : W -> String -> W * Maybe String,
   stdout : String,
 }
 appendStr : String -> String -> String
 PrintAppends (c : Console) (w : W) (s : String) : Bool :=
-  c.world.read (after Unit (c.print s w)) c.stdout
+  c.world.read (after Unit (c.print w s)) c.stdout
     == (match c.world.read w c.stdout { nothing -> just s ; just prior -> just (appendStr prior s) })
 PrintChangesOnlyStdout (c : Console) (w : W) (s : String) : Bool :=
-  sameAt c.world w (after Unit (c.print s w)) (except c.world.places [c.stdout])
+  sameAt c.world w (after Unit (c.print w s)) (except c.world.places [c.stdout])
 ReadGivesThePlace (c : Console) (w : W) (p : String) : Bool :=
-  result (Maybe String) (c.readFile p w) == c.world.read w p
+  result (Maybe String) (c.readFile w p) == c.world.read w p
 ReadChangesNothing (c : Console) (w : W) (p : String) : Bool :=
-  sameAt c.world w (after (Maybe String) (c.readFile p w)) c.world.places
+  sameAt c.world w (after (Maybe String) (c.readFile w p)) c.world.places
 Console := PrintAppends & PrintChangesOnlyStdout & ReadGivesThePlace & ReadChangesNothing

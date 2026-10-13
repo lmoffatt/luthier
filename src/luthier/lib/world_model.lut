@@ -1,0 +1,22 @@
+-- world_model.lut: the first model of the world, through externs to the host.
+--
+-- Draft 0, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1). The console of world.lth §4,
+-- its operations routes to host functions (10.S8, 3.S13): the places are the standard output and
+-- the files; what is read at a place is read by the host. The representation of `W` is the host's
+-- and stays here (L6.12): a program sees the token through this model only.
+
+import "world.lth" World Console
+
+-- the observable world: its places, and what the host reads at one
+theWorld : World := {
+  places := extern "python:luthier.host.places",
+  read := extern "python:luthier.host.read_place",
+}
+
+-- the console: `print` appends to the standard output, `readFile` reads a file
+console : Console := {
+  world := theWorld,
+  print := extern "python:luthier.host.print_line",
+  readFile := extern "python:luthier.host.read_file",
+  stdout := "stdout",
+}
