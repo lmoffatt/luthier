@@ -101,15 +101,21 @@ TimesPositive (R : U) (o : OrderedRing R) (p : NonNegativePair R o) : Bool :=
   o.leq (zeroOf R o.ring) (timesOf R o.ring p.x p.y)
 OrderedRing (R : U) := LeqTotal R & LeqAntisymmetric R & LeqTransitive R & PlusMonotone R & TimesPositive R
 
--- an ordered field: a field whose ring is ordered; the order's laws are the ordered ring's
+-- an ordered field: a field whose ring is ordered; the order's laws are the ordered ring's. The
+-- ordered ring `{ ring := o.field.ring, leq := o.leq }` is written in the law itself, so the law
+-- reads `field` and `leq`: by 4.S15 a law depends on the names in it "without unfolding
+-- definitions", and a helper that built it was not read (report of the leftovers agent, f8c5f40).
 OrderedField (F : U) : { field : Field F, leq : F -> F -> Bool }
-asOrderedRing (F : U) (o : OrderedField F) : OrderedRing F := { ring := o.field.ring, leq := o.leq }
-FieldIsOrdered (F : U) (o : OrderedField F) (x y : F) (p : LeqPair F (asOrderedRing F o))
-               (c : LeqChain F (asOrderedRing F o)) (b : LeqBoth F (asOrderedRing F o))
-               (q : NonNegativePair F (asOrderedRing F o)) : Bool :=
-  LeqTotal F (asOrderedRing F o) x y and LeqAntisymmetric F (asOrderedRing F o) b
-  and LeqTransitive F (asOrderedRing F o) c and PlusMonotone F (asOrderedRing F o) p x
-  and TimesPositive F (asOrderedRing F o) q
+FieldIsOrdered (F : U) (o : OrderedField F) (x y : F)
+               (p : LeqPair F { ring := o.field.ring, leq := o.leq })
+               (c : LeqChain F { ring := o.field.ring, leq := o.leq })
+               (b : LeqBoth F { ring := o.field.ring, leq := o.leq })
+               (q : NonNegativePair F { ring := o.field.ring, leq := o.leq }) : Bool :=
+  LeqTotal F { ring := o.field.ring, leq := o.leq } x y
+  and LeqAntisymmetric F { ring := o.field.ring, leq := o.leq } b
+  and LeqTransitive F { ring := o.field.ring, leq := o.leq } c
+  and PlusMonotone F { ring := o.field.ring, leq := o.leq } p x
+  and TimesPositive F { ring := o.field.ring, leq := o.leq } q
 OrderedField (F : U) := FieldIsOrdered F
 
 -- ---------------------------------------------------------------- §5 Completeness (11.R3)
