@@ -2188,3 +2188,21 @@ Quote:      "Ok a los tres."
 Source:     chat:da165104:2971
 Kind:       spec (2.S1, 2.S4, 2.S5)
 Status:     current
+
+D-2026-10-13-r  Who writes and who reviews Luthier's own theories (Z9 of the plan from zero, amending
+                Z6). The theories are written by the session, which fixes the pattern of the first
+                three files (a theory as a record type with its laws, a model as a named value,
+                a law of role for each constructor, the domain and the argument of uniqueness when
+                the laws determine a function, quantification over subtypes with generators). The
+                Python specimens, and fenced mechanical tasks such as rewriting the programs of
+                `tests/spec/`, go to Sonnet agents or to external models: these are certified
+                against their theories, so their errors show. Each layer of theories gets one
+                round of review by the four external models, not each file, and the rounds stop
+                when one finds only local defects. External models may also write, to spare the
+                Claude quota: the session prepares the brief and the bundle, Luciano sends it, the
+                session reads the reply whole, checks and commits it.
+Author:     Luciano, on the model's recommendation; the use of external models to write is his
+Quote:      "de acuerdo. Tambien podemos usar IAs externas porque mi limite esta en 83%"
+Source:     chat:da165104:3026
+Kind:       plan (Z6, Z9 of record/plan-from-zero-2026-10-13-decisions.md)
+Status:     current
