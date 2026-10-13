@@ -1,0 +1,41 @@
+-- world.lth: the world as a token threaded through actions, what an action may change, externs
+-- as routes validated at their first action, and the parts of the world a program touches.
+--
+-- Draft 0, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, brought before evidence by
+-- D-2026-10-13-ad: execution first, so that sonolocalización runs uncertified and the
+-- certificates are designed on how it fails). Sources: spec 10.S1 to 10.S13 (an action, the token,
+-- the core's table, two kinds of action, externs as routes, the bridge, named worlds); L11; L4.5;
+-- D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md (the token used
+-- exactly once; `W` optional in `main`); D-2026-10-13-a (one world), -b (`W` a keyword), -g.
+-- Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+--
+-- What this file states. The core knows of the world only the table of 10.S5: the token `W`, a
+-- keyword with no `==`, which a program never constructs; `act`, applying an action to a token;
+-- `own`, whether an action concerns Luthier's own store. Everything else is a library's (10.S5,
+-- D-2026-10-12-al): what the parts of the world are, what an observation of one is, how a class
+-- of machines is described. So the theories here take the library's representation of the world
+-- as a type `R`, the model of `W`, and state over it what the core asks: an action is a function
+-- over the token with its result (10.S3); it changes only what its declaration says (10.S7); an
+-- action on Luthier's own store is idempotent and a world action never is (10.S6); an extern is a
+-- route, read when a demand reaches it, validated against its type's laws before it is applied
+-- (10.S8 to 10.S10). What cannot be tested (the disk persists while the program is off, the clock
+-- is monotone) is marked assumed, so the certificate of a run says under what hypotheses it holds
+-- (10.S13, 6.S10).
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones, checks it with
+-- `luthier parse src/luthier/lib/world.lth`, sets its status to done here, and commits.
+--
+--   §1 The token and actions: an action's type says it is one; `act`; `own`; state
+--      actions idempotent, world actions never (10.S3 to 10.S6; D4, D8).               todo
+--   §2 Places and observations: the world as the library represents it; an action changes
+--      only the places its declaration names (10.S7); what is assumed (10.S13).        todo
+--   §3 Externs as routes: read at the first demand with the hash of what was read in the
+--      identity, validated against the type's laws, refused if they fail, provisional as
+--      debt (10.S8 to 10.S10, L11.2, L11.7).                                           todo
+--   §4 The actions the first slice needs: `print`, reading a file (10.S2; D8).          todo
+--   §5 Named worlds: an extern with no law runs in one, priced as an assumption (10.S12,
+--      L11.6). Waits for evidence (certification.lth).                                 todo
+--   §6 The externs of sonolocalización (numpy and its data formats). Waits for the
+--      inventory, record/IA/sonolocalizacion-inventory-2026-10-13/.                     todo
