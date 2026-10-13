@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 b223b3483253, commit fd3cba9 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 f6f23fd4505f, commit 548b320 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-13; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -23,6 +23,7 @@ Each term has one category and is defined here and nowhere else; the principles 
   value made of several named fields (a record, a tuple); a sum, a value that is one of several
   cases, each tagged (a variant, an enumeration, `Maybe`); a function type `A -> B`; and a
   recursive type, one defined in terms of itself (a list, a tree). Each form may hold the others.
+  An *alias* names a structure: a shape used before what it is for is known (D-2026-10-13-p).
 - A *predicate* is a function into `Bool`. A *cost* is a function into `Cost`, the non-negative
   reals with infinity, 0 true and ∞ false.
 - A *law* is a predicate or a cost, or a combination of laws that is again a predicate or a cost;
@@ -132,9 +133,15 @@ demanded).
   theory. What a file imports has its theory in a theory file (D-2026-10-13-i, -j). A theory file may
   hold the definitions its laws need and a value that is part of the theory, never a model of a theory
   declared elsewhere (D-2026-10-13-o). [settled]
+- L2.7 (His words) A definition is a concept, and a collection of types is not. An alias names a
+  structure we use before we know what it is for; a definition promotes it to a theory, and what makes
+  it one is a law it must follow, stating the role of each part. Distinct constructors are free and
+  state no role; an observer that only lists them is an automatic accessor, not a law; a `data` with
+  no law of its constructors' roles is a collection and is written as an alias (D-2026-10-13-p,
+  D-2026-10-07-e). It costs thought, and that is its purpose. [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
-Status: settled; clause 6 settled (D-2026-10-13-i, -j, -n).
+Status: settled; clause 6 settled (D-2026-10-13-i, -j, -n); clause 7 his (D-2026-10-13-p).
 
 **L3. Equality has levels and belongs to the object.**
 From: G0 (the identity type and its levels) with G2 (under cost, the identity proposition acquires a

@@ -2142,3 +2142,37 @@ Kind:       language and spec (2.S5, 2.S6, 2.S9, 2.S15, 2.S19, 2.S20, 2.S21, 3.R
             4.R4, 4.R6, 12.S8, 12.S22, 12.S23; principles L2.6). For G1, L14, P5, P16
 Status:     current. The model's, by the same mark, reversible: a record has two or more names, so
             `{ x : A }` with no law is not a form (it is `A`)
+
+D-2026-10-13-p  A definition is a concept, and a collection of types is not. An alias names a
+                structure: a shape we use before we know what it is for. A definition promotes it
+                to a theory, and what makes it one is a law it must follow, a law that states the
+                role of each part. For a `data`, distinct constructors are free by construction and
+                give no role; an observer that only lists the constructors (`keywordText`) with a
+                law of injectivity is an automatic accessor, and does not count. A `data` whose
+                constructors have no law of their role is a collection, written as an alias of a sum.
+                So `Keyword`, `Op` and `TokenKind` in grammar.lth go: keywords are the words the
+                grammar takes as literals, operators the literals of its precedence levels, token
+                kinds its categories, and their roles are laws over `luthierSyntax`. Precedence is
+                one clear table, the open forms (`(x : A) ->`, `(x : A) *`, `\`, `if`) at its
+                loosest level. His marks on round 2 besides: R1, R2, R5, R6 as recommended.
+Author:     Luciano; the application to the three enumerations and the precedence table the model's
+Quote:      "esto es cheating. La idea es que haya leyes acerca de los campos de data, algo que
+            obligue a pensar para que uso cada cosa"
+            "Un nombre es un concepto, una coleccion de tipos no es un concepto."
+            "necesitamos reglas claras y obvias de precedencia de operadores."
+            "hay una sola observacion relevante, es mi cruzada para que una definicion sea un
+            concepto, una idea. Una coleccion de tipos no lo es."
+            "Es la idea del alias, un alias es una estructura que no sabemos para que esta, la usamos
+            pero no definimos su funcionalidad aun. Luego la promovemos a teoria."
+            "Entonces con un alias le ponemos un nombre a una estructura, pero para que sea teoria
+            tiene que tener una definicion que le dice que  ley tiene que seguir."
+Source:     luthier@13641e8:record/IA/first-code-review-2026-10-13/round-2/questions-for-luciano.md:48
+            luthier@13641e8:record/IA/first-code-review-2026-10-13/round-2/questions-for-luciano.md:50
+            luthier@13641e8:record/IA/first-code-review-2026-10-13/round-2/questions-for-luciano.md:64
+            chat:da165104:2551
+            chat:da165104:2568
+            chat:da165104:2568
+Kind:       principles (L2.7 new; Terms) and spec (2.S8, 3.R3, 4.R3, 4.R4). For G0, L2, L8,
+            D-2026-10-07-e
+Status:     current; reverses the model's reading of Q1 in D-2026-10-13-o (observers with laws of
+            injectivity)

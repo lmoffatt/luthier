@@ -129,6 +129,7 @@ Each term has one category and is defined here and nowhere else; the principles 
   value made of several named fields (a record, a tuple); a sum, a value that is one of several
   cases, each tagged (a variant, an enumeration, `Maybe`); a function type `A -> B`; and a
   recursive type, one defined in terms of itself (a list, a tree). Each form may hold the others.
+  An *alias* names a structure: a shape used before what it is for is known (D-2026-10-13-p).
 - A *predicate* is a function into `Bool`. A *cost* is a function into `Cost`, the non-negative
   reals with infinity, 0 true and ∞ false.
 - A *law* is a predicate or a cost, or a combination of laws that is again a predicate or a cost;
@@ -497,13 +498,20 @@ L2.6   The theoretical module of clause 4 is a file of its own: a theory file ho
        (D-2026-10-13-i, -j). A theory file may hold the definitions its laws need and a value that
        is part of the theory, never a model of a theory declared elsewhere (D-2026-10-13-o).
        [settled]
+L2.7   (His words) A definition is a concept, and a collection of types is not. An alias names a
+       structure we use before we know what it is for; a definition promotes it to a theory, and
+       what makes it one is a law it must follow, stating the role of each part. Distinct
+       constructors are free and state no role; an observer that only lists them is an automatic
+       accessor, not a law; a `data` with no law of its constructors' roles is a collection and is
+       written as an alias (D-2026-10-13-p, D-2026-10-07-e). It costs thought, and that is its
+       purpose. [settled]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j
 Rests on:   O9 (the kind of a hole in the elaborated form, for the spec)
 Source:     Luciano, 2026-05-29 (dialogue:20260529T1400:tipos-no-definidos-y-forward-reference); the
             hole named 2026-09-29; `external` and the theoretical module 2026-10-10 (WhatsApp Ptt
             2026-10-10 at 17.41.53.md; WhatsApp Ptt 2026-10-10 at 17.25.23.md, 00:00 to 00:40); his
             annotation on draft 8, bcdac41
-Status:     settled; clause 6 settled (D-2026-10-13-i, -j, -n)
+Status:     settled; clause 6 settled (D-2026-10-13-i, -j, -n); clause 7 his (D-2026-10-13-p)
 History:    draft 0 (6d9dbd3): stated. draft 4 (c7c6396): the elaborated form records which of the
             five it is. draft 5 (5b1446c): `assumed` has one meaning. draft 6 (8809e20): an axiom is
             not a value. draft 9 (0636378): his words on a declared name's type. draft 10 (72cc7be,

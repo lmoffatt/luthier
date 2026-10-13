@@ -142,10 +142,12 @@ Files: r2_definition.accept.lut, r2_definition.reject.lut.
 labeled base must touch every label; over an unlabeled base it must touch its parameter. A
 predicate that touches nothing (`\ p { true }`) defines nothing. `{ eq, add, mul | Associative A
 eq add }` is rejected: `mul` is a label no law touches, a semigroup juxtaposed to a bare function.
-The `| true` records of the first libraries disappear. [decided D-2026-10-13-o] The same holds for a `data`:
-each constructor is told apart by an observer bound to it by a law, `keywordText kwData == "data"`
-or the laws of `derives` on `eps` and `seq`; a constructor no observer distinguishes means nothing
-and is reported (G1; the table of 4.S19 makes it visible).
+The `| true` records of the first libraries disappear. [decided D-2026-10-13-p] The same holds for a `data`
+(L2.7): each constructor needs a law stating its role in some theory, as the laws of `derives` give
+`eps` and `seq` theirs, or the tree laws of `grammar.lth` give each surface form the text that
+writes it. Distinct constructors are free by construction and state no role, and an observer that
+only lists the constructors is an accessor, not such a law. A `data` with no constructor so bound
+is a collection and is reported, to be written as an alias of a sum (the table of 4.S19 shows it).
 Files: r3_connected.accept.lut, r3_dangling_label.reject.lut.
 
 **4.R4. Only laws or a `data` make a new type.** [decided D-2026-10-13-o] A definition `x : U := t` makes `x` a

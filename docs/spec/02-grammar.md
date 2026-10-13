@@ -28,7 +28,7 @@ that a law can spell a text of several lines (`grammar.lth`).
 `provisional`, `test`, `with`, `exhaustive`, `import`, `forget`, `U`, `operator`, `if`, `then`,
 `else`, `cite`, `let`, `in`, `primitive` and `axiom`. The last two bodies are allowed only in
 `core.lut` and the libraries of the distribution (spec 11). `as`, `checked`, `size`, `sampled`,
-`under`, `where` and `profile` are ordinary names that act as keywords in their position. Here `gen` goes from the language (D-2026-10-06-ac, spec 2.S19); the parser still reads
+`under`, `where` and `profile` are ordinary names that act as keywords in their position; that class is retired, these being named arguments or keywords now (2.S21, D-2026-10-13-p). Here `gen` goes from the language (D-2026-10-06-ac, spec 2.S19); the parser still reads
 it today. `and`, `or` and `mod` are ordinary names written infix; `Bool`, `Int`, `Float64`,
 `String`, `Unit`, `Empty`, `Maybe`, `List`, `Nat` and `Fin` are definitions of `core.lut`, not
 words of the grammar. Replaced: 2.S21.
@@ -68,7 +68,10 @@ Clauses under a header with parameters are a `match` on the tuple of the paramet
 the module keeps, such as a `test` line or a citation (2.S21 makes `test` and `cite` functions);
 which terms may stand there is the checker's, and no `<-` does (2.R5). A trailing separator is
 allowed after the last constructor of a `data`, the last arm of a `match` and the last item of a
-record or a block. A name may be
+record or a block. [decided D-2026-10-13-p] A definition has a body or clauses, never both:
+`definition ::= name { binder } [ ":" term ] ( ":=" body | clause { clause } )`; a definition by
+clauses is the `match` of its clauses on the tuple of its parameters (2.S12). Between the
+constructors of a `data` on one line, `;` is required (a line break gives it, 2.S4). A name may be
 declared in one act and defined in another, in the same file or another; what the body of a
 definition means depends on its type (spec 4). An alias with binders is a function on types:
 `Maybe (A : U) = < nothing : Unit | just : A >`.
@@ -101,14 +104,39 @@ Files: r12_defaults.accept.lut, r12_named_unknown.reject.lut.
 left side is a type and implication when it is a `Bool`; `*` is the product type or
 multiplication, `+` the sum type or addition, by the type of the left operand; `&` is the
 conjunction of laws (spec 5). An `operator` directive gives `+`, `-`, `*`, `/` a meaning on the
-argument types of a function, and a type names its model (D-2026-10-11-j): `the model a type names gives its operators (`spec 4.R13`), as the ring of `Z7`.
+argument types of a function, and a type names its model (D-2026-10-11-j): the model a type names gives its operators (`spec 4.R13`), as the ring of `Z7`.
+
+[decided D-2026-10-13-p] One table, the language designed, from the loosest to the tightest:
+
+| level | forms | associativity |
+|---|---|---|
+| 1 | the open forms: `(x : A) ->`, `(x : A) *`, `\ params { }`, `if c then a else`, each taking the whole term to its right | (prefix) |
+| 2 | `&` | right |
+| 3 | `->` | right |
+| 4 | `or` | left |
+| 5 | `and` | left |
+| 6 | `==` `/=` `<` `<=` `>` `>=` | left |
+| 7 | `+` `-` | left |
+| 8 | `*` `/` `mod` | left |
+| 9 | `-` prefix, negation | (prefix) |
+| 10 | application | left |
+| 11 | `.field` | left |
+
+So `(n : Nat) * Vec n` is `(n : Nat) * (Vec n)`, `if c then a else b + 1` is `if c then a else (b + 1)`,
+and the dangling `else` of 2.S11 belongs to the nearest `if`, all by the table. `and`, `or` and `mod`
+are operators like `+`, not names (D-2026-10-13-p), and the `operator` act gives each its meaning
+on a type, as for `+`, `-`, `*`, `/`. The table is stated in `src/luthier/lib/grammar.lth`, whose
+`luthierSyntax` is the grammar (2.S9).
 
 **2.R2. A type names its model.** [implemented] An operator is resolved by the type of its
 operands; two models of a carrier are two types (`spec 4.R13`), and a type with two
 models for one operator is rejected.
 Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 
-**2.S9. Terms.** [implemented]
+**2.S9. Terms.** [implemented] [decided D-2026-10-13-p] The grammar of the language designed is the value
+`luthierSyntax` of `src/luthier/lib/grammar.lth` (L14.6: the theory is the authority); the EBNF
+below is the one `v0.1-final` read, kept as an explanation, and where the two differ the value
+holds.
 
     term   ::= term op term
              | term atom                                      -- application
@@ -190,7 +218,8 @@ translation; spec 3 cites it.
 | `{ i1 ; ... ; in ; e }`, a block | the definitions of its items with fresh names, and `e`; a sub-DAG with one output (D-2026-10-11-i) |
 | `w1 <- act w0 ...`, an action in a block | an ordinary binding: actions take and return the world (spec 10) |
 | `\ (x, y) { t }` | `\ p { match p { (x, y) -> t } }` |
-| `let p = e in body` | `match e { p -> body }` |
+| `let p = e in body` | `match e { p -> body }` (retired, 2.S21) |
+| a definition by clauses `f (x : A) (y : B) \| p, q := t \| ...` | `f := \ x { \ y { match (x, y) { (p, q) -> t ; ... } } }` (D-2026-10-13-p) |
 | `-x` | `0 - x` on an `Int`, `0.0 - x` on a `Float64` |
 
 ## §5 What the parser leaves to the checker
@@ -297,14 +326,15 @@ its value, stays open (spec 8).
 ## §11 The keywords, and what becomes Luthier
 
 **2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `W` (D-2026-10-13-b), `data`, `match`, `if`,
-`then`, `else`, `U`, `operator` and `quote` (D-2026-10-13-o): `operator` binds a symbol, which no
-function can take as an argument, and `quote` captures a term unevaluated. Everything else is a core or library
+`then`, `else`, `U`, `operator`, `quote`, `import` and `as` (D-2026-10-13-o, -p): `operator` binds a
+symbol, which no function can take as an argument; `quote` captures a term unevaluated; `import`
+binds names (12.S22) and `as` renames one on that line. They are the words `luthierSyntax` takes as
+literals, so the keyword set is derived from the grammar and not listed apart (D-2026-10-13-p). Everything else is a core or library
 name: `let` and `in` give way to blocks (§8); `forget` is a function of core; `extern`,
 `primitive` and `axiom` are names of core whose application the checker recognizes (`spec 3 §8`),
 with `provisional` a named argument of `extern`; `test` and `cite` are functions whose options
 (`with`, `exhaustive`, `size`, `sampled`, `under`, `where`, `profile`, `checked`) are named
-arguments and values (`spec 7`, `spec 6`); `import` gives a module value (`spec
-12.S22`). Keyword or not, what each construct means is stated in Luthier (L14.5). The parser reads the
+arguments and values (`spec 7`, `spec 6`); the import line is 12.S22's. Keyword or not, what each construct means is stated in Luthier (L14.5). The parser reads the
 older forms today, and the statements above that describe them say so.
 
 ## Open
