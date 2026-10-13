@@ -2393,3 +2393,13 @@ Quote:      "Ok"
 Source:     chat:52b10bff:5180
 Kind:       plan (v0.2's criteria) and program.lth, library.lth
 Status:     current
+
+D-2026-10-13-af The two citation programs of `tests/spec/` (`cite_proved.accept`,
+                `cite_not_reference.reject`) stay xfails until the citation library (`cite`,
+                `Reference`, spec 6.R1) exists, which waits on O10; they join the four of
+                D-2026-10-13-ae in `v0.2`'s criterion b.
+Author:     Luciano, on the model's recommendation
+Quote:      "Si"
+Source:     chat:52b10bff:5385
+Kind:       plan (v0.2's criteria)
+Status:     current
