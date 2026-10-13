@@ -509,7 +509,7 @@ signatureIn (whole acts : SurfaceProgram) (n : String) : List Surface * Maybe Su
   cons act rest -> match act { define x bs t b -> if x == n then (binderTypes bs, typeOfAct whole n t) else signatureIn whole rest n ;
                                _ -> signatureIn whole rest n } }
 binderTypes (bs : List Binder) : List Surface := match bs { nil -> nil ;
-  cons b rest -> concat (match b { explicit xs t d -> repeatFor xs t ; implicit xs t -> repeatFor xs t }) (binderTypes rest) }
+  cons b rest -> concatTerms (match b { explicit xs t d -> repeatFor xs t ; implicit xs t -> repeatFor xs t }) (binderTypes rest) }
 repeatFor (xs : List String) (t : Surface) : List Surface := match xs { nil -> nil ; cons x rest -> cons t (repeatFor rest t) }
 operatorBindings (p : SurfaceProgram) : List (String * String) := match p { nil -> nil ; cons act rest -> match act {
   operatorAct o t -> (match t { name f -> cons (o, f) (operatorBindings rest) ; _ -> operatorBindings rest }) ;
