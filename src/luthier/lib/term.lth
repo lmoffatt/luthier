@@ -242,6 +242,13 @@ AlphaCongruent (a : Alpha) (p q : AlphaPair a) (x l : String) : Bool :=
 renamedTo (x y : String) (t : Term) : Term := if x == y then t else swap x y t
 underBinder (a : Alpha) (x y : String) (b c : Term) : Bool :=
   (x == y and a.alphaEq b c) or (not (member x (freeVars c)) and a.alphaEq b (renamedTo y x c))
+-- a `data` binds its own name in its constructors' types (`freeVars`, `swap`), so its name is
+-- compared as a binder (Codex, writing kernel.py: `RenameBound` renamed it and `AlphaPartsAgree`
+-- asked it fixed)
+underBinderPairs (a : Alpha) (x y : String) (cs ds : List (String * Term)) : Bool :=
+  (x == y and pairsAgree a cs ds) or (not (member x (pairsFree ds)) and pairsAgree a cs (renamePairs y x ds))
+renamePairs (y x : String) (kvs : List (String * Term)) : List (String * Term) :=
+  match kvs { nil -> nil ; cons (k, v) rest -> cons (k, renamedTo y x v) (renamePairs y x rest) }
 pairsAgree (a : Alpha) (xs ys : List (String * Term)) : Bool := match xs {
   nil -> (match ys { nil -> true ; cons y rest -> false }) ;
   cons (k, u) rest -> match ys { nil -> false ; cons (j, v) more -> k == j and a.alphaEq u v and pairsAgree a rest more } }
@@ -252,8 +259,15 @@ patternShape (q : Pattern) : Pattern := match q {
   PCon c qs -> PCon c (shapes qs) ; PPair l r -> PPair (patternShape l) (patternShape r) ;
   PInj l r -> PInj l (patternShape r) }
 shapes (qs : List Pattern) : List Pattern := match qs { nil -> nil ; cons q rest -> cons (patternShape q) (shapes rest) }
+-- renaming `ys` to `xs` position by position, at once: each swap is applied to the term and to the
+-- names still to rename, so a later pair sees the names the earlier swaps left (a permutation as a
+-- product of transpositions; Codex, writing kernel.py: one swap after another without this turned
+-- `(x, y)` into `(y, x)` back again)
 renameAll (xs ys : List String) (t : Term) : Term := match xs { nil -> t ;
-  cons x rest -> match ys { nil -> t ; cons y more -> renameAll rest more (renamedTo y x t) } }
+  cons x rest -> match ys { nil -> t ;
+    cons y more -> renameAll rest (swapNames y x more) (renamedTo y x t) } }
+swapNames (y x : String) (ns : List String) : List String :=
+  match ns { nil -> nil ; cons n rest -> cons (swapName y x n) (swapNames y x rest) }
 armsAgree (a : Alpha) (xs ys : List (Pattern * Term)) : Bool := match xs {
   nil -> (match ys { nil -> true ; cons y rest -> false }) ;
   cons (p, b) rest -> match ys { nil -> false ;
@@ -273,7 +287,7 @@ partsAgree (a : Alpha) (s t : Term) : Bool := match s {
   Sum kvs -> (match t { Sum jws -> pairsAgree a kvs jws ; _ -> false }) ;
   Record kvs -> (match t { Record jws -> pairsAgree a kvs jws ; _ -> false }) ;
   RecordValue kvs -> (match t { RecordValue jws -> pairsAgree a kvs jws ; _ -> false }) ;
-  Data n cs -> (match t { Data m ds -> n == m and pairsAgree a cs ds ; _ -> false }) ;
+  Data n cs -> (match t { Data m ds -> underBinderPairs a n m cs ds ; _ -> false }) ;
   Match u arms -> (match t { Match v brs -> a.alphaEq u v and armsAgree a arms brs ; _ -> false }) ;
   Let x d v b -> (match t { Let y e w c -> a.alphaEq d e and a.alphaEq v w and underBinder a x y b c ; _ -> false }) }
 AlphaPartsAgree (a : Alpha) (p : AlphaPair a) : Bool := partsAgree a p.s p.t
