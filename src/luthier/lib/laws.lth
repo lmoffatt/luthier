@@ -1,0 +1,78 @@
+-- laws.lth: what a law's value must give, the laws of relations, and a law as a theory.
+--
+-- Draft 0, 2026-10-13, by Claude Opus 5.5 in the session (step 3.2 of
+-- record/plan-from-zero-2026-10-13-execution.md). Sources: spec 5.S1 to 5.S8 (a law has a
+-- verdict; `lift` and `exact`; how laws combine; no cutoff); D-2026-10-11-l (the laws of relations
+-- live here); D-2026-10-13-l (a law is a theory: `forall`, `exists`, the connectives, and evidence
+-- that follows the form); 6.S5 (the cost algebra, whose six laws are certification.lth's, step 5);
+-- L2.7. Pattern of ebnf.lth.
+--
+-- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
+-- this file takes the first todo, writes it in the pattern of the done ones, checks it with
+-- `luthier parse src/luthier/lib/laws.lth`, sets its status to done here, and commits.
+--
+--   §1 The verdict: `lift`, `exact`, and `LawValue`, what the core asks of a law's
+--      value (5.S2, 5.S3, 5.S5).                                                       done
+--   §2 The laws of relations and operations, as templates a theory applies
+--      (D-2026-10-11-l).                                                              done
+--   §3 A law as a theory: its forms (`forall`, `exists`, and, or, then, a case) and
+--      its evidence, with what each kind of evidence settles (D-2026-10-13-l).       todo
+
+import "checks.lth" Failures isEmpty
+
+-- ---------------------------------------------------------------- §1 The verdict
+
+-- A cost `C` (5.S2, 6.S5) with what a verdict needs of it: `zero`, holding exactly; `top`, failing;
+-- and its order. The algebra of costs, with its six laws, is certification.lth's (step 5); here
+-- only the two laws the retraction needs (5.S5): `zero <= zero`, and `top <= zero` false, so a
+-- library cannot take `zero = top`.
+CostScale (C : U) : { zero : C, top : C, leq : C -> C -> Bool }
+ZeroIsExact (C : U) (s : CostScale C) : Bool := s.leq s.zero s.zero
+TopIsNotExact (C : U) (s : CostScale C) : Bool := not (s.leq s.top s.zero)
+CostScale (C : U) := ZeroIsExact C & TopIsNotExact C
+
+-- `lift` reads a Boolean law as a cost, `exact` reads a cost back as whether it holds exactly
+-- (5.S5); `exact (lift b) == b` follows from the two laws above
+lift (C : U) (s : CostScale C) (b : Bool) : C := if b then s.zero else s.top
+exact (C : U) (s : CostScale C) (c : C) : Bool := s.leq c s.zero
+
+-- What the core asks of a law's value (5.S3): a verdict in `C`. For `Bool` it is `lift`; for `C`
+-- the identity; for a check, `lift` of whether it holds (5.S9). A law into a type with no verdict
+-- is not a law.
+LawValue (C : U) (s : CostScale C) : {
+  ofBool : Bool -> C,
+  ofCost : C -> C,
+  ofCheck : (E : U) -> Failures E -> C,
+}
+VerdictOfBool (C : U) (s : CostScale C) (v : LawValue C s) (b : Bool) : Bool := v.ofBool b == lift C s b
+VerdictOfCost (C : U) (s : CostScale C) (v : LawValue C s) (c : C) : Bool := v.ofCost c == c
+VerdictOfCheck (C : U) (s : CostScale C) (v : LawValue C s) (E : U) (fs : Failures E) : Bool :=
+  v.ofCheck E fs == lift C s (isEmpty E fs)
+-- the retraction: reading a Boolean verdict back gives the Boolean
+ExactLift (C : U) (s : CostScale C) (v : LawValue C s) (b : Bool) : Bool := exact C s (v.ofBool b) == b
+LawValue (C : U) (s : CostScale C) := VerdictOfBool C s & VerdictOfCost C s & VerdictOfCheck C s & ExactLift C s
+
+-- ---------------------------------------------------------------- §2 The laws of relations
+
+-- Templates a theory applies to its own relation or operation (D-2026-10-11-l): definitions the
+-- laws of a theory are written with, not laws on their own, so a theory that claims them gives
+-- them their subject (4.S14). The relation `r` and the operation `op` are the theory's; equality
+-- is the structural `==` (4.R8) or the theory's own `eq`, passed as `same`.
+isReflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
+isSymmetric (A : U) (r : A -> A -> Bool) (x y : A) : Bool := not (r x y) or r y x
+isAntisymmetric (A : U) (same r : A -> A -> Bool) (x y : A) : Bool := not (r x y and r y x) or same x y
+isTransitive (A : U) (r : A -> A -> Bool) (x y z : A) : Bool := not (r x y and r y z) or r x z
+isTotal (A : U) (r : A -> A -> Bool) (x y : A) : Bool := r x y or r y x
+isAssociative (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (x y z : A) : Bool := same (op (op x y) z) (op x (op y z))
+isCommutative (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (x y : A) : Bool := same (op x y) (op y x)
+isLeftIdentity (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (e x : A) : Bool := same (op e x) x
+isRightIdentity (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (e x : A) : Bool := same (op x e) x
+isInverse (A : U) (same : A -> A -> Bool) (op : A -> A -> A) (inv : A -> A) (e x : A) : Bool :=
+  same (op x (inv x)) e and same (op (inv x) x) e
+isDistributive (A : U) (same : A -> A -> Bool) (times plus : A -> A -> A) (x y z : A) : Bool :=
+  same (times x (plus y z)) (plus (times x y) (times x z))
+isHomomorphism (A B : U) (same : B -> B -> Bool) (f : A -> B) (opA : A -> A -> A) (opB : B -> B -> B) (x y : A) : Bool :=
+  same (f (opA x y)) (opB (f x) (f y))
+-- The implications above (symmetric, antisymmetric, transitive) are written as alternatives:
+-- sampled at random, their premises rarely hold (7.S12), so a theory quantifies them over the
+-- pairs its relation relates, as kernel_laws.lth §1 does for equality.
