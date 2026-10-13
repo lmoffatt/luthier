@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "luthier"
+version = "0.2.0.dev0"
+description = "Luthier: a language of tested types, rebuilt from its theories (the v0.1 interpreter is at the tag v0.1-final)."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+luthier = ["lib/*.lth", "lib/*.lut"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
