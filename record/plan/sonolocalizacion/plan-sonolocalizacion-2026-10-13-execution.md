@@ -15,6 +15,14 @@ writes theories; Codex what must run and iterate; a web model small bites).
   not marked S5; one commit undoes it. The plan from zero is at step 2.2 (`term.lth`, another
   session) with `kernel.py` next (D-2026-10-13-u).
 
+- 2026-10-14, 05:40 (the night, record/plan/night-2026-10-13.md): step 1 done by an Opus agent
+  (inventory at 5cce858; the sonolocalización session's answers at c49b34b). Step 2 taken as the
+  inventory's §6, items 1 to 5. Step 3 begun: the theories (core.lut, numbers, arrays, tables;
+  3c43822 to d63cee7), the kernel's primitives (c2a63d0), the bridge (2821823), the port of
+  validate_graph.lut with session A's graph copied (2b9a2c5 to 9ea7d8f, examples/sonolocalizacion/);
+  the run reads the graph and stops in run.py (bite 5 running). Codex is gone: specimens by Claude
+  agents.
+
 ## Steps
 
 1. Inventory, read only (Luciano runs any script there): in `~/Projects/sonolocalizacion`, which
