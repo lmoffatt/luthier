@@ -12,7 +12,7 @@
 --
 -- On meaning (L2.7). The constructors of `Term` that compute get their roles from the laws of
 -- `Reduction` (§5): `Lam` and `App` from `Beta`, `Var` from `Delta`, `Match`, `Inj` and `Pair`
--- from `Iota`, `Lit` from `Prim`, `Extern` from `ExternCall`, `Hole` from `HolesStay`. The type
+-- from `Iota`, `Lit` from `Prim`, `Extern` from `ExternIsValue`, `Hole` from `HolesStay`. The type
 -- formers (`Universe`, `World`, `Pi`, `Sigma`, `Sum`, `Data`, `Subtype`) are values for reduction
 -- (`ValuesStay`); their roles are the checker's, laws of `WellFormed` in program.lth (step 3.1).
 --
@@ -29,8 +29,8 @@
 --      law of renaming a bound variable (3.S31, L3.3; `Object` of kernel_laws.lth).     done
 --   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               done
 --   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  done
---   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternCall`, `HolesStay`,
---      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         todo
+--   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternIsValue`, `HolesStay`,
+--      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         done
 --   §6 Quote and eval (3.S32): cases on literals and closed terms.                      todo
 --   §7 The models, to write in term_model.lut: `reduce` (the interpreter in Luthier),
 --      `alpha`, `substitute`, `canon`. Not in this step's first pass.                todo
@@ -253,9 +253,83 @@ UnqualifyIdempotent (a : Alpha) (m : CanonicalForm a) (x : String) : Bool :=
   m.unqualify (m.unqualify x) == m.unqualify x
 -- the canonical form of a term without module prefixes means the same term: alpha-equal to it
 CanonKeepsTerm (a : Alpha) (m : CanonicalForm a) (t : Term) : Bool :=
-  a.alphaEq (m.canon t) (m.canon (m.canon t)) and (not (allUnqualified m.unqualify (freeVars t)) or a.alphaEq (m.canon t) t)
+  not (allUnqualified m.unqualify (freeVars t)) or a.alphaEq (m.canon t) t
 allUnqualified (u : String -> String) (xs : List String) : Bool :=
   match xs { nil -> true ; cons x rest -> u x == x and allUnqualified u rest }
 
 CanonicalForm (a : Alpha) := CanonOfAlpha a & CanonIdempotent a & CanonOfName a & UnqualifyIdempotent a
   & CanonKeepsTerm a
+
+-- ---------------------------------------------------------------- §5 Reduction
+
+-- `reduce p n t` evaluates `t` in the program `p` with fuel `n` (3.S11: recursion is general, and
+-- evaluation runs under a budget), giving `just` its weak normal form, or `nothing` when the fuel
+-- runs out. Its laws are the five rules of 3.S14 to 3.S18, each a definitional equality, and they
+-- give the computing constructors of `Term` their roles (L2.7). Two results agree when both are
+-- alpha-equal values or either ran out of fuel: a case that runs out is not evidence either way
+-- (7.S12), and a certifier counts it apart. The model is `reduce` of term_model.lut (3.S33); the
+-- host's evaluator is a second specimen (L14.3).
+Reduction (a : Alpha) (sb : Substitution a) : { reduce : Program -> Nat -> Term -> Maybe Term }
+
+agree (a : Alpha) (r s : Maybe Term) : Bool := match r {
+  nothing -> true ;
+  just u -> match s { nothing -> true ; just v -> a.alphaEq u v } }
+isJust (r : Maybe Term) : Bool := match r { nothing -> false ; just u -> true }
+
+-- 3.S14, beta: a lambda applied is its body with the argument for its variable
+Beta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (x : String) (ty body arg : Term) : Bool :=
+  agree a (m.reduce p n (App (Lam x ty body) arg)) (m.reduce p n (sb.subst x arg body))
+
+-- 3.S15, delta: a defined name in head position is its body; a declared name is a hole and does
+-- not reduce (3.S9, 3.S19), applied or not
+Delta (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (f : String) (ty b arg : Term) : Bool :=
+  agree a (m.reduce (cons (Define f ty b) p) n (App (Var f) arg)) (m.reduce (cons (Define f ty b) p) n (App b arg))
+HolesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (f : String) (ty : Term) : Bool :=
+  agree a (m.reduce (cons (Declare f ty) p) n (Var f)) (just (Var f))
+  and agree a (m.reduce p n (Hole f)) (just (Hole f))
+  and agree a (m.reduce p n Axiom) (just Axiom)
+
+-- 3.S16, iota: a match on an injection, a pair or a constructor takes the first arm whose pattern
+-- matches, with the pattern's variables substituted; an arm that does not match is passed over
+Iota (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l : String) (y : String) (v b : Term) : Bool :=
+  agree a (m.reduce p n (Match (Inj l v) [(PInj l (PVar y), b)])) (m.reduce p n (sb.subst y v b))
+  and agree a (m.reduce p n (Match (App (Var l) v) [(PCon l [PVar y], b)])) (m.reduce p n (sb.subst y v b))
+  and agree a (m.reduce p n (Match v [(PWild, b)])) (m.reduce p n b)
+IotaPair (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (y : String) (f : NotFreeIn) (b : Term) : Bool :=
+  y == f.y or agree a (m.reduce p n (Match (Pair f.s (Var y)) [(PPair (PVar y) (PVar f.y), b)]))
+                      (m.reduce p n (sb.subst f.y (Var y) (sb.subst y f.s b)))
+IotaSkips (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (l k : String) (v b : Term)
+          (rest : List (Pattern * Term)) : Bool :=
+  l == k or agree a (m.reduce p n (Match (Inj l v) (cons (PInj k PWild, b) rest))) (m.reduce p n (Match (Inj l v) rest))
+
+-- 3.S17, prim: arithmetic and comparison on constants are the host's, here on integers, the
+-- operators being the names `+`, `*` and `==` that 2.S12 translates the infix forms into, and
+-- `true`, `false` the constructors of `Bool`
+Prim (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (i j : Int) : Bool :=
+  agree a (m.reduce p n (App (App (Var "+") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i + j))))
+  and agree a (m.reduce p n (App (App (Var "*") (Lit (IntConst i))) (Lit (IntConst j)))) (just (Lit (IntConst (i * j))))
+  and agree a (m.reduce p n (App (App (Var "==") (Lit (IntConst i))) (Lit (IntConst j))))
+              (just (Var (if i == j then "true" else "false")))
+
+-- 3.S18, extern: an extern is a value until applied to as many closed arguments as its type has
+-- parameters; then the host is called (spec 10), and what it answers is the specimen's, not this
+-- theory's
+ExternIsValue (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (r : String) : Bool :=
+  agree a (m.reduce p n (Extern r)) (just (Extern r))
+
+-- values reduce to themselves: lambdas (no reduction under a binder), constants, and the type
+-- formers, whose roles are the checker's (program.lth)
+ValuesStay (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (x : String) (c : Constant)
+           (ty b : Term) (kvs : List (String * Term)) : Bool :=
+  agree a (m.reduce p n (Lam x ty b)) (just (Lam x ty b)) and agree a (m.reduce p n (Lit c)) (just (Lit c))
+  and agree a (m.reduce p n Universe) (just Universe) and agree a (m.reduce p n World) (just World)
+  and agree a (m.reduce p n (Pi x ty b)) (just (Pi x ty b)) and agree a (m.reduce p n (Sigma x ty b)) (just (Sigma x ty b))
+  and agree a (m.reduce p n (Sum kvs)) (just (Sum kvs)) and agree a (m.reduce p n (Data x kvs)) (just (Data x kvs))
+  and agree a (m.reduce p n (Subtype x ty b)) (just (Subtype x ty b))
+
+-- a result is final, and more fuel does not change it
+Final (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (n : Nat) (t : Term) : Bool :=
+  match m.reduce p n t { nothing -> true ; just v -> agree a (m.reduce p n v) (just v) and agree a (m.reduce p (n + 1) t) (just v) }
+
+Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & HolesStay a sb & Iota a sb & IotaPair a sb
+  & IotaSkips a sb & Prim a sb & ExternIsValue a sb & ValuesStay a sb & Final a sb
