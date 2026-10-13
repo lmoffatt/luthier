@@ -1,0 +1,6 @@
+-- Runner integration fixture, user request 2026-10-13; test_run.py supplies firstLine.
+import "world.lth" Console
+import "world_model.lut" console : Console
+firstLine (text : String) : String := extern "python:test_run.first_line" text
+main (w : W) : W * Unit :=
+  match console.readFile w "input.txt" { (next, text) -> console.print next (firstLine text) }

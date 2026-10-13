@@ -22,7 +22,21 @@ def main(argv: list[str] | None = None) -> int:
     p_eval.add_argument("file")
     p_eval.add_argument("name")
     p_eval.add_argument("--fuel", type=int, default=10000)
+    p_run = sub.add_parser("run", help="run a program with the host world")
+    p_run.add_argument("file")
+    p_run.add_argument("--main", default="main")
+    p_run.add_argument("--fuel", type=int, default=10000)
     ns = parser.parse_args(argv)
+
+    if ns.command == "run":
+        from .run import run_file
+        try:
+            print(run_file(ns.file, ns.main, ns.fuel), end="")
+            return 0
+        except (OSError, ValueError, RecursionError) as exc:
+            import sys
+            print(f"{ns.file}: {exc}", file=sys.stderr)
+            return 1
 
     if ns.command == "eval":
         from .elaborate import ElaborationError, elaborate_program, show_term
