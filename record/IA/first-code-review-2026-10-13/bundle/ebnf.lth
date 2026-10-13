@@ -1,0 +1,122 @@
+-- ebnf.lth: grammars in extended Backus-Naur form, as data, and the laws of what they derive.
+--
+-- Draft 1, 2026-10-13, written by Claude Fable 5.1 in the session integrating the specification
+-- (step 1 of record/plan-from-zero-2026-10-13-execution.md). A theory file (spec 12.S23): the
+-- data, the declaration of `derives` and the laws that determine it. Draft 0 defined `derives` by
+-- an implementation, against 4.R10 (a law characterizes; a second implementation is not a law);
+-- that implementation is now the model in ebnf_model.lut, certified against the laws below. It is
+-- generic: Luthier's own grammar (grammar.lth) is one value of `Ebnf`, and the grammars of the
+-- texts Luthier reads, a `.bib` file or a CSV, are others (L14: a grammar is data).
+--
+-- A grammar is a start symbol and productions over tokens. A token, as a grammar sees it, is a
+-- kind (the lexer's class: "name", "number", "string", "symbol", "keyword") and a text. The
+-- meaning of a grammar is `derives`: whether a token list is produced from the start symbol. Its
+-- laws are those of the regular operations (Kleene): the empty string is the unit of sequence,
+-- alternation is union, repetition is the least fixed point, and a nonterminal stands for the
+-- union of its right-hand sides.
+
+-- ---------------------------------------------------------------- the data
+
+TokenView = { kind : String, text : String }
+
+Rhs : U := data {
+  eps : Rhs ;                            -- the empty string
+  lit : String -> Rhs ;                  -- a token with this text
+  cat : String -> Rhs ;                  -- a token of this kind, any text
+  ref : String -> Rhs ;                  -- a nonterminal
+  seq : List Rhs -> Rhs ;                -- one after another
+  alt : List Rhs -> Rhs ;                -- one of them
+  opt : Rhs -> Rhs ;                     -- [ ]
+  rep : Rhs -> Rhs }                     -- { }, zero or more
+
+Production = { lhs : String, rhs : Rhs }
+
+Ebnf = { start : String, rules : List Production }
+
+-- ---------------------------------------------------------------- helpers the laws use
+
+append (A : U) (xs ys : List A) : List A :=
+  match xs { nil -> ys ; cons x rest -> cons x (append A rest ys) }
+
+-- the right-hand sides of a nonterminal, in the order written
+rulesOf (e : Ebnf) (n : String) : List Rhs := rulesIn e.rules n
+rulesIn (ps : List Production) (n : String) : List Rhs :=
+  match ps { nil -> nil ; cons p rest -> if p.lhs == n then cons p.rhs (rulesIn rest n) else rulesIn rest n }
+
+-- the grammar `e` with its start replaced by a fresh nonterminal whose one rule is `r`: how a
+-- law speaks of what a right-hand side derives inside `e`
+withStart (e : Ebnf) (r : Rhs) : Ebnf :=
+  { start := "'start", rules := cons { lhs := "'start", rhs := r } e.rules }
+
+-- every way to split a list in two, in order: (nil, ts), ([t1], rest), ...
+splits (A : U) (ts : List A) : List (List A * List A) :=
+  cons (nil, ts) (match ts { nil -> nil ; cons t rest -> prefixed A t (splits A rest) })
+prefixed (A : U) (t : A) (ps : List (List A * List A)) : List (List A * List A) :=
+  match ps { nil -> nil ; cons (xs, ys) more -> cons (cons t xs, ys) (prefixed A t more) }
+
+anySplit (e : Ebnf) (a b : Rhs) (ps : List (List TokenView * List TokenView)) : Bool :=
+  match ps { nil -> false ;
+    cons (xs, ys) more -> (derives (withStart e a) xs and derives (withStart e b) ys) or anySplit e a b more }
+
+anyRhs (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
+  match rs { nil -> false ; cons r rest -> derives (withStart e r) ts or anyRhs e rest ts }
+
+-- ---------------------------------------------------------------- the theory
+
+-- The meaning of a grammar: declared here, determined by the laws below, given by a model.
+derives : Ebnf -> List TokenView -> Bool
+
+-- the empty string derives exactly the empty list: the unit of sequence
+EpsEmpty (e : Ebnf) (ts : List TokenView) : Bool :=
+  derives (withStart e eps) ts == (ts == nil)
+
+-- a literal derives exactly the one token with that text
+LitOne (e : Ebnf) (s : String) (ts : List TokenView) : Bool :=
+  derives (withStart e (lit s)) ts == match ts { cons t nil -> t.text == s ; _ -> false }
+
+-- a category derives exactly the one token of that kind
+CatOne (e : Ebnf) (k : String) (ts : List TokenView) : Bool :=
+  derives (withStart e (cat k)) ts == match ts { cons t nil -> t.kind == k ; _ -> false }
+
+-- a nonterminal derives what any of its right-hand sides derives
+RefUnion (e : Ebnf) (n : String) (ts : List TokenView) : Bool :=
+  derives (withStart e (ref n)) ts == anyRhs e (rulesOf e n) ts
+
+-- the start symbol is a nonterminal like any other
+StartIsRef (e : Ebnf) (ts : List TokenView) : Bool :=
+  derives e ts == derives (withStart e (ref e.start)) ts
+
+-- an empty sequence is the empty string; a sequence splits the list between its head and its tail
+SeqEmpty (e : Ebnf) (ts : List TokenView) : Bool :=
+  derives (withStart e (seq nil)) ts == derives (withStart e eps) ts
+SeqSplits (e : Ebnf) (a : Rhs) (rs : List Rhs) (ts : List TokenView) : Bool :=
+  derives (withStart e (seq (cons a rs))) ts == anySplit e a (seq rs) (splits TokenView ts)
+
+-- alternation is union
+AltUnion (e : Ebnf) (rs : List Rhs) (ts : List TokenView) : Bool :=
+  derives (withStart e (alt rs)) ts == anyRhs e rs ts
+
+-- optional is the empty string or the thing
+OptIsAlt (e : Ebnf) (a : Rhs) (ts : List TokenView) : Bool :=
+  derives (withStart e (opt a)) ts == derives (withStart e (alt [eps, a])) ts
+
+-- repetition unfolds: nothing, or the thing and then the repetition again
+RepUnfolds (e : Ebnf) (a : Rhs) (ts : List TokenView) : Bool :=
+  derives (withStart e (rep a)) ts == derives (withStart e (alt [eps, seq [a, rep a]])) ts
+
+-- A model of `derives` satisfies all of them. The laws quantify over grammars, right-hand sides
+-- and token lists; their generators (spec 7) draw small ones. `RepUnfolds` makes `derives` the
+-- least fixed point only together with termination, which no sample sees: a model that diverges
+-- on a left-recursive grammar does not fail these laws, it fails to answer (3.S11, fuel).
+derives := EpsEmpty & LitOne & CatOne & RefUnion & StartIsRef & SeqEmpty & SeqSplits
+  & AltUnion & OptIsAlt & RepUnfolds
+
+-- ---------------------------------------------------------------- the theory of a recognizer
+
+-- A recognizer for a grammar: a function on token lists whose one law is that it accepts exactly
+-- what the grammar derives. A parser that builds a tree is a recognizer with a result
+-- (grammar.lth) and inherits this law through `isParsed`.
+Recognizer (e : Ebnf) : { accepts : List TokenView -> Bool }
+AcceptsWhatDerives (e : Ebnf) (r : Recognizer e) (ts : List TokenView) : Bool :=
+  r.accepts ts == derives e ts
+Recognizer := AcceptsWhatDerives

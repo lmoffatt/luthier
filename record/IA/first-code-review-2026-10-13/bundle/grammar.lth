@@ -1,0 +1,378 @@
+-- grammar.lth: chapter 2 of the specification, the grammar of Luthier, as a theory.
+--
+-- Draft 0, 2026-10-13, written by Claude Fable 5.1 in the session integrating the specification
+-- (step 1 of record/plan-from-zero-2026-10-13-execution.md). Source: docs/spec/02-grammar.md at
+-- dcd27fd, with D-2026-10-12-ab (the keywords), D-2026-10-13-b (`W`), D-2026-10-13-n (an import
+-- names what enters with its theory; theory files are `.lth`) and D9 of the superseded plan (a
+-- top-level `test` line is data). A theory file: types, declarations and laws, nothing that
+-- touches the world (spec 12.S23).
+--
+-- What this file states. The surface syntax is data (L14): a text lexes into tokens, tokens parse
+-- into a surface program, and a surface program prints back into text. A model of `Grammar` is a
+-- lexer, a parser and a printer together; the Python parser of src/luthier/parse.py is its first
+-- specimen, certified against the laws below (L14.3). The parser decides little (spec 2.S13): the
+-- tree keeps the acts as written and carries no positions; what `->`, `*`, `+` and a name in a
+-- pattern mean is the checker's (spec 4), and the translation of each surface form into the
+-- kernel (spec 2.S12) is stated in term.lth as the laws of `desugar`, since `Term` lives there.
+--
+-- The grammar itself is data too: `luthierSyntax` below is a value of `Ebnf` (ebnf.lth), the
+-- productions of chapter 2 stratified by precedence (spec 2.S8), and a parser accepts exactly
+-- what it derives, after the layout pass of spec 2.S4 (`ParsesWhatDerives`). The case laws then
+-- pin which tree each text gives, since a grammar alone does not say that.
+--
+-- Every law cites the item of chapter 2 it states, above its definition. A constructor is
+-- declared with its whole type, curried, as core.lut declares `cons`.
+
+import "ebnf.lth" Ebnf Rhs Production TokenView derives eps lit cat ref seq alt opt rep
+
+-- ---------------------------------------------------------------- lexical (spec 2 §1)
+
+-- spec 2.S1: a name (a dotted name is one token, spec 2.S14), a number, a string, a symbol; a
+-- comment is dropped by the lexer; a line break is a token, since layout reads it (spec 2.S4).
+-- Added here to 2.S1, proposed: inside a string, `\"`, `\\` and `\n` stand for a quote, a
+-- backslash and a line break, so that the laws below can spell texts of several lines.
+TokenKind : U := data {
+  nameToken    : TokenKind ;
+  keywordToken : TokenKind ;
+  numberToken  : TokenKind ;
+  stringToken  : TokenKind ;
+  symbolToken  : TokenKind ;
+  newlineToken : TokenKind ;
+  endToken     : TokenKind }
+
+Token = { kind : TokenKind, text : String, line : Nat, column : Nat }
+
+-- spec 2.S21 with D-2026-10-13-b: the keywords. `operator` is kept a keyword (2.S21 says
+-- "possibly"): it binds a symbol, which no function can take as an argument. `quote` captures a
+-- term unevaluated (spec 2.S20), so it is a form of the grammar and not a name of core; 2.S21
+-- does not list it, a question for the specification.
+Keyword : U := data {
+  kwData : Keyword ; kwMatch : Keyword ; kwIf : Keyword ; kwThen : Keyword ; kwElse : Keyword ;
+  kwU : Keyword ; kwW : Keyword ; kwOperator : Keyword ; kwQuote : Keyword }
+
+keywordText (k : Keyword) : String := match k {
+  kwData -> "data" ; kwMatch -> "match" ; kwIf -> "if" ; kwThen -> "then" ; kwElse -> "else" ;
+  kwU -> "U" ; kwW -> "W" ; kwOperator -> "operator" ; kwQuote -> "quote" }
+
+LexError = { line : Nat, column : Nat, message : String }
+
+LexResult = < lexed : List Token | lexFailed : LexError >
+
+-- ---------------------------------------------------------------- the surface tree (spec 2 §2, §3)
+
+-- spec 2.S1: a number is an integer or a double by its spelling (a point or an exponent makes it
+-- a double); a string is a string.
+Literal : U := data {
+  intLit    : Int -> Literal ;
+  floatLit  : Float64 -> Literal ;
+  stringLit : String -> Literal }
+
+-- spec 2.S8: the operators written between two terms, from the loosest to the tightest. `and`,
+-- `or` and `mod` are names written infix (spec 2.S2) and parse as applications of those names.
+Op : U := data {
+  amp : Op ;                                 -- &, the conjunction of laws
+  arrow : Op ;                               -- ->, the function type or implication, by the checker
+  eq : Op ; neq : Op ; lt : Op ; le : Op ; gt : Op ; ge : Op ;
+  plus : Op ; minus : Op ; times : Op ; div : Op }
+
+opText (o : Op) : String := match o {
+  amp -> "&" ; arrow -> "->" ; eq -> "==" ; neq -> "/=" ; lt -> "<" ; le -> "<=" ; gt -> ">" ;
+  ge -> ">=" ; plus -> "+" ; minus -> "-" ; times -> "*" ; div -> "/" }
+
+-- spec 2.S9, 2.S10: a pattern. A name is a constructor, a label or a variable; the checker says
+-- which (spec 2.S13).
+SurfacePattern : U := data {
+  pWild  : SurfacePattern ;
+  pName  : String -> SurfacePattern ;
+  pCon   : String -> List SurfacePattern -> SurfacePattern ;     -- a constructor applied
+  pLit   : Literal -> SurfacePattern ;
+  pTuple : List SurfacePattern -> SurfacePattern }
+
+-- spec 2.S9: a parameter of a lambda.
+LambdaParam : U := data {
+  plainParam : String -> LambdaParam ;
+  typedParam : List String -> Surface -> LambdaParam ;           -- (x y : A)
+  shapeParam : List SurfacePattern -> LambdaParam }              -- (p, q), a tuple pattern
+
+-- spec 2.S17: an item of a block.
+Item : U := data {
+  bind   : String -> Surface -> Item ;                           -- x := t, once
+  rebind : String -> Surface -> Item }                           -- x <- t; an action's result too
+
+-- spec 2.S9: the terms.
+Surface : U := data {
+  name        : String -> Surface ;                              -- dotted or not (spec 2.S14)
+  literal     : Literal -> Surface ;
+  universe    : Surface ;                                        -- U
+  world       : Surface ;                                        -- W (D-2026-10-13-b)
+  app         : Surface -> Surface -> Surface ;
+  binop       : Op -> Surface -> Surface -> Surface ;
+  neg         : Surface -> Surface ;                             -- -x (spec 2.S15)
+  tuple       : List Surface -> Surface ;                        -- (a, b, c)
+  pi          : List String -> Surface -> Surface -> Surface ;   -- (x y : A) -> B
+  sigma       : List String -> Surface -> Surface -> Surface ;   -- (x y : A) * B
+  sigmaNamed  : String -> Surface -> String -> Surface -> Surface ;  -- (x : A) * (y : B)
+  sumNamed    : String -> Surface -> String -> Surface -> Surface ;  -- (x : A) + (y : B)
+  record      : List (String * Surface) -> Surface ;             -- { x : A, y : B }
+  recordLaw   : List (String * Surface) -> Surface -> Surface ;  -- { x : A, y : B | p }
+  subtype     : SurfacePattern -> Surface -> Surface -> Surface ; -- { p : T | law }
+  recordValue : List (String * Surface) -> Surface ;             -- { x := a, y := b }
+  block       : List Item -> Surface -> Surface ;                -- { items ; e } (spec 2.S17)
+  sum         : List (String * Surface) -> Surface ;             -- < x : A | y : B >
+  list        : List Surface -> Surface ;                        -- [a, b]
+  lambda      : List LambdaParam -> Surface -> Surface ;         -- \ params { block }
+  match       : Surface -> List (SurfacePattern * Surface) -> Surface ;
+  namedArg    : String -> Surface -> Surface ;                   -- (x <- t) (spec 2.S7)
+  ifThen      : Surface -> Surface -> Maybe Surface -> Surface ; -- if c then a [else b]
+  proj        : Surface -> String -> Surface ;                   -- (f x).field (spec 2.S14)
+  quote       : Surface -> Surface }                             -- quote { t } (spec 2.S20)
+
+-- spec 2.S5, 2.S16: a binder before the colon of an act; `{A B : U}` is implicit.
+Binder : U := data {
+  explicit : List String -> Surface -> Maybe Surface -> Binder ;  -- (x y : A), (x : A <- d)
+  implicit : List String -> Surface -> Binder }                    -- {A B : U}
+
+-- spec 2.S5: a clause under a header with parameters.
+Clause = { patterns : List SurfacePattern, body : Surface }
+
+-- spec 2.S5: the body of a definition. `extern`, `primitive` and `axiom` are names of core
+-- (spec 2.S21), so their applications are terms and need no form of their own.
+Body : U := data {
+  termBody : Surface -> Body ;
+  dataBody : List (String * Surface) -> Body }                   -- data { c : T ; ... }
+
+-- spec 12.S22 (D-2026-10-13-n): what an import brings in, each with its theory and its alias.
+ImportName = { name : String, theory : Maybe Surface, alias : Maybe String }
+
+-- spec 2.S5, 2.S6 and D9: the acts. A bare term at the top level is a datum the module keeps,
+-- such as a `test` line or a `cite` line (D-2026-10-13-n); the checker says which terms may
+-- stand there.
+SurfaceAct : U := data {
+  declare  : String -> List Binder -> Surface -> SurfaceAct ;
+  define   : String -> List Binder -> Maybe Surface -> Body -> List Clause -> SurfaceAct ;
+  alias    : String -> List Binder -> Surface -> SurfaceAct ;
+  import_  : String -> List ImportName -> SurfaceAct ;           -- import "file" names
+  operator : Op -> Surface -> SurfaceAct ;                       -- operator + := term
+  datum    : Surface -> SurfaceAct }
+
+-- spec 2.S5: a program is its acts, in no order (spec 3.S1).
+SurfaceProgram = List SurfaceAct
+
+-- ---------------------------------------------------------------- errors
+
+ParseError = { line : Nat, column : Nat, message : String }
+
+ParseResult = < parsed : SurfaceProgram | parseFailed : List ParseError >
+
+isParsed (r : ParseResult) : Bool := match r { parsed p -> true ; parseFailed es -> false }
+
+-- ---------------------------------------------------------------- the grammar as data
+
+-- spec 2.S4, layout, is a pass between the lexer and the grammar: it reads the line and column of
+-- each token and gives the grammar a token list in which a line break at column 0 is the token
+-- "\n" that ends an act, a line break between the items of a block is ";", and every other line
+-- break is dropped (inside brackets, under an indented continuation, before `then`, `else` or an
+-- infix operator). Its laws are the layout cases below.
+tokenView (t : Token) : TokenView := { kind := kindName t.kind, text := t.text }
+kindName (k : TokenKind) : String := match k {
+  nameToken -> "name" ; keywordToken -> "keyword" ; numberToken -> "number" ; stringToken -> "string" ;
+  symbolToken -> "symbol" ; newlineToken -> "newline" ; endToken -> "end" }
+
+-- spec 2.S5, 2.S6, 2.S9, 2.S10, 2.S16, 12.S22, as productions. Precedence (spec 2.S8) is the
+-- stratification `term` > `ampTerm` > ... > `atom`; associativity to the right is a right
+-- recursion, to the left a repetition.
+luthierSyntax : Ebnf := { start := "program", rules := [
+  { lhs := "program",     rhs := rep (seq [ref "act", lit "\n"]) },
+  { lhs := "act",         rhs := alt [ref "declaration", ref "definition", ref "alias", ref "import", ref "operator", ref "datum"] },
+  { lhs := "declaration", rhs := seq [cat "name", rep (ref "binder"), lit ":", ref "term"] },
+  { lhs := "definition",  rhs := seq [cat "name", rep (ref "binder"), opt (seq [lit ":", ref "term"]), lit ":=", ref "body", rep (ref "clause")] },
+  { lhs := "alias",       rhs := seq [cat "name", rep (ref "binder"), lit "=", ref "term"] },
+  { lhs := "import",      rhs := seq [lit "import", cat "string", ref "importName", rep (ref "importName")] },
+  { lhs := "importName",  rhs := seq [cat "name", opt (seq [lit ":", ref "term"]), opt (seq [lit "as", cat "name"])] },
+  { lhs := "operator",    rhs := seq [lit "operator", ref "opSymbol", lit ":=", ref "term"] },
+  { lhs := "opSymbol",    rhs := alt [lit "+", lit "-", lit "*", lit "/"] },
+  { lhs := "datum",       rhs := ref "term" },
+  { lhs := "binder",      rhs := alt [
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", opt (seq [lit "<-", ref "term"]), lit ")"],
+      seq [lit "{", cat "name", rep (cat "name"), lit ":", ref "term", lit "}"]] },
+  { lhs := "clause",      rhs := seq [lit "|", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ":=", ref "term"] },
+  { lhs := "body",        rhs := alt [ref "term",
+      seq [lit "data", lit "{", opt (seq [cat "name", lit ":", ref "term", rep (seq [lit ";", cat "name", lit ":", ref "term"])]), lit "}"]] },
+  { lhs := "term",        rhs := ref "ampTerm" },
+  { lhs := "ampTerm",     rhs := seq [ref "arrowTerm", opt (seq [lit "&", ref "ampTerm"])] },
+  { lhs := "arrowTerm",   rhs := seq [ref "orTerm", opt (seq [lit "->", ref "arrowTerm"])] },
+  { lhs := "orTerm",      rhs := seq [ref "andTerm", rep (seq [lit "or", ref "andTerm"])] },
+  { lhs := "andTerm",     rhs := seq [ref "cmpTerm", rep (seq [lit "and", ref "cmpTerm"])] },
+  { lhs := "cmpTerm",     rhs := seq [ref "addTerm", rep (seq [alt [lit "==", lit "/=", lit "<", lit "<=", lit ">", lit ">="], ref "addTerm"])] },
+  { lhs := "addTerm",     rhs := seq [ref "mulTerm", rep (seq [alt [lit "+", lit "-"], ref "mulTerm"])] },
+  { lhs := "mulTerm",     rhs := seq [ref "negTerm", rep (seq [alt [lit "*", lit "/", lit "mod"], ref "negTerm"])] },
+  { lhs := "negTerm",     rhs := alt [seq [lit "-", ref "negTerm"], ref "appTerm"] },
+  { lhs := "appTerm",     rhs := seq [ref "projTerm", rep (ref "projTerm")] },
+  { lhs := "projTerm",    rhs := seq [ref "atom", rep (seq [lit ".", cat "name"])] },
+  { lhs := "atom",        rhs := alt [
+      cat "name", cat "number", cat "string", lit "U", lit "W",
+      seq [lit "(", ref "term", lit ")"],
+      seq [lit "(", ref "term", lit ",", ref "term", rep (seq [lit ",", ref "term"]), lit ")"],
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")", lit "->", ref "term"],
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")", lit "*", ref "term"],
+      seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "*", lit "(", cat "name", lit ":", ref "term", lit ")"],
+      seq [lit "(", cat "name", lit ":", ref "term", lit ")", lit "+", lit "(", cat "name", lit ":", ref "term", lit ")"],
+      seq [lit "(", cat "name", lit "<-", ref "term", lit ")"],
+      seq [lit "{", ref "field", rep (seq [ref "sep", ref "field"]), opt (seq [lit "|", ref "term"]), lit "}"],
+      seq [lit "{", ref "pattern", lit ":", ref "term", lit "|", ref "term", lit "}"],
+      seq [lit "{", cat "name", lit ":=", ref "term", rep (seq [ref "sep", cat "name", lit ":=", ref "term"]), lit "}"],
+      seq [lit "{", ref "block", lit "}"],
+      seq [lit "<", cat "name", lit ":", ref "term", rep (seq [lit "|", cat "name", lit ":", ref "term"]), lit ">"],
+      seq [lit "[", opt (seq [ref "term", rep (seq [lit ",", ref "term"])]), lit "]"],
+      seq [lit "\\", ref "lparam", rep (ref "lparam"), lit "{", ref "block", lit "}"],
+      seq [lit "match", ref "term", lit "{", opt (seq [ref "arm", rep (seq [lit ";", ref "arm"])]), lit "}"],
+      seq [lit "if", ref "term", lit "then", ref "term", opt (seq [lit "else", ref "term"])],
+      seq [lit "quote", lit "{", ref "term", lit "}"]] },
+  { lhs := "field",       rhs := seq [cat "name", rep (cat "name"), lit ":", ref "term"] },
+  { lhs := "sep",         rhs := alt [lit ",", lit ";"] },
+  { lhs := "block",       rhs := seq [rep (seq [ref "item", lit ";"]), ref "term"] },
+  { lhs := "item",        rhs := seq [cat "name", alt [lit ":=", lit "<-"], ref "term"] },
+  { lhs := "arm",         rhs := seq [ref "pattern", lit "->", ref "term"] },
+  { lhs := "lparam",      rhs := alt [cat "name",
+      seq [lit "(", cat "name", rep (cat "name"), lit ":", ref "term", lit ")"],
+      seq [lit "(", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] },
+  { lhs := "pattern",     rhs := alt [lit "_", seq [cat "name", rep (ref "patom")], ref "patom"] },
+  { lhs := "patom",       rhs := alt [cat "name", cat "number", cat "string",
+      seq [lit "(", ref "pattern", rep (seq [lit ",", ref "pattern"]), lit ")"]] } ] }
+
+-- ---------------------------------------------------------------- the theory
+
+-- A model of the grammar: a lexer, the layout pass, a parser from text and a printer back to
+-- text. The parser goes from text and not from tokens, so that errors keep their positions;
+-- `lex` and `layout` are observable on their own, for the laws that bind them to the grammar.
+Grammar : {
+  lex    : String -> LexResult,
+  layout : List Token -> List TokenView,
+  parse  : String -> ParseResult,
+  print  : SurfaceProgram -> String }
+
+-- ---------------------------------------------------------------- the laws
+
+-- The printer and the parser are inverse on programs: what is printed parses back to the same
+-- tree. This is the law that reaches every form of the tree, since `SurfaceProgram` is drawn by
+-- its generator (spec 7.S3). spec 2.S9, 2.S12 (the tree keeps what was written).
+RoundTrip (g : Grammar) (p : SurfaceProgram) : Bool := g.parse (g.print p) == parsed p
+
+-- Parsing is canonical: printing a parsed text and parsing again changes nothing. Tested on
+-- texts, it reaches programs the generator may not. spec 2.S4 (layout), 2.S13.
+Canonical (g : Grammar) (s : String) : Bool :=
+  match g.parse s { parsed p -> g.parse (g.print p) == parsed p ; parseFailed es -> true }
+
+-- The parser accepts exactly what the grammar derives from the laid-out tokens; a text the lexer
+-- rejects is not a program. spec 2 §2, §3 as data (`luthierSyntax`), 2.S4 (layout).
+ParsesWhatDerives (g : Grammar) (s : String) : Bool :=
+  isParsed (g.parse s) == match g.lex s { lexed ts -> derives luthierSyntax (g.layout ts) ; lexFailed e -> false }
+
+-- spec 2.S21: a keyword is never a name.
+keywordAsName (k : Keyword) : String := match k {
+  kwData -> "data : U" ; kwMatch -> "match : U" ; kwIf -> "if : U" ; kwThen -> "then : U" ;
+  kwElse -> "else : U" ; kwU -> "U : U" ; kwW -> "W : U" ; kwOperator -> "operator : U" ;
+  kwQuote -> "quote : U" }
+KeywordsReserved (g : Grammar) (k : Keyword) : Bool := not (isParsed (g.parse (keywordAsName k)))
+
+-- spec 2.S1: a comment is not part of the program.
+CommentDropped (g : Grammar) : Bool :=
+  g.parse "x : Int   -- a comment" == g.parse "x : Int"
+
+-- spec 2.S3: `<-` is one token, so `a<-1` binds and `a < -1` compares.
+ArrowIsOneToken (g : Grammar) : Bool :=
+  g.parse "f := { a<-1 ; a }" == g.parse "f := { a <- 1 ; a }"
+  and g.parse "f (a : Int) : Bool := a < -1" == g.parse "f (a : Int) : Bool := a < (-1)"
+
+-- spec 2.S8: precedence, from the loosest to the tightest, and associativity.
+PlusBeforeTimes (g : Grammar) : Bool :=
+  g.parse "x := a + b * c" == g.parse "x := a + (b * c)"
+ComparisonBeforeAnd (g : Grammar) : Bool :=
+  g.parse "x := a < b and c" == g.parse "x := (a < b) and c"
+AndBeforeOr (g : Grammar) : Bool :=
+  g.parse "x := a or b and c" == g.parse "x := a or (b and c)"
+OrBeforeArrow (g : Grammar) : Bool :=
+  g.parse "x := a or b -> c" == g.parse "x := (a or b) -> c"
+ArrowBeforeAmp (g : Grammar) : Bool :=
+  g.parse "x := A -> B & C" == g.parse "x := (A -> B) & C"
+ArrowAssociatesRight (g : Grammar) : Bool :=
+  g.parse "x := A -> B -> C" == g.parse "x := A -> (B -> C)"
+AmpAssociatesRight (g : Grammar) : Bool :=
+  g.parse "x := A & B & C" == g.parse "x := A & (B & C)"
+MinusAssociatesLeft (g : Grammar) : Bool :=
+  g.parse "x := a - b - c" == g.parse "x := (a - b) - c"
+ApplicationTightest (g : Grammar) : Bool :=
+  g.parse "x := f a + g b" == g.parse "x := (f a) + (g b)"
+ProjectionTightest (g : Grammar) : Bool :=
+  g.parse "x := f (p).field" == g.parse "x := f ((p).field)"
+
+-- spec 2.S15: negation binds looser than application and needs parentheses as an argument.
+NegationLooserThanApplication (g : Grammar) : Bool :=
+  g.parse "x := -f a" == g.parse "x := -(f a)"
+  and g.parse "x := f -a" == g.parse "x := f - a"
+
+-- spec 2.S11: the dangling else belongs to the nearest if.
+DanglingElse (g : Grammar) : Bool :=
+  g.parse "x := if a then if b then p else q"
+    == g.parse "x := if a then (if b then p else q)"
+
+-- spec 2.S10: a union as an argument needs parentheses, since `<` after a term compares.
+UnionAsArgument (g : Grammar) : Bool :=
+  g.parse "x := f (< a : A | b : B >)"
+    == parsed [define "x" [] nothing (termBody (app (name "f") (sum [("a", name "A"), ("b", name "B")]))) []]
+  and not (isParsed (g.parse "x := f < a : A | b : B >"))
+
+-- spec 2.S4: layout. An indented line continues the act; line breaks inside brackets are
+-- ignored; in a block a line break separates items and `;` is the same; a line that cannot
+-- start an item continues the one above.
+IndentContinuesAct (g : Grammar) : Bool :=
+  g.parse "f (a : Int) : Int :=\n  a + 1" == g.parse "f (a : Int) : Int := a + 1"
+BracketsIgnoreBreaks (g : Grammar) : Bool :=
+  g.parse "x := f (a,\n b)" == g.parse "x := f (a, b)"
+  and g.parse "x := [a,\nb]" == g.parse "x := [a, b]"
+BreakSeparatesItems (g : Grammar) : Bool :=
+  g.parse "f := {\n  a := 1\n  b := 2\n  a + b }" == g.parse "f := { a := 1 ; b := 2 ; a + b }"
+OperatorContinuesLine (g : Grammar) : Bool :=
+  g.parse "x := a\n  + b" == g.parse "x := a + b"
+  and g.parse "x := if c\n  then a\n  else b" == g.parse "x := if c then a else b"
+
+-- spec 2.S17: a brace term with a final bare term is a block, without one a record value.
+BlockOrRecord (g : Grammar) : Bool :=
+  g.parse "x := { a := 1 ; a }"
+    == parsed [define "x" [] nothing (termBody (block [bind "a" (literal (intLit 1))] (name "a"))) []]
+  and g.parse "x := { a := 1 }"
+    == parsed [define "x" [] nothing (termBody (recordValue [("a", literal (intLit 1))])) []]
+
+-- spec 12.S22 (D-2026-10-13-n): the import line names what enters, with its theory and alias.
+ImportNamesWhatEnters (g : Grammar) : Bool :=
+  g.parse "import \"linear_algebra.lth\" LinearAlgebra"
+    == parsed [import_ "linear_algebra.lth"
+                 [{ name := "LinearAlgebra", theory := nothing, alias := nothing }]]
+  and g.parse "import \"linear_algebra_numpy.lut\" Numpy : LinearAlgebra as LA"
+    == parsed [import_ "linear_algebra_numpy.lut"
+                 [{ name := "Numpy", theory := just (name "LinearAlgebra"), alias := just "LA" }]]
+  and not (isParsed (g.parse "import \"x.lut\""))
+
+-- D9 (D-2026-10-13-n): a bare term at the top level is a datum.
+TopLevelDatum (g : Grammar) : Bool :=
+  g.parse "test f (n <- 100)"
+    == parsed [datum (app (app (name "test") (name "f")) (namedArg "n" (literal (intLit 100))))]
+
+-- spec 2.R5: `<-` at the top level is not an act.
+NoArrowAtTopLevel (g : Grammar) : Bool := not (isParsed (g.parse "x <- 1"))
+
+-- Errors say where. spec 2.S13: the parser reports; the checker decides.
+linesPositive (es : List ParseError) : Bool :=
+  match es { nil -> true ; cons e rest -> e.line >= 1 and linesPositive rest }
+ErrorsHaveLines (g : Grammar) (s : String) : Bool :=
+  match g.parse s { parsed p -> true ; parseFailed es -> linesPositive es }
+BrokenTextFails (g : Grammar) : Bool := not (isParsed (g.parse "x := )"))
+
+-- A grammar is a lexer, a parser and a printer that satisfy all of the above.
+Grammar := RoundTrip & Canonical & ParsesWhatDerives & KeywordsReserved & CommentDropped & ArrowIsOneToken
+  & PlusBeforeTimes & ComparisonBeforeAnd & AndBeforeOr & OrBeforeArrow & ArrowBeforeAmp
+  & ArrowAssociatesRight & AmpAssociatesRight & MinusAssociatesLeft & ApplicationTightest
+  & ProjectionTightest & NegationLooserThanApplication & DanglingElse & UnionAsArgument
+  & IndentContinuesAct & BracketsIgnoreBreaks & BreakSeparatesItems & OperatorContinuesLine
+  & BlockOrRecord & ImportNamesWhatEnters & TopLevelDatum & NoArrowAtTopLevel
+  & ErrorsHaveLines & BrokenTextFails
