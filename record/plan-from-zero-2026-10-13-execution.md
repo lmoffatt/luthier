@@ -54,6 +54,9 @@ by Luciano.
   theories (object, terminal and initial, Boolean algebra, free monoid and the recursion of `List`,
   ordered semiring, exponential, product, coproduct), and `kernel_models.lut`, the core's types as
   their models. Next: step 2.2, `term.lth`.
+- 2026-10-13: step 2.2, `term.lth` §1 to §6 (892fbf3 to b7dfb6d): `Constant`, `Pattern`, `Term`,
+  `Act`, `Program`; alpha-equivalence, substitution, canonical form, reduction with fuel, quote and
+  eval. Its models, `term_model.lut` (§7), to Codex (`record/IA/term-2026-10-13/codex-models.md`).
 
 - 2026-10-13: step 4.2 brought forward, by Codex (55708f2): the 48 programs of `tests/spec/` in
   the new syntax, 47 parse, `r12_toplevel_arrow` is a syntax rejection by design (a runner must
