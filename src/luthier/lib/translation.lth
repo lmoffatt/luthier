@@ -36,7 +36,7 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Literal Fi
   matchOf namedArg ifThen proj intLit floatLit stringLit pWild pApp pLit pTuple plainParam typedParam
   shapeParam bind rebind
 import "term.lth" Term Program Act Pattern Constant Alpha Var Lit Universe World Lam App Pi Sigma Pair
-  Match Inj Sum Data Subtype Record RecordValue Proj Declare Define Datum IntConst FloatConst StringConst PVar
+  Match Inj Sum Data Subtype Record RecordValue Proj Let Declare Define Datum IntConst FloatConst StringConst PVar
   PWild PCon PPair PLit
 
 -- ---------------------------------------------------------------- §1 The theory and the acts
@@ -181,15 +181,14 @@ Arguments (a : Alpha) (e : Elaboration a) : Bool :=
                       (app (nm "id") (nm "i")))
           (App (App (Var "id") (Var "Int")) (Var "i"))
 
--- a block is its items, each a fresh name for its value, and its final term: in the kernel, which
--- has no `let`, a lambda applied (the reading of "a sub-DAG with one output" this file takes); a
+-- a block is its items, each a local definition of a fresh name, and its final term: nested
+-- `Let`s, so that inside the block a name is its value definitionally (D-2026-10-13-aa, Q1); a
 -- `<-` binds a fresh name that every later use means (2.S12, 2.S17, 4.R12)
 Blocks (a : Alpha) (e : Elaboration a) : Bool :=
   gives a (e.term [] (block [bind "x" (literal (intLit 1))] (nm "x")))
-          (App (Lam "x" (Var "Int") (Var "x")) (Lit (IntConst 1)))
+          (Let "x" (Var "Int") (Lit (IntConst 1)) (Var "x"))
   and gives a (e.term [] (block [rebind "y" (literal (intLit 1)), rebind "y" (binop "+" (nm "y") (literal (intLit 1)))] (nm "y")))
-          (App (Lam "y0" (Var "Int") (App (Lam "y1" (Var "Int") (Var "y1")) (bin "+" (Var "y0") (Lit (IntConst 1)))))
-               (Lit (IntConst 1)))
+          (Let "y0" (Var "Int") (Lit (IntConst 1)) (Let "y1" (Var "Int") (bin "+" (Var "y0") (Lit (IntConst 1))) (Var "y1")))
 
 -- a tuple parameter is a lambda whose body matches its argument (2.S12); a definition by clauses
 -- is a lambda over its parameters matching their tuple, or the one parameter itself (D-2026-10-13-p)

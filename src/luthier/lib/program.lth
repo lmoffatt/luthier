@@ -43,7 +43,7 @@ import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern LambdaPara
   subtype recordValue block sum list lambda matchOf namedArg ifThen proj quoted pWild pApp pLit pTuple
   plainParam typedParam shapeParam bind rebind
 import "term.lth" Term Program Act Constant Pattern Alpha Substitution Var Lit Universe World Lam App Pi
-  Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Declare Define Datum IntConst FloatConst
+  Sigma Pair Match Inj Sum Data Subtype Extern Primitive Axiom Hole Record RecordValue Proj Let Declare Define Datum IntConst FloatConst
   StringConst PCon
 
 -- ---------------------------------------------------------------- §1 Failures and the theory
@@ -353,6 +353,11 @@ TypeOfLam (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx
 TypeOfApp (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (b : Term) (i : Int) : Bool :=
   match t.typeOf p (cons (x, Var "Int") ctx) b { nothing -> true ;
     just bt -> typed a sb t (t.typeOf p ctx (App (Lam x (Var "Int") b) (Lit (IntConst i)))) (sb.subst x (Lit (IntConst i)) bt) }
+-- a local definition is transparent: its type is that of its body with the value for the name, so
+-- inside it the name is the value (D-2026-10-13-aa, Q1)
+TypeOfLet (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) (b : Term) : Bool :=
+  match t.typeOf p ctx (sb.subst x (Lit (IntConst i)) b) { nothing -> true ;
+    just bt -> typed a sb t (t.typeOf p ctx (Let x (Var "Int") (Lit (IntConst i)) b)) bt }
 -- the universe is a type, and the world (D-2026-10-13-b)
 TypeOfUniverse (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) : Bool :=
   typed a sb t (t.typeOf p ctx Universe) Universe and typed a sb t (t.typeOf p ctx World) Universe
@@ -374,7 +379,7 @@ BranchRefines (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ctx : Context
       == just (Subtype x ty (App (Var "not") (App (Var q) (Var x))))
 
 Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb & TypeOfLam a sb & TypeOfApp a sb
-  & TypeOfUniverse a sb & RefinesItself a sb & SubtypeRefinesBase a sb & RefinesFunctions a sb & BranchRefines a sb
+  & TypeOfLet a sb & TypeOfUniverse a sb & RefinesItself a sb & SubtypeRefinesBase a sb & RefinesFunctions a sb & BranchRefines a sb
 
 -- ---------------------------------------------------------------- §5 The rules that read types
 
@@ -390,6 +395,7 @@ applications (ctx : Context) (u : Term) : List Application := match u {
   Pi x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
   Sigma x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
   Subtype x ty b -> appendApps (applications ctx ty) (applications (cons (x, ty) ctx) b) ;
+  Let x ty v b -> appendApps (applications ctx ty) (appendApps (applications ctx v) (applications (cons (x, ty) ctx) b)) ;
   Pair x y -> appendApps (applications ctx x) (applications ctx y) ;
   Inj l x -> applications ctx x ;
   Match s arms -> appendApps (applications ctx s) (armsApplications ctx arms) ;
