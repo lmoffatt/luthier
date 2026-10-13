@@ -44,3 +44,15 @@ exists:
 | 10 Actions and the world | | principles L4, L11; D-2026-10-10-c, D-2026-10-12-m, -ab, -ac; rationale 09; spec 2, 3, 4, 12 at e8409ef | Sonnet, brief `record/spec-briefs/10-world.md` at e8409ef | 2026-10-13: 14 statements, no rules; the world as a token threaded through actions, the interface of a world library (10.S5: W, act, own) proposed; no program can name an action today, `print` exists in no library; questions: L11.7 is proposed in the principles while D-2026-10-12-ac is current; the validation at the first action asking has no entry of its own (cited through D-2026-10-11-n); integrator: the file hash moved out of the world's interface, `checker.py` named for the check-time import | |
 | 11 Numbers | 06 | 06 at bd4537e; D-2026-10-12-y (D6) | Sonnet, brief at 3445ad8 | 2026-10-12: 4 rules, 19 statements; S3, S10, S11, S16 to S19 proposed; decided without an id: `toFloat64` stays with the integers (2026-10-05); 11.R3 borrows `n5_arrays.accept.lut` | 2026-10-12, integration: 11.S5 cites D-2026-10-05-c (d84904b) |
 | 12 Files and tools | 03 §1 to §4 | 03, 05 §7 as implemented; D-2026-10-12-y (D7) | Sonnet, brief `record/spec-briefs/12-files-and-tools.md` at 3445ad8 | 2026-10-12: 20 statements, 1 rule; S1 (a file denotes a dependent record type, `lib/library.lut`) and S9 (the pure file plus `_python` file pattern) proposed; S17 strict `run` decided; two questions for Luciano: do `--checked` and `--no-record` stay, and does `eval` refuse an uncertified cone as `run` does; the old 03 kept until step 2 | |
+
+## The interpreter retired
+
+2026-10-13, step 0 of `record/plan-from-zero-2026-10-13-execution.md` (D-2026-10-13-h, Z4): the
+interpreter of version 0.1 is kept at the tag `v0.1-final` (fd3cba9) and removed from the tree:
+`src/luthier/` except `arrays.py`, `tables.py`, `rational.py` and a new `__init__.py`; `core.lut`
+and `src/luthier/lib/` with their certificates; `examples/`; the interpreter's tests
+(`test_bridge.py`, `bridge_externs.py`, `test_certificates.py`, `test_checker_rules.py`,
+`test_evaluators.py`, `test_kernel.py`, `test_spec.py`, `test_sugar.py`); the `luthier` command in
+`pyproject.toml`. The 50 programs of `tests/spec/` moved to `tests/spec/v0.1/`, to be rewritten into
+the new syntax in step 4. Until then `[implemented]` in a chapter means implemented in
+`v0.1-final`, and `scripts/check_spec.py` finds its programs in `tests/spec/v0.1/`.

@@ -14,6 +14,8 @@ status is one of:
 
 - `[implemented]`: in the interpreter, with its two programs passing; a rule of evaluation also
   needs a program whose value is compared (D-2026-10-12-ah);
+  until the interpreter rebuilt from zero exists (D-2026-10-13-h), `[implemented]` means
+  implemented in the interpreter at the tag `v0.1-final`, whose programs are in `tests/spec/v0.1/`;
 - `[decided D-YYYY-MM-DD-x]`: taken by that entry of `record/decisions.md`, not yet implemented;
 - `[decided Ln.k]`: stated by a clause of `docs/principles.md` marked settled, not yet implemented
   (D-2026-10-13-g);

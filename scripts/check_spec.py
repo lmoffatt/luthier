@@ -262,8 +262,9 @@ def check_files(item: Item, tests_dir: Path) -> list[Finding]:
     for n in item.files:
         if not n.endswith((".accept.lut", ".reject.lut")):
             out.append((item.files_line, f"{label}: {n} is neither .accept.lut nor .reject.lut"))
-        elif not (tests_dir / n).is_file():
-            out.append((item.files_line, f"{label}: {n} not found in tests/spec/"))
+        elif not ((tests_dir / n).is_file() or (tests_dir / "v0.1" / n).is_file()):
+            # until the new checker exists, a program may still be one of v0.1's (D-2026-10-13-h)
+            out.append((item.files_line, f"{label}: {n} not found in tests/spec/ or tests/spec/v0.1/"))
     if item.status == "implemented":
         for kind in ("accept", "reject"):
             if not any(n.endswith(f".{kind}.lut") for n in item.files):

@@ -1,9 +1,0 @@
--- A reference to a source outside Luthier: what `cite` names when a definition is correct by a
--- theorem (05 §7, D-2026-10-11-f). The identifiers are text, "" when absent; the law asks for at
--- least one that resolves (a DOI, an ISBN or a URL), as record/bibliography/README.md asks of every
--- source. `sha256` pins the text of the entry it was read from. A `.bib` file imports as a module
--- of these values, one per entry, named by its key: `import "luthier.bib" as biblio`.
-
-ReferenceData = { key : String, doi : String, isbn : String, url : String, title : String, sha256 : String }
-Resolvable (r : ReferenceData) : Bool := not (r.doi == "" and r.isbn == "" and r.url == "")
-Reference : U := { r : ReferenceData | Resolvable r }

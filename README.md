@@ -1,5 +1,9 @@
 # Luthier
 
+> Being rebuilt from zero (2026-10-13, D-2026-10-13-h): first the theories of Luthier, written in
+> Luthier, then the Python that implements them. The interpreter this page describes is at the tag
+> `v0.1-final` (`git checkout v0.1-final`); the specification it will follow is `docs/spec/`.
+
 A language that verifies models of theories. A theory is a type with its laws; a model is a value
 of it, and defining a model defines its test. The common case is a function type with its laws, a
 theory of one symbol over types already modelled with their equality; a function is a model of it

@@ -1,7 +1,7 @@
-"""Luthier version 0: definitions, data, subtypes with laws, extern, test.
+"""Luthier, rebuilt from zero (D-2026-10-13-h).
 
-From Python: `luthier.load("file.lut")` gives a Program whose holes the environment fills
-with `fill`, evaluates with `eval` and certifies with `test` (see api.py)."""
-__version__ = "0.0.1"
-
-from .api import load, Program, FillError  # noqa: E402,F401
+The interpreter of version 0.1 is at the tag `v0.1-final`. What stays here are the host functions
+that externs call (`arrays`, `tables`, `rational`), specimens of the world that depend on nothing of
+the interpreter. The theories of Luthier and their Python specimens are written anew, as
+`record/plan-from-zero-2026-10-13-execution.md` says."""
+__version__ = "0.2.0.dev0"

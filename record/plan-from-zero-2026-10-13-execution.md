@@ -10,7 +10,11 @@ until Luciano marks them, every step assumes them as recommended and says so in 
 - 2026-10-13: plan written; Z1 to Z7 with Luciano; nothing started.
 - 2026-10-13: his marks (D-2026-10-13-n): Z1, Z3 to Z8 ok, Z8 enforced (`.lth`), Z2 as recommended;
   spec 12.S22 and 12.S23 written on Z5 and Z8. Theory files are `.lth`: read `lib/*.lut` below as
-  `lib/*.lth` for every theory. Next: step 0.
+  `lib/*.lth` for every theory.
+- 2026-10-13: step 0 done: tag `v0.1-final` at fd3cba9; the old interpreter, libraries, examples
+  and their tests removed; `tests/spec/` moved to `tests/spec/v0.1/`; `[implemented]` read as
+  `v0.1-final` until step 4 (index legend, `check_spec.py`). Next: step 1, `grammar.lth` and the
+  parser.
 
 ## Rules for every step
 
