@@ -171,6 +171,15 @@ by Luciano.
 - 2026-10-13, 22:30: Codex is gone (his word: its tokens are spent); its two runs killed, nothing
   kept. check.py bite 3b and the inventory relaunched as Opus agents. From here every specimen
   bite goes to a Claude agent (Sonnet, Opus or Fable by its difficulty), briefed by the same files.
+- 2026-10-14, 04:30 (the night, record/plan/night-2026-10-13.md): the pattern on `<-` through
+  parser, elaborator and checker (a590378, ff16b60, 93332f2, d45a152); the kernel's structural
+  `==` demanding its parts (0e1f69c, 323b402); host/run on world.lth draft 1 and observe at
+  places (16d3895, 044297c); the inventory of sonolocalización (5cce858) and the slice's first
+  theories: `core.lut`, `algebra.lth`, `numbers.lth` with `numbers_model.lut` (the step 6.1
+  names `number_model.lut` and `rational.lut` read as these; `rational.lut` not written),
+  `arrays.lth` and `tables.lth` with their models (3c43822 to d63cee7). v0.2's criterion a: 18
+  refusals left on the theory files, by cause, in the theories' hands (agent running).
+
 
 ## Rules for every step
 
