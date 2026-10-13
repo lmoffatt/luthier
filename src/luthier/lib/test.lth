@@ -117,9 +117,9 @@ Grade : U := data {
   ExhaustiveGrade : Grade ;
   Cases : Grade ;
   Sampled : Grade ;
-  Assumed : Grade ;
+  AssumedGrade : Grade ;
 }
-gradeRank (g : Grade) : Nat := match g { Proved -> 4 ; ExhaustiveGrade -> 3 ; Cases -> 2 ; Sampled -> 1 ; Assumed -> 0 }
+gradeRank (g : Grade) : Nat := match g { Proved -> 4 ; ExhaustiveGrade -> 3 ; Cases -> 2 ; Sampled -> 1 ; AssumedGrade -> 0 }
 weakest (g h : Grade) : Grade := if gradeRank g <= gradeRank h then g else h
 grade (v : Verdict) (c : Maybe Coverage) : Maybe Grade := match v {
   Confirmed -> (match c { just k -> (match k { Exhaustive -> just ExhaustiveGrade ; Bounded n -> just ExhaustiveGrade ;
@@ -128,7 +128,7 @@ grade (v : Verdict) (c : Maybe Coverage) : Maybe Grade := match v {
   Supported -> (match c { just k -> (match k { Bounded n -> just ExhaustiveGrade ; Drawn s -> just Sampled ; _ -> just Cases }) ;
                           nothing -> just Cases }) ;
   Cites r -> just Proved ;
-  Assumes -> just Assumed ;
+  Assumes -> just AssumedGrade ;
   _ -> nothing }
 -- the roles of the grades: each is the grade of the evidence it names, and the order is total,
 -- with proved above exhaustive above cases above sampled above assumed
@@ -137,7 +137,7 @@ GradesAsTerms (g : Grading) (s n : Nat) (r : String) : Bool :=
   g.gradeOf Confirmed (just Exhaustive) == just ExhaustiveGrade and g.gradeOf Supported (just (Bounded n)) == just ExhaustiveGrade
   and g.gradeOf Supported (just Listed) == just Cases and g.gradeOf Supported (just (Drawn s)) == just Sampled
   and g.gradeOf Confirmed (just (Drawn s)) == just Cases and g.gradeOf (Cites r) nothing == just Proved
-  and g.gradeOf Assumes nothing == just Assumed and g.gradeOf Refuted (just Exhaustive) == nothing
+  and g.gradeOf Assumes nothing == just AssumedGrade and g.gradeOf Refuted (just Exhaustive) == nothing
   and g.gradeOf Unsettled (just (Drawn s)) == nothing
 GradesAreOrdered (g : Grading) (x y : Grade) : Bool := g.below x y == (gradeRank x < gradeRank y)
 Grading := GradesAsTerms & GradesAreOrdered
