@@ -2235,3 +2235,12 @@ Source:     chat:da165104:3712
             chat:da165104:3733
 Kind:       spec (3.S7, 3.S36), the plan (step 2.1), principles (L2.7, his words added)
 Status:     current
+
+D-2026-10-13-u  `kernel.py`, the evaluator, the specimen of `term.lth`, is brought forward from step
+                4 to the end of step 2 of the plan from zero, so that Luthier evaluates expressions
+                before the checker's theories are written; programs run unchecked until step 4.
+Author:     Luciano, on the model's recommendation
+Quote:      "podes adelantar el kernel, si"
+Source:     chat:52b10bff:3278
+Kind:       plan (steps 2 and 4 of record/plan-from-zero-2026-10-13-execution.md)
+Status:     current

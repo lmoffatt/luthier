@@ -145,6 +145,9 @@ by Luciano.
    iota, prim, extern (3.S33, §4 of chapter 3), `quote` and `eval` (3.S32).
 3. Both pass the parser. Then the external review of layer 0 (`grammar.lth` was reviewed already).
 4. The translation table of 2.S12, surface tree to `Term`, in `term.lth` or its own theory.
+5. `src/luthier/kernel.py`, the evaluator, the specimen of `term.lth` (D-2026-10-13-u, brought
+   forward from step 4): `luthier eval` reduces a term of a parsed file, unchecked until step 4.
+   With an extern binding the case laws of `grammar.lth` can then be evaluated against `parse.py`.
 
 ## Step 3. The checker's theories (layer 1, by the session, Z9)
 
@@ -161,8 +164,7 @@ by Luciano.
 
 ## Step 4. The Python checker and evaluator (layers 0 and 1)
 
-1. `src/luthier/kernel.py` (terms and reduction, the specimen of `term.lth`) and
-   `src/luthier/check.py` (the specimen of `program.lth`), by the session or an agent with a brief; `luthier check files`.
+1. `src/luthier/check.py` (the specimen of `program.lth`), by the session or an agent with a brief; `luthier check files`.
 2. *Agent or external model.* Rewrite the 50 programs of `tests/spec/v0.1/` into the new syntax in `tests/spec/`,
    each keeping its rule and its `-- expect:` line; `tests/test_spec.py` anew.
 3. The theories of steps 1 to 3 pass the checker; the programs pass; the items of chapters 2 to 4
