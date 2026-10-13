@@ -631,6 +631,19 @@ TypeOfFormers (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) 
 -- a local definition is transparent: inside it the name is the value (D-2026-10-13-aa, Q1)
 TypeOfLet (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) (i : Int) : Bool :=
   typed a sb t (t.typeOf p ctx (Let x int (lit i) (Var x))) int
+-- `&` joins two laws over one model (5.S6): two Boolean predicates give a Boolean predicate, and
+-- when either part is valued in `Law` (laws.lth) the Boolean part is lifted and the conjunction is
+-- a `Law` ("a combination of both lifts each Boolean part") [proposed: elaborate.py bite 6,
+-- 0984440; stated by luthier-03]
+predicateOn (x : String) (c : Term) : Term := Pi x (Var "A") c
+conjunctionOf (ctx : Context) (x : String) (l r : Term) : Context :=
+  cons ("P", predicateOn x l) (cons ("Q", predicateOn x r) ctx)
+amp : Term := App (App (Var "&") (Var "P")) (Var "Q")
+TypeOfConjunction (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) (x : String) : Bool :=
+  typed a sb t (t.typeOf p (conjunctionOf ctx x (Var "Bool") (Var "Bool")) amp) (predicateOn x (Var "Bool"))
+  and typed a sb t (t.typeOf p (conjunctionOf ctx x (Var "Law") (Var "Bool")) amp) (predicateOn x (Var "Law"))
+  and typed a sb t (t.typeOf p (conjunctionOf ctx x (Var "Bool") (Var "Law")) amp) (predicateOn x (Var "Law"))
+  and typed a sb t (t.typeOf p (conjunctionOf ctx x (Var "Law") (Var "Law")) amp) (predicateOn x (Var "Law"))
 -- the universe is a type, and the world (D-2026-10-13-b); version 0 keeps `U : U` (3.S8)
 TypeOfUniverse (a : Alpha) (sb : Substitution a) (t : Typing a sb) (p : Program) (ctx : Context) : Bool :=
   typed a sb t (t.typeOf p ctx Universe) Universe and typed a sb t (t.typeOf p ctx World) Universe
@@ -668,7 +681,7 @@ BranchRefines (a : Alpha) (sb : Substitution a) (t : Typing a sb) (ctx : Context
   branchesRefine ctx t.branchContext x (App (Var q) (Var x)) ty
   and branchesRefine ctx t.branchContext x (App (App (Var "<") (lit 0)) (Var x)) ty
 
-Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb & TypeOfLam a sb & TypeOfApp a sb
+Typing (a : Alpha) (sb : Substitution a) := TypeOfVar a sb & TypeOfConstant a sb & TypeOfLam a sb & TypeOfApp a sb & TypeOfConjunction a sb
   & TypeOfIntroductions a sb & TypeOfFormers a sb & TypeOfLet a sb & TypeOfUniverse a sb & SameIsAlpha a sb
   & SameSeparates a sb & RefinesItself a sb & SubtypeRefinesBase a sb & RefinesFunctions a sb & RefinesSeparates a sb
   & BranchRefines a sb
