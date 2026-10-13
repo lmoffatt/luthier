@@ -47,8 +47,10 @@ You said "Nat tiene las suyas" (D-2026-10-13-t). `kernel_laws.lth` §5 states an
 semiring: `+` and `*` with their units, associativity, commutativity and distribution, and the
 order laws (total, compatible with `+`, `0` the least), the order marked proposed.
 
-Recommended: accept as written, on one condition the coordinating session adds: that the
-constructors keep their roles, `succ n == n + 1`, and a law of induction (or of folding) saying
-there are no other naturals, as `List` has. If they are already there, nothing changes.
+Recommended: accept as written. The coordinating session asked that the successor have its role
+and that no other naturals exist; done at 0381962: `Nat` is `{ k : Int | 0 <= k }` (11.R1), with no
+`succ` constructor, so the role is the successor `x + 1`, and `SuccessorIsNext` (nothing strictly
+between `x` and `x + 1`) with `ZeroLeast` says every natural is reached from `0` by successors.
+Induction itself quantifies over predicates and cannot be tested, the same limit as `List`'s fold.
 
 
