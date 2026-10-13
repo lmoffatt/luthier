@@ -1,8 +1,8 @@
 -- hello.lut: the first program with an action (10.S2, D8). `main` takes the world and gives it
--- back with its result; the action is the console's `print`, an extern of world_model.lut, which
--- runs when a demand reaches `main` and never from a memo (10.S6).
+-- back with its result; the action is the host's `print`, an extern of world_model.lut, which
+-- runs when a demand reaches `main` and never from a memo (10.S6); its description, `console` of
+-- the same file, is what world.lth's laws test.
 
-import "world.lth" Console
-import "world_model.lut" console : Console
+import "world_model.lut" HostConsole host : HostConsole
 
-main (w : W) : W * Unit := console.print w "hello, world"
+main (w : W) : W * Unit := host.print w "hello, world"

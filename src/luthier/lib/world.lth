@@ -1,168 +1,187 @@
--- world.lth: the world as a token threaded through actions, what an action may change, externs
--- as routes validated at their first action, and the parts of the world a program touches.
+-- world.lth: the world as a token threaded through actions, actions described over the library's
+-- representation of the world, externs as routes validated at their first action, and the parts of
+-- the world a program touches.
 --
--- Draft 0, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1 of
--- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, brought before evidence by
--- D-2026-10-13-ad: execution first, so that sonolocalización runs uncertified and the
--- certificates are designed on how it fails). Sources: spec 10.S1 to 10.S13 (an action, the token,
--- the core's table, two kinds of action, externs as routes, the bridge, named worlds); L11; L4.5;
--- D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md (the token used
--- exactly once; `W` optional in `main`); D-2026-10-13-a (one world), -b (`W` a keyword), -g.
--- Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+-- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, before evidence by
+-- D-2026-10-13-ad); draft 0 at 1f8c61c, rewritten on the internal review of layers 2 and 3
+-- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, world.1 to world.9). Sources: spec 10.S1
+-- to 10.S13; L11; L4.5; D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md
+-- (the token used exactly once; `W` optional in `main`); D-2026-10-13-a (one world; an action is a
+-- directed request, checked by comparing the representation before and after), -b (`W` a
+-- keyword), -g. Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
 --
 -- What this file states. The core knows of the world only the table of 10.S5: the token `W`, a
--- keyword with no `==`, which a program never constructs; `act`, applying an action to a token;
--- `own`, whether an action concerns Luthier's own store. Everything else is a library's (10.S5,
--- D-2026-10-12-al): what the parts of the world are, what an observation of one is, how a class
--- of machines is described. So the theories here are stated over `W` itself, and what the library
--- adds, the representation of `W` and the observations of it, stays private by ascription (L6.12):
--- a model of `World` says what is read at each place. The core asks: an action is a function
--- over the token with its result (10.S3); it changes only what its declaration says (10.S7); an
--- action on Luthier's own store is idempotent and a world action never is (10.S6); an extern is a
--- route, read when a demand reaches it, validated against its type's laws before it is applied
--- (10.S8 to 10.S10). What cannot be tested (the disk persists while the program is off, the clock
--- is monotone) is marked assumed, so the certificate of a run says under what hypotheses it holds
+-- keyword with no `==` and no introduction, which a program never constructs and uses exactly once
+-- (D4); and `own`, whether an action concerns Luthier's own store. An action is a function that
+-- takes the token first and gives the token after with its result, `W -> ... -> W * A` (10.S3; D8;
+-- 2.S17's `w1 <- print w0 "x"`). Since a token is used once and nothing generates one, no law can
+-- apply an action to a token twice or compare what two tokens read (the review's world.1): the laws
+-- are stated over the library's representation of the world, a type `S` with structural equality,
+-- and over an action's description, a function `S -> S * A` that says what the action does to the
+-- representation. Those laws are tested by sampling `S`. The host's action is then certified
+-- against its description along one chain of tokens: observe, act once, observe again, compare
+-- (D-2026-10-13-a); that protocol is the certifier's and is stated at the end as a definition, since
+-- it threads the token and so is itself an action, which a theory file does not hold as a law
+-- (10.S3, 12.S23). What cannot be tested (the disk persists while the program is off) is assumed
 -- (10.S13, 6.S10).
 --
 -- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
 -- `luthier parse src/luthier/lib/world.lth`, sets its status to done here, and commits.
 --
---   §1 The token and actions: an action's type says it is one; `act`; `own`; state
---      actions idempotent, world actions never (10.S3 to 10.S6; D4, D8).               done
---   §2 Places and observations: the world as the library represents it; an action changes
---      only the places its declaration names (10.S7); what is assumed (10.S13).        done
---   §3 Externs as routes: read at the first demand with the hash of what was read in the
---      identity, validated against the type's laws, refused if they fail, provisional as
---      debt (10.S8 to 10.S10, L11.2, L11.7).                                           done
---   §4 The actions the first slice needs: `print`, reading a file (10.S2; D8).          done
---   §5 Named worlds: an extern with no law runs in one, priced as an assumption (10.S12,
+--   §1 The token, the representation, actions and their descriptions; own actions idempotent
+--      (10.S3 to 10.S6; D4, D8).                                                      done
+--   §2 Places: what is read at one; an action changes only the places it declares, at every
+--      other place; what is assumed (10.S7, 10.S13).                                   done
+--   §3 Externs as routes: read at the first demand, the hash of what was read in the
+--      identity, validated against the type's laws before applied, refused if refuted, a
+--      provisional one applied as debt without validation (10.S8 to 10.S10, L11.2, 4.R5). done
+--   §4 The actions the first slice needs, by their descriptions: `print`, reading a file
+--      (10.S2; D8).                                                                   done
+--   §5 Certifying a host action against its description along one chain of tokens: the
+--      protocol, as a definition (D-2026-10-13-a).                                     done
+--   §6 Named worlds: an extern with no law runs in one, priced as an assumption (10.S12,
 --      L11.6). Waits for evidence (certification.lth).                                 todo
---   §6 The externs of sonolocalización (numpy and its data formats). Waits for the
+--   §7 The externs of sonolocalización (numpy and its data formats). Waits for the
 --      inventory, record/IA/sonolocalizacion-inventory-2026-10-13/.                     todo
 
--- ---------------------------------------------------------------- §1 The token and actions
+import "kernel_laws.lth" Concrete
+import "laws.lth" Verdict Refuted Confirmed Supported Unsettled Cites Assumes
 
--- An action is a function that takes the token first and gives the token after with its result,
--- `W * A` (10.S3, 10.S4; D8: a `main` with `W` returns `W * A`; 2.S17 writes `w1 <- print w0 "x"`):
+-- ---------------------------------------------------------------- §1 The token, the representation, actions
+
+-- An action takes the token first and gives the token after with its result (10.S3, 10.S4, D8):
 -- its type says it is an action, and a function that mentions no `W` holds no effect (10.S1).
--- `act` applies it. The token has no `==` (4.R8); a program constructs none, it enters at
--- `main` or in the session (D8: `W` optional in `main`, a `main` without it a pure script).
 Action (A : U) = W -> W * A
-act (A : U) (a : Action A) (w : W) : W * A := a w
-after (A : U) (p : W * A) : W := match p { (w, x) -> w }
-result (A : U) (p : W * A) : A := match p { (w, x) -> x }
 
--- Two kinds of action (10.S6): one on Luthier's own store (writing a certificate, recording a
--- test) is idempotent and may be served from the memo; one on the world runs each time it is
--- demanded. `own` says which, from the action's declaration and not from its effect; an action
--- that declares nothing is a world action, the safer reading. The token is used exactly once
--- (D4): an action whose new token nobody uses is not demanded, so every action lies on the chain
--- that reaches the output; that is a rule of the checker over blocks (program.lth, 4.R12), not a
--- law here.
-Declared (A : U) = { run : Action A, own : Bool, places : List String }
+-- The library's representation of the world: a type `S` with structural equality, so that two
+-- states can be compared (D-2026-10-13-a: an action is checked by comparing the representation
+-- before and after). What is read at a place of it is `read`; the places are any string (a file
+-- path, "stdout", "clock"), so an action that writes where nothing was declared is seen (the
+-- review's world.6).
+World (S : Concrete) : { read : S -> String -> Maybe String }
 
--- An observable world: the library says what a place is (a file path, the standard output, the
--- clock) and what is read at one; the token has no `==`, so two tokens are told apart only by
--- what is read at the places. The
--- laws a world owes: an own action done twice leaves what is read everywhere as once (10.S6); an
--- action changes only the places its declaration names (10.S7, §2).
-World : {
+-- An action's description: what it does to the representation, a function `S -> S * A`, with
+-- whether it concerns Luthier's own store (10.S6, `own`, from the declaration and not from the
+-- effect; what declares nothing is a world action, the safer reading) and the places it declares
+-- it changes (10.S7). The token is used exactly once (D4): an action whose new token nobody uses is
+-- not demanded; that is the checker's over blocks (program.lth), not a law here.
+Described (S : Concrete) (A : U) (m : World S) : {
+  describe : S -> S * A,
+  own : Bool,
   places : List String,
-  read : W -> String -> Maybe String,
 }
-sameAt (m : World) (w v : W) (ps : List String) : Bool :=
-  match ps { nil -> true ; cons p rest -> m.read w p == m.read v p and sameAt m w v rest }
--- an own action is idempotent: running it on its own result reads the same everywhere
-OwnIsIdempotent (m : World) (A : U) (a : Declared A) (w : W) : Bool :=
-  not a.own or sameAt m (after A (a.run w)) (after A (a.run (after A (a.run w)))) m.places
+stateAfter (S : Concrete) (A : U) (p : S * A) : S := match p { (s, x) -> s }
+resultOf (S : Concrete) (A : U) (p : S * A) : A := match p { (s, x) -> x }
+
+-- an own action is idempotent (10.S6): describing it on its own result gives the same state
+OwnIsIdempotent (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : S) : Bool :=
+  not d.own or stateAfter S A (d.describe (stateAfter S A (d.describe s))) == stateAfter S A (d.describe s)
 
 -- ---------------------------------------------------------------- §2 Places and what an action changes
 
 -- An action may change the world and Luthier's store, and nothing else (10.S7): not a definition,
--- not a binding of another block. In the world, it changes only the places its declaration names:
--- at every other place, what is read after is what was read before. That is the law of the world's
--- library over the observations it defines, certified as any law (D-2026-10-13-a).
-except (ps xs : List String) : List String :=
-  match ps { nil -> nil ; cons p rest -> if memberStr p xs then except rest xs else cons p (except rest xs) }
+-- not a binding of another block. In the world it changes only the places it declares: at any other
+-- place, what is read after is what was read before. Quantified over every place, so a random path
+-- is one the action must leave alone, which is the case to test.
 memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
-ChangesOnlyDeclared (m : World) (A : U) (a : Declared A) (w : W) : Bool :=
-  sameAt m w (after A (a.run w)) (except m.places a.places)
+ChangesOnlyDeclared (S : Concrete) (A : U) (m : World S) (d : Described S A m) (s : S) (p : String) : Bool :=
+  memberStr p d.places or m.read (stateAfter S A (d.describe s)) p == m.read s p
+
+Described (S : Concrete) (A : U) (m : World S) := OwnIsIdempotent S A m & ChangesOnlyDeclared S A m
 
 -- What cannot be tested is assumed, so that the certificate of a run says under what hypotheses it
--- holds (10.S13, 6.S10): what is written at a place is read back at it (the disk persists); a
--- place no action touched reads the same after the program was off. Stated as laws, their
--- evidence is a citation or an assumption (laws.lth, `Assumed`), never a sample.
-Persistence : {
-  world : World,
-  write : W -> String -> String -> W,
+-- holds (10.S13, 6.S10): what is written at a place is read back at it, and a write changes no
+-- other place (the disk persists). Stated as laws of the representation; their evidence for the
+-- host is a citation or an assumption (laws.lth, `Assumes`), never a sample.
+Persistence (S : Concrete) : {
+  world : World S,
+  write : S -> String -> String -> S,
 }
-WriteThenRead (s : Persistence) (w : W) (p c : String) : Bool :=
-  not (memberStr p s.world.places) or s.world.read (s.write w p c) p == just c
-WriteChangesOnlyItsPlace (s : Persistence) (w : W) (p c : String) : Bool :=
-  sameAt s.world w (s.write w p c) (except s.world.places [p])
-Persistence := WriteThenRead & WriteChangesOnlyItsPlace
-
-World := OwnIsIdempotent & ChangesOnlyDeclared
-
-import "test.lth" TestSpec Tester
-import "laws.lth" Evidence Verdict Refuted Confirmed Supported Unsettled Cites Assumes
+WriteThenRead (S : Concrete) (s : Persistence S) (st : S) (p c : String) : Bool :=
+  s.world.read (s.write st p c) p == just c
+WriteChangesOnlyItsPlace (S : Concrete) (s : Persistence S) (st : S) (p c q : String) : Bool :=
+  p == q or s.world.read (s.write st p c) q == s.world.read st q
+Persistence (S : Concrete) := WriteThenRead S & WriteChangesOnlyItsPlace S
 
 -- ---------------------------------------------------------------- §3 Externs as routes
 
--- An extern is a name, a declared type and a route to a host function: data (3.S40, 10.S8). Its
--- file is read when a demand reaches the node, once per plan, and may be absent while the program
--- is checked (L11.7); the hash of the bytes read, computed by the core, enters the identity of what
--- the extern produces and of its certificate (10.S9). `hash` is the core's (spec 6.S8), declared
--- here until core names it.
+-- An extern is a name, a declared type and a route to a host function: data (3.S40, 10.S8;
+-- D-2026-10-12-ac: a definition like any other, not an action). Its file is read when a demand
+-- reaches the node, once per plan, and may be absent while the program is checked (L11.7); the hash
+-- of the bytes read, computed by the core, enters the identity of what the extern produces and of
+-- its certificate (10.S9). `hash` is the core's (spec 6.S8), declared here until core names it.
 hash : String -> String
 Route = { name : String, route : String, provisional : Bool }
 
--- The first time an action asks for an extern, before it is applied, it is tested against the
--- laws of its declared type like any function, and refused if it fails (10.S10, L11.2): the
--- validation is a test of test.lth, its verdict read from the evidence by laws.lth's `Settling`;
--- a refutation refuses, and an extern whose type has no law to validate against is not applied
--- (L11.3), unless it is provisional, which is applied, recorded as debt and never certified
--- (4.R5). The certificate stays by hash: a second demand with the same hash does not test again.
+-- The first time an action asks for an extern, before it is applied, it is tested against the laws
+-- of its declared type like any function, and refused if it fails (10.S10, L11.2). The verdict is
+-- of the bytes read, so a changed file is validated again and the certificate stays by hash. An
+-- extern whose type has no law to validate against is not applied (L11.3). A provisional extern
+-- is the declared exception: applied without validation, recorded as debt, listed by `check -v`
+-- and never certified (4.R5), so its verdict is an assumption. A model of `Externs` is the
+-- validator of a run: the test it runs is test.lth's, and what the evidence settles is laws.lth's.
 Externs : {
-  read : W -> Route -> W * Maybe String,
-  verdictOf : Route -> Verdict,
-  applied : Route -> Bool,
+  verdictOf : Route -> String -> Verdict,
+  applied : Route -> String -> Bool,
   identity : Route -> String -> String,
 }
--- refused when its type's laws are refuted; not applied when nothing settles them, unless provisional
-RefusedWhenRefuted (e : Externs) (r : Route) : Bool :=
-  not (e.verdictOf r == Refuted) or not (e.applied r)
-NotAppliedWithoutLaw (e : Externs) (r : Route) : Bool :=
-  r.provisional or not (e.verdictOf r == Unsettled) or not (e.applied r)
-ProvisionalIsApplied (e : Externs) (r : Route) : Bool := not r.provisional or e.applied r
--- the identity of what it produces carries the hash of what was read, so two reads of different
--- bytes are two identities
-IdentityCarriesHash (e : Externs) (r : Route) (bytes other : String) : Bool :=
-  bytes == other or not (e.identity r (hash bytes) == e.identity r (hash other))
-Externs := RefusedWhenRefuted & NotAppliedWithoutLaw & ProvisionalIsApplied & IdentityCarriesHash
+settled (v : Verdict) : Bool := match v { Confirmed -> true ; Supported -> true ; Cites r -> true ; _ -> false }
+-- applied exactly when its laws are settled by the validation, or it is provisional
+AppliedWhenSettled (e : Externs) (r : Route) (h : String) : Bool :=
+  e.applied r h == (r.provisional or settled (e.verdictOf r h))
+-- a provisional extern is not validated: its verdict is an assumption
+ProvisionalIsAssumed (e : Externs) (r : Route) (h : String) : Bool :=
+  not r.provisional or e.verdictOf r h == Assumes
+-- the identity of what it produces carries the hash of what was read: two reads with different
+-- hashes are two identities (`hash` itself is the core's, and what it tells apart is its own law)
+IdentityCarriesHash (e : Externs) (r : Route) (h k : String) : Bool :=
+  h == k or not (e.identity r h == e.identity r k)
+Externs := AppliedWhenSettled & ProvisionalIsAssumed & IdentityCarriesHash
 
 -- ---------------------------------------------------------------- §4 The actions the first slice needs
 
--- `print` appends its text to the standard output, a place of the world, and changes nothing
--- else; reading a file gives what is at its place, and changes nothing (10.S2, D8: `print` is the
--- first action). Both take the token first, as 2.S17 writes them. The model is world_model.lut,
--- whose operations are externs to the host (10.S8); the first program with an action is
--- examples/hello.lut.
-Console : {
-  world : World,
-  print : W -> String -> W * Unit,
-  readFile : W -> String -> W * Maybe String,
+-- `print` writes its text as a line at the standard output, a place of the world, and changes no
+-- other place; reading a file gives what is at its place, and changes nothing (10.S2; D8: `print`
+-- the first action). Stated by their descriptions over the representation; the host's actions in
+-- world_model.lut are certified against them by the protocol of §5. `appendStr` is core's `String`
+-- concatenation, declared until core names it.
+appendStr : String -> String -> String
+Console (S : Concrete) : {
+  world : World S,
+  printLine : String -> S -> S * Unit,
+  readFile : String -> S -> S * Maybe String,
   stdout : String,
 }
-appendStr : String -> String -> String
-PrintAppends (c : Console) (w : W) (s : String) : Bool :=
-  c.world.read (after Unit (c.print w s)) c.stdout
-    == (match c.world.read w c.stdout { nothing -> just s ; just prior -> just (appendStr prior s) })
-PrintChangesOnlyStdout (c : Console) (w : W) (s : String) : Bool :=
-  sameAt c.world w (after Unit (c.print w s)) (except c.world.places [c.stdout])
-ReadGivesThePlace (c : Console) (w : W) (p : String) : Bool :=
-  result (Maybe String) (c.readFile w p) == c.world.read w p
-ReadChangesNothing (c : Console) (w : W) (p : String) : Bool :=
-  sameAt c.world w (after (Maybe String) (c.readFile w p)) c.world.places
-Console := PrintAppends & PrintChangesOnlyStdout & ReadGivesThePlace & ReadChangesNothing
+lineOf (s : String) : String := appendStr s "\n"
+PrintAppendsALine (S : Concrete) (c : Console S) (st : S) (s : String) : Bool :=
+  c.world.read (stateAfter S Unit (c.printLine s st)) c.stdout
+    == just (match c.world.read st c.stdout { nothing -> lineOf s ; just prior -> appendStr prior (lineOf s) })
+PrintChangesOnlyStdout (S : Concrete) (c : Console S) (st : S) (s p : String) : Bool :=
+  p == c.stdout or c.world.read (stateAfter S Unit (c.printLine s st)) p == c.world.read st p
+ReadGivesThePlace (S : Concrete) (c : Console S) (st : S) (p : String) : Bool :=
+  resultOf S (Maybe String) (c.readFile p st) == c.world.read st p
+ReadChangesNothing (S : Concrete) (c : Console S) (st : S) (p : String) : Bool :=
+  stateAfter S (Maybe String) (c.readFile p st) == st
+Console (S : Concrete) := PrintAppendsALine S & PrintChangesOnlyStdout S & ReadGivesThePlace S & ReadChangesNothing S
+
+-- ---------------------------------------------------------------- §5 Certifying a host action
+
+-- A host action is certified against its description along one chain of tokens (D-2026-10-13-a):
+-- observe the representation, act once, observe again, and compare what the description says
+-- with what the host did. Each token is used once. The protocol threads the token, so it is an
+-- action and not a law of this file: the certifier runs it, and its Bool is the evidence
+-- (`Evaluated`, laws.lth) for the law "the host agrees with its description" on that chain.
+-- the host's side of the console: the actions, routes to the host (world_model.lut), and the
+-- observation of the representation
+Host (S : Concrete) = {
+  observe : W -> W * S,
+  print : W -> String -> W * Unit,
+  readFile : W -> String -> W * Maybe String,
+}
+agreement (S : Concrete) (A : Concrete) (m : World S) (o : Host S) (d : Described S A m) (host : Action A) (w0 : W) : W * Bool :=
+  match o.observe w0 { (w1, before) ->
+  match host w1 { (w2, x) ->
+  match o.observe w2 { (w3, after) ->
+    (w3, d.describe before == (after, x)) } } }

@@ -1,22 +1,39 @@
--- world_model.lut: the first model of the world, through externs to the host.
+-- world_model.lut: the first model of the world: a representation, the descriptions of the console's
+-- actions over it, and the host's actions as externs.
 --
--- Draft 0, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1). The console of world.lth §4,
--- its operations routes to host functions (10.S8, 3.S13): the places are the standard output and
--- the files; what is read at a place is read by the host. The representation of `W` is the host's
--- and stays here (L6.12): a program sees the token through this model only.
+-- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1; draft 0 at 1f8c61c). The
+-- representation `State` is what the host observes of the world in one run: the standard output
+-- and the files read, each a place (10.S5: the library gives the representation and the
+-- observations). `console` describes `print` and `readFile` over it, pure functions that world.lth's
+-- laws test by sampling `State`; `host` is the actions themselves, routes to host functions
+-- (10.S8), certified against `console` by the protocol of world.lth §5 along one chain of tokens.
 
-import "world.lth" World Console
+import "world.lth" World Described Console Host appendStr lineOf
 
--- the observable world: its places, and what the host reads at one
-theWorld : World := {
-  places := extern "python:luthier.host.places",
-  read := extern "python:luthier.host.read_place",
+-- the representation: the standard output so far, and the files by path
+State = { stdout : String, files : List (String * String) }
+lookupFile (fs : List (String * String)) (p : String) : Maybe String :=
+  match fs { nil -> nothing ; cons (q, c) rest -> if p == q then just c else lookupFile rest p }
+
+-- the observable world: what is read at a place of the representation
+theWorld : World State := {
+  read := fn st p { if p == "stdout" then just st.stdout else lookupFile st.files p },
 }
 
--- the console: `print` appends to the standard output, `readFile` reads a file
-console : Console := {
+-- the console, by its descriptions: `print` appends a line to the standard output and changes
+-- nothing else; `readFile` gives what is at the path and changes nothing
+console : Console State := {
   world := theWorld,
+  printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := st.files }, unit) },
+  readFile := fn p st { (st, lookupFile st.files p) },
+  stdout := "stdout",
+}
+
+-- the host's actions, routes to Python: the token comes first and goes back unchanged (run.py
+-- makes it once per run), the state is read by `observe`
+HostConsole = Host State
+host : HostConsole := {
+  observe := extern "python:luthier.host.observe",
   print := extern "python:luthier.host.print_line",
   readFile := extern "python:luthier.host.read_file",
-  stdout := "stdout",
 }
