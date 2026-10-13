@@ -215,6 +215,11 @@ Blocks (a : Alpha) (e : Elaboration a) : Bool :=
                        declare "w0" [] world]
                       (block [rebind (pvar "w1") (app (app (nm "print") (nm "w0")) (literal (stringLit "x")))] (nm "w1")))
           (Match (App (App (Var "print") (Var "w0")) (Lit (StringConst "x"))) [(PPair (PVar "w1") PWild, Var "w1")])
+  -- a pattern against a value that is not an action is the same one-arm `match` (2.S17: the left
+  -- of `<-` is a pattern against what the right gives)
+  and gives a (e.term [declare "n" [] (binop "*" (nm "Int") (nm "Int"))]
+                      (block [rebind (pTuple [pvar "a", pvar "b"]) (nm "n")] (nm "a")))
+          (Match (Var "n") [(PPair (PVar "a") (PVar "b"), Var "a")])
   -- a bare name bound to a value that is not an action rebinds it: a `Let` on a fresh name
   and gives a (e.term [] (block [rebind (pvar "y") (literal (intLit 1)), rebind (pvar "y") (binop "+" (nm "y") (literal (intLit 1)))] (nm "y")))
           (Let "y0" (Var "Int") (Lit (IntConst 1)) (Let "y1" (Var "Int") (bin "+" (Var "y0") (Lit (IntConst 1))) (Var "y1")))
