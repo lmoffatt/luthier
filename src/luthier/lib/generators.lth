@@ -31,7 +31,7 @@
 --      list (7.R4); bindings by parameter and by type (7.R1).                                done
 --   §6 Budgets, every one an argument (7.S8).                                               done
 --   §7 The programs a rule of the checker is tested on: generators of `Violating` and `Clean`
---      for each rule, the census of tests/spec/ first, then one-edit mutations (program.lth). todo
+--      for each rule, the census of tests/spec/ first, then one-edit mutations (program.lth). done
 
 import "kernel_laws.lth" Concrete
 
@@ -186,3 +186,33 @@ positiveBudgets (tries redraws probes drawsPerCase coveringAbove : Nat) : Bool :
   0 < tries and 0 < redraws and 0 < probes and 0 < drawsPerCase and 0 < coveringAbove
 Budgets : U := { tries redraws probes drawsPerCase largestSize coveringAbove : Nat |
                     positiveBudgets tries redraws probes drawsPerCase coveringAbove }
+
+-- ---------------------------------------------------------------- §7 The programs a rule is tested on
+
+import "grammar.lth" SurfaceProgram
+import "program.lth" Violating Clean
+
+-- For each rule of the checker, the programs with a name that violates it and those with a name
+-- that does not (program.lth: `ReportsViolations`, `ReportsNoFalseFailure`; review of layers 0-1,
+-- B). At size 0 each generator walks its census, the programs of tests/spec/ for that rule, one per
+-- seed in order; at larger sizes it draws a well-formed program from a small pool of names (act
+-- names, core's, imports) and changes it by one edit aimed at the rule (a second `:=` of a name,
+-- a body at `U` that is no type, an `==` on a function, a name nothing defines, a constructor no
+-- law mentions). What `violating` gives violates the rule because its type says so: that is its
+-- obligation, tested as any generator's (7.S1).
+RuleCases (v : SurfaceProgram -> String -> Bool) : {
+  violating : Gen (Violating v),
+  clean : Gen (Clean v),
+  census : List (Violating v),
+  cleanCensus : List (Clean v),
+}
+nth (T : U) (xs : List T) (i : Nat) : Maybe T :=
+  match xs { nil -> nothing ; cons x rest -> if i == 0 then just x else nth T rest (i - 1) }
+-- at size 0, seed `i` gives the census's `i`-th program, while there is one
+CensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Nat) : Bool :=
+  i >= 2147483648 or (match nth (Violating v) c.census i { nothing -> true ;
+    just w -> (match c.violating 0 i { (x, s) -> x.p == w.p and x.n == w.n }) })
+CleanCensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : Nat) : Bool :=
+  i >= 2147483648 or (match nth (Clean v) c.cleanCensus i { nothing -> true ;
+    just w -> (match c.clean 0 i { (x, s) -> x.p == w.p and x.n == w.n }) })
+RuleCases (v : SurfaceProgram -> String -> Bool) := CensusFirst v & CleanCensusFirst v
