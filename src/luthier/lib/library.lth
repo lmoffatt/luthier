@@ -26,9 +26,9 @@
 --      they need the file's kind and the library set). Which paths are core and the
 --      libraries is the model's until core.lut exists.                                    done
 
-import "grammar.lth" SurfaceProgram SurfaceAct Surface ImportName declare define importAct name app termBody
-  record recordValue alias dataBody Binder explicit implicit Field literal stringLit floatLit universe binop tuple
-  pi sigma sigmaNamed subtype sum list proj
+import "grammar.lth" SurfaceProgram SurfaceAct Surface SurfacePattern Item ImportName declare define importAct name
+  app termBody record recordValue alias dataBody Binder explicit implicit Field literal stringLit floatLit universe
+  binop tuple pi sigma sigmaNamed subtype sum list proj block lambda ifThen matchOf bind rebind
 import "program.lth" actNames member coreNames
 
 -- ---------------------------------------------------------------- §1 Files and their kinds
@@ -67,11 +67,30 @@ Loader : {
   admitsAt : String -> SurfaceProgram -> Bool,
 }
 
--- an `extern` body: the application of the core name `extern` (3.S39), found anywhere in a body
-externBody (t : Surface) : Bool := match t { app f a -> externBody f ; name s -> s == "extern" ; _ -> false }
+-- an `extern` body: the application of the core name `extern` (3.S39), found anywhere in a body,
+-- inside a record value, a block, a lambda, a tuple or a list as well (the review's lib.4:
+-- world_model.lut writes its externs inside record values)
+externHead (t : Surface) : Bool := match t { app f a -> externHead f ; name s -> s == "extern" ; _ -> false }
+externBody (t : Surface) : Bool := externHead t or (match t {
+  app f a -> externBody f or externBody a ;
+  recordValue kvs -> anyExtern (pairValues kvs) ;
+  block items e -> externBody e or anyExtern (itemValues items) ;
+  lambda ps items e -> externBody e or anyExtern (itemValues items) ;
+  tuple ts -> anyExtern ts ; list ts -> anyExtern ts ;
+  binop o a b -> externBody a or externBody b ;
+  ifThen c a m -> externBody c or externBody a or (match m { nothing -> false ; just y -> externBody y }) ;
+  matchOf x arms -> externBody x or anyExtern (armBodies arms) ;
+  _ -> false })
+anyExtern (ts : List Surface) : Bool := match ts { nil -> false ; cons t rest -> externBody t or anyExtern rest }
+pairValues (kvs : List (String * Surface)) : List Surface := match kvs { nil -> nil ; cons (k, v) rest -> cons v (pairValues rest) }
+itemValues (items : List Item) : List Surface := match items { nil -> nil ;
+  cons it rest -> cons (match it { bind x v -> v ; rebind q v -> v }) (itemValues rest) }
+armBodies (arms : List (SurfacePattern * Surface)) : List Surface := match arms { nil -> nil ; cons (q, b) rest -> cons b (armBodies rest) }
 hasExtern (p : SurfaceProgram) : Bool := match p { nil -> false ;
   cons act rest -> (match act { define x bs t b -> (match b { termBody u -> externBody u ; _ -> false }) ; _ -> false })
                    or hasExtern rest }
+-- the programs with an extern: the domain of the law below, since a random program has none (lib.7)
+WithExtern : U := { p : SurfaceProgram | hasExtern p }
 sameNames (xs ys : List String) : Bool := allIn xs ys and allIn ys xs
 allIn (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> member x ys and allIn rest ys }
 
@@ -82,7 +101,13 @@ KindByExtension (l : Loader) : Bool :=
 -- a theory file never touches the world, so it rejects an extern (12.S23, L2.6); one direction
 -- only: what else a theory file may not hold (an action, a model of another theory) needs the
 -- types, and is the checker's (program.lth). A model file takes an extern.
-TheoryFileRejectsExtern (l : Loader) (p : SurfaceProgram) : Bool := not (hasExtern p) or not (l.admits TheoryFile p)
+TheoryFileRejectsExtern (l : Loader) (w : WithExtern) : Bool := not (l.admits TheoryFile w.p)
+-- and a theory file admits a theory: a declaration, a definition without extern (lib.2)
+TheoryFileAdmitsATheory (l : Loader) : Bool :=
+  l.admits TheoryFile [declare "A" [] universe, define "f" [] (just (name "A")) (termBody (name "a"))]
+-- a data file holds no acts: it is read as data (12.R1, a `.bib` as references), never admitted
+-- as a program (lib.5)
+DataFileHoldsNoActs (l : Loader) (p : SurfaceProgram) : Bool := not (l.admits DataFile p)
 ModelFileTakesExtern (l : Loader) : Bool :=
   l.admits ModelFile [define "f" [] (just (name "Int")) (termBody (app (name "extern") (name "route")))]
 
@@ -179,7 +204,9 @@ mentionsR (p : SurfaceProgram) : Bool := match p { nil -> false ;
 
 -- a small set of files: a primitive and an axiom where they belong (core, a library), the reject
 -- programs of 11.R1 to 11.R3 (n2, n3, n4 of tests/spec/), a primitive in a library, and `R` in a
--- binder's type and inside an arrow. Which of these paths is core or a library is the model's.
+-- binder's type and inside an arrow. Which path is core and which a library is the model's, with
+-- the anchors the chapter names (11.R2: `core.lut`; 11.R3: `core.lut` and `lib/`), so that a model
+-- cannot call every path core (lib.1).
 policyFiles : FileSystem := [
   ("core.lut", [define "Int" [] (just universe) (termBody (app (name "primitive") (literal (stringLit "integer"))))]),
   ("lib/algebra.lut", [define "realField" [] (just (app (name "CompleteOrderedField") (name "Real")))
@@ -194,6 +221,10 @@ policyFiles : FileSystem := [
 -- only the core says what the interpreter provides: a `primitive` body outside core is refused
 -- (11.R2); one direction only, as `TheoryFileRejectsExtern`
 PrimitiveOnlyInCore (l : Loader) : Bool := primitiveRefused l.isCore l.admitsAt policyFiles
+CoreAndLibrariesAreNamed (l : Loader) : Bool :=
+  l.isCore "core.lut" and l.isLibrary "lib/algebra.lut" and not (l.isCore "lib/money.lut")
+  and not (l.isCore "n3_primitive_outside_core.lut") and not (l.isLibrary "n4_axiom_outside_lib.lut")
+  and not (l.isCore "n4_axiom_outside_lib.lut")
 -- an axiom outside core and the libraries of the distribution is refused (11.R3); one direction
 AxiomOnlyInCoreAndLibraries (l : Loader) : Bool := axiomRefused l.isCore l.isLibrary l.admitsAt policyFiles
 -- `R` names no type (11.R1; `Real` and `Float64` do), in any file; one direction
@@ -218,3 +249,4 @@ AdmitsAtRefinesAdmits (l : Loader) (path : String) (p : SurfaceProgram) : Bool :
 Loader := KindByExtension & TheoryFileRejectsExtern & ModelFileTakesExtern & SeesExactly & SeesTheTheorysFields
   & NothingWithoutDemand & CheckingReadsTheories & RunningReadsWhatItReaches & VerifiesTheModel
   & PrimitiveOnlyInCore & AxiomOnlyInCoreAndLibraries & RNamesNoType & AdmitsAtRefinesAdmits
+  & TheoryFileAdmitsATheory & DataFileHoldsNoActs & CoreAndLibrariesAreNamed

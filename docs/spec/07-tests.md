@@ -78,7 +78,7 @@ A binding keyed by a parameter applies to that parameter in every law of the tes
 
 **7.S5. Dimensions from a census, entries from a numeric generator, structure from a family.** [decided D-2026-10-06-ab] A vector generator is a dimension generator and an entry generator. The dimensions default to the census 0, 1, 2, 3, 5, 10 (LAPACK tests at these and at 50), which a binding can change. Matrices with structure are drawn by named families, each a generator: unit vectors, uniform on the sphere; probability vectors (Dirichlet); positions in a box; symmetric; symmetric positive definite with a given spectrum; orthogonal, drawn uniformly (the Haar measure, from the QR factorization of a Gaussian matrix with the signs of the diagonal of R); prescribed singular values with a condition number `κ` and a mode (one large value, one small value, geometric, arithmetic, log-uniform), as LAPACK's xLATMS; low rank; nearly singular; scaled near underflow or overflow; diagonal and triangular. The constructions are those of section 5 of `record/generators-2026-10-06.md`. A family that claims a distribution states it as a law (spec 7.S1); Mezzadri shows that a QR without the sign correction gives orthogonal matrices with the wrong distribution, which their type cannot see. A family can give the pair (`κ`, A), so that a law states its tolerance as a function of `κ`.
 
-The generic generators (spec 7.S2, spec 7.S3) and the families are to be written in Luthier (L14.2): the functors and the numeric generators in `lib/generators.lut`, the families in `lib/array.lut`, both `[proposed]` and not written. What exists is `lib/random.lut`: `Gen`, the congruential source `nextSeed`, `randBelow`, the generators `genInt`, `genNat`, `genBool`, `genFloat64`, `genList`, `genSeed`, and the type `Seed`; it has no census, no metric, no family.
+The generic generators (spec 7.S2, spec 7.S3) and the families are to be written in Luthier (L14.2): the functors and the numeric generators in `lib/generators.lut`, the families in `lib/array.lut`, both `[proposed]` and not written. [decided D-2026-10-13-ad] Their theories are `src/luthier/lib/generators.lth` (the source and its laws, sampling by weight, the metrics by their invariance, exhaustive and sized generators, filters, censuses, bindings, budgets) with the models of `generators_model.lut`; the functors over the forms of a type wait for core. What exists is `lib/random.lut`: `Gen`, the congruential source `nextSeed`, `randBelow`, the generators `genInt`, `genNat`, `genBool`, `genFloat64`, `genList`, `genSeed`, and the type `Seed`; it has no census, no metric, no family.
 
 ## §6 Functions and theories
 
@@ -138,7 +138,10 @@ A statistical law (the uniformity of draws, a density pair, the transform of res
 of `lib/test.lut`, the one with the most parameters in the language, so each option is a named
 argument with a default: the mode (`exhaustive`, `sampled` with its metric), the number of cases,
 the size, the bindings and the profile, which is a record value, and every budget of 7.S8. The
-directive forms of 7.R1 are its older surface (`spec 2`).
+directive forms of 7.R1 are its older surface (`spec 2`). [decided D-2026-10-13-ad] `test` builds a
+`TestSpec`, data the module keeps (D9 of the plan, `test "x.lut"` the action), in
+`src/luthier/lib/test.lth`, which also states what a run gives (its coverage the weakest of the
+mode's and the bindings', its cases those asked or not run, 7.S12) and the grades ordered (7.S10).
 
 ## Open
 
