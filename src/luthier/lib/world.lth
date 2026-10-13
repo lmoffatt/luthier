@@ -14,8 +14,9 @@
 -- keyword with no `==`, which a program never constructs; `act`, applying an action to a token;
 -- `own`, whether an action concerns Luthier's own store. Everything else is a library's (10.S5,
 -- D-2026-10-12-al): what the parts of the world are, what an observation of one is, how a class
--- of machines is described. So the theories here take the library's representation of the world
--- as a type `R`, the model of `W`, and state over it what the core asks: an action is a function
+-- of machines is described. So the theories here are stated over `W` itself, and what the library
+-- adds, the representation of `W` and the observations of it, stays private by ascription (L6.12):
+-- a model of `World` says what is read at each place. The core asks: an action is a function
 -- over the token with its result (10.S3); it changes only what its declaration says (10.S7); an
 -- action on Luthier's own store is idempotent and a world action never is (10.S6); an extern is a
 -- route, read when a demand reaches it, validated against its type's laws before it is applied
@@ -42,15 +43,14 @@
 
 -- ---------------------------------------------------------------- §1 The token and actions
 
--- The library's representation of the world, the model of `W`: a type `R` the core never names.
 -- An action is a function that takes the token and gives its result with the token after (10.S3,
 -- 10.S4): its type says it is an action, and a function that mentions no `W` holds no effect
 -- (10.S1). `act` applies it. The token has no `==` (4.R8); a program constructs none, it enters at
 -- `main` or in the session (D8: `W` optional in `main`, a `main` without it a pure script).
-Action (R A : U) = R -> A * R
-act (R A : U) (a : Action R A) (w : R) : A * R := a w
-after (R A : U) (p : A * R) : R := match p { (x, w) -> w }
-result (R A : U) (p : A * R) : A := match p { (x, w) -> x }
+Action (A : U) = W -> A * W
+act (A : U) (a : Action A) (w : W) : A * W := a w
+after (A : U) (p : A * W) : W := match p { (x, w) -> w }
+result (A : U) (p : A * W) : A := match p { (x, w) -> x }
 
 -- Two kinds of action (10.S6): one on Luthier's own store (writing a certificate, recording a
 -- test) is idempotent and may be served from the memo; one on the world runs each time it is
@@ -59,21 +59,22 @@ result (R A : U) (p : A * R) : A := match p { (x, w) -> x }
 -- (D4): an action whose new token nobody uses is not demanded, so every action lies on the chain
 -- that reaches the output; that is a rule of the checker over blocks (program.lth, 4.R12), not a
 -- law here.
-Declared (R A : U) = { run : Action R A, own : Bool, places : List String }
+Declared (A : U) = { run : Action A, own : Bool, places : List String }
 
 -- An observable world: the library says what a place is (a file path, the standard output, the
--- clock) and what is read at one; two tokens are told apart by what is read at the places. The
+-- clock) and what is read at one; the token has no `==`, so two tokens are told apart only by
+-- what is read at the places. The
 -- laws a world owes: an own action done twice leaves what is read everywhere as once (10.S6); an
 -- action changes only the places its declaration names (10.S7, §2).
-World (R : U) : {
+World : {
   places : List String,
-  read : R -> String -> Maybe String,
+  read : W -> String -> Maybe String,
 }
-sameAt (R : U) (m : World R) (w v : R) (ps : List String) : Bool :=
-  match ps { nil -> true ; cons p rest -> m.read w p == m.read v p and sameAt R m w v rest }
+sameAt (m : World) (w v : W) (ps : List String) : Bool :=
+  match ps { nil -> true ; cons p rest -> m.read w p == m.read v p and sameAt m w v rest }
 -- an own action is idempotent: running it on its own result reads the same everywhere
-OwnIsIdempotent (R : U) (m : World R) (A : U) (a : Declared R A) (w : R) : Bool :=
-  not a.own or sameAt R m (after R A (a.run w)) (after R A (a.run (after R A (a.run w)))) m.places
+OwnIsIdempotent (m : World) (A : U) (a : Declared A) (w : W) : Bool :=
+  not a.own or sameAt m (after A (a.run w)) (after A (a.run (after A (a.run w)))) m.places
 
 -- ---------------------------------------------------------------- §2 Places and what an action changes
 
@@ -84,24 +85,24 @@ OwnIsIdempotent (R : U) (m : World R) (A : U) (a : Declared R A) (w : R) : Bool 
 except (ps xs : List String) : List String :=
   match ps { nil -> nil ; cons p rest -> if memberStr p xs then except rest xs else cons p (except rest xs) }
 memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
-ChangesOnlyDeclared (R : U) (m : World R) (A : U) (a : Declared R A) (w : R) : Bool :=
-  sameAt R m w (after R A (a.run w)) (except m.places a.places)
+ChangesOnlyDeclared (m : World) (A : U) (a : Declared A) (w : W) : Bool :=
+  sameAt m w (after A (a.run w)) (except m.places a.places)
 
 -- What cannot be tested is assumed, so that the certificate of a run says under what hypotheses it
 -- holds (10.S13, 6.S10): what is written at a place is read back at it (the disk persists); a
 -- place no action touched reads the same after the program was off. Stated as laws, their
 -- evidence is a citation or an assumption (laws.lth, `Assumed`), never a sample.
-Persistence (R : U) : {
-  world : World R,
-  write : R -> String -> String -> R,
+Persistence : {
+  world : World,
+  write : W -> String -> String -> W,
 }
-WriteThenRead (R : U) (s : Persistence R) (w : R) (p c : String) : Bool :=
+WriteThenRead (s : Persistence) (w : W) (p c : String) : Bool :=
   not (memberStr p s.world.places) or s.world.read (s.write w p c) p == just c
-WriteChangesOnlyItsPlace (R : U) (s : Persistence R) (w : R) (p c : String) : Bool :=
-  sameAt R s.world w (s.write w p c) (except s.world.places [p])
-Persistence (R : U) := WriteThenRead R & WriteChangesOnlyItsPlace R
+WriteChangesOnlyItsPlace (s : Persistence) (w : W) (p c : String) : Bool :=
+  sameAt s.world w (s.write w p c) (except s.world.places [p])
+Persistence := WriteThenRead & WriteChangesOnlyItsPlace
 
-World (R : U) := OwnIsIdempotent R & ChangesOnlyDeclared R
+World := OwnIsIdempotent & ChangesOnlyDeclared
 
 import "test.lth" TestSpec Tester
 import "laws.lth" Evidence Verdict Refuted Confirmed Supported Unsettled Cites Assumes
@@ -122,43 +123,43 @@ Route = { name : String, route : String, provisional : Bool }
 -- a refutation refuses, and an extern whose type has no law to validate against is not applied
 -- (L11.3), unless it is provisional, which is applied, recorded as debt and never certified
 -- (4.R5). The certificate stays by hash: a second demand with the same hash does not test again.
-Externs (R : U) : {
-  read : R -> Route -> Maybe String * R,
+Externs : {
+  read : W -> Route -> Maybe String * W,
   verdictOf : Route -> Verdict,
   applied : Route -> Bool,
   identity : Route -> String -> String,
 }
 -- refused when its type's laws are refuted; not applied when nothing settles them, unless provisional
-RefusedWhenRefuted (R : U) (e : Externs R) (r : Route) : Bool :=
+RefusedWhenRefuted (e : Externs) (r : Route) : Bool :=
   not (e.verdictOf r == Refuted) or not (e.applied r)
-NotAppliedWithoutLaw (R : U) (e : Externs R) (r : Route) : Bool :=
+NotAppliedWithoutLaw (e : Externs) (r : Route) : Bool :=
   r.provisional or not (e.verdictOf r == Unsettled) or not (e.applied r)
-ProvisionalIsApplied (R : U) (e : Externs R) (r : Route) : Bool := not r.provisional or e.applied r
+ProvisionalIsApplied (e : Externs) (r : Route) : Bool := not r.provisional or e.applied r
 -- the identity of what it produces carries the hash of what was read, so two reads of different
 -- bytes are two identities
-IdentityCarriesHash (R : U) (e : Externs R) (r : Route) (bytes other : String) : Bool :=
+IdentityCarriesHash (e : Externs) (r : Route) (bytes other : String) : Bool :=
   bytes == other or not (e.identity r (hash bytes) == e.identity r (hash other))
-Externs (R : U) := RefusedWhenRefuted R & NotAppliedWithoutLaw R & ProvisionalIsApplied R & IdentityCarriesHash R
+Externs := RefusedWhenRefuted & NotAppliedWithoutLaw & ProvisionalIsApplied & IdentityCarriesHash
 
 -- ---------------------------------------------------------------- §4 The actions the first slice needs
 
 -- `print` appends its text to the standard output, a place of the world, and changes nothing
 -- else; reading a file gives what is at its place, and changes nothing (10.S2, D8: `print` is the
 -- first action). Both are models of `Declared`, the first naming its place and the second none.
-Console (R : U) : {
-  world : World R,
-  print : String -> Action R Unit,
-  readFile : String -> Action R (Maybe String),
+Console : {
+  world : World,
+  print : String -> Action Unit,
+  readFile : String -> Action (Maybe String),
   stdout : String,
 }
 appendStr : String -> String -> String
-PrintAppends (R : U) (c : Console R) (w : R) (s : String) : Bool :=
-  c.world.read (after R Unit (c.print s w)) c.stdout
+PrintAppends (c : Console) (w : W) (s : String) : Bool :=
+  c.world.read (after Unit (c.print s w)) c.stdout
     == (match c.world.read w c.stdout { nothing -> just s ; just prior -> just (appendStr prior s) })
-PrintChangesOnlyStdout (R : U) (c : Console R) (w : R) (s : String) : Bool :=
-  sameAt R c.world w (after R Unit (c.print s w)) (except c.world.places [c.stdout])
-ReadGivesThePlace (R : U) (c : Console R) (w : R) (p : String) : Bool :=
-  result R (Maybe String) (c.readFile p w) == c.world.read w p
-ReadChangesNothing (R : U) (c : Console R) (w : R) (p : String) : Bool :=
-  sameAt R c.world w (after R (Maybe String) (c.readFile p w)) c.world.places
-Console (R : U) := PrintAppends R & PrintChangesOnlyStdout R & ReadGivesThePlace R & ReadChangesNothing R
+PrintChangesOnlyStdout (c : Console) (w : W) (s : String) : Bool :=
+  sameAt c.world w (after Unit (c.print s w)) (except c.world.places [c.stdout])
+ReadGivesThePlace (c : Console) (w : W) (p : String) : Bool :=
+  result (Maybe String) (c.readFile p w) == c.world.read w p
+ReadChangesNothing (c : Console) (w : W) (p : String) : Bool :=
+  sameAt c.world w (after (Maybe String) (c.readFile p w)) c.world.places
+Console := PrintAppends & PrintChangesOnlyStdout & ReadGivesThePlace & ReadChangesNothing
