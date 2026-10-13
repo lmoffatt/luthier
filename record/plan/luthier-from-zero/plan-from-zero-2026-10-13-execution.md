@@ -104,6 +104,12 @@ by Luciano.
   Claude sessions coordinate by message (file owners: see the coordinator's first message, and
   record/IA/*/prompt*.md for every brief).
 
+- 2026-10-13, night (the coordinating session): the plans moved to record/plan/<objective>/
+  (2578abf); this is the plan in force, `plan-implementation-2026-10-13-*` beside it superseded.
+  Step 2.5 done (`kernel.py`, d111060); step 2.6 (`elaborate.py`, `luthier eval`) running; layer 2's
+  `generators.lth` and `test.lth` written by luthier-03, who pauses until the specimens report.
+  Next: step 4.1, `check.py` with `luthier check`, then `v0.2`.
+
 ## Rules for every step
 
 - Commit before every change; one theory or one specimen, at least one commit; the message names the
@@ -195,8 +201,12 @@ by Luciano.
 3. Both pass the parser. Then the external review of layer 0 (`grammar.lth` was reviewed already).
 4. The translation table of 2.S12, surface tree to `Term`, in `term.lth` or its own theory.
 5. `src/luthier/kernel.py`, the evaluator, the specimen of `term.lth` (D-2026-10-13-u, brought
-   forward from step 4): `luthier eval` reduces a term of a parsed file, unchecked until step 4.
-   With an extern binding the case laws of `grammar.lth` can then be evaluated against `parse.py`.
+   forward from step 4). Done: bites 1 to 1e by Codex (b9ae112 to d111060), 53 law tests, no xfail;
+   its runs found four defects of `term.lth`, fixed in the theory.
+6. `src/luthier/elaborate.py`, the specimen of `translation.lth`, and `luthier eval FILE NAME`:
+   parse, elaborate, reduce. Running (brief record/IA/elaborate-2026-10-13/). With it Luthier runs a
+   file; unchecked until step 4. With an extern binding the case laws of `grammar.lth` can then be
+   evaluated against `parse.py`.
 
 ## Step 3. The checker's theories (layer 1, by the session, Z9)
 
