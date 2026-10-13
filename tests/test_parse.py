@@ -6,8 +6,6 @@ from pathlib import Path
 import random
 import re
 
-import pytest
-
 from luthier.ebnf import cats_of, count_derivations, lits_of, lits_of_names, luthier_syntax
 from luthier.parse import layout, lex, parse, print_program
 from luthier.surface import (
@@ -228,28 +226,14 @@ def _is_luthier_syntax_act(segment: list[tuple[str, str]]) -> bool:
     )
 
 
-def _derives_by_acts(text: str, *, skip_luthier_syntax: bool = True) -> bool:
-    """Check ``program ::= { act newline }`` one laid-out act at a time.
+def _derives_by_acts(text: str) -> bool:
+    """Check every laid-out act, including the grammar's own definition."""
+    from luthier.ebnf import derives_program
 
-    The one bootstrap act defining ``luthierSyntax`` has 1842 laid-out tokens and
-    is intentionally omitted here; a dedicated skipped test below records that
-    missing recognizer check.
-    """
     lr = lex(text)
     if isinstance(lr, LexFailed):
         return False
-    views = list(layout(lr.tokens))
-    start = 0
-    for i, tv in enumerate(views):
-        if tv == ("newline", "\n"):
-            segment = views[start:i]
-            if skip_luthier_syntax and _is_luthier_syntax_act(segment):
-                start = i + 1
-                continue
-            if count_derivations(G, segment, "act") == 0:
-                return False
-            start = i + 1
-    return start == len(views)
+    return derives_program(G, list(layout(lr.tokens)), end=("newline", "\n"))
 
 
 # ---------------------------------------------------------------- general laws
@@ -280,9 +264,6 @@ def test_parses_what_derives():
         assert _is_parsed(parse(text)) == _derives_by_acts(text), text
 
 
-@pytest.mark.skip(
-    reason="count_derivations too slow on 1842 tokens; the recognizer will be replaced"
-)
 def test_parses_what_derives_luthier_syntax_act():
     text = (LIB / "grammar.lth").read_text(encoding="utf-8")
     lr = lex(text)
@@ -293,20 +274,12 @@ def test_parses_what_derives_luthier_syntax_act():
         if tv == ("newline", "\n"):
             segment = views[start:i]
             if _is_luthier_syntax_act(segment):
-                assert len(segment) == 1842
                 assert count_derivations(G, segment, "act") > 0
                 return
             start = i + 1
     raise AssertionError("luthierSyntax act not found")
 
 
-@pytest.mark.xfail(
-    reason=(
-        "defect of grammar.lth: `match f { p -> q } { r -> s }` "
-        "has two derivations with different trees"
-    ),
-    strict=True,
-)
 def test_match_followed_by_block_is_unambiguous():
     text = "x := match f { p -> q } { r -> s }"
     lr = lex(text)
@@ -314,6 +287,10 @@ def test_match_followed_by_block_is_unambiguous():
     views = list(layout(lr.tokens))
     assert views[-1] == ("newline", "\n")
     assert count_derivations(G, views[:-1], "act") == 1
+    assert parse(text) == defx(
+        App(MatchOf(nm("f"), ((PApp("p", ()), nm("q")),)),
+            Block((), Binop("->", nm("r"), nm("s"))))
+    )
 
 
 def test_errors_have_lines():
@@ -455,6 +432,30 @@ def test_brackets_ignore_breaks():
     same_layout(
         "x := match m {\n  a -> b ;\n  c -> e }",
         "x := match m { a -> b ; c -> e }",
+    )
+
+
+def test_layout_classifies_brackets_from_the_prefix():
+    same_layout("x := quote {\n a\n b\n}", "x := quote { a b }")
+    same_layout(
+        "x := match (f {\n a := 1\n a\n}) {\n p -> q\n}",
+        "x := match (f { a := 1 ; a }) { p -> q }",
+    )
+    same_layout(
+        "x := match [match m {\n p -> q\n}] {\n r -> s\n}",
+        "x := match [match m { p -> q }] { r -> s }",
+    )
+    same_layout(
+        "x := < a : (A >\n b)\n > b > c\ny := d",
+        "x := < a : (A > b) > b > c\ny := d",
+    )
+    lr = lex("x := < a : A > b > c\ny := d")
+    assert isinstance(lr, Lexed)
+    assert sum(text == "\n" for _, text in layout(lr.tokens)) == 2
+    # Match arms suppress the break; a following block inserts a separator.
+    same_layout(
+        "x := match f {\n p -> q\n} {\n a := 1\n a\n}",
+        "x := match f { p -> q } { a := 1 ; a }",
     )
 
 
@@ -617,6 +618,9 @@ def test_open_form_ends_its_term():
 
 def test_print_parenthesizes():
     trees = [
+        MatchOf(App(nm("f"), Block((), nm("a"))), ((PApp("p", ()), nm("q")),)),
+        Sum((("a", Binop(">", nm("A"), nm("b"))),)),
+        Sum((("a", Pi(("x",), nm("A"), nm("B"))),)),
         IfThen(nm("c"), IfThen(nm("d"), nm("y"), None), nm("b")),
         IfThen(
             nm("c"),
@@ -648,6 +652,27 @@ def test_sum_as_argument():
         App(nm("f"), Sum((("a", nm("A")), ("b", nm("B")))))
     )
     assert isinstance(parse("x := f < a : A | b : B >"), ParseFailed)
+    assert parse("x := < a : A > b > c") == defx(
+        Binop(">", App(Sum((("a", nm("A")),)), nm("b")), nm("c"))
+    )
+    assert parse("x := < a : (A > b) >") == defx(
+        Sum((("a", Binop(">", nm("A"), nm("b"))),))
+    )
+
+
+def test_sum_alternative_precedence_and_parentheses():
+    for value in [
+        "A & B -> C or D and E == F + G * H",
+        "(if c then A else B)", "((x : A) -> B)", "(A > b)",
+    ]:
+        text = f"x := < a : {value} >"
+        assert _derives_by_acts(text)
+        result = parsed(text)
+        assert parse(print_program(result.program)) == result
+    for value in ["if c then A else B", "(x : A) -> B"]:
+        text = f"x := < a : {value} >"
+        assert isinstance(parse(text), ParseFailed)
+        assert not _derives_by_acts(text)
 
 
 # ---------------------------------------------------------------- tree laws
@@ -976,6 +1001,21 @@ def test_pattern_tree():
     assert parse("x := match e { }") == defx(
         MatchOf(nm("e"), ())
     )
+
+
+def test_scrutinee_tree():
+    assert parse("x := match g.lex s { a -> b }") == defx(
+        MatchOf(App(nm("g.lex"), nm("s")), ((PApp("a", ()), nm("b")),))
+    )
+    assert parse("x := match f { p -> q } { r -> s }") == defx(
+        App(MatchOf(nm("f"), ((PApp("p", ()), nm("q")),)),
+            Block((), Binop("->", nm("r"), nm("s"))))
+    )
+    assert parse("x := match (f { a := 1 ; a }) { r -> s }") == defx(
+        MatchOf(App(nm("f"), Block((Bind("a", numeral(1)),), nm("a"))),
+                ((PApp("r", ()), nm("s")),))
+    )
+    assert isinstance(parse("x := match f { a := 1 ; a } { r -> s }"), ParseFailed)
 
 
 def test_named_arg_tree():

@@ -1,6 +1,10 @@
 """The Python specimen of `Derives` (src/luthier/ebnf.py) on `luthierSyntax` read from grammar.lth."""
 
 import re
+from pathlib import Path
+from time import perf_counter
+
+import pytest
 
 from luthier.ebnf import cats_of, count_derivations, lits_of, lits_of_names, luthier_syntax
 
@@ -62,3 +66,48 @@ def test_a_program_derives_act_by_act():
     assert derives_program(G, [])
     assert not derives_program(G, views("x := f < a : A | b : B >") + views("y := a"))
     assert not derives_program(G, views("x := a")[:-1])
+
+
+@pytest.mark.parametrize("filename", ["grammar.lth", "ebnf.lth", "ebnf_model.lut"])
+def test_bootstrap_file_derives_in_under_ten_seconds(filename):
+    from luthier.ebnf import derives_program
+    from luthier.parse import layout, lex
+    from luthier.surface import Lexed
+
+    path = Path(__file__).parents[1] / "src/luthier/lib" / filename
+    lexed = lex(path.read_text(encoding="utf-8"))
+    assert isinstance(lexed, Lexed)
+    tokens = list(layout(lexed.tokens))
+    started = perf_counter()
+    assert derives_program(G, tokens, end=("newline", "\n"))
+    assert perf_counter() - started < 10
+
+
+def test_earley_preserves_nullable_choices_and_consuming_repetition():
+    from luthier.ebnf import Ebnf
+
+    def count(rhs, tokens):
+        return count_derivations(Ebnf("s", (("s", rhs),)), tokens)
+
+    eps = ("eps",)
+    a = ("lit", "a")
+    token = [("anything", "a")]
+    assert count(("seq", ()), []) == 1
+    assert count(("alt", ()), []) == 0
+    assert count(("opt", eps), []) == 2
+    assert count(("alt", (a, a, a)), token) == 2
+    assert count(("seq", (("opt", a), ("opt", a))), token) == 2
+    assert count(("rep", ("opt", a)), []) == 1
+    assert count(("rep", ("opt", a)), token * 3) == 1
+    assert count(("rep", eps), token) == 0
+
+
+def test_earley_counts_duplicate_rules_and_matches_categories():
+    from luthier.ebnf import Ebnf
+
+    grammar = Ebnf("s", (("s", ("cat", "name")), ("s", ("lit", "a"))))
+    assert count_derivations(grammar, [("name", "a")]) == 2
+    assert count_derivations(grammar, [("number", "a")]) == 1
+    assert count_derivations(grammar, [("name", "b")]) == 1
+    assert count_derivations(grammar, [("number", "b")]) == 0
+    assert count_derivations(grammar, [], "missing") == 0

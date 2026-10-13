@@ -158,87 +158,11 @@ class _Frame:
     opener: str
     kind: str
     first_item_column: int | None = None
+    match_pending: bool = False
 
 
 def _continuation_start(text: str) -> bool:
     return text in {"then", "else"} or text in _BINARY_OPERATORS
-
-
-def _brace_looks_like_match_body(tokens: tuple[Token, ...], index: int) -> bool:
-    """Whether this brace can be the ``{ arms }`` delimiter of ``match``.
-
-    Empty arms are valid.  Otherwise every arm has a top-level ``->``; seeing
-    one before a top-level item separator is enough to distinguish ordinary
-    record/block/data braces in the cases where layout itself must choose.
-    A block whose sole value is an arrow term is genuinely ambiguous after a
-    match subject; choosing the earliest viable match brace agrees with the
-    parser and is reported as a grammar ambiguity.
-    """
-    pairs = {")": "(", "]": "[", "}": "{", ">": "<"}
-    opens = set(pairs.values())
-    stack: list[str] = []
-    j = index + 1
-    if j < len(tokens) and tokens[j].text == "}":
-        return True
-    while j < len(tokens):
-        text = tokens[j].text
-        if text in opens:
-            stack.append(text)
-        elif text in pairs:
-            if text == "}" and not stack:
-                return False
-            if stack and stack[-1] == pairs[text]:
-                stack.pop()
-        elif not stack:
-            if text == "->":
-                return True
-            if text in {":=", "<-"}:
-                return False
-        j += 1
-    return False
-
-
-def _classify_brace(tokens: tuple[Token, ...], index: int) -> str:
-    # `data` is an item-separating brace; `quote` groups one term.  The latter
-    # is not stated by 2.S4 but is forced by quote's production.
-    prev = tokens[index - 1].text if index else ""
-    if prev == "data":
-        return "separating"
-    if prev == "quote":
-        return "ignoring"
-
-    # A brace immediately after `match` must belong to its subject.  Otherwise
-    # an arm-looking brace belongs to the nearest unmatched match in this act.
-    if prev == "match" or not _brace_looks_like_match_body(tokens, index):
-        return "separating"
-
-    pairs = {")": "(", "]": "[", "}": "{", ">": "<"}
-    opens = set(pairs.values())
-    stack: list[str] = []
-    for j in range(index - 1, -1, -1):
-        t = tokens[j]
-        text = t.text
-        if text in pairs:
-            stack.append(pairs[text])
-            continue
-        if text in opens:
-            if stack and stack[-1] == text:
-                stack.pop()
-                continue
-            if not stack:
-                # An unmatched opener contains the candidate; a match outside
-                # that container cannot own it.
-                break
-        if stack:
-            continue
-        if text in {";", ","}:
-            break
-        if text == "match":
-            return "ignoring"
-        # Do not cross the beginning of this top-level act into a previous act.
-        if t.column == 0 and (j == 0 or tokens[j - 1].line < t.line):
-            break
-    return "separating"
 
 
 def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
@@ -255,6 +179,9 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
             if f.first_item_column is None and t.text != "}":
                 f.first_item_column = t.column
 
+    # A pending match belongs to its bracket level. Brackets in its scrutinee
+    # shield their own braces; the first brace back at this level opens arms.
+    root_match_pending = False
     prev: Token | None = None
     for idx, tok in enumerate(tokens):
         if prev is not None and tok.line > prev.line:
@@ -278,6 +205,7 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
             else:
                 if tok.column == 0 and next_text != "}" and not _continuation_start(next_text):
                     append_token(Token("newline", "\n", tok.line, tok.column))
+                    root_match_pending = False
                 # An indented line continues the act.
 
         opens_angle = (
@@ -287,7 +215,15 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
             and tokens[idx + 2].text == ":"
         )
         if tok.text in {"(", "[", "{"} or opens_angle:
-            kind = _classify_brace(tokens, idx) if tok.text == "{" else "ignoring"
+            kind = "ignoring"
+            if tok.text == "{":
+                pending = stack[-1].match_pending if stack else root_match_pending
+                kind = "ignoring" if pending or (prev and prev.text == "quote") else "separating"
+                if pending:
+                    if stack:
+                        stack[-1].match_pending = False
+                    else:
+                        root_match_pending = False
             append_token(tok)
             stack.append(_Frame(tok.text, kind))
         elif tok.text in {")", "]", ">", "}"}:
@@ -300,6 +236,11 @@ def _layout_tokens(tokens: tuple[Token, ...]) -> tuple[Token, ...]:
         else:
             append_token(tok)
 
+        if tok.text == "match":
+            if stack:
+                stack[-1].match_pending = True
+            else:
+                root_match_pending = True
         prev = tok
 
     if out and out[-1].text != "\n":
@@ -325,7 +266,6 @@ class _Parser:
         self.i = 0
         self.furthest = 0
         self.expected: set[str] = set()
-        self._stop_arg_brace = 0
 
     def _mark(self, expected: str) -> None:
         if self.i > self.furthest:
@@ -703,8 +643,6 @@ class _Parser:
         """appTerm ::= projTerm { argTerm }"""
         value = self.projTerm()
         while self._starts_arg_atom():
-            if self._stop_arg_brace and self._peek("{"):
-                break
             start = self.i
             try:
                 arg = self.argTerm()
@@ -730,56 +668,98 @@ class _Parser:
             value = Proj(value, self._name())
         return value
 
+    def sumAlt(self) -> Surface:
+        left = self.sumArrow()
+        if self._peek("&"):
+            self._take("&")
+            return Binop("&", left, self.sumAlt())
+        return left
+
+    def sumArrow(self) -> Surface:
+        left = self.sumOr()
+        if self._peek("->"):
+            self._take("->")
+            return Binop("->", left, self.sumArrow())
+        return left
+
+    def sumOr(self) -> Surface:
+        return self._left_chain(self.sumAnd, {"or"})
+
+    def sumAnd(self) -> Surface:
+        return self._left_chain(self.sumCmp, {"and"})
+
+    def sumCmp(self) -> Surface:
+        return self._left_chain(self.addTerm, {"==", "/=", "<", "<=", ">="})
+
+    def scrutinee(self) -> Surface:
+        return self._left_chain(self.sAnd, {"or"})
+
+    def sAnd(self) -> Surface:
+        return self._left_chain(self.sCmp, {"and"})
+
+    def sCmp(self) -> Surface:
+        return self._left_chain(self.sAdd, {"==", "/=", "<", "<=", ">", ">="})
+
+    def sAdd(self) -> Surface:
+        return self._left_chain(self.sMul, {"+", "-"})
+
+    def sMul(self) -> Surface:
+        return self._left_chain(self.sNeg, {"*", "/", "mod"})
+
+    def sNeg(self) -> Surface:
+        if self._peek("-"):
+            self._take("-")
+            return Neg(self.sNeg())
+        return self.sApp()
+
+    def sApp(self) -> Surface:
+        value = self.sProj()
+        while self._starts_s_arg_atom():
+            value = App(value, self.sArg())
+        return value
+
+    def sProj(self) -> Surface:
+        value = self.sAtom()
+        while self._peek("."):
+            self._take(".")
+            value = Proj(value, self._name())
+        return value
+
+    def sArg(self) -> Surface:
+        value = self.sArgAtom()
+        while self._peek("."):
+            self._take(".")
+            value = Proj(value, self._name())
+        return value
+
+    def sAtom(self) -> Surface:
+        return self.atom() if self._peek("<") else self.sArgAtom()
+
+    def _starts_s_arg_atom(self) -> bool:
+        return self.i < len(self.tokens) and (
+            self.tokens[self.i].kind in {"name", "number", "string"}
+            or self.tokens[self.i].text in {"U", "W", "(", "["}
+        )
+
+    def sArgAtom(self) -> Surface:
+        if not self._starts_s_arg_atom():
+            self._fail("scrutinee atom")
+        return self.argAtom()
+
     def atom(self) -> Surface:
-        """atom ::= argAtom | "<" name ":" term { "|" name ":" term } ">"""
+        """atom ::= argAtom | '<' name ':' sumAlt { '|' name ':' sumAlt } '>'"""
         if self._peek("<"):
             self._take("<")
-            first_name = self._name()
-            self._take(":")
-            value_start = self.i
-
-            def exact_term(a: int, b: int) -> Surface | None:
-                if a >= b:
-                    return None
-                sub = _Parser(self.tokens[a:b])
-                try:
-                    value = sub.term()
-                    return value if sub.i == len(sub.tokens) else None
-                except _NoParse:
-                    return None
-
-            def alternatives(name: str, a: int):
-                # `>` is also a comparison operator. Try later boundaries
-                # first, so a viable comparison inside an alternative is kept
-                # inside the sum; if no later close works, an earlier `>` is
-                # the delimiter.
-                for j in range(len(self.tokens) - 1, a - 1, -1):
-                    boundary = self.tokens[j].text
-                    if boundary not in {"|", ">"}:
-                        continue
-                    value = exact_term(a, j)
-                    if value is None:
-                        continue
-                    if boundary == ">":
-                        return [(name, value)], j + 1
-                    if (
-                        j + 2 >= len(self.tokens)
-                        or self.tokens[j + 1].kind != "name"
-                        or self.tokens[j + 2].text != ":"
-                    ):
-                        continue
-                    rest = alternatives(self.tokens[j + 1].text, j + 3)
-                    if rest is not None:
-                        more, end = rest
-                        return [(name, value), *more], end
-                return None
-
-            parsed = alternatives(first_name, value_start)
-            if parsed is None:
-                self._fail("sum alternative and '>'")
-            alts, end = parsed
-            self.i = end
-            return Sum(tuple(alts))
+            alternatives = []
+            while True:
+                name = self._name()
+                self._take(":")
+                alternatives.append((name, self.sumAlt()))
+                if not self._peek("|"):
+                    break
+                self._take("|")
+            self._take(">")
+            return Sum(tuple(alternatives))
         return self.argAtom()
 
     def argAtom(self) -> Surface:
@@ -826,41 +806,18 @@ class _Parser:
             return Lambda(tuple(params), items, body)
         if self._peek("match"):
             self._take("match")
-            subject_start = self.i
-            # The subject may itself end in one or more brace arguments. Try
-            # each later `{` as the match delimiter, earliest first. A slice
-            # must parse completely as `term`, and the candidate brace must
-            # parse completely as the arm list.
-            for brace_at in range(subject_start + 1, len(self.tokens)):
-                if self.tokens[brace_at].text != "{":
-                    continue
-                sub = _Parser(self.tokens[subject_start:brace_at])
-                try:
-                    value = sub.term()
-                    if sub.i != len(sub.tokens):
-                        continue
-                except _NoParse:
-                    continue
-
-                saved = self.i
-                self.i = brace_at
-                try:
-                    self._take("{")
-                    arms: list[tuple[SurfacePattern, Surface]] = []
-                    if not self._peek("}"):
-                        arms.append(self.arm())
-                        while self._peek(";"):
-                            self._take(";")
-                            if self._peek("}"):
-                                break
-                            arms.append(self.arm())
-                    self._take("}")
-                    return MatchOf(value, tuple(arms))
-                except _NoParse:
-                    self.i = saved
-                    continue
-            self.i = subject_start
-            self._fail("match subject and arms")
+            value = self.scrutinee()
+            self._take("{")
+            arms: list[tuple[SurfacePattern, Surface]] = []
+            if not self._peek("}"):
+                arms.append(self.arm())
+                while self._peek(";"):
+                    self._take(";")
+                    if self._peek("}"):
+                        break
+                    arms.append(self.arm())
+            self._take("}")
+            return MatchOf(value, tuple(arms))
         if self._peek("quote"):
             self._take("quote")
             self._take("{")
@@ -1305,19 +1262,7 @@ def _print_pattern_atom(p: SurfacePattern) -> str:
     return _print_pattern(p)
 
 
-def _starts_with_sum_application(t: Surface) -> bool:
-    """Whether printing ``t`` begins with a sum used as an application head."""
-    if isinstance(t, App):
-        f = t.function
-        while isinstance(f, App):
-            f = f.function
-        return isinstance(f, Sum)
-    return False
-
-
 def _needs_parens(child: Surface, parent_op: str, side: str) -> bool:
-    if parent_op == ">" and side == "left" and _starts_with_sum_application(child):
-        return True
     cp = _precedence(child)
     pp = _PREC[parent_op]
     if _open_ending(child):
@@ -1340,12 +1285,31 @@ def _print_operand(child: Surface, parent_op: str, side: str) -> str:
     return f"({s})" if _needs_parens(child, parent_op, side) else s
 
 
-def _contains_brace_argument(t: Surface) -> bool:
-    if not isinstance(t, App):
-        return False
-    if isinstance(t.argument, (Record, Subtype, RecordValue, Block)):
-        return True
-    return _contains_brace_argument(t.function)
+def _scrutinee_needs_parens(t: Surface) -> bool:
+    if isinstance(t, Binop):
+        return t.operator in {"&", "->"} or (
+            _scrutinee_needs_parens(t.left) or _scrutinee_needs_parens(t.right)
+        )
+    if isinstance(t, Neg):
+        return _scrutinee_needs_parens(t.value)
+    if isinstance(t, App):
+        return _scrutinee_needs_parens(t.function) or _scrutinee_needs_parens(t.argument)
+    if isinstance(t, Proj):
+        return _scrutinee_needs_parens(t.value)
+    return not isinstance(t, (Name, Literal, Universe, World, Tuple, NamedArg, List, Sum))
+
+
+def _sum_alt_needs_parens(t: Surface) -> bool:
+    if isinstance(t, Binop):
+        return t.operator == ">" or (
+            _sum_alt_needs_parens(t.left) or _sum_alt_needs_parens(t.right)
+        )
+    return _precedence(t) == 1
+
+
+def _print_sum_alt(t: Surface) -> str:
+    text = _print_term(t)
+    return f"({text})" if _sum_alt_needs_parens(t) else text
 
 
 def _print_term(t: Surface) -> str:
@@ -1416,7 +1380,7 @@ def _print_term(t: Surface) -> str:
         return "{ " + " ; ".join(parts) + " }"
     if isinstance(t, Sum):
         return "< " + " | ".join(
-            f"{k} : {_print_term(v)}" for k, v in t.alternatives
+            f"{k} : {_print_sum_alt(v)}" for k, v in t.alternatives
         ) + " >"
     if isinstance(t, List):
         return "[" + ", ".join(_print_term(x) for x in t.values) + "]"
@@ -1429,7 +1393,7 @@ def _print_term(t: Surface) -> str:
             f"{_print_pattern(p)} -> {_print_term(v)}" for p, v in t.arms
         )
         subject = _print_term(t.value)
-        if _contains_brace_argument(t.value):
+        if _scrutinee_needs_parens(t.value):
             subject = f"({subject})"
         return f"match {subject} {{" + (" " + arms + " " if arms else " ") + "}"
     if isinstance(t, NamedArg):

@@ -13,7 +13,6 @@ A right-hand side is a tuple: ("eps",), ("lit", text), ("cat", kind), ("ref", na
 from __future__ import annotations
 
 import re
-import sys
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -155,67 +154,137 @@ def lits_of_names(e: Ebnf, names: list[str]) -> list[str]:
     return seen
 
 
-def count_derivations(e: Ebnf, tokens: list[TokenView], start: str | None = None) -> int:
-    """How many derivations of `tokens` from `start` (the grammar's start symbol by default).
-    A literal matches a token by its text, a category by its kind (`LitOne`, `CatOne`). Defined on
-    grammars without left recursion (`WellFormedEbnf`): a right-hand side is entered at the same
-    span only behind a part that derived the empty list."""
-    ts = tuple(tokens)
-    rules = {lhs: e.rules_of(lhs) for lhs, _ in e.rules}
-    limit = sys.getrecursionlimit()
-    sys.setrecursionlimit(max(limit, 20000))
-    try:
-        @lru_cache(maxsize=None)
-        def nt(name: str, i: int, j: int) -> int:
-            return sum(rhs(r, i, j) for r in rules.get(name, ()))
+@lru_cache(maxsize=16)
+def _productions(e: Ebnf):
+    """Expand EBNF without merging alternative occurrences or user nonterminals."""
+    productions = []
+    by_name = {}
+    fresh = 0
 
-        @lru_cache(maxsize=None)
-        def rhs(r: Rhs, i: int, j: int) -> int:
-            kind = r[0]
-            if kind == "eps":
-                return int(i == j)
-            if kind == "lit":
-                return int(j == i + 1 and ts[i][1] == r[1])
-            if kind == "cat":
-                return int(j == i + 1 and ts[i][0] == r[1])
-            if kind == "ref":
-                return nt(r[1], i, j)
-            if kind == "alt":
-                return sum(rhs(x, i, j) for x in r[1])
-            if kind == "opt":
-                return int(i == j) + rhs(r[1], i, j)
-            if kind == "seq":
-                return seq(r[1], i, j)
-            if kind == "rep":
-                return rep(r[1], i, j)
+    def add(lhs, symbols):
+        index = len(productions)
+        productions.append((lhs, tuple(symbols)))
+        by_name.setdefault(lhs, []).append(index)
+
+    def symbol(r):
+        nonlocal fresh
+        kind = r[0]
+        if kind in {"lit", "cat"}:
+            return r
+        if kind == "ref":
+            return ("nt", r[1])
+        name = fresh
+        fresh += 1
+        if kind == "eps":
+            add(name, ())
+        elif kind == "seq":
+            add(name, [symbol(x) for x in r[1]])
+        elif kind == "alt":
+            for child in r[1]:
+                add(name, [symbol(child)])
+        elif kind == "opt":
+            add(name, ())
+            add(name, [symbol(r[1])])
+        elif kind == "rep":
+            child = symbol(r[1])
+            # A private wrapper marks the consuming first round of RepRounds.
+            round_name = fresh
+            fresh += 1
+            add(round_name, [child])
+            add(name, ())
+            add(name, [("nonempty", round_name), ("nt", name)])
+        else:
             raise ValueError(f"unknown right-hand side {r!r}")
+        return ("nt", name)
 
-        @lru_cache(maxsize=None)
-        def seq(xs: tuple[Rhs, ...], i: int, j: int) -> int:
-            if not xs:
-                return int(i == j)
-            total = 0
-            for m in range(i, j + 1):
-                first = rhs(xs[0], i, m)
-                if first:
-                    total += first * seq(xs[1:], m, j)
-            return total
+    for lhs, rhs in e.rules:
+        add(lhs, [symbol(rhs)])
+    return productions, by_name
 
-        @lru_cache(maxsize=None)
-        def rep(x: Rhs, i: int, j: int) -> int:
-            # a round consumes something (`RepRounds`)
-            if i == j:
-                return 1
-            total = 0
-            for m in range(i + 1, j + 1):
-                first = rhs(x, i, m)
-                if first:
-                    total += first * rep(x, m, j)
-            return total
 
-        return nt(start or e.start, 0, len(ts))
-    finally:
-        sys.setrecursionlimit(limit)
+def count_derivations(e: Ebnf, tokens: list[TokenView], start: str | None = None) -> int:
+    """Count derivations, stopping at 2 (0, 1, or at least 2).
+
+    Earley items recognize only reachable prefixes; a packed forest counts distinct
+    productions and splits afterwards. Literals match text, categories match kind
+    (LitOne, CatOne). As in WellFormedEbnf, the grammar has no left recursion;
+    each repetition round must consume at least one token (RepRounds).
+    """
+    productions, by_name = _productions(e)
+    n = len(tokens)
+    # A node is (end, production, dot, origin). Edges are predecessor/child
+    # pairs; predictions are seeds, never multiplied by their callers.
+    forest = {}
+    charts = [[] for _ in range(n + 1)]
+    waiting = [{} for _ in range(n + 1)]
+    completed = [{} for _ in range(n + 1)]
+
+    def insert(end, rule, dot, origin, edge=None):
+        node = (end, rule, dot, origin)
+        if node not in forest:
+            forest[node] = set()
+            charts[end].append(node)
+        if edge is not None:
+            forest[node].add(edge)
+        return node
+
+    for rule in by_name.get(start or e.start, ()):
+        insert(0, rule, 0, 0)
+
+    def advance(parent, child):
+        end, rule, dot, origin = parent
+        symbol = productions[rule][1][dot]
+        if symbol[0] == "nonempty" and child[0] == end:
+            return
+        insert(child[0], rule, dot + 1, origin, (parent, child))
+
+    for end, agenda in enumerate(charts):
+        for node in agenda:
+            _, rule, dot, origin = node
+            lhs, symbols = productions[rule]
+            if dot == len(symbols):
+                completed[end].setdefault((origin, lhs), []).append(node)
+                for parent in waiting[origin].get(lhs, ()):
+                    advance(parent, node)
+            else:
+                symbol = symbols[dot]
+                kind, value = symbol
+                if kind in {"nt", "nonempty"}:
+                    waiting[end].setdefault(value, []).append(node)
+                    for predicted in by_name.get(value, ()):
+                        insert(end, predicted, 0, end)
+                    # Nullable completions may precede this waiting item.
+                    for child in completed[end].get((end, value), ()):
+                        advance(node, child)
+                elif end < n and (tokens[end][1] if kind == "lit" else tokens[end][0]) == value:
+                    insert(end + 1, rule, dot + 1, origin, (node, None))
+
+    roots = completed[n].get((0, start or e.start), ())
+    counts = {}
+    # Iterative postorder avoids changing Python's recursion limit on large acts.
+    for root in roots:
+        stack = [(root, False)]
+        while stack:
+            node, ready = stack.pop()
+            if node in counts:
+                continue
+            if node[2] == 0:
+                counts[node] = 1
+            elif ready:
+                total = 0
+                for parent, child in forest[node]:
+                    total += counts[parent] * (1 if child is None else counts[child])
+                    if total >= 2:
+                        break
+                counts[node] = min(2, total)
+            else:
+                stack.append((node, True))
+                for parent, child in forest[node]:
+                    if parent not in counts:
+                        stack.append((parent, False))
+                    if child is not None and child not in counts:
+                        stack.append((child, False))
+    return min(2, sum(counts[root] for root in roots))
 
 
 def derives(e: Ebnf, tokens: list[TokenView], start: str | None = None) -> bool:
@@ -226,8 +295,9 @@ def derives(e: Ebnf, tokens: list[TokenView], start: str | None = None) -> bool:
 def derives_program(e: Ebnf, tokens: list[TokenView], act: str = "act", end: TokenView = ("literal", "\n")) -> bool:
     """`derives` for a whole laid-out file of `luthierSyntax`, act by act. Since
     `program ::= { act newline }` and the newline token occurs nowhere else, a file derives iff it
-    ends in a newline (or is empty) and each segment up to a newline derives `act`. The whole-file
-    count is cubic in the number of tokens; this is linear in the number of acts."""
+    ends in a newline (or is empty) and each segment up to a newline derives `act`.
+    Each segment is recognized with Earley items; splitting avoids retaining a forest
+    for the whole file."""
     segment: list[TokenView] = []
     for t in tokens:
         if t == end:
