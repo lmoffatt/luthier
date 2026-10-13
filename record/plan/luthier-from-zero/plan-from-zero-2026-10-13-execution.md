@@ -179,6 +179,12 @@ by Luciano.
   names `number_model.lut` and `rational.lut` read as these; `rational.lut` not written),
   `arrays.lth` and `tables.lth` with their models (3c43822 to d63cee7). v0.2's criterion a: 18
   refusals left on the theory files, by cause, in the theories' hands (agent running).
+- 2026-10-14, 07:30: v0.2's criteria measured: (a) `luthier check` clean on 27 of 30 files, six
+  names left on 4.R3's one-file reading (his question in record/plan/night-2026-10-13.md) and
+  `Initial`; (b) 51 programs with their verdict, the 7 xfails; (c) met; (d) the suite (493) and
+  three lints green, `check_quotes.py` fails on old entries (his question); (e) the flips applied
+  from the audit (342b757). The tag and the push wait for him. The slice's first stage runs end
+  to end (examples/sonolocalizacion/validate_graph.lut, 14c9b98).
 
 
 ## Rules for every step
