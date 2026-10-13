@@ -7,6 +7,7 @@
 -- Let/binder update: fe3bdab, 048cd55 and 23d23f4; user request v4, recorded in codex.md.
 -- Constructor update: term.lth at 66d5cae; user request v5, recorded in codex.md.
 -- Equality update: term.lth at 360b4d4 and 051e6aa; user request v6, recorded in codex.md.
+-- Equality demands parts: term.lth at 924df6b; Claude Sonnet agent, recorded in codex.md.
 -- These are candidate models: parse does not certify the laws. See the report's manual audit.
 import "term.lth" Constant Pattern Term Act Program Alpha Substitution CanonicalForm Reduction
   IntConst FloatConst StringConst PVar PWild PCon PPair PLit PInj
@@ -252,13 +253,35 @@ equalTerms (p : Program) (vs ws : List Term) : Bool := match (vs, ws) {
 equalFields (p : Program) (fs gs : List (String * Term)) : Bool := match fs {
   nil -> true ; cons (k, v) rest -> match lookupField gs k {
     nothing -> false ; just w -> equalValues p v w and equalFields p rest gs } }
+-- EqualityDemandsParts: a part that is not yet a value is reduced in place, leftmost first,
+-- after the operand's head has stepped; a part that cannot become a value leaves == stuck.
+stepValue (p : Program) (t : Term) : Maybe Term := match stepHead p t {
+  Next k -> just k ; Done k -> demandParts p t }
+demandParts (p : Program) (t : Term) : Maybe Term := match t {
+  Pair a b -> if concreteValue p a
+    then (match stepValue p b { just d -> just (Pair a d) ; nothing -> nothing })
+    else (match stepValue p a { just c -> just (Pair c b) ; nothing -> nothing }) ;
+  Inj l a -> match stepValue p a { just c -> just (Inj l c) ; nothing -> nothing } ;
+  RecordValue fs -> match demandFields p fs { just gs -> just (RecordValue gs) ; nothing -> nothing } ;
+  _ -> match constructorTerms p t nil { nothing -> nothing ; just (c, vs) ->
+    if dataConstructor p c
+    then (match demandTerms p vs { just ws -> just (rebuildConstructor c ws) ; nothing -> nothing })
+    else nothing } }
+demandFields (p : Program) (fs : List (String * Term)) : Maybe (List (String * Term)) := match fs {
+  nil -> nothing ; cons (k, v) rest -> if concreteValue p v
+    then (match demandFields p rest { just gs -> just (cons (k, v) gs) ; nothing -> nothing })
+    else (match stepValue p v { just w -> just (cons (k, w) rest) ; nothing -> nothing }) }
+demandTerms (p : Program) (vs : List Term) : Maybe (List Term) := match vs {
+  nil -> nothing ; cons v rest -> if concreteValue p v
+    then (match demandTerms p rest { just ws -> just (cons v ws) ; nothing -> nothing })
+    else (match stepValue p v { just w -> just (cons w rest) ; nothing -> nothing }) }
 stepEquality (p : Program) (i j : Term) : HeadStep :=
   if concreteValue p i and concreteValue p j then Next (truthTerm (equalValues p i j))
-  else match stepHead p i {
-    Next k -> Next (App (App (Primitive "==") k) j) ; Done k ->
-      if concreteValue p i then match stepHead p j {
-        Next l -> Next (App (App (Primitive "==") i) l) ;
-        Done l -> Done (App (App (Primitive "==") i) j) }
+  else match stepValue p i {
+    just k -> Next (App (App (Primitive "==") k) j) ; nothing ->
+      if concreteValue p i then match stepValue p j {
+        just l -> Next (App (App (Primitive "==") i) l) ;
+        nothing -> Done (App (App (Primitive "==") i) j) }
       else Done (App (App (Primitive "==") i) j) }
 stepHead (p : Program) (t : Term) : HeadStep := match t {
   Var x -> match lookupBody p x { nothing -> Done t ; just b -> Next b } ;
