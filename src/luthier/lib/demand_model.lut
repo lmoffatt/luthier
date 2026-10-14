@@ -1,0 +1,36 @@
+-- demand_model.lut: the demand of a run, built from the arguments `run` takes, with its defaults
+-- declared and recorded; the reference model of `Demanding`.
+--
+-- Draft 0, 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/demand-2026-10-15/prompt.md. A model file (12.S23): `theDemand` is the first demand
+-- of all (L5.19), an action nobody called, so every argument has a declared default, and the
+-- demand records them all (L5.18, 12.S18); `demanding` passes it down to each law and writes its
+-- record. The host's run.py, which builds the same demand from the command line, is a specimen
+-- of this file (L14.3).
+
+import "demand.lth" Demanding Demand LawDemand Record
+import "certification.lth" Value Hash
+import "test.lth" Grade Sampled
+
+-- The arguments of `run` (12.S17, 12.S18, 12.S13), each with the default the host holds today,
+-- named here as a default and not as a constant (L5.18, P11). [proposed] `Sampled` as the grade
+-- accepted when none is named (run.py's `ACCEPT`: an assumed entry serves only a run that accepts
+-- assumed, 6.S10); 10,000,000 steps of fuel (cli.py: 10,000 was a hundred times too small for
+-- validate_graph.lut); `main` as the entry; no hole set; not checked; nothing pinned; no
+-- decoration (the identity, 8.S1); no confidence (demand.lth §1).
+theDemand (entry : String <- "main") (accepts : Grade <- Sampled) (fuel : Nat <- 10000000)
+          (sets : List (String * Value) <- nil) (checked : Bool <- false) (pinned : Maybe String <- nothing) : Demand :=
+  { entry := entry, decoration := nothing, accepts := accepts, delta := nothing, fuel := fuel, sets := sets,
+    checked := checked, pinned := pinned }
+
+-- L12.3, 6.S15: the demand on one law, passed down: the run's cutoff and values, the law's name
+-- and cone
+lawDemand (d : Demand) (law : String) (cone : Hash) : LawDemand :=
+  { law := law, cone := cone, given := d.sets, accepts := d.accepts }
+
+-- 12.S18, L5.18: what the run records of its demand
+recorded (d : Demand) (h : Hash) : Record :=
+  { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, delta := d.delta, fuel := d.fuel,
+    checked := d.checked, lock := d.pinned }
+
+demanding : Demanding := { lawDemand := lawDemand, recorded := recorded }
