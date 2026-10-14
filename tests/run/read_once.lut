@@ -1,0 +1,22 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-9.md, 8.S4): a read of the world bound once and
+-- observed twice is made once. `readCounted` reads a file as the host's readFile does, giving its
+-- text, and counts its calls (test_run.read_counted); `main` binds the read by a block,
+-- `byArgument` passes it to a function that matches its parameter twice. Each prints the text
+-- twice, then how many reads were made.
+import "world_model.lut" HostConsole host : HostConsole
+readCounted (w : W) (path : String) : W * String := extern "python:test_run.read_counted" w path
+reads (u : Unit) : String := extern "python:test_run.reads" u
+both (w : W) (r : W * String) : W * Unit :=
+  match r { (w1, first) ->
+  match r { (w2, second) ->
+  match host.print w2 first { (w3, u) ->
+  match host.print w3 second { (w4, v) ->
+  host.print w4 (reads unit) } } } }
+main (w : W) : W * Unit := {
+  r := readCounted w "input.txt" ;
+  match r { (w1, first) ->
+  match r { (w2, second) ->
+  match host.print w2 first { (w3, u) ->
+  match host.print w3 second { (w4, v) ->
+  host.print w4 (reads unit) } } } } }
+byArgument (w : W) : W * Unit := both w (readCounted w "input.txt")

@@ -1,0 +1,25 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-9.md, 8.S4): maximize_quadratic.lut's fit with
+-- the maximizer's result bound by a block (`main`) and passed as an argument (`byArgument`)
+-- instead of matched once. The Runner demands a bound value once, so each entry runs the
+-- maximizer once although `r` is projected three times: the callback counts in the run's record
+-- are maximize_quadratic.lut's, and so is the output.
+import "world_model.lut" HostConsole host : HostConsole
+import "arrays.lth" VecOf vec
+import "belief.lth" Settings MaxResult quadratic
+import "belief_model.lut" lm
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+showBool (x : Bool) : String := extern "python:builtins.repr" x
+settings : Settings := { tol := 0.000000000001, maxIter := 100, floor := 0.000000000001 }
+b : VecOf 2 := vec Float64 2 (fn k { if k == 0 then 1.0 else 0.0 - 2.0 })
+x0 : VecOf 2 := vec Float64 2 (fn k { 0.0 })
+q := quadratic 2 b 2.0
+report (w : W) (r : MaxResult 2) : W * Unit :=
+  match host.print w (showBool r.converged) { (w1, u1) ->
+  match host.print w1 (showFloat (r.x.f 0)) { (w2, u2) ->
+  host.print w2 (showFloat (r.x.f 1)) } }
+main (w : W) : W * Unit := {
+  r := lm.maximize settings 2 q.logp q.score q.info x0 ;
+  match host.print w (showBool r.converged) { (w1, u1) ->
+  match host.print w1 (showFloat (r.x.f 0)) { (w2, u2) ->
+  host.print w2 (showFloat (r.x.f 1)) } } }
+byArgument (w : W) : W * Unit := report w (lm.maximize settings 2 q.logp q.score q.info x0)

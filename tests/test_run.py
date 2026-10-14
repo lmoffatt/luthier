@@ -80,6 +80,19 @@ def matrix(u):
     return np.ones((2, 2))
 
 
+_reads = []
+
+
+def read_counted(w, path):
+    # a file's text, each read counted (tests/run/read_once.lut)
+    _reads.append(path)
+    return w, Path(path).read_text(encoding="utf-8")
+
+
+def reads(u):
+    return str(len(_reads))
+
+
 def command(path, *args, cwd=None):
     env = dict(os.environ)
     env["PYTHONPATH"] = os.pathsep.join((str(ROOT / "src"), str(ROOT / "tests")))
@@ -546,3 +559,30 @@ main (w : W) : W * Unit := print w (showFloat (maximize (fn x { "no" })))
 ''', encoding="utf-8")
     with pytest.raises(RunError, match="not a Float64 at the crossing"):
         run_file(path)
+
+
+# ---------------------------------------------------------------- a bound value is demanded once
+# (record/IA/run-2026-10-13/prompt-9.md, 8.S4: call by need within a run)
+
+@pytest.mark.parametrize("entry", ["main", "byArgument"])
+def test_a_bound_read_is_made_once(tmp_path, entry):
+    # read_once.lut observes one read twice, bound by a block or passed as an argument
+    (tmp_path / "input.txt").write_text("data", encoding="utf-8")
+    result = command(ROOT / "tests/run/read_once.lut", "--main", entry, cwd=tmp_path)
+    assert (result.returncode, result.stdout, result.stderr) == (0, "data\ndata\n1\n", "")
+
+
+def test_a_bound_maximize_runs_once(tmp_path):
+    # maximize_shared.lut projects the result three times; each entry calls back exactly as
+    # maximize_quadratic.lut, which matches it once (test_lm.py checks those counts against lm.py)
+    for name in ("maximize_quadratic.lut", "maximize_shared.lut"):
+        (tmp_path / name).write_text((ROOT / "tests/run" / name).read_text(encoding="utf-8"), encoding="utf-8")
+    once = command(tmp_path / "maximize_quadratic.lut", cwd=tmp_path)
+    assert once.returncode == 0, once.stderr
+    expected = json.loads((tmp_path / "maximize_quadratic.run.json").read_text(encoding="utf-8"))[-1]["calls"]
+    assert set(expected["python:luthier.lm.maximize"]) == {"3", "4", "5"}
+    for entry in ("main", "byArgument"):
+        result = command(tmp_path / "maximize_shared.lut", "--main", entry, cwd=tmp_path)
+        assert (result.returncode, result.stdout, result.stderr) == (0, once.stdout, "")
+        runs = json.loads((tmp_path / "maximize_shared.run.json").read_text(encoding="utf-8"))
+        assert runs[-1]["entry"] == entry and runs[-1]["calls"] == expected

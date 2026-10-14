@@ -17,7 +17,10 @@ over an infinite domain is a callback, each call counted per receiving route and
 written to `x.run.json` (world.lth's `Crossing`); a record of functions crosses field by field; a
 host function that crossed in is applied only through the bridge; an extern applied to fewer
 arguments than its arity stays a value, and crossing out it is a `functools.partial` of the
-host's function. No certification or result hashing yet.
+host's function. v9 (prompt-9.md, 8.S4): a bound value is demanded once within a run (call by
+need): a `Let`'s value, an argument of a lambda, a part a pattern binds and a constant of the
+program stand as one `Shared` cell, reduced at the first demand and kept; `kernel.step` unchanged.
+No certification or result hashing yet.
 """
 from __future__ import annotations
 
@@ -401,6 +404,23 @@ class HostRecord(dict):
             raise AttributeError(label) from None
 
 
+@dataclass(frozen=True, eq=False, repr=False)
+class Shared(t.Axiom):
+    """A bound value demanded once (8.S4, call by need): a closed term the Runner reduces to weak
+    head normal form at its first demand and keeps for every later one. It stands where the term
+    would be substituted (a `Let`'s value, an argument of a lambda, a part a pattern binds, a
+    constant of the program), so every copy the substitution makes is this one object. To the
+    kernel it is an opaque leaf (`Axiom`), with no free names, so `kernel.step` and the
+    substitution pass it on untouched; only the Runner looks inside. `cell` is [term, forced]."""
+    cell: list = field(default_factory=list)
+
+    __eq__ = object.__eq__
+    __hash__ = object.__hash__
+
+    def __repr__(self):
+        return f"Shared({self.cell[0]!r})"
+
+
 _UNTYPED = object()
 _INTS = ("Int", "Nat")
 _NAMED = {"Float64", "String", "Unit", "Bool"} | set(_INTS)
@@ -509,6 +529,13 @@ class Runner:
                 self.families[act.name] = family
         self.program = tuple(self.typed(act) for act in program)
         self.defined = {act.name for act in program if isinstance(act, (t.Define, t.Declare))}
+        # [proposed] a constant (a definition whose body is not a lambda) is demanded once per run
+        # too: its body is closed, so its value is one, wherever its name is reached (8.S4). The
+        # first definition of a name wins, as in kernel.step's environment.
+        self.constants = {}
+        for act in self.program:
+            if isinstance(act, t.Define) and not isinstance(act.body, t.Lam):
+                self.constants.setdefault(act.name, self.share(act.body))
 
     def typed(self, act):
         """The definition with each extern it gives carrying its declared type: `f (x : A) : B :=
@@ -987,7 +1014,11 @@ class Runner:
         return t.RecordValue(tuple(items))
 
     def demanded_pattern(self, pattern, value):
-        if isinstance(pattern, (t.PVar, t.PWild)):
+        """`value` with what `pattern` inspects in weak head normal form, and what it binds to a
+        name shared (8.S4), so an arm that uses the name twice computes it once."""
+        if isinstance(pattern, t.PVar):
+            return self.share(value)
+        if isinstance(pattern, t.PWild):
             return value
         value = self.whnf(value)
         if isinstance(pattern, t.PPair) and isinstance(value, t.Pair):
@@ -1007,9 +1038,44 @@ class Runner:
                                          for p, a in zip(pattern.patterns, args)])
         return value
 
+    def share(self, term):
+        """`term` with what would be computed again at each use made a `Shared` (8.S4): an
+        application, a block, a match, a projection, an extern that is a value; a pair, an
+        injection or a record value keeps its form, its parts shared. Anything else (a name, a
+        literal, a lambda, a leaf) is returned as it is: reaching it costs no computation, or (a
+        name) is shared through `constants`."""
+        if isinstance(term, (t.App, t.Let, t.Match, t.Proj)) or (
+                isinstance(term, t.Extern) and getattr(term, "arity", None) == 0):
+            return Shared("shared", [term, False])
+        if isinstance(term, t.Pair):
+            return t.Pair(self.share(term.left), self.share(term.right))
+        if isinstance(term, t.Inj):
+            return t.Inj(term.label, self.share(term.value))
+        if isinstance(term, t.RecordValue):
+            return t.RecordValue(tuple((label, self.share(f)) for label, f in term.fields))
+        return term
+
+    def force(self, shared):
+        """The value of a `Shared`: reduced at the first demand, kept for every later one."""
+        cell = shared.cell
+        if not cell[1]:
+            cell[0] = self.whnf(cell[0])
+            cell[1] = True
+        return cell[0]
+
     def whnf(self, value):
         while True:
             self.spend()
+            if isinstance(value, Shared):
+                return self.force(value)
+            if isinstance(value, t.Var) and value.name in self.constants:
+                # Delta, the constant's body shared (8.S4)
+                value = self.constants[value.name]
+                continue
+            if isinstance(value, t.Let):
+                # Zeta, kernel.step's, with the value shared: each use of the name is one Shared
+                value = kernel.step(self.program, replace(value, value=self.share(value.value)))
+                continue
             if isinstance(value, t.App):
                 args = []
                 head = value
@@ -1018,6 +1084,9 @@ class Runner:
                     head = head.function
                 args.reverse()
                 head = self.whnf(head)
+                if isinstance(head, t.Lam):
+                    # Beta with the arguments shared: a parameter used twice computes once
+                    args = [self.share(a) for a in args]
                 if isinstance(head, t.Extern):
                     try:
                         function = self.route(head)
