@@ -431,7 +431,9 @@ samePlot (p q : Plot) : Bool :=
 -- `image` is the renderer's pure function from a plot and a format to the file's content (the
 -- bytes, each byte one character of the string [proposed]: what the host's `observe` reads a
 -- binary file as); `formatOf` reads the format a content is in from its first bytes (the PNG
--- signature, an SVG root), apart from `image` [proposed]; `formats` are the extensions it writes.
+-- signature, an SVG root), apart from `image` [proposed]; `formats` are the extensions it writes,
+-- and `rasters` those of them whose content is the pixels (PNG), not a program that draws them
+-- (SVG) [proposed]: two programs that draw the same picture may differ in their bytes.
 -- `Renderer` is the record of the drawing and the action, with no law of its own, since a law
 -- does not hold an action (world.lth §5); the action is held to the drawing by §6. The path is
 -- written in the laws as a stem and an extension, `pathOf stem ext`, since the core has no
@@ -443,6 +445,7 @@ samePlot (p q : Plot) : Bool :=
 Drawing (S : Concrete) : {
   store : Persistence S,
   formats : List String,
+  rasters : List String,
   image : Plot -> String -> String,
   formatOf : String -> String,
 }
@@ -498,7 +501,9 @@ RowOrderInvariant (S : Concrete) (d : Drawing S) (p : Plot) (name : String) (t :
 -- x, or on y, is apart by more than `margin` times the span of the two together: the margin
 -- covers what a mark occupies beyond its data (a point's size, a line's width, a text's extent),
 -- a cutoff the demand states (D-2026-10-14-c, P11). A layer with no rows occupies nothing; a line
--- across the panel (`ablines`) overlaps every layer.
+-- across the panel (`ablines`) overlaps every layer. Stated for the raster formats only
+-- [proposed]: in an SVG the layers are elements in the order drawn, so a swap changes the bytes
+-- and not the picture.
 Margin : U := { m : Float64 | 0.0 <= m }
 spanOf (a b : Range) : Float64 := fmax a.hi b.hi - fmin a.lo b.lo
 apart (margin : Margin) (a b : Range) : Bool :=
@@ -518,7 +523,7 @@ swapAt (ls : List Layer) (i : Int) : List Layer :=
     nil -> nil ;
     cons a rest -> if i == 0 then (match rest { nil -> ls ; cons b more -> cons b (cons a more) }) else cons a (swapAt rest (i - 1)) }
 LayerOrderInvariant (S : Concrete) (d : Drawing S) (margin : Margin) (p : Plot) (i : Nat) (ext : String) : Bool :=
-  not (wellFormed p) or not (memberStr ext d.formats)
+  not (wellFormed p) or not (memberStr ext d.formats) or not (memberStr ext d.rasters)
     or (match nthLayer p.layers i {
       nothing -> true ;
       just a -> match nthLayer p.layers (i + 1) {
