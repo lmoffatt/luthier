@@ -42,11 +42,17 @@ def main(argv: list[str] | None = None) -> int:
     p_test.add_argument("--no-cert", action="store_true", help="neither read nor write the store x.cert.json (12.S15)")
     p_cert = sub.add_parser("certify", help="run the test lines of several files, each in its own process (12.S16)")
     p_cert.add_argument("files", nargs="+")
+    p_cert.add_argument("--prune", action="store_true",
+                        help="rewrite the stores of FILES (x.cert.json) bounded (6.S8), running nothing")
     p_cert.add_argument("--jobs", type=int, default=1, help="files run at a time")
     p_cert.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
     p_cert.add_argument("--deep", action="store_true", help="run again the lines whose outcome a store knows")
     p_cert.add_argument("--fuel", type=int, default=1_000_000, help="reduction fuel per case")
     ns = parser.parse_args(argv)
+
+    if ns.command == "certify" and ns.prune:
+        from .certify import prune_stores
+        return prune_stores(ns.files)
 
     if ns.command == "certify":
         from .certify import certify
