@@ -595,3 +595,9 @@ def test_a_bound_maximize_runs_once(tmp_path):
         assert (result.returncode, result.stdout, result.stderr) == (0, once.stdout, "")
         runs = json.loads((tmp_path / "maximize_shared.run.json").read_text(encoding="utf-8"))
         assert runs[-1]["entry"] == entry and runs[-1]["calls"] == expected
+
+
+def test_an_array_that_crossed_in_takes_one_argument():
+    # prompt-12.md: the Runner reads an Entries' arity without inspect; its signature says the same
+    from luthier.run import Entries, Runner
+    assert Runner.signature_arity(Entries(np.zeros(2))) == 1

@@ -11,6 +11,9 @@ remain values. This module neither translates surface trees nor calls the host.
 # Update: 66d5cae, user request v6; IotaConstructors; audit codex-6.md.
 # Update: fe3bdab, user request v4; audit codex-4.md.
 # Update: 23d23f4, 048cd55, 1c521a7, reference b1582ca; user request v5; codex-5.md.
+# Update: bite 12 (prompt-12.md), from 69684d7: `step` memoizes the environment and constructor
+# table per program (by identity); substitution reads free names through a memo by identity.
+# No law, reduction order or result changes.
 # Update: bite 10 (prompt-10.md): `/=` on every concrete type, parameterized data constructors.
 # Update: 051e6aa term.lth §5 PrimStructural, PrimConstructors, EqualityStuck;
 # record/IA/kernel-2026-10-13/prompt-7.md; report opus-7.md.
@@ -318,12 +321,106 @@ def _fresh_name(x: str, avoid: set[str]) -> str:
     return x
 
 
+def _subterms(node: Term) -> tuple[Term, ...]:
+    if isinstance(node, _BINDERS):
+        _, a, b = _binder_parts(node)
+        return a, b
+    match node:
+        case Let(_, a, v, b):
+            return a, v, b
+        case App(a, b) | Pair(a, b):
+            return a, b
+        case Inj(_, a) | Proj(a, _):
+            return (a,)
+        case Match(a, arms):
+            return (a,) + tuple(b for _, b in arms)
+        case Sum(kvs) | Record(kvs) | RecordValue(kvs) | Data(_, kvs):
+            return tuple(b for _, b in kvs)
+        case Var():
+            return ()
+        case _ if isinstance(node, _LEAVES):
+            return ()
+    raise TypeError(f"unknown term: {type(node).__name__}")
+
+
+def _free_names_of(node: Term, free) -> frozenset[str]:
+    """free_names(node) from the free names `free(child)` of its immediate subterms: the same
+    scopes as `free_names`, read one level at a time."""
+    if isinstance(node, _BINDERS):
+        x, a, b = _binder_parts(node)
+        return free(a) | (free(b) - {x})
+    match node:
+        case Let(x, a, v, b):
+            return free(a) | free(v) | (free(b) - {x})
+        case Var(x):
+            return frozenset((x,))
+        case App(a, b) | Pair(a, b):
+            return free(a) | free(b)
+        case Inj(_, a) | Proj(a, _):
+            return free(a)
+        case Match(a, arms):
+            names = set(free(a))
+            for p, b in arms:
+                names.update(free(b) - set(pattern_names(p)))
+            return frozenset(names)
+        case Record(kvs):
+            names, labels = set(), set()
+            for k, b in kvs:
+                names.update(free(b) - labels)
+                labels.add(k)
+            return frozenset(names)
+        case Sum(kvs) | RecordValue(kvs):
+            return frozenset().union(*(free(b) for _, b in kvs))
+        case Data(x, kvs):
+            return frozenset().union(*(free(b) for _, b in kvs)) - {x}
+        case _ if isinstance(node, _LEAVES):
+            return frozenset()
+    raise TypeError(f"unknown term: {type(node).__name__}")
+
+
+def _memo_free_names(memo: dict[int, tuple[Term, frozenset[str]]]):
+    """`free_names`, with the free names of every subterm it reads kept in `memo` by identity
+    (record/IA/kernel-2026-10-13/prompt-12.md): within one substitution the same subterms are asked
+    again at each level it descends, and `s` at each binder it passes. The memo keeps each term
+    it keys, so no identity is reused while it lives."""
+    def lookup(u: Term) -> frozenset[str]:
+        return memo[id(u)][1]
+
+    def free(t: Term) -> frozenset[str]:
+        found = memo.get(id(t))
+        if found is not None:
+            return found[1]
+        pending = [(t, False)]
+        while pending:
+            node, ready = pending.pop()
+            if id(node) in memo:
+                continue
+            if ready:
+                memo[id(node)] = (node, _free_names_of(node, lookup))
+                continue
+            pending.append((node, True))
+            pending.extend((u, False) for u in _subterms(node) if id(u) not in memo)
+        return memo[id(t)][1]
+    return free
+
+
+# The free names substitution has read, by identity, kept across substitutions: the bodies of a
+# program's definitions and arms are substituted into again and again, the same objects each time.
+# Emptied when it holds more than FREE_NAMES_MEMO_LIMIT terms (it keeps each alive); only the time
+# a substitution takes depends on the limit.
+FREE_NAMES_MEMO_LIMIT = 1 << 12
+_free_names_memo: dict[int, tuple[Term, frozenset[str]]] = {}
+_memo_free = _memo_free_names(_free_names_memo)
+
+
 def substitute(x: str, s: Term, t: Term) -> Term:
     """Capture-avoiding substitution, matching the model's apostrophe freshening."""
-    return _run(_substitute(x, s, t))
+    if len(_free_names_memo) > FREE_NAMES_MEMO_LIMIT:
+        _free_names_memo.clear()
+    return _run(_substitute(x, s, t, _memo_free))
 
 
-def _substitute(x: str, s: Term, t: Term):
+def _substitute(x: str, s: Term, t: Term, free_names):
     if x not in free_names(t):
         return t
     if isinstance(t, _BINDERS):
@@ -333,8 +430,8 @@ def _substitute(x: str, s: Term, t: Term):
                 z = _fresh_name(y, {x} | _all_names(s) | _all_names(b))
                 b = swap(y, z, b)
                 y = z
-            b = yield _substitute(x, s, b)
-        a = yield _substitute(x, s, a)
+            b = yield _substitute(x, s, b, free_names)
+        a = yield _substitute(x, s, a, free_names)
         return type(t)(y, a, b)
     match t:
         case Let(y, a, v, b):
@@ -343,21 +440,21 @@ def _substitute(x: str, s: Term, t: Term):
                     z = _fresh_name(y, {x} | _all_names(s) | _all_names(b))
                     b = swap(y, z, b)
                     y = z
-                b = yield _substitute(x, s, b)
-            a = yield _substitute(x, s, a)
-            v = yield _substitute(x, s, v)
+                b = yield _substitute(x, s, b, free_names)
+            a = yield _substitute(x, s, a, free_names)
+            v = yield _substitute(x, s, v, free_names)
             return Let(y, a, v, b)
         case Var(y):
             return s if x == y else t
         case App(a, b) | Pair(a, b):
-            left = yield _substitute(x, s, a)
-            right = yield _substitute(x, s, b)
+            left = yield _substitute(x, s, a, free_names)
+            right = yield _substitute(x, s, b, free_names)
             return type(t)(left, right)
         case Inj(l, a):
-            value = yield _substitute(x, s, a)
+            value = yield _substitute(x, s, a, free_names)
             return Inj(l, value)
         case Proj(a, l):
-            value = yield _substitute(x, s, a)
+            value = yield _substitute(x, s, a, free_names)
             return Proj(value, l)
         case Record(kvs):
             # [proposed] (3.S31): a label binds in the later fields' types, as in `free_names`. A
@@ -367,7 +464,7 @@ def _substitute(x: str, s: Term, t: Term):
             shadowed = False
             for k, b in kvs:
                 if not shadowed:
-                    b = yield _substitute(x, s, b)
+                    b = yield _substitute(x, s, b, free_names)
                 result.append((k, b))
                 shadowed = shadowed or k == x
             return Record(tuple(result))
@@ -385,7 +482,7 @@ def _substitute(x: str, s: Term, t: Term):
                     y = z
             result = []
             for k, b in kvs:
-                body = yield _substitute(x, s, b)
+                body = yield _substitute(x, s, b, free_names)
                 result.append((k, body))
             return Data(y, tuple(result)) if isinstance(t, Data) else type(t)(tuple(result))
         case Match(a, arms):
@@ -403,9 +500,9 @@ def _substitute(x: str, s: Term, t: Term):
                             z = _fresh_name(y, avoid)
                             p = _map_pattern(p, lambda n: z if n == y else y if n == z else n)
                             b = swap(y, z, b)
-                    b = yield _substitute(x, s, b)
+                    b = yield _substitute(x, s, b, free_names)
                 result.append((p, b))
-            value = yield _substitute(x, s, a)
+            value = yield _substitute(x, s, a, free_names)
             return Match(value, tuple(result))
         case _ if isinstance(t, _LEAVES):
             return t
@@ -870,8 +967,29 @@ def _step(env: dict[str, Term | None], constructors: dict[str, frozenset[str]], 
     raise TypeError(f"unknown term: {type(t).__name__}")
 
 
+# What `step` reads from a program, memoized (record/IA/kernel-2026-10-13/prompt-12.md): the
+# program last read, by identity (as check.py's `constructors`), with its environment and its
+# constructor table. Both are pure functions of the program, which is immutable, and `_step` only
+# reads them; the reference kept here makes an identity test safe.
+_tables: list = [None, None, None]
+
+
+def _program_tables(program: Program) -> tuple[dict[str, Term | None], _Constructors]:
+    if _tables[0] is program:
+        return _tables[1], _tables[2]
+    env, constructors = _build_tables(program)
+    _tables[:] = [program, env, constructors]
+    return env, constructors
+
+
 def step(program: Program, t: Term) -> Term | None:
     """One weak-head transition; None means weak head normal form."""
+    env, constructors = _program_tables(program)
+    changed, value = _run(_step(env, constructors, t))
+    return value if changed else None
+
+
+def _build_tables(program: Program) -> tuple[dict[str, Term | None], _Constructors]:
     env: dict[str, Term | None] = {}
     for act in program:
         match act:
@@ -900,8 +1018,7 @@ def step(program: Program, t: Term) -> Term | None:
                     while isinstance(ty, Pi):
                         constructors.arity[name] += 1
                         ty = ty.codomain
-    changed, value = _run(_step(env, constructors, t))
-    return value if changed else None
+    return env, constructors
 
 
 def reduce(program: Program, fuel: int, t: Term) -> Term | None:

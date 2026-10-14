@@ -1197,3 +1197,30 @@ def test_substitute_does_not_capture_a_record_field():
     assert substitute("a", Var("q"), r2) == r2
     v = RecordValue((("n", Var("n")),))
     assert substitute("n", Var("k"), v) == RecordValue((("n", Var("k")),))
+
+
+def test_step_reads_each_program_by_its_own_acts():
+    # prompt-12.md: step memoizes its environment and constructor table by the program's identity;
+    # another program, even one equal to an earlier one, is read by its own acts
+    one = (Define("a", Universe(), Lit(IntConst(1))),)
+    two = (Define("a", Universe(), Lit(IntConst(2))),)
+    data = (Define("B", Universe(), Data("B", (("yes", Var("B")), ("no", Var("B"))))),)
+    assert step(one, Var("a")) == Lit(IntConst(1))
+    assert step(two, Var("a")) == Lit(IntConst(2))
+    assert step(one, Var("a")) == Lit(IntConst(1))
+    assert step(tuple(two), Var("a")) == Lit(IntConst(2))
+    assert step(data, App(App(Primitive("=="), Var("yes")), Var("no"))) == Var("false")
+    assert step(one, App(App(Primitive("=="), Var("yes")), Var("no"))) is None
+
+
+def test_memoized_free_names_are_free_names(samples):
+    # prompt-12.md: substitution reads free names through a memo by identity; it gives what
+    # free_names gives, for each term and, through one shared memo, for each of its subterms
+    from luthier.kernel import _memo_free_names, _subterms
+    free = _memo_free_names({})
+    for t in samples:
+        pending = [t]
+        while pending:
+            u = pending.pop()
+            assert free(u) == free_names(u)
+            pending.extend(_subterms(u))

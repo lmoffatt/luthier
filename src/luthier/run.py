@@ -21,7 +21,8 @@ host's function. v9 (prompt-9.md, 8.S4): a bound value is demanded once within a
 need): a `Let`'s value, an argument of a lambda, a part a pattern binds and a constant of the
 program stand as one `Shared` cell, reduced at the first demand and kept; `kernel.step` unchanged.
 v10 (prompt-10.md, 12.S22): a constructor or a label of a sum and another file's definition of the
-same name are kept apart (the definition is `name@file`). No certification or result hashing yet.
+same name are kept apart (the definition is `name@file`). v12 (prompt-12.md): the arity a host
+function's Python signature gives is read once per function. No certification or result hashing yet.
 """
 from __future__ import annotations
 
@@ -545,6 +546,8 @@ class Runner:
         # An opaque kernel leaf stands for the host-owned identity for this run.
         self.token = t.Axiom("host world token")
         self.routes = {}
+        # the arity of each host function read from its Python signature (`arity`)
+        self.signatures = {}
         self.objects = 0
         # the types the bridge resolves names to: a type definition's body, a theory's record
         self.types = {}
@@ -610,6 +613,20 @@ class Runner:
         with no type declared, its Python signature; a builtin without one, one."""
         if getattr(head, "arity", None) is not None:
             return head.arity
+        if isinstance(function, Entries):
+            return 1  # its signature, `(i)`, read without inspect (prompt-12.md)
+        # a function's signature does not change: read once per function (prompt-12.md)
+        try:
+            return self.signatures[function]
+        except KeyError:
+            pass
+        except TypeError:  # an unhashable callable: read each time
+            return self.signature_arity(function)
+        arity = self.signatures[function] = self.signature_arity(function)
+        return arity
+
+    @staticmethod
+    def signature_arity(function):
         try:
             return len(inspect.signature(function).parameters)
         except (TypeError, ValueError):
