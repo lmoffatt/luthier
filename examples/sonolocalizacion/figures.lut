@@ -1,0 +1,124 @@
+-- figures.lut: the three plots of the fit, as values of plot.lth's `Plot` over the three tables
+-- experiment_zero.lut builds (positions, residuals, transform).
+--
+-- Draft 0, 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/plots-2026-10-15/prompt-figures.md (step 3 of
+-- record/plan/plots/plan-plots-2026-10-14-execution.md). Sources: decisions G4 (the three plots)
+-- and G5 (they live here, imported by experiment_zero.lut) of
+-- record/plan/plots/plan-plots-2026-10-14-decisions.md; plot.lth §1 and §2 (the value and its
+-- constructors); P11 (every criterion a parameter). What is [proposed] below is this agent's.
+--
+-- Each plot is a pure function of a fit's table (two for the residuals) and of what the demand
+-- states: the canvas, the marks' sizes and the expansion of the automatic limits (`Style`), and
+-- the one criterion of each plot (the ellipses' level, the node whose pairs are coloured with its
+-- palette, the half-width of the Kolmogorov band). None is a constant here (P11):
+-- experiment_zero.lut gives them by definitions. The program renders them (plot_model.lut's
+-- `matplotlib`); nothing here is an action.
+--
+-- The tables are read through `cell`, by column name, so that no refinement of tables.lth's
+-- accessors (`realAt` asks its column to be of the kind) has to be shown here: a cell that is
+-- missing or of another kind reads as 0.0, -1 or "", which no row of the fit's tables asks for.
+
+import "tables.lth" Table Cell int real text
+import "arrays.lth" countBelow
+import "plot.lth" Plot Canvas Mapping plot point ellipse abline addLayer texts scale coord labels linear palette auto
+  stated equal
+
+-- ---------------------------------------------------------------- reading the fit's tables
+cellReal (t : Table) (c : String) (r : Int) : Float64 :=
+  if 0 <= r and r < t.nRows then (match t.cell c r { nothing -> 0.0 ; just x -> match x { real v -> v ; _ -> 0.0 } }) else 0.0
+cellInt (t : Table) (c : String) (r : Int) : Int :=
+  if 0 <= r and r < t.nRows then (match t.cell c r { nothing -> 0 - 1 ; just x -> match x { int k -> k ; _ -> 0 - 1 } }) else 0 - 1
+cellText (t : Table) (c : String) (r : Int) : String :=
+  if 0 <= r and r < t.nRows then (match t.cell c r { nothing -> "" ; just x -> match x { text s -> s ; _ -> "" } }) else ""
+appendNames (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (appendNames rest ys) }
+
+-- [proposed] What the three plots share and the demand states (P11): the size of a point and of a
+-- text in points, the width of a line or an ellipse's outline in points, and the fraction of the
+-- data's range added at each end of an automatic linear scale (plot.lth `Limits`).
+Style = { pointSize : Float64, textSize : Float64, lineWidth : Float64, expand : Float64 }
+
+-- ---------------------------------------------------------------- (1) the positions (G4)
+-- Each node at its posterior mean (x, y), an ellipse of semi-axes `level` times its posterior sds
+-- (sx, sy) around it, axis-aligned (plot.lth's `ellipses`: the covariance between x and y is not
+-- in the table), and its name written at the mean; equal aspect, metres on both axes.
+positionsPlot (cv : Canvas) (s : Style) (level : Float64) (positions : Table) : Plot :=
+  labels "posterior positions" "x (m)" "y (m)"
+    (coord (equal unit)
+      (scale "y" (linear (auto { expand := s.expand }))
+        (scale "x" (linear (auto { expand := s.expand }))
+          (addLayer
+            (point "positions" nil s.pointSize
+              (ellipse "positions" [("xerr", "sx"), ("yerr", "sy")] level s.lineWidth
+                (plot cv "positions" positions [("x", "x"), ("y", "y")])))
+            { geom := texts { size := s.textSize }, mapping := [("label", "name")], table := "positions" }))))
+
+-- ---------------------------------------------------------------- (2) the residuals (G4)
+-- [proposed] Whether a measurement touches a node is computed here, from the residuals' node
+-- indices `i`, `j` and the positions' `name` (one row per node, in the graph's order, as
+-- experiment_zero.lut's `positionsTable` writes it): a column `pair` added to the residuals,
+-- "touches <node>" or "other", which the palette colours in that sorted order.
+touchLevel (positions residuals : Table) (node : String) (r : Int) : String :=
+  if cellText positions "name" (cellInt residuals "i" r) == node or cellText positions "name" (cellInt residuals "j" r) == node
+  then "touches " + node else "other"
+withPairs (positions residuals : Table) (node : String) : Table := {
+  nRows := residuals.nRows,
+  names := appendNames residuals.names ["pair"],
+  kinds := appendNames residuals.kinds ["str"],
+  cell := fn c r { if c == "pair" then just (text (touchLevel positions residuals node r)) else residuals.cell c r },
+}
+
+-- the standardized residual (residual over sigma) against the predicted distance, a line at zero,
+-- the points coloured by whether their pair touches `node`
+residualsPlot (cv : Canvas) (s : Style) (node : String) (colours : List String) (positions residuals : Table) : Plot :=
+  labels "standardized residuals" "predicted distance (m)" "residual / sigma"
+    (scale "colour" (palette colours)
+      (scale "y" (linear (auto { expand := s.expand }))
+        (scale "x" (linear (auto { expand := s.expand }))
+          (point "residuals" [("colour", "pair")] s.pointSize
+            (abline 0.0 0.0 s.lineWidth
+              (plot cv "residuals" (withPairs positions residuals node) [("x", "predicted"), ("y", "standardized")]))))))
+
+-- ---------------------------------------------------------------- (3) the transform's quantiles (G4)
+-- The transforms that enter the Kolmogorov distance are those of the data with a residual of
+-- their own, leverage below one (experiment_zero.lut `keptTransforms`: a residual's sd is positive
+-- exactly then). The i-th smallest of n of them is plotted at the uniform quantile i/(n+1), ties
+-- broken by row; computed here by ranks, so no sort crosses to the host.
+-- (Named `keptRow`, not `kept`: experiment_zero.lut binds `kept` in a `match` of `transformOf`, and
+-- a definition of that name here, though not imported there, took the binder's place in the check:
+-- 4.R9 refused transformOf. A finding of 2026-10-15 for the loader's scopes, 12.S22.)
+keptRow (t : Table) (r : Int) : Bool := cellReal t "leverage" r < 1.0
+keptCount (t : Table) : Int := countBelow t.nRows (fn r { keptRow t r })
+-- the row of the k-th kept transform (from 0), searching from row r; -1 past the end
+nthKeptFrom (t : Table) (r k : Int) : Int :=
+  if r >= t.nRows then 0 - 1
+  else if keptRow t r then (if k == 0 then r else nthKeptFrom t (r + 1) (k - 1))
+  else nthKeptFrom t (r + 1) k
+-- how many kept transforms come before row r's in the order of u, ties by row
+rankOf (t : Table) (r : Int) : Int :=
+  countBelow t.nRows (fn q { keptRow t q and (cellReal t "u" q < cellReal t "u" r or (cellReal t "u" q == cellReal t "u" r and q < r)) })
+quantileCell (t : Table) (c : String) (k : Int) : Maybe Cell :=
+  if c == "quantile" then just (real (toFloat64 (rankOf t (nthKeptFrom t 0 k) + 1) / toFloat64 (keptCount t + 1)))
+  else if c == "u" then just (real (cellReal t "u" (nthKeptFrom t 0 k)))
+  else nothing
+-- one row per kept transform: its uniform quantile and its u
+quantileTable (t : Table) : Table := {
+  nRows := keptCount t,
+  names := ["quantile", "u"],
+  kinds := ["float", "float"],
+  cell := fn c k { quantileCell t c k },
+}
+
+-- u against its uniform quantile on the unit square, the support of both (stated limits, so the
+-- band shows whole); the diagonal, and the Kolmogorov band as the lines at plus and minus `band`
+-- over it (`band` the half-width the demand computes from its level and n)
+transformPlot (cv : Canvas) (s : Style) (band : Float64) (transform : Table) : Plot :=
+  labels "transform of the residuals" "uniform quantile i/(n+1)" "u"
+    (coord (equal unit)
+      (scale "y" (linear (stated { lo := 0.0, hi := 1.0 }))
+        (scale "x" (linear (stated { lo := 0.0, hi := 1.0 }))
+          (point "quantiles" nil s.pointSize
+            (abline (0.0 - band) 1.0 s.lineWidth
+              (abline band 1.0 s.lineWidth
+                (abline 0.0 1.0 s.lineWidth
+                  (plot cv "quantiles" (quantileTable transform) [("x", "quantile"), ("y", "u")]))))))))
