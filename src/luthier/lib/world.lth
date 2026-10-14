@@ -9,7 +9,8 @@
 -- to 10.S13; L11; L4.5; D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md
 -- (the token used exactly once; `W` optional in `main`); D-2026-10-13-a (one world; an action is a
 -- directed request, checked by comparing the representation before and after), -b (`W` a
--- keyword), -g. Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+-- keyword), -g; D-2026-10-14-a (functions cross the bridge as callbacks, counted). Pattern of
+-- ebnf.lth: a theory, its laws over a model, `T := laws`.
 --
 -- What this file states. The core knows of the world only the table of 10.S5: the token `W`, a
 -- keyword with no `==` and no introduction, which a program never constructs and uses exactly once
@@ -36,7 +37,9 @@
 --      other place; what is assumed (10.S7, 10.S13).                                   done
 --   §3 Externs as routes: read at the first demand, the hash of what was read in the
 --      identity, validated against the type's laws before applied, refused if refuted, a
---      provisional one applied as debt without validation (10.S8 to 10.S10, L11.2, 4.R5). done
+--      provisional one applied as debt without validation (10.S8 to 10.S10, L11.2, 4.R5);
+--      a Luthier function crossing as a callback, its calls counted, a record of
+--      functions crossing by field (3.S23; D-2026-10-14-a, 12.S18).                   done
 --   §4 The actions the first slice needs, by their descriptions: `print`, reading a file
 --      (10.S2; D8).                                                                   done
 --   §5 Certifying a host action against its description along one chain of tokens: the
@@ -139,6 +142,39 @@ ProvisionalIsAssumed (e : Externs) (r : Route) (h : String) : Bool :=
 IdentityCarriesHash (e : Externs) (r : Route) (h k : String) : Bool :=
   h == k or not (e.identity r h == e.identity r k)
 Externs := AppliedWhenSettled & ProvisionalIsAssumed & IdentityCarriesHash
+
+-- A Luthier function passed to a host function crosses as a callback (3.S23; D-2026-10-14-a): the
+-- host calls it through the bridge, at the arguments it chooses, and each call gives the
+-- function's value there, nothing more than applying it here. The callback takes no token: a
+-- function that mentions no `W` holds no effect (10.S1), so the host's calls change no place of
+-- the world, and the host's action, with or without a callback, stays one action of the world,
+-- described as one (`Described`) and certified along one chain of tokens (§5; D4: the token is
+-- the action's, used once by it, and never the callback's). A record whose fields are functions
+-- crosses as the record with each field a callback (D-2026-10-14-a): the host reads a field and
+-- calls it, and calling the field is calling the function, counted the same. The calls are
+-- counted, and the count is in the run's record (12.S18, P2), beside the result: the cost of a
+-- fit is in the calls to its objective. [proposed] (D-2026-10-14-a names the count and the record,
+-- not its key) The count is per callback crossing, recorded with the route of the extern that
+-- received it. A model of `Crossing` is the bridge (run.py): what it gives the host when the host
+-- calls at `xs`, the arguments it asked at, with how many calls that was. The theory says nothing
+-- of what the host does between the calls; that is the host action's, under `Described`.
+Crossing (A B : Concrete) : {
+  callBack : (A -> B) -> List A -> List B * Nat,
+  callField : List (String * (A -> B)) -> String -> List A -> List B * Nat,
+}
+mapList (A B : Concrete) (f : A -> B) (xs : List A) : List B :=
+  match xs { nil -> nil ; cons x rest -> cons (f x) (mapList A B f rest) }
+lengthOf (A : Concrete) (xs : List A) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf A rest }
+-- each call gives the function's value at the argument: the crossing is faithful
+CallbackGivesTheFunction (A B : Concrete) (b : Crossing A B) (f : A -> B) (xs : List A) : Bool :=
+  match b.callBack f xs { (ys, n) -> ys == mapList A B f xs }
+-- and the calls are counted, one per argument the host asked at (12.S18)
+CallsAreCounted (A B : Concrete) (b : Crossing A B) (f : A -> B) (xs : List A) : Bool :=
+  match b.callBack f xs { (ys, n) -> n == lengthOf A xs }
+-- a record of functions crosses by field: calling a field is calling the function, counted the same
+RecordCrossesByField (A B : Concrete) (b : Crossing A B) (l : String) (f : A -> B) (xs : List A) : Bool :=
+  b.callField [(l, f)] l xs == b.callBack f xs
+Crossing (A B : Concrete) := CallbackGivesTheFunction A B & CallsAreCounted A B & RecordCrossesByField A B
 
 -- ---------------------------------------------------------------- §4 The actions the first slice needs
 
