@@ -34,3 +34,23 @@ law's domain), `tests/tester/tables_laws.lut`.
 
 Check: `PYTHONPATH=src python3 -m pytest tests/test_run.py -q`, then `PYTHONPATH=src python3 -m
 pytest tests -q`. Report in your final message.
+
+## Addendum (2026-10-15, 02:30): the interpreter's revision, first
+
+Every store went stale at commit 5803e48 because `certify.interpreter_revision` is the last
+commit touching `src/luthier/*.py` (plus a dirty hash), so the tests un-xfailed there fail now.
+Night default, [proposed] for Luciano (report-run.md decision 2; the night plan's Questions):
+the interpreter's revision in an entry's identity is the last tag reachable from HEAD
+(`git describe --tags --abbrev=0`, today `v0.2`), with no dirty marker, so that the stores stay
+current between tags; the host code behind the cone's externs is already hashed by file (6.S8's
+other part). Change `interpreter_revision` so, with its docstring saying why and citing the
+decision, keep the package-version fallback outside git, adjust `tests/test_certify.py` to the
+new reading. Then, in the background, re-certify the library once:
+`PYTHONPATH=src python3 -m luthier.cli certify tests/tester/arrays_laws.lut tests/tester/fit_laws.lut
+tests/tester/belief_laws.lut tests/tester/optimization_laws.lut tests/tester/probability_laws.lut
+tests/tester/numbers_laws.lut tests/tester/tables_laws.lut --jobs 4 --fuel 100000000` (about 30
+minutes; tables_laws after your items 1 and 2), and at the end `luthier run tests/run/vector_norm.lut`,
+`tests/run/table_cell.lut` and the fit (`experiment_zero.lut` with the usual `--set`s, `--set
+lmMaxIter=2`): which run certified now, which are still refused and for which laws; remove the
+xfail marks that no longer hold. This addendum comes before items 1 to 3; you may change
+`src/luthier/certify.py` and `tests/test_certify.py` for it.
