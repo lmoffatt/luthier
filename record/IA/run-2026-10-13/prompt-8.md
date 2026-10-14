@@ -39,3 +39,11 @@ then the other. `examples/hello.lut`, `validate_graph.lut` and the 32 run tests 
 Check: `PYTHONPATH=src python3 -m pytest tests/test_run.py -q`, then `PYTHONPATH=src python3 -m
 pytest tests -q`. Do not commit. Report in your final message: what crosses and how, every
 choice D-a and the theory left open.
+
+## Addendum (the theories landed, f708cb9)
+
+`record/IA/theories-2026-10-14/report.md`, "What the specimens must do": world.lth's `Crossing`
+(`CallbackGivesTheFunction`, `CallsAreCounted`, `RecordCrossesByField`) and term.lth's
+`ExternIsValue` (a route is not a name), `ExternPartialIsValue`, `HostGivesBackAValue`. Read that
+section first; each test of this bite names the law it meets. The count is keyed by the receiving
+extern's route in the run's record (12.S18).
