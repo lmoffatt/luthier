@@ -31,6 +31,12 @@ writes theories; Codex what must run and iterate; a web model small bites).
   `experiment_zero.lut`, needs functions across the bridge (inventory §6 item 6), unstated in the
   spec: his question.
 
+- 2026-10-14, 18:40: step 3's second stage ported (examples/sonolocalizacion/experiment_zero.lut
+  with positions.lut, distances.lut; the fit's theories probability, belief, optimization and
+  the host's lm.py in luthier, P7) and run once end to end on a probe: 59 iterations, 4856 s,
+  sigma 0.235 m (v0.1's header: 25.7 cm; the comparison is Luciano's, step 4). At HEAD it stops
+  on a loader bug (run bite 10 running). The cost per iteration (95 s) is the next question.
+
 ## Steps
 
 1. Inventory, read only (Luciano runs any script there): in `~/Projects/sonolocalizacion`, which
