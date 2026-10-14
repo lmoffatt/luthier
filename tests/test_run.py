@@ -109,12 +109,16 @@ def command(path, *args, cwd=None):
     # a run appends to x.run.json beside x.lut (12.S18); a test leaves none in the repository
     where = record_path(Path(cwd or ".") / path)
     existed = where.exists()
+    lock = where.parent / "luthier.lock"  # `run` writes it beside the program when absent (12.S13)
+    locked = lock.exists()
     try:
         return subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path), *args],
                               cwd=cwd, env=env, capture_output=True, text=True)
     finally:
         if not existed and ROOT in where.resolve().parents:
             where.unlink(missing_ok=True)
+        if not locked and ROOT in lock.resolve().parents:
+            lock.unlink(missing_ok=True)
 
 
 def test_hello():
@@ -751,3 +755,102 @@ def test_host_table_names_and_kinds_cross_as_lists(monkeypatch):
     # the certification of csv's laws is not the question here (they are graded by tables_laws.lut)
     monkeypatch.setattr("luthier.run.certification", lambda *a, **k: None)
     assert run_file(ROOT / "tests/run/table_names.lut", fuel=10_000_000) == "same\ndifferent\nsame\n"
+
+
+# ---------------------------------------------------------------- the record completed, the lock
+# (record/IA/run-2026-10-13/prompt-11.md; 12.S18, 12.S13)
+
+def _hello(tmp_path):
+    path = tmp_path / "hello.lut"
+    path.write_text((ROOT / "examples/hello.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    return path
+
+
+def test_an_entry_has_every_field_of_12_S18(tmp_path, capsys):
+    from luthier import certify
+    path = _hello(tmp_path)
+    assert main(["run", str(path), "--fuel", "123456"]) == 0
+    entry = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]
+    for field_name in ("entry", "time", "parameters", "output", "calls", "certification", "fuel", "files_read", "lock"):
+        assert field_name in entry
+    cert = entry["certification"]
+    for field_name in ("cone", "interpreter", "accept", "states", "laws", "not certified",
+                       "fingerprint", "python", "hosts"):
+        assert field_name in cert
+    assert cert["fingerprint"].startswith("sha256:") and cert["fingerprint"] != cert["cone"]
+    assert cert["interpreter"] == certify.interpreter_revision()
+    assert cert["python"] and isinstance(cert["hosts"], dict)
+    assert entry["fuel"]["given"] == 123456 and 0 < entry["fuel"]["spent"] < 123456
+    assert entry["files_read"] == []
+
+
+def test_a_run_records_the_file_it_read_with_its_hash(tmp_path, monkeypatch, capsys):
+    import hashlib
+    path = tmp_path / "read_first_line.lut"
+    path.write_text((RUN / "read_first_line.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / "input.txt").write_bytes(b"first line\nsecond line\n")
+    monkeypatch.chdir(tmp_path)
+    assert main(["run", str(path)]) == 0
+    entry = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]
+    assert entry["files_read"] == [["input.txt", "sha256:" + hashlib.sha256(b"first line\nsecond line\n").hexdigest()]]
+    assert any(r.startswith("python:test_run") for r in entry["certification"]["hosts"])
+
+
+def test_the_files_read_are_listed_with_their_hash(tmp_path):
+    host.reset()
+    f = tmp_path / "f.txt"
+    f.write_bytes(b"abc\n")
+    host.read_file(None, str(f))
+    host.read_file(None, str(f))
+    host.observe(None, [str(f), str(tmp_path / "missing")])
+    assert host.files_read() == [(str(f), "sha256:" + __import__("hashlib").sha256(b"abc\n").hexdigest())]
+    host.reset()
+    assert host.files_read() == []
+
+
+def test_the_same_code_has_the_same_fingerprint_and_other_code_another(tmp_path):
+    a, b = tmp_path / "a", tmp_path / "b"
+    a.mkdir(), b.mkdir()
+    one = _hello(a)
+    two = _hello(b)
+    other = b / "other.lut"
+    other.write_text(two.read_text(encoding="utf-8").replace("hello, world", "hello, there"), encoding="utf-8")
+    for p in (one, two, other):
+        assert main(["run", str(p)]) == 0
+    fp = [json.loads(record_path(p).read_text(encoding="utf-8"))[-1]["certification"]["fingerprint"]
+          for p in (one, two, other)]
+    assert fp[0] == fp[1] != fp[2]
+
+
+def test_the_lock_is_written_when_absent_matches_and_warns_when_it_differs(tmp_path, capsys):
+    from luthier import certify
+    path = _hello(tmp_path)
+    lock = tmp_path / "luthier.lock"
+    # absent: written beside the program, with the current revision
+    assert main(["run", str(path)]) == 0
+    assert json.loads(lock.read_text(encoding="utf-8")) == {"interpreter": certify.interpreter_revision()}
+    first = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["lock"]
+    assert first["status"] == "written" and first["pinned"] == certify.interpreter_revision()
+    capsys.readouterr()
+    # matches: no warning
+    assert main(["run", str(path)]) == 0
+    out, err = capsys.readouterr()
+    assert err == "" and json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["lock"]["status"] == "matches"
+    # differs: a warning on standard error, the run goes on, the lock is not rewritten
+    lock.write_text(json.dumps({"interpreter": "v0.0-other"}), encoding="utf-8")
+    assert main(["run", str(path)]) == 0
+    out, err = capsys.readouterr()
+    assert out == "hello, world\n" and "pins interpreter v0.0-other" in err
+    last = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["lock"]
+    assert last["status"] == "differs" and last["pinned"] == "v0.0-other"
+    assert json.loads(lock.read_text(encoding="utf-8")) == {"interpreter": "v0.0-other"}
+
+
+def test_a_lock_in_the_directory_above_is_found(tmp_path, capsys):
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    path = _hello(sub)
+    (tmp_path / "luthier.lock").write_text(json.dumps({"interpreter": "v0.0-other"}), encoding="utf-8")
+    assert main(["run", str(path)]) == 0
+    assert "v0.0-other" in capsys.readouterr().err
+    assert not (sub / "luthier.lock").exists()

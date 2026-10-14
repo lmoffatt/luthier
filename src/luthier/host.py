@@ -8,11 +8,13 @@ record (12.S18). Plots (record/IA/plots-2026-10-15/prompt-host.md): a file is re
 turned into a string by `text_of_bytes`, so a binary file (a PNG) is observed, one character per
 byte, as plots.py's `image` gives it, for world.lth's `agreement`.
 """
+import hashlib
 from dataclasses import dataclass
 from pathlib import Path
 
 _stdout = ""
 _calls = {}
+_reads = []
 
 
 @dataclass(frozen=True)
@@ -41,13 +43,24 @@ def text_of_bytes(data):
 
 
 def _read(path):
-    return text_of_bytes(Path(path).read_bytes())
+    data = Path(path).read_bytes()
+    pair = (str(path), "sha256:" + hashlib.sha256(data).hexdigest())
+    if pair not in _reads:
+        _reads.append(pair)
+    return text_of_bytes(data)
+
+
+def files_read():
+    """The files read so far in this run, as (path as the program gave it, sha256 of its bytes), in
+    the order first read, each pair once (12.S18: what a record needs to say the inputs were the same)."""
+    return list(_reads)
 
 
 def reset():
     global _stdout
     _stdout = ""
     _calls.clear()
+    _reads.clear()
 
 
 def count(route, position):

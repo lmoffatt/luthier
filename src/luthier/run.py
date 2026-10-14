@@ -34,6 +34,7 @@ import importlib
 import inspect
 import json
 import math
+import platform
 from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
 
@@ -1577,7 +1578,14 @@ def certification(loaded, program, entry, values, accept=None):
         raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (accepting "
                       f"{certify.GRADE_WORDS[accept]} and above; 12.S17):\n  " + "\n  ".join(lines), refusals)
     with_laws = [c for c in cone if c["laws"]]
+    code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
+            # the canonical code's hash apart from the hosts and the interpreter (12.S18): two
+            # records with the same fingerprint ran the same code [proposed: certify.cone_hash of
+            # the cone's code with no hosts and an empty interpreter]
+            "fingerprint": certify.cone_hash(code_only),
+            "python": platform.python_version(),
+            "hosts": {r: h for r, h in cones.hosts(entry)},
             "accept": certify.GRADE_WORDS[accept],
             "states": {"certified": len(with_laws), "vacuous": len(cone) - len(with_laws),
                        "provisional": 0, "uncertified": 0, "stale": 0, "failed": 0},
@@ -1627,7 +1635,34 @@ def run(path, main="main", fuel=10000, sets=(), accept=None):
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
+    state = dict(state or {}, fuel={"given": fuel, "spent": fuel - runner.fuel},
+                 files_read=[list(pair) for pair in host.files_read()], lock=lock_status(path))
     return host.stdout(), values, state
+
+
+LOCK = "luthier.lock"
+
+
+def lock_status(path):
+    """12.S13: the `luthier.lock` found in the directory of the program or the one above, which
+    pins the interpreter's revision. Gives {"path", "pinned", "status"}: `matches`, `differs` (a
+    warning on standard error: the run goes on, 12.S13 names no refusal and no flag that turns the
+    lock off), or `absent` (`record` then writes it beside the program)."""
+    from . import certify
+    here = Path(path).resolve().parent
+    current = certify.interpreter_revision()
+    for directory in (here, here.parent):
+        lock = directory / LOCK
+        if lock.exists():
+            try:
+                pinned = json.loads(lock.read_text(encoding="utf-8"))["interpreter"]
+            except (ValueError, KeyError, TypeError):
+                raise RunError(f"{lock}: not a lock (a JSON object with an `interpreter`)")
+            if pinned != current:
+                import sys
+                print(f"warning: {lock} pins interpreter {pinned}, this is {current} (12.S13)", file=sys.stderr)
+            return {"path": str(lock), "pinned": pinned, "status": "matches" if pinned == current else "differs"}
+    return {"path": str(here / LOCK), "pinned": None, "status": "absent"}
 
 
 def run_file(path, main="main", fuel=10000, sets=(), accept=None):
@@ -1645,14 +1680,26 @@ def record(path, main, values, output, state=None):
     receiving extern's route -> position among its arguments -> count, D-2026-10-14-a), and the
     certification state of the cone (`certification`: the hash of the entry's cone, the
     interpreter's revision, the grade accepted, the counts of states of the cone's names and the
-    names not certified, empty since a run starts only on a certified cone). The lock status is not
-    recorded yet."""
+    names not certified, empty since a run starts only on a certified cone, the fingerprint of the
+    cone's code, the Python's and the hosts' versions), the fuel given and spent, the files read
+    with the hash of their bytes (`files_read`) and the lock (`lock`: its path, the revision it
+    pins and whether the run `matches` it, `differs`, or found it `absent` and wrote it)."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
     item = {"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "parameters": values, "output": output, "calls": host.calls()}
     if state is not None:
+        state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
+        for key in ("fuel", "files_read", "lock"):
+            if key in state:
+                item[key] = state.pop(key)
+        lock = item.get("lock")
+        if lock and lock["status"] == "absent":
+            from . import certify
+            Path(lock["path"]).write_text(json.dumps({"interpreter": certify.interpreter_revision()}) + "\n",
+                                          encoding="utf-8")
+            lock["pinned"], lock["status"] = certify.interpreter_revision(), "written"
         item["certification"] = state
     runs.append(item)
     where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
