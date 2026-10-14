@@ -1,0 +1,60 @@
+-- tests/tester/sonolocalizacion_laws.lut: the laws of the port (examples/sonolocalizacion:
+-- positions.lut, distances.lut, distance_graph.lut) run through `luthier test`, on the brief
+-- record/IA/evidence-2026-10-14/prompt.md. positions.lut's `layout` is an `Iso` (algebra.lth),
+-- whose laws take the two types as parameters (7.R2): `LayoutFromUndoesTo` and
+-- `LayoutToUndoesFrom` [proposed] are the laws at the layout's types, for a drawn number of nodes.
+-- distances.lut's three laws compare an implementation of the likelihoods with the native ones;
+-- the implementations live in sonolocalización (P7), so here the native ones are the models
+-- (`nativeFull`, `nativeProfile`), which makes `FullAgrees` and `ProfileAgrees` a check of the
+-- laws' arithmetic and `ProfileIsFullAtItsSigma` a law of the construction. Their domains,
+-- `TestedFull` and `TestedFree`, keep the free coordinates within 5 m: drawn at size 5.
+-- distance_graph.lut's `ReportsValidity` on `firstViolation`, over listed graphs: session A's
+-- (tests/tester/session_a.lut) and one broken per invariant, each session A's text with a line
+-- added or a column removed. Each cutoff a census of one, the demand's (D-2026-10-14-c): the
+-- tolerance 1e-12 [proposed]. Seed 20261014.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Dim MatOf VecOf
+import "algebra.lth" FromUndoesTo ToUndoesFrom
+import "../../examples/sonolocalizacion/positions.lut" layout
+import "../../examples/sonolocalizacion/distances.lut" FullAgrees ProfileAgrees ProfileIsFullAtItsSigma nativeFull nativeProfile
+import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph Violation ReportsValidity firstViolation graphOf parseTable
+import "session_a.lut" nodesTextA measurementsTextA the graphA
+
+tolerance : Tolerance := 1.0e-12
+cutoffs : List Binding := [ { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+
+-- positions.lut: the layout's two round trips, exact
+LayoutFromUndoesTo (n : Dim) (a : MatOf 3 n) : Bool := FromUndoesTo (MatOf 3 n) (VecOf (3 * n)) (layout n) a
+LayoutToUndoesFrom (n : Dim) (p : VecOf (3 * n)) : Bool := ToUndoesFrom (MatOf 3 n) (VecOf (3 * n)) (layout n) p
+test "LayoutFromUndoesTo" (SampledMode linear) (seed <- 20261014)
+test "LayoutToUndoesFrom" (SampledMode linear) (seed <- 20261014)
+
+-- distances.lut: the native likelihoods as the implementations
+onFull : List Binding := [ { parameter := just "l", type := nothing, generator := "nativeFull", coverage := Listed } ]
+onProfile : List Binding := [ { parameter := just "l", type := nothing, generator := "nativeProfile", coverage := Listed } ]
+test "FullAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onFull) (profile <- cutoffs)
+test "ProfileAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs)
+test "ProfileIsFullAtItsSigma" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs)
+
+-- distance_graph.lut: session A's graph and one broken per invariant, in ValidGraph's order
+graphFrom (nodes measurements : String) : DistanceGraph := the (graphOf (parseTable (just nodes)) (parseTable (just measurements)))
+graphs : List DistanceGraph := [
+  graphA,
+  graphFrom "name:str,x:float,y:float,z:float\nmic1,0.0,0.0,1.69\n" measurementsTextA,
+  graphFrom nodesTextA "i:int,j:int\n1,2\n",
+  graphFrom nodesTextA (measurementsTextA + "1,99,2.0\n"),
+  graphFrom nodesTextA (measurementsTextA + "3,3,1.0\n"),
+  graphFrom nodesTextA (measurementsTextA + "1,2,0.0\n"),
+  graphFrom (nodesTextA + "extra,9.0,9.0,1.0,0.0,1.0,0.01\n") measurementsTextA,
+  graphFrom (nodesTextA + "mic1,9.0,9.0,1.0,1.0,1.0,0.01\n") measurementsTextA,
+  graphFrom nodesTextA (measurementsTextA + "6,7,1.0\n") ]
+checks : List (DistanceGraph -> Maybe Violation) := [firstViolation]
+listedGraphs : List Binding := [
+  { parameter := just "f", type := nothing, generator := "checks", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "graphs", coverage := Listed } ]
+test "ReportsValidity" ExhaustiveMode (whereBindings <- listedGraphs)
