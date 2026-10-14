@@ -141,6 +141,17 @@ approxMatSlack (slack : Float64) (tol : Tolerance) (a b : Mat Float64) : Bool :=
     forallPairs2 a.m a.n (fn i j { abs (a.f i j - b.f i j) <= slack + tol * (1.0 + abs (a.f i j) + abs (b.f i j)) })
   else false
 
+-- the same comparison with each entry's scale given: the entries differ by at most the tolerance
+-- times the scale of that entry (what the sum compared adds in magnitude, 11.S14), so the
+-- comparison follows the magnitudes and not a flat constant; the scale is a matrix of the shape
+-- compared, else the comparison fails
+-- [proposed, D-2026-10-14-c; 11.S14]
+absMat (a : Mat Float64) : Mat Float64 := mat Float64 a.m a.n (fn i j { abs (a.f i j) })
+approxMatOf (tol : Tolerance) (scale a b : Mat Float64) : Bool :=
+  if a.m == b.m and a.n == b.n and scale.m == a.m and scale.n == a.n then
+    forallPairs2 a.m a.n (fn i j { withinOf tol (scale.f i j) (a.f i j) (b.f i j) })
+  else false
+
 -- ---------------------------------------------------------------- §4 The leaves (3.S28, 12.S9)
 
 -- The operations the host computes faster, as one record: what a model of it must meet is below,
@@ -257,19 +268,41 @@ PinvOfDiagonal (m : Arrays) (tol : Tolerance) (fl : ClearFloor) (d : ClearDiagon
   approxMat tol (m.pinvSym fl (diagonal d)) (pinvOfDiagonal fl d)
 PinvOfZero (m : Arrays) (fl : RankFloor) (k : Dim) : Bool := approxMat exact (m.pinvSym fl (zeroMat k k)) (zeroMat k k)
 PinvOfIdentity (m : Arrays) (tol : Tolerance) (fl : RankFloor) (k : Dim) : Bool := approxMat tol (m.pinvSym fl (identity k)) (identity k)
+-- [proposed, 2026-10-14, on the evidence report's Findings] Two changes.
+-- (1) PinvRestricts is stated over the matrices that are positive semidefinite at the floor,
+-- `PsdAt m fl`: the retained rank at the floor of the negative of the matrix is zero, that is,
+-- every eigenvalue of s is at least minus the floor times the largest in magnitude. Reading
+-- taken: the one the leaf `retainedRank` already gives, so the predicate needs no spectrum of its
+-- own and is the predicate of the slack (the part dropped is then at most the floor times the
+-- largest eigenvalue in magnitude, below `fl * frobDef s`, 11.S18). Rejected: the dropped part's
+-- norm as the slack (needs the spectrum, which the law has no leaf for), and quadratic forms on a
+-- listed basis (do not decide semidefiniteness). On an indefinite matrix pinvSym drops the
+-- negative eigenvalues by design, and s p s differs from s by the negative part.
+-- (2) PinvProjects, PinvSymmetric, PinvScales compare relative to the magnitudes (11.S14): the
+-- entries of p s p are sums of products, compared to p within the tolerance times the sum of the
+-- magnitudes of those products; the symmetry laws likewise with the scale of the matrix compared;
+-- and P at a scale is compared with a scale of the condition of s read from the retained
+-- spectrum, `frobDef s * frobDef p` (a bound on the condition number of s on its retained
+-- subspace), since the error of p is of order cond times eps (11.S18: the tolerance depends on the
+-- conditioning). The tolerance stays a parameter of each law (D-2026-10-14-c).
+-- spec 11.S14, 11.S18
+PsdAt (m : Arrays) (fl : RankFloor) : U := { s : Symmetric | m.retainedRank fl (mscaleDef (0.0 - 1.0) s) == 0 }
 PinvProjects (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   { p := m.pinvSym fl s
-    approxMat tol (m.matMul p (m.matMul s p)) p }
+    approxMatOf tol (matMulDef (absMat p) (matMulDef (absMat s) (absMat p))) (m.matMul p (m.matMul s p)) p }
 PinvSymmetric (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   { p := m.pinvSym fl s
-    approxMat tol p (m.transpose p) and approxMat tol (m.matMul s p) (m.transpose (m.matMul s p)) }
-PinvRestricts (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
+    approxMatOf tol (absMat p) p (m.transpose p)
+      and approxMatOf tol (matMulDef (absMat s) (absMat p)) (m.matMul s p) (m.transpose (m.matMul s p)) }
+PinvRestricts (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : PsdAt m fl) : Bool :=
   { p := m.pinvSym fl s
     approxMatSlack (fl * frobDef s) tol (m.matMul s (m.matMul p s)) s }
 PinvTraceIsRank (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   within tol (m.trace (m.matMul s (m.pinvSym fl s))) (toFloat64 (m.retainedRank fl s))
 PinvScales (m : Arrays) (tol : Tolerance) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
-  approxMat tol (m.pinvSym fl (mscaleDef c s)) (mscaleDef (1.0 / c) (m.pinvSym fl s))
+  { p := m.pinvSym fl s
+    approxMatOf (frobDef s * frobDef p * tol) (mscaleDef (1.0 / c) (absMat p) )
+      (m.pinvSym fl (mscaleDef c s)) (mscaleDef (1.0 / c) p) }
 
 Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
   & DotSymmetric & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
