@@ -17,7 +17,7 @@
 -- prior mean of its position (x, y, z in metres) and the prior standard deviation of each
 -- coordinate (sx, sy, sz). `measurements` has a row per measured distance: the row indices i and j
 -- of the two nodes and the distance d in metres, horizontal, as the tape measures it on the floor
--- (positions_slice.lut). Repeated pairs are allowed; heights from the ground belong in the prior,
+-- (positions.lut). Repeated pairs are allowed; heights from the ground belong in the prior,
 -- not here. Whatever produces a graph (a script per experiment) is free; what it produces must
 -- satisfy the invariants below, which are checked on the files before a fit. They are written as
 -- Bools over a concrete graph; a row-wise one reads its cells only where the ones it needs hold.
@@ -27,7 +27,7 @@ import "tables.lth" Table Codec Cell hasColumn intAt realAt textAt firstFailing
 import "tables_model.lut" csv : Codec
 import "arrays.lth" Arrays Vec Mat MatOf MatRows VecOf RankFloor vec mat forallBelow existsBelow sumToInt
 import "arrays_model.lut" numpy : Arrays
-import "positions_slice.lut" Node pairDistance distanceJacobian flatten Design PairsAmong
+import "positions.lut" Node pairDistance distanceJacobian flatten Design PairsAmong
 
 DistanceGraph = { nodes : Table, measurements : Table }
 
