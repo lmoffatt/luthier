@@ -25,6 +25,8 @@ parsed (s : String) : Table := match csv.parse s { just t -> t }
 -- tables built in Luthier: the empty table (no rows, one column), one row, three rows of an int, a
 -- real and a text column
 emptyT : Table := { nRows := 0, names := ["k"], kinds := ["int"], cell := fn c r { nothing } }
+-- kept in the census though `RoundTrip` is stated over tables with a column (tables.lth, 12.S23
+-- [proposed]): it shows the law's domain, which holds vacuously here
 noColumns : Table := { nRows := 0, names := [], kinds := [], cell := fn c r { nothing } }
 oneRow : Table := { nRows := 1, names := ["n"], kinds := ["int"],
   cell := fn c r { if c == "n" then just (int 7) else nothing } }
