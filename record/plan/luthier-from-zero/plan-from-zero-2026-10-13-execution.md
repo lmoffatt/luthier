@@ -422,9 +422,11 @@ and the slice's libraries (`arrays`, `tables`, `probability`, `belief`, `optimiz
 `src/luthier/lm.py`); the kernel's primitives and the Runner's speed (kernel bites 7 to 12).
 
 Planned:
-1. *An Opus or Fable agent.* `src/luthier/lib/demand.lth` (8.S1, 8.S2: the demand as a value, the
-   cutoffs it carries, the holes it fills) and `plan.lth` (8.S4, 8.S8, 8.S11: the plan as data,
-   the memo across runs keyed by the cone), then the external review of layer 3.
+1. Done 2026-10-15 (a Fable agent, 5df0c75 to a18c4a9): `src/luthier/lib/demand.lth` with
+   `demand_model.lut` (8.S1, 8.S2: the demand as a value, the cutoffs it carries, the holes it
+   fills; the decoration and the costs as holes) and `plan.lth` with `plan_model.lut` (8.S3,
+   8.S4, 8.S8, 8.S11: the dataflow, the schedule, `Confluent`, the memo key). Next: the external
+   review of layer 3 (world, certification, demand, plan).
 2. *Claude agents.* `eval` and `session` as the spec reads them (12.S19, 2.S18); the result store
    across runs (8.S3, 8.S8). Done 2026-10-15: externs validated at their first action (10.S8 to
    10.S10) through `agreement` (788b7f4); the run record complete and the lock (c03e16f);
