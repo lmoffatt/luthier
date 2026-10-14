@@ -1,14 +1,14 @@
 -- Runner integration fixture (record/IA/plots-2026-10-15/prompt-host.md, item 2; plot.lth,
 -- plot_model.lut): a `Plot` of two tables built in Luthier, each read from a CSV the test writes
 -- and parsed by `csv`, with points and a line over one and a text over the other, rendered by the
--- host's renderer to plot.png and plot.svg in the working directory. The text layer is built by
--- `addLayer` and not by plot.lth's `text`: importing `text`, a definition with the name of
--- `Cell`'s label, changes the hash of csv's cone in this program, and csv's entries then read as
--- stale (a finding of 2026-10-15 for the certifier; `addLayer p l` is what `text` does).
+-- host's renderer to plot.png and plot.svg in the working directory. The text layer is plot.lth's
+-- `text`, a definition with the name of `Cell`'s label (the loader calls it `text@plot`): importing
+-- it once changed the hash of csv's cone here and csv's entries read as stale, until the cone
+-- followed each reference by its exact name (record/IA/certification-2026-10-14/prompt-scope.md).
 import "world_model.lut" HostConsole host : HostConsole
 import "tables.lth" Table
 import "tables_model.lut" csv : Codec
-import "plot.lth" Plot Canvas Mapping plot table point line addLayer texts scale labels linear auto
+import "plot.lth" Plot Canvas Mapping plot table point line text scale labels linear auto
 import "plot_model.lut" matplotlib
 
 canvas : Canvas := { width := 4.0, height := 3.0, dpi := 50.0 }
@@ -20,11 +20,10 @@ figure (obs notes : Table) : Plot :=
   labels "two tables" "x" "y"
     (scale "y" (linear (auto { expand := 0.05 }))
       (scale "x" (linear (auto { expand := 0.05 }))
-        (addLayer
+        (text "notes" [("label", "name")] 8.0
           (line "obs" nil 1.0
             (point "obs" nil 4.0
-              (table "notes" notes (plot canvas "obs" obs xy))))
-          { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))
+              (table "notes" notes (plot canvas "obs" obs xy)))))))
 
 parsed (w : W) (path : String) : W * Maybe Table :=
   match host.readFile w path { (w1, nothing) -> (w1, nothing) ; (w1, just s) -> (w1, csv.parse s) }

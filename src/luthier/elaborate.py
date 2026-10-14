@@ -17,7 +17,7 @@ import json
 from dataclasses import dataclass, field
 
 from . import surface as s, term as t
-from .kernel import alpha_equal, substitute
+from .kernel import alpha_equal, pattern_names, substitute
 
 
 class ElaborationError(ValueError):
@@ -127,7 +127,12 @@ def infer(v, c):
             inner = c.child(); inner.types[n] = a
             return infer(b, inner)
         case t.Match(_, arms):
-            return infer(arms[0][1], c) if arms else t.Hole('type')
+            if not arms: return t.Hole('type')
+            # a pattern variable is a fresh name (2.S12): it shadows a definition of the same name,
+            # its type unknown here (record/IA/certification-2026-10-14/prompt-scope.md item 1)
+            inner = c.child()
+            inner.types.update((n, t.Hole('type')) for n in pattern_names(arms[0][0]))
+            return infer(arms[0][1], inner)
         case t.Pair(a, b):
             return t.Sigma('_', infer(a, c), infer(b, c))
     return t.Hole('type')

@@ -231,21 +231,23 @@ class Cones:
             code, refs, routes = [], set(), set()
             for act in self.acts.get(name, ()):
                 term = t.Pair(act.type, act.body) if isinstance(act, t.Define) else act.type
-                term = _plain(term)
+                # the references by the names the program calls them (`apart@plot`, not `apart`), so
+                # that the cone reaches the definitions the name reaches and no other of the same
+                # plain name; the tags go only from the code that is hashed
                 out = {"constructors": set(), "routes": set()}
                 _walk(term, out)
                 refs |= set(kernel.free_names(term)) | out["constructors"]
                 routes |= out["routes"]
-                code.append((name.partition("@")[0], kernel.canonical(term)))
+                code.append((name.partition("@")[0], kernel.canonical(_plain(term))))
             self.memo[name] = (code, refs, routes)
         return self.memo[name]
 
     def names(self, name):
         """The names the cone of `name` reaches, itself included (as the program calls them)."""
+        # each reference by its exact name: a definition of the same plain name in another file (the
+        # loader's `name@file`) is another name, and the importer's names never enter the cone of a
+        # library name (6.S8, 12.S22; record/IA/certification-2026-10-14/prompt-scope.md item 2)
         seen, pending = set(), [name]
-        tags = {}
-        for n in self.acts:
-            tags.setdefault(n.partition("@")[0], []).append(n)
         while pending:
             n = pending.pop()
             if n in seen or n not in self.acts:
@@ -253,7 +255,7 @@ class Cones:
             seen.add(n)
             _, refs, _ = self._part(n)
             for r in refs:
-                for m in (r, self.owner.get(r)) + tuple(tags.get(r, ())):
+                for m in (r, self.owner.get(r)):
                     if m is not None and m not in seen and m in self.acts:
                         pending.append(m)
         return seen

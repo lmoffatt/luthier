@@ -79,6 +79,128 @@ def _sum_labels(value, out):
     return out
 
 
+class FileScope:
+    """An act of a file with its names as a program calls them: what it defines by `internal`, each
+    free name it uses by `reference`, each pattern by `pattern` (which gives the names it binds, so
+    that a binder shadows a definition of the same name). `Loaded` resolves them for a run; check.py's
+    `load_imports` for the typing of an importer's imports (12.S22)."""
+
+    def scoped(self, f, act):
+        """An act of the file with each name it defines and each free name it uses in the program's
+        names; a name it cannot resolve is left as written and recorded against the act."""
+        path = f.path
+        missing = []
+        if isinstance(act, (s.Define, s.Declare, s.Alias)):
+            bound = set()
+            binders = []
+            for b in act.binders:
+                b = replace(b, type=self.rename(path, b.type, bound, missing),
+                            **({"default": self.rename(path, b.default, bound, missing)} if isinstance(b, s.Explicit) else {}))
+                binders.append(b)
+                bound |= set(b.names)
+            changes = {"name": self.internal(path, act.name), "binders": tuple(binders)}
+            if isinstance(act, s.Alias):
+                changes["value"] = self.rename(path, act.value, bound, missing)
+            else:
+                changes["type"] = self.rename(path, act.type, bound, missing)
+            if isinstance(act, s.Define):
+                body = act.body
+                if isinstance(body, s.DataBody):
+                    body = s.DataBody(tuple((self.internal(path, n), self.rename(path, ty, bound, missing))
+                                            for n, ty in body.constructors))
+                else:
+                    body = self.rename(path, body, bound, missing)
+                changes["body"] = body
+            result = replace(act, **changes)
+            if missing:
+                self.errors.setdefault(result.name, []).extend(missing)
+            return result
+        return self.rename(path, act, set(), missing)
+
+    def rename(self, path, value, bound, missing):
+        """`value` with its free names resolved in the file at `path`; binders followed as
+        check.py's `names` follows them."""
+        r = lambda v, b=bound: self.rename(path, v, b, missing)
+        if value is None or isinstance(value, (str, int, float, bool)):
+            return value
+        if isinstance(value, tuple):
+            return tuple(r(v) for v in value)
+        if isinstance(value, s.Name):
+            root, dot, rest = value.name.partition(".")
+            if root in bound:
+                return value
+            return s.Name(self.reference(path, root, missing) + dot + rest)
+        if isinstance(value, (s.Pi, s.Sigma)):
+            return replace(value, domain=r(value.domain), codomain=r(value.codomain, bound | set(value.names)))
+        if isinstance(value, s.SigmaNamed):
+            return replace(value, left_type=r(value.left_type), right_type=r(value.right_type, bound | {value.left_name}))
+        if isinstance(value, s.Subtype):
+            pattern, binds = self.pattern(path, value.pattern, missing)
+            return s.Subtype(pattern, r(value.type), r(value.law, bound | binds))
+        if isinstance(value, s.Record):
+            inner, out = set(bound), []
+            for fl in value.fields:
+                out.append(replace(fl, type=r(fl.type, set(inner))))
+                inner |= set(fl.names)
+            return s.Record(tuple(out), r(value.law, inner))
+        if isinstance(value, (s.Block, s.Lambda)):
+            inner = set(bound)
+            params = []
+            if isinstance(value, s.Lambda):
+                for q in value.params:
+                    if isinstance(q, s.TypedParam):
+                        q = replace(q, type=r(q.type, set(inner)))
+                        inner |= set(q.names)
+                    elif isinstance(q, s.PlainParam):
+                        inner.add(q.name)
+                    else:
+                        patterns = []
+                        for p in q.patterns:
+                            p, binds = self.pattern(path, p, missing)
+                            patterns.append(p)
+                            inner |= binds
+                        q = s.ShapeParam(tuple(patterns))
+                    params.append(q)
+            items = []
+            for it in value.items:
+                v = r(it.value, set(inner))
+                if isinstance(it, s.Bind):
+                    items.append(s.Bind(it.name, v))
+                    inner.add(it.name)
+                else:
+                    p, binds = self.pattern(path, it.pattern, missing)
+                    items.append(s.Rebind(p, v))
+                    inner |= binds
+            if isinstance(value, s.Block):
+                return s.Block(tuple(items), r(value.value, inner))
+            return s.Lambda(tuple(params), tuple(items), r(value.body, inner))
+        if isinstance(value, s.MatchOf):
+            arms = []
+            for p, body in value.arms:
+                p, binds = self.pattern(path, p, missing)
+                arms.append((p, r(body, bound | binds)))
+            return s.MatchOf(r(value.value), tuple(arms))
+        if isinstance(value, s.Clause):
+            patterns, binds = [], set()
+            for p in value.patterns:
+                p, b = self.pattern(path, p, missing)
+                patterns.append(p)
+                binds |= b
+            return s.Clause(tuple(patterns), r(value.body, bound | binds))
+        if isinstance(value, s.RecordValue):
+            return s.RecordValue(tuple((label, r(v)) for label, v in value.fields))
+        if isinstance(value, s.Sum):
+            return s.Sum(tuple((label, r(v)) for label, v in value.alternatives))
+        if isinstance(value, s.NamedArg):
+            return s.NamedArg(value.name, r(value.value))
+        if isinstance(value, s.Proj):
+            return s.Proj(r(value.value), value.field)
+        if is_dataclass(value) and not isinstance(value, type):
+            return replace(value, **{fl.name: r(getattr(value, fl.name)) for fl in fields(value)
+                                     if not isinstance(getattr(value, fl.name), str)})
+        return value
+
+
 @dataclass
 class _File:
     path: Path
@@ -90,7 +212,7 @@ class _File:
     imports: dict = field(default_factory=dict)   # the name the file sees -> (file, the name there)
 
 
-class Loaded:
+class Loaded(FileScope):
     """The files a run reads from `path` (and core), each act's names scoped by its file (12.S22).
 
     A file sees its own definitions, the names its imports list (each under its alias, a model
@@ -232,123 +354,6 @@ class Loaded:
         if found is None:
             return name in _BUILTIN_CONSTRUCTORS
         return found[1] in self.files[found[0]].constructors
-
-    # ------------------------------------------------------------------ renaming one act
-
-    def scoped(self, f, act):
-        """An act of the file with each name it defines and each free name it uses in the program's
-        names; a name it cannot resolve is left as written and recorded against the act."""
-        path = f.path
-        missing = []
-        if isinstance(act, (s.Define, s.Declare, s.Alias)):
-            bound = set()
-            binders = []
-            for b in act.binders:
-                b = replace(b, type=self.rename(path, b.type, bound, missing),
-                            **({"default": self.rename(path, b.default, bound, missing)} if isinstance(b, s.Explicit) else {}))
-                binders.append(b)
-                bound |= set(b.names)
-            changes = {"name": self.internal(path, act.name), "binders": tuple(binders)}
-            if isinstance(act, s.Alias):
-                changes["value"] = self.rename(path, act.value, bound, missing)
-            else:
-                changes["type"] = self.rename(path, act.type, bound, missing)
-            if isinstance(act, s.Define):
-                body = act.body
-                if isinstance(body, s.DataBody):
-                    body = s.DataBody(tuple((self.internal(path, n), self.rename(path, ty, bound, missing))
-                                            for n, ty in body.constructors))
-                else:
-                    body = self.rename(path, body, bound, missing)
-                changes["body"] = body
-            result = replace(act, **changes)
-            if missing:
-                self.errors.setdefault(result.name, []).extend(missing)
-            return result
-        return self.rename(path, act, set(), missing)
-
-    def rename(self, path, value, bound, missing):
-        """`value` with its free names resolved in the file at `path`; binders followed as
-        check.py's `names` follows them."""
-        r = lambda v, b=bound: self.rename(path, v, b, missing)
-        if value is None or isinstance(value, (str, int, float, bool)):
-            return value
-        if isinstance(value, tuple):
-            return tuple(r(v) for v in value)
-        if isinstance(value, s.Name):
-            root, dot, rest = value.name.partition(".")
-            if root in bound:
-                return value
-            return s.Name(self.reference(path, root, missing) + dot + rest)
-        if isinstance(value, (s.Pi, s.Sigma)):
-            return replace(value, domain=r(value.domain), codomain=r(value.codomain, bound | set(value.names)))
-        if isinstance(value, s.SigmaNamed):
-            return replace(value, left_type=r(value.left_type), right_type=r(value.right_type, bound | {value.left_name}))
-        if isinstance(value, s.Subtype):
-            pattern, binds = self.pattern(path, value.pattern, missing)
-            return s.Subtype(pattern, r(value.type), r(value.law, bound | binds))
-        if isinstance(value, s.Record):
-            inner, out = set(bound), []
-            for fl in value.fields:
-                out.append(replace(fl, type=r(fl.type, set(inner))))
-                inner |= set(fl.names)
-            return s.Record(tuple(out), r(value.law, inner))
-        if isinstance(value, (s.Block, s.Lambda)):
-            inner = set(bound)
-            params = []
-            if isinstance(value, s.Lambda):
-                for q in value.params:
-                    if isinstance(q, s.TypedParam):
-                        q = replace(q, type=r(q.type, set(inner)))
-                        inner |= set(q.names)
-                    elif isinstance(q, s.PlainParam):
-                        inner.add(q.name)
-                    else:
-                        patterns = []
-                        for p in q.patterns:
-                            p, binds = self.pattern(path, p, missing)
-                            patterns.append(p)
-                            inner |= binds
-                        q = s.ShapeParam(tuple(patterns))
-                    params.append(q)
-            items = []
-            for it in value.items:
-                v = r(it.value, set(inner))
-                if isinstance(it, s.Bind):
-                    items.append(s.Bind(it.name, v))
-                    inner.add(it.name)
-                else:
-                    p, binds = self.pattern(path, it.pattern, missing)
-                    items.append(s.Rebind(p, v))
-                    inner |= binds
-            if isinstance(value, s.Block):
-                return s.Block(tuple(items), r(value.value, inner))
-            return s.Lambda(tuple(params), tuple(items), r(value.body, inner))
-        if isinstance(value, s.MatchOf):
-            arms = []
-            for p, body in value.arms:
-                p, binds = self.pattern(path, p, missing)
-                arms.append((p, r(body, bound | binds)))
-            return s.MatchOf(r(value.value), tuple(arms))
-        if isinstance(value, s.Clause):
-            patterns, binds = [], set()
-            for p in value.patterns:
-                p, b = self.pattern(path, p, missing)
-                patterns.append(p)
-                binds |= b
-            return s.Clause(tuple(patterns), r(value.body, bound | binds))
-        if isinstance(value, s.RecordValue):
-            return s.RecordValue(tuple((label, r(v)) for label, v in value.fields))
-        if isinstance(value, s.Sum):
-            return s.Sum(tuple((label, r(v)) for label, v in value.alternatives))
-        if isinstance(value, s.NamedArg):
-            return s.NamedArg(value.name, r(value.value))
-        if isinstance(value, s.Proj):
-            return s.Proj(r(value.value), value.field)
-        if is_dataclass(value) and not isinstance(value, type):
-            return replace(value, **{fl.name: r(getattr(value, fl.name)) for fl in fields(value)
-                                     if not isinstance(getattr(value, fl.name), str)})
-        return value
 
     def pattern(self, path, p, missing):
         """A pattern with its constructors in the program's names, and the names it binds."""

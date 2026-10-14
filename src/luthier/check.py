@@ -8,7 +8,8 @@ from functools import lru_cache
 from dataclasses import dataclass, fields, is_dataclass
 from . import surface as s, term as t
 from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError
-from .kernel import alpha_equal, substitute, reduce, free_names
+from .kernel import alpha_equal, substitute, reduce, free_names, pattern_names
+from .run import FileScope
 
 
 @dataclass(frozen=True)
@@ -424,7 +425,10 @@ class Typing:
         elif isinstance(u, t.Inj): yield from self.applications(u.value, ctx)
         elif isinstance(u, t.Match):
             yield from self.applications(u.value, ctx)
-            for _, b in u.arms: yield from self.applications(b, ctx)
+            for q, b in u.arms:
+                # a pattern variable is a fresh name (2.S12, 4.R12): it shadows a top-level name of
+                # the file or of an import, its type unknown here (prompt-scope.md item 1)
+                yield from self.applications(b, {**ctx, **{n: t.Hole('type') for n in pattern_names(q)}})
 
     def body(self, n):
         return next((a.body for a in self.program if isinstance(a, t.Define) and a.name == n), None)
@@ -455,38 +459,122 @@ def resolve(path, name):
 
 
 def load_imports(program, path, seen=None):
-    """The acts that `program`'s imports bring, transitively: a name imported `as` another becomes
-    an alias. Unreadable files are skipped (4.R2 names what is missing); operators and data are left
-    out, being the imported file's own business. A definition does not take the name of a
+    """The acts that `program`'s imports bring, transitively, for its typing (12.S22). Each imported
+    file's names are resolved in that file (its definitions, then what its imports list), as run.py's
+    `Loaded` resolves them: a definition the importer does not list but whose name the importer
+    writes (as a definition, a free name or a binder) is called `name@file` and so never resolves a
+    name of the importer, nor the importer's definition a name of the imported file
+    (prompt-scope.md item 1); a name listed under another (`as`, or re-exported under another name)
+    becomes an alias. Unreadable files are skipped (4.R2 names what is missing); operators and data
+    are left out, being the imported file's own business. A definition does not take the name of a
     constructor or a label of a sum (prompt-10.md, 12.S22, as run.py's `Loaded` keeps them apart):
     an imported definition of such a name is left out, unless the file lists it in an import of its
     file and has no constructor or label of that name itself."""
-    brought, listed = [], set()
-    _brought(program, path, set() if seen is None else seen, brought, listed)
+    files = {}
+    _brought(program, path, set() if seen is None else seen, files)
+    scope = _ImportScope(files, program, path)
+    brought = [(target, scope.scoped(f, a)) for target, f in files.items() for a in f.acts]
     own = _constructors_of(program)
     taken = own | _constructors_of(tuple(a for _, a in brought))
     return tuple(a for target, a in brought
-                 if target is None or not isinstance(a, (s.Declare, s.Define)) or a.name not in taken
-                 or ((target, a.name) in listed and a.name not in own))
+                 if not isinstance(a, (s.Declare, s.Define)) or a.name not in taken
+                 or (target, a.name) in scope.listed and a.name not in own) + scope.aliases
 
 
-def _brought(program, path, seen, brought, listed):
-    """`(file, act)` of what `program`'s imports bring, in load_imports' order (file None for an
-    alias of an `as`), and in `listed` the `(file, name)` its own imports name."""
+class _File:
+    """An imported file as load_imports reads it: its acts, the names it defines, its imports (the
+    name it writes -> (file, the name there))."""
+    def __init__(self, path, acts, imports):
+        self.path, self.acts, self.imports = path, acts, imports
+        self.defined = {a.name for a in acts}
+        self.constructors = _constructors_of(acts)
+
+
+def _imports_of(program, path):
+    return {i.asName or i.name: (target, i.name) for act in program if isinstance(act, s.ImportAct)
+            for target in [resolve(path, act.path)] if target is not None for i in act.names}
+
+
+def _brought(program, path, seen, files):
+    """Into `files`, each file `program`'s imports read, transitively, imports before importers."""
     from .parse import parse
     for act in program:
         if not isinstance(act, s.ImportAct): continue
         target = resolve(path, act.path)
-        if target is not None:
-            listed.update((target, i.name) for i in act.names)
         if target is not None and target not in seen:
             seen.add(target)
             try: parsed = parse(target.read_text(encoding='utf-8'))
             except OSError: parsed = None
             if isinstance(parsed, s.Parsed):
-                _brought(parsed.program, target, seen, brought, set())
-                brought.extend((target, a) for a in parsed.program if isinstance(a, (s.Declare, s.Define, s.Alias)))
-        brought.extend((None, s.Alias(i.asName, (), s.Name(i.name))) for i in act.names if i.asName)
+                _brought(parsed.program, target, seen, files)
+                files[target] = _File(target, tuple(a for a in parsed.program if isinstance(a, (s.Declare, s.Define, s.Alias))),
+                                      _imports_of(parsed.program, target))
+
+
+def _written(program):
+    """The names a file writes: what it defines, each free or bound name (a dotted one by its root),
+    each pattern variable and binder."""
+    out = set()
+    for x in nodes(program):
+        if isinstance(x, s.Name): out.add(namePrefix(x.name))
+        elif isinstance(x, (s.PApp, s.PlainParam, s.Bind, s.Declare, s.Define, s.Alias)): out.add(x.name)
+        elif isinstance(x, s.SigmaNamed): out.update((x.left_name, x.right_name))
+        elif isinstance(x, (s.TypedParam, s.Pi, s.Sigma, s.Explicit, s.Implicit)): out.update(x.names)
+    return out
+
+
+class _ImportScope(FileScope):
+    """The names of the imported files' acts as the importer's typing reads them (load_imports)."""
+
+    def __init__(self, files, program, path):
+        self.files, self.errors, self.memo = files, {}, {}
+        tags = {}
+        for f in files.values():
+            k = tags.setdefault(f.path.stem, 0); tags[f.path.stem] = k + 1
+            f.tag = f.path.stem if k == 0 else f'{f.path.stem}~{k}'
+        self.constructors = set().union(*(f.constructors for f in files.values()), _constructors_of(program),
+                                        {'true', 'false', 'nil', 'cons', 'just', 'nothing', 'ok', 'failed'})
+        self.written = _written(program)
+        # what the importer lists: a name it sees as written keeps it, another becomes an alias
+        self.visible, self.listed, self.aliases = set(), set(), ()
+        for name, (target, there) in _imports_of(program, path).items():
+            found = self.see(target, there)
+            if found is None: continue
+            self.listed.add(found)
+            if found[1] == name: self.visible.add(found)
+            else: self.aliases += (s.Alias(name, (), s.Name(self.internal(*found))),)
+
+    def see(self, path, name):
+        """(file, name there) of the definition `name` means in the file at `path`, or None."""
+        key = (path, name)
+        if key not in self.memo:
+            self.memo[key] = None   # an import cycle resolves to nothing
+            f = self.files.get(path)
+            found = None
+            if f is not None and name in f.defined: found = key
+            elif f is not None and name in f.imports: found = self.see(*f.imports[name])
+            self.memo[key] = found
+        return self.memo[key]
+
+    def internal(self, path, name):
+        hidden = (path, name) not in self.visible and name in self.written and name in self.files[path].defined
+        return f'{name}@{self.files[path].tag}' if hidden else name
+
+    def reference(self, path, name, missing):
+        found = self.see(path, name)
+        return name if found is None else self.internal(*found)
+
+    def pattern(self, path, p, missing):
+        """A pattern as written (constructors are global, as the elaborator reads them), with the
+        names it binds."""
+        if isinstance(p, s.PApp):
+            if p.patterns or p.name in self.constructors:
+                binds = set().union(*(self.pattern(path, q, missing)[1] for q in p.patterns))
+                return p, binds
+            return p, {p.name}
+        if isinstance(p, s.PTuple):
+            return p, set().union(*(self.pattern(path, q, missing)[1] for q in p.patterns))
+        return p, set()
 
 
 def elaboration_error(acts):

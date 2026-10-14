@@ -423,6 +423,42 @@ def test_an_imported_definition_does_not_take_a_labels_name(tmp_path):
     assert not c.check(program(b.read_text()), b)
 
 
+def test_a_match_binder_shadows_an_imported_definition(tmp_path):
+    # prompt-scope.md item 1 (figures.lut's report, finding 1): a.lut's `kept`, not listed by b.lut,
+    # took the place of b.lut's match binder `kept` and 4.R9 refused `f` (2.S12: a pattern variable
+    # is a fresh name; 12.S22: an unlisted name is not in scope)
+    (tmp_path / 'a.lut').write_text('kept (r : Int) : Bool := r < 1\nother : Real := 1.0\n')
+    b = tmp_path / 'b.lut'
+    b.write_text('import "a.lut" other\nf (x : Real) : Real := match x * 2.0 { kept -> kept + 1.0 }\n'
+                 'h (r : Real) : Real := r\ng (x : Real) : Real := h (match x * 2.0 { kept -> kept })\n')
+    assert not c.check(program(b.read_text()), b)
+    # and a definition of the file itself: the binder shadows it too
+    p = program('kept (r : Int) : Bool := r < 1\nf (x : Real) : Real := match x * 2.0 { kept -> kept + 1.0 }\n'
+                'h (r : Real) : Real := r\ng (x : Real) : Real := h (match x * 2.0 { kept -> kept })\n')
+    assert not [x for x in c.check(p) if x.rule == '4.R9']
+
+
+def test_an_unlisted_imported_name_never_resolves_a_name_of_the_importer(tmp_path):
+    # prompt-scope.md item 1: an imported act not listed is typed for the listed ones' sake, under
+    # `name@file` when the importer writes its name, and each imported file's names resolve in it
+    (tmp_path / 'a.lut').write_text('kept (r : Int) : Bool := r < 1\nunused (r : Int) : Int := r\n'
+                                    'other (r : Int) : Bool := kept (unused r)\n')
+    b = tmp_path / 'b.lut'
+    b.write_text('import "a.lut" other\nkept : String := "x"\nf (x : Int) : Bool := other x\n')
+    brought = {a.name: a for a in c.load_imports(program(b.read_text()), b)}
+    assert set(brought) == {'kept@a', 'unused', 'other'}
+    assert c.names(brought['other'].body) - {'r'} == {'kept@a', 'unused'}
+    assert not c.check(program(b.read_text()), b)
+    # a free unlisted name of the importer is unknown (4.R2), and not typed as a.lut's `kept`
+    b.write_text('import "a.lut" other\nf (x : Real) : Bool := kept x\n')
+    assert [(x.rule, x.name) for x in c.check(program(b.read_text()), b)] == [('4.R2', 'f')]
+    # listed under another name, it is an alias of the definition, which keeps its own name hidden
+    b.write_text('import "a.lut" kept as k\nf (kept : Int) : Bool := k kept\n')
+    brought = {a.name: a for a in c.load_imports(program(b.read_text()), b)}
+    assert brought['k'].value.name == 'kept@a' and 'kept' not in brought
+    assert not c.check(program(b.read_text()), b)
+
+
 def test_typing_rules_run_act_by_act_when_the_file_does_not_elaborate_whole():
     # check bite 6: a record refinement (elaborate.py: "record refinements require check.py") left
     # the whole file untyped, so 4.R9 answered "no violation" on every act

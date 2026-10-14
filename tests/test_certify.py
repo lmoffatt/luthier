@@ -89,6 +89,52 @@ def test_the_cone_of_a_name_in_a_program(tmp_path):
     assert hashes(base.replace("helper (x : Int) : Int := x + 1", "helper (y : Int) : Int := y + 1"))[0] == h
 
 
+def _run_cones(path, roots=()):
+    """The cones of the runtime program `run` builds for the file's `main` (run.py's pipeline), with
+    `roots` kept beside it."""
+    from luthier import run
+    loaded = run.Loaded(path)
+    entry = loaded.name(loaded.top, "main")
+    return certify.Cones(run._elaborated(run.runtime_slice(loaded.acts, entry, run.core_data(loaded) + roots)))
+
+
+def test_an_import_beside_a_library_name_leaves_its_cone(tmp_path):
+    """prompt-scope.md item 2 (plots.py's report, finding 1): importing plot.lth's `text` (a
+    definition the loader calls `text@plot`, since `text` is a label of tables.lth's `Cell`) left
+    csv's cone, and the cones of Codec's laws, as they are without it (6.S8, 12.S22)."""
+    head = 'import "tables.lth" Table Codec\nimport "tables_model.lut" csv : Codec\n'
+    main = 'main (s : String) (p : Plot) : Maybe Table := match drawn p { q -> csv.parse s }\n'
+    without = tmp_path / "without.lut"
+    without.write_text(head + 'import "plot.lth" Plot addLayer texts\n'
+                       'drawn (p : Plot) : Plot := addLayer p { geom := texts { size := 8.0 }, mapping := nil, table := "t" }\n'
+                       + main, encoding="utf-8")
+    with_text = tmp_path / "with_text.lut"
+    with_text.write_text(head + 'import "plot.lth" Plot text\ndrawn (p : Plot) : Plot := text "t" nil 8.0 p\n' + main,
+                         encoding="utf-8")
+    laws = ("RoundTrip", "Canonical", "Tolerant", "Rejects")
+    a, b = _run_cones(without, laws), _run_cones(with_text, laws)
+    assert "text@plot" in b.acts and "text@plot" not in b.names("csv")
+    assert a.hash("csv") == b.hash("csv")
+    assert all(n in a.acts and n in b.acts for n in laws)
+    assert [a.hash(n) for n in laws] == [b.hash(n) for n in laws]
+
+
+def test_a_local_name_beside_a_library_law_leaves_its_cone(tmp_path):
+    """prompt-scope.md item 2: a test program defining `apart` (plot.lth has one, then called
+    `apart@plot`) left LayerOrderInvariant's cone as it is without it."""
+    def law_hash(text):
+        path = tmp_path / "p.lut"
+        path.write_text(text, encoding="utf-8")
+        runner, _, loaded = tester.load_program(path, 10000, ("LayerOrderInvariant", "apart"))
+        cones = certify.Cones(runner)
+        return cones.hash("LayerOrderInvariant"), cones.names("LayerOrderInvariant")
+    base = 'import "plot.lth" LayerOrderInvariant\n'
+    h, names = law_hash(base)
+    h2, names2 = law_hash(base + "apart (x : Int) : Int := x + 1\n")
+    assert "apart" in names and "apart@plot" in names2 and "apart" not in names2
+    assert h == h2
+
+
 def test_the_host_code_behind_an_extern(tmp_path, monkeypatch):
     module = tmp_path / "hostmod_certify.py"
     module.write_text("def f(x):\n    return x\n", encoding="utf-8")
