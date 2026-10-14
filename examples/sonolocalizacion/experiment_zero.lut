@@ -109,6 +109,11 @@ runSettings : Settings := { tol := lmTol, maxIter := lmMaxIter, floor := lmFloor
 -- size of the matrix and eps the spacing of the doubles at one (arrays.lth §4, P11).
 covFloor (n : Int) : RankFloor := toFloat64 n * doubles.epsilon
 
+-- Every result of the host that is used more than once is bound by a one-arm `match`, which the
+-- run evaluates once; a `:=` binding or an argument is passed unevaluated and computed again at
+-- each use until run.py has call by need (8.S4; record/IA/fit-host-2026-10-14/report.md).
+-- The posterior's mean is the mode itself (laplaceAt, belief.lth §3), so it is read as `mode.x`.
+--
 -- What the fit gives, on the positions of n coordinates. A zero distance between two measured nodes
 -- cannot be excluded ahead for the points the maximizer visits: the Jacobian does not exist there
 -- (positions.lut), so the fit says whether the measured pairs are apart where it ended, and the run
@@ -124,18 +129,16 @@ fit (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTre
   model := meanModel m
   lik := likelihoodOf m st
   prior := priorBelief m
-  mode := laplaceMode (3 * m.x0.n) lm settings lik prior m.d
-  post := laplaceAt (3 * m.x0.n) lik prior m.d mode.x
-  h := model.mean post.mean
-  r := sub m.d h
-  f := lik.info m.d post.mean
-  cov := pinvSym (covFloor (3 * m.x0.n)) post.precision
-  nu := toFloat64 m.d.n - trace (matMul f cov)
   d := designOf m
-  result := { posterior := post, sigma := (match st { eliminated u -> elementary.sqrt (dot r r / nu) ; known s -> s }), nu := nu,
-              predicted := h, converged := mode.converged,
-              separated := Separated post.mean (nodesOf d post.mean d.i) (nodesOf d post.mean d.j) }
-  result }
+  match laplaceMode (3 * m.x0.n) lm settings lik prior m.d { mode ->
+  match (laplaceAt (3 * m.x0.n) lik prior m.d mode.x).precision { precision ->
+  match model.mean mode.x { h ->
+  match sub m.d h { r ->
+  match toFloat64 m.d.n - trace (matMul (lik.info m.d mode.x) (pinvSym (covFloor (3 * m.x0.n)) precision)) { nu ->
+    { posterior := { mean := mode.x, precision := precision },
+      sigma := (match st { eliminated u -> elementary.sqrt (dot r r / nu) ; known s -> s }), nu := nu,
+      predicted := h, converged := mode.converged,
+      separated := Separated mode.x (nodesOf d mode.x d.i) (nodesOf d mode.x d.j) } } } } } } }
 
 -- ---------------------------------------------------------------- the transform of the residuals
 -- Under the linearized model each residual has variance sigma^2 (1 - h_k), with h_k = (J Sigma J^T)_kk
@@ -154,9 +157,8 @@ keptTransforms (sd u : Vec Float64) (k : Nat) : List (Vec Float64) :=
 
 -- the leverage of each datum, (J Sigma J^T)_kk / s^2; the sd of each residual; each residual over its
 -- sd; and the transform of each
-leverages (jac cov : Mat Float64) (assumed : Float64) : Vec Float64 := {
-  h := matMul jac (matMul cov (transpose jac))
-  vec Float64 h.m (fn k { h.f k k / assumed }) }
+leverages (jac cov : Mat Float64) (assumed : Float64) : Vec Float64 :=
+  match matMul jac (matMul cov (transpose jac)) { h -> vec Float64 h.m (fn k { h.f k k / assumed }) }
 residualSds (lev : Vec Float64) (sigma : Float64) : Vec Float64 :=
   vec Float64 lev.n (fn k { if lev.f k < 1.0 then sigma * elementary.sqrt (1.0 - lev.f k) else 0.0 })
 overSds (r sd : Vec Float64) : Vec Float64 := vec Float64 sd.n (fn k { if sd.f k > 0.0 and k < r.n then r.f k / sd.f k else 0.0 })
@@ -164,15 +166,14 @@ normalTransforms (z : Vec Float64) : Vec Float64 := vec Float64 z.n (fn k { norm
 
 transformOf (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) (f : Fit (3 * g.nodes.nRows)) : Transform := {
   m := fitOf g c
-  r := sub m.d f.predicted
-  assumed := match st { eliminated u -> dot r r / toFloat64 r.n ; known s -> s * s }
-  lev := leverages ((meanModel m).jac f.posterior.mean) (pinvSym (covFloor (3 * m.x0.n)) f.posterior.precision) assumed
-  sd := residualSds lev f.sigma
-  z := overSds r sd
-  u := normalTransforms z
-  kept := keptTransforms sd u 0
+  match sub m.d f.predicted { r ->
+  match (match st { eliminated u -> dot r r / toFloat64 r.n ; known s -> s * s }) { assumed ->
+  match leverages ((meanModel m).jac f.posterior.mean) (pinvSym (covFloor (3 * m.x0.n)) f.posterior.precision) assumed { lev ->
+  match residualSds lev f.sigma { sd ->
+  match normalTransforms (overSds r sd) { u ->
+  match keptTransforms sd u 0 { kept ->
   match valueSums kept { (s1, s2, count) ->
-    { leverage := lev, z := z, u := u, distance := kolmogorovDistance kept, count := count } } }
+    { leverage := lev, z := overSds r sd, u := u, distance := kolmogorovDistance kept, count := count } } } } } } } } }
 
 -- the tail probability of the distance, by Kolmogorov's limit with Stephens's correction
 transformTail (t : Transform) : Float64 :=
@@ -180,9 +181,8 @@ transformTail (t : Transform) : Float64 :=
   else { q := elementary.sqrt (toFloat64 t.count)
          kolmogorovTail ((q + 0.12 + 0.11 / q) * t.distance) }
 
-posteriorSd (n : Nat) (b : GaussianBelief n) : Vec Float64 := {
-  cov := pinvSym (covFloor n) b.precision
-  vec Float64 b.mean.n (fn k { elementary.sqrt (cov.f k k) }) }
+posteriorSd (n : Nat) (b : GaussianBelief n) : Vec Float64 :=
+  match pinvSym (covFloor n) b.precision { cov -> vec Float64 b.mean.n (fn k { elementary.sqrt (cov.f k k) }) }
 
 -- ---------------------------------------------------------------- the tables
 -- The three tables of a run, as `Table` values (tables.lth): their columns and kinds, and each
@@ -262,14 +262,14 @@ summary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : Distanc
 -- valid; the run reads the graph and writes what this gives.
 Report = { positions : Table, residuals : Table, transform : Table, summary : String }
 
-reportOf (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) : Report := {
-  f := fit settings g c st
-  t := transformOf g c st f
-  r := { positions := positionsTable g f.posterior.mean (posteriorSd (3 * g.nodes.nRows) f.posterior) (flatten (toMapInput g).x0),
-         residuals := residualsTable g f.predicted f.sigma,
-         transform := transformTable g t.leverage t.z t.u,
-         summary := summary settings (3 * g.nodes.nRows) f t g }
-  r }
+reportOf (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) : Report :=
+  match fit settings g c st { f ->
+  match transformOf g c st f { t ->
+  match posteriorSd (3 * g.nodes.nRows) f.posterior { sd ->
+    { positions := positionsTable g f.posterior.mean sd (flatten (toMapInput g).x0),
+      residuals := residualsTable g f.predicted f.sigma,
+      transform := transformTable g t.leverage t.z t.u,
+      summary := summary settings (3 * g.nodes.nRows) f t g } } } }
 
 -- A table as text (tables_model.lut's codec), at a path. The host has no write action yet
 -- (world_model.lut), so the text goes to the standard output after a header line naming the path.
@@ -288,7 +288,7 @@ writeReport (w : W) (r : Report) : W * Unit := {
 runOn (w : W) (read : Maybe DistanceGraph) (c : Widening) (st : SigmaTreatment) : W * Unit :=
   match read {
     nothing -> host.print w ("FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables") ;
-    just g -> if ValidGraph g then writeReport w (reportOf runSettings g c st) else host.print w ("the graph in " + graphDir + " is not valid") }
+    just g -> if ValidGraph g then (match reportOf runSettings g c st { r -> writeReport w r }) else host.print w ("the graph in " + graphDir + " is not valid") }
 
 runWith (w : W) (c : Widening) (st : SigmaTreatment) : W * Unit := {
   (w1, read) <- readGraph w graphDir
