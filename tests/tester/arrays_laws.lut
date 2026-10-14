@@ -1,0 +1,111 @@
+-- tests/tester/arrays_laws.lut: the laws of `Arrays` (arrays.lth §4) run through `luthier test` on
+-- numpy's model (arrays_model.lut), on the brief record/IA/evidence-2026-10-14/prompt.md. Each
+-- cutoff is a census of one, the demand's (D-2026-10-14-c): the tolerance 1e-12 [proposed, as
+-- numbers_laws.lut], the rank floor 30 eps = 6.661338147750939e-15, session A's `lmFloor`
+-- (experiment_zero.lut:39). Seed 20261014. Sampled where the tester draws the parameters
+-- (`Dim`, `VecOf n`, `MatOf r c`, `Fin n`, `Positive`, `ClearDiagonal`); a symmetric or an
+-- orthogonal matrix has no generator (a filter over a random matrix accepts only the 0 x 0 and
+-- 1 x 1 ones), so those laws run sampled, to show it, and again on the listed matrices below.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Arrays Vec Mat RankFloor mat identity zeroMat AddPointwise SubPointwise ScalePointwise
+  TransposePointwise MaddPointwise MsubPointwise MscalePointwise DotSymmetric DotOnBasis DotAgrees NormOfBasis
+  NormOfDot NormScales MatVecOnBasis MatVecAgrees MatMulIdentity MatMulTransposes MatMulAgrees RankOfDiagonal
+  RankOfZeroAndIdentity RankBounded RankScales RankUnderRotation TraceOfIdentity TraceAdditive TraceCyclic
+  TraceAgrees PinvOfDiagonal PinvOfZero PinvOfIdentity PinvProjects PinvSymmetric PinvRestricts PinvTraceIsRank
+  PinvScales
+import "arrays_model.lut" numpy
+
+tolerance : Tolerance := 1.0e-12
+floor : RankFloor := 6.661338147750939e-15
+models : List Binding := [
+  { parameter := just "m", type := nothing, generator := "numpy", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- listed symmetric matrices of three rows: rank one, indefinite, zero, the identity, an eigenvalue
+-- above the floor and one below it
+diag3 (a b c : Float64) : Mat Float64 := mat Float64 3 3 (fn i j { if i == j then (if i == 0 then a else if i == 1 then b else c) else 0.0 })
+symmetric3 : List (Mat Float64) := [
+  mat Float64 3 3 (fn i j { toFloat64 ((i + 1) * (j + 1)) }),
+  mat Float64 3 3 (fn i j { if i == j then toFloat64 (2 * i - 1) else 0.5 }),
+  zeroMat 3 3,
+  identity 3,
+  diag3 1.0 1.0e-13 2.0,
+  diag3 1.0 1.0e-16 2.0 ]
+-- and of other sizes: Hilbert's of five (eigenvalues down to 3e-6), one negative entry
+symmetricMore : List (Mat Float64) := [
+  mat Float64 3 3 (fn i j { toFloat64 ((i + 1) * (j + 1)) }),
+  mat Float64 3 3 (fn i j { if i == j then toFloat64 (2 * i - 1) else 0.5 }),
+  zeroMat 3 3,
+  diag3 1.0 1.0e-13 2.0,
+  diag3 1.0 1.0e-16 2.0,
+  mat Float64 5 5 (fn i j { 1.0 / toFloat64 (i + j + 1) }),
+  mat Float64 1 1 (fn i j { 0.0 - 2.0 }) ]
+-- listed orthogonal matrices of three rows: a permutation, a reflection, a rotation by the 3-4-5
+-- triangle (orthogonal within rounding)
+orthogonal3 : List (Mat Float64) := [
+  mat Float64 3 3 (fn i j { if j == (i + 1) mod 3 then 1.0 else 0.0 }),
+  diag3 1.0 (0.0 - 1.0) 1.0,
+  mat Float64 3 3 (fn i j { if i == 2 or j == 2 then (if i == j then 1.0 else 0.0)
+                            else if i == j then 0.6 else if i == 0 then 0.0 - 0.8 else 0.8 }) ]
+three : List Int := [3]
+listedS : List Binding := [ { parameter := just "s", type := nothing, generator := "symmetricMore", coverage := Listed } ]
+listedRotation : List Binding := [
+  { parameter := just "k", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "q", type := nothing, generator := "orthogonal3", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "symmetric3", coverage := Listed } ]
+
+-- entrywise, exact
+test "AddPointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "SubPointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "ScalePointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "TransposePointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MaddPointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MsubPointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MscalePointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
+-- the inner product and the norm
+test "DotSymmetric" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "DotOnBasis" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "DotAgrees" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "NormOfBasis" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "NormOfDot" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "NormScales" (SampledMode linear) (seed <- 20261014) (profile <- models)
+-- products
+test "MatVecOnBasis" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MatVecAgrees" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MatMulIdentity" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MatMulTransposes" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "MatMulAgrees" (SampledMode linear) (seed <- 20261014) (profile <- models)
+-- the rank at the floor
+test "RankOfDiagonal" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "RankOfZeroAndIdentity" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "RankBounded" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "RankScales" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "RankUnderRotation" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "RankBounded" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
+test "RankScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- listedS) (profile <- models)
+test "RankUnderRotation" ExhaustiveMode (whereBindings <- listedRotation) (profile <- models)
+-- the trace
+test "TraceOfIdentity" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "TraceAdditive" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "TraceCyclic" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "TraceAgrees" (SampledMode linear) (seed <- 20261014) (profile <- models)
+-- the pseudo-inverse at the floor
+test "PinvOfDiagonal" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvOfZero" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvOfIdentity" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvProjects" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvSymmetric" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvRestricts" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvTraceIsRank" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvScales" (SampledMode linear) (seed <- 20261014) (profile <- models)
+test "PinvProjects" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
+test "PinvSymmetric" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
+test "PinvRestricts" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
+test "PinvTraceIsRank" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
+test "PinvScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- listedS) (profile <- models)
