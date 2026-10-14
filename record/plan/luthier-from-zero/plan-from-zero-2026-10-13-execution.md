@@ -200,6 +200,11 @@ by Luciano.
   slice's files, the entry store 7.S9, 7.S13, the certifier 6.S8).
 - 2026-10-14, 20:50: the tag `v0.2` set at 9c0add5 on his approval ("lo apruebo"); the push is
   his (the session's push was refused by its permission classifier). Milestone of step 4 done.
+- 2026-10-15, 00:40 (step 5, the night's order): the evidence on the slice (71008cb, record/IA/
+  evidence-2026-10-14/: two laws of arrays.lth refuted and fixed, the rest confirmed, lm and the
+  native maximizer agree); `certification.lth` with its model (043f4b9, 9918c38, Boolean first,
+  D-2026-10-14-c); `certify.py`, the store `x.cert.json`, `luthier certify`, the tester reusing
+  entries (40e5937). Running: `run`'s refusal (12.S17). Then v0.3's criterion: the fit certified.
 
 
 ## Rules for every step
