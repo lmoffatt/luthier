@@ -1,0 +1,64 @@
+-- plan_model.lut: the default plan, call by need as run.py does, and forward on demand, over a
+-- small dataflow; the reference model of `Planning`.
+--
+-- Draft 0, 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/demand-2026-10-15/prompt.md. A model file (12.S23): `planning` schedules the live
+-- cone by the strategy asked; `byNeed` is the order run.py reduces in (8.S4: each name at its
+-- first demand, kept), `forward` the strict topological order of 8.S3; `example` is a dataflow of
+-- five names of which the entry reaches four, and the two plans of it agree (`Confluent`). The
+-- memo of 8.S8 has no model: 8.S10 says the result store does not exist, and plan.lth's `Keying`
+-- waits for the host's hash of a key, as certification_model.lut's `hashing` is for a cone.
+
+import "plan.lth" Planning Plan Dataflow Node Schedule Strategy ForwardOnDemand CallByNeed reaches memberStr appendOne
+  subset count LinearizesOn EquivalentOn Confluent
+
+-- call by need: the order of first demand, each name after what it reads and once (a depth-first
+-- visit from the entry, in the order the reads are listed); bounded by the count of nodes, so a
+-- cycle ends
+visit (A : U) (d : Dataflow A) (n : String) (done : List String) (k : Nat) : List String :=
+  if memberStr n done or k == 0 then done else appendOne (visitAll A d (readsIn d.nodes n) done (k - 1)) n
+visitAll (A : U) (d : Dataflow A) (ns : List String) (done : List String) (k : Nat) : List String :=
+  match ns { nil -> done ; cons n rest -> visitAll A d rest (visit A d n done k) k }
+readsIn (ns : List Node) (x : String) : List String :=
+  match ns { nil -> nil ; cons n rest -> if n.name == x then n.reads else readsIn rest x }
+byNeed (A : U) (d : Dataflow A) (entry : String) : Schedule := visit A d entry nil (1 + count d.nodes)
+
+-- forward on demand: the live names placed strictly, each as soon as what it reads among the live
+-- names is placed, in the order of the live set; a name no round can place (a cycle) is left out
+placeable (ns : List Node) (live placed : List String) (n : String) : Bool :=
+  not (memberStr n placed) and subset (readsAmong ns live n) placed
+readsAmong (ns : List Node) (live : List String) (n : String) : List String := keepIn live (readsIn ns n)
+keepIn (within xs : List String) : List String :=
+  match xs { nil -> nil ; cons x rest -> if memberStr x within then cons x (keepIn within rest) else keepIn within rest }
+round (ns : List Node) (live placed candidates : List String) : List String :=
+  match candidates { nil -> placed ; cons n rest ->
+    round ns live (if placeable ns live placed n then appendOne placed n else placed) rest }
+rounds (ns : List Node) (live placed : List String) (k : Nat) : List String :=
+  if k == 0 then placed else rounds ns live (round ns live placed live) (k - 1)
+forward (A : U) (d : Dataflow A) (live : List String) : Schedule := rounds d.nodes live nil (1 + count d.nodes)
+
+plan (A : U) (st : Strategy) (d : Dataflow A) (entry : String) : Plan A :=
+  { strategy := st, entry := entry, live := reaches A d entry,
+    schedule := (match st { CallByNeed -> byNeed A d entry ; ForwardOnDemand -> forward A d (reaches A d entry) }) }
+
+eqNat (x y : Nat) : Bool := x == y
+planning : Planning Nat eqNat := { plan := plan Nat }
+
+-- the example: a = 1, b = a + 1, c = a * 2, d = b + c, e = d + 100; the entry `d` reaches four
+-- names and `e` is not produced (L5.13)
+example : Dataflow Nat := {
+  nodes := [{ name := "a", reads := nil }, { name := "b", reads := ["a"] }, { name := "c", reads := ["a"] },
+            { name := "d", reads := ["b", "c"] }, { name := "e", reads := ["d"] }],
+  init := 0,
+  step := fn n env { if n == "a" then 1 else if n == "b" then env "a" + 1 else if n == "c" then env "a" * 2
+                     else if n == "d" then env "b" + env "c" else if n == "e" then env "d" + 100 else 0 },
+}
+-- call by need gives a, b, c, d; forward on demand gives a, b, c, d too on this example, since the
+-- live set is listed from the entry (d, b, c, a) and a round places what it can
+needPlan : Plan Nat := plan Nat CallByNeed example "d"
+forwardPlan : Plan Nat := plan Nat ForwardOnDemand example "d"
+bothLinearize : Bool := LinearizesOn Nat example needPlan.live needPlan.schedule
+  and LinearizesOn Nat example forwardPlan.live forwardPlan.schedule
+-- and a third linearization by hand, c before b, gives the same values (8.S5)
+agree : Bool := Confluent Nat eqNat example needPlan.live needPlan.schedule ["a", "c", "b", "d"]
+  and EquivalentOn Nat eqNat example needPlan.live needPlan.schedule forwardPlan.schedule
