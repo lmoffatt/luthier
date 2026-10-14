@@ -3,7 +3,8 @@ v4 for arrays, tables and numbers across the bridge (prompt-4.md); v6 for the lo
 externs' arity (prompt-6.md); v7 for `run --set` and the run's record (prompt-7.md); v8 for functions
 across the bridge (prompt-8.md, D-2026-10-14-a), the host side in tests/run/bridge_host.py; v13 for
 run's refusal of a cone that is not certified (record/IA/certification-2026-10-14/prompt-run.md,
-certification.lth §3, 12.S17), the programs under tests/run/certified/."""
+certification.lth §3, 12.S17), the programs under tests/run/certified/; v16 for the demand and the plan
+as values (prompt-13.md; demand.lth, plan.lth), the program tests/run/plan_cone.lut."""
 import json
 import os
 import re
@@ -549,19 +550,26 @@ def test_fit_renders_its_figures_slow(tmp_path):
     # record/IA/plots-2026-10-15/prompt-figures.md item 3 (plan G4): the fit on graph_noA2 writes
     # its three figures under outDir, and two runs write the same bytes (plot.lth `rendersTheSame`,
     # across processes)
-    images = []
+    images, plans = [], []
     for k in (1, 2):
         out = tmp_path / f"run{k}"
         out.mkdir()
         result = command(ROOT / "examples/sonolocalizacion/experiment_zero.lut",
                          "--set", "graphDir=examples/sonolocalizacion/A/graph_noA2", "--set", f"outDir={out}",
                          "--set", "lmMaxIter=500", "--set", "lmTol=1e-6", "--set", "lmFloor=5.995204332975845e-15",
-                         "--fuel", "100000000000", cwd=ROOT)
+                         "--fuel", "100000000000", cwd=ROOT, record=True)
         assert result.returncode == 0, result.stderr
         assert result.stdout.splitlines()[-1].startswith("nodes 9, measurements 19, sigma ")
         assert all((out / name).is_file() for name in FIGURES)
         images.append([(out / name).read_bytes() for name in FIGURES])
+        # prompt-13.md item 4: the record holds the demand, the plan and the key (12.S18, 8.S8, L5.6)
+        assert {"demand", "plan", "key"} <= set(result.record)
+        assert result.record["demand"]["parameters"]["outDir"] == str(out)
+        assert result.record["key"]["values"]["graphDir"] == "examples/sonolocalizacion/A/graph_noA2"
+        plans.append(result.record["plan"])
     assert images[0] == images[1]
+    # the same program, entry and order of reduction: the same plan, its hash stable across runs
+    assert plans[0]["hash"].startswith("sha256:") and plans[0] == plans[1]
 
 
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 3 minutes; set LUTHIER_SLOW=1")
@@ -1119,3 +1127,121 @@ def test_the_protocols_observations_change_nothing(tmp_path, monkeypatch, capsys
     firsts = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]["first actions"]
     assert [(f["action"], f["law"]) for f in firsts] == [("host.print", "HostAgreesPrint"),
                                                          ("host.observe", "HostObserveChangesNothing")]
+
+
+# ---------------------------------------------------------------- the demand and the plan as values
+# (record/IA/run-2026-10-13/prompt-13.md; demand.lth, plan.lth, record/IA/demand-2026-10-15/report.md)
+
+def _surface_value(x):
+    """A default argument as demand_model.lut writes it, as Python reads it."""
+    if isinstance(x, s.Literal):
+        return x.literal.value
+    return {"nil": (), "false": False, "true": True, "nothing": None}.get(x.name, x.name)
+
+
+def test_the_runs_defaults_are_demand_models():
+    # L5.19, P11: the default of each argument of `run` is declared in demand_model.lut's
+    # `theDemand`; run.DEMAND_DEFAULTS mirrors it
+    from luthier.parse import parse
+    from luthier.run import DEMAND_DEFAULTS
+    program = parse((LIB / "demand_model.lut").read_text(encoding="utf-8")).program
+    the_demand = next(a for a in program if isinstance(a, s.Define) and a.name == "theDemand")
+    declared = {b.names[0]: _surface_value(b.default) for b in the_demand.binders}
+    assert declared == dict(DEMAND_DEFAULTS, pinned=None)
+
+
+def test_inner_keeps_every_cutoff_and_a_law_demand_carries_the_runs():
+    from luthier.run import demand_of
+    d = demand_of("main", 99, {"x": 1}, "Cases", True, "v0.2")
+    assert d.inner("law") == demand_of("law", 99, {"x": 1}, "Cases", True, "v0.2")
+    assert d.law("L", "sha256:c", [("x", {"Number": 1.0})], {})["accepts"] == "Cases"
+    assert demand_of().accepts == "Sampled" and demand_of().fuel == 10_000_000
+
+
+def test_every_demand_on_a_law_is_passed_down_from_the_runs(tmp_path, monkeypatch, capsys):
+    # PassedDownNotRecomputed (L12.3): the demand on each law of the cone and on each first action
+    # carries the run's cutoff, whatever it is
+    from luthier import certify
+    seen = []
+    serves = certify.serves
+
+    def spy(demand, entry):
+        seen.append((demand["law"], demand["accepts"]))
+        return serves(demand, entry)
+    monkeypatch.setattr(certify, "serves", spy)
+    path = _hello(tmp_path)
+    assert main(["run", str(path), "--accept", "assumed"]) == 0
+    assert {law for law, _ in seen} >= {"HostAgreesPrint"} and len({law for law, _ in seen}) > 1
+    assert {accepts for _, accepts in seen} == {"AssumedGrade"}
+
+
+def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
+    # RecordsEveryCutoff (12.S18, L5.18): the demand as one object; PlanIsTheLiveCone (L5.13): e is
+    # not produced; the call-by-need schedule (8.S4); KeyReadsOnlyTheCone (8.S8): unusedHole is
+    # recorded as given and stays out of the key; the plan's hash is the same for the same plan (L5.6)
+    path = tmp_path / "plan_cone.lut"
+    path.write_text((RUN / "plan_cone.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    for unused in ("7", "8"):
+        assert main(["run", str(path), "--set", "usedHole=1", "--set", f"unusedHole={unused}", "--fuel", "5000"]) == 0
+    assert capsys.readouterr().out == "5\n5\n"
+    runs = json.loads(record_path(path).read_text(encoding="utf-8"))
+    first, second = runs
+    d = first["demand"]
+    assert d == {"entry": "main", "cone": first["certification"]["cone"],
+                 "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "delta": None,
+                 "fuel": 5000, "checked": False, "lock": None}
+    # the fields kept beside it say the same
+    assert (first["entry"], first["parameters"], first["checked"], first["fuel"]["given"],
+            first["certification"]["accept"]) == (d["entry"], d["parameters"], d["checked"], d["fuel"], d["accept"])
+    plan = first["plan"]
+    assert plan["strategy"] == "CallByNeed" and plan["entry"] == "main"
+    assert {"a", "b", "c", "d", "usedHole", "main"} <= set(plan["live"])
+    assert "e" not in plan["live"] and "unusedHole" not in plan["live"]
+    assert plan["schedule"] == ["a", "b", "c", "d"]
+    assert plan["hash"].startswith("sha256:") and plan == second["plan"]
+    assert first["key"] == second["key"] == {"decoration": None, "values": {"usedHole": 1}}
+    assert second["demand"]["parameters"]["unusedHole"] == 8
+
+
+def test_the_plans_hash_sees_the_schedule():
+    # PlanHashSeesTheSchedule (L5.6)
+    from luthier.run import plan_hash
+    plan = {"strategy": "CallByNeed", "entry": "main", "live": ["a", "b", "c"], "schedule": ["a", "b", "c"]}
+    assert plan_hash(plan) == plan_hash(dict(plan))
+    assert plan_hash(plan) != plan_hash(dict(plan, schedule=["a", "c", "b"]))
+
+
+def test_a_reader_of_the_runs_reports_a_breach_of_determined(tmp_path):
+    # demand.lth's `Runs` (8.S3): one demand record, one result; x.run.json is not served from
+    from luthier.run import read_runs
+    path = tmp_path / "x.lut"
+    one = {"entry": "main", "cone": "sha256:c", "parameters": {}, "accept": "sampled", "delta": None,
+           "fuel": 1, "checked": False, "lock": None}
+    runs = [{"demand": one, "output": "1\n"}, {"output": "2\n"}, {"demand": dict(one, fuel=2), "output": "2\n"},
+            {"demand": one, "output": "1\n"}, {"demand": one, "output": "3\n"}]
+    record_path(path).write_text(json.dumps(runs), encoding="utf-8")
+    assert read_runs(path) == (runs, [(0, 4), (3, 4)])
+    assert read_runs(tmp_path / "none.lut") == ([], [])
+
+
+def _evaluate(path, name, label=None):
+    """A definition of a file (a projection of it, with `label`) reduced in every part by the Runner,
+    shown; the file's imports loaded as `run` loads them, nothing certified."""
+    from luthier import term as t
+    from luthier.run import Runner, _elaborated, _type_shown, core_data, runtime_slice
+    loaded = Loaded(path)
+    entry = loaded.name(loaded.top, name)
+    runner = Runner(_elaborated(runtime_slice(loaded.acts, entry, core_data(loaded))), 10_000_000)
+    term = t.Var(entry) if label is None else t.Proj(t.Var(entry), label)
+    return _type_shown(runner.value(term), 1000)
+
+
+def test_the_example_plans_linearize_and_agree():
+    # PlanIsConfluent, PlanLinearizes, TheDefaultsAgree on plan_model.lut's `example` (8.S4, 8.S5,
+    # 8.S11): call by need and forward on demand each linearize the live cone, and they and a third
+    # linearization by hand give every live name one value
+    model = LIB / "plan_model.lut"
+    assert _evaluate(model, "bothLinearize") == "true"
+    assert _evaluate(model, "agree") == "true"
+    a_b_c_d = 'cons "a" (cons "b" (cons "c" (cons "d" nil)))'
+    assert _evaluate(model, "needPlan", "schedule") == _evaluate(model, "forwardPlan", "schedule") == a_b_c_d

@@ -24,8 +24,10 @@ def main(argv: list[str] | None = None) -> int:
     p_eval.add_argument("--fuel", type=int, default=10000)
     p_run = sub.add_parser("run", help="run a program with the host world")
     p_run.add_argument("file")
-    p_run.add_argument("--main", default="main")
-    p_run.add_argument("--fuel", type=int, default=10_000_000,
+    # the defaults of `run`'s arguments are the demand's, declared in lib/demand_model.lut's
+    # `theDemand` and mirrored in run.DEMAND_DEFAULTS (L5.19, P11): None here means "not given"
+    p_run.add_argument("--main", default=None, help="the entry [default main]")
+    p_run.add_argument("--fuel", type=int, default=None,
                        help="reduction fuel [proposed: default 10,000,000, 10,000 was a hundred times too small for validate_graph.lut]")
     p_run.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
                        help="give a hole of the file (a declared String, Int, Float64 or Bool) its value (12.S18)")
@@ -33,7 +35,7 @@ def main(argv: list[str] | None = None) -> int:
                        help="the weakest grade an entry of the store may have to serve the run (6.S15, 7.S15) "
                             "[proposed: sampled when none is named, so an assumed entry serves only a run "
                             "that accepts assumed]; the run is refused when its cone is not certified (12.S17)")
-    p_run.add_argument("--checked", action="store_true", default=False,
+    p_run.add_argument("--checked", action="store_true", default=None,
                        help="test each value an extern gives at a declared subtype against its predicate as "
                             "it crosses, refusing the run at the first refuted one (12.S18, 4.R5); off by "
                             "default, a parameter of the demand (P11): without it the refinement is an "
@@ -81,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, GRADES.get(ns.accept), ns.checked)
             print(output, end="")
-            record(ns.file, ns.main, values, output, state)
+            record(ns.file, state["demand"]["entry"], values, output, state)
             return 0
         except (OSError, ValueError, RecursionError) as exc:
             import sys

@@ -1,0 +1,17 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-13.md; plan.lth, demand.lth): plan_model.lut's
+-- `example` as a program. a = 1, b = a + 1, c = a * 2, d = b + c, e = d + 100; the entry reads d
+-- and the hole usedHole, so its live cone holds a, b, c, d and not e (L5.13); the call-by-need
+-- schedule of the constants is a, b, c, d (plan_model.lut's `byNeed`). unusedHole is set by a test
+-- and read by nothing, so it is recorded and stays out of the key (8.S8, `KeyReadsOnlyTheCone`).
+print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
+showInt (x : Int) : String := extern "python:builtins.repr" x
+
+a : Int := 1 + 0
+b : Int := a + 1
+c : Int := a * 2
+d : Int := b + c
+e : Int := d + 100
+usedHole : Int
+unusedHole : Int
+
+main (w : W) : W * Unit := print w (showInt (d + usedHole))

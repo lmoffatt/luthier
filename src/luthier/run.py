@@ -36,7 +36,12 @@ where it crosses, either way (`String`, `Unit`, `Bool`, `Nat` not negative, `Int
 the token's slot only the run's token), and a type the bridge does not read is an error, never the
 untyped reading (review A24/B18, A26/B17, A28/B19); under `run --checked` the predicate of each
 subtype a value crosses in at is evaluated by the Runner before the program sees it (`refine`), a
-refuted one refusing the run, and the record counts them per route.
+refuted one refusing the run, and the record counts them per route. v16 (prompt-13.md; demand.lth,
+plan.lth, record/IA/demand-2026-10-15/report.md): `run` builds one `Demand` from its arguments and
+demand_model.lut's defaults, from which every law's demand and the record derive; the record holds
+the demand (`demand`), the plan (the live cone, the call-by-need schedule of the Runner's shared
+constants and its hash, `plan`) and the demand's key (`key`); `read_runs` reads `x.run.json` back and
+reports the breaches of `determined`.
 """
 from __future__ import annotations
 
@@ -465,7 +470,8 @@ class Shared(t.Axiom):
     would be substituted (a `Let`'s value, an argument of a lambda, a part a pattern binds, a
     constant of the program), so every copy the substitution makes is this one object. To the
     kernel it is an opaque leaf (`Axiom`), with no free names, so `kernel.step` and the
-    substitution pass it on untouched; only the Runner looks inside. `cell` is [term, forced]."""
+    substitution pass it on untouched; only the Runner looks inside. `cell` is [term, forced], and
+    for a constant of the program [term, forced, its name] (`Runner.schedule`)."""
     cell: list = field(default_factory=list)
 
     __eq__ = object.__eq__
@@ -605,8 +611,15 @@ class Runner:
         # first definition of a name wins, as in kernel.step's environment.
         self.constants = {}
         for act in self.program:
-            if isinstance(act, t.Define) and not isinstance(act.body, t.Lam):
-                self.constants.setdefault(act.name, self.share(act.body))
+            if isinstance(act, t.Define) and not isinstance(act.body, t.Lam) and act.name not in self.constants:
+                shared = self.constants[act.name] = self.share(act.body)
+                if isinstance(shared, Shared):
+                    shared.cell.append(act.name)
+        # the call-by-need schedule (plan.lth's `Schedule`, 8.S4): each constant's name when its
+        # first reduction ends, so after the constants it demanded on the way (plan_model.lut's
+        # `byNeed`). [proposed] Only a constant whose body is a computation is a cell (`share`):
+        # a function, a literal, a record or a name costs nothing to reach and is not scheduled.
+        self.schedule = []
 
     def typed(self, act):
         """The definition with each extern it gives carrying its declared type: `f (x : A) : B :=
@@ -1236,6 +1249,8 @@ class Runner:
         if not cell[1]:
             cell[0] = self.whnf(cell[0])
             cell[1] = True
+            if len(cell) > 2:
+                self.schedule.append(cell[2])
         return cell[0]
 
     def whnf(self, value):
@@ -1546,6 +1561,65 @@ class Refused(RunError):
 # assumed entry serves only a run that accepts `assumed` by name (6.S10, D-2026-10-14-c)
 ACCEPT = "Sampled"
 
+# demand_model.lut's `theDemand`: the default of each argument of `run` (L5.19, P11), declared there
+# and mirrored here; tests/test_run.py checks the two agree. `pinned` has no default to mirror: it
+# is read from the lock (12.S13).
+DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "fuel": 10_000_000, "sets": (), "checked": False}
+
+
+@dataclass(frozen=True)
+class Demand:
+    """demand.lth's `Demand` (8.S1): what a run asks of the program, built once by `run` from its
+    arguments and `DEMAND_DEFAULTS` before anything is evaluated; every law's demand, the inner
+    demand of a first action and the run's record derive from it (L12.3, `PassedDownNotRecomputed`,
+    `RecordsEveryCutoff`). `entry` the name as the user writes it; `accepts` the weakest grade
+    accepted (test.lth's `Grade`, by constructor name); `sets` each hole's value (`--set`, parsed by
+    the hole's type, `fill`), in the order given; `pinned` the interpreter's revision the lock pins,
+    None when none does. `decoration` and `delta` are `nothing` in this draft (demand.lth §1)."""
+    entry: str
+    accepts: str
+    fuel: int
+    sets: tuple
+    checked: bool
+    pinned: str | None
+    decoration: None = None
+    delta: float | None = None
+
+    def inner(self, entry):
+        """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
+        return replace(self, entry=entry)
+
+    def law(self, law, cone, given, fingerprints):
+        """demand.lth's `lawDemand` as certify.serves reads it (certification.lth §3): the law, its
+        cone, what the run gives its parameters, and this demand's cutoff, never recomputed.
+        [proposed] `given` is what the caller binds: the model parameter and the sets the law
+        takes (`certification`), or the model and the action's arguments (`FirstActions`)."""
+        return {"law": law, "cone": cone, "given": given, "accepts": self.accepts, "fingerprints": fingerprints}
+
+    def record(self, cone):
+        """demand.lth's `Record` (`recorded`, 12.S18, L5.18): the demand as the run's entry keeps
+        it, on the cone it ran. [proposed] the grade by its `--accept` word, as `certification`'s
+        `accept`; the parameters as an object, as the entry's `parameters`."""
+        from . import certify
+        return {"entry": self.entry, "cone": cone, "parameters": dict(self.sets),
+                "accept": certify.GRADE_WORDS[self.accepts], "delta": self.delta, "fuel": self.fuel,
+                "checked": self.checked, "lock": self.pinned}
+
+    def key(self, live_holes):
+        """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
+        always read, and the values of the holes the live cone reads (`live_holes`, by the names the
+        user writes); a hole set that the cone does not read stays in `sets` and the record, not here."""
+        return {"decoration": self.decoration, "values": {n: v for n, v in self.sets if n in live_holes}}
+
+
+def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None):
+    """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
+    demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
+    d = DEMAND_DEFAULTS
+    return Demand(entry=d["entry"] if main is None else main, accepts=accept or d["accepts"],
+                  fuel=d["fuel"] if fuel is None else fuel, sets=tuple(dict(values).items()),
+                  checked=d["checked"] if checked is None else checked, pinned=pinned)
+
 
 def _head_name(x):
     while isinstance(x, s.App):
@@ -1716,7 +1790,7 @@ def _elaborated(kept):
     return program + tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
 
 
-def certification(loaded, program, entry, values, accept=None):
+def certification(loaded, program, entry, demand):
     """What a run requires (certification.lth §3, 7.S15, 12.S17, 6.S14): the cone of the entry with,
     per name, its demands, read against the stores of the files loaded (12.S11). Gives the
     certification state the run records (12.S18); raises `Refused`, listing each refusal with its
@@ -1725,13 +1799,13 @@ def certification(loaded, program, entry, values, accept=None):
     Each name of the cone whose type is a theory head (through aliases) demands each law the
     theory states; a name whose type states no law is certified vacuously ([proposed] 10 of the
     theory, 6.S1). A demand: the law (as a test line names it), the current hash of the law's
-    cone, the cutoff `accept`, and what the run gives the law: [proposed] the name itself to the
-    law's parameter typed by the theory (printed, as a census of one prints it), and each hole the
-    run filled with `--set` to the law's parameter of the same name (certification.lth's
-    `Demand`); the model's own cone is compared with the fingerprint the entry's binding recorded
-    (certify.at). A name built on a provisional extern is refused whole."""
+    cone, the run's cutoff passed down (`Demand.law`, L12.3), and what the run gives the law:
+    [proposed] the name itself to the law's parameter typed by the theory (printed, as a census of
+    one prints it), and each hole the run filled with `--set` to the law's parameter of the same
+    name (certification.lth's `Demand`); the model's own cone is compared with the fingerprint the
+    entry's binding recorded (certify.at). A name built on a provisional extern is refused whole."""
     from . import certify
-    accept = accept or ACCEPT
+    accept, values = demand.accepts, dict(demand.sets)
     cones = certify.Cones(program)
     names = sorted(cones.names(entry))
     theories = _Theories(loaded.acts)
@@ -1774,8 +1848,7 @@ def certification(loaded, program, entry, values, accept=None):
                 params = [p for a in theories.acts.get(law, ()) if isinstance(a, s.Define)
                           for b in a.binders if isinstance(b, s.Explicit) for p in b.names]
                 given += [(p, _given(values[p])) for p in params if p in values and p != m]
-                demands.append({"law": law.partition("@")[0], "cone": law_cones.hash(law), "given": given,
-                                "accepts": accept, "fingerprints": fingerprints})
+                demands.append(demand.law(law.partition("@")[0], law_cones.hash(law), given, fingerprints))
         cone.append({"name": n.partition("@")[0], "provisional": n in provisional, "laws": demands})
     entries = sorted((e for f in loaded.files for e in certify.read_store(f)),
                      key=lambda e: e.get("date", ""), reverse=True)
@@ -1948,8 +2021,8 @@ class FirstActions:
     [proposed] A refuted law writes no entry; the observations of the protocol pass the token on and
     change no place (`HostObserveChangesNothing`)."""
 
-    def __init__(self, loaded, specs, accept):
-        self.loaded, self.accept = loaded, accept
+    def __init__(self, loaded, specs, demand):
+        self.loaded, self.demand = loaded, demand
         self.by_route = {}
         for spec in specs:
             # [proposed] two models of the cone with one route: the first, by name, is validated
@@ -1969,9 +2042,11 @@ class FirstActions:
             raise RunError(f"{spec['law']}: {len(spec['arguments'])} arguments, {spec['action']} was given "
                            f"{len(given) - 1}")
         printed = [(p, _printed(v)) for p, v in zip(spec["arguments"], given[1:])]
-        demand = {"law": spec["law"], "cone": spec["law cone"],
-                  "given": [(spec["model"], {"Printed": spec["name"]})] + printed,
-                  "accepts": self.accept, "fingerprints": {spec["model"]: spec["model hash"]}}
+        # the validation is an inner action whose entry is the law: it receives the run's demand
+        # with every cutoff kept (demand.lth's `inner`, L12.3)
+        demand = self.demand.inner(spec["law"]).law(
+            spec["law"], spec["law cone"], [(spec["model"], {"Printed": spec["name"]})] + printed,
+            {spec["model"]: spec["model hash"]})
         shown = {p: certify._shown_value(v) for p, v in printed}
         served = next((e for e in self.entries() if certify.serves(demand, e)), None)
         if served is not None:
@@ -2096,17 +2171,27 @@ def refuse_provisional(kept, entry):
                       + "\n  ".join(lines), refusals)
 
 
-def run(path, main="main", fuel=10000, sets=(), accept=None, checked=False):
+def run(path, main=None, fuel=None, sets=(), accept=None, checked=None):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
     (`run --checked`, 12.S18): each value an extern gives at a declared subtype has its predicate
     evaluated as it crosses (4.R5), a refuted one refusing the run; the state then says so and
-    counts the refinements tested per route."""
+    counts the refinements tested per route. An argument not given takes demand_model.lut's
+    default (`DEMAND_DEFAULTS`).
+
+    The run's demand (demand.lth's `Demand`) is built once, as soon as the values of `--set` are
+    read by their holes' types, and everything after derives from it: the demand on each law and
+    on each first action (`PassedDownNotRecomputed`), and the record (`RecordsEveryCutoff`). The
+    state carries the demand as recorded (`demand`), the plan (`plan`: the strategy, the live cone,
+    the call-by-need schedule and its hash, plan.lth's `Plan`, L5.6) and the demand's key (`key`,
+    plan.lth's `DemandKey`, `KeyReadsOnlyTheCone`)."""
     host.reset()
+    lock = lock_status(path)
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
-    entry = loaded.name(loaded.top, main) or main
+    demand = demand_of(main, fuel, values, accept, checked, lock["pinned"])
+    entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)
     if roots:
@@ -2121,24 +2206,46 @@ def run(path, main="main", fuel=10000, sets=(), accept=None, checked=False):
     program = _elaborated(kept)
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
-        raise RunError(f"missing main: {main}")
-    main = entry
-    state = certification(loaded, program, entry, values, accept)
-    runner = Runner(program, fuel, checked)
-    firsts = FirstActions(loaded, state.pop("_firsts", []) if state else [], accept or ACCEPT)
+        raise RunError(f"missing main: {demand.entry}")
+    state = certification(loaded, program, entry, demand)
+    runner = Runner(program, demand.fuel, demand.checked)
+    firsts = FirstActions(loaded, state.pop("_firsts", []) if state else [], demand)
     runner.first = firsts.by_route
     runner.validate = firsts
-    value = t.Var(main)
+    value = t.Var(entry)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):
         value = t.App(value, runner.token)
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    state = dict(state or {}, fuel={"given": fuel, "spent": fuel - runner.fuel}, **{"first actions": firsts.done},
-                 files_read=[list(pair) for pair in host.files_read()], lock=lock_status(path), checked=checked)
-    if checked:
+    live = live_cone(kept)
+    plan = {"strategy": "CallByNeed", "entry": demand.entry, "live": list(live), "schedule": list(runner.schedule)}
+    plan["hash"] = plan_hash(plan)
+    live_holes = {n for n, _ in demand.sets if loaded.internal(loaded.top, n) in set(live)}
+    state = state or {}
+    state = dict(state, fuel={"given": demand.fuel, "spent": demand.fuel - runner.fuel},
+                 **{"first actions": firsts.done}, files_read=[list(pair) for pair in host.files_read()],
+                 lock=lock, checked=demand.checked, demand=demand.record(state.get("cone")), plan=plan,
+                 key=demand.key(live_holes))
+    if demand.checked:
         state["refinements"] = dict(runner.tested)
     return host.stdout(), values, state
+
+
+def live_cone(kept):
+    """plan.lth's `reaches` as `run` computes it: the names of the slice `runtime_slice` keeps for
+    the entry (the backward pass over names, 8.S3, L5.13), each once, in the program's order (core
+    first, then each file after its imports). [proposed] The roots of the slice are in it: core's
+    data, which every run may read, and the laws run at a first action (10.S10)."""
+    return tuple(dict.fromkeys(a.name for a in kept if isinstance(a, (s.Define, s.Declare, s.Alias))))
+
+
+def plan_hash(plan):
+    """plan.lth's `planHash` (L5.6, `PlanHashSeesTheSchedule`): sha256 of the plan's strategy,
+    entry, live cone and schedule, as `certify.cone_hash` hashes a cone (canonical JSON)."""
+    from . import certify
+    payload = {k: plan[k] for k in ("strategy", "entry", "live", "schedule")}
+    return certify._sha(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
 
 
 LOCK = "luthier.lock"
@@ -2166,7 +2273,7 @@ def lock_status(path):
     return {"path": str(here / LOCK), "pinned": None, "status": "absent"}
 
 
-def run_file(path, main="main", fuel=10000, sets=(), accept=None, checked=False):
+def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None):
     return run(path, main, fuel, sets, accept, checked)[0]
 
 
@@ -2185,7 +2292,13 @@ def record(path, main, values, output, state=None):
     cone's code, the Python's and the hosts' versions), the fuel given and spent, the files read
     with the hash of their bytes (`files_read`) and the lock (`lock`: its path, the revision it
     pins and whether the run `matches` it, `differs`, or found it `absent` and wrote it), whether
-    it ran `--checked` (`checked`) and then the refinements tested per route (`refinements`)."""
+    it ran `--checked` (`checked`) and then the refinements tested per route (`refinements`).
+
+    The demand as one object (`demand`, demand.lth's `Record`: entry, cone, parameters, accept,
+    delta, fuel, checked, lock), the plan (`plan`) and the demand's key (`key`). [proposed] The
+    fields that were there before are kept beside it, with the same values: `entry`, `parameters`,
+    `checked` and `certification.accept`, which tests and readers of the record read; `fuel` and
+    `lock`, which hold the run's part too (the fuel spent, the lock's path and status)."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
@@ -2193,7 +2306,7 @@ def record(path, main, values, output, state=None):
             "parameters": values, "output": output, "calls": host.calls()}
     if state is not None:
         state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
-        for key in ("fuel", "files_read", "lock", "checked", "refinements"):
+        for key in ("demand", "plan", "key", "fuel", "files_read", "lock", "checked", "refinements"):
             if key in state:
                 item[key] = state.pop(key)
         lock = item.get("lock")
@@ -2206,3 +2319,25 @@ def record(path, main, values, output, state=None):
     runs.append(item)
     where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return where
+
+
+def read_runs(path):
+    """The runs `x.run.json` holds beside `x.lut` (or at `path` itself), and the breaches of
+    demand.lth's `determined` among them (`Runs`, 8.S3): each pair (i, j), i < j, of runs with one
+    demand record (`demand`) and two outputs. Nothing is served from them yet (8.S10). [proposed] A
+    run recorded before the demand was (no `demand`) is in the list and in no pair."""
+    path = Path(path)
+    where = path if path.name.endswith(".run.json") else record_path(path)
+    runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
+    return runs, breaches(runs)
+
+
+def breaches(runs):
+    """demand.lth's `determined`, as the pairs that break it: two runs with an equal `demand` and
+    different `output`s."""
+    found = []
+    for j, b in enumerate(runs):
+        for i, a in enumerate(runs[:j]):
+            if "demand" in a and a.get("demand") == b.get("demand") and a.get("output") != b.get("output"):
+                found.append((i, j))
+    return found
