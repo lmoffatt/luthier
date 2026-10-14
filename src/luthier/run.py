@@ -10,12 +10,15 @@ run loads `lib/core.lut` before the file (12.S22, 11.R2), defines kernel.BOOTSTR
 `eval` does, and the Runner brings the operands of a primitive and of `and`/`or` to weak head
 normal form itself, with the host. v6 (prompt-6.md): the loader scopes each file's names by the
 file (12.S22, `Loaded`), and an extern's arity is read from its declared type, the host's signature
-only when no type is declared. No certification or result hashing yet.
+only when no type is declared. v7 (prompt-7.md): `--set name=value` fills a hole of the file run
+(3.S9, 12.S18), and each run appends its entry, time, parameters and output to `x.run.json`.
+No certification or result hashing yet.
 """
 from __future__ import annotations
 
 import importlib
 import inspect
+import json
 import math
 from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
@@ -25,6 +28,7 @@ import numpy as np
 from . import host, kernel, surface as s, term as t
 from .elaborate import elaborate_program
 from .parse import parse
+from .surface import Parsed
 
 
 class RunError(ValueError):
@@ -1072,12 +1076,107 @@ def _primitive_body(act):
     return act
 
 
-def run_file(path, main="main", fuel=10000):
+# the types a `--set` can give (12.S18): a parameter hole has one of these, by name
+PARAMETER_TYPES = ("String", "Int", "Float64", "Bool")
+
+
+def _show_type(ty):
+    if isinstance(ty, s.Name):
+        return ty.name
+    if isinstance(ty, s.Binop):
+        return f"{_show_type(ty.left)} {ty.operator} {_show_type(ty.right)}"
+    if isinstance(ty, s.App):
+        return f"{_show_type(ty.function)} {_show_type(ty.argument)}"
+    return type(ty).__name__
+
+
+def holes(loaded):
+    """The holes of the file run (3.S9): the names it declares and does not define, each with the
+    act that declares it."""
+    acts = loaded.files[loaded.top].acts
+    defined = {a.name for a in acts if isinstance(a, s.Define)}
+    return {a.name: a for a in acts if isinstance(a, s.Declare) and a.name not in defined}
+
+
+def parameter(hole, text):
+    """The value `--set` gives a hole: `text` read as a literal of the hole's type (12.S18). A
+    String is the text as written; an Int, a Float64 or a Bool is parsed as a Luthier literal."""
+    ty = hole.type
+    if not _is_parameter(hole):
+        shown = " ".join(f"({' '.join(b.names)} : {_show_type(b.type)})" if hasattr(b, "names") else "?"
+                         for b in hole.binders)
+        raise RunError(f"--set {hole.name}: {hole.name}{' ' + shown if shown else ''} : {_show_type(ty)} "
+                       f"is not a parameter; --set gives a String, an Int, a Float64 or a Bool")
+    if ty.name == "String":
+        return text
+    parsed = parse(f"value := {text}")
+    term = None
+    if isinstance(parsed, Parsed) and len(parsed.program) == 1 and isinstance(parsed.program[0].body, s.TermBody):
+        term = parsed.program[0].body.term
+    sign = 1
+    if isinstance(term, s.Neg):
+        sign, term = -1, term.value
+    literal = term.literal if isinstance(term, s.Literal) else None
+    if ty.name == "Int" and isinstance(literal, s.IntLit):
+        return sign * literal.value
+    if ty.name == "Float64" and isinstance(literal, s.FloatLit):
+        return sign * literal.value
+    if ty.name == "Bool" and sign == 1 and isinstance(term, s.Name) and term.name in ("true", "false"):
+        return term.name == "true"
+    raise RunError(f"--set {hole.name}={text}: not a literal of type {ty.name}")
+
+
+def _literal(value):
+    if isinstance(value, bool):
+        return s.Name("true" if value else "false")
+    if isinstance(value, int):
+        return s.Literal(s.IntLit(value))
+    if isinstance(value, float):
+        return s.Literal(s.FloatLit(value))
+    return s.Literal(s.StringLit(value))
+
+
+def fill(loaded, sets):
+    """Fill the holes of the file run with the `--set name=value` of `sets` (12.S18): each hole set
+    becomes a definition of its literal. Gives the values set, and the program's names of the
+    parameter holes left empty."""
+    found = holes(loaded)
+    values = {}
+    for item in sets:
+        name, sep, text = item.partition("=")
+        if not sep:
+            raise RunError(f"--set {item}: expected name=value")
+        if name not in found:
+            raise RunError(f"--set {name}: {name} is not a declared hole of {loaded.top.name}")
+        values[name] = parameter(found[name], text)
+    internal = {loaded.internal(loaded.top, n): n for n in found}
+    loaded.by_file[loaded.top] = tuple(
+        s.Define(a.name, (), a.type, s.TermBody(_literal(values[internal[a.name]])))
+        if isinstance(a, s.Declare) and internal.get(a.name) in values else a
+        for a in loaded.by_file[loaded.top])
+    loaded.acts = tuple(a for acts in loaded.by_file.values() for a in acts)
+    # a declaration of another type (a theory, `Shows : { ... }`, or a function) is no parameter
+    return values, {i: n for i, n in internal.items() if n not in values and _is_parameter(found[n])}
+
+
+def _is_parameter(hole):
+    return not hole.binders and isinstance(hole.type, s.Name) and hole.type.name in PARAMETER_TYPES
+
+
+def run(path, main="main", fuel=10000, sets=()):
+    """Run `main` of the file at `path` with its holes filled by `sets`; gives the standard output
+    and the values set."""
     host.reset()
     loaded = Loaded(path)
+    values, empty = fill(loaded, sets)
     entry = loaded.name(loaded.top, main) or main
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     loaded.demand(kept)
+    for a in kept:
+        if isinstance(a, s.Declare) and a.name in empty:
+            name = empty[a.name]
+            raise RunError(f"{name} : {_show_type(a.type)} is a hole of {loaded.top.name} the run needs; "
+                           f"give it with --set {name}=...")
     program = tuple(_primitive_body(a) for a in elaborate_program(kept))
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
@@ -1092,4 +1191,26 @@ def run_file(path, main="main", fuel=10000):
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    return host.stdout()
+    return host.stdout(), values
+
+
+def run_file(path, main="main", fuel=10000, sets=()):
+    return run(path, main, fuel, sets)[0]
+
+
+def record_path(path):
+    path = Path(path)
+    return path.with_name(path.stem + ".run.json")
+
+
+def record(path, main, values, output):
+    """Append this run to `x.run.json` beside `x.lut` (12.S18): the entry, the time, the
+    parameters and the output. The hash and fingerprint of the cone, the interpreter's revision,
+    the lock status and the states of the cone are not recorded yet."""
+    from datetime import datetime, timezone
+    where = record_path(path)
+    runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
+    runs.append({"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                 "parameters": values, "output": output})
+    where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return where

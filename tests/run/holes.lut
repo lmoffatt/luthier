@@ -1,0 +1,11 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-7.md): the holes of the file run (3.S9), which
+-- `run --set name=value` fills (12.S18). main needs graphDir and loud; unused is never demanded;
+-- twice is a function hole, which --set refuses.
+import "world_model.lut" HostConsole host : HostConsole
+
+graphDir : String
+loud : Bool
+unused : Int
+twice (n : Int) : Int
+
+main (w : W) : W * Unit := host.print w (if loud then graphDir + "!" else graphDir)

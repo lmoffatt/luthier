@@ -1,7 +1,9 @@
 """Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md);
 v4 for arrays, tables and numbers across the bridge (prompt-4.md); v6 for the loader's scopes and the
-externs' arity (prompt-6.md)."""
+externs' arity (prompt-6.md); v7 for `run --set` and the run's record (prompt-7.md)."""
+import json
 import os
+import re
 from dataclasses import fields, is_dataclass
 from pathlib import Path
 import subprocess
@@ -12,7 +14,7 @@ import pytest
 
 from luthier import arrays, host, surface as s
 from luthier.cli import main
-from luthier.run import Loaded, RunError, run_file
+from luthier.run import Loaded, RunError, parameter, record_path, run_file
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -71,8 +73,15 @@ def matrix(u):
 def command(path, *args, cwd=None):
     env = dict(os.environ)
     env["PYTHONPATH"] = os.pathsep.join((str(ROOT / "src"), str(ROOT / "tests")))
-    return subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path), *args],
-                          cwd=cwd, env=env, capture_output=True, text=True)
+    # a run appends to x.run.json beside x.lut (12.S18); a test leaves none in the repository
+    where = record_path(Path(cwd or ".") / path)
+    existed = where.exists()
+    try:
+        return subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path), *args],
+                              cwd=cwd, env=env, capture_output=True, text=True)
+    finally:
+        if not existed and ROOT in where.resolve().parents:
+            where.unlink(missing_ok=True)
 
 
 def test_hello():
@@ -299,7 +308,8 @@ EXPECTED_VALIDATE_GRAPH = ("valid: 10 nodes, 22 measurements, 21 distinct pairs;
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 5 minutes; set LUTHIER_SLOW=1")
 def test_validate_graph_slow():
     # prompt-10.md item 4: the first full run of the slice
-    result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut", cwd=ROOT)
+    result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut",
+                     "--set", "graphDir=examples/sonolocalizacion/A/graph", cwd=ROOT)
     assert result.returncode == 0, result.stderr
     assert result.stdout == EXPECTED_VALIDATE_GRAPH
 
@@ -398,3 +408,58 @@ def test_the_arity_of_an_extern_is_its_declared_types():
     # math.log has no Python signature: typed, one argument by its type; untyped, taken as unary;
     # math.pi, declared a Float64, is the host's value
     assert run_file(ROOT / "tests" / "run" / "extern_arity.lut") == "0.0 3.141592653589793 0.0\n"
+
+
+# ---------------------------------------------------------------- run --set fills the file's holes
+# (record/IA/run-2026-10-13/prompt-7.md, 3.S9, 12.S18)
+
+HOLES = ROOT / "tests" / "run" / "holes.lut"
+
+
+@pytest.mark.parametrize("sets, output", [
+    (("graphDir=a/b", "loud=false"), "a/b\n"),
+    (("graphDir=a/b", "loud=true", "unused=-3"), "a/b!\n"),
+])
+def test_set_fills_the_holes(sets, output):
+    assert run_file(HOLES, sets=sets) == output
+
+
+@pytest.mark.parametrize("sets, message", [
+    ((), "graphDir : String is a hole of holes.lut the run needs; give it with --set graphDir="),
+    (("loud=true",), "graphDir : String is a hole of holes.lut the run needs"),
+    (("graphDir=a", "loud=yes"), "--set loud=yes: not a literal of type Bool"),
+    (("graphDir=a", "loud=true", "unused=1.5"), "--set unused=1.5: not a literal of type Int"),
+    (("twice=3",), "twice (n : Int) : Int is not a parameter"),
+    (("nope=1",), "nope is not a declared hole of holes.lut"),
+    (("graphDir",), "expected name=value"),
+])
+def test_set_refuses(sets, message):
+    with pytest.raises(RunError, match=re.escape(message)):
+        run_file(HOLES, sets=sets)
+
+
+@pytest.mark.parametrize("type_, text, value", [
+    ("String", "a b=c", "a b=c"), ("Int", "-3", -3), ("Float64", "1e-3", 0.001),
+    ("Float64", "-2.5", -2.5), ("Bool", "true", True), ("Bool", "false", False),
+])
+def test_a_set_value_is_a_literal_of_the_holes_type(type_, text, value):
+    assert parameter(s.Declare("x", (), s.Name(type_)), text) == value
+
+
+def test_a_hole_of_another_type_is_refused_by_name():
+    with pytest.raises(RunError, match="x : Table is not a parameter"):
+        parameter(s.Declare("x", (), s.Name("Table")), "t.csv")
+
+
+def test_the_run_appends_its_record(tmp_path, capsys):
+    path = tmp_path / "holes.lut"
+    path.write_text(HOLES.read_text(encoding="utf-8"), encoding="utf-8")
+    assert main(["run", str(path), "--set", "graphDir=a/b", "--set", "loud=false"]) == 0
+    assert main(["run", str(path), "--set", "graphDir=c", "--set", "loud=true"]) == 0
+    assert main(["run", str(path)]) == 1
+    assert capsys.readouterr().out == "a/b\nc!\n"
+    runs = json.loads((tmp_path / "holes.run.json").read_text(encoding="utf-8"))
+    assert [(r["entry"], r["parameters"], r["output"]) for r in runs] == [
+        ("main", {"graphDir": "a/b", "loud": False}, "a/b\n"),
+        ("main", {"graphDir": "c", "loud": True}, "c!\n")]
+    assert all(r["time"] for r in runs)

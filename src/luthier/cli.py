@@ -27,6 +27,8 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--main", default="main")
     p_run.add_argument("--fuel", type=int, default=10_000_000,
                        help="reduction fuel [proposed: default 10,000,000, 10,000 was a hundred times too small for validate_graph.lut]")
+    p_run.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
+                       help="give a hole of the file (a declared String, Int, Float64 or Bool) its value (12.S18)")
     p_test = sub.add_parser("test", help="run the file's test lines (test.lth's Tester)")
     p_test.add_argument("file")
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
@@ -47,9 +49,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if all(o.grade is not None for o in outcomes) else 1
 
     if ns.command == "run":
-        from .run import run_file
+        from .run import record, run
         try:
-            print(run_file(ns.file, ns.main, ns.fuel), end="")
+            output, values = run(ns.file, ns.main, ns.fuel, ns.set)
+            print(output, end="")
+            record(ns.file, ns.main, values, output)
             return 0
         except (OSError, ValueError, RecursionError) as exc:
             import sys

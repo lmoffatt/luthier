@@ -12,7 +12,8 @@
 -- graph that cannot be read, where v0.1 stopped with the extern's error.
 --
 -- Run from the root of this repository with
---   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/validate_graph.lut
+--   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/validate_graph.lut \
+--     --set graphDir=examples/sonolocalizacion/A/graph
 
 import "world_model.lut" HostConsole host : HostConsole
 import "numbers.lth" Doubles
@@ -20,11 +21,10 @@ import "numbers_model.lut" doubles : Doubles
 import "arrays.lth" RankFloor
 import "distance_graph.lut" DistanceGraph ValidDistanceGraph ValidGraph firstViolation describe readGraph distinctPairs unseenDirections rigidMotions intToString
 
--- The graph directory, relative to where the run starts: session A of experiment zero
--- (examples/sonolocalizacion/A/graph/SOURCE.md). A run parameter, a declared hole that
--- `run --set graphDir=...` replaces (3.S9, 8.S1, 12.S18); the new `run` has no `--set` yet, so it is
--- defined here.
-graphDir : String := "examples/sonolocalizacion/A/graph"
+-- The graph directory, relative to where the run starts, for example session A of experiment
+-- zero (examples/sonolocalizacion/A/graph/SOURCE.md). A run parameter: a declared hole that
+-- `run --set graphDir=...` fills (3.S9, 8.S1, 12.S18).
+graphDir : String
 
 -- The rank floor of the directions the distances see: v0.1's, n eps times the largest eigenvalue,
 -- n the size of the matrix (3 per node) and eps the spacing of the doubles at one
