@@ -1,0 +1,153 @@
+-- demand.lth: the demand as a value: what an action asks of a program, with every cutoff it
+-- carries; what it passes down to each law of the cone; what a run records of it.
+--
+-- Draft 0, 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/demand-2026-10-15/prompt.md (step 6.1 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md). Sources: spec 8.S1, 8.S2,
+-- 8.S3, 8.S8 (docs/spec/08-demand.md); 6.S10, 6.S14, 6.S15; 12.S13, 12.S17, 12.S18; L5.17, L5.18,
+-- L5.19, L12.3, P11; D-2026-10-13-f (the demand is open), D-2026-10-13-m (the cost types come
+-- later), D-2026-10-14-c (first everything Boolean, the cutoffs as parameters the demand
+-- supplies); certification.lth §3 (the demand on one law, `serves`, `Certified`), test.lth §3
+-- (`Grade`), generators.lth §6 (`Budgets`, the same rule: every budget an argument). Pattern of
+-- certification.lth.
+--
+-- What this file states. 8.S1 says a demand is open: whatever the program declares as a
+-- parameter, the demand may set; its form is a library's (D-2026-10-12-al), so what is here is
+-- one library's record, with the operations of 8.S2 that the core asks for. D-2026-10-14-c says
+-- first everything Boolean, so the cutoff is the weakest grade accepted, and where a cost would
+-- enter (the bound, the evidence cost, the price of an assumption, 6.S15, 6.S10) there is a hole
+-- `C`, with the comment "D-2026-10-13-m, after the slice's failures". certification.lth §3 keeps
+-- its `Demand`, the demand on one law; here it is `LawDemand`, the same record by structure, and
+-- the law of 8.S1 is that it is passed down from the run's demand and not recomputed (L12.3).
+-- A model of `Demanding` builds the demand of a run from the arguments `run` takes
+-- (demand_model.lut, `theDemand`), with its defaults declared there and recorded (L5.19). What
+-- the brief or the spec leaves open is marked [proposed] at the item above it.
+--
+-- Index (all sections written in this draft):
+--   §1 The demand: its fields, the holes for the costs and the decorated type (8.S1, 8.S2,
+--      6.S15, 6.S10, 12.S18, 12.S13).                                                       done
+--   §2 Passing down: the demand on one law, the demand an inner action receives (L12.3,
+--      6.S15, 6.S10).                                                                       done
+--   §3 What a run records of its demand, and what two runs of one demand owe each other
+--      (12.S18, L5.18, 8.S3).                                                               done
+--   §4 The theory `Demanding`, the laws of §2 and §3 claimed.                               done
+
+import "certification.lth" Certifying Entry Value Hash ServesIsMonotoneInTheCutoff
+import "test.lth" Grade Sampled AssumedGrade gradeRank
+import "term.lth" Term
+
+-- ---------------------------------------------------------------- §1 The demand
+
+-- The cost type of 6.S4, and what a demand carries in it (6.S15: the cutoff is a bound and an
+-- evidence cost in `C`; 6.S10: the evidence cost it assigns to assumptions, with no default):
+-- holes. D-2026-10-13-m, after the slice's failures. In this draft the cutoff is the weakest
+-- grade accepted (`accepts`, D-2026-10-14-c) and the price of an assumption is whether that grade
+-- admits `AssumedGrade` (§2).
+C : U
+bound : Demand -> C
+evidence : Demand -> C
+assumed : Demand -> Maybe C
+
+-- The decorated type (8.S1): asking for `t : P T` where the program computes a `T` asks the cone
+-- of `t` to build a `P T`, the cone written generic over a type operator `G`, the identity by
+-- default, which the demand replaces by `P`. [proposed, 8.S1] Whether the generic form is written
+-- by hand or derived from the cone is open, and so is the interface asked of `P` beyond the
+-- functor and applicative laws of 8.S2's table; both are holes. A demand that names no
+-- decoration asks for the cone's own type, the identity.
+Decoration : U
+decorate : Decoration -> Term -> Term
+
+-- A demand (8.S1): the entry; the type demanded, the identity when `nothing`; the cutoff, the
+-- weakest grade accepted (6.S15, D-2026-10-14-c; `run --accept`); the confidence for sampled
+-- evidence (D-2026-10-12-r); the limit on resources (`run --fuel`, the reduction steps); the
+-- values of the program's holes (`run --set`, 12.S18); whether every value an extern gives is
+-- tested against its refinements as it crosses (`run --checked`, 12.S18, P11); and the lock, the
+-- interpreter's revision the program's directory pins (12.S13), `nothing` when none does.
+-- [proposed] The entry is a name; 8.S1's term as entry waits for an action that asks for one.
+-- [proposed] `delta` is `nothing` in this draft, since no statistic becomes a cost before
+-- D-2026-10-13-m; when one does it is required as `assumed` is, with no default. Every field is a
+-- parameter the first demand takes as a declared default argument and records (L5.18, L5.19);
+-- none is a constant of the core.
+Demand = { entry : String, decoration : Maybe Decoration, accepts : Grade, delta : Maybe Float64,
+           fuel : Nat, sets : List (String * Value), checked : Bool, pinned : Maybe String }
+
+-- the value a demand gives a hole of the program, if it gives one (12.S18: a hole left without a
+-- value is an error that asks for `--set`)
+given (d : Demand) (name : String) : Maybe Value := lookupValue name d.sets
+lookupValue (name : String) (vs : List (String * Value)) : Maybe Value :=
+  match vs { nil -> nothing ; cons (n, v) rest -> if n == name then just v else lookupValue name rest }
+
+-- ---------------------------------------------------------------- §2 Passing down
+
+-- The demand on one law (certification.lth §3, its `Demand`, 6.S15, 7.S15): the law, the current
+-- hash of its cone, what the run gives its parameters, and the weakest grade accepted. The same
+-- record by structure, so a `LawDemand` is what `Certifying.serves` and `refuse` take.
+LawDemand = { law : String, cone : Hash, given : List (String * Value), accepts : Grade }
+
+-- Whether a demand admits assumptions (6.S10) in the Boolean draft: its cutoff admits
+-- `AssumedGrade`, the lowest grade (test.lth §3). The price of an assumption in `C` is the hole
+-- `assumed` above; `nothing` there is what refuses every assumed value when the cost types come.
+-- [proposed] Until then `run --accept assumed` is where a demand names that price.
+admitsAssumptions (d : Demand) : Bool := gradeRank d.accepts <= gradeRank AssumedGrade
+
+-- The demand an inner action receives (L12.3, L5.17): the caller's demand with the inner entry,
+-- every cutoff kept, since a cutoff does not compose and so is passed down, never recomputed
+-- from the inner cone.
+inner (d : Demand) (entry : String) : Demand :=
+  { entry := entry, decoration := d.decoration, accepts := d.accepts, delta := d.delta, fuel := d.fuel,
+    sets := d.sets, checked := d.checked, pinned := d.pinned }
+
+-- ---------------------------------------------------------------- §3 What a run records
+
+-- What a run records of its demand (12.S18, `x.run.json`; L5.18: every threshold or level a
+-- certificate needs comes from the demand and is recorded with it): the entry, the hash of the
+-- cone it ran, every parameter it set, the grade it accepted, the confidence, the fuel given,
+-- whether it ran checked, and the lock. The time, the output, the fuel spent and the states of
+-- the cone are the run's, not the demand's, and are not here.
+Record = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade,
+           delta : Maybe Float64, fuel : Nat, checked : Bool, lock : Maybe String }
+
+-- A run as its record keeps it: what was demanded, on which cone, and the result printed. The
+-- same demand on the same cone gives the same result (8.S3: results are memoized under the hash
+-- of code, inputs and mode; 8.S5: a definition has no effects): two runs with one record have one
+-- result. That is the predicate of the type, so every store of runs owes it, one read back from
+-- `x.run.json` included. [proposed] In the Boolean draft the record is the identity of a result;
+-- the key of 8.S8, with the mode, the seed, the plan and the certificates, is plan.lth's.
+Run = { record : Record, result : String }
+agreesWithRun (r : Run) (rs : List Run) : Bool :=
+  match rs { nil -> true ; cons q rest -> (not (r.record == q.record) or r.result == q.result) and agreesWithRun r rest }
+determined (rs : List Run) : Bool :=
+  match rs { nil -> true ; cons r rest -> agreesWithRun r rest and determined rest }
+Runs : U := { rs : List Run | determined rs }
+
+-- ---------------------------------------------------------------- §4 The theory
+
+-- A model of the demand gives, for a run's demand, the demand on each law of its cone and what
+-- the run records.
+Demanding : {
+  lawDemand : Demand -> String -> Hash -> LawDemand,
+  recorded : Demand -> Hash -> Record,
+}
+
+-- §2. L12.3, 6.S15: the demand on a law carries the run's cutoff and the run's values, and the
+-- law's own name and cone; nothing of it is recomputed from the law's cone. [proposed] The run
+-- also gives the law the name it certifies, printed, to the law's model parameter
+-- (certification.lth §3, run.py's `certification`); that is the run's binding and not the
+-- demand's, so `given` here is what `--set` gave.
+PassedDownNotRecomputed (m : Demanding) (d : Demand) (law : String) (cone : Hash) : Bool :=
+  m.lawDemand d law cone == { law := law, cone := cone, given := d.sets, accepts := d.accepts }
+-- 6.S10: a demand that names no price for assumptions refuses every assumed value: no entry with
+-- the grade `AssumedGrade` serves a law under it
+NoPriceRefusesAssumed (m : Demanding) (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) : Bool :=
+  admitsAssumptions d or not (e.grade == just AssumedGrade) or not (k.serves (m.lawDemand d law cone) e)
+-- 6.S16, L10.5: lowering the cutoff loses nothing accepted; certification.lth's law, applied to
+-- the demand passed down, not restated
+LoweringLosesNothing (m : Demanding) (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) (g : Grade) : Bool :=
+  ServesIsMonotoneInTheCutoff k (m.lawDemand d law cone) e g
+
+-- §3. 12.S18, L5.18: the record carries every cutoff and parameter the demand carries, and the
+-- cone it ran; so an inner demand (`inner`) records what its caller's would, at the inner entry
+RecordsEveryCutoff (m : Demanding) (d : Demand) (h : Hash) : Bool :=
+  m.recorded d h == { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, delta := d.delta,
+                      fuel := d.fuel, checked := d.checked, lock := d.pinned }
+Demanding := PassedDownNotRecomputed & NoPriceRefusesAssumed & LoweringLosesNothing & RecordsEveryCutoff
