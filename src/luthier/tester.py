@@ -38,7 +38,9 @@ from pathlib import Path
 from . import host, kernel, surface as s, term as t
 from .elaborate import elaborate_program, show_term as _show_term
 from .parse import parse
-from .run import (Loaded, Runner, RunError, _applied, _arrow, _instantiate, _primitive_body, core_data,
+import numpy as np
+
+from .run import (Entries, Loaded, Runner, RunError, _applied, _arrow, _instantiate, _primitive_body, core_data,
                   runtime_slice)
 
 TRUE, FALSE = t.Var("true"), t.Var("false")
@@ -448,13 +450,70 @@ class Values:
         base, predicates = self.form(ty)
         kind = base.name if isinstance(base, t.Var) else None
         lo, hi = self.bounds(predicates, kind) if kind in ("Int", "Float64") else (None, None)
+        fixed = self.fixed_fields(predicates) if isinstance(base, t.Record) else {}
         for _ in range(self.budgets.get("tries", 2000)):
-            v = self.draw_base(base, lo, hi)
+            v = self.draw_base(base, lo, hi, fixed)
             if self.holds(predicates, v):
                 return v
         raise Unfit(f"no value of {_show(ty)} in {self.budgets.get('tries', 2000)} tries (7.S6)")
 
-    def draw_base(self, ty, lo, hi):
+    def fixed_fields(self, predicates):
+        """The fields of a record a refinement equates, conjunct by conjunct, to a value: `v.n == k`
+        (`VecOf k`), `a.m == r and a.n == c` (`MatOf r c`), `a.m == a.n` (`Square`). Each is built,
+        not drawn and filtered (7.S6): {label: (name, expression)}, the expression read once the
+        fields it names are drawn."""
+        fixed = {}
+        for name, p in predicates:
+            for c in _conjuncts(p):
+                if not (isinstance(c, t.App) and isinstance(c.function, t.App) and c.function.function == t.Var("==")):
+                    continue
+                for side, other in ((c.function.argument, c.argument), (c.argument, c.function.argument)):
+                    if isinstance(side, t.Proj) and side.record == t.Var(name) and side.label not in fixed:
+                        if not _mentions(other, name) or isinstance(other, t.Proj) and other.record == t.Var(name):
+                            fixed[side.label] = (name, other)
+                            break
+        return fixed
+
+    def fixed_value(self, fixed, label, items):
+        """The value a refinement fixes for `label`, given the fields drawn so far, or None."""
+        if label not in fixed:
+            return None
+        name, expr = fixed[label]
+        if _mentions(expr, name):
+            if not (isinstance(expr, t.Proj) and expr.label in dict(items)):
+                return None
+            return dict(items)[expr.label]
+        try:
+            v = self.whnf(expr)
+        except RunError:
+            return None
+        return v if isinstance(v, t.Lit) else None
+
+    def table(self, ty):
+        """A function on finite indices, `Fin n -> ... -> A` with `A` a `Float64` or an `Int` (each a
+        subtype, bounds read), drawn entry by entry as the host array it is (3.S21, 11.S9): the
+        values of a `Vec` or a `Mat`. None when the domain is not a `Fin` of a known length."""
+        shape, leaf = [], ty
+        while (arrow := _arrow(self.whnf(leaf))) is not None:
+            if arrow[0] != "_" and _mentions(arrow[2], arrow[0]):
+                return None
+            try:
+                k = self.runner.size(arrow[1])
+            except RunError:
+                return None
+            if k is None:
+                return None
+            shape.append(k)
+            leaf = arrow[2]
+        base, _ = self.form(leaf)
+        if not shape or base not in (t.Var("Float64"), t.Var("Int")):
+            return None
+        count = int(np.prod(shape)) if shape else 1
+        entries = [self.draw(leaf).constant.value for _ in range(count)]
+        array = np.array(entries, dtype=np.float64 if base == t.Var("Float64") else np.int64).reshape(shape)
+        return self.runner.host_object(Entries(array), ty)
+
+    def draw_base(self, ty, lo, hi, fixed=None):
         rng, n = self.rng, self.size
         if isinstance(ty, t.Var) and ty.name in ("Int", "Float64"):
             # 7.S3: the bounds of the type, otherwise [-s, s]; a missing side at s from the other
@@ -478,7 +537,9 @@ class Values:
         if isinstance(ty, t.Record):
             items, types = [], list(ty.fields)
             for k, (label, fty) in enumerate(types):
-                v = self.draw(fty)
+                v = self.fixed_value(fixed or {}, label, items)
+                if v is None:
+                    v = self.draw(fty)
                 items.append((label, v))
                 types[k + 1:] = [(l, _instantiate(label, v, f)) for l, f in types[k + 1:]]
             return t.RecordValue(tuple(items))
@@ -491,6 +552,8 @@ class Values:
                 result = t.App(t.App(t.Var("cons"), self.draw(element)), result)
             return result
         if _arrow(ty) is not None:
+            if (drawn := self.table(ty)) is not None:
+                return drawn
             raise NoGenerator(f"a function {_show(ty)}: bind a census (7.R4)")
         raise NoGenerator(f"no generator of {_show(ty)}")
 
@@ -509,13 +572,22 @@ def parameters(runner, law):
     return params
 
 
+def _list_depth(runner, ty):
+    """How many `List`s a type is nested in: a census of lists, for a parameter that is a list,
+    lists its elements (`List (List A)` for a `List A`; a refined list, `UnitList`, read as one)."""
+    depth = 0
+    while (element := _applied(runner.resolve(ty), "List")) is not None:
+        depth, ty = depth + 1, element
+    return depth
+
+
 def census(runner, binding, ty, name):
     """The values a binding names (7.R4): a definition of the program, `name` there, its elements
     when it is a list and the parameter is not."""
     definition = next((a for a in runner.program if isinstance(a, t.Define) and a.name == name), None)
     if definition is None:
         raise NoGenerator(f"the binding names {binding.generator}, which is not defined")
-    if _applied(runner.resolve(definition.type), "List") is not None and _applied(runner.resolve(ty), "List") is None:
+    if _list_depth(runner, definition.type) > _list_depth(runner, ty):
         values = _list(runner, t.Var(name))
         if not values:
             raise NoGenerator(f"the census {binding.generator} is empty")

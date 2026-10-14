@@ -110,3 +110,37 @@ def test_an_exhaustive_run_is_the_whole_type_weakened_by_its_bindings():
     plain, listed = tester.run_tests(ROOT / "tests" / "tester" / "weakest.lut")
     assert tester._base(plain.evidence.coverage) == "Exhaustive" and plain.verdict == "Confirmed"
     assert tester._base(listed.evidence.coverage) == "Listed" and listed.verdict == "Supported"
+
+
+SHAPES = '''import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "arrays.lth" Dim VecOf MatOf Square
+VecHasItsLength (n : Dim) (x : VecOf n) : Bool := x.n == n and x.f (n - 1) == x.f (n - 1)
+MatHasItsShape (r c : Dim) (a : MatOf r c) : Bool := a.m == r and a.n == c and a.f (r - 1) (c - 1) <= 10.0
+SquareIsSquare (a : Square) : Bool := a.m == a.n
+size (xs : List Int) : Int := match xs { nil -> 0 ; cons x rest -> 1 + size rest }
+AtMostTwo (xs : List Int) : Bool := size xs <= 2
+lists : List (List Int) := [nil, [1, 2], [3]]
+test "VecHasItsLength" (SampledMode linear)
+test "MatHasItsShape" (SampledMode linear)
+test "SquareIsSquare" (SampledMode linear)
+test "AtMostTwo" ExhaustiveMode (whereBindings <- [{ parameter := just "xs", type := nothing, generator := "lists", coverage := Listed }])
+'''
+
+
+def test_arrays_are_drawn_and_a_census_of_lists_lists_its_elements(tmp_path, capsys):
+    # record/IA/evidence-2026-10-14/prompt.md: a `Fin n -> Float64` is drawn as the host array it
+    # is, a field a refinement equates to a value is built (`VecOf n`, `MatOf r c`, `Square`), and
+    # a census of lists for a parameter that is a list gives its elements
+    program = tmp_path / "shapes.lut"
+    program.write_text(SHAPES)
+    code, lines = lines_of(capsys, program)
+    assert code == 0
+    assert lines == [
+        "VecHasItsLength: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
+        "MatHasItsShape: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
+        "SquareIsSquare: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
+        "AtMostTwo: exhaustive, 3 cases, cases",
+    ]
