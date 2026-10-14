@@ -23,3 +23,13 @@ converges; a first attempt at the default stopped with "fuel spent" after 2 min 
 kept). Its record is the last entry of `examples/sonolocalizacion/experiment_zero.run.json`
 (ignored by git), with the certification state of the cone: 83 laws, 6 certified, 175 names
 vacuous, none uncertified, stale or failed.
+
+## The figures, 2026-10-15
+
+`figures/positions.png`, `residuals.png`, `transform.png`: the three plots of G4
+(record/plan/plots/plan-plots-2026-10-14-decisions.md) that `experiment_zero.lut` at fd498a9
+renders with `figures.lut` at 8e0ab62, by the command above on `graph_noA2` with `--set lmTol=1e-6`
+and `--set outDir=<scratch>`, run in a worktree at 325a709 holding those two files (the library at
+HEAD then refused the cone: numpy's `PinvRestricts` stale after 6157fbc changed arrays.lth), 3 min;
+its summary line: sigma 0.02214331908164216 m, nu 4.471102722862414, Kolmogorov distance
+0.17285053266082867 over 19, tail probability 0.5794153448510095. matplotlib 3.11.1.
