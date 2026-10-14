@@ -1,0 +1,555 @@
+-- plot.lth: a plot as a pure value built from tables by ggplot's layers, its well-formedness as
+-- laws, and the renderer that draws it to a file as an action of the world, by its description.
+--
+-- Draft 0, 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/plots-2026-10-15/prompt-theory.md (step 1 of
+-- record/plan/plots/plan-plots-2026-10-14-execution.md). Sources: the decisions G1 to G5 of
+-- record/plan/plots/plan-plots-2026-10-14-decisions.md (the night's defaults until Luciano marks
+-- them; his words at its top: "una teoría simple pero que luego se pueda extender ... el de
+-- ggplot pero, claro, puro"); Wickham, "A layered grammar of graphics" (2010), the pattern he
+-- named; spec 10.S3 (an action takes the token first), 10.S8 to 10.S10 (externs as routes,
+-- validated at their first action), 3.S40, 4.R8 (`==` only where equality is structural), 4.S8 (a
+-- theory: its base, its laws), 7.S12 (premises counted apart), 12.S18 (the run's record); P10, P11,
+-- L2.7; D-2026-10-14-c (laws Boolean, every cutoff a parameter the demand supplies). Pattern:
+-- world.lth §1 to §5 (a description over the representation, a host action certified against it
+-- by `agreement`) and tables.lth (a record whose laws are its schema's).
+--
+-- What this file states. A plot is a value of the theory `Plot` (G1, P10): its tables by name, the
+-- mapping from aesthetics to column names that its layers inherit, its layers (each a geometry
+-- over a table and a mapping), its scales by aesthetic, its coordinates, its facet and its labels
+-- (G2). Every kind is a labeled sum and every collection a `List`, so a new geometry or scale is a
+-- new label and one model, not a change of type (G2). The constructors are pure functions
+-- `Plot -> Plot`, so a plot is built as ggplot's `+` builds one. The laws of `Plot` are its
+-- well-formedness (G3): every aesthetic names a column of its layer's table of the kind its
+-- geometry draws, every scale is stated and its limits contain the data or are stated by the
+-- demand (P11). A plot holds tables, and a table holds a function, so a plot has no `==` (4.R8):
+-- "the same plot" is `samePlot`, structural on everything but the tables and `sameTable` on them
+-- (§4). Changing the order of a table's rows changes the value, so the invariances of G3 are laws
+-- of what is drawn, the renderer's image (§5): the image does not change under a permutation of
+-- the rows of a table no layer orders by rows, nor under a swap of two layers that do not
+-- overlap, overlap judged with a margin that the demand states (D-2026-10-14-c). Rendering is an
+-- action (G1, 10.S3): `render : W -> Plot -> String -> W * Unit` writes the image at the path,
+-- and its description over world.lth's representation is a write of `image p ext` at the path
+-- and nowhere else: the theory `Drawing`, whose laws are G3's on rendering; `Renderer` is the
+-- record of a drawing and the host's action, certified against the drawing by world.lth's
+-- `agreement` (§6), as world.lth's `Host` is against `Console`.
+--
+-- Index (all sections written in this draft):
+--   §1 The value: geometries, scales, coordinates, layers, labels, `Plot` (G2).          done
+--   §2 The constructors, each `Plot -> Plot` (G2).                                      done
+--   §3 Reading a plot: tables and aesthetics by name, ranges of the data, limits.        done
+--   §4 Well-formedness, the laws of `Plot`, and the same plot (G3, 4.R8).                done
+--   §5 The renderer: `Drawing` (the description, its laws) and `Renderer` (G1, G3).    done
+--   §6 Certifying the renderer along one chain of tokens (world.lth §5).                 done
+
+import "kernel_laws.lth" Concrete
+import "world.lth" World Described Persistence Host agreement
+import "tables.lth" Table hasColumn realAt intAt memberStr distinct listLength sameCell sameTable
+import "arrays.lth" forallBelow existsBelow countBelow foldWith
+
+-- ---------------------------------------------------------------- §1 The value (plan G2)
+
+-- An aesthetic is named by a string and mapped to a column by name: a mapping is a list of pairs
+-- (aesthetic, column), the first pair of an aesthetic the one that counts. [proposed] Strings
+-- and not a labeled sum: the kinds of tables.lth are strings with a list of the known ones, and a
+-- label of a `||` sum is an injection in scope, so `x`, `y`, `label` and `size` as labels would
+-- take over every parameter of those names; `AestheticsKnown` (§4) refuses a misspelt one. A new
+-- aesthetic is a new entry of `knownAesthetics`.
+Mapping = List (String * String)
+knownAesthetics : List String := ["x", "y", "xend", "yend", "xerr", "yerr", "colour", "size", "group", "label"]
+-- an aesthetic drawn as a number: a position, its end, its error (a half-width), a size in points
+numericAesthetic (a : String) : Bool :=
+  a == "x" or a == "y" or a == "xend" or a == "yend" or a == "xerr" or a == "yerr" or a == "size"
+
+-- plan G2: a geometry is a labeled sum, each label with the parameters it draws with (P11: a size,
+-- a width, a level is the demand's, never a constant here). [proposed] The labels are the plural
+-- nouns (`points`, not `point`): a label is an injection in scope, and the constructors of §2
+-- take the singular names the plan gives them; with one name for both, `point { size := s }`
+-- inside `point` is the recursive call (probed with `luthier eval`, 2026-10-15). [proposed]
+-- `ablines` (a line `y = intercept + slope x` across the panel, no table) is beyond the six of
+-- G2: G4 needs a horizontal line at zero (plot 2) and the diagonal with the Kolmogorov band
+-- (plot 3). An ellipse's semi-axes are `level` times its `xerr` and `yerr` columns, axis-aligned;
+-- an error bar spans `y - yerr` to `y + yerr` (and `x` likewise when `xerr` is mapped).
+Geom = {
+  points : { size : Float64 }
+  || lines : { width : Float64 }
+  || errorbars : { width : Float64 }
+  || ellipses : { level : Float64, width : Float64 }
+  || texts : { size : Float64 }
+  || segments : { width : Float64 }
+  || ablines : { intercept : Float64, slope : Float64, width : Float64 }
+}
+
+-- plan G2, P11: a scale maps an aesthetic's data to the drawing, with its limits stated by the
+-- demand or computed from the data with an expansion the demand states. For `linear` the
+-- expansion is a fraction of the range added at each end; for `log` it is a factor (at least one)
+-- that divides the least value and multiplies the greatest. [proposed] `palette` is a list of
+-- colours (any colour name or `#rrggbb` the host knows), assigned to the levels of the colour
+-- column in their sorted order, never in the order of the rows (§5's invariance); a continuous
+-- colour scale is a new label. The size aesthetic has no scale: its column is the size in points.
+Range = { lo : Float64, hi : Float64 }
+Limits = { auto : { expand : Float64 } || stated : Range }
+Scale = { linear : Limits || log : Limits || palette : List String }
+
+-- plan G2: cartesian coordinates, or equal aspect for positions in metres
+Coord = { cartesian : Unit || equal : Unit }
+
+-- plan G2: a layer is a geometry over a table, named, and the aesthetics it maps itself; an
+-- aesthetic it does not map is the plot's
+Layer = { geom : Geom, mapping : Mapping, table : String }
+Labels = { title : String, x : String, y : String }
+
+-- plan G2, G1 (P10): the plot, a theory whose laws are §4's. The layers are drawn in their order,
+-- a later one over an earlier one; the facet, if any, is a column whose levels split the panels.
+Plot : {
+  tables : List (String * Table),
+  mapping : Mapping,
+  layers : List Layer,
+  scales : List (String * Scale),
+  coord : Coord,
+  facet : Maybe String,
+  labels : Labels,
+}
+
+-- ---------------------------------------------------------------- §2 The constructors (plan G2)
+
+-- Each constructor is a pure function to `Plot`; the layer constructors take the table's name,
+-- the layer's own mapping and the geometry's parameters, and put the layer last (on top), so
+-- `labels t "" "" (coord (equal unit) (text "fit" m 8.0 (point "fit" m 4.0 (plot "fit" tbl m))))`
+-- is ggplot's `ggplot(tbl, m) + geom_point(size = 4) + geom_text(size = 8) + coord_equal() +
+-- labs(title = t)`. [proposed] The brief's `point m` takes the table and the parameters too:
+-- a plot has several tables, and a size is a parameter (P11).
+appendLayer (ls : List Layer) (l : Layer) : List Layer := match ls { nil -> [l] ; cons a rest -> cons a (appendLayer rest l) }
+withLayers (p : Plot) (ls : List Layer) : Plot :=
+  { tables := p.tables, mapping := p.mapping, layers := ls, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
+addLayer (p : Plot) (l : Layer) : Plot := withLayers p (appendLayer p.layers l)
+withData (p : Plot) (ds : List (String * Table)) : Plot :=
+  { tables := ds, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
+dropTable (ds : List (String * Table)) (name : String) : List (String * Table) :=
+  match ds { nil -> nil ; cons (n, t) rest -> if n == name then dropTable rest name else cons (n, t) (dropTable rest name) }
+appendTable (ds : List (String * Table)) (name : String) (t : Table) : List (String * Table) :=
+  match ds { nil -> [(name, t)] ; cons d rest -> cons d (appendTable rest name t) }
+dropScale (ss : List (String * Scale)) (a : String) : List (String * Scale) :=
+  match ss { nil -> nil ; cons (b, s) rest -> if a == b then dropScale rest a else cons (b, s) (dropScale rest a) }
+
+-- plan G2: a plot from one table, named, and the mapping its layers inherit; no layer, no scale,
+-- cartesian coordinates, no facet, no labels
+plot (name : String) (t : Table) (m : Mapping) : Plot :=
+  { tables := [(name, t)], mapping := m, layers := nil, scales := nil, coord := cartesian unit, facet := nothing,
+    labels := { title := "", x := "", y := "" } }
+-- plan G2: a further table, by name (it replaces a table of that name)
+table (name : String) (t : Table) (p : Plot) : Plot := withData p (appendTable (dropTable p.tables name) name t)
+-- plan G2: points at x, y; colour and size if mapped
+point (tbl : String) (m : Mapping) (size : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := points { size := size }, mapping := m, table := tbl }
+-- plan G2: a line through x, y in the order of x, one per group and colour
+line (tbl : String) (m : Mapping) (width : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := lines { width := width }, mapping := m, table := tbl }
+-- plan G2: error bars at x, y, of half-width yerr (and xerr if mapped)
+errorbar (tbl : String) (m : Mapping) (width : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := errorbars { width := width }, mapping := m, table := tbl }
+-- plan G2: ellipses centred at x, y with semi-axes level times xerr and yerr
+ellipse (tbl : String) (m : Mapping) (level width : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := ellipses { level := level, width := width }, mapping := m, table := tbl }
+-- plan G2: the label column written at x, y
+text (tbl : String) (m : Mapping) (size : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := texts { size := size }, mapping := m, table := tbl }
+-- plan G2: segments from x, y to xend, yend
+segment (tbl : String) (m : Mapping) (width : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := segments { width := width }, mapping := m, table := tbl }
+-- plan G4, [proposed]: the line y = intercept + slope x across the panel; it reads no table
+abline (intercept slope width : Float64) (p : Plot) : Plot :=
+  addLayer p { geom := ablines { intercept := intercept, slope := slope, width := width }, mapping := nil, table := "" }
+-- plan G2: the scale of an aesthetic ("x", "y" or "colour"), replacing any earlier one
+scale (a : String) (s : Scale) (p : Plot) : Plot :=
+  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := cons (a, s) (dropScale p.scales a), coord := p.coord,
+    facet := p.facet, labels := p.labels }
+-- plan G2: the coordinates
+coord (c : Coord) (p : Plot) : Plot :=
+  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := c, facet := p.facet, labels := p.labels }
+-- plan G2: the panels split by the levels of a column
+facet (col : String) (p : Plot) : Plot :=
+  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := just col, labels := p.labels }
+-- plan G2: the title and the axes' labels
+labels (title xlab ylab : String) (p : Plot) : Plot :=
+  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet,
+    labels := { title := title, x := xlab, y := ylab } }
+
+-- ---------------------------------------------------------------- §3 Reading a plot
+
+allLayers (ls : List Layer) (f : Layer -> Bool) : Bool := match ls { nil -> true ; cons l rest -> f l and allLayers rest f }
+anyLayer (ls : List Layer) (f : Layer -> Bool) : Bool := match ls { nil -> false ; cons l rest -> f l or anyLayer rest f }
+allStr (xs : List String) (f : String -> Bool) : Bool := match xs { nil -> true ; cons x rest -> f x and allStr rest f }
+keysOf (m : Mapping) : List String := match m { nil -> nil ; cons (a, c) rest -> cons a (keysOf rest) }
+namesOf (ds : List (String * Table)) : List String := match ds { nil -> nil ; cons (n, t) rest -> cons n (namesOf rest) }
+isNilStr (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> false }
+isJustStr (m : Maybe String) : Bool := match m { nothing -> false ; just c -> true }
+lookupStr (m : Mapping) (k : String) : Maybe String :=
+  match m { nil -> nothing ; cons (a, c) rest -> if a == k then just c else lookupStr rest k }
+lookupTable (ds : List (String * Table)) (name : String) : Maybe Table :=
+  match ds { nil -> nothing ; cons (n, t) rest -> if n == name then just t else lookupTable rest name }
+lookupScale (ss : List (String * Scale)) (a : String) : Maybe Scale :=
+  match ss { nil -> nothing ; cons (b, s) rest -> if a == b then just s else lookupScale rest a }
+nthLayer (ls : List Layer) (i : Int) : Maybe Layer :=
+  match ls { nil -> nothing ; cons l rest -> if i == 0 then just l else nthLayer rest (i - 1) }
+
+-- the column of an aesthetic in a layer: the layer's own mapping first, then the plot's, and the
+-- plot's only for an aesthetic the layer's geometry draws (ggplot's inheritance)
+aesOf (p : Plot) (l : Layer) (a : String) : Maybe String :=
+  match lookupStr l.mapping a {
+    just c -> just c ;
+    nothing -> if memberStr a (draws l.geom) then lookupStr p.mapping a else nothing }
+
+-- what each geometry needs mapped, and what else it may draw (plan G3: "of the kind the geometry
+-- asks")
+needs (g : Geom) : List String :=
+  match g {
+    points s -> ["x", "y"] ; lines s -> ["x", "y"] ; errorbars s -> ["x", "y", "yerr"] ;
+    ellipses s -> ["x", "y", "xerr", "yerr"] ; texts s -> ["x", "y", "label"] ;
+    segments s -> ["x", "y", "xend", "yend"] ; ablines s -> nil }
+mayDraw (g : Geom) : List String :=
+  match g {
+    points s -> ["colour", "size"] ; lines s -> ["colour", "group"] ; errorbars s -> ["xerr", "colour"] ;
+    ellipses s -> ["colour"] ; texts s -> ["colour"] ; segments s -> ["colour"] ; ablines s -> nil }
+appendStrs (xs ys : List String) : List String := match xs { nil -> ys ; cons x rest -> cons x (appendStrs rest ys) }
+draws (g : Geom) : List String := appendStrs (needs g) (mayDraw g)
+-- the reach of an error column: an error bar spans one half-width, an ellipse `level` of them
+reach (g : Geom) : Float64 := match g { errorbars s -> 1.0 ; ellipses s -> s.level ; _ -> 0.0 }
+-- whether a geometry draws its rows in the order of the rows: none of the seven does (`lines`
+-- orders by x); a `path` would, and §5's row invariance would then exclude its table
+ordersByRows (g : Geom) : Bool := match g { _ -> false }
+
+-- a cell as a number, when the column is a number
+numAt (t : Table) (c : String) (r : Fin t.nRows) : Maybe Float64 :=
+  if hasColumn t c "float" then just (realAt t c r)
+  else if hasColumn t c "int" then just (toFloat64 (intAt t c r)) else nothing
+numOf (t : Table) (c : Maybe String) (r : Fin t.nRows) : Maybe Float64 :=
+  match c { nothing -> nothing ; just n -> numAt t n r }
+
+fmin (a b : Float64) : Float64 := if a < b then a else b
+fmax (a b : Float64) : Float64 := if a < b then b else a
+unionRange (a b : Maybe Range) : Maybe Range :=
+  match a { nothing -> b ; just u -> match b { nothing -> a ; just v -> just { lo := fmin u.lo v.lo, hi := fmax u.hi v.hi } } }
+pointRange (v : Float64) : Maybe Range := just { lo := v, hi := v }
+optRange (m : Maybe Float64) : Maybe Range := match m { nothing -> nothing ; just v -> pointRange v }
+
+-- the end and the error of a position: "xend" and "xerr" of "x"; nothing for another aesthetic
+endOf (a : String) : String := if a == "x" then "xend" else if a == "y" then "yend" else ""
+errOf (a : String) : String := if a == "x" then "xerr" else if a == "y" then "yerr" else ""
+
+-- what one row of a layer occupies on an aesthetic: the value, its end, and the value plus and
+-- minus its error times the geometry's reach
+rowRange (p : Plot) (l : Layer) (t : Table) (a : String) (r : Fin t.nRows) : Maybe Range :=
+  unionRange (optRange (numOf t (aesOf p l (endOf a)) r))
+    (match numOf t (aesOf p l a) r {
+      nothing -> nothing ;
+      just v -> match numOf t (aesOf p l (errOf a)) r {
+        nothing -> pointRange v ;
+        just e -> unionRange (pointRange (v - reach l.geom * e)) (pointRange (v + reach l.geom * e)) } })
+-- what a layer occupies on an aesthetic, over its rows; nothing for a layer with no table or rows
+layerRange (p : Plot) (l : Layer) (a : String) : Maybe Range :=
+  match lookupTable p.tables l.table {
+    nothing -> nothing ;
+    just t -> foldWith (Maybe Range) unionRange nothing t.nRows (fn r { rowRange p l t a r }) }
+rangeOver (p : Plot) (ls : List Layer) (a : String) : Maybe Range :=
+  match ls { nil -> nothing ; cons l rest -> unionRange (layerRange p l a) (rangeOver p rest a) }
+-- the range of the data on an aesthetic, over every layer
+dataRange (p : Plot) (a : String) : Maybe Range := rangeOver p p.layers a
+
+-- the limits a scale draws an aesthetic at: stated, or the data's range expanded (§1)
+expandRange (isLog : Bool) (e : Float64) (g : Range) : Range :=
+  if isLog then { lo := g.lo / e, hi := g.hi * e }
+  else { lo := g.lo - e * (g.hi - g.lo), hi := g.hi + e * (g.hi - g.lo) }
+limitsFrom (isLog : Bool) (l : Limits) (d : Maybe Range) : Maybe Range :=
+  match l {
+    stated g -> just g ;
+    auto e -> match d { nothing -> nothing ; just g -> just (expandRange isLog e.expand g) } }
+resolvedLimits (p : Plot) (a : String) : Maybe Range :=
+  match lookupScale p.scales a {
+    nothing -> nothing ;
+    just s -> match s {
+      linear l -> limitsFrom false l (dataRange p a) ;
+      log l -> limitsFrom true l (dataRange p a) ;
+      palette cs -> nothing } }
+
+-- the levels of a column of a table: how many distinct cells it has
+levels (t : Table) (c : String) : Int :=
+  countBelow t.nRows (fn r { not (existsBelow r (fn s { sameCell (t.cell c s) (t.cell c r) })) })
+
+-- ---------------------------------------------------------------- §4 Well-formedness (plan G3)
+
+-- plan G3 [proposed]: every aesthetic a mapping names is a known one, so a misspelt aesthetic is
+-- refused and not ignored
+AestheticsKnown (p : Plot) : Bool :=
+  allStr (keysOf p.mapping) (fn a { memberStr a knownAesthetics })
+    and allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { memberStr a knownAesthetics }) })
+-- plan G2: the tables are named once each
+TablesNamedOnce (p : Plot) : Bool := distinct (namesOf p.tables)
+-- plan G3: a layer that draws columns names a table of the plot
+LayersNameTheirTables (p : Plot) : Bool :=
+  allLayers p.layers (fn l { isNilStr (needs l.geom) or isJustTable (lookupTable p.tables l.table) })
+isJustTable (m : Maybe Table) : Bool := match m { nothing -> false ; just t -> true }
+-- plan G3 [proposed]: a layer's own mapping names only aesthetics its geometry draws
+LayerMapsWhatItDraws (p : Plot) : Bool :=
+  allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { memberStr a (draws l.geom) }) })
+-- plan G3: every aesthetic a geometry needs is mapped, by the layer or by the plot
+NeedsMapped (p : Plot) : Bool :=
+  allLayers p.layers (fn l { allStr (needs l.geom) (fn a { isJustStr (aesOf p l a) }) })
+-- plan G3, tables.lth §3 (`hasColumn`, `kinds`): every aesthetic a layer draws names a column of
+-- its table, a number ("int" or "float") where the aesthetic is drawn as a number, any kind for
+-- colour, group and label
+columnFits (p : Plot) (l : Layer) (a : String) : Bool :=
+  match aesOf p l a {
+    nothing -> true ;
+    just c -> match lookupTable p.tables l.table {
+      nothing -> false ;
+      just t -> if numericAesthetic a then hasColumn t c "float" or hasColumn t c "int" else memberStr c t.names } }
+AestheticsAreColumns (p : Plot) : Bool := allLayers p.layers (fn l { allStr (draws l.geom) (fn a { columnFits p l a }) })
+-- plan G2, P11 [proposed]: a geometry's sizes, widths and level are positive
+geomParametersPositive (g : Geom) : Bool :=
+  match g {
+    points s -> s.size > 0.0 ; lines s -> s.width > 0.0 ; errorbars s -> s.width > 0.0 ;
+    ellipses s -> s.level > 0.0 and s.width > 0.0 ; texts s -> s.size > 0.0 ; segments s -> s.width > 0.0 ;
+    ablines s -> s.width > 0.0 }
+GeometryParametersPositive (p : Plot) : Bool := allLayers p.layers (fn l { geomParametersPositive l.geom })
+-- plan G3, P11 [proposed]: every scale a layer is drawn on is stated by the demand, none taken by
+-- default: x and y for a plot with a layer, colour for a plot that maps it
+hasScale (p : Plot) (a : String) : Bool := match lookupScale p.scales a { nothing -> false ; just s -> true }
+mapsColour (p : Plot) : Bool := anyLayer p.layers (fn l { isJustStr (aesOf p l "colour") })
+ScalesStated (p : Plot) : Bool :=
+  (match p.layers { nil -> true ; cons l rest -> hasScale p "x" and hasScale p "y" })
+    and (not (mapsColour p) or hasScale p "colour")
+-- plan G2 [proposed]: positions take a linear or log scale, colour a palette
+scaleFits (a : String) (s : Scale) : Bool :=
+  match s { linear l -> a == "x" or a == "y" ; log l -> a == "x" or a == "y" ; palette cs -> a == "colour" }
+allScales (ss : List (String * Scale)) (f : String -> Scale -> Bool) : Bool :=
+  match ss { nil -> true ; cons (a, s) rest -> f a s and allScales rest f }
+ScalesFitTheirAesthetics (p : Plot) : Bool := allScales p.scales scaleFits
+-- plan G3, P11: stated limits are an interval, of positive numbers on a log scale; an expansion is
+-- not negative, and a log scale's factor is at least one; a palette has a colour
+limitsWellFormed (isLog : Bool) (l : Limits) : Bool :=
+  match l {
+    stated g -> g.lo < g.hi and (not isLog or g.lo > 0.0) ;
+    auto e -> if isLog then e.expand >= 1.0 else e.expand >= 0.0 }
+scaleWellFormed (s : Scale) : Bool :=
+  match s { linear l -> limitsWellFormed false l ; log l -> limitsWellFormed true l ;
+            palette cs -> not (isNilStr cs) }
+ScaleLimitsWellFormed (p : Plot) : Bool := allScales p.scales (fn a s { scaleWellFormed s })
+-- plan G3: a scale's limits contain the data or are stated by the demand. Computed limits exist
+-- (there is data to compute them from), are an interval (not one point: a single value needs
+-- stated limits), and contain every value drawn on the aesthetic, its ends and errors included.
+-- Stated limits may clip the data: the demand stated them (P11). The host draws at
+-- `resolvedLimits`, not at limits of its own.
+contains (g d : Range) : Bool := g.lo <= d.lo and d.hi <= g.hi
+limitsContain (p : Plot) (a : String) (l : Limits) : Bool :=
+  match l {
+    stated g -> true ;
+    auto e -> match resolvedLimits p a {
+      nothing -> false ;
+      just g -> g.lo < g.hi and (match dataRange p a { nothing -> false ; just d -> contains g d }) } }
+LimitsContainTheData (p : Plot) : Bool :=
+  allScales p.scales (fn a s { match s { linear l -> limitsContain p a l ; log l -> limitsContain p a l ; palette cs -> true } })
+-- plan G3 [proposed]: a log scale draws positive data only
+LogScaleOnPositiveData (p : Plot) : Bool :=
+  allScales p.scales (fn a s { match s {
+    log l -> (match dataRange p a { nothing -> true ; just d -> d.lo > 0.0 }) ;
+    _ -> true } })
+-- plan G3 [proposed]: a palette has a colour for every level of the colour column of each layer
+-- that maps colour, so that two levels never share one
+paletteLength (p : Plot) : Int :=
+  match lookupScale p.scales "colour" { nothing -> 0 ; just s -> match s { palette cs -> listLength String cs ; _ -> 0 } }
+PaletteCoversLevels (p : Plot) : Bool :=
+  allLayers p.layers (fn l { match aesOf p l "colour" {
+    nothing -> true ;
+    just c -> match lookupTable p.tables l.table { nothing -> true ; just t -> levels t c <= paletteLength p } } })
+-- plan G2 [proposed]: the facet is a column of the table of some layer; a layer whose table lacks
+-- it is drawn in every panel (ggplot's rule)
+FacetIsAColumn (p : Plot) : Bool :=
+  match p.facet {
+    nothing -> true ;
+    just c -> anyLayer p.layers (fn l { match lookupTable p.tables l.table { nothing -> false ; just t -> memberStr c t.names } }) }
+-- plan G2 [proposed]: equal aspect draws one unit of x as one of y (positions in metres), so it
+-- asks the two position scales of one kind, both linear or both log
+scaleKind (p : Plot) (a : String) : String := match lookupScale p.scales a { nothing -> "" ; just s -> (scaleKey s).kind }
+CoordFitsScales (p : Plot) : Bool := match p.coord { cartesian u -> true ; equal u -> scaleKind p "x" == scaleKind p "y" }
+
+Plot := AestheticsKnown & TablesNamedOnce & LayersNameTheirTables & LayerMapsWhatItDraws & NeedsMapped
+  & AestheticsAreColumns & GeometryParametersPositive & ScalesStated & ScalesFitTheirAesthetics
+  & ScaleLimitsWellFormed & LimitsContainTheData & LogScaleOnPositiveData & PaletteCoversLevels & FacetIsAColumn & CoordFitsScales
+
+-- the laws as one predicate, the premise of §5's laws (a renderer is asked to draw only a plot)
+wellFormed (p : Plot) : Bool :=
+  AestheticsKnown p and TablesNamedOnce p and LayersNameTheirTables p and LayerMapsWhatItDraws p and NeedsMapped p
+    and AestheticsAreColumns p and GeometryParametersPositive p and ScalesStated p and ScalesFitTheirAesthetics p
+    and ScaleLimitsWellFormed p and LimitsContainTheData p and LogScaleOnPositiveData p and PaletteCoversLevels p
+    and FacetIsAColumn p and CoordFitsScales p
+
+-- The same plot (plan G3, 4.R8). A plot holds tables and a table holds a function, so `Plot` has
+-- no `==`: two plots are the same when their tables are the same by `sameTable` (tables.lth, the
+-- observational equality of tables), name by name in order, and every other part is structurally
+-- equal. [proposed] The sums are compared through a key of strings and numbers, not by `==`,
+-- because the kernel's `==` does not step on the labels of a `||` sum (tables.lth `sameCell`).
+geomKey (g : Geom) : String * List Float64 :=
+  match g {
+    points s -> ("points", [s.size]) ; lines s -> ("lines", [s.width]) ; errorbars s -> ("errorbars", [s.width]) ;
+    ellipses s -> ("ellipses", [s.level, s.width]) ; texts s -> ("texts", [s.size]) ;
+    segments s -> ("segments", [s.width]) ; ablines s -> ("ablines", [s.intercept, s.slope, s.width]) }
+limitsKey (l : Limits) : String * List Float64 :=
+  match l { auto e -> ("auto", [e.expand]) ; stated g -> ("stated", [g.lo, g.hi]) }
+ScaleKey = { kind : String, limits : String * List Float64, colours : List String }
+scaleKey (s : Scale) : ScaleKey :=
+  match s {
+    linear l -> { kind := "linear", limits := limitsKey l, colours := nil } ;
+    log l -> { kind := "log", limits := limitsKey l, colours := nil } ;
+    palette cs -> { kind := "palette", limits := ("", nil), colours := cs } }
+coordKey (c : Coord) : String := match c { cartesian u -> "cartesian" ; equal u -> "equal" }
+sameLayers (xs ys : List Layer) : Bool :=
+  match xs {
+    nil -> (match ys { nil -> true ; cons b rest -> false }) ;
+    cons a more -> match ys {
+      nil -> false ;
+      cons b rest -> geomKey a.geom == geomKey b.geom and a.mapping == b.mapping and a.table == b.table and sameLayers more rest } }
+sameScales (xs ys : List (String * Scale)) : Bool :=
+  match xs {
+    nil -> (match ys { nil -> true ; cons b rest -> false }) ;
+    cons (a, s) more -> match ys { nil -> false ; cons (b, u) rest -> a == b and scaleKey s == scaleKey u and sameScales more rest } }
+sameData (ds es : List (String * Table)) : Bool :=
+  match ds {
+    nil -> (match es { nil -> true ; cons e rest -> false }) ;
+    cons (n, t) more -> match es { nil -> false ; cons (m, u) rest -> n == m and sameTable t u and sameData more rest } }
+samePlot (p q : Plot) : Bool :=
+  sameData p.tables q.tables and p.mapping == q.mapping and sameLayers p.layers q.layers and sameScales p.scales q.scales
+    and coordKey p.coord == coordKey q.coord and p.facet == q.facet and p.labels == q.labels
+
+-- ---------------------------------------------------------------- §5 The renderer (plan G1, G3; 10.S3, 10.S10)
+
+-- A renderer draws a plot to a file: `render w p path` is an action (G1, 10.S3), a route to the
+-- host (3.S40, 10.S8). As in world.lth, where `Console` is the theory of the descriptions and
+-- `Host` the record of the actions, the renderer is two parts. `Drawing` is the theory: what a
+-- render does, described over world.lth's representation `S` through a store (`Persistence`): it
+-- writes `image p ext` at the path, `ext` the path's extension, and changes no other place.
+-- `image` is the renderer's pure function from a plot and a format to the file's content (the
+-- bytes, each byte one character of the string [proposed]: what the host's `observe` reads a
+-- binary file as); `formatOf` reads the format a content is in from its first bytes (the PNG
+-- signature, an SVG root), apart from `image` [proposed]; `formats` are the extensions it writes.
+-- `Renderer` is the record of the drawing and the action, with no law of its own, since a law
+-- does not hold an action (world.lth §5); the action is held to the drawing by §6. The path is
+-- written in the laws as a stem and an extension, `pathOf stem ext`, since the core has no
+-- operation that reads a string's end; a path whose extension is not among `formats` is not the
+-- description's, and the host refuses it. [proposed] The renderer's version (G3: "the renderer's
+-- version") is the identity of its routes, which carries the hash of the host file read (10.S9),
+-- with the version of the drawing library the host reports, both in the run's record (12.S18, P2);
+-- a `version` field would have no law to state its role (4.R3, L2.7).
+Drawing (S : Concrete) : {
+  store : Persistence S,
+  formats : List String,
+  image : Plot -> String -> String,
+  formatOf : String -> String,
+}
+Renderer (S : Concrete) = { drawing : Drawing S, render : W -> Plot -> String -> W * Unit }
+pathOf (stem ext : String) : String := stem + "." + ext
+
+-- the description of `render w p (pathOf stem ext)` (world.lth §1): a world action (not Luthier's
+-- store), declaring the one place it changes, so that world.lth's `ChangesOnlyDeclared` holds it
+-- to that place
+drawn (S : Concrete) (d : Drawing S) (p : Plot) (stem ext : String) : Described S Unit d.store.world := {
+  describe := fn st { (d.store.write st (pathOf stem ext) (d.image p ext), unit) },
+  own := false,
+  places := [pathOf stem ext],
+}
+
+-- plan G3: the file exists after `render`, and its content is the image. With a store whose
+-- `WriteThenRead` holds (world.lth §2) this follows; stated so that the law G3 names is one law,
+-- and the host is held to it by `agreement` (§6).
+FileExistsAfter (S : Concrete) (d : Drawing S) (p : Plot) (stem ext : String) (st : S) : Bool :=
+  not (wellFormed p) or not (memberStr ext d.formats)
+    or (match (drawn S d p stem ext).describe st { (after, u) -> d.store.world.read after (pathOf stem ext) == just (d.image p ext) })
+
+-- The image's laws, each over a well-formed plot (a premise, counted apart, 7.S12) and a format
+-- the renderer writes.
+
+-- plan G3: the file's format is what the path's extension says
+FormatByExtension (S : Concrete) (d : Drawing S) (p : Plot) (ext : String) : Bool :=
+  not (wellFormed p) or not (memberStr ext d.formats) or d.formatOf (d.image p ext) == ext
+
+-- plan G3, 4.R8: the bytes are a function of the plot's value: two plots that are the same
+-- (`samePlot`, tables compared by their cells) draw the same bytes. Not automatic, because two
+-- host tables with the same cells may differ inside.
+ImageOfTheValue (S : Concrete) (d : Drawing S) (p q : Plot) (ext : String) : Bool :=
+  not (wellFormed p) or not (memberStr ext d.formats) or not (samePlot p q) or d.image p ext == d.image q ext
+
+-- plan G3, L2.7 (the role of the rows): the image does not depend on the order of the rows of a
+-- table that no layer draws in the order of its rows. A permutation is a bijection of the rows
+-- (on a finite set, onto is enough); `put` gives the plot the table under a name.
+bijective (n : Int) (f : Fin n -> Fin n) : Bool := forallBelow n (fn i { existsBelow n (fn j { f j == i }) })
+permuteRows (t : Table) (f : Fin t.nRows -> Fin t.nRows) : Table :=
+  { nRows := t.nRows, names := t.names, kinds := t.kinds, cell := fn c r { t.cell c (f r) } }
+replaceTable (ds : List (String * Table)) (name : String) (t : Table) : List (String * Table) :=
+  match ds { nil -> nil ; cons (n, u) rest -> if n == name then cons (n, t) (replaceTable rest name t) else cons (n, u) (replaceTable rest name t) }
+put (p : Plot) (name : String) (t : Table) : Plot := withData p (replaceTable p.tables name t)
+tableOrderedByRows (p : Plot) (name : String) : Bool := anyLayer p.layers (fn l { l.table == name and ordersByRows l.geom })
+RowOrderInvariant (S : Concrete) (d : Drawing S) (p : Plot) (name : String) (t : Table) (f : Fin t.nRows -> Fin t.nRows) (ext : String) : Bool :=
+  not (wellFormed (put p name t)) or not (memberStr ext d.formats) or not (bijective t.nRows f)
+    or tableOrderedByRows p name or d.image (put p name (permuteRows t f)) ext == d.image (put p name t) ext
+
+-- plan G3, L2.7 (the role of the order of layers): two adjacent layers that do not overlap can be
+-- swapped and the image does not change; the order of layers is the order of drawing, and it
+-- matters only where they overlap. [proposed] Two layers do not overlap when what they occupy on
+-- x, or on y, is apart by more than `margin` times the span of the two together: the margin
+-- covers what a mark occupies beyond its data (a point's size, a line's width, a text's extent),
+-- a cutoff the demand states (D-2026-10-14-c, P11). A layer with no rows occupies nothing; a line
+-- across the panel (`ablines`) overlaps every layer.
+Margin : U := { m : Float64 | 0.0 <= m }
+spanOf (a b : Range) : Float64 := fmax a.hi b.hi - fmin a.lo b.lo
+apart (margin : Margin) (a b : Range) : Bool :=
+  a.hi + margin * spanOf a b < b.lo or b.hi + margin * spanOf a b < a.lo
+acrossPanel (g : Geom) : Bool := match g { ablines s -> true ; _ -> false }
+layersApart (margin : Margin) (p : Plot) (a b : Layer) : Bool :=
+  if acrossPanel a.geom or acrossPanel b.geom then false
+  else match layerRange p a "x" {
+    nothing -> true ;
+    just ax -> match layerRange p b "x" {
+      nothing -> true ;
+      just bx -> apart margin ax bx or (match layerRange p a "y" {
+        nothing -> true ;
+        just ay -> match layerRange p b "y" { nothing -> true ; just by -> apart margin ay by } }) } }
+swapAt (ls : List Layer) (i : Int) : List Layer :=
+  match ls {
+    nil -> nil ;
+    cons a rest -> if i == 0 then (match rest { nil -> ls ; cons b more -> cons b (cons a more) }) else cons a (swapAt rest (i - 1)) }
+LayerOrderInvariant (S : Concrete) (d : Drawing S) (margin : Margin) (p : Plot) (i : Nat) (ext : String) : Bool :=
+  not (wellFormed p) or not (memberStr ext d.formats)
+    or (match nthLayer p.layers i {
+      nothing -> true ;
+      just a -> match nthLayer p.layers (i + 1) {
+        nothing -> true ;
+        just b -> not (layersApart margin p a b) or d.image (withLayers p (swapAt p.layers i)) ext == d.image p ext } })
+
+-- [proposed] The negative control: an image that ignored the plot would pass every law above
+-- (each says that two images are equal). Two plots that differ in their title draw differently.
+-- The test draws titles that differ in a visible character (two titles of spaces would not).
+retitle (p : Plot) (s : String) : Plot := labels s p.labels.x p.labels.y p
+ImageSeesTheTitle (S : Concrete) (d : Drawing S) (p : Plot) (s : String) (ext : String) : Bool :=
+  not (wellFormed p) or not (memberStr ext d.formats) or s == p.labels.title or not (d.image (retitle p s) ext == d.image p ext)
+
+Drawing (S : Concrete) := FileExistsAfter S & FormatByExtension S & ImageOfTheValue S & RowOrderInvariant S & LayerOrderInvariant S & ImageSeesTheTitle S
+
+-- ---------------------------------------------------------------- §6 Certifying the renderer (world.lth §5)
+
+-- The host's `render` is certified against `drawn` along one chain of tokens by world.lth's
+-- `agreement`: observe the path, render once, observe again, and compare with the description
+-- (the file exists after, with the image's bytes, and nothing else declared changed). Each token
+-- is used once; this threads the token, so it is a definition the certifier runs, not a law
+-- (10.S3, 12.S23). `o` is the host's observation (world_model.lut `host`).
+renderAgrees (S : Concrete) (r : Renderer S) (o : Host S) (p : Plot) (stem ext : String) (w0 : W) : W * Bool :=
+  agreement S Unit r.drawing.store.world o (drawn S r.drawing p stem ext) (fn w { r.render w p (pathOf stem ext) }) w0
+
+-- plan G3: rendering is deterministic: two renders of one value, to two paths, give the same
+-- bytes. `agreement` at each implies it (the description is a function); this asks no
+-- description, so it is the check a run can afford at every render. Across runs and processes the
+-- same holds by the hash in the run's record (12.S18), compared by the slow test of step 3.
+rendersTheSame (S : Concrete) (r : Renderer S) (o : Host S) (p : Plot) (a b : String) (w0 : W) : W * Bool :=
+  match r.render w0 p a { (w1, u) ->
+  match r.render w1 p b { (w2, v) ->
+  match o.observe w2 [a, b] { (w3, st) ->
+    (w3, r.drawing.store.world.read st a == r.drawing.store.world.read st b) } } }
