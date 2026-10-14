@@ -1,0 +1,31 @@
+-- tests/tester/generators_laws.lut: the laws of the families of generators_model.lut (the
+-- generators a test binds, 7.R1, 7.S5), run through `luthier test`, on the brief
+-- record/IA/tester-2026-10-14/prompt-3.md. Each law is quantified over the size and the seed, so
+-- a sampled case is one draw of the family. The cutoffs as censuses of one, as arrays_laws.lut and
+-- probability_laws.lut: the tolerance 1e-12 [proposed], the rank floor 30 eps, the level alpha
+-- 0.01 on 200 values [proposed]. Seed 20261014. `UniformSampleIsUniform` holds on a fraction
+-- 1 - alpha of seeds (7.S17): about one refuting seed in 100 is expected.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear SymmetricGivesSymmetric SymmetricOfGivesItsSize GramGivesPsd
+  OrthogonalGivesOrthogonal UnitListGivesUnitValues UniformSampleIsUniform ClearDiagonalGivesClear
+import "generators.lth" Binding Level
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" RankFloor
+
+tolerance : Tolerance := 1.0e-12
+floor : RankFloor := 6.661338147750939e-15
+level : Level := { alpha := 0.01, n := 200 }
+cutoffs : List Binding := [
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "level", coverage := Listed } ]
+
+test "SymmetricGivesSymmetric" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "SymmetricOfGivesItsSize" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "GramGivesPsd" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "OrthogonalGivesOrthogonal" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "UnitListGivesUnitValues" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "ClearDiagonalGivesClear" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)

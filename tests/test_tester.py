@@ -145,3 +145,75 @@ def test_arrays_are_drawn_and_a_census_of_lists_lists_its_elements(tmp_path, cap
         "SquareIsSquare: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)",
         "AtMostTwo: exhaustive, 3 cases, cases (ran)",
     ]
+
+
+GENERATED = '''import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear symmetricOf orthogonal unitList
+import "generators.lth" Gen Seed byParameter
+import "arrays.lth" Dim MatOf SymmetricOf Symmetric
+import "probability.lth" UnitList allUnit
+counter : Gen Int := fn n s { (s mod 7, (s * 1103515245 + 12345) mod 2147483648) }
+wide : Gen Int := fn n s { (s mod 70, (s + 1) mod 2147483648) }
+Seven : U := { x : Int | 0 <= x and x < 7 }
+InSeven (x : Seven) : Bool := x < 7
+Rotated (k : Dim) (q : MatOf k k) (s : SymmetricOf k) : Bool := q.m == k and s.m == k
+Unit (vs : UnitList) : Bool := allUnit vs
+IsSquare (s : Symmetric) : Bool := s.m == s.n
+test "InSeven" (SampledMode linear) (whereBindings <- [byParameter "x" "counter"])
+test "InSeven" (SampledMode linear) (whereBindings <- [byParameter "x" "wide"])
+test "InSeven" ExhaustiveMode (whereBindings <- [byParameter "x" "counter"])
+test "Rotated" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "q" "orthogonal", byParameter "s" "symmetricOf"])
+test "Unit" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "vs" "unitList"])
+test "IsSquare" (SampledMode linear) (cases <- 10) (whereBindings <- [byParameter "s" "orthogonal"])
+'''
+
+
+def test_a_binding_names_a_generator(tmp_path, capsys):
+    # record/IA/tester-2026-10-14/prompt-3.md: a binding names a value of `Gen T`, in Luthier
+    # (`counter`) or the host's (generators_model.lut), or a family reading an earlier parameter
+    # (`orthogonal k`); what it gives is checked against the parameter's type (7.S1)
+    program = tmp_path / "generated.lut"
+    program.write_text(GENERATED)
+    code, lines = lines_of(capsys, program)
+    assert code == 1
+    luthier, invalid, exhaustive, family, host, unread = lines
+    assert luthier == "InSeven: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)"
+    assert "not run: x : Seven: the generator wide gave a value outside Seven at seed 7 (7.S1)" in invalid
+    assert "not run: x is bound to the generator counter: ExhaustiveMode lists values" in exhaustive
+    assert family == "Rotated: sampled (seed 0, size 10, metric ignored), 10 cases, sampled (ran)"
+    assert host == "Unit: sampled (seed 0, size 10, metric ignored), 10 cases, sampled (ran)"
+    assert "the generator orthogonal reads k, which the law does not quantify before this parameter" in unread
+
+
+def test_a_generator_threads_its_seed_and_its_entry_names_it(tmp_path):
+    program = tmp_path / "generated.lut"
+    program.write_text(GENERATED)
+    outcomes = tester.run_tests(program)
+    drawn = [case[0].constant.value for case, _ in outcomes[0].evidence.cases]
+    seed, expected = 0, []
+    for _ in range(100):  # counter's values, the seed threaded from the spec's (7.S1)
+        expected.append(seed % 7)
+        seed = (seed * 1103515245 + 12345) % 2 ** 31
+    assert drawn == expected
+    assert tester._base(outcomes[0].evidence.coverage) == "Drawn"
+    binding = outcomes[3].entry["binding"]
+    assert [b["generator"] for b in binding[1:]] == ["orthogonal k (generator, size 10)",
+                                                     "symmetricOf k (generator, size 10)"]
+    assert all(b["fingerprint"].startswith("sha256:") for b in binding[1:])
+    assert any(route == "python:luthier.generators.orthogonal" for route, _ in outcomes[3].entry["hosts"])
+    assert tester.run_tests(program)[0].evidence.cases == outcomes[0].evidence.cases
+
+
+def test_the_host_generators_give_their_family_and_the_next_seed():
+    import numpy as np
+    from luthier import generators as g
+    a, s1 = g.symmetric(10, 5)
+    assert np.array_equal(a, a.T) and 0 <= s1 < 2 ** 31 and g.symmetric(10, 5)[1] == s1
+    q, _ = g.orthogonal(7, 10, 5)
+    assert np.allclose(q.T @ q, np.eye(7), atol=1e-13)
+    p, _ = g.gram(10, 5)
+    assert np.all(np.linalg.eigvalsh(p) >= -1e-9 * max(1.0, np.abs(p).max()))
+    vs, _ = g.unit_list(0.5, 10, 5)
+    assert all(((0.0 <= v) & (v <= 1.0)).all() for v in vs)
+    d, _ = g.clear_diagonal(0.25, 1.0, 1000.0, 10, 5)
+    assert all(x == 0.0 or 1.0 <= abs(x) <= 1000.0 for x in d)

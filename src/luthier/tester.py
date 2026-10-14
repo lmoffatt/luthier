@@ -18,10 +18,19 @@ points is laws.lth's `ForallOnPoints`, and the grade is test.lth's `grade`, redu
 Not in this bite (each says so where it applies): the metric of `SampledMode` (draws are uniform
 between the bounds, 7.S4's special values and atom at 0 too); the sized generators of recursive
 data other than `List` (7.S3's [proposed] row); enumeration of lists under `ExhaustiveMode`;
-covering arrays (7.R3: above `coveringAbove` cases the test is not run); bindings to a generator
-(a binding here names a census: one value, or a list of values, of the program); a size schedule
-(every case is drawn at the spec's size). Of the budgets
-(7.S8) only `tries` and `coveringAbove` are read: a draw a filter cannot give within `tries`
+covering arrays (7.R3: above `coveringAbove` cases the test is not run); a size schedule (every
+case is drawn at the spec's size).
+
+A binding names a census (one value, or a list of values, of the program) or a generator (bite 3,
+record/IA/tester-2026-10-14/prompt-3.md; 7.R1, 7.S1, 7.S7): a value of `Gen T`, written in Luthier
+or a host extern, or a family `(x : A) -> ... -> Gen T` whose parameters are named after earlier
+parameters of the law, which it reads (generators.lth's `dependent`). Under SampledMode the tester
+applies it to those values, the spec's size and the current seed; the seed starts at the spec's
+and each draw gives the next (7.S1), so one first seed fixes every draw. What it gives must belong
+to the parameter's type, checked on every draw (7.S1's validity); a value outside it makes the law
+not run, the generator's failure and not the law's. Its coverage is `Drawn` at the spec's seed.
+
+Of the budgets (7.S8) only `tries` and `coveringAbove` are read: a draw a filter cannot give within `tries`
 makes the law not run (7.S6), so `drawsPerCase` and `redraws` have nothing to bound yet. A case
 whose reduction raises (the host failed, a match stuck, the fuel spent) is not evaluated
 (7.S12); it is reported on that case and leaves the law unsettled unless another case refutes it.
@@ -63,6 +72,22 @@ class NoGenerator(Exception):
 
 class Unfit(Exception):
     """A filter gave no value within its budget of tries: the law is not run (7.S6)."""
+
+
+SEEDS = 2 ** 31  # generators.lth's `Seed`: an integer in [0, 2^31)
+
+
+@dataclass
+class Generator:
+    """A binding's generator (7.R1, 7.S1): the definition as the program calls it, the binding's
+    name for it, and the earlier parameters of the law it reads, in its order (7.S7)."""
+    called: str
+    written: str
+    reads: tuple = ()
+
+
+class Invalid(Exception):
+    """A generator gave a value outside the parameter's type (7.S1): the law is not run."""
 
 
 def _unqualified(term):
@@ -317,8 +342,9 @@ def _head_name(ty):
 class Values:
     """The values of a type as kernel terms: every one (exhaustive) or one drawn (sampled)."""
 
-    def __init__(self, runner, rng, size, budgets, fuel):
+    def __init__(self, runner, rng, size, budgets, fuel, seed=0):
         self.runner, self.rng, self.size, self.budgets, self.fuel = runner, rng, size, budgets, fuel
+        self.seed = seed % SEEDS  # the seed a generator binding draws from next (7.S1)
 
     def whnf(self, term):
         self.runner.fuel = self.fuel
@@ -459,6 +485,27 @@ class Values:
 
     # ---------------------------------------------------------- sampled (7.S3, 7.S6)
 
+    def generate(self, generator, earlier, ty):
+        """A value of `ty` from a binding's generator: applied to the earlier parameters it reads,
+        the size and the current seed; the seed it gives back is the next draw's (7.S1). Invalid
+        when the value is outside `ty` or the next seed is not a seed."""
+        args = [earlier[n] for n in generator.reads] + [t.Lit(t.IntConst(self.size)), t.Lit(t.IntConst(self.seed))]
+        pair = self.whnf(Runner.apply(t.Var(generator.called), args))
+        if not isinstance(pair, t.Pair):
+            raise RunError(f"the generator {generator.written} gave {_show(pair)}, not a value and a seed")
+        following = self.whnf(pair.right)
+        if not (isinstance(following, t.Lit) and isinstance(following.constant, t.IntConst)
+                and 0 <= following.constant.value < SEEDS):
+            raise Invalid(f"the generator {generator.written} gave {_show(following)} as the next seed (7.S1)")
+        self.runner.fuel = self.fuel
+        value = self.runner.value(pair.left)
+        _, predicates = self.form(ty)
+        if not self.holds(predicates, value):
+            raise Invalid(f"the generator {generator.written} gave a value outside {_show(ty)} at seed "
+                          f"{self.seed} (7.S1)")
+        self.seed = following.constant.value
+        return value
+
     def draw(self, ty):
         base, predicates = self.form(ty)
         kind = base.name if isinstance(base, t.Var) else None
@@ -594,6 +641,29 @@ def _list_depth(runner, ty):
     return depth
 
 
+def generator_of(runner, name, law_parameters=()):
+    """The binding's definition read as a generator (7.R1, 7.S1): its type, its leading arrows
+    aside, is `Nat -> Seed -> T * Seed` (`Gen T` unfolded); the leading arrows are the law's
+    earlier parameters it reads, by name (7.S7). None when it is not a generator (a census)."""
+    definition = next((a for a in runner.program if isinstance(a, t.Define) and a.name == name), None)
+    if definition is None or definition.type is None:
+        return None
+    arrows, ty = [], definition.type
+    while (arrow := _arrow(ty)) is not None:
+        arrows.append(arrow)
+        ty = arrow[2]
+    if len(arrows) < 2 or not isinstance(ty, t.Sigma) or _head_name(ty.codomain) != "Seed":
+        return None
+    if _head_name(arrows[-2][1]) not in ("Nat", "Int") or _head_name(arrows[-1][1]) != "Seed":
+        return None
+    reads = tuple(a[0] for a in arrows[:-2])
+    unknown = [r for r in reads if law_parameters is not None and r not in law_parameters]
+    if unknown:
+        raise NoGenerator(f"the generator {name.partition('@')[0]} reads {', '.join(unknown)}, which the law "
+                          f"does not quantify before this parameter (7.S7)")
+    return Generator(name, name.partition("@")[0], reads)
+
+
 def census(runner, binding, ty, name):
     """The values a binding names (7.R4): a definition of the program, `name` there, its elements
     when it is a list and the parameter is not."""
@@ -625,19 +695,30 @@ def run_spec(runner, spec, fuel, loaded=None):
     if params is None:
         return _not_run(spec, f"no definition {spec.law}")
     names = tuple(n for n, _ in params)
-    values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel)
+    values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel, spec.seed)
     limit = spec.budgets.get("coveringAbove", 20000)
-    # each parameter: a census its binding names, or the mode's functor over its type
+    # each parameter: a census or a generator its binding names, or the mode's functor over its type
     con = _constructor(loaded)
-    plan, coverage = [], (t.App(con("Drawn"), t.Lit(t.IntConst(spec.seed))) if spec.sampled else con("Exhaustive"))
+    drawn = t.App(con("Drawn"), t.Lit(t.IntConst(spec.seed)))
+    plan, coverage = [], (drawn if spec.sampled else con("Exhaustive"))
     try:
-        for name, ty in params:
+        for k, (name, ty) in enumerate(params):
             b = resolve_binding(spec, name, _head_name(ty))
-            plan.append(census(runner, b, ty, _as_called(loaded, b.generator)) if b else None)
+            if b is None:
+                plan.append(None)
+                continue
+            called = _as_called(loaded, b.generator)
+            g = generator_of(runner, called, names[:k])
+            if g is not None and not spec.sampled:
+                raise NoGenerator(f"{name} is bound to the generator {b.generator}: ExhaustiveMode lists values, "
+                                  f"a generator draws them (SampledMode)")
+            plan.append(g if g is not None else census(runner, b, ty, called))
     except (NoGenerator, RunError) as exc:
         return _not_run(spec, str(exc), names)
     for b in spec.where + spec.profile:  # test.lth's specCoverage: every binding weakens it
-        coverage = _weaker(b.coverage, coverage)
+        # a generator's coverage is a draw from the spec's seed, whatever the binding says
+        is_generator = _is_generator(runner, loaded, b)
+        coverage = _weaker(_weaker(b.coverage, drawn) if is_generator else b.coverage, coverage)
 
     cases = []
     try:
@@ -648,7 +729,7 @@ def run_spec(runner, spec, fuel, loaded=None):
         else:
             # 7.S6: a draw that a filter cannot give within its tries makes the law not run
             cases = [_draw_case(values, params, plan, k) for k in range(spec.cases)]
-    except (NoGenerator, Unfit) as exc:
+    except (NoGenerator, Unfit, Invalid) as exc:
         return _not_run(spec, str(exc), names)
     except RunError as exc:
         return _not_run(spec, f"drawing the cases: {exc}", names)
@@ -700,12 +781,24 @@ def _draw_case(values, params, plan, walked):
     for k, (name, ty) in enumerate(params):
         for (earlier, _), v in zip(params, case):
             ty = _instantiate(earlier, v, ty)
-        # a census is walked in turn, each value once per round (generators.lth's `walk`, gen.10)
+        # a census is walked in turn, each value once per round (generators.lth's `walk`, gen.10);
+        # a generator draws from the seed it threads (7.S1)
         try:
-            case.append(plan[k][walked % len(plan[k])] if plan[k] is not None else values.draw(ty))
-        except (NoGenerator, Unfit) as exc:
+            if isinstance(plan[k], Generator):
+                case.append(values.generate(plan[k], {n: v for (n, _), v in zip(params, case)}, ty))
+            else:
+                case.append(plan[k][walked % len(plan[k])] if plan[k] is not None else values.draw(ty))
+        except (NoGenerator, Unfit, Invalid) as exc:
             raise type(exc)(f"{name} : {_show(params[k][1])}: {exc}") from exc
     return tuple(case)
+
+
+def _is_generator(runner, loaded, binding):
+    """Whether the binding names a generator (by its type, `generator_of`) rather than a census."""
+    try:
+        return generator_of(runner, _as_called(loaded, binding.generator), None) is not None
+    except NoGenerator:
+        return True
 
 
 def grade_of(runner, verdict, coverage, loaded=None):
@@ -843,12 +936,12 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
             if recorded is not entries:
                 entries = recorded
                 certify.write_store(path, entries)
-            for home in model_homes(loaded, spec):
+            for home in model_homes(loaded, spec, runner):
                 certify.add_entry(home, entry)
     return outcomes
 
 
-def model_homes(loaded, spec):
+def model_homes(loaded, spec, runner=None):
     """[proposed, night default for decision 1 of report-run.md] The files, other than the test
     program and core, that define a census a binding of the line names (`numpy` in
     arrays_model.lut), when the law is itself defined in another file than the test program's: the
@@ -865,6 +958,9 @@ def model_homes(loaded, spec):
         return []
     homes = []
     for b in spec.where + spec.profile:
+        # [proposed] a generator is not a model the law is certified on: its file is no home
+        if runner is not None and _is_generator(runner, loaded, b):
+            continue
         try:
             found = loaded.see(top, b.generator)
         except RunError:
@@ -950,7 +1046,9 @@ def new_entry(runner, loaded, spec, cones, fuel):
     grade and the outcome are `settle`'s.
 
     [proposed] A parameter's generator is the census its binding names, printed with the binding's
-    coverage, its fingerprint the hash of the census's cone; otherwise the mode's functor over the
+    coverage, its fingerprint the hash of the census's cone; or the generator its binding names
+    (bite 3), printed with the parameters it reads and the size, its fingerprint the hash of its
+    cone (7.S9: a name with its fingerprint), no reach (a draw lists no values); otherwise the mode's functor over the
     parameter's type, printed with the metric and the size, its fingerprint empty (the drawing code
     is the interpreter's, in the cone's hash). The reach: a census's members; the support of the
     type under ExhaustiveMode; under SampledMode, for an `Int` or a `Float64` (refined or not, not
@@ -964,6 +1062,16 @@ def new_entry(runner, loaded, spec, cones, fuel):
         b = resolve_binding(spec, name, _head_name(ty))
         if b is not None:
             called = _as_called(loaded, b.generator)
+            try:
+                g = generator_of(runner, called, None)
+            except NoGenerator:
+                g = None
+            if g is not None:
+                reads = "".join(f" {r}" for r in g.reads)
+                binding.append({"parameter": name, "generator": f"{b.generator}{reads} (generator, size {spec.size})",
+                                "fingerprint": cones.hash(called)})
+                hosts.update(cones.hosts(called))
+                continue
             # a census that lists models: the hashes of its members, comma-joined, so that a run
             # naming one model finds its own hash there (`at` in certify.py) [proposed]
             listed = _listed_called(loaded, called)
