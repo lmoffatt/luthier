@@ -1,0 +1,290 @@
+-- probability.lth: a likelihood over the vectors of a dimension, the mean model and the Gaussian
+-- construction on it, the derivatives their laws need, and the uniform values of a calibrated
+-- model with Kolmogorov's distance and tail.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2-2026-10-14/prompt.md (item 1; inventory §6 item 7, rows 21 and 24).
+-- Sources: spec 7.R2 (the libraries quantify over `VecOf n`, never over `(Theta : U)`), 11.S18
+-- (a tolerance is the demand's, D-2026-10-12-h), 7.S17 (a statistical law declares its level),
+-- 4.R10 (a law characterizes; agreement with a native definition is a corollary), 12.S9 (the
+-- pattern of a library), P11 (every criterion is a parameter: the step and the tolerance of a
+-- central difference, v0.1's `fdStep`, `fdTol`). The v0.1 file is `probability.lut` at the tag
+-- v0.1-final (lines 36, 57-86, 114-120, 275-313 are what the slice uses); the names below are
+-- its, so that the port of experiment_zero.lut, positions.lut and distances.lut is a rename at
+-- most. What is not here: the sampler, the probability integral transform and the Bartlett
+-- identities of v0.1 (`IsDensityOf`, `Kernel`), which need a generator of standard normals;
+-- generators.lth has `Random.uniform` only, and `normalVec` was an extern with no theory.
+--
+-- What this file states. The parameter space is `VecOf n` and moving along a direction is
+-- `add` (7.R2; v0.1's `dim` and `shift` fields are gone). A mean model gives the predicted
+-- observations and their Jacobian; a likelihood reports its log-likelihood, its score and its
+-- information on data `y`, a vector of `k` observations. The laws: the Jacobian is the derivative
+-- of the mean and the score the gradient of the log-likelihood, each by a central difference
+-- along a drawn direction at the demand's resolution (step and tolerance, P11); the information is
+-- symmetric and non-negative. Of the Gaussian construction: the log-likelihood peaks at the mean,
+-- and the profile likelihood is the full one at the sigma that maximizes it, in value, score and
+-- information. Kolmogorov's distance is a leaf (numpy's sort), characterized by its native
+-- definition exactly (the same operations in the same order, v0.1 probability_python.lut) and by
+-- what it is: of a multiset, zero on nothing, `max u (1 - u)` on one value, in [0, 1]. The
+-- elementary functions and the array leaves are the imported models, as arrays.lth takes its
+-- square root [proposed; the alternative is a parameter `(e : Elementary) (a : Arrays)` on
+-- every definition, which the port would have to thread].
+--
+-- Index (all sections written in this draft):
+--   §1 Derivatives by central differences at a resolution: `IsGradient`, `IsJacobian`
+--      (7.R2; v0.1 array.lut:181-192).                                                    done
+--   §2 `MeanModel`, `ScaledModel` and their laws (v0.1 probability.lut:275-286).          done
+--   §3 `Likelihood` and what a likelihood is (v0.1 probability.lut:114-120, 133-156).     done
+--   §4 The Gaussian construction: `gaussian`, `profiled`, their laws
+--      (v0.1 probability.lut:288-313).                                                    done
+--   §5 Uniform values: `normalCdf`, `normalTail`, `valueSums`, Kolmogorov's distance as a
+--      theory, `kolmogorovTail`, `UniformAtLevel` (v0.1 probability.lut:36-86).           done
+
+import "numbers.lth" Tolerance Positive within withinOf abs
+import "numbers_model.lut" elementary : Elementary
+import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat sumTo forallBelow approxVec approxMat zeros exact
+import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul transpose madd mscale
+import "generators.lth" Level
+
+-- ---------------------------------------------------------------- §1 Derivatives (7.R2, P11)
+
+-- How a slope is measured: the step of the central difference, in the units of the parameter,
+-- and the tolerance of the comparison. Both are the demand's (P11, 11.S18): v0.1 held
+-- `fdStep := cbrt eps` and `fdTol := sqrt eps` as constants (array.lut:181-182), the truncation
+-- and the rounding of the difference being each of order eps^(2/3) at that step.
+Resolution : U := { step : Float64, tol : Tolerance | 0.0 < step and 0.0 <= tol }
+
+-- g is the gradient of f at t: g t is a vector of the dimension, and the slope of f along it, by
+-- the central difference at the resolution's step, is its norm; compared relative to the size of
+-- f at t, since the difference of two values of f loses the digits they share (v0.1 array.lut:184)
+-- spec 7.R2
+IsGradient (n : Nat) (r : Resolution) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (t : VecOf n) : Bool :=
+  { v := g t
+    nv := norm v
+    if v.n /= n then false
+    else if nv == 0.0 then true
+    else {
+      h := scale (r.step / nv) v
+      slope := (f (add t h) - f (sub t h)) / (2.0 * r.step)
+      withinOf r.tol (1.0 + abs (f t) + nv) slope nv } }
+
+-- j is the Jacobian of m at t: along a drawn direction v, the central difference of m at the
+-- resolution's step is j t applied to the unit vector of v, entry by entry within the tolerance
+IsJacobian (n : Nat) (r : Resolution) (m : VecOf n -> Vec Float64) (j : VecOf n -> Mat Float64) (t v : VecOf n) : Bool :=
+  { nv := norm v
+    if nv == 0.0 then true
+    else {
+      h := scale (r.step / nv) v
+      slope := scale (1.0 / (2.0 * r.step)) (sub (m (add t h)) (m (sub t h)))
+      approxVec r.tol slope (matVec (j t) (scale (1.0 / nv) v)) } }
+
+-- ---------------------------------------------------------------- §2 The mean model
+
+-- A mean model on the vectors of dimension n: the k predicted observations and their Jacobian,
+-- k x n. [proposed] `k` is a field (v0.1 had none; `TangentShapes` was a law on the data's
+-- length) so that the laws can quantify the data over `VecOf l.k`; the port sets `k := i.n`.
+MeanModel (n : Nat) : { k : Nat, mean : VecOf n -> Vec Float64, jac : VecOf n -> Mat Float64 }
+-- spec 7.R2: the shapes are the model's, and the Jacobian is the derivative of the mean
+MeanShape (n : Nat) (m : MeanModel n) (t : VecOf n) : Bool := (m.mean t).n == m.k
+JacShape (n : Nat) (m : MeanModel n) (t : VecOf n) : Bool := (m.jac t).m == m.k and (m.jac t).n == n
+JacIsJacobian (n : Nat) (m : MeanModel n) (r : Resolution) (t v : VecOf n) : Bool := IsJacobian n r m.mean m.jac t v
+MeanModel (n : Nat) := MeanShape n & JacShape n & JacIsJacobian n
+
+-- A scaled model: a mean model whose parameter also carries u = log sigma, a homogeneous error,
+-- with the gradient of u in the parameter space (zero when sigma is known, v0.1
+-- probability.lut:283-286)
+ScaledModel (n : Nat) : { model : MeanModel n, logSigma : VecOf n -> Float64, dLogSigma : VecOf n -> Vec Float64 }
+ScaledShapes (n : Nat) (m : ScaledModel n) (t : VecOf n) : Bool := (m.dLogSigma t).n == n and (m.model.mean t).n == m.model.k
+DLogSigmaIsGradient (n : Nat) (m : ScaledModel n) (r : Resolution) (t : VecOf n) : Bool := IsGradient n r m.logSigma m.dLogSigma t
+ScaledModel (n : Nat) := ScaledShapes n & DLogSigmaIsGradient n
+
+-- ---------------------------------------------------------------- §3 What a likelihood is
+
+-- What a likelihood reports on data y, k observations, at a parameter t: the log-likelihood, its
+-- score (the gradient in t) and the information it claims, n x n (v0.1 probability.lut:114-120;
+-- the paper's diagnostics read the three). The data are vectors: v0.1's `(Y : U)` is fixed to
+-- `Vec Float64` [proposed], which is what the slice has and what 7.R2 asks of type parameters.
+Likelihood (n : Nat) : {
+  k : Nat,
+  loglik : Vec Float64 -> VecOf n -> Float64,
+  score : Vec Float64 -> VecOf n -> Vec Float64,
+  info : Vec Float64 -> VecOf n -> Mat Float64,
+}
+-- the score and the information live in the space of directions: their dimension is n; the data
+-- the laws run on have the likelihood's length
+-- spec 7.R2
+TangentShapes (n : Nat) (l : Likelihood n) (y : VecOf l.k) (t : VecOf n) : Bool :=
+  y.n == l.k and (l.score y t).n == n and (l.info y t).m == n and (l.info y t).n == n
+-- the score is the gradient of the log-likelihood (v0.1 probability.lut:146-147)
+ScoreIsGradient (n : Nat) (l : Likelihood n) (r : Resolution) (y : VecOf l.k) (t : VecOf n) : Bool :=
+  IsGradient n r (l.loglik y) (l.score y) t
+-- the information reported is a Fisher information: symmetric within the tolerance, and its
+-- quadratic form on a drawn direction is not negative beyond rounding (v0.1 probability.lut:155-156
+-- read the spectrum; here the form, which the array leaves state)
+InfoSymmetric (n : Nat) (l : Likelihood n) (tol : Tolerance) (y : VecOf l.k) (t : VecOf n) : Bool :=
+  approxMat tol (l.info y t) (transpose (l.info y t))
+InfoNonNegative (n : Nat) (l : Likelihood n) (tol : Tolerance) (y : VecOf l.k) (t v : VecOf n) : Bool :=
+  { q := dot v (matVec (l.info y t) v)
+    0.0 <= q or within tol q 0.0 }
+Likelihood (n : Nat) := TangentShapes n & ScoreIsGradient n & InfoSymmetric n & InfoNonNegative n
+
+-- ---------------------------------------------------------------- §4 The Gaussian construction
+
+-- constants of the density, not criteria (P11): pi and log (2 pi)
+pi : Float64 := 3.141592653589793
+log2pi : Float64 := 1.8378770664093453
+-- the outer product of two vectors, natively (arrays.lth has no leaf for it)
+outerDef (x y : Vec Float64) : Mat Float64 := mat Float64 x.n y.n (fn i j { x.f i * y.f j })
+
+-- Full Gaussian likelihood, u = log sigma a parameter. With r = y - mean, J the Jacobian, K the
+-- number of observations and g the gradient of u (v0.1 probability.lut:288-300):
+--   loglik = -1/2 e^{-2u} |r|^2 - K u - K/2 log 2 pi
+--   score  = e^{-2u} J^T r + (e^{-2u} |r|^2 - K) g
+--   info   = e^{-2u} J^T J + 2 K g g^T
+gaussian (n : Nat) (m : ScaledModel n) : Likelihood n := {
+  k := m.model.k,
+  loglik := fn y t {
+    r := sub y (m.model.mean t)
+    u := m.logSigma t
+    0.0 - 0.5 * elementary.exp (-2.0 * u) * dot r r - toFloat64 r.n * u - 0.5 * toFloat64 r.n * log2pi },
+  score := fn y t {
+    r := sub y (m.model.mean t)
+    e := elementary.exp (-2.0 * m.logSigma t)
+    add (scale e (matVec (transpose (m.model.jac t)) r)) (scale (e * dot r r - toFloat64 r.n) (m.dLogSigma t)) },
+  info := fn y t {
+    j := m.model.jac t
+    e := elementary.exp (-2.0 * m.logSigma t)
+    g := m.dLogSigma t
+    madd (mscale e (matMul (transpose j) j)) (mscale (2.0 * toFloat64 j.m) (outerDef g g)) },
+}
+
+-- Profile likelihood, sigma eliminated by its maximum sigma^2 = RSS / K (v0.1
+-- probability.lut:302-313):
+--   loglik = -K/2 log(2 pi RSS / K) - K/2
+--   score  = (K / RSS) J^T r
+--   info   = (K / RSS) J^T J
+profiled (n : Nat) (m : MeanModel n) : Likelihood n := {
+  k := m.k,
+  loglik := fn y t {
+    r := sub y (m.mean t)
+    kk := toFloat64 r.n
+    0.0 - 0.5 * kk * elementary.log (2.0 * pi * dot r r / kk) - 0.5 * kk },
+  score := fn y t {
+    r := sub y (m.mean t)
+    scale (toFloat64 r.n / dot r r) (matVec (transpose (m.jac t)) r) },
+  info := fn y t {
+    r := sub y (m.mean t)
+    j := m.jac t
+    mscale (toFloat64 r.n / dot r r) (matMul (transpose j) j) },
+}
+
+-- a mean model with sigma known, u = log sigma a constant of the model and its gradient zero:
+-- what experiment_zero.lut builds for `known s` (:89)
+fixedSigma (n : Nat) (m : MeanModel n) (u : Float64) : ScaledModel n :=
+  { model := m, logSigma := fn s { u }, dLogSigma := fn s { zeros n } }
+
+-- The laws of the construction, per model (7.R4: a record of functions has no generator; the
+-- test binds the model). The full log-likelihood is greatest at the mean, exactly: there the
+-- residual is zero and elsewhere a non-negative quantity is subtracted, which rounding keeps
+-- (11.S4, monotone).
+-- spec 4.R10
+GaussianPeaksAtMean (n : Nat) (m : ScaledModel n) (t : VecOf n) (y : VecOf m.model.k) : Bool :=
+  (gaussian n m).loglik (m.model.mean t) t >= (gaussian n m).loglik y t
+-- The profile likelihood is the full one at the sigma that maximizes it, u* = 1/2 log (RSS / K),
+-- held fixed: equal in value, score and information within the tolerance (distances.lut of the
+-- slice stated it for its model; here for any mean model)
+-- spec 11.S18
+ProfiledIsGaussianAtItsSigma (n : Nat) (m : MeanModel n) (tol : Tolerance) (t : VecOf n) (y : VecOf m.k) : Bool :=
+  { r := sub y (m.mean t)
+    ustar := 0.5 * elementary.log (dot r r / toFloat64 r.n)
+    fixed := gaussian n (fixedSigma n m ustar)
+    prof := profiled n m
+    within tol (prof.loglik y t) (fixed.loglik y t)
+    and approxVec tol (prof.score y t) (fixed.score y t)
+    and approxMat tol (prof.info y t) (fixed.info y t) }
+
+-- ---------------------------------------------------------------- §5 Uniform values
+
+-- the distribution function of the standard normal, by erf, and the probability of a departure
+-- beyond z standard errors on either side (v0.1 probability.lut:36-38)
+sqrt2 : Float64 := 1.4142135623730951
+normalCdf (x : Float64) : Float64 := 0.5 * (1.0 + elementary.erf (x / sqrt2))
+normalTail (z : Float64) : Float64 := 1.0 - elementary.erf (z / sqrt2)
+
+-- the sums of u and u^2 over every entry of a list of vectors, and how many entries: a triple,
+-- as v0.1 gave it (probability.lut:57-58) and experiment_zero.lut matches it
+valueSums (vs : List (Vec Float64)) : Float64 * Float64 * Int :=
+  match vs {
+    nil -> (0.0, 0.0, 0) ;
+    cons u rest -> match valueSums rest { (s1, s2, c) -> (s1 + sumTo u.n (fn k { u.f k }), s2 + dot u u, c + u.n) } }
+
+-- Kolmogorov's distance of the values from the uniform on [0, 1]: on the values sorted, the
+-- largest of i/n - u_i and u_i - (i - 1)/n, zero on no values. The native definition sorts by
+-- insertion (v0.1 probability.lut:63-76).
+entriesOnto (v : Vec Float64) (k : Nat) (tail : List Float64) : List Float64 :=
+  if k >= v.n then tail else cons (v.f k) (entriesOnto v (k + 1) tail)
+pooled (vs : List (Vec Float64)) : List Float64 := match vs { nil -> nil ; cons v rest -> entriesOnto v 0 (pooled rest) }
+insertSorted (x : Float64) (xs : List Float64) : List Float64 :=
+  match xs { nil -> cons x nil ; cons y ys -> if x <= y then cons x xs else cons y (insertSorted x ys) }
+sortedValues (xs : List Float64) : List Float64 := match xs { nil -> nil ; cons y ys -> insertSorted y (sortedValues ys) }
+larger (a b : Float64) : Float64 := if a > b then a else b
+kolmogorovFrom (n i : Int) (us : List Float64) (acc : Float64) : Float64 :=
+  match us {
+    nil -> acc ;
+    cons u rest -> {
+      a := toFloat64 i / toFloat64 n - u
+      b := u - toFloat64 (i - 1) / toFloat64 n
+      kolmogorovFrom n (i + 1) rest (larger acc (larger a b)) } }
+lengthOf (xs : List Float64) : Int := match xs { nil -> 0 ; cons x rest -> 1 + lengthOf rest }
+kolmogorovDistanceDef (vs : List (Vec Float64)) : Float64 :=
+  { us := sortedValues (pooled vs)
+    kolmogorovFrom (lengthOf us) 1 us 0.0 }
+reverseOnto (vs acc : List (Vec Float64)) : List (Vec Float64) := match vs { nil -> acc ; cons v rest -> reverseOnto rest (cons v acc) }
+
+-- the values the distance is stated on: in [0, 1], where it is bounded by one; a list of such
+-- vectors is a subtype of the list (not a list of a subtype), so that it refines the leaf's domain
+unitVec (v : Vec Float64) : Bool := forallBelow v.n (fn k { 0.0 <= v.f k and v.f k <= 1.0 })
+allUnit (vs : List (Vec Float64)) : Bool := match vs { nil -> true ; cons v rest -> unitVec v and allUnit rest }
+UnitList : U := { vs : List (Vec Float64) | allUnit vs }
+UnitValue : U := { u : Float64 | 0.0 <= u and u <= 1.0 }
+single (u : Float64) : List (Vec Float64) := cons (vec Float64 1 (fn k { u })) nil
+
+-- The distance as a theory of one leaf (numpy's sort, probability_model.lut). Characterized:
+-- zero on no values; on one value `max u (1 - u)`, exactly; of the multiset, so the list reversed
+-- gives the same, exactly; within [0, 1] on unit values; and equal to the native definition
+-- exactly, the same operations on the same sorted values in the same order (v0.1 certified the
+-- exact agreement, probability_python.lut), so a tolerance is not taken.
+-- spec 4.R10
+Kolmogorov : { distance : List (Vec Float64) -> Float64 }
+KolmogorovOfNothing (d : Kolmogorov) : Bool := d.distance nil == 0.0
+KolmogorovOfOne (d : Kolmogorov) (u : UnitValue) : Bool := d.distance (single u) == larger u (1.0 - u)
+KolmogorovOfMultiset (d : Kolmogorov) (vs : UnitList) : Bool := d.distance vs == d.distance (reverseOnto vs nil)
+KolmogorovBounded (d : Kolmogorov) (vs : UnitList) : Bool := 0.0 <= d.distance vs and d.distance vs <= 1.0
+KolmogorovAgrees (d : Kolmogorov) (vs : UnitList) : Bool := d.distance vs == kolmogorovDistanceDef vs
+Kolmogorov := KolmogorovOfNothing & KolmogorovOfOne & KolmogorovOfMultiset & KolmogorovBounded & KolmogorovAgrees
+
+-- Kolmogorov's limit of the tail P(sqrt n D > x), 2 sum_k (-1)^(k-1) exp(-2 k^2 x^2), with
+-- Stephens's correction for a finite n, x = (sqrt n + 0.12 + 0.11 / sqrt n) D (Stephens, JRSS B
+-- 32, 1970); one below x = 0.2, where the series is slow and the tail is above 1 - 1e-13.
+-- [proposed] The truncation of the series (100 terms, from x = 0.2) is the precision of the
+-- definition, below what a double resolves, and not a criterion a demand would set, so it is
+-- written here and not taken as a parameter (P11 read on criteria).
+tailSeriesTerms : Int := 100
+tailSeriesFrom : Float64 := 0.2
+kolmogorovTail (x : Float64) : Float64 :=
+  if x < tailSeriesFrom then 1.0
+  else 2.0 * sumTo tailSeriesTerms (fn k { (if k mod 2 == 0 then 1.0 else -1.0) * elementary.exp (-2.0 * toFloat64 ((k + 1) * (k + 1)) * x * x) })
+
+-- the tail probability of the distance of n values, with Stephens's correction: the p-value of
+-- the values against the uniform on [0, 1]; one on no values
+uniformPValue (d : Kolmogorov) (vs : List (Vec Float64)) : Float64 :=
+  match valueSums vs { (s1, s2, count) ->
+    if count < 1 then 1.0
+    else { q := elementary.sqrt (toFloat64 count)
+           kolmogorovTail ((q + 0.12 + 0.11 / q) * d.distance vs) } }
+
+-- A statistical law declares its level (7.S17, 6.S5): the values are uniform on [0, 1] at the
+-- level alpha when the tail probability of their Kolmogorov distance is not below alpha; the
+-- level is the demand's (`Level` of generators.lth, as `UniformAtLevel` there), and as a Bool law
+-- it holds on a fraction 1 - alpha of calibrated samples, which is what its certificate says.
+UniformAtLevel (d : Kolmogorov) (l : Level) (vs : UnitList) : Bool := uniformPValue d vs >= l.alpha
