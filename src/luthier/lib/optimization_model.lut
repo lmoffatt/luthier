@@ -1,0 +1,38 @@
+-- optimization_model.lut: the two models of `LMStep` (optimization.lth §3), the native
+-- definitions and the host's Levenberg-Marquardt reached through the record crossing, and the
+-- native driver as a model of belief.lth's `Maximizer`.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2-2026-10-14/prompt.md (item 3; D-2026-10-14-a). A model file
+-- (12.S23): values of the theories, certified against optimization.lth §3 and belief.lth §2
+-- (10.S10); the host's fields are routes (3.S40, 10.S8) to src/luthier/lm.py, the successor in
+-- this repository of sonolocalización's src/lm.py (P7), not yet written; the report says what
+-- it must do. What crosses to the host's step: `n`, the settings and the damping as records of
+-- numbers, the objective as a record whose three fields are callbacks (D-2026-10-14-a), the
+-- state as a record of an array and numbers; back, a record read at `LMState n`. The native
+-- model is the one the host's is compared with (`DirectionAgrees`; the step's laws determine
+-- the step from the direction, so agreement of the steps is a corollary, 4.R10).
+
+import "belief.lth" Maximizer Settings MaxResult
+import "optimization.lth" LMStep Objective Damping LMState Run dampedStep lmStep minimize start negate posteriorOf isConverged
+import "arrays.lth" Vec Mat VecOf
+
+-- the native definitions, as one model
+native : LMStep := { direction := dampedStep, step := lmStep }
+
+-- the host's, routes to lm.py
+host : LMStep := {
+  direction := extern "python:luthier.lm.damped_step",
+  step := extern "python:luthier.lm.step",
+}
+
+-- the native driver as a maximizer of belief.lth: the negative of the log posterior minimized
+-- from the start, with the damping given (P11); converged when the run's reason says so
+-- (v0.1 optimization.lut:112-115)
+lmMaximizer (d : Damping) : Maximizer := {
+  maximize := fn s n f g m x0 {
+    o := negate n (posteriorOf n f g m)
+    r := minimize n s d o (start n o d x0)
+    res := { x := r.state.x, converged := isConverged r.reason }
+    res },
+}
