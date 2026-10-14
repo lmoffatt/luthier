@@ -1,0 +1,28 @@
+-- belief_model.lut: the host's Levenberg-Marquardt as the model of `Maximizer` (belief.lth §2),
+-- reached through the callback crossing, and the maximizer bound to it by name.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2-2026-10-14/prompt.md (item 2; inventory row 22; D-2026-10-14-a).
+-- A model file (12.S23): one value of the theory, its field a route to the host (3.S40, 10.S8),
+-- validated against belief.lth §2 the first time an action asks for it (10.S10), its calls to
+-- the three Luthier functions counted and recorded in the run's record (D-2026-10-14-a, 12.S18).
+-- The host code is src/luthier/lm.py, the successor in this repository of sonolocalización's
+-- src/lm.py (P7: the host code of the fit lives here); it does not exist yet, and the report
+-- (record/IA/slice-theories-2-2026-10-14/report.md) says what it must do. What crosses in: the
+-- settings as a record of three numbers; `n`; the three lambdas over `VecOf n` as callbacks,
+-- each called with a numpy array and answering a float, an array or a matrix; the start as an
+-- array. What crosses out: a record `{ x, converged }` read at `MaxResult n`. [proposed] The
+-- route `luthier.lm.maximize` takes the settings as its first argument (v0.1's took `tol` and
+-- `maxIter` apart, experiment_zero.lut:95 `fastMaximizer lm.tol lm.maxIter`); the damping
+-- schedule of the method is the host's own (optimization.lth `Damping`), not a setting of the
+-- maximizer.
+
+import "belief.lth" Maximizer Settings MaxResult
+import "arrays.lth" Vec Mat VecOf
+
+lm : Maximizer := {
+  maximize := extern "python:luthier.lm.maximize",
+}
+
+-- the maximizer by name, as experiment_zero.lut will call it through laplaceMode (:116)
+maximize : Settings -> (n : Nat) -> (VecOf n -> Float64) -> (VecOf n -> Vec Float64) -> (VecOf n -> Mat Float64) -> VecOf n -> MaxResult n := lm.maximize
