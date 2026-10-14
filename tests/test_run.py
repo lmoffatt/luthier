@@ -1,6 +1,7 @@
 """Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md);
 v4 for arrays, tables and numbers across the bridge (prompt-4.md); v6 for the loader's scopes and the
-externs' arity (prompt-6.md); v7 for `run --set` and the run's record (prompt-7.md)."""
+externs' arity (prompt-6.md); v7 for `run --set` and the run's record (prompt-7.md); v8 for functions
+across the bridge (prompt-8.md, D-2026-10-14-a), the host side in tests/run/bridge_host.py."""
 import json
 import os
 import re
@@ -463,3 +464,58 @@ def test_the_run_appends_its_record(tmp_path, capsys):
         ("main", {"graphDir": "a/b", "loud": False}, "a/b\n"),
         ("main", {"graphDir": "c", "loud": True}, "c!\n")]
     assert all(r["time"] for r in runs)
+
+
+# ---------------------------------------------------------------- functions across the bridge
+# (record/IA/run-2026-10-13/prompt-8.md, D-2026-10-14-a, 3.S23; the laws of world.lth's Crossing
+# and term.lth's extern conjuncts, record/IA/theories-2026-10-14/report.md)
+
+RUN = ROOT / "tests" / "run"
+
+
+def test_a_lambda_handed_to_the_host_is_a_callback():
+    # CallbackGivesTheFunction: the host calls (x - 0.3)^2 at 0.0, 0.1, ..., 0.9 and gets Float64s
+    assert run_file(RUN / "callbacks.lut") == "0.3\n"
+    # CallsAreCounted: ten calls, keyed by the receiving extern's route and the argument
+    assert host.calls() == {"python:run.bridge_host.maximize": {"1": 10}}
+
+
+def test_the_calls_are_in_the_runs_record(tmp_path, capsys):
+    path = tmp_path / "callbacks.lut"
+    path.write_text((RUN / "callbacks.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    assert main(["run", str(path)]) == 0
+    assert main(["run", str(path)]) == 0
+    runs = json.loads((tmp_path / "callbacks.run.json").read_text(encoding="utf-8"))
+    # each run counts its own calls (12.S18)
+    assert [r["calls"] for r in runs] == [{"python:run.bridge_host.maximize": {"1": 10}}] * 2
+
+
+def test_a_record_of_functions_crosses_by_field():
+    # RecordCrossesByField: the host reads objective.value and objective.grad, each counted apart
+    assert run_file(RUN / "record_of_functions.lut") == "3.0\n"
+    assert host.calls() == {"python:run.bridge_host.descend": {"1.value": 3, "1.grad": 2}}
+
+
+def test_a_host_function_given_back_is_applied_through_the_bridge():
+    # HostGivesBackAValue and ExternIsValue: the host's closures cross in as host:k values, applied
+    # by the bridge; one applied to a Luthier lambda calls it back, counted under its handle
+    assert run_file(RUN / "host_function.lut") == "3.5\n18.0\n"
+    assert host.calls() == {"host:2 run.bridge_host.twice_at.<locals>.at": {"1": 2}}
+
+
+def test_an_extern_applied_to_fewer_arguments_is_a_value():
+    # ExternPartialIsValue: add 1.0 waits for its second argument; handed to the host, add 1.0 is
+    # a functools.partial of the host's add, written bare or with its parameters (eta)
+    assert run_file(RUN / "extern_partial.lut") == (
+        "3.5\npartial add (1.0,) 3.0\npartial add (1.0,) 3.0\n")
+    assert host.calls() == {}
+
+
+def test_a_callbacks_result_crosses_by_the_codomain(tmp_path):
+    path = tmp_path / "bad_callback.lut"
+    path.write_text(PRELUDE + '''
+maximize (f : Float64 -> Float64) : Float64 := extern "python:run.bridge_host.maximize" f
+main (w : W) : W * Unit := print w (showFloat (maximize (fn x { "no" })))
+''', encoding="utf-8")
+    with pytest.raises(RunError, match="not a Float64 at the crossing"):
+        run_file(path)

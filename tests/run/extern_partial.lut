@@ -1,0 +1,15 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-8.md, D-2026-10-14-a): an extern applied to
+-- fewer arguments than its declared type has is a value until the rest arrives (term.lth's
+-- ExternPartialIsValue). add, two arguments by its type, applied to 1.0 then to 2.5; the same
+-- partial handed to the host is a functools.partial of the host's add (run.bridge_host.describe
+-- applies it to 2.0), whether add is written bare or with its parameters (addBound, read by eta).
+import "world_model.lut" HostConsole host : HostConsole
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+add : Float64 -> Float64 -> Float64 := extern "python:run.bridge_host.add"
+addBound (x : Float64) (y : Float64) : Float64 := extern "python:run.bridge_host.add" x y
+describe (f : Float64 -> Float64) : String := extern "python:run.bridge_host.describe" f
+inc : Float64 -> Float64 := add 1.0
+main (w : W) : W * Unit :=
+  match host.print w (showFloat (inc 2.5)) { (w1, u) ->
+  match host.print w1 (describe (add 1.0)) { (w2, v) ->
+  host.print w2 (describe (addBound 1.0)) } }

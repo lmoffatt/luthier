@@ -2,12 +2,15 @@
 
 Derivation: brief record/IA/run-2026-10-13/prompt-2.md (bite 2), after prompt.md (bite 1);
 choices in record/IA/run-2026-10-13/opus-2.md. The host keeps the standard output so far; files
-are read from disk at each observation (bite 3, prompt-3.md: observe takes the places).
+are read from disk at each observation (bite 3, prompt-3.md: observe takes the places). Bite 8
+(prompt-8.md, D-2026-10-14-a): the calls the host makes back into Luthier, counted for the run's
+record (12.S18).
 """
 from dataclasses import dataclass
 from pathlib import Path
 
 _stdout = ""
+_calls = {}
 
 
 @dataclass(frozen=True)
@@ -28,6 +31,20 @@ NOTHING = _Nothing()
 def reset():
     global _stdout
     _stdout = ""
+    _calls.clear()
+
+
+def count(route, position):
+    """One call the host made to a Luthier function it received from the extern at `route`, at
+    `position` among its arguments ("1", or "1.value" for a field of a record argument)."""
+    per_route = _calls.setdefault(route, {})
+    per_route[position] = per_route.get(position, 0) + 1
+
+
+def calls():
+    """The calls counted so far in this run: route -> position -> how many (world.lth's
+    `CallsAreCounted`)."""
+    return {route: dict(positions) for route, positions in _calls.items()}
 
 
 def stdout():

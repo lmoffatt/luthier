@@ -12,10 +12,16 @@ normal form itself, with the host. v6 (prompt-6.md): the loader scopes each file
 file (12.S22, `Loaded`), and an extern's arity is read from its declared type, the host's signature
 only when no type is declared. v7 (prompt-7.md): `--set name=value` fills a hole of the file run
 (3.S9, 12.S18), and each run appends its entry, time, parameters and output to `x.run.json`.
-No certification or result hashing yet.
+v8 (prompt-8.md, D-2026-10-14-a, 3.S23): a Luthier function handed to the host at a function type
+over an infinite domain is a callback, each call counted per receiving route and position and
+written to `x.run.json` (world.lth's `Crossing`); a record of functions crosses field by field; a
+host function that crossed in is applied only through the bridge; an extern applied to fewer
+arguments than its arity stays a value, and crossing out it is a `functools.partial` of the
+host's function. No certification or result hashing yet.
 """
 from __future__ import annotations
 
+import functools
 import importlib
 import inspect
 import json
@@ -566,15 +572,21 @@ class Runner:
 
     # ------------------------------------------------------------------ to the host
 
-    def to_host(self, value, ty=None):
+    def to_host(self, value, ty=None, at=None):
+        """`value` as the host receives it, at the declared type `ty` when there is one. `at` is
+        (route, position): the extern receiving it and where among its arguments, the key under
+        which the calls of a callback are counted (12.S18)."""
         value = self.whnf(value)
         if value is self.token or value == self.token:
             return self.token
         if isinstance(value, TypedExtern) and value.obj is not None:
             # a host object goes back as it came (an array, a method of a host table)
             return value.obj.array if isinstance(value.obj, Entries) else value.obj
+        partial = self.host_partial(value)
+        if partial is not None:
+            return partial
         if ty is not None:
-            result = self.typed_to_host(value, self.resolve(ty))
+            result = self.typed_to_host(value, self.resolve(ty), at)
             if result is not _UNTYPED:
                 return result
         if isinstance(value, t.Lit):
@@ -598,7 +610,7 @@ class Runner:
             return {label: self.to_host(field) for label, field in value.fields}
         raise RunError(f"unsupported extern argument: {value!r}")
 
-    def typed_to_host(self, value, ty):
+    def typed_to_host(self, value, ty, at=None):
         name = ty.name if isinstance(ty, t.Var) else None
         if name == "Float64":
             # 11.S6: a float, an integer with an exact double promoted; 11.S7: never NaN or inf
@@ -616,33 +628,33 @@ class Runner:
             if value == t.Var("nothing"):
                 return host.NOTHING
             if isinstance(value, t.App) and value.function == t.Var("just"):
-                return host.Just(self.to_host(value.argument, element))
+                return host.Just(self.to_host(value.argument, element, at))
         if (element := _applied(ty, "List")) is not None:
             items = []
             while (isinstance(value, t.App) and isinstance(value.function, t.App)
                    and value.function.function == t.Var("cons")):
-                items.append(self.to_host(value.function.argument, element))
+                items.append(self.to_host(value.function.argument, element, at))
                 value = self.whnf(value.argument)
             if value == t.Var("nil"):
                 return items
             raise RunError(f"not a list at the crossing: {value!r}")
         if isinstance(ty, t.Sigma) and isinstance(value, t.Pair):
-            return (self.to_host(value.left, ty.domain),
-                    self.to_host(value.right, _instantiate(ty.name, value.left, ty.codomain)))
+            return (self.to_host(value.left, ty.domain, at),
+                    self.to_host(value.right, _instantiate(ty.name, value.left, ty.codomain), at))
         if isinstance(ty, t.Sum):
             # a sum crosses as (label, value): `int 3` is ("int", 3), tables.py's cells
             alternatives = dict(ty.alternatives)
             if isinstance(value, t.App) and isinstance(value.function, t.Var) and value.function.name in alternatives:
                 label = value.function.name
-                return label, self.to_host(value.argument, alternatives[label])
+                return label, self.to_host(value.argument, alternatives[label], at)
             if isinstance(value, t.Inj) and value.label in alternatives:
-                return value.label, self.to_host(value.value, alternatives[value.label])
+                return value.label, self.to_host(value.value, alternatives[value.label], at)
         if isinstance(ty, t.Record) and isinstance(value, t.RecordValue):
-            return self.record_to_host(value, ty)
+            return self.record_to_host(value, ty, at)
         if (arrow := _arrow(ty)) is not None:
             if self.size(arrow[1]) is not None:
-                return self.materialize(value, ty)
-            return self.function_to_host(value, ty)
+                return self.materialize(value, ty, at)
+            return self.function_to_host(value, ty, at)
         return _UNTYPED
 
     def float64(self, x):
@@ -654,7 +666,7 @@ class Runner:
             raise RunError(f"{x} is not a Float64 (11.S7)")
         return x
 
-    def materialize(self, value, ty):
+    def materialize(self, value, ty, at=None):
         """A lambda over `Fin n` handed to the host is the array of its n values (3.S23), each
         entry evaluated once (3.S25); `Fin m -> Fin n -> A` two-dimensional (3.S24). The element
         type decides the representation: `Float64` float64, `Int` int64 in range (11.S8), any other
@@ -664,7 +676,7 @@ class Runner:
         entries = []
         for k in range(n):
             index = t.Lit(t.IntConst(k))
-            entries.append(self.to_host(t.App(value, index), _instantiate(name, index, codomain)))
+            entries.append(self.to_host(t.App(value, index), _instantiate(name, index, codomain), at))
         leaf, shape = codomain, [n]
         while (arrow := _arrow(self.resolve(leaf))) is not None:
             try:
@@ -687,10 +699,16 @@ class Runner:
             array = array.reshape(shape)
         return array
 
-    def function_to_host(self, value, ty):
-        """A Luthier function the host calls: its arguments cross back by the domain's types and
-        its result to the host by the codomain's."""
+    def function_to_host(self, value, ty, at=None):
+        """A Luthier function over an infinite domain handed to the host is a callback (3.S23,
+        D-2026-10-14-a; world.lth's `CallbackGivesTheFunction`): when the host calls it, its
+        arguments cross in by the domain's types, the Runner reduces the application (with the
+        host, on this run's fuel), and the result crosses out by the codomain's type. Each call is
+        counted under `at`, the receiving extern's route and the position (`CallsAreCounted`)."""
+        route, position = at if at is not None else ("?", "?")
+
         def call(*args):
+            host.count(route, position)
             current, result = ty, value
             for arg in args:
                 arrow = _arrow(self.resolve(current))
@@ -699,10 +717,60 @@ class Runner:
                 term = self.from_host(arg, arrow[1])
                 result = t.App(result, term)
                 current = _instantiate(arrow[0], term, arrow[2])
-            return self.to_host(result, current)
+            return self.to_host(result, current, (route, position + ".out"))
         return call
 
-    def record_to_host(self, value, ty):
+    def host_partial(self, value):
+        """An extern (or a host function that crossed in) applied to fewer arguments than its
+        arity is a partial application, a value (term.lth's `ExternPartialIsValue`); crossing out
+        it is the host's function partially applied to its arguments, crossed by their declared
+        types: `functools.partial`, or the function itself when no argument was given. A lambda
+        that only passes its parameters on to such an application (`add2 1.0`, `add2` defined as
+        `add2 (x y : Float64) : Float64 := extern "..." x y`) is read as it, by eta. None for any
+        other value."""
+        while isinstance(value, t.Lam):
+            if not (isinstance(value.body, t.App) and value.body.argument == t.Var(value.name)
+                    and value.name not in kernel.free_names(value.body.function)):
+                return None
+            value = value.body.function
+        args, head = [], value
+        while isinstance(head, t.App):
+            args.append(head.argument)
+            head = head.function
+        if not isinstance(head, t.Extern):
+            return None
+        args.reverse()
+        try:
+            function = self.route(head)
+        except Exception as exc:
+            raise RunError(f"extern {head.route} failed: {exc}") from exc
+        if not callable(function) or len(args) >= self.arity(head, function):
+            return None
+        given, _ = self.cross_out(head, function, args)
+        return functools.partial(function, *given) if given else function
+
+    def key(self, head, function):
+        """The name a receiving extern's calls are counted under: its route, and for a host
+        function that crossed in (`host:k`, a name of this run only) also its Python name."""
+        if getattr(head, "obj", None) is None:
+            return head.route
+        name = getattr(function, "__qualname__", None) or type(function).__qualname__
+        module = getattr(function, "__module__", None)
+        return f"{head.route} {module + '.' if module else ''}{name}"
+
+    def cross_out(self, head, function, args):
+        """The arguments of an extern crossed to the host, each at its declared domain, a later
+        domain instantiated with the earlier arguments (`(n : Int) -> Fin n -> Float64`); untyped,
+        by value. Gives them and the type of what remains."""
+        ty, given, route = getattr(head, "type", None), [], self.key(head, function)
+        for k, a in enumerate(args, 1):
+            a = self.whnf(a)
+            arrow = _arrow(self.resolve(ty)) if ty is not None else None
+            domain, ty = (arrow[1], _instantiate(arrow[0], a, arrow[2])) if arrow else (None, None)
+            given.append(self.to_host(a, domain, (route, str(k))))
+        return given, ty
+
+    def record_to_host(self, value, ty, at=None):
         """A record by its fields, a later field's type reading the earlier ones (`f : Fin n -> A`).
         A `Vec` `{ n, f }` or a `Mat` `{ m, n, f }` is the array of `f`, its shape the record's;
         a `Table` the record `tables.as_table` reads, its `cell` giving None or (label, value); a
@@ -712,7 +780,8 @@ class Runner:
         for k, (label, field_type) in enumerate(types):
             if label not in given:
                 raise RunError(f"the record has no field {label}")
-            out[label] = self.to_host(given[label], field_type)
+            field_at = None if at is None else (at[0], f"{at[1]}.{label}")
+            out[label] = self.to_host(given[label], field_type, field_at)
             types[k + 1:] = [(l, _instantiate(label, given[label], f)) for l, f in types[k + 1:]]
         labels = tuple(out)
         if labels in (("n", "f"), ("m", "n", "f")) and isinstance(out["f"], np.ndarray):
@@ -904,14 +973,7 @@ class Runner:
                         arity = self.arity(head, function)
                         if len(args) < arity:
                             return self.apply(head, args)
-                        # each argument crosses at its declared type, a later type reading the
-                        # earlier arguments (`(n : Int) -> Fin n -> Float64`); untyped, by value
-                        ty, given = getattr(head, "type", None), []
-                        for a in args[:arity]:
-                            a = self.whnf(a)
-                            arrow = _arrow(self.resolve(ty)) if ty is not None else None
-                            domain, ty = (arrow[1], _instantiate(arrow[0], a, arrow[2])) if arrow else (None, None)
-                            given.append(self.to_host(a, domain))
+                        given, ty = self.cross_out(head, function, args[:arity])
                         result = function(*given)
                         value = self.apply(self.from_host(result, ty), args[arity:])
                         continue
@@ -1205,12 +1267,13 @@ def record_path(path):
 
 def record(path, main, values, output):
     """Append this run to `x.run.json` beside `x.lut` (12.S18): the entry, the time, the
-    parameters and the output. The hash and fingerprint of the cone, the interpreter's revision,
+    parameters, the output, and the calls the host made back into Luthier during the run
+    (`calls`: receiving extern's route -> position among its arguments -> count, D-2026-10-14-a). The hash and fingerprint of the cone, the interpreter's revision,
     the lock status and the states of the cone are not recorded yet."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
     runs.append({"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                 "parameters": values, "output": output})
+                 "parameters": values, "output": output, "calls": host.calls()})
     where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return where

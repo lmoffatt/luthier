@@ -1,0 +1,11 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-8.md, D-2026-10-14-a): a host function the host
+-- gives back is an opaque value, applied only through the bridge (term.lth's ExternIsValue and
+-- HostGivesBackAValue). adder 2.0 is the host's closure x -> 2 + x, applied to 1.5; twiceAt 3.0
+-- is a host function that calls the Luthier function it receives twice: 9 + 9.
+import "world_model.lut" HostConsole host : HostConsole
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+adder (k : Float64) : Float64 -> Float64 := extern "python:run.bridge_host.adder" k
+twiceAt (x : Float64) : (Float64 -> Float64) -> Float64 := extern "python:run.bridge_host.twice_at" x
+main (w : W) : W * Unit :=
+  match host.print w (showFloat (adder 2.0 1.5)) { (w1, u) ->
+  host.print w1 (showFloat (twiceAt 3.0 (fn y { y * y }))) }

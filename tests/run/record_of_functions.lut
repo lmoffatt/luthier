@@ -1,0 +1,10 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-8.md, D-2026-10-14-a): a record whose fields are
+-- functions crosses as the record, each field a callback the host reads by attribute and each
+-- counted on its own (world.lth's RecordCrossesByField). run.bridge_host.descend calls value three
+-- times and grad twice, and gives value 1 + grad 1 = 1 + 2 = 3.
+import "world_model.lut" HostConsole host : HostConsole
+Objective = { value : Float64 -> Float64, grad : Float64 -> Float64 }
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+descend (o : Objective) : Float64 := extern "python:run.bridge_host.descend" o
+square : Objective := { value := fn x { x * x }, grad := fn x { 2.0 * x } }
+main (w : W) : W * Unit := host.print w (showFloat (descend square))

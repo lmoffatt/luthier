@@ -1,0 +1,8 @@
+-- Runner fixture (record/IA/run-2026-10-13/prompt-8.md, D-2026-10-14-a, 3.S23): a Luthier lambda
+-- over Float64 handed to a host function is a callback (world.lth's CallbackGivesTheFunction).
+-- run.bridge_host.maximize calls it at the ten points 0.0, 0.1, ..., 0.9 and gives the least,
+-- 0.3; the ten calls are counted in the run's record (CallsAreCounted, 12.S18).
+import "world_model.lut" HostConsole host : HostConsole
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+maximize (f : Float64 -> Float64) : Float64 := extern "python:run.bridge_host.maximize" f
+main (w : W) : W * Unit := host.print w (showFloat (maximize (fn x { (x - 0.3) * (x - 0.3) })))
