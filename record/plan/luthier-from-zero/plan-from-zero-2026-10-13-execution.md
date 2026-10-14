@@ -426,8 +426,9 @@ Planned:
    cutoffs it carries, the holes it fills) and `plan.lth` (8.S4, 8.S8, 8.S11: the plan as data,
    the memo across runs keyed by the cone), then the external review of layer 3.
 2. *Claude agents.* `eval` and `session` as the spec reads them (12.S19, 2.S18); the result store
-   across runs (8.S3, 8.S8); externs validated at their first action (10.S8 to 10.S10) through
-   `agreement`; `--checked` (12.S18, L11.2).
+   across runs (8.S3, 8.S8). Done 2026-10-15: externs validated at their first action (10.S8 to
+   10.S10) through `agreement` (788b7f4); the run record complete and the lock (c03e16f);
+   `--checked` (12.S18, L11.2) running.
 3. Milestone `v0.4`.
 
 ## After
