@@ -1,0 +1,23 @@
+-- probability_model.lut: numpy's sort as the model of `Kolmogorov` (probability.lth §5), and the
+-- distance bound to it by name.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2-2026-10-14/prompt.md (item 1; inventory row 24). A model file
+-- (12.S23): one value of the theory, its field a route to the host (3.S40, 10.S8), certified
+-- against probability.lth §5 like any extern (10.S10). The host code is
+-- src/luthier/arrays.py `kolmogorov_distance`, which survives from v0.1 (probability_python.lut
+-- at the tag v0.1-final bound the same route) and computes the native definition's operations
+-- on the values sorted, so `KolmogorovAgrees` is exact. What crosses: a Luthier `List (Vec
+-- Float64)`, each vector's `f` materialized over `Fin n` (3.S23), as a Python list of arrays;
+-- back, a float. The Gaussian construction has no model here: `gaussian` and `profiled` are
+-- native, over the leaves of arrays_model.lut; v0.1's `normalVec` (the sampler's normals) is
+-- not bound, since probability.lth states no theory for it yet.
+
+import "probability.lth" Kolmogorov Vec
+
+numpySort : Kolmogorov := {
+  distance := extern "python:luthier.arrays.kolmogorov_distance",
+}
+
+-- the leaf by name, as experiment_zero.lut calls it (:161)
+kolmogorovDistance : List (Vec Float64) -> Float64 := numpySort.distance
