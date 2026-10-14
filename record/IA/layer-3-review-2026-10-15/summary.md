@@ -3,8 +3,10 @@
 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on the brief
 `prompt-summary.md` of this folder (section "The prompt"). Inputs: the six replies under `A/`
 read whole (sha256 prefixes: gpt.md 958af9d35fb1, deepseek.md dea12a8b2285, perplexity.md
-5a19ea43138c, grok.md 7083c9fc7e90, kimi.md 3ab955d719a4, fable.md a44b91d04bfc, Claude Fable on the
-web, committed at 9d95863); the reviewed files at the frozen commit 055589c (`FROZEN`), read at the
+5a19ea43138c, grok.md 7083c9fc7e90, kimi.md 3ab955d719a4; Claude Fable on the web, one model in two
+documents: fable.md a44b91d04bfc, committed at 9d95863, and
+review-layer-3-world-certification-round-1.md b247f053b089, committed at ce56627, the same findings
+formatted with a header, compared word by word and adding nothing else); the reviewed files at the frozen commit 055589c (`FROZEN`), read at the
 lines the findings quote; `src/luthier/host.py` where a finding depends on the host. The first
 version of this summary (2982741) had the five replies before Fable's; this one folds Fable in.
 
