@@ -1,0 +1,154 @@
+-- belief.lth: a Gaussian belief about a parameter in information form, the maximizer Laplace's
+-- update needs, stated as a theory so that the host's can be validated, and the update itself.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2-2026-10-14/prompt.md (item 2; inventory §6 item 7, row 22; the
+-- callback crossing of D-2026-10-14-a). Sources: spec 7.R2 (over `VecOf n`), 3.S23 as it stands
+-- (a Luthier lambda passed to the host is a callback; a record whose fields are functions
+-- crosses as the record), 10.S8 to 10.S10 (an extern is a route, validated against its type's
+-- laws at the first action that asks for it), 11.S18 (a tolerance is the demand's), 7.R4 (a law
+-- over the models of a theory is certified per model), 4.R10, P11 (every criterion is a
+-- parameter: the maximizer's tolerance, budget and floor). The v0.1 file is `belief.lut` at the
+-- tag v0.1-final (lines 110-136 are what the slice uses); the names are its. What is not here:
+-- v0.1's `BeliefFamily`, `Discrete`, the evidence and the calibration laws, which need a
+-- sampler and the generator of normals probability.lth lacks; and `laplaceEvidence`, which
+-- needs a log-determinant no leaf gives.
+--
+-- What this file states. A Gaussian belief on the vectors of dimension n is a mean and a
+-- precision, the inverse covariance; zero precision along a direction is a belief that knows
+-- nothing there, how the gauge of the positions enters without inventing a scale. Its laws: the
+-- precision is symmetric and its log density is greatest at the mean (the precision is not
+-- negative on any direction). A maximizer is a theory of one function: given the settings, the
+-- objective with its score and its information on the vectors of a dimension and a start, it
+-- gives where it stopped and whether it converged there (v0.1's `Maximizer` was a bare function
+-- type with its laws in optimization.lut; here the laws are the type's, so that 10.S10 can
+-- validate the host's `lm.maximize`, belief_model.lut, at its first action). The laws: the
+-- objective does not fall from the start; where it says it converged the Newton decrement, half
+-- of g^T M^+ g at the settings' floor, is within the settings' tolerance; the dimension is kept;
+-- and on a concave quadratic, whose maximum is known, it converges. The first three are stated
+-- over any `Posterior`, a record of functions with no generator, so they are certified per
+-- problem (7.R4, listed cases); the quadratic family has the generators of `VecOf n` and
+-- `Positive`, so it is sampled. Laplace's update is then a definition on the parts: the new mean
+-- is the maximizer's `x` on belief times likelihood, the new precision the prior's plus the
+-- information there; its laws are those of its parts (L9.2) and none is restated.
+--
+-- Index (all sections written in this draft):
+--   §1 `GaussianBelief`, `gaussianLogDensity`, the laws of a belief (v0.1 belief.lut:110-116). done
+--   §2 `Settings`, `MaxResult`, `Posterior`, `Maximizer` and the laws a maximizer must meet
+--      (v0.1 belief.lut:118-122, optimization.lut:118-128).                                   done
+--   §3 Laplace's update: `laplacePosterior`, `laplaceMode`, `laplaceAt`, `laplaceUpdate`
+--      (v0.1 belief.lut:124-136).                                                              done
+
+import "numbers.lth" Tolerance Positive within withinOf abs
+import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat identity approxVec approxMat exact RankFloor
+import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul madd mscale transpose pinvSym
+import "probability.lth" Likelihood Resolution IsGradient
+
+-- ---------------------------------------------------------------- §1 Gaussian beliefs
+
+-- Information form on the vectors of dimension n: the mean and the precision, n x n. The log
+-- density, up to its constant (v0.1 belief.lut:113-116).
+GaussianBelief (n : Nat) : { mean : VecOf n, precision : MatOf n n }
+gaussianLogDensity (n : Nat) (b : GaussianBelief n) (t : VecOf n) : Float64 :=
+  { d := sub t b.mean
+    0.0 - 0.5 * dot d (matVec b.precision d) }
+
+-- the precision is symmetric within the tolerance, and the log density is greatest at the mean:
+-- zero there, and elsewhere minus half a quadratic form that is not negative beyond rounding
+-- (the precision is positive semidefinite, read through the density, which is what the belief
+-- says; a zero direction is allowed, the belief knows nothing there)
+-- spec 11.S18
+PrecisionSymmetric (n : Nat) (b : GaussianBelief n) (tol : Tolerance) : Bool := approxMat tol b.precision (transpose b.precision)
+DensityPeaksAtMean (n : Nat) (b : GaussianBelief n) (tol : Tolerance) (t : VecOf n) : Bool :=
+  { q := gaussianLogDensity n b t
+    gaussianLogDensity n b b.mean == 0.0 and (q <= 0.0 or within tol q 0.0) }
+GaussianBelief (n : Nat) := PrecisionSymmetric n & DensityPeaksAtMean n
+
+-- ---------------------------------------------------------------- §2 The maximizer (3.S23, 10.S10, P11)
+
+-- The settings a maximizer runs with, the demand's (P11; experiment_zero.lut:98 took `tol` and
+-- `maxIter` from its parameters): the tolerance of the decrement at which it has converged, the
+-- budget of iterations, and the floor of the step matrix's spectrum below which a direction is
+-- not stepped nor counted in the decrement. [proposed] The floor is the third setting (v0.1's
+-- `solve` inverted the matrix whole, and raised where it was singular).
+Settings : U := { tol : Positive, maxIter : Nat, floor : RankFloor | 0.0 < tol and 0 < maxIter and 0.0 <= floor }
+
+-- where a maximizer stopped on the vectors of dimension n, and whether it converged there (a
+-- method with a budget can run out of it before the gradient vanishes, and says so)
+MaxResult (n : Nat) = { x : VecOf n, converged : Bool }
+
+-- What a maximizer is given: a log posterior with its score and its information on the vectors
+-- of dimension n, as three functions (what crosses to the host, each a callback, D-2026-10-14-a).
+-- The laws: the score is the gradient of the log posterior at the demand's resolution, the
+-- information symmetric. Certified per posterior (7.R4).
+Posterior (n : Nat) : { logp : VecOf n -> Float64, score : VecOf n -> Vec Float64, info : VecOf n -> Mat Float64 }
+PosteriorScoreIsGradient (n : Nat) (p : Posterior n) (r : Resolution) (t : VecOf n) : Bool := IsGradient n r p.logp p.score t
+PosteriorInfoSymmetric (n : Nat) (p : Posterior n) (tol : Tolerance) (t : VecOf n) : Bool := approxMat tol (p.info t) (transpose (p.info t))
+Posterior (n : Nat) := PosteriorScoreIsGradient n & PosteriorInfoSymmetric n
+
+-- the Newton decrement of a log posterior at x: half of g^T M^+ g, the increase the information
+-- predicts to the maximum, with the pseudo-inverse at the settings' floor (v0.1
+-- optimization.lut:51 solved the matrix whole)
+decrement (n : Nat) (s : Settings) (g : VecOf n -> Vec Float64) (m : VecOf n -> Mat Float64) (x : VecOf n) : Float64 :=
+  { gx := g x
+    0.5 * dot gx (matVec (pinvSym s.floor (m x)) gx) }
+
+-- A maximizer: the settings, the dimension, the log posterior, its score, its information and a
+-- start in; where it stopped and whether it converged out. It evaluates the functions only at
+-- vectors of that dimension, which their types say (v0.1 belief.lut:122).
+Maximizer : {
+  maximize : Settings -> (n : Nat) -> (VecOf n -> Float64) -> (VecOf n -> Vec Float64) -> (VecOf n -> Mat Float64) -> VecOf n -> MaxResult n,
+}
+
+-- what any maximizer must meet, on any posterior (v0.1 optimization.lut:118-128): the log
+-- posterior does not fall from the start; where it says it converged, the decrement there,
+-- recomputed from the posterior and not from the run, is within the settings' tolerance; and
+-- the dimension is kept. That it converges within its budget is a quality of the method on a
+-- problem, not a law, except where the maximum is known: a concave quadratic, below.
+-- spec 10.S10, P11
+MaximizerAscends (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
+  p.logp (mx.maximize s n p.logp p.score p.info x0).x >= p.logp x0
+MaximizerStationary (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
+  { r := mx.maximize s n p.logp p.score p.info x0
+    if r.converged then decrement n s p.score p.info r.x <= s.tol else true }
+MaximizerKeepsDimension (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
+  (mx.maximize s n p.logp p.score p.info x0).x.n == n
+
+-- the concave quadratic with its maximum at b and curvature c on every direction: the family
+-- with generators (`VecOf n`, `Positive`), on which a maximizer converges within any budget that
+-- is not tiny (Levenberg-Marquardt takes a handful of accepted steps on it) and ends at b within
+-- the decrement's tolerance, c |x - b|^2 / 2 <= tol
+quadratic (n : Nat) (b : VecOf n) (c : Positive) : Posterior n := {
+  logp := fn x { d := sub x b
+                 0.0 - 0.5 * c * dot d d },
+  score := fn x { scale (0.0 - c) (sub x b) },
+  info := fn x { mscale c (identity n) },
+}
+QuadraticConverges (mx : Maximizer) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  { q := quadratic n b c
+    r := mx.maximize s n q.logp q.score q.info x0
+    d := sub r.x b
+    r.converged and 0.5 * c * dot d d <= s.tol }
+Maximizer := MaximizerAscends & MaximizerStationary & MaximizerKeepsDimension & QuadraticConverges
+
+-- ---------------------------------------------------------------- §3 Laplace's update
+
+-- belief times likelihood on datum y, as the posterior a maximizer is given: the log posterior
+-- up to its constant, its score and its information, the prior's precision plus the
+-- likelihood's (v0.1 belief.lut:127-131, the three lambdas of laplaceMode)
+laplacePosterior (n : Nat) (l : Likelihood n) (b : GaussianBelief n) (y : Vec Float64) : Posterior n := {
+  logp := fn t { gaussianLogDensity n b t + l.loglik y t },
+  score := fn t { sub (l.score y t) (matVec b.precision (sub t b.mean)) },
+  info := fn t { madd b.precision (l.info y t) },
+}
+
+-- Laplace's update: the new mean is the maximum of belief times likelihood, found from the
+-- prior mean; the new precision the prior's plus the information the likelihood reports there
+laplaceMode (n : Nat) (mx : Maximizer) (s : Settings) (l : Likelihood n) (b : GaussianBelief n) (y : Vec Float64) : MaxResult n :=
+  { p := laplacePosterior n l b y
+    mx.maximize s n p.logp p.score p.info b.mean }
+-- the Gaussian belief at a mode m: mean m, precision the prior's plus the information there
+laplaceAt (n : Nat) (l : Likelihood n) (b : GaussianBelief n) (y : Vec Float64) (m : VecOf n) : GaussianBelief n :=
+  { mean := m, precision := madd b.precision (l.info y m) }
+laplaceUpdate (n : Nat) (mx : Maximizer) (s : Settings) (l : Likelihood n) (b : GaussianBelief n) (y : Vec Float64) : GaussianBelief n :=
+  laplaceAt n l b y (laplaceMode n mx s l b y).x
