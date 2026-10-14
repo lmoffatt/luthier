@@ -14,3 +14,4 @@ the sessions (CLAUDE.md).
 | The way of working | `working-method/` | done (`record/working-method.md`) |
 | Superseded plans, kept for the decisions still in force and his annotations | `archive/` | `plan-implementation-2026-10-13-*`, replaced by the rebuild from zero (D-2026-10-13-h); its D4, D8, D9 still apply |
 | Repairs of the v0.1 interpreter | `archive/repair-v0.1/` | closed by the rebuild from zero (tag `v0.1-final`) |
+- `plots/`: the plots as pure values (ggplot's grammar) rendered by an action; decisions G1 to G5 and the execution, 2026-10-14, after the evidence on the fit.
