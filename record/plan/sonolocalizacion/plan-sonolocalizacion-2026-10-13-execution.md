@@ -42,6 +42,10 @@ writes theories; Codex what must run and iterate; a web model small bites).
   without: 0.022 m). Step 4's comparison still needs Luciano's v0.1 run and the corrected graph;
   the A2 question is his. Step 3 done but for certification (step 5 of the Luthier plan).
 
+- 2026-10-15, 04:30: the fit runs certified on the new Luthier (every law in its cone served by
+  the library's stores; `run` refuses an uncertified cone). Step 3 done. Step 4 (his comparison
+  with v0.1, the corrected graph, the A2 decision) his.
+
 ## Steps
 
 1. Inventory, read only (Luciano runs any script there): in `~/Projects/sonolocalizacion`, which

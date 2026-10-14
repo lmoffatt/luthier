@@ -205,6 +205,15 @@ by Luciano.
   native maximizer agree); `certification.lth` with its model (043f4b9, 9918c38, Boolean first,
   D-2026-10-14-c); `certify.py`, the store `x.cert.json`, `luthier certify`, the tester reusing
   entries (40e5937). Running: `run`'s refusal (12.S17). Then v0.3's criterion: the fit certified.
+- 2026-10-15, 04:30: `run` refuses an uncertified cone (5959875, 12.S17, 7.S15); certify writes
+  each entry into its model's file store (5803e48, 4d8c700), the interpreter's revision in the
+  identity is the last tag (bb5a9a8, proposed), the library's stores tracked (their commit);
+  tables.lth's laws certified on listed cases (tables_laws.lut, tables_controls.lut); the
+  kernel compares a labeled sum's labels (73ea8e6). The fit of sonolocalización runs certified,
+  `run` strict: step 5.5's criterion for `v0.3` is met; the tag is his. Open under step 5: the
+  generators of symmetric and orthogonal matrices, of unit lists and of normals (the laws over
+  records of functions run on listed cases, 7.R4); fuel in an entry's identity (his question);
+  `--checked`; the statistical laws (7.S17 to 7.S19); the external review of layer 2.
 
 
 ## Rules for every step
