@@ -151,6 +151,12 @@ approxMatOf (tol : Tolerance) (scale a b : Mat Float64) : Bool :=
   if a.m == b.m and a.n == b.n and scale.m == a.m and scale.n == a.n then
     forallPairs2 a.m a.n (fn i j { withinOf tol (scale.f i j) (a.f i j) (b.f i j) })
   else false
+-- the same with a slack added: the known difference (the part dropped below a floor) plus the
+-- tolerance times the scale of the entry [proposed, D-2026-10-14-c; 11.S14]
+approxMatSlackOf (slack : Float64) (tol : Tolerance) (scale a b : Mat Float64) : Bool :=
+  if a.m == b.m and a.n == b.n and scale.m == a.m and scale.n == a.n then
+    forallPairs2 a.m a.n (fn i j { abs (a.f i j - b.f i j) <= slack + tol * scale.f i j })
+  else false
 
 -- ---------------------------------------------------------------- §4 The leaves (3.S28, 12.S9)
 
@@ -296,7 +302,9 @@ PinvSymmetric (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : 
       and approxMatOf tol (matMulDef (absMat s) (absMat p)) (m.matMul s p) (m.transpose (m.matMul s p)) }
 PinvRestricts (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : PsdAt m fl) : Bool :=
   { p := m.pinvSym fl s
-    approxMatSlack (fl * frobDef s) tol (m.matMul s (m.matMul p s)) s }
+    -- [proposed, 2026-10-15; 11.S14] the rounding of s p s is of the magnitudes (cond times eps, as
+    -- its siblings, 7032d7b), not a flat constant: scale |s||p||s|; the slack stays for the dropped part
+    approxMatSlackOf (fl * frobDef s) tol (matMulDef (absMat s) (matMulDef (absMat p) (absMat s))) (m.matMul s (m.matMul p s)) s }
 PinvTraceIsRank (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   within tol (m.trace (m.matMul s (m.pinvSym fl s))) (toFloat64 (m.retainedRank fl s))
 PinvScales (m : Arrays) (tol : Tolerance) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
