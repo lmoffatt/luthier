@@ -6,10 +6,14 @@
 -- (`Dim`, `VecOf n`, `MatOf r c`, `Fin n`, `Positive`, `ClearDiagonal`); a symmetric or an
 -- orthogonal matrix has no generator (a filter over a random matrix accepts only the 0 x 0 and
 -- 1 x 1 ones), so those laws run sampled, to show it, and again on the listed matrices below.
+-- Since 2026-10-15 (record/IA/tester-2026-10-14/prompt-3.md) a binding can name a generator
+-- (7.R1): each listed line has a sampled twin whose matrix is drawn by a family of
+-- generators_model.lut (symmetric, positive semidefinite, orthogonal with a symmetric of its
+-- size, a diagonal with an atom at 0); the listed lines are kept.
 
 import "test.lth" test ExhaustiveMode SampledMode
-import "generators_model.lut" linear
-import "generators.lth" Binding
+import "generators_model.lut" linear symmetric symmetricOf gram orthogonal clearDiagonal
+import "generators.lth" Binding byParameter
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
 import "arrays.lth" Arrays Vec Mat RankFloor mat identity zeroMat AddPointwise SubPointwise ScalePointwise
@@ -70,6 +74,11 @@ listedRotation : List Binding := [
   { parameter := just "k", type := nothing, generator := "three", coverage := Listed },
   { parameter := just "q", type := nothing, generator := "orthogonal3", coverage := Listed },
   { parameter := just "s", type := nothing, generator := "symmetric3", coverage := Listed } ]
+-- the generators the sampled twins bind (generators_model.lut); `byParameter`'s coverage is a draw
+drawnS : List Binding := [byParameter "s" "symmetric"]
+drawnPsd : List Binding := [byParameter "s" "gram"]
+drawnRotation : List Binding := [byParameter "q" "orthogonal", byParameter "s" "symmetricOf"]
+drawnD : List Binding := [byParameter "d" "clearDiagonal"]
 
 -- entrywise, exact
 test "AddPointwise" (SampledMode linear) (seed <- 20261014) (profile <- models)
@@ -101,6 +110,10 @@ test "RankUnderRotation" (SampledMode linear) (seed <- 20261014) (profile <- mod
 test "RankBounded" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
 test "RankScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- listedS) (profile <- models)
 test "RankUnderRotation" ExhaustiveMode (whereBindings <- listedRotation) (profile <- models)
+test "RankOfDiagonal" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnD) (profile <- models)
+test "RankBounded" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnS) (profile <- models)
+test "RankScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnS) (profile <- models)
+test "RankUnderRotation" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnRotation) (profile <- models)
 -- the trace
 test "TraceOfIdentity" (SampledMode linear) (seed <- 20261014) (profile <- models)
 test "TraceAdditive" (SampledMode linear) (seed <- 20261014) (profile <- models)
@@ -120,3 +133,9 @@ test "PinvSymmetric" ExhaustiveMode (whereBindings <- listedS) (profile <- model
 test "PinvRestricts" ExhaustiveMode (whereBindings <- listedPsd) (profile <- models)
 test "PinvTraceIsRank" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
 test "PinvScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- listedS) (profile <- models)
+test "PinvOfDiagonal" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnD) (profile <- models)
+test "PinvProjects" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnS) (profile <- models)
+test "PinvSymmetric" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnS) (profile <- models)
+test "PinvRestricts" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnPsd) (profile <- models)
+test "PinvTraceIsRank" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnS) (profile <- models)
+test "PinvScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnS) (profile <- models)
