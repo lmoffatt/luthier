@@ -13,3 +13,10 @@ with `lmFloor` 6.661338147750939e-15 for `graph` (N = 10) and 5.995204332975845e
 verbatim (stdout: the three tables after a `== <path>` line each, then the summary line).
 Uncertified (12.S17 not enforced). Luciano's decision on the A2 block is open; this is Luthier's
 output on the two files, not the analysis's result.
+
+## A certified run, 2026-10-15 at 04:40
+
+`fit-A-graph_noA2-certified.txt`: the same command on `graph_noA2` at commit 871ea67 (the
+stores of src/luthier/lib/ at revision v0.2 serving every law in the cone; `run` strict,
+12.S17), default fuel. Its record is the last entry of `examples/sonolocalizacion/
+experiment_zero.run.json` (ignored by git), with the certification state of the cone.
