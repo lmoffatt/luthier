@@ -19,6 +19,10 @@ certification.lth's `Entry` reads them. Its predicate (`Store`: one outcome per 
 exactly when passed) is checked on every store read or written; `record` never edits an entry and
 leaves the store as it is on a known identity; a stale entry is kept, and is stale only as read
 against the current hash of its law's cone (12.S11), never marked in the file.
+
+§3, what a run requires (`contains`, `covers_all`, `serves`, `state_of`, `refuse`), is the reading
+of the store `run` makes before evaluating (run.py's `certification`), after
+record/IA/certification-2026-10-14/prompt-run.md; it writes nothing.
 """
 from __future__ import annotations
 
@@ -432,6 +436,113 @@ def standings(path):
     from .tester import law_cones
     entries = read_store(path)
     return [(law, standing(entries, law, current)) for law, current in law_cones(path)]
+
+
+# ---------------------------------------------------------------------- §3 what a run requires
+
+# the grades a demand may accept, as `--accept` names them (test.lth's `Grade`)
+GRADES = {word: grade for grade, word in GRADE_WORDS.items()}
+
+
+def contains(reach, value):
+    """certification_model's `contains`: the support holds every value, an interval the numbers
+    between its ends (ends included), a census its members."""
+    if reach == "Support":
+        return True
+    (kind, what), = reach.items()
+    if kind == "Interval":
+        return "Number" in value and what[0] <= value["Number"] <= what[1]
+    return kind == "Members" and value in what
+
+
+def covers_all(reach, given):
+    """certification.lth's `coversAll`: each value given is in the reach recorded for its parameter
+    (the first recorded, as `reachOf`); a parameter with no reach recorded covers nothing."""
+    reaches = {}
+    for r in reach:
+        reaches.setdefault(r["parameter"], r["reach"])
+    return all(p in reaches and contains(reaches[p], v) for p, v in given)
+
+
+def at(demand, entry):
+    """Whether the entry is at the demand's hash: its law's cone, and [proposed] the cone of each
+    model the demand names (`fingerprints`: parameter -> the current hash of the name the run gives
+    it), as the fingerprint the entry's binding recorded for that parameter, when the entry's reach
+    holds that model. The tester hashes the
+    law's cone and keeps the model's in the binding (7.S9); an entry whose model has changed since
+    is at another hash, so stale for this demand."""
+    if entry["cone"] != demand["cone"]:
+        return False
+    drawn = {d["parameter"]: d["fingerprint"] for d in entry["binding"]}
+    given = dict(demand["given"])
+    # an entry whose reach does not hold the model given is about another model: its fingerprint
+    # says nothing of this one, and `serves` refuses it by its reach
+    return all(drawn.get(p) == h for p, h in demand.get("fingerprints", {}).items()
+               if covers_all(entry["reach"], [(p, given[p])]))
+
+
+def serves(demand, entry):
+    """certification_model's `serves`: the law's entry at the current hash, passed, at or above the
+    grade the demand accepts, its reach covering what the run gives."""
+    return (entry["law"] == demand["law"] and at(demand, entry) and passed(entry)
+            and entry["grade"] is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[entry["grade"]]
+            and covers_all(entry["reach"], demand["given"]))
+
+
+def state_of(demand, entries):
+    """certification_model's `stateOf`: ("Current", the outcome of the latest entry at the current
+    hash), else ("Stale", the hash of the law's latest entry), else ("Uncertified", None)."""
+    e = next((e for e in entries if e["law"] == demand["law"] and at(demand, e)), None)
+    if e is not None:
+        return "Current", e["outcome"]
+    f = next((e for e in entries if e["law"] == demand["law"]), None)
+    if f is not None:
+        return "Stale", f["cone"]
+    return "Uncertified", None
+
+
+def refuse(entries, cone):
+    """certification_model's `refuse`: per name of the cone (`name`, `provisional`, `laws`, each
+    law a demand), a provisional name refused whole, otherwise each law no entry serves, listed
+    with its state (`RefusalSaysWhy`, `RefusalIsPerLaw`, `ProvisionalIsRefused`)."""
+    refusals = []
+    for c in cone:
+        if c["provisional"]:
+            refusals.append({"name": c["name"], "law": None, "state": ("Provisional", None)})
+            continue
+        for d in c["laws"]:
+            if not any(serves(d, e) for e in entries):
+                refusals.append({"name": c["name"], "law": d["law"], "state": state_of(d, entries),
+                                 "demand": d})
+    return refusals
+
+
+def show_refusal(refusal, entries):
+    """One line of `run`'s refusal: the name, the law and its state; for a law whose latest entry
+    at the current hash passed, why it does not serve [proposed, certification.lth's `State`]."""
+    kind, what = refusal["state"]
+    head = refusal["name"] if refusal["law"] is None else f"{refusal['name']}: {refusal['law']}"
+    if kind == "Provisional":
+        return f"{head}: provisional (built on an extern not yet validated)"
+    if kind == "Uncertified":
+        return f"{head}: uncertified (no entry)"
+    d = refusal["demand"]
+    if kind == "Stale":
+        if what == d["cone"]:
+            return f"{head}: stale (the model's code changed since its entries)"
+        return f"{head}: stale (its entries are at {what[7:19]}, the cone is now at {d['cone'][7:19]})"
+    if what != "Passed":
+        return f"{head}: {show_outcome(what)}"
+    current = [e for e in entries if e["law"] == d["law"] and at(d, e) and passed(e)]
+    if all(GRADE_RANK[e["grade"]] < GRADE_RANK[d["accepts"]] for e in current):
+        best = max((e["grade"] for e in current), key=GRADE_RANK.__getitem__)
+        return f"{head}: passed, {GRADE_WORDS[best]}, below the grade accepted ({GRADE_WORDS[d['accepts']]})"
+    shown = ", ".join(f"{p} = {_shown_value(v)}" for p, v in d["given"])
+    return f"{head}: passed, but no passed entry's reach covers {shown}"
+
+
+def _shown_value(v):
+    return repr(v["Number"]) if "Number" in v else v["Printed"]
 
 
 # ---------------------------------------------------------------------- `luthier certify` (12.S16)

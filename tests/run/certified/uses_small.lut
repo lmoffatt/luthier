@@ -1,0 +1,9 @@
+-- tests/run/certified/uses_small.lut: `main` reaches `same`, whose law small.lut's test line
+-- certifies; `other` reaches `also`, a model no entry's reach covers (prompt-run.md).
+
+import "world_model.lut" HostConsole host : HostConsole
+import "small.lut" Small same also
+
+show (b : Bool) : String := if b then "true" else "false"
+main (w : W) : W * Unit := host.print w (show (same.f true))
+other (w : W) : W * Unit := host.print w (show (also.f true))

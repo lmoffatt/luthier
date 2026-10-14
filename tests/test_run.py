@@ -1,7 +1,9 @@
 """Runner integration tests derived from user request 2026-10-13, v1; v2 for world.lth draft 1 (prompt-2.md);
 v4 for arrays, tables and numbers across the bridge (prompt-4.md); v6 for the loader's scopes and the
 externs' arity (prompt-6.md); v7 for `run --set` and the run's record (prompt-7.md); v8 for functions
-across the bridge (prompt-8.md, D-2026-10-14-a), the host side in tests/run/bridge_host.py."""
+across the bridge (prompt-8.md, D-2026-10-14-a), the host side in tests/run/bridge_host.py; v13 for
+run's refusal of a cone that is not certified (record/IA/certification-2026-10-14/prompt-run.md,
+certification.lth §3, 12.S17), the programs under tests/run/certified/."""
 import json
 import os
 import re
@@ -15,9 +17,17 @@ import pytest
 
 from luthier import arrays, host, surface as s
 from luthier.cli import main
-from luthier.run import Loaded, RunError, parameter, record_path, run_file
+from luthier.run import Loaded, Refused, RunError, parameter, record_path, run_file
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def refused(models):
+    """A run the store refuses since prompt-run.md (12.S17): the laws the types of `models` state
+    have no entry in the stores the run reads (the x.cert.json of the files it loads, 12.S11).
+    Strict, so that the test fails, and its mark is removed, once the store certifies the cone."""
+    return pytest.mark.xfail(strict=True, reason=f"refused (12.S17): the laws of {models} have no entry "
+                                                 f"in the stores of the files the run loads")
 
 
 def first_line(text):
@@ -203,16 +213,19 @@ main (w : W) : W * Unit := match cons (first "one\\ntwo") nil {
     assert run_file(path) == "matched\n"
 
 
+@refused("numpy : Arrays")
 def test_vector_norm_through_numpy():
     result = command(ROOT / "tests/run/vector_norm.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
 
 
+@refused("numpy : Arrays")
 def test_matrix_product_through_numpy():
     result = command(ROOT / "tests/run/matrix_product.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "43.0\n2\n", "")
 
 
+@refused("csv : Codec, built : Codec")
 def test_table_cell_through_csv(tmp_path):
     (tmp_path / "table.csv").write_text("id:int,name:str,x:float\n1,alpha,0.5\n2,beta,1.5\n", encoding="utf-8")
     result = command(ROOT / "tests/run/table_cell.lut", cwd=tmp_path)
@@ -220,6 +233,7 @@ def test_table_cell_through_csv(tmp_path):
     assert result.stdout == "beta\n2\n1.5\na:int,b:str\n0,x\n1,x\n\n"
 
 
+@refused("csv : Codec, built : Codec")
 def test_table_not_parsed_is_nothing(tmp_path):
     (tmp_path / "table.csv").write_text("id:real\n1\n", encoding="utf-8")
     result = command(ROOT / "tests/run/table_cell.lut", cwd=tmp_path)
@@ -316,6 +330,7 @@ def test_connective_on_a_match_reads_core_data():
     assert (result.returncode, result.stdout, result.stderr) == (0, "yes\n", "")
 
 
+@refused("csv : Codec")
 def test_host_cell_under_an_operator_crosses_first():
     # prompt-5.md: the Runner reduces a primitive's operands with the host
     result = command(ROOT / "tests/run/host_cell_under_operator.lut")
@@ -347,6 +362,7 @@ EXPECTED_VALIDATE_GRAPH = ("valid: 10 nodes, 22 measurements, 21 distinct pairs;
 
 
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 5 minutes; set LUTHIER_SLOW=1")
+@refused("csv : Codec, doubles : Doubles, elementary : Elementary, numpy : Arrays")
 def test_validate_graph_slow():
     # prompt-10.md item 4: the first full run of the slice
     result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut",
@@ -387,6 +403,7 @@ def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
     assert {loaded.name(SCOPE / f, "helper") for f in ("left.lut", "right.lut")} == {"helper@left", "helper@right"}
 
 
+@refused("csv : Codec")
 def test_a_label_and_another_files_definition_of_its_name_are_kept_apart():
     # prompt-10.md: generators.lth's import brings program.lth's `int : Term`, which took the name of
     # tables.lth's Cell label `int`, and `intAt` was a stuck match
@@ -581,6 +598,7 @@ def test_a_bound_read_is_made_once(tmp_path, entry):
     assert (result.returncode, result.stdout, result.stderr) == (0, "data\ndata\n1\n", "")
 
 
+@refused("lm : Maximizer, numpy : Arrays")
 def test_a_bound_maximize_runs_once(tmp_path):
     # maximize_shared.lut projects the result three times; each entry calls back exactly as
     # maximize_quadratic.lut, which matches it once (test_lm.py checks those counts against lm.py)
@@ -601,3 +619,112 @@ def test_an_array_that_crossed_in_takes_one_argument():
     # prompt-12.md: the Runner reads an Entries' arity without inspect; its signature says the same
     from luthier.run import Entries, Runner
     assert Runner.signature_arity(Entries(np.zeros(2))) == 1
+
+
+# ---------------------------------------------------------------- run refuses a cone not certified
+# (record/IA/certification-2026-10-14/prompt-run.md; certification.lth §3; 12.S17, 12.S18, 7.S15)
+
+CERTIFIED = RUN / "certified"
+
+
+def _certified_copy(tmp_path):
+    """The programs of tests/run/certified/ in tmp_path, where their stores are written."""
+    for p in CERTIFIED.glob("*.lut"):
+        (tmp_path / p.name).write_text(p.read_text(encoding="utf-8"), encoding="utf-8")
+    return tmp_path
+
+
+def _certify_small(tmp_path):
+    from luthier.tester import run_tests
+    outcomes = run_tests(tmp_path / "small.lut", store=True)
+    assert [o.grade for o in outcomes] == ["Cases"]
+
+
+def test_a_cone_whose_types_state_no_law_runs_and_records_its_state(tmp_path, capsys):
+    # hello.lut's cone: `host : HostConsole = Host State`, a record that states no law (6.S1)
+    path = tmp_path / "hello.lut"
+    path.write_text((ROOT / "examples/hello.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    assert main(["run", str(path)]) == 0
+    state = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]
+    assert state["accept"] == "sampled" and state["laws"] == 0 and state["not certified"] == []
+    assert state["states"]["certified"] == 0 and state["states"]["vacuous"] > 0
+    assert state["cone"].startswith("sha256:")
+
+
+def test_an_uncertified_cone_is_refused_per_law_and_nothing_runs(tmp_path, capsys):
+    # RefusalSaysWhy: no entry at all, uncertified; exit 1, nothing evaluated, no record
+    path = _certified_copy(tmp_path) / "uses_small.lut"
+    assert main(["run", str(path)]) == 1
+    out, err = capsys.readouterr()
+    assert out == "" and "same: FixesBool: uncertified (no entry)" in err
+    assert not record_path(path).exists()
+
+
+def test_a_passed_entry_serves_at_or_above_the_cutoff(tmp_path, capsys):
+    # ServesAtTheCutoff and ServesIsMonotoneInTheCutoff: the entry's grade is `cases`
+    path = _certified_copy(tmp_path) / "uses_small.lut"
+    _certify_small(tmp_path)
+    for accept in (None, "cases", "assumed"):
+        assert main(["run", str(path)] + (["--accept", accept] if accept else [])) == 0
+    assert capsys.readouterr().out == "true\n" * 3
+    state = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]
+    assert state["laws"] == 1 and state["states"]["certified"] == 1 and state["not certified"] == []
+    for accept in ("exhaustive", "proved"):
+        with pytest.raises(Refused, match=f"same: FixesBool: passed, cases, below the grade accepted \\({accept}\\)"):
+            run_file(path, accept={"exhaustive": "ExhaustiveGrade", "proved": "Proved"}[accept])
+
+
+def test_an_entry_serves_only_the_model_its_reach_holds(tmp_path):
+    # CertifiesOnlyUnderItsBinding: the census lists `same`, the run gives the law `also`
+    path = _certified_copy(tmp_path) / "uses_small.lut"
+    _certify_small(tmp_path)
+    with pytest.raises(Refused, match="also: FixesBool: passed, but no passed entry's reach covers m = also"):
+        run_file(path, main="other")
+
+
+def test_a_change_to_the_model_or_to_the_law_makes_the_entry_stale(tmp_path):
+    # StaleCertifiesNothing: the model's cone against the binding's fingerprint, the law's cone
+    # against the entry's hash
+    _certified_copy(tmp_path)
+    _certify_small(tmp_path)
+    small = tmp_path / "small.lut"
+    text = small.read_text(encoding="utf-8")
+    small.write_text(text.replace("same : Small := { f := fn b { b } }",
+                                  "same : Small := { f := fn b { if b then true else false } }"), encoding="utf-8")
+    with pytest.raises(Refused, match=r"same: FixesBool: stale \(the model's code changed since its entries\)"):
+        run_file(tmp_path / "uses_small.lut")
+    small.write_text(text.replace("m.f b == b", "(m.f b == b) and true"), encoding="utf-8")
+    with pytest.raises(Refused, match=r"same: FixesBool: stale \(its entries are at \w+, the cone is now at \w+\)"):
+        run_file(tmp_path / "uses_small.lut")
+
+
+def test_a_provisional_name_is_refused_whole():
+    # ProvisionalIsRefused
+    with pytest.raises(Refused, match=r"shout: provisional") as refusal:
+        run_file(CERTIFIED / "provisional.lut")
+    assert refusal.value.refusals == [{"name": "shout", "law": None, "state": ("Provisional", None)}]
+
+
+def test_the_refusal_is_per_law_and_says_why():
+    # RefusalIsPerLaw, RefusalSaysWhy, ACoveringPassServes over certify's reading of a store
+    from luthier import certify
+    def entry(law, cone, outcome, grade, members):
+        return {"law": law, "cone": cone, "binding": [{"parameter": "m", "generator": "x", "fingerprint": "f"}],
+                "reach": [{"parameter": "m", "reach": {"Members": [{"Printed": v} for v in members]}}],
+                "outcome": outcome, "grade": grade}
+    def demand(law, accepts="Sampled", model="x"):
+        return {"law": law, "cone": "h", "given": [("m", {"Printed": model})], "accepts": accepts,
+                "fingerprints": {"m": "f"}}
+    entries = [entry("A", "h", "Passed", "Sampled", ["x"]), entry("B", "old", "Passed", "Proved", ["x"]),
+               entry("C", "h", {"Failed": "m = x"}, None, ["x"])]
+    one = {"name": "x", "provisional": False, "laws": [demand("A"), demand("B"), demand("C"), demand("D")]}
+    refusals = certify.refuse(entries, [one])
+    assert [(r["law"], r["state"]) for r in refusals] == [
+        ("B", ("Stale", "old")), ("C", ("Current", {"Failed": "m = x"})), ("D", ("Uncertified", None))]
+    split = [{"name": "x", "provisional": False, "laws": [d]} for d in one["laws"]]
+    assert certify.refuse(entries, split) == refusals
+    assert certify.refuse(entries, []) == [] and certify.refuse(entries, [{**one, "laws": []}]) == []
+    assert certify.serves(demand("A"), entries[0]) and not certify.serves(demand("A", "Cases"), entries[0])
+    assert not certify.serves(demand("A", model="y"), entries[0])
+    assert certify.refuse(entries, [{**one, "provisional": True}]) == [
+        {"name": "x", "law": None, "state": ("Provisional", None)}]

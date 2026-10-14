@@ -22,7 +22,10 @@ need): a `Let`'s value, an argument of a lambda, a part a pattern binds and a co
 program stand as one `Shared` cell, reduced at the first demand and kept; `kernel.step` unchanged.
 v10 (prompt-10.md, 12.S22): a constructor or a label of a sum and another file's definition of the
 same name are kept apart (the definition is `name@file`). v12 (prompt-12.md): the arity a host
-function's Python signature gives is read once per function. No certification or result hashing yet.
+function's Python signature gives is read once per function. v13 (record/IA/certification-2026-10-14/
+prompt-run.md, certification.lth §3, 12.S17, 7.S15): before evaluating, `run` reads the stores of
+the files loaded and refuses a cone that is not certified (`certification`, `Refused`), with no
+opt-out (D-2026-10-12-y); the record carries the cone's certification state (12.S18).
 """
 from __future__ import annotations
 
@@ -1393,9 +1396,207 @@ def _is_parameter(hole):
     return not hole.binders and isinstance(hole.type, s.Name) and hole.type.name in PARAMETER_TYPES
 
 
-def run(path, main="main", fuel=10000, sets=()):
-    """Run `main` of the file at `path` with its holes filled by `sets`; gives the standard output
-    and the values set."""
+class Refused(RunError):
+    """`run`'s refusal (12.S17): the cone of the entry is not certified; `refusals` lists each law
+    no entry serves, and each provisional name, with its state."""
+
+    def __init__(self, message, refusals):
+        super().__init__(message)
+        self.refusals = refusals
+
+
+# [proposed] the grade a run accepts when it names none with `--accept`: sampled and above, so an
+# assumed entry serves only a run that accepts `assumed` by name (6.S10, D-2026-10-14-c)
+ACCEPT = "Sampled"
+
+
+def _head_name(x):
+    while isinstance(x, s.App):
+        x = x.function
+    return x.name if isinstance(x, s.Name) else None
+
+
+def _provisional(x):
+    """Whether a surface term holds an extern applied to `provisional` (4.R5, check.provisional)."""
+    if isinstance(x, s.App) and isinstance(x.argument, s.NamedArg) and x.argument.name == "provisional":
+        return True
+    if isinstance(x, tuple):
+        return any(_provisional(y) for y in x)
+    if is_dataclass(x) and not isinstance(x, type):
+        return any(_provisional(getattr(x, f.name)) for f in fields(x))
+    return False
+
+
+class _Theories:
+    """The theory heads of the loaded files (a name declared at a record and defined by its laws,
+    `Arrays : { ... }` and `Arrays := AddPointwise & ...`), and the laws a type states (6.S1)."""
+
+    def __init__(self, acts):
+        self.declared = {a.name: a for a in acts if isinstance(a, s.Declare)}
+        self.bodies, self.aliases, self.acts = {}, {}, {}
+        for a in acts:
+            if isinstance(a, (s.Define, s.Declare)):
+                self.acts.setdefault(a.name, []).append(a)
+            if isinstance(a, s.Alias):
+                self.aliases[a.name] = a.value
+            elif isinstance(a, s.Define) and a.type is None and isinstance(a.body, s.TermBody):
+                self.bodies[a.name] = a.body.term
+
+    def is_theory(self, name):
+        d = self.declared.get(name)
+        return d is not None and isinstance(d.type, s.Record) and name in self.bodies
+
+    def theory_of(self, ty):
+        """The theory head a type names, through aliases (`HostConsole = Host State`); None when
+        it names none: such a type states no law."""
+        name = _head_name(ty)
+        for _ in range(64):
+            if name is None or self.is_theory(name):
+                return name
+            value = self.aliases.get(name, self.bodies.get(name))
+            name = _head_name(value) if value is not None else None
+        return None
+
+    def laws(self, theory):
+        """The laws a theory states: the conjuncts of its definition, a conjunct that is itself a
+        theory head read through, in the order written."""
+        out, pending = [], [self.bodies[theory]]
+        while pending:
+            x = pending.pop(0)
+            if isinstance(x, s.Binop) and x.operator == "&":
+                pending[:0] = [x.left, x.right]
+                continue
+            name = _head_name(x)
+            if name is None:
+                continue
+            if self.is_theory(name) and name != theory:
+                pending[:0] = [self.bodies[name]]
+            elif name not in out:
+                out.append(name)
+        return out
+
+    def model_parameter(self, law, theory):
+        """The parameter of a law whose type is the theory: the model the law is applied to."""
+        for a in self.acts.get(law, ()):
+            if isinstance(a, s.Define):
+                for b in a.binders:
+                    if isinstance(b, s.Explicit) and self.theory_of(b.type) == theory:
+                        return b.names[0]
+        return None
+
+    def type_of(self, name):
+        """The declared type of a name that takes no binders, or None."""
+        for a in self.acts.get(name, ()):
+            if not a.binders and a.type is not None:
+                return a.type
+        return None
+
+
+def _given(value):
+    """certification.lth's `Value` of a `--set` value: a number, or the literal printed."""
+    if isinstance(value, bool):
+        return {"Printed": "true" if value else "false"}
+    if isinstance(value, (int, float)):
+        return {"Number": float(value)}
+    return {"Printed": json.dumps(value, ensure_ascii=False)}
+
+
+def _elaborated(kept):
+    """The runtime program of a slice, as `run` and the tester build it."""
+    # a refined record (belief.lth's `Settings`) as a subtype of the record, as the tester reads
+    # it: the elaborator refuses record refinements, and the bridge drops refinements (resolve)
+    from .tester import _refined_records
+    program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
+    # the kernel's bootstrap of the symbols, as `luthier eval` (cli.py); a file's own come first
+    return program + tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
+
+
+def certification(loaded, program, entry, values, accept=None):
+    """What a run requires (certification.lth §3, 7.S15, 12.S17, 6.S14): the cone of the entry with,
+    per name, its demands, read against the stores of the files loaded (12.S11). Gives the
+    certification state the run records (12.S18); raises `Refused`, listing each refusal with its
+    state, when the store refuses anything of the cone.
+
+    Each name of the cone whose type is a theory head (through aliases) demands each law the
+    theory states; a name whose type states no law is certified vacuously ([proposed] 10 of the
+    theory, 6.S1). A demand: the law (as a test line names it), the current hash of the law's
+    cone, the cutoff `accept`, and what the run gives the law: [proposed] the name itself to the
+    law's parameter typed by the theory (printed, as a census of one prints it), and each hole the
+    run filled with `--set` to the law's parameter of the same name (certification.lth's
+    `Demand`); the model's own cone is compared with the fingerprint the entry's binding recorded
+    (certify.at). A name built on a provisional extern is refused whole."""
+    from . import certify
+    accept = accept or ACCEPT
+    cones = certify.Cones(program)
+    names = sorted(cones.names(entry))
+    theories = _Theories(loaded.acts)
+    surface = {}
+    for a in loaded.acts:
+        if isinstance(a, (s.Define, s.Declare)):
+            surface.setdefault(a.name, []).append(a)
+    # each name of the cone: provisional, or the theory its type states laws of
+    stating = {}
+    provisional = set()
+    for n in names:
+        if any(_provisional(getattr(a, "body", None)) for a in surface.get(n, ())):
+            provisional.add(n)
+        ty = theories.type_of(n)
+        theory = theories.theory_of(ty) if ty is not None else None
+        if theory is not None:
+            stating[n] = theory
+    laws = sorted({law for theory in set(stating.values()) for law in theories.laws(theory)})
+    law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws)))) \
+        if laws else None
+    cone = []
+    for n in names:
+        demands = []
+        if n in stating and n not in provisional:
+            theory = stating[n]
+            for law in theories.laws(theory):
+                given, fingerprints = [], {}
+                m = theories.model_parameter(law, theory)
+                if m is not None:
+                    given.append((m, {"Printed": n.partition("@")[0]}))
+                    fingerprints[m] = cones.hash(n)
+                params = [p for a in theories.acts.get(law, ()) if isinstance(a, s.Define)
+                          for b in a.binders if isinstance(b, s.Explicit) for p in b.names]
+                given += [(p, _given(values[p])) for p in params if p in values and p != m]
+                demands.append({"law": law.partition("@")[0], "cone": law_cones.hash(law), "given": given,
+                                "accepts": accept, "fingerprints": fingerprints})
+        cone.append({"name": n.partition("@")[0], "provisional": n in provisional, "laws": demands})
+    entries = sorted((e for f in loaded.files for e in certify.read_store(f)),
+                     key=lambda e: e.get("date", ""), reverse=True)
+    refusals = certify.refuse(entries, cone)
+    if refusals:
+        lines = [certify.show_refusal(r, entries) for r in refusals]
+        raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (accepting "
+                      f"{certify.GRADE_WORDS[accept]} and above; 12.S17):\n  " + "\n  ".join(lines), refusals)
+    with_laws = [c for c in cone if c["laws"]]
+    return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
+            "accept": certify.GRADE_WORDS[accept],
+            "states": {"certified": len(with_laws), "vacuous": len(cone) - len(with_laws),
+                       "provisional": 0, "uncertified": 0, "stale": 0, "failed": 0},
+            "laws": sum(len(c["laws"]) for c in with_laws), "not certified": []}
+
+
+def refuse_provisional(kept, entry):
+    """A name of the slice built on a provisional extern (4.R5) is refused whole (6.S14, 12.S17,
+    `ProvisionalIsRefused`), before the slice is elaborated: the elaborator does not read the
+    extern's `(provisional <- true)`. [proposed] The laws of the rest of the cone are then not
+    listed: a provisional name refuses the run whatever the store holds."""
+    names = sorted(dict.fromkeys(a.name for a in kept if isinstance(a, s.Define) and _provisional(a.body)))
+    if names:
+        refusals = [{"name": n.partition("@")[0], "law": None, "state": ("Provisional", None)} for n in names]
+        from .certify import show_refusal
+        lines = [show_refusal(r, []) for r in refusals]
+        raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (12.S17):\n  "
+                      + "\n  ".join(lines), refusals)
+
+
+def run(path, main="main", fuel=10000, sets=(), accept=None):
+    """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
+    its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
+    gives the standard output, the values set and the certification state of the cone."""
     host.reset()
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
@@ -1407,16 +1608,13 @@ def run(path, main="main", fuel=10000, sets=()):
             name = empty[a.name]
             raise RunError(f"{name} : {_show_type(a.type)} is a hole of {loaded.top.name} the run needs; "
                            f"give it with --set {name}=...")
-    # a refined record (belief.lth's `Settings`) as a subtype of the record, as the tester reads
-    # it: the elaborator refuses record refinements, and the bridge drops refinements (resolve)
-    from .tester import _refined_records
-    program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
+    refuse_provisional(kept, entry)
+    program = _elaborated(kept)
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
         raise RunError(f"missing main: {main}")
     main = entry
-    # the kernel's bootstrap of the symbols, as `luthier eval` (cli.py); a file's own come first
-    program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
+    state = certification(loaded, program, entry, values, accept)
     runner = Runner(program, fuel)
     value = t.Var(main)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):
@@ -1424,11 +1622,11 @@ def run(path, main="main", fuel=10000, sets=()):
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    return host.stdout(), values
+    return host.stdout(), values, state
 
 
-def run_file(path, main="main", fuel=10000, sets=()):
-    return run(path, main, fuel, sets)[0]
+def run_file(path, main="main", fuel=10000, sets=(), accept=None):
+    return run(path, main, fuel, sets, accept)[0]
 
 
 def record_path(path):
@@ -1436,15 +1634,21 @@ def record_path(path):
     return path.with_name(path.stem + ".run.json")
 
 
-def record(path, main, values, output):
+def record(path, main, values, output, state=None):
     """Append this run to `x.run.json` beside `x.lut` (12.S18): the entry, the time, the
-    parameters, the output, and the calls the host made back into Luthier during the run
-    (`calls`: receiving extern's route -> position among its arguments -> count, D-2026-10-14-a). The hash and fingerprint of the cone, the interpreter's revision,
-    the lock status and the states of the cone are not recorded yet."""
+    parameters, the output, the calls the host made back into Luthier during the run (`calls`:
+    receiving extern's route -> position among its arguments -> count, D-2026-10-14-a), and the
+    certification state of the cone (`certification`: the hash of the entry's cone, the
+    interpreter's revision, the grade accepted, the counts of states of the cone's names and the
+    names not certified, empty since a run starts only on a certified cone). The lock status is not
+    recorded yet."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
-    runs.append({"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                 "parameters": values, "output": output, "calls": host.calls()})
+    item = {"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "parameters": values, "output": output, "calls": host.calls()}
+    if state is not None:
+        item["certification"] = state
+    runs.append(item)
     where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return where
