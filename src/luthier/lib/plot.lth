@@ -13,6 +13,8 @@
 -- L2.7; D-2026-10-14-c (laws Boolean, every cutoff a parameter the demand supplies). Pattern:
 -- world.lth §1 to §5 (a description over the representation, a host action certified against it
 -- by `agreement`) and tables.lth (a record whose laws are its schema's).
+-- The canvas (`Canvas`, `CanvasPositive`, `plot`'s first argument) was added the same day on
+-- record/IA/plots-2026-10-15/prompt-host.md (item 0), the theory agent's open item (P11).
 --
 -- What this file states. A plot is a value of the theory `Plot` (G1, P10): its tables by name, the
 -- mapping from aesthetics to column names that its layers inherit, its layers (each a geometry
@@ -99,9 +101,17 @@ Coord = { cartesian : Unit || equal : Unit }
 Layer = { geom : Geom, mapping : Mapping, table : String }
 Labels = { title : String, x : String, y : String }
 
+-- P11 [proposed]: the canvas the plot is drawn on, its width and height in inches and its
+-- resolution in dots per inch (a raster's pixels are width times dpi by height times dpi; an SVG
+-- carries the size in points and ignores the dpi). It is part of the value, stated by the demand
+-- (no default): two sizes are two images, and a size taken by the host would be a constant in the
+-- code.
+Canvas = { width : Float64, height : Float64, dpi : Float64 }
+
 -- plan G2, G1 (P10): the plot, a theory whose laws are §4's. The layers are drawn in their order,
 -- a later one over an earlier one; the facet, if any, is a column whose levels split the panels.
 Plot : {
+  canvas : Canvas,
   tables : List (String * Table),
   mapping : Mapping,
   layers : List Layer,
@@ -115,16 +125,16 @@ Plot : {
 
 -- Each constructor is a pure function to `Plot`; the layer constructors take the table's name,
 -- the layer's own mapping and the geometry's parameters, and put the layer last (on top), so
--- `labels t "" "" (coord (equal unit) (text "fit" m 8.0 (point "fit" m 4.0 (plot "fit" tbl m))))`
+-- `labels t "" "" (coord (equal unit) (text "fit" m 8.0 (point "fit" m 4.0 (plot cv "fit" tbl m))))`
 -- is ggplot's `ggplot(tbl, m) + geom_point(size = 4) + geom_text(size = 8) + coord_equal() +
--- labs(title = t)`. [proposed] The brief's `point m` takes the table and the parameters too:
--- a plot has several tables, and a size is a parameter (P11).
+-- labs(title = t)`, drawn at ggsave's size `cv`. [proposed] The brief's `point m` takes the
+-- table and the parameters too: a plot has several tables, and a size is a parameter (P11).
 appendLayer (ls : List Layer) (l : Layer) : List Layer := match ls { nil -> [l] ; cons a rest -> cons a (appendLayer rest l) }
 withLayers (p : Plot) (ls : List Layer) : Plot :=
-  { tables := p.tables, mapping := p.mapping, layers := ls, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
+  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := ls, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
 addLayer (p : Plot) (l : Layer) : Plot := withLayers p (appendLayer p.layers l)
 withData (p : Plot) (ds : List (String * Table)) : Plot :=
-  { tables := ds, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
+  { canvas := p.canvas, tables := ds, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet, labels := p.labels }
 dropTable (ds : List (String * Table)) (name : String) : List (String * Table) :=
   match ds { nil -> nil ; cons (n, t) rest -> if n == name then dropTable rest name else cons (n, t) (dropTable rest name) }
 appendTable (ds : List (String * Table)) (name : String) (t : Table) : List (String * Table) :=
@@ -132,10 +142,11 @@ appendTable (ds : List (String * Table)) (name : String) (t : Table) : List (Str
 dropScale (ss : List (String * Scale)) (a : String) : List (String * Scale) :=
   match ss { nil -> nil ; cons (b, s) rest -> if a == b then dropScale rest a else cons (b, s) (dropScale rest a) }
 
--- plan G2: a plot from one table, named, and the mapping its layers inherit; no layer, no scale,
--- cartesian coordinates, no facet, no labels
-plot (name : String) (t : Table) (m : Mapping) : Plot :=
-  { tables := [(name, t)], mapping := m, layers := nil, scales := nil, coord := cartesian unit, facet := nothing,
+-- plan G2: a plot on a canvas from one table, named, and the mapping its layers inherit; no layer,
+-- no scale, cartesian coordinates, no facet, no labels. [proposed] The canvas comes first and has
+-- no default (P11).
+plot (cv : Canvas) (name : String) (t : Table) (m : Mapping) : Plot :=
+  { canvas := cv, tables := [(name, t)], mapping := m, layers := nil, scales := nil, coord := cartesian unit, facet := nothing,
     labels := { title := "", x := "", y := "" } }
 -- plan G2: a further table, by name (it replaces a table of that name)
 table (name : String) (t : Table) (p : Plot) : Plot := withData p (appendTable (dropTable p.tables name) name t)
@@ -162,17 +173,17 @@ abline (intercept slope width : Float64) (p : Plot) : Plot :=
   addLayer p { geom := ablines { intercept := intercept, slope := slope, width := width }, mapping := nil, table := "" }
 -- plan G2: the scale of an aesthetic ("x", "y" or "colour"), replacing any earlier one
 scale (a : String) (s : Scale) (p : Plot) : Plot :=
-  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := cons (a, s) (dropScale p.scales a), coord := p.coord,
+  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := p.layers, scales := cons (a, s) (dropScale p.scales a), coord := p.coord,
     facet := p.facet, labels := p.labels }
 -- plan G2: the coordinates
 coord (c : Coord) (p : Plot) : Plot :=
-  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := c, facet := p.facet, labels := p.labels }
+  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := c, facet := p.facet, labels := p.labels }
 -- plan G2: the panels split by the levels of a column
 facet (col : String) (p : Plot) : Plot :=
-  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := just col, labels := p.labels }
+  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := just col, labels := p.labels }
 -- plan G2: the title and the axes' labels
 labels (title xlab ylab : String) (p : Plot) : Plot :=
-  { tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet,
+  { canvas := p.canvas, tables := p.tables, mapping := p.mapping, layers := p.layers, scales := p.scales, coord := p.coord, facet := p.facet,
     labels := { title := title, x := xlab, y := ylab } }
 
 -- ---------------------------------------------------------------- §3 Reading a plot
@@ -283,6 +294,8 @@ levels (t : Table) (c : String) : Int :=
 AestheticsKnown (p : Plot) : Bool :=
   allStr (keysOf p.mapping) (fn a { memberStr a knownAesthetics })
     and allLayers p.layers (fn l { allStr (keysOf l.mapping) (fn a { memberStr a knownAesthetics }) })
+-- P11 [proposed]: the canvas has a positive width, height and resolution
+CanvasPositive (p : Plot) : Bool := p.canvas.width > 0.0 and p.canvas.height > 0.0 and p.canvas.dpi > 0.0
 -- plan G2: the tables are named once each
 TablesNamedOnce (p : Plot) : Bool := distinct (namesOf p.tables)
 -- plan G3: a layer that draws columns names a table of the plot
@@ -373,13 +386,13 @@ FacetIsAColumn (p : Plot) : Bool :=
 scaleKind (p : Plot) (a : String) : String := match lookupScale p.scales a { nothing -> "" ; just s -> (scaleKey s).kind }
 CoordFitsScales (p : Plot) : Bool := match p.coord { cartesian u -> true ; equal u -> scaleKind p "x" == scaleKind p "y" }
 
-Plot := AestheticsKnown & TablesNamedOnce & LayersNameTheirTables & LayerMapsWhatItDraws & NeedsMapped
+Plot := CanvasPositive & AestheticsKnown & TablesNamedOnce & LayersNameTheirTables & LayerMapsWhatItDraws & NeedsMapped
   & AestheticsAreColumns & GeometryParametersPositive & ScalesStated & ScalesFitTheirAesthetics
   & ScaleLimitsWellFormed & LimitsContainTheData & LogScaleOnPositiveData & PaletteCoversLevels & FacetIsAColumn & CoordFitsScales
 
 -- the laws as one predicate, the premise of §5's laws (a renderer is asked to draw only a plot)
 wellFormed (p : Plot) : Bool :=
-  AestheticsKnown p and TablesNamedOnce p and LayersNameTheirTables p and LayerMapsWhatItDraws p and NeedsMapped p
+  CanvasPositive p and AestheticsKnown p and TablesNamedOnce p and LayersNameTheirTables p and LayerMapsWhatItDraws p and NeedsMapped p
     and AestheticsAreColumns p and GeometryParametersPositive p and ScalesStated p and ScalesFitTheirAesthetics p
     and ScaleLimitsWellFormed p and LimitsContainTheData p and LogScaleOnPositiveData p and PaletteCoversLevels p
     and FacetIsAColumn p and CoordFitsScales p
@@ -418,7 +431,7 @@ sameData (ds es : List (String * Table)) : Bool :=
     nil -> (match es { nil -> true ; cons e rest -> false }) ;
     cons (n, t) more -> match es { nil -> false ; cons (m, u) rest -> n == m and sameTable t u and sameData more rest } }
 samePlot (p q : Plot) : Bool :=
-  sameData p.tables q.tables and p.mapping == q.mapping and sameLayers p.layers q.layers and sameScales p.scales q.scales
+  p.canvas == q.canvas and sameData p.tables q.tables and p.mapping == q.mapping and sameLayers p.layers q.layers and sameScales p.scales q.scales
     and coordKey p.coord == coordKey q.coord and p.facet == q.facet and p.labels == q.labels
 
 -- ---------------------------------------------------------------- §5 The renderer (plan G1, G3; 10.S3, 10.S10)
