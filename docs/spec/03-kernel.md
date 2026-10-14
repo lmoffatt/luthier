@@ -197,9 +197,12 @@ fields are functions crosses as the record with each function a callback; a host
 crossing in is an opaque value, applicable only through the bridge and never reduced by the
 kernel; and an extern applied to fewer arguments than its declared type has is a partial
 application, the arity read from that type. Needed by the fit of sonolocalización
-(`record/plan/questions-2026-10-14.md`, Q1). Not implemented: `run.py` crosses by the declared
-type (`record/IA/run-2026-10-13/report-4.md`) and reads the arity (`report-6.md`), the callback
-and the opaque host function are to do.
+(`record/plan/questions-2026-10-14.md`, Q1). Implemented at dda4192: `run.py` crosses by the
+declared type (`record/IA/run-2026-10-13/report-4.md`), reads the arity (`report-6.md`), and
+carries the callback with its count, the record of functions, the opaque host function and the
+partial (`report-8.md`); the laws are world.lth's `Crossing` and term.lth's `ExternPartialIsValue`
+and `HostGivesBackAValue` (`record/IA/theories-2026-10-14/report.md`). Programs:
+`tests/run/callbacks.lut`, `record_of_functions.lut`, `host_function.lut`, `extern_partial.lut`.
 
 **3.S24. Bridge 3, representation by type.** [implemented] `Fin n -> Float64` is a one-dimensional
 ndarray, `Fin m -> Fin n -> Float64` a two-dimensional one, `Fin n -> A` for a non-numeric `A` a
