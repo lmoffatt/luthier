@@ -46,6 +46,16 @@ symmetricMore : List (Mat Float64) := [
   diag3 1.0 1.0e-16 2.0,
   mat Float64 5 5 (fn i j { 1.0 / toFloat64 (i + j + 1) }),
   mat Float64 1 1 (fn i j { 0.0 - 2.0 }) ]
+-- the positive semidefinite ones among them, where PinvRestricts is stated (PsdAt, 11.S18): rank
+-- one, the zero matrix, one eigenvalue above the floor and one below it, Hilbert's of five; the
+-- indefinite ones (the second, the one negative entry) are left out, the law does not claim them
+symmetricPsd : List (Mat Float64) := [
+  mat Float64 3 3 (fn i j { toFloat64 ((i + 1) * (j + 1)) }),
+  zeroMat 3 3,
+  identity 3,
+  diag3 1.0 1.0e-13 2.0,
+  diag3 1.0 1.0e-16 2.0,
+  mat Float64 5 5 (fn i j { 1.0 / toFloat64 (i + j + 1) }) ]
 -- listed orthogonal matrices of three rows: a permutation, a reflection, a rotation by the 3-4-5
 -- triangle (orthogonal within rounding)
 orthogonal3 : List (Mat Float64) := [
@@ -55,6 +65,7 @@ orthogonal3 : List (Mat Float64) := [
                             else if i == j then 0.6 else if i == 0 then 0.0 - 0.8 else 0.8 }) ]
 three : List Int := [3]
 listedS : List Binding := [ { parameter := just "s", type := nothing, generator := "symmetricMore", coverage := Listed } ]
+listedPsd : List Binding := [ { parameter := just "s", type := nothing, generator := "symmetricPsd", coverage := Listed } ]
 listedRotation : List Binding := [
   { parameter := just "k", type := nothing, generator := "three", coverage := Listed },
   { parameter := just "q", type := nothing, generator := "orthogonal3", coverage := Listed },
@@ -106,6 +117,6 @@ test "PinvTraceIsRank" (SampledMode linear) (seed <- 20261014) (profile <- model
 test "PinvScales" (SampledMode linear) (seed <- 20261014) (profile <- models)
 test "PinvProjects" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
 test "PinvSymmetric" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
-test "PinvRestricts" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
+test "PinvRestricts" ExhaustiveMode (whereBindings <- listedPsd) (profile <- models)
 test "PinvTraceIsRank" ExhaustiveMode (whereBindings <- listedS) (profile <- models)
 test "PinvScales" (SampledMode linear) (seed <- 20261014) (whereBindings <- listedS) (profile <- models)
