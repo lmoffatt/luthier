@@ -20,13 +20,21 @@ between the bounds, 7.S4's special values and atom at 0 too); the sized generato
 data other than `List` (7.S3's [proposed] row); enumeration of lists under `ExhaustiveMode`;
 covering arrays (7.R3: above `coveringAbove` cases the test is not run); bindings to a generator
 (a binding here names a census: one value, or a list of values, of the program); a size schedule
-(every case is drawn at the spec's size); the store of entries (7.S9, 7.S13). Of the budgets
+(every case is drawn at the spec's size). Of the budgets
 (7.S8) only `tries` and `coveringAbove` are read: a draw a filter cannot give within `tries`
 makes the law not run (7.S6), so `drawsPerCase` and `redraws` have nothing to bound yet. A case
 whose reduction raises (the host failed, a match stuck, the fuel spent) is not evaluated
 (7.S12); it is reported on that case and leaves the law unsettled unless another case refutes it.
 A name two libraries define is scoped by its file in run.py's loader (12.S22): a law or a census
 a test line names is the one the test file sees.
+
+The store (bite 2, record/IA/certification-2026-10-14/prompt-certify.md; certification.lth §1,
+7.S9, 7.S13): each line's identity is the law, the hash of its cone (certify.py), the binding
+expanded per parameter, the seed and `n`. Before a line runs its identity is looked up in
+`x.cert.json`: a known outcome, whatever it is, is reused and reported as known with its date;
+`deep` runs it again (and records nothing new: the store keeps one outcome per identity). A line
+run writes its entry, with the reach of each parameter, the evidence, the grade when it passed,
+the date, the interpreter's revision and the host code by route.
 """
 from __future__ import annotations
 
@@ -35,7 +43,7 @@ import string
 from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
 
-from . import host, kernel, surface as s, term as t
+from . import certify, host, kernel, surface as s, term as t
 from .elaborate import elaborate_program, show_term as _show_term
 from .parse import parse
 import numpy as np
@@ -124,6 +132,11 @@ class Outcome:
     refuting: tuple | None  # the first refuting case
     raised: list = field(default_factory=list)  # (case, message): the host failed or the reduction stuck
     parameters: tuple = ()
+    cone: str | None = None     # the hash of the law's cone (certify.py)
+    entry: dict | None = None   # the store's entry of this line (certification.lth's `Entry`)
+    known: str | None = None    # the date of the known entry reused, when the line did not run
+    stale: str | None = None    # the date of a stale entry of the same law and binding, kept
+    differs: str | None = None  # under `deep`, the date of a known entry whose outcome differs
 
 
 # ---------------------------------------------------------------------- loading
@@ -741,24 +754,48 @@ def show_case(names, case):
     return ", ".join(f"{n} = {_show(v)}" for n, v in zip(names, case))
 
 
+def _tail(outcome):
+    """What the line settled: the grade, the refuting case, or why it settled nothing."""
+    if isinstance(outcome.evidence, NotRun):
+        return f"not run: {outcome.evidence.reason}"
+    if outcome.verdict == "Refuted":
+        return f"refuted at {show_case(outcome.parameters, outcome.refuting)}"
+    if outcome.verdict == "Unsettled":
+        case, message = outcome.raised[0]
+        return (f"unsettled: {len(outcome.raised)} cases raised, the first at "
+                f"{show_case(outcome.parameters, case)}: {message}")
+    return _GRADE_WORDS.get(outcome.grade, outcome.grade)
+
+
+def _entry_tail(entry):
+    o = entry["outcome"]
+    if o == "Passed":
+        return _GRADE_WORDS.get(entry["grade"], entry["grade"])
+    if "Failed" in o:
+        return f"refuted at {o['Failed']}"
+    return f"not run: {o['NotRunFor']}" if "NotRun" in entry["evidence"] else o["NotRunFor"]
+
+
 def line(outcome):
-    """One line per test: the law, the mode, the cases evaluated, the grade, the refuting case."""
+    """One line per test: the law, the mode, the cases evaluated, the grade or the refuting case,
+    and whether it ran or its outcome was known (7.S13)."""
     spec = outcome.spec
     mode = f"sampled (seed {spec.seed}, size {spec.size}, metric ignored)" if spec.sampled else "exhaustive"
     head = f"{spec.law}: {mode}, {outcome.evaluated} cases"
-    if isinstance(outcome.evidence, NotRun):
-        return f"{head}, not run: {outcome.evidence.reason}"
-    if outcome.verdict == "Refuted":
-        return f"{head}, refuted at {show_case(outcome.parameters, outcome.refuting)}"
-    if outcome.verdict == "Unsettled":
-        case, message = outcome.raised[0]
-        return (f"{head}, unsettled: {len(outcome.raised)} cases raised, the first at "
-                f"{show_case(outcome.parameters, case)}: {message}")
-    return f"{head}, {_GRADE_WORDS.get(outcome.grade, outcome.grade)}"
+    if outcome.known is not None:
+        return f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known})"
+    how = "ran"
+    if outcome.stale is not None:
+        how += f"; the entry of {outcome.stale} is stale, kept"
+    if outcome.differs is not None:
+        how += f"; the known entry of {outcome.differs} differs and is kept"
+    return f"{head}, {_tail(outcome)} ({how})"
 
 
-def run_tests(path, seed=None, fuel=1_000_000):
-    """Run every `test` line of the file; the outcomes in order."""
+
+
+def prepare(path, fuel=1_000_000):
+    """The file's program with its test lines read as specs: the Runner, the specs, the loader."""
     runner, names, loaded = load_program(path, fuel)
     specs = [read_spec(runner, t.Var(name)) for name in names]
     # the laws and censuses the specs name, when a definition (a profile) holds their names
@@ -768,9 +805,135 @@ def run_tests(path, seed=None, fuel=1_000_000):
     if missing:
         runner, names, loaded = load_program(path, fuel, missing)
         specs = [read_spec(runner, t.Var(name)) for name in names]
+    return runner, specs, loaded
+
+
+def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
+    """Run every `test` line of the file; the outcomes in order. With `store`, each line's identity
+    is looked up in `x.cert.json` first (a known outcome is reused unless `deep`) and each line run
+    is recorded there (certification.lth's `known` and `record`)."""
+    runner, specs, loaded = prepare(path, fuel)
+    cones = certify.Cones(runner)
+    entries = certify.read_store(path) if store else []
     outcomes = []
     for spec in specs:
         if seed is not None:
             spec.seed = seed
-        outcomes.append(run_spec(runner, spec, fuel, loaded))
+        entry = new_entry(runner, loaded, spec, cones, fuel)
+        found = certify.known(entries, certify.identity(entry))
+        if found is not None and not deep:
+            evidence = found["evidence"]
+            points = evidence.get("Points", {})
+            outcomes.append(Outcome(spec, evidence, points.get("verdict", "NotRun"), found["grade"],
+                                    points.get("evaluated", 0), None, cone=entry["cone"], entry=found,
+                                    known=found["date"]))
+            continue
+        outcome = run_spec(runner, spec, fuel, loaded)
+        settle(entry, outcome)
+        outcome.cone, outcome.entry = entry["cone"], entry
+        if found is not None and found["outcome"] != entry["outcome"]:
+            outcome.differs = found["date"]
+        old = next((e for e in entries if e["law"] == entry["law"] and e["binding"] == entry["binding"]
+                    and certify.stale(entry["cone"], e)), None)
+        if old is not None:
+            outcome.stale = old["date"]
+        outcomes.append(outcome)
+        if store:
+            recorded = certify.record(entries, entry)
+            if recorded is not entries:
+                entries = recorded
+                certify.write_store(path, entries)
     return outcomes
+
+
+def law_cones(path, fuel=1_000_000):
+    """Each law the file's test lines name, as the file writes it, with the hash of its cone."""
+    runner, specs, loaded = prepare(path, fuel)
+    cones = certify.Cones(runner)
+    return list({spec.law: cones.hash(_as_called(loaded, spec.law)) for spec in specs}.items())
+
+
+# ---------------------------------------------------------------------- the entry (certification.lth §1)
+
+def _value(runner, v):
+    """certification.lth's `Value`: a census member that reduces to a number literal (`tolerance :=
+    1.0e-12`) as the number, anything else printed as the census writes it."""
+    try:
+        runner.fuel = 10000
+        w = runner.whnf(v)
+    except (RunError, RecursionError, ValueError, KeyError, TypeError):
+        w = v
+    if isinstance(w, t.Lit) and isinstance(w.constant, (t.IntConst, t.FloatConst)):
+        return {"Number": float(w.constant.value)}
+    return {"Printed": _show(v)}
+
+
+def new_entry(runner, loaded, spec, cones, fuel):
+    """The entry of a line before it runs: its identity (the law, the hash of its cone, the binding
+    expanded per parameter, the seed, `n`), the budgets, the reach of each parameter, the date, the
+    interpreter and the host code by route (the law's cone's and each census's). The evidence, the
+    grade and the outcome are `settle`'s.
+
+    [proposed] A parameter's generator is the census its binding names, printed with the binding's
+    coverage, its fingerprint the hash of the census's cone; otherwise the mode's functor over the
+    parameter's type, printed with the metric and the size, its fingerprint empty (the drawing code
+    is the interpreter's, in the cone's hash). The reach: a census's members; the support of the
+    type under ExhaustiveMode; under SampledMode, for an `Int` or a `Float64` (refined or not, not
+    dependent on an earlier parameter), the interval it is drawn from; no reach otherwise, which
+    covers no value a run gives (certification.lth's `coversAll`)."""
+    law = _as_called(loaded, spec.law)
+    params = parameters(runner, law) or []
+    values = Values(runner, random.Random(0), spec.size, spec.budgets, fuel)
+    binding, reach, hosts = [], [], dict(cones.hosts(law))
+    for k, (name, ty) in enumerate(params):
+        b = resolve_binding(spec, name, _head_name(ty))
+        if b is not None:
+            called = _as_called(loaded, b.generator)
+            binding.append({"parameter": name, "generator": f"{b.generator} ({_show(b.coverage)})",
+                            "fingerprint": cones.hash(called)})
+            hosts.update(cones.hosts(called))
+            try:
+                members = census(runner, b, ty, called)
+            except (NoGenerator, RunError):
+                continue
+            reach.append({"parameter": name, "reach": {"Members": [_value(runner, v) for v in members]}})
+            continue
+        mode = f"SampledMode {_show(spec.metric)} (size {spec.size})" if spec.sampled else "ExhaustiveMode"
+        binding.append({"parameter": name, "generator": f"{mode} over {_show(ty)}", "fingerprint": ""})
+        if not spec.sampled:
+            reach.append({"parameter": name, "reach": "Support"})
+            continue
+        if any(_mentions(ty, earlier) for earlier, _ in params[:k]):
+            continue
+        try:
+            base, predicates = values.form(ty)
+            if base not in (t.Var("Int"), t.Var("Float64")):
+                continue
+            lo, hi = values.bounds(predicates, base.name)
+        except (RunError, RecursionError):
+            continue
+        lo = -spec.size if lo is None else lo        # draw_base's defaults
+        hi = (max(lo, 0) + spec.size) if hi is None else hi
+        reach.append({"parameter": name, "reach": {"Interval": [float(lo), float(hi)]}})
+    return {"law": spec.law, "cone": cones.hash(law), "binding": binding, "seed": spec.seed, "cases": spec.cases,
+            "budgets": dict(spec.budgets), "reach": reach, "evidence": None, "grade": None, "outcome": None,
+            "date": certify.now(), "interpreter": certify.interpreter_revision(),
+            "hosts": [[r, h] for r, h in sorted(hosts.items())]}
+
+
+def settle(entry, outcome):
+    """The entry's evidence, grade and outcome from the line's: passed with its grade; failed at
+    the refuting case; not run with its reason, or unsettled with the first case that raised."""
+    if isinstance(outcome.evidence, NotRun):
+        entry["evidence"] = {"NotRun": outcome.evidence.reason}
+        entry["outcome"] = {"NotRunFor": outcome.evidence.reason}
+        return entry
+    entry["evidence"] = {"Points": {"evaluated": outcome.evaluated, "raised": len(outcome.raised),
+                                    "coverage": _show(outcome.evidence.coverage), "verdict": outcome.verdict}}
+    if outcome.verdict == "Refuted":
+        entry["outcome"] = {"Failed": show_case(outcome.parameters, outcome.refuting)}
+    elif outcome.grade is not None:
+        entry["outcome"], entry["grade"] = "Passed", outcome.grade
+    else:
+        entry["outcome"] = {"NotRunFor": _tail(outcome)}
+    return entry

@@ -14,7 +14,8 @@ CASES = ROOT / "tests" / "tester" / "cases.lut"
 
 
 def lines_of(capsys, *args):
-    code = main(["test", *map(str, args)])
+    # --no-cert: the programs under tests/ get no store (test_certify.py tests the store)
+    code = main(["test", "--no-cert", *map(str, args)])
     return code, capsys.readouterr().out.splitlines()
 
 
@@ -22,13 +23,13 @@ def test_the_five_kinds_of_outcome(capsys):
     code, lines = lines_of(capsys, LAWS)
     assert code == 1  # a law is refuted and one is not run
     assert lines == [
-        "NotInvolutive: exhaustive, 2 cases, exhaustive",
-        "AndIsOr: exhaustive, 4 cases, refuted at a = true, b = false",
-        "PlusCommutes: sampled (seed 7, size 10, metric ignored), 200 cases, sampled",
-        "Small: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
-        "Small: sampled (seed 0, size 1000, metric ignored), 100 cases, refuted at x = 729",
+        "NotInvolutive: exhaustive, 2 cases, exhaustive (ran)",
+        "AndIsOr: exhaustive, 4 cases, refuted at a = true, b = false (ran)",
+        "PlusCommutes: sampled (seed 7, size 10, metric ignored), 200 cases, sampled (ran)",
+        "Small: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)",
+        "Small: sampled (seed 0, size 1000, metric ignored), 100 cases, refuted at x = 729 (ran)",
         "PlusCommutes: exhaustive, 0 cases, not run: x : Int: Int is infinite: "
-        "ExhaustiveMode needs its bounds or a census (7.R3)",
+        "ExhaustiveMode needs its bounds or a census (7.R3) (ran)",
     ]
 
 
@@ -62,11 +63,11 @@ def test_a_failure_on_a_case_is_reported_on_that_case(capsys):
     assert code == 1
     host, stuck, census, unbound, scoped, infinite = lines
     assert "unsettled" in host and "the first at x = -" in host and "math domain error" in host
-    assert stuck == "Partial: exhaustive, 1 cases, unsettled: 1 cases raised, the first at b = false: stuck match"
-    assert census == "DivisionAlgorithm: sampled (seed 0, size 10, metric ignored), 30 cases, sampled"
+    assert stuck == "Partial: exhaustive, 1 cases, unsettled: 1 cases raised, the first at b = false: stuck match (ran)"
+    assert census == "DivisionAlgorithm: sampled (seed 0, size 10, metric ignored), 30 cases, sampled (ran)"
     assert "not run: m : IntegerDivision" in unbound and "bind a census (7.R4)" in unbound
     # numbers.lth's LeqTransitive over its own LeqChain (kernel_laws.lth and algebra.lth define one too)
-    assert scoped == "LeqTransitive: sampled (seed 0, size 10, metric ignored), 30 cases, sampled"
+    assert scoped == "LeqTransitive: sampled (seed 0, size 10, metric ignored), 30 cases, sampled (ran)"
     assert "not run: a : Int" in infinite
 
 
@@ -139,8 +140,8 @@ def test_arrays_are_drawn_and_a_census_of_lists_lists_its_elements(tmp_path, cap
     code, lines = lines_of(capsys, program)
     assert code == 0
     assert lines == [
-        "VecHasItsLength: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
-        "MatHasItsShape: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
-        "SquareIsSquare: sampled (seed 0, size 10, metric ignored), 100 cases, sampled",
-        "AtMostTwo: exhaustive, 3 cases, cases",
+        "VecHasItsLength: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)",
+        "MatHasItsShape: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)",
+        "SquareIsSquare: sampled (seed 0, size 10, metric ignored), 100 cases, sampled (ran)",
+        "AtMostTwo: exhaustive, 3 cases, cases (ran)",
     ]

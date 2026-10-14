@@ -34,12 +34,24 @@ def main(argv: list[str] | None = None) -> int:
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
     p_test.add_argument("--fuel", type=int, default=1_000_000,
                         help="reduction fuel per case [proposed: default 1,000,000]")
+    p_test.add_argument("--deep", action="store_true", help="run again a line whose outcome the store knows (7.S13)")
+    p_test.add_argument("--no-cert", action="store_true", help="neither read nor write the store x.cert.json (12.S15)")
+    p_cert = sub.add_parser("certify", help="run the test lines of several files, each in its own process (12.S16)")
+    p_cert.add_argument("files", nargs="+")
+    p_cert.add_argument("--jobs", type=int, default=1, help="files run at a time")
+    p_cert.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
+    p_cert.add_argument("--deep", action="store_true", help="run again the lines whose outcome a store knows")
+    p_cert.add_argument("--fuel", type=int, default=1_000_000, help="reduction fuel per case")
     ns = parser.parse_args(argv)
+
+    if ns.command == "certify":
+        from .certify import certify
+        return 0 if certify(ns.files, ns.jobs, ns.seed, ns.deep, ns.fuel) else 1
 
     if ns.command == "test":
         from .tester import line, run_tests
         try:
-            outcomes = run_tests(ns.file, ns.seed, ns.fuel)
+            outcomes = run_tests(ns.file, ns.seed, ns.fuel, deep=ns.deep, store=not ns.no_cert)
         except (OSError, ValueError, RecursionError) as exc:
             import sys
             print(f"{ns.file}: {exc}", file=sys.stderr)
@@ -117,10 +129,28 @@ def main(argv: list[str] | None = None) -> int:
             if ns.verbose:
                 for item in report(result.program):
                     print(f"{path}:{line_of(item.name)}: {item.kind} {item.name}: {item.message}")
+                failed |= _standings(path, line_of)
         elif ns.tree and isinstance(result, Parsed):
             for act in result.program:
                 print(act)
     return 1 if failed else 0
+
+
+def _standings(path, line_of):
+    """`check -v`: per law a test line of the file names, its standing from the store against the
+    current hash of its cone (12.S11, 12.S14): the grade, refuted, not run, stale or uncertified.
+    Only for a file with test lines; True when the program cannot be loaded."""
+    from .tester import collect_tests
+    try:
+        if not collect_tests(path):
+            return False
+        from .certify import standings
+        for law, standing in standings(path):
+            print(f"{path}:{line_of(law)}: certificate {law}: {standing}")
+        return False
+    except (OSError, ValueError, RecursionError) as exc:
+        print(f"{path}:1: certificate: {exc}")
+        return True
 
 
 if __name__ == "__main__":
