@@ -13,7 +13,8 @@
 -- On meaning (L2.7). The constructors of `Term` that compute get their roles from the laws of
 -- `Reduction` (§5): `Lam` and `App` from `Beta`, `Var` from `Delta`, `Match`, `Inj`, `Pair` and the
 -- patterns from `Iota`, `RecordValue` and `Proj` from `ProjOfRecord`, `Lit` (of every kind) and
--- `Primitive` from `Prim`, `Extern` from `ExternIsValue`, `Hole` and `Axiom` from `HolesStay`,
+-- `Primitive` from `Prim`, `Extern` from `ExternIsValue` (with `ExternPartialIsValue` and
+-- `HostGivesBackAValue`, D-2026-10-14-a), `Hole` and `Axiom` from `HolesStay`,
 -- `Datum` from `DatumIsInert`, `Let` from `Zeta`. The type
 -- formers (`Universe`, `World`, `Pi`, `Sigma`, `Sum`, `Data`, `Subtype`) are values for reduction
 -- (`ValuesStay`); their roles are the checker's, laws of `WellFormed` in program.lth (step 3.1).
@@ -32,7 +33,8 @@
 --   §3 Substitution, capture-avoiding (3.S14's `t[a/x]`).                               done
 --   §4 Canonical form: alpha-invariant and idempotent; module prefixes removed (3.S34).  done
 --   §5 Reduction: `Beta`, `Delta`, `Iota`, `Prim`, `ExternIsValue`, `HolesStay`,
---      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33).                         done
+--      `ValuesStay`, with fuel (3.S11, 3.S14 to 3.S20, 3.S33); an extern partially
+--      applied, an opaque host function, the host's answer (3.S23; D-2026-10-14-a).   done
 --   §6 Quote and eval (3.S32): cases on literals and closed terms.                      done
 --   §7 The models, to write in term_model.lut: `reduce` (the interpreter in Luthier),
 --      `alpha`, `substitute`, `canonical`; by Codex (record/IA/term-2026-10-13/
@@ -581,9 +583,35 @@ EqualityStuck (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (x f : Stri
 
 -- 3.S18, extern: an extern is a value until applied to as many closed arguments as its type has
 -- parameters; then the host is called (spec 10), which this theory does not state: the answer is
--- the specimen's and its certificate's
-ExternIsValue (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (r : String) : Bool :=
-  isNormal (m.step p (Extern r))
+-- the specimen's and its certificate's. A host function crossing in (3.S23; D-2026-10-14-a) is
+-- opaque: applicable only through the bridge, never reduced by the kernel. [proposed] (D-2026-10-14-a
+-- names no representation) It is an `Extern` whose route is a handle the bridge minted, with the
+-- type the declaring extern's result type gives (run.py's `host:n`), so this law is its law: it
+-- stays as it is under the step, and a route is not a name (3.S40), so no definition in the
+-- program unfolds it, not even one of the route's own spelling; under `==` it is stuck
+-- (`EqualityStuck`).
+ExternIsValue (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (r : String) (ty b : Term) : Bool :=
+  isNormal (m.step p (Extern r)) and isNormal (m.step (cons (Define r ty b) p) (Extern r))
+-- 3.S23 (D-2026-10-14-a): an extern applied to fewer arguments than its declared type has
+-- parameters is a partial application, a value, the arity read from the declared type: the program
+-- declares the extern with a type of two parameters and the step leaves it applied to one.
+-- [proposed] (D-2026-10-14-a says where the arity comes from, not where the step reads it) The
+-- step finds the arity of `Extern r` in the `Define` whose body it is, so the law gives the program.
+ExternPartialIsValue (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (f x y r : String)
+                     (ta tb tc : Term) (c : Constant) : Bool :=
+  isNormal (m.step (cons (Define f (Pi x ta (Pi y tb tc)) (Extern r)) p) (App (Extern r) (Lit c)))
+-- and what the host gives back is a value (3.S23; D-2026-10-14-a): an application of an extern
+-- that the step does not leave as it is went to the host through the bridge, whether its argument
+-- was a constant or a lambda over an infinite domain, which crossed as a callback (its calls are
+-- world.lth's, `Crossing`), and the step gives the host's answer as a value: a constant, a
+-- constructor applied, or an opaque host function. [proposed] (D-2026-10-14-a says the host
+-- function crossing in is a value, not that every answer is) The host's answer is a value in one
+-- step. A model without a host, term_model.lut, leaves the application as it is and keeps the law
+-- trivially; it binds the kernel with a host, run.py.
+HostGivesBackAValue (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Program) (r x : String) (ty b : Term)
+                    (c : Constant) : Bool :=
+  (match m.step p (App (Extern r) (Lit c)) { nothing -> true ; just u -> isNormal (m.step p u) })
+  and (match m.step p (App (Extern r) (Lam x ty b)) { nothing -> true ; just u -> isNormal (m.step p u) })
 
 -- values do not step: lambdas (nothing under a binder), constants, introductions, the type
 -- formers (whose roles are the checker's, program.lth), a primitive or an extern alone
@@ -626,7 +654,7 @@ NotEqualNegates (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (p : Prog
 
 Reduction (a : Alpha) (sb : Substitution a) := Beta a sb & Delta a sb & Zeta a sb & HeadFirst a sb & HolesStay a sb & Iota a sb
   & IotaPair a sb & IotaSkips a sb & IotaConstructors a sb & ProjOfRecord a sb & Prim a sb & PrimInt a sb & PrimFloat a sb
-  & PrimString a sb & PrimConvert a sb & PrimStructural a sb & PrimConstructors a sb & EqualityDemandsParts a sb & NotEqualNegates a sb & EqualityStuck a sb & ExternIsValue a sb & ValuesStay a sb
+  & PrimString a sb & PrimConvert a sb & PrimStructural a sb & PrimConstructors a sb & EqualityDemandsParts a sb & NotEqualNegates a sb & EqualityStuck a sb & ExternIsValue a sb & ExternPartialIsValue a sb & HostGivesBackAValue a sb & ValuesStay a sb
   & DatumIsInert a sb
 
 -- ---------------------------------------------------------------- §6 Quote and eval
