@@ -67,6 +67,15 @@ def a_float(u):
     return 1.5
 
 
+def an_int(u):
+    return 1
+
+
+def settings_sum(s, x):
+    # a refined record read by key and by attribute, a `VecOf 2` as its ndarray
+    return s["tol"] + s.maxIter + float(np.sum(x))
+
+
 def matrix(u):
     return np.ones((2, 2))
 
@@ -226,6 +235,8 @@ showInt (x : Int) : String := extern "python:builtins.repr" x
      'main (w : W) : W * Unit := print w (showFloat (nan unit))', "not a Float64"),
     ('yes (u : Unit) : Int := extern "python:test_run.a_bool" u\n'
      'main (w : W) : W * Unit := print w (showInt (yes unit))', "where an Int is declared"),
+    ('yes (u : Unit) : Bool := extern "python:test_run.an_int" u\n'
+     'main (w : W) : W * Unit := print w (if yes unit then "y" else "n")', "where a Bool is declared"),
     ('half (u : Unit) : Int := extern "python:test_run.a_float" u\n'
      'main (w : W) : W * Unit := print w (showInt (half unit))', "where an Int is declared"),
     ('ramp (n : Int) : Fin n -> Float64 := extern "python:test_run.ramp" n\n'
@@ -248,6 +259,22 @@ def test_crossing_errors(tmp_path, source, message):
         return
     assert result.returncode == 1, result.stdout
     assert message in result.stderr
+
+
+def test_a_refined_record_and_a_type_family_cross(tmp_path):
+    # the fit's crossings (record/IA/fit-host-2026-10-14/prompt.md): a record with a refinement
+    # (belief.lth's `Settings`) crosses as its record, by key or attribute; a type family applied
+    # (`VecOf 2`) is unfolded to the vectors of length 2 and crosses as an ndarray
+    path = tmp_path / "families.lut"
+    path.write_text(PRELUDE + '''
+import "arrays.lth" VecOf vec
+Opts : U := { tol : Float64, maxIter : Int | 0.0 < tol and 0 < maxIter }
+total (s : Opts) (x : VecOf 2) : Float64 := extern "python:test_run.settings_sum" s x
+opts : Opts := { tol := 0.5, maxIter := 2 }
+main (w : W) : W * Unit := print w (showFloat (total opts (vec Float64 2 (fn k { 1.0 }))))
+''', encoding="utf-8")
+    result = command(path, cwd=ROOT / "tests")
+    assert (result.returncode, result.stdout, result.stderr) == (0, "4.5\n", "")
 
 
 def test_each_entry_once(tmp_path):

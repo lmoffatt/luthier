@@ -298,6 +298,15 @@ def pinv_sym(a):
     return (V[:, keep] / w[keep]) @ V[:, keep].T
 
 
+def pinv_sym_at(floor, a):
+    """`pinvSym` of arrays.lth with its floor a parameter (P11), at the same floor as
+    `retained_rank_at`: V diag(1 / w on the eigenvalues above floor * max |w|, 0 elsewhere) V^T;
+    nothing retained for an empty or a zero matrix, which gives the zero matrix."""
+    w, V = np.linalg.eigh(np.asarray(a, dtype=float))
+    keep = w > float(floor) * np.max(np.abs(w)) if w.size else np.zeros(0, dtype=bool)
+    return (V[:, keep] / w[keep]) @ V[:, keep].T
+
+
 def pinv_sqrt_sym(a):
     """M with M A M the projector on the retained subspace of A."""
     w, V = np.linalg.eigh(np.asarray(a))

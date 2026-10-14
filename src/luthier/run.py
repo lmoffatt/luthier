@@ -405,6 +405,8 @@ _UNTYPED = object()
 _INTS = ("Int", "Nat")
 _NAMED = {"Float64", "String", "Unit", "Bool"} | set(_INTS)
 _INT64 = (-2 ** 63, 2 ** 63)
+# the type families the bridge reads by name, never unfolded (`Fin n` is an index, 3.S21)
+_READ_BY_NAME = {"Fin", "Maybe", "List"}
 
 
 def _applied(ty, name):
@@ -456,6 +458,28 @@ def _parameters(body):
     return count
 
 
+def _family(act):
+    """(parameters, body) of a type family: a definition of a function into `U` by as many
+    lambdas (`VecOf (k : Int) : U := { v : Vec Float64 | v.n == k }`), or a theory declared over
+    parameters (`Objective (n : Nat) : { value : VecOf n -> Float64, ... }`); None otherwise."""
+    names, ty = [], act.type
+    while isinstance(ty, t.Pi):
+        names.append(ty.name)
+        ty = ty.codomain
+    if not names:
+        return None
+    if isinstance(act, t.Declare):
+        return (names, ty) if isinstance(ty, t.Record) else None
+    if ty != t.Universe():
+        return None
+    body = act.body
+    for name in names:
+        if not isinstance(body, t.Lam):
+            return None
+        body = kernel.substitute(body.name, t.Var(name), body.body) if body.name != name else body.body
+    return None if isinstance(body, t.Data) else (names, body)
+
+
 def _with_extern(body, typed):
     if isinstance(body, t.Lam):
         return replace(body, body=_with_extern(body.body, typed))
@@ -473,11 +497,16 @@ class Runner:
         self.objects = 0
         # the types the bridge resolves names to: a type definition's body, a theory's record
         self.types = {}
+        # the type families, by their parameters: `VecOf (k : Int) : U := ...`, `Objective (n : Nat) : { ... }`
+        self.families = {}
         for act in program:
             if isinstance(act, t.Define) and act.type == t.Universe() and not isinstance(act.body, t.Lam):
                 self.types[act.name] = act.body
             elif isinstance(act, t.Declare) and isinstance(act.type, t.Record):
                 self.types[act.name] = act.type
+            if (isinstance(act, (t.Define, t.Declare)) and act.name not in _READ_BY_NAME
+                    and (family := _family(act)) is not None):
+                self.families[act.name] = family
         self.program = tuple(self.typed(act) for act in program)
         self.defined = {act.name for act in program if isinstance(act, (t.Define, t.Declare))}
 
@@ -536,8 +565,27 @@ class Runner:
                 ty = ty.type
             elif isinstance(ty, t.Var) and ty.name not in _NAMED and ty.name in self.types:
                 ty = self.types[ty.name]
+            elif (applied := self.family_applied(ty)) is not None:
+                ty = applied
             else:
                 return ty
+
+    def family_applied(self, ty):
+        """A type family applied to as many arguments as it has parameters, its body with them put
+        for the parameters (`VecOf 2` the vectors of length 2, `Objective n` its record); None for
+        any other type."""
+        args, head = [], ty
+        while isinstance(head, t.App):
+            args.append(head.argument)
+            head = head.function
+        if not (isinstance(head, t.Var) and head.name in self.families):
+            return None
+        names, body = self.families[head.name]
+        if len(args) != len(names):
+            return None
+        for name, arg in zip(names, reversed(args)):
+            body = _instantiate(name, arg, body)
+        return body
 
     def spend(self):
         if self.fuel <= 0:
@@ -849,7 +897,10 @@ class Runner:
             if n is not None and not 0 <= int(value) < n:
                 raise RunError(f"the host gave {value!r} outside Fin {n}")
             return t.Lit(t.IntConst(int(value)))
-        if name == "Bool" and isinstance(value, (bool, np.bool_)):
+        if name == "Bool":
+            # a bool, never an int read as one (the fit report's `converged`, 11.S6)
+            if not isinstance(value, (bool, np.bool_)):
+                raise RunError(f"the host gave {value!r} where a Bool is declared (11.S6)")
             return t.Var("true" if value else "false")
         if (element := _applied(ty, "Maybe")) is not None:
             # host.NOTHING or None is nothing (tables.parse gives None); host.Just or a value is just
@@ -1239,7 +1290,10 @@ def run(path, main="main", fuel=10000, sets=()):
             name = empty[a.name]
             raise RunError(f"{name} : {_show_type(a.type)} is a hole of {loaded.top.name} the run needs; "
                            f"give it with --set {name}=...")
-    program = tuple(_primitive_body(a) for a in elaborate_program(kept))
+    # a refined record (belief.lth's `Settings`) as a subtype of the record, as the tester reads
+    # it: the elaborator refuses record refinements, and the bridge drops refinements (resolve)
+    from .tester import _refined_records
+    program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
         raise RunError(f"missing main: {main}")

@@ -1,0 +1,22 @@
+-- Runner fixture (record/IA/fit-host-2026-10-14/prompt.md): belief_model.lut's `lm`, the host's
+-- Levenberg-Marquardt (src/luthier/lm.py), maximizes belief.lth's concave quadratic with its
+-- maximum at b = (1, -2) and curvature c = 2 from the origin, through the callback crossing
+-- (3.S23, D-2026-10-14-a): logp, score and info are Luthier lambdas the host calls, each call
+-- counted in the run's record (12.S18). Prints whether it converged and the maximum found.
+-- `main` matches the result once: the runner substitutes an argument unevaluated, so `report`
+-- given the call itself would run the maximizer at each of its three projections.
+import "world_model.lut" HostConsole host : HostConsole
+import "arrays.lth" VecOf vec
+import "belief.lth" Settings MaxResult quadratic
+import "belief_model.lut" lm
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+showBool (x : Bool) : String := extern "python:builtins.repr" x
+settings : Settings := { tol := 0.000000000001, maxIter := 100, floor := 0.000000000001 }
+b : VecOf 2 := vec Float64 2 (fn k { if k == 0 then 1.0 else 0.0 - 2.0 })
+x0 : VecOf 2 := vec Float64 2 (fn k { 0.0 })
+q := quadratic 2 b 2.0
+report (w : W) (r : MaxResult 2) : W * Unit :=
+  match host.print w (showBool r.converged) { (w1, u1) ->
+  match host.print w1 (showFloat (r.x.f 0)) { (w2, u2) ->
+  host.print w2 (showFloat (r.x.f 1)) } }
+main (w : W) : W * Unit := match lm.maximize settings 2 q.logp q.score q.info x0 { r -> report w r }
