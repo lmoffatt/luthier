@@ -7,6 +7,8 @@ of the fit (`record/IA/evidence-2026-10-14/`) has landed and been read.
 ## Status
 
 - 2026-10-14, 21:30: written; nothing started.
+- 2026-10-15, 06:30: the certificates done (his priority), step 1 launched: plot.lth and
+  plot_model.lut by an Opus agent (brief record/IA/plots-2026-10-15/prompt-theory.md).
 
 ## Steps
 
