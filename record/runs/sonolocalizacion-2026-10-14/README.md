@@ -14,9 +14,12 @@ verbatim (stdout: the three tables after a `== <path>` line each, then the summa
 Uncertified (12.S17 not enforced). Luciano's decision on the A2 block is open; this is Luthier's
 output on the two files, not the analysis's result.
 
-## A certified run, 2026-10-15 at 04:40
+## A certified run, 2026-10-15
 
 `fit-A-graph_noA2-certified.txt`: the same command on `graph_noA2` at commit 871ea67 (the
 stores of src/luthier/lib/ at revision v0.2 serving every law in the cone; `run` strict,
-12.S17), default fuel. Its record is the last entry of `examples/sonolocalizacion/
-experiment_zero.run.json` (ignored by git), with the certification state of the cone.
+12.S17), with `--fuel 100000000000` (the default fuel of 10,000,000 is spent before the fit
+converges; a first attempt at the default stopped with "fuel spent" after 2 min and is not
+kept). Its record is the last entry of `examples/sonolocalizacion/experiment_zero.run.json`
+(ignored by git), with the certification state of the cone: 83 laws, 6 certified, 175 names
+vacuous, none uncertified, stale or failed.
