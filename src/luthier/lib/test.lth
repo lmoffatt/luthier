@@ -18,7 +18,8 @@
 -- laws.lth: the points of the law's domain with their evidence and the coverage the run reached,
 -- which is the weakest of the mode's and of each binding's (7.S10), or `NotRun` with its reason
 -- when a budget gave nothing (7.S12). The grade is read from the verdict and the coverage, and
--- the grades are ordered, so that "the weakest" means something (test.5).
+-- the grades are ordered, so that "the weakest" means something (test.5); the order of the
+-- coverages themselves is laws.lth's since D-2026-10-14-b.
 --
 -- Index (all sections written in this draft):
 --   §1 The spec: modes, `TestSpec`, `test` with its defaults (7.S20, 7.R1, 7.S8).            done
@@ -28,7 +29,7 @@
 
 import "generators.lth" Seed Binding Budgets Metric
 import "laws.lth" Evidence Points At NotRun Coverage Exhaustive Bounded Listed Drawn Verdict Confirmed Refuted
-  Supported Unsettled Cites Assumes
+  Supported Unsettled Cites Assumes rankOf weaker
 
 -- ---------------------------------------------------------------- §1 The spec
 
@@ -68,9 +69,8 @@ coverageOf (e : Evidence) : Maybe Coverage := match e { Points A pts c -> just c
 pointCount (e : Evidence) : Nat := match e { Points A pts c -> countPoints A pts ; _ -> 0 }
 countPoints (A : U) (pts : List (A * Evidence)) : Nat := match pts { nil -> 0 ; cons x rest -> 1 + countPoints A rest }
 isNotRun (e : Evidence) : Bool := match e { NotRun r -> true ; _ -> false }
--- the coverages in order of strength, so that the weakest of several is defined (7.S10)
-rankOf (c : Coverage) : Nat := match c { Exhaustive -> 3 ; Bounded n -> 2 ; Listed -> 1 ; Drawn s -> 0 }
-weaker (c d : Coverage) : Coverage := if rankOf c <= rankOf d then c else d
+-- the coverages in order of strength, `rankOf` and `weaker`, are laws.lth's, which defines
+-- `Coverage` (7.S10; D-2026-10-14-b): read here, not repeated
 modeCoverage (m : Mode) (size : Nat) (s : Seed) : Coverage := match m {
   ExhaustiveMode -> Bounded size ; SampledMode k -> Drawn s }
 bindingsCoverage (bs : List Binding) (c : Coverage) : Coverage :=
