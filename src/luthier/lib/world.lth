@@ -258,9 +258,9 @@ agreement (S : Concrete) (A : Concrete) (m : World S) (o : Host S) (d : Describe
 -- arguments; the entry is kept by the hash of the model's cone, which holds the host's code (10.S9,
 -- 6.S8), so a changed host is validated again.
 HostAgreesPrint (S : Concrete) (o : Host S) (s : String) (w0 : W) : Bool :=
-  match agreement S Unit o.world o (o.printDescribed s) (fn w { o.print w s }) w0 { (w1, ok) -> ok }
+  match agreement S Unit o.world o (o.printDescribed s) (fn w { o.print w s }) w0 { (w1, holds) -> holds }
 HostAgreesReadFile (S : Concrete) (o : Host S) (p : String) (w0 : W) : Bool :=
-  match agreement S (Maybe String) o.world o (o.readFileDescribed p) (fn w { o.readFile w p }) w0 { (w1, ok) -> ok }
+  match agreement S (Maybe String) o.world o (o.readFileDescribed p) (fn w { o.readFile w p }) w0 { (w1, holds) -> holds }
 HostObserveChangesNothing (S : Concrete) (o : Host S) (places : List String) (w0 : W) : Bool :=
   match o.observe w0 places { (w1, first) -> match o.observe w1 places { (w2, second) -> first == second } }
 Host (S : Concrete) := HostAgreesPrint S & HostAgreesReadFile S & HostObserveChangesNothing S
