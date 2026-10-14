@@ -125,24 +125,24 @@ def _kernel_code(code):
 
 @functools.cache
 def interpreter_revision():
-    """The interpreter's revision (6.S8): the commit of this repository that last changed the Python
-    of src/luthier/ [proposed: the libraries under lib/ enter by the code of each cone, not here],
-    followed by `+` and the hash of those files when the working tree changes them; the package's
-    version when it is installed without its repository."""
+    """The interpreter's revision (6.S8): the last tag reachable from HEAD of this repository
+    (`git describe --tags --abbrev=0`), with no dirty marker, so that the stores stay current
+    between tags [proposed: night default for decision 2 of record/IA/certification-2026-10-14/
+    report-run.md; before it, the last commit touching src/luthier/*.py plus a dirty hash made
+    every store stale at each commit; the host code behind a cone's externs is hashed by file,
+    host_hash, 6.S8's other part; the libraries under lib/ enter by the code of each cone]. The
+    package's version when it is installed without its repository (or the repository has no tag)."""
     try:
-        def git(*args):
-            return subprocess.run(["git", "-C", str(_PACKAGE), *args], capture_output=True, text=True,
-                                  check=True).stdout.strip()
-        commit = git("log", "-1", "--format=%H", "--", "*.py")
-        if not commit:
-            raise OSError("not in a repository")
-        dirty = git("status", "--porcelain", "--", "*.py")
+        tag = subprocess.run(["git", "-C", str(_PACKAGE), "describe", "--tags", "--abbrev=0"],
+                             capture_output=True, text=True, check=True).stdout.strip()
+        if not tag:
+            raise OSError("no tag")
+        return tag
     except (OSError, subprocess.CalledProcessError):
         try:
             return "luthier " + importlib.metadata.version("luthier")
         except importlib.metadata.PackageNotFoundError:
             return "luthier unversioned " + _python_files_hash()[:19]
-    return commit if not dirty else f"{commit}+{_python_files_hash()[7:19]}"
 
 
 def _python_files_hash():

@@ -361,3 +361,10 @@ def test_adding_to_a_store_twice_keeps_one_entry(tmp_path):
     certify.add_entry(path, entry())
     certify.add_entry(path, entry(seed=1))
     assert [e["seed"] for e in certify.read_store(path)] == [1, 0]
+
+
+def test_interpreter_revision_is_the_last_tag():
+    import subprocess
+    tag = subprocess.run(["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True,
+                         cwd=certify._PACKAGE).stdout.strip()
+    assert tag and certify.interpreter_revision() == tag and "+" not in tag

@@ -725,3 +725,9 @@ def test_the_refusal_is_per_law_and_says_why():
     assert not certify.serves(demand("A", model="y"), entries[0])
     assert certify.refuse(entries, [{**one, "provisional": True}]) == [
         {"name": "x", "law": None, "state": ("Provisional", None)}]
+
+
+def test_host_table_names_and_kinds_cross_as_lists(monkeypatch):
+    # the certification of csv's laws is not the question here (they are graded by tables_laws.lut)
+    monkeypatch.setattr("luthier.run.certification", lambda *a, **k: None)
+    assert run_file(ROOT / "tests/run/table_names.lut", fuel=10_000_000) == "same\ndifferent\nsame\n"
