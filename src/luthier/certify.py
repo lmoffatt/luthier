@@ -358,11 +358,74 @@ def known(entries, key):
     return next((e for e in entries if identity(e) == key), None)
 
 
+KEEP = 4
+
+
+def _group(entry):
+    """(law, binding without the fingerprints): the identity without the seed and `n` and without
+    the hashes of the census' cones, which change when a cone does."""
+    binding = entry["binding"]
+    if isinstance(binding, list):
+        binding = [{k: v for k, v in d.items() if k != "fingerprint"} if isinstance(d, dict) else d
+                   for d in binding]
+    return json.dumps([entry["law"], binding], sort_keys=True, ensure_ascii=False)
+
+
+def _stamp(entry):
+    """What makes an entry current: its cone's hash and the fingerprints of its binding."""
+    binding = entry["binding"]
+    prints = [d.get("fingerprint") for d in binding if isinstance(d, dict)] if isinstance(binding, list) else []
+    return json.dumps([entry["cone"], prints])
+
+
+def prune(entries, current=None, keep=KEEP):
+    """The store bounded [proposed, 6.S8 "up to four" and 12.S11]: per (law, binding without
+    fingerprints), the `keep` most recent entries at the current cone hash and fingerprints (by date,
+    the store's order breaking ties), and no stale entry once a current one exists; a group with no
+    current entry keeps its most recent entry only. `current` maps a group's key to a `_stamp`, and a
+    group not in it takes the stamp of its most recent entry. What stays keeps the store's order
+    (latest in front)."""
+    current = dict(current or {})
+    order = sorted(range(len(entries)), key=lambda k: (entries[k].get("date", ""), -k), reverse=True)
+    groups = {}
+    for k in order:
+        groups.setdefault(_group(entries[k]), []).append(k)
+    dropped = set()
+    for g, ks in groups.items():
+        stamp = current.get(g)
+        if stamp is None:
+            stamp = _stamp(entries[ks[0]])
+        at = [k for k in ks if _stamp(entries[k]) == stamp]
+        if at:
+            dropped.update(at[keep:])
+            dropped.update(k for k in ks if _stamp(entries[k]) != stamp)
+        else:
+            dropped.update(ks[1:])
+    return [e for k, e in enumerate(entries) if k not in dropped]
+
+
 def record(entries, entry):
-    """certification.lth's `record`: a new entry in front, the store unchanged on a known identity."""
+    """certification.lth's `record`: a new entry in front, the store unchanged on a known identity;
+    the entry's (law, binding) is then pruned at its cone hash (`prune`)."""
     if known(entries, identity(entry)) is not None:
         return entries
-    return [entry] + list(entries)
+    return prune([entry] + list(entries), {_group(entry): _stamp(entry)})
+
+
+def prune_stores(paths, out=print):
+    """`luthier certify --prune FILES`: each file is a store (x.cert.json) or the x.lut beside one;
+    it is rewritten bounded, nothing is run."""
+    for path in paths:
+        where = store_path(path) if not str(path).endswith(".cert.json") else Path(path)
+        if not where.exists():
+            out(f"{where}: no store")
+            continue
+        entries = json.loads(where.read_text(encoding="utf-8"))
+        kept = prune(entries)
+        if len(kept) != len(entries):
+            write_store(where.with_name(where.name[:-len(".cert.json")]), kept)
+        out(f"{where}: {len(entries)} -> {len(kept)} entries")
+    return 0
 
 
 def add_entry(path, entry):

@@ -230,7 +230,10 @@ def test_a_changed_definition_makes_the_entry_stale(laws, capsys):
     assert "is stale, kept" in tester.line(small[0])
     assert all(o.known for o in outcomes if o.spec.law != "Small")
     after = certify.read_store(laws)
-    assert after[len(after) - len(before):] == before  # the stale entries are kept
+    # the stale entries of Small went once its new ones exist (6.S8 bounded); the others stay
+    rest = [e for e in before if e["law"] != "Small"]
+    assert [e for e in after if e["law"] != "Small"][-len(rest):] == rest
+    assert all(e["cone"] == small[0].entry["cone"] for e in after if e["law"] == "Small")
     assert dict(certify.standings(laws))["Small"] == "sampled"
 
 
@@ -389,3 +392,39 @@ def test_interpreter_revision_is_the_last_tag():
     tag = subprocess.run(["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True,
                          cwd=certify._PACKAGE).stdout.strip()
     assert tag and certify.interpreter_revision() == tag and "+" not in tag
+
+
+# ---------------------------------------------------------------------- the store bounded (6.S8)
+
+def _entry(law="L", cone="sha256:a", binding="b", seed=0, date="2026-10-15T00:00:00+00:00", outcome="Passed"):
+    return {"law": law, "cone": cone, "binding": binding, "seed": seed, "cases": 10, "outcome": outcome,
+            "grade": "Cases" if outcome == "Passed" else None, "date": date}
+
+
+def test_a_store_keeps_four_entries_per_binding_at_the_current_cone():
+    entries = []
+    for k in range(7):
+        entries = certify.record(entries, _entry(seed=k, date=f"2026-10-15T00:00:0{k}+00:00"))
+    assert [e["seed"] for e in entries] == [6, 5, 4, 3]
+    other = certify.record(entries, _entry(binding="c", seed=1))
+    assert len(other) == 5            # another binding is another group
+
+
+def test_stale_entries_go_once_a_current_one_exists_and_the_latest_stays_before():
+    old = [_entry(cone="sha256:a", seed=k, date=f"2026-10-14T00:00:0{k}+00:00") for k in range(3)]
+    old = list(reversed(old))
+    assert [e["seed"] for e in certify.prune(old, {certify._group(old[0]): certify._stamp(_entry(cone="sha256:b"))})] == [2]  # all stale: the latest only
+    store = certify.record(old, _entry(cone="sha256:b", seed=0))
+    assert [e["cone"] for e in store] == ["sha256:b"]
+    assert certify.store_errors(store) == []
+    assert certify.known(store, certify.identity(_entry(cone="sha256:b", seed=0))) is not None
+    assert certify.known(store, certify.identity(_entry(cone="sha256:a", seed=0))) is None
+
+
+def test_prune_stores_rewrites_a_store_and_runs_nothing(tmp_path):
+    entries = [_entry(seed=k, date=f"2026-10-15T00:00:0{k}+00:00") for k in range(6)][::-1]
+    entries.append(_entry(cone="sha256:z", seed=9, date="2026-10-13T00:00:00+00:00"))
+    where = tmp_path / "x.cert.json"
+    where.write_text(json.dumps(entries))
+    assert main(["certify", "--prune", str(where)]) == 0
+    assert len(json.loads(where.read_text())) == 4
