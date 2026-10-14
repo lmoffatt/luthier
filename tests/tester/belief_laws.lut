@@ -1,0 +1,67 @@
+-- tests/tester/belief_laws.lut: the laws of belief.lth run through `luthier test`, on the brief
+-- record/IA/evidence-2026-10-14/prompt.md. `Maximizer` on the host's Levenberg-Marquardt (`lm`,
+-- belief_model.lut); `GaussianBelief` and `Posterior`, theories with no model file, on listed
+-- cases: session A's prior and posterior (tests/tester/session_a.lut, 30 coordinates) and three
+-- members of the quadratic family (`quadratic`, belief.lth §2) at dimension 3. Each cutoff a
+-- census of one, the demand's (D-2026-10-14-c): the settings of session A's run (lmTol 1e-12,
+-- lmMaxIter 500, lmFloor 30 eps), the tolerance 1e-12 [proposed], the resolution distances.lut's
+-- `pitResolution`. Seed 20261014. A `GaussianBelief` is a record of arrays, which the tester draws:
+-- it is run once sampled, to show what a draw that is not a model gives (7.R4), then on the prior.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Vec vec
+import "belief.lth" Posterior quadratic PrecisionSymmetric DensityPeaksAtMean PosteriorScoreIsGradient
+  PosteriorInfoSymmetric MaximizerAscends MaximizerStationary MaximizerKeepsDimension QuadraticConverges
+import "belief_model.lut" lm
+import "../../examples/sonolocalizacion/distances.lut" pitResolution
+import "session_a.lut" dimA priorA posteriorA settingsA
+
+tolerance : Tolerance := 1.0e-12
+cutoffs : List Binding := [
+  { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
+
+-- the quadratic family at dimension 3: maximum at (-1, 0, 1), curvature 2, 1e-3 and 1e3
+centre3 : Vec Float64 := vec Float64 3 (fn k { toFloat64 k - 1.0 })
+quadratics3 : List (Posterior 3) := [quadratic 3 centre3 2.0, quadratic 3 centre3 1.0e-3, quadratic 3 centre3 1.0e3]
+three : List Int := [3]
+onQuadratics : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed } ]
+-- session A: its dimension, prior, posterior, and the fit's start, the prior mean
+dimSessionA : List Int := [dimA]
+priorMeanA : Vec Float64 := priorA.mean
+onSessionA : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "b", type := nothing, generator := "priorA", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "posteriorA", coverage := Listed } ]
+fitA : List Binding := [
+  { parameter := just "x0", type := nothing, generator := "priorMeanA", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "posteriorA", coverage := Listed } ]
+
+-- §1 Gaussian beliefs: drawn (not models), then session A's prior
+test "PrecisionSymmetric" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "DensityPeaksAtMean" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "PrecisionSymmetric" ExhaustiveMode (whereBindings <- onSessionA) (profile <- cutoffs)
+test "DensityPeaksAtMean" (SampledMode linear) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
+-- §2 posteriors: the quadratic family, session A's
+test "PosteriorScoreIsGradient" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "PosteriorInfoSymmetric" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "PosteriorScoreIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
+test "PosteriorInfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
+-- §2 the maximizer lm: drawn quadratics (QuadraticConverges), the listed quadratics from drawn starts
+test "QuadraticConverges" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "MaximizerAscends" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "MaximizerStationary" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "MaximizerKeepsDimension" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+-- and session A's posterior from its prior mean: the fit itself, one case
+test "MaximizerAscends" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs)
+test "MaximizerStationary" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs)
+test "MaximizerKeepsDimension" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs)
