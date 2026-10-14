@@ -1,0 +1,68 @@
+-- tests/tester/optimization_laws.lut: the laws of optimization.lth run through `luthier test`, on
+-- the brief record/IA/evidence-2026-10-14/prompt.md. `Objective`, a record of functions with no
+-- generator (7.R4), on listed cases: the quadratic family at dimension 3 (`quadraticObjective`)
+-- and the fit's objective, session A's posterior negated (tests/tester/session_a.lut).
+-- `LMStep` on its two models (optimization_model.lut): the native definitions (`native`) and the
+-- host's (`host`, lm.py), on session A's objective; on the quadratic family they run in
+-- tests/tester/fit_laws.lut. Each cutoff a census of one, the demand's (D-2026-10-14-c): session
+-- A's settings and v0.1's damping schedule (`settingsA`, `dampingA`), the tolerance 1e-12
+-- [proposed], the resolution distances.lut's `pitResolution`. Seed 20261014. The points, the
+-- directions and the damping are drawn; a state (`LMState n`) is a record the tester draws whole,
+-- its value `phi` unrelated to the point, which `StepRule` allows.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Vec vec
+import "optimization.lth" Objective negate quadraticObjective GradIsGradient StepMatrixSymmetric StepMatrixNonNegative
+  DirectionDescends DirectionAgrees StepRule
+import "optimization_model.lut" native host
+import "../../examples/sonolocalizacion/distances.lut" pitResolution
+import "session_a.lut" dimA posteriorA settingsA dampingA
+
+tolerance : Tolerance := 1.0e-12
+cutoffs : List Binding := [
+  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
+  { parameter := just "d", type := nothing, generator := "dampingA", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
+
+-- the quadratic family at dimension 3: minimum at (-1, 0, 1), curvature 2, 1e-3 and 1e3
+centre3 : Vec Float64 := vec Float64 3 (fn k { toFloat64 k - 1.0 })
+quadratics3 : List (Objective 3) := [quadraticObjective 3 centre3 2.0, quadraticObjective 3 centre3 1.0e-3,
+                                     quadraticObjective 3 centre3 1.0e3]
+three : List Int := [3]
+onQuadratics : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "quadratics3", coverage := Listed } ]
+-- the fit's objective: session A's posterior, negated
+objectiveA : Objective dimA := negate dimA posteriorA
+dimSessionA : List Int := [dimA]
+onSessionA : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "objectiveA", coverage := Listed } ]
+nativeOnA : List Binding := [
+  { parameter := just "m", type := nothing, generator := "native", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "objectiveA", coverage := Listed } ]
+hostOnA : List Binding := [
+  { parameter := just "m", type := nothing, generator := "host", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "objectiveA", coverage := Listed } ]
+
+-- §1 the objective: the quadratic family, session A's
+test "GradIsGradient" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "StepMatrixSymmetric" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "StepMatrixNonNegative" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
+test "GradIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
+test "StepMatrixSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
+test "StepMatrixNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onSessionA) (profile <- cutoffs)
+-- §3 the step on session A's objective: the native model, then the host's, on the same draws
+test "DirectionDescends" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- nativeOnA) (profile <- cutoffs)
+test "DirectionAgrees" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- nativeOnA) (profile <- cutoffs)
+test "StepRule" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- nativeOnA) (profile <- cutoffs)
+test "DirectionDescends" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- hostOnA) (profile <- cutoffs)
+test "DirectionAgrees" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- hostOnA) (profile <- cutoffs)
+test "StepRule" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- hostOnA) (profile <- cutoffs)
