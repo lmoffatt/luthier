@@ -5,7 +5,10 @@
 -- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1 of
 -- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, before evidence by
 -- D-2026-10-13-ad); draft 0 at 1f8c61c, rewritten on the internal review of layers 2 and 3
--- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, world.1 to world.9). Sources: spec 10.S1
+-- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, world.1 to world.9). 2026-10-15, by Claude
+-- Opus 5.5, an agent of the coordinating session, on record/IA/certification-2026-10-14/
+-- prompt-first-action.md: `Host` a theory with its laws (§5), `appendStr` given a body (§4).
+-- Sources: spec 10.S1
 -- to 10.S13; L11; L4.5; D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md
 -- (the token used exactly once; `W` optional in `main`); D-2026-10-13-a (one world; an action is a
 -- directed request, checked by comparing the representation before and after), -b (`W` a
@@ -22,9 +25,10 @@
 -- and over an action's description, a function `S -> S * A` that says what the action does to the
 -- representation. Those laws are tested by sampling `S`. The host's action is then certified
 -- against its description along one chain of tokens: observe, act once, observe again, compare
--- (D-2026-10-13-a); that protocol is the certifier's and is stated at the end as a definition, since
--- it threads the token and so is itself an action, which a theory file does not hold as a law
--- (10.S3, 12.S23). What cannot be tested (the disk persists while the program is off) is assumed
+-- (D-2026-10-13-a); that protocol is stated at the end as a definition, `agreement`, since it
+-- threads the token and so is itself an action (10.S3, 12.S23), and `Host`'s laws are its Bool at
+-- the action's arguments, which the runner evaluates at an action's first application in a run
+-- (10.S10). What cannot be tested (the disk persists while the program is off) is assumed
 -- (10.S13, 6.S10).
 --
 -- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
@@ -43,7 +47,9 @@
 --   §4 The actions the first slice needs, by their descriptions: `print`, reading a file
 --      (10.S2; D8).                                                                   done
 --   §5 Certifying a host action against its description along one chain of tokens: the
---      protocol, as a definition (D-2026-10-13-a).                                     done
+--      protocol, as a definition (D-2026-10-13-a); `Host` a theory whose laws are the
+--      agreement of each action with its description and an observation that changes
+--      nothing, validated at the action's first application (10.S10, L11.2).          done
 --   §6 Named worlds: an extern with no law runs in one, priced as an assumption (10.S12,
 --      L11.6). Waits for evidence (certification.lth).                                 todo
 --   §7 The externs of sonolocalización (numpy and its data formats). Waits for the
@@ -181,9 +187,11 @@ Crossing (A B : Concrete) := CallbackGivesTheFunction A B & CallsAreCounted A B 
 -- `print` writes its text as a line at the standard output, a place of the world, and changes no
 -- other place; reading a file gives what is at its place, and changes nothing (10.S2; D8: `print`
 -- the first action). Stated by their descriptions over the representation; the host's actions in
--- world_model.lut are certified against them by the protocol of §5. `appendStr` is core's `String`
--- concatenation, declared until core names it.
-appendStr : String -> String -> String
+-- world_model.lut are certified against them by the protocol of §5. `appendStr` is `String`
+-- concatenation, the core's `+` on strings [proposed: a body, so that a description runs when a
+-- host action is validated against it (§5); declared without one in draft 1, A12 of the naive
+-- review, record/IA/review-naive-2026-10-15/].
+appendStr (a b : String) : String := a + b
 Console (S : Concrete) : {
   world : World S,
   printLine : String -> S -> S * Unit,
@@ -209,18 +217,46 @@ Console (S : Concrete) := PrintAppendsALine S & PrintChangesOnlyStdout S & ReadG
 -- compare what the description says with what the host did. Each token is used once. The
 -- observation takes the places, since the host cannot read the whole world: a representation
 -- stands for the world at the places observed (the coordinator's point on `files`: a read of a
--- file not yet observed looked like a change). The protocol threads the token, so it is an
--- action and not a law of this file: the certifier runs it, and its Bool is the evidence
--- (`Evaluated`, laws.lth) for the law "the host agrees with its description" on that chain.
--- the host's side of the console: the actions, routes to the host (world_model.lut), and the
--- observation of the representation
-Host (S : Concrete) = {
+-- file not yet observed looked like a change). The observation is not an action of the program:
+-- it changes no place, and the token threads through it.
+--
+-- The host's side of the console is a theory (L11.2: an extern is declared over a type whose laws
+-- it is validated against; D-2026-10-13-a; the naive review's A16/B25, record/IA/
+-- review-naive-2026-10-15/for-luciano.md): its actions, routes to the host (world_model.lut), the
+-- observation, and for each action the description it is held to, a `Described` value over the
+-- representation `world` reads. [proposed] The descriptions are fields of the host's model, so
+-- that a model says what each of its actions does and the law needs nothing beyond the model and
+-- the action's arguments; `printDescribed s` is `print w s`'s, `readFileDescribed p` is
+-- `readFile w p`'s.
+Host (S : Concrete) : {
+  world : World S,
   observe : W -> List String -> W * S,
   print : W -> String -> W * Unit,
   readFile : W -> String -> W * Maybe String,
+  printDescribed : String -> Described S Unit world,
+  readFileDescribed : String -> Described S (Maybe String) world,
 }
 agreement (S : Concrete) (A : Concrete) (m : World S) (o : Host S) (d : Described S A m) (host : Action A) (w0 : W) : W * Bool :=
   match o.observe w0 d.places { (w1, before) ->
   match host w1 { (w2, x) ->
   match o.observe w2 d.places { (w3, after) ->
     (w3, d.describe before == (after, x)) } } }
+
+-- The laws of `Host`. `HostAgrees`, one law per action: each action agrees with its description
+-- on the chain of tokens the protocol threads, at the action's arguments; the law is the Bool
+-- `agreement` gives, and the token after is the runner's, which goes on with it (D4: used once).
+-- And the observation changes nothing: observing twice at the same places reads the same, so
+-- that the protocol's own observations are not a change of the world (10.S7). A law that takes
+-- the token is not drawn by a sampler (a token is not generated, D4) and `luthier test` does not
+-- run it; the runner runs it once, the first time a run asks for the action, with the run's own
+-- arguments, and the action the protocol applies is the one the program asked for, applied once
+-- (10.S10, L11.2). Its Bool is the evidence (`Evaluated`, laws.lth) of one case at those
+-- arguments; the entry is kept by the hash of the model's cone, which holds the host's code (10.S9,
+-- 6.S8), so a changed host is validated again.
+HostAgreesPrint (S : Concrete) (o : Host S) (s : String) (w0 : W) : Bool :=
+  match agreement S Unit o.world o (o.printDescribed s) (fn w { o.print w s }) w0 { (w1, ok) -> ok }
+HostAgreesReadFile (S : Concrete) (o : Host S) (p : String) (w0 : W) : Bool :=
+  match agreement S (Maybe String) o.world o (o.readFileDescribed p) (fn w { o.readFile w p }) w0 { (w1, ok) -> ok }
+HostObserveChangesNothing (S : Concrete) (o : Host S) (places : List String) (w0 : W) : Bool :=
+  match o.observe w0 places { (w1, first) -> match o.observe w1 places { (w2, second) -> first == second } }
+Host (S : Concrete) := HostAgreesPrint S & HostAgreesReadFile S & HostObserveChangesNothing S
