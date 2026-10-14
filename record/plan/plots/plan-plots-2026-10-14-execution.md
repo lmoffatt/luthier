@@ -11,6 +11,11 @@ of the fit (`record/IA/evidence-2026-10-14/`) has landed and been read.
   plot_model.lut by an Opus agent (brief record/IA/plots-2026-10-15/prompt-theory.md).
 - 2026-10-15, 07:45: step 1 done (470a4d5, bc25d58, bb11f0b; 15 proposed readings in the
   night plan's Questions). Step 2 launched (prompt-host.md): plots.py, the canvas as a field.
+- 2026-10-15, 11:00: steps 2 and 3 done: plots.py (1f5e0c6, certified), figures.lut and
+  experiment_zero.lut rendering the three plots (8e0ab62, fd498a9), the figures in
+  record/runs/sonolocalizacion-2026-10-14/figures/. Step 4 (evidence on plot.lth's laws) partly:
+  plot_laws.lut certifies Drawing's six laws on listed plots; `agreement` for the renderer not
+  run. Open: label offsets or visible ellipses in the positions figure (the theory has no nudge).
 
 ## Steps
 
