@@ -365,6 +365,20 @@ def record(entries, entry):
     return [entry] + list(entries)
 
 
+def add_entry(path, entry):
+    """`record` into the store of another file (a model's, beside its definition): read, record and
+    write under a lock, since several test programs may add to one store at once."""
+    import fcntl
+    where = store_path(path)
+    with open(where.with_name(where.name + ".lock"), "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        entries = read_store(path)
+        recorded = record(entries, entry)
+        if recorded is not entries:
+            write_store(path, recorded)
+    return where
+
+
 def now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 

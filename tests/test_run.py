@@ -213,13 +213,11 @@ main (w : W) : W * Unit := match cons (first "one\\ntwo") nil {
     assert run_file(path) == "matched\n"
 
 
-@refused("numpy : Arrays")
 def test_vector_norm_through_numpy():
     result = command(ROOT / "tests/run/vector_norm.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
 
 
-@refused("numpy : Arrays")
 def test_matrix_product_through_numpy():
     result = command(ROOT / "tests/run/matrix_product.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "43.0\n2\n", "")
@@ -598,7 +596,6 @@ def test_a_bound_read_is_made_once(tmp_path, entry):
     assert (result.returncode, result.stdout, result.stderr) == (0, "data\ndata\n1\n", "")
 
 
-@refused("lm : Maximizer, numpy : Arrays")
 def test_a_bound_maximize_runs_once(tmp_path):
     # maximize_shared.lut projects the result three times; each entry calls back exactly as
     # maximize_quadratic.lut, which matches it once (test_lm.py checks those counts against lm.py)

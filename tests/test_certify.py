@@ -309,3 +309,55 @@ def test_the_reach_of_a_census_and_of_a_drawn_number(tmp_path):
         {"parameter": "x", "reach": {"Interval": [-10.0, 10.0]}}]
     assert [d["generator"] for d in e["binding"][:2]] == ["tol (Listed)", "names (Listed)"]
     assert e["binding"][0]["fingerprint"].startswith("sha256:") and e["binding"][2]["fingerprint"] == ""
+
+
+# ---------------------------------------------------------------------- the model's own store
+
+MODEL = '''import "numbers.lth" Doubles
+doubles : Doubles := {
+  plus := fn a b { a + b }, minus := fn a b { a - b }, times := fn a b { a * b }, divide := fn a b { a / b },
+  less := fn a b { a < b }, leq := fn a b { a <= b }, greater := fn a b { a > b }, geq := fn a b { a >= b },
+  unequal := fn a b { a /= b },
+  epsilon := 2.220446049250313e-16,
+}
+'''
+LAWS_OF_MODEL = '''import "test.lth" test SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Doubles PlusCommutes
+import "m_model.lut" doubles
+
+models : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]
+
+Wrapper (d : Doubles) (x : Float64) : Bool := PlusCommutes d x x
+
+test "PlusCommutes" (SampledMode linear) (profile <- models)
+test "Wrapper" (SampledMode linear) (profile <- models)
+'''
+
+
+def test_an_entry_goes_into_the_store_of_the_file_that_defines_the_model(tmp_path):
+    (tmp_path / "m_model.lut").write_text(MODEL, encoding="utf-8")
+    top = tmp_path / "t_laws.lut"
+    top.write_text(LAWS_OF_MODEL, encoding="utf-8")
+    outcomes = tester.run_tests(top, store=True)
+    own = certify.read_store(top)
+    home = certify.read_store(tmp_path / "m_model.lut")
+    assert [e["law"] for e in own][::-1] == ["PlusCommutes", "Wrapper"]
+    # the law of the library goes to the model's store too, the program's own wrapper does not
+    assert [e["law"] for e in home] == ["PlusCommutes"]
+    assert certify.identity(home[0]) == certify.identity(next(e for e in own if e["law"] == "PlusCommutes"))
+    assert home[0]["outcome"] == "Passed" and len(outcomes) == 2
+    # again: nothing new in either store
+    tester.run_tests(top, store=True, deep=True)
+    assert certify.read_store(tmp_path / "m_model.lut") == home and certify.read_store(top) == own
+
+
+def test_adding_to_a_store_twice_keeps_one_entry(tmp_path):
+    path = tmp_path / "m.lut"
+    certify.add_entry(path, entry())
+    certify.add_entry(path, entry())
+    certify.add_entry(path, entry(seed=1))
+    assert [e["seed"] for e in certify.read_store(path)] == [1, 0]

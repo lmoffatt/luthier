@@ -843,7 +843,35 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
             if recorded is not entries:
                 entries = recorded
                 certify.write_store(path, entries)
+            for home in model_homes(loaded, spec):
+                certify.add_entry(home, entry)
     return outcomes
+
+
+def model_homes(loaded, spec):
+    """[proposed, night default for decision 1 of report-run.md] The files, other than the test
+    program and core, that define a census a binding of the line names (`numpy` in
+    arrays_model.lut), when the law is itself defined in another file than the test program's: the
+    entry is also written into their stores, which a run of an importer reads (12.S11). A law the
+    test program defines (a wrapper) has no such home."""
+    if loaded is None:
+        return []
+    top = loaded.top
+    try:
+        law = loaded.see(top, spec.law)
+    except RunError:
+        return []
+    if law is None or law[0] == top:
+        return []
+    homes = []
+    for b in spec.where + spec.profile:
+        try:
+            found = loaded.see(top, b.generator)
+        except RunError:
+            continue
+        if found is not None and found[0] not in (top, loaded.core) and found[0] not in homes:
+            homes.append(found[0])
+    return homes
 
 
 def law_cones(path, fuel=1_000_000):
