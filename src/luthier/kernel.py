@@ -21,6 +21,7 @@ remain values. This module neither translates surface trees nor calls the host.
 from __future__ import annotations
 
 import math
+from dataclasses import fields, is_dataclass
 from collections.abc import Generator
 
 from .term import (
@@ -1018,6 +1019,24 @@ def _build_tables(program: Program) -> tuple[dict[str, Term | None], _Constructo
                     while isinstance(ty, Pi):
                         constructors.arity[name] += 1
                         ty = ty.codomain
+    # The labels of every labeled sum met in the program (the elaborator inlines type aliases, so
+    # `Cell = { int : Int || ... }` is only found inside the types that use it): it has no types
+    # of values, so an applied label reaches the kernel as `App (Var l) v` (a `Unit` alternative
+    # as `Var l`) and compares as the injection it stands for (PrimStructural, 3.S4). [proposed]
+    # A label already a constructor or a definition, or of an earlier sum, is left out.
+    pending: list = [x for act in program for x in ((act.type, act.body) if isinstance(act, Define) else (act.value,) if isinstance(act, Datum) else ())]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, Sum):
+            labels = [(k, v) for k, v in node.alternatives if k not in env and k not in constructors]
+            names = frozenset(k for k, _ in labels)
+            for k, v in labels:
+                constructors[k] = names
+                constructors.arity[k] = 0 if v == Var("Unit") else 1
+        if isinstance(node, tuple):
+            pending.extend(node)
+        elif is_dataclass(node):
+            pending.extend(getattr(node, f.name) for f in fields(node))
     return env, constructors
 
 

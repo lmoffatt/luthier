@@ -225,7 +225,7 @@ def cli(*args):
     return subprocess.run([sys.executable, '-m', 'luthier.cli', 'eval', *map(str, args)], capture_output=True, text=True, env=env)
 
 
-@pytest.mark.parametrize('file,output', [('arithmetic', '19'), ('factorial', '24'), ('data', '2'), ('record', '7'), ('block', '3'), ('lambda', '5'), ('chained_projection', '7')])
+@pytest.mark.parametrize('file,output', [('arithmetic', '19'), ('factorial', '24'), ('data', '2'), ('record', '7'), ('block', '3'), ('lambda', '5'), ('chained_projection', '7'), ('labeled_sum', '101')])
 def test_eval(file, output):
     r = cli(ROOT / 'tests/eval' / (file + '.lut'), 'answer')
     assert r.returncode == 0, r.stdout + r.stderr
@@ -367,3 +367,12 @@ def test_chained_projection_on_a_parenthesised_expression_is_two_projections():
         e = term(text, ctx)
         assert isinstance(e, t.Proj) and e.label == 'n'
         assert isinstance(e.record, t.Proj) and e.record.label == 'x'
+
+
+def test_applied_label_is_an_application_not_an_injection():
+    # bite 13: the elaborator has no types, so an applied label of a `||` sum is `App (Var l) v`
+    # and the alias is inlined into the types that use it; the kernel learns the labels from there
+    p = elaborate_program(program('Cell = { int : Int || real : Float64 }\nc : Cell := int 1'))
+    assert len(p) == 1 and isinstance(p[0], t.Define)
+    assert isinstance(p[0].type, t.Sum)
+    assert p[0].body == t.App(V('int'), t.Lit(t.IntConst(1)))

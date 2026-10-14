@@ -1168,6 +1168,27 @@ def test_parameterized_data_constructors():
     assert step((), bin_("==", just(num(1)), just(num(1)))) is None
 
 
+def test_equality_on_the_labels_of_a_sum():
+    # bite 13: the labels of a `||` sum met in the program compare as injections (PrimStructural)
+    cell = Sum((("int", Var("Int")), ("real", Var("Float64")), ("text", Var("String"))))
+    mark = Sum((("none", Var("Unit")), ("some", Var("Int"))))
+    p = (maybe_data(), Define("c", App(Var("Maybe"), cell), Var("c")), Define("m", mark, Var("m")))
+    just = lambda v: App(Var("just"), v)
+    lab = lambda l, v: App(Var(l), v)
+    one, real = just(lab("int", num(1))), just(lab("real", Lit(FloatConst(1.0))))
+    assert reduce(p, 30, bin_("==", one, one)) == truth(True)
+    assert reduce(p, 30, bin_("==", one, just(lab("int", num(2))))) == truth(False)
+    assert reduce(p, 30, bin_("==", one, real)) == truth(False)
+    assert reduce(p, 30, bin_("/=", one, real)) == truth(True)
+    assert reduce(p, 30, bin_("/=", one, one)) == truth(False)
+    # a label with no part is compared by label alone
+    assert reduce(p, 30, bin_("==", Var("none"), Var("none"))) == truth(True)
+    assert reduce(p, 30, bin_("==", Var("none"), lab("some", num(3)))) == truth(False)
+    assert reduce(p, 30, bin_("/=", lab("some", num(3)), lab("some", num(3)))) == truth(False)
+    # without the sum in the program the label is a free name, not comparable
+    assert step((maybe_data(),), bin_("==", lab("int", num(1)), lab("int", num(1)))) is None
+
+
 # 3.S31 [proposed]: a record type's label binds in the later fields' types.
 def _mat():
     from luthier.term import Pi

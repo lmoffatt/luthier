@@ -1,0 +1,9 @@
+Bool : U := data { false : Bool ; true : Bool }
+Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
+Cell = { int : Int || real : Float64 || text : String }
+Mark = { none : Unit || some : Int }
+one : Maybe Cell := just (int 1)
+other : Maybe Cell := just (real 1.0)
+bare : Mark := none
+score (b : Bool) : Int := match b { true -> 1 ; false -> 0 }
+answer : Int := (score (one == one) * 100) + ((score (one == other) * 10) + score (bare /= some 3))
