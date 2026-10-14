@@ -1,0 +1,55 @@
+-- plot_model.lut: the host's renderer (src/luthier/plots.py, matplotlib) as the model of
+-- `Drawing` and `Renderer` (plot.lth).
+--
+-- Draft 0, 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/plots-2026-10-15/prompt-theory.md (step 1 of
+-- record/plan/plots/plan-plots-2026-10-14-execution.md; decisions G1, G3, G5 of
+-- plan-plots-2026-10-14-decisions.md). A model file (12.S23): one value of the theory, its
+-- functions routes to the host (3.S40, 10.S8), pattern of tables_model.lut and world_model.lut.
+-- The host module does not exist yet: step 2 of the plan writes it, and until then the routes are
+-- read at the first demand and fail there (L11.7), as any extern whose file is absent.
+--
+-- What crosses. A `Plot` crosses by its declared type, as a table does (tables_model.lut): a
+-- record with its fields; each `Table` in `tables` as the host's table (tables.py `Table`); a
+-- mapping as a list of pairs of strings; a geometry, a scale, limits and coordinates as the
+-- bridge of run.py crosses a labeled sum, the pair `(label, value)` with the value a record of
+-- the label's parameters (a `Unit` for `cartesian` and `equal`); `facet` as a `Maybe String`.
+-- `image p ext` gives the file's content as a string with one character per byte [proposed],
+-- the reading of a binary file that world_model.lut's `observe` must share for `agreement` to
+-- compare them. `formatOf` reads a content's format from its first bytes. `render w p path`
+-- writes `image p ext` at the path, `ext` what follows the path's last ".", and refuses a path
+-- whose extension is not among `formats`.
+--
+-- The store of the description is world_model.lut's representation: a write at a path replaces
+-- the file there and leaves the standard output and every other file (world.lth `Persistence`).
+--
+-- The three plots of G4 are not here: they are values over the tables of experiment_zero.lut,
+-- which a library model does not see, and G5 places them in examples/sonolocalizacion/
+-- figures.lut (step 3).
+
+import "plot.lth" Drawing Renderer
+import "world.lth" Persistence
+import "world_model.lut" State theWorld
+
+dropFile (fs : List (String * String)) (p : String) : List (String * String) :=
+  match fs { nil -> nil ; cons (q, c) rest -> if p == q then dropFile rest p else cons (q, c) (dropFile rest p) }
+
+-- the representation's store: a write puts the content at the path, first, and drops what was there
+files : Persistence State := {
+  world := theWorld,
+  write := fn st p c { { stdout := st.stdout, files := cons (p, c) (dropFile st.files p) } },
+}
+
+-- the description: the image and the format reader are the host's pure functions, routes to Python
+matplotlibDrawing : Drawing State := {
+  store := files,
+  formats := ["png", "svg"],
+  image := extern "python:luthier.plots.image",
+  formatOf := extern "python:luthier.plots.format_of",
+}
+
+-- the renderer: the drawing and the action, `render w p path`, a route to Python (G1)
+matplotlib : Renderer State := {
+  drawing := matplotlibDrawing,
+  render := extern "python:luthier.plots.render",
+}
