@@ -6,19 +6,23 @@
 -- record/plan/plots/plan-plots-2026-10-14-execution.md; decisions G1, G3, G5 of
 -- plan-plots-2026-10-14-decisions.md). A model file (12.S23): one value of the theory, its
 -- functions routes to the host (3.S40, 10.S8), pattern of tables_model.lut and world_model.lut.
--- The host module does not exist yet: step 2 of the plan writes it, and until then the routes are
--- read at the first demand and fail there (L11.7), as any extern whose file is absent.
+-- The host module is src/luthier/plots.py, written on record/IA/plots-2026-10-15/prompt-host.md
+-- (step 2); the laws of `Drawing` on `matplotlibDrawing` and of `Persistence` on `files` are
+-- tests/tester/plot_laws.lut's.
 --
 -- What crosses. A `Plot` crosses by its declared type, as a table does (tables_model.lut): a
--- record with its fields; each `Table` in `tables` as the host's table (tables.py `Table`); a
--- mapping as a list of pairs of strings; a geometry, a scale, limits and coordinates as the
--- bridge of run.py crosses a labeled sum, the pair `(label, value)` with the value a record of
--- the label's parameters (a `Unit` for `cartesian` and `equal`); `facet` as a `Maybe String`.
--- `image p ext` gives the file's content as a string with one character per byte [proposed],
--- the reading of a binary file that world_model.lut's `observe` must share for `agreement` to
--- compare them. `formatOf` reads a content's format from its first bytes. `render w p path`
--- writes `image p ext` at the path, `ext` what follows the path's last ".", and refuses a path
--- whose extension is not among `formats`.
+-- record with its fields; its `canvas` a record of three floats (inches, inches, dots per inch;
+-- added to plot.lth on prompt-host.md, item 0); each `Table` in `tables` as the host's table
+-- (tables.py `Table`) or the record `tables.as_table` reads; a mapping as a list of pairs of
+-- strings; a geometry, a scale, limits and coordinates as the bridge of run.py crosses a labeled
+-- sum, the pair `(label, value)` with the value a record of the label's parameters (a `Unit` for
+-- `cartesian` and `equal`); `facet` as a `Maybe String`. `image p ext` gives the file's content
+-- as a string as the host reads a file (host.py `text_of_bytes`, which `observe` and `readFile`
+-- share, so that `agreement` compares like with like): one character per byte for a PNG
+-- [proposed], the UTF-8 text for an SVG, the two the same while the SVG is ASCII. `formatOf`
+-- reads a content's format from its first bytes. `render w p path` writes `image p ext` at the
+-- path, `ext` what follows the path's last ".", and refuses a path whose extension is not among
+-- `formats`.
 --
 -- The store of the description is world_model.lut's representation: a write at a path replaces
 -- the file there and leaves the standard output and every other file (world.lth `Persistence`).
