@@ -1,0 +1,1428 @@
+[
+ {
+  "law": "UniformAtLevel",
+  "cone": "sha256:bcbbd2caca67e4fbae99af45914eeef370b7bfb695bcd97eccfee1047a1ba3d3",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "l",
+    "generator": "level (Listed)",
+    "fingerprint": "sha256:fd60c63019f561d43beb69964fb2ad73187081e2167d2a68b50b379594e3408a"
+   },
+   {
+    "parameter": "vs",
+    "generator": "uniformLists (Listed)",
+    "fingerprint": "sha256:e31660a4be9cbde1cb9a4aee85ff6288453953da81e8b863c9a9b7976bcd58ec"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "level"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T16:50:48+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:1b682ebe8dfe29343f0ba99c63f26fec2ca4ee05d52bd6c3237658f79dbd9181",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:22cdc67e17595b602873660dcc87fc98f377d8eedac3ebaed80f23215717d1dd"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:8b58ff241b29110ea6d90ef1549429d3f405604b5677e1c26c1afbfe9dfb3845",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:22cdc67e17595b602873660dcc87fc98f377d8eedac3ebaed80f23215717d1dd"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:d011fcb5edd32b774b3bcff569311bfc94aa794b5925c9709978bf11f82bea48",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:22cdc67e17595b602873660dcc87fc98f377d8eedac3ebaed80f23215717d1dd"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:1b682ebe8dfe29343f0ba99c63f26fec2ca4ee05d52bd6c3237658f79dbd9181",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:8b58ff241b29110ea6d90ef1549429d3f405604b5677e1c26c1afbfe9dfb3845",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:d011fcb5edd32b774b3bcff569311bfc94aa794b5925c9709978bf11f82bea48",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfOne",
+  "cone": "sha256:87ed156076bb223e591b35a98d2851df711ad1d53a9fd5d072557e6adfb28cd9",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   },
+   {
+    "parameter": "u",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitValue",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "u",
+    "reach": {
+     "Interval": [
+      0.0,
+      1.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfNothing",
+  "cone": "sha256:93e7078c8f78faa108f7a06d65b50ac1b76c8fb3677f33071b8ce2be44082462",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:ab51e550b19bf72e1411f149f047ad796500e1288588b265d11ccf7089b661a7"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T16:50:42+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "UniformAtLevel",
+  "cone": "sha256:a2b9fda5b283ae78ebfdbc94ca06214ae2633bb76250b66509dbca7a92efa43d",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "l",
+    "generator": "level (Listed)",
+    "fingerprint": "sha256:045446c01131d2fa33ccf11e9c6b12bfcbf74b7e125dbe7ab7e7d517087dcb62"
+   },
+   {
+    "parameter": "vs",
+    "generator": "uniformLists (Listed)",
+    "fingerprint": "sha256:537ca8d4db0aab756a2a513e2aafe4dda7859ab0e7c246ba54baa52ca381fa1e"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "level"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T15:48:06+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:56cfd0fa8df77be32830e1dd897345c08207f065dc0ebc92da422621077cf678",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:87a39d67a83f25dbf1733f61cca6386b5dc8655e13ad0766e67a66bc918d0c56"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:cc112281aeaa6278015786889e7aa5e492674433a84c3671578eec9d486d20d9",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:87a39d67a83f25dbf1733f61cca6386b5dc8655e13ad0766e67a66bc918d0c56"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:0435fe611644e46d5b211de546349b9719c5799613128ef2b0dcee1852ff4ab5",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "vs",
+    "generator": "unitLists (Listed)",
+    "fingerprint": "sha256:87a39d67a83f25dbf1733f61cca6386b5dc8655e13ad0766e67a66bc918d0c56"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "vs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 0) fn (k : (Fin 0)) { 0.0 })) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 101) 0)) nil)"
+      },
+      {
+       "Printed": "((cons ((spread 30) 0)) ((cons ((spread 50) 30)) ((cons ((spread 21) 80)) nil)))"
+      },
+      {
+       "Printed": "((cons ((spread 1) 0)) ((cons ((spread 1) 1)) ((cons ((spread 1) 2)) nil)))"
+      },
+      {
+       "Printed": "((cons (((vec Float64) 20) fn (k : (Fin 20)) { 0.9 })) ((cons ((spread 10) 0)) nil))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovAgrees",
+  "cone": "sha256:56cfd0fa8df77be32830e1dd897345c08207f065dc0ebc92da422621077cf678",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovBounded",
+  "cone": "sha256:cc112281aeaa6278015786889e7aa5e492674433a84c3671578eec9d486d20d9",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfMultiset",
+  "cone": "sha256:0435fe611644e46d5b211de546349b9719c5799613128ef2b0dcee1852ff4ab5",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "vs",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitList",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "NotRun": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "grade": null,
+  "outcome": {
+   "NotRunFor": "vs : UnitList: recursive data List: its sized generator is a later bite (7.S3)"
+  },
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfOne",
+  "cone": "sha256:7fe4b87cdfc538563ce35e5a3fdfbc468efc1530f935b2809b1480c9c8716b3d",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   },
+   {
+    "parameter": "u",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over UnitValue",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "u",
+    "reach": {
+     "Interval": [
+      0.0,
+      1.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ },
+ {
+  "law": "KolmogorovOfNothing",
+  "cone": "sha256:42de60d789d650848bb14ae413a93ffb8b68daf3417d2451e1bc3eb5d888cd25",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "numpySort (Listed)",
+    "fingerprint": "sha256:5587efa9474b0ce6377cd8a19f0c2e251d15216dab0984dd824e48ea671b9421"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "numpySort"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T15:48:00+00:00",
+  "interpreter": "5959875af5928743de21c69e3ec23ae784adcda9+560dd0c8109c",
+  "hosts": [
+   [
+    "python:luthier.arrays.kolmogorov_distance",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ]
+ }
+]
