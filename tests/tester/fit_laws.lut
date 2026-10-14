@@ -1,0 +1,68 @@
+-- tests/tester/fit_laws.lut: the fit's laws on the quadratic family, on the brief
+-- record/IA/evidence-2026-10-14/prompt.md, item 3: `QuadraticConverges` (belief.lth) on two
+-- models of `Maximizer`, the host's Levenberg-Marquardt (`lm`, belief_model.lut) and the native
+-- one (`lmMaximizer` with v0.1's damping, optimization_model.lut); the laws of `LMStep`
+-- (optimization.lth) on its two models, the host's (`host`) and the native definitions
+-- (`native`). The quadratic family is drawn: its maximum `b`, its curvature `c` and the start.
+-- `DirectionDescends`, `DirectionAgrees` and `StepRule` take an objective, a record of functions
+-- (7.R4); the three `...OnQuadratic` below [proposed] are each law applied to the family's
+-- objective, so that the family's parameters are what the tester draws. `MaximizersAgree`
+-- [proposed] states the question of item 3, that the two maximizers end at the same point and
+-- say the same about convergence, within the tolerance. Each cutoff a census of one, the demand's
+-- (D-2026-10-14-c): session A's settings and v0.1's damping (tests/tester/session_a.lut), the
+-- tolerance 1e-12 [proposed]. Seed 20261014: every line draws the same cases, the models being
+-- censuses.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance Positive
+import "arrays.lth" Dim VecOf approxVec
+import "belief.lth" Maximizer Settings MaxResult quadratic QuadraticConverges
+import "belief_model.lut" lm
+import "optimization.lth" LMStep Damping LMState quadraticObjective QuadraticStepAccepts DirectionDescends
+  DirectionAgrees StepRule
+import "optimization_model.lut" native host lmMaximizer
+import "session_a.lut" settingsA dampingA
+
+tolerance : Tolerance := 1.0e-12
+nativeLM : Maximizer := lmMaximizer dampingA
+
+DirectionDescendsOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x : VecOf n) (mu : Positive) : Bool :=
+  DirectionDescends m tol s n (quadraticObjective n b c) x mu
+DirectionAgreesOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x : VecOf n) (mu : Positive) : Bool :=
+  DirectionAgrees m tol s n (quadraticObjective n b c) x mu
+StepRuleOnQuadratic (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (st : LMState n) : Bool :=
+  StepRule m s d n (quadraticObjective n b c) st
+MaximizersAgree (mx my : Maximizer) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  { q := quadratic n b c
+    r1 := mx.maximize s n q.logp q.score q.info x0
+    r2 := my.maximize s n q.logp q.score q.info x0
+    r1.converged == r2.converged and approxVec tol r1.x r2.x }
+
+cutoffs : List Binding := [
+  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
+  { parameter := just "d", type := nothing, generator := "dampingA", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+onLm : List Binding := [ { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed } ]
+onNativeLM : List Binding := [ { parameter := just "mx", type := nothing, generator := "nativeLM", coverage := Listed } ]
+onHost : List Binding := [ { parameter := just "m", type := nothing, generator := "host", coverage := Listed } ]
+onNative : List Binding := [ { parameter := just "m", type := nothing, generator := "native", coverage := Listed } ]
+both : List Binding := [
+  { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },
+  { parameter := just "my", type := nothing, generator := "nativeLM", coverage := Listed } ]
+
+-- Maximizer: the host's, the native one, and whether they agree
+test "QuadraticConverges" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLm) (profile <- cutoffs)
+test "QuadraticConverges" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNativeLM) (profile <- cutoffs)
+test "MaximizersAgree" (SampledMode linear) (seed <- 20261014) (whereBindings <- both) (profile <- cutoffs)
+-- LMStep: the host's, then the native definitions
+test "QuadraticStepAccepts" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
+test "DirectionDescendsOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
+test "DirectionAgreesOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
+test "StepRuleOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onHost) (profile <- cutoffs)
+test "QuadraticStepAccepts" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
+test "DirectionDescendsOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
+test "DirectionAgreesOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
+test "StepRuleOnQuadratic" (SampledMode linear) (seed <- 20261014) (whereBindings <- onNative) (profile <- cutoffs)
