@@ -9,10 +9,17 @@
 -- [proposed]. Seed 20261014. The parameters and data (`VecOf n`) are drawn; a unit list of
 -- vectors has no generator (a filter over random lists accepts only empty vectors), so its laws
 -- run sampled, to show it, and on the listed lists below.
+-- Since 2026-10-15 (record/IA/tester-2026-10-14/prompt-3.md) a binding can name a generator
+-- (7.R1): the listed Kolmogorov lines have sampled twins whose lists are drawn by
+-- generators_model.lut's `unitList` (values in [0, 1] with atoms at 0, 1 and ties) and, for the
+-- statistical law, `uniformSample` (a calibrated sample); the listed lines are kept. As a Bool law
+-- `UniformAtLevel` holds on a fraction 1 - alpha of calibrated samples (7.S17): at alpha 0.01 over
+-- 100 drawn samples about one refuting case is expected, and the tester does not yet estimate a
+-- level (7.S17's runs), so a refutation there is read against that count.
 
 import "test.lth" test ExhaustiveMode SampledMode
-import "generators_model.lut" linear
-import "generators.lth" Binding Level
+import "generators_model.lut" linear unitList uniformSample
+import "generators.lth" Binding Level byParameter
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec vec
@@ -46,6 +53,8 @@ uniformLists : List (List (Vec Float64)) := [
   [spread 30 0, spread 50 30, spread 21 80],
   [spread 1 0, spread 1 1, spread 1 2] ]
 listedUniform : List Binding := [ { parameter := just "vs", type := nothing, generator := "uniformLists", coverage := Listed } ]
+drawnVs : List Binding := [byParameter "vs" "unitList"]
+drawnUniform : List Binding := [byParameter "vs" "uniformSample"]
 
 -- the models as censuses of one, with their dimension and the cutoffs
 dimPos : List Int := [freeDim]
@@ -77,6 +86,10 @@ test "KolmogorovOfMultiset" ExhaustiveMode (whereBindings <- listedVs) (profile 
 test "KolmogorovBounded" ExhaustiveMode (whereBindings <- listedVs) (profile <- kolmogorov)
 test "KolmogorovAgrees" ExhaustiveMode (whereBindings <- listedVs) (profile <- kolmogorov)
 test "UniformAtLevel" ExhaustiveMode (whereBindings <- listedUniform) (profile <- kolmogorov)
+test "KolmogorovOfMultiset" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnVs) (profile <- kolmogorov)
+test "KolmogorovBounded" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnVs) (profile <- kolmogorov)
+test "KolmogorovAgrees" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnVs) (profile <- kolmogorov)
+test "UniformAtLevel" (SampledMode linear) (seed <- 20261014) (whereBindings <- drawnUniform) (profile <- kolmogorov)
 
 -- §2 the mean models: session A's, distances.lut's
 test "MeanShape" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- cutoffs)
