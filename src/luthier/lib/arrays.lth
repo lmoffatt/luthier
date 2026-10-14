@@ -35,7 +35,9 @@
 --   §3 The native definitions, and the comparisons of arrays within a tolerance
 --      (v0.1 array.lut:49-78, 351-352).                                                  done
 --   §4 The leaves: `Arrays`, its laws, exact or within the demand's tolerance (3.S28,
---      11.S14, 11.S18); the retained rank with its floor (P11).                           done
+--      11.S14, 11.S18); the retained rank with its floor (P11); the trace and the
+--      pseudo-inverse of a symmetric matrix (added 2026-10-14 for the fit's theories,
+--      record/IA/slice-theories-2-2026-10-14/prompt.md item 3).                           done
 
 import "numbers.lth" Tolerance within withinOf abs Positive Elementary
 import "numbers_model.lut" elementary : Elementary
@@ -111,6 +113,8 @@ transposeDef (a : Mat Float64) : Mat Float64 := mat Float64 a.n a.m (fn i j { a.
 maddDef (a : Mat Float64) (b : MatOf a.m a.n) : Mat Float64 := mat Float64 a.m a.n (fn i j { a.f i j + b.f i j })
 msubDef (a : Mat Float64) (b : MatOf a.m a.n) : Mat Float64 := mat Float64 a.m a.n (fn i j { a.f i j - b.f i j })
 mscaleDef (c : Float64) (a : Mat Float64) : Mat Float64 := mat Float64 a.m a.n (fn i j { c * a.f i j })
+-- the trace of a square matrix, the sum of its diagonal in the order of 3.S27 (v0.1 array.lut:70)
+traceDef (a : Square) : Float64 := sumTo a.m (fn i { a.f i i })
 
 -- Functions have no structural equality (4.R8): arrays compare entry by entry, within the
 -- tolerance given, and differ when their shapes do; with tolerance zero the comparison is exact.
@@ -140,6 +144,7 @@ Arrays : {
   mscale : Float64 -> Mat Float64 -> Mat Float64,
   transpose : Mat Float64 -> Mat Float64,
   retainedRank : RankFloor -> Mat Float64 -> Int,
+  trace : Mat Float64 -> Float64,
 }
 
 -- entrywise operations are exact: the host applies the machine's operation to each entry, which
@@ -207,7 +212,22 @@ RankScales (m : Arrays) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :
 RankUnderRotation (m : Arrays) (tol : Tolerance) (fl : RankFloor) (k : Dim) (q : Orthogonal tol k) (s : SymmetricOf k) : Bool :=
   m.retainedRank fl (m.matMul (m.transpose q) (m.matMul s q)) == m.retainedRank fl s
 
+-- The trace: of the identity its size, exactly (a sum of ones); linear and cyclic within the
+-- demand's tolerance, the cyclic law relative to the magnitudes of the products summed (both
+-- sides sum the same r c products in different orders, 11.S14); and within the tolerance of the
+-- native sum relative to the magnitudes of the diagonal (v0.1 array.lut:247-252 held the
+-- tolerance; here the demand gives it, 11.S18).
+-- spec 11.S14, 11.S18
+TraceOfIdentity (m : Arrays) (k : Dim) : Bool := m.trace (identity k) == toFloat64 k
+TraceAdditive (m : Arrays) (tol : Tolerance) (k : Dim) (a b : MatOf k k) : Bool :=
+  within tol (m.trace (m.madd a b)) (m.trace a + m.trace b)
+TraceCyclic (m : Arrays) (tol : Tolerance) (r c : Dim) (a : MatOf r c) (b : MatOf c r) : Bool :=
+  withinOf tol (absSumTo r (fn i { absSumTo c (fn j { a.f i j * b.f j i }) })) (m.trace (m.matMul a b)) (m.trace (m.matMul b a))
+TraceAgrees (m : Arrays) (tol : Tolerance) (k : Dim) (a : MatOf k k) : Bool :=
+  withinOf tol (absSumTo k (fn i { a.f i i })) (m.trace a) (traceDef a)
+
 Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
   & DotSymmetric & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
   & MatVecOnBasis & MatVecAgrees & MatMulIdentity & MatMulTransposes & MatMulAgrees
   & RankOfDiagonal & RankOfZeroAndIdentity & RankBounded & RankScales & RankUnderRotation
+  & TraceOfIdentity & TraceAdditive & TraceCyclic & TraceAgrees
