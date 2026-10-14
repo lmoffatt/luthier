@@ -98,8 +98,20 @@ textAt (t : Table) (c : { s : String | hasColumn t s "str" }) (r : Fin t.nRows) 
 -- two tables are the same when they have the same columns and every cell agrees; `cell` is a
 -- function, so a table has no `==` of its own (4.R8) and this is the equality the codec carries.
 -- Inside the branch the row counts agree, which lets `u.cell` take `t`'s row (4.R11).
+-- two cells are the same when they are of the same kind and agree. [proposed] Written by cases and
+-- not by `==` on `Maybe Cell`: the kernel's `==` does not step on the labels of a `||` sum (they
+-- are not the constructors of a data), so a table with any cell left `sameTable` stuck.
+sameCell (a b : Maybe Cell) : Bool :=
+  match a {
+    nothing -> match b { nothing -> true ; just y -> false } ;
+    just x -> match b {
+      nothing -> false ;
+      just y -> match x {
+        int k -> match y { int l -> k == l ; real q -> false ; text s -> false } ;
+        real p -> match y { int l -> false ; real q -> p == q ; text s -> false } ;
+        text r -> match y { int l -> false ; real q -> false ; text s -> r == s } } } }
 sameCells (t u : Table) (ns : List String) : Bool :=
-  match ns { nil -> true ; cons n rest -> forallBelow t.nRows (fn r { t.cell n r == u.cell n r }) and sameCells t u rest }
+  match ns { nil -> true ; cons n rest -> forallBelow t.nRows (fn r { sameCell (t.cell n r) (u.cell n r) }) and sameCells t u rest }
 sameTable (t u : Table) : Bool :=
   if t.nRows == u.nRows then t.names == u.names and t.kinds == u.kinds and sameCells t u t.names else false
 
@@ -125,7 +137,13 @@ Perturbed = { table : Table, text : String }
 BrokenText = { s : String }
 
 -- spec 4.S8: reading what was written gives back the table
-RoundTrip (c : Codec) (t : Table) : Bool := match c.parse (c.render t) { nothing -> false ; just x -> c.eq x t }
+-- [proposed, 12.S23] over the tables with at least one column: the format's header is the columns, so
+-- a table with none renders to the empty text and `parse` rejects it ("no header"); the law is
+-- vacuously true there, and the tables with no columns stay in the census of the test so that its
+-- domain is visible. The other reading, an empty schema rendered as an empty header that `parse`
+-- accepts, changes the host's format (tables.py) and is the author's to take.
+RoundTrip (c : Codec) (t : Table) : Bool :=
+  if nCols t > 0 then (match c.parse (c.render t) { nothing -> false ; just x -> c.eq x t }) else true
 -- a text that parses renders to a text that parses to the same table: writing is canonical
 Canonical (c : Codec) (p : Perturbed) : Bool :=
   match c.parse p.text { nothing -> true ; just t -> (match c.parse (c.render t) { nothing -> false ; just x -> c.eq x t }) }
