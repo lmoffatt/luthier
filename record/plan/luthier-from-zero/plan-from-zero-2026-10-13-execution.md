@@ -407,7 +407,17 @@ empiece a generar certificados y ver que todo funcione como debe ser"):
    (12.S18: the cone's hash, the interpreter's revision, the certification state).
 4. Then what the evidence asked: the generators that are missing (valid graphs, normals), the
    statistical laws (7.S17 to 7.S19), the external review of layer 2.
-5. Milestone `v0.3`: the fit of sonolocalización runs certified, `run` strict.
+5. Milestone `v0.3`, its criteria (written 2026-10-15 on his rule that a milestone's criteria
+   precede its work; measured by the coordinating session): (a) `luthier run` refuses an
+   uncertified cone and the fit of sonolocalización runs with every law of its cone served
+   (met, 4d8c700); (b) a host action is validated at its first action and a lying host is
+   refused (met, 788b7f4); (c) `luthier certify` writes the entries of 7.S9 into the models'
+   stores, bounded by 6.S8, reused by 7.S13 (met, 40e5937, 5803e48, db35721); (d) the laws of
+   the slice's theories have grades in the evidence table, none refuted (met: the two
+   refutations of arrays.lth fixed; `tests/tester/*_laws.lut`); (e) the suite and the lints
+   green (met at 694; `check_quotes.py`'s old debt excepted, his question); (f) the external
+   review of layers 2 and 3 read and its first changes applied (layer 3's round 1 replies in,
+   synthesis running; layer 2 not sent). The tag when (f) is met, by him.
 
 ## Step 6. Execution (layer 3)
 
