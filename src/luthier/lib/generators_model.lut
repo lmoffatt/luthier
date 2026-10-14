@@ -3,8 +3,10 @@
 -- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (layer 2; draft 0 at 8570a0d). The two
 -- metrics of numbers (7.S2, 7.S4), the reference support, filter and resolution of bindings, from
 -- the definitions of generators.lth; the core's instances of the forms of a type wait for core.
+-- [proposed, 2026-10-15, record/IA/tester-2026-10-14/prompt-3.md] The families a test binds a
+-- parameter to (7.R1, 7.S5), host generators with their routes and the law each must meet.
 
-import "generators.lth" Metric LinearMetric LogMetric Support Filter Resolution Gen power pick resolve filtered
+import "generators.lth" Metric LinearMetric LogMetric Support Filter Resolution Gen power pick resolve filtered Seed Level
 import "kernel_laws.lth" Concrete
 
 -- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
@@ -21,3 +23,77 @@ filterOf (T : U) (g : Gen T) (p : T -> Bool) : Filter T :=
   { base := g, keep := p, draw := fn tries n s { filtered T g p tries n s } }
 -- the reference resolution of bindings
 resolution : Resolution := { bindingOf := resolve }
+
+-- ---------------------------------------------------------------- the families a test binds (7.S5)
+
+-- [proposed, 2026-10-15, record/IA/tester-2026-10-14/prompt-3.md] Generators a `where` or profile
+-- binding names (7.R1), host code in src/luthier/generators.py (P7). Each is a value of `Gen T`,
+-- or a family `(k : Dim) -> Gen T` whose parameters are named after the law's earlier parameters
+-- they read (7.S7: `dependent`'s `gb`); the seed crosses as an `Int` and the next one comes back
+-- with the value (7.S1). The criteria of a family (an atom's probability, a magnitude's bounds)
+-- are its arguments, set here (P11). Each comes with the law its values must meet, quantified
+-- over the size and the seed; the type a generator gives is its validity, which the tester also
+-- checks on every value it draws (7.S1).
+import "arrays.lth" Vec Mat Dim MatOf Symmetric SymmetricOf ClearDiagonal RankFloor approxMat exact
+  transposeDef matMulDef mscaleDef identity forallBelow
+import "numbers.lth" Tolerance abs
+import "probability.lth" UnitList allUnit UniformAtLevel
+import "probability_model.lut" numpySort
+import "arrays_model.lut" numpy : Arrays
+
+-- The host's families as one record, as a model file holds its externs (12.S23): check.py's 4.R5
+-- reads a standalone extern's type against the file's own definitions only, and refuses one
+-- over an imported type (`Symmetric`); a record's fields are typed by the record's type.
+hostGenerators : {
+  symmetric : Gen Symmetric,
+  symmetricOf : (k : Dim) -> Gen (SymmetricOf k),
+  gram : Gen Symmetric,
+  orthogonal : (k : Dim) -> Gen (MatOf k k),
+  unitListWith : Float64 -> Gen UnitList,
+  uniformSample : Gen UnitList,
+  clearDiagonalWith : Float64 -> Float64 -> Float64 -> Gen ClearDiagonal,
+} := {
+  symmetric := extern "python:luthier.generators.symmetric",
+  symmetricOf := extern "python:luthier.generators.symmetric_of",
+  gram := extern "python:luthier.generators.gram",
+  orthogonal := extern "python:luthier.generators.orthogonal",
+  unitListWith := extern "python:luthier.generators.unit_list",
+  uniformSample := extern "python:luthier.generators.uniform_sample",
+  clearDiagonalWith := extern "python:luthier.generators.clear_diagonal",
+}
+-- symmetric matrices, v0.1's B + B^T (arrays.py's gen_symmetric), of a size between 1 and the
+-- size, entries in [-size, size]; and of k rows
+symmetric : Gen Symmetric := hostGenerators.symmetric
+symmetricOf (k : Dim) : Gen (SymmetricOf k) := hostGenerators.symmetricOf k
+-- positive semidefinite: B^T B with B of fewer rows than columns in most draws (rank deficient)
+gram : Gen Symmetric := hostGenerators.gram
+-- orthogonal, Haar: the QR of a Gaussian matrix with the signs of R's diagonal (7.S5, Mezzadri)
+orthogonal (k : Dim) : Gen (MatOf k k) := hostGenerators.orthogonal k
+-- lists of vectors of values in [0, 1], an entry an atom (0, 1 or a tie) with probability 0.2
+-- (as lambdas: run.py's Runner leaves a constant that is a partial application of an extern stuck
+-- when applied to the remaining arguments)
+unitList : Gen UnitList := fn size seed { hostGenerators.unitListWith 0.2 size seed }
+-- a calibrated sample: every value independent and uniform in [0, 1) (7.S17)
+uniformSample : Gen UnitList := hostGenerators.uniformSample
+-- a diagonal clear of the floor: an atom at 0 of probability 0.25, else a sign and a magnitude
+-- log-uniform in [1, 1000], ClearDiagonal's bounds (7.S4)
+clearDiagonal : Gen ClearDiagonal := fn size seed { hostGenerators.clearDiagonalWith 0.25 1.0 1000.0 size seed }
+
+symmetricGives (a : Mat Float64) : Bool := a.m == a.n and approxMat exact a (transposeDef a)
+SymmetricGivesSymmetric (size : Nat) (seed : Seed) : Bool := match symmetric size seed { (a, next) -> symmetricGives a }
+SymmetricOfGivesItsSize (k : Dim) (size : Nat) (seed : Seed) : Bool :=
+  match symmetricOf k size seed { (a, next) -> a.m == k and symmetricGives a }
+-- positive semidefinite at a floor as arrays.lth's `PsdAt` reads it: nothing retained of `-a`
+GramGivesPsd (fl : RankFloor) (size : Nat) (seed : Seed) : Bool :=
+  match gram size seed { (a, next) -> symmetricGives a and numpy.retainedRank fl (mscaleDef (0.0 - 1.0) a) == 0 }
+-- `transpose q * q == identity` within a tolerance, the demand's (P11)
+OrthogonalGivesOrthogonal (tol : Tolerance) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
+  match orthogonal k size seed { (q, next) -> q.m == k and q.n == k and approxMat tol (matMulDef (transposeDef q) q) (identity k) }
+UnitListGivesUnitValues (size : Nat) (seed : Seed) : Bool := match unitList size seed { (vs, next) -> allUnit vs }
+-- calibrated: uniform at the level (probability.lth's `UniformAtLevel` on numpy's sort), a law that
+-- holds on a fraction 1 - alpha of seeds (7.S17)
+UniformSampleIsUniform (l : Level) (size : Nat) (seed : Seed) : Bool :=
+  match uniformSample size seed { (vs, next) -> UniformAtLevel numpySort l vs }
+ClearDiagonalGivesClear (size : Nat) (seed : Seed) : Bool :=
+  match clearDiagonal size seed { (d, next) ->
+    forallBelow d.n (fn k { d.f k == 0.0 or (1.0 <= abs (d.f k) and abs (d.f k) <= 1000.0) }) }
