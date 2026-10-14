@@ -2448,3 +2448,21 @@ Quote:      "la verdad prefiero que las construcciones tengan su ley en su archi
 Source:     luthier@c707f7c:record/plan/questions-2026-10-14.md:50
 Kind:       theories (core.lut, kernel_models.lut, laws.lth, test.lth)
 Status:     current
+
+D-2026-10-14-c  First everything Boolean: every law is a Boolean predicate, and every cutoff it
+                needs (a tolerance, a resolution, a rank floor, a convergence threshold, a level)
+                is a parameter of the law that the demand supplies (P11, 8.S1, L5.18), never a
+                constant in a file. The cost types of D-2026-10-13-m (`Distance`, `Evidence`,
+                certification.lth) come later, on the slice's failures, and may then relate
+                those cutoffs to the cost. Exception kept as stated: a law with a quantifier
+                that has no finite Boolean form (`SupIsLeast`, algebra.lth) stays a `Law`,
+                stated and not tested.
+Author:     Luciano
+Quote:      "hagamos primero todo booleano, pero expongamos los parametros de tolerancia de corte
+            como variables que luego pide la demanda. La idea es que quizas luego esos parametros
+            de corte esten relacionados con el costo. Pero primero hagamos todo booleano"
+Source:     chat:a5ea3059:0 (this session, 2026-10-14 evening; the line is unknown until the
+            export)
+Kind:       theories (the laws of numbers.lth, arrays.lth, probability.lth, belief.lth,
+            optimization.lth as written), step 5.1 of the plan
+Status:     current
