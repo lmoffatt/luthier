@@ -198,6 +198,8 @@ by Luciano.
   slice's second stage runs end to end at 4.8 s per iteration (bite 12). Order after v0.2 (i)
   done but for certification; (ii) next: evidence on the fit's laws (`luthier test` on the
   slice's files, the entry store 7.S9, 7.S13, the certifier 6.S8).
+- 2026-10-14, 20:50: the tag `v0.2` set at 9c0add5 on his approval ("lo apruebo"); the push is
+  his (the session's push was refused by its permission classifier). Milestone of step 4 done.
 
 
 ## Rules for every step
