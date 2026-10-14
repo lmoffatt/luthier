@@ -1,0 +1,42 @@
+-- Runner integration fixture (record/IA/plots-2026-10-15/prompt-host.md, item 2; plot.lth,
+-- plot_model.lut): a `Plot` of two tables built in Luthier, each read from a CSV the test writes
+-- and parsed by `csv`, with points and a line over one and a text over the other, rendered by the
+-- host's renderer to plot.png and plot.svg in the working directory. The text layer is built by
+-- `addLayer` and not by plot.lth's `text`: importing `text`, a definition with the name of
+-- `Cell`'s label, changes the hash of csv's cone in this program, and csv's entries then read as
+-- stale (a finding of 2026-10-15 for the certifier; `addLayer p l` is what `text` does).
+import "world_model.lut" HostConsole host : HostConsole
+import "tables.lth" Table
+import "tables_model.lut" csv : Codec
+import "plot.lth" Plot Canvas Mapping plot table point line addLayer texts scale labels linear auto
+import "plot_model.lut" matplotlib
+
+canvas : Canvas := { width := 4.0, height := 3.0, dpi := 50.0 }
+xy : Mapping := [("x", "x"), ("y", "y")]
+
+-- ggplot(obs, aes(x, y)) + geom_point(size = 4) + geom_line(linewidth = 1) +
+-- geom_text(aes(label = name), data = notes, size = 8) + labs(title = "two tables")
+figure (obs notes : Table) : Plot :=
+  labels "two tables" "x" "y"
+    (scale "y" (linear (auto { expand := 0.05 }))
+      (scale "x" (linear (auto { expand := 0.05 }))
+        (addLayer
+          (line "obs" nil 1.0
+            (point "obs" nil 4.0
+              (table "notes" notes (plot canvas "obs" obs xy))))
+          { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))
+
+parsed (w : W) (path : String) : W * Maybe Table :=
+  match host.readFile w path { (w1, nothing) -> (w1, nothing) ; (w1, just s) -> (w1, csv.parse s) }
+
+main (w : W) : W * Unit :=
+  match parsed w "obs.csv" { (w1, o) ->
+  match parsed w1 "notes.csv" { (w2, n) ->
+  match o {
+    nothing -> host.print w2 "no obs" ;
+    just obs -> match n {
+      nothing -> host.print w2 "no notes" ;
+      just notes ->
+        match matplotlib.render w2 (figure obs notes) "plot.png" { (w3, u) ->
+        match matplotlib.render w3 (figure obs notes) "plot.svg" { (w4, v) ->
+        host.print w4 "rendered" } } } } } }

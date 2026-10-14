@@ -4,7 +4,9 @@ Derivation: brief record/IA/run-2026-10-13/prompt-2.md (bite 2), after prompt.md
 choices in record/IA/run-2026-10-13/opus-2.md. The host keeps the standard output so far; files
 are read from disk at each observation (bite 3, prompt-3.md: observe takes the places). Bite 8
 (prompt-8.md, D-2026-10-14-a): the calls the host makes back into Luthier, counted for the run's
-record (12.S18).
+record (12.S18). Plots (record/IA/plots-2026-10-15/prompt-host.md): a file is read as bytes and
+turned into a string by `text_of_bytes`, so a binary file (a PNG) is observed, one character per
+byte, as plots.py's `image` gives it, for world.lth's `agreement`.
 """
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,6 +28,20 @@ class _Nothing:
 
 NOTHING = _Nothing()
 """`nothing` of `Maybe`, as it crosses the bridge."""
+
+
+def text_of_bytes(data):
+    """A file's bytes as a string: UTF-8 when they are valid UTF-8, with Python's universal
+    newlines as `read_text` gave it (a text file reads as before), Latin-1 otherwise, one
+    character per byte (a binary file, a PNG, plot.lth §5 [proposed])."""
+    try:
+        return data.decode("utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    except UnicodeDecodeError:
+        return data.decode("latin-1")
+
+
+def _read(path):
+    return text_of_bytes(Path(path).read_bytes())
 
 
 def reset():
@@ -62,7 +78,7 @@ def observe(w, places):
         if place == "stdout":
             continue
         try:
-            files.append((place, Path(place).read_text(encoding="utf-8")))
+            files.append((place, _read(place)))
         except (FileNotFoundError, IsADirectoryError, NotADirectoryError):
             pass
     return w, {"stdout": _stdout if "stdout" in places else "", "files": files}
@@ -77,7 +93,7 @@ def print_line(w, s):
 def read_file(w, path):
     """`W -> String -> W * Maybe String`: `nothing` when there is no file to read."""
     try:
-        text = Path(path).read_text(encoding="utf-8")
+        text = _read(path)
     except (FileNotFoundError, IsADirectoryError, NotADirectoryError):
         return w, NOTHING
     return w, Just(text)

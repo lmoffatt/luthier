@@ -1,0 +1,104 @@
+-- tests/tester/plot_laws.lut: the laws of `Drawing` (plot.lth §5) on matplotlib's drawing
+-- (plot_model.lut, src/luthier/plots.py) and of `Persistence` (world.lth §2) on its store
+-- `files`, as listed cases, on the brief record/IA/plots-2026-10-15/prompt-host.md (item 2: the
+-- run of tests/run/plot_two_tables.lut is refused while these laws have no entry). Written
+-- 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session. `Plot` and the
+-- permutations of rows have no generator, so each census is a list: plots built here from tables
+-- parsed by `csv` (points and a line; points coloured by a palette, a text from a second table
+-- and a line y = x; the same plots built a second time, for `ImageOfTheValue`), the three-row
+-- table of the first under every permutation of its rows, two layers apart for the swap.
+-- `S` is bound to world_model.lut's `State`, the representation `files` is a store of. The
+-- margin of `LayerOrderInvariant` is a census of one, the demand's (D-2026-10-14-c):
+-- 0.05 [proposed], a twentieth of the span of the two layers together. Seed 20261015 (the
+-- censuses are listed; the seed only names the run).
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "kernel_laws.lth" Concrete
+import "tables.lth" Table
+import "tables_model.lut" csv
+import "plot.lth" Plot Canvas Mapping Drawing Margin plot table point line addLayer texts abline scale labels linear
+  auto palette FileExistsAfter FormatByExtension ImageOfTheValue RowOrderInvariant LayerOrderInvariant
+  ImageSeesTheTitle
+import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
+import "world_model.lut" State
+import "plot_model.lut" matplotlibDrawing files
+
+parsed (s : String) : Table := match csv.parse s { just t -> t }
+canvas : Canvas := { width := 4.0, height := 3.0, dpi := 50.0 }
+xy : Mapping := [("x", "x"), ("y", "y")]
+obsText : String := "x:float,y:float,g:str\n1.0,2.0,a\n2.0,3.5,b\n3.0,1.0,a\n"
+notesText : String := "x:float,y:float,name:str\n1.5,3.0,first\n9.0,3.0,far\n"
+
+-- points and a line over obs
+pointsAndLine (obs : Table) : Plot :=
+  labels "points and a line" "x" "y" (scale "y" (linear (auto { expand := 0.05 })) (scale "x" (linear (auto { expand := 0.05 }))
+    (line "obs" nil 1.0 (point "obs" nil 4.0 (plot canvas "obs" obs xy)))))
+-- points coloured by g, a text from notes, the line y = x
+coloured (obs notes : Table) : Plot :=
+  labels "coloured" "x" "y" (scale "colour" (palette ["red", "blue"])
+    (scale "y" (linear (auto { expand := 0.05 })) (scale "x" (linear (auto { expand := 0.05 }))
+      (abline 0.0 1.0 0.5
+        (addLayer (point "obs" [("colour", "g")] 4.0 (table "notes" notes (plot canvas "obs" obs xy)))
+          { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))))
+-- points over obs (x 1 to 3) then a text over notes (x 1.5 and 9): the layers overlap on x and y
+-- for the first note; with the second alone they are apart on x
+farText : String := "x:float,y:float,name:str\n9.0,3.0,far\n"
+apartLayers (obs notes : Table) : Plot :=
+  labels "apart" "x" "y" (scale "y" (linear (auto { expand := 0.05 })) (scale "x" (linear (auto { expand := 0.05 }))
+    (addLayer (point "obs" nil 4.0 (table "notes" notes (plot canvas "obs" obs xy)))
+      { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))
+
+states : List Concrete := [State]
+drawings : List (Drawing State) := [matplotlibDrawing]
+plots : List Plot := [
+  pointsAndLine (parsed obsText),
+  coloured (parsed obsText) (parsed notesText),
+  apartLayers (parsed obsText) (parsed farText),
+  apartLayers (parsed obsText) (parsed notesText) ]
+again : List Plot := [ pointsAndLine (parsed obsText), coloured (parsed obsText) (parsed notesText) ]
+exts : List String := ["png", "svg"]
+stems : List String := ["plot"]
+blank : State := { stdout := "", files := nil }
+withFile : State := { stdout := "", files := [("plot.png", "old"), ("other.txt", "kept")] }
+worlds : List State := [blank, withFile]
+names : List String := ["obs"]
+obsTables : List Table := [parsed obsText]
+-- the six permutations of three rows
+perms : List (Fin 3 -> Fin 3) := [
+  fn r { r },
+  fn r { if r == 0 then 1 else if r == 1 then 0 else 2 },
+  fn r { if r == 0 then 0 else if r == 1 then 2 else 1 },
+  fn r { if r == 0 then 2 else if r == 1 then 1 else 0 },
+  fn r { if r == 0 then 1 else if r == 1 then 2 else 0 },
+  fn r { if r == 0 then 2 else if r == 1 then 0 else 1 } ]
+margins : List Margin := [0.05]
+positions : List Int := [0, 1]
+titles : List String := ["", "another title"]
+paths : List String := ["plot.png", "plot.svg", "other.txt"]
+contents : List String := ["", "x", "PNG"]
+stores : List (Persistence State) := [files]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+onExists : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "stem" "stems",
+  bind "ext" "exts", bind "st" "worlds"]
+onFormat : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "ext" "exts"]
+onValue : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "q" "again", bind "ext" "exts"]
+onRows : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "name" "names",
+  bind "t" "obsTables", bind "f" "perms", bind "ext" "exts"]
+onLayers : List Binding := [bind "S" "states", bind "d" "drawings", bind "margin" "margins", bind "p" "plots",
+  bind "i" "positions", bind "ext" "exts"]
+onTitle : List Binding := [bind "S" "states", bind "d" "drawings", bind "p" "plots", bind "s" "titles", bind "ext" "exts"]
+onWrite : List Binding := [bind "S" "states", bind "s" "stores", bind "st" "worlds", bind "p" "paths", bind "c" "contents"]
+onOthers : List Binding := [bind "S" "states", bind "s" "stores", bind "st" "worlds", bind "p" "paths", bind "c" "contents",
+  bind "q" "paths"]
+
+test "FileExistsAfter" ExhaustiveMode (seed <- 20261015) (whereBindings <- onExists)
+test "FormatByExtension" ExhaustiveMode (seed <- 20261015) (whereBindings <- onFormat)
+test "ImageOfTheValue" ExhaustiveMode (seed <- 20261015) (whereBindings <- onValue)
+test "RowOrderInvariant" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRows)
+test "LayerOrderInvariant" ExhaustiveMode (seed <- 20261015) (whereBindings <- onLayers)
+test "ImageSeesTheTitle" ExhaustiveMode (seed <- 20261015) (whereBindings <- onTitle)
+test "WriteThenRead" ExhaustiveMode (seed <- 20261015) (whereBindings <- onWrite)
+test "WriteChangesOnlyItsPlace" ExhaustiveMode (seed <- 20261015) (whereBindings <- onOthers)
