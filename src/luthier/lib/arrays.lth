@@ -115,6 +115,15 @@ msubDef (a : Mat Float64) (b : MatOf a.m a.n) : Mat Float64 := mat Float64 a.m a
 mscaleDef (c : Float64) (a : Mat Float64) : Mat Float64 := mat Float64 a.m a.n (fn i j { c * a.f i j })
 -- the trace of a square matrix, the sum of its diagonal in the order of 3.S27 (v0.1 array.lut:70)
 traceDef (a : Square) : Float64 := sumTo a.m (fn i { a.f i i })
+-- the Frobenius norm, the root of the sum of the squares of the entries (v0.1 array.lut:75); a
+-- bound on every eigenvalue in magnitude, which is what the pseudo-inverse's laws use it for
+frobDef (a : Mat Float64) : Float64 := elementary.sqrt (sumTo a.m (fn i { sumTo a.n (fn j { a.f i j * a.f i j }) }))
+-- the pseudo-inverse of a diagonal matrix at a floor: one over each entry above the floor times
+-- the largest in magnitude, zero elsewhere (negative entries are never retained, as retainedRank
+-- counts them)
+pinvOfDiagonal (fl : RankFloor) (d : Vec Float64) : Mat Float64 :=
+  { big := foldWith Float64 (fn a b { if a > b then a else b }) 0.0 d.n (fn k { abs (d.f k) })
+    diagonal (vec Float64 d.n (fn k { if d.f k > fl * big then 1.0 / d.f k else 0.0 })) }
 
 -- Functions have no structural equality (4.R8): arrays compare entry by entry, within the
 -- tolerance given, and differ when their shapes do; with tolerance zero the comparison is exact.
@@ -125,6 +134,12 @@ approxMat (tol : Tolerance) (a b : Mat Float64) : Bool :=
   if a.m == b.m and a.n == b.n then forallPairs2 a.m a.n (fn i j { within tol (a.f i j) (b.f i j) }) else false
 forallPairs2 (m n : Int) (p : Fin m -> Fin n -> Bool) : Bool := forallBelow m (fn i { forallBelow n (p i) })
 exact : Tolerance := 0.0
+-- the same comparison of matrices with a slack added to the tolerance's share: what a law states
+-- when the two sides differ by a known amount (the part of a matrix below a floor) and rounding
+approxMatSlack (slack : Float64) (tol : Tolerance) (a b : Mat Float64) : Bool :=
+  if a.m == b.m and a.n == b.n then
+    forallPairs2 a.m a.n (fn i j { abs (a.f i j - b.f i j) <= slack + tol * (1.0 + abs (a.f i j) + abs (b.f i j)) })
+  else false
 
 -- ---------------------------------------------------------------- §4 The leaves (3.S28, 12.S9)
 
@@ -145,6 +160,7 @@ Arrays : {
   transpose : Mat Float64 -> Mat Float64,
   retainedRank : RankFloor -> Mat Float64 -> Int,
   trace : Mat Float64 -> Float64,
+  pinvSym : RankFloor -> Mat Float64 -> Mat Float64,
 }
 
 -- entrywise operations are exact: the host applies the machine's operation to each entry, which
@@ -226,8 +242,38 @@ TraceCyclic (m : Arrays) (tol : Tolerance) (r c : Dim) (a : MatOf r c) (b : MatO
 TraceAgrees (m : Arrays) (tol : Tolerance) (k : Dim) (a : MatOf k k) : Bool :=
   withinOf tol (absSumTo k (fn i { a.f i i })) (m.trace a) (traceDef a)
 
+-- The pseudo-inverse of a symmetric matrix on its retained subspace, at the same floor as the
+-- rank (P11; v0.1 array.lut:157 held `n eps` inside): P = V diag(1 / w on the retained, 0) V^T.
+-- Characterized where the spectrum is read off: a diagonal clear of the floor, the zero matrix
+-- (nothing retained), the identity; and on any symmetric matrix by what holds of the projector
+-- S P = V_r V_r^T whatever is discarded: P S P = P, S P symmetric, P symmetric, the trace of S P
+-- the retained rank; S P S = S up to the part of S discarded, which is below the floor times the
+-- largest eigenvalue in magnitude, itself below the Frobenius norm (the slack); P at a positive
+-- scale is P over the scale (the floor is relative). Each within the demand's tolerance, which
+-- 11.S18 says depends on the conditioning (so the demand sets it); agreement with a native
+-- spectrum is a corollary (4.R10) and is not restated.
+-- spec 11.S18, P11
+PinvOfDiagonal (m : Arrays) (tol : Tolerance) (fl : ClearFloor) (d : ClearDiagonal) : Bool :=
+  approxMat tol (m.pinvSym fl (diagonal d)) (pinvOfDiagonal fl d)
+PinvOfZero (m : Arrays) (fl : RankFloor) (k : Dim) : Bool := approxMat exact (m.pinvSym fl (zeroMat k k)) (zeroMat k k)
+PinvOfIdentity (m : Arrays) (tol : Tolerance) (fl : RankFloor) (k : Dim) : Bool := approxMat tol (m.pinvSym fl (identity k)) (identity k)
+PinvProjects (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
+  { p := m.pinvSym fl s
+    approxMat tol (m.matMul p (m.matMul s p)) p }
+PinvSymmetric (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
+  { p := m.pinvSym fl s
+    approxMat tol p (m.transpose p) and approxMat tol (m.matMul s p) (m.transpose (m.matMul s p)) }
+PinvRestricts (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
+  { p := m.pinvSym fl s
+    approxMatSlack (fl * frobDef s) tol (m.matMul s (m.matMul p s)) s }
+PinvTraceIsRank (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
+  within tol (m.trace (m.matMul s (m.pinvSym fl s))) (toFloat64 (m.retainedRank fl s))
+PinvScales (m : Arrays) (tol : Tolerance) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
+  approxMat tol (m.pinvSym fl (mscaleDef c s)) (mscaleDef (1.0 / c) (m.pinvSym fl s))
+
 Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
   & DotSymmetric & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
   & MatVecOnBasis & MatVecAgrees & MatMulIdentity & MatMulTransposes & MatMulAgrees
   & RankOfDiagonal & RankOfZeroAndIdentity & RankBounded & RankScales & RankUnderRotation
   & TraceOfIdentity & TraceAdditive & TraceCyclic & TraceAgrees
+  & PinvOfDiagonal & PinvOfZero & PinvOfIdentity & PinvProjects & PinvSymmetric & PinvRestricts & PinvTraceIsRank & PinvScales

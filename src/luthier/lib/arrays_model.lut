@@ -28,6 +28,9 @@ numpy : Arrays := {
   -- inside (inventory row 13); a `retained_rank_at(floor, a)` is the one-line host change
   retainedRank := extern "python:luthier.arrays.retained_rank_at",
   trace := extern "python:luthier.arrays.trace",
+  -- [proposed] the floor as the first argument, as retainedRank: arrays.py's `pinv_sym(a)` holds
+  -- `n eps` inside; a `pinv_sym_at(floor, a)` (eigh, keep `w > floor * max |w|`) is the host change
+  pinvSym := extern "python:luthier.arrays.pinv_sym_at",
 }
 
 -- the leaves by name, so that `operator` can bind them (4.R13 names a function with its type)
@@ -44,6 +47,7 @@ mscale : Float64 -> Mat Float64 -> Mat Float64 := numpy.mscale
 transpose : Mat Float64 -> Mat Float64 := numpy.transpose
 retainedRank : RankFloor -> Mat Float64 -> Int := numpy.retainedRank
 trace : Mat Float64 -> Float64 := numpy.trace
+pinvSym : RankFloor -> Mat Float64 -> Mat Float64 := numpy.pinvSym
 
 -- The arithmetic of vectors and matrices written with `+ - *`, each resolved by the types of its
 -- operands (4.R13, 2.R2; v0.1 array.lut:357-364): `Vec + Vec`, `Mat + Mat`, `Float64 * Vec`,
