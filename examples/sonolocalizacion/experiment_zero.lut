@@ -29,9 +29,12 @@
 --                 whether the distances agree with it
 -- With 22 data and 30 parameters a test on the residuals has little power; the controls say more.
 --
--- The host has no action that writes a file yet (world_model.lut: `print` and `readFile`), so each
--- table is printed to the standard output after a header line `== <path>`, the path it would be
--- written at under outDir; the summary line is printed last.
+-- The host has no action that writes a table to a file yet (world_model.lut: `print` and
+-- `readFile`), so each table is printed to the standard output after a header line `== <path>`, the
+-- path it would be written at under outDir. The three plots of the tables (figures.lut, plan G4 of
+-- record/plan/plots/plan-plots-2026-10-14-decisions.md) are rendered after them by the host's
+-- renderer (plot_model.lut) to outDir/positions.png, residuals.png and transform.png; outDir must
+-- exist. The summary line is printed last.
 --
 -- Run from the root of this repository with
 --   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/experiment_zero.lut \
@@ -54,6 +57,9 @@ import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode lapl
 import "belief_model.lut" lm : Maximizer
 import "positions.lut" Design Separated flatten
 import "positions_model.lut" positionsModel nodesOf
+import "plot.lth" Canvas
+import "plot_model.lut" matplotlib
+import "figures.lut" Style positionsPlot residualsPlot transformPlot keptCount
 import "distance_graph.lut" DistanceGraph GraphWithColumns ValidDistanceGraph ValidGraph MapInput toMapInput designOf readGraph nameOf iOf jOf dOf intToString realToString
 
 -- ---------------------------------------------------------------- parameters
@@ -278,11 +284,38 @@ writeTable (w : W) (path : String) (t : Table) : W * Unit := {
   (w1, done) <- host.print w ("== " + path)
   host.print w1 (csv.render t) }
 
+-- The figures (plan G4, figures.lut) and what they take from the demand (P11), each a definition
+-- [proposed by the agent of record/IA/plots-2026-10-15/prompt-figures.md]: the canvas, in inches
+-- and dots per inch; the marks' sizes in points and the automatic scales' expansion; the
+-- ellipses' semi-axes in posterior sds; the node whose measurements the residual plot colours
+-- (the speaker placement A2, whose block of distances is in question in session A) and the two
+-- colours, for "other" and "touches" in that order; the level of the Kolmogorov band.
+figureCanvas : Canvas := { width := 6.0, height := 5.0, dpi := 100.0 }
+figureStyle : Style := { pointSize := 5.0, textSize := 7.0, lineWidth := 1.0, expand := 0.08 }
+ellipseLevel : Float64 := 2.0
+highlightedNode : String := "parlante_A2"
+pairColours : List String := ["#0072B2", "#D55E00"]
+bandLevel : Float64 := 0.05
+
+-- [proposed] The half-width of the Kolmogorov band at level alpha over n transforms: c / (sqrt n +
+-- 0.12 + 0.11 / sqrt n), with Stephens's correction as in `transformTail`, and c = sqrt(-log(alpha /
+-- 2) / 2), where the first term of Kolmogorov's tail, 2 exp(-2 c^2), equals alpha (c = 1.358 at
+-- 0.05; the omitted terms change it in the fourth digit).
+bandHalfWidth (alpha : Float64) (n : Int) : Float64 :=
+  if n < 1 then 1.0
+  else { q := elementary.sqrt (toFloat64 n)
+         elementary.sqrt (0.0 - elementary.log (alpha / 2.0) / 2.0) / (q + 0.12 + 0.11 / q) }
+
 writeReport (w : W) (r : Report) : W * Unit := {
   (w1, u1) <- writeTable w (outDir + "/positions.csv") r.positions
   (w2, u2) <- writeTable w1 (outDir + "/residuals.csv") r.residuals
   (w3, u3) <- writeTable w2 (outDir + "/transform.csv") r.transform
-  host.print w3 r.summary }
+  (w4, u4) <- matplotlib.render w3 (positionsPlot figureCanvas figureStyle ellipseLevel r.positions) (outDir + "/positions.png")
+  (w5, u5) <- matplotlib.render w4 (residualsPlot figureCanvas figureStyle highlightedNode pairColours r.positions r.residuals)
+                (outDir + "/residuals.png")
+  (w6, u6) <- matplotlib.render w5 (transformPlot figureCanvas figureStyle (bandHalfWidth bandLevel (keptCount r.transform)) r.transform)
+                (outDir + "/transform.png")
+  host.print w6 r.summary }
 
 -- The graph is checked against its invariants before the fit; an invalid one is reported, not fit.
 -- The run of the experiment and its two controls differ in the prior and in how sigma is treated.
