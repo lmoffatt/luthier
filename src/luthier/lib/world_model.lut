@@ -1,15 +1,20 @@
--- world_model.lut: the first model of the world: a representation, the descriptions of the console's
--- actions over it, and the host's actions as externs.
+-- world_model.lut: the first model of the world: a representation, the console's actions described
+-- over it, and the host's actions as externs, held to the console's descriptions.
 --
--- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1; draft 0 at 1f8c61c). The
+-- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (step 6.1; draft 0 at 1f8c61c). 2026-10-15,
+-- by Claude Fable 5.1, an agent of the coordinating session, on record/IA/layer-3-review-2026-10-15/
+-- prompt-fix-host.md: the host carries the console and no description of its own (W1, M1). The
 -- representation `State` is what the host observes of the world at the places it is asked for:
 -- the standard output, and the files at the paths observed (10.S5: the library gives the
 -- representation and the observations). `observe w places` reads those places from the world; a
--- path with no file is absent from `files`, so `readFile` of it gives `nothing`. `console` describes `print` and `readFile` over it, pure functions that world.lth's
--- laws test by sampling `State`; `host` is the actions themselves, routes to host functions
--- (10.S8), certified against `console` by the protocol of world.lth §5 along one chain of tokens.
+-- path with no file is absent from `files`, so `readFile` of it gives `nothing`, and so does a path
+-- not observed. `console` describes `print` and `readFile` over it, pure functions that world.lth's
+-- laws test by sampling `State` (tests/tester/world_laws.lut); `host` is the actions themselves,
+-- routes to host functions (10.S8), held to `console`'s descriptions (world.lth §4,
+-- `printDescription`, `readFileDescription`, `observeDescription`) by the laws of `Host` over the
+-- cases `agreement` gathers along one chain of tokens (world.lth §5).
 
-import "world.lth" World Described Console Host appendStr lineOf
+import "world.lth" World Console Host appendStr lineOf
 
 -- the representation: the standard output so far, and the files by path
 State = { stdout : String, files : List (String * String) }
@@ -22,7 +27,9 @@ theWorld : World State := {
 }
 
 -- the console, by its descriptions: `print` appends a line to the standard output and changes
--- nothing else; `readFile` gives what is at the path and changes nothing
+-- nothing else; `readFile` gives what is at the path and changes nothing. The standard output's
+-- place is `stdout`, the one `theWorld.read` answers from `st.stdout`; world.lth's descriptions
+-- of the host's actions read it from here.
 console : Console State := {
   world := theWorld,
   printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := st.files }, unit) },
@@ -30,31 +37,20 @@ console : Console State := {
   stdout := "stdout",
 }
 
--- the descriptions the host's actions are held to (world.lth §5, `Host`'s laws): `print w s` is a
--- world action that changes the standard output only, as `console.printLine s` says; `readFile w p`
--- a world action that reads the file at `p`, its one declared place, and changes nothing, as
--- `console.readFile p` says (10.S7: the places are what `agreement` observes)
-printDescribed (s : String) : Described State Unit theWorld := {
-  describe := console.printLine s,
-  own := false,
-  places := ["stdout"],
-}
-readFileDescribed (p : String) : Described State (Maybe String) theWorld := {
-  describe := console.readFile p,
-  own := false,
-  places := [p],
-}
-
--- the host's actions, routes to Python: the token comes first and goes back unchanged (run.py
--- makes it once per run); `observe w places` reads the standard output and the files at `places`.
--- `Host`'s laws hold each action to its description; run.py validates an action at its first
--- application in a run (10.S10, L11.2) and keeps the entry in world_model.cert.json.
+-- The host's actions, routes to Python. The token comes first and a token goes back (10.S5: a new
+-- one each time, in the abstraction; the Python hands back the object it was given, which is one
+-- implementation of it, since no program compares tokens). `observe w places` reads the files at
+-- `places` from the disk and the standard output when "stdout" is among them, from the text
+-- `print` has written so far (host.py): the observer reads what the host itself wrote there, and
+-- the terminal gets that text when the run ends. That is what world.lth's `ObserverIsFaithful`
+-- assumes of this model, an entry of its store that is an assumption or a citation of host.py,
+-- never a case. `Host`'s laws hold each action to the console's description; run.py validates an
+-- action at its first application in a run (10.S10, L11.2), the case gathered by `agreement`, and
+-- keeps the entry in world_model.cert.json.
 HostConsole = Host State
 host : HostConsole := {
-  world := theWorld,
+  console := console,
   observe := extern "python:luthier.host.observe",
   print := extern "python:luthier.host.print_line",
   readFile := extern "python:luthier.host.read_file",
-  printDescribed := printDescribed,
-  readFileDescribed := readFileDescribed,
 }
