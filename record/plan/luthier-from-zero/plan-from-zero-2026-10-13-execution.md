@@ -334,9 +334,11 @@ by Luciano.
 2. Done, brought forward (55708f2, by Codex): the 48 programs of `tests/spec/v0.1/` in the new
    syntax in `tests/spec/`, each keeping its rule and its `-- expect:` line; `tests/test_spec.py`
    checks them at the level of syntax, with a hook for the checker's verdicts.
-3. The theories of steps 1 to 3 pass the checker; the programs pass; the items of chapters 2 to 4
-   flip to `[implemented]` as their programs pass.
-4. Milestone `v0.2` (Z7), when all of these hold, checked by the coordinating session:
+3. Done (2026-10-14): the theories pass the checker (clean on every theory, model and example
+   file at 69c78ad); the programs pass (51 with their verdict, 7 xfails by decision); the items
+   of chapters 2 to 4 flipped from the audit (record/IA/opus-2026-10-13/spec-audit-v0.2-report.md).
+4. Done: milestone `v0.2`, tagged at 9c0add5 on his approval (2026-10-14), the push his. Its
+   criteria, as checked by the coordinating session:
    a. `luthier check` reports no failure on the theory files of `src/luthier/lib/` (layers 0 and
       1, and those of layer 2 already written);
    b. every program of `tests/spec/` (48) gets its expected verdict from `luthier check`, with its
@@ -362,39 +364,68 @@ extern at its first action, so that one analysis of sonolocalización runs uncer
 analysis's laws and on how they fail ("para diseñar los certificados primero tenemos que ver como
 falla"); (iii) the rest of step 6, the demand and the planner, which need certificates.
 
-## Step 5. Evidence (layer 2)
+## Step 5. Evidence and certification (layer 2)
 
-1. *By the session* (Z9). Two cost types, `Distance` for the values of laws and `Evidence` for what samples
-   give (D-2026-10-13-m), with the interface of 6.S5 split between them and refined here.
-   `src/luthier/lib/certification.lth` (6.S16: `CostAlgebra C` with its six laws,
-   `Certificate C`, `grade`, `transport`, `compose`, `serves`) and `src/luthier/lib/cost.lut`, a
-   first model (`⊕` the sum over [0, ∞]): these wait for a case that uses costs (D-2026-10-13-aa,
-   Q6). Done: `src/luthier/lib/test.lth` (7.S20, `TestSpec` of D9) and
-   `src/luthier/lib/generators.lth` with `generators_model.lut` (7.S1 to 7.S8, sized generators of
-   recursive `data`, the programs each checker rule is tested on). Then the external review of
-   layer 2.
-2. *Codex.* Their Python specimens: the certifier (certificates by hash of the canonical cone, 6.S8, with the
-   chain kept), the tester, the generators; `luthier test`, `luthier certify`; the statistical laws
-   (7.S17 to 7.S19).
-3. Milestone `v0.3`.
+Done (2026-10-13 and 14): `src/luthier/lib/test.lth` with `test_model.lut` (7.S20, the test as
+data, D9; the grades) and `generators.lth` with `generators_model.lut` (7.S1 to 7.S8; the theory
+`Enumeration`, no sized generators of recursive `data` yet), both reviewed internally (record/
+IA/opus-2026-10-13/review-layers-2-3-report.md) and corrected; `laws.lth` with the coverages
+in order; `src/luthier/tester.py` and `luthier test` (record/IA/tester-2026-10-14/), exhaustive on
+finite types and sampled from a seed, censuses as bindings, no entry store: numbers.lth's laws
+run, nothing refuted. The cost types of D-2026-10-13-m (`Distance`, `Evidence`, 6.S5's algebra)
+are deferred by D-2026-10-14-c: first everything Boolean with the cutoffs as parameters the
+demand supplies; the costs later, on the slice's failures.
+
+Planned, in this order (his approval of 2026-10-14 evening: "lo importante es que Luthier
+empiece a generar certificados y ver que todo funcione como debe ser"):
+1. *An Opus agent, running.* Evidence on the fit: `test` lines on the slice's theories and the
+   port with the cutoffs bound, `luthier test` on each, per law the grade and the reading of
+   each refutation (record/IA/evidence-2026-10-14/). A refuted law goes to its author.
+2. *An Opus agent, running.* `src/luthier/lib/certification.lth` with `certification_model.lut`,
+   Boolean first (record/IA/certification-2026-10-14/prompt-theory.md): the entry (7.S9, 7.S13,
+   6.S8), the certificate and its grade (6.S6, 6.S7, 6.S11, 6.S13 without costs), what a run
+   requires (7.S15, 12.S17, 6.S14); a hole `C` where a cost would enter.
+3. *Claude agents.* The specimens: `luthier certify` (12.S16) writing `x.cert.json` beside the
+   file with the entries of 7.S9 (the hash of the canonical cone, the host code and the
+   interpreter, 6.S8); the tester reusing an entry whose identity, seed and `n` match (7.S13,
+   `--deep` reruns); `run` reading the cone's certificates and refusing an uncertified or
+   provisional name, each listed with its state (12.S17, 7.S15); the run record completed
+   (12.S18: the cone's hash, the interpreter's revision, the certification state).
+4. Then what the evidence asked: the generators that are missing (valid graphs, normals), the
+   statistical laws (7.S17 to 7.S19), the external review of layer 2.
+5. Milestone `v0.3`: the fit of sonolocalización runs certified, `run` strict.
 
 ## Step 6. Execution (layer 3)
 
-1. *By the session* (Z9). `src/luthier/lib/demand.lth` (8.S1, 8.S2), `src/luthier/lib/plan.lth`
-   (8.S4, 8.S8, 8.S11), `src/luthier/lib/world.lth` with `print` (10.S5, 10.S13, D8),
-   `src/luthier/lib/number_model.lut` and `src/luthier/lib/rational.lut` (11); then the external
-   review of layer 3.
-2. *Codex.* Their Python specimens: `run` (strict, 12.S17), `eval`, `session`, the result store keyed by what
-   the cone reads; externs read when a demand reaches them, validated at the first action (10.S8 to
-   10.S10), calling the host modules kept in step 0.
+Done, brought forward by D-2026-10-13-ad: `src/luthier/lib/world.lth` with `world_model.lut`
+(the token, places, externs as routes, `print` and `readFile`, observation at the declared
+places, `agreement`, the callback crossing `Crossing` of D-2026-10-14-a); `src/luthier/host.py`,
+`run.py` and `luthier run` (record/IA/run-2026-10-13/, bites 1 to 10: core in every run, imports
+scoped by name, the bridge by the declared type with arrays, tables, Maybe, callbacks, records of
+functions, host functions and partials, call by need, `--set`, the record begun); the numbers
+(`core.lut`, `numbers.lth` with `numbers_model.lut`, `algebra.lth`; `rational.lut` not written)
+and the slice's libraries (`arrays`, `tables`, `probability`, `belief`, `optimization`, with
+`src/luthier/lm.py`); the kernel's primitives and the Runner's speed (kernel bites 7 to 12).
+
+Planned:
+1. *An Opus or Fable agent.* `src/luthier/lib/demand.lth` (8.S1, 8.S2: the demand as a value, the
+   cutoffs it carries, the holes it fills) and `plan.lth` (8.S4, 8.S8, 8.S11: the plan as data,
+   the memo across runs keyed by the cone), then the external review of layer 3.
+2. *Claude agents.* `eval` and `session` as the spec reads them (12.S19, 2.S18); the result store
+   across runs (8.S3, 8.S8); externs validated at their first action (10.S8 to 10.S10) through
+   `agreement`; `--checked` (12.S18, L11.2).
 3. Milestone `v0.4`.
 
 ## After
 
-The domain libraries rewritten over the new language (Z1); `planner.lth` and the planner (chapter
-9); the decorated demand of 8.S1 (ask Luciano how the generic form is obtained); sonolocalización,
-by its own plan (`record/plan/sonolocalizacion/`); the core in Rust as a second model of
-`term.lth` after `v0.3` (Z10, D-2026-10-13-v).
+The plots (record/plan/plots/, his word of 2026-10-14: a plot as a pure value in ggplot's
+grammar, rendering an action; after the certificates); the domain libraries rewritten over the
+new language (Z1: the sampler and the ensemble diagnostics of probability.lth wait for a
+generator of normals); `planner.lth` and the planner (chapter 9); the decorated demand of 8.S1
+(ask Luciano how the generic form is obtained); sonolocalización by its own plan
+(`record/plan/sonolocalizacion/`: step 4, his comparison with v0.1 and the corrected graph; the
+A2 decision); the core in Rust as a second model of `term.lth` after `v0.3` (Z10,
+D-2026-10-13-v); the quote lint's old debt (record/decisions.md D-2026-10-09-a to -12-w).
 
 ## If the session that reads this has no memory of the chat
 
