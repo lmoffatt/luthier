@@ -189,6 +189,15 @@ by Luciano.
   test` (48d2c5d, an Opus agent), exhaustive and sampled over test.lth, censuses as bindings, no
   entry store yet; numbers.lth's laws run, nothing refuted. Step 5.2's "Codex" reads "a Claude
   agent" (Codex is gone since 2026-10-13 22:30).
+- 2026-10-14, 20:30 (the afternoon; log in record/plan/night-2026-10-13.md, state in
+  record/handoff-2026-10-14.md): D-2026-10-14-a (functions across the bridge: run.py bite 8,
+  world.lth `Crossing`, term.lth) and -b (roles in the defining file) applied; `luthier check`
+  clean on every file (criterion a met; the tag his); `run --set` and `x.run.json` begun
+  (12.S18); call by need in the Runner (8.S4, run.py); the loader keeps labels and constructors
+  apart; the fit's theories (probability, belief, optimization) with `src/luthier/lm.py`; the
+  slice's second stage runs end to end at 4.8 s per iteration (bite 12). Order after v0.2 (i)
+  done but for certification; (ii) next: evidence on the fit's laws (`luthier test` on the
+  slice's files, the entry store 7.S9, 7.S13, the certifier 6.S8).
 
 
 ## Rules for every step

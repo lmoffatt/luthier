@@ -37,6 +37,11 @@ writes theories; Codex what must run and iterate; a web model small bites).
   sigma 0.235 m (v0.1's header: 25.7 cm; the comparison is Luciano's, step 4). At HEAD it stops
   on a loader bug (run bite 10 running). The cost per iteration (95 s) is the next question.
 
+- 2026-10-14, 20:30: the fit runs on the committed tree at 4.8 s per iteration (bite 12); two
+  runs recorded in luthier's record/runs/sonolocalizacion-2026-10-14/ (with A2: sigma 0.235 m;
+  without: 0.022 m). Step 4's comparison still needs Luciano's v0.1 run and the corrected graph;
+  the A2 question is his. Step 3 done but for certification (step 5 of the Luthier plan).
+
 ## Steps
 
 1. Inventory, read only (Luciano runs any script there): in `~/Projects/sonolocalizacion`, which
