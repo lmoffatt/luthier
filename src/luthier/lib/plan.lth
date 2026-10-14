@@ -1,0 +1,215 @@
+-- plan.lth: the plan as a value: the dataflow of a cone, a schedule that linearizes it, the live
+-- subgraph a demand reaches, the strategy as a parameter, the law `Confluent`, and the key under
+-- which a result is kept.
+--
+-- Draft 0, 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/demand-2026-10-15/prompt.md (step 6.1 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md). Sources: spec 8.S3,
+-- 8.S4, 8.S5, 8.S8, 8.S9, 8.S10, 8.S11 (docs/spec/08-demand.md); L5.2, L5.6, L5.11, L5.13, L5.14,
+-- P11; D-2026-10-10-d (forward on demand; results kept under a hash), D-2026-10-13-g (the plan a
+-- value of this file, `Confluent` the law an order of evaluation is certified against; the key of
+-- 8.S8), D-2026-10-14-c (every law Boolean); the retired `lib/plan.lut` at v0.1-final (a718abc:
+-- `Dataflow`, `Schedule`, `Linearizes`, `run`, `Equivalent`, `Confluent` over `Fin n`), rewritten
+-- over names; demand.lth (`Demand`); certification.lth §4 (the pattern of a hash's laws). Pattern
+-- of certification.lth.
+--
+-- What this file states. A dataflow says, for each name of a cone, what it reads and how its
+-- value follows from theirs (8.S4: a demand's plan is the dataflow of its cone). A schedule is an
+-- order of names; it linearizes the dataflow when it holds each live name once and none before
+-- what it reads (L5.2: each node once and whole). Running a schedule computes the names in its
+-- order; `Confluent` says any two linearizations give every name the same value, which holds
+-- because a definition has no effects (8.S5), and is here a Boolean law a dataflow is certified
+-- against (8.S11, L5.11), with the two schedules as the parameters a test draws. A plan is the
+-- live subgraph the entry reaches with a schedule of it and the strategy that chose the order
+-- (8.S4: the strategy is a parameter). The key of 8.S8 is stated with the laws a hash of it owes;
+-- 8.S10 says the memo that would read it does not exist, so plan_model.lut gives it no model. The
+-- backward pass from a demand and a program to a dataflow is a hole (8.S11: not written). What
+-- the brief or the spec leaves open is marked [proposed] at the item above it.
+--
+-- Index (all sections written in this draft):
+--   §1 The dataflow over names; the live subgraph an entry reaches (8.S3, 8.S4, L5.13).     done
+--   §2 Schedules: linearizing, running, `Confluent` (8.S5, 8.S11, L5.2, L5.11).             done
+--   §3 The plan and the strategy; the backward pass as a hole (8.S4, 8.S11).                done
+--   §4 The key of a result (8.S8, 8.S9, 8.S10, L5.6).                                       done
+--   §5 The theory `Planning`, the laws of §2 to §4 claimed.                                  done
+
+import "demand.lth" Demand Decoration
+import "certification.lth" Value Hash
+import "generators.lth" Seed
+import "term.lth" Term Program
+
+-- ---------------------------------------------------------------- §1 The dataflow
+
+-- A node of the dataflow: a name and the names it reads (8.S6: a dependence is an edge; a
+-- parameter is a node with nothing read). A dataflow over values of `A`: its nodes, the value a
+-- name holds before it is computed, and how a name's value follows from the values so far.
+-- [proposed] The nodes are listed in the program's order; a name read that no node defines is a
+-- leaf that keeps `init` (a hole the demand did not fill is an error that flows, 8.S3).
+Node = { name : String, reads : List String }
+Dataflow (A : U) = { nodes : List Node, init : A, step : String -> (String -> A) -> A }
+
+memberStr (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or memberStr x rest }
+subset (xs ys : List String) : Bool := match xs { nil -> true ; cons x rest -> memberStr x ys and subset rest ys }
+sameMembers (xs ys : List String) : Bool := subset xs ys and subset ys xs
+noDuplicates (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> not (memberStr x rest) and noDuplicates rest }
+count (xs : List Node) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + count rest }
+names (ns : List Node) : List String := match ns { nil -> nil ; cons n rest -> cons n.name (names rest) }
+readsOf (ns : List Node) (x : String) : List String :=
+  match ns { nil -> nil ; cons n rest -> if n.name == x then n.reads else readsOf rest x }
+-- the names added at the end, each once, in the order met
+addNew (xs new : List String) : List String :=
+  match new { nil -> xs ; cons n rest -> if memberStr n xs then addNew xs rest else addNew (appendOne xs n) rest }
+appendOne (xs : List String) (n : String) : List String := match xs { nil -> [n] ; cons x rest -> cons x (appendOne rest n) }
+readsOfAll (ns : List Node) (xs : List String) : List String :=
+  match xs { nil -> nil ; cons x rest -> addNew (readsOf ns x) (readsOfAll ns rest) }
+
+-- The live subgraph (8.S3, L5.13): what the entry reaches along `reads`, the backward pass over
+-- names that computes no value; closed in as many rounds as there are nodes, so it ends on a
+-- cycle too. What it does not reach, the complement of the cone, is not produced.
+expand (ns : List Node) (seen : List String) (k : Nat) : List String :=
+  if k == 0 then seen else expand ns (addNew seen (readsOfAll ns seen)) (k - 1)
+reaches (A : U) (d : Dataflow A) (entry : String) : List String := expand d.nodes [entry] (count d.nodes)
+
+-- ---------------------------------------------------------------- §2 Schedules
+
+-- A schedule: names in the order they are computed. It linearizes a dataflow on a set of names
+-- when it holds exactly those, each once (L5.2: each node once), and none before what it reads
+-- among them (a name read outside the set is a leaf, §1).
+Schedule = List String
+placedBefore (ns : List Node) (placed s : List String) : Bool :=
+  match s { nil -> true ; cons n rest -> subset (keep placed (readsOf ns n)) placed
+                                         and subset (readsOf ns n) (addNew placed rest) and placedBefore ns (cons n placed) rest }
+keep (within xs : List String) : List String :=
+  match xs { nil -> nil ; cons x rest -> if memberStr x within then cons x (keep within rest) else keep within rest }
+LinearizesOn (A : U) (d : Dataflow A) (live : List String) (s : Schedule) : Bool :=
+  sameMembers s live and noDuplicates s and placedBefore d.nodes nil s
+
+-- Running a schedule: each name in its order, from the values so far; a name not scheduled keeps
+-- `init`.
+update (A : U) (env : String -> A) (n : String) (v : A) : String -> A := fn m { if m == n then v else env m }
+runFrom (A : U) (d : Dataflow A) (s : Schedule) (env : String -> A) : String -> A :=
+  match s { nil -> env ; cons n rest -> runFrom A d rest (update A env n (d.step n env)) }
+run (A : U) (d : Dataflow A) (s : Schedule) : String -> A := runFrom A d s (fn m { d.init })
+
+-- Two schedules are equivalent on a set of names when every name of it gets the same value under
+-- both; `Confluent` (8.S5, 8.S11, L5.11, D-2026-10-13-g): any two linearizations are equivalent.
+-- The law a dataflow is certified against, with the schedules drawn; a session block reordered
+-- is one more pair it covers (8.S14).
+allNames (p : String -> Bool) (xs : List String) : Bool := match xs { nil -> true ; cons x rest -> p x and allNames p rest }
+EquivalentOn (A : U) (eq : A -> A -> Bool) (d : Dataflow A) (live : List String) (s1 s2 : Schedule) : Bool :=
+  allNames (fn n { eq (run A d s1 n) (run A d s2 n) }) live
+Confluent (A : U) (eq : A -> A -> Bool) (d : Dataflow A) (live : List String) (s1 s2 : Schedule) : Bool :=
+  not (LinearizesOn A d live s1 and LinearizesOn A d live s2) or EquivalentOn A eq d live s1 s2
+
+-- ---------------------------------------------------------------- §3 The plan
+
+-- The strategy, a parameter separate from the program (8.S4, L5.2, P11): forward on demand, the
+-- default 8.S3 decides (the live subgraph in topological order, computed strictly); or call by
+-- need, what `run.py` does today (each name reduced at its first demand and kept), which computes
+-- the same live subgraph in the order of first demand. Both are linearizations, so by `Confluent`
+-- they agree. [proposed] Whether the strategy is a field of the demand is open; 8.S1 does not
+-- list it, so here it is an argument of the plan with its default.
+Strategy : U := data {
+  ForwardOnDemand : Strategy ;
+  CallByNeed : Strategy ;
+}
+
+-- A plan: the strategy that chose it, the entry, the live subgraph and a schedule of it
+-- (D-2026-10-13-g: the plan is a value; L5.6: its hash enters the identity of a result).
+Plan (A : U) = { strategy : Strategy, entry : String, live : List String, schedule : Schedule }
+
+-- The backward pass from a program to its dataflow (8.S4: a demand's plan is the dataflow of its
+-- cone; 8.S11: a function from a demand and a program to a plan, not written): a hole. The
+-- values of the dataflow are terms, the kernel's reduction its `step` (term.lth §5).
+dataflowOf : Program -> Dataflow Term
+-- and the plan of a demand on a program, by the strategy given, call by need unless another is
+-- asked [proposed, 8.S4: the default implemented is call by need; 8.S3's decided default is
+-- forward on demand]
+planOf (eq : Term -> Term -> Bool) (p : Planning Term eq) (d : Demand) (prog : Program)
+       (strategy : Strategy <- CallByNeed) : Plan Term :=
+  p.plan strategy (dataflowOf prog) d.entry
+
+-- ---------------------------------------------------------------- §4 The key of a result
+
+-- Of the demand, the key holds only what the cone reads (8.S8): the type demanded, always read,
+-- and the values given to holes that are live; a parameter the cone does not read leaves the key
+-- as it was.
+DemandKey = { decoration : Maybe Decoration, values : List (String * Value) }
+keepRead (live : List String) (vs : List (String * Value)) : List (String * Value) :=
+  match vs { nil -> nil ; cons (n, v) rest -> if memberStr n live then cons (n, v) (keepRead live rest) else keepRead live rest }
+demandKey (d : Demand) (live : List String) : DemandKey := { decoration := d.decoration, values := keepRead live d.sets }
+withSet (d : Demand) (n : String) (v : Value) : Demand :=
+  { entry := d.entry, decoration := d.decoration, accepts := d.accepts, delta := d.delta, fuel := d.fuel,
+    sets := cons (n, v) d.sets, checked := d.checked, pinned := d.pinned }
+
+-- The identity of a result (8.S8, L5.6, D-2026-10-13-g): the demand's key, the hash of the cone
+-- (the code, the hosts behind its externs and the interpreter, certification.lth §4), the mode,
+-- the seed, the hash of the plan, and the hashes of the certificates of the live cone. A hit
+-- serves a demand only with an equal key (8.S9); the memo that would hold it does not exist
+-- (8.S10), and `x.run.json` is written and never read back. [proposed] The mode is a string: 8.S1
+-- names `m` and the spec does not define it; today the only mode is `--checked`, printed.
+MemoKey = { demand : DemandKey, cone : Hash, mode : String, seed : Seed, plan : Hash, certificates : List Hash }
+withDemand (k : MemoKey) (dk : DemandKey) : MemoKey :=
+  { demand := dk, cone := k.cone, mode := k.mode, seed := k.seed, plan := k.plan, certificates := k.certificates }
+withCone (k : MemoKey) (h : Hash) : MemoKey :=
+  { demand := k.demand, cone := h, mode := k.mode, seed := k.seed, plan := k.plan, certificates := k.certificates }
+withMode (k : MemoKey) (m : String) : MemoKey :=
+  { demand := k.demand, cone := k.cone, mode := m, seed := k.seed, plan := k.plan, certificates := k.certificates }
+withSeed (k : MemoKey) (s : Seed) : MemoKey :=
+  { demand := k.demand, cone := k.cone, mode := k.mode, seed := s, plan := k.plan, certificates := k.certificates }
+withPlan (k : MemoKey) (h : Hash) : MemoKey :=
+  { demand := k.demand, cone := k.cone, mode := k.mode, seed := k.seed, plan := h, certificates := k.certificates }
+withCertificates (k : MemoKey) (hs : List Hash) : MemoKey :=
+  { demand := k.demand, cone := k.cone, mode := k.mode, seed := k.seed, plan := k.plan, certificates := hs }
+
+-- The hash of a key and of a plan are the host's, as the hash of a cone is (certification.lth
+-- §4). Their laws (8.S2: equal demands give equal keys, which a function gives; 8.S11: the key
+-- changes when any input of 8.S8 changes): two keys that differ in one input have different
+-- hashes. [proposed] As in certification.lth §4, a collision of the hash function is the host's,
+-- and a sample that finds one refutes the model.
+Keying (A : U) : { key : MemoKey -> Hash, planHash : Plan A -> Hash }
+KeySeesTheDemand (A : U) (h : Keying A) (k : MemoKey) (dk : DemandKey) : Bool := dk == k.demand or not (h.key (withDemand k dk) == h.key k)
+KeySeesTheCone (A : U) (h : Keying A) (k : MemoKey) (c : Hash) : Bool := c == k.cone or not (h.key (withCone k c) == h.key k)
+KeySeesTheMode (A : U) (h : Keying A) (k : MemoKey) (m : String) : Bool := m == k.mode or not (h.key (withMode k m) == h.key k)
+KeySeesTheSeed (A : U) (h : Keying A) (k : MemoKey) (s : Seed) : Bool := s == k.seed or not (h.key (withSeed k s) == h.key k)
+KeySeesThePlan (A : U) (h : Keying A) (k : MemoKey) (p : Hash) : Bool := p == k.plan or not (h.key (withPlan k p) == h.key k)
+KeySeesTheCertificates (A : U) (h : Keying A) (k : MemoKey) (hs : List Hash) : Bool :=
+  hs == k.certificates or not (h.key (withCertificates k hs) == h.key k)
+PlanHashSeesTheSchedule (A : U) (h : Keying A) (p : Plan A) (s : Schedule) : Bool :=
+  s == p.schedule or not (h.planHash { strategy := p.strategy, entry := p.entry, live := p.live, schedule := s } == h.planHash p)
+Keying (A : U) := KeySeesTheDemand A & KeySeesTheCone A & KeySeesTheMode A & KeySeesTheSeed A & KeySeesThePlan A
+  & KeySeesTheCertificates A & PlanHashSeesTheSchedule A
+
+-- ---------------------------------------------------------------- §5 The theory
+
+-- A model of planning gives, for a strategy, a dataflow and an entry, a plan.
+Planning (A : U) (eq : A -> A -> Bool) : { plan : Strategy -> Dataflow A -> String -> Plan A }
+
+-- §3. 8.S4, L5.13: a plan is of the strategy and entry asked, and its live set is what the entry
+-- reaches, no more and no less
+PlanIsTheLiveCone (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A) (e : String) : Bool :=
+  (p.plan st d e).strategy == st and (p.plan st d e).entry == e and sameMembers (p.plan st d e).live (reaches A d e)
+-- 8.S3, L5.2: its schedule linearizes the live cone, each name once, none before what it reads
+PlanLinearizes (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A) (e : String) : Bool :=
+  LinearizesOn A d (p.plan st d e).live (p.plan st d e).schedule
+-- 8.S4, 8.S5: two strategies give one result on the live cone (an instance of `Confluent`)
+StrategiesAgree (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (s1 s2 : Strategy) (d : Dataflow A) (e : String) : Bool :=
+  EquivalentOn A eq d (reaches A d e) (p.plan s1 d e).schedule (p.plan s2 d e).schedule
+-- 8.S4: the two strategies named, call by need (run.py today) and forward on demand (8.S3's
+-- default), compute the same live subgraph and give every name of it one value
+TheDefaultsAgree (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflow A) (e : String) : Bool :=
+  sameMembers (p.plan CallByNeed d e).live (p.plan ForwardOnDemand d e).live
+    and EquivalentOn A eq d (reaches A d e) (p.plan CallByNeed d e).schedule (p.plan ForwardOnDemand d e).schedule
+-- 8.S11, L5.11: the dataflow of a plan is confluent, on the schedules drawn
+PlanIsConfluent (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflow A) (e : String) (s1 s2 : Schedule) : Bool :=
+  Confluent A eq d (reaches A d e) s1 s2
+-- §4. 8.S8: a value given to a hole the cone does not read leaves the demand's key as it was
+KeyReadsOnlyTheCone (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A) (dm : Demand) (n : String) (v : Value) : Bool :=
+  memberStr n (p.plan st d dm.entry).live
+    or demandKey (withSet dm n v) (p.plan st d dm.entry).live == demandKey dm (p.plan st d dm.entry).live
+-- 8.S8: the type demanded is always in the key: a value and its derivative have two keys
+KeyReadsTheType (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (dm : Demand) (live : List String) : Bool :=
+  (demandKey dm live).decoration == dm.decoration
+
+Planning (A : U) (eq : A -> A -> Bool) := PlanIsTheLiveCone A eq & PlanLinearizes A eq & StrategiesAgree A eq
+  & TheDefaultsAgree A eq & PlanIsConfluent A eq & KeyReadsOnlyTheCone A eq & KeyReadsTheType A eq
