@@ -16,7 +16,8 @@
 --   §2 The laws of relations and operations, as templates a theory applies
 --      (D-2026-10-11-l).                                                              done
 --   §3 A law as a theory: its forms (`forall`, `exists`, and, or, then, a case) and
---      its evidence, with what each kind of evidence settles (D-2026-10-13-l).       done
+--      its evidence, with what each kind of evidence settles (D-2026-10-13-l); the
+--      coverages in order (7.S10; D-2026-10-14-b, from test.lth).                   done
 
 import "checks.lth" Failures isEmpty
 
@@ -96,14 +97,28 @@ Law : U := data {
 -- the domain names (7.S10: bounded is exhaustive on that box, and on the whole type a support);
 -- a census chosen by hand; or a draw from a seed (7.R1, 7.S8). Roles: `ForallOnPoints` and
 -- `ExistsOnPoints` (only the exhaustive coverage confirms a `forall` or refutes an `exists`), and
--- the grade each gives, test.lth's `GradesAsTerms` (4.R3: a law of its role in some theory; the
--- check of this file alone does not see that one).
+-- `CoveragesAreOrdered`, the order of the four by strength, from which the weakest of several is
+-- read (7.S10; D-2026-10-14-b: a data's constructors have their roles in the file that defines
+-- it, so the order moved here from test.lth, which reads it). The grade each coverage gives is
+-- test.lth's (`GradesAsTerms`).
 Coverage : U := data {
   Exhaustive : Coverage ;
   Bounded : Nat -> Coverage ;
   Listed : Coverage ;
   Drawn : Nat -> Coverage ;
 }
+
+-- The coverages in order of strength (7.S10: an entry's grade is summarized by the weakest of the
+-- reaches of its parameters): exhaustive above bounded above listed above drawn. `rankOf` is the
+-- reference order and `weaker` the weakest of two, which test.lth reads to give a run the weakest
+-- of its mode's and its bindings'. A model of `Covering` ranks coverages; the law is the chain of
+-- the four, stated by the constructors, whatever a bound's size or a draw's seed.
+rankOf (c : Coverage) : Nat := match c { Exhaustive -> 3 ; Bounded n -> 2 ; Listed -> 1 ; Drawn s -> 0 }
+weaker (c d : Coverage) : Coverage := if rankOf c <= rankOf d then c else d
+Covering : { rank : Coverage -> Nat }
+CoveragesAreOrdered (k : Covering) (n s : Nat) : Bool :=
+  k.rank (Drawn s) < k.rank Listed and k.rank Listed < k.rank (Bounded n) and k.rank (Bounded n) < k.rank Exhaustive
+Covering := CoveragesAreOrdered
 
 -- Evidence follows the form of the law (D-2026-10-13-l): a case evaluated, with the value the
 -- evaluation gave; a value of the quantified type with the evidence for the law at it (a witness
