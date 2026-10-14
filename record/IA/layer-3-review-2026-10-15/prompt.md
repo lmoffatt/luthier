@@ -38,3 +38,22 @@ writes a directory to attach, write it), the round's material at the current com
 Commit the folder's files (`git add` the paths; message ending "Co-Authored-By: Claude Sonnet
 5.5 <noreply@anthropic.com>"). Report in your final message: the files, their sizes in words,
 the commit frozen.
+
+## Round 1, bundles B, C and D (2026-10-15, 17:20, on his question "preguntas B, C etc?")
+
+By the same mechanism (`freeze.py` extended with three bundles, the same head adapted, the same
+nine questions with question 9 changed per bundle), three more single-paste prompts at the
+current commit:
+- `B-prompt.md`: `src/luthier/lib/demand.lth`, `demand_model.lut`, `plan.lth`, `plan_model.lut`,
+  `docs/spec/08-demand.md`; question 9: what law is missing for `run`'s record and key to
+  identify a result (8.S8, 12.S18).
+- `C-prompt.md`: `generators.lth`, `generators_model.lut`, `test.lth`, `test_model.lut`,
+  `laws.lth`, `docs/spec/07-tests.md`, `05-laws.md`; question 9: which generator is missing for
+  a sampled law that today runs on listed cases only (7.R1, 7.R4).
+- `D-prompt.md`: `probability.lth`, `belief.lth`, `optimization.lth` with their models,
+  `arrays.lth` at the sections they use (or whole if under the limit), `docs/spec/11-*.md` §2
+  and 6.S16 as context, and `examples/sonolocalizacion/experiment_zero.lut` as the program that
+  uses them; question 9: what law is missing for the host's maximizer (`lm : Maximizer`) to be
+  certified beyond the quadratic family.
+Each under about 25,000 words (split only if needed); the README updated with the three and
+where their replies go (`B/`, `C/`, `D/`). Commit the folder's files; report the word counts.
