@@ -52,7 +52,7 @@ writes theories; Codex what must run and iterate; a web model small bites).
 2. The slice: from the table, the minimal set of theories and specimens to run one analysis end to
    end, in order; marked against the plan from zero (which steps it pulls forward, which it
    shrinks). To Luciano as one screen before starting.
-3. Execute the slice, theories by the session, specimens by Codex; one external review round for
+3. Execute the slice, theories by a Claude agent, specimens by Claude agents (Codex gone since 2026-10-13); one external review round for
    the slice's theories.
 4. Run the analysis; compare with the current results of sonolocalización.
 5. The same for macroir (S4).
