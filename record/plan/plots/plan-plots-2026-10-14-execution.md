@@ -9,6 +9,8 @@ of the fit (`record/IA/evidence-2026-10-14/`) has landed and been read.
 - 2026-10-14, 21:30: written; nothing started.
 - 2026-10-15, 06:30: the certificates done (his priority), step 1 launched: plot.lth and
   plot_model.lut by an Opus agent (brief record/IA/plots-2026-10-15/prompt-theory.md).
+- 2026-10-15, 07:45: step 1 done (470a4d5, bc25d58, bb11f0b; 15 proposed readings in the
+  night plan's Questions). Step 2 launched (prompt-host.md): plots.py, the canvas as a field.
 
 ## Steps
 
