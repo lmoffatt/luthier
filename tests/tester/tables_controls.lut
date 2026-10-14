@@ -1,0 +1,21 @@
+-- tests/tester/tables_controls.lut: lines whose refutations are controls. Each is expected to be
+-- refuted: it shows that a law of tables_laws.lut can fail on a case that breaks it, so that its
+-- passing there is not vacuous. 7.S19 names controls for statistical laws; here the same idea
+-- [proposed]. Kept apart from tables_laws.lut so that certifying that file refuses nothing it
+-- should serve.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "tables.lth" Table Cell int CellsOfTheirKind
+
+-- a table with a cell that is nothing where its column says int: not a table of the theory
+-- (CellsOfTheirKind)
+holeT : Table := { nRows := 2, names := ["k"], kinds := ["int"],
+  cell := fn c r { if c == "k" then (if r == 0 then just (int 1) else nothing) else nothing } }
+
+holes : List Table := [ holeT ]
+holeOnly : List Binding := [ { parameter := just "t", type := nothing, generator := "holes", coverage := Listed } ]
+
+-- expected to be refuted: the table with a nothing cell breaks the law
+test "CellsOfTheirKind" ExhaustiveMode (seed <- 20261014) (whereBindings <- holeOnly)
