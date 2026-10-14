@@ -1,0 +1,22 @@
+-- `run --checked` fixture (record/IA/run-2026-10-13/prompt-12.md item 3; 12.S18, 4.R5, 10.S11):
+-- each extern gives a value at a declared subtype. `main` takes the honest ones (a Positive, a
+-- VecOf 3, a PsdAt numpy 0.1, whose predicate calls numpy's retainedRank); `refuteNegative`,
+-- `refuteShort` and `refuteIndefinite` each take one that refutes its predicate. Without --checked every entry runs.
+import "world_model.lut" HostConsole host : HostConsole
+import "numbers.lth" Positive
+import "arrays.lth" Vec Mat VecOf PsdAt
+import "arrays_model.lut" numpy : Arrays
+showFloat (x : Float64) : String := extern "python:builtins.repr" x
+positive (u : Unit) : Positive := extern "python:run.checked_host.two" u
+negative (u : Unit) : Positive := extern "python:run.checked_host.minus_one" u
+three (u : Unit) : VecOf 3 := extern "python:run.checked_host.three_entries" u
+short (u : Unit) : VecOf 3 := extern "python:run.checked_host.two_entries" u
+psd (u : Unit) : PsdAt numpy 0.1 := extern "python:run.checked_host.identity" u
+indefinite (u : Unit) : PsdAt numpy 0.1 := extern "python:run.checked_host.indefinite" u
+main (w : W) : W * Unit :=
+  match host.print w (showFloat (positive unit)) { (w1, a) ->
+  match host.print w1 (showFloat ((three unit).f 2)) { (w2, b) ->
+  host.print w2 (showFloat ((psd unit).f 1 1)) } }
+refuteNegative (w : W) : W * Unit := host.print w (showFloat (negative unit))
+refuteShort (w : W) : W * Unit := host.print w (showFloat ((short unit).f 1))
+refuteIndefinite (w : W) : W * Unit := host.print w (showFloat ((indefinite unit).f 1 1))

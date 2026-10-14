@@ -31,6 +31,12 @@ model's theory holds it to a law that takes the token (world.lth's `Host` laws) 
 first application in a run (`FirstActions`): served by the model file's store, or the law run once
 with the run's arguments, the protocol's application of the action being the program's; refuted, the
 run is refused naming the action and the place; confirmed, an entry in the store and in the record.
+v15 (record/IA/run-2026-10-13/prompt-12.md; 12.S18, 4.R5, 10.S11): every declared type is checked
+where it crosses, either way (`String`, `Unit`, `Bool`, `Nat` not negative, `Int` in 64 bits, `Maybe`,
+the token's slot only the run's token), and a type the bridge does not read is an error, never the
+untyped reading (review A24/B18, A26/B17, A28/B19); under `run --checked` the predicate of each
+subtype a value crosses in at is evaluated by the Runner before the program sees it (`refine`), a
+refuted one refusing the run, and the record counts them per route.
 """
 from __future__ import annotations
 
@@ -423,10 +429,12 @@ class TypedExtern(t.Extern):
     result by type (11.S6); with `obj`, a host object that crossed into the kernel (3.S22), applied
     like an extern, its route a name of this run only. `arity`, how many arguments the host's
     function takes, is read from the declared type (`Runner.typed`); None for a host object, whose
-    arity is its Python signature's."""
+    arity is its Python signature's. `name`, the definition that gives it (`neg`, `numpy.norm`),
+    for a refusal at the crossing to name (10.S11)."""
     type: object = None
     obj: object = field(default=None, compare=False, hash=False)
     arity: int | None = field(default=None, compare=False, hash=False)
+    name: str | None = field(default=None, compare=False, hash=False)
 
 
 class Entries:
@@ -467,12 +475,21 @@ class Shared(t.Axiom):
         return f"Shared({self.cell[0]!r})"
 
 
-_UNTYPED = object()
 _INTS = ("Int", "Nat")
 _NAMED = {"Float64", "String", "Unit", "Bool"} | set(_INTS)
 _INT64 = (-2 ** 63, 2 ** 63)
 # the type families the bridge reads by name, never unfolded (`Fin n` is an index, 3.S21)
 _READ_BY_NAME = {"Fin", "Maybe", "List"}
+
+
+def _integer(x, name, where):
+    """An integer at a declared `Int`, `Nat` or `Fin n` as it crosses, either way: 64 bits (11.S8,
+    scalars as arrays, review A26/B17), not negative at `Nat`."""
+    if name == "Nat" and x < 0:
+        raise RunError(f"{x} {where} where a Nat is declared")
+    if not _INT64[0] <= x < _INT64[1]:
+        raise RunError(f"the integer {x} {where} does not fit in 64 bits (11.S8)")
+    return x
 
 
 def _applied(ty, name):
@@ -555,8 +572,11 @@ def _with_extern(body, typed):
 
 
 class Runner:
-    def __init__(self, program, fuel):
+    def __init__(self, program, fuel, checked=False):
         self.fuel = fuel
+        # `run --checked` (12.S18, 4.R5): each value crossing in at a declared subtype has its
+        # predicate evaluated here; `tested` counts them per route, for the run's record
+        self.checked, self.tested = checked, {}
         # An opaque kernel leaf stands for the host-owned identity for this run.
         self.token = t.Axiom("host world token")
         self.routes = {}
@@ -594,9 +614,11 @@ class Runner:
         if not isinstance(act, t.Define) or act.type is None or isinstance(act.type, t.Hole):
             return act  # no type declared (the elaborator's hole): the host's signature decides
         extern = _extern_of(act.body)
+        shown = act.name.partition("@")[0]
         if extern is not None:
             arity = _parameters(act.body) or self.arity_of(act.type)
-            return replace(act, body=_with_extern(act.body, TypedExtern(extern.route, act.type, arity=arity)))
+            return replace(act, body=_with_extern(act.body, TypedExtern(extern.route, act.type, arity=arity,
+                                                                        name=shown)))
         record = self.resolve(act.type)
         if isinstance(act.body, t.RecordValue) and isinstance(record, t.Record):
             types = dict(record.fields)
@@ -605,7 +627,8 @@ class Runner:
                 extern = _extern_of(value)
                 if extern is not None and label in types:
                     arity = _parameters(value) or self.arity_of(types[label])
-                    value = _with_extern(value, TypedExtern(extern.route, types[label], arity=arity))
+                    value = _with_extern(value, TypedExtern(extern.route, types[label], arity=arity,
+                                                            name=f"{shown}.{label}"))
                 items.append((label, value))
             return replace(act, body=t.RecordValue(tuple(items)))
         return act
@@ -661,6 +684,43 @@ class Runner:
                 ty = applied
             else:
                 return ty
+
+    def refinements(self, ty):
+        """The subtypes `ty` names down to what the bridge reads, as `resolve` unfolds them, each
+        (binder, predicate), the innermost first (`Positive` gives `Moderate`'s predicate, then its
+        own): the predicates a value crossing in at `ty` owes (4.R5). The refinements of a named
+        primitive (`Nat`) are the bridge's shape checks, not listed here."""
+        found = []
+        while True:
+            if isinstance(ty, t.Subtype):
+                found.append((ty.name, ty.predicate))
+                ty = ty.type
+            elif isinstance(ty, t.Var) and ty.name not in _NAMED and ty.name in self.types:
+                ty = self.types[ty.name]
+            elif (applied := self.family_applied(ty)) is not None:
+                ty = applied
+            else:
+                return found[::-1]
+
+    def refine(self, term, ty, at):
+        """`run --checked` (12.S18, 4.R5, 10.S11): the predicate of each subtype of `ty` evaluated
+        by the Runner on `term`, the value that crossed in, before the program sees it; each counted
+        under `at`'s route. A refuted one refuses the run naming the extern, the route, the type and
+        the value."""
+        for binder, predicate in self.refinements(ty):
+            name, route = at if at is not None else (None, "?")
+            self.tested[route] = self.tested.get(route, 0) + 1
+            holds = self.whnf(kernel.substitute(binder, term, predicate))
+            if holds == t.Var("true"):
+                continue
+            who = route if name is None or name == route else f"{name} ({route})"
+            declared, law, value = _type_shown(ty), _type_shown(predicate), _type_shown(term)
+            if holds != t.Var("false"):
+                raise RunError(f"--checked: the refinement {law} of {declared} gave {_type_shown(holds)}, "
+                               f"not a Bool, on what {who} gave")
+            raise Refused(f"--checked: {who} gave {value} where {declared} is declared: {law} is false "
+                          f"at {binder} = that value (12.S18, 4.R5, 10.S11)",
+                          [{"name": name, "route": route, "type": declared, "predicate": law, "value": value}])
 
     def family_applied(self, ty):
         """A type family applied to as many arguments as it has parameters, its body with them put
@@ -726,9 +786,7 @@ class Runner:
         if partial is not None:
             return partial
         if ty is not None:
-            result = self.typed_to_host(value, self.resolve(ty), at)
-            if result is not _UNTYPED:
-                return result
+            return self.typed_to_host(value, self.resolve(ty), at)
         if isinstance(value, t.Lit):
             return value.constant.value
         if value == t.Var("unit"):
@@ -751,7 +809,13 @@ class Runner:
         raise RunError(f"unsupported extern argument: {value!r}")
 
     def typed_to_host(self, value, ty, at=None):
+        """`value` crossed out at the resolved declared type `ty`, its shape checked (11.S6 to 11.S8;
+        prompt-12.md item 1): a type the bridge does not read is an error, never the untyped
+        reading (review A28/B19)."""
         name = ty.name if isinstance(ty, t.Var) else None
+        if isinstance(ty, t.World):
+            # `to_host` gave the run's token already; anything else in its slot is refused (10.S4)
+            raise RunError(f"not the run's token at the crossing: {_shown(value)} (10.S4)")
         if name == "Float64":
             # 11.S6: a float, an integer with an exact double promoted; 11.S7: never NaN or inf
             if isinstance(value, t.Lit) and type(value.constant.value) in (int, float):
@@ -763,12 +827,25 @@ class Runner:
             n = self.size(ty)
             if n is not None and not 0 <= value.constant.value < n:
                 raise RunError(f"index {value.constant.value} outside Fin {n}")
-            return value.constant.value
+            return _integer(value.constant.value, name, "at the crossing")
+        if name == "String":
+            if isinstance(value, t.Lit) and isinstance(value.constant, t.StringConst):
+                return value.constant.value
+            raise RunError(f"not a String at the crossing: {_shown(value)}")
+        if name == "Unit":
+            if value == t.Var("unit"):
+                return None
+            raise RunError(f"not unit at the crossing: {_shown(value)}")
+        if name == "Bool":
+            if value in (t.Var("true"), t.Var("false")):
+                return value == t.Var("true")
+            raise RunError(f"not a Bool at the crossing: {_shown(value)}")
         if (element := _applied(ty, "Maybe")) is not None:
             if value == t.Var("nothing"):
                 return host.NOTHING
             if isinstance(value, t.App) and value.function == t.Var("just"):
                 return host.Just(self.to_host(value.argument, element, at))
+            raise RunError(f"not a Maybe at the crossing: {_shown(value)}")
         if (element := _applied(ty, "List")) is not None:
             items = []
             while (isinstance(value, t.App) and isinstance(value.function, t.App)
@@ -795,7 +872,8 @@ class Runner:
             if self.size(arrow[1]) is not None:
                 return self.materialize(value, ty, at)
             return self.function_to_host(value, ty, at)
-        return _UNTYPED
+        raise RunError(f"{_shown(value)} at the crossing where {_type_shown(ty)} is declared: "
+                       f"not a value of that type the bridge reads (prompt-12.md, A28/B19)")
 
     def float64(self, x):
         if type(x) is int:
@@ -854,7 +932,9 @@ class Runner:
                 arrow = _arrow(self.resolve(current))
                 if arrow is None:
                     raise RunError(f"too many arguments for {value!r}")
-                term = self.from_host(arg, arrow[1])
+                # what the host passes the callback crosses in as a result does, its refinements
+                # tested under --checked, counted under the receiver's route and position
+                term = self.from_host(arg, arrow[1], (None, f"{route} callback {position}"))
                 result = t.App(result, term)
                 current = _instantiate(arrow[0], term, arrow[2])
             return self.to_host(result, current, (route, position + ".out"))
@@ -937,13 +1017,17 @@ class Runner:
             out["cell"] = lambda name, row: (lambda c: None if c is host.NOTHING else c.value)(cell(name, row))
         return out
 
-    def from_host(self, value, ty=None):
+    def from_host(self, value, ty=None, at=None):
+        """`value` the host gave, as a kernel term: read by the declared type `ty` when there is one
+        (`typed_from_host`), its refinements then tested under `run --checked` (`refine`); by value
+        otherwise. `at` is (name, route): the extern it came from, or the callback's receiver."""
         if value is self.token:
             return self.token
         if ty is not None:
-            result = self.typed_from_host(value, self.resolve(ty))
-            if result is not _UNTYPED:
-                return result
+            result = self.typed_from_host(value, self.resolve(ty), at)
+            if self.checked:
+                self.refine(result, ty, at)
+            return result
         if value is None:
             return t.Var("unit")
         if value is host.NOTHING:
@@ -974,9 +1058,14 @@ class Runner:
             return self.host_object(value, None)
         raise RunError(f"unsupported extern result: {value!r}")
 
-    def typed_from_host(self, value, ty):
+    def typed_from_host(self, value, ty, at=None):
+        """The host's `value` read at the resolved declared type `ty`, its shape checked (11.S6 to
+        11.S8); a type the bridge does not read is an error, never the untyped reading (prompt-12.md
+        item 1, review A28/B19). The refinements are `refine`'s."""
         if isinstance(ty, t.World):
-            return _UNTYPED
+            # `from_host` took the run's token already: anything else in its slot is refused (10.S4,
+            # review A24/B18)
+            raise RunError(f"the host gave {value!r} where the run's token is declared (10.S4)")
         name = ty.name if isinstance(ty, t.Var) else None
         if name == "Float64":
             if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, float, np.integer, np.floating)):
@@ -988,7 +1077,15 @@ class Runner:
             n = self.size(ty)
             if n is not None and not 0 <= int(value) < n:
                 raise RunError(f"the host gave {value!r} outside Fin {n}")
-            return t.Lit(t.IntConst(int(value)))
+            return t.Lit(t.IntConst(_integer(int(value), name, "from the host")))
+        if name == "String":
+            if not isinstance(value, str):
+                raise RunError(f"the host gave {value!r} where a String is declared")
+            return t.Lit(t.StringConst(str(value)))
+        if name == "Unit":
+            if value is not None:
+                raise RunError(f"the host gave {value!r} where Unit is declared")
+            return t.Var("unit")
         if name == "Bool":
             # a bool, never an int read as one (the fit report's `converged`, 11.S6)
             if not isinstance(value, (bool, np.bool_)):
@@ -998,30 +1095,37 @@ class Runner:
             # host.NOTHING or None is nothing (tables.parse gives None); host.Just or a value is just
             if value is None or value is host.NOTHING:
                 return t.Var("nothing")
+            # [proposed, kept from report-4.md choice 5] a bare value is `just`: tables.py's `parse`
+            # and `Table.cell` give one (prompt-12.md asks none; see report-12.md)
             inner = value.value if isinstance(value, host.Just) else value
-            return t.App(t.Var("just"), self.from_host(inner, element))
-        if (element := _applied(ty, "List")) is not None and isinstance(value, (list, tuple)):
+            return t.App(t.Var("just"), self.from_host(inner, element, at))
+        if (element := _applied(ty, "List")) is not None:
+            if not isinstance(value, (list, tuple)):
+                raise RunError(f"the host gave {value!r} where a List is declared")
             result = t.Var("nil")
             for item in reversed(value):
-                result = t.App(t.App(t.Var("cons"), self.from_host(item, element)), result)
+                result = t.App(t.App(t.Var("cons"), self.from_host(item, element, at)), result)
             return result
-        if isinstance(ty, t.Sigma) and isinstance(value, tuple) and len(value) == 2:
-            left = self.from_host(value[0], ty.domain)
-            return t.Pair(left, self.from_host(value[1], _instantiate(ty.name, left, ty.codomain)))
+        if isinstance(ty, t.Sigma):
+            if not (isinstance(value, tuple) and len(value) == 2):
+                raise RunError(f"the host gave {value!r} where a pair is declared")
+            left = self.from_host(value[0], ty.domain, at)
+            return t.Pair(left, self.from_host(value[1], _instantiate(ty.name, left, ty.codomain), at))
         if isinstance(ty, t.Sum):
             alternatives = dict(ty.alternatives)
             if isinstance(value, tuple) and len(value) == 2 and value[0] in alternatives:
-                return t.App(t.Var(value[0]), self.from_host(value[1], alternatives[value[0]]))
+                return t.App(t.Var(value[0]), self.from_host(value[1], alternatives[value[0]], at))
             raise RunError(f"the host gave {value!r} where one of {tuple(alternatives)} is declared")
         if isinstance(ty, t.Record):
-            return self.record_from_host(value, ty)
+            return self.record_from_host(value, ty, at)
         if (arrow := _arrow(ty)) is not None:
             if isinstance(value, np.ndarray):
                 return self.host_object(Entries(self.array_from_host(value, ty)), ty)
             if callable(value):
                 return self.host_object(value, ty)
             raise RunError(f"the host gave {value!r} where a function is declared")
-        return _UNTYPED
+        raise RunError(f"the host gave {value!r} where {_type_shown(ty)} is declared, a type the bridge "
+                       f"does not read (prompt-12.md, A28/B19)")
 
     def array_from_host(self, a, ty):
         """An ndarray as a value of `Fin n -> ... -> A` (11.S6): as many dimensions as indices, the
@@ -1047,11 +1151,17 @@ class Runner:
                 raise RunError(f"an array of dtype {a.dtype} where Float64 is declared (11.S6)")
             if not np.all(np.isfinite(a)):
                 raise RunError("an array with NaN or inf crossed (11.S7)")
-        elif isinstance(leaf, t.Var) and leaf.name in _INTS and a.dtype.kind not in "iu":
-            raise RunError(f"an array of dtype {a.dtype} where Int is declared (11.S6)")
+        elif isinstance(leaf, t.Var) and leaf.name in _INTS:
+            if a.dtype.kind not in "iu":
+                raise RunError(f"an array of dtype {a.dtype} where Int is declared (11.S6)")
+            # an unsigned array may hold what int64 does not (11.S8, review B17); a Nat no negative
+            if a.size and a.dtype.kind == "u" and int(a.max()) >= _INT64[1]:
+                raise RunError(f"an array of dtype {a.dtype} with an entry that does not fit in 64 bits (11.S8)")
+            if a.size and leaf.name == "Nat" and a.dtype.kind == "i" and int(a.min()) < 0:
+                raise RunError(f"an array with the entry {int(a.min())} where Nat is declared")
         return a
 
-    def record_from_host(self, value, ty):
+    def record_from_host(self, value, ty, at=None):
         """A record by the type's fields: a dict's entries, an ndarray as a `Vec` (n := its length,
         f := the array) or a `Mat` (m, n := its shape), any other object by its attributes (a
         tables.Table: nRows, names, kinds, and its method cell)."""
@@ -1073,7 +1183,7 @@ class Runner:
                 component = getattr(value, label)
             else:
                 raise RunError(f"the host gave {value!r} where the record {labels} is declared")
-            term = self.from_host(component, field_type)
+            term = self.from_host(component, field_type, at)
             items.append((label, term))
             types[k + 1:] = [(l, _instantiate(label, term, f)) for l, f in types[k + 1:]]
         return t.RecordValue(tuple(items))
@@ -1170,7 +1280,7 @@ class Runner:
                                 continue
                         given, ty = self.cross_out(head, function, args[:arity])
                         result = function(*given)
-                        value = self.from_host(result, ty)
+                        value = self.from_host(result, ty, (getattr(head, "name", None), self.key(head, function)))
                         if self.trace is not None:
                             self.trace.append((head.route, given, value))
                         value = self.apply(value, args[arity:])
@@ -1186,7 +1296,7 @@ class Runner:
                     if getattr(value, "arity", None) == 0:
                         # a declared value, not a function: the host's object, or what it gives
                         result = function() if callable(function) else function
-                        return self.from_host(result, value.type)
+                        return self.from_host(result, value.type, (value.name, value.route))
                     if getattr(value, "arity", None) is None and callable(function) and self.arity(value, function) == 0:
                         return self.from_host(function(), getattr(value, "type", None))
                 except Exception as exc:
@@ -1756,6 +1866,51 @@ def _printed(value):
         return {"Printed": repr(value)}
 
 
+_INFIX = {"+", "-", "*", "/", "==", "/=", "<", "<=", ">", ">=", "and", "or", "mod"}
+
+
+def _type_shown(term, width=120):
+    """A type, a predicate or a value as a refusal at the crossing shows it: `VecOf 3`,
+    `0.0 < x`, `{ n := 2, f := [1. 2.] }` (a host array by its entries); cut at `width`."""
+    def show(x, inner=False):
+        if isinstance(x, Shared):
+            return show(x.cell[0], inner)
+        if isinstance(x, TypedExtern) and x.obj is not None:
+            if isinstance(x.obj, Entries):
+                return np.array2string(x.obj.array, threshold=8, separator=" ").replace("\n", "")
+            return x.route
+        if isinstance(x, t.Lit):
+            return json.dumps(x.constant.value, ensure_ascii=False)
+        if isinstance(x, t.Var):
+            return x.name.partition("@")[0]
+        if isinstance(x, t.Proj):
+            return f"{show(x.record, True)}.{x.label}"
+        if isinstance(x, t.App):
+            args, head = [], x
+            while isinstance(head, t.App):
+                args.append(head.argument)
+                head = head.function
+            args.reverse()
+            if isinstance(head, (t.Var, t.Primitive)) and getattr(head, "name", None) in _INFIX and len(args) == 2:
+                text = f"{show(args[0], True)} {head.name} {show(args[1], True)}"
+            else:
+                text = " ".join([show(head, True)] + [show(a, True) for a in args])
+            return f"({text})" if inner else text
+        if isinstance(x, t.Pair):
+            return f"({show(x.left)}, {show(x.right)})"
+        if isinstance(x, t.RecordValue):
+            return "{ " + ", ".join(f"{label} := {show(v)}" for label, v in x.fields) + " }"
+        if isinstance(x, t.Subtype):
+            return f"{{ {x.name} : {show(x.type)} | {show(x.predicate)} }}"
+        from .elaborate import show_term
+        try:
+            return show_term(x)
+        except Exception:
+            return repr(x)
+    text = show(term)
+    return text if len(text) <= width else text[:width - 3] + "..."
+
+
 def _shown(term, width=60):
     """A kernel value as a refusal shows it: a string literal quoted, a constructor applied with its
     arguments, a pair, a record; cut at `width` characters."""
@@ -1941,10 +2096,13 @@ def refuse_provisional(kept, entry):
                       + "\n  ".join(lines), refusals)
 
 
-def run(path, main="main", fuel=10000, sets=(), accept=None):
+def run(path, main="main", fuel=10000, sets=(), accept=None, checked=False):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
-    gives the standard output, the values set and the certification state of the cone."""
+    gives the standard output, the values set and the certification state of the cone. `checked`
+    (`run --checked`, 12.S18): each value an extern gives at a declared subtype has its predicate
+    evaluated as it crosses (4.R5), a refuted one refusing the run; the state then says so and
+    counts the refinements tested per route."""
     host.reset()
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
@@ -1966,7 +2124,7 @@ def run(path, main="main", fuel=10000, sets=(), accept=None):
         raise RunError(f"missing main: {main}")
     main = entry
     state = certification(loaded, program, entry, values, accept)
-    runner = Runner(program, fuel)
+    runner = Runner(program, fuel, checked)
     firsts = FirstActions(loaded, state.pop("_firsts", []) if state else [], accept or ACCEPT)
     runner.first = firsts.by_route
     runner.validate = firsts
@@ -1977,7 +2135,9 @@ def run(path, main="main", fuel=10000, sets=(), accept=None):
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
     state = dict(state or {}, fuel={"given": fuel, "spent": fuel - runner.fuel}, **{"first actions": firsts.done},
-                 files_read=[list(pair) for pair in host.files_read()], lock=lock_status(path))
+                 files_read=[list(pair) for pair in host.files_read()], lock=lock_status(path), checked=checked)
+    if checked:
+        state["refinements"] = dict(runner.tested)
     return host.stdout(), values, state
 
 
@@ -2006,8 +2166,8 @@ def lock_status(path):
     return {"path": str(here / LOCK), "pinned": None, "status": "absent"}
 
 
-def run_file(path, main="main", fuel=10000, sets=(), accept=None):
-    return run(path, main, fuel, sets, accept)[0]
+def run_file(path, main="main", fuel=10000, sets=(), accept=None, checked=False):
+    return run(path, main, fuel, sets, accept, checked)[0]
 
 
 def record_path(path):
@@ -2024,7 +2184,8 @@ def record(path, main, values, output, state=None):
     names not certified, empty since a run starts only on a certified cone, the fingerprint of the
     cone's code, the Python's and the hosts' versions), the fuel given and spent, the files read
     with the hash of their bytes (`files_read`) and the lock (`lock`: its path, the revision it
-    pins and whether the run `matches` it, `differs`, or found it `absent` and wrote it)."""
+    pins and whether the run `matches` it, `differs`, or found it `absent` and wrote it), whether
+    it ran `--checked` (`checked`) and then the refinements tested per route (`refinements`)."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
@@ -2032,7 +2193,7 @@ def record(path, main, values, output, state=None):
             "parameters": values, "output": output, "calls": host.calls()}
     if state is not None:
         state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
-        for key in ("fuel", "files_read", "lock"):
+        for key in ("fuel", "files_read", "lock", "checked", "refinements"):
             if key in state:
                 item[key] = state.pop(key)
         lock = item.get("lock")

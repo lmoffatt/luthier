@@ -103,18 +103,72 @@ def reads(u):
     return str(len(_reads))
 
 
-def command(path, *args, cwd=None):
+# the shapes and refinements at the crossing (prompt-12.md items 1 and 3)
+def identity(x):
+    return x
+
+
+def or_zero(m):
+    return m.value if isinstance(m, host.Just) else 0
+
+
+def minus_one_int(u):
+    return -1
+
+
+def huge(u):
+    return 2 ** 70
+
+
+def a_string(u):
+    return "red"
+
+
+def a_list(u):
+    return [7, 8]
+
+
+def an_ndarray(u):
+    return np.array([7, 8])
+
+
+def unit_as_three(w, s):
+    return w, 3
+
+
+def token_lost(w, s):
+    return None, None
+
+
+def unsigned(n):
+    return np.array([2 ** 64 - 1] * n, dtype=np.uint64)
+
+
+def unsigned_small(n):
+    return np.array([5] * n, dtype=np.uint64)
+
+
+def command(path, *args, cwd=None, record=False):
+    """`luthier run path args` in a process; with `record`, the result carries the run's entry of
+    `x.run.json` (`result.record`), and a record that existed is left as it was."""
     env = dict(os.environ)
     env["PYTHONPATH"] = os.pathsep.join((str(ROOT / "src"), str(ROOT / "tests")))
     # a run appends to x.run.json beside x.lut (12.S18); a test leaves none in the repository
     where = record_path(Path(cwd or ".") / path)
     existed = where.exists()
+    before = where.read_bytes() if existed and record else None
     lock = where.parent / "luthier.lock"  # `run` writes it beside the program when absent (12.S13)
     locked = lock.exists()
     try:
-        return subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path), *args],
-                              cwd=cwd, env=env, capture_output=True, text=True)
+        result = subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path), *args],
+                                cwd=cwd, env=env, capture_output=True, text=True)
+        if record:
+            entries = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
+            result.record = entries[-1] if len(entries) > len(json.loads(before or b"[]")) else None
+        return result
     finally:
+        if before is not None:
+            where.write_bytes(before)
         if not existed and ROOT in where.resolve().parents:
             where.unlink(missing_ok=True)
         if not locked and ROOT in lock.resolve().parents:
@@ -290,6 +344,122 @@ def test_crossing_errors(tmp_path, source, message):
     assert message in result.stderr
 
 
+# prompt-12.md item 1 (review A24/B18, A26/B17, A28/B19): every declared type is checked where it
+# crosses, either way, and a type the bridge does not read is an error; each case with its control,
+# the same program with a value of the type, which runs
+SHAPES = {
+    "to the host, String": (
+        'len (s : String) : Int := extern "python:builtins.len" s\n'
+        'main (w : W) : W * Unit := print w (showInt (len {}))', '"abc"', "3", "not a String at the crossing"),
+    "to the host, Unit": (
+        'three (u : Unit) : Int := extern "python:test_run.three" u\n'
+        'main (w : W) : W * Unit := print w (showInt (three {}))', "unit", "1", "not unit at the crossing"),
+    "to the host, Bool": (
+        'same (b : Bool) : Bool := extern "python:test_run.identity" b\n'
+        'main (w : W) : W * Unit := print w (if same {} then "y" else "n")', "true", "1", "not a Bool at the crossing"),
+    "to the host, Nat": (
+        'nat (k : Nat) : Int := extern "python:test_run.identity" k\n'
+        'main (w : W) : W * Unit := print w (showInt (nat {}))', "2", "(0 - 1)", "where a Nat is declared"),
+    "to the host, Int of 64 bits": (
+        'int (k : Int) : Int := extern "python:test_run.identity" k\n'
+        'main (w : W) : W * Unit := print w (showInt (int {}))', "9223372036854775807",
+        "(9223372036854775807 + 1)", "does not fit in 64 bits"),
+    "to the host, Maybe": (
+        'orZero (m : Maybe Int) : Int := extern "python:test_run.or_zero" m\n'
+        'main (w : W) : W * Unit := print w (showInt (orZero {}))', "(just 3)", "3", "not a Maybe at the crossing"),
+    "to the host, the token": (
+        'main (w : W) : W * Unit := print {} "x"', "w", "unit", "not the run's token"),
+    "from the host, String": (
+        'str (u : Unit) : String := extern "python:test_run.{}" u\n'
+        'main (w : W) : W * Unit := print w (str unit)', "a_string", "three", "where a String is declared"),
+    "from the host, Unit": (
+        'say (w : W) (s : String) : W * Unit := extern "python:{}" w s\n'
+        'main (w : W) : W * Unit := say w "x"', "luthier.host.print_line", "test_run.unit_as_three",
+        "where Unit is declared"),
+    "from the host, Nat": (
+        'nat (u : Unit) : Nat := extern "python:test_run.{}" u\n'
+        'main (w : W) : W * Unit := print w (showInt (nat unit))', "an_int", "minus_one_int", "where a Nat is declared"),
+    "from the host, Int of 64 bits": (
+        'int (u : Unit) : Int := extern "python:test_run.{}" u\n'
+        'main (w : W) : W * Unit := print w (showInt (int unit))', "an_int", "huge", "does not fit in 64 bits"),
+    "from the host, List": (
+        'items (u : Unit) : List Int := extern "python:test_run.{}" u\n'
+        'main (w : W) : W * Unit := print w (match items unit {{ nil -> "" ; cons x rest -> showInt x }})',
+        "a_list", "an_ndarray", "where a List is declared"),
+    "from the host, the token": (
+        'say (w : W) (s : String) : W * Unit := extern "python:{}" w s\n'
+        'main (w : W) : W * Unit := say w "x"', "luthier.host.print_line", "test_run.token_lost",
+        "where the run's token is declared"),
+    "from the host, an unsigned array": (
+        'big (n : Int) : Fin n -> Int := extern "python:test_run.{}" n\n'
+        'main (w : W) : W * Unit := print w (showInt (big 1 0))', "unsigned_small", "unsigned", "does not fit in 64 bits"),
+    "from the host, a type the bridge does not read": (
+        'Colour : U := data {{ red : Colour ; blue : Colour }}\n'
+        'colour (u : Unit) : {} := extern "python:test_run.a_string" u\n'
+        'main (w : W) : W * Unit := match colour unit {{ _ -> print w "seen" }}', "String", "Colour",
+        "a type the bridge does not read"),
+}
+
+
+@pytest.mark.parametrize("case", SHAPES)
+@pytest.mark.parametrize("honest", [True, False], ids=["control", "refused"])
+def test_each_declared_type_is_checked_where_it_crosses(tmp_path, case, honest):
+    source, good, bad, message = SHAPES[case]
+    path = tmp_path / "shape.lut"
+    path.write_text(PRELUDE + source.format(good if honest else bad), encoding="utf-8")
+    result = command(path, cwd=ROOT / "tests")
+    if honest:
+        assert (result.returncode, result.stderr) == (0, ""), result.stderr
+        assert result.stdout
+        return
+    assert result.returncode == 1, result.stdout
+    assert message in result.stderr
+
+
+# prompt-12.md items 2 and 3 (12.S18, 4.R5, 10.S11): under `run --checked` each value an extern
+# gives at a declared subtype has its predicate evaluated by the Runner as it crosses; the host
+# side is tests/run/checked_host.py
+
+CHECKED = ROOT / "tests" / "run" / "checked.lut"
+
+
+@pytest.mark.parametrize("entry, message", [
+    ("refuteNegative", "--checked: negative (python:run.checked_host.minus_one) gave -1.0 where Positive is "
+                       "declared: 0.0 < x is false at x = that value (12.S18, 4.R5, 10.S11)"),
+    ("refuteShort", "--checked: short (python:run.checked_host.two_entries) gave { n := 2, f := [1. 2.] } where "
+                    "VecOf 3 is declared: v.n == 3 is false at v = that value"),
+    ("refuteIndefinite", "where PsdAt numpy 0.1 is declared: (numpy.retainedRank 0.1 (mscaleDef (0.0 - 1.0) s)) "
+                         "== 0 is false"),
+])
+def test_checked_refuses_a_value_that_refutes_its_refinement(entry, message):
+    refused = command(CHECKED, "--main", entry, "--checked", cwd=ROOT / "tests")
+    assert (refused.returncode, refused.stdout) == (1, "")
+    assert message in refused.stderr
+    # without the flag the refinement is the certificate's obligation (4.R5): the run goes on
+    unchecked = command(CHECKED, "--main", entry, cwd=ROOT / "tests")
+    assert (unchecked.returncode, unchecked.stderr) == (0, "")
+
+
+def test_checked_runs_an_honest_host_and_records_the_count(tmp_path):
+    checked = command(CHECKED, "--checked", cwd=ROOT / "tests", record=True)
+    assert (checked.returncode, checked.stdout, checked.stderr) == (0, "2.0\n3.0\n1.0\n", "")
+    # Positive is Moderate's predicate and its own, PsdAt Symmetric's and its own
+    assert checked.record["checked"] is True
+    assert checked.record["refinements"] == {"python:run.checked_host.two": 2,
+                                             "python:run.checked_host.three_entries": 1,
+                                             "python:run.checked_host.identity": 2}
+    unchecked = command(CHECKED, cwd=ROOT / "tests", record=True)
+    assert unchecked.stdout == checked.stdout
+    assert unchecked.record["checked"] is False and "refinements" not in unchecked.record
+
+
+def test_vector_norm_under_checked():
+    # numpy.norm gives a Float64 and takes a Vec Float64: no subtype crosses in, none is tested
+    result = command(ROOT / "tests/run/vector_norm.lut", "--checked", record=True)
+    assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
+    assert (result.record["checked"], result.record["refinements"]) == (True, {})
+
+
 def test_a_refined_record_and_a_type_family_cross(tmp_path):
     # the fit's crossings (record/IA/fit-host-2026-10-14/prompt.md): a record with a refinement
     # (belief.lth's `Settings`) crosses as its record, by key or attribute; a type family applied
@@ -392,6 +562,21 @@ def test_fit_renders_its_figures_slow(tmp_path):
         assert all((out / name).is_file() for name in FIGURES)
         images.append([(out / name).read_bytes() for name in FIGURES])
     assert images[0] == images[1]
+
+
+@pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 3 minutes; set LUTHIER_SLOW=1")
+def test_the_fit_runs_checked_slow(tmp_path):
+    # prompt-12.md item 3: the fit of test_fit_renders_its_figures_slow under --checked (12.S18): every
+    # VecOf n the maximizer gives back, or passes to the posterior's callbacks, has its length tested
+    result = command(ROOT / "examples/sonolocalizacion/experiment_zero.lut",
+                     "--set", "graphDir=examples/sonolocalizacion/A/graph_noA2", "--set", f"outDir={tmp_path}",
+                     "--set", "lmMaxIter=500", "--set", "lmTol=1e-6", "--set", "lmFloor=5.995204332975845e-15",
+                     "--fuel", "100000000000", "--checked", cwd=ROOT, record=True)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines()[-1].startswith("nodes 9, measurements 19, sigma ")
+    assert result.record["checked"] is True
+    print(json.dumps(result.record["refinements"], indent=1))
+    assert result.record["refinements"].get("python:luthier.lm.maximize", 0) > 0
 
 
 # ---------------------------------------------------------------- the loader scopes names by file

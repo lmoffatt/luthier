@@ -33,6 +33,11 @@ def main(argv: list[str] | None = None) -> int:
                        help="the weakest grade an entry of the store may have to serve the run (6.S15, 7.S15) "
                             "[proposed: sampled when none is named, so an assumed entry serves only a run "
                             "that accepts assumed]; the run is refused when its cone is not certified (12.S17)")
+    p_run.add_argument("--checked", action="store_true", default=False,
+                       help="test each value an extern gives at a declared subtype against its predicate as "
+                            "it crosses, refusing the run at the first refuted one (12.S18, 4.R5); off by "
+                            "default, a parameter of the demand (P11): without it the refinement is an "
+                            "obligation the certificate of the extern's laws covers")
     p_test = sub.add_parser("test", help="run the file's test lines (test.lth's Tester)")
     p_test.add_argument("file")
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
@@ -74,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
         from .certify import GRADES
         from .run import record, run
         try:
-            output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, GRADES.get(ns.accept))
+            output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, GRADES.get(ns.accept), ns.checked)
             print(output, end="")
             record(ns.file, ns.main, values, output, state)
             return 0
