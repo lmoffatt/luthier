@@ -642,7 +642,8 @@ class _Parser:
         value = self.atom()
         while self._peek("."):
             self._take(".")
-            value = Proj(value, self._name())
+            for part in self._name().split("."):
+                value = Proj(value, part)
         return value
 
     def scrutinee(self) -> Surface:
@@ -676,7 +677,8 @@ class _Parser:
         value = self.sAtom()
         while self._peek("."):
             self._take(".")
-            value = Proj(value, self._name())
+            for part in self._name().split("."):
+                value = Proj(value, part)
         return value
 
     def _starts_s_atom(self) -> bool:

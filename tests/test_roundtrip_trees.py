@@ -227,7 +227,7 @@ class Trees:
                             record, subtype, lambda: pairs(s.RecordValue), block,
                             lambda: pairs(s.Sum, 2), lambda: sequence(s.List, 0), lambda_, match,
                             lambda: s.NamedArg(self.name(), self.children(size, ['surface'])[0]),
-                            if_, lambda: s.Proj(self.children(size, ['surface'])[0], self.name()),
+                            if_, lambda: s.Proj(self.children(size, ['surface'])[0], self.rng.choice(NAMES[:-1])),  # a Proj's field is one label: a dotted one reparses as two projections (2.S14)
                             lambda: s.Quoted(self.children(size, ['surface'])[0])]
         elif kind in {'pattern', 'subpattern'}:
             choices = [lambda: s.PWild(), lambda: s.PLit(self.literal()),

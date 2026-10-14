@@ -1136,3 +1136,10 @@ def test_broken_text_fails():
 def test_three_files_parse():
     for p in FILES:
         assert isinstance(parse(p.read_text(encoding="utf-8")), Parsed), p
+
+
+def test_chained_projection_on_a_parenthesised_expression_is_two_projections():
+    inner = Record((("x", Record((("n", numeral(3)),))),)) if False else None
+    r = parse("x := (f y).x.n")
+    assert r == defx(Proj(Proj(App(nm("f"), nm("y")), "x"), "n"))
+    assert parse("x := e.x.n") == defx(nm("e.x.n"))

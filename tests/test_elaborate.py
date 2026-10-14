@@ -225,7 +225,7 @@ def cli(*args):
     return subprocess.run([sys.executable, '-m', 'luthier.cli', 'eval', *map(str, args)], capture_output=True, text=True, env=env)
 
 
-@pytest.mark.parametrize('file,output', [('arithmetic', '19'), ('factorial', '24'), ('data', '2'), ('record', '7'), ('block', '3'), ('lambda', '5')])
+@pytest.mark.parametrize('file,output', [('arithmetic', '19'), ('factorial', '24'), ('data', '2'), ('record', '7'), ('block', '3'), ('lambda', '5'), ('chained_projection', '7')])
 def test_eval(file, output):
     r = cli(ROOT / 'tests/eval' / (file + '.lut'), 'answer')
     assert r.returncode == 0, r.stdout + r.stderr
@@ -359,3 +359,11 @@ def test_as_type_reads_implies_as_the_arrow():
     assert as_type(implies) == t.Pi('_', t.Var('P'), t.Var('Bool'))
     law = t.Subtype('x', t.Var('Int'), implies)
     assert as_type(law) == law
+
+
+def test_chained_projection_on_a_parenthesised_expression_is_two_projections():
+    ctx = 'f (k : Int) : { x : { n : Int } } := { x := { n := k } }'
+    for text in ['({ x := { n := 3 } }).x.n', '(f 3).x.n']:
+        e = term(text, ctx)
+        assert isinstance(e, t.Proj) and e.label == 'n'
+        assert isinstance(e.record, t.Proj) and e.record.label == 'x'
