@@ -491,7 +491,7 @@ def at(demand, entry):
     given = dict(demand["given"])
     # an entry whose reach does not hold the model given is about another model: its fingerprint
     # says nothing of this one, and `serves` refuses it by its reach
-    return all(drawn.get(p) == h for p, h in demand.get("fingerprints", {}).items()
+    return all(h in drawn.get(p, "").split(",") for p, h in demand.get("fingerprints", {}).items()
                if covers_all(entry["reach"], [(p, given[p])]))
 
 

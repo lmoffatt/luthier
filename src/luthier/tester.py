@@ -869,9 +869,56 @@ def model_homes(loaded, spec):
             found = loaded.see(top, b.generator)
         except RunError:
             continue
-        if found is not None and found[0] not in (top, loaded.core) and found[0] not in homes:
-            homes.append(found[0])
+        if found is None:
+            continue
+        files = [found[0]]
+        # a census that is a list literal of names: each member defined in another file is a home
+        # too (`codecs : List Codec := [csv]`, csv in tables_model.lut) [proposed]
+        for member in _list_members(loaded, found):
+            try:
+                there = loaded.see(found[0], member)
+            except RunError:
+                continue
+            if there is not None:
+                files.append(there[0])
+        for f in files:
+            if f not in (top, loaded.core) and f not in homes:
+                homes.append(f)
     return homes
+
+
+def _listed_called(loaded, called):
+    """The members of a census that is a list literal of names, as the program calls them."""
+    if loaded is None:
+        return []
+    found = next(((f, n) for f in loaded.files for n in loaded.files[f].defined
+                  if loaded.internal(f, n) == called), None)
+    if found is None:
+        return []
+    out = []
+    for member in _list_members(loaded, found):
+        try:
+            there = loaded.see(found[0], member)
+        except RunError:
+            return []
+        if there is None:
+            return []
+        out.append(loaded.internal(*there))
+    return out
+
+
+def _list_members(loaded, found):
+    """The names a definition's list literal body holds (`[csv, built]`), as the file that defines
+    the census writes them; none when its body is anything else."""
+    file = loaded.files.get(found[0])
+    if file is None:
+        return []
+    for act in file.acts:
+        if isinstance(act, s.Define) and act.name == found[1] and not act.binders:
+            body = getattr(act.body, "term", None)
+            if isinstance(body, s.List):
+                return [v.name for v in body.values if isinstance(v, s.Name)]
+    return []
 
 
 def law_cones(path, fuel=1_000_000):
@@ -917,8 +964,11 @@ def new_entry(runner, loaded, spec, cones, fuel):
         b = resolve_binding(spec, name, _head_name(ty))
         if b is not None:
             called = _as_called(loaded, b.generator)
+            # a census that lists models: the hashes of its members, comma-joined, so that a run
+            # naming one model finds its own hash there (`at` in certify.py) [proposed]
+            listed = _listed_called(loaded, called)
             binding.append({"parameter": name, "generator": f"{b.generator} ({_show(b.coverage)})",
-                            "fingerprint": cones.hash(called)})
+                            "fingerprint": ",".join(cones.hash(m) for m in listed) if listed else cones.hash(called)})
             hosts.update(cones.hosts(called))
             try:
                 members = census(runner, b, ty, called)

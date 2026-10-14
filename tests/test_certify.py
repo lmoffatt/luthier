@@ -355,6 +355,27 @@ def test_an_entry_goes_into_the_store_of_the_file_that_defines_the_model(tmp_pat
     assert certify.read_store(tmp_path / "m_model.lut") == home and certify.read_store(top) == own
 
 
+LAWS_OF_LIST = LAWS_OF_MODEL.replace(
+    '''models : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed } ]''',
+    '''census : List Doubles := [doubles]
+models : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "census", coverage := Listed } ]''')
+
+
+def test_a_census_that_lists_a_model_sends_the_entry_to_its_file(tmp_path):
+    (tmp_path / "m_model.lut").write_text(MODEL, encoding="utf-8")
+    top = tmp_path / "t_laws.lut"
+    top.write_text(LAWS_OF_LIST, encoding="utf-8")
+    assert LAWS_OF_LIST != LAWS_OF_MODEL
+    tester.run_tests(top, store=True)
+    own = certify.read_store(top)
+    home = certify.read_store(tmp_path / "m_model.lut")
+    assert [e["law"] for e in own][::-1] == ["PlusCommutes", "Wrapper"]
+    assert [e["law"] for e in home] == ["PlusCommutes"]
+    assert home[0]["binding"][0]["generator"].startswith("census")
+
+
 def test_adding_to_a_store_twice_keeps_one_entry(tmp_path):
     path = tmp_path / "m.lut"
     certify.add_entry(path, entry())

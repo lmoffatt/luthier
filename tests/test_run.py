@@ -328,7 +328,6 @@ def test_connective_on_a_match_reads_core_data():
     assert (result.returncode, result.stdout, result.stderr) == (0, "yes\n", "")
 
 
-@refused("csv : Codec")
 def test_host_cell_under_an_operator_crosses_first():
     # prompt-5.md: the Runner reduces a primitive's operands with the host
     result = command(ROOT / "tests/run/host_cell_under_operator.lut")
@@ -360,7 +359,6 @@ EXPECTED_VALIDATE_GRAPH = ("valid: 10 nodes, 22 measurements, 21 distinct pairs;
 
 
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 5 minutes; set LUTHIER_SLOW=1")
-@refused("csv : Codec, doubles : Doubles, elementary : Elementary, numpy : Arrays")
 def test_validate_graph_slow():
     # prompt-10.md item 4: the first full run of the slice
     result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut",
@@ -401,7 +399,6 @@ def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
     assert {loaded.name(SCOPE / f, "helper") for f in ("left.lut", "right.lut")} == {"helper@left", "helper@right"}
 
 
-@refused("csv : Codec")
 def test_a_label_and_another_files_definition_of_its_name_are_kept_apart():
     # prompt-10.md: generators.lth's import brings program.lth's `int : Term`, which took the name of
     # tables.lth's Cell label `int`, and `intAt` was a stuck match
