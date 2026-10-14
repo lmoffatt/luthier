@@ -24,6 +24,8 @@ Stopping reasons are coded as integers, as in the source: 0 running, 1 converged
 """
 from __future__ import annotations
 
+import os
+import sys
 from types import SimpleNamespace
 
 import numpy as np
@@ -36,6 +38,16 @@ from luthier.arrays import add, dot, madd, mat_vec, mscale, pinv_sym_at, scale
 DAMPING = SimpleNamespace(init=0.001, factor=3.0, least=1e-15, most=1e15)
 
 RUNNING, CONVERGED, EXHAUSTED, STALLED = 0, 1, 2, 3
+
+# A trace of the iterations on the standard error, when the environment sets LUTHIER_LM_TRACE
+# (a probe's instrument, record/IA/fit-convergence-2026-10-15/prompt.md): it reads values the
+# method computes anyway and changes none.
+_TRACE = bool(os.environ.get("LUTHIER_LM_TRACE"))
+
+
+def _trace(*parts):
+    if _TRACE:
+        print("lm", *parts, file=sys.stderr, flush=True)
 
 
 def _field(r, name):
@@ -73,8 +85,11 @@ def step(n, settings, damping, o, s) -> dict:
     point and the value and multiply the damping by the factor."""
     x, phi, mu, it = (_vec(_field(s, "x")), float(_field(s, "phi")), float(_field(s, "mu")),
                       int(_field(s, "iter")))
-    xt = add(x, damped_step(n, settings, o, x, mu))
+    dx = damped_step(n, settings, o, x, mu)
+    xt = add(x, dx)
     pt = float(o.value(xt))
+    _trace(f"iter={it + 1} phi={phi!r} trial={pt!r} step={float(np.linalg.norm(dx)):.6e} mu={mu:.3e}",
+           "accepted" if pt < phi else "rejected")
     if pt < phi:
         return {"x": xt, "phi": pt, "mu": _lowered(damping, mu), "iter": it + 1, "accepted": True}
     return {"x": x, "phi": phi, "mu": mu * float(_field(damping, "factor")), "iter": it + 1,
@@ -93,7 +108,9 @@ def decrement(settings, o, x) -> float:
 def finished(settings, damping, o, s) -> int:
     """optimization.lth `finished`: converged by the decrement, exhausted by the budget, stalled
     by the damping beyond its most; running otherwise."""
-    if decrement(settings, o, _field(s, "x")) < float(_field(settings, "tol")):
+    dec = decrement(settings, o, _field(s, "x"))
+    _trace(f"iter={int(_field(s, 'iter'))} decrement={dec:.6e}")
+    if dec < float(_field(settings, "tol")):
         return CONVERGED
     if int(_field(s, "iter")) >= int(_field(settings, "maxIter")):
         return EXHAUSTED

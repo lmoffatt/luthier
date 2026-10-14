@@ -163,3 +163,27 @@ def test_luthier_runs_the_host_maximizer_through_the_callbacks(tmp_path):
                 np.zeros(2))
     assert runs[-1]["calls"] == {"python:luthier.lm.maximize": {
         "3": counts["logp"], "4": counts["score"], "5": counts["info"]}}
+
+
+def test_with_the_exact_information_the_method_takes_few_steps():
+    # record/IA/fit-convergence-2026-10-15: on the quadratic family the information is minus the
+    # Hessian, so the damped step is the Newton step shrunk by 1 / (1 + mu), and the damping falls
+    # by 3 each accepted step from 0.001: the distance to the maximum is multiplied by about 1e-3,
+    # 3e-4, 1e-4, ... A run that took many steps here would say the method, not the problem, is slow.
+    for n, b, c, x0 in cases():
+        o = negate(quadratic(b, c))
+        s, code = lm.minimize(n, SETTINGS, lm.DAMPING, o, lm.start(n, o, lm.DAMPING, x0))
+        assert code == lm.CONVERGED
+        assert s["iter"] <= 3
+
+
+def test_the_trace_changes_nothing(monkeypatch, capsys):
+    # LUTHIER_LM_TRACE prints each iteration to the standard error; the run is the same to the bit
+    n, b, c, x0 = next(iter(cases(1)))
+    p = quadratic(b, c)
+    quiet = lm.maximize(SETTINGS, n, p.logp, p.score, p.info, x0)
+    monkeypatch.setattr(lm, "_TRACE", True)
+    traced = lm.maximize(SETTINGS, n, p.logp, p.score, p.info, x0)
+    err = capsys.readouterr().err
+    assert np.array_equal(quiet["x"], traced["x"]) and quiet["converged"] == traced["converged"]
+    assert "decrement=" in err and "mu=" in err and "step=" in err
