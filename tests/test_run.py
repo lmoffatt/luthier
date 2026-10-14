@@ -661,14 +661,21 @@ def _certify_small(tmp_path):
     assert [o.grade for o in outcomes] == ["Cases"]
 
 
-def test_a_cone_whose_types_state_no_law_runs_and_records_its_state(tmp_path, capsys):
-    # hello.lut's cone: `host : HostConsole = Host State`, a record that states no law (6.S1)
+def test_hellos_cone_runs_and_records_its_state(tmp_path, capsys):
+    # hello.lut's cone (prompt-first-action.md): `console : Console State`, whose four laws
+    # tests/tester/world_laws.lut certifies into world_model.cert.json, and `host : HostConsole =
+    # Host State`, whose laws are run at an action's first application (10.S10); the rest vacuous
     path = tmp_path / "hello.lut"
     path.write_text((ROOT / "examples/hello.lut").read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["run", str(path)]) == 0
     state = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]
-    assert state["accept"] == "sampled" and state["laws"] == 0 and state["not certified"] == []
-    assert state["states"]["certified"] == 0 and state["states"]["vacuous"] > 0
+    assert state["accept"] == "sampled" and state["laws"] == 4 and state["not certified"] == []
+    assert state["states"]["certified"] == 1 and state["states"]["at first action"] == 1
+    assert state["states"]["vacuous"] > 0
+    assert {f["law"] for f in state["at first action"]} == {"HostAgreesPrint", "HostAgreesReadFile",
+                                                            "HostObserveChangesNothing"}
+    assert [(f["action"], f["outcome"]) for f in state["first actions"]] in (
+        [("host.print", "served")], [("host.print", "confirmed")])
     assert state["cone"].startswith("sha256:")
 
 
@@ -689,7 +696,8 @@ def test_a_passed_entry_serves_at_or_above_the_cutoff(tmp_path, capsys):
         assert main(["run", str(path)] + (["--accept", accept] if accept else [])) == 0
     assert capsys.readouterr().out == "true\n" * 3
     state = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]
-    assert state["laws"] == 1 and state["states"]["certified"] == 1 and state["not certified"] == []
+    # `same`'s FixesBool and world_model's `console`, its four laws (prompt-first-action.md)
+    assert state["laws"] == 5 and state["states"]["certified"] == 2 and state["not certified"] == []
     for accept in ("exhaustive", "proved"):
         with pytest.raises(Refused, match=f"same: FixesBool: passed, cases, below the grade accepted \\({accept}\\)"):
             run_file(path, accept={"exhaustive": "ExhaustiveGrade", "proved": "Proved"}[accept])
@@ -854,3 +862,75 @@ def test_a_lock_in_the_directory_above_is_found(tmp_path, capsys):
     assert main(["run", str(path)]) == 0
     assert "v0.0-other" in capsys.readouterr().err
     assert not (sub / "luthier.lock").exists()
+
+
+# ---------------------------------------------------------------- a host action validated at its
+# first action (record/IA/certification-2026-10-14/prompt-first-action.md; 10.S10, L11.2)
+
+def _first_action_copy(tmp_path):
+    """The first-action programs and their models in tmp_path, where the models' store is written."""
+    for name in ("first_action_models.lut", "first_action_honest.lut", "first_action_liar.lut"):
+        (tmp_path / name).write_text((RUN / name).read_text(encoding="utf-8"), encoding="utf-8")
+    return tmp_path
+
+
+def test_a_lying_print_is_refused_at_its_first_action_naming_the_place(tmp_path, capsys):
+    # liar.print writes its line twice; HostAgreesPrint (world.lth's agreement) is refuted at the
+    # run's own argument, the place named; nothing is recorded, no entry written
+    path = _first_action_copy(tmp_path) / "first_action_liar.lut"
+    with pytest.raises(Refused, match=r"liar\.print disagrees with its description at its first action .*"
+                                      r"HostAgreesPrint at s = \"twice\": the place stdout differs"):
+        run_file(path)
+    assert main(["run", str(path)]) == 1
+    out, err = capsys.readouterr()
+    assert out == "" and '(described just "twice\\n", observed just "twice\\ntwice\\n")' in err
+    assert not record_path(path).exists()
+    assert not (tmp_path / "first_action_models.cert.json").exists()
+
+
+def test_a_first_action_is_validated_once_recorded_and_then_served(tmp_path, capsys, monkeypatch):
+    from luthier import certify
+    path = _first_action_copy(tmp_path) / "first_action_honest.lut"
+    store = tmp_path / "first_action_models.cert.json"
+    for k in range(2):
+        assert main(["run", str(path)]) == 0
+    assert capsys.readouterr().out == "once\n" * 2
+    runs = json.loads(record_path(path).read_text(encoding="utf-8"))
+    firsts = [r["certification"]["first actions"] for r in runs]
+    assert [[(f["action"], f["law"], f["arguments"], f["outcome"]) for f in fs] for fs in firsts] == [
+        [("honest.print", "HostAgreesPrint", {"s": '"once"'}, "confirmed")],
+        [("honest.print", "HostAgreesPrint", {"s": '"once"'}, "served")]]
+    assert firsts[0][0]["store"] == str(store) and firsts[1][0]["entry"] == firsts[0][0]["entry"]
+    entries = json.loads(store.read_text(encoding="utf-8"))
+    assert len(entries) == 1
+    entry = entries[0]
+    assert (entry["law"], entry["grade"], entry["outcome"], entry["cases"]) == ("HostAgreesPrint", "Cases", "Passed", 1)
+    assert [(b["parameter"], b["generator"]) for b in entry["binding"]] == [
+        ("o", "honest (the run's model)"), ("s", '"once" (the run\'s argument)')]
+    assert ["python:luthier.host.print_line", certify.host_hash("python:luthier.host.print_line")] in entry["hosts"]
+    before = store.read_bytes()
+    assert main(["run", str(path)]) == 0 and store.read_bytes() == before
+    # another argument is another case, validated again
+    other = tmp_path / "first_action_other.lut"
+    other.write_text(path.read_text(encoding="utf-8").replace('"once"', '"again"'), encoding="utf-8")
+    assert main(["run", str(other)]) == 0
+    assert json.loads(record_path(other).read_text(encoding="utf-8"))[-1]["certification"]["first actions"][0]["outcome"] == "confirmed"
+    # the host's code changed: the model's cone is at another hash, so validated again (10.S9)
+    monkeypatch.setattr(certify, "host_hash", lambda route: "changed " + route)
+    assert main(["run", str(path)]) == 0
+    assert json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]["first actions"][0]["outcome"] == "confirmed"
+    capsys.readouterr()
+
+
+def test_the_protocols_observations_change_nothing(tmp_path, monkeypatch, capsys):
+    # observe.lut's first print and first observe are validated (HostAgreesPrint,
+    # HostObserveChangesNothing); the protocol's observations add nothing to what is printed
+    (tmp_path / "input.txt").write_text("first line\n", encoding="utf-8")
+    path = tmp_path / "observe.lut"
+    path.write_text((RUN / "observe.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert main(["run", str(path)]) == 0
+    assert capsys.readouterr().out == "one\none\n\n\nfirst line\n\n"
+    firsts = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]["first actions"]
+    assert [(f["action"], f["law"]) for f in firsts] == [("host.print", "HostAgreesPrint"),
+                                                         ("host.observe", "HostObserveChangesNothing")]

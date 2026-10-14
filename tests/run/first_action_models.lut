@@ -1,0 +1,24 @@
+-- Fixture of the first-action tests (record/IA/certification-2026-10-14/prompt-first-action.md;
+-- 10.S10, L11.2): two models of world.lth's `Host` over world_model.lut's representation and
+-- descriptions. `honest` has world_model's routes; `liar`'s print writes its line twice, while the
+-- description it is held to, `printDescribed`, says once. test_run.py copies this file beside the
+-- programs into a scratch directory, where its store is written.
+import "world.lth" Host
+import "world_model.lut" State theWorld printDescribed readFileDescribed
+
+honest : Host State := {
+  world := theWorld,
+  observe := extern "python:luthier.host.observe",
+  print := extern "python:luthier.host.print_line",
+  readFile := extern "python:luthier.host.read_file",
+  printDescribed := printDescribed,
+  readFileDescribed := readFileDescribed,
+}
+liar : Host State := {
+  world := theWorld,
+  observe := extern "python:luthier.host.observe",
+  print := extern "python:run.lying_host.print_twice",
+  readFile := extern "python:luthier.host.read_file",
+  printDescribed := printDescribed,
+  readFileDescribed := readFileDescribed,
+}

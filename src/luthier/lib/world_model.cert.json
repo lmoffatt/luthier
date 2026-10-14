@@ -1,5 +1,808 @@
 [
  {
+  "law": "HostObserveChangesNothing",
+  "cone": "sha256:ab12ab44bd668c8068e74281b02be35fa281e11b556fc82ea2fc8440c24fbd51",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:f74c1aaf7796a586c16acc727cbb3e2460241a28975e054f7af0ea273cb27a05"
+   },
+   {
+    "parameter": "places",
+    "generator": "[\"stdout\", \"input.txt\"] (the run's argument)",
+    "fingerprint": "sha256:77a80906eec33b16c3b8eafdcde06ba0386e4fe6443db297b2c3d7ac6bc96e6b"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "places",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\", \"input.txt\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.observe"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:11:35+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:152cf094375a24120a84bec55eb2dbc088355affd4208f40238285b53d398eae",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:f74c1aaf7796a586c16acc727cbb3e2460241a28975e054f7af0ea273cb27a05"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"one\" (the run's argument)",
+    "fingerprint": "sha256:ca7e6b39f1179152f42af7f55213d7a50431d52e716a3802072e6a4aca7c9497"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"one\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:11:35+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:152cf094375a24120a84bec55eb2dbc088355affd4208f40238285b53d398eae",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:f74c1aaf7796a586c16acc727cbb3e2460241a28975e054f7af0ea273cb27a05"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"first line\" (the run's argument)",
+    "fingerprint": "sha256:7a201d326b4440b41ae347db1006deeeb10e959b720828408587e5c9c49a2446"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"first line\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:11:35+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:d2dcdb0c82684a7a94af2292fe2839255a2a0c969ff870cb6714f51427d5d84d",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:f74c1aaf7796a586c16acc727cbb3e2460241a28975e054f7af0ea273cb27a05"
+   },
+   {
+    "parameter": "p",
+    "generator": "\"input.txt\" (the run's argument)",
+    "fingerprint": "sha256:4ad6063a7208ddef8dad675b630be49ea12737e052fe8ff2a4a9e17fd9577bc8"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"input.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:11:34+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:152cf094375a24120a84bec55eb2dbc088355affd4208f40238285b53d398eae",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:f74c1aaf7796a586c16acc727cbb3e2460241a28975e054f7af0ea273cb27a05"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"hello, world\" (the run's argument)",
+    "fingerprint": "sha256:5a6172c43d0cacae71749f499782dfb74c4d5fff432206f21e7b9a61a57b33f5"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"hello, world\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:11:34+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "ReadChangesNothing",
+  "cone": "sha256:0b4e3da4d3832bdae83501f2a9bdbf081a87fdcb24a39a10f7443e0ffe23bbab",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "consoles (Listed)",
+    "fingerprint": "sha256:ea71e62a39f4c2594cebd1aa6fc94d97c680ade9069092a472b17d2c3c54df83"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:f93704bdb8c01918191c1648c776a50c6027ee2115808b9c65806d0f8546f15f,sha256:0f666c1b900d07a4250b26c71ec174353385f87879f7445462ca01abdc2bddd0,sha256:275da6ca85033bec8bebfde0facd22887aecf80d3917a59e143fad4571e98043"
+   },
+   {
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:3563d8c2d60c0b594ad1973a7005ce4ee319cce2a8583bfb322ae4db63750ec2"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "console"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:01:37+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "ReadGivesThePlace",
+  "cone": "sha256:a15aa5be8b81e5ac5aad547c63dadfb0e6d09e5742fa8eb1b50ee521c9ec5a5e",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "consoles (Listed)",
+    "fingerprint": "sha256:ea71e62a39f4c2594cebd1aa6fc94d97c680ade9069092a472b17d2c3c54df83"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:f93704bdb8c01918191c1648c776a50c6027ee2115808b9c65806d0f8546f15f,sha256:0f666c1b900d07a4250b26c71ec174353385f87879f7445462ca01abdc2bddd0,sha256:275da6ca85033bec8bebfde0facd22887aecf80d3917a59e143fad4571e98043"
+   },
+   {
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:3563d8c2d60c0b594ad1973a7005ce4ee319cce2a8583bfb322ae4db63750ec2"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "console"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:01:37+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "PrintChangesOnlyStdout",
+  "cone": "sha256:74dd52ede03a5789c36b9bb82de9e6e98aa5cc79f448613517812214f35f83ca",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "consoles (Listed)",
+    "fingerprint": "sha256:ea71e62a39f4c2594cebd1aa6fc94d97c680ade9069092a472b17d2c3c54df83"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:f93704bdb8c01918191c1648c776a50c6027ee2115808b9c65806d0f8546f15f,sha256:0f666c1b900d07a4250b26c71ec174353385f87879f7445462ca01abdc2bddd0,sha256:275da6ca85033bec8bebfde0facd22887aecf80d3917a59e143fad4571e98043"
+   },
+   {
+    "parameter": "s",
+    "generator": "lines (Listed)",
+    "fingerprint": "sha256:d2253215371a975d49f3ed486092f7ef90620e243fb2acd99741ae19629b94fe"
+   },
+   {
+    "parameter": "p",
+    "generator": "places (Listed)",
+    "fingerprint": "sha256:3563d8c2d60c0b594ad1973a7005ce4ee319cce2a8583bfb322ae4db63750ec2"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "console"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"hello, world\""
+      },
+      {
+       "Printed": "\"two\\nlines\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"stdout\""
+      },
+      {
+       "Printed": "\"input.txt\""
+      },
+      {
+       "Printed": "\"empty.txt\""
+      },
+      {
+       "Printed": "\"other.txt\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 36,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:01:37+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "PrintAppendsALine",
+  "cone": "sha256:e18ea80c7b171c7782de12a646736b33e738386f152315b1e3fe1492db020213",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "consoles (Listed)",
+    "fingerprint": "sha256:ea71e62a39f4c2594cebd1aa6fc94d97c680ade9069092a472b17d2c3c54df83"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:f93704bdb8c01918191c1648c776a50c6027ee2115808b9c65806d0f8546f15f,sha256:0f666c1b900d07a4250b26c71ec174353385f87879f7445462ca01abdc2bddd0,sha256:275da6ca85033bec8bebfde0facd22887aecf80d3917a59e143fad4571e98043"
+   },
+   {
+    "parameter": "s",
+    "generator": "lines (Listed)",
+    "fingerprint": "sha256:d2253215371a975d49f3ed486092f7ef90620e243fb2acd99741ae19629b94fe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "console"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "printed"
+      },
+      {
+       "Printed": "withFiles"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"hello, world\""
+      },
+      {
+       "Printed": "\"two\\nlines\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-14T21:01:36+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
   "law": "ImageSeesTheTitle",
   "cone": "sha256:508ccbd4735737ace222b440f41c87331a7f23f8dd82ecdadcdf851343818053",
   "binding": [

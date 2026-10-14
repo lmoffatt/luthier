@@ -1,0 +1,35 @@
+-- tests/tester/world_laws.lut: the laws of `Console` (world.lth §4) on world_model.lut's `console`,
+-- as listed cases. Written 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/certification-2026-10-14/prompt-first-action.md: since `host` carries the Described
+-- values of its actions, built on `console`, the cone of a program that uses `host` holds
+-- `console`, and a run requires these laws served (12.S17). `S` is bound to world_model.lut's
+-- `State`; the states are an empty world, one with printed text, and one with files; the places
+-- the standard output, a file the states hold and one they do not. Seed 20261015 (the censuses
+-- are listed; the seed only names the run).
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "kernel_laws.lth" Concrete
+import "world.lth" Console PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace ReadChangesNothing
+import "world_model.lut" State console
+
+states : List Concrete := [State]
+consoles : List (Console State) := [console]
+blank : State := { stdout := "", files := nil }
+printed : State := { stdout := "one\n", files := nil }
+withFiles : State := { stdout := "", files := [("input.txt", "first\nsecond\n"), ("empty.txt", "")] }
+worlds : List State := [blank, printed, withFiles]
+lines : List String := ["", "hello, world", "two\nlines"]
+places : List String := ["stdout", "input.txt", "empty.txt", "other.txt"]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+onPrint : List Binding := [bind "S" "states", bind "c" "consoles", bind "st" "worlds", bind "s" "lines"]
+onPrintElsewhere : List Binding := [bind "S" "states", bind "c" "consoles", bind "st" "worlds", bind "s" "lines",
+  bind "p" "places"]
+onRead : List Binding := [bind "S" "states", bind "c" "consoles", bind "st" "worlds", bind "p" "places"]
+
+test "PrintAppendsALine" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPrint)
+test "PrintChangesOnlyStdout" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPrintElsewhere)
+test "ReadGivesThePlace" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRead)
+test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRead)

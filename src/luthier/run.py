@@ -25,7 +25,12 @@ same name are kept apart (the definition is `name@file`). v12 (prompt-12.md): th
 function's Python signature gives is read once per function. v13 (record/IA/certification-2026-10-14/
 prompt-run.md, certification.lth §3, 12.S17, 7.S15): before evaluating, `run` reads the stores of
 the files loaded and refuses a cone that is not certified (`certification`, `Refused`), with no
-opt-out (D-2026-10-12-y); the record carries the cone's certification state (12.S18).
+opt-out (D-2026-10-12-y); the record carries the cone's certification state (12.S18). v14
+(record/IA/certification-2026-10-14/prompt-first-action.md, 10.S10, L11.2): a host action whose
+model's theory holds it to a law that takes the token (world.lth's `Host` laws) is validated at its
+first application in a run (`FirstActions`): served by the model file's store, or the law run once
+with the run's arguments, the protocol's application of the action being the program's; refuted, the
+run is refused naming the action and the place; confirmed, an entry in the store and in the record.
 """
 from __future__ import annotations
 
@@ -555,6 +560,9 @@ class Runner:
         # An opaque kernel leaf stands for the host-owned identity for this run.
         self.token = t.Axiom("host world token")
         self.routes = {}
+        # the actions validated at their first application (10.S10): route -> what `validate`
+        # (run's `FirstActions`) needs; `validating` while a law runs, `trace` the host's calls then
+        self.first, self.validate, self.validating, self.trace = {}, None, False, None
         # the arity of each host function read from its Python signature (`arity`)
         self.signatures = {}
         self.objects = 0
@@ -1150,9 +1158,22 @@ class Runner:
                         arity = self.arity(head, function)
                         if len(args) < arity:
                             return self.apply(head, args)
+                        if self.first and not self.validating and head.route in self.first:
+                            # the action's first application in the run (10.S10): validated, the
+                            # protocol's own application being the program's when it ran; the
+                            # arguments shared, so that the validation and the program compute
+                            # each once (8.S4)
+                            args = [self.share(a) for a in args]
+                            acted = self.validate(self, self.first.pop(head.route), head, args[:arity])
+                            if acted is not None:
+                                value = self.apply(acted, args[arity:])
+                                continue
                         given, ty = self.cross_out(head, function, args[:arity])
                         result = function(*given)
-                        value = self.apply(self.from_host(result, ty), args[arity:])
+                        value = self.from_host(result, ty)
+                        if self.trace is not None:
+                            self.trace.append((head.route, given, value))
+                        value = self.apply(value, args[arity:])
                         continue
                     except RunError:
                         raise
@@ -1497,6 +1518,74 @@ class _Theories:
                 return a.type
         return None
 
+    def theory_args(self, ty):
+        """The arguments a type gives its theory head, through aliases (`HostConsole = Host State`:
+        [State]); [] when it names none."""
+        for _ in range(64):
+            name = _head_name(ty)
+            if name is None:
+                return []
+            if self.is_theory(name):
+                args = []
+                while isinstance(ty, s.App):
+                    args.append(ty.argument)
+                    ty = ty.function
+                return args[::-1]
+            ty = self.aliases.get(name, self.bodies.get(name))
+            if ty is None:
+                return []
+        return []
+
+    def action_law(self, law, theory):
+        """[proposed] A law of the theory that takes the token (`W`), world.lth's `Host` laws: run
+        once at the first application of its action in a run (10.S10, L11.2), never by a sampler.
+        Gives {model: the parameter typed by the theory, before: the parameters ahead of it (the
+        theory's own), arguments: those between it and the token (the action's, in order), field:
+        the one action of the model the law's body projects (a field whose type takes the token),
+        token: the token's parameter}; None for any other law."""
+        define = next((a for a in self.acts.get(law, ()) if isinstance(a, s.Define)), None)
+        if define is None or not isinstance(define.body, s.TermBody):
+            return None
+        params = [(n, b.type) for b in define.binders if isinstance(b, s.Explicit) for n in b.names]
+        tokens = [k for k, (_, ty) in enumerate(params) if ty == s.World()]
+        model = self.model_parameter(law, theory)
+        if len(tokens) != 1 or model is None:
+            return None
+        k = next(i for i, (n, _) in enumerate(params) if n == model)
+        if not k < tokens[0]:
+            return None
+        record = self.declared[theory].type
+        actions = {n for f in record.fields for n in f.names if _takes_token(f.type)}
+        read = {x.partition(".")[2].split(".")[0] for x in _dotted(define.body.term) if x.startswith(model + ".")}
+        fields_ = sorted(read & actions)
+        if len(fields_) != 1:
+            return None
+        return {"model": model, "before": [n for n, _ in params[:k]],
+                "arguments": [n for n, _ in params[k + 1:tokens[0]]], "field": fields_[0],
+                "token": params[tokens[0]][0]}
+
+
+def _takes_token(ty):
+    """Whether a surface type is a function whose first argument is the token (an action)."""
+    if isinstance(ty, s.Binop) and ty.operator == "->":
+        return ty.left == s.World()
+    if isinstance(ty, s.Pi):
+        return ty.domain == s.World()
+    return False
+
+
+def _dotted(x):
+    """The dotted names a surface term mentions (`o.print`)."""
+    if isinstance(x, s.Name):
+        if "." in x.name:
+            yield x.name
+    elif isinstance(x, tuple):
+        for y in x:
+            yield from _dotted(y)
+    elif is_dataclass(x) and not isinstance(x, type):
+        for f in fields(x):
+            yield from _dotted(getattr(x, f.name))
+
 
 def _given(value):
     """certification.lth's `Value` of a `--set` value: a number, or the literal printed."""
@@ -1550,15 +1639,23 @@ def certification(loaded, program, entry, values, accept=None):
         theory = theories.theory_of(ty) if ty is not None else None
         if theory is not None:
             stating[n] = theory
-    laws = sorted({law for theory in set(stating.values()) for law in theories.laws(theory)})
+    laws = sorted({law for theory in set(stating.values()) for law in theories.laws(theory)
+                   if theories.action_law(law, theory) is None})
     law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws)))) \
         if laws else None
-    cone = []
+    cone, firsts = [], []
     for n in names:
         demands = []
         if n in stating and n not in provisional:
             theory = stating[n]
             for law in theories.laws(theory):
+                action = theories.action_law(law, theory)
+                if action is not None:
+                    # validated at the action's first application in the run, not before (10.S10)
+                    spec = _first_action_spec(loaded, program, cones, theories, n, theory, law, action)
+                    if spec is not None:
+                        firsts.append(spec)
+                    continue
                 given, fingerprints = [], {}
                 m = theories.model_parameter(law, theory)
                 if m is not None:
@@ -1578,6 +1675,7 @@ def certification(loaded, program, entry, values, accept=None):
         raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (accepting "
                       f"{certify.GRADE_WORDS[accept]} and above; 12.S17):\n  " + "\n  ".join(lines), refusals)
     with_laws = [c for c in cone if c["laws"]]
+    at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
             # the canonical code's hash apart from the hosts and the interpreter (12.S18): two
@@ -1587,9 +1685,246 @@ def certification(loaded, program, entry, values, accept=None):
             "python": platform.python_version(),
             "hosts": {r: h for r, h in cones.hosts(entry)},
             "accept": certify.GRADE_WORDS[accept],
-            "states": {"certified": len(with_laws), "vacuous": len(cone) - len(with_laws),
+            "states": {"certified": len(with_laws), "at first action": len(at_first - {c["name"] for c in with_laws}),
+                       "vacuous": len([c for c in cone if not c["laws"] and c["name"] not in at_first]),
                        "provisional": 0, "uncertified": 0, "stale": 0, "failed": 0},
-            "laws": sum(len(c["laws"]) for c in with_laws), "not certified": []}
+            "laws": sum(len(c["laws"]) for c in with_laws), "not certified": [],
+            # the laws validated at their action's first application (10.S10): what `run` checks
+            # as the program asks, and records under "first actions"
+            "at first action": [{"action": f["action"], "law": f["law"], "route": f["route"]} for f in firsts],
+            "_firsts": firsts}
+
+
+def _first_action_roots(loaded, kept):
+    """The action laws (`_Theories.action_law`) of the theories the names of a slice are models of:
+    roots of the run's slice, so that the Runner can run them at the action's first application."""
+    theories = _Theories(loaded.acts)
+    roots = []
+    for a in kept:
+        if not isinstance(a, (s.Define, s.Declare)) or a.binders:
+            continue
+        ty = theories.type_of(a.name)
+        theory = theories.theory_of(ty) if ty is not None else None
+        if theory is None:
+            continue
+        roots += [law for law in theories.laws(theory)
+                  if theories.action_law(law, theory) is not None and law not in roots]
+    return tuple(roots)
+
+
+def _home(loaded, name):
+    """The file that defines the program's name `name`: its store keeps the model's entries (12.S11)."""
+    for path, acts in loaded.by_file.items():
+        if any(getattr(a, "name", None) == name for a in acts):
+            return path
+    return None
+
+
+def _first_action_spec(loaded, program, cones, theories, name, theory, law, action):
+    """What `FirstActions` needs to validate the action of model `name` that `law` holds to its
+    description: the route of the model's field, the theory's arguments for the law's leading
+    parameters (`S`), the hashes of the law's cone and of the model's (its hosts' code inside,
+    6.S8), and the file whose store keeps the entry."""
+    definition = next((a for a in program if isinstance(a, t.Define) and a.name == name), None)
+    route = None
+    if definition is not None and isinstance(definition.body, t.RecordValue):
+        value = dict(definition.body.fields).get(action["field"])
+        extern = _extern_of(value) if value is not None else None
+        route = extern.route if extern is not None else None
+    if route is None:
+        # [proposed] an action the model writes in Luthier is not a route: the externs it applies
+        # are validated as theirs
+        return None
+    args = [t.Var(a.name) if isinstance(a, s.Name) else t.Universe()
+            for a in theories.theory_args(theories.type_of(name))]
+    if len(args) != len(action["before"]):
+        raise RunError(f"{law.partition('@')[0]}: {len(action['before'])} parameters before the model, "
+                       f"the type of {name.partition('@')[0]} gives its theory {len(args)}")
+    plain = name.partition("@")[0]
+    return {"name": plain, "internal": name, "law": law.partition("@")[0], "law internal": law,
+            "action": f"{plain}.{action['field']}", "route": route, "model": action["model"],
+            "arguments": action["arguments"], "type args": args, "law cone": cones.hash(law),
+            "model hash": cones.hash(name), "hosts": cones.hosts(name), "home": _home(loaded, name)}
+
+
+def _printed(value):
+    """An argument the host received, as certification.lth's `Value` (`_given`); a value JSON does
+    not print, by its repr."""
+    try:
+        return _given(value)
+    except (TypeError, ValueError):
+        return {"Printed": repr(value)}
+
+
+def _shown(term, width=60):
+    """A kernel value as a refusal shows it: a string literal quoted, a constructor applied with its
+    arguments, a pair, a record; cut at `width` characters."""
+    def show(x):
+        if isinstance(x, Shared):
+            return show(x.cell[0])
+        if isinstance(x, t.Lit):
+            return json.dumps(x.constant.value, ensure_ascii=False)
+        if isinstance(x, t.Var):
+            return x.name.partition("@")[0]
+        if isinstance(x, t.App):
+            argument = show(x.argument)
+            return f"{show(x.function)} ({argument})" if isinstance(x.argument, t.App) else f"{show(x.function)} {argument}"
+        if isinstance(x, t.Pair):
+            return f"({show(x.left)}, {show(x.right)})"
+        if isinstance(x, t.RecordValue):
+            return "{ " + ", ".join(f"{label} := {show(v)}" for label, v in x.fields) + " }"
+        return repr(x)
+    text = show(term)
+    return text if len(text) <= width else text[:width - 3] + "..."
+
+
+class FirstActions:
+    """The validation of a host action at its first application in a run (10.S10, L11.2): run's
+    model of world.lth's `Host` laws (`_Theories.action_law`). At the first application of an
+    action whose model's theory holds it to a law that takes the token, with the run's own
+    arguments: if an entry of the model file's store serves the law at those arguments (the law's
+    cone, the model's cone with its hosts' code, the grade accepted; certify.serves), the action is
+    applied as usual; otherwise the Runner runs the law once (for `HostAgrees*`, world.lth's
+    `agreement`: observe the declared places, act once, observe again, compare with the
+    description), the action the law applies being the program's (applied once, its result the
+    program's). A refuted law refuses the run naming the action and the place that differed; a
+    confirmed one is recorded in the store of the file that defines the model (grade `cases`, one
+    case, the binding the model and the run's arguments, 7.S9) and in the run's record (`done`).
+    [proposed] A refuted law writes no entry; the observations of the protocol pass the token on and
+    change no place (`HostObserveChangesNothing`)."""
+
+    def __init__(self, loaded, specs, accept):
+        self.loaded, self.accept = loaded, accept
+        self.by_route = {}
+        for spec in specs:
+            # [proposed] two models of the cone with one route: the first, by name, is validated
+            self.by_route.setdefault(spec["route"], spec)
+        self.done = []
+
+    def entries(self):
+        from . import certify
+        return sorted((e for f in self.loaded.files for e in certify.read_store(f)),
+                      key=lambda e: e.get("date", ""), reverse=True)
+
+    def __call__(self, runner, spec, head, args):
+        from . import certify
+        function = runner.route(head)
+        given, _ = runner.cross_out(head, function, args)
+        if len(given) - 1 != len(spec["arguments"]):
+            raise RunError(f"{spec['law']}: {len(spec['arguments'])} arguments, {spec['action']} was given "
+                           f"{len(given) - 1}")
+        printed = [(p, _printed(v)) for p, v in zip(spec["arguments"], given[1:])]
+        demand = {"law": spec["law"], "cone": spec["law cone"],
+                  "given": [(spec["model"], {"Printed": spec["name"]})] + printed,
+                  "accepts": self.accept, "fingerprints": {spec["model"]: spec["model hash"]}}
+        shown = {p: certify._shown_value(v) for p, v in printed}
+        served = next((e for e in self.entries() if certify.serves(demand, e)), None)
+        if served is not None:
+            self.done.append({"action": spec["action"], "law": spec["law"], "arguments": shown,
+                              "outcome": "served", "entry": served["date"]})
+            return None
+        term = t.Var(spec["law internal"])
+        for a in spec["type args"] + [t.Var(spec["internal"])] + list(args[1:]) + [runner.token]:
+            term = t.App(term, a)
+        runner.validating, runner.trace = True, []
+        try:
+            verdict = runner.whnf(term)
+            trace = runner.trace
+        finally:
+            runner.validating, runner.trace = False, None
+        acted = next((v for r, _, v in trace if r == head.route), None)
+        if acted is None:
+            raise RunError(f"{spec['law']} did not apply {spec['action']}")
+        if verdict == t.Var("false"):
+            where = self.disagreement(runner, spec, args, trace, head, acted)
+            at = ", ".join(f"{p} = {v}" for p, v in shown.items())
+            refusal = {"name": spec["name"], "law": spec["law"], "state": ("Refuted", where), "action": spec["action"]}
+            raise Refused(f"refused: {spec['action']} disagrees with its description at its first action "
+                          f"(10.S10, L11.2): {spec['law']} at {at or 'no argument'}: {where}", [refusal])
+        if verdict != t.Var("true"):
+            raise RunError(f"{spec['law']} gave no Bool: {_shown(verdict)}")
+        entry = self.entry(spec, demand, printed)
+        where = certify.add_entry(spec["home"], entry) if spec["home"] is not None else None
+        self.done.append({"action": spec["action"], "law": spec["law"], "arguments": shown,
+                          "outcome": "confirmed", "entry": entry["date"],
+                          "store": str(where) if where is not None else None})
+        return acted
+
+    def entry(self, spec, demand, printed):
+        """certification.lth's `Entry` of a confirmed first action: one case, grade `cases`; each
+        argument a census of one, its value printed in the generator so that two arguments are two
+        groups of the store (certify.prune) and its hash its fingerprint."""
+        from . import certify
+        binding = [{"parameter": spec["model"], "generator": f"{spec['name']} (the run's model)",
+                    "fingerprint": spec["model hash"]}]
+        binding += [{"parameter": p, "generator": f"{certify._shown_value(v)} (the run's argument)",
+                     "fingerprint": certify._sha(json.dumps(v, sort_keys=True, ensure_ascii=False))}
+                    for p, v in printed]
+        return {"law": spec["law"], "cone": spec["law cone"], "binding": binding, "seed": None, "cases": 1,
+                "budgets": {}, "reach": [{"parameter": p, "reach": {"Members": [v]}} for p, v in demand["given"]],
+                "evidence": {"Points": {"evaluated": 1, "raised": 0, "coverage": "Listed", "verdict": "Supported"},
+                             "protocol": "first action (10.S10)", "route": spec["route"]},
+                "grade": "Cases", "outcome": "Passed", "date": certify.now(),
+                "interpreter": certify.interpreter_revision(), "hosts": [list(h) for h in spec["hosts"]]}
+
+    def disagreement(self, runner, spec, args, trace, head, acted):
+        """Where a refuted `agreement` differed: each declared place at which the world the
+        description gives reads otherwise than the world observed after the action, then the
+        result. Read from the law's application of world.lth's `agreement` (its `m` and `d`) and
+        the protocol's two observations; for another law, that it was refuted."""
+        parts = _agreement_parts(runner.program, spec, args, runner.token)
+        observed = [(g, v) for r, g, v in trace if r != head.route]
+        if parts is None or len(observed) < 2 or not isinstance(acted, t.Pair):
+            return "the law is refuted"
+        m, d = parts
+        (given_before, before), (_, after) = observed[0], observed[1]
+        before, after = runner.whnf(before), runner.whnf(after)
+        described = runner.whnf(t.App(t.Proj(d, "describe"), before.right))
+        if not isinstance(described, t.Pair):
+            return "the law is refuted"
+        differing = []
+        for p in given_before[1] if isinstance(given_before[1], list) else []:
+            read = [t.App(t.App(t.Proj(m, "read"), st), t.Lit(t.StringConst(p))) for st in (described.left, after.right)]
+            if runner.whnf(t.App(t.App(t.Var("=="), read[0]), read[1])) == t.Var("false"):
+                differing.append(f"the place {p} differs (described {_shown(runner.value(read[0]))}, "
+                                 f"observed {_shown(runner.value(read[1]))})")
+        if runner.whnf(t.App(t.App(t.Var("=="), described.right), acted.right)) == t.Var("false"):
+            differing.append(f"the result differs (described {_shown(runner.value(described.right))}, "
+                             f"given {_shown(runner.value(acted.right))})")
+        return "; ".join(differing) or "the representations differ outside the places read"
+
+
+def _agreement_parts(program, spec, args, token):
+    """(m, d) of the application of world.lth's `agreement` in the law's body, with the law's
+    parameters given the run's values; None when the body applies none."""
+    law = next((a for a in program if isinstance(a, t.Define) and a.name == spec["law internal"]), None)
+    if law is None:
+        return None
+    values = spec["type args"] + [t.Var(spec["internal"])] + list(args[1:]) + [token]
+    body = law.body
+    for v in values:
+        if not isinstance(body, t.Lam):
+            return None
+        body = kernel.substitute(body.name, v, body.body)
+
+    def find(x):
+        head, xs = x, []
+        while isinstance(head, t.App):
+            xs.append(head.argument)
+            head = head.function
+        if isinstance(head, t.Var) and head.name.partition("@")[0] == "agreement" and len(xs) >= 5:
+            xs.reverse()
+            return xs[2], xs[4]
+        if isinstance(x, tuple):
+            for y in x:
+                if (r := find(y)) is not None:
+                    return r
+        elif is_dataclass(x) and not isinstance(x, type):
+            for f in fields(x):
+                if (r := find(getattr(x, f.name))) is not None:
+                    return r
+        return None
+    return find(body)
 
 
 def refuse_provisional(kept, entry):
@@ -1615,6 +1950,9 @@ def run(path, main="main", fuel=10000, sets=(), accept=None):
     values, empty = fill(loaded, sets)
     entry = loaded.name(loaded.top, main) or main
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
+    roots = _first_action_roots(loaded, kept)
+    if roots:
+        kept = runtime_slice(loaded.acts, entry, core_data(loaded) + roots)
     loaded.demand(kept)
     for a in kept:
         if isinstance(a, s.Declare) and a.name in empty:
@@ -1629,13 +1967,16 @@ def run(path, main="main", fuel=10000, sets=(), accept=None):
     main = entry
     state = certification(loaded, program, entry, values, accept)
     runner = Runner(program, fuel)
+    firsts = FirstActions(loaded, state.pop("_firsts", []) if state else [], accept or ACCEPT)
+    runner.first = firsts.by_route
+    runner.validate = firsts
     value = t.Var(main)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):
         value = t.App(value, runner.token)
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    state = dict(state or {}, fuel={"given": fuel, "spent": fuel - runner.fuel},
+    state = dict(state or {}, fuel={"given": fuel, "spent": fuel - runner.fuel}, **{"first actions": firsts.done},
                  files_read=[list(pair) for pair in host.files_read()], lock=lock_status(path))
     return host.stdout(), values, state
 
