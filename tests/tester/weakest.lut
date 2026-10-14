@@ -1,0 +1,15 @@
+-- tests/tester/weakest.lut: test.lth's CoverageIsTheWeakest under ExhaustiveMode: the whole type's
+-- coverage (`Exhaustive`) weakened by a binding that lists the cases (`Listed`), and unweakened.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+
+NotInvolutive (b : Bool) : Bool := not (not b) == b
+
+bools : List Bool := [true, false]
+listed : List Binding := [
+  { parameter := just "b", type := nothing, generator := "bools", coverage := Listed } ]
+
+test "NotInvolutive" ExhaustiveMode
+test "NotInvolutive" ExhaustiveMode (whereBindings <- listed)

@@ -103,3 +103,10 @@ def test_the_laws_of_numbers_lth(capsys):
     # the log laws settle since the extern's arity is its declared type's (run.py, prompt-6.md)
     assert not any("unsettled" in line for line in lines), lines
     assert not any("@" in line for line in lines), lines
+
+
+def test_an_exhaustive_run_is_the_whole_type_weakened_by_its_bindings():
+    """test.lth's CoverageIsTheWeakest: `wholeCoverage` is `Exhaustive` weakened by the bindings."""
+    plain, listed = tester.run_tests(ROOT / "tests" / "tester" / "weakest.lut")
+    assert tester._base(plain.evidence.coverage) == "Exhaustive" and plain.verdict == "Confirmed"
+    assert tester._base(listed.evidence.coverage) == "Listed" and listed.verdict == "Supported"
