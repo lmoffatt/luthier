@@ -1,0 +1,306 @@
+-- experiment_zero.lut: the positions of the microphones and the speaker placements from the tape
+-- distances, as a Laplace update of the prior the graph declares.
+--
+-- Ported 2026-10-14 by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/slice-port-2-2026-10-14/prompt.md, from prototipo-cero/luthier/experiment_zero.lut of
+-- sonolocalización at its commit 5ffc36ef70e16e11182bc09e4a927c381e35df1c (v0.1 syntax), with the
+-- three tables of src/distance_graph.py:248-284 there (`positions_table`, `residuals_table`,
+-- `transform_table`) written here natively, as `Table` values (tables.lth), in place of the
+-- externs. The renames and the changes beyond them follow the theories' report
+-- (record/IA/slice-theories-2-2026-10-14/report.md, last section); what changed and every reading
+-- the spec or the theories left open: this port's report, record/IA/slice-port-2-2026-10-14/report.md.
+--
+-- From experiment_zero.lut's header, kept: the graph directory (nodes.csv, measurements.csv) is
+-- the input. The parameter is the whole position vector, node by node; the belief is Gaussian in
+-- information form, with the prior's diagonal precision. The distances enter through the profile
+-- likelihood (sigma eliminated), so the fit does not need the tape's error, and sigma is read off
+-- the residuals afterwards as sqrt(RSS / nu), with nu = K - tr(F Sigma) the residual degrees of
+-- freedom. Outputs: positions.csv (posterior mean and sd per node, shift from the prior),
+-- residuals.csv (each measurement with its prediction and standardized residual) and
+-- transform.csv (each residual over its own sd, with its leverage, and its probability integral
+-- transform under the fitted model). The summary line says how far the transforms are from
+-- uniform: it reports, it does not stop the run.
+--
+-- Two control runs, each an entry with its own parameter, say where a large sigma comes from (25.7
+-- cm in session A, with every standardized residual below 0.8):
+--   priorWidened  the prior sds of the horizontal coordinates multiplied by horizontalWidening: if
+--                 the prior on the microphones (0.2 m) is too tight, the fit moves them and sigma falls
+--   sigmaKnown    the tape's error given, fixedSigma, instead of eliminated: the transforms say
+--                 whether the distances agree with it
+-- With 22 data and 30 parameters a test on the residuals has little power; the controls say more.
+--
+-- The host has no action that writes a file yet (world_model.lut: `print` and `readFile`), so each
+-- table is printed to the standard output after a header line `== <path>`, the path it would be
+-- written at under outDir; the summary line is printed last.
+--
+-- Run from the root of this repository with
+--   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/experiment_zero.lut \
+--     --set graphDir=examples/sonolocalizacion/A/graph --set outDir=<dir> \
+--     --set lmTol=1e-12 --set lmMaxIter=500 --set lmFloor=6.661338147750939e-15
+-- (v0.1's values of session A; the floor is v0.1's `n eps` for the 30 coordinates of session A),
+-- and the controls with --main priorWidened --set horizontalWidening=5.0, or --main sigmaKnown
+-- --set fixedSigma=0.03, each with its own outDir.
+
+import "world_model.lut" HostConsole host : HostConsole
+import "numbers.lth" Doubles Elementary
+import "numbers_model.lut" doubles : Doubles elementary : Elementary
+import "arrays.lth" Arrays Vec Mat VecOf MatOf RankFloor vec mat zeros
+import "arrays_model.lut" numpy : Arrays sub dot matMul transpose trace pinvSym
+import "tables.lth" Table Codec Cell int real text
+import "tables_model.lut" csv : Codec
+import "probability.lth" Kolmogorov MeanModel ScaledModel Likelihood gaussian profiled normalCdf kolmogorovTail valueSums
+import "probability_model.lut" numpySort : Kolmogorov kolmogorovDistance
+import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode laplaceAt
+import "belief_model.lut" lm : Maximizer
+import "positions.lut" Design positionsModel Separated nodesOf flatten
+import "distance_graph.lut" DistanceGraph GraphWithColumns ValidDistanceGraph ValidGraph MapInput toMapInput designOf readGraph nameOf iOf jOf dOf intToString realToString
+
+-- ---------------------------------------------------------------- parameters
+-- run parameters: declared holes that `run --set name=value` fills (3.S9, 8.S1, 12.S18). The graph
+-- directory and the directory of the tables, relative to where the run starts.
+graphDir : String
+outDir : String
+-- the parameters of the two controls, needed only by their entries
+horizontalWidening : Float64
+fixedSigma : Float64
+-- Levenberg-Marquardt: the tolerance on the Newton decrement, in nats, below which it says it
+-- converged, its budget of iterations (session A: 1e-12 and 500), and the floor of the step
+-- matrix's spectrum below which a direction is neither stepped nor counted (belief.lth `Settings`)
+lmTol : Float64
+lmMaxIter : Int
+lmFloor : Float64
+
+-- ---------------------------------------------------------------- the model on the full position vector
+-- theta is the positions of the graph's nodes, node by node (positions.lut), and the mean model is
+-- the one of the design the graph measures, the model distances.lut certifies with the gauge fixed
+meanModel (m : MapInput) : MeanModel (3 * m.x0.n) := positionsModel (designOf m)
+
+-- the prior as a Gaussian belief: mean x0, diagonal precision 1 / sd^2, flattened node by node
+priorBelief (m : MapInput) : GaussianBelief (3 * m.x0.n) := {
+  s := flatten m.sdx
+  b := { mean := flatten m.x0, precision := mat Float64 s.n s.n (fn a c { if a == c then 1.0 / (s.f a * s.f a) else 0.0 }) }
+  b }
+
+-- the graph with the prior sds of the horizontal coordinates (x and y) multiplied by c: the heights
+-- were measured and the horizontal positions guessed, and a gauge fixed by a tiny sd stays fixed
+widenedPrior (m : MapInput) (c : Float64) : MapInput :=
+  { x0 := m.x0, sdx := mat Float64 3 m.x0.n (fn a k { if a < 2 then c * m.sdx.f a k else m.sdx.f a k }), i := m.i, j := m.j, d := m.d }
+
+-- how the fit treats the tape's error: eliminated by the profile likelihood, sigma read off the
+-- residuals; or known
+SigmaTreatment = { eliminated : Unit || known : { s : Float64 | 0.0 < s } }
+
+-- with sigma known, u = log s is a constant of the model and its gradient zero: probability.lth's
+-- `fixedSigma`, written here under another name, since the run parameter of the control has that
+-- one (v0.1's `--set fixedSigma=0.03`)
+knownSigma (n : Nat) (m : MeanModel n) (u : Float64) : ScaledModel n := { model := m, logSigma := fn s { u }, dLogSigma := fn s { zeros n } }
+likelihoodOf (m : MapInput) (st : SigmaTreatment) : Likelihood (3 * m.x0.n) :=
+  match st {
+    eliminated u -> profiled (3 * m.x0.n) (meanModel m) ;
+    known s -> gaussian (3 * m.x0.n) (knownSigma (3 * m.x0.n) (meanModel m) (elementary.log s)) }
+
+-- ---------------------------------------------------------------- the update
+-- The maximizer is the host's Levenberg-Marquardt (belief_model.lut, src/luthier/lm.py), a model
+-- of `Maximizer` validated against belief.lth §2 at the first action that asks for it (10.S10),
+-- with the settings the run takes from its parameters.
+runSettings : Settings := { tol := lmTol, maxIter := lmMaxIter, floor := lmFloor }
+
+-- The floor of the pseudo-inverse of a posterior precision, its covariance: v0.1's `n eps`, n the
+-- size of the matrix and eps the spacing of the doubles at one (arrays.lth §4, P11).
+covFloor (n : Int) : RankFloor := toFloat64 n * doubles.epsilon
+
+-- What the fit gives, on the positions of n coordinates. A zero distance between two measured nodes
+-- cannot be excluded ahead for the points the maximizer visits: the Jacobian does not exist there
+-- (positions.lut), so the fit says whether the measured pairs are apart where it ended, and the run
+-- reports it with convergence.
+Fit (n : Int) = { posterior : GaussianBelief n, sigma : Float64, nu : Float64, predicted : Vec Float64, converged : Bool, separated : Bool }
+
+-- the fit of a valid graph, with its horizontal prior sds widened by c (1 for the experiment)
+Widening : U := { c : Float64 | 0.0 < c }
+fitOf (g : ValidDistanceGraph) (c : Widening) : MapInput := widenedPrior (toMapInput g) c
+
+fit (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) : Fit (3 * g.nodes.nRows) := {
+  m := fitOf g c
+  model := meanModel m
+  lik := likelihoodOf m st
+  prior := priorBelief m
+  mode := laplaceMode (3 * m.x0.n) lm settings lik prior m.d
+  post := laplaceAt (3 * m.x0.n) lik prior m.d mode.x
+  h := model.mean post.mean
+  r := sub m.d h
+  f := lik.info m.d post.mean
+  cov := pinvSym (covFloor (3 * m.x0.n)) post.precision
+  nu := toFloat64 m.d.n - trace (matMul f cov)
+  d := designOf m
+  result := { posterior := post, sigma := (match st { eliminated u -> elementary.sqrt (dot r r / nu) ; known s -> s }), nu := nu,
+              predicted := h, converged := mode.converged,
+              separated := Separated post.mean (nodesOf d post.mean d.i) (nodesOf d post.mean d.j) }
+  result }
+
+-- ---------------------------------------------------------------- the transform of the residuals
+-- Under the linearized model each residual has variance sigma^2 (1 - h_k), with h_k = (J Sigma J^T)_kk
+-- / s^2 its leverage, s^2 the variance the likelihood assumes (RSS / K for the profile one) and Sigma
+-- the posterior covariance; the leverages sum to K - nu. A residual over its own sd, z_k, is a
+-- standard normal, and Phi(z_k) is uniform (with sigma estimated a t with nu degrees of freedom would
+-- be exact; the normal is what is reported). A datum the fit reproduces exactly, h_k = 1, has a
+-- residual of zero and no distribution, and is left out of the distance.
+Transform = { leverage : Vec Float64, z : Vec Float64, u : Vec Float64, distance : Float64, count : Int }
+
+-- the transforms of the data with a residual of their own, each as a vector of one
+keptTransforms (sd u : Vec Float64) (k : Nat) : List (Vec Float64) :=
+  if k >= sd.n then nil
+  else if k < u.n and sd.f k > 0.0 then cons (vec Float64 1 (fn q { u.f k })) (keptTransforms sd u (k + 1))
+  else keptTransforms sd u (k + 1)
+
+-- the leverage of each datum, (J Sigma J^T)_kk / s^2; the sd of each residual; each residual over its
+-- sd; and the transform of each
+leverages (jac cov : Mat Float64) (assumed : Float64) : Vec Float64 := {
+  h := matMul jac (matMul cov (transpose jac))
+  vec Float64 h.m (fn k { h.f k k / assumed }) }
+residualSds (lev : Vec Float64) (sigma : Float64) : Vec Float64 :=
+  vec Float64 lev.n (fn k { if lev.f k < 1.0 then sigma * elementary.sqrt (1.0 - lev.f k) else 0.0 })
+overSds (r sd : Vec Float64) : Vec Float64 := vec Float64 sd.n (fn k { if sd.f k > 0.0 and k < r.n then r.f k / sd.f k else 0.0 })
+normalTransforms (z : Vec Float64) : Vec Float64 := vec Float64 z.n (fn k { normalCdf (z.f k) })
+
+transformOf (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) (f : Fit (3 * g.nodes.nRows)) : Transform := {
+  m := fitOf g c
+  r := sub m.d f.predicted
+  assumed := match st { eliminated u -> dot r r / toFloat64 r.n ; known s -> s * s }
+  lev := leverages ((meanModel m).jac f.posterior.mean) (pinvSym (covFloor (3 * m.x0.n)) f.posterior.precision) assumed
+  sd := residualSds lev f.sigma
+  z := overSds r sd
+  u := normalTransforms z
+  kept := keptTransforms sd u 0
+  match valueSums kept { (s1, s2, count) ->
+    { leverage := lev, z := z, u := u, distance := kolmogorovDistance kept, count := count } } }
+
+-- the tail probability of the distance, by Kolmogorov's limit with Stephens's correction
+transformTail (t : Transform) : Float64 :=
+  if t.count < 1 then 1.0
+  else { q := elementary.sqrt (toFloat64 t.count)
+         kolmogorovTail ((q + 0.12 + 0.11 / q) * t.distance) }
+
+posteriorSd (n : Nat) (b : GaussianBelief n) : Vec Float64 := {
+  cov := pinvSym (covFloor n) b.precision
+  vec Float64 b.mean.n (fn k { elementary.sqrt (cov.f k k) }) }
+
+-- ---------------------------------------------------------------- the tables
+-- The three tables of a run, as `Table` values (tables.lth): their columns and kinds, and each
+-- cell from the node or the measurement of its row (v0.1's externs positions_table,
+-- residuals_table and transform_table of src/distance_graph.py:248-284, written here). An entry
+-- outside a vector reads 0.0, which a row of the graph never asks for.
+entry (v : Vec Float64) (k : Int) : Float64 := if 0 <= k and k < v.n then v.f k else 0.0
+names3 (a b c : String) : List String := cons a (cons b (cons c nil))
+real3 : List String := names3 "float" "float" "float"
+
+-- one row per node: its name, the posterior mean and sd of each coordinate, and how far the mean
+-- moved from the prior's
+shiftOf (mean prior : Vec Float64) (r : Int) : Float64 :=
+  elementary.sqrt ((entry mean (3 * r) - entry prior (3 * r)) * (entry mean (3 * r) - entry prior (3 * r))
+    + (entry mean (3 * r + 1) - entry prior (3 * r + 1)) * (entry mean (3 * r + 1) - entry prior (3 * r + 1))
+    + (entry mean (3 * r + 2) - entry prior (3 * r + 2)) * (entry mean (3 * r + 2) - entry prior (3 * r + 2)))
+positionCell (g : GraphWithColumns) (mean sd prior : Vec Float64) (c : String) (r : Fin g.nodes.nRows) : Maybe Cell :=
+  if c == "name" then just (text (nameOf g r))
+  else if c == "x" then just (real (entry mean (3 * r)))
+  else if c == "y" then just (real (entry mean (3 * r + 1)))
+  else if c == "z" then just (real (entry mean (3 * r + 2)))
+  else if c == "sx" then just (real (entry sd (3 * r)))
+  else if c == "sy" then just (real (entry sd (3 * r + 1)))
+  else if c == "sz" then just (real (entry sd (3 * r + 2)))
+  else if c == "shift" then just (real (shiftOf mean prior r))
+  else nothing
+positionsTable (g : GraphWithColumns) (mean sd prior : Vec Float64) : Table := {
+  nRows := g.nodes.nRows,
+  names := cons "name" (cons "x" (cons "y" (cons "z" (cons "sx" (cons "sy" (cons "sz" (cons "shift" nil))))))),
+  kinds := cons "str" (cons "float" (cons "float" (cons "float" (cons "float" (cons "float" (cons "float" (cons "float" nil))))))),
+  cell := fn c r { positionCell g mean sd prior c r },
+}
+
+-- one row per measurement: its nodes, the distance, the prediction, the residual and the residual
+-- over sigma
+residualCell (g : GraphWithColumns) (predicted : Vec Float64) (sigma : Float64) (c : String) (r : Fin g.measurements.nRows) : Maybe Cell :=
+  if c == "i" then just (int (iOf g r))
+  else if c == "j" then just (int (jOf g r))
+  else if c == "d" then just (real (dOf g r))
+  else if c == "predicted" then just (real (entry predicted r))
+  else if c == "residual" then just (real (dOf g r - entry predicted r))
+  else if c == "standardized" then just (real ((dOf g r - entry predicted r) / sigma))
+  else nothing
+residualsTable (g : ValidDistanceGraph) (predicted : Vec Float64) (sigma : Float64) : Table := {
+  nRows := g.measurements.nRows,
+  names := cons "i" (cons "j" (cons "d" (names3 "predicted" "residual" "standardized"))),
+  kinds := cons "int" (cons "int" (cons "float" real3)),
+  cell := fn c r { residualCell g predicted sigma c r },
+}
+
+-- one row per measurement: its nodes, its leverage, its residual over its own sd, and the transform
+transformCell (g : GraphWithColumns) (lev z u : Vec Float64) (c : String) (r : Fin g.measurements.nRows) : Maybe Cell :=
+  if c == "i" then just (int (iOf g r))
+  else if c == "j" then just (int (jOf g r))
+  else if c == "leverage" then just (real (entry lev r))
+  else if c == "z" then just (real (entry z r))
+  else if c == "u" then just (real (entry u r))
+  else nothing
+transformTable (g : ValidDistanceGraph) (lev z u : Vec Float64) : Table := {
+  nRows := g.measurements.nRows,
+  names := cons "i" (cons "j" (names3 "leverage" "z" "u")),
+  kinds := cons "int" (cons "int" real3),
+  cell := fn c r { transformCell g lev z u c r },
+}
+
+-- ---------------------------------------------------------------- the program
+summary (settings : Settings) (n : Int) (f : Fit n) (t : Transform) (g : DistanceGraph) : String :=
+  "nodes " + intToString g.nodes.nRows + ", measurements " + intToString g.measurements.nRows
+  + ", sigma " + realToString f.sigma + " m, nu " + realToString f.nu
+  + ", transform of the residuals: Kolmogorov distance " + realToString t.distance + " over " + intToString t.count
+  + ", tail probability " + realToString (transformTail t)
+  + (if f.converged then "" else ", NOT CONVERGED: the maximizer ran out of its " + intToString settings.maxIter + " iterations")
+  + (if f.separated then "" else ", NOT SEPARATED: two measured nodes coincide where the fit ended")
+
+-- What a run writes and says, from a valid graph: the tables of the positions, the residuals and
+-- their transforms, and the summary. A function of the graph, so its laws are tested on graphs drawn
+-- valid; the run reads the graph and writes what this gives.
+Report = { positions : Table, residuals : Table, transform : Table, summary : String }
+
+reportOf (settings : Settings) (g : ValidDistanceGraph) (c : Widening) (st : SigmaTreatment) : Report := {
+  f := fit settings g c st
+  t := transformOf g c st f
+  r := { positions := positionsTable g f.posterior.mean (posteriorSd (3 * g.nodes.nRows) f.posterior) (flatten (toMapInput g).x0),
+         residuals := residualsTable g f.predicted f.sigma,
+         transform := transformTable g t.leverage t.z t.u,
+         summary := summary settings (3 * g.nodes.nRows) f t g }
+  r }
+
+-- A table as text (tables_model.lut's codec), at a path. The host has no write action yet
+-- (world_model.lut), so the text goes to the standard output after a header line naming the path.
+writeTable (w : W) (path : String) (t : Table) : W * Unit := {
+  (w1, done) <- host.print w ("== " + path)
+  host.print w1 (csv.render t) }
+
+writeReport (w : W) (r : Report) : W * Unit := {
+  (w1, u1) <- writeTable w (outDir + "/positions.csv") r.positions
+  (w2, u2) <- writeTable w1 (outDir + "/residuals.csv") r.residuals
+  (w3, u3) <- writeTable w2 (outDir + "/transform.csv") r.transform
+  host.print w3 r.summary }
+
+-- The graph is checked against its invariants before the fit; an invalid one is reported, not fit.
+-- The run of the experiment and its two controls differ in the prior and in how sigma is treated.
+runOn (w : W) (read : Maybe DistanceGraph) (c : Widening) (st : SigmaTreatment) : W * Unit :=
+  match read {
+    nothing -> host.print w ("FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables") ;
+    just g -> if ValidGraph g then writeReport w (reportOf runSettings g c st) else host.print w ("the graph in " + graphDir + " is not valid") }
+
+runWith (w : W) (c : Widening) (st : SigmaTreatment) : W * Unit := {
+  (w1, read) <- readGraph w graphDir
+  runOn w1 read c st }
+
+-- The entries: the experiment, and its two controls (`run --main priorWidened`, `run --main
+-- sigmaKnown`). A run parameter is a plain `Float64` (`--set` fills only the plain types), so the
+-- control's entry asks it positive, which v0.1 asked in the parameter's type.
+main (w : W) : W * Unit := runWith w 1.0 (eliminated unit)
+priorWidened (w : W) : W * Unit :=
+  if 0.0 < horizontalWidening then runWith w horizontalWidening (eliminated unit)
+  else host.print w ("horizontalWidening must be positive: " + realToString horizontalWidening)
+sigmaKnown (w : W) : W * Unit :=
+  if 0.0 < fixedSigma then runWith w 1.0 (known fixedSigma)
+  else host.print w ("fixedSigma must be positive: " + realToString fixedSigma)
