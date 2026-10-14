@@ -414,6 +414,15 @@ def test_R9_reads_imported_subtypes(tmp_path):
     assert any(f.rule == '4.R9' and f.name == 's' for f in c.check(program(b.read_text()), b))
 
 
+def test_an_imported_definition_does_not_take_a_labels_name(tmp_path):
+    # prompt-10.md: program.lth's function `known` reached experiment_zero.lut through its imports
+    # and took the name of its sum's label, so 4.R9 refused `sigmaKnown`
+    (tmp_path / 'a.lut').write_text('known (n : Int) : Bool := true\nother : Int := 1\n')
+    b = tmp_path / 'b.lut'
+    b.write_text('import "a.lut" other\nT = { a : Unit || known : { s : Float64 | 0.0 < s } }\nx : T := known 0.03\n')
+    assert not c.check(program(b.read_text()), b)
+
+
 def test_typing_rules_run_act_by_act_when_the_file_does_not_elaborate_whole():
     # check bite 6: a record refinement (elaborate.py: "record refinements require check.py") left
     # the whole file untyped, so 4.R9 answered "no violation" on every act

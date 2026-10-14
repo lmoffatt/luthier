@@ -1,0 +1,9 @@
+-- A label of a sum and another file's definition of the same name are different names (prompt-10.md,
+-- 12.S22): tables.lth's Cell label `int` is not program.lth's `int : Term`, which generators.lth's
+-- import brings into the run. Prints 7.
+import "world_model.lut" HostConsole host : HostConsole
+import "tables.lth" Table Codec intAt
+import "tables_model.lut" csv : Codec
+import "generators.lth" Level
+showInt (x : Int) : String := extern "python:builtins.repr" x
+main (w : W) : W * Unit := host.print w (match csv.parse "a:int\n7\n" { nothing -> "no table" ; just t -> showInt (intAt t "a" 0) })

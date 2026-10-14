@@ -387,6 +387,15 @@ def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
     assert {loaded.name(SCOPE / f, "helper") for f in ("left.lut", "right.lut")} == {"helper@left", "helper@right"}
 
 
+def test_a_label_and_another_files_definition_of_its_name_are_kept_apart():
+    # prompt-10.md: generators.lth's import brings program.lth's `int : Term`, which took the name of
+    # tables.lth's Cell label `int`, and `intAt` was a stuck match
+    assert run_file(SCOPE / "label_and_definition.lut") == "7\n"
+    loaded = Loaded(SCOPE / "label_and_definition.lut")
+    assert loaded.name(LIB / "tables.lth", "int") == "int"
+    assert loaded.name(LIB / "program.lth", "int") == "int@program"
+
+
 def _mentions(value, names):
     """The names of `names` that `value` refers to, as a term or as a pattern."""
     if isinstance(value, (s.Name, s.PApp)):

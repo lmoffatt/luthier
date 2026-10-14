@@ -455,24 +455,38 @@ def resolve(path, name):
 
 
 def load_imports(program, path, seen=None):
-    """The acts that `program`'s imports bring, transitively, as run.py's loader reads them: a name
-    imported `as` another becomes an alias. Unreadable files are skipped (4.R2 names what is
-    missing); operators and data are left out, being the imported file's own business."""
+    """The acts that `program`'s imports bring, transitively: a name imported `as` another becomes
+    an alias. Unreadable files are skipped (4.R2 names what is missing); operators and data are left
+    out, being the imported file's own business. A definition does not take the name of a
+    constructor or a label of a sum (prompt-10.md, 12.S22, as run.py's `Loaded` keeps them apart):
+    an imported definition of such a name is left out, unless the file lists it in an import of its
+    file and has no constructor or label of that name itself."""
+    brought, listed = [], set()
+    _brought(program, path, set() if seen is None else seen, brought, listed)
+    own = _constructors_of(program)
+    taken = own | _constructors_of(tuple(a for _, a in brought))
+    return tuple(a for target, a in brought
+                 if target is None or not isinstance(a, (s.Declare, s.Define)) or a.name not in taken
+                 or ((target, a.name) in listed and a.name not in own))
+
+
+def _brought(program, path, seen, brought, listed):
+    """`(file, act)` of what `program`'s imports bring, in load_imports' order (file None for an
+    alias of an `as`), and in `listed` the `(file, name)` its own imports name."""
     from .parse import parse
-    seen = set() if seen is None else seen
-    result = []
     for act in program:
         if not isinstance(act, s.ImportAct): continue
         target = resolve(path, act.path)
+        if target is not None:
+            listed.update((target, i.name) for i in act.names)
         if target is not None and target not in seen:
             seen.add(target)
             try: parsed = parse(target.read_text(encoding='utf-8'))
             except OSError: parsed = None
             if isinstance(parsed, s.Parsed):
-                result.extend(load_imports(parsed.program, target, seen))
-                result.extend(a for a in parsed.program if isinstance(a, (s.Declare, s.Define, s.Alias)))
-        result.extend(s.Alias(i.asName, (), s.Name(i.name)) for i in act.names if i.asName)
-    return tuple(result)
+                _brought(parsed.program, target, seen, brought, set())
+                brought.extend((target, a) for a in parsed.program if isinstance(a, (s.Declare, s.Define, s.Alias)))
+        brought.extend((None, s.Alias(i.asName, (), s.Name(i.name))) for i in act.names if i.asName)
 
 
 def elaboration_error(acts):

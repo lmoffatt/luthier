@@ -20,7 +20,8 @@ arguments than its arity stays a value, and crossing out it is a `functools.part
 host's function. v9 (prompt-9.md, 8.S4): a bound value is demanded once within a run (call by
 need): a `Let`'s value, an argument of a lambda, a part a pattern binds and a constant of the
 program stand as one `Shared` cell, reduced at the first demand and kept; `kernel.step` unchanged.
-No certification or result hashing yet.
+v10 (prompt-10.md, 12.S22): a constructor or a label of a sum and another file's definition of the
+same name are kept apart (the definition is `name@file`). No certification or result hashing yet.
 """
 from __future__ import annotations
 
@@ -81,6 +82,7 @@ class _File:
     acts: list = field(default_factory=list)
     defined: set = field(default_factory=set)
     constructors: set = field(default_factory=set)
+    labels: set = field(default_factory=set)      # the labels of the sums its acts write
     imports: dict = field(default_factory=dict)   # the name the file sees -> (file, the name there)
 
 
@@ -92,8 +94,12 @@ class Loaded:
     or of what they import. A name two files define does not collide: each reference resolves in
     its own file. Inside the program a definition keeps its name when no other file defines it, or
     when its file is the one run (then core); otherwise it is called `name@file` (the file's stem),
-    which the user never writes. A reference a file cannot resolve is an error naming the file,
-    raised only when a demand reaches the act that makes it (12.S21)."""
+    which the user never writes. A constructor (of a data, or a label of a sum) and a definition of
+    the same name are different names too: the definition is then always `name@file`, the labels
+    keeping their written names, global as the elaborator and the bridge read them (prompt-10.md).
+    A constructor reference resolves as a definition's does: the file's own data and sums, then the
+    names its imports list, then core. A reference a file cannot resolve is an error naming the
+    file, raised only when a demand reaches the act that makes it (12.S21)."""
 
     def __init__(self, path, core=True):
         self.files = {}
@@ -115,12 +121,17 @@ class Loaded:
             else:
                 if len(fs) == 1:
                     self.plain[n] = fs[0]
+        self.labels = _sum_labels(tuple(a for f in self.files.values() for a in f.acts), set())
+        # a definition that is not a constructor never keeps the name of a constructor or a label
+        reserved = self.labels | _BUILTIN_CONSTRUCTORS | {n for f in self.files.values() for n in f.constructors}
+        for n in reserved & set(self.plain):
+            if n not in self.files[self.plain[n]].constructors:
+                del self.plain[n]
         stems = {}
         for f in self.files.values():
             k = stems.setdefault(f.path.stem, 0)
             stems[f.path.stem] = k + 1
             f.tag = f.path.stem if k == 0 else f"{f.path.stem}~{k}"
-        self.labels = _sum_labels(tuple(a for f in self.files.values() for a in f.acts), set())
         self.memo = {}
         self.errors = {}   # the internal name of an act -> what it cannot resolve
         # each file's acts in the program's names, imports before importers, core first
@@ -153,12 +164,20 @@ class Loaded:
                 f.defined.update(_defines(act))
                 if isinstance(act, s.Define) and isinstance(act.body, s.DataBody):
                     f.constructors.update(n for n, _ in act.body.constructors)
+                _sum_labels(act, f.labels)
         active.remove(path)
         self.files[path] = f
 
     def internal(self, path, name):
-        """The program's name of the definition of `name` in the file at `path`."""
+        """The program's name of the definition of `name` in the file at `path`; a label of a sum
+        of the file keeps its name."""
+        if self.is_label(path, name):
+            return name
         return name if self.plain.get(name) == path else f"{name}@{self.files[path].tag}"
+
+    def is_label(self, path, name):
+        f = self.files[path]
+        return name in f.labels and name not in f.defined
 
     def see(self, path, name):
         """(file, name there) of the definition a reference to `name` in the file means, None when
@@ -172,13 +191,13 @@ class Loaded:
         self.memo[key] = _VISITING
         f = self.files[path]
         try:
-            if name in f.defined:
+            if name in f.defined or name in f.labels:
+                # its own definitions, then the labels of its own sums
                 found = (path, name)
             elif name in f.imports:
                 target, there = f.imports[name]
                 found = self.see(target, there)
-                if found is None and there not in _sum_labels(tuple(self.files[target].acts), set()):
-                    # a label of a sum the file defines is the sum's, global as the elaborator reads it
+                if found is None:
                     raise RunError(f"{path.name} imports {there} from {target.name}, which does not define it")
             elif self.core is not None and path != self.core and name in self.files[self.core].defined:
                 found = (self.core, name)
@@ -336,8 +355,7 @@ class Loaded:
                     q, b = self.pattern(path, q, missing)
                     out.append(q)
                     binds |= b
-                name = p.name if p.name in self.labels and not self.is_constructor(path, p.name) else self.reference(path, p.name, missing)
-                return s.PApp(name, tuple(out)), binds
+                return s.PApp(self.constructor(path, p.name, missing), tuple(out)), binds
             return p, {p.name}
         if isinstance(p, s.PTuple):
             out, binds = [], set()
@@ -347,6 +365,19 @@ class Loaded:
                 binds |= b
             return s.PTuple(tuple(out)), binds
         return p, set()
+
+    def constructor(self, path, name, missing):
+        """A pattern's head: a constructor or a label the file sees, else a label of any file (global,
+        as the elaborator reads it), else whatever the name resolves to."""
+        try:
+            found = self.see(path, name)
+        except RunError:
+            found = None
+        if found is not None and (found[1] in self.files[found[0]].constructors or self.is_label(*found)):
+            return self.internal(*found)
+        if name in self.labels:
+            return name
+        return self.reference(path, name, missing)
 
     def reference(self, path, name, missing):
         try:
