@@ -204,8 +204,12 @@ PrintAppendsALine (S : Concrete) (c : Console S) (st : S) (s : String) : Bool :=
     == just (match c.world.read st c.stdout { nothing -> lineOf s ; just prior -> appendStr prior (lineOf s) })
 PrintChangesOnlyStdout (S : Concrete) (c : Console S) (st : S) (s p : String) : Bool :=
   p == c.stdout or c.world.read (stateAfter S Unit (c.printLine s st)) p == c.world.read st p
+-- [proposed] The standard output is a place and not a file: reading the file at a path gives what
+-- is read at that place, for every path other than the standard output's place (refuted at
+-- p = "stdout" without the premise, by tests/tester/world_laws.lut: `readFile` reads files, and
+-- the representation reads the printed text there).
 ReadGivesThePlace (S : Concrete) (c : Console S) (st : S) (p : String) : Bool :=
-  resultOf S (Maybe String) (c.readFile p st) == c.world.read st p
+  p == c.stdout or resultOf S (Maybe String) (c.readFile p st) == c.world.read st p
 ReadChangesNothing (S : Concrete) (c : Console S) (st : S) (p : String) : Bool :=
   stateAfter S (Maybe String) (c.readFile p st) == st
 Console (S : Concrete) := PrintAppendsALine S & PrintChangesOnlyStdout S & ReadGivesThePlace S & ReadChangesNothing S
