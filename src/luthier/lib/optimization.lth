@@ -1,0 +1,157 @@
+-- optimization.lth: Levenberg-Marquardt as types with laws over the array leaves: the objective
+-- as a record of functions, the damping and the state of a run, one step as a theory whose
+-- model is the host's or the native one, and the native driver.
+--
+-- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/slice-theories-2-2026-10-14/prompt.md (item 3; inventory §6 item 7; the record of
+-- functions crossing of D-2026-10-14-a). Sources: spec 7.R2 (over `VecOf n`), 3.S23 as it
+-- stands (a record whose fields are functions crosses as the record, each a callback), 10.S10
+-- (an extern validated against its type's laws), 11.S18 (a tolerance is the demand's), 7.R4
+-- (per model), 4.R10, P11 (every criterion is a parameter: the damping schedule, v0.1's
+-- `muInit`, `muFactor`, `muMin`, `muMax`, and the settings of belief.lth). The v0.1 file is
+-- `optimization.lut` at the tag v0.1-final; the names are its. The settings (tolerance, budget,
+-- floor) and the decrement are belief.lth's, so that one `Settings` serves the maximizer and
+-- the step; `pinvSym` and `trace` are arrays.lth's (added for this file, one commit each).
+--
+-- What this file states. An objective is what is minimized: a value on the vectors of a
+-- dimension, its gradient and a positive step matrix (the information, or Gauss-Newton); its
+-- laws tie the gradient to the value and ask the step matrix symmetric and not negative. The
+-- algorithm is split into pieces that each carry a law: the damped direction, (M + mu diag M)^+
+-- applied to -g at the settings' floor; one step, a trial that either accepts (the value falls,
+-- the damping divides by the factor, not below the least) or rejects (the point and the value
+-- stay, the damping multiplies by the factor); `finished` says why a run stops (converged by the
+-- decrement, exhausted by the budget, stalled by the damping beyond its most); the driver
+-- iterates the step until it does. `LMStep` is the theory of the direction and the step, with
+-- the laws above and the descent of the direction; its models are the native definitions and
+-- the host's (optimization_model.lut). Correctness does not depend on the path: a run that ends
+-- converged is certified by the decrement at its end, recomputed from the objective, which is
+-- the law `MaximizerStationary` of belief.lth on the native runner (optimization_model.lut
+-- `lmMaximizer`).
+--
+-- Index (all sections written in this draft):
+--   §1 `Objective`, its laws, `negate`, `posteriorOf` (v0.1 optimization.lut:16-24, 108-110). done
+--   §2 `Damping`, `LMState`, `start`, `dampedStep`, `lmStep`, `Reason`, `finished`, `Run`,
+--      `minimize` (v0.1 optimization.lut:27-73).                                              done
+--   §3 `LMStep`, the laws of a step: descent, the damping, the decrease; the quadratic family
+--      (v0.1 optimization.lut:76-92).                                                         done
+
+import "numbers.lth" Tolerance Positive within withinOf abs
+import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat identity approxVec approxMat exact RankFloor
+import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul madd mscale transpose pinvSym
+import "probability.lth" Resolution IsGradient
+import "belief.lth" Settings Posterior decrement quadratic
+
+-- ---------------------------------------------------------------- §1 The objective (D-2026-10-14-a)
+
+-- A record whose fields are functions (what crosses to the host as the record with each field
+-- a callback, D-2026-10-14-a): the value on the vectors of dimension n, its gradient and the
+-- step matrix. The gradient is the gradient of the value at the demand's resolution; the step
+-- matrix is symmetric and its quadratic form not negative beyond rounding. Whether it
+-- approximates the Hessian is a quality of the method, not a law of the objective (v0.1
+-- optimization.lut:18-24). Certified per objective (7.R4), and on the quadratic family below.
+Objective (n : Nat) : { value : VecOf n -> Float64, grad : VecOf n -> Vec Float64, stepMatrix : VecOf n -> Mat Float64 }
+-- spec 7.R2, 11.S18
+GradIsGradient (n : Nat) (o : Objective n) (r : Resolution) (x : VecOf n) : Bool := IsGradient n r o.value o.grad x
+StepMatrixSymmetric (n : Nat) (o : Objective n) (tol : Tolerance) (x : VecOf n) : Bool :=
+  approxMat tol (o.stepMatrix x) (transpose (o.stepMatrix x))
+StepMatrixNonNegative (n : Nat) (o : Objective n) (tol : Tolerance) (x v : VecOf n) : Bool :=
+  { q := dot v (matVec (o.stepMatrix x) v)
+    0.0 <= q or within tol q 0.0 }
+Objective (n : Nat) := GradIsGradient n & StepMatrixSymmetric n & StepMatrixNonNegative n
+
+-- a log posterior (belief.lth) as the objective that minimizes its negative, the information
+-- its step matrix (v0.1 optimization.lut:108-110); and the three functions a maximizer takes,
+-- as one posterior
+negate (n : Nat) (p : Posterior n) : Objective n :=
+  { value := fn x { 0.0 - p.logp x }, grad := fn x { scale (0.0 - 1.0) (p.score x) }, stepMatrix := p.info }
+posteriorOf (n : Nat) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (m : VecOf n -> Mat Float64) : Posterior n :=
+  { logp := f, score := g, info := m }
+
+-- ---------------------------------------------------------------- §2 The damping and the state (P11)
+
+-- The damping schedule, the method's own, a parameter (P11; v0.1 held `muInit := 0.001`,
+-- `muFactor := 3.0`, `muMin := 1e-15`, `muMax := 1e15` as constants, optimization.lut:29-32):
+-- the damping a run starts at, the factor it divides by on acceptance and multiplies by on
+-- rejection, the least it falls to, and the most beyond which the run has stalled.
+Damping : U := { init factor least most : Float64 | 0.0 < least and least <= init and init <= most and 1.0 < factor }
+
+-- the state of a run on the vectors of dimension n: the point, its value, the damping, the
+-- iterations so far, and whether the last trial was accepted (v0.1 optimization.lut:27)
+LMState (n : Nat) = { x : VecOf n, phi : Float64, mu : Float64, iter : Int, accepted : Bool }
+
+start (n : Nat) (o : Objective n) (d : Damping) (x0 : VecOf n) : LMState n :=
+  { x := x0, phi := o.value x0, mu := d.init, iter := 0, accepted := true }
+
+-- the diagonal part of a matrix
+diagOf (m : Mat Float64) : Mat Float64 := mat Float64 m.m m.n (fn i j { if i == j then m.f i i else 0.0 })
+
+-- the damped direction: (M + mu diag M)^+ applied to -g, the pseudo-inverse at the settings'
+-- floor (v0.1 optimization.lut:51 solved the matrix whole)
+dampedStep (n : Nat) (s : Settings) (o : Objective n) (x : VecOf n) (mu : Float64) : Vec Float64 :=
+  { m := o.stepMatrix x
+    scale (0.0 - 1.0) (matVec (pinvSym s.floor (madd m (mscale mu (diagOf m)))) (o.grad x)) }
+
+-- the damping after an acceptance: divided by the factor, not below the least
+lowered (d : Damping) (mu : Float64) : Float64 := if mu / d.factor > d.least then mu / d.factor else d.least
+
+-- one trial: the value at the damped step is taken if it falls, and the damping lowered; else
+-- the point and the value stay and the damping is raised (v0.1 optimization.lut:54-59)
+lmStep (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : LMState n :=
+  { xt := add st.x (dampedStep n s o st.x st.mu)
+    pt := o.value xt
+    if pt < st.phi
+    then { x := xt, phi := pt, mu := lowered d st.mu, iter := st.iter + 1, accepted := true }
+    else { x := st.x, phi := st.phi, mu := st.mu * d.factor, iter := st.iter + 1, accepted := false } }
+
+-- why a run stops: converged when the decrement is below the settings' tolerance, exhausted by
+-- the budget, stalled by the damping beyond its most; running otherwise (v0.1
+-- optimization.lut:63-69)
+Reason = { running : Unit || converged : Unit || exhausted : Unit || stalled : Unit }
+isConverged (r : Reason) : Bool := match r { converged u -> true ; _ -> false }
+finished (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Reason :=
+  if decrement n s o.grad o.stepMatrix st.x < s.tol then converged unit
+  else if st.iter >= s.maxIter then exhausted unit
+  else if st.mu > d.most then stalled unit
+  else running unit
+
+Run (n : Nat) = { state : LMState n, reason : Reason }
+
+-- the native driver: the step iterated until the run is finished (v0.1 optimization.lut:72-73)
+minimize (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState n) : Run n :=
+  match finished n s d o st {
+    running u -> minimize n s d o (lmStep n s d o st) ;
+    r -> { state := st, reason := r } }
+
+-- ---------------------------------------------------------------- §3 The laws of a step (10.S10)
+
+-- The direction and the step as a theory of two functions, so that the host's (lm.step,
+-- optimization_model.lut) is validated against them at its first action (10.S10) and the native
+-- definitions above are its other model. The laws: the direction descends (its inner product
+-- with the gradient is not positive beyond rounding) and agrees with the native one within the
+-- demand's tolerance; a step accepted lowers the value, takes the point along the direction,
+-- lowers the damping by the schedule, and counts the iteration; a step rejected keeps the point
+-- and the value, raises the damping by the factor, and counts the iteration; and on a concave
+-- quadratic the first step from the start is accepted unless the start is the minimum.
+LMStep : {
+  direction : (n : Nat) -> Settings -> Objective n -> VecOf n -> Float64 -> Vec Float64,
+  step : (n : Nat) -> Settings -> Damping -> Objective n -> LMState n -> LMState n,
+}
+-- spec 11.S18
+DirectionDescends (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (o : Objective n) (x : VecOf n) (mu : Positive) : Bool :=
+  { q := dot (o.grad x) (m.direction n s o x mu)
+    q <= 0.0 or within tol q 0.0 }
+DirectionAgrees (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (o : Objective n) (x : VecOf n) (mu : Positive) : Bool :=
+  approxVec tol (m.direction n s o x mu) (dampedStep n s o x mu)
+-- spec P11 (the damping is the schedule's)
+StepRule (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (o : Objective n) (st : LMState n) : Bool :=
+  { s2 := m.step n s d o st
+    if s2.accepted
+    then s2.phi < st.phi and approxVec exact s2.x (add st.x (m.direction n s o st.x st.mu))
+         and s2.mu == lowered d st.mu and s2.iter == st.iter + 1
+    else approxVec exact s2.x st.x and s2.phi == st.phi and s2.mu == st.mu * d.factor and s2.iter == st.iter + 1 }
+-- the quadratic family of belief.lth, minimized: its minimum at b, curvature c
+quadraticObjective (n : Nat) (b : VecOf n) (c : Positive) : Objective n := negate n (quadratic n b c)
+QuadraticStepAccepts (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  { o := quadraticObjective n b c
+    norm (sub x0 b) == 0.0 or (m.step n s d o (start n o d x0)).accepted }
+LMStep := DirectionDescends & DirectionAgrees & StepRule & QuadraticStepAccepts
