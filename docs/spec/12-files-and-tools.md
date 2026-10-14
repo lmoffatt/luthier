@@ -37,7 +37,7 @@ Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
 
 **12.S12. Obligations of the importer.** [implemented] Laws of the importer that mention imported functions are obligations of the importer and always run. `luthier test x.lut --name m.f --deep` runs an imported definition and writes into the certificate of its own file; this certifies an obligation whose generator lives in another file. `--imports` runs every imported obligation that has no entry yet and writes each into its own file's certificate.
 
-**12.S13. A pinned interpreter.** [implemented] When a `luthier.lock` is found in the directory of the program or the one above, every command that loads a program warns on standard error if the running interpreter is not the pinned commit; `run` records the lock and whether it agrees.
+**12.S13. A pinned interpreter.** [implemented] When a `luthier.lock` is found in the directory of the program or the one above, every command that loads a program warns on standard error if the running interpreter is not the pinned commit; `run` records the lock and whether it agrees. [implemented] At c03e16f `run` searches the lock in the program's directory and the one above, pins the interpreter's revision as the certifier reads it (the last tag, D-2026-10-14's night default, not a commit), warns when it differs, writes it after a successful run when absent and records the status; `check`, `test` and `eval` do not warn yet.
 
 ## §5 The commands
 

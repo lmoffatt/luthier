@@ -175,9 +175,11 @@ and owe nothing. Under a constructor of a sum (the `Table` of a `Maybe Table`) e
 payload becomes `match v { just t -> L t ; _ -> true }`, and a law quantified over something whose
 type depends on the payload (a row `r : Fin t.nRows`) is quantified over the base of that type with
 its refinement as a precondition inside the match. A refinement deeper in a payload (a field of a
-record in a sum) and one under a data type are not entered. [proposed] `luthier run --checked`, which `cli.py` does not have yet, tests every
-value an extern gives against the Bool laws of its type as it crosses, each entry of an array and
-each component of a record included; a quantified law is left to `test`, and a function an extern
+record in a sum) and one under a data type are not entered. [implemented] `luthier run --checked` (78ddb6a) tests every
+value an extern gives against the subtype predicates of its declared type as it crosses (a named
+subtype, a family such as `VecOf n`, a refined record), each entry of an array when the program
+reads it, and refuses the run naming the extern, the predicate and the value (10.S11); the laws
+of a theory type are the certificate's (`run` demands them before evaluating, 12.S17); a quantified law is left to `test`, and a function an extern
 gives is tested when it is called (`spec 10`). Today `run.py` checks only the bounds and shapes of
 `Float64`, `Int` and `Fin n` where a value crosses, the entry bound of a declared `Fin` codomain
 included. The checker does not resolve the target (4.S24).
