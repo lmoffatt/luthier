@@ -1,0 +1,354 @@
+-- certification.lth: the entry of a test's outcome, a law's certificate, what a run requires, and
+-- the hash of a cone; Boolean, with the cutoffs as parameters.
+--
+-- Draft 0, 2026-10-14, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/certification-2026-10-14/prompt-theory.md (step 5.1 of
+-- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md). Sources: spec 6.S1 to
+-- 6.S16 (docs/spec/06-certification.md); 7.S9, 7.S10, 7.S12, 7.S13, 7.S15; 12.S11, 12.S16, 12.S17;
+-- D-2026-10-14-c (first everything Boolean: every cutoff is a parameter the demand supplies);
+-- D-2026-10-13-m (the cost types come later); laws.lth §3 (`Evidence`); test.lth §3 (`Grade`, its
+-- order, `weakest`); generators.lth (`Seed`, `Budgets`; `Binding`, which 7.S9 expands); term.lth §4
+-- (the canonical form the hash of a cone covers, 3.S34). Pattern of test.lth.
+--
+-- What this file states. 6.S16 asks for a theory over a cost type `C`. D-2026-10-14-c says first
+-- everything Boolean, so here a law passes or does not, the bound of an entry is `lift` of its
+-- outcome (a pass is `0`, a failure `top`, refused by every cutoff, 6.S5), and the evidence cutoff
+-- of a demand is the weakest grade it accepts, a parameter of the demand. Where a cost would enter
+-- (6.S5, 6.S6, 6.S11, 6.S12, 6.S15) there is a hole `C`, with the comment "D-2026-10-13-m, after
+-- the slice's failures". A model of `Certifying` reads the store; `certification_model.lut` is
+-- the reference, and the host's certify.py, tester.py and `run`'s refusal are its specimen
+-- (6.S16, L14.3). What the brief or the spec leaves open is marked [proposed] at the item above it.
+--
+-- Index (all sections written in this draft):
+--   §1 The entry: its identity, what it holds, its state; the store (7.S9, 7.S12, 7.S13, 6.S6,
+--      6.S8, 12.S11).                                                                          done
+--   §2 The certificate: the entries of one law, its grade the weakest; transport along an
+--      identity and a path, no evidence for free (6.S7, 7.S10, 6.S11, 6.S12, 6.S13).           done
+--   §3 What a run requires: `serves`, the refusal, `Certified` (6.S14, 6.S15, 7.S15, 12.S17).  done
+--   §4 The hash of a cone (6.S8, 12.S11, 3.S34).                                                 done
+--   §5 The theory `Certifying`, the laws of §1 to §3 claimed.                                    done
+
+import "laws.lth" Evidence
+import "test.lth" Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade gradeRank weakest
+import "generators.lth" Seed Budgets
+import "term.lth" Term Alpha CanonicalForm
+
+-- The cost type of 6.S4, and what an entry carries in it (6.S6: the bound observed and the
+-- evidence cost), compared with a demand's cutoff in the order of `C` (6.S15) and composed by its
+-- `⊕` along an identity or a path (6.S11, 6.S12): holes. D-2026-10-13-m, after the slice's
+-- failures. In this draft the bound is `lift` of the outcome (§1) and the evidence is the grade
+-- (§2), compared with the grade a demand accepts (§3).
+C : U
+entryBound : Entry -> C
+entryEvidence : Entry -> C
+
+-- ---------------------------------------------------------------- §1 The entry
+
+Hash = String
+
+-- 7.S9: the binding of an entry, expanded: for each parameter, the generator that drew it, as a
+-- functor with its parameters (printed) or as a name, with its fingerprint. A `Binding` of
+-- generators.lth (by parameter or by type, in `where` or in a profile) resolved for one parameter
+-- (`resolve`) gives one of these.
+Drawing = { parameter : String, generator : String, fingerprint : String }
+
+-- A value a run gives a parameter (7.S15: the holes filled by `--set`): a number, or any other
+-- value by its printed canonical form. [proposed] Two kinds suffice to compare with a reach: an
+-- interval reads numbers, a census compares by equality.
+Value : U := data {
+  Number : Float64 -> Value ;
+  Printed : String -> Value ;
+}
+
+-- The reach of a parameter (7.S10, 7.S15): the support of its type, which contains every value
+-- the type admits (the type check is the checker's); an interval of numbers, ends included; or the
+-- members of a census. Roles: `ReachesAsSets` (§5).
+Reach : U := data {
+  Support : Reach ;
+  Interval : Float64 -> Float64 -> Reach ;
+  Members : List Value -> Reach ;
+}
+ParameterReach = { parameter : String, reach : Reach }
+
+-- What a run that ran gave (6.S3, 7.S12): passed; failed, with its case printed; or not run, with
+-- its reason (no generator, no case evaluated with the counts, fuel spent, a hole without a value).
+-- A citation (6.R1) and an assumption (6.S10) are entries that passed, with grade proved or assumed
+-- [proposed: the outcome is the verdict's, the grade says on what it stands]. Roles:
+-- `OnlyAPassServes`, `AFailureRefutes`, `NotRunAddsNothing` (§5).
+Outcome : U := data {
+  Passed : Outcome ;
+  Failed : String -> Outcome ;
+  NotRunFor : String -> Outcome ;
+}
+
+-- The identity of an outcome: 7.S9's identity of an entry (the law, the hash of its cone, the
+-- binding expanded), with the seed and `n` of 7.S13, under which a test is deterministic.
+Identity = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat }
+
+-- An entry: its identity; what it holds, the budgets (7.S8), the reach of each parameter (7.S10),
+-- the evidence of laws.lth, the grade of test.lth (`nothing` unless it passed), its outcome, the
+-- date, the interpreter's revision and the hash of the host code behind each extern the cone
+-- calls, by route (6.S8). The counts of 7.S12 and the labels of 7.S14 are in the evidence and its
+-- reasons. [proposed] `cases` is the `n` asked, which 7.S12 compares with the cases evaluated.
+Entry = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat,
+          budgets : Budgets, reach : List ParameterReach, evidence : Evidence, grade : Maybe Grade,
+          outcome : Outcome, date : String, interpreter : String, hosts : List (String * Hash) }
+
+-- The state of a law in the store, as a refusal lists it (12.S11, 12.S17): the outcome of its
+-- latest entry at the current hash; stale, when every entry it has is at another hash (the latest
+-- such hash kept); uncertified, with no entry; or provisional, a name built on a provisional
+-- extern (4.R5), refused whatever its entries. Stale is never stored: it is read against the
+-- current hash. [proposed] A passed entry that does not serve (a reach that misses the run's
+-- values, a grade below the cutoff) is listed as `Current Passed`; the refusal says it does not
+-- serve. Roles: `RefusalSaysWhy`, `ProvisionalIsRefused` (§5).
+State : U := data {
+  Current : Outcome -> State ;
+  Stale : Hash -> State ;
+  Uncertified : State ;
+  Provisional : State ;
+}
+
+-- The store: the entries, the latest in front (6.S8). Two entries with the same identity have the
+-- same outcome (7.S13, determinism), and an entry has a grade exactly when it passed (6.S3: only a
+-- pass certifies; test.lth: a refutation or nothing settled has no grade). These are the predicate
+-- of the type, so every store built owes them: the tester's, and one read from `x.cert.json`.
+agreesWith (k : Certifying) (e : Entry) (es : List Entry) : Bool :=
+  match es { nil -> true ; cons f rest ->
+    (not (k.identity e == k.identity f) or e.outcome == f.outcome) and agreesWith k e rest }
+determined (k : Certifying) (es : List Entry) : Bool :=
+  match es { nil -> true ; cons e rest -> agreesWith k e rest and determined k rest }
+gradedAsOutcome (es : List Entry) : Bool :=
+  match es { nil -> true ; cons e rest -> ((e.outcome == Passed) == not (e.grade == nothing)) and gradedAsOutcome rest }
+Store (k : Certifying) : U := { es : List Entry | determined k es and gradedAsOutcome es }
+
+-- A known outcome is not recomputed (7.S13): the latest entry with the identity asked, whatever
+-- its outcome. The tester asks before it runs; `--deep` runs again, and a new seed or `n` is a
+-- new identity.
+known (k : Certifying) (i : Identity) (es : List Entry) : Maybe Entry :=
+  match es { nil -> nothing ; cons e rest -> if k.identity e == i then just e else known k i rest }
+
+-- Recording never edits an entry (6.S8): a new entry goes in front and the old ones stay. Writing a
+-- certificate is idempotent (6.S15) [proposed: an entry whose identity the store has leaves the
+-- store as it is, since 7.S13 says its outcome is the one kept; so `--deep` rechecks and adds
+-- nothing, and a new seed adds an entry].
+record (k : Certifying) (e : Entry) (st : Store k) : Store k :=
+  match known k (k.identity e) st { just f -> st ; nothing -> cons e st }
+
+-- ---------------------------------------------------------------- §2 The certificate
+
+-- A law's certificate (6.S6 for the Boolean case): the law, the current hash of its cone, and its
+-- entries. What it is certified on and its grade are read from the entries, not stored apart
+-- (6.S7): only the entries of the law at the current hash count (12.S11). [proposed] A failure at
+-- the current hash, under any binding, refutes the law, and the certificate has no grade (6.S3: a
+-- definition fails when one law fails); otherwise, under one binding the entries add evidence, so
+-- the binding's grade is the strongest of its passes (6.S13: a better grade comes from a new
+-- check), and across bindings the grade is the weakest (7.S10: the grade is summarized by the
+-- weakest). The cost form of the grade (an evidence cost in `C`, 6.S7) is the hole above.
+Certificate = { law : String, cone : Hash, entries : List Entry }
+withEntry (c : Certificate) (e : Entry) : Certificate := { law := c.law, cone := c.cone, entries := cons e c.entries }
+stronger (g h : Grade) : Grade := if gradeRank g <= gradeRank h then h else g
+
+-- The older names of a grade (point, census of k, bounded, witnessed, sampled) read as the five
+-- (6.S7, decided D-2026-10-13-g; 7.S10): a point is cases with one case, a census is cases,
+-- bounded is exhaustive on the box its domain names, witnessed is cases with a witness.
+gradeOfOldName (s : String) : Maybe Grade :=
+  if s == "point" then just Cases else if s == "census" then just Cases
+  else if s == "bounded" then just ExhaustiveGrade else if s == "witnessed" then just Cases
+  else if s == "sampled" then just Sampled else if s == "proved" then just Proved
+  else if s == "assumed" then just AssumedGrade else if s == "exhaustive" then just ExhaustiveGrade
+  else if s == "cases" then just Cases else nothing
+
+-- What a law stands certified on, and with which grade: the reach of each parameter (7.S10) and the
+-- grade. Transport (6.S11) takes B's standing and the standing of the identity of A and B, and gives
+-- A on the intersection of the two, with the weaker grade; on nothing outside it. For the Boolean
+-- identity of this draft the distance is `lift true = 0`, so B's certificate transports exactly;
+-- an identity valued in `C` adds its distance by `⊕` (the hole above). [proposed] A parameter that
+-- only one of the two standings reaches is not reached by the transport.
+Standing = { law : String, on : List ParameterReach, grade : Grade }
+
+-- Along a path (6.S12): link by link, each link the standing of an identity and the name it reaches.
+-- Two links sampled over one distribution compose by the union bound, their failure fractions and
+-- their δ summed: that is a cost, the hole above (D-2026-10-13-m, after the slice's failures); here
+-- the grades meet by `weakest` and the reaches intersect.
+along (k : Certifying) (b : Standing) (path : List (String * Standing)) : Standing :=
+  match path { nil -> b ; cons (a, i) rest -> along k (k.transport b i a) rest }
+
+-- ---------------------------------------------------------------- §3 What a run requires
+
+-- A demand on one law (6.S15, 7.S15): the law, the current hash of its cone, what the run gives
+-- its parameters (the holes filled by `--set`, compared when the run starts), and the cutoff, the
+-- weakest grade the demand accepts (D-2026-10-14-c: a parameter the demand supplies). An assumed
+-- entry serves only a demand that accepts `AssumedGrade` (6.S10: the demand names the price of
+-- assumptions, with no default). [proposed] The run gives each law its values by parameter name;
+-- values computed during the run are compared at each call under `--checked` (7.S15), not here.
+-- The cost cutoff of 6.S15 (a bound and an evidence cost in `C`) is the hole above.
+Demand = { law : String, cone : Hash, given : List (String * Value), accepts : Grade }
+withAccepts (d : Demand) (g : Grade) : Demand := { law := d.law, cone := d.cone, given := d.given, accepts := g }
+
+-- the reach recorded for a parameter, and whether the reaches cover what the run gives
+-- [proposed: a value given to a parameter the entry records no reach for is not covered]
+reachOf (p : String) (rs : List ParameterReach) : Maybe Reach :=
+  match rs { nil -> nothing ; cons r rest -> if r.parameter == p then just r.reach else reachOf p rest }
+coversAll (contains : Reach -> Value -> Bool) (rs : List ParameterReach) (given : List (String * Value)) : Bool :=
+  match given { nil -> true ; cons (p, v) rest ->
+    (match reachOf p rs { just r -> contains r v ; nothing -> false }) and coversAll contains rs rest }
+anyServes (serves : Demand -> Entry -> Bool) (d : Demand) (es : List Entry) : Bool :=
+  match es { nil -> false ; cons e rest -> serves d e or anyServes serves d rest }
+
+-- The dependency cone of the entry of a run (6.S14, 12.S17): each name, whether it is provisional
+-- (4.R5), and the demands on its laws. A name whose type states no law is certified with nothing
+-- to run [proposed, 6.S1: certified when each law its type states has a passing entry].
+ConeName = { name : String, provisional : Bool, laws : List Demand }
+Refusal = { name : String, law : Maybe String, state : State }
+appendRefusals (xs ys : List Refusal) : List Refusal := match xs { nil -> ys ; cons x rest -> cons x (appendRefusals rest ys) }
+-- the latest entry of a law, and the latest at a hash
+latestOf (l : String) (es : List Entry) : Maybe Entry :=
+  match es { nil -> nothing ; cons e rest -> if e.law == l then just e else latestOf l rest }
+latestAt (l : String) (h : Hash) (es : List Entry) : Maybe Entry :=
+  match es { nil -> nothing ; cons e rest -> if e.law == l and e.cone == h then just e else latestAt l h rest }
+
+-- What a run requires (7.S15, 12.S17, 6.S14): a cone the store refuses nothing of. `run` starts
+-- only on a value of this type, and otherwise lists each refusal with its state; there is no flag
+-- that opts out (D-2026-10-12-y). `test` demands certificates without values (6.S14), which this
+-- type does not cover.
+Certified (k : Certifying) (es : List Entry) : U := { cone : List ConeName | k.refuse es cone == nil }
+
+-- ---------------------------------------------------------------- §4 The hash of a cone
+
+-- What the hash of a cone covers (6.S8, 12.S11): the code of the cone, each name with its
+-- definition (a hole filled is a definition, so an entry is kept per filling); the hash of the host
+-- code behind each extern it calls, by route (the source files of the module's directory, or the
+-- installed package and its version); and the interpreter's revision. [proposed] The code and the
+-- hosts are listed in one order the host fixes (by name, by route), so a list is a cone.
+Cone = { code : List (String * Term), hosts : List (String * Hash), interpreter : String }
+-- the code in canonical form (3.S34): names without module prefix, terms canonical
+canonCode (a : Alpha) (m : CanonicalForm a) (code : List (String * Term)) : List (String * Term) :=
+  match code { nil -> nil ; cons (x, t) rest -> cons (m.unqualify x, m.canon t) (canonCode a m rest) }
+
+-- The hash is the host's (an extern, certification_model.lut). Its laws (6.S8): it is a function
+-- of the canonical form, and a change to the code, to the host code or to the interpreter changes
+-- it. [proposed] "Changes it" is stated as: two cones that differ there have different hashes; a
+-- collision of the hash function is the host's, and a sample that finds one refutes the model.
+ConeHashing (a : Alpha) (m : CanonicalForm a) : { hash : Cone -> Hash }
+HashOfTheCanonicalForm (a : Alpha) (m : CanonicalForm a) (h : ConeHashing a m) (c : Cone) : Bool :=
+  h.hash { code := canonCode a m c.code, hosts := c.hosts, interpreter := c.interpreter } == h.hash c
+HashSeesTheCode (a : Alpha) (m : CanonicalForm a) (h : ConeHashing a m) (c : Cone) (code : List (String * Term)) : Bool :=
+  canonCode a m code == canonCode a m c.code
+    or not (h.hash { code := code, hosts := c.hosts, interpreter := c.interpreter } == h.hash c)
+HashSeesTheHost (a : Alpha) (m : CanonicalForm a) (h : ConeHashing a m) (c : Cone) (hosts : List (String * Hash)) : Bool :=
+  hosts == c.hosts or not (h.hash { code := c.code, hosts := hosts, interpreter := c.interpreter } == h.hash c)
+HashSeesTheInterpreter (a : Alpha) (m : CanonicalForm a) (h : ConeHashing a m) (c : Cone) (r : String) : Bool :=
+  r == c.interpreter or not (h.hash { code := c.code, hosts := c.hosts, interpreter := r } == h.hash c)
+ConeHashing (a : Alpha) (m : CanonicalForm a) := HashOfTheCanonicalForm a m & HashSeesTheCode a m
+  & HashSeesTheHost a m & HashSeesTheInterpreter a m
+
+-- ---------------------------------------------------------------- §5 The theory
+
+-- A model of certification reads the store: the identity of an entry, whether it is stale against
+-- a hash, the grade of a certificate, whether a reach contains a value, whether an entry serves a
+-- demand, what a cone is refused, and transport along an identity.
+Certifying : {
+  identity : Entry -> Identity,
+  stale : Hash -> Entry -> Bool,
+  grade : Certificate -> Maybe Grade,
+  contains : Reach -> Value -> Bool,
+  serves : Demand -> Entry -> Bool,
+  refuse : List Entry -> List ConeName -> List Refusal,
+  transport : Standing -> Standing -> String -> Standing,
+}
+
+-- §1. 7.S9, 7.S13: the identity of an outcome is the law, the cone's hash, the binding expanded,
+-- the seed and `n`, and nothing the entry holds besides
+IdentityIsTheKey (k : Certifying) (e : Entry) : Bool :=
+  k.identity e == { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases }
+-- 12.S11: an entry is stale when its hash differs from the current hash of its cone
+StaleIsAnotherHash (k : Certifying) (h : Hash) (e : Entry) : Bool := k.stale h e == not (e.cone == h)
+
+-- §2. 6.S7, 7.S10: a certificate with no entry has no grade; a failure at the current hash refutes
+NoEntryNoGrade (k : Certifying) (l : String) (h : Hash) : Bool := k.grade { law := l, cone := h, entries := nil } == nothing
+AFailureRefutes (k : Certifying) (c : Certificate) (e : Entry) : Bool :=
+  not (e.law == c.law and e.cone == c.cone)
+    or (match e.outcome { Failed x -> k.grade (withEntry c e) == nothing ; _ -> true })
+-- 12.S11, 7.S12, 6.S13: an entry of another law, a stale one or one not run adds nothing
+OnlyCurrentEntriesCount (k : Certifying) (c : Certificate) (e : Entry) : Bool :=
+  (e.law == c.law and not (k.stale c.cone e)) or k.grade (withEntry c e) == k.grade c
+NotRunAddsNothing (k : Certifying) (c : Certificate) (e : Entry) : Bool :=
+  match e.outcome { NotRunFor r -> k.grade (withEntry c e) == k.grade c ; _ -> true }
+-- 7.S10 [proposed reading above]: two passes under different bindings give the weaker grade, under
+-- one binding the stronger
+WeakestAcrossBindings (k : Certifying) (c : Certificate) (e f : Entry) (g h : Grade) : Bool :=
+  not (c.entries == nil and e.law == c.law and e.cone == c.cone and f.law == c.law and f.cone == c.cone
+       and e.outcome == Passed and f.outcome == Passed and e.grade == just g and f.grade == just h
+       and not (e.binding == f.binding))
+    or k.grade (withEntry (withEntry c f) e) == just (weakest g h)
+StrongestUnderOneBinding (k : Certifying) (c : Certificate) (e f : Entry) (g h : Grade) : Bool :=
+  not (c.entries == nil and e.law == c.law and e.cone == c.cone and f.law == c.law and f.cone == c.cone
+       and e.outcome == Passed and f.outcome == Passed and e.grade == just g and f.grade == just h
+       and e.binding == f.binding)
+    or k.grade (withEntry (withEntry c f) e) == just (stronger g h)
+-- 6.S11: transport gives A, on the intersection of the two reaches, with the weaker grade
+TransportTakesTheWeaker (k : Certifying) (b i : Standing) (a : String) : Bool :=
+  (k.transport b i a).law == a and (k.transport b i a).grade == weakest b.grade i.grade
+TransportOnTheIntersection (k : Certifying) (b i : Standing) (a : String) (given : List (String * Value)) : Bool :=
+  coversAll k.contains (k.transport b i a).on given
+    == (coversAll k.contains b.on given and coversAll k.contains i.on given)
+-- 6.S13 (L10.9), for the Boolean case: transport never raises a grade nor widens a reach, and a
+-- path neither (the bound is `lift true = 0` along a Boolean identity; in `C`, monotone `⊕`)
+NoEvidenceForFree (k : Certifying) (b i : Standing) (a : String) (given : List (String * Value)) : Bool :=
+  gradeRank (k.transport b i a).grade <= gradeRank b.grade
+    and (not (coversAll k.contains (k.transport b i a).on given) or coversAll k.contains b.on given)
+PathNeverRaises (k : Certifying) (b : Standing) (path : List (String * Standing)) : Bool :=
+  gradeRank (along k b path).grade <= gradeRank b.grade
+
+-- §3. 7.S10, 7.S15: a reach as a set of values; the support holds every value
+ReachesAsSets (k : Certifying) (x lo hi : Float64) (s : String) (vs : List Value) : Bool :=
+  k.contains Support (Number x) and k.contains Support (Printed s)
+    and k.contains (Interval lo hi) (Number x) == (lo <= x and x <= hi)
+    and not (k.contains (Interval lo hi) (Printed s))
+    and k.contains (Members vs) (Number x) == anyIs (Number x) vs
+    and k.contains (Members vs) (Printed s) == anyIs (Printed s) vs
+anyIs (v : Value) (vs : List Value) : Bool := match vs { nil -> false ; cons w rest -> w == v or anyIs v rest }
+-- 12.S11: a stale entry certifies nothing
+StaleCertifiesNothing (k : Certifying) (d : Demand) (e : Entry) : Bool := not (k.stale d.cone e) or not (k.serves d e)
+-- 6.S3: only a pass certifies
+OnlyAPassServes (k : Certifying) (d : Demand) (e : Entry) : Bool := not (k.serves d e) or e.outcome == Passed
+-- 7.S9, 7.S15: an entry certifies its law only under its binding, on the reach it drew, so it serves
+-- a run only when that reach covers what the run gives the law
+CertifiesOnlyUnderItsBinding (k : Certifying) (d : Demand) (e : Entry) : Bool :=
+  not (k.serves d e) or (e.law == d.law and coversAll k.contains e.reach d.given)
+-- 6.S15, D-2026-10-14-c: it serves only at or above the grade the demand accepts
+ServesAtTheCutoff (k : Certifying) (d : Demand) (e : Entry) : Bool :=
+  not (k.serves d e) or (match e.grade { just g -> gradeRank d.accepts <= gradeRank g ; nothing -> false })
+-- and an entry that meets all of these serves (6.S15: a certificate serves every demand it meets)
+ACoveringPassServes (k : Certifying) (d : Demand) (e : Entry) (g : Grade) : Bool :=
+  not (e.law == d.law and not (k.stale d.cone e) and e.outcome == Passed and e.grade == just g
+       and gradeRank d.accepts <= gradeRank g and coversAll k.contains e.reach d.given)
+    or k.serves d e
+-- 6.S16: `serves` is monotone in the cutoff
+ServesIsMonotoneInTheCutoff (k : Certifying) (d : Demand) (e : Entry) (g : Grade) : Bool :=
+  not (k.serves d e and gradeRank g <= gradeRank d.accepts) or k.serves (withAccepts d g) e
+-- 6.S14, 12.S17: a provisional name is refused whole [proposed: its laws not listed]
+ProvisionalIsRefused (k : Certifying) (es : List Entry) (n : String) (ds : List Demand) : Bool :=
+  k.refuse es [{ name := n, provisional := true, laws := ds }] == [{ name := n, law := nothing, state := Provisional }]
+-- 7.S15, 12.S17: a law no entry serves is refused, listed with its state: the latest entry at the
+-- current hash, stale when there is none there, uncertified when there is none at all
+RefusalSaysWhy (k : Certifying) (es : List Entry) (n : String) (d : Demand) : Bool :=
+  k.refuse es [{ name := n, provisional := false, laws := [d] }]
+    == (if anyServes k.serves d es then nil
+        else [{ name := n, law := just d.law,
+                state := (match latestAt d.law d.cone es { just e -> Current e.outcome ;
+                            nothing -> (match latestOf d.law es { just f -> Stale f.cone ; nothing -> Uncertified }) }) }])
+-- each name and each law is refused on its own, and a cone with nothing in it is refused nothing
+RefusalIsPerLaw (k : Certifying) (es : List Entry) (c : ConeName) (rest : List ConeName) (n : String) (d : Demand) (ds : List Demand) : Bool :=
+  k.refuse es nil == nil
+    and k.refuse es (cons c rest) == appendRefusals (k.refuse es [c]) (k.refuse es rest)
+    and k.refuse es [{ name := n, provisional := false, laws := cons d ds }]
+        == appendRefusals (k.refuse es [{ name := n, provisional := false, laws := [d] }])
+                          (k.refuse es [{ name := n, provisional := false, laws := ds }])
+    and k.refuse es [{ name := n, provisional := false, laws := nil }] == nil
+
+Certifying := IdentityIsTheKey & StaleIsAnotherHash & NoEntryNoGrade & AFailureRefutes & OnlyCurrentEntriesCount
+  & NotRunAddsNothing & WeakestAcrossBindings & StrongestUnderOneBinding & TransportTakesTheWeaker
+  & TransportOnTheIntersection & NoEvidenceForFree & PathNeverRaises & ReachesAsSets & StaleCertifiesNothing
+  & OnlyAPassServes & CertifiesOnlyUnderItsBinding & ServesAtTheCutoff & ACoveringPassServes
+  & ServesIsMonotoneInTheCutoff & ProvisionalIsRefused & RefusalSaysWhy & RefusalIsPerLaw
