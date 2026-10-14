@@ -1,0 +1,32 @@
+-- positions_model.lut: the mean model of a design, the distances its pairs measure, on the
+-- positions of its nodes: the part of v0.1's positions.lut that needs probability.lth.
+--
+-- Split from positions.lut on 2026-10-14 by Claude Opus 5.5, an agent of the coordinating
+-- session (record/IA/slice-port-2-2026-10-14/report.md), from prototipo-cero/luthier/positions.lut
+-- of sonolocalización at its commit 5ffc36ef70e16e11182bc09e4a927c381e35df1c, lines 58-68. Why a
+-- file of its own: importing probability.lth brings program.lth into the run (through
+-- generators.lth), and program.lth's definition `int : Term` takes the name of tables.lth's
+-- constructor `int` in a run, so every `intAt` is a `stuck match` (smallest program in the
+-- report). distance_graph.lut imports positions.lut and does not need the model; with the model
+-- here, validate_graph.lut runs again. experiment_zero.lut and distances.lut import it from here.
+-- [proposed] Back into positions.lut once the run keeps a constructor's name from another file's
+-- definition.
+
+import "arrays.lth" Vec Mat VecOf vec mat
+import "probability.lth" MeanModel
+import "positions.lut" PositionsOf Node Design pairDistances Separated distanceJacobian
+
+-- The mean model of a design: the distances of its pairs, on the positions of its nodes, the
+-- vectors of dimension 3 n. Where a measured pair coincides the distances have no derivative:
+-- the model has no Jacobian to give there and gives zero, and a fit says whether it ended at such
+-- a point (experiment_zero.lut). The nodes of the design are the nodes of its positions; a vector
+-- of them is rebuilt entry by entry to be read as one.
+nodesOf (d : Design) (t : PositionsOf d.nodes) (v : Vec (Fin d.nodes)) : Vec (Node t) := vec (Node t) v.n (fn k { v.f k })
+positionsModel (d : Design) : MeanModel (3 * d.nodes) := {
+  k := d.i.n,
+  mean := fn t { pairDistances t (nodesOf d t d.i) (nodesOf d t d.j) },
+  jac := fn t {
+    i := nodesOf d t d.i
+    j := nodesOf d t d.j
+    if Separated t i j then distanceJacobian t i j else mat Float64 i.n (3 * d.nodes) (fn k c { 0.0 }) },
+}
