@@ -1,0 +1,101 @@
+-- certification_model.lut: the store as a value, the reference model of `Certifying`, and the hash
+-- of a cone as a route to the host.
+--
+-- Draft 0, 2026-10-14, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/certification-2026-10-14/prompt-theory.md (item 4). A model file (12.S23): `certifying`
+-- reads the store written in Luthier over the kernel's types, and is what certify.py, tester.py's
+-- store and `run`'s refusal are certified against (6.S16, L14.3). `hashing` is the host's hash of
+-- a cone (6.S8), a route the specimen gives: src/luthier/certify.py must define `cone_hash`, taking
+-- a cone (the code in canonical form, the hosts by route, the interpreter's revision) and answering
+-- a string; it is validated against certification.lth §4 like any extern (3.S28).
+
+import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
+  Standing ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
+  Uncertified Provisional Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt
+import "test.lth" Grade gradeRank weakest
+import "term_model.lut" alpha canonical
+
+-- the store as a value: the entries, the latest in front (6.S8); it starts empty
+emptyStore : Store certifying := nil
+
+-- 7.S9, 7.S13: the identity of an outcome
+identity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases }
+
+-- 12.S11: stale against the current hash of the cone
+stale (h : Hash) (e : Entry) : Bool := not (e.cone == h)
+
+-- 7.S10, 7.S15: a reach as a set of values
+anyValue (v : Value) (vs : List Value) : Bool := match vs { nil -> false ; cons w rest -> w == v or anyValue v rest }
+contains (r : Reach) (v : Value) : Bool := match r {
+  Support -> true ;
+  Interval lo hi -> (match v { Number x -> lo <= x and x <= hi ; Printed s -> false }) ;
+  Members vs -> anyValue v vs }
+
+-- 6.S7, 7.S10: the grade of a certificate. The entries that count are the law's at the current
+-- hash; a failure among them leaves no grade; under one binding the strongest pass, across
+-- bindings the weakest.
+counts (c : Certificate) (e : Entry) : Bool := e.law == c.law and e.cone == c.cone
+anyFailure (c : Certificate) (es : List Entry) : Bool :=
+  match es { nil -> false ; cons e rest -> (counts c e and isFailure e) or anyFailure c rest }
+isFailure (e : Entry) : Bool := match e.outcome { Failed x -> true ; _ -> false }
+-- the passes that count, each with its grade
+passes (c : Certificate) (es : List Entry) : List (List Drawing * Grade) :=
+  match es { nil -> nil ; cons e rest ->
+    if counts c e and e.outcome == Passed
+    then (match e.grade { just g -> cons (e.binding, g) (passes c rest) ; nothing -> passes c rest })
+    else passes c rest }
+-- the strongest grade under one binding
+bestUnder (b : List Drawing) (ps : List (List Drawing * Grade)) (g : Grade) : Grade :=
+  match ps { nil -> g ; cons (b2, h) rest -> bestUnder b rest (if b2 == b then stronger g h else g) }
+-- the weakest of the bindings' bests
+weakestOfBests (all ps : List (List Drawing * Grade)) (acc : Maybe Grade) : Maybe Grade :=
+  match ps { nil -> acc ; cons (b, g) rest ->
+    weakestOfBests all rest (just (match acc { nothing -> bestUnder b all g ; just h -> weakest h (bestUnder b all g) })) }
+grade (c : Certificate) : Maybe Grade :=
+  if anyFailure c c.entries then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
+
+-- 6.S15, 7.S15: an entry serves a demand when it is the law's at the current hash, passed, at or
+-- above the cutoff, and its reach covers what the run gives
+atLeast (accepts : Grade) (g : Maybe Grade) : Bool := match g { just h -> gradeRank accepts <= gradeRank h ; nothing -> false }
+serves (d : Demand) (e : Entry) : Bool :=
+  e.law == d.law and e.cone == d.cone and e.outcome == Passed and atLeast d.accepts e.grade
+    and coversAll contains e.reach d.given
+
+-- 6.S14, 7.S15, 12.S17: what a cone is refused, each with its state
+stateOf (d : Demand) (es : List Entry) : State :=
+  match latestAt d.law d.cone es { just e -> Current e.outcome ;
+    nothing -> (match latestOf d.law es { just f -> Stale f.cone ; nothing -> Uncertified }) }
+refuseLaws (es : List Entry) (n : String) (ds : List Demand) : List Refusal :=
+  match ds { nil -> nil ; cons d rest ->
+    if anyServes serves d es then refuseLaws es n rest
+    else cons { name := n, law := just d.law, state := stateOf d es } (refuseLaws es n rest) }
+refuseName (es : List Entry) (c : ConeName) : List Refusal :=
+  if c.provisional then [{ name := c.name, law := nothing, state := Provisional }] else refuseLaws es c.name c.laws
+refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
+  match cs { nil -> nil ; cons c rest -> appendRefusals (refuseName es c) (refuse es rest) }
+
+-- 6.S11: transport along a Boolean identity: the intersection of the reaches, the weaker grade
+larger (x y : Float64) : Float64 := if x <= y then y else x
+smaller (x y : Float64) : Float64 := if x <= y then x else y
+keepWithin (r : Reach) (vs : List Value) : List Value :=
+  match vs { nil -> nil ; cons v rest -> if contains r v then cons v (keepWithin r rest) else keepWithin r rest }
+meet (r s : Reach) : Reach := match r {
+  Support -> s ;
+  Interval lo hi -> (match s { Support -> r ; Interval lo2 hi2 -> Interval (larger lo lo2) (smaller hi hi2) ;
+                                Members vs -> Members (keepWithin r vs) }) ;
+  Members vs -> Members (keepWithin s vs) }
+meetReaches (bs is : List ParameterReach) : List ParameterReach :=
+  match bs { nil -> nil ; cons r rest ->
+    (match reachOf r.parameter is { just s -> cons { parameter := r.parameter, reach := meet r.reach s } (meetReaches rest is) ;
+                                    nothing -> meetReaches rest is }) }
+transport (b i : Standing) (a : String) : Standing := { law := a, on := meetReaches b.on i.on, grade := weakest b.grade i.grade }
+
+certifying : Certifying := {
+  identity := identity, stale := stale, grade := grade, contains := contains, serves := serves,
+  refuse := refuse, transport := transport,
+}
+
+-- 6.S8: the hash of a cone, the host's
+hashing : ConeHashing alpha canonical := {
+  hash := extern "python:luthier.certify.cone_hash",
+}
