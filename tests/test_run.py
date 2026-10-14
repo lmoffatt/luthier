@@ -367,6 +367,29 @@ def test_validate_graph_slow():
     assert result.stdout == EXPECTED_VALIDATE_GRAPH
 
 
+FIGURES = ("positions.png", "residuals.png", "transform.png")
+
+
+@pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 6 minutes; set LUTHIER_SLOW=1")
+def test_fit_renders_its_figures_slow(tmp_path):
+    # record/IA/plots-2026-10-15/prompt-figures.md item 3 (plan G4): the fit on graph_noA2 writes
+    # its three figures under outDir, and two runs write the same bytes (plot.lth `rendersTheSame`,
+    # across processes)
+    images = []
+    for k in (1, 2):
+        out = tmp_path / f"run{k}"
+        out.mkdir()
+        result = command(ROOT / "examples/sonolocalizacion/experiment_zero.lut",
+                         "--set", "graphDir=examples/sonolocalizacion/A/graph_noA2", "--set", f"outDir={out}",
+                         "--set", "lmMaxIter=500", "--set", "lmTol=1e-6", "--set", "lmFloor=5.995204332975845e-15",
+                         "--fuel", "100000000000", cwd=ROOT)
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.splitlines()[-1].startswith("nodes 9, measurements 19, sigma ")
+        assert all((out / name).is_file() for name in FIGURES)
+        images.append([(out / name).read_bytes() for name in FIGURES])
+    assert images[0] == images[1]
+
+
 # ---------------------------------------------------------------- the loader scopes names by file
 # (record/IA/run-2026-10-13/prompt-6.md, 12.S22)
 
