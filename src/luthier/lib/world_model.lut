@@ -30,11 +30,31 @@ console : Console State := {
   stdout := "stdout",
 }
 
+-- the descriptions the host's actions are held to (world.lth §5, `Host`'s laws): `print w s` is a
+-- world action that changes the standard output only, as `console.printLine s` says; `readFile w p`
+-- a world action that reads the file at `p`, its one declared place, and changes nothing, as
+-- `console.readFile p` says (10.S7: the places are what `agreement` observes)
+printDescribed (s : String) : Described State Unit theWorld := {
+  describe := console.printLine s,
+  own := false,
+  places := ["stdout"],
+}
+readFileDescribed (p : String) : Described State (Maybe String) theWorld := {
+  describe := console.readFile p,
+  own := false,
+  places := [p],
+}
+
 -- the host's actions, routes to Python: the token comes first and goes back unchanged (run.py
--- makes it once per run); `observe w places` reads the standard output and the files at `places`
+-- makes it once per run); `observe w places` reads the standard output and the files at `places`.
+-- `Host`'s laws hold each action to its description; run.py validates an action at its first
+-- application in a run (10.S10, L11.2) and keeps the entry in world_model.cert.json.
 HostConsole = Host State
 host : HostConsole := {
+  world := theWorld,
   observe := extern "python:luthier.host.observe",
   print := extern "python:luthier.host.print_line",
   readFile := extern "python:luthier.host.read_file",
+  printDescribed := printDescribed,
+  readFileDescribed := readFileDescribed,
 }
