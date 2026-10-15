@@ -13,12 +13,16 @@
 -- law of generators_model.lut: the cone of the wrapper differs from the law's, so `luthier
 -- certify` will probably not match the control to the law by cone hash; the law stays reported
 -- uncontrolled until its parameters include the family (a change in generators_model.lut, not
--- made here). `UniformSampleIsUniform` is statistical and has no control here.
+-- made here). `UniformSampleIsUniform` is statistical (laws.lth §4): its control, added
+-- 2026-10-15 on record/IA/statistical-2026-10-15/prompt-tester.md (7.S19, L9.14), is
+-- generators_model.lut's `SkewedSampleIsUniform`, the same law on the calibrated sample squared,
+-- run by Wald's sequential test at generators_laws.lut's cutoffs `wald`; it passes when the test
+-- fails it. It too is a law of its own cone, so `UniformSampleIsUniform` reads uncontrolled.
 
 import "test.lth" test SampledMode
-import "generators_model.lut" linear symmetricGives
+import "generators_model.lut" linear symmetricGives SkewedSampleIsUniform
 import "generators.lth" Binding Seed
-import "laws.lth" Listed
+import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance abs
 import "arrays.lth" Vec Mat Dim RankFloor mat vec identity approxMat transposeDef matMulDef mscaleDef forallBelow
 import "arrays_model.lut" numpy : Arrays
@@ -69,3 +73,8 @@ test "GramGivesPsdOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- 
 test "OrthogonalGivesOrthogonalOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
 test "UnitListGivesUnitValuesOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
 test "ClearDiagonalGivesClearOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
+
+-- the statistical law's control: the sequential test at the demand's cutoffs, as generators_laws.lut
+wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
+onWald : List Binding := [ { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
+test "SkewedSampleIsUniform" (SampledMode linear) (seed <- 20261015) (profile <- onWald) (control <- true)
