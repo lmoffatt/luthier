@@ -52,6 +52,9 @@ def main(argv: list[str] | None = None) -> int:
                             "it crosses, refusing the run at the first refuted one (12.S18, 4.R5); off by "
                             "default, a parameter of the demand (P11): without it the refinement is an "
                             "obligation the certificate of the extern's laws covers")
+    p_run.add_argument("--fresh", action="store_true",
+                       help="execute even when x.results.json holds this run's key (L5.20); nothing is written "
+                            "if the value agrees, and both are kept if it does not")
     p_test = sub.add_parser("test", help="run the file's test lines (test.lth's Tester)")
     p_test.add_argument("file")
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
@@ -96,7 +99,8 @@ def main(argv: list[str] | None = None) -> int:
         from .certify import GRADES
         from .run import record, run
         try:
-            output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, GRADES.get(ns.accept), ns.checked)
+            output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, GRADES.get(ns.accept), ns.checked,
+                                        ns.fresh)
             print(output, end="")
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0

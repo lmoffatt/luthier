@@ -1637,7 +1637,7 @@ class Demand:
         from . import certify
         return {"entry": self.entry, "cone": cone, "parameters": dict(self.sets),
                 "accept": certify.GRADE_WORDS[self.accepts], "delta": self.delta, "fuel": self.fuel,
-                "checked": self.checked, "lock": self.pinned}
+                "checked": self.checked, "lock": self.pinned, "decoration": self.decoration}
 
     def key(self, live_holes):
         """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
@@ -1981,6 +1981,7 @@ def certification(loaded, program, entry, demand, refuse=True):
                     axioms[id(d)] = axiom
                 demands.append(d)
         cone.append({"name": n.partition("@")[0], "provisional": n in provisional, "laws": demands})
+    stores_read = _stores_read(loaded.files)
     entries = sorted((e for f in loaded.files for e in certify.read_store(f)),
                      key=lambda e: e.get("date", ""), reverse=True)
     # an axiom no entry serves, at a cutoff of assumed: accepted as its assumption (6.S10)
@@ -2007,6 +2008,10 @@ def certification(loaded, program, entry, demand, refuse=True):
         refused.setdefault(r["name"], {"Provisional": "provisional", "Stale": "stale"}.get(
             kind, "failed" if kind == "Current" and isinstance(what, dict) and "Failed" in what else "uncertified"))
     with_laws = [c for c in cone if c["laws"] and c["name"] not in refused]
+    # the certificates that served the cone (8.S8): for each law demanded, the latest entry that
+    # serves it, by the hash of its canonical JSON
+    served = {_entry_hash(e) for c in with_laws for d in c["laws"]
+              if (e := next((e for e in entries if certify.serves(d, e)), None)) is not None}
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
@@ -2028,9 +2033,33 @@ def certification(loaded, program, entry, demand, refuse=True):
                                  "frame": f["frame"]["law"] if f["frame"] else None} for f in firsts],
             # the axioms accepted as assumptions, with no entry (6.S10, 10.S13)
             "assumed": assumed,
+            # the certificates that served the cone and the stores read, by hash (8.S8, D-2026-10-15-d)
+            "certificates": sorted(served), "stores_read": stores_read,
             "_firsts": firsts,
             # what a refusal would have listed, for `eval` only: a run that starts has none
             **({} if refuse else {"refused": [certify.show_refusal(r, entries) for r in refusals]})}
+
+
+def _stores_read(files):
+    """The certificate stores a run reads (12.S11), each as [path, sha256 of its bytes], in the
+    order of the files loaded, a file with no store left out (D-2026-10-15-d: each run records the
+    hash of the stores it read). [proposed] The bytes are hashed just before `certify.read_store`
+    reads them; a store written between the two reads is the host's race, outside `W` (L14.4)."""
+    import hashlib
+    from . import certify
+    read = []
+    for f in files:
+        where = certify.store_path(f)
+        if where.exists():
+            read.append([str(where), "sha256:" + hashlib.sha256(where.read_bytes()).hexdigest()])
+    return read
+
+
+def _entry_hash(entry):
+    """The hash of a certificate's entry (8.S8: the certificates' hashes): sha256 of its canonical
+    JSON, as `plan_hash` hashes a plan."""
+    from . import certify
+    return certify._sha(json.dumps(entry, sort_keys=True, ensure_ascii=False, separators=(",", ":")))
 
 
 def _first_action_roots(loaded, kept):
@@ -2464,7 +2493,7 @@ def refuse_provisional(kept, entry):
                       + "\n  ".join(lines), refusals)
 
 
-def run(path, main=None, fuel=None, sets=(), accept=None, checked=None):
+def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=False):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -2478,7 +2507,14 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None):
     on each first action (demand.lth's `lawDemand`), and the record (`recorded`). The
     state carries the demand as recorded (`demand`), the plan (`plan`: the strategy, the live cone,
     the call-by-need schedule and its hash, plan.lth's `Plan`, L5.6) and the demand's key (`key`,
-    plan.lth's `DemandKey`, `KeyReadsOnlyTheCone`)."""
+    plan.lth's `DemandKey`, `KeyReadsOnlyTheCone`).
+
+    The store of results (8.S3, 8.S8, 8.S10; D-2026-10-15-d): the run's key (`result_key`, plan.lth's
+    `keyOf`) is computed before anything is evaluated, and its hash is recorded (`key_hash`). When the
+    live cone performs no action (`acts`) and `x.results.json` holds the key with one value, the run
+    is served from it without evaluating; its state names the entry (`result_store`'s `served`). A
+    cone that acts always executes. `fresh` (`run --fresh`, L5.20) executes whatever the store holds;
+    `record` then writes nothing if the value agrees and keeps both if it does not."""
     host.reset()
     lock = lock_status(path)
     loaded = Loaded(path)
@@ -2500,7 +2536,28 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None):
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
         raise RunError(f"missing main: {demand.entry}")
-    state = certification(loaded, program, entry, demand)
+    state = certification(loaded, program, entry, demand) or {}
+    live = live_cone(kept)
+    live_holes = {n for n, _ in demand.sets if loaded.internal(loaded.top, n) in set(live)}
+    plan = {"strategy": "CallByNeed", "entry": demand.entry, "live": list(live), "schedule": []}
+    pure = not acts(program, live)
+    seed = None  # [proposed] a run draws nothing today; the seed of 8.S8 is `nothing`
+    certificates = state.pop("certificates", [])
+    known = {"demand": demand.record(state.get("cone")), "key": demand.key(live_holes)}
+    key = result_key(known, seed, plan, certificates)
+    common = dict(lock=lock, checked=demand.checked, demand=known["demand"], key=known["key"], seed=seed,
+                  certificates=certificates, key_hash=key_hash(key))
+    if pure and not fresh:
+        results = read_results(path)
+        i = served_by(results, key)
+        if i is not None:
+            state.pop("_firsts", None)
+            plan["hash"] = plan_hash(plan)
+            return "", values, dict(state, fuel={"given": demand.fuel, "spent": 0}, **{"first actions": []},
+                                    files_read=[], plan=plan, **common,
+                                    result_store={"pure": True, "fresh": False, "served": {
+                                        "store": str(results_path(path)), "entry": i,
+                                        "key hash": results[i]["key hash"], "time": results[i]["time"]}})
     runner = Runner(program, demand.fuel, demand.checked)
     firsts = FirstActions(loaded, state.pop("_firsts", []) if state else [], demand)
     runner.first = firsts.by_route
@@ -2511,15 +2568,16 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None):
     result = runner.whnf(value)
     if isinstance(result, t.Pair):
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
-    live = live_cone(kept)
-    plan = {"strategy": "CallByNeed", "entry": demand.entry, "live": list(live), "schedule": list(runner.schedule)}
+    plan["schedule"] = list(runner.schedule)
     plan["hash"] = plan_hash(plan)
-    live_holes = {n for n, _ in demand.sets if loaded.internal(loaded.top, n) in set(live)}
-    state = state or {}
-    state = dict(state, fuel={"given": demand.fuel, "spent": demand.fuel - runner.fuel},
+    spent = demand.fuel - runner.fuel
+    store = {"pure": pure, "fresh": fresh}
+    if pure:
+        # the value printed, as `eval` prints it (12.S19), what the store keeps under the key
+        store.update(key=key, value=_type_shown(runner.value(result), sys.maxsize))
+    state = dict(state, fuel={"given": demand.fuel, "spent": spent},
                  **{"first actions": firsts.done}, files_read=[list(pair) for pair in host.files_read()],
-                 lock=lock, checked=demand.checked, demand=demand.record(state.get("cone")), plan=plan,
-                 key=demand.key(live_holes))
+                 plan=plan, **common, result_store=store)
     if demand.checked:
         state["refinements"] = dict(runner.tested)
     return host.stdout(), values, state
@@ -2531,6 +2589,108 @@ def live_cone(kept):
     first, then each file after its imports). [proposed] The roots of the slice are in it: core's
     data, which every run may read, and the laws run at a first action (10.S10)."""
     return tuple(dict.fromkeys(a.name for a in kept if isinstance(a, (s.Define, s.Declare, s.Alias))))
+
+
+def _holds_world(x):
+    """Whether a kernel term holds the world `W` anywhere."""
+    if isinstance(x, t.World):
+        return True
+    if isinstance(x, tuple):
+        return any(_holds_world(y) for y in x)
+    if is_dataclass(x) and not isinstance(x, type):
+        return any(_holds_world(getattr(x, f.name)) for f in fields(x))
+    return False
+
+
+def acts(program, live):
+    """Whether the live cone performs an action (D-2026-10-15-d): a name of it whose type or
+    definition holds the world `W`. [proposed] Read from the elaborated code before anything is
+    evaluated, so a name that holds `W` and is never applied counts too, the safer reading (10.S6:
+    an action with no declaration counts as one on the world)."""
+    live = set(live)
+    return any(_holds_world(a) for a in program if isinstance(a, (t.Define, t.Declare)) and a.name in live)
+
+
+def chosen_plan(plan):
+    """plan.lth's `chosen`: the plan as chosen before it runs, its schedule empty; call by need
+    writes the schedule as it runs (8.S4), and a key read before evaluating cannot hold it."""
+    return {"strategy": plan["strategy"], "entry": plan["entry"], "live": list(plan["live"]), "schedule": []}
+
+
+def result_key(record, seed, plan, certificates):
+    """plan.lth's `keyOf` (8.S8, D-2026-10-15-h): the key of a run from its record (`demand`,
+    demand.lth's `Record`, and `key`, plan.lth's `demandKey` of it on the plan's live cone, which
+    holds the decoration from the record), its seed, its plan, as chosen, and the hashes of the
+    certificates that served its cone. The fuel, the time and the lock are in the record and not
+    here (D-2026-10-15-g). `record` is an entry of `x.run.json` or anything with those two fields."""
+    return {"demand": record["key"], "cone": record["demand"]["cone"],
+            "mode": "checked" if record["demand"]["checked"] else "plain", "seed": seed,
+            "plan": plan_hash(chosen_plan(plan)), "certificates": list(certificates)}
+
+
+def key_hash(key):
+    """plan.lth's `Keying.key`: sha256 of the key's canonical JSON, as `plan_hash` hashes a plan."""
+    from . import certify
+    return certify._sha(json.dumps(key, sort_keys=True, ensure_ascii=False, separators=(",", ":")))
+
+
+def results_path(path):
+    """`x.results.json` beside `x.lut` (L10.12: in the store of the file that makes the claim)."""
+    path = Path(path)
+    return path.with_name(path.stem + ".results.json")
+
+
+def read_results(path):
+    """The entries of `x.results.json` beside `x.lut` (or at `path` itself): each {"key hash",
+    "key", "value", "time"}, in the order written; [] when there is none."""
+    path = Path(path)
+    where = path if path.name.endswith(".results.json") else results_path(path)
+    if not where.exists():
+        return []
+    results = json.loads(where.read_text(encoding="utf-8"))
+    if not isinstance(results, list):
+        raise RunError(f"{where}: not a list of results")
+    return results
+
+
+def served_by(results, key):
+    """The index of the entry that serves `key` (8.S9: a hit needs an equal key): the first whose
+    key equals it and hashes to the hash it is stored under, when every entry of that hash holds
+    one value; None when there is none, or when they disagree (`results_breaches`, plan.lth's
+    `ResultsDetermined` broken: not served until the discrepancy is resolved, D-2026-10-15-f)."""
+    h = key_hash(key)
+    same = [i for i, r in enumerate(results) if r.get("key hash") == h]
+    if not same or len({json.dumps(results[i].get("value")) for i in same}) != 1:
+        return None
+    return next((i for i in same if results[i].get("key") == key and key_hash(results[i]["key"]) == h), None)
+
+
+def results_breaches(results):
+    """plan.lth's `ResultsDetermined` as the pairs (i, j), i < j, that break it: one key hash, two
+    values."""
+    return [(i, j) for j, b in enumerate(results) for i, a in enumerate(results[:j])
+            if a.get("key hash") == b.get("key hash") and a.get("value") != b.get("value")]
+
+
+def store_result(path, store, key_h, time):
+    """Write a pure run's value under its key in `x.results.json` (D-2026-10-15-d), unless an entry
+    of that key already holds it; gives what the record says: `agrees` (the entry that already
+    held it, nothing written) or `written` (its index), with `disagrees` (the entries of the key
+    holding another value: both kept, D-2026-10-15-f)."""
+    where = results_path(path)
+    results = read_results(path)
+    same = [i for i, r in enumerate(results) if r.get("key hash") == key_h]
+    agree = [i for i in same if results[i].get("value") == store["value"]]
+    if agree:
+        return {"agrees": agree[0]}
+    results.append({"key hash": key_h, "key": store["key"], "value": store["value"], "time": time})
+    tmp = where.with_name(where.name + ".tmp")
+    tmp.write_text(json.dumps(results, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    tmp.replace(where)
+    said = {"written": len(results) - 1}
+    if same:
+        said["disagrees"] = same
+    return said
 
 
 def plan_hash(plan):
@@ -2566,8 +2726,8 @@ def lock_status(path):
     return {"path": str(here / LOCK), "pinned": None, "status": "absent"}
 
 
-def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None):
-    return run(path, main, fuel, sets, accept, checked)[0]
+def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=False):
+    return run(path, main, fuel, sets, accept, checked, fresh)[0]
 
 
 def record_path(path):
@@ -2591,7 +2751,15 @@ def record(path, main, values, output, state=None):
     delta, fuel, checked, lock), the plan (`plan`) and the demand's key (`key`). [proposed] The
     fields that were there before are kept beside it, with the same values: `entry`, `parameters`,
     `checked` and `certification.accept`, which tests and readers of the record read; `fuel` and
-    `lock`, which hold the run's part too (the fuel spent, the lock's path and status)."""
+    `lock`, which hold the run's part too (the fuel spent, the lock's path and status).
+
+    The store of results (D-2026-10-15-d, D-2026-10-15-h): the hash of the run's key (`key_hash`),
+    with the seed and the certificates that served the cone (`seed`, `certificates`), from which
+    and from `demand`, `key` and `plan` the key is computed again (`result_key`); the hash of the
+    bytes of each certificate store read (`stores_read`); and `result_store`: whether the cone is
+    pure, whether the run was `--fresh`, and the entry of `x.results.json` that served it
+    (`served`), or, for a pure run executed, what `store_result` did with its value under the
+    record's time. Each is said on standard error."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
@@ -2599,9 +2767,14 @@ def record(path, main, values, output, state=None):
             "parameters": values, "output": output, "calls": host.calls()}
     if state is not None:
         state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
-        for key in ("demand", "plan", "key", "fuel", "files_read", "lock", "checked", "refinements"):
+        for key in ("demand", "plan", "key", "key_hash", "seed", "certificates", "fuel", "files_read",
+                    "stores_read", "lock", "checked", "refinements", "result_store"):
             if key in state:
                 item[key] = state.pop(key)
+        store = item.get("result_store")
+        if store is not None:
+            item["result_store"] = store = dict(store)
+            _say_store(path, store, item)
         lock = item.get("lock")
         if lock and lock["status"] == "absent":
             from . import certify
@@ -2612,6 +2785,31 @@ def record(path, main, values, output, state=None):
     runs.append(item)
     where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return where
+
+
+def _say_store(path, store, item):
+    """`record`'s part for the store of results: a pure value executed is stored (`store_result`)
+    and the key and the value move out of the record's `result_store` (the record keeps the key's
+    hash); what happened is said on standard error."""
+    name = results_path(path).name
+    if "served" in store:
+        served = store["served"]
+        print(f"served from {name}, entry {served['entry']} of {served['time']} (8.S9; --fresh executes it)",
+              file=sys.stderr)
+        return
+    if not store.get("pure"):
+        return
+    key, value = store.pop("key"), store.pop("value")
+    store.update(store_result(path, {"key": key, "value": value}, item["key_hash"], item["time"]))
+    if "disagrees" in store:
+        print(f"{name}: this run's value differs from entries {store['disagrees']} under the same key; both kept "
+              f"(entry {store['written']}), and the key is not served until the discrepancy is resolved",
+              file=sys.stderr)
+    elif "agrees" in store and store.get("fresh"):
+        print(f"--fresh: the value agrees with entry {store['agrees']} of {name}; nothing written", file=sys.stderr)
+    elif "agrees" in store:
+        print(f"{name}: not served, its entries under this key disagree; this run agrees with entry "
+              f"{store['agrees']}", file=sys.stderr)
 
 
 def read_runs(path):

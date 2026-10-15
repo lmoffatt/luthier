@@ -1279,7 +1279,7 @@ def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
     d = first["demand"]
     assert d == {"entry": "main", "cone": first["certification"]["cone"],
                  "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "delta": None,
-                 "fuel": 5000, "checked": False, "lock": None}
+                 "fuel": 5000, "checked": False, "lock": None, "decoration": None}
     # the fields kept beside it say the same
     assert (first["entry"], first["parameters"], first["checked"], first["fuel"]["given"],
             first["certification"]["accept"]) == (d["entry"], d["parameters"], d["checked"], d["fuel"], d["accept"])
