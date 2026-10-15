@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 3566f5247e20, commit 828061a) by `scripts/project_principles.py` (project_principles v2) on 2026-10-16; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 adf26448b3f7, commit e6eb343) by `scripts/project_principles.py` (project_principles v2) on 2026-10-16; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -140,7 +140,13 @@ demanded).
   no law of its constructors' roles is a collection and is written as an alias (D-2026-10-13-p,
   D-2026-10-07-e). It costs thought, and that is its purpose. Everything has laws; it is a matter of
   finding them, usually in the place the thing holds in a known structure (`Unit` terminal, `List` the
-  free monoid, D-2026-10-13-t). [settled]
+  free monoid, D-2026-10-13-t). To be conceptual is to be practical at another level: the law pays
+  when it bites, not when it is read (D-2026-10-16-b). [settled]
+- L2.8 A definition and the law of its role live in one file, the one that defines it, so that the
+  file is the concept whole; and nothing is said twice: where the role is a theory stated elsewhere,
+  the defining file claims that theory's model (core.lut claims `Unit`, `Bool`, `Maybe`, `List` as
+  models of kernel_laws.lth's theories) rather than restating the law. Locality yields to
+  non-repetition (D-2026-10-14-b, D-2026-10-16-b). [proposed]
 References: spec 4.R1; D-2026-10-13-i, D-2026-10-13-j.
 Rests on: O9 (the kind of a hole in the elaborated form, for the spec).
 Status: settled; clause 6 settled (D-2026-10-13-i, -j, -n); clause 7 his (D-2026-10-13-p).
@@ -236,9 +242,9 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
 - L5.5 The tests are actions, so verifying is demanding; what a demand requires of the certificates
   in its cone, and when a certificate serves it, is L10.5 and L10.6. [settled]
 - L5.6 A result is identified by code, inputs, mode, the demanded type and tolerance, the model its
-  type names (Terms), the seed, the plan that produced it, the plan being a value (`lib/plan.lut`),
-  and the hashes of the certificates in its live cone, so a host library or platform that changed is a
-  new result. [settled]
+  type names (Terms), the seed, the plan that produced it, the plan being a value (`plan.lth`), and
+  the hashes of the certificates in its live cone, so a host library or platform that changed is a new
+  result. [settled]
 - L5.7 The runtime includes the thread count and scheduling of the host, and an extern whose bits
   depend on scheduling is not bit-identical to itself, so its identity law is `Cost`, never `Bool`
   (L3). [settled]
@@ -278,7 +284,9 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
 - L5.18 No unrecorded policy constants: thresholds, budgets, limits, statistical levels and the
   planner's default policies are never constants in code; they are declared, passed and recorded. The
   kernel's primitives (0, ∞, `lift`, `exact`) and mathematical constants are not policies
-  (D-2026-10-12-n). [proposed]
+  (D-2026-10-12-n). A domain a law states is part of the law, not a cutoff; a series' truncation is
+  derived from the demand's tolerance; what a demander could vary is a declared default, recorded
+  (D-2026-10-16-b). [proposed]
 - L5.19 The outermost demand, an action with no caller, carries its tolerance as a declared default
   argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
   [settled]
@@ -557,7 +565,9 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
 - L10.5 A certificate serves every demand whose cutoff it meets, on the bound and on the evidence
   cost alike (D-2026-10-12-h); the demand states what it requires (P11), and a memo hit serves a
   demand only if the cached cone meets it, checked at the hit and not only when the certificate was
-  issued. [settled]
+  issued. In the Boolean slice the clause is suspended (D-2026-10-14-c, D-2026-10-16-b) until the cost
+  types: the tolerance is a law parameter and so part of the binding, matched exactly
+  (certification.lth's comment at the cost cutoff of 6.S15). [settled]
 - L10.6 Certification is the default: demanding a value demands every certificate in its dependency
   cone, paid once through the memo, with no opt-out at the start (D-2026-10-12-y: a cone with an
   uncertified or provisional name is refused); an exception, if a real case asks for one, is O3 and
@@ -633,6 +643,14 @@ world it runs in) with L4; delegation (now L9.7) from G1 and G2; transport (now 
   is checked; a module is a value, and its file is read when a demand first needs one of its names, so
   an import is not an action either; `test` of a module is the action that demands everything in it,
   the one that finds what is latent and ill defined (D-2026-10-12-ac, -ad). [settled]
+- L11.8 A function crosses the bridge as a callback: the host calls it through the bridge, each call
+  crossing by the declared types, and the calls are counted and recorded with the run (the control:
+  what the host did with Luthier's function is known); a record of functions crosses by field; a host
+  function given to Luthier is an opaque value, applied only through the bridge and never reduced by
+  the kernel, so what Luthier knows of it is its declared type and its laws (L11.2); a partial
+  application of an extern is a value, its arity from its declared type (D-2026-10-14-a,
+  D-2026-10-16-b; world.lth `Crossing`, term.lth `ExternPartialIsValue`, `HostGivesBackAValue`).
+  [proposed]
 References: D-2026-10-11-m; W5, W10.
 Rests on: O3 (the opt-out's syntax; the world as a value).
 Status: settled by his correction of draft 7; clause 6 candidate, reworded; clause 7 settled
@@ -693,6 +711,12 @@ is the demand's (G0, the demand).
 - L13.4 The functor reading stands with "non-expansive plus an additive term", and the cost algebra
   needs both parts: a multiplicative one where a Lipschitz constant exists and an additive one where
   rounding enters (`11` §5). [mark pending]
+- L13.5 A cutoff is read against the realization's defect at the point where it is met: a demand's
+  tolerance below what rounding resolves there (ε times the magnitudes compared, times the condition
+  number where one enters) asks for evidence the computation cannot give, and the law's comparison
+  carries the scale (11.S14) so that the tolerance the demand supplies is in the units of what is
+  compared. Below that resolution a stricter cutoff buys nothing, as the last iterations of a fit at
+  1e-12 bought nothing at 1e-6 (D-2026-10-16-b). [proposed]
 References: `11`.
 Rests on: O1 (the two parts of the algebra).
 Status: settled in its statement; clauses 3 and 4 are the correction proposed, his mark pending.
@@ -718,7 +742,11 @@ blocks; the done and implemented items are in the record's drafts table.
   whether it is the third eureka or a principle of good use is his to mark after that analysis.
   Until it exists the application runs on a Boolean interim: laws of the form d(f x, g x) ≤ tol
   with tol a parameter (L5), every law returning `Bool` or `Cost` with the result type saying
-  which (`11` §2, L3), no composition of tolerances along a chain, no run database. Blocks L8.7,
+  which (`11` §2, L3), no composition of tolerances along a chain, no run database. The interim is
+  his (D-2026-10-14-c): the cutoff parameters the Boolean laws take, demanded and never constants,
+  are where the cost enters when the algebra exists, a cutoff being a cost's threshold (L12.3);
+  a law with a quantifier of no finite Boolean form (`SupIsLeast`) stays a `Law`, stated and not
+  tested (D-2026-10-16-b). Blocks L8.7,
   L3.3, L12, L13.3, L13.4, L5.4, L6.6, L6.8, L10.3, L10.8.
 - **O2** (language) The type with its equality as the base case of every theory (a setoid; a
   metric space where the equality is a cost), the kernel's structural `==` its model for the
