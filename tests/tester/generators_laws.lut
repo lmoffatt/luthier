@@ -12,14 +12,20 @@
 -- with a probability of about 1%; at size 50 a sample of `uniformSample` is up to 2500 values.
 -- Its control, `SkewedSampleIsUniform`, is in generators_controls.lut. The Bool form at a level
 -- (`Level`, `l`) is gone.
+-- Since 2026-10-15 (record/IA/controls-2026-10-15/prompt-weak-laws.md, L9.14) each law of a family
+-- takes the family as its parameter `g` [proposed]; a line binds `g` to a census of one listing
+-- the family (a binding that names a `Gen T` itself would be drawn from), so that
+-- generators_controls.lut can bind a family broken on purpose to the same law.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear SymmetricGivesSymmetric SymmetricOfGivesItsSize GramGivesPsd
   OrthogonalGivesOrthogonal UnitListGivesUnitValues UniformSampleIsUniform ClearDiagonalGivesClear
-import "generators.lth" Binding
+  symmetric symmetricOf gram orthogonal unitList clearDiagonal
+import "generators.lth" Binding Gen
 import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
-import "arrays.lth" RankFloor
+import "arrays.lth" RankFloor Dim MatOf Symmetric SymmetricOf ClearDiagonal
+import "probability.lth" UnitList
 
 tolerance : Tolerance := 1.0e-12
 floor : RankFloor := 6.661338147750939e-15
@@ -29,10 +35,19 @@ cutoffs : List Binding := [
   { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
   { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
 
-test "SymmetricGivesSymmetric" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
-test "SymmetricOfGivesItsSize" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
-test "GramGivesPsd" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
-test "OrthogonalGivesOrthogonal" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
-test "UnitListGivesUnitValues" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+-- the families, each a census of one bound to the law's `g`
+symmetricFamily : List (Gen Symmetric) := [symmetric]
+symmetricOfFamily : List ((k : Dim) -> Gen (SymmetricOf k)) := [symmetricOf]
+gramFamily : List (Gen Symmetric) := [gram]
+orthogonalFamily : List ((k : Dim) -> Gen (MatOf k k)) := [orthogonal]
+unitListFamily : List (Gen UnitList) := [unitList]
+clearDiagonalFamily : List (Gen ClearDiagonal) := [clearDiagonal]
+family (name : String) : List Binding := [ { parameter := just "g", type := nothing, generator := name, coverage := Listed } ]
+
+test "SymmetricGivesSymmetric" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "symmetricFamily") (profile <- cutoffs)
+test "SymmetricOfGivesItsSize" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "symmetricOfFamily") (profile <- cutoffs)
+test "GramGivesPsd" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "gramFamily") (profile <- cutoffs)
+test "OrthogonalGivesOrthogonal" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "orthogonalFamily") (profile <- cutoffs)
+test "UnitListGivesUnitValues" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "unitListFamily") (profile <- cutoffs)
 test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
-test "ClearDiagonalGivesClear" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
+test "ClearDiagonalGivesClear" (SampledMode linear) (seed <- 20261014) (whereBindings <- family "clearDiagonalFamily") (profile <- cutoffs)
