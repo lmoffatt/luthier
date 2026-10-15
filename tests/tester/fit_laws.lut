@@ -27,6 +27,10 @@ import "optimization_model.lut" native host lmMaximizer
 import "session_a.lut" settingsA dampingA
 
 tolerance : Tolerance := 1.0e-12
+-- the iterations the demand grants a maximizer on the quadratic family (QuadraticConverges's
+-- `budget`), a census of one, 50, as the probe of record/IA/layer-3-review-2026-10-15/report-fix-BCD.md
+-- [proposed]; settingsA's maxIter 500 is above it, so the law is asked
+budget : Nat := 50
 nativeLM : Maximizer := lmMaximizer dampingA
 
 DirectionDescendsOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x : VecOf n) (mu : Positive) : Bool :=
@@ -44,7 +48,8 @@ MaximizersAgree (mx my : Maximizer) (tol : Tolerance) (s : Settings) (n : Dim) (
 cutoffs : List Binding := [
   { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
   { parameter := just "d", type := nothing, generator := "dampingA", coverage := Listed },
-  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed } ]
 onLm : List Binding := [ { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed } ]
 onNativeLM : List Binding := [ { parameter := just "mx", type := nothing, generator := "nativeLM", coverage := Listed } ]
 onHost : List Binding := [ { parameter := just "m", type := nothing, generator := "host", coverage := Listed } ]
