@@ -534,6 +534,30 @@ ppinvFloor : List Binding := [
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
   { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
 
+-- pinvSym's floor is an absolute 1e-3 instead of relative to the largest eigenvalue, read through
+-- the relative leaf as rankAbs is (nothing retained when the norm is at most 1e-3); PinvScales held
+-- on it before it scaled s to the size of the floor (record/IA/controls-2026-10-15/report-tail.md)
+pinvAbs : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { if frobDef a <= 1.0e-3 then zeroMat a.m a.n else numpy.pinvSym (1.0e-3 / frobDef a) a },
+}
+ppinvAbs : List Binding := [
+  { parameter := just "m", type := nothing, generator := "pinvAbs", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
 -- the listed symmetric matrices of arrays_laws.lut (copied): the positive semidefinite ones where
 -- PinvRestricts is stated, and the ones PinvTraceIsRank runs on
 diag3 (a b c : Float64) : Mat Float64 := mat Float64 3 3 (fn i j { if i == j then (if i == 0 then a else if i == 1 then b else c) else 0.0 })
@@ -628,5 +652,6 @@ test "PinvSymmetric" (SampledMode linear) (seed <- 20261015) (whereBindings <- d
 test "PinvRestricts" ExhaustiveMode (whereBindings <- listedPsd) (profile <- pridge) (control <- true)
 -- pinvFloor: an eigenvalue under 0.67 of the largest is dropped by the pinv but counted by the real rank
 test "PinvTraceIsRank" ExhaustiveMode (whereBindings <- listedS) (profile <- ppinvFloor) (control <- true)
--- ridge: the ridge does not scale as 1 / c
-test "PinvScales" (SampledMode linear) (seed <- 20261015) (profile <- pridge) (control <- true)
+-- pinvAbs: scaled to the size of the floor, every eigenvalue is below the absolute floor of 1e-3
+-- (before, ridge: the ridge does not scale as 1 / c; it saw a break of the size of the matrix)
+test "PinvScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- ppinvAbs) (control <- true)
