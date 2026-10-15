@@ -3,7 +3,9 @@
 -- Draft 1, 2026-10-13, by Claude Fable 5.1 in the session (layer 2 of
 -- record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md, step 5.1); draft 0 at
 -- 163eca2 by Claude Opus 5.5, rewritten on the internal review of layers 2 and 3
--- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, test.1 to test.7). Sources: spec 7.S20
+-- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, test.1 to test.7); the field `control` added
+-- 2026-10-15 by Claude Opus 5.5 on record/IA/controls-2026-10-15/prompt-tester.md (7.S19, L9.14,
+-- D-2026-10-15-a). Sources: spec 7.S20
 -- (`test` is a function with named arguments), 7.R1 (a test names its generators; a census is a
 -- binding, not a mode), 7.S8 (budgets), 7.S9 (an entry's identity includes its binding), 7.S10
 -- (grades; the weakest summarizes), 7.S12 (`n` counts evaluated cases; an entry is accepted only
@@ -41,9 +43,14 @@ Mode : U := data {
 }
 
 -- what to test and how (D9: a value the module keeps): the law, the mode, the cases asked, the
--- largest size, the seed, the bindings in `where` and the profile's, the budgets (7.S8, 7.S9)
+-- largest size, the seed, the bindings in `where` and the profile's, the budgets (7.S8, 7.S9), and
+-- whether the line is a control: the law tested on a model broken on purpose, expected to be
+-- refuted (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). [proposed: a field with a
+-- default, the least change; a form `control law ...` would need the parser] A control's
+-- refutation is the control passing, a confirmation is the control failing (the law too weak to
+-- see the break), and neither grades the law (`controlPasses`, §2).
 TestSpec = { law : String, mode : Mode, cases : Nat, size : Nat, seed : Seed,
-             whereBindings : List Binding, profile : List Binding, budgets : Budgets }
+             whereBindings : List Binding, profile : List Binding, budgets : Budgets, control : Bool }
 
 -- `test`: every option a named argument with a default (7.S20). The defaults of the budgets that
 -- today's code holds (the tries of a filter, the redraws, the probes) are those numbers, named
@@ -53,9 +60,9 @@ defaultBudgets : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPe
                               specialMass := 0.05, atomAtZero := 0.01 }
 test (law : String) (mode : Mode) (cases : Nat <- 100) (size : Nat <- 10)
      (seed : Seed <- 0) (whereBindings : List Binding <- nil) (profile : List Binding <- nil)
-     (budgets : Budgets <- defaultBudgets) : TestSpec :=
+     (budgets : Budgets <- defaultBudgets) (control : Bool <- false) : TestSpec :=
   { law := law, mode := mode, cases := cases, size := size, seed := seed, whereBindings := whereBindings,
-    profile := profile, budgets := budgets }
+    profile := profile, budgets := budgets, control := control }
 
 -- ---------------------------------------------------------------- §2 Running
 
@@ -69,6 +76,9 @@ coverageOf (e : Evidence) : Maybe Coverage := match e { Points A pts c -> just c
 pointCount (e : Evidence) : Nat := match e { Points A pts c -> countPoints A pts ; _ -> 0 }
 countPoints (A : U) (pts : List (A * Evidence)) : Nat := match pts { nil -> 0 ; cons x rest -> 1 + countPoints A rest }
 isNotRun (e : Evidence) : Bool := match e { NotRun r -> true ; _ -> false }
+-- a control passes when its law is refuted on the broken model; any other verdict is the control
+-- failing (confirmed or supported: the law cannot see the break) or settling nothing (7.S19)
+controlPasses (v : Verdict) : Bool := match v { Refuted -> true ; _ -> false }
 -- the coverages in order of strength, `rankOf` and `weaker`, are laws.lth's, which defines
 -- `Coverage` (7.S10; D-2026-10-14-b): read here, not repeated
 modeCoverage (m : Mode) (size : Nat) (s : Seed) : Coverage := match m {
