@@ -307,7 +307,7 @@ def test_a_statistical_law_runs_the_sequential_test(tmp_path):
                                                   "spent": 2, "initial": 1, "budget": 400}, "coverage": "(Drawn 3)"}
     assert (holds.entry["outcome"], holds.entry["grade"]) == ("Passed", "Sampled")
     assert fails.entry["outcome"] == {"Failed": f"8 samples of 1 {RATES}"}
-    assert unresolved.entry["outcome"] == {"NotRunFor": f"unresolved at 400 samples of 1 {RATES}"}
+    assert list(unresolved.entry["outcome"]) == ["Unresolved"] and unresolved.entry["outcome"]["Unresolved"]["spent"] == 400
     assert holds.entry["binding"] == [{"parameter": "c", "generator": "wald (Listed)",
                                        "fingerprint": holds.entry["binding"][0]["fingerprint"]}]
 

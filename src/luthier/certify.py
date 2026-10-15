@@ -40,7 +40,7 @@ entry whose evidence is `Tested` holds the sequential test's verdict with alpha,
 samples spent, and the cutoffs' `initial` and `budget` (`tested_text` reads them). A pass is graded
 as any (sampled, over `Drawn seed`); `standing` adds the rates and what was spent to the grade, so
 that the certificate shows the price of a sampled grade (7.S17). An unresolved test is a
-`NotRunFor` that says so.
+`Unresolved` outcome carrying the test's record (older stores wrote `NotRunFor "unresolved at ..."`, still read).
 """
 from __future__ import annotations
 
@@ -352,6 +352,9 @@ def store_errors(entries):
             continue
         if passed(e) != (e["grade"] is not None):
             errors.append(f"entry {k} ({e['law']}): a grade exactly when passed")
+        tested = _tested(e)
+        if passed(e) and tested and not (tested.get("verdict") == "Holds" and e["grade"] == "Sampled"):
+            errors.append(f"entry {k} ({e['law']}): a statistical pass is a Holds graded sampled")
         i = identity(e)
         if i in seen and entries[seen[i]]["outcome"] != e["outcome"]:
             errors.append(f"entries {seen[i]} and {k} ({e['law']}): one identity, two outcomes")
@@ -542,8 +545,10 @@ def show_outcome(outcome):
     if outcome == "Passed":
         return "passed"
     (kind, why), = outcome.items()
+    if kind == "Unresolved":
+        return "unresolved at " + (tested_text(why) if isinstance(why, dict) else str(why))
     if kind == "NotRunFor" and why.startswith("unresolved at "):
-        return why
+        return why  # entries written before `Unresolved` was an outcome
     if kind == "ControlRefuted":
         return f"refuted at {why}: the control passed"
     if kind == "ControlConfirmed":

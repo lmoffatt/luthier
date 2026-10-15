@@ -666,3 +666,27 @@ def test_certify_a_statistical_law_with_its_rates_and_its_control(tmp_path, caps
     # an unresolved test is no failure and no grade: it says so
     assert certify.show_outcome({"NotRunFor": f"unresolved at 100 samples of 1 {rates}"}) == \
         f"unresolved at 100 samples of 1 {rates}"
+
+
+def test_an_unresolved_entry_round_trips_and_a_statistical_pass_is_a_holds_graded_sampled(tmp_path):
+    tested = {"verdict": "Unresolved", "alpha": 0.01, "beta": 0.01, "delta": 0.9, "spent": 100,
+              "initial": 1, "budget": 100}
+    unresolved = entry(outcome={"Unresolved": tested}, grade=None)
+    unresolved["evidence"] = {"Tested": tested, "coverage": "Drawn"}
+    path = tmp_path / "u.lut"
+    certify.write_store(path, [unresolved])
+    assert certify.read_store(path) == [unresolved]
+    assert certify.show_outcome(unresolved["outcome"]) == f"unresolved at {certify.tested_text(tested)}"
+    # a store written before: the old NotRunFor text still reads
+    old = entry(outcome={"NotRunFor": "unresolved at 100 samples"}, grade=None)
+    assert certify.store_errors([old]) == []
+    assert certify.show_outcome(old["outcome"]) == "unresolved at 100 samples"
+    # a pass over Tested evidence is a Holds graded sampled, no other
+    holds = dict(tested, verdict="Holds")
+    ok = entry(grade="Sampled")
+    ok["evidence"] = {"Tested": holds, "coverage": "Drawn"}
+    assert certify.store_errors([ok]) == []
+    for grade, verdict in (("Cases", "Holds"), ("Sampled", "Fails")):
+        bad = entry(grade=grade)
+        bad["evidence"] = {"Tested": dict(tested, verdict=verdict), "coverage": "Drawn"}
+        assert "a Holds graded sampled" in certify.store_errors([bad])[0]

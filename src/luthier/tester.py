@@ -1030,6 +1030,8 @@ def _entry_tail(entry):
         return f"{_CONTROL_FAILED} ({o['ControlConfirmed']})"
     if "Failed" in o:
         return f"refuted at {o['Failed']}"
+    if "Unresolved" in o:
+        return certify.show_outcome(o)
     return f"not run: {o['NotRunFor']}" if "NotRun" in entry["evidence"] else o["NotRunFor"]
 
 
@@ -1345,7 +1347,7 @@ def _settle_tested(entry, outcome):
     if outcome.verdict == "Refuted":
         entry["outcome"] = {"ControlRefuted" if outcome.spec.control else "Failed": rates}
     elif outcome.verdict == "Unsettled":
-        entry["outcome"] = {"NotRunFor": f"unresolved at {rates}"}
+        entry["outcome"] = {"Unresolved": tested}
     elif outcome.spec.control:
         entry["outcome"] = {"ControlConfirmed": f"{_GRADE_WORDS.get(outcome.grade, outcome.grade)}, held at {rates}"}
     else:
