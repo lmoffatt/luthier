@@ -93,7 +93,7 @@ fuel it used recorded, a cost for the planner); a not-run for fuel records the f
 and serves only demands with that much or less; the same for a sequential test's budget (an
 undecided outcome at budget B serves only budgets up to B). Recommendation: (c) now (never memoize a
 not-run for lack of fuel: simplest, and correct), (d) when the costs come.
-
+c
 **5. Is the run's record the memo key, or does `x.run.json` carry the key's hash?** 8.S8 (a value
 and its derivative have two keys) against `demand.lth` 107-108 (`Record` has no decoration, seed,
 plan or certificate hashes) and `plan.lth` 151 (`MemoKey` has them; nothing relates the two), so
@@ -104,6 +104,13 @@ hashes); (b) `x.run.json` carries the key's hash and `Record` stays as it is. No
 law, B1, B2, B14, and item 1's store. Sources:
 `record/IA/layer-3-review-2026-10-15/summary-BCD.md` (top screen item 5, B1, B2);
 `report-second-line.md` (B1, B2, B14).
+*Recommendation (coordinator, 2026-10-15):* (b). The record says how to reproduce a run (P2); the key
+says when two results are the same result; they differ on purpose. Item 4 shows it: fuel belongs in
+the record and must stay out of the key, since a pass is the same pass at any larger fuel. The law
+`determined` then speaks of the key, and a law relates the two: the key is a function of the
+record, the seed, the plan and the certificates. Today `x.run.json` already holds the record
+(`demand`), the plan with its hash and the demand key (`key`: decoration and live values), but no
+seed and no hash of the whole key.
 
 **6. Does the interpreter enter the hash by every commit or by the last tag?** 6.S8 as written puts
 the interpreter's revision in the hash, so every store goes stale at any commit to
