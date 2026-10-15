@@ -21,6 +21,9 @@
 -- probability_laws.lut's cutoffs `wald`; it passes when the test fails it. `NoAlternativeAtZero`
 -- and `RatioNonNegative` on a statistic whose ratio is 2 at distance zero, and one whose ratio is
 -- negative at the distance 0.5 of the cutoffs.
+-- Since 2026-10-15 (record/IA/controls-2026-10-15/prompt-tail.md) the `lump` line is in
+-- generators_controls.lut, a control of `UniformSampleIsUniform`: probability_laws.lut's
+-- `SourceIsUniform` line, which it controlled, computed the same test as that law's line and went.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear unitList
@@ -28,9 +31,9 @@ import "generators.lth" Binding byParameter
 import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonNegative
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat vec mat
-import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood UnitList uniformPValue SourceIsUniform
+import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood UnitList uniformPValue
   GaussianConstruction GaussianPeaksAtMean ProfiledIsGaussianAtItsSigma gaussian profiled pi
-import "probability_model.lut" numpySort lump
+import "probability_model.lut" numpySort
 import "numbers_model.lut" elementary
 import "arrays_model.lut" sub dot scale matVec matMul transpose mscale
 import "../../examples/sonolocalizacion/distances.lut" pitResolution freeDim fullModel posModel
@@ -224,12 +227,6 @@ test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 2
 -- ---------------------------------------------------------------- the statistical law (laws.lth §4)
 -- the cutoffs of probability_laws.lut, a census of one, never drawn
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
-onLump : List Binding := [
-  { parameter := just "d", type := nothing, generator := "numpySort", coverage := Listed },
-  { parameter := just "source", type := nothing, generator := "lump", coverage := Listed },
-  { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
--- every value 0.9: the p-value is near zero on every sample, and the test fails the law
-test "SourceIsUniform" (SampledMode linear) (seed <- 20261015) (profile <- onLump) (control <- true)
 
 -- the statistic of probability.lth with its ratio broken: 2 at distance zero; negative at 0.5
 unitListType : List U := [UnitList]
