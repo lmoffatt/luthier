@@ -30,7 +30,7 @@
 --   §3 Grades: read from the verdict and the coverage, ordered (7.S10, L10.2).              done
 
 import "generators.lth" Seed Binding Budgets Metric
-import "laws.lth" Evidence Points At NotRun Coverage Exhaustive Bounded Listed Drawn Verdict Confirmed Refuted
+import "laws.lth" Evidence Points At NotRun Cited Assumed Coverage Exhaustive Bounded Listed Drawn Verdict Confirmed Refuted
   Supported Unsettled Cites Assumes rankOf weaker
 
 -- ---------------------------------------------------------------- §1 The spec
@@ -95,9 +95,13 @@ specCoverage (s : TestSpec) : Coverage :=
 wholeCoverage (s : TestSpec) : Coverage :=
   bindingsCoverage s.profile (bindingsCoverage s.whereBindings Exhaustive)
 
--- a run is points of the law, or not run with a reason (test.1)
+-- a run is evidence a run gives, or not run with a reason (test.1): never a citation or an
+-- assumption, which no run produces (6.R1, 6.S10). [proposed, T3 of summary-BCD.md] Not "points
+-- or not run" only: the evidence follows the law's form (laws.lth §3), so a correct tester gives
+-- `Evaluated` for a case, `Pair` or `Side` for a connective and `Tested` for a statistical law, and
+-- the earlier law refuted it on every law that is not a `forall`.
 RunIsPointsOrNotRun (t : Tester) (s : TestSpec) : Bool :=
-  match t.run s { Points A pts c -> true ; NotRun r -> true ; _ -> false }
+  match t.run s { Cited r -> false ; Assumed -> false ; _ -> true }
 -- the coverage of a sampled run is at most the spec's; an exhaustive run's is the spec's, bounded
 -- by the size, or the whole type's, both weakened by the bindings (the coordinator, 2026-10-14:
 -- the law asked `Bounded size` where tester.py and laws.lth's `ForallOnPoints` give `Exhaustive`)
