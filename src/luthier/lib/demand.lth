@@ -10,6 +10,14 @@
 -- supplies); certification.lth §3 (the demand on one law, `serves`, `Certified`), test.lth §3
 -- (`Grade`), generators.lth §6 (`Budgets`, the same rule: every budget an argument). Pattern of
 -- certification.lth.
+-- 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- layer-3-review-2026-10-15/prompt-fix-BCD.md and the coordinator's addition to it (B19 of its
+-- summary-BCD.md, Fable's first change for this file): `Demanding` had no model that could fail
+-- a law (two laws fixed its two operations outright, two were laws of `Certifying`), so
+-- `lawDemand` and `recorded` are definitions, the two laws of `Certifying` at the demand passed
+-- down stay as predicates for certification.lth to claim, and the one law a model can break, that
+-- one identity has one result, is the law of a theory whose value is the store, over the identity
+-- as a parameter (which identity is item 5 of the summary, Luciano's question).
 --
 -- What this file states. 8.S1 says a demand is open: whatever the program declares as a
 -- parameter, the demand may set; its form is a library's (D-2026-10-12-al), so what is here is
@@ -19,18 +27,19 @@
 -- `C`, with the comment "D-2026-10-13-m, after the slice's failures". certification.lth §3 keeps
 -- its `Demand`, the demand on one law; here it is `LawDemand`, the same record by structure, and
 -- the law of 8.S1 is that it is passed down from the run's demand and not recomputed (L12.3).
--- A model of `Demanding` builds the demand of a run from the arguments `run` takes
--- (demand_model.lut, `theDemand`), with its defaults declared there and recorded (L5.19). What
--- the brief or the spec leaves open is marked [proposed] at the item above it.
+-- The demand of a run is built from the arguments `run` takes (demand_model.lut, `theDemand`),
+-- with its defaults declared there and recorded (L5.19); what it passes down and what it records
+-- are definitions of it. What the brief or the spec leaves open is marked [proposed] at the item
+-- above it.
 --
 -- Index (all sections written in this draft):
 --   §1 The demand: its fields, the holes for the costs and the decorated type (8.S1, 8.S2,
 --      6.S15, 6.S10, 12.S18, 12.S13).                                                       done
 --   §2 Passing down: the demand on one law, the demand an inner action receives (L12.3,
 --      6.S15, 6.S10).                                                                       done
---   §3 What a run records of its demand, and what two runs of one demand owe each other
---      (12.S18, L5.18, 8.S3).                                                               done
---   §4 The theory `Demanding`, the laws of §2 and §3 claimed.                               done
+--   §3 What a run records of its demand (12.S18, L5.18).                                     done
+--   §4 The theory `Store`: one identity, one result (8.S3, 8.S9).                           done
+--   §5 The laws of `Certifying` at the demand passed down (6.S10, 6.S16).                   done
 
 import "certification.lth" Certifying Entry Value Hash ServesIsMonotoneInTheCutoff
 import "test.lth" Grade Sampled AssumedGrade gradeRank
@@ -90,6 +99,14 @@ LawDemand = { law : String, cone : Hash, given : List (String * Value), accepts 
 -- [proposed] Until then `run --accept assumed` is where a demand names that price.
 admitsAssumptions (d : Demand) : Bool := gradeRank d.accepts <= gradeRank AssumedGrade
 
+-- The demand on a law of the cone (L12.3, 6.S15): the run's cutoff and the run's values, the
+-- law's own name and cone; nothing of it is recomputed from the law's cone. [proposed] The run
+-- also gives the law the name it certifies, printed, to the law's model parameter
+-- (certification.lth §3, run.py's `certification`); that is the run's binding and not the
+-- demand's, so `given` here is what `--set` gave.
+lawDemand (d : Demand) (law : String) (cone : Hash) : LawDemand :=
+  { law := law, cone := cone, given := d.sets, accepts := d.accepts }
+
 -- The demand an inner action receives (L12.3, L5.17): the caller's demand with the inner entry,
 -- every cutoff kept, since a cutoff does not compose and so is passed down, never recomputed
 -- from the inner cone.
@@ -103,51 +120,48 @@ inner (d : Demand) (entry : String) : Demand :=
 -- certificate needs comes from the demand and is recorded with it): the entry, the hash of the
 -- cone it ran, every parameter it set, the grade it accepted, the confidence, the fuel given,
 -- whether it ran checked, and the lock. The time, the output, the fuel spent and the states of
--- the cone are the run's, not the demand's, and are not here.
+-- the cone are the run's, not the demand's, and are not here. The decoration is not recorded
+-- (B1 of summary-BCD.md; with item 5).
 Record = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade,
            delta : Maybe Float64, fuel : Nat, checked : Bool, lock : Maybe String }
+recorded (d : Demand) (h : Hash) : Record :=
+  { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, delta := d.delta, fuel := d.fuel,
+    checked := d.checked, lock := d.pinned }
 
--- A run as its record keeps it: what was demanded, on which cone, and the result printed. The
--- same demand on the same cone gives the same result (8.S3: results are memoized under the hash
--- of code, inputs and mode; 8.S5: a definition has no effects): two runs with one record have one
--- result. That is the predicate of the type, so every store of runs owes it, one read back from
--- `x.run.json` included. [proposed] In the Boolean draft the record is the identity of a result;
--- the key of 8.S8, with the mode, the seed, the plan and the certificates, is plan.lth's.
-Run = { record : Record, result : String }
-agreesWithRun (r : Run) (rs : List Run) : Bool :=
-  match rs { nil -> true ; cons q rest -> (not (r.record == q.record) or r.result == q.result) and agreesWithRun r rest }
-determined (rs : List Run) : Bool :=
-  match rs { nil -> true ; cons r rest -> agreesWithRun r rest and determined rest }
-Runs : U := { rs : List Run | determined rs }
+-- ---------------------------------------------------------------- §4 The store
 
--- ---------------------------------------------------------------- §4 The theory
+-- A store of runs: each result kept under the identity of what produced it. The same demand on
+-- the same cone gives the same result (8.S3: results are memoized under the hash of code, inputs
+-- and mode; 8.S5: a definition has no effects; 8.S9: a hit serves only an equal key), so a store
+-- holds one result per identity; one read back from `x.run.json` included. [proposed] The identity
+-- is a parameter `K` with its equality: whether it is the record of §3, which run.py's `breaches`
+-- compares today, or plan.lth's `MemoKey`, which carries the decoration, the seed, the mode, the
+-- plan and the certificates the record lacks, is item 5 of summary-BCD.md, Luciano's question. At
+-- the record the law is false of a store holding two legitimate runs that differ only in what the
+-- record does not carry (a seed under which a sampled certificate passes and one under which it
+-- fails, B2).
+Stored (K : U) = { key : K, result : String }
+agreesWith (K : U) (eq : K -> K -> Bool) (r : Stored K) (rs : List (Stored K)) : Bool :=
+  match rs { nil -> true ; cons q rest -> (not (eq r.key q.key) or r.result == q.result) and agreesWith K eq r rest }
+determined (K : U) (eq : K -> K -> Bool) (rs : List (Stored K)) : Bool :=
+  match rs { nil -> true ; cons r rest -> agreesWith K eq r rest and determined K eq rest }
 
--- A model of the demand gives, for a run's demand, the demand on each law of its cone and what
--- the run records.
-Demanding : {
-  lawDemand : Demand -> String -> Hash -> LawDemand,
-  recorded : Demand -> Hash -> Record,
-}
+-- 8.S3, 8.S9: two runs with one identity have one result. The value of the theory is the store;
+-- 8.S10 says none is read back yet, so no model file gives one.
+Store (K : U) (eq : K -> K -> Bool) : { runs : List (Stored K) }
+OneIdentityOneResult (K : U) (eq : K -> K -> Bool) (st : Store K eq) : Bool := determined K eq st.runs
+Store (K : U) (eq : K -> K -> Bool) := OneIdentityOneResult K eq
 
--- §2. L12.3, 6.S15: the demand on a law carries the run's cutoff and the run's values, and the
--- law's own name and cone; nothing of it is recomputed from the law's cone. [proposed] The run
--- also gives the law the name it certifies, printed, to the law's model parameter
--- (certification.lth §3, run.py's `certification`); that is the run's binding and not the
--- demand's, so `given` here is what `--set` gave.
-PassedDownNotRecomputed (m : Demanding) (d : Demand) (law : String) (cone : Hash) : Bool :=
-  m.lawDemand d law cone == { law := law, cone := cone, given := d.sets, accepts := d.accepts }
+-- ---------------------------------------------------------------- §5 Certifying at the demand passed down
+
+-- Two laws of certification.lth's `Certifying` at the demand §2 passes down; no demand model can
+-- break them, so they are predicates here, for `Certifying` to claim (certification.lth is
+-- another session's while this is written). [proposed] Where they go is certification.lth's.
 -- 6.S10: a demand that names no price for assumptions refuses every assumed value: no entry with
 -- the grade `AssumedGrade` serves a law under it
-NoPriceRefusesAssumed (m : Demanding) (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) : Bool :=
-  admitsAssumptions d or not (e.grade == just AssumedGrade) or not (k.serves (m.lawDemand d law cone) e)
+NoPriceRefusesAssumed (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) : Bool :=
+  admitsAssumptions d or not (e.grade == just AssumedGrade) or not (k.serves (lawDemand d law cone) e)
 -- 6.S16, L10.5: lowering the cutoff loses nothing accepted; certification.lth's law, applied to
 -- the demand passed down, not restated
-LoweringLosesNothing (m : Demanding) (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) (g : Grade) : Bool :=
-  ServesIsMonotoneInTheCutoff k (m.lawDemand d law cone) e g
-
--- §3. 12.S18, L5.18: the record carries every cutoff and parameter the demand carries, and the
--- cone it ran; so an inner demand (`inner`) records what its caller's would, at the inner entry
-RecordsEveryCutoff (m : Demanding) (d : Demand) (h : Hash) : Bool :=
-  m.recorded d h == { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, delta := d.delta,
-                      fuel := d.fuel, checked := d.checked, lock := d.pinned }
-Demanding := PassedDownNotRecomputed & NoPriceRefusesAssumed & LoweringLosesNothing & RecordsEveryCutoff
+LoweringLosesNothing (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) (g : Grade) : Bool :=
+  ServesIsMonotoneInTheCutoff k (lawDemand d law cone) e g
