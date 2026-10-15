@@ -11,7 +11,7 @@ Rules adopted (coordinator's, each undone by one commit):
   a comment of the code.
 - Before reasoning a design question, search the principles record, the spec and the decisions.
 
-Status: 2026-10-16, step 0 done (e6eb343, b27dae8, 805daff); step 1 done (b9705b0: 131 clauses, 60 implemented, 44 postponed, 27 pending); step 3a running; step 2 waits for 3a (both touch spec statuses).
+Status: 2026-10-16, step 0 done (e6eb343, b27dae8, 805daff); step 1 done (b9705b0: 131 clauses, 60 implemented, 44 postponed, 27 pending); step 3a done (5f2b87d..812bc15; v0.4 criterion c met, verified by the coordinator); step 2 and step 3b launched.
 
 ## Step 0. His decisions of 2026-10-15/16 into the principles (agent, Sonnet)
 D-2026-10-16-b: L2.8, L2.7's sentence, L13.5, L11.8, O1's note, L10.5 marked suspended in the Boolean
