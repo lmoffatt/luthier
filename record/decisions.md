@@ -2610,3 +2610,19 @@ Quote:      "Si" (to: "¿agrego las cláusulas 1 y 2 a los principios como propu
 Source:     chat:luthier-3e:0 (this session, 2026-10-16; the line unknown until the export)
 Kind:       principles (L10.11, L10.12); later spec 6, 8, 12 and certification.lth
 Status:     current
+
+D-2026-10-16-b  On items 7, 22 and 29 to 33 of record/plan/decisions-pending-2026-10-15.md, the
+                coordinator's recommendations taken: 7 (a) without the copy: `certify` writes an
+                entry only in the store of the file that makes the claim (L10.12), none beside the
+                test program; 29 (a): L2.8 added as proposed; 30 (b): the sentence in L2.7 only, no
+                P13 clause (a recurring mechanism with no real case); 31 (a): L13.5 added; 32 (a):
+                L11.8 added; 33 (a), with (i) also marking L10.5 suspended in the Boolean slice by
+                D-2026-10-14-c until the cost types, and (ii) L5.6's citation to `plan.lth`; 22 (a)
+                refined: a domain a law states is part of the law, not a cutoff; a series'
+                truncation is derived from the demand's tolerance; what a demander could vary is a
+                declared default, recorded (L5.18, L5.19).
+Author:     Luciano
+Quote:      "Si, es más fácil para todos así. Sí, estoy de acuerdo con todas las seis decisiones."
+Source:     chat:luthier-3e:0 (this session, 2026-10-16; the line unknown until the export)
+Kind:       principles (L2.7, L2.8, L5.6, L10.5, L11.8, L13.5, O1); certify.py's store; P11's reading
+Status:     current
