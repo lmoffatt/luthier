@@ -440,6 +440,32 @@ def test_adding_to_a_store_twice_keeps_one_entry(tmp_path):
     assert [e["seed"] for e in certify.read_store(path)] == [1, 0]
 
 
+def test_a_store_another_process_writes_during_the_suite_survives():
+    # record/IA/controls-2026-10-15/prompt-tail.md: the suite reads and writes a copy of the
+    # library's stores (conftest.py), so a store that a `luthier certify` beside it rewrites during
+    # a test keeps what certify wrote, and the test's own write never reaches the library
+    import subprocess
+    import sys
+    from conftest import library_stores_apart
+    probe = certify.LIBRARY / "suite_probe_model.lut"  # no such file is needed: the store is beside its name
+    where = certify.LIBRARY / "suite_probe_model.cert.json"
+    ours = {"law": "Ours", "cone": "sha256:0", "binding": [], "seed": 1, "cases": 1, "outcome": "Passed", "grade": "Sampled"}
+    theirs = dict(ours, law="Theirs")
+    try:
+        where.write_text("[]\n", encoding="utf-8")
+        with library_stores_apart() as copy:
+            certify.write_store(probe, [ours])
+            assert json.loads((copy / where.name).read_text(encoding="utf-8")) == [ours]
+            env = {k: v for k, v in os.environ.items() if k != certify.LIBRARY_STORES}
+            subprocess.run([sys.executable, "-c",
+                            "import json, sys; from luthier import certify; "
+                            "certify.write_store(sys.argv[1], [json.loads(sys.argv[2])])",
+                            str(probe), json.dumps(theirs)], env=env, check=True)
+        assert json.loads(where.read_text(encoding="utf-8")) == [theirs]
+    finally:
+        where.unlink(missing_ok=True)
+
+
 def test_interpreter_revision_is_the_last_tag():
     import subprocess
     tag = subprocess.run(["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True,
