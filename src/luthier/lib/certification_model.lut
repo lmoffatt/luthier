@@ -15,7 +15,7 @@
 -- failure). `grade` already is the fold the theory's step laws now fix (C1), and is unchanged.
 
 import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
-  Standing ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
+  Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
   Uncertified Provisional Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical
@@ -82,7 +82,8 @@ refuseName (es : List Entry) (c : ConeName) : List Refusal :=
 refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
   match cs { nil -> nil ; cons c rest -> appendRefusals (refuseName es c) (refuse es rest) }
 
--- 6.S11: transport along a Boolean identity: the intersection of the reaches, the weaker grade
+-- 6.S11: transport along a Boolean identity: the intersection of the reaches, the weaker grade, and
+-- only along a link from the law carried (C7 of the round-1 review)
 larger (x y : Float64) : Float64 := if x <= y then y else x
 smaller (x y : Float64) : Float64 := if x <= y then x else y
 keepWithin (r : Reach) (vs : List Value) : List Value :=
@@ -96,7 +97,9 @@ meetReaches (bs is : List ParameterReach) : List ParameterReach :=
   match bs { nil -> nil ; cons r rest ->
     (match reachOf r.parameter is { just s -> cons { parameter := r.parameter, reach := meet r.reach s } (meetReaches rest is) ;
                                     nothing -> meetReaches rest is }) }
-transport (b i : Standing) (a : String) : Standing := { law := a, on := meetReaches b.on i.on, grade := weakest b.grade i.grade }
+transport (b : Standing) (l : Link) : Maybe Standing :=
+  if l.from == b.law then just { law := l.to, on := meetReaches b.on l.standing.on, grade := weakest b.grade l.standing.grade }
+  else nothing
 
 certifying : Certifying := {
   identity := identity, stale := stale, grade := grade, contains := contains, serves := serves,
