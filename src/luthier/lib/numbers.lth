@@ -97,7 +97,13 @@ LeqTotal (d : Doubles) (x y : Moderate) : Bool := d.leq x y or d.leq y x
 -- was not run (7.S6 asks a constructive subtype; 7.S12: no rare premise; the coordinator's item 5)
 LeqAntisymmetric (d : Doubles) (x y : Moderate) : Bool := x == y or not (d.leq x y and d.leq y x)
 LeqTransitive (d : Doubles) (c : LeqChain d) : Bool := d.leq c.x c.z
-LessIsStrict (d : Doubles) (x y : Moderate) : Bool := d.less x y == (d.leq x y and not (x == y))
+-- [proposed, 2026-10-15, L9.14] the strict order differs from the order only at a tie, which two
+-- independent draws almost never give, so `less := a <= b` passed the law over every drawn pair
+-- (report-mutants.md); the law is stated over a pair that ties when `tie` holds, its second the
+-- first: the same instances as over every pair, drawn with an atom at equality of one half
+LessIsStrict (d : Doubles) (x y : Moderate) (tie : Bool) : Bool :=
+  { z := if tie then x else y
+    d.less x z == (d.leq x z and not (x == z)) }
 GreaterIsLessReversed (d : Doubles) (x y : Moderate) : Bool := d.greater x y == d.less y x
 GeqIsLeqReversed (d : Doubles) (x y : Moderate) : Bool := d.geq x y == d.leq y x
 UnequalIsNotEqual (d : Doubles) (x y : Moderate) : Bool := d.unequal x y == not (x == y)
