@@ -8,7 +8,10 @@ read; each of its entries is assigned the file that makes its claim (tester.py's
 matching it to a current test line of that file:
   1. by (law, binding without fingerprints, kind), the group `certify.prune` uses;
   2. else by (law, kind) when every current line of that law and kind has one claim file;
-  3. else by the names of the binding's generators (each before " (").
+  3. else by the names of the binding's generators (each before " (");
+  4. else (an entry of a line since changed or removed) by `claim_file` on the entry's own binding,
+     each parameter bound to its generator's name as the test program sees it; each such entry is
+     printed.
 An entry no tier resolves stops the fold (nothing is written). An entry whose identity is already
 in the claim's store is not added again; the others are added without pruning (no entry lost), the
 store kept latest in front, its predicate (`certify.store_errors`) checked. A store whose every
@@ -26,6 +29,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+# entries of laws no file defines any longer: kept as evidence, beside no program, read by nothing
+ARCHIVE = ROOT / "record" / "archive" / "stores-2026-10-16"
 sys.path.insert(0, str(ROOT / "src"))
 
 from luthier import certify, tester  # noqa: E402
@@ -40,7 +45,8 @@ def kind(entry):
 
 
 def lines_of(program):
-    """Per current test line: (group key, (law, kind), generator names, claim file)."""
+    """Per current test line: (group key, (law, kind), generator names, claim file); and the
+    program as loaded, for tier 4."""
     runner, specs, loaded = tester.prepare(program)
     cones = certify.Cones(runner)
     out = []
@@ -50,10 +56,25 @@ def lines_of(program):
             entry["kind"] = certify.CONTROL
         claim = tester.claim_file(loaded, spec, runner).resolve()
         out.append((certify._group(entry), (entry["law"], kind(entry)), generators(entry), claim))
-    return out
+    return out, (runner, loaded)
 
 
-def claim_of(entry, lines):
+def from_entry(entry, program):
+    """Tier 4: `claim_file` of a spec made of the entry's law and binding; ORPHAN when no file the
+    test program loads defines the law any longer (a law removed since)."""
+    runner, loaded = program
+    if not any(entry["law"] in f.defined for f in loaded.files.values()):
+        return ORPHAN
+    where = [tester.Binding(d["parameter"], None, name, None)
+             for d, name in zip(entry["binding"], generators(entry))]
+    spec = tester.Spec(entry["law"], False, None, 0, 0, 0, where, [], {}, kind(entry) == certify.CONTROL)
+    return tester.claim_file(loaded, spec, runner).resolve()
+
+
+ORPHAN = "orphan"
+
+
+def claim_of(entry, lines, program):
     group = certify._group(entry)
     by_group = {c for g, _, _, c in lines if g == group}
     if len(by_group) == 1:
@@ -64,7 +85,12 @@ def claim_of(entry, lines):
     by_names = {c for gens, c in same if gens == generators(entry)}
     if len(by_names) == 1:
         return by_names.pop(), 3
-    return None, None
+    try:
+        claim = from_entry(entry, program)
+        return claim, (5 if claim == ORPHAN else 4)
+    except Exception as exc:  # reported with the entry, and the fold stops
+        print(f"tier 4 failed: {entry['law']}: {type(exc).__name__}: {exc}")
+        return None, None
 
 
 def main(argv=None):
@@ -74,8 +100,9 @@ def main(argv=None):
     if os.environ.get(certify.LIBRARY_STORES):
         sys.exit(f"{certify.LIBRARY_STORES} is set: the library's stores would be read elsewhere")
     stores = sorted(p for d in ("tests/tester", "examples") for p in (ROOT / d).rglob("*.cert.json"))
-    folded, plan, tiers, unresolved = [], {}, {1: 0, 2: 0, 3: 0}, []
+    folded, plan, tiers, unresolved = [], {}, {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}, []
     total_before = 0
+    orphans = {}
     for store in stores:
         program = store.with_name(store.name[:-len(".cert.json")] + ".lut")
         if not program.exists() or not tester.collect_tests(program):
@@ -84,16 +111,23 @@ def main(argv=None):
         raw = store.read_bytes()
         entries = json.loads(raw)
         print(f"read: {store.relative_to(ROOT)} {len(entries)} entries sha256:{hashlib.sha256(raw).hexdigest()}")
-        lines = lines_of(program)
+        lines, loaded = lines_of(program)
         own = []
         for e in entries:
-            claim, tier = claim_of(e, lines)
+            claim, tier = claim_of(e, lines, loaded)
+            if tier == 4:
+                print(f"  tier 4: {e['law']} {generators(e)} -> {Path(claim).relative_to(ROOT)}")
+            if tier == 5:
+                print(f"  orphan: {e['law']} {generators(e)} (no file defines the law)")
             if claim is None:
                 unresolved.append((store, e["law"], generators(e)))
                 continue
             tiers[tier] += 1
-            if claim == program.resolve():
+            if claim == ORPHAN:
+                orphans.setdefault(store.name, []).append(e)
+            elif claim == program.resolve():
                 own.append(e)
+                print(f"  own: {e['law']} {generators(e)}")
             else:
                 plan.setdefault(claim, []).append(e)
         total_before += len(entries)
@@ -104,8 +138,10 @@ def main(argv=None):
         sys.exit(1)
     moved = already = 0
     targets = {}
+    owns = {store.with_name(store.name[:-len(".cert.json")] + ".lut").resolve(): own for store, _, own in folded}
     for claim, entries in plan.items():
-        current = certify.read_store(claim)
+        # a test program that states a law is that law's claim: its store, once folded, is its own
+        current = list(owns[claim]) if claim in owns else certify.read_store(claim)
         seen = {certify.identity(e) for e in current}
         new = []
         for e in entries:
@@ -124,15 +160,25 @@ def main(argv=None):
         print(f"claim: {Path(claim).relative_to(ROOT)} {len(current)} + {len(new)} = {len(merged)} "
               f"({len(entries) - len(new)} already there)")
     kept = sum(len(own) for _, _, own in folded)
+    orphaned = sum(len(es) for es in orphans.values())
     print(f"tiers: {tiers}")
     print(f"before: {total_before} entries in {len(folded)} stores beside files with test lines")
     print(f"after: {moved} moved, {already} already in the claim's store, {kept} kept beside their own "
-          f"claim; {moved + already + kept} accounted for")
+          f"claim, {orphaned} orphans archived in {ARCHIVE.relative_to(ROOT)}; "
+          f"{moved + already + kept + orphaned} accounted for")
     if ns.write:
         for claim, (_, merged) in targets.items():
             certify.write_store(claim, merged)
+        if orphans:
+            ARCHIVE.mkdir(parents=True, exist_ok=True)
+        for name, es in orphans.items():
+            (ARCHIVE / name).write_text(json.dumps(es, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+            print(f"archived: {(ARCHIVE / name).relative_to(ROOT)} {len(es)} entries")
         for store, _, own in folded:
-            if own:
+            program = store.with_name(store.name[:-len(".cert.json")] + ".lut").resolve()
+            if program in targets:
+                print(f"kept: {store.relative_to(ROOT)} {len(targets[program][1])} entries of its own claims")
+            elif own:
                 certify.write_store(store.with_name(store.name[:-len(".cert.json")]), sorted(
                     own, key=lambda e: e.get("date", ""), reverse=True))
                 print(f"kept: {store.relative_to(ROOT)} {len(own)} entries of its own claims")
