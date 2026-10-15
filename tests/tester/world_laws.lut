@@ -103,7 +103,12 @@ validator : Externs := {
   identity := fn r h { r.route + " at " + h },
 }
 validators : List Externs := [validator]
-cutoff : List Grade := [Sampled]
+-- the cutoff and the state type under names of this file: a census member defined in another file
+-- makes that file a home of the line's entries (tester.py's `model_homes`), and neither `Sampled`
+-- (a constructor of test.lth) nor `State` (an alias, which `_is_type` does not see as a type) is
+-- a model; the Host lines' entries would otherwise land in world_model.cert.json
+sampledCutoff : Grade := Sampled
+cutoff : List Grade := [sampledCutoff]
 routes : List Route := [routeOf "fit" lawful "python:m.fit" false, routeOf "raw" lawless "python:m.raw" false,
   routeOf "guess" lawful "python:m.guess" true, routeOf "rawGuess" lawless "python:m.rawGuess" true]
 hashes : List String := ["sha256:h1", "sha256:h2", "sha256:h3", "sha256:h4"]
@@ -146,6 +151,8 @@ test "RecordCrossesByField" ExhaustiveMode (seed <- 20261015) (whereBindings <- 
 -- §5 the host, over the cases a faithful host gathers along one chain of tokens
 listedHost : Host State := { console := console, observe := host.observe, print := host.print, readFile := host.readFile }
 hosts : List (Host State) := [listedHost]
+HostState = State
+hostStates : List Concrete := [HostState]
 case (S A : U) (b : S) (x : A) (a : S) : Observed S A := { before := b, result := x, after := a }
 after (st : State) (out : String) : State := { stdout := out, files := st.files }
 hello : List String := ["hello, world"]
@@ -168,17 +175,17 @@ helloHeld : List (Held State Unit theWorld) := [held State Unit theWorld (fn w {
 inputHeld : List (Held State (Maybe String) theWorld) := [held State (Maybe String) theWorld
   (fn w { listedHost.readFile w "input.txt" }) (readFileDescription State console "input.txt")]
 extras : List (List String) := [["stdout"], ["stdout", "input.txt", "other.txt"]]
-test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "s" "hello", bind "c" "helloCases"])
-test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "s" "empty", bind "c" "emptyCases"])
-test "HostAgreesReadFile" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostAgreesReadFile" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "p" "input", bind "c" "inputCases"])
-test "HostAgreesReadFile" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostAgreesReadFile" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "p" "otherFile", bind "c" "otherCases"])
-test "HostObserveChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostObserveChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "ps" "observed", bind "c" "observeCases"])
-test "HostChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "A" "unitTypes", bind "h" "helloHeld", bind "extra" "extras", bind "c" "helloCases"])
-test "HostChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+test "HostChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "hostStates", bind "o" "hosts",
   bind "A" "maybeTypes", bind "h" "inputHeld", bind "extra" "extras", bind "c" "inputCases"])
