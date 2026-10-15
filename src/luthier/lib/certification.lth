@@ -126,6 +126,12 @@ State : U := data {
 -- same outcome (7.S13, determinism), and an entry has a grade exactly when it passed (6.S3: only a
 -- pass certifies; test.lth: a refutation or nothing settled has no grade). These are the predicate
 -- of the type, so every store built owes them: the tester's, and one read from `x.cert.json`.
+-- [D-2026-10-15-d, L14.4: the hole marked] The store is read here and written by `record` below,
+-- but `x.cert.json` (and run.py's `x.results.json`) are read and written by the host, in Python,
+-- outside the token `W`: no action of this file touches them, and a store changed by a third party
+-- between two reads is not seen by any law. Postponed until both stores become places of the
+-- world with actions of their own (10.S6, 12.S11), with the full store of results; until then each
+-- run records the hash of the bytes of every store it read (`stores_read`, 12.S18).
 -- [proposed, C6 and C11 of the round-1 review] Two more, so that what an entry holds is tied to
 -- what it ran (6.S7: the grade is a view of the evidence, not stored apart) and the reader's
 -- "latest" is the latest: a pass's grade is one its evidence admits, and a pass over listed cases
@@ -180,7 +186,8 @@ known (k : Certifying) (i : Identity) (es : List Entry) : Maybe Entry :=
 -- Recording never edits an entry (6.S8): a new entry goes in front and the old ones stay. Writing a
 -- certificate is idempotent (6.S15) [proposed: an entry whose identity the store has leaves the
 -- store as it is, since 7.S13 says its outcome is the one kept; so `--deep` rechecks and adds
--- nothing, and a new seed adds an entry].
+-- nothing, and a new seed adds an entry]. The write itself is the host's, outside `W` (the hole
+-- marked at the store above, D-2026-10-15-d).
 record (k : Certifying) (e : Entry) (st : Store k) : Store k :=
   match known k (k.identity e) st { just f -> st ; nothing -> cons e st }
 
