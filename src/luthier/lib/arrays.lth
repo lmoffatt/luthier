@@ -313,10 +313,19 @@ PinvRestricts (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : PsdAt m fl) :
     approxMatSlackOf (fl * frobDef s) tol (matMulDef (absMat s) (matMulDef (absMat p) (absMat s))) (m.matMul s (m.matMul p s)) s }
 PinvTraceIsRank (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   within tol (m.trace (m.matMul s (m.pinvSym fl s))) (toFloat64 (m.retainedRank fl s))
+-- [proposed, 2026-10-15, L9.14] as RankScales (15caf52): a scale drawn within the size leaves an
+-- absolute floor unseen (one of 1e-3 passed, record/IA/controls-2026-10-15/report-tail.md), so the
+-- law also scales s to a Frobenius norm of c times the floor, where every eigenvalue is below any
+-- absolute floor above c fl, while a floor relative to the largest retains what it retained in s;
+-- P there is P over that scale, compared as at c. A zero floor or a zero matrix has nothing to
+-- scale to.
 PinvScales (m : Arrays) (tol : Tolerance) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
   { p := m.pinvSym fl s
     approxMatOf (frobDef s * frobDef p * tol) (mscaleDef (1.0 / c) (absMat p) )
-      (m.pinvSym fl (mscaleDef c s)) (mscaleDef (1.0 / c) p) }
+      (m.pinvSym fl (mscaleDef c s)) (mscaleDef (1.0 / c) p)
+    and (fl == 0.0 or frobDef s == 0.0
+         or approxMatOf (frobDef s * frobDef p * tol) (mscaleDef (frobDef s / (c * fl)) (absMat p))
+              (m.pinvSym fl (mscaleDef (c * fl / frobDef s) s)) (mscaleDef (frobDef s / (c * fl)) p)) }
 
 Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
   & DotSymmetric & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
