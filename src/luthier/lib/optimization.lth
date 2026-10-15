@@ -12,6 +12,10 @@
 -- `optimization.lut` at the tag v0.1-final; the names are its. The settings (tolerance, budget,
 -- floor) and the decrement are belief.lth's, so that one `Settings` serves the maximizer and
 -- the step; `pinvSym` and `trace` are arrays.lth's (added for this file, one commit each).
+-- 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- layer-3-review-2026-10-15/prompt-fix-BCD.md (items 1 and 4 of its summary-BCD.md): the gradient
+-- of an objective along a drawn direction; `StepRule` determines the step from the direction: the
+-- trial point and its value, accepted exactly when the value falls.
 --
 -- What this file states. An objective is what is minimized: a value on the vectors of a
 -- dimension, its gradient and a positive step matrix (the information, or Gauss-Newton); its
@@ -51,7 +55,7 @@ import "belief.lth" Settings Posterior decrement quadratic
 -- optimization.lut:18-24). Certified per objective (7.R4), and on the quadratic family below.
 Objective (n : Nat) : { value : VecOf n -> Float64, grad : VecOf n -> Vec Float64, stepMatrix : VecOf n -> Mat Float64 }
 -- spec 7.R2, 11.S18
-GradIsGradient (n : Nat) (o : Objective n) (r : Resolution) (x : VecOf n) : Bool := IsGradient n r o.value o.grad x
+GradIsGradient (n : Nat) (o : Objective n) (r : Resolution) (x v : VecOf n) : Bool := IsGradient n r o.value o.grad x v
 StepMatrixSymmetric (n : Nat) (o : Objective n) (tol : Tolerance) (x : VecOf n) : Bool :=
   approxMat tol (o.stepMatrix x) (transpose (o.stepMatrix x))
 StepMatrixNonNegative (n : Nat) (o : Objective n) (tol : Tolerance) (x v : VecOf n) : Bool :=
@@ -128,10 +132,11 @@ minimize (n : Nat) (s : Settings) (d : Damping) (o : Objective n) (st : LMState 
 -- optimization_model.lut) is validated against them at its first action (10.S10) and the native
 -- definitions above are its other model. The laws: the direction descends (its inner product
 -- with the gradient is not positive beyond rounding) and agrees with the native one within the
--- demand's tolerance; a step accepted lowers the value, takes the point along the direction,
--- lowers the damping by the schedule, and counts the iteration; a step rejected keeps the point
--- and the value, raises the damping by the factor, and counts the iteration; and on a concave
--- quadratic the first step from the start is accepted unless the start is the minimum.
+-- demand's tolerance; the step tries the point along the direction and is accepted exactly when
+-- the objective's value there is below the state's: accepted, it takes that point and that value,
+-- lowers the damping by the schedule and counts the iteration; rejected, it keeps the point and
+-- the value, raises the damping by the factor and counts the iteration; and on a concave quadratic
+-- the first step from the start is accepted unless the start is the minimum.
 LMStep : {
   direction : (n : Nat) -> Settings -> Objective n -> VecOf n -> Float64 -> Vec Float64,
   step : (n : Nat) -> Settings -> Damping -> Objective n -> LMState n -> LMState n,
@@ -142,13 +147,20 @@ DirectionDescends (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (o : O
     q <= 0.0 or within tol q 0.0 }
 DirectionAgrees (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (o : Objective n) (x : VecOf n) (mu : Positive) : Bool :=
   approxVec tol (m.direction n s o x mu) (dampedStep n s o x mu)
+-- [proposed] The acceptance is an equivalence and the new value is the objective's at the trial
+-- point, so that the law determines the step from the direction (4.R10): as an implication with
+-- the value only bounded, `phi := pt - 1` and "accept only on even iterations" passed it
+-- (summary-BCD.md, item 4). The state is any record, its `phi` unrelated to its point; the law
+-- compares with `st.phi` as given, which is what `lmStep` reads.
 -- spec P11 (the damping is the schedule's)
 StepRule (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (o : Objective n) (st : LMState n) : Bool :=
   { s2 := m.step n s d o st
-    if s2.accepted
-    then s2.phi < st.phi and approxVec exact s2.x (add st.x (m.direction n s o st.x st.mu))
-         and s2.mu == lowered d st.mu and s2.iter == st.iter + 1
-    else approxVec exact s2.x st.x and s2.phi == st.phi and s2.mu == st.mu * d.factor and s2.iter == st.iter + 1 }
+    xt := add st.x (m.direction n s o st.x st.mu)
+    pt := o.value xt
+    s2.accepted == (pt < st.phi) and s2.iter == st.iter + 1
+    and (if s2.accepted
+         then approxVec exact s2.x xt and s2.phi == pt and s2.mu == lowered d st.mu
+         else approxVec exact s2.x st.x and s2.phi == st.phi and s2.mu == st.mu * d.factor) }
 -- the quadratic family of belief.lth, minimized: its minimum at b, curvature c
 quadraticObjective (n : Nat) (b : VecOf n) (c : Positive) : Objective n := negate n (quadratic n b c)
 QuadraticStepAccepts (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
