@@ -5,7 +5,11 @@
 -- verdict; `lift` and `exact`; how laws combine; no cutoff); D-2026-10-11-l (the laws of relations
 -- live here); D-2026-10-13-l (a law is a theory: `forall`, `exists`, the connectives, and evidence
 -- that follows the form); 6.S5 (the cost algebra, whose six laws are certification.lth's, step 5);
--- L2.7. Pattern of ebnf.lth.
+-- L2.7. Pattern of ebnf.lth. §4 added 2026-10-15 by Claude Fable 5.1, an agent of the coordinating
+-- session, on record/IA/statistical-2026-10-15/prompt-theory.md: 7.S17 to 7.S19 as rewritten that
+-- day, L9.15, D-2026-10-15-b (a statistical law's verdict is ternary, the grey zone resolved by
+-- Wald's sequential probability ratio test), D-2026-10-14-c (its cutoffs the demand's), L9.14
+-- (each with a control).
 --
 -- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
@@ -18,6 +22,10 @@
 --   §3 A law as a theory: its forms (`forall`, `exists`, and, or, then, a case) and
 --      its evidence, with what each kind of evidence settles (D-2026-10-13-l); the
 --      coverages in order (7.S10; D-2026-10-14-b, from test.lth).                   done
+--   §4 Statistical laws: the ternary verdict with its rates, the demand's cutoffs, a
+--      statistical law as a theory of its statistic and its alternative, Wald's
+--      sequential test over a stream of samples (7.S17 to 7.S19, L9.15,
+--      D-2026-10-15-b).                                                             done
 
 import "checks.lth" Failures isEmpty
 
@@ -82,7 +90,9 @@ isHomomorphism (A B : U) (same : B -> B -> Bool) (f : A -> B) (opA : A -> A -> A
 -- stated by it (conditioning is an operation on a measure, not a connective). This is the type
 -- `Law` of what a test runs (5.S1, 3.S12); it is Boolean until the cost library (D-2026-10-13-aa,
 -- Q6), when a case valued in `C` joins it. In `U` with constructors over `U`: version 0 keeps
--- `U : U` (3.S8).
+-- `U : U` (3.S8). `Statistical` is the form of a statistical law (7.S17, §4): a theory of its
+-- statistic and its alternative, the stream its samples are drawn from, and the cutoffs of the
+-- sequential test that values it.
 Law : U := data {
   Case : Bool -> Law ;
   Forall : (A : U) -> (A -> Law) -> Law ;
@@ -91,6 +101,7 @@ Law : U := data {
   Either : Law -> Law -> Law ;
   Not : Law -> Law ;
   Then : Law -> Law -> Law ;
+  Statistical : (S T : U) -> StatisticalLaw S -> (Nat -> T -> S * T) -> Sequential -> Law ;
 }
 
 -- How much of a type the cases of a `forall` cover: all of it; all of it up to a size, the box
@@ -125,7 +136,8 @@ Covering := CoveragesAreOrdered
 -- of an `exists`, a counterexample to a `forall`); points of the type with their evidence and how
 -- much they cover; a pair for `and`; one side for `or`; a citation or an assumption, which models
 -- any law whole; a run that gave no case, with its reason (a budget spent, a generator that could
--- not draw; 7.S12), which settles nothing.
+-- not draw; 7.S12), which settles nothing; and, for a statistical law, the verdict of its
+-- sequential test with the rates it carries (§4, 7.S17).
 Evidence : U := data {
   Evaluated : Bool -> Evidence ;
   At : (A : U) -> A -> Evidence -> Evidence ;
@@ -135,6 +147,7 @@ Evidence : U := data {
   Cited : String -> Evidence ;
   Assumed : Evidence ;
   NotRun : String -> Evidence ;
+  Tested : StatisticalVerdict -> Evidence ;
 }
 
 -- What evidence settles: confirmed, refuted, supported (by a census or a sample, never confirmed),
@@ -214,6 +227,11 @@ CitedWhole (m : Settling) (p : Law) (r : String) : Bool := m.settles p (Cited r)
 AssumedWhole (m : Settling) (p : Law) : Bool := m.settles p Assumed == Assumes
 -- a run that did not run settles nothing
 NotRunIsUnsettled (m : Settling) (p : Law) (r : String) : Bool := m.settles p (NotRun r) == Unsettled
+-- a statistical law is settled by the verdict of its sequential test (§4): holding supports it (a
+-- sample never confirms, 7.S10), failing refutes it, and an unresolved test settles nothing
+StatisticalByTest (m : Settling) (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (v : StatisticalVerdict) : Bool :=
+  m.settles (Statistical S T l draw c) (Tested v)
+    == (match v { Holds r -> Supported ; Fails r -> Refuted ; Unresolved r -> Unsettled })
 -- the combination of a conjunction's verdicts: commutative and associative, a refutation absorbs
 -- everything, an unsettled part absorbs all but a refutation, and confirmation is neutral; beyond
 -- that it is the demand's (5.S8)
@@ -224,4 +242,77 @@ CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
 
 Settling := CaseIsEvaluated & ForallAtOnePoint & ForallOnPoints & ExistsAtOnePoint & ExistsOnPoints & BothByPair
   & EitherBySide & EitherRefutedByBoth & NotFlips & ThenIsMaterial & CitedWhole & AssumedWhole & NotRunIsUnsettled
-  & CombineCommutes & CombineAssociates & CombineAbsorbs
+  & StatisticalByTest & CombineCommutes & CombineAssociates & CombineAbsorbs
+
+-- ---------------------------------------------------------------- §4 Statistical laws
+
+-- A statistical law's verdict is ternary (7.S17, L9.15, D-2026-10-15-b): it holds, it fails, or it
+-- is unresolved with what was sampled. Each carries its rates: `alpha`, the probability of failing
+-- a law that holds; `beta`, of holding one that fails, against the alternative at distance
+-- `delta`; and the samples spent. They go into the certificate as the price of a sampled grade,
+-- operated on when the cost types come (G2, L12.6; D-2026-10-13-m). [proposed] `delta` travels
+-- with `beta`, which means nothing without the alternative it is measured against.
+Rates = { alpha beta delta : Float64, spent : Nat }
+StatisticalVerdict : U := data {
+  Holds : Rates -> StatisticalVerdict ;
+  Fails : Rates -> StatisticalVerdict ;
+  Unresolved : Rates -> StatisticalVerdict ;
+}
+
+-- The cutoffs of the sequential test, every one the demand's (D-2026-10-14-c, L5.18, 7.S8), never
+-- a constant in a law: the error rates `alpha` and `beta`, the distance `delta` of the
+-- alternative, the size of each sample (`initial`: the test grows by samples of this size,
+-- [proposed] reading of L9.15's "initial size") and the budget, the most samples the test may
+-- spend. `alpha + beta < 1` so that Wald's thresholds bracket one; `delta < 1` so that the
+-- reference alternative below is a density with no zero (a single sample would otherwise settle
+-- the test by itself).
+sequentialCutoffs (alpha beta delta : Float64) (initial budget : Nat) : Bool :=
+  0.0 < alpha and alpha < 1.0 and 0.0 < beta and beta < 1.0 and alpha + beta < 1.0
+  and 0.0 < delta and delta < 1.0 and 0 < initial and 0 < budget
+Sequential : U := { alpha beta delta : Float64, initial budget : Nat | sequentialCutoffs alpha beta delta initial budget }
+rates (c : Sequential) (spent : Nat) : Rates := { alpha := c.alpha, beta := c.beta, delta := c.delta, spent := spent }
+
+-- A statistical law is a theory of its statistic and of its alternative at a distance (7.S17):
+-- `statistic` reads a sample of `S`; `ratio delta v` is the likelihood of the statistic's value
+-- `v` under the alternative at distance `delta` against the null, the law holding. Its laws: at
+-- distance zero there is no alternative, so the ratio is one, and the test could never conclude;
+-- and a likelihood ratio is never negative. What the test presumes beyond them, that the ratio
+-- has mean one under the null, is the calibration of the statistic (7.S17's runs on the model
+-- the law tests), a statistical law of this theory itself, not stated here. The stream the
+-- samples come from is not the law's: `Statistical` carries it beside the law, as `Forall`
+-- carries its type, a `draw` that gives one sample of a size from the state of the stream and
+-- the state after it (for a generator the state is the seed, 7.S1, which is the test's and not
+-- the law's, L9.15).
+StatisticalLaw (S : U) : { statistic : S -> Float64, ratio : Float64 -> Float64 -> Float64 }
+NoAlternativeAtZero (S : U) (l : StatisticalLaw S) (x : S) : Bool := l.ratio 0.0 (l.statistic x) == 1.0
+RatioNonNegative (S : U) (l : StatisticalLaw S) (c : Sequential) (x : S) : Bool := 0.0 <= l.ratio c.delta (l.statistic x)
+StatisticalLaw (S : U) := NoAlternativeAtZero S & RatioNonNegative S
+
+-- The reference alternative, for a law whose statistic is a p-value: under the null the p-value
+-- is uniform on [0, 1]; under the alternative at distance `delta` its density is
+-- `1 + delta (1 - 2 p)`, tilted toward small p-values. [proposed] 7.S17 names an alternative at
+-- distance delta and no form. This one is a density for every `delta` in (0, 1), keeps the ratio
+-- within [1 - delta, 1 + delta] so that no single p-value settles the test alone, needs neither a
+-- logarithm nor a power (laws.lth imports no model), and lies at Kolmogorov distance `delta / 4`
+-- from the uniform. The drift of the log ratio per sample under the null is about -0.045 at
+-- `delta = 0.5` and -0.19 at `delta = 0.9`; against a source whose p-values are all near zero it
+-- is `log (1 + delta)`.
+tilt (delta p : Float64) : Float64 := 1.0 + delta * (1.0 - 2.0 * p)
+byPValue (S : U) (pValue : S -> Float64) : StatisticalLaw S := { statistic := pValue, ratio := tilt }
+
+-- Wald's sequential probability ratio test (7.S17, 7.S18; Wald 1945) as a definition over the
+-- stream of samples: the product of the likelihood ratios of the samples so far fails the law
+-- when it reaches `(1 - beta) / alpha`, holds it when it falls to `beta / (1 - alpha)` (the
+-- thresholds whose error rates are at most about `alpha` and `beta`), and between the two one
+-- more sample is drawn, until the budget is spent, which leaves the law unresolved with what was
+-- spent. 7.S18's repetition of a failure once is this test's continuation into the grey zone,
+-- with one more draw.
+upperThreshold (c : Sequential) : Float64 := (1.0 - c.beta) / c.alpha
+lowerThreshold (c : Sequential) : Float64 := c.beta / (1.0 - c.alpha)
+sequentialFrom (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (t : T) (ratio : Float64) (spent : Nat) : StatisticalVerdict :=
+  if ratio >= upperThreshold c then Fails (rates c spent)
+  else if ratio <= lowerThreshold c then Holds (rates c spent)
+  else if spent >= c.budget then Unresolved (rates c spent)
+  else match draw c.initial t { (x, t2) -> sequentialFrom S T l draw c t2 (ratio * l.ratio c.delta (l.statistic x)) (spent + 1) }
+sequential (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (t : T) : StatisticalVerdict :=
+  sequentialFrom S T l draw c t 1.0 0
