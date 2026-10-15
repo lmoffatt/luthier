@@ -2626,3 +2626,24 @@ Quote:      "Si, es más fácil para todos así. Sí, estoy de acuerdo con todas
 Source:     chat:luthier-3e:0 (this session, 2026-10-16; the line unknown until the export)
 Kind:       principles (L2.7, L2.8, L5.6, L10.5, L11.8, L13.5, O1); certify.py's store; P11's reading
 Status:     current
+
+D-2026-10-16-c  A provisional extern is refused by default, in the theory (world.lth) as in `run`
+                (6.S14, L10.6); a demand that names it runs it as assumed, the grade propagating to
+                everything downstream. `provisional` is transitory debt, chosen while exploring
+                (every function has laws; what is missing is having written them): it carries its
+                reason; every run that applies one warns on stderr naming it; `check -v` lists them.
+                A permanent black box is certified by a law of characterization (agrees with
+                recorded outputs on stored cases), never left provisional. Against the danger he
+                named, a provisional forgotten deep in the code and hidden by a blanket
+                `--accept assumed` at the outermost run: [proposed by the coordinator] the
+                acceptance names what it accepts (`--accept assumed:correlate`), so a forgotten one
+                still refuses the run. Item 10 (option a); item 11 (`--uncertified`) moot.
+Author:     Luciano, on the decision assistant's explanation
+Quote:      "dale a, me parece que agranda Luthier. El peligro es que por olvido quede un
+            provisional dentro del código. Con lo que externamente también lo tenés que correr con
+            un accept algo y en la corrida más externa, como digo el peligro es que quede olvidado
+            un provisional dentro del código"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       world.lth (`applied`), 10.S10, 6.S14, run.py and cli.py (`--accept`), check.py
+Status:     current

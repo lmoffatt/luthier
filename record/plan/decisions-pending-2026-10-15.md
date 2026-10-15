@@ -173,6 +173,8 @@ provisional name is refused; an exception is O3 and leaves grade `assumed`) and 
 (`--accept assumed` today), with no new flag. Cost: one law of world.lth; 10.S10's "never certified"
 becomes "certified only as assumed"; item 11's flag becomes moot.
 
+*Answered in chat (2026-10-16): (a), D-2026-10-16-c; item 11 moot.*
+
 **11. Does `run --uncertified` exist until certification lands?** 12.S17 makes `run` refuse an
 uncertified cone with no opt-out (D-2026-10-12-y); D-2026-10-13-ac puts the slice's run before
 certification exists. Recommended: `run --uncertified`, printing the debt (the coordinator, with
