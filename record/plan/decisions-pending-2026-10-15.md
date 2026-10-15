@@ -139,6 +139,12 @@ default: ignored, as `*.cert.json` is. P2 (everything derived carries how it was
 tracking those of the slice's runs. Options: (a) ignored; (b) tracked for the slice's runs only;
 (c) all tracked. No recommendation. Sources: `record/plan/night-2026-10-13.md` (run 7 item);
 `record/principles-candidates-2026-10-15.md` (tensions).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (b). A slice run is the evidence
+Luciano will compare and cite, and D-2026-10-15-h made the record the object that says how to
+reproduce a run, so it belongs in git beside the program; the suite's runs and probes stay ignored.
+P2 (everything derived carries how it was derived) decides it, P8 (no more bureaucracy than it pays
+for) bounds it to the slice. Cost: a `.gitignore` exception for `examples/sonolocalizacion/` and a
+commit after each of his runs.
 
 ## The world and the host
 
@@ -160,6 +166,12 @@ laws gets no grade (`NoLawNoGrade`). Options: (a) refuse in both; (b) apply in b
 debt; (c) `run` applies only under `--uncertified` (see 11). No recommendation. Unblocks: S10-4,
 the O3 of the slice. Sources: `summary.md` (W5, contradictions); `report-second-line.md` (W5,
 S10-4, "Luciano: the provisional extern"); `record/plan/night-2026-10-13.md` (naive review item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a) by default. world.lth's
+`applied` should refuse a provisional extern as `run` does: L10.6 (a cone with an uncertified or
+provisional name is refused; an exception is O3 and leaves grade `assumed`) and 6.S14 say so. L5.20
+(every possible behavior has a way to be said) is met by the demand's price for assumptions
+(`--accept assumed` today), with no new flag. Cost: one law of world.lth; 10.S10's "never certified"
+becomes "certified only as assumed"; item 11's flag becomes moot.
 
 **11. Does `run --uncertified` exist until certification lands?** 12.S17 makes `run` refuse an
 uncertified cone with no opt-out (D-2026-10-12-y); D-2026-10-13-ac puts the slice's run before
@@ -174,17 +186,34 @@ grade for what is not checked), its default price yours. Options: (a) `assumed` 
 price (8.S1, 6.S10: a demand supplies it); (b) a stated default price. No recommendation. Unblocks:
 W1 and W9 (host and disk persistence) closing. Sources: `report-second-line.md` (W1, W9);
 `summary.md` (top screen item 1).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a), answered by L10.2 (an
+`assumed` certificate's evidence cost is the demand's parameter for assumptions, with no default, so
+a demand naming none refuses assumed values) and 6.S10 (D-2026-10-12-t), specific enough to win over
+L5.18's declared defaults. Cost: every acting run holds the observer in its cone, so each names a
+price (`--accept assumed` today). Where the host gives a guarantee, L9.7 (verification by delegation
+is `proved` by citation) removes the price for that place.
 
 **13. Which token follows a memo hit of an own action?** 10.S6 (own actions memoized, the token
 used once, D4). When an own action is served from the memo, which token comes back is a decision,
 not a wording fix. No options given in the source; the agent's reading is that it needs yours.
 Unblocks: S10-5. Source: `report-second-line.md` (S10-5).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* answered for now by D-2026-10-15-d
+(the stores are read and written in Python, outside the token W, until the full result store), so no
+own action is served from a memo under the token today. Later a memo hit is a read of the store, and
+L4.10 (an observation is itself an action) gives the token: the one that read returns, as for any
+observation. No special rule is needed. Cost: one sentence in 10.S6 when it is rewritten.
 
 **14. Is a bare value where `Maybe` is declared a `just` in `--checked`?** `tables.py`'s `parse`
 returns a table or None and `Table.cell` a pair or None, and the fit reads its CSVs through them.
 Options: (a) lenient, the docstring says a bare value is `just` (the night's default [proposed]);
 (b) strict bridge, tables.py returns `host.Just`. No recommendation. Unblocks: the strict
 `--checked` over the fit. Source: `record/plan/night-2026-10-13.md` (report-12 item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (b). `--checked` exists to test
+what crosses the bridge, and the lenient reading cannot tell `just nothing` from `nothing` in a
+`Maybe (Maybe T)`, nor a host that forgot to wrap from one that answered. L11.1 (an extern is
+declared over what it really receives and returns) decides it, with L11.8 (what crosses the bridge
+is recorded). Cost: `parse` and `Table.cell` in tables.py return the host's `Just` and nothing,
+their callers follow, and the cones that read tables are re-certified.
 
 ## Certification and grades
 
@@ -194,11 +223,23 @@ pin a law at `sampled` after an exhaustive run with the same generators. Options
 reading; (b) the weakest over all entries. The certification agent names (a) as the reading most
 worth your attention; no source recommends it. Unblocks: the grade rules of `certification.lth`
 standing. Source: `record/plan/night-2026-10-13.md` (certification.lth item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a). Taking the weakest over all
+entries would let a later sampled run undo an exhaustive pass under the same generators, against
+L10.4 (a later check issues a new certificate that supersedes the old, both kept, so progress is the
+chain). Across bindings the weakest is 7.S10's own text ("summarized by the weakest"). Within one
+binding, item 41's pooling and L10.11 (cases drawn under several seeds are an aggregate) refine
+"strongest pass". Cost: none; the file already states it.
 
 **16. May a failure (the top element) be a cutoff?** 6.S15: today the Boolean slice refuses
 failures by `OnlyAPassServes` and every cutoff refuses the top. Options: (a) no, a failure is
 refused outside the cutoff; (b) yes, a cutoff may accept it. No recommendation. Unblocks: S6-2.
 Source: `report-second-line.md` (S6-2).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a). A cutoff that accepts a
+failure accepts anything, which is running uncertified, the opt-out 6.S14 forbids (a cone with a
+name lacking a certificate is refused; no opt-out, D-2026-10-12-y). Running past a failure is said
+through L10.6's exception (O3, priced as an assumption), which keeps L5.20 (every possible behavior
+has a way to be said). The Boolean slice already refuses failures by `OnlyAPassServes`. Cost: one
+sentence in 6.S15.
 
 **17. What grade does a bounded exhaustive run give, and in what order?** 7.S10 (a `Bounded n` is a
 grade of its own): `test.lth` 125 gives `Confirmed` with `Bounded`, while `laws.lth` 190's
@@ -209,6 +250,12 @@ is a fixed order where L10.2 orders without a domain (T5). Options: (a) `Bounded
 right. No recommendation. Unblocks: T4, T5, L7, and the three-file agreement. Sources:
 `summary-BCD.md` (T4, T5, contradictions); `report-second-line.md` (T4, T5);
 `record/plan/night-2026-10-13.md` (tester item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (b), which is what 7.S10 already
+says ("bounded is exhaustive on the box the domain names"): `Bounded n` is a domain, not a grade,
+and L10.2 (the grade is derived from the domain and the evidence cost) decides it. test.lth grades
+it so; laws.lth's `ForallOnPoints` should confirm under `Bounded` on its box. `gradeRank`'s fixed
+order is the Boolean slice's stand-in until the cost types, to be marked so. Cost: two theory files,
+no certified store.
 
 ## The demand and the plan
 
@@ -220,11 +267,23 @@ field of the demand (8.S1 changed), forward the default (8.S3, changes run.py); 
 argument, forward the default. No recommendation (the draft marks its own reading [proposed]).
 Unblocks: B10, B22, and 8.S3 against 8.S4. Sources: `report-second-line.md` (B10, B22);
 `record/plan/night-2026-10-13.md` (demand.lth and plan.lth item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (b) for the place, forward for the
+default. D-2026-10-13-f (8.S1: the demand is the gate through which parameters change what the
+program does) puts a parameter separate from the program in the demand, and L5.2 (by default,
+forward on demand) is settled. By D-2026-10-15-h the strategy is in the record and out of the key,
+as `Confluent` justifies. Cost: 8.S1 gains the field; run.py's call by need stays the host's
+specimen, held to `TheDefaultsAgree`.
 
 **19. Does a model enter a result's key by the plan's hash or by its cone?** 8.S8 and 8.S11. The
 spec's list omits the laws; whether the model enters by plan hash or cone is open. Options:
 (a) plan hash; (b) cone hash. No recommendation. Unblocks: B24 and the key law. Source:
 `report-second-line.md` (B24).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (b), the cone. The model a type
+names is code the result depends on, so it enters where all code enters, the cone's hash, which
+D-2026-10-15-e made the strict level of equality fixed by the language; the plan's hash says how the
+cone was realized, and a plan over names would miss a changed model. B24's other law (the key
+identifies) is ordered by D-2026-10-15-h (the key is a function of the record). Cost: one sentence
+in 8.S8 and `Keying`.
 
 **20. Do per-law cutoffs get a field in `Demand`?** Today they travel in `sets` under the laws'
 parameter names and `DemandKey` keeps one only if the name is in `live`; whether the backward pass
@@ -240,6 +299,12 @@ default of 10,000,000 (kernel bite 10, proposed) is spent before the fit converg
 steps); `--fuel` reaches it. Options: (a) keep the default and pass `--fuel`; (b) a larger default;
 (c) unbounded, the budget a recorded `--set`-like parameter of the demand. No recommendation.
 Unblocks: the fit without a flag. Source: `record/plan/night-2026-10-13.md` (fuel item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (c). D-2026-10-15-g settles that
+fuel only cuts a run and a pass is the same pass at any larger fuel, so a default bound buys only
+cut runs, as the fit showed; 8.S1 lists "limits on resources if the action wants them". The bound
+stays sayable, declared and recorded (L5.18, no unrecorded policy constants; fuel in the record,
+D-2026-10-15-h). Cost: a runaway program is stopped by hand; `certify` keeps its own budget, since a
+test needs one (7.S8).
 
 ## Tests and generators
 
@@ -259,6 +324,12 @@ theories, evidence items).
 (7.S12, vacuous against not run), and which wins is a decision. Options: (a) vacuous is `NotRun`
 (coverage zero); (b) vacuous is a pass with its premise count recorded. No recommendation.
 Unblocks: S7-1 and the tester's report of rare premises. Source: `report-second-line.md` (S7-1).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a). 7.S12 counts the cases with a
+false premise apart from `n`, so a law whose premise never held evaluated nothing and is not run,
+its premise count the reason. L9.14 (a law is evidence of nothing until a wrong model refutes it)
+decides it: no broken model can fail a vacuous run, and BE2 showed the price, a give-up maximizer
+passing `MaximizerStationary` vacuously. Cost: 7.S12's last sentence reworded and one branch of
+tester.py.
 
 **24. Three rules for binding a law's parameters (7.R1, 7.R2, 7.S-profile).** G6: a parameter bound
 by a `where` type binding versus a profile parameter (7.R1); L5: `(A : U)` inside a law needs a rule
@@ -266,18 +337,36 @@ by a `where` type binding versus a profile parameter (7.R1); L5: `(A : U)` insid
 demand. Options per rule: (a) the draft's reading; (b) state the stricter rule in the chapter.
 No recommendation; the review says each is the spec's. Unblocks: G6, L5, P8. Source:
 `report-second-line.md` (G6, L5, P8).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a) for G6 and P8, written into the
+chapter; L5 has its strict rule. G6: the draft's `resolve` takes the parameter first, then the
+scope, by 7.R1's reason (only a parameter binding tells two parameters of one type apart). L5: 7.R2
+(testing a law quantified over a type `U` is a static error) answers it; `Settling`'s laws move to
+an instance. P8: a Bool definition is tested when a conjunction claims it or a test names it. Cost:
+three sentences.
 
 ## The specification's wording
 
 **25. Keep the lexer's three readings of 2.S1?** ASCII letters and digits; blanks space, tab, CR;
 backslash a class of its own, marked [proposed] in grammar.lth's lexicon. Options: (a) keep;
 (b) name changes. Unblocks: closing 2.S1's wording. Source: `record/plan/night-2026-10-13.md`.
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a). ASCII names keep the cone's
+hash, which D-2026-10-15-e made the strict level of equality, free of Unicode normalization (two
+encodings of `á` would be two names); the blanks and the backslash class are what today's files and
+the three escapes of D-2026-10-13-q need. No source asks for more. Cost: Greek or accented names are
+refused (`σ` is natural for a biologist); widening later is one commit to grammar.lth and parse.py,
+with a normalization rule stated then.
 
 **26. Which stands: 3.R1's first paragraph and 3.R2, or D-2026-10-13-x?** 3.R1 and 3.R2 say names
 and labels are binders and `Int * Bool` is one structure with the record; D-2026-10-13-x says the
 opposite. The night left both texts. Options: (a) the decision stands, 3.R1 and 3.R2 reworded;
 (b) the chapter stands, the decision reversed. No recommendation. Unblocks: the spec's consistency
 on 3.R1. Source: `record/plan/night-2026-10-13.md` (the audit finding 4).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a). D-2026-10-13-x is his, later,
+and carried out: term.lth keeps the labels, the hash covers them, and 3.R1 already holds a `[decided
+D-2026-10-13-x]` paragraph, so its first paragraph and 3.R2 describe the old checker. L2.7 (what
+makes a definition a concept is a law stating the role of each part) agrees: two labeled units are
+not `Bool` without `Bool`'s laws. Cost: 3.R1 and 3.R2 reworded; `k_named_product` and
+`k_bool_is_sum` flip to reject when the checker follows.
 
 **27. A refutable pattern on `<-` (`(w, just x) <- ...`).** 2.S17, D-2026-10-13-ag. Night default:
 the checker refuses it with a message; alternative: a `Failures` of the block. Options: (a) refuse
@@ -295,6 +384,29 @@ inconsistencies (`Exhaustive` declared twice, `Assumed` clashing, `LeqBoth`). Op
 naming exceptions; (b) read the lists. No source recommends; the night marks each reversible.
 Unblocks: the `[proposed]` markers clearing from the spec and theories. Source:
 `record/plan/night-2026-10-13.md` (the several items named).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* (a), naming the exceptions below:
+each reading is one commit to undo (P6, every change can be undone) and no source contradicts the
+ones ratified; the held ones are reversed by a decision of this week or wait on his own open
+questions.
+- The slice's theories (18): ratify, except 12 (a theory file importing a model by name), held with
+  T7, since L2.6 says a theory file never holds a model of a theory declared elsewhere.
+- The fit's theories (14): ratify, except 2 (the same import), 5 (the series' truncation as two
+  constants; D-2026-10-16-b derives it from the demand's tolerance) and 9 (the damping as the host's
+  own values; D-2026-10-16-b makes it a declared default, recorded).
+- plot.lth (15): hold all, with G1 to G5 of `record/plan/plots/plan-plots-2026-10-14-decisions.md`,
+  which he has not answered.
+- certification.lth (13): ratify; the reading on a known identity is now D-2026-10-15-f (kept when
+  it disagrees), and the provisional refusal follows item 10.
+- demand.lth and plan.lth (12): ratify, except 5 (the record as identity, reversed by
+  D-2026-10-15-h), 7 (the fuel default, item 21), 9 and 10 (item 18).
+- The spec flips: ratify 4.S5, 4.S10, 4.S11, 4.S22 as `[proposed]`, 2.S18 and 4.R4; hold 4.S13,
+  whose borrowed `[decided D-2026-10-12-z]` presents the model's reason as his decision (P1,
+  Luciano's part stays discernible), to be marked `[proposed]`.
+- The elaborator's readings: ratify the three (a conjunction with a `Law` part typed `Law`; a
+  `primitive` name at a type is a type; a `Record` label binds in later fields, which fixed a
+  capture).
+- The tester's inconsistencies: ratify the fixes (rename the duplicate `Exhaustive` and the clashing
+  `Assumed`; `LeqBoth` as a constructive subtype, 7.S6); they are defects, not readings.
 
 ## Principles
 
@@ -340,6 +452,12 @@ Options: (a) keep A2; (b) drop it. No recommendation. Unblocks: the corrected gr
 the slice's plan, and the comparison with v0.1 (sigma 25.7 cm with every standardized residual below
 0.8, against this port's 0.235 m, residuals -1.46 to 0.95, which needs your v0.1 run on the same
 graph). Source: `record/plan/night-2026-10-13.md` (sonolocalización items).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* technical reading, his call.
+Without the three A2 rows sigma falls from 0.235 m to 0.022 m, the tail probability rises from 0.048
+to 0.58 and every standardized residual is within 1.2: a tenfold change from 3 of 22 measurements
+points to a systematic error in that block, not noise. Both fits predate D-2026-10-06-sa/sb.
+Regenerate the corrected graph first, then decide; if A2 goes, record why and keep the with-A2 fit
+(P3, keep the original evidence).
 
 **35. How to make the fit faster?** About 95 s per iteration, mostly the native 22 x 30 Jacobian
 crossing entry by entry through the Runner, and the score and information asked twice at the same
@@ -347,10 +465,21 @@ point. Options: (a) speed the Runner (kernel.step rebuilds its environment per c
 Jacobian stays certified by laws); (b) the model gives the Jacobian as one extern over the whole
 vector (v0.1's `distances_python.lut`). The night does (a) as far as it goes. No recommendation.
 Unblocks: the fit's wall time. Source: `record/plan/night-2026-10-13.md` (fit's cost item).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* technical reading, his call. Mostly
+answered by events: bite 12 (69c78ad) made the Runner 13 times faster, 4.8 s per iteration against
+95 s, and the fit runs in about 5 minutes. So (a), as the night did; the native Jacobian stays
+certified by `IsJacobian`, and (b) would bring an extern that L11.2 (an extern is validated against
+its type's laws before it is applied) holds to the same law. Revisit (b) on a real case. Cost: none
+now.
 
 **36. S4 (macroir after) and S5 (the VS Code extension) of the sonolocalización plan.** Written,
 untried by you; S2 and S3 applied by your instruction. Options: (a) accept; (b) hold; (c) drop.
 No recommendation. Source: `record/plan/night-2026-10-13.md` (first item list).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* technical reading, his call. (a)
+for both. S4's condition, the slice running end to end, is nearly met: the fit runs, and step 4
+waits only on the corrected graph; macroir's own inventory comes first, as it did here. S5's minimal
+extension exists in `tools/vscode-luthier` and costs him one try. Neither has a dependent yet, so
+holding them costs nothing either.
 
 **37. Laplace by information or by curvature?** `laplaceUpdate` takes the precision as the
 information; for a nonlinear mean the negative Hessian differs from Fisher. Options: (a)
@@ -359,6 +488,12 @@ relating them. No recommendation (the review says it is a design question; the c
 law is missing from belief.lth). Also whether `laplaceUpdate` should carry `converged`. Unblocks:
 BE5. Sources: `summary-BCD.md` (BE5); `report-second-line.md` (BE5);
 `record/principles-candidates-2026-10-15.md` (C2).
+*Recommendation (an Opus agent of the coordinator, 2026-10-16):* technical reading, his call: (c).
+For a nonlinear mean the negative Hessian of the log-likelihood is the information minus the
+residuals times the mean's second derivatives, over the variance; they nearly agree at a good fit,
+and the fit already computes the information. Keep it, and state `InfoIsTheHessian` with its
+distance, the law the fit's bad smell found missing, with a refuted model (L9.14, a law is evidence
+of nothing until a wrong model refutes it). `laplaceUpdate` should carry `converged` (BE2).
 
 ## Tags and pushes
 
