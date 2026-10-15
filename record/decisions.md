@@ -2526,3 +2526,16 @@ Quote:      "Luthier tiene que dar siempre la opción a un comportamiento posibl
 Source:     chat:luthier-3e:0 (this session, 2026-10-15; the line unknown until the export)
 Kind:       principles (L5.20); spec (8.S3, 8.S8, 8.S10, the store); the planner and the store
 Status:     current
+
+D-2026-10-15-d  The stores across runs, now: only pure results are served from the result store
+                (an acting run always executes); each run records the hash of the stores it read;
+                the hole (the stores written and read in Python, outside the token W) is marked in
+                certification.lth (L14.4). Later, with the full result store, both stores become
+                places of the world with own actions (10.S6 and 12.S11 rewritten once).
+Author:     Luciano, option (a) of item 1 of record/plan/decisions-pending-2026-10-15.md (10de096),
+            the coordinator's recommendation
+Quote:      "ya puse a en la 1"
+Source:     chat:luthier-3e:0 (this session, 2026-10-15 ~17:45; his mark in the file not yet saved
+            when logged)
+Kind:       spec (8.S3, 8.S8, 8.S10, 10.S6, 12.S11), run.py, certification.lth; v0.4's criterion (c)
+Status:     current
