@@ -130,6 +130,28 @@ EquivalentOn (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List Stri
 Confluent (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) (s1 s2 : Schedule) : Bool :=
   not (LinearizesOn A eq d live s1 and LinearizesOn A eq d live s2) or EquivalentOn A eq d live s1 s2
 
+-- [proposed, B11 of summary-BCD.md] A linearization built from drawn choices: at each step the
+-- names of the set not yet placed whose reads among the set are placed are ready, and the choice
+-- picks one of them (its index modulo how many are ready; the first when the choices run out).
+-- Every linearization of an acyclic dataflow is one of these, and drawn schedules almost never
+-- linearize, so the law over the plan compares with these and not with schedules drawn whole.
+readyIn (ns : List Node) (live placed cands : List String) : List String :=
+  match cands { nil -> nil ; cons n rest ->
+    if not (memberStr n placed) and subset (keep live (readsOf ns n)) placed then cons n (readyIn ns live placed rest)
+    else readyIn ns live placed rest }
+lengthStrs (xs : List String) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + lengthStrs rest }
+atIndex (xs : List String) (i : Nat) : List String :=
+  match xs { nil -> nil ; cons x rest -> if i == 0 then [x] else atIndex rest (i - 1) }
+headOr (cs : List Nat) : Nat := match cs { nil -> 0 ; cons c rest -> c }
+tailOf (cs : List Nat) : List Nat := match cs { nil -> nil ; cons c rest -> rest }
+readyOrder (ns : List Node) (live placed : List String) (cs : List Nat) (k : Nat) : Schedule :=
+  if k == 0 then nil
+  else match atIndex (readyIn ns live placed live) (headOr cs mod (1 + lengthStrs (readyIn ns live placed live))) {
+    nil -> (match readyIn ns live placed live { nil -> nil ; cons x rest -> cons x (readyOrder ns live (cons x placed) (tailOf cs) (k - 1)) }) ;
+    cons x rest -> cons x (readyOrder ns live (cons x placed) (tailOf cs) (k - 1)) }
+linearization (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List String) (cs : List Nat) : Schedule :=
+  readyOrder d.nodes live nil cs (lengthStrs live)
+
 -- ---------------------------------------------------------------- §3 The plan
 
 -- The strategy, a parameter separate from the program (8.S4, L5.2, P11): forward on demand, the
@@ -175,17 +197,20 @@ firstDemand (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (entry : String) :
 -- (D-2026-10-13-g: the plan is a value; L5.6: its hash enters the identity of a result).
 Plan (A : U) = { strategy : Strategy, entry : String, live : List String, schedule : Schedule }
 
--- The backward pass from a program to its dataflow (8.S4: a demand's plan is the dataflow of its
--- cone; 8.S11: a function from a demand and a program to a plan, not written): a hole. The
--- values of the dataflow are terms, the kernel's reduction its `step` (term.lth §5).
--- The equality of the terms is the plan's parameter, as it is `Planning`'s (4.R8).
-dataflowOf : (eq : Term -> Term -> Bool) -> Program -> Dataflow Term eq
+-- The backward pass from a demand and a program to the dataflow of its cone (8.S4: a demand's plan
+-- is the dataflow of its cone; 8.S11: a function from a demand and a program to a plan, not
+-- written): a hole. The values of the dataflow are terms, the kernel's reduction its `step`
+-- (term.lth §5). The equality of the terms is the plan's parameter, as it is `Planning`'s (4.R8).
+-- [proposed, B20 of summary-BCD.md] It takes the demand, whose holes filled and type demanded
+-- change the cone (8.S11, 8.S8); from the program alone the plan of a demand with `--set` or a
+-- decoration was the plan of the unset, undecorated program.
+dataflowOf : (eq : Term -> Term -> Bool) -> Demand -> Program -> Dataflow Term eq
 -- and the plan of a demand on a program, by the strategy given, call by need unless another is
 -- asked [proposed, 8.S4: the default implemented is call by need; 8.S3's decided default is
 -- forward on demand]
 planOf (eq : Term -> Term -> Bool) (p : Planning Term eq) (d : Demand) (prog : Program)
        (strategy : Strategy <- CallByNeed) : Plan Term :=
-  p.plan strategy (dataflowOf eq prog) d.entry
+  p.plan strategy (dataflowOf eq d prog) d.entry
 
 -- ---------------------------------------------------------------- §4 The key of a result
 
@@ -258,9 +283,12 @@ StrategiesAgree (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (s1 s2 : Strat
 TheDefaultsAgree (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflow A eq) (e : String) : Bool :=
   sameMembers (p.plan CallByNeed d e).live (p.plan ForwardOnDemand d e).live
     and EquivalentOn A eq d (reaches A eq d e) (p.plan CallByNeed d e).schedule (p.plan ForwardOnDemand d e).schedule
--- 8.S11, L5.11: the dataflow of a plan is confluent, on the schedules drawn
-PlanIsConfluent (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflow A eq) (e : String) (s1 s2 : Schedule) : Bool :=
-  Confluent A eq d (reaches A eq d e) s1 s2
+-- 8.S11, L5.11: the dataflow of a plan is confluent: the plan's schedule and any linearization
+-- of its live cone, built from drawn choices, give every live name one value [proposed, B11 of
+-- summary-BCD.md: over two schedules drawn whole the premise almost never held, and the law did
+-- not mention the plan]
+PlanIsConfluent (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A eq) (e : String) (cs : List Nat) : Bool :=
+  Confluent A eq d (reaches A eq d e) (p.plan st d e).schedule (linearization A eq d (reaches A eq d e) cs)
 -- §3. L2.7, 8.S3, 8.S4: the role of each strategy, an order: forward on demand by levels, call
 -- by need in the order of first demand. [proposed] Without these a planner that gives one schedule
 -- for both passes every law above (summary-BCD.md, B9).
@@ -268,7 +296,11 @@ ForwardIsByLevels (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflo
   byLevels d.nodes (p.plan ForwardOnDemand d e).live 0 (p.plan ForwardOnDemand d e).schedule
 ByNeedIsFirstDemand (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflow A eq) (e : String) : Bool :=
   (p.plan CallByNeed d e).schedule == firstDemand A eq d e
--- §4. 8.S8: a value given to a hole the cone does not read leaves the demand's key as it was
+-- §4. 8.S8: a value given to a hole the cone does not read leaves the demand's key as it was, and
+-- the type demanded is always in the key. [proposed, B13 of summary-BCD.md] Both follow from the
+-- definition of `demandKey` for every planner, so no model can fail them (L9.14): they are kept
+-- as statements of the definition, not claimed by `Planning`; a law of the key a model can fail
+-- is `Keying`'s.
 KeyReadsOnlyTheCone (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A eq) (dm : Demand) (n : String) (v : Value) : Bool :=
   memberStr n (p.plan st d dm.entry).live
     or demandKey (withSet dm n v) (p.plan st d dm.entry).live == demandKey dm (p.plan st d dm.entry).live
@@ -278,4 +310,3 @@ KeyReadsTheType (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (dm : Demand) 
 
 Planning (A : U) (eq : A -> A -> Bool) := PlanIsTheLiveCone A eq & PlanLinearizes A eq & StrategiesAgree A eq
   & TheDefaultsAgree A eq & ForwardIsByLevels A eq & ByNeedIsFirstDemand A eq & PlanIsConfluent A eq
-  & KeyReadsOnlyTheCone A eq & KeyReadsTheType A eq
