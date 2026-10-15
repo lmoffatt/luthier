@@ -805,6 +805,14 @@ main (w : W) : W * Unit := print w (showFloat (maximize (fn x { "no" })))
 # ---------------------------------------------------------------- a bound value is demanded once
 # (record/IA/run-2026-10-13/prompt-9.md, 8.S4: call by need within a run)
 
+def test_a_bare_name_binds_the_token_of_an_imported_models_action(tmp_path):
+    # print_twice.lut binds `w <- host.print w "..."` twice, host imported from world_model.lut: the
+    # sugar of 2.S17 binds the token, so the second print crosses with the run's token
+    # (record/IA/v04-2026-10-15/prompt-sugar.md)
+    result = command(ROOT / "tests/run/print_twice.lut", cwd=tmp_path)
+    assert (result.returncode, result.stdout, result.stderr) == (0, "first\nsecond\n", "")
+
+
 @pytest.mark.parametrize("entry", ["main", "byArgument"])
 def test_a_bound_read_is_made_once(tmp_path, entry):
     # read_once.lut observes one read twice, bound by a block or passed as an argument

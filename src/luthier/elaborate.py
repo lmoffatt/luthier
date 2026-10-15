@@ -54,11 +54,14 @@ class Context:
     names: dict = field(default_factory=dict)
     used: set = field(default_factory=set)
     refinements: set = field(default_factory=set)  # names that are types by refining one (`is_type`)
+    # whether `infer` reads a projection's type from the record of the theory its model is typed by
+    # (`theory_record`); only the sugar of 2.S17 asks it, see `block`
+    models: bool = False
 
     def child(self):
         return Context(self.types.copy(), self.signatures, self.aliases,
                        self.operators, self.constructors, self.names.copy(), self.used,
-                       self.refinements)
+                       self.refinements, self.models)
 
     def fresh(self, name):
         candidate = name
@@ -122,6 +125,8 @@ def infer(v, c):
             return t.Record(tuple((n, infer(x, c)) for n, x in fs))
         case t.Proj(r, n):
             ty = infer(r, c)
+            if c.models and not isinstance(ty, t.Record):
+                ty = theory_record(ty, c)
             return dict(ty.fields).get(n, t.Hole('type')) if isinstance(ty, t.Record) else t.Hole('type')
         case t.Let(n, a, _, b):
             inner = c.child(); inner.types[n] = a
@@ -138,21 +143,28 @@ def infer(v, c):
     return t.Hole('type')
 
 
+def theory_record(ty, c):
+    """The record of a theory applied to its arguments, else None: `Host State`, with `Host (S :
+    Concrete) : { ..., print : W -> String -> W * Unit }` declared, is that record with `S` as
+    `State`. A model typed by an imported theory (`host : HostConsole`, `HostConsole = Host State`)
+    has its fields' types read from it when `Context.models` is set, so the sugar of 2.S17 sees
+    `host.print w "x"` as an action (record/IA/v04-2026-10-15/prompt-sugar.md)."""
+    head = ty
+    args = []
+    while isinstance(head, t.App):
+        args.append(head.argument); head = head.function
+    if not isinstance(head, t.Var):
+        return None
+    declared = c.types.get(head.name)
+    for arg in reversed(args):
+        declared = substitute(declared.name, arg, declared.codomain) if isinstance(declared, t.Pi) else None
+    return declared if isinstance(declared, t.Record) else None
+
+
 def theory_domains(ty, c):
     """Keep a law's model domain tied to the declared theory record."""
     if isinstance(ty, t.Pi):
-        domain = ty.domain
-        head = domain
-        args = []
-        while isinstance(head, t.App):
-            args.append(head.argument); head = head.function
-        if isinstance(head, t.Var):
-            declared = c.types.get(head.name)
-            for arg in reversed(args):
-                declared = substitute(declared.name, arg, declared.codomain) if isinstance(declared, t.Pi) else None
-            if isinstance(declared, t.Record):
-                domain = declared
-        return t.Pi(ty.name, domain, theory_domains(ty.codomain, c))
+        return t.Pi(ty.name, theory_record(ty.domain, c) or ty.domain, theory_domains(ty.codomain, c))
     return ty
 
 
@@ -271,6 +283,16 @@ def block(items, body, c, expected):
     else:
         value = walk(item.value, c)
     ty = infer(value, c)
+    if isinstance(item, s.Rebind) and name is not None and not is_action(ty):
+        # [proposed] a bare name on an action that is a field of a model typed by a theory
+        # (`w <- host.print w "x"`): the field's type is read from the theory's record here
+        # alone. Read everywhere, it would give a type to every `:=` on such a projection, and
+        # the cones of laws that have one (numpy's Pinv*, lm's) would change their hash and go
+        # stale (record/IA/v04-2026-10-15/report-sugar.md)
+        reading = c.child(); reading.models = True
+        seen = infer(value, reading)
+        if is_action(seen):
+            ty = seen
     if isinstance(item, s.Rebind) and (is_action(ty) or name is None):
         inner = c.child()
         if name is not None and ty.codomain == t.Var('Unit'):

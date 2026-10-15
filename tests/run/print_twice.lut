@@ -1,0 +1,9 @@
+-- Runner fixture (record/IA/v04-2026-10-15/prompt-sugar.md): the sugar of 2.S17
+-- (D-2026-10-13-ag), a bare name on the left of `<-` binding the token of an action whose result
+-- is `W * Unit`, over a field of an imported model. Each line is printed once, in order.
+import "world_model.lut" HostConsole host : HostConsole
+main (w : W) : W * Unit := {
+  w <- host.print w "first" ;
+  w <- host.print w "second" ;
+  (w, unit)
+}

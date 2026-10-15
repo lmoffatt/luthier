@@ -206,6 +206,23 @@ def test_Blocks_action_chain_rebinds_the_token():
        WORLD)
 
 
+def test_Blocks_action_unit_through_an_imported_model():
+    # the sugar on an action that is a field of a model typed by a theory applied to its arguments,
+    # as `host : HostConsole` with `HostConsole = Host State` over world.lth's `Host`
+    # (record/IA/v04-2026-10-15/prompt-sugar.md): the field's type is read from the theory's record,
+    # so `w <- host.print w "x"` binds the token, as `print` declared alone does. `(host).print` is
+    # the projection that run.py makes of the dotted name `host.print` (`projections`)
+    context = ('Concrete : U\nState : Concrete\n'
+               'Host (S : Concrete) : { console : S, print : W -> String -> W * Unit }\n'
+               'HostConsole = Host State\nhost : HostConsole\nw0 : W')
+    def unit(n): return t.PPair(pv(n), t.PWild())
+    action = t.Proj(V('host'), 'print')
+    eq('{ w <- (host).print w0 "a"; w <- (host).print w "b"; w }',
+       t.Match(apps(action, [V('w0'), text('a')]), ((unit('a'),
+           t.Match(apps(action, [V('a'), text('b')]), ((unit('b'), V('b')),))),)),
+       context)
+
+
 def test_Blocks_pattern_on_a_value():
     # translation.lth (1665b9d) law Blocks, its fourth gives: a pattern against a value that is not
     # an action is the same one-arm match (2.S17); only a bare name on a non-action stays a Let
