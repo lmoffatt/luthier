@@ -45,7 +45,7 @@
 --   §6 Certifying the renderer along one chain of tokens (world.lth §5).                 done
 
 import "kernel_laws.lth" Concrete
-import "world.lth" World Described Persistence Host agreement
+import "world.lth" World Described Persistence Host agreement Observed held
 import "tables.lth" Table hasColumn realAt intAt memberStr distinct listLength sameCell sameTable
 import "arrays.lth" forallBelow existsBelow countBelow foldWith
 
@@ -555,12 +555,18 @@ Drawing (S : Concrete) := FileExistsAfter S & FormatByExtension S & ImageOfTheVa
 -- ---------------------------------------------------------------- §6 Certifying the renderer (world.lth §5)
 
 -- The host's `render` is certified against `drawn` along one chain of tokens by world.lth's
--- `agreement`: observe the path, render once, observe again, and compare with the description
--- (the file exists after, with the image's bytes, and nothing else declared changed). Each token
--- is used once; this threads the token, so it is a definition the certifier runs, not a law
--- (10.S3, 12.S23). `o` is the host's observation (world_model.lut `host`).
-renderAgrees (S : Concrete) (r : Renderer S) (o : Host S) (p : Plot) (stem ext : String) (w0 : W) : W * Bool :=
-  agreement S Unit r.drawing.store.world o (drawn S r.drawing p stem ext) (fn w { r.render w p (pathOf stem ext) }) w0
+-- `agreement`: observe the path and the places `extra` the certifier adds, render once, observe
+-- again, and give the token with the case gathered (the world before, the result, the world
+-- after). Whether the case agrees with the description (the file exists after, with the image's
+-- bytes) is world.lth's `agrees` on the same `Held`, and whether nothing undeclared changed is
+-- `HostChangesOnlyDeclared`, both predicates over the case. Each token is used once; this threads
+-- the token, so it is a definition the certifier runs, not a law (10.S3, 12.S23). `o` is the
+-- host's observation (world_model.lut `host`). 2026-10-15, on record/IA/layer-3-review-2026-10-15/
+-- prompt-run-host.md: follows world.lth's `agreement`, which takes a `Held` and `extra` and gives
+-- the case instead of a Bool.
+renderAgrees (S : Concrete) (r : Renderer S) (o : Host S) (p : Plot) (stem ext : String) (extra : List String) (w0 : W) : W * Observed S Unit :=
+  agreement S Unit r.drawing.store.world o
+    (held S Unit r.drawing.store.world (fn w { r.render w p (pathOf stem ext) }) (drawn S r.drawing p stem ext)) extra w0
 
 -- plan G3: rendering is deterministic: two renders of one value, to two paths, give the same
 -- bytes. `agreement` at each implies it (the description is a function); this asks no
