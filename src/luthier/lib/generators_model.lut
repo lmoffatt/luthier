@@ -110,9 +110,11 @@ OrthogonalGivesOrthogonal (g : (k : Dim) -> Gen (MatOf k k)) (tol : Tolerance) (
 UnitListGivesUnitValues (g : Gen UnitList) (size : Nat) (seed : Seed) : Bool := match g size seed { (vs, next) -> allUnit vs }
 -- calibrated: the source is uniform (probability.lth's `SourceIsUniform` on numpy's sort), a
 -- statistical law in the form of laws.lth §4 whose verdict is the sequential test's at the
--- demand's cutoffs (7.S17, L9.15); and its control on the skewed sample, expected to fail
-UniformSampleIsUniform (c : Sequential) : Law := SourceIsUniform numpySort uniformSample c
-SkewedSampleIsUniform (c : Sequential) : Law := SourceIsUniform numpySort skewedSample c
+-- demand's cutoffs (7.S17, L9.15). [proposed, 2026-10-15, L9.14] The source is the law's
+-- parameter, bound by the test to `uniformSample` (generators_laws.lut) and, as its control, to
+-- `skewedSample` (generators_controls.lut), so that the control is a line of this law, of its cone;
+-- before, the control was a law of its own, `SkewedSampleIsUniform`, which certify did not count.
+UniformSampleIsUniform (source : Gen UnitList) (c : Sequential) : Law := SourceIsUniform numpySort source c
 ClearDiagonalGivesClear (g : Gen ClearDiagonal) (size : Nat) (seed : Seed) : Bool :=
   match g size seed { (d, next) ->
     forallBelow d.n (fn k { d.f k == 0.0 or (1.0 <= abs (d.f k) and abs (d.f k) <= 1000.0) }) }
