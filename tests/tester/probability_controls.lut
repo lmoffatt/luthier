@@ -9,9 +9,9 @@
 -- broken. The mean-model and likelihood laws run on session A's `modelA` and `likelihoodA`
 -- (session_a.lut) with one field replaced; no record-update syntax exists, so each broken record is
 -- written whole, the other fields copied by field access. `GaussianPeaksAtMean` and
--- `ProfiledIsGaussianAtItsSigma` state the native construction over a model, and both sides of
--- each read the same mean and Jacobian, so no model refutes them: they have no control, see the
--- comments there.
+-- `ProfiledIsGaussianAtItsSigma` take the construction as a parameter (probability.lth's
+-- `GaussianConstruction`, since record/IA/controls-2026-10-15/prompt-weak-laws.md); their controls
+-- are constructions broken on purpose, on the models of probability_laws.lut.
 --
 -- The statistical law and the laws of its statistic, added 2026-10-15 on
 -- record/IA/statistical-2026-10-15/prompt-tester.md (laws.lth §4, 7.S17 to 7.S19, L9.14):
@@ -29,8 +29,11 @@ import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonN
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat vec mat
 import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood UnitList uniformPValue SourceIsUniform
+  GaussianConstruction GaussianPeaksAtMean ProfiledIsGaussianAtItsSigma gaussian profiled pi
 import "probability_model.lut" numpySort lump
-import "../../examples/sonolocalizacion/distances.lut" pitResolution freeDim fullModel
+import "numbers_model.lut" elementary
+import "arrays_model.lut" sub dot scale matVec matMul transpose mscale
+import "../../examples/sonolocalizacion/distances.lut" pitResolution freeDim fullModel posModel
 import "session_a.lut" dimA modelA likelihoodA
 
 tolerance : Tolerance := 1.0e-12
@@ -175,19 +178,48 @@ test "InfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261015) (wher
 test "InfoNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNegInfo) (profile <- cutoffs) (control <- true)
 
 -- ---------------------------------------------------------------- the construction
--- GaussianPeaksAtMean has no control: the law states the native `gaussian` over a scaled model and
--- reads the model only through its mean and log sigma at one parameter. Its log-likelihood at the
--- mean is -K u - const and at y is that minus a non-negative term, so no mean or log sigma of finite
--- values makes it fail. The breaks tried raise instead of giving a verdict: a mean one entry longer
--- than k (numpy `sub` cannot broadcast shapes (21,) and (22,)), a mean of 1e200 (the sum of squares
--- is inf, "inf is not a Float64", 11.S7).
--- ProfiledIsGaussianAtItsSigma has no control: like GaussianPeaksAtMean it states probability.lth's
--- own construction (`profiled` against `gaussian (fixedSigma ...)`) over a model, both sides reading
--- the same mean and Jacobian, so no model breaks it; what would is a wrong construction (u* over
--- K - 1, say), and passing one needs the construction as a parameter of the law, a new definition
--- in the theory. A Jacobian of scale 1e150 was tried and the law held (CONTROL FAILED, a control
--- aimed at the model, not at what the law states: removed 2026-10-15 by Claude Opus 5.5 after
--- a14bc0c); a mean of 1e200 raised instead (inf, 11.S7).
+-- The breaks of a model tried before the construction was a parameter (report-mutants.md): a
+-- mean one entry longer than k and a mean of 1e200 raised (numpy `sub` cannot broadcast; inf is
+-- not a Float64, 11.S7), and a Jacobian of scale 1e150 left ProfiledIsGaussianAtItsSigma holding,
+-- since both sides read the same mean and Jacobian. A broken construction is what the laws see.
+-- the full likelihood with the residual's sign flipped, +1/2 e^{-2u} |r|^2: least at the mean
+flippedFull (n : Nat) (m : ScaledModel n) : Likelihood n := {
+  k := (gaussian n m).k,
+  loglik := fn y t {
+    r := sub y (m.model.mean t)
+    (gaussian n m).loglik y t + elementary.exp (-2.0 * m.logSigma t) * dot r r },
+  score := (gaussian n m).score,
+  info := (gaussian n m).info }
+residualFlipped : GaussianConstruction := { full := flippedFull, profile := profiled }
+-- the profile at the unbiased sigma, sigma^2 = RSS / (K - 1), in place of the one that maximizes
+-- the full likelihood, RSS / K: in value, score and information
+unbiasedProfile (n : Nat) (m : MeanModel n) : Likelihood n := {
+  k := m.k,
+  loglik := fn y t {
+    r := sub y (m.mean t)
+    kk := toFloat64 r.n
+    0.0 - 0.5 * kk * elementary.log (2.0 * pi * dot r r / (kk - 1.0)) - 0.5 * (kk - 1.0) },
+  score := fn y t {
+    r := sub y (m.mean t)
+    scale ((toFloat64 r.n - 1.0) / dot r r) (matVec (transpose (m.jac t)) r) },
+  info := fn y t {
+    r := sub y (m.mean t)
+    j := m.jac t
+    mscale ((toFloat64 r.n - 1.0) / dot r r) (matMul (transpose j) j) } }
+unbiased : GaussianConstruction := { full := gaussian, profile := unbiasedProfile }
+dimPos : List Int := [freeDim]
+onFlippedFull : List Binding := [
+  { parameter := just "g", type := nothing, generator := "residualFlipped", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "dimFull", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "fullModel", coverage := Listed } ]
+onUnbiased : List Binding := [
+  { parameter := just "g", type := nothing, generator := "unbiased", coverage := Listed },
+  { parameter := just "n", type := nothing, generator := "dimPos", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "posModel", coverage := Listed } ]
+-- the full log-likelihood least at the mean, not greatest
+test "GaussianPeaksAtMean" (SampledMode linear) (cases <- 5) (seed <- 20261015) (whereBindings <- onFlippedFull) (profile <- cutoffs) (control <- true)
+-- the profile at the unbiased sigma is not the full likelihood at the sigma that maximizes it
+test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261015) (whereBindings <- onUnbiased) (profile <- cutoffs) (control <- true)
 
 -- ---------------------------------------------------------------- the statistical law (laws.lth §4)
 -- the cutoffs of probability_laws.lut, a census of one, never drawn
