@@ -88,7 +88,7 @@ rest are fixed here so that no chapter redefines them.
 | ε̂ | the bound on the failure fraction from n samples at confidence 1 − δ; a sample converts to the evidence cost −log(1 − ε̂(n, δ)) in nats (D-2026-10-12-r) | `spec 6` |
 | Φ | the distribution function of the standard normal | `spec 7` |
 
-**1.S12. Cost and grades.** [decided D-2026-10-12-y] `Cost` is the type of the costs defined in the Terms (`spec 5` gives its algebra). The grades of a certificate are the five of
+**1.S12. Cost and grades.** [decided D-2026-10-12-y; suspended by D-2026-10-14-c] `Cost` is the type of the costs defined in the Terms (`spec 5` gives its algebra). The grades of a certificate are the five of
 the Terms (proved, exhaustive, cases, sampled, assumed); the domain and the evidence cost carry
 what the older grades point, census of k, bounded and witnessed said, and the grades of `05 §7`
 (point, sampled, bounded, exhaustive, witnessed, proved, assumed) are read through that
