@@ -9,14 +9,15 @@
 -- at the tag v0.1-final bound the same route) and computes the native definition's operations
 -- on the values sorted, so `KolmogorovAgrees` is exact. What crosses: a Luthier `List (Vec
 -- Float64)`, each vector's `f` materialized over `Fin n` (3.S23), as a Python list of arrays;
--- back, a float. The Gaussian construction has no model here: `gaussian` and `profiled` are
+-- back, a float. The Gaussian construction's model is `gaussianConstruction` (added 2026-10-15
+-- on record/IA/controls-2026-10-15/prompt-weak-laws.md, L9.14): `gaussian` and `profiled`,
 -- native, over the leaves of arrays_model.lut; v0.1's `normalVec` (the sampler's normals) is
 -- not bound, since probability.lth states no theory for it yet.
 -- 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on record/IA/
 -- statistical-2026-10-15/prompt-theory.md: `lump`, a source broken on purpose, the control of
 -- `SourceIsUniform` (L9.14, 7.S19) that needs no host.
 
-import "probability.lth" Kolmogorov Vec UnitList SourceIsUniform
+import "probability.lth" Kolmogorov Vec UnitList SourceIsUniform GaussianConstruction gaussian profiled
 import "arrays.lth" vec
 import "generators.lth" Gen Seed nextSeed
 import "laws.lth" Law Sequential
@@ -27,6 +28,10 @@ numpySort : Kolmogorov := {
 
 -- the leaf by name, as experiment_zero.lut calls it (:161)
 kolmogorovDistance : List (Vec Float64) -> Float64 := numpySort.distance
+
+-- the Gaussian construction of probability.lth §4, the full and the profile likelihood, as the
+-- model of its theory (L9.14: a wrong construction can then be passed to its laws)
+gaussianConstruction : GaussianConstruction := { full := gaussian, profile := profiled }
 
 -- The control of `SourceIsUniform` (L9.14: a law is evidence of nothing until a wrong model
 -- refutes it): a source every value of which is 0.9, the lump that tests/tester/probability_laws.lut
