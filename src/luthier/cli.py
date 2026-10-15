@@ -18,10 +18,12 @@ def main(argv: list[str] | None = None) -> int:
     p_check = sub.add_parser("check", help="check static semantics")
     p_check.add_argument("-v", "--verbose", action="store_true")
     p_check.add_argument("files", nargs="+")
-    p_eval = sub.add_parser("eval", help="reduce a definition to weak head normal form")
-    p_eval.add_argument("file")
-    p_eval.add_argument("name")
-    p_eval.add_argument("--fuel", type=int, default=10000)
+    p_eval = sub.add_parser("eval", help="evaluate a term in the context of the files, their imports and "
+                                          "core, printing its value, its type and the states of its cone; "
+                                          "records nothing, demands no certificate (12.S19)")
+    p_eval.add_argument("files", nargs="+")
+    p_eval.add_argument("term", help="a term, as it would be written in the files (a name, an application, ...)")
+    p_eval.add_argument("--fuel", type=int, default=None, help="reduction fuel [default the demand's, as run's]")
     p_run = sub.add_parser("run", help="run a program with the host world")
     p_run.add_argument("file")
     # the defaults of `run`'s arguments are the demand's, declared in lib/demand_model.lut's
@@ -94,33 +96,17 @@ def main(argv: list[str] | None = None) -> int:
             return 1
 
     if ns.command == "eval":
-        from .elaborate import ElaborationError, elaborate_program, show_term
-        from .kernel import reduce
-        from . import term as t
+        from .run import RunError, _type_shown, evaluate, show_states
+        import sys
         try:
-            result = parse(Path(ns.file).read_text(encoding="utf-8"))
-            if isinstance(result, ParseFailed):
-                for error in result.errors:
-                    print(f"{ns.file}:{error.line}:{error.column}: {error.message}")
-                return 1
-            program = elaborate_program(result.program)
-            if not any(isinstance(a, t.Define) and a.name == ns.name for a in program):
-                print(f"unknown definition: {ns.name}")
-                return 1
-            # Bootstrap core arithmetic, retaining user definitions as overrides.
-            # (a reversible choice: the alternative resolves through core.lut's `operator` acts)
-            from .kernel import BOOTSTRAP_PRIMITIVES
-            program += tuple(t.Define(op, t.Universe(), t.Primitive(op))
-                             for op in BOOTSTRAP_PRIMITIVES)
-            value = reduce(program, ns.fuel, t.Var(ns.name))
-            if value is None:
-                print(f"fuel spent ({ns.fuel})")
-                return 1
-            print(show_term(value))
-            return 0
-        except (OSError, ElaborationError, ValueError) as exc:
-            print(f"{ns.file}: {exc}")
+            value, ty, states = evaluate(ns.files, ns.term, ns.fuel)
+        except (OSError, RunError, ValueError, RecursionError) as exc:
+            print(f"{ns.files[0]}: {exc}", file=sys.stderr)
             return 1
+        print(f"{_type_shown(value, sys.maxsize)} : {_type_shown(ty, sys.maxsize)}")
+        for line in show_states(states):
+            print(line)
+        return 0
 
     failed = False
     for raw_path in ns.files:

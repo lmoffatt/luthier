@@ -225,25 +225,62 @@ def cli(*args):
     return subprocess.run([sys.executable, '-m', 'luthier.cli', 'eval', *map(str, args)], capture_output=True, text=True, env=env)
 
 
-@pytest.mark.parametrize('file,output', [('arithmetic', '19'), ('factorial', '24'), ('data', '2'), ('record', '7'), ('block', '3'), ('lambda', '5'), ('chained_projection', '7'), ('labeled_sum', '101')])
+@pytest.mark.parametrize('file,output', [('arithmetic', '19 : Int'), ('factorial', '24 : Int'), ('data', '2 : Int'), ('record', '7 : Int'), ('block', '3 : Int'), ('lambda', '5 : Int'), ('chained_projection', '7 : Int'), ('labeled_sum', '101 : Int')])
 def test_eval(file, output):
+    # 12.S19: the value with its type, then the states of the term's cone
     r = cli(ROOT / 'tests/eval' / (file + '.lut'), 'answer')
     assert r.returncode == 0, r.stdout + r.stderr
-    assert r.stdout.strip() == output
+    lines = r.stdout.splitlines()
+    assert lines[0] == output
+    assert lines[1].startswith('states of the cone')
 
 
-@pytest.mark.parametrize('name,fuel,message', [('missing', '100', 'unknown definition'), ('answer', '0', 'fuel spent')])
-def test_eval_errors(name, fuel, message):
-    r = cli(ROOT / 'tests/eval/arithmetic.lut', name, '--fuel', fuel)
+@pytest.mark.parametrize('term,message', [('missing', 'missing is neither defined there, nor imported'), ('answer', 'fuel spent')])
+def test_eval_errors(term, message):
+    r = cli(ROOT / 'tests/eval/arithmetic.lut', term, '--fuel', '0' if term == 'answer' else '100')
     assert r.returncode == 1
-    assert message in r.stdout
+    assert message in r.stderr
 
 
 def test_eval_parse_error(tmp_path):
     path = tmp_path / 'bad.lut'; path.write_text('answer := (')
     r = cli(path, 'answer')
     assert r.returncode == 1
-    assert str(path) in r.stdout
+    assert str(path) in r.stderr
+
+
+def test_eval_loads_imports():
+    # 12.S19 in the context of the files as run loads them (12.S22): a name the file imports from
+    # plan_model.lut evaluates to its value, not its weak head form
+    r = cli(ROOT / 'tests/eval/plan_agree.lut', 'agree')
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.splitlines()[0] == 'true : Bool'
+    r = cli(ROOT / 'tests/eval/plan_agree.lut', 'needPlan.schedule')
+    assert r.stdout.splitlines()[0] == 'cons "a" (cons "b" (cons "c" (cons "d" nil))) : List String'
+
+
+def test_eval_prints_the_states_and_demands_no_certificate():
+    # 12.S19: no certificate demanded; the laws of the cone no store serves are listed, not refused
+    r = cli(ROOT / 'tests/eval/plan_agree.lut', 'allHold')
+    assert r.returncode == 0, r.stdout + r.stderr
+    lines = r.stdout.splitlines()
+    assert lines[0] == 'true : Bool'
+    assert '1 uncertified' in lines[1]
+    assert '  example: Acyclic: uncertified (no entry)' in lines
+
+
+def test_eval_a_term_over_several_files():
+    r = cli(ROOT / 'tests/eval/arithmetic.lut', ROOT / 'tests/eval/factorial.lut', 'answer + factorial (succ (succ zero))')
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert r.stdout.splitlines()[0] == '21 : Int'
+
+
+def test_eval_records_nothing(tmp_path):
+    # 12.S19, D-2026-10-12-ah: the probe writes no run record, no lock and no store
+    (tmp_path / 'f.lut').write_text('answer : Int := 6 * 7\n')
+    r = cli(tmp_path / 'f.lut', 'answer')
+    assert r.stdout.splitlines()[0] == '42 : Int'
+    assert sorted(p.name for p in tmp_path.iterdir()) == ['f.lut']
 
 
 def test_fresh_names_avoid_capture():

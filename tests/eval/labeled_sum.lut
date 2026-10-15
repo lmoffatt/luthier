@@ -1,5 +1,5 @@
-Bool : U := data { false : Bool ; true : Bool }
-Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
+-- `Bool` and `Maybe` are core's (12.S22: `eval` loads core as `run` does); a file's own `Bool`
+-- is another type, which the kernel's `==` does not return (record/IA/v04-2026-10-15/report.md)
 Cell = { int : Int || real : Float64 || text : String }
 Mark = { none : Unit || some : Int }
 one : Maybe Cell := just (int 1)

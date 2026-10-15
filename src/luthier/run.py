@@ -1890,7 +1890,7 @@ def _elaborated(kept):
     return program + tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
 
 
-def certification(loaded, program, entry, demand):
+def certification(loaded, program, entry, demand, refuse=True):
     """What a run requires (certification.lth §3, 7.S15, 12.S17, 6.S14): the cone of the entry with,
     per name, its demands, read against the stores of the files loaded (12.S11). Gives the
     certification state the run records (12.S18); raises `Refused`, listing each refusal with its
@@ -1910,7 +1910,13 @@ def certification(loaded, program, entry, demand):
     body is an axiom (`_Theories.axiom_of`, world.lth's `ObserverIsFaithful`) is demanded at the
     demand's cutoff for axioms (`Demand.cutoff`); [proposed] when that cutoff is assumed and no entry
     serves it, it is accepted as the assumption it states and listed under `assumed`, so that the
-    run's certificate says under what hypothesis it holds (6.S10, 10.S13)."""
+    run's certificate says under what hypothesis it holds (6.S10, 10.S13).
+
+    With `refuse` false (`eval`, 12.S19, which demands no certificate) nothing is refused: the
+    state counts each name of the cone by its state and lists under `refused` each line a refusal
+    would have printed. [proposed] A name with several laws not served takes the state of the
+    first; a law whose latest entry at the current hash passed but does not serve the cutoff counts
+    as uncertified, its line saying why."""
     from . import certify
     accept, values = demand.accepts, dict(demand.sets)
     cones = certify.Cones(program)
@@ -1980,11 +1986,17 @@ def certification(loaded, program, entry, demand):
                 kept_laws.append(d)
         c["laws"] = kept_laws
     refusals = certify.refuse(entries, cone)
-    if refusals:
+    if refusals and refuse:
         lines = [certify.show_refusal(r, entries) for r in refusals]
         raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (accepting "
                       f"{certify.GRADE_WORDS[accept]} and above; 12.S17):\n  " + "\n  ".join(lines), refusals)
-    with_laws = [c for c in cone if c["laws"]]
+    # each refused name by the state of its first refusal (none when `refuse`: they were raised)
+    refused = {}
+    for r in refusals:
+        kind, what = r["state"]
+        refused.setdefault(r["name"], {"Provisional": "provisional", "Stale": "stale"}.get(
+            kind, "failed" if kind == "Current" and isinstance(what, dict) and "Failed" in what else "uncertified"))
+    with_laws = [c for c in cone if c["laws"] and c["name"] not in refused]
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
@@ -1996,16 +2008,19 @@ def certification(loaded, program, entry, demand):
             "hosts": {r: h for r, h in cones.hosts(entry)},
             "accept": certify.GRADE_WORDS[accept],
             "states": {"certified": len(with_laws), "at first action": len(at_first - {c["name"] for c in with_laws}),
-                       "vacuous": len([c for c in cone if not c["laws"] and c["name"] not in at_first]),
-                       "provisional": 0, "uncertified": 0, "stale": 0, "failed": 0},
-            "laws": sum(len(c["laws"]) for c in with_laws), "not certified": [],
+                       "vacuous": len([c for c in cone if not c["laws"] and c["name"] not in at_first
+                                       and c["name"] not in refused]),
+                       **{k: list(refused.values()).count(k) for k in ("provisional", "uncertified", "stale", "failed")}},
+            "laws": sum(len(c["laws"]) for c in with_laws), "not certified": sorted(refused),
             # the laws validated at their action's first application (10.S10): what `run` checks
             # as the program asks, and records under "first actions"
             "at first action": [{"action": f["action"], "law": f["law"], "route": f["route"],
                                  "frame": f["frame"]["law"] if f["frame"] else None} for f in firsts],
             # the axioms accepted as assumptions, with no entry (6.S10, 10.S13)
             "assumed": assumed,
-            "_firsts": firsts}
+            "_firsts": firsts,
+            # what a refusal would have listed, for `eval` only: a run that starts has none
+            **({} if refuse else {"refused": [certify.show_refusal(r, entries) for r in refusals]})}
 
 
 def _first_action_roots(loaded, kept):
@@ -2601,3 +2616,89 @@ def breaches(runs):
             if "demand" in a and a.get("demand") == b.get("demand") and a.get("output") != b.get("output"):
                 found.append((i, j))
     return found
+
+
+class Probe(Loaded):
+    """`luthier eval files term`'s context (12.S19): the files loaded with their imports and core
+    exactly as `run` loads one (`Loaded`), and the term as the one definition of a file of its own,
+    `<eval>`, beside the first of them, which sees what each of the files sees (its definitions,
+    its constructors and labels, the names its imports list) and nothing else. [proposed] A name two
+    of the files give is the first file's; the term's definition takes the first of `it`, `it1`,
+    ... that none of the files sees, so the term cannot name itself."""
+
+    NAME = "<eval>"
+
+    def __init__(self, files, term, core=True):
+        if not files:
+            raise RunError("eval needs a file")
+        self.context = tuple(Path(f).resolve() for f in files)
+        self.term = term
+        self.it = None
+        super().__init__(self.context[0].parent / self.NAME, core)
+
+    def visit(self, path, active):
+        if path.resolve() != self.top:
+            return super().visit(path, active)
+        active.add(path)
+        f = _File(path)
+        for target in self.context:
+            if not target.exists():
+                raise RunError(f"no file {target}")
+            self.visit(target, active)
+            g = self.files[target]
+            for name in sorted(g.defined | g.labels | set(g.imports)):
+                f.imports.setdefault(name, (target, name))
+        k = 0
+        while (it := "it" + (str(k) if k else "")) in f.imports:
+            k += 1
+        result = parse(f"{it} := {self.term}")
+        if isinstance(result, s.ParseFailed):
+            raise RunError("; ".join(f"the term: {e.message}" for e in result.errors))
+        if len(result.program) != 1 or not isinstance(result.program[0], s.Define):
+            raise RunError("the term is not one term")
+        self.it = it
+        f.acts.extend(result.program)
+        f.defined.add(it)
+        _sum_labels(result.program, f.labels)
+        active.remove(path)
+        self.files[path] = f
+
+
+def evaluate(files, term, fuel=None):
+    """`luthier eval files term` (12.S19): the value of `term` in the context of `files` (`Probe`),
+    its inferred type, and the states of its cone. The probe that records nothing (D-2026-10-12-ah):
+    no `x.run.json`, no lock, no store written, no certificate demanded; the states are read from
+    the stores of the files loaded, as `run` reads them, and printed beside the value so that it is
+    never taken for a certified result. The value is reduced in every concrete part
+    (`Runner.value`); a function, or a computation stuck on a hole, stays as it is. [proposed] The
+    states are read at the demand's default cutoff (`DEMAND_DEFAULTS`), and a law the stores do not
+    serve is listed, not refused; the first actions of 10.S10 are not validated, since `eval` gives
+    its term no world and so performs no action. Gives (value, type, states), the states as
+    `certification` gives them with `refused` set, or {"error": why} when they cannot be read."""
+    host.reset()
+    loaded = Probe(files, term)
+    entry = loaded.internal(loaded.top, loaded.it)
+    kept = runtime_slice(loaded.acts, entry, core_data(loaded))
+    loaded.demand(kept)
+    program = _elaborated(kept)
+    definition = next(a for a in program if isinstance(a, t.Define) and a.name == entry)
+    demand = demand_of(loaded.it, fuel)
+    try:
+        states = certification(loaded, program, entry, demand, refuse=False)
+        states.pop("_firsts", None)
+    except (RunError, OSError, RecursionError) as exc:
+        states = {"error": str(exc)}
+    runner = Runner(program, demand.fuel)
+    value = runner.value(t.Var(entry))
+    return value, definition.type, states
+
+
+def show_states(states):
+    """The lines `eval` prints after the value (12.S19): the counts of the states of the cone's
+    names that are not zero, then each law or name not certified with its state."""
+    if "error" in states:
+        return [f"states: not read ({states['error']})"]
+    counts = ", ".join(f"{n} {k}" for k, n in states["states"].items() if n) or "no names"
+    lines = [f"states of the cone, accepting {states['accept']} and above: {counts}"]
+    lines += [f"  {line}" for line in states.get("refused", ())]
+    return lines

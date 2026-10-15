@@ -1,0 +1,6 @@
+-- A file importing plan_model.lut, for `luthier eval` with imports (12.S19; record/IA/v04-2026-10-15/
+-- prompt.md): `luthier eval tests/eval/plan_agree.lut agree` prints `true : Bool`.
+import "plan_model.lut" agree bothLinearize readersFirstRefused needPlan
+
+-- a definition of its own over the imported ones
+allHold : Bool := agree and bothLinearize and readersFirstRefused
