@@ -4,7 +4,8 @@
 For each chapter file given (or every `docs/spec/NN-*.md` except `00-index.md`): the first line
 is `# N. Title` with N the chapter's number; sections are `## §k Title` numbered from 1 and the
 last one is `## Open`; every item `**N.Rk. Title.**` (rule) or `**N.Sk. Title.**` (statement)
-carries exactly one status (`[implemented]`, `[decided D-YYYY-MM-DD-x]`, `[decided Ln.k]`, `[proposed]`)
+carries exactly one status (`[implemented]`, `[decided D-YYYY-MM-DD-x]`, `[decided Ln.k]`, `[proposed]`;
+a decided status may add a postponement, `[decided D-x; suspended by D-y]`, with D-y checked like D-x)
 and R and S are numbered 1..n; a decided id exists in `record/decisions.md`, and a decided clause
 `Ln.k` is a clause of `docs/principles.md` marked `[settled]` (D-2026-10-13-g); a rule ends with a `Files:` line
 naming programs of `tests/spec/` (an implemented rule needs an accept and a reject one, a
@@ -15,7 +16,8 @@ chapters, between a chapter and `docs/principles.md`, or twice in a chapter (hea
 code blocks and the chapter's header paragraph are left out).
 
 Each finding is printed as `path:line: check-spec: message`; information (a cited chapter not
-written yet) as `path:line: check-spec (information): message`. Exit status: 0 with no findings,
+written yet) as `path:line: check-spec (information): message`; at the end one information line
+with the counts of the statuses: implemented, decided (of which suspended), proposed. Exit status: 0 with no findings,
 1 with findings, 2 when a file cannot be read. `--root` is the repository root (default: the one
 this script lives in).
 
@@ -36,8 +38,9 @@ TITLE_RE = re.compile(r"^#\s+(\d+)\.\s+\S")
 SECTION_RE = re.compile(r"^##\s+§(\d+)\s+\S")
 ITEM_RE = re.compile(r"^\*\*(\d+)\.([RS])(\d+)\.\s*(.*?)\*\*\s*(.*)$")
 STATUS_RE = re.compile(r"^\[([^\]]*)\]")
-DECIDED_RE = re.compile(r"^decided (D-\d{4}-\d{2}-\d{2}-[a-z]+)$")
-DECIDED_CLAUSE_RE = re.compile(r"^decided (L\d+\.\d+)$")
+SUSPENDED = r"(?:; suspended by (D-\d{4}-\d{2}-\d{2}-[a-z]+))?"
+DECIDED_RE = re.compile(r"^decided (D-\d{4}-\d{2}-\d{2}-[a-z]+)" + SUSPENDED + "$")
+DECIDED_CLAUSE_RE = re.compile(r"^decided (L\d+\.\d+)" + SUSPENDED + "$")
 DECISION_LINE_RE = re.compile(r"^(D-\d{4}-\d{2}-\d{2}-[a-z]+)\s")
 FILES_RE = re.compile(r"^Files:\s*(.*)$")
 CHAPTER_NAME_RE = re.compile(r"^(\d\d)-.+\.md$")
@@ -221,20 +224,35 @@ def check_status(item: Item, decisions: set[str], principles: list[str] | None =
                             "`[decided D-...]` or `[proposed]`)")]
     if s in ("implemented", "proposed"):
         return []
+    out: list[Finding] = []
     c = DECIDED_CLAUSE_RE.match(s)
+    m = DECIDED_RE.match(s)
     if c:
         status = clause_status(principles or [], c.group(1))
         if status is None:
-            return [(item.line, f"{label_of(item)}: {c.group(1)} is not a clause of docs/principles.md")]
-        if status != "settled":
-            return [(item.line, f"{label_of(item)}: {c.group(1)} is not settled in docs/principles.md")]
-        return []
-    m = DECIDED_RE.match(s)
-    if not m:
+            out.append((item.line, f"{label_of(item)}: {c.group(1)} is not a clause of docs/principles.md"))
+        elif status != "settled":
+            out.append((item.line, f"{label_of(item)}: {c.group(1)} is not settled in docs/principles.md"))
+        suspender = c.group(2)
+    elif m:
+        if m.group(1) not in decisions:
+            out.append((item.line, f"{label_of(item)}: {m.group(1)} is not in record/decisions.md"))
+        suspender = m.group(2)
+    else:
         return [(item.line, f"{label_of(item)} has an invalid status [{s}]")]
-    if m.group(1) not in decisions:
-        return [(item.line, f"{label_of(item)}: {m.group(1)} is not in record/decisions.md")]
-    return []
+    if suspender and suspender not in decisions:
+        out.append((item.line, f"{label_of(item)}: {suspender} is not in record/decisions.md"))
+    return out
+
+
+def count_statuses(items: list[Item]) -> str:
+    """One line: how many items are implemented, decided (of which suspended), proposed."""
+    implemented = sum(i.status == "implemented" for i in items)
+    proposed = sum(i.status == "proposed" for i in items)
+    decided = [i for i in items if i.status.startswith("decided")]
+    suspended = sum("; suspended by " in i.status for i in decided)
+    return (f"{implemented} implemented, {len(decided)} decided (of which {suspended} suspended), "
+            f"{proposed} proposed")
 
 
 def check_numbering(ch: Chapter) -> list[Finding]:
@@ -514,6 +532,7 @@ def main(argv: list[str] | None = None) -> int:
         for line, msg in info:
             print(f"{label}:{line}: check-spec (information): {msg}")
         status = 1 if found else status
+    print("check-spec (information): " + count_statuses([i for ch in targets for i in ch.items]))
     return status
 
 

@@ -20,6 +20,9 @@ status is one of:
 - `[decided D-YYYY-MM-DD-x]`: taken by that entry of `record/decisions.md`, not yet implemented;
 - `[decided Ln.k]`: stated by a clause of `docs/principles.md` marked settled, not yet implemented
   (D-2026-10-13-g);
+- `[decided D-x; suspended by D-y]` (also `[decided Ln.k; suspended by D-y]`): decided, and its
+  implementation postponed by the decision D-y, which the checker finds in `record/decisions.md`
+  like D-x; a postponement found only in a theory's comment is written in the clause's text;
 - `[proposed]`: the model's, awaiting Luciano's mark.
 
 Citations: `spec 4.R3` is rule 3 of chapter 4, `spec 8 §2` section 2 of chapter 8; `L5`, `L5.3`,
@@ -27,7 +30,8 @@ Citations: `spec 4.R3` is rule 3 of chapter 4, `spec 8 §2` section 2 of chapter
 `D-2026-10-11-c` a decision; `W5` the way of working; `P11` the method. `scripts/check_spec.py`
 verifies that every citation resolves, that every item has a status, that implemented rules have
 their programs, and that no run of eight words is repeated across chapters or copied from the
-principles.
+principles. It prints, as information, the counts of the statuses: implemented, decided (of which
+suspended), proposed.
 
 ## The chapters
 
