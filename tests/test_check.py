@@ -423,6 +423,20 @@ def test_an_imported_definition_does_not_take_a_labels_name(tmp_path):
     assert not c.check(program(b.read_text()), b)
 
 
+def test_an_imported_alias_does_not_take_a_labels_name(tmp_path):
+    # report-e.md, finding 3: kernel_laws.lth's alias `Selected (A B : U)` and term_model.lut's sum
+    # label `Selected`, both brought by demand_laws.lut's imports, failed to elaborate together;
+    # the typing fell back to the file alone and the imported alias `Hash` (certification.lth's
+    # `Hash = String`) was an opaque name, so 4.R9 refused a string literal passed at `Hash`
+    (tmp_path / 'a.lut').write_text('Selected (A B : U) = { one : A || two : B }\nother : Int := 1\n')
+    (tmp_path / 'b.lut').write_text('Step = { Selected : Int || Other : Unit }\npick (n : Int) : Step := Selected n\n')
+    (tmp_path / 'h.lut').write_text('Hash = String\n')
+    d = tmp_path / 'd.lut'
+    d.write_text('import "a.lut" other\nimport "b.lut" pick\nimport "h.lut" Hash\n'
+                 'tag (l : String) (h : Hash) : String := l + h\ntagged : String := tag "L" "sha256:cccc"\n')
+    assert not c.check(program(d.read_text()), d)
+
+
 def test_a_match_binder_shadows_an_imported_definition(tmp_path):
     # prompt-scope.md item 1 (figures.lut's report, finding 1): a.lut's `kept`, not listed by b.lut,
     # took the place of b.lut's match binder `kept` and 4.R9 refused `f` (2.S12: a pattern variable

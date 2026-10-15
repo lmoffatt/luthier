@@ -358,3 +358,32 @@ def test_a_type_a_census_lists_is_no_model_home():
     homes = {spec.law: [Path(h).name for h in tester.model_homes(loaded, spec, runner)] for spec in specs
              if spec.law in ("NoAlternativeAtZero", "KolmogorovOfOne")}
     assert homes == {"NoAlternativeAtZero": [], "KolmogorovOfOne": ["probability_model.lut"]}
+
+
+def test_an_alias_or_a_constructor_is_no_model_home(tmp_path):
+    # report-e.md, finding 1: demand_laws.lut and world_laws.lut as first written, with demand.lth's
+    # alias `Record` and world_model.lut's alias `State` listed for a parameter `K : U` or `S :
+    # Concrete`, and test.lth's constructor `Sampled` for `accepts : Grade`; none is a model, so
+    # none of their files is a home. A model is a value whose type is the parameter's theory head:
+    # certification_model.lut's `certifying : Certifying`, world_model.lut's `host : HostConsole`
+    tester_dir = ROOT / "tests" / "tester"
+    demand = (tester_dir / "demand_laws.lut").read_text(encoding="utf-8")
+    assert "keyTypes : List U := [Key]" in demand
+    (tmp_path / "demand_laws.lut").write_text(
+        demand.replace("keyTypes : List U := [Key]", "keyTypes : List U := [Record]"), encoding="utf-8")
+    world = (tester_dir / "world_laws.lut").read_text(encoding="utf-8")
+    first = (world.replace("cutoff : List Grade := [sampledCutoff]", "cutoff : List Grade := [Sampled]")
+             .replace('bind "S" "hostStates"', 'bind "S" "states"')
+             .replace("hosts : List (Host State) := [listedHost]", "hosts : List (Host State) := [host]"))
+    assert first.count('bind "S" "states"') > world.count('bind "S" "states"') and "[Sampled]" in first
+    (tmp_path / "world_laws.lut").write_text(first, encoding="utf-8")
+    homes = {}
+    for name in ("demand_laws.lut", "world_laws.lut"):
+        runner, specs, loaded = tester.prepare(tmp_path / name)
+        for spec in specs:
+            if spec.law in ("OneIdentityOneResult", "NoPriceRefusesAssumed", "AppliedWhenSettled", "HostAgreesPrint",
+                            "PrintAppendsALine"):
+                homes.setdefault(spec.law, [Path(h).name for h in tester.model_homes(loaded, spec, runner)])
+    assert homes == {"OneIdentityOneResult": [], "NoPriceRefusesAssumed": ["certification_model.lut"],
+                     "AppliedWhenSettled": [], "HostAgreesPrint": ["world_model.lut"],
+                     "PrintAppendsALine": ["world_model.lut"]}

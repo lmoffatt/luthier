@@ -2182,7 +2182,9 @@ class FirstActions:
     the first application of an action whose model's theory holds it to a law over its case, with
     the run's own arguments: if entries of the model file's store serve the law and the frame law at
     those arguments and the places added (the laws' cones, the model's cone with its hosts' code,
-    the grade accepted; certify.serves), the action is applied as usual. Otherwise the Runner
+    the grade accepted; certify.serves), the action is applied as usual. [proposed] Only an entry a
+    first action wrote serves (its kind, `certify.FIRST_ACTION`, as a control has its own): a
+    tester's entry of listed cases on the same model is never the run's own case. Otherwise the Runner
     gathers one case by world.lth's `agreement` (observe the declared places and the places added,
     act once, observe again), with the `Held` the law's body builds (its action the program's, at
     the program's arguments), evaluates the law on the case and the frame law on the same case
@@ -2250,6 +2252,11 @@ class FirstActions:
             demands.append((frame["law"], frame["cone"], self.demand.inner(frame["law"]).law(
                 frame["law"], frame["cone"], [model, (held_name, held_shown), places],
                 {spec["model"]: spec["model hash"]})))
+        # [proposed] a first action's demand is served only by an entry a first action wrote: a
+        # tester's entry of listed cases on the same model never stands for the run's own case
+        # (10.S10; report-e.md, finding 2)
+        for _, _, d in demands:
+            d["kind"] = certify.FIRST_ACTION
         entries = self.entries()
         served = [next((e for e in entries if certify.serves(d, e)), None) for _, _, d in demands]
         if all(e is not None for e in served):
@@ -2314,7 +2321,8 @@ class FirstActions:
         return t.Pair(pair.left, result)
 
     def entry(self, spec, law, cone, demand):
-        """certification.lth's `Entry` of a law confirmed at a first action: one case, grade `cases`;
+        """certification.lth's `Entry` of a law confirmed at a first action, of its own kind
+        (`certify.FIRST_ACTION`): one case, grade `cases`;
         each parameter the run gives a census of one, its value printed in the generator so that two
         arguments are two groups of the store (certify.prune) and its hash its fingerprint; the
         places the certifier added last."""
@@ -2327,7 +2335,7 @@ class FirstActions:
                 "the action held" if law != spec["law"] else "the run's argument"
             binding.append({"parameter": p, "generator": f"{certify._shown_value(v)} ({what})",
                             "fingerprint": certify._sha(json.dumps(v, sort_keys=True, ensure_ascii=False))})
-        return {"law": law, "cone": cone, "binding": binding, "seed": None, "cases": 1,
+        return {"law": law, "cone": cone, "binding": binding, "seed": None, "cases": 1, "kind": certify.FIRST_ACTION,
                 "budgets": {}, "reach": [{"parameter": p, "reach": {"Members": [v]}} for p, v in demand["given"]],
                 "evidence": {"Points": {"evaluated": 1, "raised": 0, "coverage": "Listed", "verdict": "Supported"},
                              "protocol": "first action (10.S10)", "route": spec["route"]},

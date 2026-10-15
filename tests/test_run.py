@@ -1144,6 +1144,58 @@ def test_a_first_action_is_validated_once_recorded_and_then_served(tmp_path, cap
     capsys.readouterr()
 
 
+FIRST_ACTION_LAWS = """\
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "kernel_laws.lth" Concrete
+import "world.lth" Host Observed HostAgreesPrint
+import "world_model.lut" State
+import "first_action_models.lut" honest
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+Key = State
+states : List Concrete := [Key]
+hosts : List (Host State) := [honest]
+once : List String := ["once"]
+blank : State := { stdout := "", files := nil }
+cases : List (Observed State Unit) := [{ before := blank, result := unit, after := { stdout := "once\\n", files := nil } }]
+test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+  bind "s" "once", bind "c" "cases"])
+"""
+
+
+def test_a_testers_entry_on_the_model_never_serves_its_first_action(tmp_path, capsys):
+    # report-e.md, finding 2: a test line certifies HostAgreesPrint on `honest` over a listed case
+    # at s = "once", and its entry lands in the model's store (honest's file is its home). Its
+    # reach is widened to the places the run adds, so that it covers every value the run gives:
+    # at the same law cone and model hash it would serve the run's demand but for its kind. The run
+    # still gathers its own case (10.S10) and writes an entry of the first action's kind.
+    from luthier import certify, tester
+    _first_action_copy(tmp_path)
+    laws = tmp_path / "first_action_laws.lut"
+    laws.write_text(FIRST_ACTION_LAWS, encoding="utf-8")
+    assert tester.passes(tester.run_tests(laws, store=True)[0])
+    store = tmp_path / "first_action_models.cert.json"
+    listed, = json.loads(store.read_text(encoding="utf-8"))
+    assert listed["law"] == "HostAgreesPrint" and "kind" not in listed and certify.entry_kind(listed) is None
+    listed["reach"].append({"parameter": "extra", "reach": {"Members": [{"Printed": '["stdout"]'}]}})
+    store.write_text(json.dumps([listed]), encoding="utf-8")
+    path = tmp_path / "first_action_honest.lut"
+    assert main(["run", str(path)]) == 0 and capsys.readouterr().out == "once\n"
+    firsts = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]["first actions"]
+    assert [(f["law"], f["outcome"]) for f in firsts] == [("HostAgreesPrint", "confirmed"),
+                                                          ("HostChangesOnlyDeclared", "confirmed")]
+    entries = json.loads(store.read_text(encoding="utf-8"))
+    own = next(e for e in entries if e["law"] == "HostAgreesPrint" and e.get("kind") == certify.FIRST_ACTION)
+    # the run's demand, as FirstActions makes it: without its kind the listed entry would serve it
+    demand = {"law": own["law"], "cone": own["cone"], "accepts": "Cases",
+              "given": [(r["parameter"], r["reach"]["Members"][0]) for r in own["reach"]],
+              "fingerprints": {"o": own["binding"][0]["fingerprint"]}}
+    assert certify.serves(demand, listed) and not certify.serves(demand, own)
+    demand["kind"] = certify.FIRST_ACTION
+    assert not certify.serves(demand, listed) and certify.serves(demand, own)
+
+
 def test_the_protocols_observations_change_nothing(tmp_path, monkeypatch, capsys):
     # observe.lut's first print and first observe are validated (HostAgreesPrint,
     # HostObserveChangesNothing); the protocol's observations add nothing to what is printed

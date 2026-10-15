@@ -469,7 +469,10 @@ def load_imports(program, path, seen=None):
     are left out, being the imported file's own business. A definition does not take the name of a
     constructor or a label of a sum (prompt-10.md, 12.S22, as run.py's `Loaded` keeps them apart):
     an imported definition of such a name is left out, unless the file lists it in an import of its
-    file and has no constructor or label of that name itself."""
+    file and has no constructor or label of that name itself. So is an alias: kernel_laws.lth's
+    `Selected (A B : U)` beside term_model.lut's label `Selected` made the imports fail to
+    elaborate together, the typing fell back to the file alone, and an imported alias (`Hash`)
+    became an opaque name that a literal's `String` does not refine (4.R9; report-e.md, finding 3)."""
     files = {}
     _brought(program, path, set() if seen is None else seen, files)
     scope = _ImportScope(files, program, path)
@@ -477,7 +480,7 @@ def load_imports(program, path, seen=None):
     own = _constructors_of(program)
     taken = own | _constructors_of(tuple(a for _, a in brought))
     return tuple(a for target, a in brought
-                 if not isinstance(a, (s.Declare, s.Define)) or a.name not in taken
+                 if not isinstance(a, (s.Declare, s.Define, s.Alias)) or a.name not in taken
                  or (target, a.name) in scope.listed and a.name not in own) + scope.aliases
 
 

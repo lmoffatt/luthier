@@ -1117,11 +1117,18 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
 
 def model_homes(loaded, spec, runner=None):
     """[proposed, night default for decision 1 of report-run.md] The files, other than the test
-    program and core, that define a census a binding of the line names (`numpy` in
+    program and core, that define a model a binding of the line names (`numpy` in
     arrays_model.lut), when the law is itself defined in another file than the test program's: the
     entry is also written into their stores, which a run of an importer reads (12.S11). A law the
-    test program defines (a wrapper) has no such home."""
-    if loaded is None:
+    test program defines (a wrapper) has no such home.
+
+    A model is a value whose type is the theory head of the parameter the binding binds (`numpy :
+    Arrays` for `a : Arrays`, `listedHost : Host State` for `o : Host S`): the census the binding
+    names, or each member of a census that is a list literal of names. A type alias (`State`,
+    demand.lth's `Record`), a type (`UnitList`), a constructor (`Sampled`) or a census whose
+    parameter's type is no theory head (`S : U`, `g : Grade`) is no model, and its file no home
+    (report-e.md, finding 1)."""
+    if loaded is None or runner is None:
         return []
     top = loaded.top
     try:
@@ -1131,9 +1138,13 @@ def model_homes(loaded, spec, runner=None):
     if law is None or law[0] == top:
         return []
     homes = []
-    for b in spec.where + spec.profile:
+    for name, ty in parameters(runner, _as_called(loaded, spec.law)) or []:
+        head = _program_head(ty)
+        if head is None or not _theory_head(runner, head):
+            continue
+        b = resolve_binding(spec, name, _head_name(ty))
         # [proposed] a generator is not a model the law is certified on: its file is no home
-        if runner is not None and _is_generator(runner, loaded, b):
+        if b is None or _is_generator(runner, loaded, b):
             continue
         try:
             found = loaded.see(top, b.generator)
@@ -1141,30 +1152,53 @@ def model_homes(loaded, spec, runner=None):
             continue
         if found is None:
             continue
-        files = [found[0]]
-        # a census that is a list literal of names: each member defined in another file is a home
-        # too (`codecs : List Codec := [csv]`, csv in tables_model.lut) [proposed]
+        # the census itself when it is a model, else each member of its list literal that is one
+        # (`codecs : List Codec := [csv]`, csv in tables_model.lut) [proposed]
+        candidates = [found] if _is_model(runner, loaded, found, head) else []
         for member in _list_members(loaded, found):
             try:
                 there = loaded.see(found[0], member)
             except RunError:
                 continue
-            # [proposed] a type a census lists (`[UnitList]` for a parameter `S : U`) is no model
-            if there is not None and not _is_type(runner, loaded, there):
-                files.append(there[0])
-        for f in files:
+            if there is not None and _is_model(runner, loaded, there, head):
+                candidates.append(there)
+        for f, _ in candidates:
             if f not in (top, loaded.core) and f not in homes:
                 homes.append(f)
     return homes
 
 
-def _is_type(runner, loaded, there):
-    """Whether the definition `there` (file, name) is a type, a definition into `U`."""
-    if runner is None:
+def _program_head(ty):
+    """The name at the head of a type as the program calls it (`Host` of `Host S`), or None."""
+    while isinstance(ty, t.App):
+        ty = ty.function
+    return ty.name if isinstance(ty, t.Var) else None
+
+
+def _theory_head(runner, name):
+    """Whether `name` (as the program calls it) is a theory head: declared at a record, `Host (S :
+    Concrete) : { ... }` (check.py's `theory_head`; its definition by laws, `Host (S : Concrete) :=
+    HostAgreesPrint S & ...`, is not kept in a runner's program)."""
+    declared = next((a for a in runner.program if isinstance(a, t.Declare) and a.name == name), None)
+    if declared is None:
+        return False
+    ty = declared.type
+    while isinstance(ty, t.Pi):
+        ty = ty.codomain
+    return isinstance(ty, t.Record)
+
+
+def _is_model(runner, loaded, there, head):
+    """Whether the name `there` (file, name) is a model of the theory `head`: its file defines it as
+    a value (no alias, no constructor, no label of a sum) and its type's head is `head`."""
+    file = loaded.files.get(there[0])
+    if file is None or there[1] in file.constructors or loaded.is_label(*there):
+        return False
+    if not any(isinstance(a, s.Define) and a.name == there[1] for a in file.acts):
         return False
     called = loaded.internal(*there)
-    d = next((a for a in runner.program if isinstance(a, (t.Define, t.Declare)) and a.name == called), None)
-    return d is not None and isinstance(d.type, t.Universe)
+    d = next((a for a in runner.program if isinstance(a, t.Define) and a.name == called), None)
+    return d is not None and _program_head(d.type) == head
 
 
 def _listed_called(loaded, called):

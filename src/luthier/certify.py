@@ -326,6 +326,21 @@ def store_path(path):
 
 IDENTITY = ("law", "cone", "binding", "seed", "cases")
 CONTROL = "Control"  # the kind of a control's entry (tester.py); a law's entry has no kind
+# [proposed] the kind of an entry a run writes when it validates a host action at its first
+# application (run.py's `FirstActions`, 10.S10), and of the demand that action makes: such a demand
+# is served only by such an entry, never by a tester's listed cases (report-e.md, finding 2)
+FIRST_ACTION = "FirstAction"
+
+
+def entry_kind(entry):
+    """The entry's kind: `Control`, `FirstAction`, or None for a law's entry from a test line. An
+    entry a first action wrote before the kind existed is read by its evidence's protocol."""
+    if "kind" in entry:
+        return entry["kind"]
+    evidence = entry.get("evidence")
+    if isinstance(evidence, dict) and evidence.get("protocol") == "first action (10.S10)":
+        return FIRST_ACTION
+    return None
 
 
 def is_control(entry):
@@ -700,8 +715,11 @@ def at(demand, entry):
 
 def serves(demand, entry):
     """certification_model's `serves`: the law's entry at the current hash, passed, at or above the
-    grade the demand accepts, its reach covering what the run gives."""
-    return (entry["law"] == demand["law"] and at(demand, entry) and passed(entry)
+    grade the demand accepts, its reach covering what the run gives. [proposed] And of the demand's
+    kind: a first action's demand (`FIRST_ACTION`) only by an entry a first action wrote, any other
+    demand only by an entry of no kind (a control's has its own, and never passes)."""
+    return (entry["law"] == demand["law"] and entry_kind(entry) == demand.get("kind") and at(demand, entry)
+            and passed(entry)
             and entry["grade"] is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[entry["grade"]]
             and covers_all(entry["reach"], demand["given"]))
 
