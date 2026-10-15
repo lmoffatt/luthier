@@ -1,0 +1,71 @@
+-- tests/tester/generators_controls.lut: the controls of the laws of generators_laws.lut. Each line
+-- is written `(control <- true)` (test.lth's `control`) and is expected to be refuted: it shows
+-- that a law about a family of generators_model.lut can fail on a family that is broken on
+-- purpose, so that its passing there is not vacuous (7.S19 as D-2026-10-15-a generalized it to
+-- every law; L9.14). The tester records its outcome as a control's entry, never the law's failure.
+-- Written 2026-10-15 by Claude Sonnet, an agent of the coordinating session, on
+-- record/IA/controls-2026-10-15/prompt-mutants.md.
+--
+-- Each law of generators_laws.lut names its family inside its body (`SymmetricGivesSymmetric`
+-- calls `symmetric`), so no wrong family can be passed to it. Each control below is therefore of a
+-- local wrapper law `XOnBroken`, the law's body applied to a family broken on purpose (the way
+-- fit_laws.lut states `DirectionDescendsOnQuadratic`). The control is of the wrapper, not of the
+-- law of generators_model.lut: the cone of the wrapper differs from the law's, so `luthier
+-- certify` will probably not match the control to the law by cone hash; the law stays reported
+-- uncontrolled until its parameters include the family (a change in generators_model.lut, not
+-- made here). `UniformSampleIsUniform` is statistical and has no control here.
+
+import "test.lth" test SampledMode
+import "generators_model.lut" linear symmetricGives
+import "generators.lth" Binding Seed
+import "laws.lth" Listed
+import "numbers.lth" Tolerance abs
+import "arrays.lth" Vec Mat Dim RankFloor mat vec identity approxMat transposeDef matMulDef mscaleDef forallBelow
+import "arrays_model.lut" numpy : Arrays
+import "probability.lth" allUnit
+
+tolerance : Tolerance := 1.0e-12
+floor : RankFloor := 6.661338147750939e-15
+cutoffs : List Binding := [
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- broken families, each a function of the size and the seed returning a value and the next seed
+-- symmetric: only the upper triangle filled, the mirror forgotten
+brokenSymmetric (size : Nat) (seed : Seed) : Mat Float64 * Seed :=
+  (mat Float64 size size (fn i j { if i <= j then 1.0 else 0.0 }), seed)
+-- symmetric of k rows: one row too many
+brokenSymmetricOf (k : Dim) (size : Nat) (seed : Seed) : Mat Float64 * Seed := (identity (k + 1), seed)
+-- gram: negative diagonal, not positive semidefinite
+brokenGram (size : Nat) (seed : Seed) : Mat Float64 * Seed :=
+  (mat Float64 size size (fn i j { if i == j then 0.0 - 1.0 else 0.0 }), seed)
+-- orthogonal: the identity scaled by 2
+brokenOrthogonal (k : Dim) (size : Nat) (seed : Seed) : Mat Float64 * Seed :=
+  (mat Float64 k k (fn i j { if i == j then 2.0 else 0.0 }), seed)
+-- unit list: values above 1
+brokenUnitList (size : Nat) (seed : Seed) : List (Vec Float64) * Seed :=
+  (cons (vec Float64 (size + 1) (fn k { 1.5 })) nil, seed)
+-- clear diagonal: entries of 1/2, neither 0 nor of magnitude in [1, 1000]
+brokenClear (size : Nat) (seed : Seed) : Vec Float64 * Seed := (vec Float64 (size + 1) (fn k { 0.5 }), seed)
+
+-- the bodies of generators_laws.lut's laws on the broken families
+SymmetricGivesSymmetricOnBroken (size : Nat) (seed : Seed) : Bool :=
+  match brokenSymmetric size seed { (a, next) -> symmetricGives a }
+SymmetricOfGivesItsSizeOnBroken (k : Dim) (size : Nat) (seed : Seed) : Bool :=
+  match brokenSymmetricOf k size seed { (a, next) -> a.m == k and symmetricGives a }
+GramGivesPsdOnBroken (fl : RankFloor) (size : Nat) (seed : Seed) : Bool :=
+  match brokenGram size seed { (a, next) -> symmetricGives a and numpy.retainedRank fl (mscaleDef (0.0 - 1.0) a) == 0 }
+OrthogonalGivesOrthogonalOnBroken (tol : Tolerance) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
+  match brokenOrthogonal k size seed { (q, next) -> q.m == k and q.n == k and approxMat tol (matMulDef (transposeDef q) q) (identity k) }
+UnitListGivesUnitValuesOnBroken (size : Nat) (seed : Seed) : Bool :=
+  match brokenUnitList size seed { (vs, next) -> allUnit vs }
+ClearDiagonalGivesClearOnBroken (size : Nat) (seed : Seed) : Bool :=
+  match brokenClear size seed { (d, next) ->
+    forallBelow d.n (fn k { d.f k == 0.0 or (1.0 <= abs (d.f k) and abs (d.f k) <= 1000.0) }) }
+
+test "SymmetricGivesSymmetricOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
+test "SymmetricOfGivesItsSizeOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
+test "GramGivesPsdOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
+test "OrthogonalGivesOrthogonalOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
+test "UnitListGivesUnitValuesOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
+test "ClearDiagonalGivesClearOnBroken" (SampledMode linear) (seed <- 20261015) (profile <- cutoffs) (control <- true)
