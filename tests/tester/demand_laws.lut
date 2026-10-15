@@ -1,0 +1,62 @@
+-- tests/tester/demand_laws.lut: the laws of demand.lth as listed cases: `Store`'s
+-- `OneIdentityOneResult` (§4) on stores of runs written here, and the two laws of `Certifying` at
+-- the demand passed down (§5) on certification_model.lut's `certifying`. Written 2026-10-15 by Claude
+-- Opus 5.5, an agent of the coordinating session, on record/IA/v04-2026-10-15/prompt-e.md
+-- (criterion e of v0.4, L9.14). No model file gives a store of runs (8.S10: `x.run.json` is never
+-- read back), so the stores are listed here, keyed by demand.lth's `Record` with structural
+-- equality (the identity run.py's `breaches` compares today; which identity is Luciano's question,
+-- item 5 of record/IA/layer-3-review-2026-10-15/summary-BCD.md): none, three runs of three
+-- identities, and a store where one identity was run twice with one result. The demands are
+-- demand_model.lut's `theDemand` at three cutoffs; the entries are of one law at one hash, at each
+-- grade, one failed and one of another law. The grade `g` is every value of `Grade`. Seed 20261015
+-- (the censuses are listed; the seed only names the run).
+
+import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade defaultBudgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited
+import "certification.lth" Certifying Entry Hash Outcome Passed Failed
+import "certification_model.lut" certifying
+import "demand.lth" Demand Record Stored Store recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
+import "demand_model.lut" theDemand
+
+-- §4 the store of runs
+eqRecord (a b : Record) : Bool := a == b
+keyTypes : List U := [Record]
+keyEqs : List (Record -> Record -> Bool) := [eqRecord]
+first : Record := recorded (theDemand (entry <- "main")) "sha256:aaaa"
+assumedToo : Record := recorded (theDemand (entry <- "main") (accepts <- AssumedGrade)) "sha256:aaaa"
+other : Record := recorded (theDemand (entry <- "other")) "sha256:bbbb"
+run (k : Record) (r : String) : Stored Record := { key := k, result := r }
+noRuns : Store Record eqRecord := { runs := nil }
+threeIdentities : Store Record eqRecord := { runs := [run first "1", run assumedToo "2", run other "3"] }
+runTwice : Store Record eqRecord := { runs := [run first "1", run other "3", run first "1"] }
+stores : List (Store Record eqRecord) := [noRuns, threeIdentities, runTwice]
+
+-- §5 the demands, at the default cutoff (sampled), one that admits assumptions, and cases
+sampledDemand : Demand := theDemand (entry <- "main")
+assumedDemand : Demand := theDemand (entry <- "main") (accepts <- AssumedGrade)
+casesDemand : Demand := theDemand (entry <- "main") (accepts <- Cases)
+demands : List Demand := [sampledDemand, assumedDemand, casesDemand]
+models : List Certifying := [certifying]
+laws : List String := ["L"]
+cones : List Hash := ["sha256:cccc"]
+entry (l : String) (h : String) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := l, cone := h, binding := nil, seed := 20261015, cases := 1, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-15", interpreter := "listed", hosts := nil }
+assumedPass : Entry := entry "L" "sha256:cccc" (just AssumedGrade) Passed
+sampledPass : Entry := entry "L" "sha256:cccc" (just Sampled) Passed
+provedPass : Entry := entry "L" "sha256:cccc" (just Proved) Passed
+failed : Entry := entry "L" "sha256:cccc" nothing (Failed "x = 1")
+assumedElsewhere : Entry := entry "M" "sha256:cccc" (just AssumedGrade) Passed
+anyEntries : List Entry := [assumedPass, sampledPass, provedPass, failed, assumedElsewhere]
+-- of the law at its hash (`EntryFor (lawDemand d law cone)`)
+entriesFor : List Entry := [assumedPass, sampledPass, provedPass, failed]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+test "OneIdentityOneResult" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "K" "keyTypes", bind "eq" "keyEqs",
+  bind "st" "stores"])
+test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "models", bind "d" "demands",
+  bind "law" "laws", bind "cone" "cones", bind "e" "anyEntries"])
+test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "models", bind "d" "demands",
+  bind "law" "laws", bind "cone" "cones", bind "e" "entriesFor"])
