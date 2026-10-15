@@ -530,6 +530,15 @@ the union of the stretches of one law, cone and binding; (b) each seed stays a s
 today. Recommendation (coordinator): (a). The seed keeps its two other uses: in a run's result key
 (item 5) and in comparing two stochastic functions on the same draws.
 
+**42. Is `fresh` a field of the demand or only an argument of `run`?** (Added 2026-10-16, the
+result-store agent's question relayed by the coordinator.) `luthier run --fresh` executes literally
+whatever the store holds (L5.20, every possible behavior has a way to be said); today it is an
+argument of `run`, recorded in the run's `result_store`. Options: (a) a field of demand.lth's
+`Demand`, declared with its default (L5.19, the outermost demand carries its defaults as declared
+arguments), like every other argument of `run`; (b) only an argument of `run`. Recommendation
+(coordinator): (a), by L5.19 and D-2026-10-13-f (the demand is the gate through which parameters
+change what the program does). Source: `record/IA/code-follows-2026-10-16/report-store.md`.
+
 ## Not listed
 
 Skipped as not waiting on Luciano: findings stated as fixed or "left" with a technical reason
