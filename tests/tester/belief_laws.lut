@@ -21,10 +21,15 @@ import "../../examples/sonolocalizacion/distances.lut" pitResolution
 import "session_a.lut" dimA priorA posteriorA settingsA
 
 tolerance : Tolerance := 1.0e-12
+-- the iterations the demand grants a maximizer on the quadratic family (QuadraticConverges's
+-- `budget`), a census of one, 50, as the probe of record/IA/layer-3-review-2026-10-15/report-fix-BCD.md
+-- [proposed]; settingsA's maxIter 500 is above it, so the law is asked
+budget : Nat := 50
 cutoffs : List Binding := [
   { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },
   { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed },
   { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
 
 -- the quadratic family at dimension 3: maximum at (-1, 0, 1), curvature 2, 1e-3 and 1e3
