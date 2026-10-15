@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 041aa21f614d, commit 37e458a) by `scripts/project_principles.py` (project_principles v2) on 2026-10-15; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 ae10c78268ec, commit b0193ba) by `scripts/project_principles.py` (project_principles v2) on 2026-10-16; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -581,6 +581,17 @@ cost) and G0, the demand (what the demand requires of the evidence is its own).
   outside the theory of certification (L6.12), so clause 9 is enforced by the language and not left to
   good conduct (D-2026-10-13-c); the precedent is the abstract type `thm` of the LCF provers, which
   only the kernel's rules build. [settled]
+- L10.11 The stores of evidence and of results are relations whose schema is a type of Luthier (an
+  entry's kinds are the constructors of a `data`); each field of an entry is a key (must match: the
+  law, the cone's hash, the generators), a range (serves when an inequality holds: the measured
+  distance against the demand's tolerance, a fuel given against the demand's fuel), an aggregate
+  (summed across rows: the cases drawn under several seeds) or informative (kept, never used to find:
+  the fuel a pass used, an annotation erased from the hash); serving a demand is a query over them,
+  and a certified identity (L6) is a relation along which transport is a join (D-2026-10-16-a).
+  [proposed]
+- L10.12 A store is one relation, partitioned in files: the partition follows the file that defines
+  the model an entry certifies, so each repository keeps its own (P7), and no entry is written in two
+  partitions (D-2026-10-16-a). [proposed]
 Example: with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
 lookup table equal to the native on a grid is certified on the grid and nowhere else (clause 7).
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-q, D-2026-10-12-r, D-2026-10-12-t; P3, P11.
