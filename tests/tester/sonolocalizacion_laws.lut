@@ -19,7 +19,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance
 import "arrays.lth" Dim MatOf VecOf
-import "algebra.lth" FromUndoesTo ToUndoesFrom
+import "algebra.lth" Iso FromUndoesTo ToUndoesFrom
 import "../../examples/sonolocalizacion/positions.lut" layout
 import "../../examples/sonolocalizacion/distances.lut" FullAgrees ProfileAgrees ProfileIsFullAtItsSigma nativeFull nativeProfile
 import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph Violation ReportsValidity firstViolation graphOf parseTable
@@ -28,11 +28,18 @@ import "session_a.lut" nodesTextA measurementsTextA the graphA
 tolerance : Tolerance := 1.0e-12
 cutoffs : List Binding := [ { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
 
--- positions.lut: the layout's two round trips, exact
-LayoutFromUndoesTo (n : Dim) (a : MatOf 3 n) : Bool := FromUndoesTo (MatOf 3 n) (VecOf (3 * n)) (layout n) a
-LayoutToUndoesFrom (n : Dim) (p : VecOf (3 * n)) : Bool := ToUndoesFrom (MatOf 3 n) (VecOf (3 * n)) (layout n) p
-test "LayoutFromUndoesTo" (SampledMode linear) (seed <- 20261014)
-test "LayoutToUndoesFrom" (SampledMode linear) (seed <- 20261014)
+-- positions.lut: the layout's two round trips, exact. [proposed] The layout is a parameter, a family
+-- over the number of nodes bound to positions.lut's `layout` (2026-10-15, Claude Opus 5.5, on
+-- record/IA/v04-2026-10-15/prompt-e.md: with `layout` named in the body no wrong layout could be
+-- passed, so the laws had no control, L9.14; sonolocalizacion_controls.lut passes one)
+LayoutFromUndoesTo (lay : (n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) (n : Dim) (a : MatOf 3 n) : Bool :=
+  FromUndoesTo (MatOf 3 n) (VecOf (3 * n)) (lay n) a
+LayoutToUndoesFrom (lay : (n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) (n : Dim) (p : VecOf (3 * n)) : Bool :=
+  ToUndoesFrom (MatOf 3 n) (VecOf (3 * n)) (lay n) p
+layouts : List ((n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) := [layout]
+onLayout : List Binding := [ { parameter := just "lay", type := nothing, generator := "layouts", coverage := Listed } ]
+test "LayoutFromUndoesTo" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLayout)
+test "LayoutToUndoesFrom" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLayout)
 
 -- distances.lut: the native likelihoods as the implementations
 onFull : List Binding := [ { parameter := just "l", type := nothing, generator := "nativeFull", coverage := Listed } ]
