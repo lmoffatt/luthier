@@ -83,6 +83,16 @@ identity; (b) let `--deep` write a new entry with the same identity (breaks `det
 plan). Night default: neither until answered. Unblocks: a fuel-starved line becoming runnable
 again; the exact form of 3. Sources: `summary.md` (item 5);
 `report-second-line.md` (C4); `record/plan/night-2026-10-13.md` (certify.py item).
+*Note (coordinator, 2026-10-15, after his reading in the chat):* fuel only cuts a run; it never
+changes the result of a run that finishes. So a pass is the same pass at any larger fuel, and (a)
+would wrongly make a pass at 1e6 not serve a demand at 1e8. Only a not-run for lack of fuel depends
+on it, and it holds only for fuel up to what it was given. Origin: a reading of the theory by an
+external review (GPT, C4), not an incident; today neither the fuel given nor the fuel used is
+recorded in an entry. A further option: (d) fuel out of the identity; a pass serves any fuel (the
+fuel it used recorded, a cost for the planner); a not-run for fuel records the fuel it was given
+and serves only demands with that much or less; the same for a sequential test's budget (an
+undecided outcome at budget B serves only budgets up to B). Recommendation: (c) now (never memoize a
+not-run for lack of fuel: simplest, and correct), (d) when the costs come.
 
 **5. Is the run's record the memo key, or does `x.run.json` carry the key's hash?** 8.S8 (a value
 and its derivative have two keys) against `demand.lth` 107-108 (`Record` has no decoration, seed,
