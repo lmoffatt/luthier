@@ -2506,3 +2506,23 @@ Quote:      "respecto a generar un boolean de un estadístico, hay una forma rec
 Source:     chat:luthier-3e:0 (this session, 2026-10-15; the line unknown until the export)
 Kind:       spec (7.S17 to 7.S19), theories (laws.lth, generators.lth, test.lth), tester.py
 Status:     current
+
+D-2026-10-15-c  Every possible behavior has a way to be said in Luthier, more verbosely if need be.
+                A default, an optimization or a certified substitution never closes off a behavior
+                the author may want: serving an acting run from the result store, collapsing two
+                identical writes, or skipping an action whose effect the world already shows are
+                defaults, and the program or its demand can always ask for the literal behavior.
+                His case: write the same variable twice to the same file, because what is wanted
+                is to see whether a third party writes in between. Written as L5.20
+                (record/principles-language.md). Bears on decisions-pending-2026-10-15.md item 1:
+                whichever option serves acting runs, the literal execution stays expressible.
+Author:     Luciano, on the coordinator's example for option (b) of the result store's question
+Quote:      "Luthier tiene que dar siempre la opción a un comportamiento posible, entonces debería
+            haber una opción donde se escriba dos veces la misma variable en el mismo file (porque
+            en realidad se quiere ver algo distinto, ver si hay un tercero escribiendo en el file
+            por ejemplo). Este es un principio importante, Luthier siempre tiene que tener una
+            forma de decir un comportamiento posible, más verbosamente pero tiene que estar esa
+            posibilidad."
+Source:     chat:luthier-3e:0 (this session, 2026-10-15; the line unknown until the export)
+Kind:       principles (L5.20); spec (8.S3, 8.S8, 8.S10, the store); the planner and the store
+Status:     current

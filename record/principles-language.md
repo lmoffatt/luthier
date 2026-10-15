@@ -744,6 +744,12 @@ L5.18  No unrecorded policy constants: thresholds, budgets, limits, statistical 
 L5.19  The outermost demand, an action with no caller, carries its tolerance as a declared default
        argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
        [settled]
+L5.20  (His words) Every possible behavior has a way to be said in Luthier, more verbosely if need
+       be: a default, an optimization or a certified substitution (L6) never closes off a behavior
+       the author may want. Serving an acting run from the store, collapsing two identical writes
+       into one, or skipping an action whose effect the world already shows are defaults, and the
+       program or its demand can always ask for the literal behavior instead (write twice to the
+       same file, to see whether a third party writes in between) (D-2026-10-15-c). [settled]
 Example:    doubling positives is positive only when positivity is demanded and derivable, sin of
             positives is only Real because no law composes (clause 15)
 References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n
@@ -791,7 +797,9 @@ History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration st
             L12) From: G0, the demand (the tolerance belongs to the demand) and G2 (a law states a
             distance, not a threshold), so a constant in the code has no place to live; restates P11
             (every criterion is a parameter, never a constant in the code) Source: P11, in force;
-            first applied as a rule of the language 2026-10-05
+            first applied as a rule of the language 2026-10-05. 2026-10-15: clause 20 from his words on the result
+            store's question (D-2026-10-15-c); it restates the organizer "expressive over
+            restrictive" retired in draft 9, whose "every path expressible" no clause carried
             (dialogue:c7437496:lmmaxiter-should-be-a-parameter) Status: settled; statement in his
             words, 2026-10-12 History: draft 0 (6d9dbd3): stated. Draft 0 of the generative plan
             proposed moving it to the way of working; withdrawn (D3). draft 6 (8809e20): the

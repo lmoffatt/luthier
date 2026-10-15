@@ -23,6 +23,9 @@ runs, or only a pure entry may. Options: (a) pure entries only (an acting run al
 recommendation ("one word", report.md). Unblocks: v0.4's criterion (c), the result store across
 runs at its smallest. Source: `record/IA/v04-2026-10-15/report.md` (section 1, criterion c);
 `record/plan/night-2026-10-13.md` ("Questions", the v0.4 item).
+*Note (coordinator, 2026-10-15, after his answer on the example):* D-2026-10-15-c (every possible
+behavior has a way to be said) applies to both options: under (b) serving is a default, and the
+demand or the program can always ask for the literal execution.
 
 **2. Does the cone's hash cover the type annotations the elaborator writes?** 6.S8 (a new check
 writes a new entry) and P2 (everything derived carries how it was derived) put the cone in the
