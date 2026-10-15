@@ -2572,3 +2572,25 @@ Quote:      "c"
 Source:     record/plan/decisions-pending-2026-10-15.md, d8d2bc0
 Kind:       spec (7.S9, 7.S13), certification.lth, certify.py
 Status:     current
+
+D-2026-10-15-h  The run's record and the result's key are two objects: the record says how to
+                reproduce a run (P2), the key when two results are the same result; `x.run.json`
+                carries the key's hash, `determined` speaks of the key, and a law states the key
+                as a function of the record, the seed, the plan and the certificates. Fuel is in
+                the record and out of the key (D-2026-10-15-g). Item 5.
+Author:     Luciano, option (b), the coordinator's recommendation
+Quote:      "b"
+Source:     record/plan/decisions-pending-2026-10-15.md, fe242aa
+Kind:       theories (demand.lth `Record`, plan.lth `MemoKey`), spec (8.S8), run.py
+Status:     current
+
+D-2026-10-15-i  The interpreter's revision in the hash: the last reachable tag for now (the night's
+                default made his); the hash of src/luthier/*.py's content when Luthier stabilizes;
+                every commit when the core is written. Item 6, the tension P2 (everything derived
+                carries how it was derived) against P8 (no more bureaucracy than it pays for),
+                resolved by stage.
+Author:     Luciano
+Quote:      "a--> for now. Cuando Luthier se estabilice c, cuando escribamos el nucleo b."
+Source:     record/plan/decisions-pending-2026-10-15.md, fe242aa
+Kind:       spec (6.S8), certify.py's interpreter revision
+Status:     current
