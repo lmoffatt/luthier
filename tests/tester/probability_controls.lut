@@ -1,5 +1,4 @@
--- tests/tester/probability_controls.lut: the controls of probability_laws.lut's laws, except the
--- statistical `UniformAtLevel`. Each line is written `(control <- true)` (test.lth's `control`) and
+-- tests/tester/probability_controls.lut: the controls of probability_laws.lut's laws. Each line is written `(control <- true)` (test.lth's `control`) and
 -- is expected to be refuted: it shows that a law of probability.lth can fail on a model broken on
 -- purpose, so that its passing in probability_laws.lut is not vacuous (7.S19 as D-2026-10-15-a
 -- generalized it to every law; L9.14). The tester records its outcome as a control's entry, never
@@ -13,15 +12,24 @@
 -- `ProfiledIsGaussianAtItsSigma` state the native construction over a model, and both sides of
 -- each read the same mean and Jacobian, so no model refutes them: they have no control, see the
 -- comments there.
+--
+-- The statistical law and the laws of its statistic, added 2026-10-15 on
+-- record/IA/statistical-2026-10-15/prompt-tester.md (laws.lth §4, 7.S17 to 7.S19, L9.14):
+-- `SourceIsUniform` on probability_model.lut's `lump`, the source every value of which is 0.9
+-- (the body of its `LumpIsUniform`, written as the law at a binding so that the control has the
+-- law's cone and `certify` matches it [proposed]), run by Wald's sequential test at
+-- probability_laws.lut's cutoffs `wald`; it passes when the test fails it. `NoAlternativeAtZero`
+-- and `RatioNonNegative` on a statistic whose ratio is 2 at distance zero, and one whose ratio is
+-- negative at the distance 0.5 of the cutoffs.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear unitList
 import "generators.lth" Binding byParameter
-import "laws.lth" Listed
+import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonNegative
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat vec mat
-import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood
-import "probability_model.lut" numpySort
+import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood UnitList uniformPValue SourceIsUniform
+import "probability_model.lut" numpySort lump
 import "../../examples/sonolocalizacion/distances.lut" pitResolution freeDim fullModel
 import "session_a.lut" dimA modelA likelihoodA
 
@@ -180,3 +188,32 @@ test "InfoNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261015) (wh
 -- in the theory. A Jacobian of scale 1e150 was tried and the law held (CONTROL FAILED, a control
 -- aimed at the model, not at what the law states: removed 2026-10-15 by Claude Opus 5.5 after
 -- a14bc0c); a mean of 1e200 raised instead (inf, 11.S7).
+
+-- ---------------------------------------------------------------- the statistical law (laws.lth §4)
+-- the cutoffs of probability_laws.lut, a census of one, never drawn
+wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
+onLump : List Binding := [
+  { parameter := just "d", type := nothing, generator := "numpySort", coverage := Listed },
+  { parameter := just "source", type := nothing, generator := "lump", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
+-- every value 0.9: the p-value is near zero on every sample, and the test fails the law
+test "SourceIsUniform" (SampledMode linear) (seed <- 20261015) (profile <- onLump) (control <- true)
+
+-- the statistic of probability.lth with its ratio broken: 2 at distance zero; negative at 0.5
+unitListType : List U := [UnitList]
+twoAtZero : StatisticalLaw UnitList := { statistic := fn vs { uniformPValue numpySort vs }, ratio := fn delta p { 2.0 } }
+negativeAtHalf : StatisticalLaw UnitList := { statistic := fn vs { uniformPValue numpySort vs },
+                                              ratio := fn delta p { 1.0 - 3.0 * delta } }
+ratioTwo : List (StatisticalLaw UnitList) := [twoAtZero]
+ratioNegative : List (StatisticalLaw UnitList) := [negativeAtHalf]
+onRatioTwo : List Binding := [
+  { parameter := just "S", type := nothing, generator := "unitListType", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "ratioTwo", coverage := Listed },
+  byParameter "x" "unitList" ]
+onRatioNegative : List Binding := [
+  { parameter := just "S", type := nothing, generator := "unitListType", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "ratioNegative", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "wald", coverage := Listed },
+  byParameter "x" "unitList" ]
+test "NoAlternativeAtZero" (SampledMode linear) (seed <- 20261015) (whereBindings <- onRatioTwo) (control <- true)
+test "RatioNonNegative" (SampledMode linear) (seed <- 20261015) (whereBindings <- onRatioNegative) (control <- true)
