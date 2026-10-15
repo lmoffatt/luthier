@@ -436,12 +436,14 @@ Files: r12_block.accept.lut, r12_toplevel_arrow.reject.lut.
 consumer is an error in a file ("unused binding"), and is allowed and reported in a session (2.S18).
 Files: r12_block.accept.lut, r12_unused_rebinding.reject.lut.
 
-**2.S18. The session.** [decided D-2026-10-11-i] `luthier session [files]`, which `cli.py` does not have yet
-(it has `parse`, `check`, `eval` and `run`), types a block one item
-at a time: `the items are those of a block (§8) and a bare term, which `spec 12` says how the command prints, and an unused rebinding is reported. Each line re-evaluates the block so far; what
-a line re-evaluates and the memo between lines are `spec 8` and O8. The world as the implicit `w`
-of the session block waits for actions (spec 10). In a session `w` is the world of the session
-block; in a file, of `main`.
+**2.S18. The session.** [implemented] (decided D-2026-10-11-i) `luthier session [files]` (spec
+12.S20) builds a block one line at a time: a line is an item of a block (§8) or a bare term, which
+is evaluated and printed as 12.S20 says, and an unused rebinding is reported (2.R6). Each line
+re-evaluates the block so far; what a line re-evaluates and the memo between lines are spec 8
+(8.S13) and O8. The block is evaluated as `eval` evaluates a term (12.S19), so today a line is not
+type-checked. [proposed] Started with `--world`, the session block takes the world as its `w`
+and its actions run once each, as 12.S20 says; without the flag there is no `w` and nothing acts.
+In a file, `w` is the world of `main`.
 
 ## §9 Tests, profiles and the removal of `gen`
 
