@@ -1237,6 +1237,17 @@ L10.10 Only a certifier builds a certificate: the constructor of `Certificate` i
        outside the theory of certification (L6.12), so clause 9 is enforced by the language and not
        left to good conduct (D-2026-10-13-c); the precedent is the abstract type `thm` of the LCF
        provers, which only the kernel's rules build. [settled]
+L10.11 The stores of evidence and of results are relations whose schema is a type of Luthier (an
+       entry's kinds are the constructors of a `data`); each field of an entry is a key (must match:
+       the law, the cone's hash, the generators), a range (serves when an inequality holds: the
+       measured distance against the demand's tolerance, a fuel given against the demand's fuel),
+       an aggregate (summed across rows: the cases drawn under several seeds) or informative (kept,
+       never used to find: the fuel a pass used, an annotation erased from the hash); serving a
+       demand is a query over them, and a certified identity (L6) is a relation along which
+       transport is a join (D-2026-10-16-a). [proposed]
+L10.12 A store is one relation, partitioned in files: the partition follows the file that defines
+       the model an entry certifies, so each repository keeps its own (P7), and no entry is written
+       in two partitions (D-2026-10-16-a). [proposed]
 Example:    with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
             lookup table equal to the native on a grid is certified on the grid and nowhere else
             (clause 7)
@@ -1258,7 +1269,9 @@ Status:     proposed in draft 11; clauses 3 and 9 settled on his marks (D-2026-1
 History:    draft 11, step 4 (2026-10-12): new entry, under G1, after L7. draft 11 (2026-10-12), his
             marks: clause 2 elaborated with the two kinds of assumption (D-2026-10-12-t); clauses 3
             and 9 marked ok (D-2026-10-12-w). draft 11 (2026-10-12): renumbered from L16 of draft 10
-            (D-2026-10-12-v).
+            (D-2026-10-12-v). 2026-10-16: clauses 11 and 12 from the chat on the stores as a
+            relational database (D-2026-10-16-a); the four roles of a field had guided D-2026-10-15-e,
+            -g and items 20 and 41 of the decisions pending
 
 L11 Luthier orchestrates other languages: an extern is a specimen certified by its laws, and what
     does not follow Luthier's way lives in a world.

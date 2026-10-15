@@ -2594,3 +2594,19 @@ Quote:      "a--> for now. Cuando Luthier se estabilice c, cuando escribamos el 
 Source:     record/plan/decisions-pending-2026-10-15.md, fe242aa
 Kind:       spec (6.S8), certify.py's interpreter revision
 Status:     current
+
+D-2026-10-16-a  The stores of evidence and of results are read as relational databases: their schema
+                is a type of Luthier, each field of an entry is a key, a range, an aggregate or
+                informative, serving is a query, a certified identity is a relation along which
+                transport is a join; a store is one relation partitioned in files by the model's
+                defining file, nothing written twice. Written as L10.11 and L10.12 [proposed]. The
+                spec (serving rules as queries, equivalences as a relation, result values in blocks
+                addressed by hash) waits for the full result store. No SQL or Datalog engine until a
+                case asks (P8).
+Author:     Luciano, on the coordinator's proposal (clauses 1 and 2 to the principles, 3 to the
+            spec later)
+Quote:      "Si" (to: "¿agrego las cláusulas 1 y 2 a los principios como propuestas, y dejo el
+            punto 3 para cuando se haga el almacén de resultados?")
+Source:     chat:luthier-3e:0 (this session, 2026-10-16; the line unknown until the export)
+Kind:       principles (L10.11, L10.12); later spec 6, 8, 12 and certification.lth
+Status:     current
