@@ -2466,3 +2466,21 @@ Source:     chat:a5ea3059:0 (this session, 2026-10-14 evening; the line is unkno
 Kind:       theories (the laws of numbers.lth, arrays.lth, probability.lth, belief.lth,
             optimization.lth as written), step 5.1 of the plan
 Status:     current
+
+D-2026-10-15-a  Every law carries, with its evidence, a model it refutes: a negative control broken
+                on purpose, 7.S19's control for statistical laws generalized to every law; a law
+                that no broken specimen can fail describes nothing and is a finding against the
+                theory; a theory is done when each of its laws has its refuted model in the
+                evidence. On the external review of layer 3 (record/IA/layer-3-review-2026-10-15/
+                summary.md: a no-op host passed `Host`, a zero score passed `IsGradient`, `phi - 1`
+                passed `StepRule`, `Demanding` could not fail, a reversed schedule passed
+                `LinearizesOn`). Written as L9.14 (record/principles-language.md), 7.S19's last
+                sentences, the execution plan's rule, record/working-method.md.
+Author:     Luciano, on the coordinating session's lesson from the review
+Quote:      "SÍ, hay que agregar el punto 1, que en algo estaba ya, a los principios y a todos los
+            documentos que correspondan. Lanzá un agente para que investigue esto."
+Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-15 ~09:30, relayed to the fork
+            luthier-5d by message; the line unknown until the export)
+Kind:       principles (L9.14), spec (7.S19), the plan's rules, the working method; the theories
+            of every layer (their evidence gains a refuted model per law)
+Status:     current
