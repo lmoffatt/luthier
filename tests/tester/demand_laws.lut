@@ -21,7 +21,10 @@ import "demand_model.lut" theDemand
 
 -- §4 the store of runs
 eqRecord (a b : Record) : Bool := a == b
-keyTypes : List U := [Record]
+-- the key type under a name of this file: `Record` is an alias of demand.lth, which tester.py's
+-- `model_homes` would take for a model and write the entries beside demand.lth
+Key = Record
+keyTypes : List U := [Key]
 keyEqs : List (Record -> Record -> Bool) := [eqRecord]
 first : Record := recorded (theDemand (entry <- "main")) "sha256:aaaa"
 assumedToo : Record := recorded (theDemand (entry <- "main") (accepts <- AssumedGrade)) "sha256:aaaa"
