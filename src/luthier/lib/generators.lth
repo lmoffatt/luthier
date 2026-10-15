@@ -7,7 +7,11 @@
 -- (record/IA/opus-2026-10-13/review-layers-2-3-report.md, gen.1 to gen.16). Sources: spec 7.S1 to
 -- 7.S8, 7.R1 to 7.R4, 7.S17, 7.S18; 7.S3's proposed sized rule for recursive `data`; program.lth's
 -- `Violating` and `Clean` domains; L2.7; L5.18; L9.6; P10 (the invariant of a metric is what
--- represents it). Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`.
+-- represents it). Pattern of ebnf.lth: a theory, its laws over a model, `T := laws`. §1's
+-- statistical laws rewritten 2026-10-15 by Claude Fable 5.1, an agent of the coordinating
+-- session, on record/IA/statistical-2026-10-15/prompt-theory.md: in the form of laws.lth §4
+-- (7.S17 to 7.S19 as rewritten that day, L9.15, D-2026-10-15-b), no law universal over seeds
+-- (the review of layer 3, summary-BCD.md item 3).
 --
 -- What this file states. A generator of `T` is a value of `Gen T`: from a size and a seed, a
 -- value and the next seed (7.S1). Its validity is its type: every value it gives belongs to `T`,
@@ -24,7 +28,8 @@
 -- `luthier parse src/luthier/lib/generators.lth`, sets its status to done here, and commits.
 --
 --   §1 Seeds and generators: `Seed`, `Gen T`, the unit interval; the random source and its
---      laws, uniform and independent (7.S1, 7.S17).                                         done
+--      laws, uniform and independent, statistical in the form of laws.lth §4 (7.S1,
+--      7.S17, L9.15).                                                                       done
 --   §2 Sampling by weight: the cumulative inversion as a field, proportional to the weight;
 --      the metrics of numbers by their invariance (7.S2, 7.S4).                              done
 --   §3 Exhaustive and sized generators, the size the type's (7.S3, 7.R3).                    done
@@ -37,7 +42,7 @@
 --      core.lut.                                                                            todo
 
 import "kernel_laws.lth" Concrete
-import "laws.lth" Coverage Drawn
+import "laws.lth" Coverage Drawn Law Statistical StatisticalLaw Sequential byPValue
 
 -- ---------------------------------------------------------------- §1 Seeds and generators
 
@@ -54,24 +59,40 @@ OrderedUnitPair : U := { v w : Float64 | 0.0 <= v and v <= w and w < 1.0 }
 -- The random source is an extern that gives seeds and uniform doubles (7.S1); its laws of
 -- stochasticity are stated here and certified as any extern's. Each value is in [0, 1); a seed
 -- moves on; the values are uniform, and successive values are independent (7.S1). The last two
--- are statistical laws (7.S17): each returns the p-value of the host's test (goodness of fit to
--- the uniform law; the pairs of successive draws uniform in the unit square), to be read against
--- the level the demand sets, and a failure is repeated once (7.S18). As Bool laws they hold on a
--- fraction `1 - alpha` of seeds, which is what their certificate says (gen.2); the level and the
--- count are parameters of the certification, `Level`.
+-- are statistical laws in the form of laws.lth §4 (7.S17, L9.15): a sample is the draws from a
+-- seed, `initial` of them, and the seed after them is the state of the stream; the statistic is
+-- the p-value of the host's test (goodness of fit to the uniform law; the pairs of successive
+-- draws uniform in the unit square), uniform on [0, 1] when the law holds; the alternative is the
+-- reference tilt of laws.lth; and the verdict is the sequential test's at the cutoffs the demand
+-- supplies, alpha, beta, delta, the size of a sample and the budget (D-2026-10-14-c). No law is
+-- quantified over seeds: the seed is the test's (7.S17; the review of layer 3, summary-BCD.md
+-- item 3: `UniformAtLevel` as a Bool law over every seed refuted a correct source on 100 seeds
+-- with probability 0.994). The two p-values are leaves declared until a host gives them; the
+-- control of each law, a source biased on purpose (L9.14), is generators_model.lut's. `Level`,
+-- the level and count of the Bool form, is no longer read by any law here; kept this bite for
+-- its importers (tests/tester/generators_laws.lut, probability_laws.lut,
+-- tests/run/scope/label_and_definition.lut), to go with them [proposed].
 Random : { next : Seed -> Seed, uniform : Seed -> Float64 }
 uniformPValue : List Float64 -> Float64
 serialPValue : List (Float64 * Float64) -> Float64
 Level : U := { alpha : Float64, n : Nat | 0.0 < alpha and alpha < 1.0 and 0 < n }
-draws (r : Random) (s : Seed) (n : Nat) : List Float64 :=
-  if n == 0 then nil else cons (r.uniform s) (draws r (r.next s) (n - 1))
-pairs (r : Random) (s : Seed) (n : Nat) : List (Float64 * Float64) :=
-  if n == 0 then nil else cons ((r.uniform s, r.uniform (r.next s))) (pairs r (r.next (r.next s)) (n - 1))
+-- `n` draws from a seed, and the seed after them
+drawsFrom (r : Random) (n : Nat) (s : Seed) : List Float64 * Seed :=
+  if n == 0 then (nil, s) else match drawsFrom r (n - 1) (r.next s) { (us, s2) -> (cons (r.uniform s) us, s2) }
+-- `n` pairs of successive draws, and the seed after them
+pairsFrom (r : Random) (n : Nat) (s : Seed) : List (Float64 * Float64) * Seed :=
+  if n == 0 then (nil, s)
+  else match pairsFrom r (n - 1) (r.next (r.next s)) { (ps, s2) -> (cons ((r.uniform s, r.uniform (r.next s))) ps, s2) }
 UniformInUnit (r : Random) (s : Seed) : Bool := 0.0 <= r.uniform s and r.uniform s < 1.0
 SeedMoves (r : Random) (s : Seed) : Bool := not (r.next s == s)
-UniformAtLevel (r : Random) (l : Level) (s : Seed) : Bool := uniformPValue (draws r s l.n) >= l.alpha
-IndependentAtLevel (r : Random) (l : Level) (s : Seed) : Bool := serialPValue (pairs r s l.n) >= l.alpha
-Random := UniformInUnit & SeedMoves & UniformAtLevel & IndependentAtLevel
+-- the statistical laws: their statistic and alternative, then the law with its stream
+uniformity : StatisticalLaw (List Float64) := byPValue (List Float64) uniformPValue
+independence : StatisticalLaw (List (Float64 * Float64)) := byPValue (List (Float64 * Float64)) serialPValue
+DrawsAreUniform (r : Random) (c : Sequential) : Law :=
+  Statistical (List Float64) Seed uniformity (fn n s { drawsFrom r n s }) c
+DrawsAreIndependent (r : Random) (c : Sequential) : Law :=
+  Statistical (List (Float64 * Float64)) Seed independence (fn n s { pairsFrom r n s }) c
+Random := UniformInUnit & SeedMoves & DrawsAreUniform & DrawsAreIndependent
 
 -- ---------------------------------------------------------------- §2 Sampling by weight
 
