@@ -355,7 +355,10 @@ prankPlus1 : List Binding := [
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
   { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
 
--- retainedRank's floor is an absolute 1 instead of relative to the largest eigenvalue
+-- retainedRank's floor is an absolute 1e-3 instead of relative to the largest eigenvalue: read
+-- through the relative leaf as 1e-3 over the Frobenius norm (the largest eigenvalue is at most the
+-- norm), and none retained when the norm is at most 1e-3 (report-weak-laws.md; before, an absolute
+-- 1, the floor the law saw while it did not see 1e-3)
 rankAbs : Arrays := {
   add := numpy.add,
   sub := numpy.sub,
@@ -368,7 +371,7 @@ rankAbs : Arrays := {
   msub := numpy.msub,
   mscale := numpy.mscale,
   transpose := numpy.transpose,
-  retainedRank := fn fl a { if frobDef a == 0.0 then 0 else numpy.retainedRank (if 1.0 / frobDef a < 0.5 then 1.0 / frobDef a else 0.5) a },
+  retainedRank := fn fl a { if frobDef a <= 1.0e-3 then 0 else numpy.retainedRank (1.0e-3 / frobDef a) a },
   trace := numpy.trace,
   pinvSym := numpy.pinvSym,
 }
@@ -599,7 +602,7 @@ test "RankOfDiagonal" (SampledMode linear) (seed <- 20261015) (profile <- prankF
 test "RankOfZeroAndIdentity" (SampledMode linear) (seed <- 20261015) (profile <- prankPlus1) (control <- true)
 -- rankPlus1: a full-rank matrix has rank m + 1
 test "RankBounded" (SampledMode linear) (seed <- 20261015) (profile <- prankPlus1) (control <- true)
--- rankAbs: a scale moves an eigenvalue across the absolute floor of 1
+-- rankAbs: scaled to the size of the floor, every eigenvalue is below the absolute floor of 1e-3
 test "RankScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- prankAbs) (control <- true)
 -- rankDiag: a rotation moves the diagonal, not the rank
 test "RankUnderRotation" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnRotation) (profile <- prankDiag) (control <- true)
