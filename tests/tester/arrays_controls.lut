@@ -1,0 +1,629 @@
+-- tests/tester/arrays_controls.lut: the controls of arrays.lth's laws. Each line is written
+-- `(control <- true)` (test.lth's `control`) and is expected to be refuted: it runs a law of
+-- arrays_laws.lut on a model of `Arrays` broken on purpose (one leaf wrong, a plausible bug), so
+-- that the law's passing on numpy is not vacuous (7.S19 as D-2026-10-15-a generalized it to every
+-- law; L9.14). The tester records its outcome as a control's entry, never the law's failure.
+-- Written 2026-10-15 by Claude Sonnet, an agent of the coordinating session, on
+-- record/IA/controls-2026-10-15/prompt-mutants.md. Sampled lines keep arrays_laws.lut's `linear`
+-- metric, tolerance and rank floor; seed 20261015. The broken models copy numpy's other fields.
+-- PinvRestricts and PinvTraceIsRank run on listed matrices, as the laws do where sampling the
+-- shape fails (see arrays_laws.lut).
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear symmetric symmetricOf orthogonal
+import "generators.lth" Binding byParameter
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Arrays Vec Mat RankFloor mat vec identity zeroMat sumTo countBelow frobDef
+  AddPointwise SubPointwise ScalePointwise TransposePointwise MaddPointwise MsubPointwise MscalePointwise
+  DotSymmetric DotOnBasis DotAgrees NormOfBasis NormOfDot NormScales MatVecOnBasis MatVecAgrees
+  MatMulIdentity MatMulTransposes MatMulAgrees RankOfDiagonal RankOfZeroAndIdentity RankBounded RankScales
+  RankUnderRotation TraceOfIdentity TraceAdditive TraceCyclic TraceAgrees PinvOfDiagonal PinvOfZero
+  PinvOfIdentity PinvProjects PinvSymmetric PinvRestricts PinvTraceIsRank PinvScales
+import "arrays_model.lut" numpy
+
+tolerance : Tolerance := 1.0e-12
+floor : RankFloor := 6.661338147750939e-15
+
+-- add is subtraction
+swapAdd : Arrays := {
+  add := numpy.sub,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pswapAdd : List Binding := [
+  { parameter := just "m", type := nothing, generator := "swapAdd", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- sub is addition
+swapSub : Arrays := {
+  add := numpy.add,
+  sub := numpy.add,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pswapSub : List Binding := [
+  { parameter := just "m", type := nothing, generator := "swapSub", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- scale multiplies by c + 1
+shiftScale : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := fn c x { numpy.scale (c + 1.0) x },
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pshiftScale : List Binding := [
+  { parameter := just "m", type := nothing, generator := "shiftScale", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- transpose forgets to swap the indices
+noSwapT : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := fn a { a },
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pnoSwapT : List Binding := [
+  { parameter := just "m", type := nothing, generator := "noSwapT", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- madd is subtraction
+swapMadd : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.msub,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pswapMadd : List Binding := [
+  { parameter := just "m", type := nothing, generator := "swapMadd", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- msub is addition
+swapMsub : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.madd,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pswapMsub : List Binding := [
+  { parameter := just "m", type := nothing, generator := "swapMsub", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- mscale multiplies by s + 1
+shiftMscale : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := fn s a { numpy.mscale (s + 1.0) a },
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pshiftMscale : List Binding := [
+  { parameter := just "m", type := nothing, generator := "shiftMscale", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- dot adds the first coordinate of x, so it is not symmetric
+skewDot : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := fn x y { numpy.dot x y + x.f 0 },
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pskewDot : List Binding := [
+  { parameter := just "m", type := nothing, generator := "skewDot", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- dot drops the last coordinate
+dropDot : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := fn x y { sumTo (x.n - 1) (fn k { x.f k * y.f k }) },
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pdropDot : List Binding := [
+  { parameter := just "m", type := nothing, generator := "dropDot", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- norm is off by one
+norm1 : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := fn x { numpy.norm x + 1.0 },
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pnorm1 : List Binding := [
+  { parameter := just "m", type := nothing, generator := "norm1", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- norm forgets the square root
+sqNorm : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := fn x { numpy.dot x x },
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+psqNorm : List Binding := [
+  { parameter := just "m", type := nothing, generator := "sqNorm", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- matVec doubles its result
+doubleMV : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := fn a x { numpy.scale 2.0 (numpy.matVec a x) },
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pdoubleMV : List Binding := [
+  { parameter := just "m", type := nothing, generator := "doubleMV", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- matMul doubles its result
+doubleMM : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := fn a b { numpy.mscale 2.0 (numpy.matMul a b) },
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+pdoubleMM : List Binding := [
+  { parameter := just "m", type := nothing, generator := "doubleMM", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- retainedRank's floor is 1e14 times too large (about 0.67 of the largest)
+rankFloor : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := fn fl a { numpy.retainedRank (fl * 1.0e14) a },
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+prankFloor : List Binding := [
+  { parameter := just "m", type := nothing, generator := "rankFloor", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- retainedRank is off by one
+rankPlus1 : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := fn fl a { numpy.retainedRank fl a + 1 },
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+prankPlus1 : List Binding := [
+  { parameter := just "m", type := nothing, generator := "rankPlus1", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- retainedRank's floor is an absolute 1 instead of relative to the largest eigenvalue
+rankAbs : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := fn fl a { if frobDef a == 0.0 then 0 else numpy.retainedRank (if 1.0 / frobDef a < 0.5 then 1.0 / frobDef a else 0.5) a },
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+prankAbs : List Binding := [
+  { parameter := just "m", type := nothing, generator := "rankAbs", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- retainedRank counts the positive diagonal entries, as if the matrix were diagonal
+rankDiag : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := fn fl a { countBelow a.m (fn i { 0.0 < a.f i i }) },
+  trace := numpy.trace,
+  pinvSym := numpy.pinvSym,
+}
+prankDiag : List Binding := [
+  { parameter := just "m", type := nothing, generator := "rankDiag", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- trace is off by one
+trace1 : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := fn a { numpy.trace a + 1.0 },
+  pinvSym := numpy.pinvSym,
+}
+ptrace1 : List Binding := [
+  { parameter := just "m", type := nothing, generator := "trace1", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- trace counts the first diagonal entry twice
+traceTwice : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := fn a { numpy.trace a + a.f 0 0 },
+  pinvSym := numpy.pinvSym,
+}
+ptraceTwice : List Binding := [
+  { parameter := just "m", type := nothing, generator := "traceTwice", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- pinvSym inverts every nonzero diagonal entry with no floor (negative ones too)
+invDiag : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { mat Float64 a.m a.n (fn i j { if i == j then (if a.f i i == 0.0 then 0.0 else 1.0 / a.f i i) else 0.0 }) },
+}
+pinvDiag : List Binding := [
+  { parameter := just "m", type := nothing, generator := "invDiag", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- pinvSym adds a ridge 1e-3 I
+ridge : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { numpy.madd (numpy.pinvSym fl a) (mat Float64 a.m a.m (fn i j { if i == j then 1.0e-3 else 0.0 })) },
+}
+pridge : List Binding := [
+  { parameter := just "m", type := nothing, generator := "ridge", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- pinvSym returns a matrix off by 1e-3 at entry (0, 1), not symmetric
+skewPinv : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { numpy.madd (numpy.pinvSym fl a) (mat Float64 a.m a.m (fn i j { if i == 0 and j == 1 then 1.0e-3 else 0.0 })) },
+}
+pskewPinv : List Binding := [
+  { parameter := just "m", type := nothing, generator := "skewPinv", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- pinvSym's floor is 1e14 times too large
+pinvFloor : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { numpy.pinvSym (fl * 1.0e14) a },
+}
+ppinvFloor : List Binding := [
+  { parameter := just "m", type := nothing, generator := "pinvFloor", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- the listed symmetric matrices of arrays_laws.lut (copied): the positive semidefinite ones where
+-- PinvRestricts is stated, and the ones PinvTraceIsRank runs on
+diag3 (a b c : Float64) : Mat Float64 := mat Float64 3 3 (fn i j { if i == j then (if i == 0 then a else if i == 1 then b else c) else 0.0 })
+symmetricMore : List (Mat Float64) := [
+  mat Float64 3 3 (fn i j { toFloat64 ((i + 1) * (j + 1)) }),
+  mat Float64 3 3 (fn i j { if i == j then toFloat64 (2 * i - 1) else 0.5 }),
+  zeroMat 3 3,
+  diag3 1.0 1.0e-13 2.0,
+  diag3 1.0 1.0e-16 2.0,
+  mat Float64 5 5 (fn i j { 1.0 / toFloat64 (i + j + 1) }),
+  mat Float64 1 1 (fn i j { 0.0 - 2.0 }) ]
+symmetricPsd : List (Mat Float64) := [
+  mat Float64 3 3 (fn i j { toFloat64 ((i + 1) * (j + 1)) }),
+  zeroMat 3 3,
+  identity 3,
+  diag3 1.0 1.0e-13 2.0,
+  diag3 1.0 1.0e-16 2.0,
+  mat Float64 5 5 (fn i j { 1.0 / toFloat64 (i + j + 1) }) ]
+listedS : List Binding := [ { parameter := just "s", type := nothing, generator := "symmetricMore", coverage := Listed } ]
+listedPsd : List Binding := [ { parameter := just "s", type := nothing, generator := "symmetricPsd", coverage := Listed } ]
+
+-- the families the sampled lines draw a symmetric matrix and a rotation from (generators_model.lut):
+-- a random matrix is symmetric or orthogonal only at 0 x 0 and 1 x 1, so the laws bind a generator
+drawnS : List Binding := [byParameter "s" "symmetric"]
+drawnRotation : List Binding := [byParameter "q" "orthogonal", byParameter "s" "symmetricOf"]
+
+-- swapAdd: the sum is a difference
+test "AddPointwise" (SampledMode linear) (seed <- 20261015) (profile <- pswapAdd) (control <- true)
+-- swapSub: the difference is a sum
+test "SubPointwise" (SampledMode linear) (seed <- 20261015) (profile <- pswapSub) (control <- true)
+-- shiftScale: the entries are not c times x
+test "ScalePointwise" (SampledMode linear) (seed <- 20261015) (profile <- pshiftScale) (control <- true)
+-- noSwapT: the result is the matrix itself, not its transpose
+test "TransposePointwise" (SampledMode linear) (seed <- 20261015) (profile <- pnoSwapT) (control <- true)
+-- swapMadd: the sum is a difference
+test "MaddPointwise" (SampledMode linear) (seed <- 20261015) (profile <- pswapMadd) (control <- true)
+-- swapMsub: the difference is a sum
+test "MsubPointwise" (SampledMode linear) (seed <- 20261015) (profile <- pswapMsub) (control <- true)
+-- shiftMscale: the entries are not s times a
+test "MscalePointwise" (SampledMode linear) (seed <- 20261015) (profile <- pshiftMscale) (control <- true)
+-- skewDot: the two orders differ by the coordinates added
+test "DotSymmetric" (SampledMode linear) (seed <- 20261015) (profile <- pskewDot) (control <- true)
+-- dropDot: on the last basis vector the dot is 0, not x_j
+test "DotOnBasis" (SampledMode linear) (seed <- 20261015) (profile <- pdropDot) (control <- true)
+-- dropDot: the native sum has the last term
+test "DotAgrees" (SampledMode linear) (seed <- 20261015) (profile <- pdropDot) (control <- true)
+-- norm1: the norm of a basis vector is 2
+test "NormOfBasis" (SampledMode linear) (seed <- 20261015) (profile <- pnorm1) (control <- true)
+-- sqNorm: the norm is the inner product, not its root
+test "NormOfDot" (SampledMode linear) (seed <- 20261015) (profile <- psqNorm) (control <- true)
+-- sqNorm: the norm grows as c squared
+test "NormScales" (SampledMode linear) (seed <- 20261015) (profile <- psqNorm) (control <- true)
+-- doubleMV: the table on the basis is twice the matrix
+test "MatVecOnBasis" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMV) (control <- true)
+-- doubleMV: twice the native sum
+test "MatVecAgrees" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMV) (control <- true)
+-- doubleMM: a times the identity is twice a
+test "MatMulIdentity" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMM) (control <- true)
+-- noSwapT: the transpose of the product is the product itself, not b^T a^T
+test "MatMulTransposes" (SampledMode linear) (seed <- 20261015) (profile <- pnoSwapT) (control <- true)
+-- doubleMM: twice the native sum
+test "MatMulAgrees" (SampledMode linear) (seed <- 20261015) (profile <- pdoubleMM) (control <- true)
+-- rankFloor: a diagonal entry under 0.67 of the largest is dropped
+test "RankOfDiagonal" (SampledMode linear) (seed <- 20261015) (profile <- prankFloor) (control <- true)
+-- rankPlus1: the zero matrix has rank 1
+test "RankOfZeroAndIdentity" (SampledMode linear) (seed <- 20261015) (profile <- prankPlus1) (control <- true)
+-- rankPlus1: a full-rank matrix has rank m + 1
+test "RankBounded" (SampledMode linear) (seed <- 20261015) (profile <- prankPlus1) (control <- true)
+-- rankAbs: a scale moves an eigenvalue across the absolute floor of 1
+test "RankScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- prankAbs) (control <- true)
+-- rankDiag: a rotation moves the diagonal, not the rank
+test "RankUnderRotation" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnRotation) (profile <- prankDiag) (control <- true)
+-- trace1: the trace of the identity is k + 1
+test "TraceOfIdentity" (SampledMode linear) (seed <- 20261015) (profile <- ptrace1) (control <- true)
+-- trace1: the offset is counted once on the left, twice on the right
+test "TraceAdditive" (SampledMode linear) (seed <- 20261015) (profile <- ptrace1) (control <- true)
+-- traceTwice: the entry added differs between a b and b a
+test "TraceCyclic" (SampledMode linear) (seed <- 20261015) (profile <- ptraceTwice) (control <- true)
+-- trace1: the native sum is one less
+test "TraceAgrees" (SampledMode linear) (seed <- 20261015) (profile <- ptrace1) (control <- true)
+-- invDiag: a negative entry is inverted, the law keeps it at zero
+test "PinvOfDiagonal" (SampledMode linear) (seed <- 20261015) (profile <- pinvDiag) (control <- true)
+-- ridge: the pseudo-inverse of the zero matrix is 1e-3 I, not zero
+test "PinvOfZero" (SampledMode linear) (seed <- 20261015) (profile <- pridge) (control <- true)
+-- ridge: the pseudo-inverse of the identity is 1.001 I
+test "PinvOfIdentity" (SampledMode linear) (seed <- 20261015) (profile <- pridge) (control <- true)
+-- ridge: p s p differs from p by the ridge
+test "PinvProjects" (SampledMode linear) (seed <- 20261015) (profile <- pridge) (control <- true)
+-- skewPinv: p is not symmetric
+test "PinvSymmetric" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- pskewPinv) (control <- true)
+-- ridge: s p s differs from s by 1e-3 s squared, above the slack
+test "PinvRestricts" ExhaustiveMode (whereBindings <- listedPsd) (profile <- pridge) (control <- true)
+-- pinvFloor: an eigenvalue under 0.67 of the largest is dropped by the pinv but counted by the real rank
+test "PinvTraceIsRank" ExhaustiveMode (whereBindings <- listedS) (profile <- ppinvFloor) (control <- true)
+-- ridge: the ridge does not scale as 1 / c
+test "PinvScales" (SampledMode linear) (seed <- 20261015) (profile <- pridge) (control <- true)
