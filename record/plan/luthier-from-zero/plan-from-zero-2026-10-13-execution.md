@@ -214,6 +214,9 @@ by Luciano.
   generators of symmetric and orthogonal matrices, of unit lists and of normals (the laws over
   records of functions run on listed cases, 7.R4); fuel in an entry's identity (his question);
   `--checked`; the statistical laws (7.S17 to 7.S19); the external review of layer 2.
+- 2026-10-15, afternoon: v0.4's criteria written before its work (step 6.3, a to f): (d) and (f)
+  met, (a) `eval` with imports next (record/IA/v04-2026-10-15/), (b) the session after it, (c)
+  the result store waits for his word on actions, (e) demand.lth and plan.lth have no lines.
 
 
 ## Rules for every step
@@ -443,13 +446,50 @@ Planned:
 1. Done 2026-10-15 (a Fable agent, 5df0c75 to a18c4a9): `src/luthier/lib/demand.lth` with
    `demand_model.lut` (8.S1, 8.S2: the demand as a value, the cutoffs it carries, the holes it
    fills; the decoration and the costs as holes) and `plan.lth` with `plan_model.lut` (8.S3,
-   8.S4, 8.S8, 8.S11: the dataflow, the schedule, `Confluent`, the memo key). Next: the external
-   review of layer 3 (world, certification, demand, plan).
+   8.S4, 8.S8, 8.S11: the dataflow, the schedule, `Confluent`, the memo key). The external
+   review of layer 3 (world, certification, demand, plan) followed (step 5.5's criterion f).
 2. *Claude agents.* `eval` and `session` as the spec reads them (12.S19, 2.S18); the result store
    across runs (8.S3, 8.S8). Done 2026-10-15: externs validated at their first action (10.S8 to
    10.S10) through `agreement` (788b7f4); the run record complete and the lock (c03e16f);
-   `--checked` (12.S18, L11.2) running.
-3. Milestone `v0.4`.
+   `--checked` (12.S18, L11.2).
+3. Milestone `v0.4`, its criteria (written 2026-10-15, before its work, on his rule that a
+   milestone's criteria precede its work; measured by the coordinating session; `luthier X` is
+   `PYTHONPATH=src python3 -m luthier.cli X`):
+   (a) `eval` as 12.S19 reads it: `luthier eval files term` loads the files with their imports
+   and core as `run` does, infers the term's type, evaluates it, prints the value with its type
+   and the states of the term's cone, demands no certificate and writes nothing. Measured:
+   `luthier eval tests/eval/plan_agree.lut agree` (a file importing plan_model.lut) prints
+   `true : Bool` and a line `states: ...`, exit 0, and `git status --short` shows no new
+   `*.run.json` or `luthier.lock`. Not met: cli.py's `eval` reads one file without its imports
+   and prints the weak head form of a name, no type, no states.
+   (b) `session` as 2.S18 and 12.S20 read it: `printf 'x <- 1\nx <- 2\nx\n:quit\n' | luthier
+   session tests/eval/arithmetic.lut` prints a note naming the unused rebinding of `x` and
+   `2 : Int`, exit 0. Not met: cli.py has no `session` (12.S20 says `[implemented]`, 2.S18 says
+   it is not; the code agrees with 2.S18).
+   (c) the result store across runs at its smallest (8.S3, 8.S8, 8.S10): `run` writes each
+   result under its key (8.S8: the demand's key, the cone's hash, the mode, the seed, the plan's
+   hash, the certificates' hashes) and a run whose key the store holds is served from it and
+   says so. Measured: `luthier run` twice on one pure entry; the second record's entry names the
+   first as the one that served it. Not met, and it waits for one word of his: whether a run
+   whose cone acts on the world (`print`, `readFile`) may be served from the store, or only a
+   pure entry.
+   (d) the external review of layer 3 read and its changes applied: every finding of
+   record/IA/layer-3-review-2026-10-15/summary.md and summary-BCD.md fixed, waiting for him, or
+   left with its reason (report-second-line.md). Met (step 5.5's f; bc646d8).
+   (e) step 6's theories each with its laws controlled (L9.14, D-2026-10-15-a): every law of
+   world.lth, demand.lth, plan.lth and the slice's libraries (numbers, arrays, tables,
+   probability, belief, optimization) has a line in `tests/tester/<theory>_laws.lut` and a
+   control in `<theory>_controls.lut`, and `luthier check -v` on those files prints `controlled`
+   for each and `uncontrolled` for none. Not met: the libraries' 142 law lines read controlled
+   (the 6 uncontrolled lines of `tests/tester/` are sonolocalizacion_laws.lut's, an example's
+   laws), world.lth has lines for `Console`'s four laws only (`Host`'s are validated at their
+   first action, 10.S10, and have no line), demand.lth and plan.lth have none (a generator of
+   dataflows is missing, record/IA/demand-2026-10-15/report.md).
+   (f) the suite and the lints green: `python3 -m pytest -q` with no failure;
+   `scripts/check_spec.py` prints nothing; `scripts/project_principles.py --check --strict`
+   exit 0; `scripts/check_quotes.py`'s old debt excepted (his question). Met on 2026-10-15 at
+   24d3d43: 710 passed, 5 skipped, 9 xfailed.
+   Order: (a), then (b), then (e) and (c) on his word.
 
 ## After
 
