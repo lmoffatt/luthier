@@ -24,6 +24,16 @@ def main(argv: list[str] | None = None) -> int:
     p_eval.add_argument("files", nargs="+")
     p_eval.add_argument("term", help="a term, as it would be written in the files (a name, an application, ...)")
     p_eval.add_argument("--fuel", type=int, default=None, help="reduction fuel [default the demand's, as run's]")
+    p_session = sub.add_parser("session", help="read one item of a block per line from standard input over the "
+                                                "files, their imports and core: `x := t`, `x <- t`, a term "
+                                                "printed with its type and its cone's states; `:items`, "
+                                                "`:quit`; records nothing (12.S20, 2.S18)")
+    p_session.add_argument("files", nargs="*")
+    p_session.add_argument("--fuel", type=int, default=None, help="reduction fuel per line [default the demand's, as run's]")
+    p_session.add_argument("--world", action="store_true",
+                           help="[proposed] the session block takes the world as `w`, and its actions run with "
+                                "the run's token, validated at their first action as run validates them (10.S10); "
+                                "without it the session has no world and acts on nothing")
     p_run = sub.add_parser("run", help="run a program with the host world")
     p_run.add_argument("file")
     # the defaults of `run`'s arguments are the demand's, declared in lib/demand_model.lut's
@@ -95,6 +105,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{ns.file}: {exc}", file=sys.stderr)
             return 1
 
+    if ns.command == "session":
+        return _session(ns.files, ns.world, ns.fuel)
+
     if ns.command == "eval":
         from .run import RunError, _type_shown, evaluate, show_states
         import sys
@@ -140,6 +153,37 @@ def main(argv: list[str] | None = None) -> int:
         elif ns.tree and isinstance(result, Parsed):
             for act in result.program:
                 print(act)
+    return 1 if failed else 0
+
+
+def _session(files, world=False, fuel=None):
+    """`luthier session [files]` (12.S20): the lines of standard input, one item or term each, until
+    `:quit` or the end; a refused line is reported on standard error and leaves the block as it
+    was. [proposed] Exit 1 when the files cannot be loaded or a line was refused, else 0. With no
+    file, the session sees core alone."""
+    import sys
+    from .run import RunError, Session
+    try:
+        session = Session(files, world, fuel)
+    except (OSError, RunError, ValueError, RecursionError) as exc:
+        print(f"session: {exc}", file=sys.stderr)
+        return 1
+    failed = False
+    prompt = sys.stdin.isatty()
+    while True:
+        if prompt:
+            print("> ", end="", flush=True)
+        text = sys.stdin.readline()
+        if not text or text.strip() == ":quit":
+            break
+        try:
+            for line in session.line(text):
+                print(line, flush=True)
+        except (RunError, ValueError, RecursionError) as exc:
+            failed = True
+            for line in getattr(exc, "out", ()):
+                print(line, flush=True)
+            print(f"session: {exc}", file=sys.stderr, flush=True)
     return 1 if failed else 0
 
 

@@ -56,6 +56,7 @@ import inspect
 import json
 import math
 import platform
+import sys
 from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
 
@@ -594,6 +595,9 @@ class Runner:
         # the actions validated at their first application (10.S10): route -> what `validate`
         # (run's `FirstActions`) needs; `validating` while a law runs, `trace` the host's calls then
         self.first, self.validate, self.validating, self.trace = {}, None, False, None
+        # `luthier session --world` (12.S20, 2.S18): the session's hook on each application of an
+        # extern to the token, which serves an action the session already performed (`Session`)
+        self.actions = None
         # the arity of each host function read from its Python signature (`arity`)
         self.signatures = {}
         self.objects = 0
@@ -1288,22 +1292,11 @@ class Runner:
                         arity = self.arity(head, function)
                         if len(args) < arity:
                             return self.apply(head, args)
-                        if self.first and not self.validating and head.route in self.first:
-                            # the action's first application in the run (10.S10): validated, the
-                            # protocol's own application being the program's when it ran; the
-                            # arguments shared, so that the validation and the program compute
-                            # each once (8.S4)
+                        if self.actions is not None and not self.validating:
                             args = [self.share(a) for a in args]
-                            acted = self.validate(self, self.first.pop(head.route), head, args[:arity])
-                            if acted is not None:
-                                value = self.apply(acted, args[arity:])
-                                continue
-                        given, ty = self.cross_out(head, function, args[:arity])
-                        result = function(*given)
-                        value = self.from_host(result, ty, (getattr(head, "name", None), self.key(head, function)))
-                        if self.trace is not None:
-                            self.trace.append((head.route, given, value))
-                        value = self.apply(value, args[arity:])
+                            value = self.apply(self.actions(self, head, function, args[:arity]), args[arity:])
+                            continue
+                        value = self.apply(self.act(head, function, args[:arity]), args[arity:])
                         continue
                     except RunError:
                         raise
@@ -1340,6 +1333,23 @@ class Runner:
             if reduced is None:
                 return value
             value = reduced
+
+    def act(self, head, function, args):
+        """The extern `head` (the host's `function`) applied to as many arguments as it takes."""
+        if self.first and not self.validating and head.route in self.first:
+            # the action's first application in the run (10.S10): validated, the protocol's own
+            # application being the program's when it ran; the arguments shared, so that the
+            # validation and the program compute each once (8.S4)
+            args = [self.share(a) for a in args]
+            acted = self.validate(self, self.first.pop(head.route), head, args)
+            if acted is not None:
+                return acted
+        given, ty = self.cross_out(head, function, args)
+        result = function(*given)
+        value = self.from_host(result, ty, (getattr(head, "name", None), self.key(head, function)))
+        if self.trace is not None:
+            self.trace.append((head.route, given, value))
+        return value
 
     def operands(self, head, args):
         """A primitive's operands, and the left operand of `and`/`or`, brought to weak head normal
@@ -2637,12 +2647,12 @@ class Probe(Loaded):
     NAME = "<eval>"
 
     def __init__(self, files, term, core=True):
-        if not files:
-            raise RunError("eval needs a file")
         self.context = tuple(Path(f).resolve() for f in files)
         self.term = term
         self.it = None
-        super().__init__(self.context[0].parent / self.NAME, core)
+        # [proposed] with no file (a session's, 12.S20), the term sees core alone, from the
+        # current directory
+        super().__init__((self.context[0].parent if self.context else Path.cwd().resolve()) / self.NAME, core)
 
     def visit(self, path, active):
         if path.resolve() != self.top:
@@ -2683,22 +2693,35 @@ def evaluate(files, term, fuel=None):
     serve is listed, not refused; the first actions of 10.S10 are not validated, since `eval` gives
     its term no world and so performs no action. Gives (value, type, states), the states as
     `certification` gives them with `refused` set, or {"error": why} when they cannot be read."""
+    if not files:
+        raise RunError("eval needs a file")
     host.reset()
+    loaded, program, entry, definition, demand, states = _probed(files, term, fuel)
+    states.pop("_firsts", None)
+    runner = Runner(program, demand.fuel)
+    value = runner.value(t.Var(entry))
+    return value, definition.type, states
+
+
+def _probed(files, term, fuel=None, actions=False):
+    """The probe's context, its elaborated program, the term's internal name and definition, the
+    demand and the states of the term's cone (`evaluate`). With `actions`, the laws run at a first
+    action (10.S10) are roots of the slice as in `run`, and the states keep their `_firsts`."""
     loaded = Probe(files, term)
     entry = loaded.internal(loaded.top, loaded.it)
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
+    roots = _first_action_roots(loaded, kept) if actions else ()
+    if roots:
+        kept = runtime_slice(loaded.acts, entry, core_data(loaded) + roots)
     loaded.demand(kept)
     program = _elaborated(kept)
     definition = next(a for a in program if isinstance(a, t.Define) and a.name == entry)
     demand = demand_of(loaded.it, fuel)
     try:
         states = certification(loaded, program, entry, demand, refuse=False)
-        states.pop("_firsts", None)
     except (RunError, OSError, RecursionError) as exc:
         states = {"error": str(exc)}
-    runner = Runner(program, demand.fuel)
-    value = runner.value(t.Var(entry))
-    return value, definition.type, states
+    return loaded, program, entry, definition, demand, states
 
 
 def show_states(states):
@@ -2710,3 +2733,188 @@ def show_states(states):
     lines = [f"states of the cone, accepting {states['accept']} and above: {counts}"]
     lines += [f"  {line}" for line in states.get("refused", ())]
     return lines
+
+
+class Session:
+    """`luthier session [files]` (12.S20, 2.S18, 8.S12, 8.S13): a block built one item per line
+    over the files, loaded with their imports and core as `eval` loads them (`Probe`). An item
+    (`x := t`, `p <- t`) joins the block when it evaluated; a bare term is evaluated as the block
+    so far ending in it, `{ items ; term }`, and printed with its type and the states of its cone
+    as `eval` prints them; it does not join. Each line re-evaluates the block so far, with no memo
+    (8.S13). The session's own rules, which `eval` does not read: `:=` defines once (2.R3), `<-`
+    rebinds only a name first bound with `<-` or the block's parameter `w` (2.R4), and a rebinding
+    whose previous binding had no consumer is a note, not a refusal (2.R6). Nothing is recorded:
+    no `x.run.json`, no lock (12.S19's probe).
+
+    [proposed] With `world` (`--world`; 12.S20 is silent on actions, 2.S18 and 10.S2 put the world
+    of the session block in `w`), the block is the body of `fn (w : W)` applied to the run's token,
+    and an action's first application in the session is validated as `run` validates it (10.S10,
+    `FirstActions`), served by the stores but writing no entry. An action is performed once, when
+    the line that applies it is entered: re-evaluating the block serves the actions already
+    performed from the session's log, in the order of the token's chain, so a print is not printed
+    again. Without `world` there is no token in the session, and no action can be applied."""
+
+    def __init__(self, files, world=False, fuel=None):
+        self.files, self.world, self.fuel = list(files), world, fuel
+        self.items = []              # the source of the items joined, in order
+        self.defined = set()         # the names bound with `:=` (2.R3)
+        self.rebindable = {"w"} if world else set()   # first bound with `<-`, or the parameter (2.R4)
+        self.pending = {"w"} if world else set()      # bound with `<-` and not consumed since (2.R6)
+        self.log = []                # the actions performed: (route, literal arguments, result)
+        self.validated = set()       # the routes validated at their first action (10.S10)
+        self.done = []               # what the validations did (FirstActions.done)
+        host.reset()
+        self.printed = 0             # the length of the host's standard output already shown
+        self.context = Probe(self.files, "0")
+
+    def _sees(self, name):
+        return self.context.name(self.context.top, name) is not None
+
+    def _binds(self, pattern):
+        from .check import pattern_binds
+        return {n for n in pattern_binds(pattern, frozenset())
+                if not self.context.is_constructor(self.context.top, n)}
+
+    @staticmethod
+    def classify(text):
+        """The line as an item (`s.Bind` or `s.Rebind`) or a term (its surface form)."""
+        result = parse(f"it := {{ {text} ; 0 }}")
+        if isinstance(result, s.Parsed) and len(result.program) == 1:
+            body = getattr(result.program[0].body, "term", None)
+            if isinstance(body, s.Block) and len(body.items) == 1:
+                return body.items[0]
+        result = parse(f"it := {text}")
+        if isinstance(result, s.ParseFailed):
+            raise RunError("; ".join(e.message for e in result.errors))
+        if len(result.program) != 1 or not isinstance(result.program[0], s.Define):
+            raise RunError("not an item of a block nor a term")
+        return result.program[0].body.term
+
+    def term(self, final, item=None):
+        """The block so far, with the line's `item` when there is one, ending in `final`, as the
+        probe's term."""
+        items = self.items + ([item] if item is not None else [])
+        body = "; ".join(items + [final])
+        if self.world:
+            return f"fn (w : W) {{ {body} }}"
+        return f"{{ {body} }}" if items else final
+
+    def line(self, text):
+        """One line of the session: gives the lines to print (notes, the standard output the
+        line's actions gave, a term's value with its type and the states); RunError when the line
+        is refused, the block then unchanged."""
+        from .check import names
+        text = text.strip().rstrip(";").strip()
+        if not text or text.startswith("--"):
+            return []
+        if text == ":items":
+            return list(self.items) or ["(no items)"]
+        if text.startswith(":"):
+            raise RunError(f"{text.split()[0]}: not a command (:items, :quit)")
+        parsed = self.classify(text)
+        notes = []
+        if isinstance(parsed, (s.Bind, s.Rebind)):
+            used = names(parsed.value)
+            if isinstance(parsed, s.Bind):
+                x = parsed.name
+                if x in self.defined or x in self.rebindable or self._sees(x):
+                    raise RunError(f"{x} is already defined: `:=` defines a name once (2.R3)")
+                binds = {x}
+            else:
+                binds = self._binds(parsed.pattern)
+                for x in sorted(binds):
+                    if x in self.defined:
+                        raise RunError(f"{x} was defined with `:=` and cannot be rebound (2.R4)")
+                    if x not in self.rebindable and self._sees(x):
+                        raise RunError(f"{x} is a name of the files, not a name first bound with `<-` "
+                                       f"in the session (2.R4)")
+                unused = sorted(binds & (self.pending - used))
+                notes = [f"note: unused rebinding of {x}: its binding before this line has no consumer "
+                         f"(2.R6, reported and allowed in a session)" for x in unused]
+            final = "(" + ", ".join(sorted(binds)) + ")" if len(binds) > 1 else next(iter(binds), "0")
+            value, ty, states, out = self.evaluate(self.term(final, text), item=True, hint=used)
+            self.items.append(text)
+            if isinstance(parsed, s.Bind):
+                self.defined.add(parsed.name)
+            else:
+                self.rebindable |= binds
+            self.pending = (self.pending - used) | (binds if isinstance(parsed, s.Rebind) else set())
+            return notes + out
+        used = names(parsed)
+        value, ty, states, out = self.evaluate(self.term(text), item=False, hint=used)
+        # [proposed] a bare term that reads a name consumes it, for 2.R6's note
+        self.pending -= used
+        return out + [f"{_type_shown(value, sys.maxsize)} : {_type_shown(ty, sys.maxsize)}"] + show_states(states)
+
+    def evaluate(self, term, item, hint=()):
+        """The probe's value of the block ending in `term` (`evaluate`), with the session's
+        actions (see the class); gives (value, type, states, the lines to print first)."""
+        try:
+            loaded, program, entry, definition, demand, states = _probed(self.files, term, self.fuel, self.world)
+        except RunError as exc:
+            if not self.world and "w" in hint:
+                raise RunError(f"{exc} (the world `w` is the session's only with --world)") from exc
+            raise
+        specs = states.pop("_firsts", None) or []
+        for spec in specs:
+            spec["home"] = None   # [proposed] the session writes no entry in a store
+        runner = Runner(program, demand.fuel)
+        ty = definition.type
+        before = len(self.log)
+        if self.world:
+            firsts = FirstActions(loaded, specs, demand)
+            runner.first = {r: spec for r, spec in firsts.by_route.items() if r not in self.validated}
+            runner.validate = firsts
+            self._k = 0
+            runner.actions = self.act
+            target = t.App(t.Var(entry), runner.token)
+            if isinstance(ty, t.Pi):
+                ty = ty.codomain
+        else:
+            target = t.Var(entry)
+        try:
+            value = runner.value(target)
+            if not item and len(self.log) > before:
+                raise RunError("the term acted on the world without binding the token it gives: an action is "
+                               "an item with its result bound, `(w, a) <- ...` (10.S2); it is not kept in the "
+                               "block")
+        except (RunError, ValueError, RecursionError) as exc:
+            # the line is refused and leaves the block as it was; what its actions did in the world
+            # is still shown (`out`, printed before the refusal)
+            del self.log[before:]
+            if self.world:
+                self.validated |= set(firsts.by_route) - set(runner.first)
+            exc.out = self.shown(firsts.done if self.world else [])
+            raise
+        if self.world:
+            self.validated |= set(firsts.by_route) - set(runner.first)
+            self.done += firsts.done
+        return value, ty, states, self.shown(firsts.done if self.world else [])
+
+    def shown(self, done):
+        """The lines a line prints before its value: the first actions it validated (10.S10), then
+        what the host printed since the last line."""
+        out = [f"note: {d['action']} at its first action (10.S10): {d['law']} {d['outcome']}" for d in done]
+        printed = host.stdout()
+        if len(printed) > self.printed:
+            out += printed[self.printed:].rstrip("\n").split("\n")
+            self.printed = len(printed)
+        return out
+
+    def act(self, runner, head, function, args):
+        """The Runner's hook (`Runner.actions`) on an extern applied with the session's world: the
+        token's chain is demanded first, so the k-th action of a re-evaluation is the k-th the
+        session performed; that one is served from the log, a new one performed and logged."""
+        if runner.whnf(args[0]) != runner.token:
+            return runner.act(head, function, args)
+        shown = tuple(v if isinstance(v, t.Lit) else None for v in (runner.whnf(a) for a in args[1:]))
+        k, self._k = self._k, self._k + 1
+        if k < len(self.log):
+            route, given, result = self.log[k]
+            if (route, given) != (head.route, shown):
+                raise RunError(f"the session's action {k + 1} was {route} and is now {head.route} with other "
+                               f"arguments: a token used twice? (10.S3, a token is used once)")
+            return result
+        result = runner.value(runner.act(head, function, args))
+        self.log.append((head.route, shown, result))
+        return result
