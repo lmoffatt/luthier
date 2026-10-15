@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 066e42eab61d, commit 02ad41b (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-15; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 041aa21f614d, commit 37e458a) by `scripts/project_principles.py` (project_principles v2) on 2026-10-15; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -282,6 +282,12 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
 - L5.19 The outermost demand, an action with no caller, carries its tolerance as a declared default
   argument (D-2026-10-11-c), recorded with the call, so there is a root and it is a parameter.
   [settled]
+- L5.20 (His words) Every possible behavior has a way to be said in Luthier, more verbosely if need
+  be: a default, an optimization or a certified substitution (L6) never closes off a behavior the
+  author may want. Serving an acting run from the store, collapsing two identical writes into one, or
+  skipping an action whose effect the world already shows are defaults, and the program or its demand
+  can always ask for the literal behavior instead (write twice to the same file, to see whether a
+  third party writes in between) (D-2026-10-15-c). [settled]
 Example: doubling positives is positive only when positivity is demanded and derivable, sin of
 positives is only Real because no law composes (clause 15).
 References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
