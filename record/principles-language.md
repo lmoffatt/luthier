@@ -1106,6 +1106,14 @@ L9.13  (His words) To design certificates, first see how the law fails: the evid
        and the certifier that produces it, are found on a real case and on the ways it fails, not
        chosen in advance; so a layer is run before its certification is designed (D-2026-10-13-ad).
        [settled]
+L9.14  (His words, on the lesson of the external review of layer 3) A law is evidence of nothing
+       until a wrong model refutes it: every law carries, with its evidence, a model it refutes, a
+       negative control broken on purpose, which is 7.S19's control for statistical laws
+       generalized to every law; a law that no broken specimen can fail (a no-op host passing
+       `Host`, a zero score passing `IsGradient`, `phi - 1` passing `StepRule`, in that review)
+       describes nothing, and is a finding against the theory that green runs never show; a theory
+       is done when each of its laws has its refuted model in the evidence (D-2026-10-15-a).
+       [settled]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d, D-2026-10-13-ad
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
@@ -1113,17 +1121,22 @@ Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor l
             (creo en Lapack)" (bcdac41) (L21, the distinction identity/law) "verificar bit a bit que
             sea igual ... por lo menos sabés que no cambia la implementación" (audio 08.58, 09:20 to
             13:19); the statistical kind for "prueba científica" (same) (L9.13) "Para diseñar los
-            certificados primero tenemos que ver como falla." (chat, 2026-10-13)
+            certificados primero tenemos que ver como falla." (chat, 2026-10-13) (L9.14) "SÍ, hay que
+            agregar el punto 1, que en algo estaba ya, a los principios y a todos los documentos
+            que correspondan." (chat, 2026-10-15)
 Source:     (L5) Luciano, 2026-10-05 (chat:52d3e68e:2760); the puzzle 2026-10-10 (WhatsApp Ptt
             2026-10-10 at 10.12.21.md, 11:38 to 18:20) (L11) Luciano, 2022-08-03 and 2023-02-22
             (written:2023-02-22_tapp-wish-list:untested-a- tested); the grades by samples 2026-10-10
             (WhatsApp Ptt 2026-10-10 at 11.11.22.md, 03:02 to 04:12); his annotation on draft 8,
             bcdac41 (L21, the distinction identity/law) Luciano, 2026-10-11 (WhatsApp Ptt 2026-10-11
             at 08.58.46.md, 09:20 to 13:19); his annotation on draft 2 (2c18c41); his annotation on
-            draft 8 (bcdac41) (L9.13) Luciano, 2026-10-13 (chat:52b10bff:5037)
+            draft 8 (bcdac41) (L9.13) Luciano, 2026-10-13 (chat:52b10bff:5037) (L9.14) Luciano,
+            2026-10-15 (chat:luthier-3e:0, relayed by that session's message; the line unknown
+            until the export)
 Status:     settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
             settled (D-2026-10-13-d, -e); clauses 11 and 12 settled (D-2026-10-13-l, -n); clause 13
-            settled (his words, on D-2026-10-13-ad; his ok, chat:52b10bff:5083)
+            settled (his words, on D-2026-10-13-ad; his ok, chat:52b10bff:5083); clause 14 settled (his words,
+            D-2026-10-15-a)
 History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d: laws accumulate
             and need not determine the operation. (L11) draft 0 (6d9dbd3): stated. draft 4
             (c7c6396): the four methods and the grade in the certificate; the dependence on the
