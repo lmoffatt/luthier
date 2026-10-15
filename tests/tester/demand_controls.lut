@@ -1,0 +1,64 @@
+-- tests/tester/demand_controls.lut: the controls of the laws of demand.lth that tests/tester/
+-- demand_laws.lut certifies. Each line is the law's line written `(control <- true)` (test.lth's
+-- `control`), with the model replaced by one broken on purpose, and is expected to be refuted (7.S19
+-- as D-2026-10-15-a generalized it to every law; L9.14). Written 2026-10-15 by Claude Opus 5.5, an
+-- agent of the coordinating session, on record/IA/v04-2026-10-15/prompt-e.md. The broken models: a
+-- store that kept a second run of one identity with another result (B2 of summary-BCD.md: two runs
+-- that differ only in what the record does not carry, a seed); a `certifying` whose `serves`
+-- ignores the cutoff; one whose `serves` takes only an entry graded exactly at the cutoff. The
+-- demands and entries are demand_laws.lut's.
+
+import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade defaultBudgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited
+import "certification.lth" Certifying Entry Hash Outcome Passed Failed
+import "certification_model.lut" certifying
+import "demand.lth" Demand LawDemand Record Stored Store recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
+import "demand_model.lut" theDemand
+
+eqRecord (a b : Record) : Bool := a == b
+keyTypes : List U := [Record]
+keyEqs : List (Record -> Record -> Bool) := [eqRecord]
+first : Record := recorded (theDemand (entry <- "main")) "sha256:aaaa"
+other : Record := recorded (theDemand (entry <- "other")) "sha256:bbbb"
+run (k : Record) (r : String) : Stored Record := { key := k, result := r }
+-- one identity, two results
+twoResults : Store Record eqRecord := { runs := [run first "1", run other "3", run first "2"] }
+brokenStores : List (Store Record eqRecord) := [twoResults]
+
+sampledDemand : Demand := theDemand (entry <- "main")
+assumedDemand : Demand := theDemand (entry <- "main") (accepts <- AssumedGrade)
+casesDemand : Demand := theDemand (entry <- "main") (accepts <- Cases)
+demands : List Demand := [sampledDemand, assumedDemand, casesDemand]
+laws : List String := ["L"]
+cones : List Hash := ["sha256:cccc"]
+entry (l : String) (h : String) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := l, cone := h, binding := nil, seed := 20261015, cases := 1, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-15", interpreter := "listed", hosts := nil }
+assumedPass : Entry := entry "L" "sha256:cccc" (just AssumedGrade) Passed
+sampledPass : Entry := entry "L" "sha256:cccc" (just Sampled) Passed
+provedPass : Entry := entry "L" "sha256:cccc" (just Proved) Passed
+failed : Entry := entry "L" "sha256:cccc" nothing (Failed "x = 1")
+assumedElsewhere : Entry := entry "M" "sha256:cccc" (just AssumedGrade) Passed
+anyEntries : List Entry := [assumedPass, sampledPass, provedPass, failed, assumedElsewhere]
+entriesFor : List Entry := [assumedPass, sampledPass, provedPass, failed]
+
+-- serves any pass of the law at its hash, whatever its grade
+anyPass (d : LawDemand) (e : Entry) : Bool := e.law == d.law and e.cone == d.cone and e.outcome == Passed
+servesAnyPass : Certifying := { identity := certifying.identity, stale := certifying.stale, grade := certifying.grade,
+  contains := certifying.contains, serves := anyPass, refuse := certifying.refuse, transport := certifying.transport }
+-- serves a pass only at the grade the demand accepts, not above it
+exactly (d : LawDemand) (e : Entry) : Bool := anyPass d e and e.grade == just d.accepts
+servesAtExactly : Certifying := { identity := certifying.identity, stale := certifying.stale, grade := certifying.grade,
+  contains := certifying.contains, serves := exactly, refuse := certifying.refuse, transport := certifying.transport }
+anyPassModels : List Certifying := [servesAnyPass]
+exactlyModels : List Certifying := [servesAtExactly]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+test "OneIdentityOneResult" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "K" "keyTypes", bind "eq" "keyEqs",
+  bind "st" "brokenStores"]) (control <- true)
+test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "anyPassModels",
+  bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "anyEntries"]) (control <- true)
+test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "exactlyModels",
+  bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "entriesFor"]) (control <- true)
