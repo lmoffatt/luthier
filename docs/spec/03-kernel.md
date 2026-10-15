@@ -15,11 +15,11 @@ declaration `x : T` introduces `x` with its base `T` and no body, which is a hol
 definition `x : T := t`, or `x := t` filling an earlier declaration, gives `x` a body. An alias
 `x = t` makes `x` stand for `t`; it is expanded before checking and has no states.
 
-**3.S2. Bodies.** [decided D-2026-10-12-ab] The body of a definition is a term, a `data` term (§2), or
+**3.S2. Bodies.** [implemented] The body of a definition is a term, a `data` term (§2), or
 `extern "target"` (§3). `primitive "..."` and `axiom "..."` are applications of names of core
 (3.S39), what they mean and where they are allowed is `spec 11`.
 
-**3.S3. Directives.** [decided D-2026-10-12-ab] Directives are not definitions and have no states.
+**3.S3. Directives.** [implemented] Directives are not definitions and have no states.
 `import` (`spec 12`) and `operator` (`spec 4`) are acts of `luthierSyntax` (`spec 2.S9`); `test`
 (`spec 7`) and `cite` (`spec 6`) are functions (3.S39); `gen` and `profile` are gone (`spec 2.S19`).
 
@@ -285,7 +285,7 @@ canonically and removes module prefixes. The hashes of `spec 6` are computed ove
 programs that differ in the names of their bound variables or in the module that holds a definition
 have one hash.
 
-**3.S35. No self-modification.** [decided D-2026-10-12-x] A `Program` value is data. Evaluating
+**3.S35. No self-modification.** [implemented] A `Program` value is data. Evaluating
 cannot change the running program: defining is an action on the world, and an action on a world
 belongs to `spec 10` (L7.4, L4).
 
@@ -325,7 +325,7 @@ canonical form of 3.S34, substitution, and `reduce` of 3.S33 with the laws that 
 
 ## §8 Constructs as names, and when a file is read
 
-**3.S39. Bodies and directives as names of core.** [decided D-2026-10-12-ab] `extern`, `primitive`
+**3.S39. Bodies and directives as names of core.** [decided D-2026-10-12-ab; suspended by D-2026-10-13-ae] `extern`, `primitive`
 and `axiom` are names of `core.lut`; a body is their application, recognized by the checker, so the
 restriction of `primitive` and `axiom` to core and the libraries becomes a law over `Program` (`spec
 4 §9`). The directives `test`, `cite` and `import` are functions (`spec 7`, `spec 6`, `spec 12`).
