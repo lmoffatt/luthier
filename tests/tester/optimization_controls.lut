@@ -1,0 +1,101 @@
+-- tests/tester/optimization_controls.lut: the controls of optimization.lth's laws. Each line is the
+-- law's line of optimization_laws.lut written `(control <- true)` (test.lth's `control`), with the
+-- objective or the model of `LMStep` replaced by one broken on purpose, and is expected to be
+-- refuted: it shows that a law can fail on a wrong model, so that its passing on the real one is
+-- not vacuous (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The tester records its
+-- outcome as a control's entry, never the law's failure, and `luthier certify
+-- optimization_laws.lut optimization_controls.lut` reports the law controlled. Written 2026-10-15
+-- by Claude Sonnet, an agent of the coordinating session, on
+-- record/IA/controls-2026-10-15/prompt-mutants.md. The objectives are the quadratic family at
+-- dimension 3, not session A, which is slow; `LMStep` is broken on the native model, the host's
+-- being a route (lm.py) that cannot be written whole.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Vec Mat vec mat
+import "optimization.lth" Objective LMStep quadraticObjective dampedStep lmStep lowered GradIsGradient StepMatrixSymmetric StepMatrixNonNegative
+  DirectionDescends DirectionAgrees StepRule
+import "optimization_model.lut" native
+import "../../examples/sonolocalizacion/distances.lut" pitResolution
+import "session_a.lut" settingsA dampingA
+
+tolerance : Tolerance := 1.0e-12
+cutoffs : List Binding := [
+  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
+  { parameter := just "d", type := nothing, generator := "dampingA", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
+
+centre3 : Vec Float64 := vec Float64 3 (fn k { toFloat64 k - 1.0 })
+zero3 : Vec Float64 := vec Float64 3 (fn k { 0.0 })
+three : List Int := [3]
+good3 : Objective 3 := quadraticObjective 3 centre3 2.0
+
+-- objectives: the gradient zero, the step matrix with one entry off its mirror, with a negative diagonal
+zeroGradO : Objective 3 := { value := good3.value, grad := fn x { zero3 }, stepMatrix := good3.stepMatrix }
+asymmetricO : Objective 3 := { value := good3.value, grad := good3.grad,
+  stepMatrix := fn x { mat Float64 3 3 (fn i j { if i == 0 and j == 1 then 1.0 else (if i == j then 2.0 else 0.0) }) } }
+negativeO : Objective 3 := { value := good3.value, grad := good3.grad,
+  stepMatrix := fn x { mat Float64 3 3 (fn i j { if i == j then 0.0 - 2.0 else 0.0 }) } }
+zeroGradOs : List (Objective 3) := [ zeroGradO ]
+asymmetricOs : List (Objective 3) := [ asymmetricO ]
+negativeOs : List (Objective 3) := [ negativeO ]
+onZeroGrad : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "zeroGradOs", coverage := Listed } ]
+onAsymmetric : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "asymmetricOs", coverage := Listed } ]
+onNegative : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "negativeOs", coverage := Listed } ]
+
+-- models of LMStep, each a record written whole from the native one
+-- the direction with its sign flipped, the step as native
+flipped : LMStep := { direction := fn n s o x mu { vec Float64 n (fn k { 0.0 - (dampedStep n s o x mu).f k }) },
+  step := native.step }
+-- the step that never accepts and leaves the damping where it was, the direction as native
+neverAccepts : LMStep := { direction := native.direction,
+  step := fn n s d o st { { x := st.x, phi := st.phi, mu := st.mu, iter := st.iter + 1, accepted := false } } }
+-- the step that accepts a falling trial but stores a value one below it (report-fix-BCD.md's counterexample)
+phiLowered : LMStep := { direction := native.direction,
+  step := fn n s d o st { { dx := dampedStep n s o st.x st.mu
+    xt := vec Float64 n (fn k { st.x.f k + dx.f k })
+    pt := o.value xt
+    if pt < st.phi
+    then { x := xt, phi := pt - 1.0, mu := lowered d st.mu, iter := st.iter + 1, accepted := true }
+    else { x := st.x, phi := st.phi, mu := st.mu * d.factor, iter := st.iter + 1, accepted := false } } } }
+phiLoweredM : List LMStep := [ phiLowered ]
+flippedM : List LMStep := [ flipped ]
+neverM : List LMStep := [ neverAccepts ]
+onFlipped : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "quadraticsO", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "flippedM", coverage := Listed } ]
+onNever : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "quadraticsO", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "neverM", coverage := Listed } ]
+onPhiLowered : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "o", type := nothing, generator := "quadraticsO", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "phiLoweredM", coverage := Listed } ]
+quadraticsO : List (Objective 3) := [ good3 ]
+
+-- a gradient that is zero everywhere is not the gradient of the value
+test "GradIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onZeroGrad) (profile <- cutoffs) (control <- true)
+-- a step matrix with one entry off its mirror is not symmetric
+test "StepMatrixSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onAsymmetric) (profile <- cutoffs) (control <- true)
+-- a step matrix with a negative diagonal has a negative quadratic form
+test "StepMatrixNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNegative) (profile <- cutoffs) (control <- true)
+-- a direction with its sign flipped climbs the objective
+test "DirectionDescends" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onFlipped) (profile <- cutoffs) (control <- true)
+-- a direction with its sign flipped is not the damped step
+test "DirectionAgrees" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onFlipped) (profile <- cutoffs) (control <- true)
+-- a step that never accepts, and keeps the damping, breaks the rule where the trial falls and on the damping
+test "StepRule" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNever) (profile <- cutoffs) (control <- true)
+-- a step that stores a value one below the trial's breaks the rule where it accepts
+test "StepRule" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onPhiLowered) (profile <- cutoffs) (control <- true)
