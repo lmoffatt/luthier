@@ -2539,3 +2539,36 @@ Source:     chat:luthier-3e:0 (this session, 2026-10-15 ~17:45; his mark in the 
             when logged)
 Kind:       spec (8.S3, 8.S8, 8.S10, 10.S6, 12.S11), run.py, certification.lth; v0.4's criterion (c)
 Status:     current
+
+D-2026-10-15-e  The cone's hash erases the type annotations the elaborator writes on binders: the
+                hash is the strict level of equality, fixed by the language; the levels above it
+                are the demand's. Condition, to be stated as a law and tested: no erased annotation
+                changes what the term does. Item 2 of record/plan/decisions-pending-2026-10-15.md.
+Author:     Luciano, option (b), the coordinator's recommendation after the chat on levels of
+            equality (HoTT, two-level type theory)
+Quote:      "b" (his mark in the file, 378085b)
+Source:     record/plan/decisions-pending-2026-10-15.md, 378085b
+Kind:       spec (6.S8), certify.py's cone hash; P2's reading
+Status:     current
+
+D-2026-10-15-f  An exact replay (same identity) is absorbed when it agrees with the stored entry
+                (6.S15, writing a certificate is idempotent; 6.S8 reworded); when it disagrees both
+                entries are kept and the law is refused until the discrepancy is resolved, since it
+                shows something outside the identity changed the result. Item 3.
+Author:     Luciano, the coordinator's variant of (a)
+Quote:      "a, salvo discrepancia."
+Source:     record/plan/decisions-pending-2026-10-15.md, 378085b
+Kind:       spec (6.S8, 6.S15), certification.lth `record`, certify.py, `--deep`
+Status:     current
+
+D-2026-10-15-g  A not-run for lack of fuel is never memoized; fuel stays out of an entry's identity,
+                since fuel only cuts a run and a pass is the same pass at any larger fuel. Later,
+                with the costs: a pass records the fuel it used, an exhaustion the fuel it was given
+                and serves only demands with that much or less; the same for a sequential test's
+                budget. Item 4.
+Author:     Luciano, option (c), on his own reading in the chat ("dos corridas idénticas una con
+            fuel mayor que el otro siguen siendo idénticas")
+Quote:      "c"
+Source:     record/plan/decisions-pending-2026-10-15.md, d8d2bc0
+Kind:       spec (7.S9, 7.S13), certification.lth, certify.py
+Status:     current
