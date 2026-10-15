@@ -2484,3 +2484,25 @@ Source:     chat:luthier-3e:0 (the coordinating session, 2026-10-15 ~09:30, rela
 Kind:       principles (L9.14), spec (7.S19), the plan's rules, the working method; the theories
             of every layer (their evidence gains a refuted model per law)
 Status:     current
+
+D-2026-10-15-b  A statistical law has a ternary verdict: it holds, it fails, or it is unresolved
+                with what was sampled. The tester resolves the grey zone sequentially (Wald's
+                sequential probability ratio test): two thresholds from the error rates alpha
+                (rejecting a law that holds) and beta (accepting one that fails) against an
+                alternative at distance delta; between them it samples more, up to the demand's
+                budget, and an exhausted budget leaves the law unsettled with what was spent
+                recorded. Alpha, beta, delta, the initial size and the budget are cutoffs the
+                demand supplies (D-2026-10-14-c); the verdict carries its error rates in the
+                certificate, the price of a sampled grade, operated on when the cost types come
+                (D-2026-10-13-m). Replaces laws universal over seeds (UniformAtLevel refuted a
+                correct source with probability 0.994 on 100 seeds; summary-BCD.md item 3).
+Author:     Luciano, on the coordinator's reading of his proposal (a recursion with three areas,
+            or three results 0, 1 and unresolved: the two are the strategy and the value)
+Quote:      "respecto a generar un boolean de un estadístico, hay una forma recursiva donde
+            fijamos tres áreas con probabilidad de error alfa o beta muy bajo y otra área gris
+            donde se aumenta la resolución generando más samples. Alternativamente se pueden dar
+            tres resultados 0 1 y unresolved?" ... "acepto lo que decías de los alfa y betas y
+            deltas."
+Source:     chat:luthier-3e:0 (this session, 2026-10-15; the line unknown until the export)
+Kind:       spec (7.S17 to 7.S19), theories (laws.lth, generators.lth, test.lth), tester.py
+Status:     current
