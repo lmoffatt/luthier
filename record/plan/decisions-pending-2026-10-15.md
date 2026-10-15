@@ -111,7 +111,7 @@ the record and must stay out of the key, since a pass is the same pass at any la
 record, the seed, the plan and the certificates. Today `x.run.json` already holds the record
 (`demand`), the plan with its hash and the demand key (`key`: decoration and live values), but no
 seed and no hash of the whole key.
-
+b
 **6. Does the interpreter enter the hash by every commit or by the last tag?** 6.S8 as written puts
 the interpreter's revision in the hash, so every store goes stale at any commit to
 `src/luthier/*.py` (re-certifying the library takes about 25 minutes). Night default taken at 02:30
@@ -122,12 +122,17 @@ pays for). Options: (a) the last tag (the night's); (b) every commit (6.S8 as wr
 is needed. Sources: `record/plan/night-2026-10-13.md` (certify.py and run's refusal items);
 `record/principles-candidates-2026-10-15.md` ("Tensions to name").
 
+a--> for now. Cuando Luthier se estabilice c, cuando escribamos el nucleo b. 
+
+
 **7. Where does `certify` write an entry?** 12.S11 (a run reads the stores of the files it
 imports). Entries written beside the test programs are not found by a run. Night default
 [proposed]: also written into the store of the file that defines the model named in the binding
 (`src/luthier/lib/*_model.cert.json`, un-ignored by .gitignore). Options: (a) the night's default;
 (b) the test lines live inside the model files. Unblocks: a run finding the certificates the library
 earned. Source: `record/plan/night-2026-10-13.md` (run's refusal, point 1).
+
+
 
 **8. Are `*.run.json` files tracked or ignored by git?** 12.S18 (a run writes its record). Night
 default: ignored, as `*.cert.json` is. P2 (everything derived carries how it was derived) argues for
