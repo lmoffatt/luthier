@@ -305,6 +305,646 @@
    },
    {
     "parameter": "d",
+    "generator": "hiddens (Listed)",
+    "fingerprint": "sha256:fe5ced14e0e431ed1051d6e707f39166e75c963fc6371965aabcd0ab81d6ce72"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryF (Listed)",
+    "fingerprint": "sha256:8d445696915d0fe52acf5ef73e93de5d741e1917d944ab40c709f58bf5f18381"
+   },
+   {
+    "parameter": "cs",
+    "generator": "choices (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "planning"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": "Support"
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hidden"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"f\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons 1) nil)"
+      },
+      {
+       "Printed": "((cons 1) ((cons 1) nil))"
+      },
+      {
+       "Printed": "((cons 0) ((cons 1) ((cons 0) nil)))"
+      },
+      {
+       "Printed": "((cons 2) ((cons 1) ((cons 1) nil)))"
+      },
+      {
+       "Printed": "((cons 5) nil)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 12,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = planning, st = ForwardOnDemand, d = hidden, e = \"f\", cs = ((cons 2) ((cons 1) ((cons 1) nil)))"
+  },
+  "date": "2026-10-15T06:37:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "TheDefaultsAgree",
+  "cone": "sha256:676d558af3d6172bd3842b77dd494897c50b4f26c2dfa3f105957dc664feae5f",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "forwardDropsFirsts (Listed)",
+    "fingerprint": "sha256:ae0df20faccaf966d5d8fbf09afb9429534ee9b67cd877f0e0c6d15c876d4a15"
+   },
+   {
+    "parameter": "d",
+    "generator": "exampleOnly (Listed)",
+    "fingerprint": "sha256:d6e56bf0f97338ea312d7a12af32bb63122735fdba287d2d08c04cf80c597c33"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryD (Listed)",
+    "fingerprint": "sha256:effc112a2ac028d7949b1bee81a6459cd3a9a414afdb248921985208540e1abe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "forwardDropsFirst"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "example"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"d\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = forwardDropsFirst, d = example, e = \"d\""
+  },
+  "date": "2026-10-15T06:37:04+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "StrategiesAgree",
+  "cone": "sha256:f7072eae721209125d67e84581583cb0bb35a6404102b234c9f825920bd00fda",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "forwardDropsFirsts (Listed)",
+    "fingerprint": "sha256:ae0df20faccaf966d5d8fbf09afb9429534ee9b67cd877f0e0c6d15c876d4a15"
+   },
+   {
+    "parameter": "s1",
+    "generator": "ExhaustiveMode over Strategy",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "s2",
+    "generator": "ExhaustiveMode over Strategy",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "exampleOnly (Listed)",
+    "fingerprint": "sha256:d6e56bf0f97338ea312d7a12af32bb63122735fdba287d2d08c04cf80c597c33"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryD (Listed)",
+    "fingerprint": "sha256:effc112a2ac028d7949b1bee81a6459cd3a9a414afdb248921985208540e1abe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "forwardDropsFirst"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s1",
+    "reach": "Support"
+   },
+   {
+    "parameter": "s2",
+    "reach": "Support"
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "example"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"d\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = forwardDropsFirst, s1 = ForwardOnDemand, s2 = CallByNeed, d = example, e = \"d\""
+  },
+  "date": "2026-10-15T06:37:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "PlanLinearizes",
+  "cone": "sha256:1a6d754a9555ee668ba7058b381da1cf3a7e128f987432a868ccf75f1e98a7be",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "reversedSchedules (Listed)",
+    "fingerprint": "sha256:0d238522da959d90c20add2ebf238d21f8bf87627f06dd3ebf2624de74e97bcc"
+   },
+   {
+    "parameter": "st",
+    "generator": "ExhaustiveMode over Strategy",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "exampleOnly (Listed)",
+    "fingerprint": "sha256:d6e56bf0f97338ea312d7a12af32bb63122735fdba287d2d08c04cf80c597c33"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryD (Listed)",
+    "fingerprint": "sha256:effc112a2ac028d7949b1bee81a6459cd3a9a414afdb248921985208540e1abe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "reversedSchedule"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": "Support"
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "example"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"d\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = reversedSchedule, st = ForwardOnDemand, d = example, e = \"d\""
+  },
+  "date": "2026-10-15T06:37:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "PlanIsTheLiveCone",
+  "cone": "sha256:604024278c9f5c77c8ccf6d944a25d8269a9b58e0a178a617e4d5c02311426db",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "wholeGraphs (Listed)",
+    "fingerprint": "sha256:466a6804279a8544bc9385d2e4b430510d4495193ba1816a2ebb430aab9e07de"
+   },
+   {
+    "parameter": "st",
+    "generator": "ExhaustiveMode over Strategy",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "exampleOnly (Listed)",
+    "fingerprint": "sha256:d6e56bf0f97338ea312d7a12af32bb63122735fdba287d2d08c04cf80c597c33"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryD (Listed)",
+    "fingerprint": "sha256:effc112a2ac028d7949b1bee81a6459cd3a9a414afdb248921985208540e1abe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "wholeGraph"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": "Support"
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "example"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"d\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = wholeGraph, st = ForwardOnDemand, d = example, e = \"d\""
+  },
+  "date": "2026-10-15T06:37:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "PlanIsConfluent",
+  "cone": "sha256:6d66317f5c1e980b50775f6f528df9ea31e17141251e5212bcde74cc3b8927a3",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "planners (Listed)",
+    "fingerprint": "sha256:0e0ea7c6c1589307252e2daf3b141d1008eb8ecfe86fc95ae76ca03f5778ad76"
+   },
+   {
+    "parameter": "st",
+    "generator": "ExhaustiveMode over Strategy",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
     "generator": "dataflows (Listed)",
     "fingerprint": "sha256:d6e56bf0f97338ea312d7a12af32bb63122735fdba287d2d08c04cf80c597c33,sha256:d606e9ee6872ab02ce32dfb666fe10a4d3c21d33102fc6d8915adbfaee1b3e15,sha256:bf5af6e5e13a2929b7ffc9d32e6829bbb4719d61339baf55775d40351436adb3"
    },

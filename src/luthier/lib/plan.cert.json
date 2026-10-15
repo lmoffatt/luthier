@@ -1,0 +1,653 @@
+[
+ {
+  "law": "ByNeedIsFirstDemand",
+  "cone": "sha256:209199d6b804fea2560b2de7b51a27ec5f61eef31527b3f7b9b34e4919c70bc8",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "needAsForwards (Listed)",
+    "fingerprint": "sha256:e5ea0d98a7877d85b682413eed4a3c43a569f1c3ae522fdabce1ea67966af2b5"
+   },
+   {
+    "parameter": "d",
+    "generator": "unevenOnly (Listed)",
+    "fingerprint": "sha256:d606e9ee6872ab02ce32dfb666fe10a4d3c21d33102fc6d8915adbfaee1b3e15"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryD (Listed)",
+    "fingerprint": "sha256:effc112a2ac028d7949b1bee81a6459cd3a9a414afdb248921985208540e1abe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "needAsForward"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "uneven"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"d\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = needAsForward, d = uneven, e = \"d\""
+  },
+  "date": "2026-10-15T06:37:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "ForwardIsByLevels",
+  "cone": "sha256:1e236d54bcc3853d0087517c7bb600488bca44d8085e93749cfec0a9feb969a9",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "forwardAsNeeds (Listed)",
+    "fingerprint": "sha256:ab28c2d776a7ba8caa78cea0ba4cc43abdfee5c794223144a46c1cbee7875498"
+   },
+   {
+    "parameter": "d",
+    "generator": "unevenOnly (Listed)",
+    "fingerprint": "sha256:d606e9ee6872ab02ce32dfb666fe10a4d3c21d33102fc6d8915adbfaee1b3e15"
+   },
+   {
+    "parameter": "e",
+    "generator": "entryD (Listed)",
+    "fingerprint": "sha256:effc112a2ac028d7949b1bee81a6459cd3a9a414afdb248921985208540e1abe"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "forwardAsNeed"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "uneven"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"d\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = forwardAsNeed, d = uneven, e = \"d\""
+  },
+  "date": "2026-10-15T06:37:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "Confluent",
+  "cone": "sha256:9dc71811463f27dcb0263d882d5159300fd4129c659f9977c715dfa21711e23f",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "d",
+    "generator": "hiddens (Listed)",
+    "fingerprint": "sha256:fe5ced14e0e431ed1051d6e707f39166e75c963fc6371965aabcd0ab81d6ce72"
+   },
+   {
+    "parameter": "live",
+    "generator": "hiddenLives (Listed)",
+    "fingerprint": "sha256:eec20d3711ef898a85b89b86ab4356f44de9ac09354372c0b28ac2b311a5b132"
+   },
+   {
+    "parameter": "s1",
+    "generator": "hiddenSchedules (Listed)",
+    "fingerprint": "sha256:16f5935056e2982e8a24e950d83038bb7dd9af4d821c6c42f1606a9a0779f08f"
+   },
+   {
+    "parameter": "s2",
+    "generator": "hiddenSchedules (Listed)",
+    "fingerprint": "sha256:16f5935056e2982e8a24e950d83038bb7dd9af4d821c6c42f1606a9a0779f08f"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hidden"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "live",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") ((cons \"f\") nil)))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s1",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") ((cons \"f\") nil)))))"
+      },
+      {
+       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"d\") ((cons \"c\") ((cons \"f\") nil)))))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s2",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") ((cons \"f\") nil)))))"
+      },
+      {
+       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"d\") ((cons \"c\") ((cons \"f\") nil)))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 4,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, d = hidden, live = ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") ((cons \"f\") nil))))), s1 = ((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") ((cons \"f\") nil))))), s2 = ((cons \"a\") ((cons \"b\") ((cons \"d\") ((cons \"c\") ((cons \"f\") nil)))))"
+  },
+  "date": "2026-10-15T06:37:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "StepIsLocal",
+  "cone": "sha256:2781764e73f28c4ee6256252817a1b8e1e780e1d557902b29f969da6ec339e83",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "d",
+    "generator": "hiddens (Listed)",
+    "fingerprint": "sha256:fe5ced14e0e431ed1051d6e707f39166e75c963fc6371965aabcd0ab81d6ce72"
+   },
+   {
+    "parameter": "n",
+    "generator": "nodeNames (Listed)",
+    "fingerprint": "sha256:6d6e2492c7298dd1e4be2b6d064d77068ed93cd80856219a82c3867222dcb34a"
+   },
+   {
+    "parameter": "env",
+    "generator": "envs (Listed)",
+    "fingerprint": "sha256:05acfb1d826ffaa8a1b229013d48bfae37b4cf8a0d50242019247b428e45b626"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "hidden"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"b\""
+      },
+      {
+       "Printed": "\"c\""
+      },
+      {
+       "Printed": "\"d\""
+      },
+      {
+       "Printed": "\"f\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "env",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "everySeven"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, d = hidden, n = \"d\", env = everySeven"
+  },
+  "date": "2026-10-15T06:37:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "Acyclic",
+  "cone": "sha256:27fcc2c804ba1361cc0d62cce00286961ef0e36908c59992cd965d82124df00f",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "d",
+    "generator": "cyclics (Listed)",
+    "fingerprint": "sha256:1ec6df96c494903105cd875cd8bddd9d548d5543fc541d4444f3a867e547afa1"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "cyclic"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, d = cyclic"
+  },
+  "date": "2026-10-15T06:37:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "NamesAreUnique",
+  "cone": "sha256:538df84e3dead9614beecdfeead28f4dbfd113a49b0dd59f119208cf8fd96681",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "d",
+    "generator": "twices (Listed)",
+    "fingerprint": "sha256:6915ae53e91b50fc5dbbb5179b1b45197aed6ff72f8cf4069a4aabb26ab0e562"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twice"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, d = twice"
+  },
+  "date": "2026-10-15T06:37:02+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ }
+]

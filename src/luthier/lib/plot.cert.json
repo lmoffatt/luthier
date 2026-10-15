@@ -1,0 +1,914 @@
+[
+ {
+  "law": "ImageSeesTheTitle",
+  "cone": "sha256:508ccbd4735737ace222b440f41c87331a7f23f8dd82ecdadcdf851343818053",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "d",
+    "generator": "noTitleList (Listed)",
+    "fingerprint": "sha256:a345dc1fae01793eb1566dc671cf880683d89405880ee8e791c158056af27a43"
+   },
+   {
+    "parameter": "p",
+    "generator": "plots (Listed)",
+    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+   },
+   {
+    "parameter": "s",
+    "generator": "titles (Listed)",
+    "fingerprint": "sha256:bc86e0d59b931b6f4fd0d35a0a4aa9d6595060e3f6a28688aa42fd6977596207"
+   },
+   {
+    "parameter": "ext",
+    "generator": "exts (Listed)",
+    "fingerprint": "sha256:fc53ffb69df2ccb646e7fdabcc61ab59efd3ada055e64e177e886f9575ecdbb5"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noTitle"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (parsed obsText))"
+      },
+      {
+       "Printed": "((coloured (parsed obsText)) (parsed notesText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed farText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed notesText))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"another title\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ext",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"png\""
+      },
+      {
+       "Printed": "\"svg\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = noTitle, p = (pointsAndLine (parsed obsText)), s = \"\", ext = \"png\""
+  },
+  "date": "2026-10-15T02:19:10+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.plots.format_of",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.plots.image",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ]
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "LayerOrderInvariant",
+  "cone": "sha256:a4aca4af6c50d3cf1c72a10ee0cd7a916d82a70c702008359197fc2f1f697633",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "d",
+    "generator": "layerOrderedList (Listed)",
+    "fingerprint": "sha256:e700baac2fb2ce24f09501f9f916c80a04d17b122d1f0690fb734e0f7d91d5d5"
+   },
+   {
+    "parameter": "margin",
+    "generator": "margins (Listed)",
+    "fingerprint": "sha256:26032cce623f01e5f1c0bfc8192b17fda74aae14d7f6f94b15b4e86f03a3b3ea"
+   },
+   {
+    "parameter": "p",
+    "generator": "plots (Listed)",
+    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+   },
+   {
+    "parameter": "i",
+    "generator": "positions (Listed)",
+    "fingerprint": "sha256:a511974233d2cd2e22a36469cacddeba2c82a20daf59e3e2711c167f471a733a"
+   },
+   {
+    "parameter": "ext",
+    "generator": "exts (Listed)",
+    "fingerprint": "sha256:fc53ffb69df2ccb646e7fdabcc61ab59efd3ada055e64e177e886f9575ecdbb5"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "layerOrdered"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "margin",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.05
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (parsed obsText))"
+      },
+      {
+       "Printed": "((coloured (parsed obsText)) (parsed notesText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed farText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed notesText))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "i",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      },
+      {
+       "Number": 1.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ext",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"png\""
+      },
+      {
+       "Printed": "\"svg\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = layerOrdered, margin = 0.05, p = ((apartLayers (parsed obsText)) (parsed farText)), i = 0, ext = \"png\""
+  },
+  "date": "2026-10-15T02:18:59+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.plots.format_of",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.plots.image",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ]
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "RowOrderInvariant",
+  "cone": "sha256:cc95cc92bbb40188f63e0d9c7461dfc3b58526cbec6281b88786dc02337cd63d",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "d",
+    "generator": "firstRowApartList (Listed)",
+    "fingerprint": "sha256:aacbcca5100a15d55d716c7d319c3f3b44ed37e32df93a9e1ccce8c8169e2d07"
+   },
+   {
+    "parameter": "p",
+    "generator": "plots (Listed)",
+    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+   },
+   {
+    "parameter": "name",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:ab09339d70241ddd9c4422ab67c7fcb04961659a8f3da7bc8ba3b1c2c924aa3e"
+   },
+   {
+    "parameter": "t",
+    "generator": "obsTables (Listed)",
+    "fingerprint": "sha256:d521ab224e95f996ffb21f11724077057f186ab200b95781500249dfee14f841"
+   },
+   {
+    "parameter": "f",
+    "generator": "perms (Listed)",
+    "fingerprint": "sha256:40e8f9d465b8ff01164c4c0ec71ceebb02817c6808c4230517d0aa2c7dbcb397"
+   },
+   {
+    "parameter": "ext",
+    "generator": "exts (Listed)",
+    "fingerprint": "sha256:fc53ffb69df2ccb646e7fdabcc61ab59efd3ada055e64e177e886f9575ecdbb5"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstRowApart"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (parsed obsText))"
+      },
+      {
+       "Printed": "((coloured (parsed obsText)) (parsed notesText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed farText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed notesText))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "name",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"obs\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(parsed obsText)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "fn (r : ?type) { r }"
+      },
+      {
+       "Printed": "fn (r : ?type) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 0; false -> 2 } } }"
+      },
+      {
+       "Printed": "fn (r : ?type) { match ((== r) 0) { true -> 0; false -> match ((== r) 1) { true -> 2; false -> 1 } } }"
+      },
+      {
+       "Printed": "fn (r : ?type) { match ((== r) 0) { true -> 2; false -> match ((== r) 1) { true -> 1; false -> 0 } } }"
+      },
+      {
+       "Printed": "fn (r : ?type) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 2; false -> 0 } } }"
+      },
+      {
+       "Printed": "fn (r : ?type) { match ((== r) 0) { true -> 2; false -> match ((== r) 1) { true -> 0; false -> 1 } } }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ext",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"png\""
+      },
+      {
+       "Printed": "\"svg\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 48,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = firstRowApart, p = (pointsAndLine (parsed obsText)), name = \"obs\", t = (parsed obsText), f = fn (r : ?type) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 0; false -> 2 } } }, ext = \"png\""
+  },
+  "date": "2026-10-15T02:18:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.plots.format_of",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.plots.image",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ]
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "ImageOfTheValue",
+  "cone": "sha256:5f80525a9e9937b7c1d2ac63d2d71788b3aa6fda4cfdf5f796e4085301bc49e8",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "d",
+    "generator": "readsOffSchemaList (Listed)",
+    "fingerprint": "sha256:5e5179616903689dc1101286409104b276d18e57452080eb15e48f3f2f4859bf"
+   },
+   {
+    "parameter": "p",
+    "generator": "plainPlots (Listed)",
+    "fingerprint": "sha256:648e66f6c009bfc0201c906290b47bb24736daaf47112cb5883b3d13e55abefb"
+   },
+   {
+    "parameter": "q",
+    "generator": "leakyPlots (Listed)",
+    "fingerprint": "sha256:67c42418937f5bcfa2f01ba6d10038673ccede2e4cc561218fb9bb8edb1def00"
+   },
+   {
+    "parameter": "ext",
+    "generator": "exts (Listed)",
+    "fingerprint": "sha256:fc53ffb69df2ccb646e7fdabcc61ab59efd3ada055e64e177e886f9575ecdbb5"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "readsOffSchema"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (parsed obsText))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "q",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (leaky (parsed obsText)))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ext",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"png\""
+      },
+      {
+       "Printed": "\"svg\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = readsOffSchema, p = (pointsAndLine (parsed obsText)), q = (pointsAndLine (leaky (parsed obsText))), ext = \"png\""
+  },
+  "date": "2026-10-15T02:18:16+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.plots.format_of",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.plots.image",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ]
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "FormatByExtension",
+  "cone": "sha256:ccb98eb4b31a8c70865038f513bb342262c957b501d8f6e48655b7cdd343ba9e",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "d",
+    "generator": "allPngList (Listed)",
+    "fingerprint": "sha256:9407c4a7be3bc75048458850b7433dcf67431ca1843e4d463a061295686cc2b4"
+   },
+   {
+    "parameter": "p",
+    "generator": "plots (Listed)",
+    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+   },
+   {
+    "parameter": "ext",
+    "generator": "exts (Listed)",
+    "fingerprint": "sha256:fc53ffb69df2ccb646e7fdabcc61ab59efd3ada055e64e177e886f9575ecdbb5"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "allPng"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (parsed obsText))"
+      },
+      {
+       "Printed": "((coloured (parsed obsText)) (parsed notesText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed farText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed notesText))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ext",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"png\""
+      },
+      {
+       "Printed": "\"svg\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = allPng, p = (pointsAndLine (parsed obsText)), ext = \"svg\""
+  },
+  "date": "2026-10-15T02:18:11+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.plots.format_of",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.plots.image",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ]
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "FileExistsAfter",
+  "cone": "sha256:8616924f5fd9efd82bdff43070a4e9cc283fb52918873a6332401c9d173d1b6c",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "states (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "d",
+    "generator": "noFileList (Listed)",
+    "fingerprint": "sha256:580912c8eb9ed3348ca391417bf870c63dcdcf2fda1ac7b90f2f8ed3d1ebaee6"
+   },
+   {
+    "parameter": "p",
+    "generator": "plots (Listed)",
+    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+   },
+   {
+    "parameter": "stem",
+    "generator": "stems (Listed)",
+    "fingerprint": "sha256:b8476c56a76afc5b2ba64ca8bbeda44cf1616303d842d8b29aa2cfdc61ec32f6"
+   },
+   {
+    "parameter": "ext",
+    "generator": "exts (Listed)",
+    "fingerprint": "sha256:fc53ffb69df2ccb646e7fdabcc61ab59efd3ada055e64e177e886f9575ecdbb5"
+   },
+   {
+    "parameter": "st",
+    "generator": "worlds (Listed)",
+    "fingerprint": "sha256:f93704bdb8c01918191c1648c776a50c6027ee2115808b9c65806d0f8546f15f,sha256:4cfb694c908bba358361d3fe011ec644d70414d8579af6000abd838681a6cefb"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noFile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(pointsAndLine (parsed obsText))"
+      },
+      {
+       "Printed": "((coloured (parsed obsText)) (parsed notesText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed farText))"
+      },
+      {
+       "Printed": "((apartLayers (parsed obsText)) (parsed notesText))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "stem",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"plot\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ext",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"png\""
+      },
+      {
+       "Printed": "\"svg\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blank"
+      },
+      {
+       "Printed": "withFile"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = noFile, p = (pointsAndLine (parsed obsText)), stem = \"plot\", ext = \"png\", st = blank"
+  },
+  "date": "2026-10-15T02:17:58+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.plots.format_of",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.plots.image",
+    "sha256:9f49fcdb2d4d0d4ed56c5002d03dfbef3b5740f59f00fec142aaa2c28005dec6"
+   ],
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ]
+  ],
+  "kind": "Control"
+ }
+]
