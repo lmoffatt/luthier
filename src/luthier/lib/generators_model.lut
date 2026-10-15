@@ -92,23 +92,29 @@ skewedSample : Gen UnitList := fn size seed { match uniformSample size seed { (v
 clearDiagonal : Gen ClearDiagonal := fn size seed { hostGenerators.clearDiagonalWith 0.25 1.0 1000.0 size seed }
 
 symmetricGives (a : Mat Float64) : Bool := a.m == a.n and approxMat exact a (transposeDef a)
-SymmetricGivesSymmetric (size : Nat) (seed : Seed) : Bool := match symmetric size seed { (a, next) -> symmetricGives a }
-SymmetricOfGivesItsSize (k : Dim) (size : Nat) (seed : Seed) : Bool :=
-  match symmetricOf k size seed { (a, next) -> a.m == k and symmetricGives a }
+-- [proposed, 2026-10-15, L9.14] Each law takes the family it speaks of as its first parameter, so
+-- that a family broken on purpose can be passed to it (tests/tester/generators_controls.lut);
+-- named in its body, as before, the family was no parameter and no wrong model could fail the law
+-- (report-mutants.md). A test binds the parameter to a census of one listing the family
+-- (generators_laws.lut's `families`): a binding naming a `Gen T` is drawn from, not passed.
+-- The type the family claims is what each law tests, as a model's leaves are tested (7.S1).
+SymmetricGivesSymmetric (g : Gen Symmetric) (size : Nat) (seed : Seed) : Bool := match g size seed { (a, next) -> symmetricGives a }
+SymmetricOfGivesItsSize (g : (k : Dim) -> Gen (SymmetricOf k)) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
+  match g k size seed { (a, next) -> a.m == k and symmetricGives a }
 -- positive semidefinite at a floor as arrays.lth's `PsdAt` reads it: nothing retained of `-a`
-GramGivesPsd (fl : RankFloor) (size : Nat) (seed : Seed) : Bool :=
-  match gram size seed { (a, next) -> symmetricGives a and numpy.retainedRank fl (mscaleDef (0.0 - 1.0) a) == 0 }
+GramGivesPsd (g : Gen Symmetric) (fl : RankFloor) (size : Nat) (seed : Seed) : Bool :=
+  match g size seed { (a, next) -> symmetricGives a and numpy.retainedRank fl (mscaleDef (0.0 - 1.0) a) == 0 }
 -- `transpose q * q == identity` within a tolerance, the demand's (P11)
-OrthogonalGivesOrthogonal (tol : Tolerance) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
-  match orthogonal k size seed { (q, next) -> q.m == k and q.n == k and approxMat tol (matMulDef (transposeDef q) q) (identity k) }
-UnitListGivesUnitValues (size : Nat) (seed : Seed) : Bool := match unitList size seed { (vs, next) -> allUnit vs }
+OrthogonalGivesOrthogonal (g : (k : Dim) -> Gen (MatOf k k)) (tol : Tolerance) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
+  match g k size seed { (q, next) -> q.m == k and q.n == k and approxMat tol (matMulDef (transposeDef q) q) (identity k) }
+UnitListGivesUnitValues (g : Gen UnitList) (size : Nat) (seed : Seed) : Bool := match g size seed { (vs, next) -> allUnit vs }
 -- calibrated: the source is uniform (probability.lth's `SourceIsUniform` on numpy's sort), a
 -- statistical law in the form of laws.lth §4 whose verdict is the sequential test's at the
 -- demand's cutoffs (7.S17, L9.15); and its control on the skewed sample, expected to fail
 UniformSampleIsUniform (c : Sequential) : Law := SourceIsUniform numpySort uniformSample c
 SkewedSampleIsUniform (c : Sequential) : Law := SourceIsUniform numpySort skewedSample c
-ClearDiagonalGivesClear (size : Nat) (seed : Seed) : Bool :=
-  match clearDiagonal size seed { (d, next) ->
+ClearDiagonalGivesClear (g : Gen ClearDiagonal) (size : Nat) (seed : Seed) : Bool :=
+  match g size seed { (d, next) ->
     forallBelow d.n (fn k { d.f k == 0.0 or (1.0 <= abs (d.f k) and abs (d.f k) <= 1000.0) }) }
 
 -- ---------------------------------------------------------------- the controls of Random (L9.14)
