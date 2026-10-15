@@ -450,6 +450,11 @@ them) applies to the processing and analysis of data, beyond building the langua
 satisfy, and its scripts are implementations of it. `prototipo-cero/luthier/` already does this for
 the estimators.
 
+A law is evidence of nothing until a wrong implementation fails it (L9.14, D-2026-10-15-a, on the
+review of layer 3 of 2026-10-15): beside the implementation that must satisfy the laws, each law
+keeps one broken on purpose that it refutes, and a law every broken one passes is a finding
+against the specification, not a passed test.
+
 ## 10. The audits
 
 Each audit is a prompt in `prompts/` and a script in `scripts/`, in the style of `extract_ideas.py`:
