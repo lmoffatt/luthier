@@ -376,6 +376,20 @@ should be rechecked); (c) the result store, item 1; (e) six uncontrolled laws, a
 and (e) are met; (b) tag with (e) listed as debt. No recommendation; no push is asked by any source
 (CLAUDE.md: push only tagged milestones). Source: `record/IA/v04-2026-10-15/report.md` (section 1).
 
+## Added after the list
+
+**41. Does a law's evidence pool its cases across seeds?** (Added 2026-10-15 by the coordinator,
+from his remark in the chat: a seed makes the stochastic deterministic, and matters for the identity
+of stochastic functions and for immutability, but to see whether a function passes its laws one
+wants many cases, and the seed is beside the point.) Today each seed writes its own entry and the
+grade is the strongest pass under one binding (certification.lth `pool`, line 408): two passes of
+100 cases with different seeds count as two certificates of 100, not one of 200. Under the
+sequential test (D-2026-10-15-b) another seed is more sample. Options: (a) the seed enters the
+identity of each stretch of sample, so it can be replayed (item 3), and the verdict is computed on
+the union of the stretches of one law, cone and binding; (b) each seed stays a separate entry, as
+today. Recommendation (coordinator): (a). The seed keeps its two other uses: in a run's result key
+(item 5) and in comparing two stochastic functions on the same draws.
+
 ## Not listed
 
 Skipped as not waiting on Luciano: findings stated as fixed or "left" with a technical reason
