@@ -11,8 +11,8 @@
 -- (session_a.lut) with one field replaced; no record-update syntax exists, so each broken record is
 -- written whole, the other fields copied by field access. `GaussianPeaksAtMean` and
 -- `ProfiledIsGaussianAtItsSigma` state the native construction over a model, and both sides of
--- each read the same mean and Jacobian, so a model wrong only in its values does not refute them;
--- their controls use a mean of the wrong length and a mean that overflows, see the comments there.
+-- each read the same mean and Jacobian, so no model refutes them: they have no control, see the
+-- comments there.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear unitList
@@ -173,17 +173,10 @@ test "InfoNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261015) (wh
 -- values makes it fail. The breaks tried raise instead of giving a verdict: a mean one entry longer
 -- than k (numpy `sub` cannot broadcast shapes (21,) and (22,)), a mean of 1e200 (the sum of squares
 -- is inf, "inf is not a Float64", 11.S7).
--- ProfiledIsGaussianAtItsSigma: a Jacobian of scale 1e150 (a unit mistake in a derivative). Both
--- sides of the law read the same mean and Jacobian, so no model refutes it that this file found: the
--- line is kept and reports CONTROL FAILED (the law's tolerance is relative, so a rounding of exp
--- (-2 u*) against K / RSS at 1e300 passes). A finding; a mean of 1e200 raised instead (inf, 11.S7).
-hugeModelA : MeanModel dimA := {
-  k := modelA.k, mean := modelA.mean,
-  jac := fn t {
-    jt := modelA.jac t
-    mat Float64 jt.m dimA (fn i j { 1.0e150 * jt.f i j }) } }
-hugeModelAL : List (MeanModel dimA) := [hugeModelA]
-onHugeModelA : List Binding := [
-  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
-  { parameter := just "m", type := nothing, generator := "hugeModelAL", coverage := Listed } ]
-test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onHugeModelA) (profile <- cutoffs) (control <- true)
+-- ProfiledIsGaussianAtItsSigma has no control: like GaussianPeaksAtMean it states probability.lth's
+-- own construction (`profiled` against `gaussian (fixedSigma ...)`) over a model, both sides reading
+-- the same mean and Jacobian, so no model breaks it; what would is a wrong construction (u* over
+-- K - 1, say), and passing one needs the construction as a parameter of the law, a new definition
+-- in the theory. A Jacobian of scale 1e150 was tried and the law held (CONTROL FAILED, a control
+-- aimed at the model, not at what the law states: removed 2026-10-15 by Claude Opus 5.5 after
+-- a14bc0c); a mean of 1e200 raised instead (inf, 11.S7).
