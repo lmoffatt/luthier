@@ -195,25 +195,36 @@ profiled (n : Nat) (m : MeanModel n) : Likelihood n := {
 fixedSigma (n : Nat) (m : MeanModel n) (u : Float64) : ScaledModel n :=
   { model := m, logSigma := fn s { u }, dLogSigma := fn s { zeros n } }
 
+-- The construction as a theory: the full likelihood of a scaled model and the profile likelihood
+-- of a mean model, two fields, so that a wrong construction is told apart (L9.14) [proposed,
+-- 2026-10-15, record/IA/controls-2026-10-15/prompt-weak-laws.md]. Stated over the native
+-- definitions as before, no model of a mean or a scale could fail the laws, both sides reading
+-- the same mean and Jacobian (report-mutants.md); the model is probability_model.lut's
+-- `gaussianConstruction`, `gaussian` and `profiled` above.
+GaussianConstruction : {
+  full : (n : Nat) -> ScaledModel n -> Likelihood n,
+  profile : (n : Nat) -> MeanModel n -> Likelihood n,
+}
 -- The laws of the construction, per model (7.R4: a record of functions has no generator; the
 -- test binds the model). The full log-likelihood is greatest at the mean, exactly: there the
 -- residual is zero and elsewhere a non-negative quantity is subtracted, which rounding keeps
 -- (11.S4, monotone).
 -- spec 4.R10
-GaussianPeaksAtMean (n : Nat) (m : ScaledModel n) (t : VecOf n) (y : VecOf m.model.k) : Bool :=
-  (gaussian n m).loglik (m.model.mean t) t >= (gaussian n m).loglik y t
+GaussianPeaksAtMean (g : GaussianConstruction) (n : Nat) (m : ScaledModel n) (t : VecOf n) (y : VecOf m.model.k) : Bool :=
+  (g.full n m).loglik (m.model.mean t) t >= (g.full n m).loglik y t
 -- The profile likelihood is the full one at the sigma that maximizes it, u* = 1/2 log (RSS / K),
 -- held fixed: equal in value, score and information within the tolerance (distances.lut of the
 -- slice stated it for its model; here for any mean model)
 -- spec 11.S18
-ProfiledIsGaussianAtItsSigma (n : Nat) (m : MeanModel n) (tol : Tolerance) (t : VecOf n) (y : VecOf m.k) : Bool :=
+ProfiledIsGaussianAtItsSigma (g : GaussianConstruction) (n : Nat) (m : MeanModel n) (tol : Tolerance) (t : VecOf n) (y : VecOf m.k) : Bool :=
   { r := sub y (m.mean t)
     ustar := 0.5 * elementary.log (dot r r / toFloat64 r.n)
-    fixed := gaussian n (fixedSigma n m ustar)
-    prof := profiled n m
+    fixed := g.full n (fixedSigma n m ustar)
+    prof := g.profile n m
     within tol (prof.loglik y t) (fixed.loglik y t)
     and approxVec tol (prof.score y t) (fixed.score y t)
     and approxMat tol (prof.info y t) (fixed.info y t) }
+GaussianConstruction := GaussianPeaksAtMean & ProfiledIsGaussianAtItsSigma
 
 -- ---------------------------------------------------------------- §5 Uniform values
 
