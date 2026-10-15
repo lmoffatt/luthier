@@ -37,7 +37,7 @@
 --   §4 The hash of a cone (6.S8, 12.S11, 3.S34).                                                 done
 --   §5 The theory `Certifying`, the laws of §1 to §3 claimed.                                    done
 
-import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed NotRun
+import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed NotRun Tested Holds Rates
 import "test.lth" Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade gradeRank weakest grade coverageOf
   pointCount
 import "generators.lth" Seed Budgets
@@ -89,6 +89,10 @@ Outcome : U := data {
   Passed : Outcome ;
   Failed : String -> Outcome ;
   NotRunFor : String -> Outcome ;
+  -- [proposed] a sequential test that spent its budget undecided (laws.lth §4): the rates it ran
+  -- at and the samples spent. Not a failure and not a pass, so no grade; like `NotRunFor` it adds
+  -- nothing to a certificate (`NotRunAddsNothing`).
+  Unresolved : Rates -> Outcome ;
 }
 
 -- The identity of an outcome: 7.S9's identity of an entry (the law, the hash of its cone, the
@@ -141,6 +145,10 @@ admits (ev : Evidence) (g : Grade) : Bool := match ev {
   Cited r -> g == Proved ;
   Assumed -> g == AssumedGrade ;
   NotRun r -> false ;
+  -- [proposed] a statistical pass: `StatisticalByTest` (laws.lth §4) settles `Holds` as supported,
+  -- over a drawn coverage, which test.lth grades `Sampled`; its rates stay in the evidence, the
+  -- price of that grade (D-2026-10-15-b), so a passed entry carries alpha, beta, delta and spent
+  Tested v -> (match v { Holds r -> g == Sampled ; _ -> false }) ;
   _ -> grade Confirmed (coverageOf ev) == just g or grade Supported (coverageOf ev) == just g }
 lengthOf (vs : List Value) : Nat := match vs { nil -> 0 ; cons v rest -> 1 + lengthOf rest }
 censusOfAtMost (n : Nat) (rs : List ParameterReach) : Bool :=
@@ -376,7 +384,8 @@ NotRunAddsNothing (k : Certifying) (c : Certificate) (ps : List (CurrentPass c))
   match e.outcome {
     Failed x -> true ;
     Passed -> not (e.grade == nothing) or k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) ;
-    NotRunFor r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) }
+    NotRunFor r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) ;
+    Unresolved r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) }
 -- 7.S10 [proposed reading of §2], as one step of the fold, so that with the laws above the grade of
 -- every certificate is fixed, by induction on its entries (C1 of the round-1 review: the earlier
 -- pair fixed it only for two passes added to a certificate with no entry). A pass `p` at the
