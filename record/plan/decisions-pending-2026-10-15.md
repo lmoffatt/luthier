@@ -276,6 +276,8 @@ forward on demand) is settled. By D-2026-10-15-h the strategy is in the record a
 as `Confluent` justifies. Cost: 8.S1 gains the field; run.py's call by need stays the host's
 specimen, held to `TheDefaultsAgree`.
 
+*Answered in chat (2026-10-16): (b), D-2026-10-16-d.*
+
 **19. Does a model enter a result's key by the plan's hash or by its cone?** 8.S8 and 8.S11. The
 spec's list omits the laws; whether the model enters by plan hash or cone is open. Options:
 (a) plan hash; (b) cone hash. No recommendation. Unblocks: B24 and the key law. Source:
@@ -309,6 +311,8 @@ D-2026-10-15-h). Cost: a runaway program is stopped by hand; `certify` keeps its
 test needs one (7.S8).
 
 ## Tests and generators
+
+*Answered in chat (2026-10-16): (c) with an optional time limit, D-2026-10-16-d.*
 
 **22. Is a default or a generator's domain constant a cutoff under P11?** P11 (every criterion is a
 parameter, never a constant in the code) and D-2026-10-14-c. Four cases wait on one criterion:
@@ -540,6 +544,7 @@ argument of `run`, recorded in the run's `result_store`. Options: (a) a field of
 arguments), like every other argument of `run`; (b) only an argument of `run`. Recommendation
 (coordinator): (a), by L5.19 and D-2026-10-13-f (the demand is the gate through which parameters
 change what the program does). Source: `record/IA/code-follows-2026-10-16/report-store.md`.
+*Answered in chat (2026-10-16): (a), D-2026-10-16-d.*
 
 ## Not listed
 

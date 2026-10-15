@@ -2647,3 +2647,19 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
             export)
 Kind:       world.lth (`applied`), 10.S10, 6.S14, run.py and cli.py (`--accept`), check.py
 Status:     current
+
+D-2026-10-16-d  The modes of running a program belong to the run, not to the definition: each is a
+                field of `Demand` (demand.lth), set by a flag of `run`, with its default declared
+                (L5.19) and recorded. Item 18 (b): the strategy a field, forward on demand the
+                default (L5.2, 8.S3); run.py's call by need stays the host's specimen while
+                `TheDefaultsAgree` holds. Item 21 (c): no fuel bound by default for `run`; a bound in
+                steps or in time (a new time limit) optional, declared and recorded; `certify` keeps
+                its budget (7.S8; a not-run for fuel never memoized, D-2026-10-15-g). Item 42 (a):
+                `fresh` a field of `Demand`.
+Author:     Luciano, on the decision assistant's reading
+Quote:      "Ambos tienen que ver con modos de correr un modelo. Es la parte de la corrida no la
+            definición, de modo que tiene que estar en la corrida." ... "En principio hagamos así."
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       demand.lth (`Demand`), plan.lth, spec 8.S1, 8.S4, run.py, cli.py
+Status:     current
