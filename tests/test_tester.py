@@ -227,15 +227,18 @@ CONTROLS = ROOT / "tests" / "tester" / "tables_controls.lut"
 
 
 def test_a_control_line_is_read_and_its_refutation_is_the_control_passing(capsys):
-    outcome, = tester.run_tests(CONTROLS)
+    outcomes = tester.run_tests(CONTROLS)
+    outcome = outcomes[0]  # the first line, CellsOfTheirKind on holeT; the others as it
+    assert all(o.spec.control and o.verdict == "Refuted" and tester.passes(o) for o in outcomes)
     assert outcome.spec.control and outcome.verdict == "Refuted" and outcome.grade is None
     assert tester.passes(outcome)
     assert outcome.entry["kind"] == "Control" and outcome.entry["grade"] is None
     assert outcome.entry["outcome"] == {"ControlRefuted": "t = holeT"}
     code, lines = lines_of(capsys, CONTROLS)
     assert code == 0  # the control passed: `luthier test` succeeds
-    assert lines == ["control of CellsOfTheirKind: exhaustive, 1 cases, refuted at t = holeT: "
-                     "the control passed (ran)"]
+    assert lines[0] == ("control of CellsOfTheirKind: exhaustive, 1 cases, refuted at t = holeT: "
+                        "the control passed (ran)")
+    assert len(lines) == 8 and all(line.endswith(": the control passed (ran)") for line in lines)
 
 
 def test_a_law_line_is_no_control_by_default():
