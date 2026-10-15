@@ -1,0 +1,51 @@
+-- tests/tester/fit_controls.lut: the controls of the fit's laws on the quadratic family. Each line
+-- is the law's line of fit_laws.lut written `(control <- true)` (test.lth's `control`), with the
+-- maximizer or the model of `LMStep` replaced by one broken on purpose, and is expected to be
+-- refuted: it shows that a law can fail on a wrong model, so that its passing on the real one is
+-- not vacuous (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The tester records its
+-- outcome as a control's entry, never the law's failure, and `luthier certify fit_laws.lut
+-- fit_controls.lut` reports the law controlled. Written 2026-10-15 by Claude Sonnet, an agent of
+-- the coordinating session, on record/IA/controls-2026-10-15/prompt-mutants.md. The laws
+-- `DirectionDescendsOnQuadratic`, `DirectionAgreesOnQuadratic`, `StepRuleOnQuadratic` and
+-- `MaximizersAgree` are fit_laws.lut's own wrappers, imported from it so that the law's cone is the
+-- same; `QuadraticConverges` (belief.lth) is also controlled in belief_controls.lut. The models of
+-- `LMStep` are broken on the native one, the host's being a route (lm.py) that cannot be written
+-- whole.
+
+import "test.lth" test SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "arrays.lth" Vec vec
+import "belief.lth" Maximizer QuadraticConverges
+import "optimization.lth" LMStep dampedStep QuadraticStepAccepts
+import "optimization_model.lut" native
+import "fit_laws.lut" nativeLM tolerance budget cutoffs DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic MaximizersAgree
+
+-- gives up: returns the start and says it did not converge
+giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := false } } }
+-- the direction with its sign flipped, the step as native
+flipped : LMStep := { direction := fn n s o x mu { vec Float64 n (fn k { 0.0 - (dampedStep n s o x mu).f k }) },
+  step := native.step }
+-- the step that never accepts and leaves the damping where it was, the direction as native
+neverAccepts : LMStep := { direction := native.direction,
+  step := fn n s d o st { { x := st.x, phi := st.phi, mu := st.mu, iter := st.iter + 1, accepted := false } } }
+onGiveUp : List Binding := [ { parameter := just "mx", type := nothing, generator := "giveUp", coverage := Listed } ]
+giveUpVsNative : List Binding := [
+  { parameter := just "mx", type := nothing, generator := "giveUp", coverage := Listed },
+  { parameter := just "my", type := nothing, generator := "nativeLM", coverage := Listed } ]
+onFlipped : List Binding := [ { parameter := just "m", type := nothing, generator := "flipped", coverage := Listed } ]
+onNever : List Binding := [ { parameter := just "m", type := nothing, generator := "neverAccepts", coverage := Listed } ]
+
+-- a maximizer that gives up never reaches the maximum
+test "QuadraticConverges" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onGiveUp) (profile <- cutoffs) (control <- true)
+-- a maximizer that gives up says it did not converge where the native one says it did
+test "MaximizersAgree" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- giveUpVsNative) (profile <- cutoffs) (control <- true)
+-- a step that never accepts does not accept the first step from a start that is not the minimum
+test "QuadraticStepAccepts" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNever) (profile <- cutoffs) (control <- true)
+-- a direction with its sign flipped climbs the objective
+test "DirectionDescendsOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onFlipped) (profile <- cutoffs) (control <- true)
+-- a direction with its sign flipped is not the damped step
+test "DirectionAgreesOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onFlipped) (profile <- cutoffs) (control <- true)
+-- a step that never accepts, and keeps the damping, breaks the rule where the trial falls and on the damping
+test "StepRuleOnQuadratic" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNever) (profile <- cutoffs) (control <- true)
