@@ -237,7 +237,7 @@ lessLoose : Doubles := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
   divide := doubles.divide,
-  less := fn a b { a /= b },
+  less := fn a b { a <= b },
   leq := doubles.leq,
   greater := doubles.greater,
   geq := doubles.geq,
@@ -459,7 +459,7 @@ test "LeqTotal" (SampledMode linear) (seed <- 20261015) (profile <- leqIsEqualPr
 test "LeqAntisymmetric" (SampledMode linear) (seed <- 20261015) (profile <- leqAlwaysProfile) (control <- true)
 -- leq allows a slack of one, which does not compose along a chain
 test "LeqTransitive" (SampledMode linear) (seed <- 20261015) (profile <- leqSlackProfile) (control <- true)
--- less is a /= b, true whenever a > b
+-- less is a <= b, wrong only at a tie, which the law draws with probability one half (report-weak-laws.md)
 test "LessIsStrict" (SampledMode linear) (seed <- 20261015) (profile <- lessLooseProfile) (control <- true)
 -- greater is a < b, the wrong direction
 test "GreaterIsLessReversed" (SampledMode linear) (seed <- 20261015) (profile <- greaterWrongProfile) (control <- true)
