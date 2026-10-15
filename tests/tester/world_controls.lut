@@ -1,0 +1,55 @@
+-- tests/tester/world_controls.lut: the controls of the laws of `Console` (world.lth §4) that
+-- tests/tester/world_laws.lut certifies on world_model.lut's `console`. Each line is the law's line
+-- written `(control <- true)` (test.lth's `control`), with the console replaced by one broken on
+-- purpose, and is expected to be refuted: it shows that the law can fail on a wrong console, so
+-- that its passing on the real one is not vacuous (7.S19 as D-2026-10-15-a generalized it to every
+-- law; L9.14). The tester records its outcome as a control's entry, never the law's failure.
+-- Written 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/controls-2026-10-15/prompt-mutants.md. The states, lines and places are those of
+-- world_laws.lut.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "kernel_laws.lth" Concrete
+import "world.lth" Console appendStr lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
+  ReadChangesNothing
+import "world_model.lut" State console theWorld lookupFile
+
+states : List Concrete := [State]
+blank : State := { stdout := "", files := nil }
+printed : State := { stdout := "one\n", files := nil }
+withFiles : State := { stdout := "", files := [("input.txt", "first\nsecond\n"), ("empty.txt", "")] }
+worlds : List State := [blank, printed, withFiles]
+lines : List String := ["", "hello, world", "two\nlines"]
+places : List String := ["stdout", "input.txt", "empty.txt", "other.txt"]
+
+-- print forgets the newline: the line is appended without its end
+noNewline : Console State := { world := theWorld,
+  printLine := fn s st { ({ stdout := appendStr st.stdout s, files := st.files }, unit) },
+  readFile := console.readFile, stdout := console.stdout }
+-- print clears the files as it writes the standard output
+dropsFiles : Console State := { world := theWorld,
+  printLine := fn s st { ({ stdout := appendStr st.stdout (lineOf s), files := nil }, unit) },
+  readFile := console.readFile, stdout := console.stdout }
+-- readFile always answers that there is no file
+readsNothing : Console State := { world := theWorld, printLine := console.printLine,
+  readFile := fn p st { (st, nothing) }, stdout := console.stdout }
+-- readFile gives the right answer but empties the standard output
+readClears : Console State := { world := theWorld, printLine := console.printLine,
+  readFile := fn p st { ({ stdout := "", files := st.files }, lookupFile st.files p) }, stdout := console.stdout }
+noNewlines : List (Console State) := [noNewline]
+dropsFilesList : List (Console State) := [dropsFiles]
+readsNothingList : List (Console State) := [readsNothing]
+readClearsList : List (Console State) := [readClears]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+onPrint (c : String) : List Binding := [bind "S" "states", bind "c" c, bind "st" "worlds", bind "s" "lines"]
+onPrintElsewhere (c : String) : List Binding := [bind "S" "states", bind "c" c, bind "st" "worlds",
+  bind "s" "lines", bind "p" "places"]
+onRead (c : String) : List Binding := [bind "S" "states", bind "c" c, bind "st" "worlds", bind "p" "places"]
+
+test "PrintAppendsALine" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPrint "noNewlines") (control <- true)
+test "PrintChangesOnlyStdout" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPrintElsewhere "dropsFilesList") (control <- true)
+test "ReadGivesThePlace" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRead "readsNothingList") (control <- true)
+test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRead "readClearsList") (control <- true)
