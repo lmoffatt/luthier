@@ -64,9 +64,10 @@ editing.
 
 `luthier test ... --no-cert`, no refuted line in any of the four:
 
-    probability_laws.lut: exit 1, no line refuted; 13 lines unsettled by fuel, all on distances.lut's
+    probability_laws.lut: exit 1, no line refuted; 10 lines unsettled by fuel, all on distances.lut's
       posModel, nativeProfile, nativeFull (JacIsJacobian, TangentShapes, ScoreIsGradient,
-      InfoSymmetric, InfoNonNegative, ProfiledIsGaussianAtItsSigma); session A's ScoreIsGradient
+      InfoSymmetric, InfoNonNegative, ProfiledIsGaussianAtItsSigma), and 3 sampled Kolmogorov lines
+      not run (no generator of a unit list); session A's ScoreIsGradient
       and fullModel's DLogSigmaIsGradient, with the drawn v, sampled (ran), 20 cases each
     belief_laws.lut: exit 1, no line refuted; the 3 session-A maximizer lines unsettled by fuel,
       as at baseline (the baseline run before my change gave the same 15 lines); the two
