@@ -1,0 +1,90 @@
+-- tests/tester/plot_controls.lut: the controls of the laws of `Drawing` (plot.lth §5) and of
+-- `Persistence` (world.lth §2) that tests/tester/plot_laws.lut certifies on matplotlib's drawing
+-- and its store `files` (plot_model.lut). Each line is the law's line written `(control <- true)`
+-- (test.lth's `control`), with the drawing or the store replaced by one broken on purpose, and is
+-- expected to be refuted: it shows that the law can fail on a wrong model, so that its passing on
+-- the real one is not vacuous (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The
+-- tester records its outcome as a control's entry, never the law's failure. Written 2026-10-15 by
+-- Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/controls-2026-10-15/prompt-mutants.md. The plots, worlds and censuses are
+-- plot_laws.lut's, imported. A broken image is matplotlib's with a mark appended that depends on
+-- what the law says the image does not depend on (or with the title dropped): the file is then no
+-- image, which no law here reads.
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "kernel_laws.lth" Concrete
+import "tables.lth" Table int real
+import "plot.lth" Plot Drawing lookupTable nthLayer retitle FileExistsAfter FormatByExtension ImageOfTheValue
+  RowOrderInvariant LayerOrderInvariant ImageSeesTheTitle
+import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
+import "world_model.lut" State theWorld
+import "plot_model.lut" matplotlibDrawing files
+import "plot_laws.lut" parsed obsText pointsAndLine states plots again exts stems worlds names obsTables perms
+  margins positions titles paths contents bind
+
+-- the store writes nothing: drawing leaves no file (FileExistsAfter)
+writesNothing : Persistence State := { world := theWorld, write := fn st p c { st } }
+noFile : Drawing State := { store := writesNothing, formats := matplotlibDrawing.formats,
+  rasters := matplotlibDrawing.rasters, image := matplotlibDrawing.image, formatOf := matplotlibDrawing.formatOf }
+-- the format reader reads every image as a PNG (FormatByExtension)
+allPng : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+  image := matplotlibDrawing.image, formatOf := fn b { "png" } }
+-- the image reads a cell at a name the schema does not have (ImageOfTheValue): two tables with the
+-- same cells may differ there
+offCell (p : Plot) : String :=
+  match lookupTable p.tables "obs" { nothing -> "" ; just t -> match t.cell "zz" 0 { nothing -> "" ; just c -> "zz" } }
+readsOffSchema : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+  image := fn p e { matplotlibDrawing.image p e + offCell p }, formatOf := matplotlibDrawing.formatOf }
+-- the image marks the first row of obs apart (RowOrderInvariant): the off-by-one of a reader that
+-- takes the first row for something else
+firstRow (p : Plot) : String :=
+  match lookupTable p.tables "obs" { nothing -> "" ; just t -> if t.cell "x" 0 == just (real 1.0) then "first" else "" }
+firstRowApart : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+  image := fn p e { matplotlibDrawing.image p e + firstRow p }, formatOf := matplotlibDrawing.formatOf }
+-- the image depends on which table the first layer draws (LayerOrderInvariant), apart or not
+firstLayer (p : Plot) : String := match nthLayer p.layers 0 { nothing -> "" ; just l -> l.table }
+layerOrdered : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+  image := fn p e { matplotlibDrawing.image p e + firstLayer p }, formatOf := matplotlibDrawing.formatOf }
+-- the image drops the title (ImageSeesTheTitle)
+noTitle : Drawing State := { store := files, formats := matplotlibDrawing.formats, rasters := matplotlibDrawing.rasters,
+  image := fn p e { matplotlibDrawing.image (retitle p "") e }, formatOf := matplotlibDrawing.formatOf }
+
+-- the store writes an empty file (WriteThenRead)
+writesEmpty : Persistence State := { world := theWorld, write := fn st p c { files.write st p "" } }
+-- the store keeps only the file it writes (WriteChangesOnlyItsPlace)
+keepsOnlyIt : Persistence State := { world := theWorld, write := fn st p c { { stdout := st.stdout, files := [(p, c)] } } }
+
+noFileList : List (Drawing State) := [noFile]
+allPngList : List (Drawing State) := [allPng]
+readsOffSchemaList : List (Drawing State) := [readsOffSchema]
+firstRowApartList : List (Drawing State) := [firstRowApart]
+layerOrderedList : List (Drawing State) := [layerOrdered]
+noTitleList : List (Drawing State) := [noTitle]
+writesEmptyList : List (Persistence State) := [writesEmpty]
+keepsOnlyItList : List (Persistence State) := [keepsOnlyIt]
+
+-- the second plot for ImageOfTheValue: obs with a cell at a name off its schema, the same plot by
+-- `samePlot` (its cells compared at the schema's names)
+leaky (t : Table) : Table := { nRows := t.nRows, names := t.names, kinds := t.kinds,
+  cell := fn c r { if c == "zz" then just (int 1) else t.cell c r } }
+plainPlots : List Plot := [pointsAndLine (parsed obsText)]
+leakyPlots : List Plot := [pointsAndLine (leaky (parsed obsText))]
+
+test "FileExistsAfter" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "noFileList",
+  bind "p" "plots", bind "stem" "stems", bind "ext" "exts", bind "st" "worlds"]) (control <- true)
+test "FormatByExtension" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "allPngList",
+  bind "p" "plots", bind "ext" "exts"]) (control <- true)
+test "ImageOfTheValue" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "readsOffSchemaList",
+  bind "p" "plainPlots", bind "q" "leakyPlots", bind "ext" "exts"]) (control <- true)
+test "RowOrderInvariant" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "firstRowApartList",
+  bind "p" "plots", bind "name" "names", bind "t" "obsTables", bind "f" "perms", bind "ext" "exts"]) (control <- true)
+test "LayerOrderInvariant" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "layerOrderedList",
+  bind "margin" "margins", bind "p" "plots", bind "i" "positions", bind "ext" "exts"]) (control <- true)
+test "ImageSeesTheTitle" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "d" "noTitleList",
+  bind "p" "plots", bind "s" "titles", bind "ext" "exts"]) (control <- true)
+test "WriteThenRead" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "s" "writesEmptyList",
+  bind "st" "worlds", bind "p" "paths", bind "c" "contents"]) (control <- true)
+test "WriteChangesOnlyItsPlace" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "s" "keepsOnlyItList",
+  bind "st" "worlds", bind "p" "paths", bind "c" "contents", bind "q" "paths"]) (control <- true)
