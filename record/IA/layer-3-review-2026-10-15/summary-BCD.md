@@ -2,7 +2,7 @@
 
 2026-10-15, by Claude Sonnet 5.5, an agent of the coordinating session, on the brief
 `prompt-summary-BCD.md` of this folder. Inputs: the replies under `B/` (deepseek, gpt, grok,
-perplexity; `B/fable.md` is empty, 0 bytes, so Claude did not answer B), `C/` (deepseek, fable,
+perplexity, and `B/fable.md`, Claude's, committed after the first version of this summary), `C/` (deepseek, fable,
 gpt, grok) and `D/` (deepseek, fable, gpt, grok, perplexity), read whole; Perplexity's from its
 derived `.md` (the PDF is the original). Kimi is in none of the three bundles. The reviewed files
 at the frozen commit 2710cfc (`FROZEN-BCD`). `git diff 2710cfc..HEAD` over every reviewed file
@@ -24,10 +24,10 @@ or a misreading.
    `PosteriorScoreIsGradient` (belief 85) and `GradIsGradient` (optimization). Verified. Fix: a
    drawn direction `v`, as `IsJacobian` already does. One law, four consumers.
 2. **`LinearizesOn` accepts a schedule that computes a node before what it reads** (B: DeepSeek,
-   GPT, Perplexity; Grok misses it). `plan.lth` 79-81: the first conjunct `subset (keep placed
+   Fable, GPT, Perplexity; Grok misses it). `plan.lth` 79-81: the first conjunct `subset (keep placed
    (readsOf ns n)) placed` is true by construction and the second accepts reads found later in
    `rest`. On the file's own `example`, `["d","b","c","a"]` passes and gives `d = 0`, against 4.
-   So `Confluent` (line 101) is false of the intended model. Verified. Perplexity adds that
+   So `Confluent` (line 101) is false of the intended model. Verified. Perplexity and Fable add that
    `Planning` also quantifies over unrestricted `Dataflow`: no law makes `step` read only what
    `reads` lists, and a one-node self-cycle has no linearization (verified in the same lines).
 3. **`Random` cannot be certified: its statistical laws are universal over seeds** (C: Fable,
@@ -46,17 +46,22 @@ or a misreading.
    contradiction below). And `MaximizerStationary` (111) is vacuous when `converged = false`, so a
    maximizer that gives up everywhere passes all but the quadratic law. Fix: `StepRule` as an
    equivalence with `s2.phi == o.value s2.x`; `MaxResult` carrying why it stopped (Fable).
-5. **A run's record and the key of a result are two unconnected identities** (B: all four answer
-   question 9 the same way). `demand.lth` 107-108: `Record` has no decoration, seed, plan or
+5. **A run's record and the key of a result are two unconnected identities** (B: all five answer
+   question 9 the same way; Fable lists what is missing: the equal-key law, the bridge from Record
+   to MemoKey, the tolerance in the key, a canonical form for `values` and `certificates`). `demand.lth` 107-108: `Record` has no decoration, seed, plan or
    certificate hashes; `plan.lth` 151: `MemoKey` has them, nothing relates the two, and
    `determined` (119) forbids two runs with one record and two results, which a stochastic run
    with another seed legitimately breaks (GPT). Verified. The question for you: is the record the
    key, or does `x.run.json` carry the key's hash?
 
-Runners-up: `Posterior` lets information be negative so `negate` (optimization 65) is not total
+Runners-up: `Demanding` is an empty theory (B: Fable alone; `lawDemand` and `recorded` are fixed
+outright by two equations and the other two laws belong to `Certifying`, so no model can fail any
+law of demand.lth; its first change: make them definitions and put the store's determinism in a
+theory that holds a store); `Dataflow` needs a theory (locality, unique names, acyclic) before
+`Planning` can have a model (B: Fable's first change, Perplexity, GPT, DeepSeek); `Posterior` lets information be negative so `negate` (optimization 65) is not total
 (D: GPT, Perplexity, Fable); `ForallOnPoints` settles no multi-parameter sampled law (C: Fable
 alone, heavy, laws.lth 187-191); `NotFlips` and `CitedWhole` are unsatisfiable together (C: Fable
-alone, laws.lth 208, 213); `Strategy` has no role law (B: GPT, DeepSeek, Grok).
+alone, laws.lth 208, 213); `Strategy` has no role law (B: Fable, GPT, DeepSeek, Grok).
 
 Contradictions between the models, and my reading:
 - Does `QuadraticConverges` fail at `maxIter = 1`? DeepSeek, GPT, Perplexity say yes (Perplexity
@@ -70,6 +75,10 @@ Contradictions between the models, and my reading:
   hidden-dependency dataflow. These agree: the law is false, the listed cases of the model do not
   reach it. Perplexity's opening line ("rejects the supplied example's topological schedules") is
   contradicted by its own check below it.
+- Does `planning` break `PlanLinearizes` on a cycle? Fable (two-node cycle: `byNeed` gives
+  `[a,b,a]`, `forward` gives `nil`), GPT and Perplexity (self-cycle) agree. On what to change first in
+  B the models split: Fable, Perplexity, GPT say a theory of `Dataflow`; DeepSeek, GPT say fix
+  `placedBefore`. Both are needed; the second is one conjunct.
 - Is anything wrong in `plan.lth`? Grok: only that `Strategy` has no role and the laws have rare
   premises; it misses item 2. Grok on D (all of it conforms) misses item 1 too. Grok's replies are
   the weakest of the round; I weigh them last.
@@ -87,25 +96,33 @@ Contradictions between the models, and my reading:
 
 ### demand.lth
 
-B1. **The record drops the type demanded** (DeepSeek, GPT, Perplexity; the three also on seed, plan
+B1. **The record drops the type demanded** (DeepSeek, Fable, GPT, Perplexity; the three also on seed, plan
 and certificates). `Record` (107-108) has no `decoration`; `RecordsEveryCutoff` (150-152) equates
 `recorded` to exactly those fields. Two demands that differ in decoration have one record.
 Verified. Whose: the theory's, with the key (item 5).
+Fable's case: `main : T` and `main : P T` have one record (8.S8: a value and its derivative have two
+keys); and the file's "[proposed] the record is the identity of a result" contradicts 8.S8.
 
-B2. **`determined` is too strong for the record it reads** (GPT; Perplexity that it only checks
+B2. **`determined` is too strong for the record it reads** (Fable, GPT; Perplexity that it only checks
 consistency inside a list). Lines 119-121. Verified: with seed, plan and certificates absent from
 `Record`, two legitimate results share a record. Whose: the theory's; goes away if B1 is closed.
+Fable: two runs that differ only in the seed, one passing a sampled certificate and one failing, are
+not a `Runs`.
 
-B3. **`NoPriceRefusesAssumed` has no price** (GPT; DeepSeek on its rare premise; Perplexity on
+B3. **`NoPriceRefusesAssumed` has no price** (Fable, GPT; DeepSeek on its rare premise; Perplexity on
 vacuity). Lines 141-142: `admitsAssumptions d` reads only `accepts` (91), and `Demand` (71-72)
 has no assumption price, though 8.S1 and 6.S10 say it has no default. Verified. The premise
 `e.grade == just AssumedGrade` over arbitrary `Entry` is rare (quoted); the subtype is assumed
 entries. Whose: the theory's, under D-2026-10-14-c (the price waits for the cost types).
+Fable's fix: the `assumed : Demand -> Maybe C` hole as the field, `nothing` by default, so 6.S10
+survives the draft. Fable also says the law is of the wrong theory (B19).
 
-B4. **`delta` fixed to `nothing`, `decoration` fixed to `nothing`** (DeepSeek, GPT, Perplexity).
+B4. **`delta` fixed to `nothing`, `decoration` fixed to `nothing`** (DeepSeek, Fable, GPT, Perplexity).
 `demand_model.lut` 23: neither is an argument of `theDemand`, unlike `entry`, `accepts`, `fuel`.
 `demand.lth` 67-68 says delta is `nothing` in this draft on purpose [proposed]. Verified. Whose:
 the model's; the file already states the reason, so a decision, not an error.
+Fable's distinction: `delta` is marked [proposed], `decoration` is not, and with it fixed no run can
+ask for `P T`.
 
 B5. **`delta` is not passed down** (Perplexity). `LawDemand` (85) has no delta. Verified. A law
 that needs the sampling level cannot get it through the passing-down. Whose: the theory's.
@@ -115,28 +132,37 @@ B6. **Defaults as cutoffs** (DeepSeek, as not sure; GPT, Grok, Perplexity say no
 
 ### plan.lth
 
-B7. **`LinearizesOn` / `placedBefore`** (DeepSeek, GPT, Perplexity). Item 2 of the top screen.
+B7. **`LinearizesOn` / `placedBefore`** (DeepSeek, Fable, GPT, Perplexity). Item 2 of the top screen.
 DeepSeek's fix (`subset (readsOf ns n) placed`) would reject a read outside the live set, which
 the comment at line 76-77 allows as a leaf; keep the reads inside `s` only. Whose: the theory's.
+Fable's fix has that form (the reads among the schedule's names must be in `placed`) and notes that
+`reaches` includes leaves, so `LinearizesOn` requires them in the schedule while the comments say a
+leaf keeps `init`.
 
-B8. **`Planning` quantifies over any `Dataflow`** (GPT, Perplexity; DeepSeek as the missing
+B8. **`Planning` quantifies over any `Dataflow`** (Fable, GPT, Perplexity; DeepSeek as the missing
 locality law). No law says `step n` reads only `readsOf n`; no law excludes cycles (a self-cycle
 has no linearization). Perplexity's counterexample: `a` reads `c` though it declares no reads, so
 `byNeed` and `forward` disagree and `StrategiesAgree` fails. Verified in the lines 84-85, 190-205.
 Whose: the theory's (a domain, or a locality law). GPT also asks 8.S5 to state completeness of
 `reads`.
+Fable makes it the first change: `Dataflow` a theory (locality, unique names, acyclic) with `Confluent`
+its consequence, since `Dataflow = {...}` is an alias and D-2026-10-10-c (what is forbidden is what
+the graph does not show) has no law. Fable also notes `PlanIsConfluent` never mentions `p`.
 
-B9. **`Strategy` has no role law** (GPT, DeepSeek, Grok). Lines 112-114. `StrategiesAgree` and
+B9. **`Strategy` has no role law** (Fable, GPT, DeepSeek, Grok). Lines 112-114. `StrategiesAgree` and
 `TheDefaultsAgree` say the strategies agree, not what makes one forward and the other by need: a
 planner returning one schedule for both passes. Verified. Whose: the theory's (L2.7).
+Fable: state them as laws of the schedule's shape (forward places a name once what it reads is placed;
+by need is depth-first post-order), or keep the strategy an alias until cost laws exist.
 
-B10. **Default strategy `CallByNeed`** (DeepSeek, GPT, Grok) against 8.S3's forward on demand.
+B10. **Default strategy `CallByNeed`** (DeepSeek, Fable, GPT, Grok) against 8.S3's forward on demand.
 `planOf` line 129. Verified, and the file marks it `[proposed]` and says why (run.py's today).
 Whose: the specification's decision against the specimen; the file is honest about it.
 
-B11. **`Confluent` is an implication over arbitrary schedules** (DeepSeek, GPT, Perplexity, Grok).
+B11. **`Confluent` is an implication over arbitrary schedules** (DeepSeek, Fable, GPT, Perplexity, Grok).
 Line 102. Random `String` lists almost never linearize. Verified. Quantify over linearizations
 of the live cone. Whose: the theory's.
+Fable's generator: permutations of one topological order.
 
 B12. **The `KeySees*` laws are one-coordinate** (GPT, Perplexity; Grok says they are exactly the
 identity needed). Lines 171-176: a hash that is XOR-like passes all six and collides when two
@@ -144,30 +170,67 @@ fields change together; Grok's "or short-circuits" reading is wrong (the law fai
 does not change). `planHash` sees the schedule only (179; GPT, Perplexity). Verified. Whose: the
 theory's; the same host hash question as certification's `hashing`.
 
-B13. **`KeyReadsTheType` is a tautology** (DeepSeek). Line 211-212 with `demandKey` (140):
+B13. **`KeyReadsTheType` is a tautology** (DeepSeek, Fable). Line 211-212 with `demandKey` (140):
 `(demandKey dm live).decoration == dm.decoration` is the definition. Verified. DeepSeek's other
 point (the key omits tolerance and `accepts`) is also in GPT and Perplexity: `DemandKey` (137) has
 only decoration and live values. Whose: the theory's; waits on B3's price.
+Fable adds `KeyReadsOnlyTheCone`, a theorem of `keepRead` true for every `p`, so section 4's two claims
+test nothing; and its case for the missing tolerance: a result served under `Proved` and one under
+`Assumed` share a key, against 8.S9 (the key includes the tolerance). Fable joins GPT and Perplexity.
 
-B14. **No law ties the key's parts to the run** (GPT, Perplexity, DeepSeek). `MemoKey` (151) fields
+B14. **No law ties the key's parts to the run** (Fable, GPT, Perplexity, DeepSeek). `MemoKey` (151) fields
 (plan is the hash of the chosen plan; certificates are the live cone's) have no provenance law.
 The question-9 answer: a law `recorded`/`memoKeyOf` relating Record and MemoKey, and a store law
 equal key gives equal result (GPT, Perplexity, DeepSeek). Whose: the theory's.
+Fable adds 8.S9's law (a hit serves a demand only with an equal key) and the read-back law (a run read
+from `x.run.json` has the key of the run that wrote it).
 
 B15. **`Strategy`'s model and `KeyReadsOnlyTheCone`** (Grok): the model "demonstrates" only the
 example; no `Keying` model exists (Grok, GPT, DeepSeek; the file says 8.S10). Not a defect.
 
 ### plan_model.lut
 
-B16. **`planning` is not a model of `Planning`** (DeepSeek, GPT; Perplexity with a different
+B16. **`planning` is not a model of `Planning`** (DeepSeek, Fable, GPT; Perplexity with a different
 case). See the contradictions. Also `byNeed` on a cycle returns `["a","b","a"]` (GPT, Perplexity
 for the self-cycle), a duplicate. Whose: the model's, because of B7 and B8.
+Fable's cases: `Confluent` on `example` with `[d,b,c,a]`; a two-node cycle; a dishonest `step` where the
+two strategies' orders differ. Fable also notes `readsIn` and `keepIn` duplicate `readsOf` and `keep`.
 
 ### 08-demand.md
 
 B17. **The chapter is stale against D-2026-10-14-c** (GPT, Grok): 8.S1/8.S2 still carry cost-valued
 cutoffs and an assumption cost; 8.S4/8.S11 say the key is unwritten while `plan.lth` has it. Not
 re-read here. Whose: the specification's.
+Fable, on another point: 8.S4's "[implemented] today" invited the wrong default (B10).
+
+B19. **`Demanding` is an empty theory** (Fable alone). `NoPriceRefusesAssumed` is quantified over
+every `k : Certifying` and `m` contributes only `m.lawDemand`, which `PassedDownNotRecomputed` fixes;
+`LoweringLosesNothing` is a law of `Certifying` at a fixed `LawDemand`. Either `Certifying` already
+refuses below `accepts` and every `m` passes, or it does not and `Demanding` has no model (which, is
+bundle A's; not sure). Verified in outline at lines 141-153. Whose: the theory's. Fable's first change
+is to make `lawDemand` and `recorded` definitions and state the store's determinism in a theory whose
+operation is the store; that changes how to read B1 and B2.
+
+B20. **`planOf` uses only `d.entry`** (Fable alone). Lines 129-130: `d.sets` and `d.decoration` never
+reach the dataflow, so the plan of a demand with holes or a decoration is the plan of the unset,
+undecorated program (8.S11, 8.S8). Whose: the theory's (`dataflowOf` is a hole that needs the demand).
+
+B21. **The key's `values` and `certificates` have no canonical form** (Fable; GPT as not sure).
+Lines 140, 151: list order and shadowed duplicates (`withSet` conses in front, `given` reads the first)
+change the key without changing what the cone reads; 8.S2 says a canonical form. Whose: the theory's.
+
+B22. **The strategy belongs in the demand** (Fable alone): D-2026-10-10-d (a parameter separate from
+the program) with D-2026-10-13-f (the demand is the gate for parameters); plan.lth's [proposed] argument
+of the plan leaves it outside both. Whose: the specification's.
+
+B23. **Per-law cutoffs have no field in `Demand`** (Fable alone): they travel in `sets` under the
+laws' parameter names and `DemandKey` keeps one only if the name is in `live`; whether the backward pass
+reaches laws is not written. Quoted. Whose: the specification's, and a question for you.
+
+B24. **8.S11's list omits two laws** (Fable alone): that the key identifies, and the law of `Dataflow`
+under `Confluent`. Also 8.S8's list (the tolerance, the model its type names) against
+D-2026-10-13-g's (key, cone, mode, seed, plan hash, certificates): whether the model enters by the plan
+hash or the cone is unsaid. Quoted. Whose: the specification's.
 
 B18. **"Call by need computes the same live subgraph"** (Perplexity): equal demanded output is not
 equal evaluated nodes. Quoted. Whose: the specification's.
@@ -424,6 +487,10 @@ Whose: the program's.
 - Whether the tester nests `Points` for several parameters (Fable; decides L2).
 - The host code: `luthier.arrays.kolmogorov_distance` (exact agreement, empty list), `luthier.lm.*`
   (unwritten) (DeepSeek, GPT, Perplexity, Fable, Grok).
+- `gradeRank`'s direction (Fable, B): if inverted, `admitsAssumptions` is backwards; whether
+  `Certifying` refuses below `accepts`, which decides whether `NoPriceRefusesAssumed` is vacuous or
+  unsatisfiable; whether generators draw functions, so a dishonest `step` is ever drawn; 12.S18's field
+  list (all Fable).
 - Whether `Hash` is finite-width, so the `KeySees*` laws are impossible for large domains
   (Perplexity, B).
 - Whether duplicate or reordered `--set` arguments are canonicalized before `DemandKey` (GPT, B).
