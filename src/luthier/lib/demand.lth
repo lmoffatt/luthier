@@ -18,6 +18,10 @@
 -- down stay as predicates for certification.lth to claim, and the one law a model can break, that
 -- one identity has one result, is the law of a theory whose value is the store, over the identity
 -- as a parameter (which identity is item 5 of the summary, Luciano's question).
+-- 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- code-follows-2026-10-16/prompt-store.md (D-2026-10-15-h, item 5 answered): the record carries the
+-- decoration, so that the key of a run is a function of its record, its seed, its plan and the
+-- certificates (plan.lth's `keyOf`); `determined` speaks of the key (§4).
 --
 -- What this file states. 8.S1 says a demand is open: whatever the program declares as a
 -- parameter, the demand may set; its form is a library's (D-2026-10-12-al), so what is here is
@@ -119,27 +123,27 @@ inner (d : Demand) (entry : String) : Demand :=
 -- What a run records of its demand (12.S18, `x.run.json`; L5.18: every threshold or level a
 -- certificate needs comes from the demand and is recorded with it): the entry, the hash of the
 -- cone it ran, every parameter it set, the grade it accepted, the confidence, the fuel given,
--- whether it ran checked, and the lock. The time, the output, the fuel spent and the states of
--- the cone are the run's, not the demand's, and are not here. The decoration is not recorded
--- (B1 of summary-BCD.md; with item 5).
+-- whether it ran checked, the lock, and the type demanded. The time, the output, the fuel spent
+-- and the states of the cone are the run's, not the demand's, and are not here. [proposed,
+-- D-2026-10-15-h] The decoration is recorded (B1 of summary-BCD.md): the key of a result reads it
+-- (8.S8, `KeyReadsTheType`), and the key is a function of the record (plan.lth's `keyOf`).
 Record = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade,
-           delta : Maybe Float64, fuel : Nat, checked : Bool, lock : Maybe String }
+           delta : Maybe Float64, fuel : Nat, checked : Bool, lock : Maybe String, decoration : Maybe Decoration }
 recorded (d : Demand) (h : Hash) : Record :=
   { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, delta := d.delta, fuel := d.fuel,
-    checked := d.checked, lock := d.pinned }
+    checked := d.checked, lock := d.pinned, decoration := d.decoration }
 
 -- ---------------------------------------------------------------- §4 The store
 
 -- A store of runs: each result kept under the identity of what produced it. The same demand on
 -- the same cone gives the same result (8.S3: results are memoized under the hash of code, inputs
 -- and mode; 8.S5: a definition has no effects; 8.S9: a hit serves only an equal key), so a store
--- holds one result per identity; one read back from `x.run.json` included. [proposed] The identity
--- is a parameter `K` with its equality: whether it is the record of §3, which run.py's `breaches`
--- compares today, or plan.lth's `MemoKey`, which carries the decoration, the seed, the mode, the
--- plan and the certificates the record lacks, is item 5 of summary-BCD.md, Luciano's question. At
--- the record the law is false of a store holding two legitimate runs that differ only in what the
--- record does not carry (a seed under which a sampled certificate passes and one under which it
--- fails, B2).
+-- holds one result per identity. The identity is a parameter `K` with its equality, and
+-- [D-2026-10-15-h] the identity of a result is its key: plan.lth's `MemoKey`, by its hash, the
+-- `key hash` of each entry of `x.results.json` (plan.lth's `ResultsDetermined`); the record of §3,
+-- which run.py's `breaches` still compares in `x.run.json`, is not an identity, since two
+-- legitimate runs may differ only in what the record does not carry (a seed under which a sampled
+-- certificate passes and one under which it fails, B2).
 Stored (K : U) = { key : K, result : String }
 agreesWith (K : U) (eq : K -> K -> Bool) (r : Stored K) (rs : List (Stored K)) : Bool :=
   match rs { nil -> true ; cons q rest -> (not (eq r.key q.key) or r.result == q.result) and agreesWith K eq r rest }
@@ -147,7 +151,7 @@ determined (K : U) (eq : K -> K -> Bool) (rs : List (Stored K)) : Bool :=
   match rs { nil -> true ; cons r rest -> agreesWith K eq r rest and determined K eq rest }
 
 -- 8.S3, 8.S9: two runs with one identity have one result. The value of the theory is the store;
--- 8.S10 says none is read back yet, so no model file gives one.
+-- run.py reads `x.results.json` back (8.S10), and no model file gives one.
 Store (K : U) (eq : K -> K -> Bool) : { runs : List (Stored K) }
 OneIdentityOneResult (K : U) (eq : K -> K -> Bool) (st : Store K eq) : Bool := determined K eq st.runs
 Store (K : U) (eq : K -> K -> Bool) := OneIdentityOneResult K eq

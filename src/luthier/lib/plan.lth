@@ -18,6 +18,11 @@
 -- unique, acyclic, its step reading only what its node lists (D-2026-10-10-c: what is forbidden is
 -- what the graph does not show), with the equality of its values a parameter (4.R8); the roles of
 -- the two strategies as laws of `Planning` (L2.7).
+-- 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- code-follows-2026-10-16/prompt-store.md (v0.4's criterion c; D-2026-10-15-d, D-2026-10-15-h): the
+-- key of a run as a function of its record, its seed, its plan and the certificates (`keyOf`), the
+-- law that run.py's key is that function (`KeyIsOfTheRecord`), and `determined` over the key's
+-- hash (`ResultsDetermined`), the store of results run.py writes in `x.results.json`.
 --
 -- What this file states. A dataflow says, for each name of a cone, what it reads and how its
 -- value follows from theirs (8.S4: a demand's plan is the dataflow of its cone). A schedule is an
@@ -28,7 +33,7 @@
 -- against (8.S11, L5.11), with the two schedules as the parameters a test draws. A plan is the
 -- live subgraph the entry reaches with a schedule of it and the strategy that chose the order
 -- (8.S4: the strategy is a parameter). The key of 8.S8 is stated with the laws a hash of it owes;
--- 8.S10 says the memo that would read it does not exist, so plan_model.lut gives it no model. The
+-- its model is run.py's (`result_key`, `key_hash`), so plan_model.lut gives it none. The
 -- backward pass from a demand and a program to a dataflow is a hole (8.S11: not written). What
 -- the brief or the spec leaves open is marked [proposed] at the item above it.
 --
@@ -39,7 +44,7 @@
 --   §4 The key of a result (8.S8, 8.S9, 8.S10, L5.6).                                       done
 --   §5 The theory `Planning`, the laws of §2 to §4 claimed.                                  done
 
-import "demand.lth" Demand Decoration
+import "demand.lth" Demand Decoration Record Stored determined
 import "certification.lth" Value Hash
 import "generators.lth" Seed
 import "term.lth" Term Program
@@ -228,9 +233,10 @@ withSet (d : Demand) (n : String) (v : Value) : Demand :=
 -- The identity of a result (8.S8, L5.6, D-2026-10-13-g): the demand's key, the hash of the cone
 -- (the code, the hosts behind its externs and the interpreter, certification.lth §4), the mode,
 -- the seed, the hash of the plan, and the hashes of the certificates of the live cone. A hit
--- serves a demand only with an equal key (8.S9); the memo that would hold it does not exist
--- (8.S10), and `x.run.json` is written and never read back. [proposed] The mode is a string: 8.S1
--- names `m` and the spec does not define it; today the only mode is `--checked`, printed.
+-- serves a demand only with an equal key (8.S9); the store that holds it is `x.results.json`
+-- (8.S10, `ResultsDetermined` below). [proposed] The mode is a string: 8.S1 names `m` and the spec
+-- does not define it; today the only mode is `--checked`, printed. The strategy is not a field:
+-- it is the plan's, so the plan's hash carries it.
 MemoKey = { demand : DemandKey, cone : Hash, mode : String, seed : Seed, plan : Hash, certificates : List Hash }
 withDemand (k : MemoKey) (dk : DemandKey) : MemoKey :=
   { demand := dk, cone := k.cone, mode := k.mode, seed := k.seed, plan := k.plan, certificates := k.certificates }
@@ -250,7 +256,22 @@ withCertificates (k : MemoKey) (hs : List Hash) : MemoKey :=
 -- changes when any input of 8.S8 changes): two keys that differ in one input have different
 -- hashes. [proposed] As in certification.lth §4, a collision of the hash function is the host's,
 -- and a sample that finds one refutes the model.
-Keying (A : U) : { key : MemoKey -> Hash, planHash : Plan A -> Hash }
+Keying (A : U) : { key : MemoKey -> Hash, planHash : Plan A -> Hash, runKey : Record -> Seed -> Plan A -> List Hash -> Hash }
+
+-- The key of a run from what it records (D-2026-10-15-h: the record says how to reproduce a run,
+-- the key when two results are the same result): of its record (demand.lth's `Record`), the type
+-- demanded and the values of the holes the plan's live cone reads, the cone it ran and whether it
+-- ran checked; its seed; the hash of its plan; the hashes of the certificates that served its
+-- cone. The fuel, the time and the lock are in the record and not in the key (D-2026-10-15-g).
+-- [proposed] The plan's hash in the key is that of the plan as chosen, before its schedule: call by
+-- need writes the schedule as it runs (8.S4), and a key read before evaluating cannot hold it; the
+-- schedule follows from the cone and the values the rest of the key holds (`ByNeedIsFirstDemand`),
+-- so leaving it out of the key distinguishes no two results the rest does not.
+chosen (A : U) (p : Plan A) : Plan A := { strategy := p.strategy, entry := p.entry, live := p.live, schedule := nil }
+modeOf (r : Record) : String := if r.checked then "checked" else "plain"
+keyOf (A : U) (h : Keying A) (r : Record) (s : Seed) (p : Plan A) (cs : List Hash) : MemoKey :=
+  { demand := { decoration := r.decoration, values := keepRead p.live r.parameters }, cone := r.cone,
+    mode := modeOf r, seed := s, plan := h.planHash (chosen A p), certificates := cs }
 KeySeesTheDemand (A : U) (h : Keying A) (k : MemoKey) (dk : DemandKey) : Bool := dk == k.demand or not (h.key (withDemand k dk) == h.key k)
 KeySeesTheCone (A : U) (h : Keying A) (k : MemoKey) (c : Hash) : Bool := c == k.cone or not (h.key (withCone k c) == h.key k)
 KeySeesTheMode (A : U) (h : Keying A) (k : MemoKey) (m : String) : Bool := m == k.mode or not (h.key (withMode k m) == h.key k)
@@ -260,8 +281,20 @@ KeySeesTheCertificates (A : U) (h : Keying A) (k : MemoKey) (hs : List Hash) : B
   hs == k.certificates or not (h.key (withCertificates k hs) == h.key k)
 PlanHashSeesTheSchedule (A : U) (h : Keying A) (p : Plan A) (s : Schedule) : Bool :=
   s == p.schedule or not (h.planHash { strategy := p.strategy, entry := p.entry, live := p.live, schedule := s } == h.planHash p)
+-- D-2026-10-15-h: the key a run computes is the hash of `keyOf` of what it records, so a model
+-- that hashed the fuel, the time or the lock, or left out a field of the key, fails it
+KeyIsOfTheRecord (A : U) (h : Keying A) (r : Record) (s : Seed) (p : Plan A) (cs : List Hash) : Bool :=
+  h.runKey r s p cs == h.key (keyOf A h r s p cs)
 Keying (A : U) := KeySeesTheDemand A & KeySeesTheCone A & KeySeesTheMode A & KeySeesTheSeed A & KeySeesThePlan A
-  & KeySeesTheCertificates A & PlanHashSeesTheSchedule A
+  & KeySeesTheCertificates A & PlanHashSeesTheSchedule A & KeyIsOfTheRecord A
+
+-- The store of results (8.S3, 8.S10, D-2026-10-15-d): `x.results.json` beside the program, each
+-- result printed under the hash of its key; demand.lth's `determined` speaks of the key
+-- (D-2026-10-15-h): one key, one result. A run that finds its key's entries disagreeing is not
+-- served and keeps its own beside them, the store then breaking this (as an exact replay of a
+-- certificate that disagrees does, D-2026-10-15-f), until the discrepancy is resolved.
+eqHash (a b : Hash) : Bool := a == b
+ResultsDetermined (rs : List (Stored Hash)) : Bool := determined Hash eqHash rs
 
 -- ---------------------------------------------------------------- §5 The theory
 
