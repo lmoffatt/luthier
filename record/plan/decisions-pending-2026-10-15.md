@@ -15,17 +15,29 @@ one, and the source is named.
 
 ## Unblock work
 
-**1. May a run whose cone acts on the world be served from the result store?** 8.S3 (decide forward
-on demand), 8.S8 (a result's key) and 8.S10 (an action's declaration is a law of the world) leave
-open whether a run whose cone performs `print` or `readFile` may be served from the store across
-runs, or only a pure entry may. Options: (a) pure entries only (an acting run always executes);
-(b) an acting run may be served when its key and its observed effects match. No source gives a
-recommendation ("one word", report.md). Unblocks: v0.4's criterion (c), the result store across
-runs at its smallest. Source: `record/IA/v04-2026-10-15/report.md` (section 1, criterion c);
-`record/plan/night-2026-10-13.md` ("Questions", the v0.4 item).
-*Note (coordinator, 2026-10-15, after his answer on the example):* D-2026-10-15-c (every possible
-behavior has a way to be said) applies to both options: under (b) serving is a default, and the
-demand or the program can always ask for the literal execution.
+**1. The stores across runs: what may be served, and are the stores places of the world?**
+(Rewritten 2026-10-15 by the coordinator after the chat on this item; the first version is in git,
+37e458a.) A certificate or a result that survives from one run to the next was written in the world,
+and reading it is observing the world. Today `luthier certify` writes `x.cert.json`, and `luthier
+run` reads it and writes a first action's entry into it, in Python, outside the token W: no action
+declares these writes and `agreement` checks none of them. The run record does not keep the hash of
+the store it read. A real case already happened: the suite and `certify` running together overwrote
+the stores, a third party writing in the same file, patched with a temp copy and a lock. 10.S6 calls
+these own actions (idempotent, memoizable); the code does not yet treat them as actions.
+D-2026-10-15-c (every possible behavior has a way to be said) holds in every option: whatever is
+served by default, the demand or the program can ask for the literal execution.
+Options:
+(a) Now: pure results only are served across runs (an acting run always executes); each run
+    records the hash of the stores it read; the hole is marked in certification.lth (L14.4, what
+    the kernel cannot yet express is written in the host and marked). Later, with the full result
+    store: both stores become places of the world with own actions (10.S6 and 12.S11 rewritten).
+(b) Now, for v0.4: both stores modeled as places of the world with own actions, and an acting run
+    served when its key and the effects the world shows match.
+Recommendation (coordinator): (a). It costs an afternoon and makes the hole visible; (b) rewrites
+10.S6 and 12.S11 and is better done once, together with the result store.
+Unblocks: v0.4's criterion (c). Sources: `record/IA/v04-2026-10-15/report.md` (section 1,
+criterion c); `record/plan/night-2026-10-13.md` ("Questions", the v0.4 item); src/luthier/run.py
+(the first action's entry), src/luthier/certify.py (the store's write).
 
 **2. Does the cone's hash cover the type annotations the elaborator writes?** 6.S8 (a new check
 writes a new entry) and P2 (everything derived carries how it was derived) put the cone in the
