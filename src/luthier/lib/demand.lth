@@ -41,7 +41,7 @@
 --   §4 The theory `Store`: one identity, one result (8.S3, 8.S9).                           done
 --   §5 The laws of `Certifying` at the demand passed down (6.S10, 6.S16).                   done
 
-import "certification.lth" Certifying Entry Value Hash ServesIsMonotoneInTheCutoff
+import "certification.lth" Certifying Entry EntryFor Value Hash ServesIsMonotoneInTheCutoff
 import "test.lth" Grade Sampled AssumedGrade gradeRank
 import "term.lth" Term
 
@@ -162,6 +162,8 @@ Store (K : U) (eq : K -> K -> Bool) := OneIdentityOneResult K eq
 NoPriceRefusesAssumed (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) : Bool :=
   admitsAssumptions d or not (e.grade == just AssumedGrade) or not (k.serves (lawDemand d law cone) e)
 -- 6.S16, L10.5: lowering the cutoff loses nothing accepted; certification.lth's law, applied to
--- the demand passed down, not restated
-LoweringLosesNothing (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : Entry) (g : Grade) : Bool :=
+-- the demand passed down, not restated, over an entry of that demand's law at its hash, the
+-- domain the law now takes (C2 of summary.md, certification.lth draft 1; a drawn `Entry` met it
+-- almost never)
+LoweringLosesNothing (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : EntryFor (lawDemand d law cone)) (g : Grade) : Bool :=
   ServesIsMonotoneInTheCutoff k (lawDemand d law cone) e g
