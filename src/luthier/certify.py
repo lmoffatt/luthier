@@ -306,10 +306,22 @@ def _datas(term):
 
 # ---------------------------------------------------------------------- §1 the entry and the store
 
+LIBRARY = Path(__file__).resolve().parent / "lib"
+LIBRARY_STORES = "LUTHIER_LIBRARY_STORES"
+
+
 def store_path(path):
-    """`x.cert.json` beside `x.lut` (12.S10)."""
+    """`x.cert.json` beside `x.lut` (12.S10). [proposed, 2026-10-15, record/IA/controls-2026-10-15/
+    prompt-tail.md] When the environment names a directory in `LUTHIER_LIBRARY_STORES`, the store
+    of a file of the library (src/luthier/lib) is that directory's of the same name: the test suite
+    reads and writes a copy of the library's stores there (tests/conftest.py), so that a run of it
+    beside `luthier certify` neither reverts nor sees what certify writes."""
     path = Path(path)
-    return path.with_name(path.stem + ".cert.json")
+    where = path.with_name(path.stem + ".cert.json")
+    elsewhere = os.environ.get(LIBRARY_STORES)
+    if elsewhere and where.parent.resolve() == LIBRARY:
+        return Path(elsewhere) / where.name
+    return where
 
 
 IDENTITY = ("law", "cone", "binding", "seed", "cases")
