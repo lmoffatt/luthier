@@ -2,25 +2,32 @@
 -- generators a test binds, 7.R1, 7.S5), run through `luthier test`, on the brief
 -- record/IA/tester-2026-10-14/prompt-3.md. Each law is quantified over the size and the seed, so
 -- a sampled case is one draw of the family. The cutoffs as censuses of one, as arrays_laws.lut and
--- probability_laws.lut: the tolerance 1e-12 [proposed], the rank floor 30 eps, the level alpha
--- 0.01 on 200 values [proposed]. Seed 20261014. `UniformSampleIsUniform` holds on a fraction
--- 1 - alpha of seeds (7.S17): about one refuting seed in 100 is expected.
+-- probability_laws.lut: the tolerance 1e-12 [proposed], the rank floor 30 eps. Seed 20261014.
+-- Since 2026-10-15 (record/IA/statistical-2026-10-15/prompt-tester.md) `UniformSampleIsUniform`
+-- is a statistical law in the form of laws.lth §4 (7.S17, L9.15, D-2026-10-15-b): the tester runs
+-- Wald's sequential test once from the line's seed, at the demand's cutoffs `wald` bound as a
+-- census of one, never drawn: alpha 0.01, beta 0.01, delta 0.5 (the brief's), samples of size 50
+-- and a budget of 400 samples [proposed]. Under the null the log ratio drifts by about -0.045 per
+-- sample (laws.lth §4), so the test holds after some 100 samples and leaves it unresolved at 400
+-- with a probability of about 1%; at size 50 a sample of `uniformSample` is up to 2500 values.
+-- Its control, `SkewedSampleIsUniform`, is in generators_controls.lut. The Bool form at a level
+-- (`Level`, `l`) is gone.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear SymmetricGivesSymmetric SymmetricOfGivesItsSize GramGivesPsd
   OrthogonalGivesOrthogonal UnitListGivesUnitValues UniformSampleIsUniform ClearDiagonalGivesClear
-import "generators.lth" Binding Level
-import "laws.lth" Listed
+import "generators.lth" Binding
+import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
 import "arrays.lth" RankFloor
 
 tolerance : Tolerance := 1.0e-12
 floor : RankFloor := 6.661338147750939e-15
-level : Level := { alpha := 0.01, n := 200 }
+wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
 cutoffs : List Binding := [
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
   { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed },
-  { parameter := just "l", type := nothing, generator := "level", coverage := Listed } ]
+  { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
 
 test "SymmetricGivesSymmetric" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
 test "SymmetricOfGivesItsSize" (SampledMode linear) (seed <- 20261014) (profile <- cutoffs)
