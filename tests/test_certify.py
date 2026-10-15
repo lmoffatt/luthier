@@ -545,7 +545,7 @@ def test_the_control_status_of_a_law():
 
 
 def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
-    # the acceptance of the brief: CellsOfTheirKind controlled, the other laws uncontrolled; no store
+    # the acceptance of the brief, then every law of tables controlled (prompt-mutants.md); no store
     laws, controls = (ROOT / "tests" / "tester" / f"tables_{n}.lut" for n in ("laws", "controls"))
     stores = [certify.store_path(p).read_bytes() for p in (laws, controls)]
     assert main(["certify", "--no-cert", str(laws), str(controls)]) == 0
@@ -553,12 +553,11 @@ def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
     assert [certify.store_path(p).read_bytes() for p in (laws, controls)] == stores
     assert out[0] == f"{laws}: 8 laws, 8 lines ran, 0 known"
     assert "  CellsOfTheirKind: cases; controlled (refuted on its control at t = holeT)" in out
-    others = [line for line in out[1:9] if "CellsOfTheirKind" not in line]
-    assert len(others) == 7 and all(line.endswith("; uncontrolled: untested against any wrong model (7.S19)")
-                                    for line in others)
-    assert out[9] == f"{controls}: 0 laws, 1 controls, 1 lines ran, 0 known"
+    assert all("; controlled (refuted on its control at " in line for line in out[1:9])
+    assert out[9] == f"{controls}: 0 laws, 8 controls, 8 lines ran, 0 known"
     assert out[10] == ("  control of CellsOfTheirKind on holes (Listed): refuted at t = holeT: "
                        "the control passed")
+    assert all(line.endswith(": the control passed") for line in out[10:18])
 
 
 PAIR_LAWS = '''import "test.lth" test ExhaustiveMode
