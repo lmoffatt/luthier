@@ -32,7 +32,7 @@ import "arrays.lth" Vec vec
 import "probability.lth" Resolution KolmogorovOfNothing KolmogorovOfOne KolmogorovOfMultiset KolmogorovBounded
   KolmogorovAgrees SourceIsUniform UnitList uniformValues MeanShape JacShape JacIsJacobian ScaledShapes DLogSigmaIsGradient TangentShapes
   ScoreIsGradient InfoSymmetric InfoNonNegative GaussianPeaksAtMean ProfiledIsGaussianAtItsSigma
-import "probability_model.lut" numpySort
+import "probability_model.lut" numpySort gaussianConstruction
 import "../../examples/sonolocalizacion/distances.lut" posModel fullModel nativeFull nativeProfile pitResolution freeDim
 import "session_a.lut" dimA modelA likelihoodA
 
@@ -125,7 +125,12 @@ test "TangentShapes" (SampledMode linear) (cases <- 5) (seed <- 20261014) (where
 test "ScoreIsGradient" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
 test "InfoSymmetric" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
 test "InfoNonNegative" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
--- §4 the construction
-test "GaussianPeaksAtMean" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
-test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- cutoffs)
-test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs)
+-- §4 the construction, a census of one, probability_model.lut's (since 2026-10-15 a parameter of
+-- its laws, record/IA/controls-2026-10-15/prompt-weak-laws.md, L9.14), with the cutoffs
+onConstruction : List Binding := [
+  { parameter := just "g", type := nothing, generator := "gaussianConstruction", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
+test "GaussianPeaksAtMean" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- onConstruction)
+test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- onConstruction)
+test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- onConstruction)
