@@ -8,10 +8,15 @@
 -- a cone (6.S8), a route the specimen gives: src/luthier/certify.py must define `cone_hash`, taking
 -- a cone (the code in canonical form, the hosts by route, the interpreter's revision) and answering
 -- a string; it is validated against certification.lth §4 like any extern (3.S28).
+--
+-- Draft 1, 2026-10-15, by Claude Opus 5.5, on record/IA/layer-3-review-2026-10-15/
+-- prompt-fix-certification.md: `refuse` follows certification.lth draft 1 (C5 of the round-1
+-- review: a law with a failure at the current hash is refused whatever serves, listed with that
+-- failure). `grade` already is the fold the theory's step laws now fix (C1), and is unchanged.
 
 import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
   Standing ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
-  Uncertified Provisional Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt
+  Uncertified Provisional Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical
 
@@ -61,14 +66,17 @@ serves (d : Demand) (e : Entry) : Bool :=
   e.law == d.law and e.cone == d.cone and e.outcome == Passed and atLeast d.accepts e.grade
     and coversAll contains e.reach d.given
 
--- 6.S14, 7.S15, 12.S17: what a cone is refused, each with its state
+-- 6.S14, 7.S15, 12.S17, 6.S3: what a cone is refused, each with its state; a law with a failure
+-- at the current hash is refused whatever serves, with the latest such failure as its state
 stateOf (d : Demand) (es : List Entry) : State :=
   match latestAt d.law d.cone es { just e -> Current e.outcome ;
     nothing -> (match latestOf d.law es { just f -> Stale f.cone ; nothing -> Uncertified }) }
 refuseLaws (es : List Entry) (n : String) (ds : List Demand) : List Refusal :=
   match ds { nil -> nil ; cons d rest ->
-    if anyServes serves d es then refuseLaws es n rest
-    else cons { name := n, law := just d.law, state := stateOf d es } (refuseLaws es n rest) }
+    match failureAt d.law d.cone es {
+      just f -> cons { name := n, law := just d.law, state := Current f.outcome } (refuseLaws es n rest) ;
+      nothing -> if anyServes serves d es then refuseLaws es n rest
+                 else cons { name := n, law := just d.law, state := stateOf d es } (refuseLaws es n rest) } }
 refuseName (es : List Entry) (c : ConeName) : List Refusal :=
   if c.provisional then [{ name := c.name, law := nothing, state := Provisional }] else refuseLaws es c.name c.laws
 refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
