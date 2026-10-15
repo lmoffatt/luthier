@@ -1585,8 +1585,8 @@ AXIOMS = "AssumedGrade"
 class Demand:
     """demand.lth's `Demand` (8.S1): what a run asks of the program, built once by `run` from its
     arguments and `DEMAND_DEFAULTS` before anything is evaluated; every law's demand, the inner
-    demand of a first action and the run's record derive from it (L12.3, `PassedDownNotRecomputed`,
-    `RecordsEveryCutoff`). `entry` the name as the user writes it; `accepts` the weakest grade
+    demand of a first action and the run's record derive from it (L12.3; demand.lth's `lawDemand` and
+    `recorded`). `entry` the name as the user writes it; `accepts` the weakest grade
     accepted (test.lth's `Grade`, by constructor name); `sets` each hole's value (`--set`, parsed by
     the hole's type, `fill`), in the order given; `pinned` the interpreter's revision the lock pins,
     None when none does. `decoration` and `delta` are `nothing` in this draft (demand.lth §1)."""
@@ -2442,7 +2442,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None):
 
     The run's demand (demand.lth's `Demand`) is built once, as soon as the values of `--set` are
     read by their holes' types, and everything after derives from it: the demand on each law and
-    on each first action (`PassedDownNotRecomputed`), and the record (`RecordsEveryCutoff`). The
+    on each first action (demand.lth's `lawDemand`), and the record (`recorded`). The
     state carries the demand as recorded (`demand`), the plan (`plan`: the strategy, the live cone,
     the call-by-need schedule and its hash, plan.lth's `Plan`, L5.6) and the demand's key (`key`,
     plan.lth's `DemandKey`, `KeyReadsOnlyTheCone`)."""
@@ -2583,8 +2583,8 @@ def record(path, main, values, output, state=None):
 
 def read_runs(path):
     """The runs `x.run.json` holds beside `x.lut` (or at `path` itself), and the breaches of
-    demand.lth's `determined` among them (`Runs`, 8.S3): each pair (i, j), i < j, of runs with one
-    demand record (`demand`) and two outputs. Nothing is served from them yet (8.S10). [proposed] A
+    demand.lth's `determined` among them (its `Store`'s `OneIdentityOneResult`, 8.S3): each pair
+    (i, j), i < j, of runs with one demand record (`demand`) and two outputs. Nothing is served from them yet (8.S10). [proposed] A
     run recorded before the demand was (no `demand`) is in the list and in no pair."""
     path = Path(path)
     where = path if path.name.endswith(".run.json") else record_path(path)
