@@ -1,0 +1,109 @@
+-- tests/tester/belief_controls.lut: the controls of belief.lth's laws. Each line is the law's line of
+-- belief_laws.lut written `(control <- true)` (test.lth's `control`), with the model or the case
+-- of the law replaced by one broken on purpose, and is expected to be refuted: it shows that a law
+-- can fail on a wrong model, so that its passing on the real one is not vacuous (7.S19 as
+-- D-2026-10-15-a generalized it to every law; L9.14). The tester records its outcome as a
+-- control's entry, never the law's failure, and `luthier certify belief_laws.lut
+-- belief_controls.lut` reports the law controlled. Written 2026-10-15 by Claude Sonnet, an agent
+-- of the coordinating session, on record/IA/controls-2026-10-15/prompt-mutants.md. The beliefs
+-- and posteriors are the quadratic family at dimension 3 (belief_laws.lut), not session A, which
+-- is slow; the maximizers are written whole, as the host's `lm` is a route and cannot be broken.
+-- `PosteriorInfoNonNegative` is a law of the same type and has no line in belief_laws.lut, so it
+-- has none here.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Vec Mat vec mat
+import "belief.lth" Posterior GaussianBelief Maximizer quadratic PrecisionSymmetric DensityPeaksAtMean PosteriorScoreIsGradient
+  PosteriorInfoSymmetric MaximizerAscends MaximizerStationary MaximizerKeepsDimension QuadraticConverges
+import "belief_model.lut" lm
+import "../../examples/sonolocalizacion/distances.lut" pitResolution
+import "session_a.lut" settingsA
+
+tolerance : Tolerance := 1.0e-12
+budget : Nat := 50
+cutoffs : List Binding := [
+  { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
+
+centre3 : Vec Float64 := vec Float64 3 (fn k { toFloat64 k - 1.0 })
+three : List Int := [3]
+zero3 : Vec Float64 := vec Float64 3 (fn k { 0.0 })
+good3 : Posterior 3 := quadratic 3 centre3 2.0
+
+-- beliefs: a precision with one entry off its mirror, and a negative precision
+asymmetricB : GaussianBelief 3 := { mean := centre3,
+  precision := mat Float64 3 3 (fn i j { if i == 0 and j == 1 then 1.0 else (if i == j then 2.0 else 0.0) }) }
+negativeB : GaussianBelief 3 := { mean := centre3,
+  precision := mat Float64 3 3 (fn i j { if i == j then 0.0 - 2.0 else 0.0 }) }
+asymmetricBs : List (GaussianBelief 3) := [ asymmetricB ]
+negativeBs : List (GaussianBelief 3) := [ negativeB ]
+onAsymmetricB : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "b", type := nothing, generator := "asymmetricBs", coverage := Listed } ]
+onNegativeB : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "b", type := nothing, generator := "negativeBs", coverage := Listed } ]
+
+-- posteriors: the quadratic with its score zero, with its information off its mirror in one entry
+zeroScoreP : Posterior 3 := { logp := good3.logp, score := fn x { zero3 }, info := good3.info }
+asymmetricInfoP : Posterior 3 := { logp := good3.logp, score := good3.score,
+  info := fn x { mat Float64 3 3 (fn i j { if i == 0 and j == 1 then 1.0 else (if i == j then 2.0 else 0.0) }) } }
+zeroScorePs : List (Posterior 3) := [ zeroScoreP ]
+asymmetricInfoPs : List (Posterior 3) := [ asymmetricInfoP ]
+onZeroScore : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "zeroScorePs", coverage := Listed } ]
+onAsymmetricInfo : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "asymmetricInfoPs", coverage := Listed } ]
+
+-- maximizers, each a record written whole
+-- gives up: returns the start and says it did not converge
+giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := false } } }
+-- claims convergence at the start, wherever it is
+claimsAtStart : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := true } } }
+-- jumps far from the start, where the log posterior is lower
+jumpsAway : Maximizer := { maximize := fn s n f g m x0 { { x := vec Float64 n (fn k { 1.0e6 }), converged := false } } }
+-- returns a vector one shorter than the dimension
+oneShort : Maximizer := { maximize := fn s n f g m x0 { { x := vec Float64 (n - 1) (fn k { 0.0 }), converged := false } } }
+quadratics3 : List (Posterior 3) := [good3]
+onQuadratics : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed } ]
+onGiveUp : List Binding := [ { parameter := just "mx", type := nothing, generator := "giveUp", coverage := Listed } ]
+onClaimsQ : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed },
+  { parameter := just "mx", type := nothing, generator := "claimsAtStart", coverage := Listed } ]
+onJumpsQ : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed },
+  { parameter := just "mx", type := nothing, generator := "jumpsAway", coverage := Listed } ]
+onShortQ : List Binding := [
+  { parameter := just "n", type := nothing, generator := "three", coverage := Listed },
+  { parameter := just "p", type := nothing, generator := "quadratics3", coverage := Listed },
+  { parameter := just "mx", type := nothing, generator := "oneShort", coverage := Listed } ]
+
+-- a precision with one entry off its mirror is not symmetric
+test "PrecisionSymmetric" ExhaustiveMode (seed <- 20261015) (whereBindings <- onAsymmetricB) (profile <- cutoffs) (control <- true)
+-- a negative precision gives a log density above zero away from the mean
+test "DensityPeaksAtMean" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNegativeB) (profile <- cutoffs) (control <- true)
+-- a score that is zero everywhere is not the gradient of the quadratic's log density
+test "PosteriorScoreIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onZeroScore) (profile <- cutoffs) (control <- true)
+-- an information with one entry off its mirror is not symmetric
+test "PosteriorInfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onAsymmetricInfo) (profile <- cutoffs) (control <- true)
+-- a maximizer that gives up returns the start unconverged, so it never reaches the quadratic's maximum
+test "QuadraticConverges" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onGiveUp) (profile <- cutoffs) (control <- true)
+-- a maximizer that jumps to a far point ends where the log posterior is lower than at the start
+test "MaximizerAscends" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onJumpsQ) (profile <- cutoffs) (control <- true)
+-- a maximizer that says it converged at the start, where the decrement is not within the tolerance
+test "MaximizerStationary" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onClaimsQ) (profile <- cutoffs) (control <- true)
+-- a maximizer that returns a vector one shorter than the dimension
+test "MaximizerKeepsDimension" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onShortQ) (profile <- cutoffs) (control <- true)
