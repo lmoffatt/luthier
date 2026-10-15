@@ -34,6 +34,13 @@ hash, reported loudly), or uncontrolled, untested against any wrong model. The g
 by it (the demand's business later). [proposed] A law and its control are matched by the hash of
 the law's cone, which names the law; the controls read are those of the files `certify` or
 `check -v` is given, so a law certified without its control file is reported uncontrolled.
+
+Statistical laws (record/IA/statistical-2026-10-15/prompt-tester.md; laws.lth §4, 7.S17, L9.15): an
+entry whose evidence is `Tested` holds the sequential test's verdict with alpha, beta, delta, the
+samples spent, and the cutoffs' `initial` and `budget` (`tested_text` reads them). A pass is graded
+as any (sampled, over `Drawn seed`); `standing` adds the rates and what was spent to the grade, so
+that the certificate shows the price of a sampled grade (7.S17). An unresolved test is a
+`NotRunFor` that says so.
 """
 from __future__ import annotations
 
@@ -514,10 +521,29 @@ def state(entries, law, current):
     return "uncertified", None
 
 
+def _number(x):
+    return f"{x:g}" if isinstance(x, float) else str(x)
+
+
+def tested_text(tested):
+    """A sequential test's verdict as the lines and the certificate print it: the samples spent of
+    their size, and its rates against its budget (laws.lth §4's `Rates` and `Sequential`)."""
+    return (f"{tested['spent']} samples of {tested['initial']} by the sequential test (alpha "
+            f"{_number(tested['alpha'])}, beta {_number(tested['beta'])}, delta {_number(tested['delta'])}, "
+            f"budget {tested['budget']})")
+
+
+def _tested(entry):
+    evidence = entry.get("evidence")
+    return evidence.get("Tested") if isinstance(evidence, dict) else None
+
+
 def show_outcome(outcome):
     if outcome == "Passed":
         return "passed"
     (kind, why), = outcome.items()
+    if kind == "NotRunFor" and why.startswith("unresolved at "):
+        return why
     if kind == "ControlRefuted":
         return f"refuted at {why}: the control passed"
     if kind == "ControlConfirmed":
@@ -534,7 +560,10 @@ def standing(entries, law, current):
         return f"stale (its entries are at {what[7:19]}, the cone is now at {current[7:19]})"
     g = certificate_grade(entries, law, current)
     if g is not None:
-        return GRADE_WORDS[g]
+        # a statistical law's pass carries its rates and what it spent (7.S17), the latest's
+        tested = next((_tested(e) for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
+                       and passed(e) and _tested(e)), None)
+        return f"supported, {GRADE_WORDS[g]}: held at {tested_text(tested)}" if tested else GRADE_WORDS[g]
     failed = next((e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
                    and isinstance(e["outcome"], dict) and "Failed" in e["outcome"]), None)
     if failed is not None:

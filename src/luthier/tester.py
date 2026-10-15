@@ -52,6 +52,18 @@ own kind, `"kind": "Control"` [proposed], whose outcome is `ControlRefuted` (the
 passed), `ControlConfirmed` (the law held on the broken model: the control failed, the law too weak
 to see the break) or `NotRunFor`; it never carries a grade, never grades or refutes the law, and is
 written only to the test file's store (no model home). certify.py reads it as the law's control.
+
+A statistical law (record/IA/statistical-2026-10-15/prompt-tester.md; laws.lth §4, 7.S17 to 7.S19,
+L9.15, D-2026-10-15-b): a law whose result type is `Law` and whose body, at its bindings, reduces to
+`Statistical S T l draw c`. Every parameter is bound by a census of one (a binding that names a
+`Gen T` is the stream itself here, not a generator of the parameter); the cutoffs `c : Sequential`
+are the demand's and are never drawn, so a line that leaves them unbound is not run, with that
+reason. The line runs laws.lth's `sequential S T l draw c seed` once through the Runner, the spec's
+seed the stream's state (`T` must be `Seed`; L9.15: the seed is the test's), and its evidence is
+`Tested v` with alpha, beta, delta and the samples spent (with the cutoffs' `initial` and `budget`)
+written in the entry (7.S17). The verdict is laws.lth's `StatisticalByTest`: `Holds` supports the
+law, graded by test.lth's `grade` over `Drawn seed` (sampled); `Fails` refutes it; `Unresolved`
+settles nothing, the budget spent in the entry. A statistical control passes on `Fails`.
 """
 from __future__ import annotations
 
@@ -157,6 +169,28 @@ class NotRun:
 
 
 @dataclass
+class Tested:
+    """laws.lth's `Tested v`: the sequential test's verdict (`Holds`, `Fails`, `Unresolved`) with its
+    rates (`alpha`, `beta`, `delta`, the samples `spent`), and the cutoffs' `initial` and `budget`."""
+    verdict: str
+    alpha: float
+    beta: float
+    delta: float
+    spent: int
+    initial: int
+    budget: int
+    coverage: t.Term = None
+
+    def record(self):
+        return {"verdict": self.verdict, "alpha": self.alpha, "beta": self.beta, "delta": self.delta,
+                "spent": self.spent, "initial": self.initial, "budget": self.budget}
+
+
+# laws.lth's `StatisticalByTest`: what the sequential test's verdict settles
+SETTLED_BY_TEST = {"Holds": "Supported", "Fails": "Refuted", "Unresolved": "Unsettled"}
+
+
+@dataclass
 class Outcome:
     spec: Spec
     evidence: object
@@ -236,7 +270,7 @@ def load_program(path, fuel, extra=()):
             loaded.errors[f"test%{k}"] = missing
     specs = tuple(specs)
     named = tuple(dict.fromkeys(loaded.name(top, n) or n for d in specs for n in _string_literals(d)))
-    grading = tuple(_constructor(loaded)(n).name for n in ("grade", "Coverage", "Verdict", "Grade"))
+    grading = tuple(_constructor(loaded)(n).name for n in ("grade", "Coverage", "Verdict", "Grade", "sequential"))
     roots = (core_data(loaded) + tuple(d.name for d in specs) + named
              + tuple(loaded.name(top, n) or n for n in extra) + grading)
     kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots)
@@ -706,6 +740,8 @@ def run_spec(runner, spec, fuel, loaded=None):
     if params is None:
         return _not_run(spec, f"no definition {spec.law}")
     names = tuple(n for n, _ in params)
+    if is_statistical(runner, law):
+        return run_statistical(runner, spec, fuel, loaded, law, params)
     values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel, spec.seed)
     limit = spec.budgets.get("coveringAbove", 20000)
     # each parameter: a census or a generator its binding names, or the mode's functor over its type
@@ -765,6 +801,84 @@ def run_spec(runner, spec, fuel, loaded=None):
         verdict = "Confirmed" if _base(coverage) == "Exhaustive" else "Supported"
     return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, loaded), len(points), refuting,
                    raised, names)
+
+
+def is_statistical(runner, law):
+    """Whether the law's result type, past its parameters, is laws.lth's `Law` (a form a test runs
+    as a whole: today `Statistical`), not a `Bool` evaluated case by case."""
+    definition = next((a for a in runner.program if isinstance(a, t.Define) and a.name == law), None)
+    if definition is None:
+        return False
+    ty = definition.type
+    while isinstance(ty, t.Pi):
+        ty = ty.codomain
+    return _head_name(ty) == "Law"
+
+
+_RAISES = (RunError, RecursionError, ValueError, KeyError, TypeError)
+
+
+def run_statistical(runner, spec, fuel, loaded, law, params):
+    """A statistical law at its bindings (laws.lth §4, L9.15): each parameter a census of one, the
+    body reduced to `Statistical S T l draw c`, and `sequential S T l draw c seed` run once through
+    the Runner from the spec's seed. The evidence is `Tested v`; the verdict `StatisticalByTest`'s;
+    the grade test.lth's over `Drawn seed`."""
+    names = tuple(n for n, _ in params)
+    seed = spec.seed % SEEDS
+    con = _constructor(loaded)
+    values = Values(runner, random.Random(seed), spec.size, spec.budgets, fuel, seed)
+    case = []
+    for name, ty in params:
+        for (earlier, _), v in zip(params, case):
+            ty = _instantiate(earlier, v, ty)
+        b = resolve_binding(spec, name, _head_name(ty))
+        if b is None:
+            if _head_name(ty) == "Sequential":
+                return _not_run(spec, f"{name} : Sequential: the sequential test's cutoffs are the demand's and "
+                                      f"never drawn; bind them as a census of one (D-2026-10-14-c, L9.15)", names)
+            return _not_run(spec, f"{name} : {_show(ty)}: a statistical law runs once, at its bindings (L9.15); "
+                                  f"bind it as a census of one", names)
+        try:
+            members = census(runner, b, ty, _as_called(loaded, b.generator))
+        except (NoGenerator, RunError) as exc:
+            return _not_run(spec, f"{name}: {exc}", names)
+        if len(members) != 1:
+            return _not_run(spec, f"{name}: a statistical law runs once per line (L9.15); the census "
+                                  f"{b.generator} has {len(members)} values, bind one", names)
+        case.append(members[0])
+    try:
+        runner.fuel = fuel
+        form = runner.whnf(Runner.apply(t.Var(law), case))
+        args, head = [], form
+        while isinstance(head, t.App):
+            args.insert(0, head.argument)
+            head = head.function
+        if _base(head) != "Statistical" or len(args) != 5:
+            return _not_run(spec, f"the law gives {_show(form)} at its bindings; of the forms of a Law the tester "
+                                  f"runs `Statistical` only (laws.lth §4)", names)
+        if _base(args[1]) != "Seed":
+            return _not_run(spec, f"the stream's state is {_show(args[1])}, not Seed: the seed is the test's "
+                                  f"(L9.15)", names)
+        cutoffs = runner.value(args[4])
+        _, predicates = values.form(con("Sequential"))
+        if not values.holds(predicates, cutoffs):
+            return _not_run(spec, f"the cutoffs {_show(cutoffs)} break Sequential's predicate (laws.lth "
+                                  f"`sequentialCutoffs`)", names)
+        c = {label: v.constant.value for label, v in cutoffs.fields}
+        runner.fuel = fuel
+        verdict = runner.value(Runner.apply(con("sequential"), args + [t.Lit(t.IntConst(seed))]))
+    except _RAISES as exc:
+        return _not_run(spec, f"the sequential test raised: {exc or type(exc).__name__}", names)
+    if not (isinstance(verdict, t.App) and _base(verdict.function) in SETTLED_BY_TEST
+            and isinstance(verdict.argument, t.RecordValue)):
+        return _not_run(spec, f"the sequential test gave {_show(verdict)}, not a StatisticalVerdict", names)
+    rates = {label: v.constant.value for label, v in verdict.argument.fields}
+    coverage = t.App(con("Drawn"), t.Lit(t.IntConst(seed)))
+    evidence = Tested(_base(verdict.function), float(rates["alpha"]), float(rates["beta"]), float(rates["delta"]),
+                      int(rates["spent"]), int(c["initial"]), int(c["budget"]), coverage)
+    settled = SETTLED_BY_TEST[evidence.verdict]
+    return Outcome(spec, evidence, settled, grade_of(runner, settled, coverage, loaded), evidence.spent, None,
+                   parameters=names)
 
 
 def _every_case(values, params, plan, limit, prefix=()):
@@ -876,6 +990,8 @@ def _tail(outcome):
     control, whether it passed (its law refuted) or failed (its law held)."""
     if isinstance(outcome.evidence, NotRun):
         return f"not run: {outcome.evidence.reason}"
+    if isinstance(outcome.evidence, Tested):
+        return _tested_tail(outcome)
     if outcome.spec.control and outcome.verdict == "Refuted":
         return f"refuted at {show_case(outcome.parameters, outcome.refuting)}: the control passed"
     if outcome.spec.control and outcome.grade is not None:
@@ -889,10 +1005,25 @@ def _tail(outcome):
     return _GRADE_WORDS.get(outcome.grade, outcome.grade)
 
 
+def _tested_tail(outcome):
+    """What a statistical line settled: the sequential test's verdict, its rates and what it spent."""
+    rates = certify.tested_text(outcome.evidence.record())
+    if outcome.verdict == "Refuted":
+        return f"refuted at {rates}" + (": the control passed" if outcome.spec.control else "")
+    if outcome.verdict == "Unsettled":
+        return f"unresolved at {rates}"
+    grade = _GRADE_WORDS.get(outcome.grade, outcome.grade)
+    if outcome.spec.control:
+        return f"{_CONTROL_FAILED} ({grade}, held at {rates})"
+    return f"supported, {grade}: held at {rates}"
+
+
 def _entry_tail(entry):
     o = entry["outcome"]
     if o == "Passed":
-        return _GRADE_WORDS.get(entry["grade"], entry["grade"])
+        tested = (entry.get("evidence") or {}).get("Tested")
+        grade = _GRADE_WORDS.get(entry["grade"], entry["grade"])
+        return f"supported, {grade}: held at {certify.tested_text(tested)}" if tested else grade
     if "ControlRefuted" in o:
         return f"refuted at {o['ControlRefuted']}: the control passed"
     if "ControlConfirmed" in o:
@@ -907,7 +1038,10 @@ def line(outcome):
     and whether it ran or its outcome was known (7.S13)."""
     spec = outcome.spec
     mode = f"sampled (seed {spec.seed}, size {spec.size}, metric ignored)" if spec.sampled else "exhaustive"
-    head = f"{'control of ' if spec.control else ''}{spec.law}: {mode}, {outcome.evaluated} cases"
+    counted = f"{outcome.evaluated} cases"
+    if isinstance(outcome.evidence, Tested) or "Tested" in (outcome.evidence if isinstance(outcome.evidence, dict) else {}):
+        mode, counted = f"sequential (seed {spec.seed % SEEDS})", f"{outcome.evaluated} samples"
+    head = f"{'control of ' if spec.control else ''}{spec.law}: {mode}, {counted}"
     if outcome.known is not None:
         return f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known})"
     how = "ran"
@@ -950,9 +1084,12 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
         if found is not None and not deep:
             evidence = found["evidence"]
             points = evidence.get("Points", {})
-            outcomes.append(Outcome(spec, evidence, points.get("verdict", "NotRun"), found["grade"],
-                                    points.get("evaluated", 0), None, cone=entry["cone"], entry=found,
-                                    known=found["date"]))
+            verdict, evaluated = points.get("verdict", "NotRun"), points.get("evaluated", 0)
+            if "Tested" in evidence:
+                verdict = SETTLED_BY_TEST[evidence["Tested"]["verdict"]]
+                evaluated = evidence["Tested"]["spent"]
+            outcomes.append(Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
+                                    entry=found, known=found["date"]))
             continue
         outcome = run_spec(runner, spec, fuel, loaded)
         settle(entry, outcome)
@@ -1010,12 +1147,22 @@ def model_homes(loaded, spec, runner=None):
                 there = loaded.see(found[0], member)
             except RunError:
                 continue
-            if there is not None:
+            # [proposed] a type a census lists (`[UnitList]` for a parameter `S : U`) is no model
+            if there is not None and not _is_type(runner, loaded, there):
                 files.append(there[0])
         for f in files:
             if f not in (top, loaded.core) and f not in homes:
                 homes.append(f)
     return homes
+
+
+def _is_type(runner, loaded, there):
+    """Whether the definition `there` (file, name) is a type, a definition into `U`."""
+    if runner is None:
+        return False
+    called = loaded.internal(*there)
+    d = next((a for a in runner.program if isinstance(a, (t.Define, t.Declare)) and a.name == called), None)
+    return d is not None and isinstance(d.type, t.Universe)
 
 
 def _listed_called(loaded, called):
@@ -1099,6 +1246,7 @@ def new_entry(runner, loaded, spec, cones, fuel):
     covers no value a run gives (certification.lth's `coversAll`)."""
     law = _as_called(loaded, spec.law)
     params = parameters(runner, law) or []
+    statistical = is_statistical(runner, law)  # its bindings are censuses of one, a stream among them
     values = Values(runner, random.Random(0), spec.size, spec.budgets, fuel)
     binding, reach, hosts = [], [], dict(cones.hosts(law))
     for k, (name, ty) in enumerate(params):
@@ -1106,7 +1254,7 @@ def new_entry(runner, loaded, spec, cones, fuel):
         if b is not None:
             called = _as_called(loaded, b.generator)
             try:
-                g = generator_of(runner, called, None)
+                g = None if statistical else generator_of(runner, called, None)
             except NoGenerator:
                 g = None
             if g is not None:
@@ -1161,6 +1309,8 @@ def settle(entry, outcome):
         entry["evidence"] = {"NotRun": outcome.evidence.reason}
         entry["outcome"] = {"NotRunFor": outcome.evidence.reason}
         return entry
+    if isinstance(outcome.evidence, Tested):
+        return _settle_tested(entry, outcome)
     entry["evidence"] = {"Points": {"evaluated": outcome.evaluated, "raised": len(outcome.raised),
                                     "coverage": _show(outcome.evidence.coverage), "verdict": outcome.verdict}}
     if outcome.spec.control:
@@ -1179,4 +1329,25 @@ def settle(entry, outcome):
         entry["outcome"], entry["grade"] = "Passed", outcome.grade
     else:
         entry["outcome"] = {"NotRunFor": _tail(outcome)}
+    return entry
+
+
+def _settle_tested(entry, outcome):
+    """A statistical line's entry (7.S17: the verdict carries its error rates into the certificate):
+    the evidence `Tested` with alpha, beta, delta, the samples spent, the cutoffs' `initial` and
+    `budget`, and the coverage; passed with its grade when the test held the law, failed when it
+    failed it, `NotRunFor` an unresolved test (it settles nothing, laws.lth `StatisticalByTest`). A
+    control's outcome is `ControlRefuted` when the test failed the law, `ControlConfirmed` when it
+    held it."""
+    tested = outcome.evidence.record()
+    entry["evidence"] = {"Tested": tested, "coverage": _show(outcome.evidence.coverage)}
+    rates = certify.tested_text(tested)
+    if outcome.verdict == "Refuted":
+        entry["outcome"] = {"ControlRefuted" if outcome.spec.control else "Failed": rates}
+    elif outcome.verdict == "Unsettled":
+        entry["outcome"] = {"NotRunFor": f"unresolved at {rates}"}
+    elif outcome.spec.control:
+        entry["outcome"] = {"ControlConfirmed": f"{_GRADE_WORDS.get(outcome.grade, outcome.grade)}, held at {rates}"}
+    else:
+        entry["outcome"], entry["grade"] = "Passed", outcome.grade
     return entry

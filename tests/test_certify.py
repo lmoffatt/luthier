@@ -611,3 +611,58 @@ def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
     assert any(line.startswith("  Idempotent: cases; CONTROL FAILED") and "alwayss" in line for line in out)
     assert any(line.startswith("  control of Idempotent on alwayss (Listed), ExhaustiveMode over Bool: "
                                "CONTROL FAILED") for line in out)
+
+
+# ---------------------------------------------------------------------- statistical laws (laws.lth §4)
+# record/IA/statistical-2026-10-15/prompt-tester.md: a statistical law's entry holds `Tested` with
+# its rates, its grade shows them (7.S17), its control is matched by the law's cone as any
+
+STATISTICAL_LAWS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Seed Binding
+import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue Listed
+pv : StatisticalLaw Float64 := byPValue Float64 (fn p { p })
+Constant (p : Float64) (c : Sequential) : Law := Statistical Float64 Seed pv (fn n s { (p, s) }) c
+wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.9, initial := 1, budget := 100 }
+ones : List Float64 := [1.0]
+onOnes : List Binding := [ { parameter := just "p", type := nothing, generator := "ones", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
+test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)
+'''
+STATISTICAL_CONTROLS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed Sequential
+import "laws.lut" Constant
+wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.9, initial := 1, budget := 100 }
+zeros : List Float64 := [0.0]
+onZeros : List Binding := [ { parameter := just "p", type := nothing, generator := "zeros", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
+test "Constant" ExhaustiveMode (seed <- 5) (profile <- onZeros) (control <- true)
+'''
+
+
+def test_certify_a_statistical_law_with_its_rates_and_its_control(tmp_path, capsys):
+    laws, controls = tmp_path / "laws.lut", tmp_path / "controls.lut"
+    laws.write_text(STATISTICAL_LAWS, encoding="utf-8")
+    controls.write_text(STATISTICAL_CONTROLS, encoding="utf-8")
+    rates = "by the sequential test (alpha 0.01, beta 0.01, delta 0.9, budget 100)"
+    for known in (0, 1):  # the second time every line is known, and reads the same
+        assert main(["certify", str(laws), str(controls)]) == 0
+        out = capsys.readouterr().out.splitlines()
+        assert out == [
+            f"{laws}: 1 laws, {1 - known} lines ran, {known} known",
+            f"  Constant: supported, sampled: held at 2 samples of 1 {rates}; controlled (refuted on its "
+            f"control at 8 samples of 1 {rates})",
+            f"{controls}: 0 laws, 1 controls, {1 - known} lines ran, {known} known",
+            f"  control of Constant on zeros (Listed), wald (Listed): refuted at 8 samples of 1 {rates}: "
+            "the control passed",
+        ]
+    entry, = certify.read_store(laws)
+    assert entry["evidence"]["Tested"] == {"verdict": "Holds", "alpha": 0.01, "beta": 0.01, "delta": 0.9,
+                                           "spent": 2, "initial": 1, "budget": 100}
+    assert certify.store_errors([entry]) == []
+    known, = tester.run_tests(laws, store=True)
+    assert known.known is not None and (known.verdict, known.evaluated) == ("Supported", 2)
+    assert tester.line(known).startswith("Constant: sequential (seed 5), 2 samples, supported, sampled: held at")
+    # an unresolved test is no failure and no grade: it says so
+    assert certify.show_outcome({"NotRunFor": f"unresolved at 100 samples of 1 {rates}"}) == \
+        f"unresolved at 100 samples of 1 {rates}"

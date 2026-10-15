@@ -258,3 +258,102 @@ def test_a_control_its_law_holds_on_is_a_failed_control(tmp_path, capsys):
     assert code == 1
     assert lines == ["control of Reflexive: exhaustive, 2 cases, CONTROL FAILED: the law held on the model "
                      "broken on purpose, too weak to see the break (7.S19) (exhaustive) (ran)"]
+
+
+# ---------------------------------------------------------------------- statistical laws (laws.lth §4)
+# record/IA/statistical-2026-10-15/prompt-tester.md (7.S17 to 7.S19, L9.15, D-2026-10-15-b): a law
+# whose value is `Statistical S T l draw c` runs Wald's sequential test once, from the line's seed,
+# at the cutoffs bound as a census of one; constant streams of p-values, as report-theory.md checked
+# them by hand: p = 0 fails at 8 samples, p = 1 holds at 2, p = 0.5 is unresolved at the budget
+
+STATISTICAL = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Seed Binding
+import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue Listed
+pv : StatisticalLaw Float64 := byPValue Float64 (fn p { p })
+AtZero (c : Sequential) : Law := Statistical Float64 Seed pv (fn n s { (0.0, s) }) c
+AtOne (c : Sequential) : Law := Statistical Float64 Seed pv (fn n s { (1.0, s) }) c
+AtHalf (c : Sequential) : Law := Statistical Float64 Seed pv (fn n s { (0.5, s) }) c
+OnPairs (c : Sequential) : Law := Statistical Float64 Int pv (fn n s { (1.0, s) }) c
+wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.9, initial := 1, budget := 400 }
+twice : List Sequential := [wald, wald]
+broken : Sequential := { alpha := 0.6, beta := 0.6, delta := 0.9, initial := 1, budget := 400 }
+cutoffs : List Binding := [ { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
+both : List Binding := [ { parameter := just "c", type := nothing, generator := "twice", coverage := Listed } ]
+bad : List Binding := [ { parameter := just "c", type := nothing, generator := "broken", coverage := Listed } ]
+test "AtZero" ExhaustiveMode (seed <- 3) (profile <- cutoffs)
+test "AtOne" ExhaustiveMode (seed <- 3) (profile <- cutoffs)
+test "AtHalf" ExhaustiveMode (seed <- 3) (profile <- cutoffs)
+test "AtZero" ExhaustiveMode (seed <- 3) (profile <- cutoffs) (control <- true)
+test "AtOne" ExhaustiveMode (seed <- 3) (profile <- cutoffs) (control <- true)
+test "AtOne" ExhaustiveMode (seed <- 3)
+test "AtOne" ExhaustiveMode (seed <- 3) (profile <- both)
+test "AtOne" ExhaustiveMode (seed <- 3) (profile <- bad)
+test "OnPairs" ExhaustiveMode (seed <- 3) (profile <- cutoffs)
+'''
+RATES = "by the sequential test (alpha 0.01, beta 0.01, delta 0.9, budget 400)"
+
+
+def test_a_statistical_law_runs_the_sequential_test(tmp_path):
+    path = tmp_path / "statistical.lut"
+    path.write_text(STATISTICAL, encoding="utf-8")
+    fails, holds, unresolved, *_ = tester.run_tests(path)
+    # laws.lth's StatisticalByTest: Fails refutes, Holds supports (sampled over Drawn seed), Unresolved
+    # settles nothing; the evidence is `Tested` with the rates and what was spent
+    assert (fails.verdict, fails.grade, fails.evidence.verdict, fails.evidence.spent) == ("Refuted", None, "Fails", 8)
+    assert (holds.verdict, holds.grade, holds.evidence.spent) == ("Supported", "Sampled", 2)
+    assert tester._show(holds.evidence.coverage) == "(Drawn 3)"
+    assert (unresolved.verdict, unresolved.grade, unresolved.evidence.spent) == ("Unsettled", None, 400)
+    assert holds.entry["evidence"] == {"Tested": {"verdict": "Holds", "alpha": 0.01, "beta": 0.01, "delta": 0.9,
+                                                  "spent": 2, "initial": 1, "budget": 400}, "coverage": "(Drawn 3)"}
+    assert (holds.entry["outcome"], holds.entry["grade"]) == ("Passed", "Sampled")
+    assert fails.entry["outcome"] == {"Failed": f"8 samples of 1 {RATES}"}
+    assert unresolved.entry["outcome"] == {"NotRunFor": f"unresolved at 400 samples of 1 {RATES}"}
+    assert holds.entry["binding"] == [{"parameter": "c", "generator": "wald (Listed)",
+                                       "fingerprint": holds.entry["binding"][0]["fingerprint"]}]
+
+
+def test_the_lines_of_a_statistical_law(tmp_path, capsys):
+    path = tmp_path / "statistical.lut"
+    path.write_text(STATISTICAL, encoding="utf-8")
+    code, lines = lines_of(capsys, path)
+    assert code == 1
+    assert lines == [
+        f"AtZero: sequential (seed 3), 8 samples, refuted at 8 samples of 1 {RATES} (ran)",
+        f"AtOne: sequential (seed 3), 2 samples, supported, sampled: held at 2 samples of 1 {RATES} (ran)",
+        f"AtHalf: sequential (seed 3), 400 samples, unresolved at 400 samples of 1 {RATES} (ran)",
+        # a statistical control passes on Fails, and fails when the test holds the law
+        f"control of AtZero: sequential (seed 3), 8 samples, refuted at 8 samples of 1 {RATES}: "
+        "the control passed (ran)",
+        "control of AtOne: sequential (seed 3), 2 samples, CONTROL FAILED: the law held on the model broken on "
+        f"purpose, too weak to see the break (7.S19) (sampled, held at 2 samples of 1 {RATES}) (ran)",
+        # the cutoffs are the demand's: never drawn, one value, within Sequential's predicate
+        "AtOne: exhaustive, 0 cases, not run: c : Sequential: the sequential test's cutoffs are the demand's "
+        "and never drawn; bind them as a census of one (D-2026-10-14-c, L9.15) (ran)",
+        "AtOne: exhaustive, 0 cases, not run: c: a statistical law runs once per line (L9.15); the census twice "
+        "has 2 values, bind one (ran)",
+        "AtOne: exhaustive, 0 cases, not run: the cutoffs { alpha := 0.6, beta := 0.6, delta := 0.9, initial := 1, "
+        "budget := 400 } break Sequential's predicate (laws.lth `sequentialCutoffs`) (ran)",
+        "OnPairs: exhaustive, 0 cases, not run: the stream's state is Int, not Seed: the seed is the test's "
+        "(L9.15) (ran)",
+    ]
+
+
+def test_a_statistical_control_is_its_own_kind(tmp_path):
+    path = tmp_path / "statistical.lut"
+    path.write_text(STATISTICAL, encoding="utf-8")
+    outcomes = tester.run_tests(path)
+    passed, failed = outcomes[3], outcomes[4]
+    assert tester.passes(passed) and not tester.passes(failed)
+    assert passed.entry["kind"] == "Control" and passed.entry["grade"] is None
+    assert passed.entry["outcome"] == {"ControlRefuted": f"8 samples of 1 {RATES}"}
+    assert failed.entry["outcome"] == {"ControlConfirmed": f"sampled, held at 2 samples of 1 {RATES}"}
+
+
+def test_a_type_a_census_lists_is_no_model_home():
+    # probability_laws.lut binds `S : U` to `[UnitList]`: probability.lth is no model whose store
+    # takes the entry; numpy's sort's file is
+    path = ROOT / "tests" / "tester" / "probability_laws.lut"
+    runner, specs, loaded = tester.prepare(path)
+    homes = {spec.law: [Path(h).name for h in tester.model_homes(loaded, spec, runner)] for spec in specs
+             if spec.law in ("NoAlternativeAtZero", "SourceIsUniform")}
+    assert homes == {"NoAlternativeAtZero": [], "SourceIsUniform": ["probability_model.lut"]}
