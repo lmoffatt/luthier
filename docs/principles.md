@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 8a26a222a7c2, commit 878c54d (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-15; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 066e42eab61d, commit 02ad41b (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-15; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -504,13 +504,21 @@ its type).
   `IsGradient`, `phi - 1` passing `StepRule`, in that review) describes nothing, and is a finding
   against the theory that green runs never show; a theory is done when each of its laws has its
   refuted model in the evidence (D-2026-10-15-a). [settled]
+- L9.15 (His words) A statistical law's verdict is ternary: it holds, it fails, or it is unresolved
+  with what was sampled; the certifier resolves the grey zone sequentially (Wald's sequential
+  probability ratio test), sampling more between two thresholds set by the error rates alpha and beta
+  against an alternative at distance delta, up to the demand's budget, and an exhausted budget leaves
+  the law unresolved with what was spent recorded. Alpha, beta, delta, the initial size and the budget
+  are the demand's cutoffs (L5.18, D-2026-10-14-c), and the verdict carries its error rates in the
+  certificate as the price of a sampled grade, operated on when the cost types come (G2, L12.6). A law
+  universal over seeds is not a statistical law (D-2026-10-15-b). [settled]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d,
 D-2026-10-13-ad.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
 Status: settled; clause 1 proposed (D-2026-10-12-k); clause 7 proposed on his mark; clause 10
 settled (D-2026-10-13-d, -e); clauses 11 and 12 settled (D-2026-10-13-l, -n); clause 13 settled (his
 words, on D-2026-10-13-ad; his ok, chat:52b10bff:5083); clause 14 settled (his words,
-D-2026-10-15-a).
+D-2026-10-15-a); clause 15 settled (his words, D-2026-10-15-b).
 
 **L10. A certificate records what is known of a law, its domain, its bound and its evidence; it is
 frozen, it serves every demand it meets, and it transports along identity.**
