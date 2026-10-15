@@ -39,6 +39,7 @@ Unblocks: v0.4's criterion (c). Sources: `record/IA/v04-2026-10-15/report.md` (s
 criterion c); `record/plan/night-2026-10-13.md` ("Questions", the v0.4 item); src/luthier/run.py
 (the first action's entry), src/luthier/certify.py (the store's write).
 
+a
 **2. Does the cone's hash cover the type annotations the elaborator writes?** 6.S8 (a new check
 writes a new entry) and P2 (everything derived carries how it was derived) put the cone in the
 hash; today the hash covers the annotations, so typing a projection better (reading a model's field
