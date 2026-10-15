@@ -322,6 +322,8 @@ def test_certify_several_files(tmp_path, capsys):
     assert main(["certify", "--jobs", "2", *paths]) == 1  # laws.lut has refuted laws
     out = capsys.readouterr().out.splitlines()
     assert out[0] == f"{paths[0]}: 4 laws, 6 lines ran, 0 known"
+    # each law with its control status (7.S19): none of these has a control
+    out = [line.replace("; uncontrolled: untested against any wrong model (7.S19)", "") for line in out]
     assert "  NotInvolutive: exhaustive" in out and "  PlusCommutes: sampled" in out
     assert "  Small: refuted at x = 729" in out and "  AndIsOr: refuted at a = true, b = false" in out
     # weakest.lut: one law under two bindings, the weakest
@@ -499,3 +501,114 @@ def test_a_current_failure_is_refused_whatever_serves():
     assert certify.show_refusal(refusals[0], [passed, failed]) == "n: L: failed at m = x"
     # the failure at another hash is stale and the pass serves
     assert certify.refuse([passed, dict(failed, cone="old")], cone) == []
+
+
+# ---------------------------------------------------------------------- controls (7.S19, L9.14)
+# record/IA/controls-2026-10-15/prompt-tester.md: a control's entry is its own kind; it grades and
+# refutes nothing, and gives each law its control status in `certify` and `check -v`
+
+def control(outcome, cone="sha256:1", law="L", seed=0):
+    return dict(entry(law=law, cone=cone, seed=seed, outcome=outcome, grade=None), kind="Control")
+
+
+def test_a_control_entry_is_no_evidence_of_the_law():
+    es = [entry(grade="Cases")]
+    refuted = control({"ControlRefuted": "x = 1"})
+    assert certify.certificate_grade([refuted] + es, "L", "sha256:1") == "Cases"
+    assert certify.state([refuted] + es, "L", "sha256:1") == ("current", "Passed")
+    assert certify.standing([refuted], "L", "sha256:1") == "uncertified"
+    assert certify.store_errors([refuted] + es) == []
+    # its kind is part of its identity: a control and a law line with one binding are two entries
+    as_law = {k: v for k, v in refuted.items() if k != "kind"}
+    assert certify.identity(refuted) != certify.identity(as_law)
+    assert certify.record(es, refuted) == [refuted] + es
+    # a run's demand: the control's refutation is no failure, and it serves nothing
+    e = dict(es[0], reach=[{"parameter": "x", "reach": "Support"}])
+    demand = {"law": "L", "cone": "sha256:1", "given": [], "accepts": "Cases"}
+    cone = [{"name": "n", "provisional": False, "laws": [demand]}]
+    assert certify.refuse([dict(refuted, reach=[]), e], cone) == []
+    assert certify.refuse([dict(refuted, reach=[])], cone)[0]["state"] == ("Uncertified", None)
+
+
+def test_the_control_status_of_a_law():
+    refuted, held = control({"ControlRefuted": "x = 1"}), control({"ControlConfirmed": "cases"}, seed=1)
+    assert certify.control_status([refuted], "L", "sha256:1") == "controlled (refuted on its control at x = 1)"
+    assert certify.control_status([], "L", "sha256:1") == "uncontrolled: untested against any wrong model (7.S19)"
+    assert certify.control_status([refuted, held], "L", "sha256:1").startswith("CONTROL FAILED")
+    # a control at another hash of the law's cone controls nothing now
+    stale = certify.control_status([refuted], "L", "sha256:2")
+    assert stale.startswith("uncontrolled") and "another hash" in stale
+    not_run = certify.control_status([control({"NotRunFor": "why"})], "L", "sha256:1")
+    assert not_run.startswith("uncontrolled") and "did not run (not run: why)" in not_run
+    # a law entry is no control
+    assert certify.control_status([entry(grade="Cases")], "L", "sha256:1").startswith("uncontrolled")
+
+
+def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
+    # the acceptance of the brief: CellsOfTheirKind controlled, the other laws uncontrolled; no store
+    laws, controls = (ROOT / "tests" / "tester" / f"tables_{n}.lut" for n in ("laws", "controls"))
+    stores = [certify.store_path(p).read_bytes() for p in (laws, controls)]
+    assert main(["certify", "--no-cert", str(laws), str(controls)]) == 0
+    out = capsys.readouterr().out.splitlines()
+    assert [certify.store_path(p).read_bytes() for p in (laws, controls)] == stores
+    assert out[0] == f"{laws}: 8 laws, 8 lines ran, 0 known"
+    assert "  CellsOfTheirKind: cases; controlled (refuted on its control at t = holeT)" in out
+    others = [line for line in out[1:9] if "CellsOfTheirKind" not in line]
+    assert len(others) == 7 and all(line.endswith("; uncontrolled: untested against any wrong model (7.S19)")
+                                    for line in others)
+    assert out[9] == f"{controls}: 0 laws, 1 controls, 1 lines ran, 0 known"
+    assert out[10] == ("  control of CellsOfTheirKind on holes (Listed): refuted at t = holeT: "
+                       "the control passed")
+
+
+PAIR_LAWS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+Idempotent (f : Bool -> Bool) (b : Bool) : Bool := f (f b) == f b
+Reflexive (a : Bool) : Bool := a == a
+keep (x : Bool) : Bool := x
+flip (x : Bool) : Bool := if x then false else true
+always (x : Bool) : Bool := true
+goods : List (Bool -> Bool) := [keep, always]
+onGoods : List Binding := [ { parameter := just "f", type := nothing, generator := "goods", coverage := Listed } ]
+test "Idempotent" ExhaustiveMode (whereBindings <- onGoods)
+test "Reflexive" ExhaustiveMode
+'''
+PAIR_CONTROLS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "laws.lut" Idempotent flip always
+flips : List (Bool -> Bool) := [flip]
+alwayss : List (Bool -> Bool) := [always]
+onFlip : List Binding := [ { parameter := just "f", type := nothing, generator := "flips", coverage := Listed } ]
+onAlways : List Binding := [ { parameter := just "f", type := nothing, generator := "alwayss", coverage := Listed } ]
+test "Idempotent" ExhaustiveMode (whereBindings <- onFlip) (control <- true)
+'''
+
+
+def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
+    laws, controls = tmp_path / "laws.lut", tmp_path / "controls.lut"
+    laws.write_text(PAIR_LAWS, encoding="utf-8")
+    controls.write_text(PAIR_CONTROLS, encoding="utf-8")
+    assert main(["certify", str(laws), str(controls)]) == 0
+    out = capsys.readouterr().out.splitlines()
+    assert "  Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
+    assert "  Reflexive: exhaustive; uncontrolled: untested against any wrong model (7.S19)" in out
+    stored = certify.read_store(controls)
+    assert [(e["kind"], e["outcome"], e["grade"]) for e in stored] == \
+        [("Control", {"ControlRefuted": "f = flip, b = true"}, None)]
+    # check -v reads the controls from the stores of the files it is given
+    main(["check", "-v", str(laws), str(controls)])
+    out = capsys.readouterr().out
+    assert "certificate Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
+    assert "certificate control of Idempotent: refuted at f = flip, b = true: the control passed" in out
+    main(["check", "-v", str(laws)])  # without the control file the law is uncontrolled
+    assert "certificate Idempotent: cases; uncontrolled" in capsys.readouterr().out
+    # a control the law holds on fails, loudly, and certify fails; the grade is unchanged
+    controls.write_text(PAIR_CONTROLS + 'test "Idempotent" ExhaustiveMode (whereBindings <- onAlways) '
+                        '(control <- true)\n', encoding="utf-8")
+    assert main(["certify", str(laws), str(controls)]) == 1
+    out = capsys.readouterr().out.splitlines()
+    assert any(line.startswith("  Idempotent: cases; CONTROL FAILED") and "alwayss" in line for line in out)
+    assert any(line.startswith("  control of Idempotent on alwayss (Listed), ExhaustiveMode over Bool: "
+                               "CONTROL FAILED") for line in out)

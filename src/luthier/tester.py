@@ -44,6 +44,14 @@ expanded per parameter, the seed and `n`. Before a line runs its identity is loo
 `deep` runs it again (and records nothing new: the store keeps one outcome per identity). A line
 run writes its entry, with the reach of each parameter, the evidence, the grade when it passed,
 the date, the interpreter's revision and the host code by route.
+
+A control (record/IA/controls-2026-10-15/prompt-tester.md; 7.S19 as D-2026-10-15-a generalized it,
+L9.14; test.lth's `control` field and `controlPasses`): a line written `(control <- true)` tests its
+law on a model broken on purpose and expects it refuted. It runs as any line, and its entry is its
+own kind, `"kind": "Control"` [proposed], whose outcome is `ControlRefuted` (the case: the control
+passed), `ControlConfirmed` (the law held on the broken model: the control failed, the law too weak
+to see the break) or `NotRunFor`; it never carries a grade, never grades or refutes the law, and is
+written only to the test file's store (no model home). certify.py reads it as the law's control.
 """
 from __future__ import annotations
 
@@ -130,6 +138,7 @@ class Spec:
     where: list
     profile: list
     budgets: dict
+    control: bool = False   # test.lth's `control`: the line is a control, expected to be refuted
 
 
 # ---------------------------------------------------------------------- the evidence (laws.lth)
@@ -288,8 +297,10 @@ def read_spec(runner, value):
                                b["coverage"]))
         return out
     budgets = {label: v.constant.value for label, v in record["budgets"].fields}
+    control = runner.whnf(record["control"]) == TRUE if "control" in record else False
     return Spec(_text(record["law"]), sampled, metric, _int(record["cases"]), _int(record["size"]),
-                _int(record["seed"]), bindings(record["whereBindings"]), bindings(record["profile"]), budgets)
+                _int(record["seed"]), bindings(record["whereBindings"]), bindings(record["profile"]), budgets,
+                control)
 
 
 # ---------------------------------------------------------------------- coverage (test.lth §2)
@@ -847,10 +858,28 @@ def show_case(names, case):
     return ", ".join(f"{n} = {_show(v)}" for n, v in zip(names, case))
 
 
+def control_passes(verdict):
+    """test.lth's `controlPasses`: a control passes when its law is refuted on the broken model."""
+    return verdict == "Refuted"
+
+
+def passes(outcome):
+    """Whether a line came out as asked: a law line with a grade, a control refuted."""
+    return control_passes(outcome.verdict) if outcome.spec.control else outcome.grade is not None
+
+
+_CONTROL_FAILED = "CONTROL FAILED: the law held on the model broken on purpose, too weak to see the break (7.S19)"
+
+
 def _tail(outcome):
-    """What the line settled: the grade, the refuting case, or why it settled nothing."""
+    """What the line settled: the grade, the refuting case, or why it settled nothing; for a
+    control, whether it passed (its law refuted) or failed (its law held)."""
     if isinstance(outcome.evidence, NotRun):
         return f"not run: {outcome.evidence.reason}"
+    if outcome.spec.control and outcome.verdict == "Refuted":
+        return f"refuted at {show_case(outcome.parameters, outcome.refuting)}: the control passed"
+    if outcome.spec.control and outcome.grade is not None:
+        return f"{_CONTROL_FAILED} ({_GRADE_WORDS.get(outcome.grade, outcome.grade)})"
     if outcome.verdict == "Refuted":
         return f"refuted at {show_case(outcome.parameters, outcome.refuting)}"
     if outcome.verdict == "Unsettled":
@@ -864,6 +893,10 @@ def _entry_tail(entry):
     o = entry["outcome"]
     if o == "Passed":
         return _GRADE_WORDS.get(entry["grade"], entry["grade"])
+    if "ControlRefuted" in o:
+        return f"refuted at {o['ControlRefuted']}: the control passed"
+    if "ControlConfirmed" in o:
+        return f"{_CONTROL_FAILED} ({o['ControlConfirmed']})"
     if "Failed" in o:
         return f"refuted at {o['Failed']}"
     return f"not run: {o['NotRunFor']}" if "NotRun" in entry["evidence"] else o["NotRunFor"]
@@ -874,7 +907,7 @@ def line(outcome):
     and whether it ran or its outcome was known (7.S13)."""
     spec = outcome.spec
     mode = f"sampled (seed {spec.seed}, size {spec.size}, metric ignored)" if spec.sampled else "exhaustive"
-    head = f"{spec.law}: {mode}, {outcome.evaluated} cases"
+    head = f"{'control of ' if spec.control else ''}{spec.law}: {mode}, {outcome.evaluated} cases"
     if outcome.known is not None:
         return f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known})"
     how = "ran"
@@ -936,7 +969,9 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
             if recorded is not entries:
                 entries = recorded
                 certify.write_store(path, entries)
-            for home in model_homes(loaded, spec, runner):
+            # [proposed] a control's entry stays in the test file's store: it is no evidence a
+            # run of the model's importer reads
+            for home in ([] if spec.control else model_homes(loaded, spec, runner)):
                 certify.add_entry(home, entry)
     return outcomes
 
@@ -1017,11 +1052,19 @@ def _list_members(loaded, found):
     return []
 
 
-def law_cones(path, fuel=1_000_000):
-    """Each law the file's test lines name, as the file writes it, with the hash of its cone."""
+def line_cones(path, fuel=1_000_000):
+    """Each (law, control) the file's test lines name, the law as the file writes it, with the hash
+    of the law's cone: [(law, cone, control)]."""
     runner, specs, loaded = prepare(path, fuel)
     cones = certify.Cones(runner)
-    return list({spec.law: cones.hash(_as_called(loaded, spec.law)) for spec in specs}.items())
+    return [(law, cone, control) for (law, control), cone in
+            {(spec.law, spec.control): cones.hash(_as_called(loaded, spec.law)) for spec in specs}.items()]
+
+
+def law_cones(path, fuel=1_000_000, control=False):
+    """Each law the file's test lines name, as the file writes it, with the hash of its cone; with
+    `control`, the laws its control lines name instead."""
+    return [(law, cone) for law, cone, c in line_cones(path, fuel) if c == control]
 
 
 # ---------------------------------------------------------------------- the entry (certification.lth §1)
@@ -1101,21 +1144,35 @@ def new_entry(runner, loaded, spec, cones, fuel):
         lo = -spec.size if lo is None else lo        # draw_base's defaults
         hi = (max(lo, 0) + spec.size) if hi is None else hi
         reach.append({"parameter": name, "reach": {"Interval": [float(lo), float(hi)]}})
-    return {"law": spec.law, "cone": cones.hash(law), "binding": binding, "seed": spec.seed, "cases": spec.cases,
-            "budgets": dict(spec.budgets), "reach": reach, "evidence": None, "grade": None, "outcome": None,
-            "date": certify.now(), "interpreter": certify.interpreter_revision(),
-            "hosts": [[r, h] for r, h in sorted(hosts.items())]}
+    entry = {"law": spec.law, "cone": cones.hash(law), "binding": binding, "seed": spec.seed, "cases": spec.cases,
+             "budgets": dict(spec.budgets), "reach": reach, "evidence": None, "grade": None, "outcome": None,
+             "date": certify.now(), "interpreter": certify.interpreter_revision(),
+             "hosts": [[r, h] for r, h in sorted(hosts.items())]}
+    if spec.control:
+        entry["kind"] = certify.CONTROL  # its own kind, part of its identity (certify.identity)
+    return entry
 
 
 def settle(entry, outcome):
     """The entry's evidence, grade and outcome from the line's: passed with its grade; failed at
-    the refuting case; not run with its reason, or unsettled with the first case that raised."""
+    the refuting case; not run with its reason, or unsettled with the first case that raised. A
+    control's entry has no grade, and its outcome is `ControlRefuted` or `ControlConfirmed`."""
     if isinstance(outcome.evidence, NotRun):
         entry["evidence"] = {"NotRun": outcome.evidence.reason}
         entry["outcome"] = {"NotRunFor": outcome.evidence.reason}
         return entry
     entry["evidence"] = {"Points": {"evaluated": outcome.evaluated, "raised": len(outcome.raised),
                                     "coverage": _show(outcome.evidence.coverage), "verdict": outcome.verdict}}
+    if outcome.spec.control:
+        # a control's outcome: refuted is the control passing, a grade the control failing; neither
+        # is the law's grade nor its failure (7.S19, D-2026-10-15-a)
+        if control_passes(outcome.verdict):
+            entry["outcome"] = {"ControlRefuted": show_case(outcome.parameters, outcome.refuting)}
+        elif outcome.grade is not None:
+            entry["outcome"] = {"ControlConfirmed": _GRADE_WORDS.get(outcome.grade, outcome.grade)}
+        else:
+            entry["outcome"] = {"NotRunFor": _tail(outcome)}
+        return entry
     if outcome.verdict == "Refuted":
         entry["outcome"] = {"Failed": show_case(outcome.parameters, outcome.refuting)}
     elif outcome.grade is not None:

@@ -23,6 +23,17 @@ against the current hash of its law's cone (12.S11), never marked in the file.
 §3, what a run requires (`contains`, `covers_all`, `serves`, `state_of`, `refuse`), is the reading
 of the store `run` makes before evaluating (run.py's `certification`), after
 record/IA/certification-2026-10-14/prompt-run.md; it writes nothing.
+
+Controls (record/IA/controls-2026-10-15/prompt-tester.md; 7.S19 as D-2026-10-15-a generalized it,
+L9.14): an entry of `"kind": "Control"` is a law's run on a model broken on purpose (tester.py).
+It is part of no certificate: the grade, the state, `serves` and `refuse` read the law's own
+entries only, so a control's refutation never refutes the law. What it gives is the law's control
+status, reported beside its grade by `certify` and `check -v` (`control_status`): controlled (a
+control refuted at the law's current cone hash), control failed (a control the law held on at that
+hash, reported loudly), or uncontrolled, untested against any wrong model. The grade is unchanged
+by it (the demand's business later). [proposed] A law and its control are matched by the hash of
+the law's cone, which names the law; the controls read are those of the files `certify` or
+`check -v` is given, so a law certified without its control file is reported uncontrolled.
 """
 from __future__ import annotations
 
@@ -295,12 +306,23 @@ def store_path(path):
 
 
 IDENTITY = ("law", "cone", "binding", "seed", "cases")
+CONTROL = "Control"  # the kind of a control's entry (tester.py); a law's entry has no kind
+
+
+def is_control(entry):
+    return entry.get("kind") == CONTROL
+
+
+def _laws_own(entries):
+    """The entries that are the law's evidence: every entry but the controls."""
+    return [e for e in entries if not is_control(e)]
 
 
 def identity(entry):
     """certification.lth's `identity`: the law, the cone's hash, the binding expanded, the seed and
-    `n` (7.S9, 7.S13), as one comparable key."""
-    return json.dumps([entry[k] for k in IDENTITY], sort_keys=True, ensure_ascii=False)
+    `n` (7.S9, 7.S13), as one comparable key; a control's kind is part of it [proposed]."""
+    key = [entry[k] for k in IDENTITY] + ([entry["kind"]] if "kind" in entry else [])
+    return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
 def passed(entry):
@@ -375,7 +397,8 @@ def _group(entry):
     if isinstance(binding, list):
         binding = [{k: v for k, v in d.items() if k != "fingerprint"} if isinstance(d, dict) else d
                    for d in binding]
-    return json.dumps([entry["law"], binding], sort_keys=True, ensure_ascii=False)
+    key = [entry["law"], binding] + ([entry["kind"]] if "kind" in entry else [])
+    return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
 def _stamp(entry):
@@ -463,7 +486,7 @@ def stale(current, entry):
 def certificate_grade(entries, law, current):
     """certification_model's `grade`: over the law's entries at the current hash, none when one
     failed or none passed; under one binding the strongest pass, across bindings the weakest."""
-    counts = [e for e in entries if e["law"] == law and e["cone"] == current]
+    counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
     if any(isinstance(e["outcome"], dict) and "Failed" in e["outcome"] for e in counts):
         return None
     best = {}
@@ -480,7 +503,8 @@ def certificate_grade(entries, law, current):
 
 def state(entries, law, current):
     """certification_model's `stateOf` without a demand: ("current", outcome of the latest entry at
-    the current hash), ("stale", the latest other hash), or ("uncertified", None)."""
+    the current hash), ("stale", the latest other hash), or ("uncertified", None). Controls aside."""
+    entries = _laws_own(entries)
     at = next((e for e in entries if e["law"] == law and e["cone"] == current), None)
     if at is not None:
         return "current", at["outcome"]
@@ -494,6 +518,10 @@ def show_outcome(outcome):
     if outcome == "Passed":
         return "passed"
     (kind, why), = outcome.items()
+    if kind == "ControlRefuted":
+        return f"refuted at {why}: the control passed"
+    if kind == "ControlConfirmed":
+        return f"{CONTROL_FAILED} ({why})"
     return f"failed at {why}" if kind == "Failed" else f"not run: {why}"
 
 
@@ -507,7 +535,7 @@ def standing(entries, law, current):
     g = certificate_grade(entries, law, current)
     if g is not None:
         return GRADE_WORDS[g]
-    failed = next((e for e in entries if e["law"] == law and e["cone"] == current
+    failed = next((e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
                    and isinstance(e["outcome"], dict) and "Failed" in e["outcome"]), None)
     if failed is not None:
         return "refuted at " + failed["outcome"]["Failed"]
@@ -516,10 +544,69 @@ def standing(entries, law, current):
 
 def standings(path):
     """Per law a test line of the file names: its standing from the store, against the current
-    hash of its cone (12.S11, 12.S14)."""
+    hash of its cone (12.S11, 12.S14). Control lines aside (`control_standings`)."""
     from .tester import law_cones
     entries = read_store(path)
     return [(law, standing(entries, law, current)) for law, current in law_cones(path)]
+
+
+# ---------------------------------------------------------------------- controls (7.S19, L9.14)
+
+CONTROL_FAILED = "CONTROL FAILED: the law held on the model broken on purpose, too weak to see the break (7.S19)"
+UNCONTROLLED = "uncontrolled: untested against any wrong model (7.S19)"
+
+
+def _refuted(entry):
+    return isinstance(entry["outcome"], dict) and "ControlRefuted" in entry["outcome"]
+
+
+def _held(entry):
+    return isinstance(entry["outcome"], dict) and "ControlConfirmed" in entry["outcome"]
+
+
+def control_status(controls, law, current):
+    """A law's control status from control entries (any store's, or a run's): "control failed" when
+    one at the law's current cone hash came out confirmed, else "controlled" when one there was
+    refuted, else uncontrolled (with what the controls of other hashes, or not run, were). The
+    law is matched by its cone's hash, which names it; `law` names the stale ones only."""
+    at = [e for e in controls if is_control(e) and e["cone"] == current]
+    held = [e for e in at if _held(e)]
+    if held:
+        on = "; ".join(", ".join(d["generator"] for d in e["binding"]) for e in held) or "no binding"
+        return f"{CONTROL_FAILED}, on {on}"
+    refuted = [e for e in at if _refuted(e)]
+    if refuted:
+        cases = "; ".join(dict.fromkeys(e["outcome"]["ControlRefuted"] for e in refuted))
+        return f"controlled (refuted on its control{'s' if len(refuted) > 1 else ''} at {cases})"
+    if at:
+        return f"{UNCONTROLLED}; its control did not run ({show_outcome(at[0]['outcome'])})"
+    if any(is_control(e) and e["law"] == law for e in controls):
+        return f"{UNCONTROLLED}; its controls are at another hash of its cone"
+    return UNCONTROLLED
+
+
+def control_standing(entries, law, current):
+    """The standing of a law's control lines in a store: of its control entries at the law's
+    current cone hash, a failed one first, else a refuted one, else the latest, as `show_outcome`
+    reads it; stale or no entry otherwise."""
+    at = [e for e in entries if is_control(e) and e["law"] == law and e["cone"] == current]
+    if at:
+        return show_outcome(next((e for e in at if _held(e)), next((e for e in at if _refuted(e)), at[0]))["outcome"])
+    if any(is_control(e) and e["law"] == law for e in entries):
+        return "stale (its entries are at another hash of the law's cone)"
+    return "no entry"
+
+
+def controls_in(paths):
+    """The control entries of the stores of `paths` (a file without a store has none)."""
+    return [e for p in paths for e in read_store(p) if is_control(e)]
+
+
+def control_standings(path):
+    """Per law a control line of the file names: its control's standing from the store."""
+    from .tester import law_cones
+    entries = read_store(path)
+    return [(law, control_standing(entries, law, current)) for law, current in law_cones(path, control=True)]
 
 
 # ---------------------------------------------------------------------- §3 what a run requires
@@ -575,7 +662,9 @@ def serves(demand, entry):
 
 def state_of(demand, entries):
     """certification_model's `stateOf`: ("Current", the outcome of the latest entry at the current
-    hash), else ("Stale", the hash of the law's latest entry), else ("Uncertified", None)."""
+    hash), else ("Stale", the hash of the law's latest entry), else ("Uncertified", None). Controls
+    aside."""
+    entries = _laws_own(entries)
     e = next((e for e in entries if e["law"] == demand["law"] and at(demand, e)), None)
     if e is not None:
         return "Current", e["outcome"]
@@ -598,7 +687,8 @@ def refuse(entries, cone):
             refusals.append({"name": c["name"], "law": None, "state": ("Provisional", None)})
             continue
         for d in c["laws"]:
-            failure = next((e for e in entries if e["law"] == d["law"] and at(d, e) and _failed(e)), None)
+            failure = next((e for e in _laws_own(entries) if e["law"] == d["law"] and at(d, e) and _failed(e)),
+                           None)
             if failure is not None:
                 refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
                                  "demand": d})
@@ -638,43 +728,59 @@ def _shown_value(v):
 
 # ---------------------------------------------------------------------- `luthier certify` (12.S16)
 
-def certify_file(path, seed=None, deep=False, fuel=1_000_000):
-    """Run one file's test lines, writing its store; per law its certificate's grade (the weakest
-    across bindings), with the counts of lines run and known. Runs in its own process."""
+def certify_file(path, seed=None, deep=False, fuel=1_000_000, store=True):
+    """Run one file's test lines, writing its store (reading and writing none without `store`); per
+    law its certificate's grade (the weakest across bindings) and the hash of its cone, the entries
+    of its control lines, with the counts of lines run and known. Runs in its own process."""
     from .tester import run_tests
     try:
-        outcomes = run_tests(path, seed, fuel, deep=deep, store=True)
+        outcomes = run_tests(path, seed, fuel, deep=deep, store=store)
+        entries = read_store(path) if store else [o.entry for o in reversed(outcomes) if o.entry is not None]
     except Exception as exc:  # the file's failure is reported with the file, the others go on
         return {"path": str(path), "error": f"{type(exc).__name__}: {exc}"}
-    entries = read_store(path)
     laws = {}
     for o in outcomes:
-        laws.setdefault(o.spec.law, o.cone)
+        if not o.spec.control:
+            laws.setdefault(o.spec.law, o.cone)
+    # each control line with its own entry's outcome (the run's, or the store's when known)
+    controls = [(o.spec.law, ", ".join(d["generator"] for d in o.entry["binding"]), show_outcome(o.entry["outcome"]))
+                for o in outcomes if o.spec.control and o.entry is not None]
     return {"path": str(path),
-            "laws": [(law, standing(entries, law, cone)) for law, cone in laws.items()],
+            "laws": [(law, cone, standing(entries, law, cone)) for law, cone in laws.items()],
+            "controls": controls,
+            "control entries": [e for e in entries if is_control(e)],
             "ran": sum(1 for o in outcomes if o.known is None),
             "known": sum(1 for o in outcomes if o.known is not None),
             "graded": all(certificate_grade(entries, law, cone) is not None for law, cone in laws.items())}
 
 
-def certify(paths, jobs=1, seed=None, deep=False, fuel=1_000_000, out=print):
-    """`luthier certify`: each file in its own process, `jobs` at a time; prints per file its laws
-    and their grades. True when every law of every file has a grade."""
+def certify(paths, jobs=1, seed=None, deep=False, fuel=1_000_000, out=print, store=True):
+    """`luthier certify`: each file in its own process, `jobs` at a time; prints per file its laws,
+    their grades and their control status, read from the control lines of every file given
+    (7.S19, L9.14), and its control lines. True when every law of every file has a grade and no
+    control failed."""
     from concurrent.futures import ProcessPoolExecutor
     import multiprocessing
     context = multiprocessing.get_context("spawn")
     ok = True
     with ProcessPoolExecutor(max_workers=max(1, jobs), mp_context=context, max_tasks_per_child=1) as pool:
-        futures = [pool.submit(certify_file, str(p), seed, deep, fuel) for p in paths]
-        for future in futures:
-            result = future.result()
-            if "error" in result:
-                out(f"{result['path']}: {result['error']}")
-                ok = False
-                continue
-            out(f"{result['path']}: {len(result['laws'])} laws, {result['ran']} lines ran, "
-                f"{result['known']} known")
-            for law, s in result["laws"]:
-                out(f"  {law}: {s}")
-            ok &= result["graded"]
+        futures = [pool.submit(certify_file, str(p), seed, deep, fuel, store) for p in paths]
+        results = [future.result() for future in futures]
+    controls = [e for r in results for e in r.get("control entries", [])]
+    for result in results:
+        if "error" in result:
+            out(f"{result['path']}: {result['error']}")
+            ok = False
+            continue
+        counted = f", {len(result['controls'])} controls" if result["controls"] else ""
+        out(f"{result['path']}: {len(result['laws'])} laws{counted}, {result['ran']} lines ran, "
+            f"{result['known']} known")
+        for law, cone, s in result["laws"]:
+            status = control_status(controls, law, cone)
+            ok &= not status.startswith("CONTROL FAILED")
+            out(f"  {law}: {s}; {status}")
+        for law, on, s in result["controls"]:
+            ok &= not s.startswith("CONTROL FAILED")
+            out(f"  control of {law} on {on}: {s}")
+        ok &= result["graded"]
     return ok

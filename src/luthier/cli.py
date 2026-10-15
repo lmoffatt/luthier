@@ -55,6 +55,8 @@ def main(argv: list[str] | None = None) -> int:
     p_cert.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
     p_cert.add_argument("--deep", action="store_true", help="run again the lines whose outcome a store knows")
     p_cert.add_argument("--fuel", type=int, default=1_000_000, help="reduction fuel per case")
+    p_cert.add_argument("--no-cert", action="store_true",
+                        help="neither read nor write the stores x.cert.json: run every line and report")
     ns = parser.parse_args(argv)
 
     if ns.command == "certify" and ns.prune:
@@ -63,10 +65,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.command == "certify":
         from .certify import certify
-        return 0 if certify(ns.files, ns.jobs, ns.seed, ns.deep, ns.fuel) else 1
+        return 0 if certify(ns.files, ns.jobs, ns.seed, ns.deep, ns.fuel, store=not ns.no_cert) else 1
 
     if ns.command == "test":
-        from .tester import line, run_tests
+        from .tester import line, passes, run_tests
         try:
             outcomes = run_tests(ns.file, ns.seed, ns.fuel, deep=ns.deep, store=not ns.no_cert)
         except (OSError, ValueError, RecursionError) as exc:
@@ -75,7 +77,8 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         for outcome in outcomes:
             print(line(outcome))
-        return 0 if all(o.grade is not None for o in outcomes) else 1
+        # a law line passes with a grade, a control line when its law is refuted (7.S19)
+        return 0 if all(passes(o) for o in outcomes) else 1
 
     if ns.command == "run":
         from .certify import GRADES
@@ -147,24 +150,35 @@ def main(argv: list[str] | None = None) -> int:
             if ns.verbose:
                 for item in report(result.program):
                     print(f"{path}:{line_of(item.name)}: {item.kind} {item.name}: {item.message}")
-                failed |= _standings(path, line_of)
+                failed |= _standings(path, line_of, ns.files)
         elif ns.tree and isinstance(result, Parsed):
             for act in result.program:
                 print(act)
     return 1 if failed else 0
 
 
-def _standings(path, line_of):
+def _standings(path, line_of, files=()):
     """`check -v`: per law a test line of the file names, its standing from the store against the
-    current hash of its cone (12.S11, 12.S14): the grade, refuted, not run, stale or uncertified.
+    current hash of its cone (12.S11, 12.S14): the grade, refuted, not run, stale or uncertified;
+    and its control status from the control entries of the stores of every file checked (7.S19,
+    L9.14): controlled, control failed, or uncontrolled. Per control line, its control's standing.
     Only for a file with test lines; True when the program cannot be loaded."""
-    from .tester import collect_tests
+    from .tester import collect_tests, line_cones
     try:
         if not collect_tests(path):
             return False
-        from .certify import standings
-        for law, standing in standings(path):
-            print(f"{path}:{line_of(law)}: certificate {law}: {standing}")
+        from .certify import control_standing, control_status, controls_in, read_store, standing
+        controls = controls_in(dict.fromkeys([path, *files]))
+        entries = read_store(path)
+        lines = line_cones(path)
+        for law, current, control in lines:
+            if not control:
+                print(f"{path}:{line_of(law)}: certificate {law}: {standing(entries, law, current)}; "
+                      f"{control_status(controls, law, current)}")
+        for law, current, control in lines:
+            if control:
+                print(f"{path}:{line_of(law)}: certificate control of {law}: "
+                      f"{control_standing(entries, law, current)}")
         return False
     except (OSError, ValueError, RecursionError) as exc:
         print(f"{path}:1: certificate: {exc}")
