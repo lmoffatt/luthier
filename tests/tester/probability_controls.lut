@@ -1,0 +1,189 @@
+-- tests/tester/probability_controls.lut: the controls of probability_laws.lut's laws, except the
+-- statistical `UniformAtLevel`. Each line is written `(control <- true)` (test.lth's `control`) and
+-- is expected to be refuted: it shows that a law of probability.lth can fail on a model broken on
+-- purpose, so that its passing in probability_laws.lut is not vacuous (7.S19 as D-2026-10-15-a
+-- generalized it to every law; L9.14). The tester records its outcome as a control's entry, never
+-- the law's failure. Written 2026-10-15 by Claude Sonnet, an agent of the coordinating session, on
+-- record/IA/controls-2026-10-15/prompt-mutants.md.
+--
+-- The Kolmogorov laws run on distances that are numpy's sort (probability_model.lut) with a leaf
+-- broken. The mean-model and likelihood laws run on session A's `modelA` and `likelihoodA`
+-- (session_a.lut) with one field replaced; no record-update syntax exists, so each broken record is
+-- written whole, the other fields copied by field access. `GaussianPeaksAtMean` and
+-- `ProfiledIsGaussianAtItsSigma` state the native construction over a model, and both sides of
+-- each read the same mean and Jacobian, so a model wrong only in its values does not refute them;
+-- their controls use a mean of the wrong length and a mean that overflows, see the comments there.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear unitList
+import "generators.lth" Binding byParameter
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+import "arrays.lth" Vec Mat vec mat
+import "probability.lth" Resolution Kolmogorov MeanModel ScaledModel Likelihood
+import "probability_model.lut" numpySort
+import "../../examples/sonolocalizacion/distances.lut" pitResolution freeDim fullModel
+import "session_a.lut" dimA modelA likelihoodA
+
+tolerance : Tolerance := 1.0e-12
+
+-- ---------------------------------------------------------------- Kolmogorov
+-- the distance with a constant 0.001 added: not zero on no values, not the native definition
+kOffset : Kolmogorov := { distance := fn vs { numpySort.distance vs + 0.001 } }
+-- the distance halved: on one value u it is not max u (1 - u)
+kHalf : Kolmogorov := { distance := fn vs { 0.5 * numpySort.distance vs } }
+-- the distance of the first vector only: it depends on the order of the vectors
+kFirst : Kolmogorov := { distance := fn vs { match vs { nil -> 0.0 ; cons v rest -> numpySort.distance (cons v nil) } } }
+-- the distance doubled: above 1 on values far from uniform
+kDouble : Kolmogorov := { distance := fn vs { 2.0 * numpySort.distance vs } }
+
+onKOffset : List Binding := [ { parameter := just "d", type := nothing, generator := "kOffset", coverage := Listed } ]
+onKHalf : List Binding := [ { parameter := just "d", type := nothing, generator := "kHalf", coverage := Listed } ]
+onKFirst : List Binding := [ { parameter := just "d", type := nothing, generator := "kFirst", coverage := Listed } ]
+onKDouble : List Binding := [ { parameter := just "d", type := nothing, generator := "kDouble", coverage := Listed } ]
+drawnVs : List Binding := [byParameter "vs" "unitList"]
+
+-- the offset gives 0.001 on nothing, not 0
+test "KolmogorovOfNothing" ExhaustiveMode (seed <- 20261015) (profile <- onKOffset) (control <- true)
+-- halved: on one value u the distance is max u (1 - u) / 2
+test "KolmogorovOfOne" (SampledMode linear) (seed <- 20261015) (profile <- onKHalf) (control <- true)
+-- first vector only: a list of several vectors reversed starts with another vector
+test "KolmogorovOfMultiset" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnVs) (profile <- onKFirst) (control <- true)
+-- doubled: above 1 on a list of values at 0.9 or on drawn atoms
+test "KolmogorovBounded" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnVs) (profile <- onKDouble) (control <- true)
+-- offset: not the native definition's value
+test "KolmogorovAgrees" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnVs) (profile <- onKOffset) (control <- true)
+
+-- ---------------------------------------------------------------- the mean models, on session A's
+-- the mean one entry longer than k
+badLength : MeanModel dimA := {
+  k := modelA.k,
+  mean := fn t {
+    mt := modelA.mean t
+    vec Float64 (modelA.k + 1) (fn i { if i < modelA.k then mt.f i else 0.0 }) },
+  jac := modelA.jac }
+-- the Jacobian one row longer than k
+badRows : MeanModel dimA := {
+  k := modelA.k,
+  mean := modelA.mean,
+  jac := fn t {
+    jt := modelA.jac t
+    mat Float64 (modelA.k + 1) dimA (fn i j { if i < modelA.k then jt.f i j else 0.0 }) } }
+-- the Jacobian's first column zeroed (a dropped term)
+zeroColumn : MeanModel dimA := {
+  k := modelA.k,
+  mean := modelA.mean,
+  jac := fn t {
+    jt := modelA.jac t
+    mat Float64 jt.m dimA (fn i j { if j == 0 then 0.0 else jt.f i j }) } }
+
+cutoffs : List Binding := [
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
+dimSessionA : List Int := [dimA]
+badLengthL : List (MeanModel dimA) := [badLength]
+badRowsL : List (MeanModel dimA) := [badRows]
+zeroColumnL : List (MeanModel dimA) := [zeroColumn]
+onBadLength : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "badLengthL", coverage := Listed } ]
+onBadRows : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "badRowsL", coverage := Listed } ]
+onZeroColumn : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "zeroColumnL", coverage := Listed } ]
+
+-- a mean of length k + 1 is not of length k
+test "MeanShape" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onBadLength) (profile <- cutoffs) (control <- true)
+-- a Jacobian of k + 1 rows is not k x n
+test "JacShape" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onBadRows) (profile <- cutoffs) (control <- true)
+-- a Jacobian with a zero column is not the derivative of the mean
+test "JacIsJacobian" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onZeroColumn) (profile <- cutoffs) (control <- true)
+
+-- ---------------------------------------------------------------- the scaled model, on fullModel
+-- dLogSigma one entry longer than the parameter
+badScaledLength : ScaledModel (freeDim + 1) := {
+  model := fullModel.model, logSigma := fullModel.logSigma,
+  dLogSigma := fn t { vec Float64 (t.n + 1) (fn f { 0.0 }) } }
+-- dLogSigma zero while log sigma is the last coordinate
+badScaledGrad : ScaledModel (freeDim + 1) := {
+  model := fullModel.model, logSigma := fullModel.logSigma,
+  dLogSigma := fn t { vec Float64 t.n (fn f { 0.0 }) } }
+badScaledLengthL : List (ScaledModel (freeDim + 1)) := [badScaledLength]
+badScaledGradL : List (ScaledModel (freeDim + 1)) := [badScaledGrad]
+dimFull : List Int := [freeDim + 1]
+onBadScaledLength : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimFull", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "badScaledLengthL", coverage := Listed } ]
+onBadScaledGrad : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimFull", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "badScaledGradL", coverage := Listed } ]
+-- a gradient of the wrong length
+test "ScaledShapes" (SampledMode linear) (cases <- 5) (seed <- 20261015) (whereBindings <- onBadScaledLength) (profile <- cutoffs) (control <- true)
+-- a zero gradient of the last coordinate
+test "DLogSigmaIsGradient" (SampledMode linear) (cases <- 5) (seed <- 20261015) (whereBindings <- onBadScaledGrad) (profile <- cutoffs) (control <- true)
+
+-- ---------------------------------------------------------------- the likelihoods, on session A's
+-- a score of the wrong length
+badScoreLength : Likelihood dimA := {
+  k := likelihoodA.k, loglik := likelihoodA.loglik, info := likelihoodA.info,
+  score := fn y t { vec Float64 (dimA + 1) (fn i { 0.0 }) } }
+-- a score of zero: not the gradient of the log-likelihood
+zeroScore : Likelihood dimA := {
+  k := likelihoodA.k, loglik := likelihoodA.loglik, info := likelihoodA.info,
+  score := fn y t { vec Float64 dimA (fn i { 0.0 }) } }
+-- an information with the upper triangle doubled: not symmetric
+asymInfo : Likelihood dimA := {
+  k := likelihoodA.k, loglik := likelihoodA.loglik, score := likelihoodA.score,
+  info := fn y t {
+    it := likelihoodA.info y t
+    mat Float64 dimA dimA (fn i j { (if i < j then 2.0 else 1.0) * it.f i j }) } }
+-- an information of the wrong sign: symmetric, negative semidefinite
+negInfo : Likelihood dimA := {
+  k := likelihoodA.k, loglik := likelihoodA.loglik, score := likelihoodA.score,
+  info := fn y t {
+    it := likelihoodA.info y t
+    mat Float64 dimA dimA (fn i j { 0.0 - it.f i j }) } }
+badScoreLengthL : List (Likelihood dimA) := [badScoreLength]
+zeroScoreL : List (Likelihood dimA) := [zeroScore]
+asymInfoL : List (Likelihood dimA) := [asymInfo]
+negInfoL : List (Likelihood dimA) := [negInfo]
+onBadScoreLength : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "badScoreLengthL", coverage := Listed } ]
+onZeroScore : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "zeroScoreL", coverage := Listed } ]
+onAsymInfo : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "asymInfoL", coverage := Listed } ]
+onNegInfo : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "l", type := nothing, generator := "negInfoL", coverage := Listed } ]
+test "TangentShapes" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onBadScoreLength) (profile <- cutoffs) (control <- true)
+test "ScoreIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onZeroScore) (profile <- cutoffs) (control <- true)
+test "InfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onAsymInfo) (profile <- cutoffs) (control <- true)
+test "InfoNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onNegInfo) (profile <- cutoffs) (control <- true)
+
+-- ---------------------------------------------------------------- the construction
+-- GaussianPeaksAtMean has no control: the law states the native `gaussian` over a scaled model and
+-- reads the model only through its mean and log sigma at one parameter. Its log-likelihood at the
+-- mean is -K u - const and at y is that minus a non-negative term, so no mean or log sigma of finite
+-- values makes it fail. The breaks tried raise instead of giving a verdict: a mean one entry longer
+-- than k (numpy `sub` cannot broadcast shapes (21,) and (22,)), a mean of 1e200 (the sum of squares
+-- is inf, "inf is not a Float64", 11.S7).
+-- ProfiledIsGaussianAtItsSigma: a Jacobian of scale 1e150 (a unit mistake in a derivative). Both
+-- sides of the law read the same mean and Jacobian, so no model refutes it that this file found: the
+-- line is kept and reports CONTROL FAILED (the law's tolerance is relative, so a rounding of exp
+-- (-2 u*) against K / RSS at 1e300 passes). A finding; a mean of 1e200 raised instead (inf, 11.S7).
+hugeModelA : MeanModel dimA := {
+  k := modelA.k, mean := modelA.mean,
+  jac := fn t {
+    jt := modelA.jac t
+    mat Float64 jt.m dimA (fn i j { 1.0e150 * jt.f i j }) } }
+hugeModelAL : List (MeanModel dimA) := [hugeModelA]
+onHugeModelA : List Binding := [
+  { parameter := just "n", type := nothing, generator := "dimSessionA", coverage := Listed },
+  { parameter := just "m", type := nothing, generator := "hugeModelAL", coverage := Listed } ]
+test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 20) (seed <- 20261015) (whereBindings <- onHugeModelA) (profile <- cutoffs) (control <- true)
