@@ -226,6 +226,10 @@ by Luciano.
 - A theory is in the syntax of chapter 2 as decided, including D-2026-10-12-ab (keywords),
   D-2026-10-13-b (`W`), Z5 (import with its theory) and D9 (top-level `test` lines as data).
 - From step 1 on, every theory passes the parser; from step 4 on, the checker.
+- A theory is done when each of its laws has, in its evidence, a wrong model it refutes: a
+  negative control broken on purpose beside the model that passes (7.S19 generalized, L9.14,
+  D-2026-10-15-a); a law every broken specimen passes is a finding against the theory, and a
+  green run says nothing about it (the lesson of the layer 3 review, 2026-10-15).
 - An item of `docs/spec/` moves to `[implemented]` only when its Python specimen runs it and its
   programs in `tests/spec/` pass.
 - Who writes (Z9, D-2026-10-13-r): a Claude session writes every theory; Codex writes the Python
