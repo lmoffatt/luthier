@@ -60,7 +60,7 @@ close and how sure a reuse must be, are the demand's. An annotation that leaves 
 should not stale a certificate. Condition: no erased annotation changes what the term does (today
 an operator is resolved in the term itself); it can be stated as a law and tested by elaborating
 with and without a typing improvement and comparing the erased terms. Costs do not touch this item.
-
+b
 ## Identity of evidence and results
 
 **3. Is an exact replay absorbed or kept?** 6.S8 (a new check writes a new entry, both kept) and
@@ -72,6 +72,8 @@ certificate's store law and `--deep`. Sources:
 `record/IA/layer-3-review-2026-10-15/summary.md` (item 5);
 `record/IA/layer-3-review-2026-10-15/report-second-line.md` (C3, S6-5, "Luciano: the replay in the
 identity"); `record/plan/night-2026-10-13.md` (certify.py item).
+
+a, salvo discrepancia. 
 
 **4. Do fuel and budgets enter an entry's identity?** 7.S13 (a known outcome is not recomputed,
 whatever its outcome) means a test that ran out of fuel is "known" and never rerun with more. Today
