@@ -240,8 +240,14 @@ RankOfDiagonal (m : Arrays) (fl : ClearFloor) (d : ClearDiagonal) : Bool :=
 RankOfZeroAndIdentity (m : Arrays) (fl : RankFloor) (k : Dim) : Bool :=
   m.retainedRank fl (zeroMat k k) == 0 and m.retainedRank fl (identity k) == k
 RankBounded (m : Arrays) (fl : RankFloor) (s : Symmetric) : Bool := 0 <= m.retainedRank fl s and m.retainedRank fl s <= s.m
+-- [proposed, 2026-10-15, L9.14] a scale drawn within the size leaves an absolute floor unseen (one
+-- of 1e-3 passed, report-mutants.md), so the law also scales s relative to its magnitude, to a
+-- Frobenius norm (a bound on every eigenvalue in magnitude) of c times the floor: there every
+-- eigenvalue is below any absolute floor above c fl, while a floor relative to the largest
+-- retains what it retained in s. A zero floor or a zero matrix has nothing to scale to.
 RankScales (m : Arrays) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
   m.retainedRank fl (mscaleDef c s) == m.retainedRank fl s
+  and (fl == 0.0 or frobDef s == 0.0 or m.retainedRank fl (mscaleDef (c * fl / frobDef s) s) == m.retainedRank fl s)
 RankUnderRotation (m : Arrays) (tol : Tolerance) (fl : RankFloor) (k : Dim) (q : Orthogonal tol k) (s : SymmetricOf k) : Bool :=
   m.retainedRank fl (m.matMul (m.transpose q) (m.matMul s q)) == m.retainedRank fl s
 
