@@ -13,6 +13,12 @@
 -- v0.1's `BeliefFamily`, `Discrete`, the evidence and the calibration laws, which need a
 -- sampler and the generator of normals probability.lth lacks; and `laplaceEvidence`, which
 -- needs a log-determinant no leaf gives.
+-- 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- layer-3-review-2026-10-15/prompt-fix-BCD.md (items 1 and 4 of its summary-BCD.md, and the
+-- runner-up on `Posterior`): the score of a posterior a gradient along a drawn direction; its
+-- information not negative, so that optimization.lth's `negate` is total; `QuadraticConverges`
+-- over the settings whose budget is at least the demand's budget for the family, the law that
+-- refutes a maximizer that gives up everywhere.
 --
 -- What this file states. A Gaussian belief on the vectors of dimension n is a mean and a
 -- precision, the inverse covariance; zero precision along a direction is a belief that knows
@@ -79,12 +85,19 @@ MaxResult (n : Nat) = { x : VecOf n, converged : Bool }
 
 -- What a maximizer is given: a log posterior with its score and its information on the vectors
 -- of dimension n, as three functions (what crosses to the host, each a callback, D-2026-10-14-a).
--- The laws: the score is the gradient of the log posterior at the demand's resolution, the
--- information symmetric. Certified per posterior (7.R4).
+-- The laws: the score is the gradient of the log posterior at the demand's resolution, along a
+-- drawn direction; the information is symmetric and its quadratic form on a drawn direction is
+-- not negative beyond rounding, as a likelihood's is (probability.lth `InfoNonNegative`).
+-- [proposed] The last law is new: without it `info := -I` is a posterior and not the step matrix
+-- of an objective, so optimization.lth's `negate` was not total (summary-BCD.md, runner-up).
+-- Certified per posterior (7.R4).
 Posterior (n : Nat) : { logp : VecOf n -> Float64, score : VecOf n -> Vec Float64, info : VecOf n -> Mat Float64 }
-PosteriorScoreIsGradient (n : Nat) (p : Posterior n) (r : Resolution) (t : VecOf n) : Bool := IsGradient n r p.logp p.score t
+PosteriorScoreIsGradient (n : Nat) (p : Posterior n) (r : Resolution) (t v : VecOf n) : Bool := IsGradient n r p.logp p.score t v
 PosteriorInfoSymmetric (n : Nat) (p : Posterior n) (tol : Tolerance) (t : VecOf n) : Bool := approxMat tol (p.info t) (transpose (p.info t))
-Posterior (n : Nat) := PosteriorScoreIsGradient n & PosteriorInfoSymmetric n
+PosteriorInfoNonNegative (n : Nat) (p : Posterior n) (tol : Tolerance) (t v : VecOf n) : Bool :=
+  { q := dot v (matVec (p.info t) v)
+    0.0 <= q or within tol q 0.0 }
+Posterior (n : Nat) := PosteriorScoreIsGradient n & PosteriorInfoSymmetric n & PosteriorInfoNonNegative n
 
 -- the Newton decrement of a log posterior at x: half of g^T M^+ g, the increase the information
 -- predicts to the maximum, with the pseudo-inverse at the settings' floor (v0.1
@@ -105,6 +118,8 @@ Maximizer : {
 -- recomputed from the posterior and not from the run, is within the settings' tolerance; and
 -- the dimension is kept. That it converges within its budget is a quality of the method on a
 -- problem, not a law, except where the maximum is known: a concave quadratic, below.
+-- `MaximizerStationary` says nothing where the maximizer says it did not converge, so a maximizer
+-- that gives up everywhere passes it; `QuadraticConverges` is the law that refutes that one.
 -- spec 10.S10, P11
 MaximizerAscends (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior n) (x0 : VecOf n) : Bool :=
   p.logp (mx.maximize s n p.logp p.score p.info x0).x >= p.logp x0
@@ -117,15 +132,22 @@ MaximizerKeepsDimension (mx : Maximizer) (s : Settings) (n : Dim) (p : Posterior
 -- the concave quadratic with its maximum at b and curvature c on every direction: the family
 -- with generators (`VecOf n`, `Positive`), on which a maximizer converges within any budget that
 -- is not tiny (Levenberg-Marquardt takes a handful of accepted steps on it) and ends at b within
--- the decrement's tolerance, c |x - b|^2 / 2 <= tol
+-- the decrement's tolerance, c |x - b|^2 / 2 <= tol. "Not tiny" is a criterion, so a parameter
+-- (P11, D-2026-10-14-c): `budget`, the iterations the demand grants a maximizer on this family;
+-- under settings with fewer (`maxIter = 1`, where a correct Levenberg-Marquardt ends with
+-- `converged = false`) the law asks nothing. [proposed] The budget is the demand's, bound by the
+-- test with the settings; drawn, a small budget with drawn settings of a small `maxIter` would
+-- refute a correct maximizer again (summary-BCD.md, item 4 and its contradiction).
 quadratic (n : Nat) (b : VecOf n) (c : Positive) : Posterior n := {
   logp := fn x { d := sub x b
                  0.0 - 0.5 * c * dot d d },
   score := fn x { scale (0.0 - c) (sub x b) },
   info := fn x { mscale c (identity n) },
 }
-QuadraticConverges (mx : Maximizer) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
-  { q := quadratic n b c
+QuadraticConverges (mx : Maximizer) (s : Settings) (budget : Nat) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  if s.maxIter < budget then true
+  else {
+    q := quadratic n b c
     r := mx.maximize s n q.logp q.score q.info x0
     d := sub r.x b
     r.converged and 0.5 * c * dot d d <= s.tol }
