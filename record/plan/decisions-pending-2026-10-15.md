@@ -53,6 +53,13 @@ own decision, `Context.models`) changes no cone and holds meanwhile; no source r
 typing improvement without a re-certification wave. Source:
 `record/IA/v04-2026-10-15/report-sugar.md` ("For the coordinator, one question");
 `record/plan/night-2026-10-13.md` ("Questions", the cone-hash item).
+*Recommendation (coordinator, 2026-10-15, after the chat on levels of equality):* (b). The cone's
+hash is the strict level of equality, fixed by the language and the same for every demander, free
+and without parameters (as the strict layer of two-level type theory); the levels above it, how
+close and how sure a reuse must be, are the demand's. An annotation that leaves the term unchanged
+should not stale a certificate. Condition: no erased annotation changes what the term does (today
+an operator is resolved in the term itself); it can be stated as a law and tested by elaborating
+with and without a typing improvement and comparing the erased terms. Costs do not touch this item.
 
 ## Identity of evidence and results
 
@@ -200,6 +207,9 @@ parameter names and `DemandKey` keeps one only if the name is in `live`; whether
 reaches laws is not written. Options: (a) a field (per-law cutoffs, typed); (b) `sets` stays.
 No recommendation. Unblocks: B23, and D-2026-10-15-b's alpha, beta, delta reaching a law. Sources:
 `summary-BCD.md` (B23); `report-second-line.md` (B23).
+*Recommendation (coordinator, 2026-10-15):* (a). When a law returns its cost (its distance) instead of
+comparing it with a tolerance it takes, the tolerance leaves the law and becomes the demand's cutoff
+for that law; a typed field is where it will live.
 
 **21. What is `run`'s default fuel?** 8.S1 (fuel is a resource limit the demand carries). The
 default of 10,000,000 (kernel bite 10, proposed) is spent before the fit converges (about 10^9
@@ -291,6 +301,11 @@ States D-2026-10-14-a as a clause. Options: (a) add; (b) leave in the decision. 
 laws take are the hook where the cost enters (D-2026-10-14-c; candidates, C5). (ii) L5.6 cites
 `lib/plan.lut`, retired: name `plan.lth` (the principles record is yours; the spec's 8.S4, 8.S11,
 9.S17 already corrected). Options: (a) both; (b) one. Recommended: (a) (candidates C5; night plan).
+*Addition (coordinator, 2026-10-15):* the first case for (i): `PinvProjects` (arrays.lth) computes
+the distance inside `approxMatOf` and discards it when comparing with `tol`; returning it lets the
+certificate record "worst residual over n cases" once and every demand decide by its cutoff without
+re-testing. With a sampled cost the certificate keeps the sample (or a sufficient summary), not only
+the verdict, since a cutoff near the observed values may need more sampling.
 
 ## The sonolocalización slice
 
