@@ -72,7 +72,17 @@ def build(tmp: Path, ch1: str = CHAPTER_1, ch2: str | None = CHAPTER_2) -> Path:
 def run(tmp: Path, *files: str) -> tuple[int, list[str]]:
     r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(tmp), *files],
                        capture_output=True, text=True)
-    return r.returncode, r.stdout.splitlines()
+    return r.returncode, [l for l in r.stdout.splitlines()
+                          if not (l.startswith(COUNTS) and l[len(COUNTS)].isdigit())]
+
+
+COUNTS = "check-spec (information): "  # the counts line starts with this and a number
+
+
+def counts_line(tmp: Path, *files: str) -> list[str]:
+    r = subprocess.run([sys.executable, str(SCRIPT), "--root", str(tmp), *files],
+                       capture_output=True, text=True)
+    return [l for l in r.stdout.splitlines() if l.startswith(COUNTS) and l[len(COUNTS)].isdigit()]
 
 
 def line_of(text: str, needle: str) -> int:
@@ -225,3 +235,18 @@ def test_unreadable_file_exits_2(tmp_path):
     build(tmp_path)
     code, _ = run(tmp_path, str(tmp_path / "docs/spec/09-missing.md"))
     assert code == 2
+
+
+def test_counts_line_appears(tmp_path):
+    ch = CHAPTER_1.replace("[implemented]", "[decided D-2026-01-01-a; suspended by D-2026-01-01-a]", 1)
+    build(tmp_path, ch)
+    assert counts_line(tmp_path) == [
+        COUNTS + "0 implemented, 2 decided (of which 1 suspended), 1 proposed"]
+
+
+def test_suspended_by_unknown_decision_is_a_finding(tmp_path):
+    ch = CHAPTER_1.replace("[implemented]", "[decided D-2026-01-01-a; suspended by D-2026-01-01-z]", 1)
+    build(tmp_path, ch)
+    code, out = run(tmp_path, str(tmp_path / "docs/spec/01-alpha.md"))
+    assert code == 1
+    expect(out, "docs/spec/01-alpha.md", line_of(ch, "**1.R1."), "D-2026-01-01-z is not in record/decisions.md")
