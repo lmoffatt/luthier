@@ -12,8 +12,14 @@
 -- back, a float. The Gaussian construction has no model here: `gaussian` and `profiled` are
 -- native, over the leaves of arrays_model.lut; v0.1's `normalVec` (the sampler's normals) is
 -- not bound, since probability.lth states no theory for it yet.
+-- 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on record/IA/
+-- statistical-2026-10-15/prompt-theory.md: `lump`, a source broken on purpose, the control of
+-- `SourceIsUniform` (L9.14, 7.S19) that needs no host.
 
-import "probability.lth" Kolmogorov Vec
+import "probability.lth" Kolmogorov Vec UnitList SourceIsUniform
+import "arrays.lth" vec
+import "generators.lth" Gen Seed nextSeed
+import "laws.lth" Law Sequential
 
 numpySort : Kolmogorov := {
   distance := extern "python:luthier.arrays.kolmogorov_distance",
@@ -21,3 +27,12 @@ numpySort : Kolmogorov := {
 
 -- the leaf by name, as experiment_zero.lut calls it (:161)
 kolmogorovDistance : List (Vec Float64) -> Float64 := numpySort.distance
+
+-- The control of `SourceIsUniform` (L9.14: a law is evidence of nothing until a wrong model
+-- refutes it): a source every value of which is 0.9, the lump that tests/tester/probability_laws.lut
+-- lists as no sample of the uniform; its p-value is near zero on every sample, so the sequential
+-- test fails it in about `log ((1 - beta) / alpha) / log (1 + delta)` samples (laws.lth §4). The
+-- law on numpy's sort and this source is `LumpIsUniform`, expected to fail; the same law on the
+-- host's calibrated sample is generators_model.lut's `UniformSampleIsUniform`.
+lump : Gen UnitList := fn size seed { ([vec Float64 size (fn k { 0.9 })], nextSeed seed) }
+LumpIsUniform (c : Sequential) : Law := SourceIsUniform numpySort lump c
