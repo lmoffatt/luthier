@@ -194,31 +194,46 @@ CaseIsEvaluated (m : Settling) (c b : Bool) : Bool :=
 ForallAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
   m.settles (Forall A p) (At A a e) == (if isRefuted (m.settles (p a) e) then Refuted else Unsettled)
 -- a `forall` on points: refuted by any counterexample; confirmed only when the points are all of
--- the type and each confirms; supported when a census or a sample confirms at every point. Written
--- out in the law, not through a helper, since it is the role of `Supported` (4.R3, L2.7: a law
--- depends on the names in its body, 4.S15)
+-- the type and each confirms; supported when every point confirms or is supported and the points
+-- are a census or a sample, or are all of the type with some point only supported. Written out in
+-- the law, not through a helper, since it is the role of `Supported` (4.R3, L2.7: a law depends on
+-- the names in its body, 4.S15). [proposed, L2 of summary-BCD.md, Fable's reply to bundle C] A law
+-- with two parameters is `Forall A (fn a { Forall B ... })`, its evidence points of `A` each with
+-- points of `B`: when the inner points are a sample each inner verdict is `Supported`, and
+-- requiring every point confirmed left the outer `Unsettled`, so no sampled law of more than one
+-- parameter was settled, where 7.S10 grades it by the weakest reach.
+isSupported (v : Verdict) : Bool := match v { Supported -> true ; _ -> false }
+allConfirmedOrSupported (vs : List Verdict) : Bool :=
+  match vs { nil -> true ; cons v rest -> (isConfirmed v or isSupported v) and allConfirmedOrSupported rest }
 ForallOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
   m.settles (Forall A p) (Points A pts c)
     == (if anyRefuted (pointVerdicts m A p pts) then Refuted
         else if allConfirmed (pointVerdicts m A p pts) then (match c { Exhaustive -> Confirmed ; _ -> Supported })
+        else if allConfirmedOrSupported (pointVerdicts m A p pts) then Supported
         else Unsettled)
 -- an `exists` is confirmed by a witness, and a failing instance does not refute it
 ExistsAtOnePoint (m : Settling) (A : U) (p : A -> Law) (a : A) (e : Evidence) : Bool :=
   m.settles (Exists A p) (At A a e) == (if isConfirmed (m.settles (p a) e) then Confirmed else Unsettled)
 ExistsOnPoints (m : Settling) (A : U) (p : A -> Law) (pts : List (A * Evidence)) (c : Coverage) : Bool :=
   m.settles (Exists A p) (Points A pts c) == existsVerdict (pointVerdicts m A p pts) c
--- `and` by a pair, its verdicts combined; `or` by either side, which confirms when its side does,
--- or by a pair of refutations
+-- `and` by a pair, its verdicts combined; `or` by either side, which confirms when its side does
+-- and supports when its side is supported (the same review item: a sampled side was dropped), or
+-- by a pair of refutations
 BothByPair (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
   m.settles (Both p q) (Pair e f) == m.combine (m.settles p e) (m.settles q f)
 EitherBySide (m : Settling) (p q : Law) (side : Bool) (e : Evidence) : Bool :=
   m.settles (Either p q) (Side side e)
-    == (if isConfirmed (m.settles (if side then p else q) e) then Confirmed else Unsettled)
+    == (if isConfirmed (m.settles (if side then p else q) e) then Confirmed
+        else if isSupported (m.settles (if side then p else q) e) then Supported else Unsettled)
 EitherRefutedByBoth (m : Settling) (p q : Law) (e f : Evidence) : Bool :=
   m.settles (Either p q) (Pair e f)
     == (if isRefuted (m.settles p e) and isRefuted (m.settles q f) then Refuted else Unsettled)
--- `not` exchanges confirmation and refutation; what is only supported or unsettled stays unsettled
-NotFlips (m : Settling) (p : Law) (e : Evidence) : Bool := m.settles (Not p) e == flip (m.settles p e)
+-- `not` exchanges confirmation and refutation; what is only supported or unsettled stays unsettled.
+-- [proposed, L1 of summary-BCD.md, Fable's one-line fix] Not on a citation or an assumption, which
+-- model any law whole (`CitedWhole`, `AssumedWhole`): at `p := Not q` the two laws gave `Cites r`
+-- and `flip (Cites r) == Unsettled` for one value, so `Settling` had no model.
+takenWhole (e : Evidence) : Bool := match e { Cited r -> true ; Assumed -> true ; _ -> false }
+NotFlips (m : Settling) (p : Law) (e : Evidence) : Bool := takenWhole e or m.settles (Not p) e == flip (m.settles p e)
 -- `then` is material: settled as `not (p and not q)`, by the same evidence
 ThenIsMaterial (m : Settling) (p q : Law) (e : Evidence) : Bool :=
   m.settles (Then p q) e == m.settles (Not (Both p (Not q))) e
@@ -239,10 +254,16 @@ CombineCommutes (m : Settling) (u v : Verdict) : Bool := m.combine u v == m.comb
 CombineAssociates (m : Settling) (u v w : Verdict) : Bool := m.combine (m.combine u v) w == m.combine u (m.combine v w)
 CombineAbsorbs (m : Settling) (v : Verdict) : Bool :=
   m.combine Refuted v == Refuted and (isRefuted v or m.combine Unsettled v == Unsettled) and m.combine Confirmed v == v
+-- [proposed, L4 of summary-BCD.md] and a conjunction is confirmed only when both parts are: two
+-- citations, two assumptions, or a supported part never combine into a confirmation (L10.9: no
+-- grade raised without evidence); left free, a model could turn `Cites r` and `Cites s` into
+-- `Confirmed`
+CombineNeverConfirmsMore (m : Settling) (u v : Verdict) : Bool :=
+  isConfirmed (m.combine u v) == (isConfirmed u and isConfirmed v)
 
 Settling := CaseIsEvaluated & ForallAtOnePoint & ForallOnPoints & ExistsAtOnePoint & ExistsOnPoints & BothByPair
   & EitherBySide & EitherRefutedByBoth & NotFlips & ThenIsMaterial & CitedWhole & AssumedWhole & NotRunIsUnsettled
-  & StatisticalByTest & CombineCommutes & CombineAssociates & CombineAbsorbs
+  & StatisticalByTest & CombineCommutes & CombineAssociates & CombineAbsorbs & CombineNeverConfirmsMore
 
 -- ---------------------------------------------------------------- §4 Statistical laws
 
