@@ -351,9 +351,10 @@ def test_a_statistical_control_is_its_own_kind(tmp_path):
 
 def test_a_type_a_census_lists_is_no_model_home():
     # probability_laws.lut binds `S : U` to `[UnitList]`: probability.lth is no model whose store
-    # takes the entry; numpy's sort's file is
+    # takes the entry; numpy's sort's file is (its `SourceIsUniform` line, the contrast before, went
+    # to generators_laws.lut as `UniformSampleIsUniform`'s; KolmogorovOfOne binds the same `d`)
     path = ROOT / "tests" / "tester" / "probability_laws.lut"
     runner, specs, loaded = tester.prepare(path)
     homes = {spec.law: [Path(h).name for h in tester.model_homes(loaded, spec, runner)] for spec in specs
-             if spec.law in ("NoAlternativeAtZero", "SourceIsUniform")}
-    assert homes == {"NoAlternativeAtZero": [], "SourceIsUniform": ["probability_model.lut"]}
+             if spec.law in ("NoAlternativeAtZero", "KolmogorovOfOne")}
+    assert homes == {"NoAlternativeAtZero": [], "KolmogorovOfOne": ["probability_model.lut"]}
