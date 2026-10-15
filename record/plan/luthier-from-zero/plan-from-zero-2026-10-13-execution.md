@@ -420,8 +420,12 @@ empiece a generar certificados y ver que todo funcione como debe ser"):
    the slice's theories have grades in the evidence table, none refuted (met: the two
    refutations of arrays.lth fixed; `tests/tester/*_laws.lut`); (e) the suite and the lints
    green (met at 694; `check_quotes.py`'s old debt excepted, his question); (f) the external
-   review of layers 2 and 3 read and its first changes applied (layer 3's round 1 replies in,
-   synthesis running; layer 2 not sent). The tag when (f) is met, by him.
+   review of layers 2 and 3 read and its changes applied (met 2026-10-15: bundles A to D sent to
+   six models, synthesized in record/IA/layer-3-review-2026-10-15/summary.md and summary-BCD.md;
+   of 130 findings 53 fixed, 20 wait for him, 43 left with reasons in report-second-line.md).
+   Beyond the criteria, the same day: L9.14 (every law refutes a wrong model) applied, 131 laws
+   controlled; L9.15 (statistical laws by Wald's sequential test) in the theories and the tester.
+   All criteria met; the tag is his.
 
 ## Step 6. Execution (layer 3)
 
