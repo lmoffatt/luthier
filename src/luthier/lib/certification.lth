@@ -131,9 +131,11 @@ State : U := data {
 -- "latest" is the latest: a pass's grade is one its evidence admits, and a pass over listed cases
 -- reaches a census of each parameter, of no more values than the cases it evaluated (6.S7: listed
 -- cases give `0` at those cases and `⊤` elsewhere); and no entry is older than one behind it.
+-- [proposed, C14 of the round-1 review] Determinism covers the grade too: one identity, one
+-- outcome and one grade (the grade is read from the evidence a deterministic run gives, 6.S7).
 agreesWith (k : Certifying) (e : Entry) (es : List Entry) : Bool :=
   match es { nil -> true ; cons f rest ->
-    (not (k.identity e == k.identity f) or e.outcome == f.outcome) and agreesWith k e rest }
+    (not (k.identity e == k.identity f) or (e.outcome == f.outcome and e.grade == f.grade)) and agreesWith k e rest }
 determined (k : Certifying) (es : List Entry) : Bool :=
   match es { nil -> true ; cons e rest -> agreesWith k e rest and determined k rest }
 gradedAsOutcome (es : List Entry) : Bool :=
@@ -236,13 +238,23 @@ gradeOfOldName (s : String) : Maybe Grade :=
 -- an identity valued in `C` adds its distance by `⊕` (the hole above). [proposed] A parameter that
 -- only one of the two standings reaches is not reached by the transport.
 Standing = { law : String, on : List ParameterReach, grade : Grade }
+-- [proposed, C7 of the round-1 review] The identity transport goes along is a link: the name whose
+-- certificate is carried (`from`, B), the name it is carried to (`to`, A), and the standing of the
+-- law A ≡ B. Transport takes a link only from the law of the standing it carries and gives
+-- nothing otherwise: before, any standing passed as "the identity" carried B's certificate to any
+-- name. That two sampled links share a distribution (6.S12, L10.8) is a cost, the hole above.
+Link = { from : String, to : String, standing : Standing }
 
 -- Along a path (6.S12): link by link, each link the standing of an identity and the name it reaches.
 -- Two links sampled over one distribution compose by the union bound, their failure fractions and
 -- their δ summed: that is a cost, the hole above (D-2026-10-13-m, after the slice's failures); here
 -- the grades meet by `weakest` and the reaches intersect.
-along (k : Certifying) (b : Standing) (path : List (String * Standing)) : Standing :=
-  match path { nil -> b ; cons (a, i) rest -> along k (k.transport b i a) rest }
+-- [proposed, C7] Each step names the next name and the standing of its identity with the last, so
+-- the link starts where the path stands; a link the model refuses ends the path with nothing.
+linkFrom (b : Standing) (a : String) (i : Standing) : Link := { from := b.law, to := a, standing := i }
+along (k : Certifying) (b : Standing) (path : List (String * Standing)) : Maybe Standing :=
+  match path { nil -> just b ; cons (a, i) rest ->
+    (match k.transport b (linkFrom b a i) { nothing -> nothing ; just s -> along k s rest }) }
 
 -- ---------------------------------------------------------------- §3 What a run requires
 
@@ -338,7 +350,7 @@ Certifying : {
   contains : Reach -> Value -> Bool,
   serves : Demand -> Entry -> Bool,
   refuse : List Entry -> List ConeName -> List Refusal,
-  transport : Standing -> Standing -> String -> Standing,
+  transport : Standing -> Link -> Maybe Standing,
 }
 
 -- §1. 7.S9, 7.S13: the identity of an outcome is the law, the cone's hash, the binding expanded,
@@ -405,19 +417,27 @@ WeakestAcrossBindings (k : Certifying) (c : Certificate) (ps qs : List (CurrentP
     or k.grade (withEntry (pool c p ps qs) p)
          == orWeakest (k.grade (without p.binding (pool c p ps qs)))
                       (k.grade (withEntry (only p.binding (pool c p ps qs)) p))
+-- 6.S11 [proposed, C7]: transport takes only a link from the law it carries; a link from any
+-- other name carries nothing. Drawn apart, a link rarely starts at the standing's law, which is
+-- the case this law tests; the laws after it take a link that does (`LinkFrom`, a field the
+-- tester equates, 7.S6).
+TransportNeedsTheIdentity (k : Certifying) (b : Standing) (l : Link) : Bool :=
+  (k.transport b l == nothing) == not (l.from == b.law)
+LinkFrom (b : Standing) : U := { l : Link | l.from == b.law }
 -- 6.S11: transport gives A, on the intersection of the two reaches, with the weaker grade
-TransportTakesTheWeaker (k : Certifying) (b i : Standing) (a : String) : Bool :=
-  (k.transport b i a).law == a and (k.transport b i a).grade == weakest b.grade i.grade
-TransportOnTheIntersection (k : Certifying) (b i : Standing) (a : String) (given : List (String * Value)) : Bool :=
-  coversAll k.contains (k.transport b i a).on given
-    == (coversAll k.contains b.on given and coversAll k.contains i.on given)
+TransportTakesTheWeaker (k : Certifying) (b : Standing) (l : LinkFrom b) : Bool :=
+  match k.transport b l { nothing -> false ; just s -> s.law == l.to and s.grade == weakest b.grade l.standing.grade }
+TransportOnTheIntersection (k : Certifying) (b : Standing) (l : LinkFrom b) (given : List (String * Value)) : Bool :=
+  match k.transport b l { nothing -> false ; just s ->
+    coversAll k.contains s.on given == (coversAll k.contains b.on given and coversAll k.contains l.standing.on given) }
 -- 6.S13 (L10.9), for the Boolean case: transport never raises a grade nor widens a reach, and a
 -- path neither (the bound is `lift true = 0` along a Boolean identity; in `C`, monotone `⊕`)
-NoEvidenceForFree (k : Certifying) (b i : Standing) (a : String) (given : List (String * Value)) : Bool :=
-  gradeRank (k.transport b i a).grade <= gradeRank b.grade
-    and (not (coversAll k.contains (k.transport b i a).on given) or coversAll k.contains b.on given)
+NoEvidenceForFree (k : Certifying) (b : Standing) (l : LinkFrom b) (given : List (String * Value)) : Bool :=
+  match k.transport b l { nothing -> true ; just s ->
+    gradeRank s.grade <= gradeRank b.grade
+      and (not (coversAll k.contains s.on given) or coversAll k.contains b.on given) }
 PathNeverRaises (k : Certifying) (b : Standing) (path : List (String * Standing)) : Bool :=
-  gradeRank (along k b path).grade <= gradeRank b.grade
+  match along k b path { nothing -> true ; just s -> gradeRank s.grade <= gradeRank b.grade }
 
 -- §3. 7.S10, 7.S15: a reach as a set of values; the support holds every value
 ReachesAsSets (k : Certifying) (x lo hi : Float64) (s : String) (vs : List Value) : Bool :=
@@ -487,7 +507,7 @@ RefusalIsPerLaw (k : Certifying) (es : List Entry) (c : ConeName) (rest : List C
     and k.refuse es [{ name := n, provisional := false, laws := nil }] == nil
 
 Certifying := IdentityIsTheKey & StaleIsAnotherHash & NoEntryNoGrade & AFailureRefutes & OnlyCurrentEntriesCount
-  & NotRunAddsNothing & WeakestAcrossBindings & StrongestUnderOneBinding & TransportTakesTheWeaker
+  & NotRunAddsNothing & WeakestAcrossBindings & StrongestUnderOneBinding & TransportNeedsTheIdentity & TransportTakesTheWeaker
   & TransportOnTheIntersection & NoEvidenceForFree & PathNeverRaises & ReachesAsSets & StaleCertifiesNothing
   & OnlyAPassServes & CertifiesOnlyUnderItsBinding & ServesAtTheCutoff & ACoveringPassServes
   & ServesIsMonotoneInTheCutoff & ProvisionalIsRefused & RefusalSaysWhy & ACurrentFailureIsRefused & RefusalIsPerLaw
