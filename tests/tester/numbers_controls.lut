@@ -1,0 +1,523 @@
+-- tests/tester/numbers_controls.lut: the controls of numbers.lth's laws. Each line is the law's
+-- line of numbers_laws.lut written `(control <- true)` (test.lth's `control`), with the model of
+-- its type in the profile replaced by one broken on purpose, and is expected to be refuted: it
+-- shows that a law can fail on a wrong model, so that its passing on the real one is not vacuous
+-- (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The tester records its outcome as
+-- a control's entry, never the law's failure, and `luthier certify numbers_laws.lut
+-- numbers_controls.lut` reports the law controlled. Written 2026-10-15 by Claude Sonnet, an agent
+-- of the coordinating session, on record/IA/controls-2026-10-15/prompt-mutants.md. The lines at a
+-- size of a million repeat a law already controlled and have no control of their own.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers_model.lut" doubles integerDivision conversion elementary
+import "numbers.lth" Tolerance Doubles IntegerDivision Conversion Elementary PlusCommutes TimesCommutes PlusZero TimesOne DivideOne TimesZero MinusSelf DivideSelf
+  MinusIsPlusNegated NegateTwice LeqReflexive LeqTotal LeqAntisymmetric LeqTransitive LessIsStrict
+  GreaterIsLessReversed GeqIsLeqReversed UnequalIsNotEqual PlusMonotone TimesMonotone EpsilonIsTheUlpOfOne
+  DivisionAlgorithm RemainderOfTheDivisorsSign QuotientOfProduct
+  ConvertZeroAndOne ConvertAddsExactly ConvertSucceeds ConvertKeepsOrder
+  SqrtOfSquares ExpOfZero LogOfOne ErfOfZero SqrtMonotone SqrtOfSquare ExpPositive ErfOdd ErfBounded
+  SqrtSquares ExpOfLog LogOfExp ExpAdds LogMultiplies
+
+tolerance : Tolerance := 1.0e-12
+
+-- the models of the real values, one per type, and the profile of each control: the same list with
+-- the broken value bound to its type
+swapped : Doubles := { plus := fn a b { a - b },
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+swappedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "swapped", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+timesSkewed : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := fn a b { a * b + a - b },
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+timesSkewedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "timesSkewed", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+plusOff : Doubles := { plus := fn a b { a + b + 1.0 },
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+plusOffProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "plusOff", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+timesOff : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := fn a b { a * b + 1.0 },
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+timesOffProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "timesOff", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+divideOff : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := fn a b { a / b + 1.0 },
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+divideOffProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "divideOff", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+divideShifted : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := fn a b { a / (b + 1.0) },
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+divideShiftedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "divideShifted", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+minusOff : Doubles := { plus := doubles.plus,
+  minus := fn a b { a - b + 1.0 },
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+minusOffProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "minusOff", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+minusFlipped : Doubles := { plus := doubles.plus,
+  minus := fn a b { b - a },
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+minusFlippedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "minusFlipped", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+minusDoubled : Doubles := { plus := doubles.plus,
+  minus := fn a b { a - b * 2.0 },
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+minusDoubledProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "minusDoubled", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+leqStrict : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := fn a b { a < b },
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+leqStrictProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "leqStrict", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+leqIsEqual : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := fn a b { a == b },
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+leqIsEqualProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "leqIsEqual", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+leqAlways : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := fn a b { true },
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+leqAlwaysProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "leqAlways", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+leqSlack : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := fn a b { a <= b + 1.0 },
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+leqSlackProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "leqSlack", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+lessLoose : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := fn a b { a /= b },
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+lessLooseProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "lessLoose", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+greaterWrong : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := fn a b { a < b },
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+greaterWrongProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "greaterWrong", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+geqWrong : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := fn a b { a <= b },
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+geqWrongProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "geqWrong", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+unequalWrong : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := fn a b { a < b },
+  epsilon := doubles.epsilon }
+unequalWrongProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "unequalWrong", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+plusFlipped : Doubles := { plus := fn a b { b - a },
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+plusFlippedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "plusFlipped", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+timesNegated : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := fn a b { 0.0 - a * b },
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := doubles.epsilon }
+timesNegatedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "timesNegated", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+epsilonSmall : Doubles := { plus := doubles.plus,
+  minus := doubles.minus,
+  times := doubles.times,
+  divide := doubles.divide,
+  less := doubles.less,
+  leq := doubles.leq,
+  greater := doubles.greater,
+  geq := doubles.geq,
+  unequal := doubles.unequal,
+  epsilon := 1.0e-16 }
+epsilonSmallProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "epsilonSmall", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+quotientOff : IntegerDivision := { quotient := fn a b { a / b + 1 }, remainder := integerDivision.remainder }
+quotientOffProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "quotientOff", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+remainderShifted : IntegerDivision := { quotient := integerDivision.quotient, remainder := fn a b { a mod b + b } }
+remainderShiftedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "remainderShifted", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+convertOff : Conversion := { convert := fn i { toFloat64 i + 1.0 } }
+convertOffProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "convertOff", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+convertDoubled : Conversion := { convert := fn i { toFloat64 i * 2.0 } }
+convertDoubledProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "convertDoubled", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+convertNegated : Conversion := { convert := fn i { 0.0 - toFloat64 i } }
+convertNegatedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "convertNegated", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+sqrtHalf : Elementary := { sqrt := fn x { x / 2.0 }, exp := elementary.exp, log := elementary.log, erf := elementary.erf }
+sqrtHalfProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "sqrtHalf", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+sqrtNegated : Elementary := { sqrt := fn x { 0.0 - x }, exp := elementary.exp, log := elementary.log, erf := elementary.erf }
+sqrtNegatedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "sqrtNegated", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+expScaled : Elementary := { sqrt := elementary.sqrt, exp := fn x { 1.0001 * elementary.exp x }, log := elementary.log, erf := elementary.erf }
+expScaledProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "expScaled", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+expNegated : Elementary := { sqrt := elementary.sqrt, exp := fn x { 0.0 - elementary.exp x }, log := elementary.log, erf := elementary.erf }
+expNegatedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "expNegated", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+logShifted : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := fn x { elementary.log x + 1.0e-4 }, erf := elementary.erf }
+logShiftedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "logShifted", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+erfShifted : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := elementary.log, erf := fn x { elementary.erf x + 1.0e-4 } }
+erfShiftedProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "erfShifted", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+erfDoubled : Elementary := { sqrt := elementary.sqrt, exp := elementary.exp, log := elementary.log, erf := fn x { 2.0 * elementary.erf x } }
+erfDoubledProfile : List Binding := [
+  { parameter := nothing, type := just "Doubles", generator := "doubles", coverage := Listed },
+  { parameter := nothing, type := just "IntegerDivision", generator := "integerDivision", coverage := Listed },
+  { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
+  { parameter := nothing, type := just "Elementary", generator := "erfDoubled", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+
+-- §2 the doubles
+-- plus is a - b, which is not commutative
+test "PlusCommutes" (SampledMode linear) (seed <- 20261015) (profile <- swappedProfile) (control <- true)
+-- times adds a - b to the product, which is not symmetric
+test "TimesCommutes" (SampledMode linear) (seed <- 20261015) (profile <- timesSkewedProfile) (control <- true)
+-- plus adds one to the sum, so x + 0 is x + 1
+test "PlusZero" (SampledMode linear) (seed <- 20261015) (profile <- plusOffProfile) (control <- true)
+-- times adds one to the product, so x * 1 is x + 1
+test "TimesOne" (SampledMode linear) (seed <- 20261015) (profile <- timesOffProfile) (control <- true)
+-- divide adds one to the quotient, so x / 1 is x + 1
+test "DivideOne" (SampledMode linear) (seed <- 20261015) (profile <- divideOffProfile) (control <- true)
+-- times adds one to the product, so x * 0 is 1
+test "TimesZero" (SampledMode linear) (seed <- 20261015) (profile <- timesOffProfile) (control <- true)
+-- minus adds one to the difference, so x - x is 1
+test "MinusSelf" (SampledMode linear) (seed <- 20261015) (profile <- minusOffProfile) (control <- true)
+-- divide divides by b + 1, so x / x is not one
+test "DivideSelf" (SampledMode linear) (seed <- 20261015) (profile <- divideShiftedProfile) (control <- true)
+-- minus is b - a: x - y is y - x, while x + (0 - y) is x + y
+test "MinusIsPlusNegated" (SampledMode linear) (seed <- 20261015) (profile <- minusFlippedProfile) (control <- true)
+-- minus takes twice b, so negating twice multiplies by four
+test "NegateTwice" (SampledMode linear) (seed <- 20261015) (profile <- minusDoubledProfile) (control <- true)
+-- leq is the strict order, which fails on x and x
+test "LeqReflexive" (SampledMode linear) (seed <- 20261015) (profile <- leqStrictProfile) (control <- true)
+-- leq is equality, so two distinct doubles are not comparable
+test "LeqTotal" (SampledMode linear) (seed <- 20261015) (profile <- leqIsEqualProfile) (control <- true)
+-- leq is always true, so two distinct doubles are each at most the other
+test "LeqAntisymmetric" (SampledMode linear) (seed <- 20261015) (profile <- leqAlwaysProfile) (control <- true)
+-- leq allows a slack of one, which does not compose along a chain
+test "LeqTransitive" (SampledMode linear) (seed <- 20261015) (profile <- leqSlackProfile) (control <- true)
+-- less is a /= b, true whenever a > b
+test "LessIsStrict" (SampledMode linear) (seed <- 20261015) (profile <- lessLooseProfile) (control <- true)
+-- greater is a < b, the wrong direction
+test "GreaterIsLessReversed" (SampledMode linear) (seed <- 20261015) (profile <- greaterWrongProfile) (control <- true)
+-- geq is a <= b, the wrong direction
+test "GeqIsLeqReversed" (SampledMode linear) (seed <- 20261015) (profile <- geqWrongProfile) (control <- true)
+-- unequal is a < b, false when a > b
+test "UnequalIsNotEqual" (SampledMode linear) (seed <- 20261015) (profile <- unequalWrongProfile) (control <- true)
+-- plus is b - a, which reverses the order of the first term
+test "PlusMonotone" (SampledMode linear) (seed <- 20261015) (profile <- plusFlippedProfile) (control <- true)
+-- times is the negated product, which reverses the order
+test "TimesMonotone" (SampledMode linear) (seed <- 20261015) (profile <- timesNegatedProfile) (control <- true)
+-- epsilon is 1e-16, below half the ulp of one, so one plus it is one
+test "EpsilonIsTheUlpOfOne" ExhaustiveMode (seed <- 20261015) (profile <- epsilonSmallProfile) (control <- true)
+
+-- §3 integer division
+-- the quotient is one too large, so q * b + r is a + b
+test "DivisionAlgorithm" (SampledMode linear) (seed <- 20261015) (profile <- quotientOffProfile) (control <- true)
+-- the remainder is shifted by the divisor, out of its range
+test "RemainderOfTheDivisorsSign" (SampledMode linear) (seed <- 20261015) (profile <- remainderShiftedProfile) (control <- true)
+-- the quotient is one too large, so (a * b) / b is a + 1
+test "QuotientOfProduct" (SampledMode linear) (seed <- 20261015) (profile <- quotientOffProfile) (control <- true)
+
+-- §4 the conversion
+-- convert doubles, so one converts to two
+test "ConvertZeroAndOne" ExhaustiveMode (seed <- 20261015) (profile <- convertDoubledProfile) (control <- true)
+-- convert adds one, so the image of a sum is one short of the sum of the images
+test "ConvertAddsExactly" (SampledMode linear) (seed <- 20261015) (profile <- convertOffProfile) (control <- true)
+-- convert doubles, so the image of i + 1 is two more than the image of i
+test "ConvertSucceeds" (SampledMode linear) (seed <- 20261015) (profile <- convertDoubledProfile) (control <- true)
+-- convert negates, which reverses the order
+test "ConvertKeepsOrder" (SampledMode linear) (seed <- 20261015) (profile <- convertNegatedProfile) (control <- true)
+
+-- §5 the elementary functions
+-- sqrt halves, so the square root of 0.25 is not 0.5
+test "SqrtOfSquares" ExhaustiveMode (seed <- 20261015) (profile <- sqrtHalfProfile) (control <- true)
+-- exp is scaled by 1.0001, so exp 0 is not one
+test "ExpOfZero" ExhaustiveMode (seed <- 20261015) (profile <- expScaledProfile) (control <- true)
+-- log adds 1e-4, so log 1 is not zero
+test "LogOfOne" ExhaustiveMode (seed <- 20261015) (profile <- logShiftedProfile) (control <- true)
+-- erf adds 1e-4, so erf 0 is not zero
+test "ErfOfZero" ExhaustiveMode (seed <- 20261015) (profile <- erfShiftedProfile) (control <- true)
+-- sqrt is the negation, which reverses the order
+test "SqrtMonotone" (SampledMode linear) (seed <- 20261015) (profile <- sqrtNegatedProfile) (control <- true)
+-- sqrt halves, so the root of x * x is x * x / 2
+test "SqrtOfSquare" (SampledMode linear) (seed <- 20261015) (profile <- sqrtHalfProfile) (control <- true)
+-- exp is the negated exponential, negative everywhere
+test "ExpPositive" (SampledMode linear) (seed <- 20261015) (profile <- expNegatedProfile) (control <- true)
+-- erf adds 1e-4, which an odd function cannot do
+test "ErfOdd" (SampledMode linear) (seed <- 20261015) (profile <- erfShiftedProfile) (control <- true)
+-- erf is doubled, so it leaves [-1, 1]
+test "ErfBounded" (SampledMode linear) (seed <- 20261015) (profile <- erfDoubledProfile) (control <- true)
+-- sqrt halves, so its square is a quarter of x
+test "SqrtSquares" (SampledMode linear) (seed <- 20261015) (profile <- sqrtHalfProfile) (control <- true)
+-- exp is scaled by 1.0001, so exp (log x) is 1.0001 x
+test "ExpOfLog" (SampledMode linear) (seed <- 20261015) (profile <- expScaledProfile) (control <- true)
+-- exp is scaled by 1.0001, so log (exp x) is x + 1e-4
+test "LogOfExp" (SampledMode linear) (seed <- 20261015) (profile <- expScaledProfile) (control <- true)
+-- exp is scaled by 1.0001, so exp (x + y) and exp x * exp y differ by 1e-4 relative
+test "ExpAdds" (SampledMode linear) (seed <- 20261015) (profile <- expScaledProfile) (control <- true)
+-- log adds 1e-4, so log (x * y) has one shift and log x + log y two
+test "LogMultiplies" (SampledMode linear) (seed <- 20261015) (profile <- logShiftedProfile) (control <- true)
