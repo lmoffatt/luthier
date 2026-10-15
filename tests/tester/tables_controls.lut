@@ -9,7 +9,9 @@
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "tables.lth" Table Cell int CellsOfTheirKind
+import "tables.lth" Table Codec Perturbed BrokenText Cell int RoundTrip Canonical Tolerant Rejects SchemaWellFormed
+  KindsKnown CellsOfTheirKind NoCellsOffSchema
+import "tables_model.lut" csv
 
 -- a table with a cell that is nothing where its column says int: not a table of the theory
 -- (CellsOfTheirKind)
@@ -21,3 +23,55 @@ holeOnly : List Binding := [ { parameter := just "t", type := nothing, generator
 
 -- expected to be refuted: the table with a nothing cell breaks the law
 test "CellsOfTheirKind" ExhaustiveMode (seed <- 20261014) (whereBindings <- holeOnly) (control <- true)
+
+-- The other laws of tables_laws.lut, added 2026-10-15 by Claude Opus 5.5, an agent of the
+-- coordinating session, on record/IA/controls-2026-10-15/prompt-mutants.md: each on a codec or a
+-- table broken on purpose, over cases like those of tables_laws.lut.
+
+parsed (s : String) : Table := match csv.parse s { just t -> t }
+smallText : String := "a:int,b:float\n1,2.5\n-3,4.0\n"
+oneRow : Table := { nRows := 1, names := ["n"], kinds := ["int"],
+  cell := fn c r { if c == "n" then just (int 7) else nothing } }
+emptyT : Table := { nRows := 0, names := ["k"], kinds := ["int"], cell := fn c r { nothing } }
+-- a table less its last row: the off-by-one of a writer or a reader that loses the last record
+lessLastRow (t : Table) : Table :=
+  { nRows := if t.nRows > 0 then t.nRows - 1 else 0, names := t.names, kinds := t.kinds, cell := fn c r { t.cell c r } }
+-- render loses the last row (RoundTrip, Canonical)
+dropsLastWritten : Codec := { parse := csv.parse, render := fn t { csv.render (lessLastRow t) }, eq := csv.eq }
+-- parse loses the last row (Tolerant)
+dropsLastRead : Codec := { parse := fn s { match csv.parse s { nothing -> nothing ; just t -> just (lessLastRow t) } },
+  render := csv.render, eq := csv.eq }
+-- parse reads a text it cannot read as the empty table, a lenient reader (Rejects)
+lenient : Codec := { parse := fn s { match csv.parse s { nothing -> just emptyT ; just t -> just t } },
+  render := csv.render, eq := csv.eq }
+dropsLastWrittenList : List Codec := [dropsLastWritten]
+dropsLastReadList : List Codec := [dropsLastRead]
+lenientList : List Codec := [lenient]
+
+tablesWithRows : List Table := [ oneRow, parsed smallText ]
+perturbedSmall : List Perturbed := [
+  { table := parsed smallText, text := "a:int,b:float\n1,2.5\n-3,4.0\n" },
+  { table := parsed smallText, text := " a : int , b : float \n 1 , 2.5 \n -3 , 4.0" } ]
+brokenTexts : List BrokenText := [ { s := "k:int,k:float\n1,2.0\n" }, { s := "a:int,b:float\n1,abc\n" } ]
+
+-- a table whose column is named twice (SchemaWellFormed)
+twiceNamed : Table := { nRows := 1, names := ["k", "k"], kinds := ["int", "int"], cell := fn c r { just (int 1) } }
+-- a table with a kind the format does not know, `real` for `float` (KindsKnown)
+unknownKind : Table := { nRows := 1, names := ["x"], kinds := ["real"], cell := fn c r { nothing } }
+-- a table whose cell answers for every name, in the schema or not (NoCellsOffSchema)
+answersAll : Table := { nRows := 1, names := ["k"], kinds := ["int"], cell := fn c r { just (int 1) } }
+twiceNamedList : List Table := [twiceNamed]
+unknownKindList : List Table := [unknownKind]
+answersAllList : List Table := [answersAll]
+offNames : List String := ["k", "nope"]
+rowZero : List Int := [0]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+test "RoundTrip" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "c" "dropsLastWrittenList", bind "t" "tablesWithRows"]) (control <- true)
+test "Canonical" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "c" "dropsLastWrittenList", bind "p" "perturbedSmall"]) (control <- true)
+test "Tolerant" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "c" "dropsLastReadList", bind "p" "perturbedSmall"]) (control <- true)
+test "Rejects" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "c" "lenientList", bind "b" "brokenTexts"]) (control <- true)
+test "SchemaWellFormed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "t" "twiceNamedList"]) (control <- true)
+test "KindsKnown" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "t" "unknownKindList"]) (control <- true)
+test "NoCellsOffSchema" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "t" "answersAllList", bind "c" "offNames", bind "r" "rowZero"]) (control <- true)
