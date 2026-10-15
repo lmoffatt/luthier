@@ -13,19 +13,24 @@
 -- broken on purpose, typed as the family it impersonates (its claim is what the law tests). The
 -- statistical law is apart:
 -- `UniformSampleIsUniform` is statistical (laws.lth §4): its control, added
--- 2026-10-15 on record/IA/statistical-2026-10-15/prompt-tester.md (7.S19, L9.14), is
--- generators_model.lut's `SkewedSampleIsUniform`, the same law on the calibrated sample squared,
--- run by Wald's sequential test at generators_laws.lut's cutoffs `wald`; it passes when the test
--- fails it. It too is a law of its own cone, so `UniformSampleIsUniform` reads uncontrolled.
+-- 2026-10-15 on record/IA/statistical-2026-10-15/prompt-tester.md (7.S19, L9.14), is the law on
+-- generators_model.lut's `skewedSample`, the calibrated sample squared, run by Wald's sequential
+-- test at generators_laws.lut's cutoffs `wald`; it passes when the test fails it. Since
+-- record/IA/controls-2026-10-15/prompt-tail.md the source is the law's parameter and the control
+-- is a line of the law, of its cone (before, a law of its own, `SkewedSampleIsUniform`, which
+-- certify did not count); the law's second control, probability_model.lut's `lump`, every value
+-- 0.9, came here from probability_controls.lut with the `SourceIsUniform` line it controlled
+-- there, which computed the same test as this law's line.
 
 import "test.lth" test SampledMode
-import "generators_model.lut" linear SkewedSampleIsUniform SymmetricGivesSymmetric SymmetricOfGivesItsSize
+import "generators_model.lut" linear UniformSampleIsUniform skewedSample SymmetricGivesSymmetric SymmetricOfGivesItsSize
   GramGivesPsd OrthogonalGivesOrthogonal UnitListGivesUnitValues ClearDiagonalGivesClear
 import "generators.lth" Binding Seed Gen
 import "laws.lth" Listed Sequential
 import "numbers.lth" Tolerance
 import "arrays.lth" Vec Mat Dim RankFloor MatOf Symmetric SymmetricOf ClearDiagonal mat vec identity
 import "probability.lth" UnitList
+import "probability_model.lut" lump
 
 tolerance : Tolerance := 1.0e-12
 floor : RankFloor := 6.661338147750939e-15
@@ -66,4 +71,9 @@ test "ClearDiagonalGivesClear" (SampledMode linear) (seed <- 20261015) (whereBin
 -- the statistical law's control: the sequential test at the demand's cutoffs, as generators_laws.lut
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
 onWald : List Binding := [ { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
-test "SkewedSampleIsUniform" (SampledMode linear) (seed <- 20261015) (profile <- onWald) (control <- true)
+onSkewed : List Binding := [ { parameter := just "source", type := nothing, generator := "skewedSample", coverage := Listed } ]
+onLump : List Binding := [ { parameter := just "source", type := nothing, generator := "lump", coverage := Listed } ]
+-- skewedSample: every value squared, biased toward 0, at Kolmogorov distance 1/4 from the uniform
+test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261015) (whereBindings <- onSkewed) (profile <- onWald) (control <- true)
+-- lump: every value 0.9, the p-value near zero on every sample
+test "UniformSampleIsUniform" (SampledMode linear) (seed <- 20261015) (whereBindings <- onLump) (profile <- onWald) (control <- true)
