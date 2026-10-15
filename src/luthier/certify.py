@@ -18,7 +18,11 @@ The store `x.cert.json` beside `x.lut` is a JSON list of entries, the latest in 
 certification.lth's `Entry` reads them. Its predicate (`Store`: one outcome per identity, a grade
 exactly when passed) is checked on every store read or written; `record` never edits an entry and
 leaves the store as it is on a known identity; a stale entry is kept, and is stale only as read
-against the current hash of its law's cone (12.S11), never marked in the file.
+against the current hash of its law's cone (12.S11), never marked in the file. [D-2026-10-16-b,
+L10.12] The stores are partitioned by the files that make the claims: an entry lives only in the
+store of the file that defines the model of the library its binding names, or else of the file
+that states its law (tester.py's `claim_file`); a test program keeps none, and `certify` and
+`check -v` read the stores of its lines' claims (`read_stores`), never one beside it.
 
 §3, what a run requires (`contains`, `covers_all`, `serves`, `state_of`, `refuse`), is the reading
 of the store `run` makes before evaluating (run.py's `certification`), after
@@ -32,8 +36,9 @@ status, reported beside its grade by `certify` and `check -v` (`control_status`)
 control refuted at the law's current cone hash), control failed (a control the law held on at that
 hash, reported loudly), or uncontrolled, untested against any wrong model. The grade is unchanged
 by it (the demand's business later). [proposed] A law and its control are matched by the hash of
-the law's cone, which names the law; the controls read are those of the files `certify` or
-`check -v` is given, so a law certified without its control file is reported uncontrolled.
+the law's cone, which names the law; the controls read are those in the stores of the claims of
+the files `certify` or `check -v` is given (a control lives beside the claim it controls), so a law
+certified without its control file is reported uncontrolled.
 
 Statistical laws (record/IA/statistical-2026-10-15/prompt-tester.md; laws.lth §4, 7.S17, L9.15): an
 entry whose evidence is `Tested` holds the sequential test's verdict with alpha, beta, delta, the
@@ -408,6 +413,13 @@ def read_store(path):
     return entries
 
 
+def read_stores(paths):
+    """The entries of the stores of `paths` (each read once), the latest in front across them, as a
+    run reads the stores of its files."""
+    entries = [e for p in dict.fromkeys(Path(p) for p in paths) for e in read_store(p)]
+    return sorted(entries, key=lambda e: e.get("date", ""), reverse=True)
+
+
 def write_store(path, entries):
     errors = store_errors(entries)
     if errors:
@@ -604,11 +616,12 @@ def standing(entries, law, current):
 
 
 def standings(path):
-    """Per law a test line of the file names: its standing from the store, against the current
-    hash of its cone (12.S11, 12.S14). Control lines aside (`control_standings`)."""
-    from .tester import law_cones
-    entries = read_store(path)
-    return [(law, standing(entries, law, current)) for law, current in law_cones(path)]
+    """Per law a test line of the file names: its standing from the stores of its lines' claims,
+    against the current hash of its cone (12.S11, 12.S14). Control lines aside (`control_standings`)."""
+    from .tester import line_claims
+    lines, claims = line_claims(path)
+    entries = read_stores(claims)
+    return [(law, standing(entries, law, current)) for law, current, control in lines if not control]
 
 
 # ---------------------------------------------------------------------- controls (7.S19, L9.14)
@@ -658,16 +671,19 @@ def control_standing(entries, law, current):
     return "no entry"
 
 
-def controls_in(paths):
-    """The control entries of the stores of `paths` (a file without a store has none)."""
-    return [e for p in paths for e in read_store(p) if is_control(e)]
+def controls_in(stores):
+    """The control entries of the stores of `stores`, files that make claims (a file without a
+    store has none)."""
+    return [e for e in read_stores(stores) if is_control(e)]
 
 
 def control_standings(path):
-    """Per law a control line of the file names: its control's standing from the store."""
-    from .tester import law_cones
-    entries = read_store(path)
-    return [(law, control_standing(entries, law, current)) for law, current in law_cones(path, control=True)]
+    """Per law a control line of the file names: its control's standing from the stores of its
+    lines' claims."""
+    from .tester import line_claims
+    lines, claims = line_claims(path)
+    entries = read_stores(claims)
+    return [(law, control_standing(entries, law, current)) for law, current, control in lines if control]
 
 
 # ---------------------------------------------------------------------- §3 what a run requires
@@ -793,13 +809,15 @@ def _shown_value(v):
 # ---------------------------------------------------------------------- `luthier certify` (12.S16)
 
 def certify_file(path, seed=None, deep=False, fuel=1_000_000, store=True):
-    """Run one file's test lines, writing its store (reading and writing none without `store`); per
+    """Run one file's test lines, writing the stores of their claims (reading and writing none
+    without `store`); per
     law its certificate's grade (the weakest across bindings) and the hash of its cone, the entries
     of its control lines, with the counts of lines run and known. Runs in its own process."""
     from .tester import run_tests
     try:
         outcomes = run_tests(path, seed, fuel, deep=deep, store=store)
-        entries = read_store(path) if store else [o.entry for o in reversed(outcomes) if o.entry is not None]
+        entries = (read_stores(o.store for o in outcomes) if store
+                   else [o.entry for o in reversed(outcomes) if o.entry is not None])
     except Exception as exc:  # the file's failure is reported with the file, the others go on
         return {"path": str(path), "error": f"{type(exc).__name__}: {exc}"}
     laws = {}
@@ -830,7 +848,8 @@ def certify(paths, jobs=1, seed=None, deep=False, fuel=1_000_000, out=print, sto
     with ProcessPoolExecutor(max_workers=max(1, jobs), mp_context=context, max_tasks_per_child=1) as pool:
         futures = [pool.submit(certify_file, str(p), seed, deep, fuel, store) for p in paths]
         results = [future.result() for future in futures]
-    controls = [e for r in results for e in r.get("control entries", [])]
+    # two files' lines may share a claim's store: each control entry once
+    controls = list({identity(e): e for r in results for e in r.get("control entries", [])}.values())
     for result in results:
         if "error" in result:
             out(f"{result['path']}: {result['error']}")

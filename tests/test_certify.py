@@ -399,16 +399,16 @@ def test_an_entry_goes_into_the_store_of_the_file_that_defines_the_model(tmp_pat
     top = tmp_path / "t_laws.lut"
     top.write_text(LAWS_OF_MODEL, encoding="utf-8")
     outcomes = tester.run_tests(top, store=True)
-    own = certify.read_store(top)
     home = certify.read_store(tmp_path / "m_model.lut")
-    assert [e["law"] for e in own][::-1] == ["PlusCommutes", "Wrapper"]
-    # the law of the library goes to the model's store too, the program's own wrapper does not
-    assert [e["law"] for e in home] == ["PlusCommutes"]
-    assert certify.identity(home[0]) == certify.identity(next(e for e in own if e["law"] == "PlusCommutes"))
-    assert home[0]["outcome"] == "Passed" and len(outcomes) == 2
-    # again: nothing new in either store
+    # only the model's store (L10.12, D-2026-10-16-b): the law of the library and the program's
+    # own wrapper on the library's model; the test program keeps none
+    assert [e["law"] for e in home][::-1] == ["PlusCommutes", "Wrapper"]
+    assert not certify.store_path(top).exists()
+    assert [o.store for o in outcomes] == [tmp_path / "m_model.lut"] * 2
+    assert home[1]["outcome"] == "Passed" and len(outcomes) == 2
+    # again: nothing new
     tester.run_tests(top, store=True, deep=True)
-    assert certify.read_store(tmp_path / "m_model.lut") == home and certify.read_store(top) == own
+    assert certify.read_store(tmp_path / "m_model.lut") == home and not certify.store_path(top).exists()
 
 
 LAWS_OF_LIST = LAWS_OF_MODEL.replace(
@@ -425,11 +425,72 @@ def test_a_census_that_lists_a_model_sends_the_entry_to_its_file(tmp_path):
     top.write_text(LAWS_OF_LIST, encoding="utf-8")
     assert LAWS_OF_LIST != LAWS_OF_MODEL
     tester.run_tests(top, store=True)
-    own = certify.read_store(top)
     home = certify.read_store(tmp_path / "m_model.lut")
-    assert [e["law"] for e in own][::-1] == ["PlusCommutes", "Wrapper"]
-    assert [e["law"] for e in home] == ["PlusCommutes"]
-    assert home[0]["binding"][0]["generator"].startswith("census")
+    assert [e["law"] for e in home][::-1] == ["PlusCommutes", "Wrapper"] and not certify.store_path(top).exists()
+    assert all(e["binding"][0]["generator"].startswith("census") for e in home)
+
+
+# record/IA/code-follows-2026-10-16/prompt-claim-store.md (L10.12, D-2026-10-16-b): an entry lives
+# only beside the file that makes the claim; a test program keeps no store, and none beside it is read
+
+SMALL_MODEL = '''Small : { f : Bool -> Bool }
+FixesBool (m : Small) (b : Bool) : Bool := m.f b == b
+Small := FixesBool
+same : Small := { f := fn b { b } }
+'''
+SMALL_TEST = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "small_model.lut" Small FixesBool same
+models : List Binding := [ { parameter := just "m", type := nothing, generator := "same", coverage := Listed } ]
+test "FixesBool" ExhaustiveMode (whereBindings <- models)
+'''
+SMALL_USE = '''import "world_model.lut" HostConsole host : HostConsole
+import "small_model.lut" same
+show (b : Bool) : String := if b then "true" else "false"
+main (w : W) : W * Unit := host.print w (show (same.f true))
+'''
+
+
+def _small(tmp_path):
+    for name, text in (("small_model.lut", SMALL_MODEL), ("small_test.lut", SMALL_TEST), ("uses.lut", SMALL_USE)):
+        (tmp_path / name).write_text(text, encoding="utf-8")
+    return tmp_path / "small_model.lut", tmp_path / "small_test.lut", tmp_path / "uses.lut"
+
+
+def test_a_law_certified_from_a_test_program_is_found_by_a_run_that_imports_only_the_model(tmp_path, capsys):
+    from luthier.run import Refused, run_file
+    model, test, uses = _small(tmp_path)
+    with pytest.raises(Refused, match="same: FixesBool: uncertified"):
+        run_file(uses)
+    assert main(["certify", str(test)]) == 0
+    assert "1 lines ran, 0 known" in capsys.readouterr().out
+    # the entry is in the model's store, none beside the test program
+    assert [e["law"] for e in certify.read_store(model)] == ["FixesBool"]
+    assert not certify.store_path(test).exists()
+    # a run that loads the model's file and never the test program finds it
+    assert run_file(uses) == "true\n"
+    assert main(["certify", str(test)]) == 0
+    assert "0 lines ran, 1 known" in capsys.readouterr().out
+    assert not certify.store_path(test).exists()
+
+
+def test_a_store_written_beside_a_test_program_by_hand_is_not_read(tmp_path, counted):
+    # the control (L9.14): the same entry, moved by hand beside the test program, serves nothing
+    from luthier.run import Refused, run_file
+    model, test, uses = _small(tmp_path)
+    tester.run_tests(test, store=True)
+    entries = certify.read_store(model)
+    certify.store_path(model).unlink()
+    certify.store_path(test).write_text(json.dumps(entries), encoding="utf-8")
+    assert dict(certify.standings(test)) == {"FixesBool": "uncertified"}
+    with pytest.raises(Refused, match="same: FixesBool: uncertified"):
+        run_file(uses)
+    counted.clear()
+    again, = tester.run_tests(test, store=True)
+    assert again.known is None and counted  # it ran: the store beside the test program was not read
+    assert certify.read_store(model) == [again.entry]
+    assert json.loads(certify.store_path(test).read_text(encoding="utf-8")) == entries  # untouched
 
 
 def test_adding_to_a_store_twice_keeps_one_entry(tmp_path):
@@ -619,16 +680,19 @@ def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
     out = capsys.readouterr().out.splitlines()
     assert "  Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
     assert "  Reflexive: exhaustive; uncontrolled: untested against any wrong model (7.S19)" in out
-    stored = certify.read_store(controls)
+    # the control lives beside the claim it controls, the file that states the law (L10.12): the
+    # controls file keeps no store
+    stored = [e for e in certify.read_store(laws) if certify.is_control(e)]
     assert [(e["kind"], e["outcome"], e["grade"]) for e in stored] == \
         [("Control", {"ControlRefuted": "f = flip, b = true"}, None)]
-    # check -v reads the controls from the stores of the files it is given
+    assert not certify.store_path(controls).exists()
+    # check -v reads the controls from the stores of the claims of the files it is given
     main(["check", "-v", str(laws), str(controls)])
     out = capsys.readouterr().out
     assert "certificate Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
     assert "certificate control of Idempotent: refuted at f = flip, b = true: the control passed" in out
-    main(["check", "-v", str(laws)])  # without the control file the law is uncontrolled
-    assert "certificate Idempotent: cases; uncontrolled" in capsys.readouterr().out
+    main(["check", "-v", str(laws)])  # the law's store holds its control: controlled without the file
+    assert "certificate Idempotent: cases; controlled" in capsys.readouterr().out
     # a control the law holds on fails, loudly, and certify fails; the grade is unchanged
     controls.write_text(PAIR_CONTROLS + 'test "Idempotent" ExhaustiveMode (whereBindings <- onAlways) '
                         '(control <- true)\n', encoding="utf-8")
@@ -682,7 +746,7 @@ def test_certify_a_statistical_law_with_its_rates_and_its_control(tmp_path, caps
             f"  control of Constant on zeros (Listed), wald (Listed): refuted at 8 samples of 1 {rates}: "
             "the control passed",
         ]
-    entry, = certify.read_store(laws)
+    entry, = [e for e in certify.read_store(laws) if not certify.is_control(e)]
     assert entry["evidence"]["Tested"] == {"verdict": "Holds", "alpha": 0.01, "beta": 0.01, "delta": 0.9,
                                            "spent": 2, "initial": 1, "budget": 100}
     assert certify.store_errors([entry]) == []

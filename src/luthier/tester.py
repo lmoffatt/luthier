@@ -40,18 +40,23 @@ a test line names is the one the test file sees.
 The store (bite 2, record/IA/certification-2026-10-14/prompt-certify.md; certification.lth §1,
 7.S9, 7.S13): each line's identity is the law, the hash of its cone (certify.py), the binding
 expanded per parameter, the seed and `n`. Before a line runs its identity is looked up in
-`x.cert.json`: a known outcome, whatever it is, is reused and reported as known with its date;
-`deep` runs it again (and records nothing new: the store keeps one outcome per identity). A line
-run writes its entry, with the reach of each parameter, the evidence, the grade when it passed,
-the date, the interpreter's revision and the host code by route.
+the store of the file that makes the line's claim (`claim_file`): a known outcome, whatever it is,
+is reused and reported as known with its date; `deep` runs it again (and records nothing new: the
+store keeps one outcome per identity). A line run writes its entry there, with the reach of each
+parameter, the evidence, the grade when it passed, the date, the interpreter's revision and the
+host code by route. The file that makes the claim (L10.12, D-2026-10-16-b; record/IA/
+code-follows-2026-10-16/prompt-claim-store.md) is the file that defines the model of the library
+the line's binding names (`model_homes`), or, when it names none, the file that states the law; a
+test program, which only gathers evidence, keeps no store of its own, and none beside it is read.
 
 A control (record/IA/controls-2026-10-15/prompt-tester.md; 7.S19 as D-2026-10-15-a generalized it,
 L9.14; test.lth's `control` field and `controlPasses`): a line written `(control <- true)` tests its
 law on a model broken on purpose and expects it refuted. It runs as any line, and its entry is its
 own kind, `"kind": "Control"` [proposed], whose outcome is `ControlRefuted` (the case: the control
 passed), `ControlConfirmed` (the law held on the broken model: the control failed, the law too weak
-to see the break) or `NotRunFor`; it never carries a grade, never grades or refutes the law, and is
-written only to the test file's store (no model home). certify.py reads it as the law's control.
+to see the break) or `NotRunFor`; it never carries a grade, never grades or refutes the law, and
+lives as any line's entry beside the claim it controls (`claim_file`: the broken model being the
+test program's, the file that states the law). certify.py reads it as the law's control.
 
 A statistical law (record/IA/statistical-2026-10-15/prompt-tester.md; laws.lth §4, 7.S17 to 7.S19,
 L9.15, D-2026-10-15-b): a law whose result type is `Law` and whose body, at its bindings, reduces to
@@ -205,6 +210,7 @@ class Outcome:
     known: str | None = None    # the date of the known entry reused, when the line did not run
     stale: str | None = None    # the date of a stale entry of the same law and binding, kept
     differs: str | None = None  # under `deep`, the date of a known entry whose outcome differs
+    store: object = None        # the file whose store holds the line's entry (`claim_file`)
 
 
 # ---------------------------------------------------------------------- loading
@@ -1072,16 +1078,22 @@ def prepare(path, fuel=1_000_000):
 
 def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
     """Run every `test` line of the file; the outcomes in order. With `store`, each line's identity
-    is looked up in `x.cert.json` first (a known outcome is reused unless `deep`) and each line run
-    is recorded there (certification.lth's `known` and `record`)."""
+    is looked up first in the store of the file that makes its claim (`claim_file`; a known outcome
+    is reused unless `deep`) and each line run is recorded there, under its lock
+    (certification.lth's `known` and `record`); the test program's own store is neither read nor
+    written."""
     runner, specs, loaded = prepare(path, fuel)
     cones = certify.Cones(runner)
-    entries = certify.read_store(path) if store else []
+    stores = {}  # the file that makes a claim -> its store's entries, as read
     outcomes = []
     for spec in specs:
         if seed is not None:
             spec.seed = seed
         entry = new_entry(runner, loaded, spec, cones, fuel)
+        home = claim_file(loaded, spec, runner)
+        if home not in stores:
+            stores[home] = certify.read_store(home) if store else []
+        entries = stores[home]
         found = certify.known(entries, certify.identity(entry))
         if found is not None and not deep:
             evidence = found["evidence"]
@@ -1091,11 +1103,11 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
                 verdict = SETTLED_BY_TEST[evidence["Tested"]["verdict"]]
                 evaluated = evidence["Tested"]["spent"]
             outcomes.append(Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
-                                    entry=found, known=found["date"]))
+                                    entry=found, known=found["date"], store=home))
             continue
         outcome = run_spec(runner, spec, fuel, loaded)
         settle(entry, outcome)
-        outcome.cone, outcome.entry = entry["cone"], entry
+        outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
         if found is not None and found["outcome"] != entry["outcome"]:
             outcome.differs = found["date"]
         old = next((e for e in entries if e["law"] == entry["law"] and e["binding"] == entry["binding"]
@@ -1104,23 +1116,62 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
             outcome.stale = old["date"]
         outcomes.append(outcome)
         if store:
-            recorded = certify.record(entries, entry)
-            if recorded is not entries:
-                entries = recorded
-                certify.write_store(path, entries)
-            # [proposed] a control's entry stays in the test file's store: it is no evidence a
-            # run of the model's importer reads
-            for home in ([] if spec.control else model_homes(loaded, spec, runner)):
-                certify.add_entry(home, entry)
+            certify.add_entry(home, entry)
+            stores[home] = certify.read_store(home)
     return outcomes
+
+
+def law_file(loaded, law):
+    """The file that states the law a test line names: the one the test program sees by that name,
+    else the one the loader calls by it (a control file may name a law it does not import), else
+    the first file loaded that defines it."""
+    try:
+        found = loaded.see(loaded.top, law)
+    except RunError:
+        found = None
+    if found is not None:
+        return found[0]
+    if law in loaded.plain:
+        return loaded.plain[law]
+    return next((p for p, f in loaded.files.items() if law in f.defined), loaded.top)
+
+
+def _reached(loaded, path):
+    """The files `path` imports, directly or through what it imports."""
+    seen, todo = set(), [path]
+    while todo:
+        f = loaded.files.get(todo.pop())
+        for target, _ in (f.imports.values() if f is not None else ()):
+            if target not in seen:
+                seen.add(target)
+                todo.append(target)
+    return seen
+
+
+def claim_file(loaded, spec, runner):
+    """The file that makes the claim a line's entry certifies, whose store alone holds the entry
+    (L10.12, D-2026-10-16-b): the file that defines the model of the library its binding names
+    (`model_homes`), or, when it names none (a theory's own law tested on a census, a control on a
+    model the test program breaks), the file that states the law. [proposed] When the binding names
+    models of several files, the one that imports the others (a run that demands the law on all of
+    them loads it), else the first; nothing is written in two stores."""
+    homes = model_homes(loaded, spec, runner)
+    for home in homes:
+        reached = _reached(loaded, home)
+        if all(other == home or other in reached for other in homes):
+            return home
+    if homes:
+        return homes[0]
+    return law_file(loaded, spec.law)
 
 
 def model_homes(loaded, spec, runner=None):
     """[proposed, night default for decision 1 of report-run.md] The files, other than the test
     program and core, that define a model a binding of the line names (`numpy` in
-    arrays_model.lut), when the law is itself defined in another file than the test program's: the
-    entry is also written into their stores, which a run of an importer reads (12.S11). A law the
-    test program defines (a wrapper) has no such home.
+    arrays_model.lut): the claim's file is one of them (`claim_file`), whose store a run of an
+    importer reads (12.S11). [proposed, 2026-10-16, prompt-claim-store.md] A law the test program
+    defines (a wrapper) on a model of the library has that model's file as its home too, so that the
+    test program keeps no store; before, it had none and its entry stayed beside the test program.
 
     A model is a value whose type is the theory head of the parameter the binding binds (`numpy :
     Arrays` for `a : Arrays`, `listedHost : Host State` for `o : Host S`): the census the binding
@@ -1131,12 +1182,6 @@ def model_homes(loaded, spec, runner=None):
     if loaded is None or runner is None:
         return []
     top = loaded.top
-    try:
-        law = loaded.see(top, spec.law)
-    except RunError:
-        return []
-    if law is None or law[0] == top:
-        return []
     homes = []
     for name, ty in parameters(runner, _as_called(loaded, spec.law)) or []:
         head = _program_head(ty)
@@ -1235,13 +1280,20 @@ def _list_members(loaded, found):
     return []
 
 
-def line_cones(path, fuel=1_000_000):
+def line_claims(path, fuel=1_000_000):
     """Each (law, control) the file's test lines name, the law as the file writes it, with the hash
-    of the law's cone: [(law, cone, control)]."""
+    of the law's cone: [(law, cone, control)]; and the files whose stores hold the lines' entries
+    (`claim_file`), each once, in the order of the lines."""
     runner, specs, loaded = prepare(path, fuel)
     cones = certify.Cones(runner)
-    return [(law, cone, control) for (law, control), cone in
-            {(spec.law, spec.control): cones.hash(_as_called(loaded, spec.law)) for spec in specs}.items()]
+    lines = [(law, cone, control) for (law, control), cone in
+             {(spec.law, spec.control): cones.hash(_as_called(loaded, spec.law)) for spec in specs}.items()]
+    return lines, list(dict.fromkeys(claim_file(loaded, spec, runner) for spec in specs))
+
+
+def line_cones(path, fuel=1_000_000):
+    """Each (law, control) the file's test lines name, with the hash of the law's cone (`line_claims`)."""
+    return line_claims(path, fuel)[0]
 
 
 def law_cones(path, fuel=1_000_000, control=False):

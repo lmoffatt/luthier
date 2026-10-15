@@ -191,20 +191,38 @@ def _session(files, world=False, fuel=None):
     return 1 if failed else 0
 
 
+def _claims_of(files, path):
+    """The files that make the claims of the test lines of the other files checked; a file that
+    cannot be loaded gives none (its own check reports it)."""
+    from .tester import collect_tests, line_claims
+    claims = []
+    for f in dict.fromkeys(files):
+        if Path(f).resolve() == Path(path).resolve():
+            continue
+        try:
+            if collect_tests(f):
+                claims += line_claims(f)[1]
+        except Exception:
+            continue
+    return claims
+
+
 def _standings(path, line_of, files=()):
     """`check -v`: per law a test line of the file names, its standing from the store against the
     current hash of its cone (12.S11, 12.S14): the grade, refuted, not run, stale or uncertified;
-    and its control status from the control entries of the stores of every file checked (7.S19,
-    L9.14): controlled, control failed, or uncontrolled. Per control line, its control's standing.
-    Only for a file with test lines; True when the program cannot be loaded."""
-    from .tester import collect_tests, line_cones
+    and its control status from the control entries of the stores of the claims of every file
+    checked (7.S19, L9.14): controlled, control failed, or uncontrolled. Per control line, its
+    control's standing. The stores read are those of the files that make the lines' claims
+    (tester.py's `claim_file`, L10.12), never one beside a test program. Only for a file with test
+    lines; True when the program cannot be loaded."""
+    from .tester import collect_tests, line_claims
     try:
         if not collect_tests(path):
             return False
-        from .certify import control_standing, control_status, controls_in, read_store, standing
-        controls = controls_in(dict.fromkeys([path, *files]))
-        entries = read_store(path)
-        lines = line_cones(path)
+        from .certify import control_standing, control_status, controls_in, read_stores, standing
+        lines, claims = line_claims(path)
+        controls = controls_in(claims + _claims_of(files, path))
+        entries = read_stores(claims)
         for law, current, control in lines:
             if not control:
                 print(f"{path}:{line_of(law)}: certificate {law}: {standing(entries, law, current)}; "
