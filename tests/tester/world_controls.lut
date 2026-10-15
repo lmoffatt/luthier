@@ -8,13 +8,17 @@
 -- record/IA/controls-2026-10-15/prompt-mutants.md. The states, lines and places are those of
 -- world_laws.lut.
 
-import "test.lth" test ExhaustiveMode
+import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "kernel_laws.lth" Concrete
+import "term.lth" Term Var App
 import "world.lth" Console appendStr lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
-  ReadChangesNothing
-import "world_model.lut" State console theWorld lookupFile
+  ReadChangesNothing World Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf settled
+  AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash Crossing mapList lengthOf
+  CallbackGivesTheFunction CallsAreCounted RecordCrossesByField Host Observed Held held printDescription
+  readFileDescription HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
+import "world_model.lut" State console theWorld lookupFile host
 
 states : List Concrete := [State]
 blank : State := { stdout := "", files := nil }
@@ -53,3 +57,152 @@ test "PrintAppendsALine" ExhaustiveMode (seed <- 20261015) (whereBindings <- onP
 test "PrintChangesOnlyStdout" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPrintElsewhere "dropsFilesList") (control <- true)
 test "ReadGivesThePlace" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRead "readsNothingList") (control <- true)
 test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRead "readClearsList") (control <- true)
+
+-- ---------------------------------------------------------------- the rest of world.lth
+-- Added 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/v04-2026-10-15/prompt-e.md: the controls of the lines world_laws.lut adds. The broken
+-- models: an own action that appends to Luthier's store instead of setting it, and a `print`
+-- described as writing the standard output that also writes a log file (`Described`); a validator
+-- that applies every extern, one that grades an extern whose type states no law, one that
+-- validates a provisional extern, and one whose identity is the route alone (`Externs`); a bridge
+-- that gives the values in reverse order, one that counts one call per crossing, and one that calls
+-- the first field whatever the label (the review's W5) (`Crossing`). `Host`'s laws read of the
+-- host model only its console, which is the console's and never the host's (world.lth §4, the
+-- review's W1), so a host broken on purpose shows only in the cases it gathers: each control lists
+-- the case `agreement` gathers from such a host (a `print` that forgets the newline, a `readFile`
+-- that finds nothing, an observation that empties the standard output, a `print` that also writes
+-- input.txt) on the same `listedHost` as world_laws.lut. `ObserverIsFaithful` has no control: it
+-- is an axiom and reads nothing of the model (11.R3).
+
+-- §1, §2 descriptions
+unitTypes : List U := [Unit]
+worldModels : List (World State) := [theWorld]
+-- the lock appended to, not set: a second write leaves two entries
+appendsLock : Described State Unit theWorld := {
+  describe := fn st { ({ stdout := st.stdout, files := cons ("luthier.lock", "pinned") st.files }, unit) },
+  own := true, places := ["luthier.lock"] }
+-- print, declared at the standard output, also writes log.txt
+printLogs : Described State Unit theWorld := {
+  describe := fn st { ({ stdout := appendStr st.stdout (lineOf "hello, world"), files := cons ("log.txt", "printed") st.files }, unit) },
+  own := false, places := ["stdout"] }
+appendsLockList : List (Described State Unit theWorld) := [appendsLock]
+printLogsList : List (Described State Unit theWorld) := [printLogs]
+logPlaces : List String := ["stdout", "log.txt"]
+test "OwnIsIdempotent" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "A" "unitTypes",
+  bind "m" "worldModels", bind "d" "appendsLockList", bind "s" "worlds"]) (control <- true)
+test "ChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "A" "unitTypes",
+  bind "m" "worldModels", bind "d" "printLogsList", bind "s" "worlds", bind "p" "logPlaces"]) (control <- true)
+
+-- §3 externs: world_laws.lut's validator, broken
+lawful : Term := App (Var "Likelihood") (Var "3")
+lawless : Term := Var "Float64"
+lawsOfType (t : Term) : List String := if t == lawful then ["TangentShapes", "ScoreIsGradient"] else nil
+validations : List (String * Grade) := [("sha256:h1", Sampled), ("sha256:h2", Cases), ("sha256:h3", Proved)]
+lookupGrade (h : String) (vs : List (String * Grade)) : Maybe Grade :=
+  match vs { nil -> nothing ; cons (k, g) rest -> if k == h then just g else lookupGrade h rest }
+gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
+  if r.provisional then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+-- applies every extern, validated or not
+appliesEvery : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute, applied := fn r h { true },
+  identity := fn r h { r.route + " at " + h } }
+-- grades by the hash whether or not the type states a law
+gradesLawless (r : Route) (h : String) : Maybe Grade := if r.provisional then just AssumedGrade else lookupGrade h validations
+gradesWithoutLaws : Externs := { lawsOf := lawsOfType, gradeOf := gradesLawless,
+  applied := fn r h { r.provisional or settled Sampled (gradesLawless r h) }, identity := fn r h { r.route + " at " + h } }
+-- validates a provisional extern as any other
+validatesAll (r : Route) (h : String) : Maybe Grade := if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+validatesProvisional : Externs := { lawsOf := lawsOfType, gradeOf := validatesAll,
+  applied := fn r h { r.provisional or settled Sampled (validatesAll r h) }, identity := fn r h { r.route + " at " + h } }
+-- the identity of what an extern produces is its route, whatever was read
+identityByRoute : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
+  applied := fn r h { r.provisional or settled Sampled (gradeOfRoute r h) }, identity := fn r h { r.route } }
+appliesEveryList : List Externs := [appliesEvery]
+gradesWithoutLawsList : List Externs := [gradesWithoutLaws]
+validatesProvisionalList : List Externs := [validatesProvisional]
+identityByRouteList : List Externs := [identityByRoute]
+cutoff : List Grade := [Sampled]
+routes : List Route := [routeOf "fit" lawful "python:m.fit" false, routeOf "raw" lawless "python:m.raw" false,
+  routeOf "guess" lawful "python:m.guess" true, routeOf "rawGuess" lawless "python:m.rawGuess" true]
+hashes : List String := ["sha256:h1", "sha256:h2", "sha256:h3", "sha256:h4"]
+externNames : List String := ["fit"]
+terms : List Term := [lawful, lawless]
+routeStrings : List String := ["python:m.fit"]
+onRoute (e : String) : List Binding := [bind "e" e, bind "n" "externNames", bind "t" "terms", bind "route" "routeStrings",
+  bind "h" "hashes"]
+test "AppliedWhenSettled" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "appliesEveryList",
+  bind "accepts" "cutoff", bind "r" "routes", bind "h" "hashes"]) (control <- true)
+test "NoLawNoGrade" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRoute "gradesWithoutLawsList") (control <- true)
+test "ProvisionalIsAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRoute "validatesProvisionalList") (control <- true)
+test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "identityByRouteList",
+  bind "r" "routes", bind "h" "hashes", bind "k" "hashes"]) (control <- true)
+
+-- §3 the crossing, broken
+fieldOf (fs : List (String * (Int -> Int))) (l : String) : Maybe (Int -> Int) :=
+  match fs { nil -> nothing ; cons (k, g) rest -> if k == l then just g else fieldOf rest l }
+reverseInts (xs acc : List Int) : List Int := match xs { nil -> acc ; cons x rest -> reverseInts rest (cons x acc) }
+callRight (f : Int -> Int) (xs : List Int) : List Int * Nat := (mapList Int Int f xs, lengthOf Int xs)
+-- the values given back in reverse order
+reversesCalls : Crossing Int Int := {
+  callBack := fn f xs { (reverseInts (mapList Int Int f xs) nil, lengthOf Int xs) },
+  callField := fn fs l xs { match fieldOf fs l { just f -> (reverseInts (mapList Int Int f xs) nil, lengthOf Int xs) ; nothing -> (nil, 0) } },
+}
+-- one call counted per crossing, whatever the host asked
+countsOnce : Crossing Int Int := {
+  callBack := fn f xs { (mapList Int Int f xs, 1) },
+  callField := fn fs l xs { match fieldOf fs l { just f -> (mapList Int Int f xs, 1) ; nothing -> (nil, 0) } },
+}
+-- the first field called whatever the label
+firstField (fs : List (String * (Int -> Int))) : Maybe (Int -> Int) := match fs { nil -> nothing ; cons (k, g) rest -> just g }
+callsFirstField : Crossing Int Int := {
+  callBack := callRight,
+  callField := fn fs l xs { match firstField fs { just f -> callRight f xs ; nothing -> (nil, 0) } },
+}
+reversesCallsList : List (Crossing Int Int) := [reversesCalls]
+countsOnceList : List (Crossing Int Int) := [countsOnce]
+callsFirstFieldList : List (Crossing Int Int) := [callsFirstField]
+ints : List Concrete := [Int]
+double (x : Int) : Int := 2 * x
+succ (x : Int) : Int := x + 1
+flip (x : Int) : Int := 0 - x
+functions : List (Int -> Int) := [double, succ, flip]
+arguments : List (List Int) := [nil, [1], [1, 2, 3], [0 - 4, 0, 7]]
+befores : List (List (String * (Int -> Int))) := [nil, [("g", succ)], [("f", double)]]
+afters : List (List (String * (Int -> Int))) := [nil, [("f", flip)], [("h", succ)]]
+labels : List String := ["f", "g"]
+onCallback (b : String) : List Binding := [bind "A" "ints", bind "B" "ints", bind "b" b, bind "f" "functions",
+  bind "xs" "arguments"]
+test "CallbackGivesTheFunction" ExhaustiveMode (seed <- 20261015) (whereBindings <- onCallback "reversesCallsList") (control <- true)
+test "CallsAreCounted" ExhaustiveMode (seed <- 20261015) (whereBindings <- onCallback "countsOnceList") (control <- true)
+test "RecordCrossesByField" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "ints", bind "B" "ints",
+  bind "b" "callsFirstFieldList", bind "before" "befores", bind "after" "afters", bind "l" "labels",
+  bind "f" "functions", bind "xs" "arguments"]) (control <- true)
+
+-- §5 the cases broken hosts gather
+listedHost : Host State := { console := console, observe := host.observe, print := host.print, readFile := host.readFile }
+hosts : List (Host State) := [listedHost]
+maybeTypes : List U := [Maybe String]
+case (S A : U) (b : S) (x : A) (a : S) : Observed S A := { before := b, result := x, after := a }
+after (st : State) (out : String) : State := { stdout := out, files := st.files }
+hello : List String := ["hello, world"]
+-- print forgets the newline
+noNewlineCases : List (Observed State Unit) := [case State Unit blank unit (after blank "hello, world")]
+input : List String := ["input.txt"]
+-- readFile finds nothing where the file is
+readsNothingCases : List (Observed State (Maybe String)) := [case State (Maybe String) withFiles nothing withFiles]
+observed : List (List String) := [["stdout", "input.txt"]]
+-- the observation empties the standard output
+clearsCases : List (Observed State State) := [case State State printed printed blank]
+-- print also writes input.txt
+clobbered : State := { stdout := "hello, world\n", files := [("input.txt", "overwritten"), ("empty.txt", "")] }
+clobbersCases : List (Observed State Unit) := [case State Unit withFiles unit clobbered]
+helloHeld : List (Held State Unit theWorld) := [held State Unit theWorld (fn w { listedHost.print w "hello, world" })
+  (printDescription State console "hello, world")]
+extras : List (List String) := [["stdout", "input.txt", "other.txt"]]
+test "HostAgreesPrint" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+  bind "s" "hello", bind "c" "noNewlineCases"]) (control <- true)
+test "HostAgreesReadFile" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+  bind "p" "input", bind "c" "readsNothingCases"]) (control <- true)
+test "HostObserveChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+  bind "ps" "observed", bind "c" "clearsCases"]) (control <- true)
+test "HostChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "o" "hosts",
+  bind "A" "unitTypes", bind "h" "helloHeld", bind "extra" "extras", bind "c" "clobbersCases"]) (control <- true)
