@@ -7,6 +7,10 @@
 -- 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
 -- layer-3-review-2026-10-15/prompt-fix-BCD.md (item 1 of its summary-BCD.md): `IsGradient` along a
 -- drawn direction, as `IsJacobian` is, so that a zero gradient is not a gradient of every function.
+-- 2026-10-15, by Claude Fable 5.1, an agent of the coordinating session, on record/IA/
+-- statistical-2026-10-15/prompt-theory.md: `UniformAtLevel`, a Bool law at a level, rewritten as
+-- `SourceIsUniform`, a statistical law in the form of laws.lth §4 (7.S17 to 7.S19 as rewritten
+-- that day, L9.15, D-2026-10-15-b), with its control in probability_model.lut (L9.14).
 -- Sources: spec 7.R2 (the libraries quantify over `VecOf n`, never over `(Theta : U)`), 11.S18
 -- (a tolerance is the demand's, D-2026-10-12-h), 7.S17 (a statistical law declares its level),
 -- 4.R10 (a law characterizes; agreement with a native definition is a corollary), 12.S9 (the
@@ -41,13 +45,15 @@
 --   §4 The Gaussian construction: `gaussian`, `profiled`, their laws
 --      (v0.1 probability.lut:288-313).                                                    done
 --   §5 Uniform values: `normalCdf`, `normalTail`, `valueSums`, Kolmogorov's distance as a
---      theory, `kolmogorovTail`, `UniformAtLevel` (v0.1 probability.lut:36-86).           done
+--      theory, `kolmogorovTail`, `uniformPValue`, and `SourceIsUniform`, the statistical
+--      law of a source of unit values (v0.1 probability.lut:36-86; laws.lth §4).          done
 
 import "numbers.lth" Tolerance Positive within withinOf abs
 import "numbers_model.lut" elementary : Elementary
 import "arrays.lth" Vec Mat VecOf MatOf Dim vec mat sumTo forallBelow approxVec approxMat zeros exact
 import "arrays_model.lut" numpy : Arrays add sub scale dot norm matVec matMul transpose madd mscale
-import "generators.lth" Level
+import "generators.lth" Gen Seed
+import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue
 
 -- ---------------------------------------------------------------- §1 Derivatives (7.R2, P11)
 
@@ -289,8 +295,16 @@ uniformPValue (d : Kolmogorov) (vs : List (Vec Float64)) : Float64 :=
     else { q := elementary.sqrt (toFloat64 count)
            kolmogorovTail ((q + 0.12 + 0.11 / q) * d.distance vs) } }
 
--- A statistical law declares its level (7.S17, 6.S5): the values are uniform on [0, 1] at the
--- level alpha when the tail probability of their Kolmogorov distance is not below alpha; the
--- level is the demand's (`Level` of generators.lth, as `UniformAtLevel` there), and as a Bool law
--- it holds on a fraction 1 - alpha of calibrated samples, which is what its certificate says.
-UniformAtLevel (d : Kolmogorov) (l : Level) (vs : UnitList) : Bool := uniformPValue d vs >= l.alpha
+-- A source of unit values is uniform on [0, 1]: a statistical law in the form of laws.lth §4
+-- (7.S17, L9.15, D-2026-10-15-b). Its statistic is the p-value above, uniform on [0, 1] when the
+-- source is; its alternative the reference tilt at the demand's distance; its samples the
+-- source's, `initial` vectors from a seed, the seed after them the state of the stream (7.S1);
+-- its verdict the sequential test's at the cutoffs the demand supplies, ternary, with its rates
+-- in the certificate. The source is bound by the test (7.R4, 7.R1: generators_model.lut's
+-- `uniformSample`, the host's calibrated sample, with `skewedSample` its control) and no law is
+-- quantified over seeds (the review of layer 3, summary-BCD.md item 3: the Bool form at a level
+-- refuted a correct source on 100 seeds with probability 0.994). The control with no host is
+-- probability_model.lut's `lump` (L9.14).
+uniformValues (d : Kolmogorov) : StatisticalLaw UnitList := byPValue UnitList (fn vs { uniformPValue d vs })
+SourceIsUniform (d : Kolmogorov) (source : Gen UnitList) (c : Sequential) : Law :=
+  Statistical UnitList Seed (uniformValues d) source c
