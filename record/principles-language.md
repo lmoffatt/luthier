@@ -1245,9 +1245,11 @@ L10.11 The stores of evidence and of results are relations whose schema is a typ
        never used to find: the fuel a pass used, an annotation erased from the hash); serving a
        demand is a query over them, and a certified identity (L6) is a relation along which
        transport is a join (D-2026-10-16-a). [proposed]
-L10.12 A store is one relation, partitioned in files: the partition follows the file that defines
-       the model an entry certifies, so each repository keeps its own (P7), and no entry is written
-       in two partitions (D-2026-10-16-a). [proposed]
+L10.12 A store is one relation, partitioned in files that mirror the files where the claims are
+       made (L2.8): an entry lives beside the file that claims what it certifies, the file that
+       defines a model for a law of its theory, the file that states an identity for the identity;
+       a file that only gathers evidence (a test program) keeps no store. So each repository keeps
+       its own (P7), and no entry is written in two partitions (D-2026-10-16-a). [proposed]
 Example:    with B's laws only `assumed`, A inherits the cost of an assumption and nothing more; a
             lookup table equal to the native on a grid is certified on the grid and nowhere else
             (clause 7)
