@@ -24,7 +24,7 @@ A dotted name `m.f` is one token, a qualified name or a projection that the chec
 [decided D-2026-10-13-q] Inside a string, `\"`, `\\` and `\n` stand for a quote, a backslash and a line break, so
 that a law can spell a text of several lines (`grammar.lth`).
 
-**2.S2. Reserved words.** [decided D-2026-10-12-ab] The reserved words are the keywords of 2.S21,
+**2.S2. Reserved words.** [implemented] The reserved words are the keywords of 2.S21,
 the literals `luthierSyntax` takes (2.S9), and `parse.py` reads those and no others
 (`test_literals_are_not_names`). `let`, `in`, `test`, `with`, `exhaustive`, `forget`, `extern`,
 `provisional`, `primitive`, `axiom` and `cite` are ordinary names there, and `gen` is no longer
@@ -447,7 +447,7 @@ In a file, `w` is the world of `main`.
 
 ## §9 Tests, profiles and the removal of `gen`
 
-**2.S19. The test directive and the profile.** [decided D-2026-10-06-ac] The grammar the model
+**2.S19. The test directive and the profile.** [implemented] The grammar the model
 wrote for D-2026-10-06-ab (old `08 §12`). The directive `test`
 extends, the act `profile` is new, and the act `gen` and its word are removed: Replaced: 2.S21.
 
@@ -478,7 +478,7 @@ its value, stays open (spec 8).
 
 ## §11 The keywords, and what becomes Luthier
 
-**2.S21. Keywords and names.** [decided D-2026-10-12-ab] The keywords are `W` (D-2026-10-13-b), `data`, `match`, `if`,
+**2.S21. Keywords and names.** [implemented] The keywords are `W` (D-2026-10-13-b), `data`, `match`, `if`,
 `then`, `else`, `U`, `operator`, `quote`, `import`, `as` and `fn` (D-2026-10-13-o, -p, -y): `operator` binds a
 symbol, which no function can take as an argument; `quote` captures a term unevaluated; `import`
 binds names (12.S22) and `as` renames one on that line. They are the words `luthierSyntax` takes as
