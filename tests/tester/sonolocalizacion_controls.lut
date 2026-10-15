@@ -17,13 +17,12 @@ import "numbers.lth" Tolerance
 import "arrays.lth" Dim MatOf VecOf mat
 import "algebra.lth" Iso FromUndoesTo ToUndoesFrom
 import "probability.lth" Likelihood log2pi
-import "../../examples/sonolocalizacion/positions.lut" layout
+import "../../examples/sonolocalizacion/positions.lut" layout LayoutFromUndoesTo LayoutToUndoesFrom
 import "../../examples/sonolocalizacion/distances.lut" FullAgrees ProfileAgrees ProfileIsFullAtItsSigma nativeFull nativeProfile
   freeDim nPairs
 import "../../examples/sonolocalizacion/distance_graph.lut" DistanceGraph Violation ReportsValidity graphOf parseTable
   HasNodeColumns HasMeasurementColumns schema
 import "../../examples/sonolocalizacion/session_a.lut" nodesTextA measurementsTextA the graphA
-import "sonolocalizacion_laws.lut" LayoutFromUndoesTo LayoutToUndoesFrom
 
 tolerance : Tolerance := 1.0e-12
 cutoffs : List Binding := [ { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]

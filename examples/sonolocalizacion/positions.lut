@@ -25,7 +25,7 @@
 -- matrix, coordinate by node; `layout` says the matrix and the vector are the same positions.
 
 import "arrays.lth" Vec Mat VecOf MatOf MatRows Dim vec mat forallBelow distance approxVec approxMat exact
-import "algebra.lth" Iso
+import "algebra.lth" Iso FromUndoesTo ToUndoesFrom
 
 -- positions as one vector, three coordinates for each node; those of n nodes
 Positions : U := { p : Vec Float64 | p.n mod 3 == 0 }
@@ -83,3 +83,10 @@ flatten (m : MatRows 3) : Vec Float64 := vec Float64 (m.m * m.n) (fn c { m.f (c 
 unflatten (p : Positions) : Mat Float64 := mat Float64 3 (p.n / 3) (fn a n { p.f (3 * n + a) })
 layout (n : Dim) : Iso (MatOf 3 n) (VecOf (3 * n)) :=
   { eqA := approxMat exact, eqB := approxVec exact, to := fn m { flatten m }, from := fn p { unflatten p } }
+-- [proposed] algebra.lth's two laws of `Iso` at the layout's types, for a number of nodes a tester
+-- draws (7.R2). Moved 2026-10-16 from tests/tester/sonolocalizacion_laws.lut, so that the law lives
+-- with the layout it is about and its entries have a file that claims them (L2.8, L10.12).
+LayoutFromUndoesTo (lay : (n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) (n : Dim) (a : MatOf 3 n) : Bool :=
+  FromUndoesTo (MatOf 3 n) (VecOf (3 * n)) (lay n) a
+LayoutToUndoesFrom (lay : (n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) (n : Dim) (p : VecOf (3 * n)) : Bool :=
+  ToUndoesFrom (MatOf 3 n) (VecOf (3 * n)) (lay n) p

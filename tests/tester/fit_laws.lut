@@ -11,7 +11,9 @@
 -- say the same about convergence, within the tolerance. Each cutoff a census of one, the demand's
 -- (D-2026-10-14-c): session A's settings and v0.1's damping (tests/tester/session_a.lut), the
 -- tolerance 1e-12 [proposed]. Seed 20261014: every line draws the same cases, the models being
--- censuses.
+-- censuses. [2026-10-16] The three `...OnQuadratic` now live in optimization.lth, `MaximizersAgree`
+-- in belief.lth and `nativeLM` in examples/sonolocalizacion/session_a.lut, so that every entry
+-- has a file that claims it and this test program keeps no store (L10.12).
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
@@ -19,31 +21,18 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers.lth" Tolerance Positive
 import "arrays.lth" Dim VecOf approxVec
-import "belief.lth" Maximizer Settings MaxResult quadratic QuadraticConverges
+import "belief.lth" Maximizer Settings MaxResult quadratic QuadraticConverges MaximizersAgree
 import "belief_model.lut" lm
 import "optimization.lth" LMStep Damping LMState quadraticObjective QuadraticStepAccepts DirectionDescends
-  DirectionAgrees StepRule
-import "optimization_model.lut" native host lmMaximizer
-import "../../examples/sonolocalizacion/session_a.lut" settingsA dampingA
+  DirectionAgrees StepRule DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic
+import "optimization_model.lut" native host
+import "../../examples/sonolocalizacion/session_a.lut" settingsA dampingA nativeLM
 
 tolerance : Tolerance := 1.0e-12
 -- the iterations the demand grants a maximizer on the quadratic family (QuadraticConverges's
 -- `budget`), a census of one, 50, as the probe of record/IA/layer-3-review-2026-10-15/report-fix-BCD.md
 -- [proposed]; settingsA's maxIter 500 is above it, so the law is asked
 budget : Nat := 50
-nativeLM : Maximizer := lmMaximizer dampingA
-
-DirectionDescendsOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x : VecOf n) (mu : Positive) : Bool :=
-  DirectionDescends m tol s n (quadraticObjective n b c) x mu
-DirectionAgreesOnQuadratic (m : LMStep) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x : VecOf n) (mu : Positive) : Bool :=
-  DirectionAgrees m tol s n (quadraticObjective n b c) x mu
-StepRuleOnQuadratic (m : LMStep) (s : Settings) (d : Damping) (n : Dim) (b : VecOf n) (c : Positive) (st : LMState n) : Bool :=
-  StepRule m s d n (quadraticObjective n b c) st
-MaximizersAgree (mx my : Maximizer) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
-  { q := quadratic n b c
-    r1 := mx.maximize s n q.logp q.score q.info x0
-    r2 := my.maximize s n q.logp q.score q.info x0
-    r1.converged == r2.converged and approxVec tol r1.x r2.x }
 
 cutoffs : List Binding := [
   { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },

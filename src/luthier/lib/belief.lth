@@ -152,6 +152,15 @@ QuadraticConverges (mx : Maximizer) (s : Settings) (budget : Nat) (n : Dim) (b :
     d := sub r.x b
     r.converged and 0.5 * c * dot d d <= s.tol }
 Maximizer := MaximizerAscends & MaximizerStationary & MaximizerKeepsDimension & QuadraticConverges
+-- [proposed] Two maximizers end at the same point of the quadratic family, within the tolerance,
+-- and say the same about convergence: no law of the theory, the question of
+-- record/IA/evidence-2026-10-14/prompt.md, item 3. Moved 2026-10-16 from tests/tester/fit_laws.lut
+-- so that its entries have a file that claims them (L2.8, L10.12).
+MaximizersAgree (mx my : Maximizer) (tol : Tolerance) (s : Settings) (n : Dim) (b : VecOf n) (c : Positive) (x0 : VecOf n) : Bool :=
+  { q := quadratic n b c
+    r1 := mx.maximize s n q.logp q.score q.info x0
+    r2 := my.maximize s n q.logp q.score q.info x0
+    r1.converged == r2.converged and approxVec tol r1.x r2.x }
 
 -- ---------------------------------------------------------------- §3 Laplace's update
 

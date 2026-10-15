@@ -17,10 +17,12 @@ import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
 import "arrays.lth" Vec vec
-import "belief.lth" Maximizer QuadraticConverges
-import "optimization.lth" LMStep dampedStep QuadraticStepAccepts
+import "belief.lth" Maximizer QuadraticConverges MaximizersAgree
+import "optimization.lth" LMStep dampedStep QuadraticStepAccepts DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic
+  StepRuleOnQuadratic
 import "optimization_model.lut" native
-import "fit_laws.lut" nativeLM tolerance budget cutoffs DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic MaximizersAgree
+import "fit_laws.lut" tolerance budget cutoffs
+import "../../examples/sonolocalizacion/session_a.lut" nativeLM
 
 -- gives up: returns the start and says it did not converge
 giveUp : Maximizer := { maximize := fn s n f g m x0 { { x := x0, converged := false } } }
