@@ -4,6 +4,9 @@
 --
 -- Draft 0, 2026-10-14, by Claude Fable 5.1, an agent of the coordinating session, on the brief
 -- record/IA/slice-theories-2-2026-10-14/prompt.md (item 1; inventory §6 item 7, rows 21 and 24).
+-- 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- layer-3-review-2026-10-15/prompt-fix-BCD.md (item 1 of its summary-BCD.md): `IsGradient` along a
+-- drawn direction, as `IsJacobian` is, so that a zero gradient is not a gradient of every function.
 -- Sources: spec 7.R2 (the libraries quantify over `VecOf n`, never over `(Theta : U)`), 11.S18
 -- (a tolerance is the demand's, D-2026-10-12-h), 7.S17 (a statistical law declares its level),
 -- 4.R10 (a law characterizes; agreement with a native definition is a corollary), 12.S9 (the
@@ -54,19 +57,22 @@ import "generators.lth" Level
 -- and the rounding of the difference being each of order eps^(2/3) at that step.
 Resolution : U := { step : Float64, tol : Tolerance | 0.0 < step and 0.0 <= tol }
 
--- g is the gradient of f at t: g t is a vector of the dimension, and the slope of f along it, by
--- the central difference at the resolution's step, is its norm; compared relative to the size of
--- f at t, since the difference of two values of f loses the digits they share (v0.1 array.lut:184)
+-- g is the gradient of f at t: g t is a vector of the dimension, and along a drawn direction v
+-- the central difference of f at the resolution's step is the inner product of g t with the unit
+-- vector of v; compared relative to the size of f at t and of g t, since the difference of two
+-- values of f loses the digits they share (v0.1 array.lut:184). [proposed] The direction is drawn,
+-- as `IsJacobian`'s is: v0.1 measured along g t itself, which a zero gradient passes for every f
+-- (record/IA/layer-3-review-2026-10-15/summary-BCD.md, item 1).
 -- spec 7.R2
-IsGradient (n : Nat) (r : Resolution) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (t : VecOf n) : Bool :=
-  { v := g t
+IsGradient (n : Nat) (r : Resolution) (f : VecOf n -> Float64) (g : VecOf n -> Vec Float64) (t v : VecOf n) : Bool :=
+  { gt := g t
     nv := norm v
-    if v.n /= n then false
+    if gt.n /= n then false
     else if nv == 0.0 then true
     else {
       h := scale (r.step / nv) v
       slope := (f (add t h) - f (sub t h)) / (2.0 * r.step)
-      withinOf r.tol (1.0 + abs (f t) + nv) slope nv } }
+      withinOf r.tol (1.0 + abs (f t) + norm gt) slope (dot gt (scale (1.0 / nv) v)) } }
 
 -- j is the Jacobian of m at t: along a drawn direction v, the central difference of m at the
 -- resolution's step is j t applied to the unit vector of v, entry by entry within the tolerance
@@ -95,7 +101,7 @@ MeanModel (n : Nat) := MeanShape n & JacShape n & JacIsJacobian n
 -- probability.lut:283-286)
 ScaledModel (n : Nat) : { model : MeanModel n, logSigma : VecOf n -> Float64, dLogSigma : VecOf n -> Vec Float64 }
 ScaledShapes (n : Nat) (m : ScaledModel n) (t : VecOf n) : Bool := (m.dLogSigma t).n == n and (m.model.mean t).n == m.model.k
-DLogSigmaIsGradient (n : Nat) (m : ScaledModel n) (r : Resolution) (t : VecOf n) : Bool := IsGradient n r m.logSigma m.dLogSigma t
+DLogSigmaIsGradient (n : Nat) (m : ScaledModel n) (r : Resolution) (t v : VecOf n) : Bool := IsGradient n r m.logSigma m.dLogSigma t v
 ScaledModel (n : Nat) := ScaledShapes n & DLogSigmaIsGradient n
 
 -- ---------------------------------------------------------------- §3 What a likelihood is
@@ -116,8 +122,8 @@ Likelihood (n : Nat) : {
 TangentShapes (n : Nat) (l : Likelihood n) (y : VecOf l.k) (t : VecOf n) : Bool :=
   y.n == l.k and (l.score y t).n == n and (l.info y t).m == n and (l.info y t).n == n
 -- the score is the gradient of the log-likelihood (v0.1 probability.lut:146-147)
-ScoreIsGradient (n : Nat) (l : Likelihood n) (r : Resolution) (y : VecOf l.k) (t : VecOf n) : Bool :=
-  IsGradient n r (l.loglik y) (l.score y) t
+ScoreIsGradient (n : Nat) (l : Likelihood n) (r : Resolution) (y : VecOf l.k) (t v : VecOf n) : Bool :=
+  IsGradient n r (l.loglik y) (l.score y) t v
 -- the information reported is a Fisher information: symmetric within the tolerance, and its
 -- quadratic form on a drawn direction is not negative beyond rounding (v0.1 probability.lut:155-156
 -- read the spectrum; here the form, which the array leaves state)
