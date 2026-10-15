@@ -28,7 +28,7 @@ one inhabitant. `4` is `{ n : Int | n == 4 }`. `x : T` says that `x` is a refine
 distinction between types and values stays on the surface, because the reader needs to know what
 reduces, but it is a difference in how far a name is determined, not in kind (L8).
 
-**4.S6. The three states of a name.** [decided D-2026-10-12-y] A name is in one of three states. It is
+**4.S6. The three states of a name.** [implemented] A name is in one of three states. It is
 *declared* when its base is known, `x : T`, by a declaration. It is *defined* when its body is
 known, by a definition in the same file or in another. It is *certified* when some of its laws
 have a certificate, each with a grade of the five grades of Terms (; D-2026-10-12-y). What a certificate records is `spec 6`; the specimens have none yet, so they tell the first two states only. Certification is about a law
@@ -56,7 +56,7 @@ theory is written:
 the theory (4.S12). A model of it is a branch:
 `csv : Codec := { parse := parseTable, render := renderTable }`.
 
-**4.S9. Concrete types and theories.** [decided D-2026-10-12-aj] A name defines a *concrete
+**4.S9. Concrete types and theories.** [implemented] A name defines a *concrete
 type* or a *theory*. A concrete type is defined natively (a `data`, an exponential, a product, a
 sum), with no law written by its author: the laws of its equality, where it has `==`, are the
 kernel's (D-2026-10-12-ak); its values are built by its constructors (those of the `data`, the lambda, the
@@ -68,7 +68,7 @@ subtype a third kind. [implemented] Today the checker tells the two apart by the
 as a theory in the sense of G1 a subtype of a labeled base, usually parameterized (`Group (A :
 U)`), whose models are given as values of the labeled base.
 
-**4.S10. A body computes; a law only checks.** [proposed] Whether laws pin down a unique
+**4.S10. A body computes; a law only checks.** [implemented] Whether laws pin down a unique
 inhabitant is undecidable and is never asked. Two bodies for one meaning are two names, and their
 agreement is a law to test (`spec 5`).
 
@@ -80,7 +80,7 @@ order designed is that the checker reads the whole program, imports included, be
 definition: (1) parse every file and collect each name with its declared type and body, and expand
 aliases; (2) resolve names and build the dependency graph; (3) compute the theories; (4) check the
 theories in an order compatible with the dependencies, each as a block; inside a block, first every
-declared type, then every law, then every other body. Order in the file is not significant.
+declared type, then every law, then every other body. Order in the file is not significant. Postponed in lib/program.lth:259 (the theories as strongly connected components are todo).
 
 ## §4 Theories are cycles, branches name them
 
@@ -89,7 +89,7 @@ The laws mention the type; the type, in its definition, names the laws; that loo
 and everything on it is defined together. A definition that mentions the theory without being on
 its loop is a branch: a new entity that names the theory and depends on it one way. `csv` is a
 branch of `Codec`; a function `shape (t : Table) : Int * Int` is a branch of `Table`. This closes
-O7.
+O7. Postponed in lib/program.lth:259 (the components are not computed).
 
 **4.S13. Why the cycle and not mere connection.** [decided D-2026-10-12-z] Connection would fuse into one
 theory two types where one only refers to the other (a law of `Codec` mentions `Table`, but
@@ -97,9 +97,9 @@ theory two types where one only refers to the other (a law of `Codec` mentions `
 the dependency structure of a program is read off its names, and two theories with the same cycle
 up to renaming (names, signatures, laws) are candidates for an isomorphism before any
 implementation is looked at. The same mathematical object, presented with other primitives, has
-another cycle (`spec 9`): the cycle belongs to the presentation.
+another cycle (`spec 9`): the cycle belongs to the presentation. Postponed in lib/program.lth:259 with the components, and in check.py:3.
 
-**4.S14. A head, and the law no type claims.** [decided D-2026-10-12-z] Every theory defined by laws has a
+**4.S14. A head, and the law no type claims.** [implemented] Every theory defined by laws has a
 head: a type whose body names the laws. A law that no type claims defines nothing; it is a branch
 over the types it mentions, and 4.R2 applies to it. `check` reports such a law as `unclaimed` and
 does not reject it yet (`r2_unclaimed_laws.reject.lut` is an expected failure in `test_spec.py`).
@@ -132,7 +132,7 @@ declaration exists: declared or defined. A declaration may mention types that ar
 that is what lets a theory's laws and its head refer to each other (L2.5).
 Files: r1_declaration.accept.lut, r1_declaration.reject.lut.
 
-**4.R2. A definition uses defined types.** [decided D-2026-10-13-ae] For a definition `n`, every name that
+**4.R2. A definition uses defined types.** [decided D-2026-10-13-ae; suspended by D-2026-10-13-ae] For a definition `n`, every name that
 occurs in type position in its declared type or its body is defined, unless it belongs to `n`'s
 own theory; the checker tests the existence of the name only (`violatesR2Exists`), and the half by
 strongly connected component waits (D-2026-10-13-ae). In term position a declared name is allowed: a hole of a defined type is a parameter
@@ -285,7 +285,7 @@ Files: r13_operator_by_type.accept.lut, r13_two_models.reject.lut.
 
 The checks the old chapter added to rules 4.R2, 4.R3, 4.R12 and 4.R13 as further programs.
 
-**4.S17. No loose functions.** [decided D-2026-10-07-e] Added to 4.R2 and 4.R4 on 2026-10-07; reported
+**4.S17. No loose functions.** [implemented] Added to 4.R2 and 4.R4 on 2026-10-07; reported
 only, not rejected. A structural type with no laws, an exponential `A -> B`, a product or a sum, is a
 *base* and not a defined type for 4.R2. A value is defined at a type that has a name and laws, at
 a `data` or at a primitive; a top-level definition at a bare exponential is a loose function, and
