@@ -43,6 +43,7 @@
 
 import "kernel_laws.lth" Concrete
 import "laws.lth" Coverage Drawn Law Statistical StatisticalLaw Sequential byPValue
+import "numbers.lth" Tolerance within
 
 -- ---------------------------------------------------------------- §1 Seeds and generators
 
@@ -121,10 +122,16 @@ occurs (T : Concrete) (ws : List (T * Float64)) (x : T) : Bool :=
 NonNegative (T : Concrete) (s : Support T) : Bool := allNonNegative T s.weights
 PickedHasWeight (T : Concrete) (s : Support T) (v : UnitInterval) : Bool :=
   match s.pick (total T s.weights * v) { nothing -> total T s.weights == 0.0 ; just x -> 0.0 < weightOf T s.weights x }
--- proportionality: `u` within `x`'s part gives `x`, stated on every value of the support
+-- the weight of the first occurrence of `x`, the part the running sum `before` starts
+firstWeightOf (T : Concrete) (ws : List (T * Float64)) (x : T) : Float64 :=
+  match ws { nil -> 0.0 ; cons (y, w) rest -> if x == y then w else firstWeightOf T rest x }
+-- proportionality: `u` within `x`'s part gives `x`, stated on every value of the support.
+-- [proposed, G4 of summary-BCD.md] The part is the first occurrence's: with `x` listed twice, the
+-- sum of its weights from where the first starts ran into the next value's part, and the
+-- reference `pick` was refuted by its own law on `[(x, 1), (y, 1), (x, 1)]`.
 ProportionalToWeight (T : Concrete) (s : Support T) (x : T) (v : UnitInterval) : Bool :=
-  not (occurs T s.weights x) or 0.0 == weightOf T s.weights x
-  or s.pick (before T s.weights x + weightOf T s.weights x * v) == just x
+  not (occurs T s.weights x) or 0.0 == firstWeightOf T s.weights x
+  or s.pick (before T s.weights x + firstWeightOf T s.weights x * v) == just x
 Support (T : Concrete) := NonNegative T & PickedHasWeight T & ProportionalToWeight T
 
 -- The metrics of numbers (7.S2, 7.S4): a metric places a uniform `u` in [0, 1) into an interval,
@@ -143,20 +150,22 @@ WithinBounds (m : Metric) (i : PositiveInterval) (v : UnitInterval) : Bool :=
 Grows (m : Metric) (i : PositiveInterval) (p : OrderedUnitPair) : Bool := m.place i.lo i.hi p.v <= m.place i.lo i.hi p.w
 StartsAtLo (m : Metric) (i : PositiveInterval) : Bool := m.place i.lo i.hi 0.0 == i.lo
 Metric := WithinBounds & Grows & StartsAtLo
--- the linear metric: on any interval, and shifted with it
-Translates (m : Metric) (i : Interval) (c : Float64) (v : UnitInterval) : Bool :=
-  m.place (i.lo + c) (i.hi + c) v == m.place i.lo i.hi v + c
+-- the linear metric: on any interval, and shifted with it. [proposed, G2 of summary-BCD.md] Within
+-- the demand's tolerance (numbers.lth's `within`, 5.S4, D-2026-10-14-c): exactly, both reference
+-- metrics fail by rounding on a part of the cases.
+Translates (m : Metric) (tol : Tolerance) (i : Interval) (c : Float64) (v : UnitInterval) : Bool :=
+  within tol (m.place (i.lo + c) (i.hi + c) v) (m.place i.lo i.hi v + c)
 WithinAnyBounds (m : Metric) (i : Interval) (v : UnitInterval) : Bool :=
   i.lo <= m.place i.lo i.hi v and m.place i.lo i.hi v <= i.hi
 LinearMetric : { metric : Metric }
-LinearTranslates (l : LinearMetric) (i : Interval) (c : Float64) (v : UnitInterval) : Bool := Translates l.metric i c v
+LinearTranslates (l : LinearMetric) (tol : Tolerance) (i : Interval) (c : Float64) (v : UnitInterval) : Bool := Translates l.metric tol i c v
 LinearWithinAny (l : LinearMetric) (i : Interval) (v : UnitInterval) : Bool := WithinAnyBounds l.metric i v
 LinearMetric := LinearTranslates & LinearWithinAny
--- the log metric: scaled with its interval
-Scales (m : Metric) (i : PositiveInterval) (k : Float64) (v : UnitInterval) : Bool :=
-  not (0.0 < k) or m.place (k * i.lo) (k * i.hi) v == k * m.place i.lo i.hi v
+-- the log metric: scaled with its interval, within the demand's tolerance (as `Translates`)
+Scales (m : Metric) (tol : Tolerance) (i : PositiveInterval) (k : Float64) (v : UnitInterval) : Bool :=
+  not (0.0 < k) or within tol (m.place (k * i.lo) (k * i.hi) v) (k * m.place i.lo i.hi v)
 LogMetric : { metric : Metric }
-LogScales (l : LogMetric) (i : PositiveInterval) (k : Float64) (v : UnitInterval) : Bool := Scales l.metric i k v
+LogScales (l : LogMetric) (tol : Tolerance) (i : PositiveInterval) (k : Float64) (v : UnitInterval) : Bool := Scales l.metric tol i k v
 LogMetric := LogScales
 
 -- ---------------------------------------------------------------- §3 Exhaustive and sized generators
@@ -194,7 +203,8 @@ Sized (T : U) (size : T -> Nat) := SizeBounded T size
 -- up to a budget of tries, after which there is no value and the law is not run, with that reason
 -- (7.S6, 7.S8, 7.S12). `draw` is the field; the laws relate it to the base (gen.3): what it gives
 -- holds; it gives nothing only when none of the base's draws in the budget holds; and what it
--- gives is the first of them that holds. The reference is `filtered`.
+-- gives is the first of them that holds, with the seed after the draws it took. The reference is
+-- `filtered`.
 filtered (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Maybe T * Seed :=
   if tries == 0 then (nothing, s) else match g n s { (x, s2) -> if p x then (just x, s2) else filtered T g p (tries - 1) n s2 }
 Filter (T : U) : { base : Gen T, keep : T -> Bool, draw : Nat -> Nat -> Seed -> Maybe T * Seed }
@@ -202,8 +212,11 @@ firstKept (T : U) (g : Gen T) (p : T -> Bool) (tries n : Nat) (s : Seed) : Maybe
   match filtered T g p tries n s { (m, s2) -> m }
 DrawKeeps (T : U) (f : Filter T) (tries n : Nat) (s : Seed) : Bool :=
   match f.draw tries n s { (m, s2) -> match m { nothing -> true ; just x -> f.keep x } }
+-- [proposed, G5 of summary-BCD.md] the seed after is the reference's too: comparing the value
+-- alone let a filter that never moved the seed pass
 DrawIsTheFirstKept (T : U) (f : Filter T) (tries n : Nat) (s : Seed) : Bool :=
-  match f.draw tries n s { (m, s2) -> m == firstKept T f.base f.keep tries n s }
+  match f.draw tries n s { (m, s2) -> m == firstKept T f.base f.keep tries n s
+    and s2 == (match filtered T f.base f.keep tries n s { (m2, s3) -> s3 }) }
 Filter (T : U) := DrawKeeps T & DrawIsTheFirstKept T
 
 -- The components of a dependent pair are drawn in order, the second with the first in its type
@@ -265,8 +278,10 @@ Resolution := ParameterWins & WhereWins & TypeBindsEveryParameter & NothingBinds
 positiveBudgets (tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws : Nat) : Bool :=
   0 < tries and 0 < redraws and 0 < probes and 0 < drawsPerCase and 0 < coveringAbove
   and 0 < levelRuns and 0 < seedsPerControl and 0 < distributionDraws
+-- [proposed, G9 of summary-BCD.md] the two masses together below one, so that something is left
+-- for the continuous draw (0.9 and 0.9 were admitted)
 budgetMasses (specialMass atomAtZero : Float64) : Bool :=
-  0.0 <= specialMass and specialMass < 1.0 and 0.0 <= atomAtZero and atomAtZero < 1.0
+  0.0 <= specialMass and 0.0 <= atomAtZero and specialMass + atomAtZero < 1.0
 Budgets : U := { tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws : Nat,
                    specialMass atomAtZero : Float64 |
                    positiveBudgets tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws
