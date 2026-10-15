@@ -1,0 +1,4 @@
+-- First-action fixture: noisy.readFile prints a line besides reading; refused at its first
+-- application by world.lth's `HostChangesOnlyDeclared`, the standard output named.
+import "first_action_models.lut" noisy
+main (w : W) : W * Maybe String := noisy.readFile w "input.txt"

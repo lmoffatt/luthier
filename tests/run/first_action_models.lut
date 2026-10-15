@@ -1,24 +1,29 @@
 -- Fixture of the first-action tests (record/IA/certification-2026-10-14/prompt-first-action.md;
--- 10.S10, L11.2): two models of world.lth's `Host` over world_model.lut's representation and
--- descriptions. `honest` has world_model's routes; `liar`'s print writes its line twice, while the
--- description it is held to, `printDescribed`, says once. test_run.py copies this file beside the
--- programs into a scratch directory, where its store is written.
+-- 10.S10, L11.2): two models of world.lth's `Host` over world_model.lut's representation, each
+-- carrying world_model.lut's `console`, whose descriptions world.lth builds and holds the actions
+-- to (record/IA/layer-3-review-2026-10-15/prompt-run-host.md, after world.lth's 2ac8f12). `honest`
+-- has world_model's routes; `liar`'s print writes its line twice, while the console's
+-- `printLine`, which world.lth's `printDescription` holds it to, says once. test_run.py copies this
+-- file beside the programs into a scratch directory, where its store is written.
 import "world.lth" Host
-import "world_model.lut" State theWorld printDescribed readFileDescribed
+import "world_model.lut" State console
 
 honest : Host State := {
-  world := theWorld,
+  console := console,
   observe := extern "python:luthier.host.observe",
   print := extern "python:luthier.host.print_line",
   readFile := extern "python:luthier.host.read_file",
-  printDescribed := printDescribed,
-  readFileDescribed := readFileDescribed,
 }
 liar : Host State := {
-  world := theWorld,
+  console := console,
   observe := extern "python:luthier.host.observe",
   print := extern "python:run.lying_host.print_twice",
   readFile := extern "python:luthier.host.read_file",
-  printDescribed := printDescribed,
-  readFileDescribed := readFileDescribed,
+}
+-- `noisy`'s readFile also prints a line: refused by the frame law, at the standard output's place
+noisy : Host State := {
+  console := console,
+  observe := extern "python:luthier.host.observe",
+  print := extern "python:luthier.host.print_line",
+  readFile := extern "python:run.lying_host.read_and_print",
 }

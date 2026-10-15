@@ -307,6 +307,11 @@ def passed(entry):
     return entry["outcome"] == "Passed"
 
 
+def _failed(entry):
+    """certification.lth's `isFailure`: the outcome is `Failed` (not `NotRunFor`)."""
+    return isinstance(entry["outcome"], dict) and "Failed" in entry["outcome"]
+
+
 def store_errors(entries):
     """What breaks `Store`'s predicate: two entries of one identity with different outcomes
     (`determined`), or a grade without a pass or a pass without a grade (`gradedAsOutcome`)."""
@@ -583,14 +588,21 @@ def state_of(demand, entries):
 def refuse(entries, cone):
     """certification_model's `refuse`: per name of the cone (`name`, `provisional`, `laws`, each
     law a demand), a provisional name refused whole, otherwise each law no entry serves, listed
-    with its state (`RefusalSaysWhy`, `RefusalIsPerLaw`, `ProvisionalIsRefused`)."""
+    with its state (`RefusalSaysWhy`, `RefusalIsPerLaw`, `ProvisionalIsRefused`). A law with a
+    failure at the demand's hash (`at`) is refused whatever serves, listed with that failure
+    (certification_model's `refuseLaws` at 82c4cb4, `ACurrentFailureIsRefused`, C5 of the layer 3
+    review: record/IA/layer-3-review-2026-10-15/report-fix-certification.md)."""
     refusals = []
     for c in cone:
         if c["provisional"]:
             refusals.append({"name": c["name"], "law": None, "state": ("Provisional", None)})
             continue
         for d in c["laws"]:
-            if not any(serves(d, e) for e in entries):
+            failure = next((e for e in entries if e["law"] == d["law"] and at(d, e) and _failed(e)), None)
+            if failure is not None:
+                refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
+                                 "demand": d})
+            elif not any(serves(d, e) for e in entries):
                 refusals.append({"name": c["name"], "law": d["law"], "state": state_of(d, entries),
                                  "demand": d})
     return refusals

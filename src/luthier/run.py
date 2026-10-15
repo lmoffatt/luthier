@@ -41,7 +41,12 @@ plan.lth, record/IA/demand-2026-10-15/report.md): `run` builds one `Demand` from
 demand_model.lut's defaults, from which every law's demand and the record derive; the record holds
 the demand (`demand`), the plan (the live cone, the call-by-need schedule of the Runner's shared
 constants and its hash, `plan`) and the demand's key (`key`); `read_runs` reads `x.run.json` back and
-reports the breaches of `determined`.
+reports the breaches of `determined`. v17 (record/IA/layer-3-review-2026-10-15/prompt-run-host.md, after
+world.lth's 2ac8f12): the laws of `Host` are predicates over an observed case; at an action's first
+application `FirstActions` gathers the case by world.lth's `agreement` with the `Held` the law
+builds and the places the certifier adds, evaluates the law and the frame law
+(`HostChangesOnlyDeclared`) on it, and gives the program the token and the case's result; a law
+whose body is an axiom (`ObserverIsFaithful`) is accepted as assumed by default (`AXIOMS`).
 """
 from __future__ import annotations
 
@@ -1566,6 +1571,15 @@ ACCEPT = "Sampled"
 # is read from the lock (12.S13).
 DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "fuel": 10_000_000, "sets": (), "checked": False}
 
+# [proposed, Luciano to mark; record/IA/layer-3-review-2026-10-15/prompt-run-host.md] the grade a run
+# accepts, by default, for a law whose body is an `axiom` (world.lth's `ObserverIsFaithful`, 11.R3):
+# assumed, so that an axiom no entry serves is accepted as the assumption it states and the run's
+# certification lists it (`assumed`, 6.S10, 10.S13). Without it every program with a host would
+# need `--accept assumed`, which would lower the cutoff of every other law too. The demand prices
+# assumptions (6.S10): this is the price accepted by default for the observer. Not yet declared in
+# demand.lth or demand_model.lut (`theDemand`), so not in DEMAND_DEFAULTS.
+AXIOMS = "AssumedGrade"
+
 
 @dataclass(frozen=True)
 class Demand:
@@ -1584,17 +1598,27 @@ class Demand:
     pinned: str | None
     decoration: None = None
     delta: float | None = None
+    axioms: str = AXIOMS
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
         return replace(self, entry=entry)
 
-    def law(self, law, cone, given, fingerprints):
+    def law(self, law, cone, given, fingerprints, axiom=False):
         """demand.lth's `lawDemand` as certify.serves reads it (certification.lth §3): the law, its
         cone, what the run gives its parameters, and this demand's cutoff, never recomputed.
         [proposed] `given` is what the caller binds: the model parameter and the sets the law
-        takes (`certification`), or the model and the action's arguments (`FirstActions`)."""
-        return {"law": law, "cone": cone, "given": given, "accepts": self.accepts, "fingerprints": fingerprints}
+        takes (`certification`), or the model and the action's arguments (`FirstActions`). For a law
+        whose body is an axiom (`axiom`), the cutoff is the weaker of `accepts` and `axioms`."""
+        return {"law": law, "cone": cone, "given": given, "accepts": self.cutoff(axiom), "fingerprints": fingerprints}
+
+    def cutoff(self, axiom=False):
+        """The weakest grade accepted for a law: `accepts`, or for an axiom the weaker of it and
+        `axioms` (`AXIOMS`)."""
+        from . import certify
+        if axiom and certify.GRADE_RANK[self.axioms] < certify.GRADE_RANK[self.accepts]:
+            return self.axioms
+        return self.accepts
 
     def record(self, cone):
         """demand.lth's `Record` (`recorded`, 12.S18, L5.18): the demand as the run's entry keeps
@@ -1720,33 +1744,109 @@ class _Theories:
                 return []
         return []
 
-    def action_law(self, law, theory):
-        """[proposed] A law of the theory that takes the token (`W`), world.lth's `Host` laws: run
-        once at the first application of its action in a run (10.S10, L11.2), never by a sampler.
-        Gives {model: the parameter typed by the theory, before: the parameters ahead of it (the
-        theory's own), arguments: those between it and the token (the action's, in order), field:
-        the one action of the model the law's body projects (a field whose type takes the token),
-        token: the token's parameter}; None for any other law."""
+    def _parameters(self, law):
+        """The law's definition and its explicit parameters, (name, surface type) in order."""
         define = next((a for a in self.acts.get(law, ()) if isinstance(a, s.Define)), None)
         if define is None or not isinstance(define.body, s.TermBody):
-            return None
-        params = [(n, b.type) for b in define.binders if isinstance(b, s.Explicit) for n in b.names]
-        tokens = [k for k, (_, ty) in enumerate(params) if ty == s.World()]
+            return None, []
+        return define, [(n, b.type) for b in define.binders if isinstance(b, s.Explicit) for n in b.names]
+
+    def _case_shape(self, law, theory):
+        """(define, params, k, case): the law's model parameter at `k` ahead of its one parameter
+        typed by world.lth's `Observed` at `case`; None when the law has no such shape."""
+        define, params = self._parameters(law)
+        cases = [k for k, (_, ty) in enumerate(params) if _plain_head(ty) == "Observed"]
         model = self.model_parameter(law, theory)
-        if len(tokens) != 1 or model is None:
+        if define is None or len(cases) != 1 or model is None:
             return None
         k = next(i for i, (n, _) in enumerate(params) if n == model)
-        if not k < tokens[0]:
-            return None
+        return (define, params, k, cases[0]) if k < cases[0] else None
+
+    def _projected_actions(self, define, model, theory):
         record = self.declared[theory].type
         actions = {n for f in record.fields for n in f.names if _takes_token(f.type)}
         read = {x.partition(".")[2].split(".")[0] for x in _dotted(define.body.term) if x.startswith(model + ".")}
-        fields_ = sorted(read & actions)
+        return sorted(read & actions)
+
+    def action_law(self, law, theory):
+        """[proposed] A law of the theory over a case of one of the model's actions, world.lth's
+        `HostAgrees*` and `HostObserveChangesNothing` (a parameter typed by `Observed`, the case
+        `agreement` gathers): run at the first application of its action in a run (10.S10, L11.2),
+        never by a sampler. Gives {model: the parameter typed by the theory, before: the parameters
+        ahead of it (the theory's own), arguments: those between it and the case (the action's, in
+        order), field: the one action of the model the law's body projects (a field whose type takes
+        the token), case: the case's parameter}; None for any other law."""
+        shape = self._case_shape(law, theory)
+        if shape is None:
+            return None
+        define, params, k, case = shape
+        model = params[k][0]
+        fields_ = self._projected_actions(define, model, theory)
         if len(fields_) != 1:
             return None
         return {"model": model, "before": [n for n, _ in params[:k]],
-                "arguments": [n for n, _ in params[k + 1:tokens[0]]], "field": fields_[0],
-                "token": params[tokens[0]][0]}
+                "arguments": [n for n, _ in params[k + 1:case]], "field": fields_[0], "case": params[case][0]}
+
+    def frame_law(self, law, theory):
+        """[proposed] A law of the theory over a case of any action of the model, world.lth's
+        `HostChangesOnlyDeclared` (10.S7): a parameter typed by `Observed`, one typed by `Held` (the
+        action the case was gathered from), the places the certifier adds, and no action of the model
+        projected. Run on the case of every first action validated (`FirstActions`). Gives {model,
+        before, between: the parameters between the model and the case, each with its role ("held",
+        "type" for the held's result type, "extra" for the certifier's places), case}; None for any
+        other law."""
+        shape = self._case_shape(law, theory)
+        if shape is None:
+            return None
+        define, params, k, case = shape
+        model = params[k][0]
+        if self._projected_actions(define, model, theory):
+            return None
+        held = [(n, ty) for n, ty in params[k + 1:case] if _plain_head(ty) == "Held"]
+        if len(held) != 1:
+            return None
+        args = []
+        ty = held[0][1]
+        while isinstance(ty, s.App):
+            args.append(ty.argument)
+            ty = ty.function
+        args.reverse()
+        result_type = args[1].name if len(args) > 1 and isinstance(args[1], s.Name) else None
+        between = []
+        for n, _ in params[k + 1:case]:
+            between.append((n, "held" if n == held[0][0] else "type" if n == result_type else "extra"))
+        if [r for _, r in between].count("extra") != 1:
+            return None
+        return {"model": model, "before": [n for n, _ in params[:k]], "between": between, "case": params[case][0]}
+
+    def case_law(self, law, theory):
+        """Whether the law is over an observed case (`action_law` or `frame_law`): run by the
+        certifier at a first action, never demanded of the store before the run."""
+        return self.action_law(law, theory) is not None or self.frame_law(law, theory) is not None
+
+    def axiom_of(self, law):
+        """[proposed] The statement of the `axiom` a law's body is, through the definitions its body
+        applies (world.lth's `ObserverIsFaithful` is `readsTheWorld S o p`, whose body is an axiom,
+        11.R3); None when the body is not an axiom."""
+        name = law
+        for _ in range(16):
+            define, _ = self._parameters(name)
+            if define is None:
+                return None
+            body = define.body.term
+            if (isinstance(body, s.App) and isinstance(body.function, s.Name)
+                    and body.function.name.partition("@")[0] == "axiom" and isinstance(body.argument, s.Literal)):
+                return body.argument.literal.value
+            name = _head_name(body)
+            if name is None:
+                return None
+        return None
+
+
+def _plain_head(ty):
+    """The head name of a surface type without the loader's `@file`."""
+    name = _head_name(ty)
+    return name.partition("@")[0] if name is not None else None
 
 
 def _takes_token(ty):
@@ -1803,7 +1903,14 @@ def certification(loaded, program, entry, demand):
     [proposed] the name itself to the law's parameter typed by the theory (printed, as a census of
     one prints it), and each hole the run filled with `--set` to the law's parameter of the same
     name (certification.lth's `Demand`); the model's own cone is compared with the fingerprint the
-    entry's binding recorded (certify.at). A name built on a provisional extern is refused whole."""
+    entry's binding recorded (certify.at). A name built on a provisional extern is refused whole.
+
+    A law over an observed case (`_Theories.case_law`, world.lth's `Host` laws but the root of
+    trust) is run at the action's first application (`FirstActions`), not read here. A law whose
+    body is an axiom (`_Theories.axiom_of`, world.lth's `ObserverIsFaithful`) is demanded at the
+    demand's cutoff for axioms (`Demand.cutoff`); [proposed] when that cutoff is assumed and no entry
+    serves it, it is accepted as the assumption it states and listed under `assumed`, so that the
+    run's certificate says under what hypothesis it holds (6.S10, 10.S13)."""
     from . import certify
     accept, values = demand.accepts, dict(demand.sets)
     cones = certify.Cones(program)
@@ -1824,21 +1931,25 @@ def certification(loaded, program, entry, demand):
         if theory is not None:
             stating[n] = theory
     laws = sorted({law for theory in set(stating.values()) for law in theories.laws(theory)
-                   if theories.action_law(law, theory) is None})
+                   if not theories.case_law(law, theory)})
     law_cones = certify.Cones(_elaborated(runtime_slice(loaded.acts, laws[0], core_data(loaded) + tuple(laws)))) \
         if laws else None
-    cone, firsts = [], []
+    cone, firsts, axioms = [], [], {}
     for n in names:
         demands = []
         if n in stating and n not in provisional:
             theory = stating[n]
+            frames = [(law, f) for law in theories.laws(theory) if (f := theories.frame_law(law, theory)) is not None]
             for law in theories.laws(theory):
                 action = theories.action_law(law, theory)
                 if action is not None:
                     # validated at the action's first application in the run, not before (10.S10)
-                    spec = _first_action_spec(loaded, program, cones, theories, n, theory, law, action)
+                    spec = _first_action_spec(loaded, program, cones, theories, n, theory, law, action, frames)
                     if spec is not None:
                         firsts.append(spec)
+                    continue
+                if theories.frame_law(law, theory) is not None:
+                    # run on the case of each first action of the model (`FirstActions`)
                     continue
                 given, fingerprints = [], {}
                 m = theories.model_parameter(law, theory)
@@ -1848,10 +1959,26 @@ def certification(loaded, program, entry, demand):
                 params = [p for a in theories.acts.get(law, ()) if isinstance(a, s.Define)
                           for b in a.binders if isinstance(b, s.Explicit) for p in b.names]
                 given += [(p, _given(values[p])) for p in params if p in values and p != m]
-                demands.append(demand.law(law.partition("@")[0], law_cones.hash(law), given, fingerprints))
+                axiom = theories.axiom_of(law)
+                d = demand.law(law.partition("@")[0], law_cones.hash(law), given, fingerprints, axiom is not None)
+                if axiom is not None:
+                    axioms[id(d)] = axiom
+                demands.append(d)
         cone.append({"name": n.partition("@")[0], "provisional": n in provisional, "laws": demands})
     entries = sorted((e for f in loaded.files for e in certify.read_store(f)),
                      key=lambda e: e.get("date", ""), reverse=True)
+    # an axiom no entry serves, at a cutoff of assumed: accepted as its assumption (6.S10)
+    assumed = []
+    for c in cone:
+        kept_laws = []
+        for d in c["laws"]:
+            if (id(d) in axioms and d["accepts"] == "AssumedGrade"
+                    and not any(certify.serves(d, e) for e in entries)):
+                assumed.append({"name": c["name"], "law": d["law"], "axiom": axioms[id(d)],
+                                "accept": certify.GRADE_WORDS[d["accepts"]]})
+            else:
+                kept_laws.append(d)
+        c["laws"] = kept_laws
     refusals = certify.refuse(entries, cone)
     if refusals:
         lines = [certify.show_refusal(r, entries) for r in refusals]
@@ -1874,7 +2001,10 @@ def certification(loaded, program, entry, demand):
             "laws": sum(len(c["laws"]) for c in with_laws), "not certified": [],
             # the laws validated at their action's first application (10.S10): what `run` checks
             # as the program asks, and records under "first actions"
-            "at first action": [{"action": f["action"], "law": f["law"], "route": f["route"]} for f in firsts],
+            "at first action": [{"action": f["action"], "law": f["law"], "route": f["route"],
+                                 "frame": f["frame"]["law"] if f["frame"] else None} for f in firsts],
+            # the axioms accepted as assumptions, with no entry (6.S10, 10.S13)
+            "assumed": assumed,
             "_firsts": firsts}
 
 
@@ -1891,8 +2021,19 @@ def _first_action_roots(loaded, kept):
         if theory is None:
             continue
         roots += [law for law in theories.laws(theory)
-                  if theories.action_law(law, theory) is not None and law not in roots]
+                  if theories.case_law(law, theory) and law not in roots]
+        protocol = _protocol(loaded, theory)
+        if protocol is not None and protocol not in roots:
+            roots.append(protocol)
     return tuple(roots)
+
+
+def _protocol(loaded, theory):
+    """[proposed] The protocol that gathers a case of the theory's actions: `agreement` of the file
+    that declares the theory (world.lth §5); None when that file defines none."""
+    home = _home(loaded, theory)
+    acts = loaded.by_file.get(home, ()) if home is not None else ()
+    return next((a.name for a in acts if isinstance(a, s.Define) and a.name.partition("@")[0] == "agreement"), None)
 
 
 def _home(loaded, name):
@@ -1903,11 +2044,13 @@ def _home(loaded, name):
     return None
 
 
-def _first_action_spec(loaded, program, cones, theories, name, theory, law, action):
+def _first_action_spec(loaded, program, cones, theories, name, theory, law, action, frames=()):
     """What `FirstActions` needs to validate the action of model `name` that `law` holds to its
     description: the route of the model's field, the theory's arguments for the law's leading
     parameters (`S`), the hashes of the law's cone and of the model's (its hosts' code inside,
-    6.S8), and the file whose store keeps the entry."""
+    6.S8), the file whose store keeps the entry, the protocol (`agreement`) that gathers the case,
+    and the frame law run on the same case (`frames`, `_Theories.frame_law`; the first, by order
+    written), with its cone's hash."""
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == name), None)
     route = None
     if definition is not None and isinstance(definition.body, t.RecordValue):
@@ -1924,10 +2067,22 @@ def _first_action_spec(loaded, program, cones, theories, name, theory, law, acti
         raise RunError(f"{law.partition('@')[0]}: {len(action['before'])} parameters before the model, "
                        f"the type of {name.partition('@')[0]} gives its theory {len(args)}")
     plain = name.partition("@")[0]
+    protocol = _protocol(loaded, theory)
+    if protocol is None:
+        raise RunError(f"{law.partition('@')[0]}: no `agreement` beside {theory.partition('@')[0]} gathers its case")
+    frame = None
+    if frames:
+        f_law, f = frames[0]
+        if len(f["before"]) != len(args):
+            raise RunError(f"{f_law.partition('@')[0]}: {len(f['before'])} parameters before the model, "
+                           f"the type of {plain} gives its theory {len(args)}")
+        frame = {"law": f_law.partition("@")[0], "internal": f_law, "between": f["between"],
+                 "cone": cones.hash(f_law)}
     return {"name": plain, "internal": name, "law": law.partition("@")[0], "law internal": law,
-            "action": f"{plain}.{action['field']}", "route": route, "model": action["model"],
-            "arguments": action["arguments"], "type args": args, "law cone": cones.hash(law),
-            "model hash": cones.hash(name), "hosts": cones.hosts(name), "home": _home(loaded, name)}
+            "action": f"{plain}.{action['field']}", "field": action["field"], "route": route,
+            "model": action["model"], "arguments": action["arguments"], "type args": args,
+            "law cone": cones.hash(law), "model hash": cones.hash(name), "hosts": cones.hosts(name),
+            "home": _home(loaded, name), "protocol": protocol, "frame": frame}
 
 
 def _printed(value):
@@ -2008,18 +2163,25 @@ def _shown(term, width=60):
 
 class FirstActions:
     """The validation of a host action at its first application in a run (10.S10, L11.2): run's
-    model of world.lth's `Host` laws (`_Theories.action_law`). At the first application of an
-    action whose model's theory holds it to a law that takes the token, with the run's own
-    arguments: if an entry of the model file's store serves the law at those arguments (the law's
-    cone, the model's cone with its hosts' code, the grade accepted; certify.serves), the action is
-    applied as usual; otherwise the Runner runs the law once (for `HostAgrees*`, world.lth's
-    `agreement`: observe the declared places, act once, observe again, compare with the
-    description), the action the law applies being the program's (applied once, its result the
-    program's). A refuted law refuses the run naming the action and the place that differed; a
-    confirmed one is recorded in the store of the file that defines the model (grade `cases`, one
-    case, the binding the model and the run's arguments, 7.S9) and in the run's record (`done`).
-    [proposed] A refuted law writes no entry; the observations of the protocol pass the token on and
-    change no place (`HostObserveChangesNothing`)."""
+    model of world.lth's `Host` laws over observed cases (`_Theories.action_law`, `frame_law`). At
+    the first application of an action whose model's theory holds it to a law over its case, with
+    the run's own arguments: if entries of the model file's store serve the law and the frame law at
+    those arguments and the places added (the laws' cones, the model's cone with its hosts' code,
+    the grade accepted; certify.serves), the action is applied as usual. Otherwise the Runner
+    gathers one case by world.lth's `agreement` (observe the declared places and the places added,
+    act once, observe again), with the `Held` the law's body builds (its action the program's, at
+    the program's arguments), evaluates the law on the case and the frame law on the same case
+    (`HostChangesOnlyDeclared`, over the places added), and hands the program the token `agreement`
+    gives back with the case's result: the action is applied once (10.S6). A refuted law refuses the
+    run naming the action and the place that differed; confirmed, each law is recorded in the store
+    of the file that defines the model (grade `cases`, one case, the binding the model, the run's
+    arguments and the places added, 7.S9) and in the run's record (`done`).
+
+    [proposed] The places the certifier adds (world.lth's `extra`, the frame law's parameter): the
+    model's standard output (`console.stdout`) and the files the run has read so far
+    (host.files_read), in that order, each once; recorded in the entries' binding. A refuted law
+    writes no entry; the observations of the protocol pass the token on and change no place
+    (`HostObserveChangesNothing`)."""
 
     def __init__(self, loaded, specs, demand):
         self.loaded, self.demand = loaded, demand
@@ -2034,6 +2196,20 @@ class FirstActions:
         return sorted((e for f in self.loaded.files for e in certify.read_store(f)),
                       key=lambda e: e.get("date", ""), reverse=True)
 
+    def extra(self, runner, spec):
+        """The places the certifier adds to the observation (see the class)."""
+        places = []
+        try:
+            out = runner.whnf(t.Proj(t.Proj(t.Var(spec["internal"]), "console"), "stdout"))
+            if isinstance(out, t.Lit) and isinstance(out.constant.value, str):
+                places.append(out.constant.value)
+        except RunError:
+            pass
+        for p, _ in host.files_read():
+            if p not in places:
+                places.append(p)
+        return places
+
     def __call__(self, runner, spec, head, args):
         from . import certify
         function = runner.route(head)
@@ -2042,119 +2218,203 @@ class FirstActions:
             raise RunError(f"{spec['law']}: {len(spec['arguments'])} arguments, {spec['action']} was given "
                            f"{len(given) - 1}")
         printed = [(p, _printed(v)) for p, v in zip(spec["arguments"], given[1:])]
-        # the validation is an inner action whose entry is the law: it receives the run's demand
-        # with every cutoff kept (demand.lth's `inner`, L12.3)
-        demand = self.demand.inner(spec["law"]).law(
-            spec["law"], spec["law cone"], [(spec["model"], {"Printed": spec["name"]})] + printed,
-            {spec["model"]: spec["model hash"]})
+        extra = self.extra(runner, spec)
+        frame = spec["frame"]
+        extra_name = next((n for n, r in frame["between"] if r == "extra"), "extra") if frame else "extra"
+        places = (extra_name, {"Printed": json.dumps(extra, ensure_ascii=False)})
+        model = (spec["model"], {"Printed": spec["name"]})
         shown = {p: certify._shown_value(v) for p, v in printed}
-        served = next((e for e in self.entries() if certify.serves(demand, e)), None)
-        if served is not None:
-            self.done.append({"action": spec["action"], "law": spec["law"], "arguments": shown,
-                              "outcome": "served", "entry": served["date"]})
+        at = ", ".join(f"{p} = {v}" for p, v in shown.items())
+        # each validation is an inner action whose entry is the law: it receives the run's demand
+        # with every cutoff kept (demand.lth's `inner`, L12.3)
+        demands = [(spec["law"], spec["law cone"], self.demand.inner(spec["law"]).law(
+            spec["law"], spec["law cone"], [model] + printed + [places], {spec["model"]: spec["model hash"]}))]
+        if frame is not None:
+            held_name = next(n for n, r in frame["between"] if r == "held")
+            held_shown = {"Printed": f"{spec['action']} at {at or 'no argument'}"}
+            demands.append((frame["law"], frame["cone"], self.demand.inner(frame["law"]).law(
+                frame["law"], frame["cone"], [model, (held_name, held_shown), places],
+                {spec["model"]: spec["model hash"]})))
+        entries = self.entries()
+        served = [next((e for e in entries if certify.serves(d, e)), None) for _, _, d in demands]
+        if all(e is not None for e in served):
+            for (law, _, _), e in zip(demands, served):
+                self.done.append({"action": spec["action"], "law": law, "arguments": shown,
+                                  "outcome": "served", "entry": e["date"]})
             return None
-        term = t.Var(spec["law internal"])
-        for a in spec["type args"] + [t.Var(spec["internal"])] + list(args[1:]) + [runner.token]:
-            term = t.App(term, a)
-        runner.validating, runner.trace = True, []
+        values = spec["type args"] + [t.Var(spec["internal"])] + list(args[1:])
+        parts = _held_parts(runner.program, spec["law internal"], values)
+        if parts is None:
+            raise RunError(f"{spec['law']} builds no `held` of {spec['action']}")
+        held_term, (S, A, m, act, d), predicate = parts
+        extra_term = t.Var("nil")
+        for p in reversed(extra):
+            extra_term = t.App(t.App(t.Var("cons"), t.Lit(t.StringConst(p))), extra_term)
+        gather = t.Var(spec["protocol"])
+        for a in (S, A, m, t.Var(spec["internal"]), held_term, extra_term, args[0]):
+            gather = t.App(gather, a)
+        runner.validating = True
         try:
-            verdict = runner.whnf(term)
-            trace = runner.trace
+            pair = runner.whnf(gather)
+            if not isinstance(pair, t.Pair):
+                raise RunError(f"agreement gave no pair: {_shown(pair)}")
+            case = runner.share(pair.right)
+            law = t.Var(spec["law internal"])
+            for a in values + [case]:
+                law = t.App(law, a)
+            verdict = runner.whnf(law)
+            frame_verdict = t.Var("true")
+            if frame is not None:
+                roles = {"held": held_term, "type": A, "extra": extra_term}
+                applied = t.Var(frame["internal"])
+                for a in spec["type args"] + [t.Var(spec["internal"])] + [roles[r] for _, r in frame["between"]] + [case]:
+                    applied = t.App(applied, a)
+                frame_verdict = runner.whnf(applied)
+            result = runner.whnf(t.Proj(case, "result"))
         finally:
-            runner.validating, runner.trace = False, None
-        acted = next((v for r, _, v in trace if r == head.route), None)
-        if acted is None:
-            raise RunError(f"{spec['law']} did not apply {spec['action']}")
+            runner.validating = False
+        for name, v in ((spec["law"], verdict), (frame and frame["law"], frame_verdict)):
+            if v not in (t.Var("true"), t.Var("false")):
+                raise RunError(f"{name} gave no Bool: {_shown(v)}")
         if verdict == t.Var("false"):
-            where = self.disagreement(runner, spec, args, trace, head, acted)
-            at = ", ".join(f"{p} = {v}" for p, v in shown.items())
+            where = self.disagreement(runner, m, d, case, predicate)
             refusal = {"name": spec["name"], "law": spec["law"], "state": ("Refuted", where), "action": spec["action"]}
             raise Refused(f"refused: {spec['action']} disagrees with its description at its first action "
                           f"(10.S10, L11.2): {spec['law']} at {at or 'no argument'}: {where}", [refusal])
-        if verdict != t.Var("true"):
-            raise RunError(f"{spec['law']} gave no Bool: {_shown(verdict)}")
-        entry = self.entry(spec, demand, printed)
-        where = certify.add_entry(spec["home"], entry) if spec["home"] is not None else None
-        self.done.append({"action": spec["action"], "law": spec["law"], "arguments": shown,
-                          "outcome": "confirmed", "entry": entry["date"],
-                          "store": str(where) if where is not None else None})
-        return acted
+        if frame_verdict == t.Var("false"):
+            where = self.undeclared_change(runner, m, d, case, extra)
+            refusal = {"name": spec["name"], "law": frame["law"], "state": ("Refuted", where), "action": spec["action"]}
+            raise Refused(f"refused: {spec['action']} changed a place it does not declare at its first action "
+                          f"(10.S7, 10.S10): {frame['law']} at {at or 'no argument'}: {where}", [refusal])
+        for (law, cone, demand), e in zip(demands, served):
+            if e is not None:
+                self.done.append({"action": spec["action"], "law": law, "arguments": shown,
+                                  "outcome": "served", "entry": e["date"]})
+                continue
+            entry = self.entry(spec, law, cone, demand)
+            where = certify.add_entry(spec["home"], entry) if spec["home"] is not None else None
+            self.done.append({"action": spec["action"], "law": law, "arguments": shown,
+                              "outcome": "confirmed", "entry": entry["date"],
+                              "store": str(where) if where is not None else None})
+        return t.Pair(pair.left, result)
 
-    def entry(self, spec, demand, printed):
-        """certification.lth's `Entry` of a confirmed first action: one case, grade `cases`; each
-        argument a census of one, its value printed in the generator so that two arguments are two
-        groups of the store (certify.prune) and its hash its fingerprint."""
+    def entry(self, spec, law, cone, demand):
+        """certification.lth's `Entry` of a law confirmed at a first action: one case, grade `cases`;
+        each parameter the run gives a census of one, its value printed in the generator so that two
+        arguments are two groups of the store (certify.prune) and its hash its fingerprint; the
+        places the certifier added last."""
         from . import certify
         binding = [{"parameter": spec["model"], "generator": f"{spec['name']} (the run's model)",
                     "fingerprint": spec["model hash"]}]
-        binding += [{"parameter": p, "generator": f"{certify._shown_value(v)} (the run's argument)",
-                     "fingerprint": certify._sha(json.dumps(v, sort_keys=True, ensure_ascii=False))}
-                    for p, v in printed]
-        return {"law": spec["law"], "cone": spec["law cone"], "binding": binding, "seed": None, "cases": 1,
+        given = demand["given"]
+        for k, (p, v) in enumerate(given[1:], 1):
+            what = "the certifier's places" if k == len(given) - 1 else \
+                "the action held" if law != spec["law"] else "the run's argument"
+            binding.append({"parameter": p, "generator": f"{certify._shown_value(v)} ({what})",
+                            "fingerprint": certify._sha(json.dumps(v, sort_keys=True, ensure_ascii=False))})
+        return {"law": law, "cone": cone, "binding": binding, "seed": None, "cases": 1,
                 "budgets": {}, "reach": [{"parameter": p, "reach": {"Members": [v]}} for p, v in demand["given"]],
                 "evidence": {"Points": {"evaluated": 1, "raised": 0, "coverage": "Listed", "verdict": "Supported"},
                              "protocol": "first action (10.S10)", "route": spec["route"]},
                 "grade": "Cases", "outcome": "Passed", "date": certify.now(),
                 "interpreter": certify.interpreter_revision(), "hosts": [list(h) for h in spec["hosts"]]}
 
-    def disagreement(self, runner, spec, args, trace, head, acted):
-        """Where a refuted `agreement` differed: each declared place at which the world the
-        description gives reads otherwise than the world observed after the action, then the
-        result. Read from the law's application of world.lth's `agreement` (its `m` and `d`) and
-        the protocol's two observations; for another law, that it was refuted."""
-        parts = _agreement_parts(runner.program, spec, args, runner.token)
-        observed = [(g, v) for r, g, v in trace if r != head.route]
-        if parts is None or len(observed) < 2 or not isinstance(acted, t.Pair):
-            return "the law is refuted"
-        m, d = parts
-        (given_before, before), (_, after) = observed[0], observed[1]
-        before, after = runner.whnf(before), runner.whnf(after)
-        described = runner.whnf(t.App(t.Proj(d, "describe"), before.right))
+    @staticmethod
+    def _strings(runner, xs):
+        out = []
+        xs = runner.whnf(xs)
+        while isinstance(xs, t.App) and isinstance(xs.function, t.App) and runner.whnf(xs.function.function) == t.Var("cons"):
+            p = runner.whnf(xs.function.argument)
+            if isinstance(p, t.Lit):
+                out.append(p.constant.value)
+            xs = runner.whnf(xs.argument)
+        return out
+
+    @staticmethod
+    def _read(runner, m, st, p):
+        return t.App(t.App(t.Proj(m, "read"), st), t.Lit(t.StringConst(p)))
+
+    def _differs(self, runner, m, a, b, p, said):
+        ra, rb = self._read(runner, m, a, p), self._read(runner, m, b, p)
+        if runner.whnf(t.App(t.App(t.Var("=="), ra), rb)) == t.Var("false"):
+            return f"the place {p} differs ({said[0]} {_shown(runner.value(ra))}, {said[1]} {_shown(runner.value(rb))})"
+        return None
+
+    def disagreement(self, runner, m, d, case, predicate):
+        """Where a refuted case differed from the description: each declared place (`d.places`) at
+        which the world the description gives reads otherwise than the world observed after the
+        action, then the result; for an observation (world.lth's `observes`), each place at which
+        its result or the world after reads otherwise than the world before."""
+        declared = self._strings(runner, t.Proj(d, "places"))
+        before, after, result = (t.Proj(case, f) for f in ("before", "after", "result"))
+        differing = []
+        if predicate == "observes":
+            for p in declared:
+                w = self._differs(runner, m, before, result, p, ("before", "observed"))
+                w = w or self._differs(runner, m, before, after, p, ("before", "after"))
+                if w:
+                    differing.append(w)
+            return "; ".join(differing) or "the law is refuted"
+        described = runner.whnf(t.App(t.Proj(d, "describe"), before))
         if not isinstance(described, t.Pair):
             return "the law is refuted"
-        differing = []
-        for p in given_before[1] if isinstance(given_before[1], list) else []:
-            read = [t.App(t.App(t.Proj(m, "read"), st), t.Lit(t.StringConst(p))) for st in (described.left, after.right)]
-            if runner.whnf(t.App(t.App(t.Var("=="), read[0]), read[1])) == t.Var("false"):
-                differing.append(f"the place {p} differs (described {_shown(runner.value(read[0]))}, "
-                                 f"observed {_shown(runner.value(read[1]))})")
-        if runner.whnf(t.App(t.App(t.Var("=="), described.right), acted.right)) == t.Var("false"):
+        for p in declared:
+            w = self._differs(runner, m, described.left, after, p, ("described", "observed"))
+            if w:
+                differing.append(w)
+        if runner.whnf(t.App(t.App(t.Var("=="), described.right), result)) == t.Var("false"):
             differing.append(f"the result differs (described {_shown(runner.value(described.right))}, "
-                             f"given {_shown(runner.value(acted.right))})")
-        return "; ".join(differing) or "the representations differ outside the places read"
+                             f"given {_shown(runner.value(result))})")
+        return "; ".join(differing) or "the law is refuted"
+
+    def undeclared_change(self, runner, m, d, case, extra):
+        """Where a refuted frame law differed: each place added and not declared at which the world
+        after reads otherwise than the world before (world.lth's `undeclared`)."""
+        declared = self._strings(runner, t.Proj(d, "places"))
+        before, after = t.Proj(case, "before"), t.Proj(case, "after")
+        differing = [w for p in extra if p not in declared
+                     if (w := self._differs(runner, m, before, after, p, ("before", "after")))]
+        return "; ".join(differing) or "the law is refuted"
 
 
-def _agreement_parts(program, spec, args, token):
-    """(m, d) of the application of world.lth's `agreement` in the law's body, with the law's
-    parameters given the run's values; None when the body applies none."""
-    law = next((a for a in program if isinstance(a, t.Define) and a.name == spec["law internal"]), None)
+def _held_parts(program, law_internal, values):
+    """The application of world.lth's `held` in the law's body, its parameters but the case given
+    the run's values: (the application, its five arguments S A m act d, the predicate it is handed
+    to, `agrees` or `observes`); None when the body applies none."""
+    law = next((a for a in program if isinstance(a, t.Define) and a.name == law_internal), None)
     if law is None:
         return None
-    values = spec["type args"] + [t.Var(spec["internal"])] + list(args[1:]) + [token]
     body = law.body
     for v in values:
         if not isinstance(body, t.Lam):
             return None
         body = kernel.substitute(body.name, v, body.body)
 
-    def find(x):
+    def spine(x):
         head, xs = x, []
         while isinstance(head, t.App):
             xs.append(head.argument)
             head = head.function
-        if isinstance(head, t.Var) and head.name.partition("@")[0] == "agreement" and len(xs) >= 5:
-            xs.reverse()
-            return xs[2], xs[4]
+        xs.reverse()
+        name = head.name.partition("@")[0] if isinstance(head, t.Var) else None
+        return name, xs
+
+    def find(x, outer):
+        name, xs = spine(x)
+        if name == "held" and len(xs) >= 5:
+            return x, tuple(xs[:5]), outer
+        if name in ("agrees", "observes"):
+            outer = name
         if isinstance(x, tuple):
             for y in x:
-                if (r := find(y)) is not None:
+                if (r := find(y, outer)) is not None:
                     return r
         elif is_dataclass(x) and not isinstance(x, type):
             for f in fields(x):
-                if (r := find(getattr(x, f.name))) is not None:
+                if (r := find(getattr(x, f.name), outer)) is not None:
                     return r
         return None
-    return find(body)
+    return find(body, None)
 
 
 def refuse_provisional(kept, entry):

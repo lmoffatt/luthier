@@ -1,5 +1,173 @@
 [
  {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:222bd31c9d43d8d36ee62434e4b9704b410827faa4d7e5e00808e7526d7d7800",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:d3e57ec1aeff28b8af2a054cc95d14a4811c21dd9cae04a758bd9a2ca95c4f68"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.print at s = \"hello, world\" (the action held)",
+    "fingerprint": "sha256:790a2014cf61ea7c3c5b8c2addb1b3d4f5d16ab00f5affbcbd32f7b94fa5aac7"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.print at s = \"hello, world\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-15T00:46:44+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesPrint",
+  "cone": "sha256:ef6d1a01aed23e09aeec48c6d10fb8abb52324e325d8725854cd009aef8a2552",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:d3e57ec1aeff28b8af2a054cc95d14a4811c21dd9cae04a758bd9a2ca95c4f68"
+   },
+   {
+    "parameter": "s",
+    "generator": "\"hello, world\" (the run's argument)",
+    "fingerprint": "sha256:5a6172c43d0cacae71749f499782dfb74c4d5fff432206f21e7b9a61a57b33f5"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "s",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"hello, world\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.print_line"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-15T00:46:44+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
   "law": "HostObserveChangesNothing",
   "cone": "sha256:ab12ab44bd668c8068e74281b02be35fa281e11b556fc82ea2fc8440c24fbd51",
   "binding": [

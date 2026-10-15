@@ -111,7 +111,12 @@ def test_an_import_beside_a_library_name_leaves_its_cone(tmp_path):
     with_text = tmp_path / "with_text.lut"
     with_text.write_text(head + 'import "plot.lth" Plot text\ndrawn (p : Plot) : Plot := text "t" nil 8.0 p\n' + main,
                          encoding="utf-8")
-    laws = ("RoundTrip", "Canonical", "Tolerant", "Rejects")
+    # Codec's laws by the names the loader gives them: since world.lth imports term.lth (2ac8f12),
+    # grammar.lth's RoundTrip and Canonical are loaded too, and tables.lth's are `RoundTrip@tables`
+    from luthier import run
+    loaded = run.Loaded(without)
+    tables = next(p for p in loaded.by_file if Path(p).name == "tables.lth")
+    laws = tuple(loaded.internal(tables, n) for n in ("RoundTrip", "Canonical", "Tolerant", "Rejects"))
     a, b = _run_cones(without, laws), _run_cones(with_text, laws)
     assert "text@plot" in b.acts and "text@plot" not in b.names("csv")
     assert a.hash("csv") == b.hash("csv")
@@ -474,3 +479,23 @@ def test_prune_stores_rewrites_a_store_and_runs_nothing(tmp_path):
     where.write_text(json.dumps(entries))
     assert main(["certify", "--prune", str(where)]) == 0
     assert len(json.loads(where.read_text())) == 4
+
+
+def test_a_current_failure_is_refused_whatever_serves():
+    # ACurrentFailureIsRefused (certification.lth, C5 of the layer 3 review; certification_model's
+    # refuseLaws at 82c4cb4): a passed entry that serves the demand, in front of a failure of the
+    # same law at the same hash (two seeds), does not save the law; it is refused with the failure
+    def entry(outcome, grade, seed):
+        return {"law": "L", "cone": "h", "binding": [{"parameter": "m", "generator": "x", "fingerprint": "f"}],
+                "seed": seed, "reach": [{"parameter": "m", "reach": {"Members": [{"Printed": "x"}]}}],
+                "outcome": outcome, "grade": grade}
+    demand = {"law": "L", "cone": "h", "given": [("m", {"Printed": "x"})], "accepts": "Sampled",
+              "fingerprints": {"m": "f"}}
+    passed, failed = entry("Passed", "Proved", 1), entry({"Failed": "m = x"}, None, 2)
+    assert certify.serves(demand, passed)
+    cone = [{"name": "n", "provisional": False, "laws": [demand]}]
+    refusals = certify.refuse([passed, failed], cone)
+    assert [(r["name"], r["law"], r["state"]) for r in refusals] == [("n", "L", ("Current", {"Failed": "m = x"}))]
+    assert certify.show_refusal(refusals[0], [passed, failed]) == "n: L: failed at m = x"
+    # the failure at another hash is stale and the pass serves
+    assert certify.refuse([passed, dict(failed, cone="old")], cone) == []
