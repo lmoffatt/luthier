@@ -634,10 +634,13 @@ def test_the_control_status_of_a_law():
 def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
     # the acceptance of the brief, then every law of tables controlled (prompt-mutants.md); no store
     laws, controls = (ROOT / "tests" / "tester" / f"tables_{n}.lut" for n in ("laws", "controls"))
-    stores = [certify.store_path(p).read_bytes() for p in (laws, controls)]
+    # the stores of the claims (L10.12): tables_model.lut's and tables.lth's; none beside the programs
+    claims = [certify.LIBRARY / n for n in ("tables_model.lut", "tables.lth")]
+    stores = [certify.store_path(p).read_bytes() for p in claims]
     assert main(["certify", "--no-cert", str(laws), str(controls)]) == 0
     out = capsys.readouterr().out.splitlines()
-    assert [certify.store_path(p).read_bytes() for p in (laws, controls)] == stores
+    assert [certify.store_path(p).read_bytes() for p in claims] == stores
+    assert not any(certify.store_path(p).exists() for p in (laws, controls))
     assert out[0] == f"{laws}: 8 laws, 8 lines ran, 0 known"
     assert "  CellsOfTheirKind: cases; controlled (refuted on its control at t = holeT)" in out
     assert all("; controlled (refuted on its control at " in line for line in out[1:9])
