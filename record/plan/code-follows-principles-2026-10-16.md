@@ -57,7 +57,7 @@ f. D-2026-10-16-c and -d (one agent, run.py and cli.py): a provisional extern re
 g. D-2026-10-16-e (after f; renames many files): executive files `.run.lut` and `.test.lut`; the
    checker's refusals; run and certify take only their kind; the migration of tests/tester and the
    two mixed sonolocalización files. Principles text (L2.6, L5.1) by a separate agent, launched.
-Order: 3b's follow-up, then f and 3c together (disjoint files), then g, then 3e.
+Order: 3b's follow-up (done, 741 passed, verified), then f and 3c together (launched), then g, then 3e.
 
 ## Step 4. The first cost (v0.5)
 `PinvProjects` returns its distance; the certificate records it; a demand is served by
