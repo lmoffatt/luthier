@@ -341,15 +341,18 @@ sequentialFrom (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : 
 sequential (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (t : T) : StatisticalVerdict :=
   sequentialFrom S T l draw c t 1.0 0
 
--- [D-2026-10-16-g] A stretch of the test: the test continued from the ratio its earlier stretches
--- left, drawing from a new state (a new seed). Its verdict is `sequentialFrom` from that ratio with
--- nothing spent yet, and `ratioAfter` is the ratio it stops at, from which the next stretch starts
--- when this one leaves the test unresolved; from a ratio of one the stretch is the whole test,
--- `sequential`. The stretches of a law under one binding are one test whose samples are their
--- total, and its alpha holds over the total: the product of likelihood ratios is a martingale under
--- the null, so the chance that it ever reaches the upper threshold is at most about alpha however
--- many stretches continue it (Ville's inequality). [proposed] The budget bounds each stretch: it is
--- a cutoff of the line, in its binding, and a new seed is the demand paying for one more stretch.
+-- [D-2026-10-16-g] A stretch of the test: the test continued from the ratio and the samples its
+-- earlier stretches left, drawing from a new state (a new seed). Its verdict is `sequentialFrom`
+-- from that ratio and that count, and `ratioAfter` is the ratio it stops at, from which the next
+-- stretch starts when this one leaves the test unresolved; from a ratio of one and nothing spent the
+-- stretch is the whole test, `sequential`. The stretches of a law under one binding are one test
+-- whose samples are their total, and its alpha holds over the total: the product of likelihood
+-- ratios is a martingale under the null, so the chance that it ever reaches the upper threshold is
+-- at most about alpha however many stretches continue it (Ville's inequality). The budget bounds
+-- the whole test across its stretches (D-2026-10-15-b names two cutoffs, the size of each sample
+-- and the budget the demand pays in all): a new seed buys no budget, so a stretch that starts at
+-- the budget draws nothing and leaves the test unresolved; a demand with a larger budget continues
+-- it from the ratio recorded (the coordinator's answer to step 3i's question, 2026-10-16).
 ratioAfter (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (t : T) (ratio : Float64) (spent : Nat) : Float64 :=
   if ratio >= upperThreshold c then ratio
   else if ratio <= lowerThreshold c then ratio

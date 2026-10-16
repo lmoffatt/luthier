@@ -305,6 +305,7 @@ def test_a_statistical_law_runs_the_sequential_test(tmp_path):
     assert (unresolved.verdict, unresolved.grade, unresolved.evidence.spent) == ("Unsettled", None, 400)
     # the ratio the test stopped at, from which a later stretch would continue it (D-2026-10-16-g)
     assert abs(holds.entry["evidence"].pop("ratio") - 0.01) < 1e-12
+    assert holds.entry["evidence"].pop("cutoffs") == "c"  # left out of the union's binding (D-2026-10-16-g)
     assert holds.entry["evidence"] == {"Tested": {"verdict": "Holds", "alpha": 0.01, "beta": 0.01, "delta": 0.9,
                                                   "spent": 2, "initial": 1, "budget": 400}, "coverage": "(Drawn 3)"}
     assert (holds.entry["outcome"], holds.entry["grade"]) == ("Passed", "Sampled")

@@ -995,31 +995,51 @@ def test_a_replayed_seed_does_not_double_n(tmp_path):
     assert certify.pooled(every, law, one.cone, binding) == 4
 
 
-STRETCHED = STATISTICAL_LAWS.replace("budget := 100", "budget := 1").replace(
-    'test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)\n',
-    'test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)\n'
-    'test "Constant" ExhaustiveMode (seed <- 6) (profile <- onOnes)\n')
+# a constant p-value of one: each sample multiplies the ratio by 0.5 at delta 0.5, so the test holds the
+# law at its seventh sample (0.5^7 <= 0.01/0.99); under a budget of 3 it is unresolved
+STRETCHED = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Seed Binding
+import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue Listed
+pv : StatisticalLaw Float64 := byPValue Float64 (fn p { p })
+Constant (p : Float64) (c : Sequential) : Law := Statistical Float64 Seed pv (fn n s { (p, s) }) c
+three : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 1, budget := 3 }
+ten : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 1, budget := 10 }
+ones : List Float64 := [1.0]
+on (c : String) : List Binding := [ { parameter := just "p", type := nothing, generator := "ones", coverage := Listed },
+  { parameter := just "c", type := nothing, generator := c, coverage := Listed } ]
+test "Constant" ExhaustiveMode (seed <- 5) (profile <- on "three")
+test "Constant" ExhaustiveMode (seed <- 6) (profile <- on "three")
+test "Constant" ExhaustiveMode (seed <- 7) (profile <- on "ten")
+'''
 
 
-def test_a_statistical_law_unresolved_after_one_stretch_is_resolved_by_a_second_with_a_new_seed(tmp_path):
+def test_the_budget_bounds_the_test_across_stretches_and_a_larger_one_continues_it(tmp_path):
     path = tmp_path / "stretched.lut"
     path.write_text(STRETCHED, encoding="utf-8")
-    # alone, one stretch of budget 1 leaves the test unresolved (a ratio of 0.1 per sample)
-    first, second = tester.run_tests(path)
-    assert first.verdict == second.verdict == "Unsettled"
-    # with the store, the second seed continues the test from where the first stopped, and holds it
-    first, second = tester.run_tests(path, store=True)
-    assert (first.verdict, first.evidence.spent) == ("Unsettled", 1)
-    assert (second.verdict, second.grade, second.evidence.spent) == ("Supported", "Sampled", 1)
-    assert second.entry["evidence"]["from"] == {"ratio": first.entry["evidence"]["ratio"], "spent": 1, "seeds": [5]}
-    assert "continuing the test of seed 5 (2 samples in all)" in tester.line(second)
+    # alone, each line is its own test: unresolved at the budget of 3, held at 7 under 10
+    alone = tester.run_tests(path)
+    assert [(o.verdict, o.evidence.spent) for o in alone] == [("Unsettled", 3), ("Unsettled", 3), ("Supported", 7)]
+    # with the store, one test: the second seed buys no budget, so it stops at 3 in all, unresolved;
+    # the line with a budget of 10 continues from the ratio recorded and holds the law at 7 in all
+    first, second, third = tester.run_tests(path, store=True)
+    assert (first.verdict, first.evidence.spent) == ("Unsettled", 3)
+    assert (second.verdict, second.evidence.spent) == ("Unsettled", 0)
+    assert second.entry["evidence"]["from"] == {"ratio": 0.125, "spent": 3, "seeds": [5]}
+    assert "unresolved at 0 samples of 1" in tester.line(second)
+    assert "continuing the test of seed 5 (3 samples in all)" in tester.line(second)
+    assert (third.verdict, third.grade, third.evidence.spent) == ("Supported", "Sampled", 4)
+    assert third.entry["evidence"]["from"] == {"ratio": 0.125, "spent": 3, "seeds": [5, 6]}
+    assert "continuing the test of seeds 5, 6 (7 samples in all)" in tester.line(third)
+    # the union is one test whatever the budgets: its key leaves the cutoffs out
     entries = certify.read_store(path)
-    assert certify.pooled(entries, "Constant", second.cone, second.entry["binding"]) == 2
-    assert certify.standing(entries, "Constant", second.cone).endswith("; pooled over seeds 5, 6: 2 samples in all")
-    # a replay starts where the stretch it repeats started: the same outcome, nothing written
+    key = certify.union_key(third.entry)
+    assert key == certify.union_key(first.entry) and [d["parameter"] for d in key] == ["p"]
+    assert certify.pooled(entries, "Constant", third.cone, key) == 7
+    assert certify.standing(entries, "Constant", third.cone).endswith("; pooled over seeds 5, 6, 7: 7 samples in all")
+    # a replay starts where its seed's stretch started: the same outcomes, nothing written
     stored = certify.store_path(path).read_text()
     again = tester.run_tests(path, store=True, deep=True)
-    assert [o.verdict for o in again] == ["Unsettled", "Supported"]
+    assert [(o.verdict, o.evidence.spent) for o in again] == [("Unsettled", 3), ("Unsettled", 0), ("Supported", 4)]
     assert certify.store_path(path).read_text() == stored
 
 

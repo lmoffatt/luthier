@@ -323,6 +323,13 @@ underAll (b : List Drawing) (es : List Entry) : List Entry := match es { nil -> 
 -- of n cases from a seed is the first n of any larger run of it (7.S1: the seed threaded draw by
 -- draw). The grade is the fold above, unchanged; the union adds its `n`, whose cost form
 -- (ε̂(n, δ), 7.S11) is the hole above. The law is `Pooling` (§5).
+-- [D-2026-10-16-g, the budget the whole test's] A statistical stretch's size is the samples it
+-- drew itself (the specimen writes the rates' `spent` less the samples before it). Its budget is
+-- the demand's for the whole test, not part of the distribution, so the specimen reads the binding
+-- of a statistical stretch without the drawing of its cutoffs (the parameter of type `Sequential`,
+-- which its evidence names): stretches run under two budgets are one union. Here `Entry` does not
+-- name that parameter, so `pooledCases` compares bindings whole; stating it waits for the entry to
+-- carry its cutoffs' parameter (a gap of this draft, the specimen ahead of the reference).
 drawnStretch (e : Entry) : Bool :=
   match e.evidence { Tested v -> true ; Points A pts c -> (match c { Drawn s -> true ; _ -> false }) ; _ -> false }
 stretchKey (e : Entry) : Maybe Seed := if drawnStretch e then just e.seed else nothing

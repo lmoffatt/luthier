@@ -77,11 +77,14 @@ settles nothing, the budget spent in the entry. A statistical control passes on 
 
 Stretches (record/IA/code-follows-2026-10-16/prompt-pool-seeds.md; D-2026-10-16-g, laws.lth's
 `ratioAfter`): the lines of a statistical law under one binding are one sequential test. A line of a
-new seed, with the store read, continues the test from the ratio the latest stretch of the law, cone,
-binding and kind stopped at (certify.py's `continuation`), drawing at most the budget again; its entry
-records the ratio it stops at and where it started (`"from"`: the ratio, the samples and the seeds
-before it), and its line says which seeds it continues. A replay (`--deep`, the same seed) starts
-where the stretch it repeats started, so it is deterministic given its identity and that record.
+new seed, with the store read, continues the test from the ratio and the samples the latest stretch of
+the law, cone, kind and binding (without its cutoffs' drawing) left at the same alpha, beta, delta and
+sample size (certify.py's `continuation`). The budget bounds the whole test: a new seed buys none, and a
+line whose budget the test has spent draws nothing and is unresolved; a line with a larger budget
+continues it. Its entry records the ratio it stops at, its cutoffs' parameter and where it started
+(`"from"`: the ratio, the samples and the seeds before it), its `spent` its own samples, and its line
+says which seeds it continues. A replay (`--deep`), or its seed under another budget, starts where that
+seed's stretch started, so it is deterministic given its identity and that record.
 """
 from __future__ import annotations
 
@@ -200,6 +203,7 @@ class Tested:
     coverage: t.Term = None
     ratio: float | None = None   # the likelihood ratio the stretch stopped at (laws.lth's `ratioAfter`)
     start: dict | None = None    # where it started, when it continued earlier stretches (D-2026-10-16-g)
+    cutoffs: str | None = None   # the parameter of its cutoffs, which its union key leaves out
 
     def record(self):
         return {"verdict": self.verdict, "alpha": self.alpha, "beta": self.beta, "delta": self.delta,
@@ -758,7 +762,8 @@ def evaluate(runner, law, case, fuel):
 
 def run_spec(runner, spec, fuel, loaded=None, start=None):
     """test.lth's `Tester.run`: the evidence of the law the spec names, with its verdict and grade.
-    `start` is where a statistical law's stretch continues the test from (D-2026-10-16-g)."""
+    `start`, given the cutoffs and their parameter, is where a statistical law's stretch continues the
+    test from (D-2026-10-16-g)."""
     law = _as_called(loaded, spec.law)
     params = parameters(runner, law)
     if params is None:
@@ -847,8 +852,9 @@ _RAISES = (RunError, RecursionError, ValueError, KeyError, TypeError)
 def run_statistical(runner, spec, fuel, loaded, law, params, start=None):
     """A statistical law at its bindings (laws.lth §4, L9.15): each parameter a census of one, the
     body reduced to `Statistical S T l draw c`, and `sequentialFrom S T l draw c seed r 0` run once
-    through the Runner from the spec's seed, `r` the ratio `start` gives (one when it gives none,
-    which is `sequential`), and `ratioAfter` likewise for the ratio it stops at (D-2026-10-16-g).
+    through the Runner from the spec's seed, `r` and `k` the ratio and the samples `start` gives for
+    these cutoffs (one and none when it gives nothing, which is `sequential`), and `ratioAfter`
+    likewise for the ratio it stops at; the budget bounds the whole test (D-2026-10-16-g).
     The evidence is `Tested v`; the verdict `StatisticalByTest`'s; the grade test.lth's over
     `Drawn seed`."""
     names = tuple(n for n, _ in params)
@@ -893,8 +899,11 @@ def run_statistical(runner, spec, fuel, loaded, law, params, start=None):
             return _not_run(spec, f"the cutoffs {_show(cutoffs)} break Sequential's predicate (laws.lth "
                                   f"`sequentialCutoffs`)", names)
         c = {label: v.constant.value for label, v in cutoffs.fields}
+        parameter = next((n for n, ty in params if _head_name(ty) == "Sequential"), None)
+        start = start(c, parameter) if start else None
+        before = int(start["spent"]) if start else 0
         from_ratio = float(start["ratio"]) if start else 1.0
-        stretch = args + [t.Lit(t.IntConst(seed)), t.Lit(t.FloatConst(from_ratio)), t.Lit(t.IntConst(0))]
+        stretch = args + [t.Lit(t.IntConst(seed)), t.Lit(t.FloatConst(from_ratio)), t.Lit(t.IntConst(before))]
         runner.fuel = fuel
         verdict = runner.value(Runner.apply(con("sequentialFrom"), stretch))
         runner.fuel = fuel
@@ -907,8 +916,8 @@ def run_statistical(runner, spec, fuel, loaded, law, params, start=None):
     rates = {label: v.constant.value for label, v in verdict.argument.fields}
     coverage = t.App(con("Drawn"), t.Lit(t.IntConst(seed)))
     evidence = Tested(_base(verdict.function), float(rates["alpha"]), float(rates["beta"]), float(rates["delta"]),
-                      int(rates["spent"]), int(c["initial"]), int(c["budget"]), coverage,
-                      float(stopped.constant.value), start)
+                      int(rates["spent"]) - before, int(c["initial"]), int(c["budget"]), coverage,
+                      float(stopped.constant.value), start, parameter)
     settled = SETTLED_BY_TEST[evidence.verdict]
     return Outcome(spec, evidence, settled, grade_of(runner, settled, coverage, loaded), evidence.spent, None,
                    parameters=names)
@@ -1158,7 +1167,7 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
             outcomes.append(reused)
             continue
         # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
-        start = certify.continuation(entries, entry, found) if store else None
+        start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
         outcome = run_spec(runner, spec, fuel, loaded, start)
         settle(entry, outcome)
         outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
@@ -1491,6 +1500,8 @@ def _settle_tested(entry, outcome):
     entry["evidence"] = {"Tested": tested, "coverage": _show(outcome.evidence.coverage)}
     if outcome.evidence.ratio is not None:  # where the stretch stopped and started (D-2026-10-16-g)
         entry["evidence"]["ratio"] = outcome.evidence.ratio
+    if outcome.evidence.cutoffs is not None:
+        entry["evidence"]["cutoffs"] = outcome.evidence.cutoffs
     if outcome.evidence.start:
         entry["evidence"]["from"] = outcome.evidence.start
     rates = certify.tested_text(tested)

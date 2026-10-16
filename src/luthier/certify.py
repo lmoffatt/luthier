@@ -60,8 +60,11 @@ and one seed. The grade is the fold of §2, unchanged; `pooled` counts the union
 seed once at its largest `n` (a replay is no new stretch), the passes and, for a statistical law, the
 stretches it left unresolved; a run over every value or a census is one stretch whatever its seed.
 `standing` adds the union when it holds two stretches or more. A statistical stretch records the ratio
-it stopped at (`"ratio"` in its evidence) and, when it continued earlier stretches, where it started
-(`"from"`: their ratio, samples and seeds); `continuation` is where the next one starts (tester.py).
+it stopped at (`"ratio"` in its evidence), the parameter of its cutoffs (`"cutoffs"`) and, when it
+continued earlier stretches, where it started (`"from"`: their ratio, samples and seeds); its `spent`
+is its own samples. The budget is the demand's for the whole test, so a statistical stretch's union
+key is its binding without its cutoffs' drawing (`union_key`): stretches run under two budgets are one
+test. `continuation` is where the next one starts (tester.py).
 """
 from __future__ import annotations
 
@@ -683,22 +686,32 @@ def stretch_size(entry):
     return tested["spent"] if tested else entry["cases"]
 
 
-def stretches(entries, law, current, binding):
-    """certification.lth's `stretchesUnder`, each key once at its largest: {seed (None when not drawn):
-    (n, entry)} of the law's own entries at the current hash under the binding (D-2026-10-16-g)."""
+def union_key(entry):
+    """The binding a stretch is pooled under: its binding, without the drawing of a statistical
+    stretch's cutoffs (the parameter its evidence names), whose budget is the demand's for the whole
+    test and not part of the distribution (D-2026-10-16-g, D-2026-10-15-b)."""
+    evidence = entry.get("evidence")
+    cutoffs = evidence.get("cutoffs") if isinstance(evidence, dict) else None
+    return [d for d in entry["binding"] if not (isinstance(d, dict) and d.get("parameter") == cutoffs)]
+
+
+def stretches(entries, law, current, key):
+    """certification.lth's `stretchesUnder`, each seed once at its largest: {seed (None when not
+    drawn): (n, entry)} of the law's own entries at the current hash whose `union_key` is `key` (an
+    exact law's: its binding) (D-2026-10-16-g)."""
     found = {}
     for e in _laws_own(entries):
-        if e["law"] == law and e["cone"] == current and e["binding"] == binding and _in_union(e):
-            key, n = (e["seed"] if _drawn(e) else None), stretch_size(e)
-            if key not in found or n > found[key][0]:
-                found[key] = (n, e)
+        if e["law"] == law and e["cone"] == current and union_key(e) == key and _in_union(e):
+            seed, n = (e["seed"] if _drawn(e) else None), stretch_size(e)
+            if seed not in found or n > found[seed][0]:
+                found[seed] = (n, e)
     return found
 
 
-def pooled(entries, law, current, binding):
+def pooled(entries, law, current, key):
     """certification.lth's `pooledCases`, the specimen of `Pooling`: the size of the union of the
-    law's stretches under the binding, a replay counted once."""
-    return sum(n for n, _ in stretches(entries, law, current, binding).values())
+    law's stretches under the key (`union_key`), a replay counted once."""
+    return sum(n for n, _ in stretches(entries, law, current, key).values())
 
 
 def pools(entries, law, current):
@@ -706,9 +719,9 @@ def pools(entries, law, current):
     of the union: its seeds and its total."""
     words, seen = [], []
     for e in _laws_own(entries):
-        if e["law"] == law and e["cone"] == current and e["binding"] not in seen:
-            seen.append(e["binding"])
-            union = stretches(entries, law, current, e["binding"])
+        if e["law"] == law and e["cone"] == current and union_key(e) not in seen:
+            seen.append(union_key(e))
+            union = stretches(entries, law, current, union_key(e))
             if len(union) > 1:
                 seeds = ", ".join(str(k) for k in sorted(k for k in union if k is not None))
                 unit = "samples" if any(_tested(f) for _, f in union.values()) else "cases"
@@ -716,22 +729,35 @@ def pools(entries, law, current):
     return words
 
 
-def continuation(entries, entry, found=None):
-    """Where a statistical stretch starts (laws.lth's `ratioAfter`, D-2026-10-16-g): a replay where the
-    stretch it repeats started (its `"from"`, None when it started the test); a new seed from the
-    latest stretch of the law, cone, binding and kind that recorded its ratio, with the samples and
-    seeds of the test so far; None when there is none, and the test starts at a ratio of one."""
-    if found is not None:
-        return (found.get("evidence") or {}).get("from")
+CUTOFFS = ("alpha", "beta", "delta", "initial")  # one test: the same rates and sample size; the budget aside
+
+
+def continuation(entries, entry, cutoffs, parameter):
+    """Where a statistical stretch starts (laws.lth's `ratioAfter`, D-2026-10-16-g), among the
+    stretches of its law, cone, kind and union key (its binding without the drawing of `parameter`,
+    its cutoffs) run at the same alpha, beta, delta and sample size, whatever their budget: where a
+    stretch of its own seed started (a replay, or the same seed under another budget, which draws
+    the same stream further), its `"from"`, None when it started the test; else from the latest
+    stretch, with the samples and seeds of the test so far; None when there is none. The budget
+    bounds the whole test (`cutoffs["budget"]` against the samples so far), so a new seed buys none."""
+    key = [d for d in entry["binding"] if d.get("parameter") != parameter]
+    same = []
     for e in entries:
         evidence = e.get("evidence")
-        if (e["law"] == entry["law"] and e["cone"] == entry["cone"] and e["binding"] == entry["binding"]
-                and e.get("kind") == entry.get("kind") and e["seed"] != entry["seed"]
-                and isinstance(evidence, dict) and "ratio" in evidence and "Tested" in evidence):
-            before = evidence.get("from") or {"ratio": 1.0, "spent": 0, "seeds": []}
-            return {"ratio": evidence["ratio"], "spent": before["spent"] + evidence["Tested"]["spent"],
-                    "seeds": before["seeds"] + [e["seed"]]}
-    return None
+        if (e["law"] == entry["law"] and e["cone"] == entry["cone"] and e.get("kind") == entry.get("kind")
+                and isinstance(evidence, dict) and "ratio" in evidence and "Tested" in evidence
+                and union_key(e) == key
+                and all(evidence["Tested"].get(c) == cutoffs.get(c) for c in CUTOFFS)):
+            same.append(e)
+    own = next((e for e in same if e["seed"] == entry["seed"]), None)
+    if own is not None:
+        return own["evidence"].get("from")
+    if not same:
+        return None
+    last = same[0]
+    before = last["evidence"].get("from") or {"ratio": 1.0, "spent": 0, "seeds": []}
+    return {"ratio": last["evidence"]["ratio"], "spent": before["spent"] + last["evidence"]["Tested"]["spent"],
+            "seeds": before["seeds"] + [last["seed"]]}
 
 
 def continued_text(start, spent):
