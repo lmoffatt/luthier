@@ -2760,3 +2760,23 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       principles (a clause, under L9 or L10); certification.lth; tester.py, generators.py;
             spec 5.S8, 7.S14, 7.S10
 Status:     current
+
+D-2026-10-16-j  Refines D-2026-10-16-i: the regions that enter a certificate's grade come only from
+                three finite sources. (1) The type: its theory declares once the degenerate cases of
+                the type (a matrix: zero, rank deficient, 1 x 1, 0 x 0; a list: empty, one element; a
+                number: 0, ±1), shared by every law over it. (2) The law: each cutoff parameter gives
+                its two sides (just above and just below a rank floor or a tolerance) and each premise
+                its boundary (`PsdAt`: barely semidefinite). (3) The code: each branch of the cone (an
+                `if`, a `match`), branch coverage. Equivalence partitioning and boundary values from
+                the specification, branch coverage from the code. A label an author adds (`κ` above
+                1e8) is recorded with its share of cases and is informative (L10.11): it enters no
+                grade and no combination. So the number of regions is bounded by the size of the
+                theory, the law and the code.
+Author:     Luciano, on his objection and the decision assistant's three sources
+Quote:      "el problema con las regiones es que puede haber tantas de estas como medidas, hay que
+            clasificar claramente para que no sea un número infinito de ellas" ... "Sí, agregalo."
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       the theories of the types (their degenerate cases), laws' cutoffs and premises, the
+            tester's branch coverage; certification.lth's grade; spec 7.S14
+Status:     current
