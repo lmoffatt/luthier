@@ -3,6 +3,7 @@ the demand (D-2026-10-16-c, D-2026-10-16-d; world.lth's `AppliedWhenSettled`, de
 `Demand` and `Ran`). Written 2026-10-16 by Claude Opus 5.5, an agent of the coordinating session,
 on record/IA/code-follows-2026-10-16/prompt-modes.md."""
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -81,7 +82,17 @@ def test_check_v_lists_the_provisionals_with_their_reasons(tmp_path, capsys):
 
 # ---------------------------------------------------------------- the modes of running (D-2026-10-16-d)
 
-def test_no_fuel_bound_by_default_finishes_past_the_old_bound(tmp_path, capsys):
+def test_the_default_demand_records_no_fuel_bound_and_fuel_records_its_bound(tmp_path, capsys):
+    path = tmp_path / "small.lut"
+    path.write_text("main : Int := 1 + 2\n", encoding="utf-8")
+    assert main(["run", str(path)]) == 0
+    assert _last(path)["demand"]["fuel"] is None and _last(path)["fuel"]["given"] is None
+    assert main(["run", str(path), "--fuel", "7000", "--fresh"]) == 0
+    assert _last(path)["demand"]["fuel"] == 7000 and _last(path)["fuel"]["given"] == 7000
+
+
+@pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 90 seconds; set LUTHIER_SLOW=1")
+def test_no_fuel_bound_by_default_finishes_past_the_old_bound_slow(tmp_path, capsys):
     # the old default cut a run at 10,000,000 steps; this one takes about 10,150,000 (35 a turn)
     path = tmp_path / "count.lut"
     path.write_text("count (n : Int) (k : Int) : Int := if k == 0 then n else if n < 0 then 0 "
