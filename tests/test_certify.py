@@ -940,3 +940,97 @@ def test_a_line_out_of_fuel_leaves_no_entry_and_runs_again_with_enough(tmp_path,
     # and the store law refuses a fuel not-run whatever the store holds
     assert certify.record([ran.entry], cut.entry) == [ran.entry]
     assert certify.record([], cut.entry) == []
+
+
+# ---------------------------------------------------------------------- the union of the stretches
+# record/IA/code-follows-2026-10-16/prompt-pool-seeds.md (step 3i; D-2026-10-16-g, L10.3): a stretch
+# is one run of a law under one binding and one seed; the union of the agreeing stretches is one
+# sample of their total size, and a statistical law's stretches continue one sequential test.
+
+POOLED = '''import "test.lth" test SampledMode
+import "generators_model.lut" linear
+PlusCommutes (x y : Int) : Bool := x + y == y + x
+test "PlusCommutes" (SampledMode linear) (seed <- 1)
+test "PlusCommutes" (SampledMode linear) (seed <- 2)
+'''
+
+
+def _pooled_law(tmp_path, text=POOLED):
+    path = tmp_path / "pooled.lut"
+    path.write_text(text, encoding="utf-8")
+    outcomes = tester.run_tests(path, store=True)
+    return path, outcomes, certify.read_store(path)
+
+
+def test_two_stretches_of_100_cases_with_different_seeds_give_a_grade_over_200(tmp_path):
+    path, (one, two), entries = _pooled_law(tmp_path)
+    assert [e["cases"] for e in entries] == [100, 100] and {e["seed"] for e in entries} == {1, 2}
+    binding = entries[0]["binding"]
+    assert certify.pooled(entries, "PlusCommutes", one.cone, binding) == 200
+    assert certify.certificate_grade(entries, "PlusCommutes", one.cone) == "Sampled"
+    assert dict(certify.standings(path))["PlusCommutes"] == "sampled; pooled over seeds 1, 2: 200 cases in all"
+    # one stretch is the line's own n, and the standing reads as before
+    assert certify.pooled(entries[1:], "PlusCommutes", one.cone, binding) == 100
+    assert certify.standing(entries[1:], "PlusCommutes", one.cone) == "sampled"
+
+
+def test_a_replayed_seed_does_not_double_n(tmp_path):
+    path, (one, _), entries = _pooled_law(tmp_path)
+    law, binding = "PlusCommutes", entries[0]["binding"]
+    stored = certify.store_path(path).read_text()
+    # an agreeing replay is absorbed by the store (Recording), and counted once if it were kept
+    tester.run_tests(path, store=True, deep=True)
+    assert certify.store_path(path).read_text() == stored
+    replay = dict(entries[0], date="2026-10-17T00:00:00+00:00")
+    assert certify.pooled([replay] + entries, law, one.cone, binding) == 200
+    # a larger n of one seed holds the smaller as its first cases: the larger counts, once
+    larger = dict(entries[0], cases=300, date="2026-10-17T00:00:00+00:00")
+    assert certify.pooled([larger] + entries, law, one.cone, binding) == 400
+    # a disagreement in any stretch refuses the union
+    disagreeing = dict(entries[1], outcome={"Failed": "x = 1, y = 2"}, grade=None, date="2026-10-17T00:00:00+00:00")
+    assert certify.certificate_grade([disagreeing] + entries, law, one.cone) is None
+    assert certify.standing([disagreeing] + entries, law, one.cone).startswith("replay disagrees")
+    # a run over every value is one stretch whatever its seed
+    every = [dict(e, evidence={"Points": {"evaluated": 4, "coverage": "Exhaustive"}}, cases=4) for e in entries]
+    assert certify.pooled(every, law, one.cone, binding) == 4
+
+
+STRETCHED = STATISTICAL_LAWS.replace("budget := 100", "budget := 1").replace(
+    'test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)\n',
+    'test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)\n'
+    'test "Constant" ExhaustiveMode (seed <- 6) (profile <- onOnes)\n')
+
+
+def test_a_statistical_law_unresolved_after_one_stretch_is_resolved_by_a_second_with_a_new_seed(tmp_path):
+    path = tmp_path / "stretched.lut"
+    path.write_text(STRETCHED, encoding="utf-8")
+    # alone, one stretch of budget 1 leaves the test unresolved (a ratio of 0.1 per sample)
+    first, second = tester.run_tests(path)
+    assert first.verdict == second.verdict == "Unsettled"
+    # with the store, the second seed continues the test from where the first stopped, and holds it
+    first, second = tester.run_tests(path, store=True)
+    assert (first.verdict, first.evidence.spent) == ("Unsettled", 1)
+    assert (second.verdict, second.grade, second.evidence.spent) == ("Supported", "Sampled", 1)
+    assert second.entry["evidence"]["from"] == {"ratio": first.entry["evidence"]["ratio"], "spent": 1, "seeds": [5]}
+    assert "continuing the test of seed 5 (2 samples in all)" in tester.line(second)
+    entries = certify.read_store(path)
+    assert certify.pooled(entries, "Constant", second.cone, second.entry["binding"]) == 2
+    assert certify.standing(entries, "Constant", second.cone).endswith("; pooled over seeds 5, 6: 2 samples in all")
+    # a replay starts where the stretch it repeats started: the same outcome, nothing written
+    stored = certify.store_path(path).read_text()
+    again = tester.run_tests(path, store=True, deep=True)
+    assert [o.verdict for o in again] == ["Unsettled", "Supported"]
+    assert certify.store_path(path).read_text() == stored
+
+
+def test_the_union_holds_on_the_reference_and_its_controls_refute_the_broken_ones():
+    # certification.lth's `Pooling` on certification_model.lut; the controls (L9.14): a union that
+    # counts a replay twice, and one that counts only the latest stretch, each refuted
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "pooling_laws.lut")
+    assert [(o.spec.law, o.verdict) for o in laws] == [("TheUnionIsMonotone", "Supported"),
+                                                       ("AReplayIsNotANewStretch", "Supported")]
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "pooling_controls.lut")
+    assert [(o.spec.law, o.verdict) for o in controls] == [("TheUnionIsMonotone", "Refuted"),
+                                                           ("AReplayIsNotANewStretch", "Refuted")]
+    twice, = (o for o in controls if o.spec.law == "AReplayIsNotANewStretch")
+    assert "p = counting" in tester.line(twice)

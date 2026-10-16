@@ -74,6 +74,14 @@ seed the stream's state (`T` must be `Seed`; L9.15: the seed is the test's), and
 written in the entry (7.S17). The verdict is laws.lth's `StatisticalByTest`: `Holds` supports the
 law, graded by test.lth's `grade` over `Drawn seed` (sampled); `Fails` refutes it; `Unresolved`
 settles nothing, the budget spent in the entry. A statistical control passes on `Fails`.
+
+Stretches (record/IA/code-follows-2026-10-16/prompt-pool-seeds.md; D-2026-10-16-g, laws.lth's
+`ratioAfter`): the lines of a statistical law under one binding are one sequential test. A line of a
+new seed, with the store read, continues the test from the ratio the latest stretch of the law, cone,
+binding and kind stopped at (certify.py's `continuation`), drawing at most the budget again; its entry
+records the ratio it stops at and where it started (`"from"`: the ratio, the samples and the seeds
+before it), and its line says which seeds it continues. A replay (`--deep`, the same seed) starts
+where the stretch it repeats started, so it is deterministic given its identity and that record.
 """
 from __future__ import annotations
 
@@ -190,6 +198,8 @@ class Tested:
     initial: int
     budget: int
     coverage: t.Term = None
+    ratio: float | None = None   # the likelihood ratio the stretch stopped at (laws.lth's `ratioAfter`)
+    start: dict | None = None    # where it started, when it continued earlier stretches (D-2026-10-16-g)
 
     def record(self):
         return {"verdict": self.verdict, "alpha": self.alpha, "beta": self.beta, "delta": self.delta,
@@ -282,7 +292,8 @@ def load_program(path, fuel, extra=()):
             loaded.errors[f"test%{k}"] = missing
     specs = tuple(specs)
     named = tuple(dict.fromkeys(loaded.name(top, n) or n for d in specs for n in _string_literals(d)))
-    grading = tuple(_constructor(loaded)(n).name for n in ("grade", "Coverage", "Verdict", "Grade", "sequential"))
+    grading = tuple(_constructor(loaded)(n).name for n in ("grade", "Coverage", "Verdict", "Grade", "sequential",
+                                                             "sequentialFrom", "ratioAfter"))
     roots = (core_data(loaded) + tuple(d.name for d in specs) + named
              + tuple(loaded.name(top, n) or n for n in extra) + grading)
     kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots)
@@ -745,15 +756,16 @@ def evaluate(runner, law, case, fuel):
     raise RunError(f"the law gave {_show(r)}, not a Bool")
 
 
-def run_spec(runner, spec, fuel, loaded=None):
-    """test.lth's `Tester.run`: the evidence of the law the spec names, with its verdict and grade."""
+def run_spec(runner, spec, fuel, loaded=None, start=None):
+    """test.lth's `Tester.run`: the evidence of the law the spec names, with its verdict and grade.
+    `start` is where a statistical law's stretch continues the test from (D-2026-10-16-g)."""
     law = _as_called(loaded, spec.law)
     params = parameters(runner, law)
     if params is None:
         return _not_run(spec, f"no definition {spec.law}")
     names = tuple(n for n, _ in params)
     if is_statistical(runner, law):
-        return run_statistical(runner, spec, fuel, loaded, law, params)
+        return run_statistical(runner, spec, fuel, loaded, law, params, start)
     values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel, spec.seed)
     limit = spec.budgets.get("coveringAbove", 20000)
     # each parameter: a census or a generator its binding names, or the mode's functor over its type
@@ -832,11 +844,13 @@ def is_statistical(runner, law):
 _RAISES = (RunError, RecursionError, ValueError, KeyError, TypeError)
 
 
-def run_statistical(runner, spec, fuel, loaded, law, params):
+def run_statistical(runner, spec, fuel, loaded, law, params, start=None):
     """A statistical law at its bindings (laws.lth §4, L9.15): each parameter a census of one, the
-    body reduced to `Statistical S T l draw c`, and `sequential S T l draw c seed` run once through
-    the Runner from the spec's seed. The evidence is `Tested v`; the verdict `StatisticalByTest`'s;
-    the grade test.lth's over `Drawn seed`."""
+    body reduced to `Statistical S T l draw c`, and `sequentialFrom S T l draw c seed r 0` run once
+    through the Runner from the spec's seed, `r` the ratio `start` gives (one when it gives none,
+    which is `sequential`), and `ratioAfter` likewise for the ratio it stops at (D-2026-10-16-g).
+    The evidence is `Tested v`; the verdict `StatisticalByTest`'s; the grade test.lth's over
+    `Drawn seed`."""
     names = tuple(n for n, _ in params)
     seed = spec.seed % SEEDS
     con = _constructor(loaded)
@@ -879,8 +893,12 @@ def run_statistical(runner, spec, fuel, loaded, law, params):
             return _not_run(spec, f"the cutoffs {_show(cutoffs)} break Sequential's predicate (laws.lth "
                                   f"`sequentialCutoffs`)", names)
         c = {label: v.constant.value for label, v in cutoffs.fields}
+        from_ratio = float(start["ratio"]) if start else 1.0
+        stretch = args + [t.Lit(t.IntConst(seed)), t.Lit(t.FloatConst(from_ratio)), t.Lit(t.IntConst(0))]
         runner.fuel = fuel
-        verdict = runner.value(Runner.apply(con("sequential"), args + [t.Lit(t.IntConst(seed))]))
+        verdict = runner.value(Runner.apply(con("sequentialFrom"), stretch))
+        runner.fuel = fuel
+        stopped = runner.value(Runner.apply(con("ratioAfter"), stretch))
     except _RAISES as exc:
         return _not_run(spec, f"the sequential test raised: {exc or type(exc).__name__}", names, _spent(runner, fuel))
     if not (isinstance(verdict, t.App) and _base(verdict.function) in SETTLED_BY_TEST
@@ -889,7 +907,8 @@ def run_statistical(runner, spec, fuel, loaded, law, params):
     rates = {label: v.constant.value for label, v in verdict.argument.fields}
     coverage = t.App(con("Drawn"), t.Lit(t.IntConst(seed)))
     evidence = Tested(_base(verdict.function), float(rates["alpha"]), float(rates["beta"]), float(rates["delta"]),
-                      int(rates["spent"]), int(c["initial"]), int(c["budget"]), coverage)
+                      int(rates["spent"]), int(c["initial"]), int(c["budget"]), coverage,
+                      float(stopped.constant.value), start)
     settled = SETTLED_BY_TEST[evidence.verdict]
     return Outcome(spec, evidence, settled, grade_of(runner, settled, coverage, loaded), evidence.spent, None,
                    parameters=names)
@@ -1032,6 +1051,8 @@ def _tail(outcome):
 def _tested_tail(outcome):
     """What a statistical line settled: the sequential test's verdict, its rates and what it spent."""
     rates = certify.tested_text(outcome.evidence.record())
+    if outcome.evidence.start:  # a stretch that continued earlier ones (D-2026-10-16-g)
+        rates += ", " + certify.continued_text(outcome.evidence.start, outcome.evidence.spent)
     if outcome.verdict == "Refuted":
         return f"refuted at {rates}" + (": the control passed" if outcome.spec.control else "")
     if outcome.verdict == "Unsettled":
@@ -1047,7 +1068,11 @@ def _entry_tail(entry):
     if o == "Passed":
         tested = (entry.get("evidence") or {}).get("Tested")
         grade = _GRADE_WORDS.get(entry["grade"], entry["grade"])
-        return f"supported, {grade}: held at {certify.tested_text(tested)}" if tested else grade
+        if not tested:
+            return grade
+        start = entry["evidence"].get("from")
+        more = f", {certify.continued_text(start, tested['spent'])}" if start else ""
+        return f"supported, {grade}: held at {certify.tested_text(tested)}{more}"
     if "ControlRefuted" in o:
         return f"refuted at {o['ControlRefuted']}: the control passed"
     if "ControlConfirmed" in o:
@@ -1132,7 +1157,9 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
                 reused.differs = [e for e in entries if certify.identity(e) == key][1]["date"]
             outcomes.append(reused)
             continue
-        outcome = run_spec(runner, spec, fuel, loaded)
+        # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
+        start = certify.continuation(entries, entry, found) if store else None
+        outcome = run_spec(runner, spec, fuel, loaded, start)
         settle(entry, outcome)
         outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
         fuel_spent = certify.out_of_fuel(entry)
@@ -1462,6 +1489,10 @@ def _settle_tested(entry, outcome):
     held it."""
     tested = outcome.evidence.record()
     entry["evidence"] = {"Tested": tested, "coverage": _show(outcome.evidence.coverage)}
+    if outcome.evidence.ratio is not None:  # where the stretch stopped and started (D-2026-10-16-g)
+        entry["evidence"]["ratio"] = outcome.evidence.ratio
+    if outcome.evidence.start:
+        entry["evidence"]["from"] = outcome.evidence.start
     rates = certify.tested_text(tested)
     if outcome.verdict == "Refuted":
         entry["outcome"] = {"ControlRefuted" if outcome.spec.control else "Failed": rates}

@@ -53,6 +53,15 @@ samples spent, and the cutoffs' `initial` and `budget` (`tested_text` reads them
 as any (sampled, over `Drawn seed`); `standing` adds the rates and what was spent to the grade, so
 that the certificate shows the price of a sampled grade (7.S17). An unresolved test is a
 `Unresolved` outcome carrying the test's record (older stores wrote `NotRunFor "unresolved at ..."`, still read).
+
+The union of a law's stretches (record/IA/code-follows-2026-10-16/prompt-pool-seeds.md; D-2026-10-16-g,
+L10.3; certification.lth's `pooledCases` and `Pooling`): a stretch is one run of a law under one binding
+and one seed. The grade is the fold of §2, unchanged; `pooled` counts the union under a binding, each
+seed once at its largest `n` (a replay is no new stretch), the passes and, for a statistical law, the
+stretches it left unresolved; a run over every value or a census is one stretch whatever its seed.
+`standing` adds the union when it holds two stretches or more. A statistical stretch records the ratio
+it stopped at (`"ratio"` in its evidence) and, when it continued earlier stretches, where it started
+(`"from"`: their ratio, samples and seeds); `continuation` is where the next one starts (tester.py).
 """
 from __future__ import annotations
 
@@ -649,6 +658,88 @@ def _tested(entry):
     return evidence.get("Tested") if isinstance(evidence, dict) else None
 
 
+# ---------------------------------------------------------------------- the union of the stretches
+
+def _drawn(entry):
+    """certification.lth's `drawnStretch`: the cases are a sample of the seed (a statistical test, or
+    points over `Drawn`), so another seed is another sample."""
+    evidence = entry.get("evidence")
+    if not isinstance(evidence, dict):
+        return False
+    if "Tested" in evidence:
+        return True
+    coverage = (evidence.get("Points") or {}).get("coverage")
+    return isinstance(coverage, str) and coverage.lstrip("(").startswith("Drawn")
+
+
+def _in_union(entry):
+    """certification.lth's `inTheUnion`: a pass, or a statistical stretch left unresolved."""
+    return passed(entry) or (isinstance(entry["outcome"], dict) and "Unresolved" in entry["outcome"])
+
+
+def stretch_size(entry):
+    """certification.lth's `stretchSize`: the samples a statistical stretch spent, else its `n`."""
+    tested = _tested(entry)
+    return tested["spent"] if tested else entry["cases"]
+
+
+def stretches(entries, law, current, binding):
+    """certification.lth's `stretchesUnder`, each key once at its largest: {seed (None when not drawn):
+    (n, entry)} of the law's own entries at the current hash under the binding (D-2026-10-16-g)."""
+    found = {}
+    for e in _laws_own(entries):
+        if e["law"] == law and e["cone"] == current and e["binding"] == binding and _in_union(e):
+            key, n = (e["seed"] if _drawn(e) else None), stretch_size(e)
+            if key not in found or n > found[key][0]:
+                found[key] = (n, e)
+    return found
+
+
+def pooled(entries, law, current, binding):
+    """certification.lth's `pooledCases`, the specimen of `Pooling`: the size of the union of the
+    law's stretches under the binding, a replay counted once."""
+    return sum(n for n, _ in stretches(entries, law, current, binding).values())
+
+
+def pools(entries, law, current):
+    """Per binding of the law at the current hash whose union holds two stretches or more, the words
+    of the union: its seeds and its total."""
+    words, seen = [], []
+    for e in _laws_own(entries):
+        if e["law"] == law and e["cone"] == current and e["binding"] not in seen:
+            seen.append(e["binding"])
+            union = stretches(entries, law, current, e["binding"])
+            if len(union) > 1:
+                seeds = ", ".join(str(k) for k in sorted(k for k in union if k is not None))
+                unit = "samples" if any(_tested(f) for _, f in union.values()) else "cases"
+                words.append(f"pooled over seeds {seeds}: {sum(n for n, _ in union.values())} {unit} in all")
+    return words
+
+
+def continuation(entries, entry, found=None):
+    """Where a statistical stretch starts (laws.lth's `ratioAfter`, D-2026-10-16-g): a replay where the
+    stretch it repeats started (its `"from"`, None when it started the test); a new seed from the
+    latest stretch of the law, cone, binding and kind that recorded its ratio, with the samples and
+    seeds of the test so far; None when there is none, and the test starts at a ratio of one."""
+    if found is not None:
+        return (found.get("evidence") or {}).get("from")
+    for e in entries:
+        evidence = e.get("evidence")
+        if (e["law"] == entry["law"] and e["cone"] == entry["cone"] and e["binding"] == entry["binding"]
+                and e.get("kind") == entry.get("kind") and e["seed"] != entry["seed"]
+                and isinstance(evidence, dict) and "ratio" in evidence and "Tested" in evidence):
+            before = evidence.get("from") or {"ratio": 1.0, "spent": 0, "seeds": []}
+            return {"ratio": evidence["ratio"], "spent": before["spent"] + evidence["Tested"]["spent"],
+                    "seeds": before["seeds"] + [e["seed"]]}
+    return None
+
+
+def continued_text(start, spent):
+    """A continued stretch as a line says it: the seeds it continues and the samples in all."""
+    seeds = ", ".join(str(k) for k in start["seeds"])
+    return f"continuing the test of seed{'s' if len(start['seeds']) > 1 else ''} {seeds} ({start['spent'] + spent} samples in all)"
+
+
 def show_outcome(outcome):
     if outcome == "Passed":
         return "passed"
@@ -679,7 +770,9 @@ def standing(entries, law, current):
         # a statistical law's pass carries its rates and what it spent (7.S17), the latest's
         tested = next((_tested(e) for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
                        and passed(e) and _tested(e)), None)
-        return f"supported, {GRADE_WORDS[g]}: held at {tested_text(tested)}" if tested else GRADE_WORDS[g]
+        shown = f"supported, {GRADE_WORDS[g]}: held at {tested_text(tested)}" if tested else GRADE_WORDS[g]
+        # the union of its stretches, when it pools two or more (D-2026-10-16-g)
+        return "; ".join([shown] + pools(entries, law, current))
     failed = next((e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
                    and isinstance(e["outcome"], dict) and "Failed" in e["outcome"]), None)
     if failed is not None:
