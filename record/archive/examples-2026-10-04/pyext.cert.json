@@ -1,0 +1,110 @@
+{
+  "goodSqrt": {
+    "hash": "de606ec977da9693",
+    "when": "2026-10-03T20:30:55",
+    "passed": true,
+    "seed": 1489964952,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "approx 1e-09 (sqrt x * sqrt x) x",
+        "params": [
+          "x : Positive"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR) where x >= 0.0"
+        ],
+        "sample_cases": [
+          "x = 0.7265721043687803",
+          "x = 0.03428860162254854",
+          "x = 0.5361980849662984",
+          "x = 0.9659223312911482",
+          "x = 0.9678483127872557"
+        ]
+      }
+    ]
+  },
+  "sinAll": {
+    "hash": "74b4bcb30bbd3499",
+    "when": "2026-10-03T20:30:55",
+    "passed": false,
+    "seed": 654440680,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "approx 1e-06 (asin (sin x)) x",
+        "params": [
+          "x : R"
+        ],
+        "mode": "sampled",
+        "cases": 15,
+        "passed": false,
+        "failure": "x = -1.7490006913350165",
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR)"
+        ],
+        "sample_cases": [
+          "x = 0.8342980333904544",
+          "x = 0.6070620794440158",
+          "x = 0.35030441786313493",
+          "x = -0.3245727295572769",
+          "x = -0.20398692025011456"
+        ]
+      }
+    ]
+  },
+  "sinBranch": {
+    "hash": "34cb213babb1e412",
+    "when": "2026-10-03T20:30:55",
+    "passed": true,
+    "seed": 135824534,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "approx 1e-06 (asin (sin x)) x",
+        "params": [
+          "x : Branch"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "R uniform in [-16, 16] (Python fallback; import \"random\" for genR) where 0.0 - 1.5707963 <= x and x <= 1.5707963"
+        ],
+        "sample_cases": [
+          "x = -0.8050086060102013",
+          "x = -0.4629797923950054",
+          "x = -0.2901367729782194",
+          "x = 0.2742822418079698",
+          "x = 0.42366624210643167"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "zeroUnderNeg": {
+    "hash": "b721b0927e1855bc",
+    "when": "2026-10-03T20:30:55",
+    "passed": true,
+    "seed": 993330340,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "bx.xor (isZero (z7.negMod7 a)) (isZero a) == false",
+        "params": [
+          "a : z7.Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "a = 0",
+          "a = 1",
+          "a = 2",
+          "a = 3",
+          "a = 4"
+        ]
+      }
+    ]
+  }
+}

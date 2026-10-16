@@ -1,0 +1,40 @@
+{
+  "fftInvertible": {
+    "hash": "28d81060bfbb2a04",
+    "when": "2026-10-03T20:30:56",
+    "passed": true,
+    "seed": 2051355218,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": [
+        "Signal"
+      ]
+    },
+    "laws": [
+      {
+        "label": "dist (realPart (ifft (fft x))) x < 1e-09",
+        "params": [
+          "x : Signal"
+        ],
+        "mode": "sampled",
+        "cases": 50,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Signal: registered Python generator, size up to 16"
+        ],
+        "sample_cases": [
+          "x = <ndarray (8,)>",
+          "x = <ndarray (8,)>",
+          "x = <ndarray (8,)>",
+          "x = <ndarray (8,)>",
+          "x = <ndarray (16,)>"
+        ]
+      }
+    ]
+  }
+}

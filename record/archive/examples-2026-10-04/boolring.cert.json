@@ -1,0 +1,819 @@
+{
+  "ringBool": {
+    "hash": "9f1dd32c3aec5c6e",
+    "when": "2026-10-03T20:30:52",
+    "passed": true,
+    "seed": 697963892,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "Reflexive Bool eqB",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "Symmetric Bool eqB",
+        "params": [
+          "x : Bool",
+          "y : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 4,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true",
+          "x = true, y = false",
+          "x = false, y = true",
+          "x = false, y = false"
+        ]
+      },
+      {
+        "label": "Associative Bool eqB xor",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "Commutative Bool eqB xor",
+        "params": [
+          "x : Bool",
+          "y : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 4,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true",
+          "x = true, y = false",
+          "x = false, y = true",
+          "x = false, y = false"
+        ]
+      },
+      {
+        "label": "LeftIdentity Bool eqB xor false",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightIdentity Bool eqB xor false",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "LeftInverse Bool eqB xor false same",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightInverse Bool eqB xor false same",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "Associative Bool eqB and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "LeftIdentity Bool eqB and true",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightIdentity Bool eqB and true",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "LeftDistrib Bool eqB xor and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "RightDistrib Bool eqB xor and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      }
+    ]
+  },
+  "semiringOr": {
+    "hash": "741fa2205b8c7ef6",
+    "when": "2026-10-03T20:30:52",
+    "passed": true,
+    "seed": 917553342,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "Reflexive Bool eqB",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "Symmetric Bool eqB",
+        "params": [
+          "x : Bool",
+          "y : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 4,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true",
+          "x = true, y = false",
+          "x = false, y = true",
+          "x = false, y = false"
+        ]
+      },
+      {
+        "label": "Associative Bool eqB or",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "Commutative Bool eqB or",
+        "params": [
+          "x : Bool",
+          "y : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 4,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true",
+          "x = true, y = false",
+          "x = false, y = true",
+          "x = false, y = false"
+        ]
+      },
+      {
+        "label": "LeftIdentity Bool eqB or false",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightIdentity Bool eqB or false",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "Associative Bool eqB and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "LeftIdentity Bool eqB and true",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightIdentity Bool eqB and true",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "LeftDistrib Bool eqB or and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "RightDistrib Bool eqB or and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      }
+    ]
+  },
+  "badRing": {
+    "hash": "8d1bc6a058ebcbd3",
+    "when": "2026-10-03T20:30:52",
+    "passed": false,
+    "seed": 2141008443,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "Reflexive Bool eqB",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "Symmetric Bool eqB",
+        "params": [
+          "x : Bool",
+          "y : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 4,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true",
+          "x = true, y = false",
+          "x = false, y = true",
+          "x = false, y = false"
+        ]
+      },
+      {
+        "label": "Associative Bool eqB or",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "Commutative Bool eqB or",
+        "params": [
+          "x : Bool",
+          "y : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 4,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true",
+          "x = true, y = false",
+          "x = false, y = true",
+          "x = false, y = false"
+        ]
+      },
+      {
+        "label": "LeftIdentity Bool eqB or false",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightIdentity Bool eqB or false",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "LeftInverse Bool eqB or false not",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 1,
+        "passed": false,
+        "failure": "x = true",
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true"
+        ]
+      },
+      {
+        "label": "RightInverse Bool eqB or false not",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 1,
+        "passed": false,
+        "failure": "x = true",
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true"
+        ]
+      },
+      {
+        "label": "Associative Bool eqB and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "LeftIdentity Bool eqB and true",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "RightIdentity Bool eqB and true",
+        "params": [
+          "x : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 2,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true",
+          "x = false"
+        ]
+      },
+      {
+        "label": "LeftDistrib Bool eqB or and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      },
+      {
+        "label": "RightDistrib Bool eqB or and",
+        "params": [
+          "x : Bool",
+          "y : Bool",
+          "z : Bool"
+        ],
+        "mode": "exhaustive",
+        "cases": 8,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Bool: all values",
+          "Bool: all values",
+          "Bool: all values"
+        ],
+        "sample_cases": [
+          "x = true, y = true, z = true",
+          "x = true, y = true, z = false",
+          "x = true, y = false, z = true",
+          "x = true, y = false, z = false",
+          "x = false, y = true, z = true"
+        ]
+      }
+    ]
+  }
+}

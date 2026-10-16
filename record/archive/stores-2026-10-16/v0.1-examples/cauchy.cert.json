@@ -1,0 +1,190 @@
+{
+  "addC": [
+    {
+      "hash": "71a3b215e5def37a",
+      "when": "2026-10-07T18:59:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 1994476935,
+      "run_seed": 7,
+      "fingerprint": {
+        "code": "d33c38bd0e69425a",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Modulus \\ n { x (n + 1) + y (n + 1) }",
+          "params": [
+            "x : Cauchy",
+            "y : Cauchy",
+            "n : Nat",
+            "m : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int -> Rational: constant functions (affine on R -> R), a thin sample where Modulus s",
+            "Int -> Rational: constant functions (affine on R -> R), a thin sample where Modulus s",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "x = \\ _ { 364263/847013 }, y = \\ _ { 230866/374339 }, n = 0, m = 0",
+            "x = \\ _ { 370277/343514 }, y = \\ _ { -838887/316336 }, n = 1, m = 1",
+            "x = \\ _ { 810127/658059 }, y = \\ _ { -124985/443749 }, n = 1, m = 1",
+            "x = \\ _ { 403307/332087 }, y = \\ _ { 976202/626605 }, n = 0, m = 1",
+            "x = \\ _ { 87179/10356 }, y = \\ _ { 283543/320236 }, n = 1, m = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.301,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "fromDouble": [
+    {
+      "hash": "9eec924db687f824",
+      "when": "2026-10-07T18:59:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 100,
+      "mode": "sampled",
+      "seed": 507284829,
+      "run_seed": 7,
+      "fingerprint": {
+        "code": "cd832b28aca66fbf",
+        "externs": {
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Modulus \\ n { toQ d }",
+          "params": [
+            "d : Float64",
+            "n : Nat",
+            "m : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 100,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Float64 uniform in [-16, 16] (Python fallback; import \"random\" for genFloat64)",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "d = 0.6328237316566385, n = 0, m = 0",
+            "d = 0.6004717785975566, n = 1, m = 0",
+            "d = 0.05525099275314882, n = 0, m = 0",
+            "d = 0.7063229199554446, n = 1, m = 1",
+            "d = 0.5300395573609855, n = 1, m = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.029,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "expC": [
+    {
+      "hash": "3a44275ce8ff2c8b",
+      "when": "2026-10-07T18:59:06",
+      "passed": true,
+      "outcome": "passed",
+      "n": 30,
+      "mode": "sampled",
+      "seed": 1162208213,
+      "run_seed": 7,
+      "fingerprint": {
+        "code": "3193eb9e13be16d0",
+        "externs": {
+          "python:builtins.round": "python 3.13.2",
+          "python:fractions.Fraction": "python 3.13.2",
+          "python:luthier.rational.nearest": "source fa7d63f723173c6f",
+          "python:luthier.rational.ratio": "source fa7d63f723173c6f"
+        },
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 3,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [
+          "NormalDouble"
+        ],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Modulus \\ n { match boundOf x { b -> taylorQ (x ((n + 1) + 2 * b)) 0 oneQ (termsFor b n 1) } }",
+          "params": [
+            "x : Cauchy",
+            "n : Nat",
+            "m : Nat"
+          ],
+          "mode": "sampled",
+          "cases": 30,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int -> Rational: constant functions (affine on R -> R), a thin sample where Modulus s",
+            "Int in [-3, 3] (Python fallback; import \"random\" for genInt) where 0 <= k",
+            "Int in [-3, 3] (Python fallback; import \"random\" for genInt) where 0 <= k"
+          ],
+          "sample_cases": [
+            "x = \\ _ { 344678/983109 }, n = 0, m = 0",
+            "x = \\ _ { 833938/997201 }, n = 1, m = 0",
+            "x = \\ _ { 369007/421329 }, n = 0, m = 1",
+            "x = \\ _ { 120839/329049 }, n = 1, m = 1",
+            "x = \\ _ { 425409/156632 }, n = 1, m = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 1.464,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
+}

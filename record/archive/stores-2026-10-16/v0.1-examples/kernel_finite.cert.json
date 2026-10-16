@@ -1,0 +1,552 @@
+{
+  "kernelFin": [
+    {
+      "hash": "1f5d120c28d1c698",
+      "when": "2026-10-11T21:55:16",
+      "passed": false,
+      "outcome": "not run",
+      "n": 100,
+      "mode": "exhaustive",
+      "seed": 623748783,
+      "run_seed": 1928919311,
+      "fingerprint": {
+        "code": "ae49f61dddf7bce1",
+        "externs": {},
+        "interpreter": "a81ca2449419391a"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Beta (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "f : Fin 3 -> Fin 2",
+            "x : Fin 3"
+          ],
+          "mode": "exhaustive",
+          "cases": 24,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Fin 3 -> Fin 2: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3"
+          ],
+          "sample_cases": [
+            "f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }, x = 0",
+            "f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }, x = 1",
+            "f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }, x = 2",
+            "f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 1 } }, x = 0",
+            "f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 1 } }, x = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.002,
+          "skipped": 0
+        },
+        {
+          "label": "PairFst (Fin 3) (Fin 2) eqFin3",
+          "params": [
+            "a : Fin 3",
+            "b : Fin 2"
+          ],
+          "mode": "exhaustive",
+          "cases": 6,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0",
+            "a = 0, b = 1",
+            "a = 1, b = 0",
+            "a = 1, b = 1",
+            "a = 2, b = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "PairSnd (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "a : Fin 3",
+            "b : Fin 2"
+          ],
+          "mode": "exhaustive",
+          "cases": 6,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0",
+            "a = 0, b = 1",
+            "a = 1, b = 0",
+            "a = 1, b = 1",
+            "a = 2, b = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "Pairing (Fin 3) (Fin 2) eqPair",
+          "params": [
+            "p : Fin 3 * Fin 2"
+          ],
+          "mode": "exhaustive",
+          "cases": 6,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3) * (Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2)"
+          ],
+          "sample_cases": [
+            "p = (0, 0)",
+            "p = (0, 1)",
+            "p = (1, 0)",
+            "p = (1, 1)",
+            "p = (2, 0)"
+          ],
+          "outcome": "passed",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "IfTrue (Fin 2) eqFin2",
+          "params": [
+            "a : Fin 2",
+            "b : Fin 2"
+          ],
+          "mode": "exhaustive",
+          "cases": 4,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0",
+            "a = 0, b = 1",
+            "a = 1, b = 0",
+            "a = 1, b = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "IfFalse (Fin 2) eqFin2",
+          "params": [
+            "a : Fin 2",
+            "b : Fin 2"
+          ],
+          "mode": "exhaustive",
+          "cases": 4,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0",
+            "a = 0, b = 1",
+            "a = 1, b = 0",
+            "a = 1, b = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.0,
+          "skipped": 0
+        },
+        {
+          "label": "CaseNothing (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "d : Fin 2",
+            "f : Fin 3 -> Fin 2"
+          ],
+          "mode": "exhaustive",
+          "cases": 16,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Fin 3 -> Fin 2: drawn as its table"
+          ],
+          "sample_cases": [
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 1 } }",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 1 ; 2 -> 0 } }",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 1 ; 2 -> 1 } }",
+            "d = 0, f = \\ i { match i { 0 -> 1 ; 1 -> 0 ; 2 -> 0 } }"
+          ],
+          "outcome": "passed",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "CaseJust (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "d : Fin 2",
+            "f : Fin 3 -> Fin 2",
+            "a : Fin 3"
+          ],
+          "mode": "exhaustive",
+          "cases": 48,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Fin 3 -> Fin 2: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3"
+          ],
+          "sample_cases": [
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }, a = 0",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }, a = 1",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 0 } }, a = 2",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 1 } }, a = 0",
+            "d = 0, f = \\ i { match i { 0 -> 0 ; 1 -> 0 ; 2 -> 1 } }, a = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.003,
+          "skipped": 0
+        },
+        {
+          "label": "FoldNil (Fin 3) (Fin 2) eqFin2 0 step",
+          "params": [],
+          "mode": "exhaustive",
+          "cases": 1,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [],
+          "sample_cases": [
+            ""
+          ],
+          "outcome": "passed",
+          "seconds": 0.001,
+          "skipped": 0
+        },
+        {
+          "label": "FoldCons (Fin 3) (Fin 2) eqFin2 0 step",
+          "params": [
+            "x : Fin 3",
+            "xs : List (Fin 3)"
+          ],
+          "mode": "exhaustive",
+          "cases": 0,
+          "passed": false,
+          "failure": null,
+          "error": "List (Fin 3) is not finitely enumerable; use `with n`",
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3",
+            "List (Fin 3): derived from its constructors, nesting up to 16"
+          ],
+          "sample_cases": [],
+          "outcome": "not run",
+          "seconds": 0.001,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "hash": "15d66ce2daeb05e4",
+      "when": "2026-10-11T21:22:42",
+      "passed": true,
+      "outcome": "passed",
+      "n": 200,
+      "mode": "sampled",
+      "seed": 1372728931,
+      "run_seed": 1899597340,
+      "fingerprint": {
+        "code": "ae49f61dddf7bce1",
+        "externs": {},
+        "interpreter": "fc6d3ed5001a2c19"
+      },
+      "generators": {},
+      "provisional": [],
+      "generation": {
+        "size": 16,
+        "growth": "1 to size over a sampled run",
+        "generators": {},
+        "python_generators": [],
+        "checked_against_type": "every value of a registered generator is tested against the predicate of its type; a value outside is an error"
+      },
+      "laws": [
+        {
+          "label": "Beta (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "f : Fin 3 -> Fin 2",
+            "x : Fin 3"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Fin 3 -> Fin 2: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3"
+          ],
+          "sample_cases": [
+            "f = <ndarray (3,)>, x = 1",
+            "f = <ndarray (3,)>, x = 0",
+            "f = <ndarray (3,)>, x = 2",
+            "f = <ndarray (3,)>, x = 0",
+            "f = <ndarray (3,)>, x = 2"
+          ],
+          "outcome": "passed",
+          "seconds": 0.175,
+          "skipped": 0
+        },
+        {
+          "label": "PairFst (Fin 3) (Fin 2) eqFin3",
+          "params": [
+            "a : Fin 3",
+            "b : Fin 2"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 1, b = 0",
+            "a = 2, b = 1",
+            "a = 0, b = 1",
+            "a = 1, b = 0",
+            "a = 1, b = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "PairSnd (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "a : Fin 3",
+            "b : Fin 2"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0",
+            "a = 2, b = 0",
+            "a = 1, b = 0",
+            "a = 0, b = 1",
+            "a = 2, b = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "Pairing (Fin 3) (Fin 2) eqPair",
+          "params": [
+            "p : Fin 3 * Fin 2"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "(Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3) * (Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2)"
+          ],
+          "sample_cases": [
+            "p = (2, 1)",
+            "p = (1, 1)",
+            "p = (2, 1)",
+            "p = (1, 0)",
+            "p = (0, 1)"
+          ],
+          "outcome": "passed",
+          "seconds": 0.011,
+          "skipped": 0
+        },
+        {
+          "label": "IfTrue (Fin 2) eqFin2",
+          "params": [
+            "a : Fin 2",
+            "b : Fin 2"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 1, b = 1",
+            "a = 1, b = 0",
+            "a = 0, b = 1",
+            "a = 1, b = 0",
+            "a = 0, b = 1"
+          ],
+          "outcome": "passed",
+          "seconds": 0.009,
+          "skipped": 0
+        },
+        {
+          "label": "IfFalse (Fin 2) eqFin2",
+          "params": [
+            "a : Fin 2",
+            "b : Fin 2"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2"
+          ],
+          "sample_cases": [
+            "a = 0, b = 0",
+            "a = 1, b = 1",
+            "a = 0, b = 1",
+            "a = 0, b = 1",
+            "a = 1, b = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.007,
+          "skipped": 0
+        },
+        {
+          "label": "CaseNothing (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "d : Fin 2",
+            "f : Fin 3 -> Fin 2"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Fin 3 -> Fin 2: drawn as its table"
+          ],
+          "sample_cases": [
+            "d = 1, f = <ndarray (3,)>",
+            "d = 0, f = <ndarray (3,)>",
+            "d = 0, f = <ndarray (3,)>",
+            "d = 0, f = <ndarray (3,)>",
+            "d = 1, f = <ndarray (3,)>"
+          ],
+          "outcome": "passed",
+          "seconds": 0.022,
+          "skipped": 0
+        },
+        {
+          "label": "CaseJust (Fin 3) (Fin 2) eqFin2",
+          "params": [
+            "d : Fin 2",
+            "f : Fin 3 -> Fin 2",
+            "a : Fin 3"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 2",
+            "Fin 3 -> Fin 2: drawn as its table",
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3"
+          ],
+          "sample_cases": [
+            "d = 1, f = <ndarray (3,)>, a = 0",
+            "d = 0, f = <ndarray (3,)>, a = 0",
+            "d = 1, f = <ndarray (3,)>, a = 1",
+            "d = 1, f = <ndarray (3,)>, a = 2",
+            "d = 0, f = <ndarray (3,)>, a = 0"
+          ],
+          "outcome": "passed",
+          "seconds": 0.026,
+          "skipped": 0
+        },
+        {
+          "label": "FoldNil (Fin 3) (Fin 2) eqFin2 0 step",
+          "params": [],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [],
+          "sample_cases": [
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "outcome": "passed",
+          "seconds": 0.008,
+          "skipped": 0
+        },
+        {
+          "label": "FoldCons (Fin 3) (Fin 2) eqFin2 0 step",
+          "params": [
+            "x : Fin 3",
+            "xs : List (Fin 3)"
+          ],
+          "mode": "sampled",
+          "cases": 200,
+          "passed": true,
+          "failure": null,
+          "error": null,
+          "domains": [
+            "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 3",
+            "List (Fin 3): derived from its constructors, nesting up to 16"
+          ],
+          "sample_cases": [
+            "x = 1, xs = cons (Fin 3) 1 (nil (Fin 3))",
+            "x = 2, xs = nil (Fin 3)",
+            "x = 1, xs = cons (Fin 3) 0 (nil (Fin 3))",
+            "x = 2, xs = cons (Fin 3) 1 (nil (Fin 3))",
+            "x = 1, xs = cons (Fin 3) 0 (nil (Fin 3))"
+          ],
+          "outcome": "passed",
+          "seconds": 0.292,
+          "skipped": 0
+        }
+      ]
+    }
+  ]
+}

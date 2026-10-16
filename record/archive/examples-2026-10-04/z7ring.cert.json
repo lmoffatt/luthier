@@ -1,0 +1,422 @@
+{
+  "addMod7": {
+    "hash": "b5c9e1bd67fbe217",
+    "when": "2026-10-03T20:30:56",
+    "passed": true,
+    "seed": 1639391550,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "0 <= (a + b) mod 7 and (a + b) mod 7 < 7",
+        "params": [
+          "a : Z7",
+          "b : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 49,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "a = 0, b = 0",
+          "a = 0, b = 1",
+          "a = 0, b = 2",
+          "a = 0, b = 3",
+          "a = 0, b = 4"
+        ]
+      }
+    ]
+  },
+  "mulMod7": {
+    "hash": "e52205e29e4d692c",
+    "when": "2026-10-03T20:30:56",
+    "passed": true,
+    "seed": 2024348492,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "0 <= (a * b) mod 7 and (a * b) mod 7 < 7",
+        "params": [
+          "a : Z7",
+          "b : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 49,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "a = 0, b = 0",
+          "a = 0, b = 1",
+          "a = 0, b = 2",
+          "a = 0, b = 3",
+          "a = 0, b = 4"
+        ]
+      }
+    ]
+  },
+  "negMod7": {
+    "hash": "533552c470b07483",
+    "when": "2026-10-03T20:30:56",
+    "passed": true,
+    "seed": 507348298,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "0 <= (7 - a) mod 7 and (7 - a) mod 7 < 7",
+        "params": [
+          "a : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "a = 0",
+          "a = 1",
+          "a = 2",
+          "a = 3",
+          "a = 4"
+        ]
+      }
+    ]
+  },
+  "ringZ7": {
+    "hash": "40429a6591891ecc",
+    "when": "2026-10-03T20:30:56",
+    "passed": true,
+    "seed": 1931250255,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {},
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "Reflexive Z7 eqZ7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "Symmetric Z7 eqZ7",
+        "params": [
+          "x : Z7",
+          "y : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 49,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0",
+          "x = 0, y = 1",
+          "x = 0, y = 2",
+          "x = 0, y = 3",
+          "x = 0, y = 4"
+        ]
+      },
+      {
+        "label": "Associative Z7 eqZ7 addMod7",
+        "params": [
+          "x : Z7",
+          "y : Z7",
+          "z : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 343,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0, z = 0",
+          "x = 0, y = 0, z = 1",
+          "x = 0, y = 0, z = 2",
+          "x = 0, y = 0, z = 3",
+          "x = 0, y = 0, z = 4"
+        ]
+      },
+      {
+        "label": "Commutative Z7 eqZ7 addMod7",
+        "params": [
+          "x : Z7",
+          "y : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 49,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0",
+          "x = 0, y = 1",
+          "x = 0, y = 2",
+          "x = 0, y = 3",
+          "x = 0, y = 4"
+        ]
+      },
+      {
+        "label": "LeftIdentity Z7 eqZ7 addMod7 zero7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "RightIdentity Z7 eqZ7 addMod7 zero7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "LeftInverse Z7 eqZ7 addMod7 zero7 negMod7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "RightInverse Z7 eqZ7 addMod7 zero7 negMod7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "Associative Z7 eqZ7 mulMod7",
+        "params": [
+          "x : Z7",
+          "y : Z7",
+          "z : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 343,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0, z = 0",
+          "x = 0, y = 0, z = 1",
+          "x = 0, y = 0, z = 2",
+          "x = 0, y = 0, z = 3",
+          "x = 0, y = 0, z = 4"
+        ]
+      },
+      {
+        "label": "LeftIdentity Z7 eqZ7 mulMod7 one7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "RightIdentity Z7 eqZ7 mulMod7 one7",
+        "params": [
+          "x : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 7,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0",
+          "x = 1",
+          "x = 2",
+          "x = 3",
+          "x = 4"
+        ]
+      },
+      {
+        "label": "LeftDistrib Z7 eqZ7 addMod7 mulMod7",
+        "params": [
+          "x : Z7",
+          "y : Z7",
+          "z : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 343,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0, z = 0",
+          "x = 0, y = 0, z = 1",
+          "x = 0, y = 0, z = 2",
+          "x = 0, y = 0, z = 3",
+          "x = 0, y = 0, z = 4"
+        ]
+      },
+      {
+        "label": "RightDistrib Z7 eqZ7 addMod7 mulMod7",
+        "params": [
+          "x : Z7",
+          "y : Z7",
+          "z : Z7"
+        ],
+        "mode": "exhaustive",
+        "cases": 343,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7",
+          "Int in [-16, 16] (Python fallback; import \"random\" for genInt) where 0 <= k and k < 7"
+        ],
+        "sample_cases": [
+          "x = 0, y = 0, z = 0",
+          "x = 0, y = 0, z = 1",
+          "x = 0, y = 0, z = 2",
+          "x = 0, y = 0, z = 3",
+          "x = 0, y = 0, z = 4"
+        ]
+      }
+    ]
+  }
+}

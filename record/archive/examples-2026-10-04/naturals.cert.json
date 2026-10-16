@@ -1,0 +1,379 @@
+{
+  "addC": {
+    "hash": "e5f9e699e53e644a",
+    "when": "2026-10-03T20:30:52",
+    "passed": true,
+    "seed": 2028053938,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "Commutative N eqN addN",
+        "params": [
+          "x : N",
+          "y : N"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "x = succ zero, y = succ zero",
+          "x = zero, y = zero",
+          "x = zero, y = zero",
+          "x = succ zero, y = succ zero",
+          "x = succ zero, y = zero"
+        ]
+      },
+      {
+        "label": "Associative N eqN addN",
+        "params": [
+          "x : N",
+          "y : N",
+          "z : N"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "x = succ zero, y = succ zero, z = zero",
+          "x = succ zero, y = zero, z = zero",
+          "x = zero, y = succ zero, z = succ zero",
+          "x = zero, y = succ zero, z = succ zero",
+          "x = succ zero, y = succ zero, z = zero"
+        ]
+      }
+    ]
+  },
+  "mulC": {
+    "hash": "e27fb3f45c74b9fd",
+    "when": "2026-10-03T20:30:53",
+    "passed": true,
+    "seed": 89848465,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "Commutative N eqN mulN",
+        "params": [
+          "x : N",
+          "y : N"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "x = zero, y = zero",
+          "x = succ zero, y = succ zero",
+          "x = zero, y = zero",
+          "x = succ zero, y = zero",
+          "x = succ zero, y = zero"
+        ]
+      },
+      {
+        "label": "Associative N eqN mulN",
+        "params": [
+          "x : N",
+          "y : N",
+          "z : N"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "x = zero, y = succ zero, z = succ zero",
+          "x = zero, y = succ zero, z = succ zero",
+          "x = succ zero, y = succ zero, z = zero",
+          "x = succ zero, y = zero, z = zero",
+          "x = succ zero, y = zero, z = succ zero"
+        ]
+      }
+    ]
+  },
+  "addMul": {
+    "hash": "fc5afaf4a8f6c86a",
+    "when": "2026-10-03T20:30:54",
+    "passed": true,
+    "seed": 18981886,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "LeftDistrib N eqN addN mulN",
+        "params": [
+          "x : N",
+          "y : N",
+          "z : N"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "x = zero, y = succ zero, z = zero",
+          "x = succ zero, y = zero, z = succ zero",
+          "x = zero, y = zero, z = succ zero",
+          "x = zero, y = succ zero, z = zero",
+          "x = zero, y = succ zero, z = succ zero"
+        ]
+      }
+    ]
+  },
+  "toNat": {
+    "hash": "1e09c68fdc31110a",
+    "when": "2026-10-03T20:30:54",
+    "passed": true,
+    "seed": 433638914,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "0 <= toInt n",
+        "params": [
+          "n : N"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "n = zero",
+          "n = succ zero",
+          "n = succ zero",
+          "n = succ zero",
+          "n = succ zero"
+        ]
+      }
+    ]
+  },
+  "natIso": {
+    "hash": "ab92f489cad12fb9",
+    "when": "2026-10-03T20:30:54",
+    "passed": true,
+    "seed": 1208738974,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "eqN (fromNat (toNat a)) a",
+        "params": [
+          "a : N"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "a = zero",
+          "a = zero",
+          "a = succ zero",
+          "a = succ zero",
+          "a = zero"
+        ]
+      },
+      {
+        "label": "eqNat (toNat (fromNat b)) b",
+        "params": [
+          "b : Nat"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "Nat: genNat, size up to 16"
+        ],
+        "sample_cases": [
+          "b = 1",
+          "b = 0",
+          "b = 1",
+          "b = 0",
+          "b = 0"
+        ]
+      }
+    ]
+  },
+  "toIntAdd": {
+    "hash": "709e163f7f576470",
+    "when": "2026-10-03T20:30:54",
+    "passed": true,
+    "seed": 801695747,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "toInt (addN m n) == toInt m + toInt n",
+        "params": [
+          "m : N",
+          "n : N"
+        ],
+        "mode": "sampled",
+        "cases": 200,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "m = succ zero, n = zero",
+          "m = succ zero, n = zero",
+          "m = succ zero, n = succ zero",
+          "m = succ zero, n = zero",
+          "m = succ zero, n = succ zero"
+        ]
+      }
+    ]
+  },
+  "toIntMul": {
+    "hash": "6a02e869fc218458",
+    "when": "2026-10-03T20:30:55",
+    "passed": true,
+    "seed": 1688289829,
+    "run_seed": 3,
+    "generation": {
+      "size": 16,
+      "growth": "1 to size over a sampled run",
+      "generators": {
+        "Bool": "genBool",
+        "Int": "genInt",
+        "N": "genN",
+        "Nat": "genNat",
+        "R": "genR"
+      },
+      "python_generators": []
+    },
+    "laws": [
+      {
+        "label": "toInt (mulN m n) == toInt m * toInt n",
+        "params": [
+          "m : N",
+          "n : N"
+        ],
+        "mode": "sampled",
+        "cases": 100,
+        "passed": true,
+        "failure": null,
+        "error": null,
+        "domains": [
+          "N: genN, size up to 16",
+          "N: genN, size up to 16"
+        ],
+        "sample_cases": [
+          "m = succ zero, n = succ zero",
+          "m = zero, n = succ zero",
+          "m = zero, n = zero",
+          "m = succ zero, n = zero",
+          "m = succ zero, n = zero"
+        ]
+      }
+    ]
+  }
+}
