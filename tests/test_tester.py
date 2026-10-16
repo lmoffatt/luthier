@@ -372,10 +372,11 @@ def test_an_alias_or_a_constructor_is_no_model_home(tmp_path):
     (tmp_path / "demand_laws.lut").write_text(
         demand.replace("keyTypes : List U := [Key]", "keyTypes : List U := [Record]"), encoding="utf-8")
     world = (tester_dir / "world_laws.lut").read_text(encoding="utf-8")
-    first = (world.replace("cutoff : List Grade := [sampledCutoff]", "cutoff : List Grade := [Sampled]")
+    first = (world.replace("cutoff : List Grade := [sampledCutoff, assumedCutoff]",
+                           "cutoff : List Grade := [Sampled, AssumedGrade]")
              .replace('bind "S" "hostStates"', 'bind "S" "states"')
              .replace("hosts : List (Host State) := [listedHost]", "hosts : List (Host State) := [host]"))
-    assert first.count('bind "S" "states"') > world.count('bind "S" "states"') and "[Sampled]" in first
+    assert first.count('bind "S" "states"') > world.count('bind "S" "states"') and "[Sampled, AssumedGrade]" in first
     (tmp_path / "world_laws.lut").write_text(first, encoding="utf-8")
     homes = {}
     for name in ("demand_laws.lut", "world_laws.lut"):

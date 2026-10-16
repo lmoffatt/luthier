@@ -40,21 +40,31 @@ def main(argv: list[str] | None = None) -> int:
     # `theDemand` and mirrored in run.DEMAND_DEFAULTS (L5.19, P11): None here means "not given"
     p_run.add_argument("--main", default=None, help="the entry [default main]")
     p_run.add_argument("--fuel", type=int, default=None,
-                       help="reduction fuel [proposed: default 10,000,000, 10,000 was a hundred times too small for validate_graph.lut]")
+                       help="a bound on the reduction steps, the run cut when they are spent [default none, "
+                            "D-2026-10-16-d]")
+    p_run.add_argument("--time-limit", type=float, default=None, metavar="SECONDS",
+                       help="a bound on the run's time, the run cut when it is reached [default none, D-2026-10-16-d]")
+    p_run.add_argument("--strategy", choices=["forward-on-demand", "call-by-need"], default=None,
+                       help="the strategy asked [default forward-on-demand, 8.S3]; run.py computes either by call "
+                            "by need, its specimen (TheDefaultsAgree, 8.S4), and the record says which ran")
     p_run.add_argument("--set", action="append", default=[], metavar="NAME=VALUE",
                        help="give a hole of the file (a declared String, Int, Float64 or Bool) its value (12.S18)")
-    p_run.add_argument("--accept", choices=["proved", "exhaustive", "cases", "sampled", "assumed"], default=None,
-                       help="the weakest grade an entry of the store may have to serve the run (6.S15, 7.S15) "
-                            "[proposed: sampled when none is named, so an assumed entry serves only a run "
-                            "that accepts assumed]; the run is refused when its cone is not certified (12.S17)")
+    p_run.add_argument("--accept", action="append", default=[], metavar="GRADE|assumed:NAME",
+                       help="a grade (proved, exhaustive, cases, sampled, assumed): the weakest an entry of the "
+                            "store may have to serve the run (6.S15, 7.S15) [proposed: sampled when none is "
+                            "named, so an assumed entry serves only a run that accepts assumed]; or assumed:NAME, "
+                            "repeatable: run the provisional extern NAME as assumed, its grade propagating to "
+                            "what is built on it (D-2026-10-16-c; a bare assumed accepts no provisional). The run "
+                            "is refused when its cone is not certified (12.S17)")
     p_run.add_argument("--checked", action="store_true", default=None,
                        help="test each value an extern gives at a declared subtype against its predicate as "
                             "it crosses, refusing the run at the first refuted one (12.S18, 4.R5); off by "
                             "default, a parameter of the demand (P11): without it the refinement is an "
                             "obligation the certificate of the extern's laws covers")
-    p_run.add_argument("--fresh", action="store_true",
+    p_run.add_argument("--fresh", action="store_true", default=None,
                        help="execute even when x.results.json holds this run's key (L5.20); nothing is written "
-                            "if the value agrees, and both are kept if it does not")
+                            "if the value agrees, and both are kept if it does not [default off, a field of the "
+                            "demand, D-2026-10-16-d]")
     p_test = sub.add_parser("test", help="run the file's test lines (test.lth's Tester)")
     p_test.add_argument("file")
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
@@ -96,11 +106,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if all(passes(o) for o in outcomes) else 1
 
     if ns.command == "run":
-        from .certify import GRADES
         from .run import record, run
         try:
-            output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, GRADES.get(ns.accept), ns.checked,
-                                        ns.fresh)
+            grade, assumes = _accepts(ns.accept)
+            strategy = {"forward-on-demand": "ForwardOnDemand", "call-by-need": "CallByNeed"}.get(ns.strategy)
+            output, values, state = run(ns.file, ns.main, ns.fuel, ns.set, grade, ns.checked, ns.fresh, assumes,
+                                        ns.time_limit, strategy)
             print(output, end="")
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0
@@ -158,6 +169,25 @@ def main(argv: list[str] | None = None) -> int:
             for act in result.program:
                 print(act)
     return 1 if failed else 0
+
+
+def _accepts(words):
+    """`run --accept`'s words (D-2026-10-16-c): at most one grade, the cutoff (None when none is
+    given, the demand's default), and the names of `assumed:NAME`, the provisional externs run as
+    assumed."""
+    from .certify import GRADES
+    grades, names = [], []
+    for w in words:
+        kind, colon, name = w.partition(":")
+        if colon and kind == "assumed" and name:
+            names.append(name)
+        elif not colon and w in GRADES:
+            grades.append(w)
+        else:
+            raise ValueError(f"--accept {w}: a grade ({', '.join(GRADES)}) or assumed:NAME")
+    if len(set(grades)) > 1:
+        raise ValueError(f"--accept names two grades: {', '.join(dict.fromkeys(grades))}")
+    return (GRADES[grades[0]] if grades else None), names
 
 
 def _session(files, world=False, fuel=None):

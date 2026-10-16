@@ -1245,7 +1245,8 @@ def test_inner_keeps_every_cutoff_and_a_law_demand_carries_the_runs():
     d = demand_of("main", 99, {"x": 1}, "Cases", True, "v0.2")
     assert d.inner("law") == demand_of("law", 99, {"x": 1}, "Cases", True, "v0.2")
     assert d.law("L", "sha256:c", [("x", {"Number": 1.0})], {})["accepts"] == "Cases"
-    assert demand_of().accepts == "Sampled" and demand_of().fuel == 10_000_000
+    # no fuel bound by default (D-2026-10-16-d)
+    assert demand_of().accepts == "Sampled" and demand_of().fuel is None
 
 
 def test_every_demand_on_a_law_is_passed_down_from_the_runs(tmp_path, monkeypatch, capsys):
@@ -1278,8 +1279,9 @@ def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
     first, second = runs
     d = first["demand"]
     assert d == {"entry": "main", "cone": first["certification"]["cone"],
-                 "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "delta": None,
-                 "fuel": 5000, "checked": False, "lock": None, "decoration": None}
+                 "parameters": {"usedHole": 1, "unusedHole": 7}, "accept": "sampled", "assumes": [], "delta": None,
+                 "fuel": 5000, "timeLimit": None, "checked": False, "lock": None, "decoration": None,
+                 "strategy": "ForwardOnDemand", "fresh": False}
     # the fields kept beside it say the same
     assert (first["entry"], first["parameters"], first["checked"], first["fuel"]["given"],
             first["certification"]["accept"]) == (d["entry"], d["parameters"], d["checked"], d["fuel"], d["accept"])

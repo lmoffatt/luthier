@@ -57,6 +57,7 @@ import json
 import math
 import platform
 import sys
+import time
 from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
 
@@ -584,8 +585,14 @@ def _with_extern(body, typed):
 
 
 class Runner:
-    def __init__(self, program, fuel, checked=False):
-        self.fuel = fuel
+    def __init__(self, program, fuel, checked=False, time_limit=None):
+        # the demand's limits (D-2026-10-16-d): `fuel` the reduction steps left, None for no bound;
+        # `time_limit` the seconds the run may take, None for none; `steps` the steps taken
+        self.fuel, self.time_limit, self.steps = fuel, time_limit, 0
+        self.deadline = None if time_limit is None else time.monotonic() + time_limit
+        # the provisional externs the demand runs as assumed, by route: (names, reason); each warns
+        # on standard error at its first application in the run (D-2026-10-16-c)
+        self.provisional, self.warned = {}, set()
         # `run --checked` (12.S18, 4.R5): each value crossing in at a declared subtype has its
         # predicate evaluated here; `tested` counts them per route, for the run's record
         self.checked, self.tested = checked, {}
@@ -762,9 +769,14 @@ class Runner:
         return body
 
     def spend(self):
-        if self.fuel <= 0:
-            raise RunError("fuel spent")
-        self.fuel -= 1
+        if self.fuel is not None:
+            if self.fuel <= 0:
+                raise RunError("fuel spent")
+            self.fuel -= 1
+        self.steps += 1
+        # the clock read every 4096 steps, so that a limit costs nothing measurable
+        if self.deadline is not None and not self.steps & 4095 and time.monotonic() > self.deadline:
+            raise RunError(f"time limit of {self.time_limit:g} s reached after {self.steps} steps (run --time-limit)")
 
     def route(self, head):
         if getattr(head, "obj", None) is not None:
@@ -773,6 +785,11 @@ class Runner:
         if route not in self.routes:
             if not route.startswith("python:"):
                 raise RunError(f"unsupported extern route: {route}")
+            if route in self.provisional and route not in self.warned:
+                self.warned.add(route)
+                names, reason = self.provisional[route]
+                print(f"warning: applying provisional extern {', '.join(names)} as assumed ({route}): "
+                      f"{reason or 'no reason given'} (D-2026-10-16-c)", file=sys.stderr)
             module, name = route[7:].rsplit(".", 1)
             self.routes[route] = getattr(importlib.import_module(module), name)
         return self.routes[route]
@@ -1578,8 +1595,15 @@ ACCEPT = "Sampled"
 
 # demand_model.lut's `theDemand`: the default of each argument of `run` (L5.19, P11), declared there
 # and mirrored here; tests/test_run.py checks the two agree. `pinned` has no default to mirror: it
-# is read from the lock (12.S13).
-DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "fuel": 10_000_000, "sets": (), "checked": False}
+# is read from the lock (12.S13). No fuel bound and no time limit (D-2026-10-16-d); forward on
+# demand asked, which call by need computes as its specimen (`TheDefaultsAgree`, 8.S4); no
+# provisional run as assumed (D-2026-10-16-c).
+DEMAND_DEFAULTS = {"entry": "main", "accepts": ACCEPT, "assumes": (), "fuel": None, "timeLimit": None, "sets": (),
+                   "checked": False, "strategy": "ForwardOnDemand", "fresh": False}
+
+# the strategy that computes a demand, by the strategy it asks (demand.lth's `Ran`,
+# `RanIsASpecimenOfTheAsked`): run.py reduces by call by need whatever is asked
+RAN = {"ForwardOnDemand": "CallByNeed", "CallByNeed": "CallByNeed"}
 
 # [proposed, Luciano to mark; record/IA/layer-3-review-2026-10-15/prompt-run-host.md] the grade a run
 # accepts, by default, for a law whose body is an `axiom` (world.lth's `ObserverIsFaithful`, 11.R3):
@@ -1599,16 +1623,24 @@ class Demand:
     `recorded`). `entry` the name as the user writes it; `accepts` the weakest grade
     accepted (test.lth's `Grade`, by constructor name); `sets` each hole's value (`--set`, parsed by
     the hole's type, `fill`), in the order given; `pinned` the interpreter's revision the lock pins,
-    None when none does. `decoration` and `delta` are `nothing` in this draft (demand.lth §1)."""
+    None when none does. `decoration` and `delta` are `nothing` in this draft (demand.lth §1).
+    `assumes` the provisional externs run as assumed, by name (`--accept assumed:NAME`,
+    D-2026-10-16-c); the modes of running (D-2026-10-16-d): `fuel` the reduction steps, None for no
+    bound; `time_limit` in seconds, None for none; `strategy` the strategy asked, by constructor
+    name; `fresh` whether the store of results is bypassed (L5.20)."""
     entry: str
     accepts: str
-    fuel: int
+    fuel: int | None
     sets: tuple
     checked: bool
     pinned: str | None
     decoration: None = None
     delta: float | None = None
     axioms: str = AXIOMS
+    assumes: tuple = ()
+    time_limit: float | None = None
+    strategy: str = DEMAND_DEFAULTS["strategy"]
+    fresh: bool = False
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
@@ -1636,8 +1668,9 @@ class Demand:
         `accept`; the parameters as an object, as the entry's `parameters`."""
         from . import certify
         return {"entry": self.entry, "cone": cone, "parameters": dict(self.sets),
-                "accept": certify.GRADE_WORDS[self.accepts], "delta": self.delta, "fuel": self.fuel,
-                "checked": self.checked, "lock": self.pinned, "decoration": self.decoration}
+                "accept": certify.GRADE_WORDS[self.accepts], "assumes": list(self.assumes), "delta": self.delta,
+                "fuel": self.fuel, "timeLimit": self.time_limit, "checked": self.checked, "lock": self.pinned,
+                "decoration": self.decoration, "strategy": self.strategy, "fresh": self.fresh}
 
     def key(self, live_holes):
         """plan.lth's `demandKey` (8.S8, `KeyReadsOnlyTheCone`, `KeyReadsTheType`): the decoration,
@@ -1646,19 +1679,51 @@ class Demand:
         return {"decoration": self.decoration, "values": {n: v for n, v in self.sets if n in live_holes}}
 
 
-def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None):
+def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None, assumes=None,
+              time_limit=None, strategy=None, fresh=None):
     """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
     demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
     d = DEMAND_DEFAULTS
+    if strategy is not None and strategy not in RAN:
+        raise RunError(f"unknown strategy {strategy}: one of {', '.join(RAN)}")
     return Demand(entry=d["entry"] if main is None else main, accepts=accept or d["accepts"],
                   fuel=d["fuel"] if fuel is None else fuel, sets=tuple(dict(values).items()),
-                  checked=d["checked"] if checked is None else checked, pinned=pinned)
+                  checked=d["checked"] if checked is None else checked, pinned=pinned,
+                  assumes=tuple(dict.fromkeys(d["assumes"] if assumes is None else assumes)),
+                  time_limit=d["timeLimit"] if time_limit is None else time_limit,
+                  strategy=d["strategy"] if strategy is None else strategy,
+                  fresh=d["fresh"] if fresh is None else fresh)
 
 
 def _head_name(x):
     while isinstance(x, s.App):
         x = x.function
     return x.name if isinstance(x, s.Name) else None
+
+
+def _provisional_of(x):
+    """The provisional externs a surface term holds, as (route, reason) pairs: the reason the
+    declaration gives (`(provisional <- "why")`, D-2026-10-16-c), None for `(provisional <- true)`."""
+    found = []
+    def walk(y):
+        if isinstance(y, s.App) and isinstance(y.argument, s.NamedArg) and y.argument.name == "provisional":
+            head, route = y.function, None
+            while isinstance(head, s.App):
+                if isinstance(head.argument, s.Literal) and isinstance(head.argument.literal, s.StringLit):
+                    route = head.argument.literal.value
+                head = head.function
+            value = y.argument.value
+            reason = (value.literal.value if isinstance(value, s.Literal) and isinstance(value.literal, s.StringLit)
+                      else None)
+            found.append((route, reason))
+        if isinstance(y, tuple):
+            for z in y:
+                walk(z)
+        elif is_dataclass(y) and not isinstance(y, type):
+            for f in fields(y):
+                walk(getattr(y, f.name))
+    walk(x)
+    return found
 
 
 def _provisional(x):
@@ -1913,7 +1978,10 @@ def certification(loaded, program, entry, demand, refuse=True):
     [proposed] the name itself to the law's parameter typed by the theory (printed, as a census of
     one prints it), and each hole the run filled with `--set` to the law's parameter of the same
     name (certification.lth's `Demand`); the model's own cone is compared with the fingerprint the
-    entry's binding recorded (certify.at). A name built on a provisional extern is refused whole.
+    entry's binding recorded (certify.at). A name built on a provisional extern is refused whole,
+    unless the demand names it (`Demand.assumes`, D-2026-10-16-c): then no law of it is demanded and
+    it is listed under `assumed` with its reasons and the names of the cone downstream of it, each
+    of grade assumed, since the grade propagates to everything built on it.
 
     A law over an observed case (`_Theories.case_law`, world.lth's `Host` laws but the root of
     trust) is run at the action's first application (`FirstActions`), not read here. A law whose
@@ -1980,7 +2048,8 @@ def certification(loaded, program, entry, demand, refuse=True):
                 if axiom is not None:
                     axioms[id(d)] = axiom
                 demands.append(d)
-        cone.append({"name": n.partition("@")[0], "provisional": n in provisional, "laws": demands})
+        cone.append({"name": n.partition("@")[0],
+                     "provisional": n in provisional and n.partition("@")[0] not in demand.assumes, "laws": demands})
     stores_read = _stores_read(loaded.files)
     entries = sorted((e for f in loaded.files for e in certify.read_store(f)),
                      key=lambda e: e.get("date", ""), reverse=True)
@@ -1996,6 +2065,13 @@ def certification(loaded, program, entry, demand, refuse=True):
             else:
                 kept_laws.append(d)
         c["laws"] = kept_laws
+    # a provisional extern the demand names: run as assumed, the grade propagating downstream
+    for n in sorted(n for n in provisional if n.partition("@")[0] in demand.assumes):
+        plain = n.partition("@")[0]
+        reasons = [r or "no reason given" for a in surface.get(n, ()) for _, r in _provisional_of(getattr(a, "body", None))]
+        downstream = sorted({m.partition("@")[0] for m in names if m != n and n in cones.names(m)})
+        assumed.append({"name": plain, "provisional": reasons, "accept": f"assumed:{plain}", "grade": "assumed",
+                        "downstream": downstream})
     refusals = certify.refuse(entries, cone)
     if refusals and refuse:
         lines = [certify.show_refusal(r, entries) for r in refusals]
@@ -2479,21 +2555,40 @@ def _held_parts(program, law_internal, values):
     return find(body, None)
 
 
-def refuse_provisional(kept, entry):
+def provisionals(kept):
+    """The names of the slice built on a provisional extern (4.R5), as the user writes them, each
+    with its routes and reasons (`_provisional_of`)."""
+    found = {}
+    for a in kept:
+        if isinstance(a, s.Define) and _provisional(a.body):
+            found.setdefault(a.name.partition("@")[0], []).extend(_provisional_of(a.body))
+    return found
+
+
+def refuse_provisional(kept, entry, assumes=()):
     """A name of the slice built on a provisional extern (4.R5) is refused whole (6.S14, 12.S17,
     `ProvisionalIsRefused`), before the slice is elaborated: the elaborator does not read the
-    extern's `(provisional <- true)`. [proposed] The laws of the rest of the cone are then not
-    listed: a provisional name refuses the run whatever the store holds."""
-    names = sorted(dict.fromkeys(a.name for a in kept if isinstance(a, s.Define) and _provisional(a.body)))
+    extern's `(provisional <- ...)`, unless the demand names it among those it runs as assumed
+    (`assumes`, `run --accept assumed:NAME`; world.lth's `AppliedWhenSettled`, D-2026-10-16-c).
+    A bare `--accept assumed` accepts none. [proposed] The laws of the rest of the cone are then
+    not listed: a provisional name not named refuses the run whatever the store holds. Gives the
+    provisional names accepted, each with its routes and reasons."""
+    found = provisionals(kept)
+    names = sorted(n for n in found if n not in assumes)
     if names:
-        refusals = [{"name": n.partition("@")[0], "law": None, "state": ("Provisional", None)} for n in names]
-        from .certify import show_refusal
-        lines = [show_refusal(r, []) for r in refusals]
+        refusals = [{"name": n, "law": None, "state": ("Provisional", None)} for n in names]
+        lines = [f"{n}: provisional ({'; '.join(r or 'no reason given' for _, r in found[n])}); "
+                 f"run it as assumed with --accept assumed:{n}" for n in names]
         raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (12.S17):\n  "
                       + "\n  ".join(lines), refusals)
+    for n in assumes:
+        if n not in found:
+            print(f"warning: --accept assumed:{n} names no provisional extern of the cone", file=sys.stderr)
+    return {n: found[n] for n in sorted(found)}
 
 
-def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=False):
+def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
+        time_limit=None, strategy=None):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -2514,12 +2609,20 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=Fa
     live cone performs no action (`acts`) and `x.results.json` holds the key with one value, the run
     is served from it without evaluating; its state names the entry (`result_store`'s `served`). A
     cone that acts always executes. `fresh` (`run --fresh`, L5.20) executes whatever the store holds;
-    `record` then writes nothing if the value agrees and keeps both if it does not."""
+    `record` then writes nothing if the value agrees and keeps both if it does not.
+
+    The modes of running are fields of the demand (D-2026-10-16-d), each recorded: `fuel` (reduction
+    steps) and `time_limit` (seconds) cut the run, neither bound by default; `strategy` the one
+    asked, forward on demand by default, which call by need computes as its specimen (`RAN`; the
+    plan records the strategy that ran, `TheDefaultsAgree`); `fresh`. `assumes` names the
+    provisional externs the run applies as assumed (`refuse_provisional`, D-2026-10-16-c); each
+    warns on standard error at its first application, and the certification lists it under
+    `assumed` with the names of the cone downstream of it, whose grade is then assumed."""
     host.reset()
     lock = lock_status(path)
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
-    demand = demand_of(main, fuel, values, accept, checked, lock["pinned"])
+    demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh)
     entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)
@@ -2531,7 +2634,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=Fa
             name = empty[a.name]
             raise RunError(f"{name} : {_show_type(a.type)} is a hole of {loaded.top.name} the run needs; "
                            f"give it with --set {name}=...")
-    refuse_provisional(kept, entry)
+    accepted = refuse_provisional(kept, entry, demand.assumes)
     program = _elaborated(kept)
     definition = next((a for a in program if isinstance(a, t.Define) and a.name == entry), None)
     if definition is None:
@@ -2539,7 +2642,8 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=Fa
     state = certification(loaded, program, entry, demand) or {}
     live = live_cone(kept)
     live_holes = {n for n, _ in demand.sets if loaded.internal(loaded.top, n) in set(live)}
-    plan = {"strategy": "CallByNeed", "entry": demand.entry, "live": list(live), "schedule": []}
+    # the strategy that ran, the specimen of the one asked (demand.lth's `Ran`, 8.S4)
+    plan = {"strategy": RAN[demand.strategy], "entry": demand.entry, "live": list(live), "schedule": []}
     pure = not acts(program, live)
     seed = None  # [proposed] a run draws nothing today; the seed of 8.S8 is `nothing`
     certificates = state.pop("certificates", [])
@@ -2547,7 +2651,7 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=Fa
     key = result_key(known, seed, plan, certificates)
     common = dict(lock=lock, checked=demand.checked, demand=known["demand"], key=known["key"], seed=seed,
                   certificates=certificates, key_hash=key_hash(key))
-    if pure and not fresh:
+    if pure and not demand.fresh:
         results = read_results(path)
         i = served_by(results, key)
         if i is not None:
@@ -2558,7 +2662,12 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=Fa
                                     result_store={"pure": True, "fresh": False, "served": {
                                         "store": str(results_path(path)), "entry": i,
                                         "key hash": results[i]["key hash"], "time": results[i]["time"]}})
-    runner = Runner(program, demand.fuel, demand.checked)
+    runner = Runner(program, demand.fuel, demand.checked, demand.time_limit)
+    for n, pairs in accepted.items():
+        for route, reason in pairs:
+            if route is not None:
+                names, why = runner.provisional.get(route, ((), reason))
+                runner.provisional[route] = (names + (n,), why)
     firsts = FirstActions(loaded, state.pop("_firsts", []) if state else [], demand)
     runner.first = firsts.by_route
     runner.validate = firsts
@@ -2570,8 +2679,8 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=Fa
         runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
     plan["schedule"] = list(runner.schedule)
     plan["hash"] = plan_hash(plan)
-    spent = demand.fuel - runner.fuel
-    store = {"pure": pure, "fresh": fresh}
+    spent = runner.steps
+    store = {"pure": pure, "fresh": demand.fresh}
     if pure:
         # the value printed, as `eval` prints it (12.S19), what the store keeps under the key
         store.update(key=key, value=_type_shown(runner.value(result), sys.maxsize))
@@ -2726,8 +2835,9 @@ def lock_status(path):
     return {"path": str(here / LOCK), "pinned": None, "status": "absent"}
 
 
-def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=False):
-    return run(path, main, fuel, sets, accept, checked, fresh)[0]
+def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
+             time_limit=None, strategy=None):
+    return run(path, main, fuel, sets, accept, checked, fresh, assumes, time_limit, strategy)[0]
 
 
 def record_path(path):
@@ -2748,7 +2858,8 @@ def record(path, main, values, output, state=None):
     it ran `--checked` (`checked`) and then the refinements tested per route (`refinements`).
 
     The demand as one object (`demand`, demand.lth's `Record`: entry, cone, parameters, accept,
-    delta, fuel, checked, lock), the plan (`plan`) and the demand's key (`key`). [proposed] The
+    assumes, delta, fuel, timeLimit, checked, lock, decoration, strategy, fresh), the plan (`plan`,
+    with the strategy that ran) and the demand's key (`key`). [proposed] The
     fields that were there before are kept beside it, with the same values: `entry`, `parameters`,
     `checked` and `certification.accept`, which tests and readers of the record read; `fuel` and
     `lock`, which hold the run's part too (the fuel spent, the lock's path and status).
