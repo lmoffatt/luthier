@@ -48,6 +48,17 @@ e. D-2026-10-15-e (item 2): the cone's hash erases binder annotations, with the 
 Each accepted when: the suite is green, the named law or test exists and a control refutes a wrong
 version (L9.14), and the stores touched are committed with the code.
 
+f. D-2026-10-16-c and -d (one agent, run.py and cli.py): a provisional extern refused by default in
+   world.lth as in run, run as assumed only when the demand names it (`--accept assumed:NAME`), a
+   warning on stderr per application, `provisional` with its reason, `check -v` lists them; the
+   modes of running as fields of `Demand` with declared defaults: strategy (forward on demand the
+   default, call by need the specimen under `TheDefaultsAgree`), fuel unbounded by default for run
+   with an optional bound in steps or time, `fresh`. Brief: prompt-modes.md.
+g. D-2026-10-16-e (after f; renames many files): executive files `.run.lut` and `.test.lut`; the
+   checker's refusals; run and certify take only their kind; the migration of tests/tester and the
+   two mixed sonolocalización files. Principles text (L2.6, L5.1) by a separate agent, launched.
+Order: 3b's follow-up, then f and 3c together (disjoint files), then g, then 3e.
+
 ## Step 4. The first cost (v0.5)
 `PinvProjects` returns its distance; the certificate records it; a demand is served by
 `distance <= tolerance` (L10.5, 6.S15 for that law); the pattern written for the other laws.
