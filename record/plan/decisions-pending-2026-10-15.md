@@ -205,6 +205,8 @@ own action is served from a memo under the token today. Later a memo hit is a re
 L4.10 (an observation is itself an action) gives the token: the one that read returns, as for any
 observation. No special rule is needed. Cost: one sentence in 10.S6 when it is rewritten.
 
+*Answered in chat (2026-10-16): ok, D-2026-10-16-f.*
+
 **14. Is a bare value where `Maybe` is declared a `just` in `--checked`?** `tables.py`'s `parse`
 returns a table or None and `Table.cell` a pair or None, and the fit reads its CSVs through them.
 Options: (a) lenient, the docstring says a bare value is `just` (the night's default [proposed]);
@@ -523,6 +525,8 @@ and (e) are met; (b) tag with (e) listed as debt. No recommendation; no push is 
 (CLAUDE.md: push only tagged milestones). Source: `record/IA/v04-2026-10-15/report.md` (section 1).
 
 ## Added after the list
+
+*Item 40 answered in chat (2026-10-16): (b), D-2026-10-16-f.*
 
 **41. Does a law's evidence pool its cases across seeds?** (Added 2026-10-15 by the coordinator,
 from his remark in the chat: a seed makes the stochastic deterministic, and matters for the identity

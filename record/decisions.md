@@ -2692,3 +2692,16 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       principles (L2.6, L5.1); spec 2, 12 (files and tools), 7 (tests); check.py, cli.py;
             the migration of tests/tester and examples
 Status:     current
+
+D-2026-10-16-f  Item 13: answered by D-2026-10-15-d (no own action is served from a memo under the
+                token today); later a memo hit is a read of the store and the token is the one
+                that read returns (L4.10), one sentence in 10.S6 when it is rewritten. Item 40:
+                option (b), v0.4 is tagged when criterion (c) is met (the result store, done
+                43572cd to 1d1cef9, its acceptance the coordinator's), with (e) (six uncontrolled
+                laws of sonolocalizacion_laws.lut) listed as debt.
+Author:     Luciano, the recommendations
+Quote:      "13 ok / 40 ok"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       spec 10.S6; the tag v0.4 (his to make)
+Status:     current
