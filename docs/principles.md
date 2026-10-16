@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 adf26448b3f7, commit e6eb343) by `scripts/project_principles.py` (project_principles v2) on 2026-10-16; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 eb615c12ec56, commit 71e4f9e) by `scripts/project_principles.py` (project_principles v2) on 2026-10-16; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -132,7 +132,11 @@ demanded).
   against it, lives in a file of its own, read only when a demand needs it and certified against the
   theory. What a file imports has its theory in a theory file (D-2026-10-13-i, -j). A theory file may
   hold the definitions its laws need and a value that is part of the theory, never a model of a theory
-  declared elsewhere (D-2026-10-13-o). [settled]
+  declared elsewhere (D-2026-10-13-o). A third kind of file is executive: it carries a demand with its
+  entry and is never imported; a `*.run.lut` holds the `main` that `luthier run` applies to the world,
+  a `*.test.lut` the `test` lines `luthier certify` runs; its results live beside it, while
+  certificates live beside the model that makes the claim (L10.12). The suffix declares the kind and
+  the content verifies it (D-2026-10-16-e). [settled]
 - L2.7 (His words) A definition is a concept, and a collection of types is not. An alias names a
   structure we use before we know what it is for; a definition promotes it to a theory, and what makes
   it one is a law it must follow, stating the role of each part. Distinct constructors are free and
@@ -227,7 +231,9 @@ iteration step, read every demand, run, collapse to the outputs, write, and asks
 object is consumed or stable: kept; with G1 for what is derived (the former L6).
 - L5.1 The declarative face states what is known, universal and minimally processed; the executive
   face is a demand from outside, and the demanded type fixes the path, the types and the tolerances
-  actually produced. [settled]
+  actually produced. The two faces are files: the declarative face is the theories and the models, the
+  executive face an executive file (L2.6) or a demand typed at the terminal, kept in its record
+  (D-2026-10-16-e). [settled]
 - L5.2 The evaluation strategy is a parameter separate from the program (clause 18); by default, a
   plan backward from the actions over names, evaluating nothing, then a strict forward run over the
   live subgraph, each node once and whole: forward on demand. [settled]
