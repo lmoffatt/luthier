@@ -199,6 +199,8 @@ L5.18's declared defaults. Cost: every acting run holds the observer in its cone
 price (`--accept assumed` today). Where the host gives a guarantee, L9.7 (verification by delegation
 is `proved` by citation) removes the price for that place.
 
+*Item 12 answered in chat (2026-10-16): D-2026-10-16-n.*
+
 **13. Which token follows a memo hit of an own action?** 10.S6 (own actions memoized, the token
 used once, D4). When an own action is served from the memo, which token comes back is a decision,
 not a wording fix. No options given in the source; the agent's reading is that it needs yours.

@@ -2829,3 +2829,33 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       spec 7.S12; belief.lth (`MaximizerStationary`, `QuadraticConverges`, `MaxResult`),
             optimization.lth, lm laws; the theories of every iterative algorithm
 Status:     current
+
+D-2026-10-16-n  Item 12, what is trusted and what is checked. Now: `print` writes at once and checks
+                what `write()` returns, failing the action when the system rejects the bytes; a
+                file is checked by re-reading it; the output is a place whose observation depends on
+                what it is connected to (a file re-read, a pipe with an own tee, a terminal only the
+                bytes accepted). The roots of trust, where no feedback exists (the system's delivery
+                to the terminal, the file system, the interpreter, the floating-point hardware), are
+                declared once per project and listed in every run's record; above them everything
+                is checked. Later, not in the initial version: each place declares its kind of
+                feedback (re-read, a loop closed by a sensor as a microphone for a speaker, only
+                statistical, the other party's acknowledgement, only recorded, durable on trust in
+                the medium), and the grade of an action there follows it. A person's input is
+                trusted with an error left open: it lowers the credibility of what that person
+                delivers, and the loop closes in the long run when later evidence agrees or
+                contradicts (the correction kept, P3). Printing on paper and acting on an experiment
+                are future cases.
+Author:     Luciano, on the decision assistant's reading (hello's output checked only by an outside
+            witness; `luthier run hello.run.lut > /dev/full` recorded as certified with output
+            "hello, world")
+Quote:      "queda claro que hay cosas que tenemos que confiar, como que el sistema operativo
+            escribe en la pantalla" ... "Con las personas es fácil de pensar, se confía pero se deja
+            abierta la posibilidad de un error, esto disminuye la credibilidad de la información
+            que entrega esa persona. Es decir, generalmente hay un loop de información solo que a
+            la larga. De todos modos dejar todo abierto es demasiado para una versión inicial."
+            ... "los errores se detectan por incongruencias posteriores"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       host.py (`print_line`, `observe`), cli.py, world.lth (`ObserverIsFaithful` becomes the
+            named roots), luthier.lock, the run record; spec 10.S7, 10.S10
+Status:     current
