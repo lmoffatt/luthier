@@ -933,5 +933,18 @@ def report(program) -> list[Report]:
     result = [coverage(q)]
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for kind, pred, message in [('unclaimed', violatesS14, 'No other definition claims this Bool law.'), ('provisional', provisionalExtern, 'Provisional extern.'), ('loose', looseFunction, 'Top-level function; reported pending local definitions.')]:
-            if pred(program, n): result.append(Report(kind, n, message))
+            if pred(program, n):
+                if kind == 'provisional': message = f'Provisional extern: {provisional_reasons(program, n)}; run refuses it unless named by --accept assumed:{n}.'
+                result.append(Report(kind, n, message))
     return result
+
+
+def provisional_reasons(p, n):
+    """The reasons `n`'s provisional externs give (`(provisional <- "why")`, D-2026-10-16-c), or
+    'no reason given' for `(provisional <- true)`."""
+    found = []
+    for x in nodes(tuple(acts(p, n, s.Define))):
+        if isinstance(x, s.NamedArg) and x.name == 'provisional':
+            v = x.value
+            found.append(v.literal.value if isinstance(v, s.Literal) and isinstance(v.literal, s.StringLit) else 'no reason given')
+    return '; '.join(found) or 'no reason given'

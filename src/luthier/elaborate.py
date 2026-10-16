@@ -339,8 +339,10 @@ def application(v, c):
     if (head == s.Name('extern') and arguments
             and isinstance(arguments[0], s.Literal)
             and isinstance(arguments[0].literal, s.StringLit)):
+        # a named argument of `extern` (`provisional <- "why"`, 4.R5) is a mark of the declaration,
+        # read by the checker and by `run` (D-2026-10-16-c), and no argument of the host's function
         return apps(t.Extern(arguments[0].literal.value),
-                    [walk(x, c) for x in arguments[1:]])
+                    [walk(x, c) for x in arguments[1:] if not isinstance(x, s.NamedArg)])
     if isinstance(head, s.Name) and head.name in c.aliases:
         alias = c.aliases[head.name]
         ns = [n for b in alias.binders for n in b.names]

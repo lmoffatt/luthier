@@ -1,7 +1,8 @@
 -- tests/run/certified/provisional.lut: a cone with a provisional extern (4.R5) is refused whole
--- (6.S14, 12.S17, certification.lth's ProvisionalIsRefused).
+-- (6.S14, 12.S17, certification.lth's ProvisionalIsRefused), unless the demand names it
+-- (`--accept assumed:shout`, D-2026-10-16-c); its declaration gives the reason (2026-10-16).
 
 import "world_model.lut" HostConsole host : HostConsole
 
-shout : String -> String := extern "python:builtins.str" (provisional <- true)
+shout : String -> String := extern "python:builtins.str" (provisional <- "str stands in for a shout not written yet")
 main (w : W) : W * Unit := host.print w (shout "x")
