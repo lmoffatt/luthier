@@ -13,10 +13,16 @@
 -- prompt-fix-certification.md: `refuse` follows certification.lth draft 1 (C5 of the round-1
 -- review: a law with a failure at the current hash is refused whatever serves, listed with that
 -- failure). `grade` already is the fold the theory's step laws now fix (C1), and is unchanged.
+--
+-- Draft 2, 2026-10-16, by Claude Opus 5.5, on record/IA/code-follows-2026-10-16/
+-- prompt-replay-fuel.md (D-2026-10-15-f, D-2026-10-15-g): a disagreement recorded at the current
+-- hash leaves no grade and is refused first, naming both entries; `recording` is the theory's
+-- `recordEntry`, the reference model of the store law `Recording`.
 
 import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
-  Uncertified Provisional Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
+  Uncertified Provisional Disagrees Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
+  disputeAt Recording recordEntry
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical
 
@@ -37,8 +43,8 @@ contains (r : Reach) (v : Value) : Bool := match r {
   Members vs -> anyValue v vs }
 
 -- 6.S7, 7.S10: the grade of a certificate. The entries that count are the law's at the current
--- hash; a failure among them leaves no grade; under one binding the strongest pass, across
--- bindings the weakest.
+-- hash; a failure among them, or a disagreement (D-2026-10-15-f), leaves no grade; under one
+-- binding the strongest pass, across bindings the weakest.
 counts (c : Certificate) (e : Entry) : Bool := e.law == c.law and e.cone == c.cone
 anyFailure (c : Certificate) (es : List Entry) : Bool :=
   match es { nil -> false ; cons e rest -> (counts c e and isFailure e) or anyFailure c rest }
@@ -56,8 +62,9 @@ bestUnder (b : List Drawing) (ps : List (List Drawing * Grade)) (g : Grade) : Gr
 weakestOfBests (all ps : List (List Drawing * Grade)) (acc : Maybe Grade) : Maybe Grade :=
   match ps { nil -> acc ; cons (b, g) rest ->
     weakestOfBests all rest (just (match acc { nothing -> bestUnder b all g ; just h -> weakest h (bestUnder b all g) })) }
+disputed (c : Certificate) : Bool := match disputeAt identity c.law c.cone c.entries { just p -> true ; nothing -> false }
 grade (c : Certificate) : Maybe Grade :=
-  if anyFailure c c.entries then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
+  if anyFailure c c.entries or disputed c then nothing else weakestOfBests (passes c c.entries) (passes c c.entries) nothing
 
 -- 6.S15, 7.S15: an entry serves a demand when it is the law's at the current hash, passed, at or
 -- above the cutoff, and its reach covers what the run gives
@@ -66,17 +73,20 @@ serves (d : Demand) (e : Entry) : Bool :=
   e.law == d.law and e.cone == d.cone and e.outcome == Passed and atLeast d.accepts e.grade
     and coversAll contains e.reach d.given
 
--- 6.S14, 7.S15, 12.S17, 6.S3: what a cone is refused, each with its state; a law with a failure
--- at the current hash is refused whatever serves, with the latest such failure as its state
+-- 6.S14, 7.S15, 12.S17, 6.S3: what a cone is refused, each with its state; a law with a
+-- disagreement at the current hash is refused whatever serves, with the first the store holds
+-- (D-2026-10-15-f); else a law with a failure there, with the latest such failure as its state
 stateOf (d : Demand) (es : List Entry) : State :=
   match latestAt d.law d.cone es { just e -> Current e.outcome ;
     nothing -> (match latestOf d.law es { just f -> Stale f.cone ; nothing -> Uncertified }) }
 refuseLaws (es : List Entry) (n : String) (ds : List Demand) : List Refusal :=
   match ds { nil -> nil ; cons d rest ->
-    match failureAt d.law d.cone es {
-      just f -> cons { name := n, law := just d.law, state := Current f.outcome } (refuseLaws es n rest) ;
-      nothing -> if anyServes serves d es then refuseLaws es n rest
-                 else cons { name := n, law := just d.law, state := stateOf d es } (refuseLaws es n rest) } }
+    match disputeAt identity d.law d.cone es {
+      just (a, b) -> cons { name := n, law := just d.law, state := Disagrees a b } (refuseLaws es n rest) ;
+      nothing -> (match failureAt d.law d.cone es {
+        just f -> cons { name := n, law := just d.law, state := Current f.outcome } (refuseLaws es n rest) ;
+        nothing -> if anyServes serves d es then refuseLaws es n rest
+                   else cons { name := n, law := just d.law, state := stateOf d es } (refuseLaws es n rest) }) } }
 refuseName (es : List Entry) (c : ConeName) : List Refusal :=
   if c.provisional then [{ name := c.name, law := nothing, state := Provisional }] else refuseLaws es c.name c.laws
 refuse (es : List Entry) (cs : List ConeName) : List Refusal :=
@@ -105,6 +115,9 @@ certifying : Certifying := {
   identity := identity, stale := stale, grade := grade, contains := contains, serves := serves,
   refuse := refuse, transport := transport,
 }
+
+-- D-2026-10-15-f, D-2026-10-15-g: the store law's reference, the theory's own `recordEntry`
+recording : Recording certifying := { record := fn e es { recordEntry certifying e es } }
 
 -- 6.S8: the hash of a cone, the host's
 hashing : ConeHashing alpha canonical := {

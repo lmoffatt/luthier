@@ -19,6 +19,15 @@
 -- its cases (C6); "the latest in front" in the store's predicate (C11); the roles of `Value` (C9).
 -- Left for Luciano: `record` on a known identity (C3) and budgets in the identity (C4).
 --
+-- Draft 2, 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/code-follows-2026-10-16/prompt-replay-fuel.md (step 3c), answering C3 and C4 as
+-- Luciano decided them: an exact replay is absorbed when it agrees and kept beside the old entry
+-- when it disagrees, which refuses the law until resolved (D-2026-10-15-f); a not-run for lack of
+-- fuel is never written, and fuel stays out of the identity (D-2026-10-15-g). New: `agree`,
+-- `disputes`, `disputeAt`, `disputedAt`, `outOfFuel` (§1); `record` on a known identity (§1); the
+-- state `Disagrees` and its refusal (§3); the store law `Recording` (§5); the grade's fold laws and
+-- the refusal's laws read a disagreement as they read a failure (§5).
+--
 -- What this file states. 6.S16 asks for a theory over a cost type `C`. D-2026-10-14-c says first
 -- everything Boolean, so here a law passes or does not, the bound of an entry is `lift` of its
 -- outcome (a pass is `0`, a failure `top`, refused by every cutoff, 6.S5), and the evidence cutoff
@@ -35,7 +44,7 @@
 --      identity and a path, no evidence for free (6.S7, 7.S10, 6.S11, 6.S12, 6.S13).           done
 --   §3 What a run requires: `serves`, the refusal, `Certified` (6.S14, 6.S15, 7.S15, 12.S17).  done
 --   §4 The hash of a cone (6.S8, 12.S11, 3.S34).                                                 done
---   §5 The theory `Certifying`, the laws of §1 to §3 claimed.                                    done
+--   §5 The theory `Certifying`, the laws of §1 to §3 claimed; the store law `Recording`.         done
 
 import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed NotRun Tested Holds Rates
 import "test.lth" Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade gradeRank weakest grade coverageOf
@@ -95,8 +104,17 @@ Outcome : U := data {
   Unresolved : Rates -> Outcome ;
 }
 
+-- [D-2026-10-15-g] A run cut by its fuel is `NotRunFor fuelSpent` (what case it stopped at and
+-- the fuel it was given go in the line it prints, not in the outcome). It is never written to a
+-- store (`record`), so the next run of the line runs it again: fuel only cuts a run, and a pass is
+-- the same pass at any larger fuel. Recording the fuel a pass used and the fuel an exhaustion was
+-- given waits for the costs (D-2026-10-15-g, later).
+fuelSpent : String := "fuel spent"
+outOfFuel (o : Outcome) : Bool := o == NotRunFor fuelSpent
+
 -- The identity of an outcome: 7.S9's identity of an entry (the law, the hash of its cone, the
--- binding expanded), with the seed and `n` of 7.S13, under which a test is deterministic.
+-- binding expanded), with the seed and `n` of 7.S13, under which a test is deterministic. The fuel
+-- given is not part of it (D-2026-10-15-g), nor of the entry.
 Identity = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat }
 
 -- An entry: its identity; what it holds, the budgets (7.S8), the reach of each parameter (7.S10),
@@ -115,17 +133,28 @@ Entry = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases 
 -- current hash. [proposed] A passed entry that does not serve (a reach that misses the run's
 -- values, a grade below the cutoff) is listed as `Current Passed`; the refusal says it does not
 -- serve. Roles: `RefusalSaysWhy`, `ACurrentFailureIsRefused`, `ProvisionalIsRefused` (§5).
+-- [D-2026-10-15-f] `Disagrees e f`: an exact replay `e` at the current hash disagreed with the
+-- entry `f` of its identity before it, and no later run has agreed with `e`; the law is refused
+-- whatever its other entries, naming both. Role: `ADisagreementIsRefused` (§5).
 State : U := data {
   Current : Outcome -> State ;
   Stale : Hash -> State ;
   Uncertified : State ;
   Provisional : State ;
+  Disagrees : Entry -> Entry -> State ;
 }
 
--- The store: the entries, the latest in front (6.S8). Two entries with the same identity have the
--- same outcome (7.S13, determinism), and an entry has a grade exactly when it passed (6.S3: only a
--- pass certifies; test.lth: a refutation or nothing settled has no grade). These are the predicate
--- of the type, so every store built owes them: the tester's, and one read from `x.cert.json`.
+-- The store: the entries, the latest in front (6.S8). An entry has a grade exactly when it passed
+-- (6.S3: only a pass certifies; test.lth: a refutation or nothing settled has no grade). This is
+-- the predicate of the type, so every store built owes it: the tester's, and one read from
+-- `x.cert.json`. [D-2026-10-15-f] Two entries with the same identity agree (7.S13, determinism: a
+-- test is deterministic given its identity), unless something outside the identity changed the
+-- result between two runs: then the store keeps both, the replay in front, and that disagreement
+-- refuses the law (§3) until a later run agrees with the latest entry (a later agreeing pair) or
+-- one of the two is removed from the store by hand (the repository's history keeps it). So
+-- `determined` (one outcome per identity: the latest two entries of each identity agree) is no
+-- longer the store's predicate: a store where it fails is a store that records a disagreement,
+-- which refuses.
 -- [D-2026-10-15-d, L14.4: the hole marked] The store is read here and written by `record` below,
 -- but `x.cert.json` (and run.py's `x.results.json`) are read and written by the host, in Python,
 -- outside the token `W`: no action of this file touches them, and a store changed by a third party
@@ -139,11 +168,34 @@ State : U := data {
 -- cases give `0` at those cases and `⊤` elsewhere); and no entry is older than one behind it.
 -- [proposed, C14 of the round-1 review] Determinism covers the grade too: one identity, one
 -- outcome and one grade (the grade is read from the evidence a deterministic run gives, 6.S7).
-agreesWith (k : Certifying) (e : Entry) (es : List Entry) : Bool :=
-  match es { nil -> true ; cons f rest ->
-    (not (k.identity e == k.identity f) or (e.outcome == f.outcome and e.grade == f.grade)) and agreesWith k e rest }
-determined (k : Certifying) (es : List Entry) : Bool :=
-  match es { nil -> true ; cons e rest -> agreesWith k e rest and determined k rest }
+agree (e f : Entry) : Bool := e.outcome == f.outcome and e.grade == f.grade
+-- [D-2026-10-15-f] The disagreements a store records: for each identity, its latest entry and the
+-- one of the same identity behind it, when the two disagree. Each function takes the identity of
+-- an entry as an argument (a model's `identity`, `k.identity` in the laws), so that a model can
+-- read its store with them.
+latestWith (ident : Entry -> Identity) (i : Identity) (es : List Entry) : Maybe Entry :=
+  match es { nil -> nothing ; cons e rest -> if ident e == i then just e else latestWith ident i rest }
+behind (ident : Entry -> Identity) (i : Identity) (es : List Entry) : List Entry :=
+  match es { nil -> nil ; cons e rest -> if ident e == i then rest else behind ident i rest }
+seenIdentity (i : Identity) (is : List Identity) : Bool := match is { nil -> false ; cons j rest -> i == j or seenIdentity i rest }
+disputes (ident : Entry -> Identity) (seen : List Identity) (es : List Entry) : List (Entry * Entry) :=
+  match es { nil -> nil ; cons e rest ->
+    if seenIdentity (ident e) seen then disputes ident seen rest
+    else (match latestWith ident (ident e) rest {
+            just f -> if agree e f then disputes ident (cons (ident e) seen) rest
+                      else cons (e, f) (disputes ident (cons (ident e) seen) rest) ;
+            nothing -> disputes ident (cons (ident e) seen) rest }) }
+-- whether the identity's latest two entries disagree
+disputedAt (ident : Entry -> Identity) (i : Identity) (es : List Entry) : Bool :=
+  match latestWith ident i es { nothing -> false ; just e ->
+    (match latestWith ident i (behind ident i es) { nothing -> false ; just f -> not (agree e f) }) }
+-- the first disagreement among a law's entries at a hash (the refusal names it)
+entriesAt (l : String) (h : Hash) (es : List Entry) : List Entry :=
+  match es { nil -> nil ; cons e rest -> if e.law == l and e.cone == h then cons e (entriesAt l h rest) else entriesAt l h rest }
+disputeAt (ident : Entry -> Identity) (l : String) (h : Hash) (es : List Entry) : Maybe (Entry * Entry) :=
+  match disputes ident nil (entriesAt l h es) { nil -> nothing ; cons p rest -> just p }
+-- one outcome per identity: no disagreement recorded
+determined (k : Certifying) (es : List Entry) : Bool := match disputes k.identity nil es { nil -> true ; cons p rest -> false }
 gradedAsOutcome (es : List Entry) : Bool :=
   match es { nil -> true ; cons e rest -> ((e.outcome == Passed) == not (e.grade == nothing)) and gradedAsOutcome rest }
 -- the grades a pass's evidence admits: test.lth's `grade` of a confirming or a supporting verdict
@@ -175,21 +227,28 @@ notBefore : String -> String -> Bool
 latestInFront (es : List Entry) : Bool :=
   match es { nil -> true ; cons e rest ->
     (match rest { nil -> true ; cons f more -> notBefore e.date f.date }) and latestInFront rest }
-Store (k : Certifying) : U := { es : List Entry | determined k es and gradedAsOutcome es and heldAsRun es and latestInFront es }
+Store (k : Certifying) : U := { es : List Entry | gradedAsOutcome es and heldAsRun es and latestInFront es }
 
 -- A known outcome is not recomputed (7.S13): the latest entry with the identity asked, whatever
 -- its outcome. The tester asks before it runs; `--deep` runs again, and a new seed or `n` is a
--- new identity.
-known (k : Certifying) (i : Identity) (es : List Entry) : Maybe Entry :=
-  match es { nil -> nothing ; cons e rest -> if k.identity e == i then just e else known k i rest }
+-- new identity. A not-run for lack of fuel is never known, since it is never written.
+known (k : Certifying) (i : Identity) (es : List Entry) : Maybe Entry := latestWith k.identity i es
 
--- Recording never edits an entry (6.S8): a new entry goes in front and the old ones stay. Writing a
--- certificate is idempotent (6.S15) [proposed: an entry whose identity the store has leaves the
--- store as it is, since 7.S13 says its outcome is the one kept; so `--deep` rechecks and adds
--- nothing, and a new seed adds an entry]. The write itself is the host's, outside `W` (the hole
--- marked at the store above, D-2026-10-15-d).
-record (k : Certifying) (e : Entry) (st : Store k) : Store k :=
-  match known k (k.identity e) st { just f -> st ; nothing -> cons e st }
+-- Recording never edits an entry (6.S8): a new entry goes in front and the old ones stay.
+-- [D-2026-10-15-f] Writing a certificate is idempotent (6.S15): an exact replay (an entry whose
+-- identity the store has) that agrees with the latest entry of its identity leaves the store as it
+-- is, so `--deep` rechecks and adds nothing; one that disagrees goes in front, beside the old, and
+-- the law is refused (`Disagrees`, §3); one that agrees with the latest of an identity in
+-- disagreement goes in front too, and the latest two then agree, which settles it. A new seed is
+-- a new identity and adds an entry. [D-2026-10-15-g] A not-run for lack of fuel is never written.
+-- The write itself is the host's, outside `W` (the hole marked at the store above,
+-- D-2026-10-15-d). The law of `record` is `Recording` (§5), of which this is the reference.
+recordEntry (k : Certifying) (e : Entry) (es : List Entry) : List Entry :=
+  if outOfFuel e.outcome then es
+  else (match known k (k.identity e) es {
+          just f -> if agree e f and not (disputedAt k.identity (k.identity e) es) then es else cons e es ;
+          nothing -> cons e es })
+record (k : Certifying) (e : Entry) (st : Store k) : Store k := recordEntry k e st
 
 -- ---------------------------------------------------------------- §2 The certificate
 
@@ -197,7 +256,8 @@ record (k : Certifying) (e : Entry) (st : Store k) : Store k :=
 -- entries. What it is certified on and its grade are read from the entries, not stored apart
 -- (6.S7): only the entries of the law at the current hash count (12.S11). [proposed] A failure at
 -- the current hash, under any binding, refutes the law, and the certificate has no grade (6.S3: a
--- definition fails when one law fails); otherwise, under one binding the entries add evidence, so
+-- definition fails when one law fails), and so does a disagreement recorded there (D-2026-10-15-f,
+-- `disputed` below); otherwise, under one binding the entries add evidence, so
 -- the binding's grade is the strongest of its passes (6.S13: a better grade comes from a new
 -- check), and across bindings the grade is the weakest (7.S10: the grade is summarized by the
 -- weakest). The cost form of the grade (an evidence cost in `C`, 6.S7) is the hole above.
@@ -219,6 +279,11 @@ isFailure (o : Outcome) : Bool := match o { Failed x -> true ; _ -> false }
 failureAt (l : String) (h : Hash) (es : List Entry) : Maybe Entry :=
   match es { nil -> nothing ; cons e rest -> if e.law == l and e.cone == h and isFailure e.outcome then just e else failureAt l h rest }
 refuted (c : Certificate) : Bool := match failureAt c.law c.cone c.entries { just f -> true ; nothing -> false }
+-- [D-2026-10-15-f] a disagreement among its entries at its hash leaves a certificate with no
+-- grade, as a failure does: the law is refused until the disagreement is resolved
+disputed (k : Certifying) (c : Certificate) : Bool :=
+  match disputeAt k.identity c.law c.cone c.entries { just p -> true ; nothing -> false }
+standsOnNothing (k : Certifying) (c : Certificate) : Bool := refuted c or disputed k c
 orWeakest (m n : Maybe Grade) : Maybe Grade :=
   match m { nothing -> n ; just g -> (match n { nothing -> m ; just h -> just (weakest g h) }) }
 orStronger (g : Grade) (m : Maybe Grade) : Grade := match m { nothing -> g ; just h -> stronger g h }
@@ -312,7 +377,8 @@ appendEntries (xs ys : List Entry) : List Entry := match xs { nil -> ys ; cons x
 -- What a run requires (7.S15, 12.S17, 6.S14): a cone the store refuses nothing of. `run` starts
 -- only on a value of this type, and otherwise lists each refusal with its state; there is no flag
 -- that opts out (D-2026-10-12-y). A cone one of whose laws has a failure at the current hash is
--- never of this type, whatever entry serves it (`ACurrentFailureIsRefused`). `test` demands
+-- never of this type, whatever entry serves it (`ACurrentFailureIsRefused`), nor one of whose laws
+-- has a disagreement recorded there (`ADisagreementIsRefused`, D-2026-10-15-f). `test` demands
 -- certificates without values (6.S14), which this type does not cover.
 Certified (k : Certifying) (es : List Entry) : U := { cone : List ConeName | k.refuse es cone == nil }
 
@@ -399,28 +465,33 @@ AFailureRefutes (k : Certifying) (c : Certificate) (f : CurrentFailure c) (ps : 
 OnlyCurrentEntriesCount (k : Certifying) (c : Certificate) (ps : List (CurrentPass c)) (e : Entry) (s : EntryOfLaw c.law) : Bool :=
   ((e.law == c.law and not (k.stale c.cone e)) or k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps))
     and (not (k.stale c.cone s) or k.grade (withEntry (withPasses c ps) s) == k.grade (withPasses c ps))
+-- [D-2026-10-15-f] unless it is a replay that starts a disagreement (it disagrees with the latest
+-- entry of its identity) or settles one (it agrees with the latest of an identity in disagreement)
 NotRunAddsNothing (k : Certifying) (c : Certificate) (ps : List (CurrentPass c)) (e : EntryOf c) : Bool :=
-  match e.outcome {
-    Failed x -> true ;
-    Passed -> not (e.grade == nothing) or k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) ;
-    NotRunFor r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) ;
-    Unresolved r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) }
+  startsOrSettles k (withPasses c ps) e
+    or (match e.outcome {
+          Failed x -> true ;
+          Passed -> not (e.grade == nothing) or k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) ;
+          NotRunFor r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) ;
+          Unresolved r -> k.grade (withEntry (withPasses c ps) e) == k.grade (withPasses c ps) })
+startsOrSettles (k : Certifying) (c : Certificate) (e : Entry) : Bool :=
+  disputedAt k.identity (k.identity e) c.entries or disputedAt k.identity (k.identity e) (cons e c.entries)
 -- 7.S10 [proposed reading of §2], as one step of the fold, so that with the laws above the grade of
 -- every certificate is fixed, by induction on its entries (C1 of the round-1 review: the earlier
 -- pair fixed it only for two passes added to a certificate with no entry). A pass `p` at the
--- current hash, added where no failure is: under its binding, the stronger of its grade and that
+-- current hash, added where no failure and no disagreement is (D-2026-10-15-f): under its binding, the stronger of its grade and that
 -- binding's grade so far; overall, the weakest of that and the grade of the other bindings. The
 -- certificate is drawn with passes put under `p`'s binding (`ps`) and passes under bindings drawn
 -- (`qs`) in front of it, so that both cases are met; with `ps` and `qs` empty it is any certificate.
 pool (c : Certificate) (p : CurrentPass c) (ps qs : List (CurrentPass c)) : Certificate :=
   prepend (passEntries c qs) (prepend (underAll p.binding (passEntries c ps)) c)
 StrongestUnderOneBinding (k : Certifying) (c : Certificate) (ps : List (CurrentPass c)) (p : CurrentPass c) : Bool :=
-  refuted (pool c p ps nil)
+  standsOnNothing k (withEntry (pool c p ps nil) p)
     or (match p.grade { nothing -> true ; just g ->
           k.grade (withEntry (only p.binding (pool c p ps nil)) p)
             == just (orStronger g (k.grade (only p.binding (pool c p ps nil)))) })
 WeakestAcrossBindings (k : Certifying) (c : Certificate) (ps qs : List (CurrentPass c)) (p : CurrentPass c) : Bool :=
-  refuted (pool c p ps qs)
+  standsOnNothing k (withEntry (pool c p ps qs) p)
     or k.grade (withEntry (pool c p ps qs) p)
          == orWeakest (k.grade (without p.binding (pool c p ps qs)))
                       (k.grade (withEntry (only p.binding (pool c p ps qs)) p))
@@ -482,28 +553,43 @@ ServesIsMonotoneInTheCutoff (k : Certifying) (d : Demand) (e : EntryFor d) (g : 
 -- 6.S14, 12.S17: a provisional name is refused whole [proposed: its laws not listed]
 ProvisionalIsRefused (k : Certifying) (es : List Entry) (n : String) (ds : List Demand) : Bool :=
   k.refuse es [{ name := n, provisional := true, laws := ds }] == [{ name := n, law := nothing, state := Provisional }]
--- 7.S15, 12.S17, 6.S3 [proposed, C5 of the round-1 review]: a failure at the current hash refutes
--- the law (§2), so a law with one is refused whatever serves, listed with the latest such failure;
--- otherwise a law no entry serves is refused, listed with its state: the latest entry at the
+-- 7.S15, 12.S17, 6.S3 [proposed, C5 of the round-1 review]: a disagreement at the current hash
+-- (D-2026-10-15-f) refuses the law whatever serves, listed with the first the store holds, its two
+-- entries named; else a failure at the current hash refutes the law (§2), so a law with one is
+-- refused whatever serves, listed with the latest such failure; otherwise a law no entry serves is refused, listed with its state: the latest entry at the
 -- current hash, stale when there is none there, uncertified when there is none at all. The store is
 -- drawn with entries of the law at the current hash (`xs`) and at drawn hashes (`ys`) in front, so
 -- that each branch is met.
 RefusalSaysWhy (k : Certifying) (n : String) (d : Demand) (xs : List (EntryFor d)) (ys : List (EntryOfLaw d.law)) (es : List Entry) : Bool :=
   k.refuse (drawnStore d xs ys es) [{ name := n, provisional := false, laws := [d] }]
-    == (match failureAt d.law d.cone (drawnStore d xs ys es) {
+    == (match disputeAt k.identity d.law d.cone (drawnStore d xs ys es) {
+         just (a, b) -> [{ name := n, law := just d.law, state := Disagrees a b }] ;
+         nothing -> (match failureAt d.law d.cone (drawnStore d xs ys es) {
           just f -> [{ name := n, law := just d.law, state := Current f.outcome }] ;
           nothing -> if anyServes k.serves d (drawnStore d xs ys es) then nil
             else [{ name := n, law := just d.law,
                     state := (match latestAt d.law d.cone (drawnStore d xs ys es) { just e -> Current e.outcome ;
                                 nothing -> (match latestOf d.law (drawnStore d xs ys es) { just f -> Stale f.cone ;
-                                                                                         nothing -> Uncertified }) }) }] })
+                                                                                         nothing -> Uncertified }) }) }] }) })
 drawnStore (d : Demand) (xs : List (EntryFor d)) (ys : List (EntryOfLaw d.law)) (es : List Entry) : List Entry :=
   appendEntries (entriesFor d xs) (appendEntries (entriesOfLaw d.law ys) es)
 -- [proposed, C5 of the round-1 review] whatever serves: a store with a failure at the current hash
 -- and, in front of it, a pass made to serve the demand refuses the law, listed with the failure
+-- (unless the store records a disagreement there, which is listed first, D-2026-10-15-f)
 ACurrentFailureIsRefused (k : Certifying) (n : String) (d : Demand) (f : FailureFor d) (p : EntryFor d) (es : List Entry) : Bool :=
-  k.refuse (cons (toward d p Passed (just Proved)) (cons f es)) [{ name := n, provisional := false, laws := [d] }]
-    == [{ name := n, law := just d.law, state := Current f.outcome }]
+  not (disputeAt k.identity d.law d.cone (cons (toward d p Passed (just Proved)) (cons f es)) == nothing)
+    or k.refuse (cons (toward d p Passed (just Proved)) (cons f es)) [{ name := n, provisional := false, laws := [d] }]
+         == [{ name := n, law := just d.law, state := Current f.outcome }]
+-- [D-2026-10-15-f] A replay of an entry: its identity, with an outcome and a grade drawn. When it
+-- disagrees with the entry, put in front of it, the certificate has no grade whatever else it
+-- holds, and the law is refused whatever serves, listed with both entries (the replay first).
+replayOf (e : Entry) (o : Outcome) (g : Maybe Grade) : Entry := reshape e e.law e.reach o g
+ADisagreementRefutes (k : Certifying) (c : Certificate) (e : EntryOf c) (o : Outcome) (g : Maybe Grade) (es : List Entry) : Bool :=
+  agree (replayOf e o g) e or k.grade (withEntry (withEntry (prepend es c) e) (replayOf e o g)) == nothing
+ADisagreementIsRefused (k : Certifying) (n : String) (d : Demand) (e : EntryFor d) (o : Outcome) (g : Maybe Grade) (es : List Entry) : Bool :=
+  agree (replayOf e o g) e
+    or k.refuse (cons (replayOf e o g) (cons e es)) [{ name := n, provisional := false, laws := [d] }]
+         == [{ name := n, law := just d.law, state := Disagrees (replayOf e o g) e }]
 -- each name and each law is refused on its own, and a cone with nothing in it is refused nothing
 RefusalIsPerLaw (k : Certifying) (es : List Entry) (c : ConeName) (rest : List ConeName) (n : String) (d : Demand) (ds : List Demand) : Bool :=
   k.refuse es nil == nil
@@ -518,3 +604,36 @@ Certifying := IdentityIsTheKey & StaleIsAnotherHash & NoEntryNoGrade & AFailureR
   & TransportOnTheIntersection & NoEvidenceForFree & PathNeverRaises & ReachesAsSets & StaleCertifiesNothing
   & OnlyAPassServes & CertifiesOnlyUnderItsBinding & ServesAtTheCutoff & ACoveringPassServes
   & ServesIsMonotoneInTheCutoff & ProvisionalIsRefused & RefusalSaysWhy & ACurrentFailureIsRefused & RefusalIsPerLaw
+  & ADisagreementRefutes & ADisagreementIsRefused
+
+-- The store law (D-2026-10-15-f, D-2026-10-15-g; 6.S8, 6.S15, 7.S13): how an entry is written to a
+-- store. A model is a way of writing one; `recordEntry` (§1) is the reference, certification_model's
+-- `recording`, and certify.py's `record` its specimen. The laws are read against the latest entry
+-- of the new entry's identity in the store (`known`).
+Recording (k : Certifying) : { record : Entry -> List Entry -> List Entry }
+-- a new identity goes in front
+ANewIdentityGoesInFront (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
+  outOfFuel e.outcome or not (known k (k.identity e) es == nothing) or r.record e es == cons e es
+-- an exact replay that agrees with the latest entry of its identity, where no disagreement stands,
+-- writes nothing (6.S15: writing a certificate is idempotent)
+AnAgreeingReplayAddsNothing (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
+  match known k (k.identity e) es { nothing -> true ;
+    just f -> not (agree e f) or disputedAt k.identity (k.identity e) es or r.record e es == es }
+-- one that disagrees is written beside it, in front, so the store shows the disagreement (and §3
+-- refuses the law)
+ADisagreeingReplayIsKept (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
+  outOfFuel e.outcome
+    or (match known k (k.identity e) es { nothing -> true ;
+          just f -> agree e f or (r.record e es == cons e es and disputedAt k.identity (k.identity e) (r.record e es)) })
+-- one that agrees with the latest entry of an identity in disagreement is written too, and settles
+-- it: a later agreeing pair
+AnAgreeingPairSettles (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
+  outOfFuel e.outcome
+    or (match known k (k.identity e) es { nothing -> true ;
+          just f -> not (agree e f) or not (disputedAt k.identity (k.identity e) es)
+                      or (r.record e es == cons e es and not (disputedAt k.identity (k.identity e) (r.record e es))) })
+-- a not-run for lack of fuel is never written (D-2026-10-15-g)
+AnExhaustionIsNeverStored (k : Certifying) (r : Recording k) (e : Entry) (es : List Entry) : Bool :=
+  not (outOfFuel e.outcome) or r.record e es == es
+Recording (k : Certifying) := ANewIdentityGoesInFront k & AnAgreeingReplayAddsNothing k & ADisagreeingReplayIsKept k
+  & AnAgreeingPairSettles k & AnExhaustionIsNeverStored k

@@ -1,0 +1,59 @@
+-- tests/tester/certification_laws.lut: the store law of certification.lth (`Recording`, §5) on
+-- certification_model.lut's `recording`, and the two laws of `Certifying` on a disagreement
+-- (`ADisagreementRefutes`, `ADisagreementIsRefused`) on its `certifying`, as listed cases. Written
+-- 2026-10-16 by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- code-follows-2026-10-16/prompt-replay-fuel.md (D-2026-10-15-f, D-2026-10-15-g). The entries are
+-- of one law at one hash: a pass and a failure of one identity (seed 1), so that one replays the
+-- other and disagrees with it; a pass of another seed; a not-run for lack of fuel and one for
+-- another reason, of the first identity; and a pass of another law. The stores: empty, one entry,
+-- two identities, a disagreement (the failure in front of the pass), a disagreement settled by a
+-- later agreeing pair, and another law's. Seed 20261016 (the censuses are listed; the seed only
+-- names the run).
+
+import "test.lth" test ExhaustiveMode Grade Proved Cases defaultBudgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited
+import "certification.lth" Certifying Recording Entry Certificate Demand Outcome Passed Failed NotRunFor fuelSpent
+  ANewIdentityGoesInFront AnAgreeingReplayAddsNothing ADisagreeingReplayIsKept AnAgreeingPairSettles
+  AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
+import "certification_model.lut" certifying recording
+
+entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-16", interpreter := "listed", hosts := nil }
+passOne : Entry := entry "L" 1 (just Cases) Passed
+failOne : Entry := entry "L" 1 nothing (Failed "x = 1")
+passTwo : Entry := entry "L" 2 (just Cases) Passed
+fuelOne : Entry := entry "L" 1 nothing (NotRunFor fuelSpent)
+notRunOne : Entry := entry "L" 1 nothing (NotRunFor "no generator")
+passOther : Entry := entry "M" 1 (just Cases) Passed
+entries : List Entry := [passOne, failOne, passTwo, fuelOne, notRunOne, passOther]
+stores : List (List Entry) := [nil, [passOne], [passTwo, passOne], [failOne, passOne], [failOne, failOne, passOne],
+  [passOther]]
+
+models : List Certifying := [certifying]
+recordings : List (Recording certifying) := [recording]
+
+-- a disagreement: the certificates and demands of the law at its hash, the entries of the law
+-- there, the outcomes and grades a replay is given
+certificates : List Certificate := [{ law := "L", cone := "sha256:cccc", entries := nil },
+  { law := "L", cone := "sha256:cccc", entries := [passTwo] }]
+ofTheLaw : List Entry := [passOne, failOne, passTwo, notRunOne]
+outcomes : List Outcome := [Passed, Failed "x = 2", NotRunFor "no generator"]
+grades : List (Maybe Grade) := [nothing, just Cases, just Proved]
+behindStores : List (List Entry) := [nil, [passTwo]]
+demands : List Demand := [{ law := "L", cone := "sha256:cccc", given := nil, accepts := Cases }]
+names : List String := ["n"]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+recordBindings : List Binding := [bind "k" "models", bind "r" "recordings", bind "e" "entries", bind "es" "stores"]
+
+test "ANewIdentityGoesInFront" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
+test "AnAgreeingReplayAddsNothing" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
+test "ADisagreeingReplayIsKept" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
+test "AnAgreeingPairSettles" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
+test "AnExhaustionIsNeverStored" ExhaustiveMode (seed <- 20261016) (whereBindings <- recordBindings)
+test "ADisagreementRefutes" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "c" "certificates", bind "e" "ofTheLaw", bind "o" "outcomes", bind "g" "grades", bind "es" "behindStores"])
+test "ADisagreementIsRefused" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "n" "names", bind "d" "demands", bind "e" "ofTheLaw", bind "o" "outcomes", bind "g" "grades", bind "es" "behindStores"])
