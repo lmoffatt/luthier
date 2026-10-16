@@ -107,3 +107,94 @@ Two test programs still keep a store because they state laws: `fit_laws.lut` (th
 `optimization.lth`, the layout laws into `examples/sonolocalizacion/distance_graph.lut`), so that
 no test program keeps one? I'd do it: it costs two small edits and the store rule then has no
 exception.
+
+## Follow-up (the coordinator's four items, 2026-10-16)
+
+### 1. No test program states a law any longer
+
+- The three `...OnQuadratic` wrappers moved from `tests/tester/fit_laws.lut` to `optimization.lth`.
+  `MaximizersAgree` went to `belief.lth`, since it's a law about `Maximizer`, which `belief.lth`
+  states.
+- `nativeLM` moved to `session_a.lut`. Left in `fit_laws.lut`, it would have made that test
+  program the claim of `MaximizersAgree`'s control.
+- `LayoutFromUndoesTo` and `LayoutToUndoesFrom` went to `examples/sonolocalizacion/positions.lut`,
+  where `layout` is defined (L2.8). The instruction said `distance_graph.lut`, which I had
+  suggested by mistake: that file doesn't define the layout.
+- None of the moved laws joins its theory's conjunction (`LMStep :=`, `Maximizer :=`), so what a
+  run demands is unchanged.
+- `tests/tester/session_a.lut` moved to `examples/sonolocalizacion/session_a.lut`. It's a file of
+  session A's models with no test lines, and its store would have been one more `*.cert.json`
+  beside a `tests/tester/*.lut`. Its ten importers follow the new path.
+- The moves left every cone hash as it was. `luthier certify` on `fit_laws`, `fit_controls`,
+  `sonolocalizacion_laws` and `sonolocalizacion_controls` gave `0 lines ran` and every line known
+  (11, 6, 6, 6), with no law reported uncontrolled.
+
+Commits: a0de6db (the move of `session_a.lut`), b92069f (the laws).
+
+### 2. The second fold
+
+`scripts/refold_claim_stores.py --write` at 3f37bcd went over every store in `src/luthier/lib`,
+`examples` and `tests/tester`. It assigns each entry its claim through the current lines of every
+test program, the same tiers as the first fold, and in tier 4 it uses the program that sees the
+entry's censuses.
+
+- **Before:** 567 entries in 27 stores, 469 identities. That's 98 copies, the 61 identities that
+  sat in more than one store.
+- **After:** 468 entries in 26 stores, one per identity. One more identity, a copy of
+  `UniformAtLevel` in `probability_model.cert.json`, was dropped because the archive of removed
+  laws already holds it. Lost: 0.
+- **Moved with their claims:** `fit_laws.cert.json` and `sonolocalizacion_laws.cert.json` (4 and
+  6 entries) are gone. Their entries went to `optimization.cert.json`, `session_a.cert.json` and
+  the new `positions.cert.json`.
+- **Left in place:** the 7 entries a run wrote at a first action (`FirstAction`, 10.S10) stay where
+  the run put them.
+- No `*.cert.json` is left beside any `tests/tester/*.lut`.
+
+Commits: 3f37bcd (the script), cd01b1f (its write).
+
+### 3. The spec
+
+I applied the wording proposed above to 12.S10, 12.S11 and 6.S6. Two stale sentences changed:
+
+- 12.S17 now ends "Today `run` refuses by default, and `--require-certified` no longer exists."
+  The flag is gone from `cli.py`.
+- 10.S7 now ends "world.lth's `HostChangesOnlyDeclared` states it, and `run` checks it at an
+  action's first application (10.S10)."
+
+Statuses are unchanged. `python3 scripts/check_spec.py` gives the single finding at
+`03-kernel.md:190`. Commit: 06b7c0b.
+
+### 4. .gitignore
+
+The `*.cert.json` line wasn't needed any more, and it did harm: the claims' stores in
+`examples/sonolocalizacion/` (`distances`, `distance_graph`, `session_a`, `positions`) were
+untracked. I removed it, along with its negation for the library. `*.cert.json.lock` stays
+ignored.
+
+Two sets of old stores became visible as a result, and I archived and tracked them:
+
+- the four v0.1 stores left in `examples/` (`cauchy`, `exp`, `kernel_finite`, `z7ring`), which
+  had no program beside them. They're now in `record/archive/stores-2026-10-16/v0.1-examples/`.
+- the stores under `record/archive/examples-2026-10-04/`, untracked until now.
+
+The test suite only writes copies of the library's stores (`LUTHIER_LIBRARY_STORES`), and after a
+full run `git status` showed no store changed. A `luthier certify` or `luthier run` now leaves its
+writes to the stores in `examples/` visible in `git status`, as it already did for the library's.
+Commit: 340214b.
+
+### Suite
+
+`python -m pytest -q`: 741 passed, 5 skipped, 9 xfailed. That includes `tests/test_check_spec.py`,
+which passes since the other agent's ada16e0.
+
+### Decisions taken on my own in the follow-up
+
+1. `session_a.lut` moved to `examples/sonolocalizacion/`.
+2. `nativeLM` moved to `session_a.lut`.
+3. `MaximizersAgree` went to `belief.lth` and the layout laws to `positions.lut`. Both differ from
+   the instruction, and the reason is the same: L2.8 puts a law with the definition it is about.
+4. The moved laws stay out of their theories' conjunctions.
+5. The refold leaves first-action entries in place, drops a copy the archive already holds, and in
+   tier 4 picks the program that sees the entry's censuses.
+6. Old stores in `examples/` and `record/archive/examples-2026-10-04/` are archived and tracked
+   (P3).
