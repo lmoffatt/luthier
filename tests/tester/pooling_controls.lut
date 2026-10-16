@@ -1,0 +1,53 @@
+-- tests/tester/pooling_controls.lut: the controls of the laws tests/tester/pooling_laws.lut
+-- certifies (7.S19 as D-2026-10-15-a generalized it, L9.14). Each line is the law's line written
+-- `(control <- true)`, with the model replaced by one broken on purpose, and is expected to be
+-- refuted. Written 2026-10-16 by Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/code-follows-2026-10-16/prompt-pool-seeds.md (D-2026-10-16-g). The broken models: a
+-- union that counts every entry, so a replay twice; and one that counts only the latest stretch,
+-- so a new seed adds nothing. The entries and censuses are pooling_laws.lut's.
+
+import "test.lth" test ExhaustiveMode Grade Cases Sampled defaultBudgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited Points Drawn
+import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Pooling Drawing
+  stretchesUnder TheUnionIsMonotone AReplayIsNotANewStretch
+import "certification_model.lut" certifying
+
+drawn (s : Int) (n : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := n, budgets := defaultBudgets, reach := nil,
+    evidence := Points Bool nil (Drawn s), grade := g, outcome := o, date := "2026-10-16", interpreter := "listed",
+    hosts := nil }
+listed (s : Int) : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := 4, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := just Cases, outcome := Passed, date := "2026-10-16", interpreter := "listed",
+    hosts := nil }
+one : Entry := drawn 1 100 (just Sampled) Passed
+two : Entry := drawn 2 100 (just Sampled) Passed
+three : Entry := drawn 3 50 (just Sampled) Passed
+oneLarger : Entry := drawn 1 200 (just Sampled) Passed
+failure : Entry := drawn 4 100 nothing (Failed "x = 1")
+notRun : Entry := drawn 5 100 nothing (NotRunFor "no generator")
+
+-- a union that sums every stretch's size, a replay counted again
+sumSizes (ps : List (Maybe Int * Nat)) : Nat := match ps { nil -> 0 ; cons (k, n) rest -> n + sumSizes rest }
+everyEntry (c : Certificate) (b : List Drawing) : Nat := sumSizes (stretchesUnder c.law c.cone b c.entries)
+counting : Pooling certifying := { pooled := everyEntry }
+-- a union that counts the latest stretch only
+firstSize (ps : List (Maybe Int * Nat)) : Nat := match ps { nil -> 0 ; cons (k, n) rest -> n }
+latestOnly (c : Certificate) (b : List Drawing) : Nat := firstSize (stretchesUnder c.law c.cone b c.entries)
+forgetting : Pooling certifying := { pooled := latestOnly }
+
+models : List Certifying := [certifying]
+countingModels : List (Pooling certifying) := [counting]
+forgettingModels : List (Pooling certifying) := [forgetting]
+cert (es : List Entry) : Certificate := { law := "L", cone := "sha256:cccc", entries := es }
+certificates : List Certificate := [cert nil, cert [one], cert [two, one], cert [failure, one], cert [listed 7]]
+passes : List Entry := [one, two, three, oneLarger, listed 8]
+ofTheLaw : List Entry := [one, two, oneLarger, failure, notRun, listed 9]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+test "TheUnionIsMonotone" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "p" "forgettingModels", bind "c" "certificates", bind "s" "passes"]) (control <- true)
+test "AReplayIsNotANewStretch" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "p" "countingModels", bind "c" "certificates", bind "e" "ofTheLaw"]) (control <- true)

@@ -10,6 +10,9 @@
 -- day, L9.15, D-2026-10-15-b (a statistical law's verdict is ternary, the grey zone resolved by
 -- Wald's sequential probability ratio test), D-2026-10-14-c (its cutoffs the demand's), L9.14
 -- (each with a control).
+-- `ratioAfter` and `spentOf` added to §4 on 2026-10-16 by Claude Opus 5.5, an agent of the
+-- coordinating session, on record/IA/code-follows-2026-10-16/prompt-pool-seeds.md (D-2026-10-16-g:
+-- a statistical law's stretches continue one sequential test).
 --
 -- Index. Status of each section: done, or todo with what it needs. A session or Codex continuing
 -- this file takes the first todo, writes it in the pattern of the done ones, checks it with
@@ -337,3 +340,20 @@ sequentialFrom (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : 
   else match draw c.initial t { (x, t2) -> sequentialFrom S T l draw c t2 (ratio * l.ratio c.delta (l.statistic x)) (spent + 1) }
 sequential (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (t : T) : StatisticalVerdict :=
   sequentialFrom S T l draw c t 1.0 0
+
+-- [D-2026-10-16-g] A stretch of the test: the test continued from the ratio its earlier stretches
+-- left, drawing from a new state (a new seed). Its verdict is `sequentialFrom` from that ratio with
+-- nothing spent yet, and `ratioAfter` is the ratio it stops at, from which the next stretch starts
+-- when this one leaves the test unresolved; from a ratio of one the stretch is the whole test,
+-- `sequential`. The stretches of a law under one binding are one test whose samples are their
+-- total, and its alpha holds over the total: the product of likelihood ratios is a martingale under
+-- the null, so the chance that it ever reaches the upper threshold is at most about alpha however
+-- many stretches continue it (Ville's inequality). [proposed] The budget bounds each stretch: it is
+-- a cutoff of the line, in its binding, and a new seed is the demand paying for one more stretch.
+ratioAfter (S T : U) (l : StatisticalLaw S) (draw : Nat -> T -> S * T) (c : Sequential) (t : T) (ratio : Float64) (spent : Nat) : Float64 :=
+  if ratio >= upperThreshold c then ratio
+  else if ratio <= lowerThreshold c then ratio
+  else if spent >= c.budget then ratio
+  else match draw c.initial t { (x, t2) -> ratioAfter S T l draw c t2 (ratio * l.ratio c.delta (l.statistic x)) (spent + 1) }
+-- the samples a verdict spent
+spentOf (v : StatisticalVerdict) : Nat := match v { Holds r -> r.spent ; Fails r -> r.spent ; Unresolved r -> r.spent }

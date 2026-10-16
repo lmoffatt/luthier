@@ -1,0 +1,45 @@
+-- tests/tester/pooling_laws.lut: the law of the union of a law's stretches (certification.lth's
+-- `Pooling`, §5) on certification_model.lut's `pooling`, as listed cases. Written 2026-10-16 by
+-- Claude Opus 5.5, an agent of the coordinating session, on record/IA/code-follows-2026-10-16/
+-- prompt-pool-seeds.md (D-2026-10-16-g). The entries are of one law at one hash under one binding:
+-- passes drawn from seeds 1, 2 and 3, one of seed 1 with a larger n, a pass over a census (not
+-- drawn, so one stretch whatever its seed), a failure and a not-run. The certificates: empty, one
+-- stretch, two stretches, and a failure in front of a stretch. Seed 20261016 (the censuses are
+-- listed; the seed only names the run).
+
+import "test.lth" test ExhaustiveMode Grade Cases Sampled defaultBudgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited Points Drawn
+import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Pooling
+  TheUnionIsMonotone AReplayIsNotANewStretch
+import "certification_model.lut" certifying pooling
+
+-- an entry of the law L at the hash cccc under no binding: drawn from its seed, or over a census
+drawn (s : Int) (n : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := n, budgets := defaultBudgets, reach := nil,
+    evidence := Points Bool nil (Drawn s), grade := g, outcome := o, date := "2026-10-16", interpreter := "listed",
+    hosts := nil }
+listed (s : Int) : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := 4, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := just Cases, outcome := Passed, date := "2026-10-16", interpreter := "listed",
+    hosts := nil }
+one : Entry := drawn 1 100 (just Sampled) Passed
+two : Entry := drawn 2 100 (just Sampled) Passed
+three : Entry := drawn 3 50 (just Sampled) Passed
+oneLarger : Entry := drawn 1 200 (just Sampled) Passed
+failure : Entry := drawn 4 100 nothing (Failed "x = 1")
+notRun : Entry := drawn 5 100 nothing (NotRunFor "no generator")
+
+models : List Certifying := [certifying]
+poolings : List (Pooling certifying) := [pooling]
+cert (es : List Entry) : Certificate := { law := "L", cone := "sha256:cccc", entries := es }
+certificates : List Certificate := [cert nil, cert [one], cert [two, one], cert [failure, one], cert [listed 7]]
+passes : List Entry := [one, two, three, oneLarger, listed 8]
+ofTheLaw : List Entry := [one, two, oneLarger, failure, notRun, listed 9]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+test "TheUnionIsMonotone" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models", bind "p" "poolings",
+  bind "c" "certificates", bind "s" "passes"])
+test "AReplayIsNotANewStretch" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
+  bind "p" "poolings", bind "c" "certificates", bind "e" "ofTheLaw"])

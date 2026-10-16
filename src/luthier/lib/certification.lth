@@ -28,6 +28,12 @@
 -- state `Disagrees` and its refusal (§3); the store law `Recording` (§5); the grade's fold laws and
 -- the refusal's laws read a disagreement as they read a failure (§5).
 --
+-- Draft 3, 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/code-follows-2026-10-16/prompt-pool-seeds.md (step 3i), after D-2026-10-16-g (item 41:
+-- a law's samples pooled across seeds, L10.3 with n the total; a statistical law continues one
+-- sequential test). New: the union of a law's stretches, `pooledCases` (§2); the theory `Pooling`
+-- with its two laws (§5). The grade's fold of §2 is unchanged: the union adds the total `n`.
+--
 -- What this file states. 6.S16 asks for a theory over a cost type `C`. D-2026-10-14-c says first
 -- everything Boolean, so here a law passes or does not, the bound of an entry is `lift` of its
 -- outcome (a pass is `0`, a failure `top`, refused by every cutoff, 6.S5), and the evidence cutoff
@@ -44,9 +50,11 @@
 --      identity and a path, no evidence for free (6.S7, 7.S10, 6.S11, 6.S12, 6.S13).           done
 --   §3 What a run requires: `serves`, the refusal, `Certified` (6.S14, 6.S15, 7.S15, 12.S17).  done
 --   §4 The hash of a cone (6.S8, 12.S11, 3.S34).                                                 done
---   §5 The theory `Certifying`, the laws of §1 to §3 claimed; the store law `Recording`.         done
+--   §5 The theory `Certifying`, the laws of §1 to §3 claimed; the store law `Recording`; the
+--      union of the stretches, `Pooling`.                                                       done
 
 import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed NotRun Tested Holds Rates
+  Points Drawn spentOf
 import "test.lth" Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade gradeRank weakest grade coverageOf
   pointCount
 import "generators.lth" Seed Budgets
@@ -295,6 +303,49 @@ under (b : List Drawing) (e : Entry) : Entry :=
   { law := e.law, cone := e.cone, binding := b, seed := e.seed, cases := e.cases, budgets := e.budgets, reach := e.reach,
     evidence := e.evidence, grade := e.grade, outcome := e.outcome, date := e.date, interpreter := e.interpreter, hosts := e.hosts }
 underAll (b : List Drawing) (es : List Entry) : List Entry := match es { nil -> nil ; cons e rest -> cons (under b e) (underAll b rest) }
+
+-- [D-2026-10-16-g] The union of a law's stretches. A stretch is one run of a law under one binding
+-- and one seed; its entry keeps its seed and its `n`. The seed names a sample of cases, and the
+-- samples of one law, cone and binding (one distribution) are one sample of their total size
+-- (L10.3: sampling a deterministic law bounds the fraction of cases where it fails, with `n` the
+-- total; one counterexample still refutes it). So the grade of a law under a binding is read on
+-- the union of its agreeing stretches: for an exact law, the sum of their cases with no failure
+-- among them (a failure refutes, above); for a statistical law, the sequential test continued
+-- across them (laws.lth §4, `ratioAfter`: each stretch starts from the ratio the earlier ones
+-- left), its samples summed. A replay of a stretch, its identity again, is not a new stretch: the
+-- store absorbs it when it agrees and keeps it beside when it disagrees (§1, `Recording`), and a
+-- disagreement in any stretch refuses the union (`disputed`). The stretches in the union are the
+-- passes at the current hash under the binding and, for a statistical law, the stretches it left
+-- unresolved, which a later one continued. [proposed] A stretch's cases are a sample of its seed
+-- only when they were drawn (a statistical test, or points over `Drawn`): every value of a type, or
+-- a census, gives the same cases whatever the seed, so all its seeds are one stretch (the key
+-- `nothing`). [proposed] Of two entries of one seed under one binding the larger `n` counts: a run
+-- of n cases from a seed is the first n of any larger run of it (7.S1: the seed threaded draw by
+-- draw). The grade is the fold above, unchanged; the union adds its `n`, whose cost form
+-- (ε̂(n, δ), 7.S11) is the hole above. The law is `Pooling` (§5).
+drawnStretch (e : Entry) : Bool :=
+  match e.evidence { Tested v -> true ; Points A pts c -> (match c { Drawn s -> true ; _ -> false }) ; _ -> false }
+stretchKey (e : Entry) : Maybe Seed := if drawnStretch e then just e.seed else nothing
+stretchSize (e : Entry) : Nat := match e.evidence { Tested v -> spentOf v ; _ -> e.cases }
+inTheUnion (e : Entry) : Bool := match e.outcome { Passed -> true ; Unresolved r -> true ; _ -> false }
+-- the stretches of a law at a hash under a binding, each by its key and its size
+stretchesUnder (l : String) (h : Hash) (b : List Drawing) (es : List Entry) : List (Maybe Seed * Nat) :=
+  match es { nil -> nil ; cons e rest ->
+    if e.law == l and e.cone == h and e.binding == b and inTheUnion e
+    then cons (stretchKey e, stretchSize e) (stretchesUnder l h b rest) else stretchesUnder l h b rest }
+hasKey (k : Maybe Seed) (ps : List (Maybe Seed * Nat)) : Bool := match ps { nil -> false ; cons (j, n) rest -> j == k or hasKey k rest }
+largestAt (k : Maybe Seed) (ps : List (Maybe Seed * Nat)) (m : Nat) : Nat :=
+  match ps { nil -> m ; cons (j, n) rest -> largestAt k rest (if j == k and m < n then n else m) }
+seenKey (k : Maybe Seed) (ks : List (Maybe Seed)) : Bool := match ks { nil -> false ; cons j rest -> j == k or seenKey k rest }
+sumOfLargest (seen : List (Maybe Seed)) (all ps : List (Maybe Seed * Nat)) : Nat :=
+  match ps { nil -> 0 ; cons (k, n) rest ->
+    if seenKey k seen then sumOfLargest seen all rest else largestAt k all 0 + sumOfLargest (cons k seen) all rest }
+-- the size of the union: each key once, at its largest
+pooledCases (c : Certificate) (b : List Drawing) : Nat :=
+  sumOfLargest nil (stretchesUnder c.law c.cone b c.entries) (stretchesUnder c.law c.cone b c.entries)
+-- one grade at most another, where `nothing` (no grade) is below every grade
+atMost (m n : Maybe Grade) : Bool :=
+  match m { nothing -> true ; just g -> (match n { nothing -> false ; just h -> gradeRank g <= gradeRank h }) }
 
 -- The older names of a grade (point, census of k, bounded, witnessed, sampled) read as the five
 -- (6.S7, decided D-2026-10-13-g; 7.S10): a point is cases with one case, a census is cases,
@@ -640,3 +691,19 @@ AnExhaustionIsNeverStored (k : Certifying) (r : Recording k) (e : Entry) (es : L
   not (outOfFuel e.outcome) or r.record e es == es
 Recording (k : Certifying) := ANewIdentityGoesInFront k & AnAgreeingReplayAddsNothing k & ADisagreeingReplayIsKept k
   & AnAgreeingPairSettles k & AnExhaustionIsNeverStored k
+
+-- The law of the union (D-2026-10-16-g; L10.3, 7.S13): how many cases the union of a law's
+-- stretches under a binding counts. A model is a way of counting them; `pooledCases` (§2) is the
+-- reference, certification_model's `pooling`, and certify.py's `pooled` its specimen.
+Pooling (k : Certifying) : { pooled : Certificate -> List Drawing -> Nat }
+-- the grade of the union is monotone in the stretches: a pass whose seed (its key) the binding has
+-- no stretch of adds its cases to the union and, where no failure or disagreement stands, lowers
+-- no grade under its binding
+TheUnionIsMonotone (k : Certifying) (p : Pooling k) (c : Certificate) (s : CurrentPass c) : Bool :=
+  hasKey (stretchKey s) (stretchesUnder c.law c.cone s.binding c.entries)
+    or (p.pooled (withEntry c s) s.binding == p.pooled c s.binding + stretchSize s
+        and (standsOnNothing k (withEntry c s) or atMost (k.grade (only s.binding c)) (k.grade (only s.binding (withEntry c s)))))
+-- a replay of a stretch (its identity again, agreeing) is not a new stretch: it adds nothing
+AReplayIsNotANewStretch (k : Certifying) (p : Pooling k) (c : Certificate) (e : EntryOf c) : Bool :=
+  p.pooled (withEntry (withEntry c e) (replayOf e e.outcome e.grade)) e.binding == p.pooled (withEntry c e) e.binding
+Pooling (k : Certifying) := TheUnionIsMonotone k & AReplayIsNotANewStretch k

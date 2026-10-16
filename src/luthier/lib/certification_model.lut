@@ -18,11 +18,15 @@
 -- prompt-replay-fuel.md (D-2026-10-15-f, D-2026-10-15-g): a disagreement recorded at the current
 -- hash leaves no grade and is refused first, naming both entries; `recording` is the theory's
 -- `recordEntry`, the reference model of the store law `Recording`.
+--
+-- Draft 3, 2026-10-16, by Claude Opus 5.5, on record/IA/code-follows-2026-10-16/
+-- prompt-pool-seeds.md (D-2026-10-16-g): `pooling` is the theory's `pooledCases`, the reference
+-- model of `Pooling`, the union of a law's stretches.
 
 import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
   Uncertified Provisional Disagrees Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
-  disputeAt Recording recordEntry
+  disputeAt Recording recordEntry Pooling pooledCases
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical
 
@@ -118,6 +122,9 @@ certifying : Certifying := {
 
 -- D-2026-10-15-f, D-2026-10-15-g: the store law's reference, the theory's own `recordEntry`
 recording : Recording certifying := { record := fn e es { recordEntry certifying e es } }
+
+-- D-2026-10-16-g: the union of the stretches' reference, the theory's own `pooledCases`
+pooling : Pooling certifying := { pooled := pooledCases }
 
 -- 6.S8: the hash of a cone, the host's
 hashing : ConeHashing alpha canonical := {
