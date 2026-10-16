@@ -368,6 +368,8 @@ scope, by 7.R1's reason (only a parameter binding tells two parameters of one ty
 an instance. P8: a Bool definition is tested when a conjunction claims it or a test names it. Cost:
 three sentences.
 
+*Answered in chat (2026-10-16): (a) for the three, D-2026-10-16-l.*
+
 ## The specification's wording
 
 **25. Keep the lexer's three readings of 2.S1?** ASCII letters and digits; blanks space, tab, CR;

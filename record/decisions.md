@@ -2796,3 +2796,16 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       spec 10.S10, 7.S10, 8.S8, 8.S1, 2.S1; world.lth, laws.lth, test.lth, demand.lth,
             plan.lth; grammar.lth
 Status:     current
+
+D-2026-10-16-l  Item 24 (a) for the three rules, written into chapter 7: G6, the most specific
+                binding wins (a parameter named over its type; at equal specificity the test line
+                over the profile), by 7.R1's reason (only a parameter binding tells two parameters
+                of one type apart); L5, a law quantified over a type `U` is a static error (7.R2) and
+                `Settling`'s laws move to concrete instances; P8, a Bool definition is tested when a
+                conjunction claims it or a test line names it (`check -v` lists an unclaimed one).
+Author:     Luciano, the recommendations
+Quote:      "24->ok, a para las tres"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       spec 7.R1, 7.R2; generators.lth `Resolution`; the theory of `Settling`
+Status:     current
