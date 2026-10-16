@@ -1,5 +1,267 @@
 [
  {
+  "law": "LoweringLosesNothing",
+  "cone": "sha256:9ccb1a9d58043231f69391babccc971a1b3327e7e7aa53150625ab141f58c43d",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:a3580ae90946e3de2179cc15256376632171138c61c337ce95f8fc716db5180d"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:dfc70cd3ca9c7503d404209049c4e64e405f86972cb326717f1b4efc3c34d724,sha256:585bae074dbc5a56617a959dce8bb3e1d7a294a093cafa5a14956836d478279d,sha256:0d353ac871db13bc0419c58c931865ba83c7219af964179f8a5e2ddcbf7eb9bf"
+   },
+   {
+    "parameter": "law",
+    "generator": "laws (Listed)",
+    "fingerprint": "sha256:552b8cb4341786e9dc04c9f110e56c7c146293003537decfa94be5eae7e93198"
+   },
+   {
+    "parameter": "cone",
+    "generator": "cones (Listed)",
+    "fingerprint": "sha256:c987245f637efb79be00d0044b3955688e2c4c2faa8d4f0a7d1ddc229cbfc365"
+   },
+   {
+    "parameter": "e",
+    "generator": "entriesFor (Listed)",
+    "fingerprint": "sha256:1a7df98f91b23bea22b3c1908dc02e267bce6c801e4129fa0269727a4974852e,sha256:46908476e00fa0881efec4b805f38be087bb3a4ae5affceb6804b14273cd8524,sha256:cedf770539fb7f7bbfee0cedaa5942adc78cdc329ba9ec93289c96e97c1f85dd,sha256:48ed5594168b860a5e879eaf06ee1e62c4695f12ec3b97333855326bda8ebbbf"
+   },
+   {
+    "parameter": "g",
+    "generator": "ExhaustiveMode over Grade",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "sampledDemand"
+      },
+      {
+       "Printed": "assumedDemand"
+      },
+      {
+       "Printed": "casesDemand"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "law",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"L\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cone",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:cccc\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "assumedPass"
+      },
+      {
+       "Printed": "sampledPass"
+      },
+      {
+       "Printed": "provedPass"
+      },
+      {
+       "Printed": "failed"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": "Support"
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 60,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T02:44:14+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "NoPriceRefusesAssumed",
+  "cone": "sha256:cab272b8648bef6ec3cb12e9e2f1d9ab5846f19ef656bf615fafb376aa5562f6",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "models (Listed)",
+    "fingerprint": "sha256:a3580ae90946e3de2179cc15256376632171138c61c337ce95f8fc716db5180d"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:dfc70cd3ca9c7503d404209049c4e64e405f86972cb326717f1b4efc3c34d724,sha256:585bae074dbc5a56617a959dce8bb3e1d7a294a093cafa5a14956836d478279d,sha256:0d353ac871db13bc0419c58c931865ba83c7219af964179f8a5e2ddcbf7eb9bf"
+   },
+   {
+    "parameter": "law",
+    "generator": "laws (Listed)",
+    "fingerprint": "sha256:552b8cb4341786e9dc04c9f110e56c7c146293003537decfa94be5eae7e93198"
+   },
+   {
+    "parameter": "cone",
+    "generator": "cones (Listed)",
+    "fingerprint": "sha256:c987245f637efb79be00d0044b3955688e2c4c2faa8d4f0a7d1ddc229cbfc365"
+   },
+   {
+    "parameter": "e",
+    "generator": "anyEntries (Listed)",
+    "fingerprint": "sha256:1a7df98f91b23bea22b3c1908dc02e267bce6c801e4129fa0269727a4974852e,sha256:46908476e00fa0881efec4b805f38be087bb3a4ae5affceb6804b14273cd8524,sha256:cedf770539fb7f7bbfee0cedaa5942adc78cdc329ba9ec93289c96e97c1f85dd,sha256:48ed5594168b860a5e879eaf06ee1e62c4695f12ec3b97333855326bda8ebbbf,sha256:d1b9f49be476053c2d5c4f159f8d13df52a4df0d0704b9352f0e3424eef40a95"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "certifying"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "sampledDemand"
+      },
+      {
+       "Printed": "assumedDemand"
+      },
+      {
+       "Printed": "casesDemand"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "law",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"L\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cone",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:cccc\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "assumedPass"
+      },
+      {
+       "Printed": "sampledPass"
+      },
+      {
+       "Printed": "provedPass"
+      },
+      {
+       "Printed": "failed"
+      },
+      {
+       "Printed": "assumedElsewhere"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 15,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T02:44:14+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
   "law": "AReplayIsNotANewStretch",
   "cone": "sha256:c8cdf37241d5890469c7a620322b630f068cd1bffc94cc2b7a1d0c5192acf94b",
   "binding": [
@@ -1681,268 +1943,6 @@
   "grade": "Cases",
   "outcome": "Passed",
   "date": "2026-10-16T02:31:16+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "LoweringLosesNothing",
-  "cone": "sha256:9ccb1a9d58043231f69391babccc971a1b3327e7e7aa53150625ab141f58c43d",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:eaee55976fdff5695abb39ac3a44252398196451a823d392bc81f733ad8d43a8"
-   },
-   {
-    "parameter": "d",
-    "generator": "demands (Listed)",
-    "fingerprint": "sha256:dfc70cd3ca9c7503d404209049c4e64e405f86972cb326717f1b4efc3c34d724,sha256:585bae074dbc5a56617a959dce8bb3e1d7a294a093cafa5a14956836d478279d,sha256:0d353ac871db13bc0419c58c931865ba83c7219af964179f8a5e2ddcbf7eb9bf"
-   },
-   {
-    "parameter": "law",
-    "generator": "laws (Listed)",
-    "fingerprint": "sha256:552b8cb4341786e9dc04c9f110e56c7c146293003537decfa94be5eae7e93198"
-   },
-   {
-    "parameter": "cone",
-    "generator": "cones (Listed)",
-    "fingerprint": "sha256:c987245f637efb79be00d0044b3955688e2c4c2faa8d4f0a7d1ddc229cbfc365"
-   },
-   {
-    "parameter": "e",
-    "generator": "entriesFor (Listed)",
-    "fingerprint": "sha256:1a7df98f91b23bea22b3c1908dc02e267bce6c801e4129fa0269727a4974852e,sha256:46908476e00fa0881efec4b805f38be087bb3a4ae5affceb6804b14273cd8524,sha256:cedf770539fb7f7bbfee0cedaa5942adc78cdc329ba9ec93289c96e97c1f85dd,sha256:48ed5594168b860a5e879eaf06ee1e62c4695f12ec3b97333855326bda8ebbbf"
-   },
-   {
-    "parameter": "g",
-    "generator": "ExhaustiveMode over Grade",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "sampledDemand"
-      },
-      {
-       "Printed": "assumedDemand"
-      },
-      {
-       "Printed": "casesDemand"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "law",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"L\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "cone",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:cccc\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "assumedPass"
-      },
-      {
-       "Printed": "sampledPass"
-      },
-      {
-       "Printed": "provedPass"
-      },
-      {
-       "Printed": "failed"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "g",
-    "reach": "Support"
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 60,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-16T00:43:08+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "NoPriceRefusesAssumed",
-  "cone": "sha256:cab272b8648bef6ec3cb12e9e2f1d9ab5846f19ef656bf615fafb376aa5562f6",
-  "binding": [
-   {
-    "parameter": "k",
-    "generator": "models (Listed)",
-    "fingerprint": "sha256:eaee55976fdff5695abb39ac3a44252398196451a823d392bc81f733ad8d43a8"
-   },
-   {
-    "parameter": "d",
-    "generator": "demands (Listed)",
-    "fingerprint": "sha256:dfc70cd3ca9c7503d404209049c4e64e405f86972cb326717f1b4efc3c34d724,sha256:585bae074dbc5a56617a959dce8bb3e1d7a294a093cafa5a14956836d478279d,sha256:0d353ac871db13bc0419c58c931865ba83c7219af964179f8a5e2ddcbf7eb9bf"
-   },
-   {
-    "parameter": "law",
-    "generator": "laws (Listed)",
-    "fingerprint": "sha256:552b8cb4341786e9dc04c9f110e56c7c146293003537decfa94be5eae7e93198"
-   },
-   {
-    "parameter": "cone",
-    "generator": "cones (Listed)",
-    "fingerprint": "sha256:c987245f637efb79be00d0044b3955688e2c4c2faa8d4f0a7d1ddc229cbfc365"
-   },
-   {
-    "parameter": "e",
-    "generator": "anyEntries (Listed)",
-    "fingerprint": "sha256:1a7df98f91b23bea22b3c1908dc02e267bce6c801e4129fa0269727a4974852e,sha256:46908476e00fa0881efec4b805f38be087bb3a4ae5affceb6804b14273cd8524,sha256:cedf770539fb7f7bbfee0cedaa5942adc78cdc329ba9ec93289c96e97c1f85dd,sha256:48ed5594168b860a5e879eaf06ee1e62c4695f12ec3b97333855326bda8ebbbf,sha256:d1b9f49be476053c2d5c4f159f8d13df52a4df0d0704b9352f0e3424eef40a95"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "certifying"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "sampledDemand"
-      },
-      {
-       "Printed": "assumedDemand"
-      },
-      {
-       "Printed": "casesDemand"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "law",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"L\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "cone",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:cccc\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "assumedPass"
-      },
-      {
-       "Printed": "sampledPass"
-      },
-      {
-       "Printed": "provedPass"
-      },
-      {
-       "Printed": "failed"
-      },
-      {
-       "Printed": "assumedElsewhere"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 15,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-16T00:43:08+00:00",
   "interpreter": "v0.2",
   "hosts": []
  }
