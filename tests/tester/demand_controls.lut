@@ -14,6 +14,7 @@ import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Hash Outcome Passed Failed
 import "certification_model.lut" certifying
 import "demand.lth" Demand LawDemand Record Stored Store recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
+  Ran RanIsASpecimenOfTheAsked Strategy ForwardOnDemand CallByNeed
 import "demand_model.lut" theDemand
 
 eqRecord (a b : Record) : Bool := a == b
@@ -62,3 +63,10 @@ test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <-
   bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "anyEntries"]) (control <- true)
 test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "exactlyModels",
   bind "d" "demands", bind "law" "laws", bind "cone" "cones", bind "e" "entriesFor"]) (control <- true)
+
+-- §6 the strategy that ran, broken (2026-10-16, by Claude Opus 5.5, on record/IA/
+-- code-follows-2026-10-16/prompt-modes.md): call by need asked, forward on demand ran, which
+-- nothing holds to the order of first demand
+swappedRun : Ran := { asked := CallByNeed, ran := ForwardOnDemand }
+swappedRuns : List Ran := [swappedRun]
+test "RanIsASpecimenOfTheAsked" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "r" "swappedRuns"]) (control <- true)

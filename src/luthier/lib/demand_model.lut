@@ -9,18 +9,26 @@
 -- 2026-10-15, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
 -- layer-3-review-2026-10-15/prompt-fix-BCD.md (B19 of its summary-BCD.md): `lawDemand` and
 -- `recorded` are demand.lth's definitions now, and `Demanding`, the theory they modelled, is gone.
+-- 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- code-follows-2026-10-16/prompt-modes.md: the modes of running as arguments with their defaults
+-- (D-2026-10-16-d), and the provisionals run as assumed, none by default (D-2026-10-16-c).
 
-import "demand.lth" Demand
+import "demand.lth" Demand Strategy ForwardOnDemand
 import "certification.lth" Value
 import "test.lth" Grade Sampled
 
 -- The arguments of `run` (12.S17, 12.S18, 12.S13), each with the default the host holds today,
 -- named here as a default and not as a constant (L5.18, P11). [proposed] `Sampled` as the grade
 -- accepted when none is named (run.py's `ACCEPT`: an assumed entry serves only a run that accepts
--- assumed, 6.S10); 10,000,000 steps of fuel (cli.py: 10,000 was a hundred times too small for
--- validate_graph.lut); `main` as the entry; no hole set; not checked; nothing pinned; no
--- decoration (the identity, 8.S1); no confidence (demand.lth §1).
-theDemand (entry : String <- "main") (accepts : Grade <- Sampled) (fuel : Nat <- 10000000)
-          (sets : List (String * Value) <- nil) (checked : Bool <- false) (pinned : Maybe String <- nothing) : Demand :=
-  { entry := entry, decoration := nothing, accepts := accepts, delta := nothing, fuel := fuel, sets := sets,
-    checked := checked, pinned := pinned }
+-- assumed, 6.S10); no provisional run as assumed (D-2026-10-16-c: each is named); no fuel bound
+-- and no time limit (D-2026-10-16-d, item 21 (c); the 10,000,000 steps of before cut runs that
+-- needed more, and `certify` keeps its own budget, 7.S8); forward on demand as the strategy
+-- (8.S3; run.py's call by need is its specimen while plan.lth's `TheDefaultsAgree` holds); not
+-- fresh; `main` as the entry; no hole set; not checked; nothing pinned; no decoration (the
+-- identity, 8.S1); no confidence (demand.lth §1).
+theDemand (entry : String <- "main") (accepts : Grade <- Sampled) (assumes : List String <- nil)
+          (fuel : Maybe Nat <- nothing) (timeLimit : Maybe Float64 <- nothing)
+          (sets : List (String * Value) <- nil) (checked : Bool <- false) (pinned : Maybe String <- nothing)
+          (strategy : Strategy <- ForwardOnDemand) (fresh : Bool <- false) : Demand :=
+  { entry := entry, decoration := nothing, accepts := accepts, assumes := assumes, delta := nothing, fuel := fuel,
+    timeLimit := timeLimit, sets := sets, checked := checked, pinned := pinned, strategy := strategy, fresh := fresh }

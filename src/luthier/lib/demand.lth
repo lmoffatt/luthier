@@ -22,6 +22,11 @@
 -- code-follows-2026-10-16/prompt-store.md (D-2026-10-15-h, item 5 answered): the record carries the
 -- decoration, so that the key of a run is a function of its record, its seed, its plan and the
 -- certificates (plan.lth's `keyOf`); `determined` speaks of the key (§4).
+-- 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- code-follows-2026-10-16/prompt-modes.md: the modes of running are fields of the demand
+-- (D-2026-10-16-d): the strategy (moved here from plan.lth, which imports it), the fuel optional,
+-- a time limit, `fresh`; and the provisional externs the demand runs as assumed, by name
+-- (D-2026-10-16-c).
 --
 -- What this file states. 8.S1 says a demand is open: whatever the program declares as a
 -- parameter, the demand may set; its form is a library's (D-2026-10-12-al), so what is here is
@@ -44,6 +49,7 @@
 --   §3 What a run records of its demand (12.S18, L5.18).                                     done
 --   §4 The theory `Store`: one identity, one result (8.S3, 8.S9).                           done
 --   §5 The laws of `Certifying` at the demand passed down (6.S10, 6.S16).                   done
+--   §6 The strategy that ran: a specimen of the one asked (8.S4, D-2026-10-16-d).           done
 
 import "certification.lth" Certifying Entry EntryFor Value Hash ServesIsMonotoneInTheCutoff
 import "test.lth" Grade Sampled AssumedGrade gradeRank
@@ -70,19 +76,37 @@ assumed : Demand -> Maybe C
 Decoration : U
 decorate : Decoration -> Term -> Term
 
+-- The strategy, a mode of running and not of the program (8.S4, L5.2, P11, D-2026-10-16-d): forward
+-- on demand, the default 8.S3 decides (the live subgraph in topological order, computed
+-- strictly); or call by need (each name reduced at its first demand and kept), which computes the
+-- same live subgraph in the order of first demand. What each constructor means is an order, stated
+-- as a law of plan.lth's `Planning` (its §5, L2.7); `TheDefaultsAgree` holds the two to the same
+-- result, which is what lets run.py's call by need be the specimen that computes a demand for
+-- forward on demand (8.S4).
+Strategy : U := data {
+  ForwardOnDemand : Strategy ;
+  CallByNeed : Strategy ;
+}
+
 -- A demand (8.S1): the entry; the type demanded, the identity when `nothing`; the cutoff, the
--- weakest grade accepted (6.S15, D-2026-10-14-c; `run --accept`); the confidence for sampled
--- evidence (D-2026-10-12-r); the limit on resources (`run --fuel`, the reduction steps); the
--- values of the program's holes (`run --set`, 12.S18); whether every value an extern gives is
--- tested against its refinements as it crosses (`run --checked`, 12.S18, P11); and the lock, the
--- interpreter's revision the program's directory pins (12.S13), `nothing` when none does.
+-- weakest grade accepted (6.S15, D-2026-10-14-c; `run --accept`); the provisional externs it runs
+-- as assumed, by name (`run --accept assumed:NAME`, D-2026-10-16-c: a provisional is refused unless
+-- named, whatever the cutoff, so a forgotten one still refuses the run); the confidence for
+-- sampled evidence (D-2026-10-12-r); the values of the program's holes (`run --set`, 12.S18);
+-- whether every value an extern gives is tested against its refinements as it crosses (`run
+-- --checked`, 12.S18, P11); the lock, the interpreter's revision the program's directory pins
+-- (12.S13), `nothing` when none does; and the modes of running (D-2026-10-16-d): the strategy
+-- (`run --strategy`), the limits on resources, none by default (`run --fuel`, in reduction steps;
+-- `run --time-limit`, in seconds; fuel only cuts a run, D-2026-10-15-g), and whether the run
+-- executes whatever the store of results holds (`run --fresh`, L5.20).
 -- [proposed] The entry is a name; 8.S1's term as entry waits for an action that asks for one.
 -- [proposed] `delta` is `nothing` in this draft, since no statistic becomes a cost before
 -- D-2026-10-13-m; when one does it is required as `assumed` is, with no default. Every field is a
 -- parameter the first demand takes as a declared default argument and records (L5.18, L5.19);
 -- none is a constant of the core.
-Demand = { entry : String, decoration : Maybe Decoration, accepts : Grade, delta : Maybe Float64,
-           fuel : Nat, sets : List (String * Value), checked : Bool, pinned : Maybe String }
+Demand = { entry : String, decoration : Maybe Decoration, accepts : Grade, assumes : List String,
+           delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, sets : List (String * Value),
+           checked : Bool, pinned : Maybe String, strategy : Strategy, fresh : Bool }
 
 -- the value a demand gives a hole of the program, if it gives one (12.S18: a hole left without a
 -- value is an error that asks for `--set`)
@@ -100,7 +124,8 @@ LawDemand = { law : String, cone : Hash, given : List (String * Value), accepts 
 -- Whether a demand admits assumptions (6.S10) in the Boolean draft: its cutoff admits
 -- `AssumedGrade`, the lowest grade (test.lth §3). The price of an assumption in `C` is the hole
 -- `assumed` above; `nothing` there is what refuses every assumed value when the cost types come.
--- [proposed] Until then `run --accept assumed` is where a demand names that price.
+-- [proposed] Until then `run --accept assumed` is where a demand names that price, for the evidence
+-- of the store; a provisional extern is priced only by name (`assumes`, D-2026-10-16-c).
 admitsAssumptions (d : Demand) : Bool := gradeRank d.accepts <= gradeRank AssumedGrade
 
 -- The demand on a law of the cone (L12.3, 6.S15): the run's cutoff and the run's values, the
@@ -112,26 +137,31 @@ lawDemand (d : Demand) (law : String) (cone : Hash) : LawDemand :=
   { law := law, cone := cone, given := d.sets, accepts := d.accepts }
 
 -- The demand an inner action receives (L12.3, L5.17): the caller's demand with the inner entry,
--- every cutoff kept, since a cutoff does not compose and so is passed down, never recomputed
--- from the inner cone.
+-- every cutoff and mode kept, since a cutoff does not compose and so is passed down, never
+-- recomputed from the inner cone.
 inner (d : Demand) (entry : String) : Demand :=
-  { entry := entry, decoration := d.decoration, accepts := d.accepts, delta := d.delta, fuel := d.fuel,
-    sets := d.sets, checked := d.checked, pinned := d.pinned }
+  { entry := entry, decoration := d.decoration, accepts := d.accepts, assumes := d.assumes, delta := d.delta,
+    fuel := d.fuel, timeLimit := d.timeLimit, sets := d.sets, checked := d.checked, pinned := d.pinned,
+    strategy := d.strategy, fresh := d.fresh }
 
 -- ---------------------------------------------------------------- §3 What a run records
 
 -- What a run records of its demand (12.S18, `x.run.json`; L5.18: every threshold or level a
 -- certificate needs comes from the demand and is recorded with it): the entry, the hash of the
--- cone it ran, every parameter it set, the grade it accepted, the confidence, the fuel given,
--- whether it ran checked, the lock, and the type demanded. The time, the output, the fuel spent
--- and the states of the cone are the run's, not the demand's, and are not here. [proposed,
+-- cone it ran, every parameter it set, the grade it accepted and the provisionals it runs as
+-- assumed, the confidence, the fuel and the time limit given, whether it ran checked, the lock,
+-- the type demanded, the strategy asked and whether it was fresh (D-2026-10-16-d: every mode
+-- recorded). The time, the output, the fuel spent, the strategy that ran (the plan's) and the
+-- states of the cone are the run's, not the demand's, and are not here. [proposed,
 -- D-2026-10-15-h] The decoration is recorded (B1 of summary-BCD.md): the key of a result reads it
 -- (8.S8, `KeyReadsTheType`), and the key is a function of the record (plan.lth's `keyOf`).
-Record = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade,
-           delta : Maybe Float64, fuel : Nat, checked : Bool, lock : Maybe String, decoration : Maybe Decoration }
+Record = { entry : String, cone : Hash, parameters : List (String * Value), accept : Grade, assumes : List String,
+           delta : Maybe Float64, fuel : Maybe Nat, timeLimit : Maybe Float64, checked : Bool, lock : Maybe String,
+           decoration : Maybe Decoration, strategy : Strategy, fresh : Bool }
 recorded (d : Demand) (h : Hash) : Record :=
-  { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, delta := d.delta, fuel := d.fuel,
-    checked := d.checked, lock := d.pinned, decoration := d.decoration }
+  { entry := d.entry, cone := h, parameters := d.sets, accept := d.accepts, assumes := d.assumes, delta := d.delta,
+    fuel := d.fuel, timeLimit := d.timeLimit, checked := d.checked, lock := d.pinned, decoration := d.decoration,
+    strategy := d.strategy, fresh := d.fresh }
 
 -- ---------------------------------------------------------------- §4 The store
 
@@ -171,3 +201,18 @@ NoPriceRefusesAssumed (k : Certifying) (d : Demand) (law : String) (cone : Hash)
 -- almost never)
 LoweringLosesNothing (k : Certifying) (d : Demand) (law : String) (cone : Hash) (e : EntryFor (lawDemand d law cone)) (g : Grade) : Bool :=
   ServesIsMonotoneInTheCutoff k (lawDemand d law cone) e g
+
+-- ---------------------------------------------------------------- §6 The strategy that ran
+
+-- A run records the strategy its demand asked (§3) and the strategy that computed it (its plan's,
+-- plan.lth's `Plan`). They may differ only where plan.lth's `TheDefaultsAgree` makes one the
+-- specimen of the other: a demand for forward on demand may be computed by call by need, which
+-- run.py does today (8.S4, D-2026-10-16-d); a demand for call by need is computed by call by need,
+-- since nothing holds forward on demand to the order of first demand. The value of the theory is
+-- what a run records of the two, its model run.py's `x.run.json` (`demand.strategy`, `plan.strategy`).
+-- [proposed] A theory and not a check in run.py, so that "say in the record which ran" is a law the
+-- record is held to.
+Ran : { asked : Strategy, ran : Strategy }
+RanIsASpecimenOfTheAsked (r : Ran) : Bool :=
+  match r.asked { ForwardOnDemand -> r.ran == ForwardOnDemand or r.ran == CallByNeed ; CallByNeed -> r.ran == CallByNeed }
+Ran := RanIsASpecimenOfTheAsked

@@ -17,6 +17,7 @@ import "laws.lth" Listed Cited
 import "certification.lth" Certifying Entry Hash Outcome Passed Failed
 import "certification_model.lut" certifying
 import "demand.lth" Demand Record Stored Store recorded OneIdentityOneResult NoPriceRefusesAssumed LoweringLosesNothing
+  Ran RanIsASpecimenOfTheAsked Strategy ForwardOnDemand CallByNeed
 import "demand_model.lut" theDemand
 
 -- §4 the store of runs
@@ -63,3 +64,12 @@ test "NoPriceRefusesAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <-
   bind "law" "laws", bind "cone" "cones", bind "e" "anyEntries"])
 test "LoweringLosesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "k" "models", bind "d" "demands",
   bind "law" "laws", bind "cone" "cones", bind "e" "entriesFor"])
+
+-- §6 the strategy that ran (2026-10-16, by Claude Opus 5.5, on record/IA/code-follows-2026-10-16/
+-- prompt-modes.md, D-2026-10-16-d): what run.py records today (forward on demand asked, call by
+-- need ran), call by need asked and run, and forward on demand asked and run
+hostRun : Ran := { asked := ForwardOnDemand, ran := CallByNeed }
+byNeedRun : Ran := { asked := CallByNeed, ran := CallByNeed }
+forwardRun : Ran := { asked := ForwardOnDemand, ran := ForwardOnDemand }
+ranRecords : List Ran := [hostRun, byNeedRun, forwardRun]
+test "RanIsASpecimenOfTheAsked" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "r" "ranRecords"])

@@ -44,7 +44,7 @@
 --   §4 The key of a result (8.S8, 8.S9, 8.S10, L5.6).                                       done
 --   §5 The theory `Planning`, the laws of §2 to §4 claimed.                                  done
 
-import "demand.lth" Demand Decoration Record Stored determined
+import "demand.lth" Demand Decoration Record Stored determined Strategy ForwardOnDemand CallByNeed
 import "certification.lth" Value Hash
 import "generators.lth" Seed
 import "term.lth" Term Program
@@ -163,16 +163,12 @@ linearization (A : U) (eq : A -> A -> Bool) (d : Dataflow A eq) (live : List Str
 -- default 8.S3 decides (the live subgraph in topological order, computed strictly); or call by
 -- need, what `run.py` does today (each name reduced at its first demand and kept), which computes
 -- the same live subgraph in the order of first demand. Both are linearizations, so by `Confluent`
--- they agree. [proposed] Whether the strategy is a field of the demand is open; 8.S1 does not
--- list it, so here it is an argument of the plan with its default. What each constructor means is
--- an order, stated as a law of `Planning` (§5, L2.7): forward on demand places the names level by
--- level, a name's level one more than the highest level of what it reads among the live names;
--- call by need places them in the order of first demand, a depth-first visit from the entry in
--- the order the reads are listed, each name after what it reads and once.
-Strategy : U := data {
-  ForwardOnDemand : Strategy ;
-  CallByNeed : Strategy ;
-}
+-- they agree. The strategy is a field of the demand (D-2026-10-16-d), so `Strategy` is declared
+-- in demand.lth and imported here. What each constructor means is an order, stated as a law of
+-- `Planning` (§5, L2.7): forward on demand places the names level by level, a name's level one
+-- more than the highest level of what it reads among the live names; call by need places them in
+-- the order of first demand, a depth-first visit from the entry in the order the reads are
+-- listed, each name after what it reads and once.
 
 -- the level of a name among the live names: 0 when it reads none of them, else one more than the
 -- highest level of those it reads; in as many rounds as there are nodes, which an acyclic
@@ -210,12 +206,12 @@ Plan (A : U) = { strategy : Strategy, entry : String, live : List String, schedu
 -- change the cone (8.S11, 8.S8); from the program alone the plan of a demand with `--set` or a
 -- decoration was the plan of the unset, undecorated program.
 dataflowOf : (eq : Term -> Term -> Bool) -> Demand -> Program -> Dataflow Term eq
--- and the plan of a demand on a program, by the strategy given, call by need unless another is
--- asked [proposed, 8.S4: the default implemented is call by need; 8.S3's decided default is
--- forward on demand]
-planOf (eq : Term -> Term -> Bool) (p : Planning Term eq) (d : Demand) (prog : Program)
-       (strategy : Strategy <- CallByNeed) : Plan Term :=
-  p.plan strategy (dataflowOf eq d prog) d.entry
+-- and the plan of a demand on a program, by the strategy the demand asks (D-2026-10-16-d; forward on
+-- demand by default, demand_model.lut's `theDemand`). run.py computes a demand for forward on
+-- demand by call by need, its specimen, and records the strategy that ran in its plan; the two
+-- agree by `TheDefaultsAgree` (8.S4).
+planOf (eq : Term -> Term -> Bool) (p : Planning Term eq) (d : Demand) (prog : Program) : Plan Term :=
+  p.plan d.strategy (dataflowOf eq d prog) d.entry
 
 -- ---------------------------------------------------------------- §4 The key of a result
 
@@ -227,8 +223,9 @@ keepRead (live : List String) (vs : List (String * Value)) : List (String * Valu
   match vs { nil -> nil ; cons (n, v) rest -> if memberStr n live then cons (n, v) (keepRead live rest) else keepRead live rest }
 demandKey (d : Demand) (live : List String) : DemandKey := { decoration := d.decoration, values := keepRead live d.sets }
 withSet (d : Demand) (n : String) (v : Value) : Demand :=
-  { entry := d.entry, decoration := d.decoration, accepts := d.accepts, delta := d.delta, fuel := d.fuel,
-    sets := cons (n, v) d.sets, checked := d.checked, pinned := d.pinned }
+  { entry := d.entry, decoration := d.decoration, accepts := d.accepts, assumes := d.assumes, delta := d.delta,
+    fuel := d.fuel, timeLimit := d.timeLimit, sets := cons (n, v) d.sets, checked := d.checked, pinned := d.pinned,
+    strategy := d.strategy, fresh := d.fresh }
 
 -- The identity of a result (8.S8, L5.6, D-2026-10-13-g): the demand's key, the hash of the cone
 -- (the code, the hosts behind its externs and the interpreter, certification.lth §4), the mode,
@@ -236,7 +233,10 @@ withSet (d : Demand) (n : String) (v : Value) : Demand :=
 -- serves a demand only with an equal key (8.S9); the store that holds it is `x.results.json`
 -- (8.S10, `ResultsDetermined` below). [proposed] The mode is a string: 8.S1 names `m` and the spec
 -- does not define it; today the only mode is `--checked`, printed. The strategy is not a field:
--- it is the plan's, so the plan's hash carries it.
+-- it is the plan's, so the plan's hash carries it (the strategy that ran, not the one asked, which
+-- the record keeps; the two give one result by `TheDefaultsAgree`). Neither `fresh` nor the limits
+-- are in the key: `fresh` decides whether the store is read, and a limit only cuts a run
+-- (D-2026-10-15-g).
 MemoKey = { demand : DemandKey, cone : Hash, mode : String, seed : Seed, plan : Hash, certificates : List Hash }
 withDemand (k : MemoKey) (dk : DemandKey) : MemoKey :=
   { demand := dk, cone := k.cone, mode := k.mode, seed := k.seed, plan := k.plan, certificates := k.certificates }
