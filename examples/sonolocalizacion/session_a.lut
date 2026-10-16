@@ -32,5 +32,5 @@ posteriorA : Posterior dimA := laplacePosterior dimA likelihoodA priorA mapA.d
 settingsA : Settings := { tol := 1.0e-12, maxIter := 500, floor := 6.661338147750939e-15 }
 -- v0.1's schedule, lm.py's DAMPING (src/luthier/lm.py:36)
 dampingA : Damping := { init := 0.001, factor := 3.0, least := 1.0e-15, most := 1.0e15 }
--- the native maximizer with v0.1's damping (moved 2026-10-16 from tests/tester/fit_laws.lut)
+-- the native maximizer with v0.1's damping (moved 2026-10-16 from tests/tester/fit_laws.test.lut)
 nativeLM : Maximizer := lmMaximizer dampingA

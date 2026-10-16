@@ -139,8 +139,8 @@ def test_finished_reads_the_decrement_the_budget_and_the_damping():
 def test_luthier_runs_the_host_maximizer_through_the_callbacks(tmp_path):
     # belief_model.lut's `lm` maximizes belief.lth's quadratic (b = (1, -2), c = 2, from the
     # origin); the host calls logp, score and info back, each call counted in x.run.json
-    path = tmp_path / "maximize_quadratic.lut"
-    path.write_text((ROOT / "tests/run/maximize_quadratic.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "maximize_quadratic.run.lut"
+    path.write_text((ROOT / "tests/run/maximize_quadratic.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     env = dict(os.environ, PYTHONPATH=str(ROOT / "src"))
     result = subprocess.run([sys.executable, "-m", "luthier.cli", "run", str(path)],
                             env=env, capture_output=True, text=True)

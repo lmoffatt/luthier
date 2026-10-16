@@ -1,4 +1,4 @@
--- tests/tester/fit_laws.lut: the fit's laws on the quadratic family, on the brief
+-- tests/tester/fit_laws.test.lut: the fit's laws on the quadratic family, on the brief
 -- record/IA/evidence-2026-10-14/prompt.md, item 3: `QuadraticConverges` (belief.lth) on two
 -- models of `Maximizer`, the host's Levenberg-Marquardt (`lm`, belief_model.lut) and the native
 -- one (`lmMaximizer` with v0.1's damping, optimization_model.lut); the laws of `LMStep`
@@ -13,7 +13,9 @@
 -- tolerance 1e-12 [proposed]. Seed 20261014: every line draws the same cases, the models being
 -- censuses. [2026-10-16] The three `...OnQuadratic` now live in optimization.lth, `MaximizersAgree`
 -- in belief.lth and `nativeLM` in examples/sonolocalizacion/session_a.lut, so that every entry
--- has a file that claims it and this test program keeps no store (L10.12).
+-- has a file that claims it and this test program keeps no store (L10.12). [2026-10-16] The cutoffs
+-- live in fit_cutoffs.lut, which the controls import too: a test program is never imported
+-- (D-2026-10-16-e).
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear
@@ -27,18 +29,8 @@ import "optimization.lth" LMStep Damping LMState quadraticObjective QuadraticSte
   DirectionAgrees StepRule DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic StepRuleOnQuadratic
 import "optimization_model.lut" native host
 import "../../examples/sonolocalizacion/session_a.lut" settingsA dampingA nativeLM
+import "fit_cutoffs.lut" tolerance budget cutoffs
 
-tolerance : Tolerance := 1.0e-12
--- the iterations the demand grants a maximizer on the quadratic family (QuadraticConverges's
--- `budget`), a census of one, 50, as the probe of record/IA/layer-3-review-2026-10-15/report-fix-BCD.md
--- [proposed]; settingsA's maxIter 500 is above it, so the law is asked
-budget : Nat := 50
-
-cutoffs : List Binding := [
-  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
-  { parameter := just "d", type := nothing, generator := "dampingA", coverage := Listed },
-  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
-  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed } ]
 onLm : List Binding := [ { parameter := just "mx", type := nothing, generator := "lm", coverage := Listed } ]
 onNativeLM : List Binding := [ { parameter := just "mx", type := nothing, generator := "nativeLM", coverage := Listed } ]
 onHost : List Binding := [ { parameter := just "m", type := nothing, generator := "host", coverage := Listed } ]

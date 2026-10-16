@@ -1,0 +1,12 @@
+-- tests/run/certified/small.test.lut: the test line that certifies small.lut's model `same`, its
+-- entry written in small.cert.json, the store of the file that defines the model (L10.12). Split
+-- from small.lut on 2026-10-16 by Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/code-follows-2026-10-16/prompt-file-kinds.md (D-2026-10-16-e).
+
+import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "small.lut" FixesBool same
+
+models : List Binding := [ { parameter := just "m", type := nothing, generator := "same", coverage := Listed } ]
+test "FixesBool" ExhaustiveMode (whereBindings <- models)

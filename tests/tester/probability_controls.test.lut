@@ -1,6 +1,6 @@
--- tests/tester/probability_controls.lut: the controls of probability_laws.lut's laws. Each line is written `(control <- true)` (test.lth's `control`) and
+-- tests/tester/probability_controls.test.lut: the controls of probability_laws.test.lut's laws. Each line is written `(control <- true)` (test.lth's `control`) and
 -- is expected to be refuted: it shows that a law of probability.lth can fail on a model broken on
--- purpose, so that its passing in probability_laws.lut is not vacuous (7.S19 as D-2026-10-15-a
+-- purpose, so that its passing in probability_laws.test.lut is not vacuous (7.S19 as D-2026-10-15-a
 -- generalized it to every law; L9.14). The tester records its outcome as a control's entry, never
 -- the law's failure. Written 2026-10-15 by Claude Sonnet, an agent of the coordinating session, on
 -- record/IA/controls-2026-10-15/prompt-mutants.md.
@@ -11,18 +11,18 @@
 -- written whole, the other fields copied by field access. `GaussianPeaksAtMean` and
 -- `ProfiledIsGaussianAtItsSigma` take the construction as a parameter (probability.lth's
 -- `GaussianConstruction`, since record/IA/controls-2026-10-15/prompt-weak-laws.md); their controls
--- are constructions broken on purpose, on the models of probability_laws.lut.
+-- are constructions broken on purpose, on the models of probability_laws.test.lut.
 --
 -- The statistical law and the laws of its statistic, added 2026-10-15 on
 -- record/IA/statistical-2026-10-15/prompt-tester.md (laws.lth §4, 7.S17 to 7.S19, L9.14):
 -- `SourceIsUniform` on probability_model.lut's `lump`, the source every value of which is 0.9
 -- (the body of its `LumpIsUniform`, written as the law at a binding so that the control has the
 -- law's cone and `certify` matches it [proposed]), run by Wald's sequential test at
--- probability_laws.lut's cutoffs `wald`; it passes when the test fails it. `NoAlternativeAtZero`
+-- probability_laws.test.lut's cutoffs `wald`; it passes when the test fails it. `NoAlternativeAtZero`
 -- and `RatioNonNegative` on a statistic whose ratio is 2 at distance zero, and one whose ratio is
 -- negative at the distance 0.5 of the cutoffs.
 -- Since 2026-10-15 (record/IA/controls-2026-10-15/prompt-tail.md) the `lump` line is in
--- generators_controls.lut, a control of `UniformSampleIsUniform`: probability_laws.lut's
+-- generators_controls.test.lut, a control of `UniformSampleIsUniform`: probability_laws.test.lut's
 -- `SourceIsUniform` line, which it controlled, computed the same test as that law's line and went.
 
 import "test.lth" test ExhaustiveMode SampledMode
@@ -225,7 +225,7 @@ test "GaussianPeaksAtMean" (SampledMode linear) (cases <- 5) (seed <- 20261015) 
 test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261015) (whereBindings <- onUnbiased) (profile <- cutoffs) (control <- true)
 
 -- ---------------------------------------------------------------- the statistical law (laws.lth §4)
--- the cutoffs of probability_laws.lut, a census of one, never drawn
+-- the cutoffs of probability_laws.test.lut, a census of one, never drawn
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
 
 -- the statistic of probability.lth with its ratio broken: 2 at distance zero; negative at 0.5

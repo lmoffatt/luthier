@@ -11,20 +11,15 @@
 -- record/IA/sonolocalizacion-inventory-2026-10-13/answers-2026-10-14.md, item 2), plus one for a
 -- graph that cannot be read, where v0.1 stopped with the extern's error.
 --
--- Run from the root of this repository with
---   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/validate_graph.lut \
---     --set graphDir=examples/sonolocalizacion/A/graph
+-- The run, with its parameter `graphDir`, is validate_graph.run.lut, which imports this file:
+-- since 2026-10-16 a model and the demand on it are two files (D-2026-10-16-e; split by Claude Opus
+-- 5.5, an agent of the coordinating session, on record/IA/code-follows-2026-10-16/
+-- prompt-file-kinds.md, the definitions unchanged).
 
-import "world_model.lut" HostConsole host : HostConsole
 import "numbers.lth" Doubles
 import "numbers_model.lut" doubles : Doubles
 import "arrays.lth" RankFloor
-import "distance_graph.lut" DistanceGraph ValidDistanceGraph ValidGraph firstViolation describe readGraph distinctPairs unseenDirections rigidMotions intToString
-
--- The graph directory, relative to where the run starts, for example session A of experiment
--- zero (examples/sonolocalizacion/A/graph/SOURCE.md). A run parameter: a declared hole that
--- `run --set graphDir=...` fills (3.S9, 8.S1, 12.S18).
-graphDir : String
+import "distance_graph.lut" DistanceGraph ValidDistanceGraph ValidGraph firstViolation describe distinctPairs unseenDirections rigidMotions intToString
 
 -- The rank floor of the directions the distances see: v0.1's, n eps times the largest eigenvalue,
 -- n the size of the matrix (3 per node) and eps the spacing of the doubles at one
@@ -44,10 +39,3 @@ report (g : DistanceGraph) : String :=
   match firstViolation g {
     nothing -> (if ValidGraph g then summary g else "the check reported nothing on a graph that is not valid") ;
     just v -> describe g v }
-
-main (w : W) : W * Unit := {
-  (w1, read) <- readGraph w graphDir
-  host.print w1 (match read {
-    nothing -> "FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables" ;
-    just g -> report g })
-}

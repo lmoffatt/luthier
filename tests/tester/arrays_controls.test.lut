@@ -1,13 +1,13 @@
--- tests/tester/arrays_controls.lut: the controls of arrays.lth's laws. Each line is written
+-- tests/tester/arrays_controls.test.lut: the controls of arrays.lth's laws. Each line is written
 -- `(control <- true)` (test.lth's `control`) and is expected to be refuted: it runs a law of
--- arrays_laws.lut on a model of `Arrays` broken on purpose (one leaf wrong, a plausible bug), so
+-- arrays_laws.test.lut on a model of `Arrays` broken on purpose (one leaf wrong, a plausible bug), so
 -- that the law's passing on numpy is not vacuous (7.S19 as D-2026-10-15-a generalized it to every
 -- law; L9.14). The tester records its outcome as a control's entry, never the law's failure.
 -- Written 2026-10-15 by Claude Sonnet, an agent of the coordinating session, on
--- record/IA/controls-2026-10-15/prompt-mutants.md. Sampled lines keep arrays_laws.lut's `linear`
+-- record/IA/controls-2026-10-15/prompt-mutants.md. Sampled lines keep arrays_laws.test.lut's `linear`
 -- metric, tolerance and rank floor; seed 20261015. The broken models copy numpy's other fields.
 -- PinvRestricts and PinvTraceIsRank run on listed matrices, as the laws do where sampling the
--- shape fails (see arrays_laws.lut).
+-- shape fails (see arrays_laws.test.lut).
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear symmetric symmetricOf orthogonal
@@ -558,7 +558,7 @@ ppinvAbs : List Binding := [
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
   { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
 
--- the listed symmetric matrices of arrays_laws.lut (copied): the positive semidefinite ones where
+-- the listed symmetric matrices of arrays_laws.test.lut (copied): the positive semidefinite ones where
 -- PinvRestricts is stated, and the ones PinvTraceIsRank runs on
 diag3 (a b c : Float64) : Mat Float64 := mat Float64 3 3 (fn i j { if i == j then (if i == 0 then a else if i == 1 then b else c) else 0.0 })
 symmetricMore : List (Mat Float64) := [

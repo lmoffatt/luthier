@@ -1,10 +1,7 @@
--- tests/run/certified/small.lut: a theory of one law, two models of it, and the test line that
--- certifies one of them, so that `run` finds its entry in small.cert.json when a program imports
--- this file (12.S11, 12.S17; record/IA/certification-2026-10-14/prompt-run.md).
-
-import "test.lth" test ExhaustiveMode
-import "generators.lth" Binding
-import "laws.lth" Listed
+-- tests/run/certified/small.lut: a theory of one law and two models of it, so that `run` finds the
+-- entry of one of them in small.cert.json when a program imports this file (12.S11, 12.S17;
+-- record/IA/certification-2026-10-14/prompt-run.md). The test line that certifies it is
+-- small.test.lut's since 2026-10-16: a test line belongs to a test program (D-2026-10-16-e).
 
 Small : { f : Bool -> Bool }
 FixesBool (m : Small) (b : Bool) : Bool := m.f b == b
@@ -12,6 +9,3 @@ Small := FixesBool
 
 same : Small := { f := fn b { b } }
 also : Small := { f := fn b { not (not b) } }
-
-models : List Binding := [ { parameter := just "m", type := nothing, generator := "same", coverage := Listed } ]
-test "FixesBool" ExhaustiveMode (whereBindings <- models)

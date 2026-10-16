@@ -1,8 +1,8 @@
--- tests/tester/generators_laws.lut: the laws of the families of generators_model.lut (the
+-- tests/tester/generators_laws.test.lut: the laws of the families of generators_model.lut (the
 -- generators a test binds, 7.R1, 7.S5), run through `luthier test`, on the brief
 -- record/IA/tester-2026-10-14/prompt-3.md. Each law is quantified over the size and the seed, so
--- a sampled case is one draw of the family. The cutoffs as censuses of one, as arrays_laws.lut and
--- probability_laws.lut: the tolerance 1e-12 [proposed], the rank floor 30 eps. Seed 20261014.
+-- a sampled case is one draw of the family. The cutoffs as censuses of one, as arrays_laws.test.lut and
+-- probability_laws.test.lut: the tolerance 1e-12 [proposed], the rank floor 30 eps. Seed 20261014.
 -- Since 2026-10-15 (record/IA/statistical-2026-10-15/prompt-tester.md) `UniformSampleIsUniform`
 -- is a statistical law in the form of laws.lth §4 (7.S17, L9.15, D-2026-10-15-b): the tester runs
 -- Wald's sequential test once from the line's seed, at the demand's cutoffs `wald` bound as a
@@ -10,16 +10,16 @@
 -- and a budget of 400 samples [proposed]. Under the null the log ratio drifts by about -0.045 per
 -- sample (laws.lth §4), so the test holds after some 100 samples and leaves it unresolved at 400
 -- with a probability of about 1%; at size 50 a sample of `uniformSample` is up to 2500 values.
--- Its control is in generators_controls.lut. The Bool form at a level (`Level`, `l`) is gone.
+-- Its control is in generators_controls.test.lut. The Bool form at a level (`Level`, `l`) is gone.
 -- Since 2026-10-15 (record/IA/controls-2026-10-15/prompt-tail.md, L9.14) the law takes its source
 -- as a parameter, bound here to the calibrated `uniformSample` (a census of one; on a statistical
 -- line a `Gen` binding is the stream itself), so that its control is a line of the same law. This
--- line and probability_laws.lut's `SourceIsUniform` line computed the same test (the same distance,
+-- line and probability_laws.test.lut's `SourceIsUniform` line computed the same test (the same distance,
 -- source, seed and cutoffs); the latter is gone.
 -- Since 2026-10-15 (record/IA/controls-2026-10-15/prompt-weak-laws.md, L9.14) each law of a family
 -- takes the family as its parameter `g` [proposed]; a line binds `g` to a census of one listing
 -- the family (a binding that names a `Gen T` itself would be drawn from), so that
--- generators_controls.lut can bind a family broken on purpose to the same law.
+-- generators_controls.test.lut can bind a family broken on purpose to the same law.
 
 import "test.lth" test ExhaustiveMode SampledMode
 import "generators_model.lut" linear SymmetricGivesSymmetric SymmetricOfGivesItsSize GramGivesPsd

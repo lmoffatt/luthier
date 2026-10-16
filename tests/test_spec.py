@@ -35,7 +35,8 @@ class SpecCase:
 def read_case(path: Path, source: str | None = None) -> SpecCase:
     """Read leading comments, including comments after blank lines before the first act."""
     source = path.read_text(encoding='utf-8') if source is None else source
-    match = re.search(r'\.(accept|reject)\.lut$', path.name)
+    # the verdict, then the kind of file (spec 12.R2): `x.accept.lut`, `x.reject.run.lut`, `x.reject.lth`
+    match = re.search(r'\.(accept|reject)(?:\.run|\.test)?\.(?:lut|lth)$', path.name)
     if match is None:
         raise ValueError(f'{path}: missing accept/reject filename verdict')
     verdict = match[1]
@@ -85,14 +86,14 @@ LIMITATIONS = {
     'n3_primitive_outside_core.reject.lut': '11.R2 remains outside program.lth v0.2, pending Luciano.',
     'n4_axiom_outside_lib.reject.lut': '11.R3 remains outside program.lth v0.2, pending Luciano.',
     'r2_definition.reject.lut': '4.R2 type-position and SCC half deliberately deferred.',
-    'cite_not_reference.reject.lut': 'the citation interface (cite, Reference; spec 6.R1, O10) has no library yet; pending Luciano.',
-    'cite_proved.accept.lut': 'the citation interface (cite, Reference; spec 6.R1, O10) has no library yet; pending Luciano.',
+    'cite_not_reference.reject.run.lut': 'the citation interface (cite, Reference; spec 6.R1, O10) has no library yet; pending Luciano.',
+    'cite_proved.accept.run.lut': 'the citation interface (cite, Reference; spec 6.R1, O10) has no library yet; pending Luciano.',
     'r2_unclaimed_laws.reject.lut': '4.R2 type-position and SCC half deliberately deferred (the existence half accepts it).',
 }
 
 
 EXPECTED_RULE = {
-    'cite_not_reference.reject.lut': '6.R1',
+    'cite_not_reference.reject.run.lut': '6.R1',
     'k_label_order.reject.lut': '4.R9',
     'n2_r_gone.reject.lut': '11.R1',
     'n3_primitive_outside_core.reject.lut': '11.R2',
@@ -128,7 +129,7 @@ def compare_checker_verdict_and_message(case: SpecCase, result: CheckerResult,
                 )
 
 
-CASES = tuple(read_case(path) for path in sorted(SPEC.glob('*.lut')))
+CASES = tuple(read_case(path) for path in sorted([*SPEC.glob('*.lut'), *SPEC.glob('*.lth')]))
 
 
 @pytest.mark.parametrize('case', [pytest.param(c, marks=pytest.mark.xfail(strict=True, reason=LIMITATIONS[c.path.name])) if c.path.name in LIMITATIONS else c for c in CASES], ids=lambda case: case.path.name)

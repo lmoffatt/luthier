@@ -1,6 +1,6 @@
 """plots.py, the renderer as the model of plot.lth's `Drawing` (record/IA/plots-2026-10-15/
 prompt-host.md, item 2), on plot.lth at c6febf0. Each test names the law of plot.lth §5 or §4 it
-holds the host to; the run of a `Plot` built in Luthier is tests/run/plot_two_tables.lut."""
+holds the host to; the run of a `Plot` built in Luthier is tests/run/plot_two_tables.run.lut."""
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -186,13 +186,13 @@ def test_the_renderer_reports_its_version():
 
 def test_a_plot_of_two_tables_built_in_luthier_renders_through_luthier_run(tmp_path):
     # The run reads the stores of the files it loads (12.S17): the laws of matplotlibDrawing and
-    # of files, certified by tests/tester/plot_laws.lut. What the program builds (a Plot of two
+    # of files, certified by tests/tester/plot_laws.test.lut. What the program builds (a Plot of two
     # tables parsed by csv, the canvas, the layers' sums) crosses and draws what the host draws
     # from the same plot written in Python.
     obs = "x:float,y:float\n1.0,2.0\n2.0,3.5\n3.0,1.0\n"
     (tmp_path / "obs.csv").write_text(obs, encoding="utf-8")
     (tmp_path / "notes.csv").write_text(NOTES, encoding="utf-8")
-    result = command(ROOT / "tests/run/plot_two_tables.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/plot_two_tables.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "rendered\n", "")
     p = figure(obs, layers=[
         {"geom": ("points", {"size": 4.0}), "mapping": [], "table": "obs"},

@@ -1,0 +1,27 @@
+-- validate_graph.run.lut: check a distance graph directory against the invariants of
+-- distance_graph.lut before any fit, and print validate_graph.lut's report: the first invariant it
+-- breaks, with its row, or a summary of a valid graph. Split from validate_graph.lut on 2026-10-16
+-- by Claude Opus 5.5, an agent of the coordinating session, on
+-- record/IA/code-follows-2026-10-16/prompt-file-kinds.md (D-2026-10-16-e: the demand is an
+-- executive file, the model a library it imports); the definitions are validate_graph.lut's as
+-- they were, and its run records, validate_graph.run.json, stay beside this file.
+--
+-- Run from the root of this repository with
+--   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/validate_graph.run.lut \
+--     --set graphDir=examples/sonolocalizacion/A/graph
+
+import "world_model.lut" HostConsole host : HostConsole
+import "distance_graph.lut" readGraph
+import "validate_graph.lut" report
+
+-- The graph directory, relative to where the run starts, for example session A of experiment
+-- zero (examples/sonolocalizacion/A/graph/SOURCE.md). A run parameter: a declared hole that
+-- `run --set graphDir=...` fills (3.S9, 8.S1, 12.S18).
+graphDir : String
+
+main (w : W) : W * Unit := {
+  (w1, read) <- readGraph w graphDir
+  host.print w1 (match read {
+    nothing -> "FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables" ;
+    just g -> report g })
+}

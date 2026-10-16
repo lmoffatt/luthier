@@ -4,7 +4,7 @@ externs' arity (prompt-6.md); v7 for `run --set` and the run's record (prompt-7.
 across the bridge (prompt-8.md, D-2026-10-14-a), the host side in tests/run/bridge_host.py; v13 for
 run's refusal of a cone that is not certified (record/IA/certification-2026-10-14/prompt-run.md,
 certification.lth §3, 12.S17), the programs under tests/run/certified/; v16 for the demand and the plan
-as values (prompt-13.md; demand.lth, plan.lth), the program tests/run/plan_cone.lut."""
+as values (prompt-13.md; demand.lth, plan.lth), the program tests/run/plan_cone.run.lut."""
 import json
 import os
 import re
@@ -95,7 +95,7 @@ _reads = []
 
 
 def read_counted(w, path):
-    # a file's text, each read counted (tests/run/read_once.lut)
+    # a file's text, each read counted (tests/run/read_once.run.lut)
     _reads.append(path)
     return w, Path(path).read_text(encoding="utf-8")
 
@@ -177,13 +177,13 @@ def command(path, *args, cwd=None, record=False):
 
 
 def test_hello():
-    result = command(ROOT / "examples/hello.lut")
+    result = command(ROOT / "examples/hello.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "hello, world\n", "")
 
 
 def test_read_first_line(tmp_path):
     (tmp_path / "input.txt").write_text("first line\nsecond line\n", encoding="utf-8")
-    result = command(ROOT / "tests/run/read_first_line.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/read_first_line.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "first line\n", "")
 
 
@@ -205,13 +205,13 @@ def test_host_observe_and_reset(tmp_path):
     assert host.observe(token, places)[1]["files"] == [(path, "changed\n"), (absent, "now\n")]
     assert host.read_file(token, path) == (token, host.Just("changed\n"))
     assert host.read_file(token, str(tmp_path / "nope")) == (token, host.NOTHING)
-    assert run_file(ROOT / "examples/hello.lut") == "hello, world\n"
+    assert run_file(ROOT / "examples/hello.run.lut") == "hello, world\n"
     assert host.observe(token, ["stdout"]) == (token, {"stdout": "hello, world\n", "files": []})
 
 
 def test_observe_through_the_bridge(tmp_path):
     (tmp_path / "input.txt").write_text("first line\n", encoding="utf-8")
-    result = command(ROOT / "tests/run/observe.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/observe.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "one\none\n\n\nfirst line\n\n", "")
 
 
@@ -232,7 +232,7 @@ def test_errors(tmp_path, source, args, message):
 
 def test_relative_import_and_custom_main(tmp_path, capsys):
     (tmp_path / "local.lut").write_text('say (w : W) : W * Unit := extern "python:luthier.host.print_line" w "local"')
-    path = tmp_path / "main.lut"
+    path = tmp_path / "main.run.lut"
     path.write_text('import "local.lut" say\nstart (w : W) : W * Unit := say w')
     assert main(["run", str(path), "--main", "start"]) == 0
     assert capsys.readouterr().out == "local\n"
@@ -245,7 +245,7 @@ def test_unused_extern_is_not_resolved(tmp_path):
 
 
 def test_missing_file_is_nothing(tmp_path):
-    result = command(ROOT / "tests/run/read_first_line.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/read_first_line.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "no input.txt\n", "")
 
 
@@ -273,19 +273,19 @@ main (w : W) : W * Unit := match cons (first "one\\ntwo") nil {
 
 
 def test_vector_norm_through_numpy():
-    result = command(ROOT / "tests/run/vector_norm.lut")
+    result = command(ROOT / "tests/run/vector_norm.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
 
 
 def test_matrix_product_through_numpy():
-    result = command(ROOT / "tests/run/matrix_product.lut")
+    result = command(ROOT / "tests/run/matrix_product.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "43.0\n2\n", "")
 
 
 @refused("csv : Codec, built : Codec")
 def test_table_cell_through_csv(tmp_path):
     (tmp_path / "table.csv").write_text("id:int,name:str,x:float\n1,alpha,0.5\n2,beta,1.5\n", encoding="utf-8")
-    result = command(ROOT / "tests/run/table_cell.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/table_cell.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stderr) == (0, "")
     assert result.stdout == "beta\n2\n1.5\na:int,b:str\n0,x\n1,x\n\n"
 
@@ -293,17 +293,17 @@ def test_table_cell_through_csv(tmp_path):
 @refused("csv : Codec, built : Codec")
 def test_table_not_parsed_is_nothing(tmp_path):
     (tmp_path / "table.csv").write_text("id:real\n1\n", encoding="utf-8")
-    result = command(ROOT / "tests/run/table_cell.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/table_cell.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "not a table\n", "")
 
 
 def test_extern_in_a_record_is_read_when_projected():
-    result = command(ROOT / "tests/run/record_externs.lut")
+    result = command(ROOT / "tests/run/record_externs.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "2.5\n", "")
 
 
 def test_numbers_and_fin_functions():
-    result = command(ROOT / "tests/run/numbers.lut")
+    result = command(ROOT / "tests/run/numbers.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "3.0\n2.0\n3.0\n3.0\n", "")
 
 
@@ -421,7 +421,7 @@ def test_each_declared_type_is_checked_where_it_crosses(tmp_path, case, honest):
 # gives at a declared subtype has its predicate evaluated by the Runner as it crosses; the host
 # side is tests/run/checked_host.py
 
-CHECKED = ROOT / "tests" / "run" / "checked.lut"
+CHECKED = ROOT / "tests" / "run" / "checked.run.lut"
 
 
 @pytest.mark.parametrize("entry, message", [
@@ -456,7 +456,7 @@ def test_checked_runs_an_honest_host_and_records_the_count(tmp_path):
 
 def test_vector_norm_under_checked():
     # numpy.norm gives a Float64 and takes a Vec Float64: no subtype crosses in, none is tested
-    result = command(ROOT / "tests/run/vector_norm.lut", "--checked", record=True)
+    result = command(ROOT / "tests/run/vector_norm.run.lut", "--checked", record=True)
     assert (result.returncode, result.stdout, result.stderr) == (0, "5.0\n", "")
     assert (result.record["checked"], result.record["refinements"]) == (True, {})
 
@@ -499,13 +499,13 @@ def test_retained_rank_at():
 
 def test_connective_on_a_match_reads_core_data():
     # prompt-5.md: `and` on a match over a list; core.lut's data in every run
-    result = command(ROOT / "tests/run/connective_on_match.lut")
+    result = command(ROOT / "tests/run/connective_on_match.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "yes\n", "")
 
 
 def test_host_cell_under_an_operator_crosses_first():
     # prompt-5.md: the Runner reduces a primitive's operands with the host
-    result = command(ROOT / "tests/run/host_cell_under_operator.lut")
+    result = command(ROOT / "tests/run/host_cell_under_operator.run.lut")
     assert (result.returncode, result.stdout, result.stderr) == (0, "8\n", "")
 
 
@@ -536,7 +536,7 @@ EXPECTED_VALIDATE_GRAPH = ("valid: 10 nodes, 22 measurements, 21 distinct pairs;
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 5 minutes; set LUTHIER_SLOW=1")
 def test_validate_graph_slow():
     # prompt-10.md item 4: the first full run of the slice
-    result = command(ROOT / "examples/sonolocalizacion/validate_graph.lut",
+    result = command(ROOT / "examples/sonolocalizacion/validate_graph.run.lut",
                      "--set", "graphDir=examples/sonolocalizacion/A/graph", cwd=ROOT)
     assert result.returncode == 0, result.stderr
     assert result.stdout == EXPECTED_VALIDATE_GRAPH
@@ -554,7 +554,7 @@ def test_fit_renders_its_figures_slow(tmp_path):
     for k in (1, 2):
         out = tmp_path / f"run{k}"
         out.mkdir()
-        result = command(ROOT / "examples/sonolocalizacion/experiment_zero.lut",
+        result = command(ROOT / "examples/sonolocalizacion/experiment_zero.run.lut",
                          "--set", "graphDir=examples/sonolocalizacion/A/graph_noA2", "--set", f"outDir={out}",
                          "--set", "lmMaxIter=500", "--set", "lmTol=1e-6", "--set", "lmFloor=5.995204332975845e-15",
                          "--fuel", "100000000000", cwd=ROOT, record=True)
@@ -576,7 +576,7 @@ def test_fit_renders_its_figures_slow(tmp_path):
 def test_the_fit_runs_checked_slow(tmp_path):
     # prompt-12.md item 3: the fit of test_fit_renders_its_figures_slow under --checked (12.S18): every
     # VecOf n the maximizer gives back, or passes to the posterior's callbacks, has its length tested
-    result = command(ROOT / "examples/sonolocalizacion/experiment_zero.lut",
+    result = command(ROOT / "examples/sonolocalizacion/experiment_zero.run.lut",
                      "--set", "graphDir=examples/sonolocalizacion/A/graph_noA2", "--set", f"outDir={tmp_path}",
                      "--set", "lmMaxIter=500", "--set", "lmTol=1e-6", "--set", "lmFloor=5.995204332975845e-15",
                      "--fuel", "100000000000", "--checked", cwd=ROOT, record=True)
@@ -596,12 +596,12 @@ LIB = ROOT / "src" / "luthier" / "lib"
 
 def test_each_file_resolves_its_own_names():
     # left.lut and right.lut both define `helper`; left.lut's `not` is not core's elsewhere
-    assert run_file(SCOPE / "main.lut") == "3 10 false true\n"
+    assert run_file(SCOPE / "main.run.lut") == "3 10 false true\n"
 
 
 @pytest.mark.parametrize("program, message", [
-    ("unlisted.lut", "unlisted.lut: helper is neither defined there, nor imported, nor core's"),
-    ("missing_import.lut", "missing_import.lut imports twice from right.lut, which does not define it"),
+    ("unlisted.run.lut", "unlisted.run.lut: helper is neither defined there, nor imported, nor core's"),
+    ("missing_import.run.lut", "missing_import.run.lut imports twice from right.lut, which does not define it"),
 ])
 def test_only_the_names_an_import_lists_enter(program, message):
     with pytest.raises(RunError) as error:
@@ -610,7 +610,7 @@ def test_only_the_names_an_import_lists_enter(program, message):
 
 
 def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
-    loaded = Loaded(SCOPE / "main.lut")
+    loaded = Loaded(SCOPE / "main.run.lut")
     top = loaded.top
     assert loaded.name(top, "twice") == "twice" and loaded.name(top, "ten") == "tenfold"
     assert loaded.name(top, "helper") is None and loaded.name(top, "tenfold") is None
@@ -622,8 +622,8 @@ def test_the_loader_reads_no_more_than_the_import_lists(tmp_path):
 def test_a_label_and_another_files_definition_of_its_name_are_kept_apart():
     # prompt-10.md: generators.lth's import brings program.lth's `int : Term`, which took the name of
     # tables.lth's Cell label `int`, and `intAt` was a stuck match
-    assert run_file(SCOPE / "label_and_definition.lut") == "7\n"
-    loaded = Loaded(SCOPE / "label_and_definition.lut")
+    assert run_file(SCOPE / "label_and_definition.run.lut") == "7\n"
+    loaded = Loaded(SCOPE / "label_and_definition.run.lut")
     assert loaded.name(LIB / "tables.lth", "int") == "int"
     assert loaded.name(LIB / "program.lth", "int") == "int@program"
 
@@ -657,7 +657,7 @@ SEEN_FROM = {}
 
 @pytest.fixture(scope="module")
 def numbers_laws():
-    return Loaded(ROOT / "tests" / "tester" / "numbers_laws.lut")
+    return Loaded(ROOT / "tests" / "tester" / "numbers_laws.test.lut")
 
 
 @pytest.mark.parametrize("name", CLASHES)
@@ -689,13 +689,13 @@ def test_the_numbers_laws_import_resolves_in_numbers_lth(numbers_laws):
 def test_the_arity_of_an_extern_is_its_declared_types():
     # math.log has no Python signature: typed, one argument by its type; untyped, taken as unary;
     # math.pi, declared a Float64, is the host's value
-    assert run_file(ROOT / "tests" / "run" / "extern_arity.lut") == "0.0 3.141592653589793 0.0\n"
+    assert run_file(ROOT / "tests" / "run" / "extern_arity.run.lut") == "0.0 3.141592653589793 0.0\n"
 
 
 # ---------------------------------------------------------------- run --set fills the file's holes
 # (record/IA/run-2026-10-13/prompt-7.md, 3.S9, 12.S18)
 
-HOLES = ROOT / "tests" / "run" / "holes.lut"
+HOLES = ROOT / "tests" / "run" / "holes.run.lut"
 
 
 @pytest.mark.parametrize("sets, output", [
@@ -707,12 +707,12 @@ def test_set_fills_the_holes(sets, output):
 
 
 @pytest.mark.parametrize("sets, message", [
-    ((), "graphDir : String is a hole of holes.lut the run needs; give it with --set graphDir="),
-    (("loud=true",), "graphDir : String is a hole of holes.lut the run needs"),
+    ((), "graphDir : String is a hole of holes.run.lut the run needs; give it with --set graphDir="),
+    (("loud=true",), "graphDir : String is a hole of holes.run.lut the run needs"),
     (("graphDir=a", "loud=yes"), "--set loud=yes: not a literal of type Bool"),
     (("graphDir=a", "loud=true", "unused=1.5"), "--set unused=1.5: not a literal of type Int"),
     (("twice=3",), "twice (n : Int) : Int is not a parameter"),
-    (("nope=1",), "nope is not a declared hole of holes.lut"),
+    (("nope=1",), "nope is not a declared hole of holes.run.lut"),
     (("graphDir",), "expected name=value"),
 ])
 def test_set_refuses(sets, message):
@@ -734,7 +734,7 @@ def test_a_hole_of_another_type_is_refused_by_name():
 
 
 def test_the_run_appends_its_record(tmp_path, capsys):
-    path = tmp_path / "holes.lut"
+    path = tmp_path / "holes.run.lut"
     path.write_text(HOLES.read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["run", str(path), "--set", "graphDir=a/b", "--set", "loud=false"]) == 0
     assert main(["run", str(path), "--set", "graphDir=c", "--set", "loud=true"]) == 0
@@ -756,14 +756,14 @@ RUN = ROOT / "tests" / "run"
 
 def test_a_lambda_handed_to_the_host_is_a_callback():
     # CallbackGivesTheFunction: the host calls (x - 0.3)^2 at 0.0, 0.1, ..., 0.9 and gets Float64s
-    assert run_file(RUN / "callbacks.lut") == "0.3\n"
+    assert run_file(RUN / "callbacks.run.lut") == "0.3\n"
     # CallsAreCounted: ten calls, keyed by the receiving extern's route and the argument
     assert host.calls() == {"python:run.bridge_host.maximize": {"1": 10}}
 
 
 def test_the_calls_are_in_the_runs_record(tmp_path, capsys):
-    path = tmp_path / "callbacks.lut"
-    path.write_text((RUN / "callbacks.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "callbacks.run.lut"
+    path.write_text((RUN / "callbacks.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["run", str(path)]) == 0
     assert main(["run", str(path)]) == 0
     runs = json.loads((tmp_path / "callbacks.run.json").read_text(encoding="utf-8"))
@@ -773,21 +773,21 @@ def test_the_calls_are_in_the_runs_record(tmp_path, capsys):
 
 def test_a_record_of_functions_crosses_by_field():
     # RecordCrossesByField: the host reads objective.value and objective.grad, each counted apart
-    assert run_file(RUN / "record_of_functions.lut") == "3.0\n"
+    assert run_file(RUN / "record_of_functions.run.lut") == "3.0\n"
     assert host.calls() == {"python:run.bridge_host.descend": {"1.value": 3, "1.grad": 2}}
 
 
 def test_a_host_function_given_back_is_applied_through_the_bridge():
     # HostGivesBackAValue and ExternIsValue: the host's closures cross in as host:k values, applied
     # by the bridge; one applied to a Luthier lambda calls it back, counted under its handle
-    assert run_file(RUN / "host_function.lut") == "3.5\n18.0\n"
+    assert run_file(RUN / "host_function.run.lut") == "3.5\n18.0\n"
     assert host.calls() == {"host:2 run.bridge_host.twice_at.<locals>.at": {"1": 2}}
 
 
 def test_an_extern_applied_to_fewer_arguments_is_a_value():
     # ExternPartialIsValue: add 1.0 waits for its second argument; handed to the host, add 1.0 is
     # a functools.partial of the host's add, written bare or with its parameters (eta)
-    assert run_file(RUN / "extern_partial.lut") == (
+    assert run_file(RUN / "extern_partial.run.lut") == (
         "3.5\npartial add (1.0,) 3.0\npartial add (1.0,) 3.0\n")
     assert host.calls() == {}
 
@@ -806,32 +806,32 @@ main (w : W) : W * Unit := print w (showFloat (maximize (fn x { "no" })))
 # (record/IA/run-2026-10-13/prompt-9.md, 8.S4: call by need within a run)
 
 def test_a_bare_name_binds_the_token_of_an_imported_models_action(tmp_path):
-    # print_twice.lut binds `w <- host.print w "..."` twice, host imported from world_model.lut: the
+    # print_twice.run.lut binds `w <- host.print w "..."` twice, host imported from world_model.lut: the
     # sugar of 2.S17 binds the token, so the second print crosses with the run's token
     # (record/IA/v04-2026-10-15/prompt-sugar.md)
-    result = command(ROOT / "tests/run/print_twice.lut", cwd=tmp_path)
+    result = command(ROOT / "tests/run/print_twice.run.lut", cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "first\nsecond\n", "")
 
 
 @pytest.mark.parametrize("entry", ["main", "byArgument"])
 def test_a_bound_read_is_made_once(tmp_path, entry):
-    # read_once.lut observes one read twice, bound by a block or passed as an argument
+    # read_once.run.lut observes one read twice, bound by a block or passed as an argument
     (tmp_path / "input.txt").write_text("data", encoding="utf-8")
-    result = command(ROOT / "tests/run/read_once.lut", "--main", entry, cwd=tmp_path)
+    result = command(ROOT / "tests/run/read_once.run.lut", "--main", entry, cwd=tmp_path)
     assert (result.returncode, result.stdout, result.stderr) == (0, "data\ndata\n1\n", "")
 
 
 def test_a_bound_maximize_runs_once(tmp_path):
-    # maximize_shared.lut projects the result three times; each entry calls back exactly as
-    # maximize_quadratic.lut, which matches it once (test_lm.py checks those counts against lm.py)
-    for name in ("maximize_quadratic.lut", "maximize_shared.lut"):
+    # maximize_shared.run.lut projects the result three times; each entry calls back exactly as
+    # maximize_quadratic.run.lut, which matches it once (test_lm.py checks those counts against lm.py)
+    for name in ("maximize_quadratic.run.lut", "maximize_shared.run.lut"):
         (tmp_path / name).write_text((ROOT / "tests/run" / name).read_text(encoding="utf-8"), encoding="utf-8")
-    once = command(tmp_path / "maximize_quadratic.lut", cwd=tmp_path)
+    once = command(tmp_path / "maximize_quadratic.run.lut", cwd=tmp_path)
     assert once.returncode == 0, once.stderr
     expected = json.loads((tmp_path / "maximize_quadratic.run.json").read_text(encoding="utf-8"))[-1]["calls"]
     assert set(expected["python:luthier.lm.maximize"]) == {"3", "4", "5"}
     for entry in ("main", "byArgument"):
-        result = command(tmp_path / "maximize_shared.lut", "--main", entry, cwd=tmp_path)
+        result = command(tmp_path / "maximize_shared.run.lut", "--main", entry, cwd=tmp_path)
         assert (result.returncode, result.stdout, result.stderr) == (0, once.stdout, "")
         runs = json.loads((tmp_path / "maximize_shared.run.json").read_text(encoding="utf-8"))
         assert runs[-1]["entry"] == entry and runs[-1]["calls"] == expected
@@ -858,18 +858,18 @@ def _certified_copy(tmp_path):
 
 def _certify_small(tmp_path):
     from luthier.tester import run_tests
-    outcomes = run_tests(tmp_path / "small.lut", store=True)
+    outcomes = run_tests(tmp_path / "small.test.lut", store=True)
     assert [o.grade for o in outcomes] == ["Cases"]
 
 
 def test_hellos_cone_runs_and_records_its_state(tmp_path, capsys):
-    # hello.lut's cone (prompt-first-action.md): `console : Console State`, whose four laws
-    # tests/tester/world_laws.lut certifies into world_model.cert.json, and `host : HostConsole =
+    # hello.run.lut's cone (prompt-first-action.md): `console : Console State`, whose four laws
+    # tests/tester/world_laws.test.lut certifies into world_model.cert.json, and `host : HostConsole =
     # Host State`, whose laws are run at an action's first application (10.S10), its frame law on
     # the same case, and its root of trust, an axiom, accepted as assumed by the default demand
     # (prompt-run-host.md); the rest vacuous
-    path = tmp_path / "hello.lut"
-    path.write_text((ROOT / "examples/hello.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "hello.run.lut"
+    path.write_text((ROOT / "examples/hello.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["run", str(path)]) == 0
     state = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]
     assert state["accept"] == "sampled" and state["laws"] == 4 and state["not certified"] == []
@@ -887,7 +887,7 @@ def test_hellos_cone_runs_and_records_its_state(tmp_path, capsys):
 
 def test_an_uncertified_cone_is_refused_per_law_and_nothing_runs(tmp_path, capsys):
     # RefusalSaysWhy: no entry at all, uncertified; exit 1, nothing evaluated, no record
-    path = _certified_copy(tmp_path) / "uses_small.lut"
+    path = _certified_copy(tmp_path) / "uses_small.run.lut"
     assert main(["run", str(path)]) == 1
     out, err = capsys.readouterr()
     assert out == "" and "same: FixesBool: uncertified (no entry)" in err
@@ -896,7 +896,7 @@ def test_an_uncertified_cone_is_refused_per_law_and_nothing_runs(tmp_path, capsy
 
 def test_a_passed_entry_serves_at_or_above_the_cutoff(tmp_path, capsys):
     # ServesAtTheCutoff and ServesIsMonotoneInTheCutoff: the entry's grade is `cases`
-    path = _certified_copy(tmp_path) / "uses_small.lut"
+    path = _certified_copy(tmp_path) / "uses_small.run.lut"
     _certify_small(tmp_path)
     for accept in (None, "cases", "assumed"):
         assert main(["run", str(path)] + (["--accept", accept] if accept else [])) == 0
@@ -911,7 +911,7 @@ def test_a_passed_entry_serves_at_or_above_the_cutoff(tmp_path, capsys):
 
 def test_an_entry_serves_only_the_model_its_reach_holds(tmp_path):
     # CertifiesOnlyUnderItsBinding: the census lists `same`, the run gives the law `also`
-    path = _certified_copy(tmp_path) / "uses_small.lut"
+    path = _certified_copy(tmp_path) / "uses_small.run.lut"
     _certify_small(tmp_path)
     with pytest.raises(Refused, match="also: FixesBool: passed, but no passed entry's reach covers m = also"):
         run_file(path, main="other")
@@ -927,16 +927,16 @@ def test_a_change_to_the_model_or_to_the_law_makes_the_entry_stale(tmp_path):
     small.write_text(text.replace("same : Small := { f := fn b { b } }",
                                   "same : Small := { f := fn b { if b then true else false } }"), encoding="utf-8")
     with pytest.raises(Refused, match=r"same: FixesBool: stale \(the model's code changed since its entries\)"):
-        run_file(tmp_path / "uses_small.lut")
+        run_file(tmp_path / "uses_small.run.lut")
     small.write_text(text.replace("m.f b == b", "(m.f b == b) and true"), encoding="utf-8")
     with pytest.raises(Refused, match=r"same: FixesBool: stale \(its entries are at \w+, the cone is now at \w+\)"):
-        run_file(tmp_path / "uses_small.lut")
+        run_file(tmp_path / "uses_small.run.lut")
 
 
 def test_a_provisional_name_is_refused_whole():
     # ProvisionalIsRefused
     with pytest.raises(Refused, match=r"shout: provisional") as refusal:
-        run_file(CERTIFIED / "provisional.lut")
+        run_file(CERTIFIED / "provisional.run.lut")
     assert refusal.value.refusals == [{"name": "shout", "law": None, "state": ("Provisional", None)}]
 
 
@@ -966,17 +966,17 @@ def test_the_refusal_is_per_law_and_says_why():
 
 
 def test_host_table_names_and_kinds_cross_as_lists(monkeypatch):
-    # the certification of csv's laws is not the question here (they are graded by tables_laws.lut)
+    # the certification of csv's laws is not the question here (they are graded by tables_laws.test.lut)
     monkeypatch.setattr("luthier.run.certification", lambda *a, **k: None)
-    assert run_file(ROOT / "tests/run/table_names.lut", fuel=10_000_000) == "same\ndifferent\nsame\n"
+    assert run_file(ROOT / "tests/run/table_names.run.lut", fuel=10_000_000) == "same\ndifferent\nsame\n"
 
 
 # ---------------------------------------------------------------- the record completed, the lock
 # (record/IA/run-2026-10-13/prompt-11.md; 12.S18, 12.S13)
 
 def _hello(tmp_path):
-    path = tmp_path / "hello.lut"
-    path.write_text((ROOT / "examples/hello.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "hello.run.lut"
+    path.write_text((ROOT / "examples/hello.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     return path
 
 
@@ -1000,8 +1000,8 @@ def test_an_entry_has_every_field_of_12_S18(tmp_path, capsys):
 
 def test_a_run_records_the_file_it_read_with_its_hash(tmp_path, monkeypatch, capsys):
     import hashlib
-    path = tmp_path / "read_first_line.lut"
-    path.write_text((RUN / "read_first_line.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "read_first_line.run.lut"
+    path.write_text((RUN / "read_first_line.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     (tmp_path / "input.txt").write_bytes(b"first line\nsecond line\n")
     monkeypatch.chdir(tmp_path)
     assert main(["run", str(path)]) == 0
@@ -1075,8 +1075,8 @@ def test_a_lock_in_the_directory_above_is_found(tmp_path, capsys):
 
 def _first_action_copy(tmp_path):
     """The first-action programs and their models in tmp_path, where the models' store is written."""
-    for name in ("first_action_models.lut", "first_action_honest.lut", "first_action_liar.lut",
-                 "first_action_noisy.lut"):
+    for name in ("first_action_models.lut", "first_action_honest.run.lut", "first_action_liar.run.lut",
+                 "first_action_noisy.run.lut"):
         (tmp_path / name).write_text((RUN / name).read_text(encoding="utf-8"), encoding="utf-8")
     return tmp_path
 
@@ -1084,7 +1084,7 @@ def _first_action_copy(tmp_path):
 def test_a_lying_print_is_refused_at_its_first_action_naming_the_place(tmp_path, capsys):
     # liar.print writes its line twice; HostAgreesPrint (world.lth's agreement) is refuted at the
     # run's own argument, the place named; nothing is recorded, no entry written
-    path = _first_action_copy(tmp_path) / "first_action_liar.lut"
+    path = _first_action_copy(tmp_path) / "first_action_liar.run.lut"
     with pytest.raises(Refused, match=r"liar\.print disagrees with its description at its first action .*"
                                       r"HostAgreesPrint at s = \"twice\": the place stdout differs"):
         run_file(path)
@@ -1100,7 +1100,7 @@ def test_a_read_that_prints_is_refused_by_the_frame_law_naming_the_place(tmp_pat
     # frame law (HostChangesOnlyDeclared), on the same case, over the places the certifier adds
     # (the standard output first), refuses it; nothing recorded, no entry (prompt-run-host.md)
     (tmp_path / "input.txt").write_text("first line\n", encoding="utf-8")
-    path = _first_action_copy(tmp_path) / "first_action_noisy.lut"
+    path = _first_action_copy(tmp_path) / "first_action_noisy.run.lut"
     monkeypatch.chdir(tmp_path)
     with pytest.raises(Refused, match=r"noisy\.readFile changed a place it does not declare at its first action .*"
                                       r"HostChangesOnlyDeclared at p = \"input.txt\": the place stdout differs "
@@ -1112,7 +1112,7 @@ def test_a_read_that_prints_is_refused_by_the_frame_law_naming_the_place(tmp_pat
 
 def test_a_first_action_is_validated_once_recorded_and_then_served(tmp_path, capsys, monkeypatch):
     from luthier import certify
-    path = _first_action_copy(tmp_path) / "first_action_honest.lut"
+    path = _first_action_copy(tmp_path) / "first_action_honest.run.lut"
     store = tmp_path / "first_action_models.cert.json"
     for k in range(2):
         assert main(["run", str(path)]) == 0
@@ -1188,7 +1188,7 @@ def test_a_testers_entry_on_the_model_never_serves_its_first_action(tmp_path, ca
     assert listed["law"] == "HostAgreesPrint" and "kind" not in listed and certify.entry_kind(listed) is None
     listed["reach"].append({"parameter": "extra", "reach": {"Members": [{"Printed": '["stdout"]'}]}})
     store.write_text(json.dumps([listed]), encoding="utf-8")
-    path = tmp_path / "first_action_honest.lut"
+    path = tmp_path / "first_action_honest.run.lut"
     assert main(["run", str(path)]) == 0 and capsys.readouterr().out == "once\n"
     firsts = json.loads(record_path(path).read_text(encoding="utf-8"))[-1]["certification"]["first actions"]
     assert [(f["law"], f["outcome"]) for f in firsts] == [("HostAgreesPrint", "confirmed"),
@@ -1205,11 +1205,11 @@ def test_a_testers_entry_on_the_model_never_serves_its_first_action(tmp_path, ca
 
 
 def test_the_protocols_observations_change_nothing(tmp_path, monkeypatch, capsys):
-    # observe.lut's first print and first observe are validated (HostAgreesPrint,
+    # observe.run.lut's first print and first observe are validated (HostAgreesPrint,
     # HostObserveChangesNothing); the protocol's observations add nothing to what is printed
     (tmp_path / "input.txt").write_text("first line\n", encoding="utf-8")
-    path = tmp_path / "observe.lut"
-    path.write_text((RUN / "observe.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "observe.run.lut"
+    path.write_text((RUN / "observe.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     assert main(["run", str(path)]) == 0
     assert capsys.readouterr().out == "one\none\n\n\nfirst line\n\n"
@@ -1270,8 +1270,8 @@ def test_the_record_holds_the_demand_the_plan_and_the_key(tmp_path, capsys):
     # RecordsEveryCutoff (12.S18, L5.18): the demand as one object; PlanIsTheLiveCone (L5.13): e is
     # not produced; the call-by-need schedule (8.S4); KeyReadsOnlyTheCone (8.S8): unusedHole is
     # recorded as given and stays out of the key; the plan's hash is the same for the same plan (L5.6)
-    path = tmp_path / "plan_cone.lut"
-    path.write_text((RUN / "plan_cone.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    path = tmp_path / "plan_cone.run.lut"
+    path.write_text((RUN / "plan_cone.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     for unused in ("7", "8"):
         assert main(["run", str(path), "--set", "usedHole=1", "--set", f"unusedHole={unused}", "--fuel", "5000"]) == 0
     assert capsys.readouterr().out == "5\n5\n"

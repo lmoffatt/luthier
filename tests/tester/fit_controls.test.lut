@@ -1,16 +1,17 @@
--- tests/tester/fit_controls.lut: the controls of the fit's laws on the quadratic family. Each line
--- is the law's line of fit_laws.lut written `(control <- true)` (test.lth's `control`), with the
+-- tests/tester/fit_controls.test.lut: the controls of the fit's laws on the quadratic family. Each line
+-- is the law's line of fit_laws.test.lut written `(control <- true)` (test.lth's `control`), with the
 -- maximizer or the model of `LMStep` replaced by one broken on purpose, and is expected to be
 -- refuted: it shows that a law can fail on a wrong model, so that its passing on the real one is
 -- not vacuous (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The tester records its
--- outcome as a control's entry, never the law's failure, and `luthier certify fit_laws.lut
--- fit_controls.lut` reports the law controlled. Written 2026-10-15 by Claude Sonnet, an agent of
+-- outcome as a control's entry, never the law's failure, and `luthier certify fit_laws.test.lut
+-- fit_controls.test.lut` reports the law controlled. Written 2026-10-15 by Claude Sonnet, an agent of
 -- the coordinating session, on record/IA/controls-2026-10-15/prompt-mutants.md. The laws
 -- `DirectionDescendsOnQuadratic`, `DirectionAgreesOnQuadratic`, `StepRuleOnQuadratic` and
--- `MaximizersAgree` are fit_laws.lut's own wrappers, imported from it so that the law's cone is the
--- same; `QuadraticConverges` (belief.lth) is also controlled in belief_controls.lut. The models of
+-- `MaximizersAgree` are fit_laws.test.lut's own wrappers, imported from it so that the law's cone is the
+-- same; `QuadraticConverges` (belief.lth) is also controlled in belief_controls.test.lut. The models of
 -- `LMStep` are broken on the native one, the host's being a route (lm.py) that cannot be written
--- whole.
+-- whole. [2026-10-16] The wrappers live in optimization.lth and belief.lth, and the cutoffs in
+-- fit_cutoffs.lut, since a test program is never imported (D-2026-10-16-e).
 
 import "test.lth" test SampledMode
 import "generators_model.lut" linear
@@ -21,7 +22,7 @@ import "belief.lth" Maximizer QuadraticConverges MaximizersAgree
 import "optimization.lth" LMStep dampedStep QuadraticStepAccepts DirectionDescendsOnQuadratic DirectionAgreesOnQuadratic
   StepRuleOnQuadratic
 import "optimization_model.lut" native
-import "fit_laws.lut" tolerance budget cutoffs
+import "fit_cutoffs.lut" tolerance budget cutoffs
 import "../../examples/sonolocalizacion/session_a.lut" nativeLM
 
 -- gives up: returns the start and says it did not converge

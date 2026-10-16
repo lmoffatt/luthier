@@ -1,4 +1,4 @@
--- tests/tester/generators_controls.lut: the controls of the laws of generators_laws.lut. Each line
+-- tests/tester/generators_controls.test.lut: the controls of the laws of generators_laws.test.lut. Each line
 -- is written `(control <- true)` (test.lth's `control`) and is expected to be refuted: it shows
 -- that a law about a family of generators_model.lut can fail on a family that is broken on
 -- purpose, so that its passing there is not vacuous (7.S19 as D-2026-10-15-a generalized it to
@@ -15,11 +15,11 @@
 -- `UniformSampleIsUniform` is statistical (laws.lth §4): its control, added
 -- 2026-10-15 on record/IA/statistical-2026-10-15/prompt-tester.md (7.S19, L9.14), is the law on
 -- generators_model.lut's `skewedSample`, the calibrated sample squared, run by Wald's sequential
--- test at generators_laws.lut's cutoffs `wald`; it passes when the test fails it. Since
+-- test at generators_laws.test.lut's cutoffs `wald`; it passes when the test fails it. Since
 -- record/IA/controls-2026-10-15/prompt-tail.md the source is the law's parameter and the control
 -- is a line of the law, of its cone (before, a law of its own, `SkewedSampleIsUniform`, which
 -- certify did not count); the law's second control, probability_model.lut's `lump`, every value
--- 0.9, came here from probability_controls.lut with the `SourceIsUniform` line it controlled
+-- 0.9, came here from probability_controls.test.lut with the `SourceIsUniform` line it controlled
 -- there, which computed the same test as this law's line.
 
 import "test.lth" test SampledMode
@@ -68,7 +68,7 @@ test "OrthogonalGivesOrthogonal" (SampledMode linear) (seed <- 20261015) (whereB
 test "UnitListGivesUnitValues" (SampledMode linear) (seed <- 20261015) (whereBindings <- family "brokenUnitListFamily") (profile <- cutoffs) (control <- true)
 test "ClearDiagonalGivesClear" (SampledMode linear) (seed <- 20261015) (whereBindings <- family "brokenClearFamily") (profile <- cutoffs) (control <- true)
 
--- the statistical law's control: the sequential test at the demand's cutoffs, as generators_laws.lut
+-- the statistical law's control: the sequential test at the demand's cutoffs, as generators_laws.test.lut
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.5, initial := 50, budget := 400 }
 onWald : List Binding := [ { parameter := just "c", type := nothing, generator := "wald", coverage := Listed } ]
 onSkewed : List Binding := [ { parameter := just "source", type := nothing, generator := "skewedSample", coverage := Listed } ]

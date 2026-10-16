@@ -1,6 +1,6 @@
 """Host side of `run --checked` (record/IA/run-2026-10-13/prompt-12.md item 3; 12.S18, 4.R5,
 10.S11): honest and dishonest values at declared subtypes (`Positive`, `VecOf 3`, `PsdAt`).
-Imported by tests/run/checked.lut as `python:run.checked_host.*` (tests/ on the path)."""
+Imported by tests/run/checked.run.lut as `python:run.checked_host.*` (tests/ on the path)."""
 import numpy as np
 
 

@@ -85,10 +85,10 @@ carries its status (implemented, decided, proposed) and its accept and reject pr
 pip install -e .
 luthier check examples/z7ring.lut              # parse and type-check
 luthier check -v examples/z7ring.lut           # and list what is certified, stale, pending, provisional
-luthier test  examples/z7ring.lut              # run the file's test directives, write the certificate
-luthier test  file.lut --name f --n 500 --seed 1
+luthier test  file.test.lut --seed 1           # run a test program's test lines, write the certificates
+luthier certify tests/tester/*.test.lut        # several test programs, each in its own process
 luthier eval  examples/z7ring.lut "addMod7 3 5"
-luthier run   program.lut --set param=value    # evaluate main, record the run in program.run.json
+luthier run   program.run.lut --set param=value  # evaluate main, record the run in program.run.json
 pytest
 ```
 

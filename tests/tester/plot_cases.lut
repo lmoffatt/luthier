@@ -1,0 +1,73 @@
+-- tests/tester/plot_cases.lut: the cases of the laws of `Drawing` (plot.lth §5) and of `Persistence`
+-- (world.lth §2) on matplotlib's drawing, shared by the laws (plot_laws.test.lut) and their controls
+-- (plot_controls.test.lut): plots built from tables parsed by `csv`, the worlds, the permutations of
+-- rows and the other censuses. Moved here from plot_laws.test.lut on 2026-10-16 by Claude Opus 5.5,
+-- an agent of the coordinating session, on record/IA/code-follows-2026-10-16/prompt-file-kinds.md:
+-- an executive file is never imported (D-2026-10-16-e), so what both test programs read lives in a
+-- library. The definitions are unchanged; the censuses of models (`drawings`, `stores`) stay in
+-- the test program.
+
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "kernel_laws.lth" Concrete
+import "tables.lth" Table
+import "tables_model.lut" csv
+import "plot.lth" Plot Canvas Mapping Margin plot table point line addLayer texts abline scale labels linear auto palette
+import "world_model.lut" State
+
+parsed (s : String) : Table := match csv.parse s { just t -> t }
+canvas : Canvas := { width := 4.0, height := 3.0, dpi := 50.0 }
+xy : Mapping := [("x", "x"), ("y", "y")]
+obsText : String := "x:float,y:float,g:str\n1.0,2.0,a\n2.0,3.5,b\n3.0,1.0,a\n"
+notesText : String := "x:float,y:float,name:str\n1.5,3.0,first\n9.0,3.0,far\n"
+
+-- points and a line over obs
+pointsAndLine (obs : Table) : Plot :=
+  labels "points and a line" "x" "y" (scale "y" (linear (auto { expand := 0.05 })) (scale "x" (linear (auto { expand := 0.05 }))
+    (line "obs" nil 1.0 (point "obs" nil 4.0 (plot canvas "obs" obs xy)))))
+-- points coloured by g, a text from notes, the line y = x
+coloured (obs notes : Table) : Plot :=
+  labels "coloured" "x" "y" (scale "colour" (palette ["red", "blue"])
+    (scale "y" (linear (auto { expand := 0.05 })) (scale "x" (linear (auto { expand := 0.05 }))
+      (abline 0.0 1.0 0.5
+        (addLayer (point "obs" [("colour", "g")] 4.0 (table "notes" notes (plot canvas "obs" obs xy)))
+          { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))))
+-- points over obs (x 1 to 3) then a text over notes (x 1.5 and 9): the layers overlap on x and y
+-- for the first note; with the second alone they are apart on x
+farText : String := "x:float,y:float,name:str\n9.0,3.0,far\n"
+apartLayers (obs notes : Table) : Plot :=
+  labels "apart" "x" "y" (scale "y" (linear (auto { expand := 0.05 })) (scale "x" (linear (auto { expand := 0.05 }))
+    (addLayer (point "obs" nil 4.0 (table "notes" notes (plot canvas "obs" obs xy)))
+      { geom := texts { size := 8.0 }, mapping := [("label", "name")], table := "notes" })))
+
+states : List Concrete := [State]
+plots : List Plot := [
+  pointsAndLine (parsed obsText),
+  coloured (parsed obsText) (parsed notesText),
+  apartLayers (parsed obsText) (parsed farText),
+  apartLayers (parsed obsText) (parsed notesText) ]
+again : List Plot := [ pointsAndLine (parsed obsText), coloured (parsed obsText) (parsed notesText) ]
+exts : List String := ["png", "svg"]
+stems : List String := ["plot"]
+blank : State := { stdout := "", files := nil }
+withFile : State := { stdout := "", files := [("plot.png", "old"), ("other.txt", "kept")] }
+worlds : List State := [blank, withFile]
+names : List String := ["obs"]
+obsTables : List Table := [parsed obsText]
+-- the six permutations of three rows
+perms : List (Fin 3 -> Fin 3) := [
+  fn r { r },
+  fn r { if r == 0 then 1 else if r == 1 then 0 else 2 },
+  fn r { if r == 0 then 0 else if r == 1 then 2 else 1 },
+  fn r { if r == 0 then 2 else if r == 1 then 1 else 0 },
+  fn r { if r == 0 then 1 else if r == 1 then 2 else 0 },
+  fn r { if r == 0 then 2 else if r == 1 then 0 else 1 } ]
+margins : List Margin := [0.05]
+positions : List Int := [0, 1]
+titles : List String := ["", "another title"]
+paths : List String := ["plot.png", "plot.svg", "other.txt"]
+contents : List String := ["", "x", "PNG"]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }

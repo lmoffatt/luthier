@@ -1,0 +1,22 @@
+-- tests/tester/fit_cutoffs.lut: the cutoffs of the fit's laws on the quadratic family, each a
+-- census of one, the demand's (D-2026-10-14-c), shared by the laws (fit_laws.test.lut) and their
+-- controls (fit_controls.test.lut). Moved here from fit_laws.test.lut on 2026-10-16 by Claude Opus
+-- 5.5, an agent of the coordinating session, on record/IA/code-follows-2026-10-16/
+-- prompt-file-kinds.md: an executive file is never imported (D-2026-10-16-e), so what both test
+-- programs read lives in a library. The definitions are unchanged.
+
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "numbers.lth" Tolerance
+
+tolerance : Tolerance := 1.0e-12
+-- the iterations the demand grants a maximizer on the quadratic family (QuadraticConverges's
+-- `budget`), a census of one, 50, as the probe of record/IA/layer-3-review-2026-10-15/report-fix-BCD.md
+-- [proposed]; settingsA's maxIter 500 is above it, so the law is asked
+budget : Nat := 50
+
+cutoffs : List Binding := [
+  { parameter := just "s", type := nothing, generator := "settingsA", coverage := Listed },
+  { parameter := just "d", type := nothing, generator := "dampingA", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "budget", type := nothing, generator := "budget", coverage := Listed } ]

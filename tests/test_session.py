@@ -12,7 +12,7 @@ from luthier import certify
 
 ROOT = Path(__file__).resolve().parents[1]
 ARITHMETIC = ROOT / "tests/eval/arithmetic.lut"
-HELLO = ROOT / "examples/hello.lut"
+HELLO = ROOT / "examples/hello.run.lut"
 
 
 def session(lines, *args, cwd=None):

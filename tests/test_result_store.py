@@ -40,9 +40,9 @@ def test_a_pure_entry_run_twice_is_served_the_second_time(tmp_path, capsys):
 
 
 def test_an_acting_entry_always_executes(tmp_path, capsys):
-    # hello.lut's cone prints (W): executed twice, nothing stored (D-2026-10-15-d)
-    path = tmp_path / "hello.lut"
-    path.write_text((ROOT / "examples/hello.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    # hello.run.lut's cone prints (W): executed twice, nothing stored (D-2026-10-15-d)
+    path = tmp_path / "hello.run.lut"
+    path.write_text((ROOT / "examples/hello.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
     assert main(["run", str(path)]) == 0
     assert main(["run", str(path)]) == 0
     assert capsys.readouterr().out == "hello, world\nhello, world\n"

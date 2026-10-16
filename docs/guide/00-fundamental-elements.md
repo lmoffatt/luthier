@@ -325,7 +325,7 @@ Where this stands. L9.13 is his: to design certificates, first see how the law f
 sonolocalización runs uncertified; certificates are then designed on its laws and on how they fail.
 The theories of tests and evidence are written (`test.lth`, `laws.lth`), and `luthier test` is their
 first specimen: it reads the `test` lines of a file and runs each law either on every case or on a
-sample. From `tests/tester/laws.lut`:
+sample. From `tests/tester/laws.test.lut`:
 
     import "test.lth" test ExhaustiveMode SampledMode
     import "generators_model.lut" linear
@@ -341,7 +341,7 @@ line names it, gives the mode and, by named arguments, the number of cases and t
 has no certificate store yet, so it reports the evidence of the run and does not record it, and
 `run` does not yet refuse a cone for lack of one.
 
-`luthier test tests/tester/laws.lut` prints one line per test line, for example `AndIsOr: exhaustive,
+`luthier test tests/tester/laws.test.lut` prints one line per test line, for example `AndIsOr: exhaustive,
 4 cases, refuted at a = true, b = false` and `PlusCommutes: sampled (seed 7, ...), 200 cases,
 sampled`. A law over `Int` under `ExhaustiveMode` is reported as not run, since `Int` is infinite
 (spec 7.R3).
@@ -364,7 +364,7 @@ changes no place: `ReadChangesNothing` in §4 of `world.lth`. Mutation is a para
 value before and its value after, and updating in place is the planner's optimization when nothing
 else reads the earlier value (L4.5).
 
-`examples/hello.lut`, the first program with an action (the comment lines of the file left out):
+`examples/hello.run.lut`, the first program with an action (the comment lines of the file left out):
 
     import "world_model.lut" HostConsole host : HostConsole
 
@@ -381,7 +381,7 @@ description and `host` is a record of `extern` routes to Python functions, certi
 files are in the repository; reading them is the quickest way to see a theory and its two models
 side by side.
 
-`luthier run examples/hello.lut` gives `main` a token `w0`. Reduction looks up `host`, takes its
+`luthier run examples/hello.run.lut` gives `main` a token `w0`. Reduction looks up `host`, takes its
 component `print`, an extern route, and finds it applied to two closed arguments, so the host is
 called (spec 3.S18) and gives back `(w1, unit)`: the next token and the empty result. The route is
 opened only now, when a demand reaches it (L11.7), and in the language designed it is first

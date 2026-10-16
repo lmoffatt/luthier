@@ -1,5 +1,5 @@
--- tests/tester/sonolocalizacion_controls.lut: the controls of the laws tests/tester/
--- sonolocalizacion_laws.lut certifies on the port (examples/sonolocalizacion). Each line is the
+-- tests/tester/sonolocalizacion_controls.test.lut: the controls of the laws tests/tester/
+-- sonolocalizacion_laws.test.lut certifies on the port (examples/sonolocalizacion). Each line is the
 -- law's line written `(control <- true)` (test.lth's `control`), with the model replaced by one
 -- broken on purpose, and is expected to be refuted (7.S19 as D-2026-10-15-a generalized it to every
 -- law; L9.14). Written 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session, on
@@ -50,7 +50,7 @@ test "FullAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 2026101
 test "ProfileAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs) (control <- true)
 test "ProfileIsFullAtItsSigma" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs) (control <- true)
 
--- distance_graph.lut: a check that sees the schema and no row, on sonolocalizacion_laws.lut's graphs
+-- distance_graph.lut: a check that sees the schema and no row, on sonolocalizacion_laws.test.lut's graphs
 schemaOnly (g : DistanceGraph) : Maybe Violation :=
   if not (HasNodeColumns g) then just (schema "HasNodeColumns")
   else if not (HasMeasurementColumns g) then just (schema "HasMeasurementColumns") else nothing

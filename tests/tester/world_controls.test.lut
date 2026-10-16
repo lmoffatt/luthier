@@ -1,12 +1,12 @@
--- tests/tester/world_controls.lut: the controls of the laws of `Console` (world.lth §4) that
--- tests/tester/world_laws.lut certifies on world_model.lut's `console`. Each line is the law's line
+-- tests/tester/world_controls.test.lut: the controls of the laws of `Console` (world.lth §4) that
+-- tests/tester/world_laws.test.lut certifies on world_model.lut's `console`. Each line is the law's line
 -- written `(control <- true)` (test.lth's `control`), with the console replaced by one broken on
 -- purpose, and is expected to be refuted: it shows that the law can fail on a wrong console, so
 -- that its passing on the real one is not vacuous (7.S19 as D-2026-10-15-a generalized it to every
 -- law; L9.14). The tester records its outcome as a control's entry, never the law's failure.
 -- Written 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session, on
 -- record/IA/controls-2026-10-15/prompt-mutants.md. The states, lines and places are those of
--- world_laws.lut.
+-- world_laws.test.lut.
 
 import "test.lth" test ExhaustiveMode Grade Proved Cases Sampled AssumedGrade
 import "generators.lth" Binding
@@ -60,7 +60,7 @@ test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- on
 
 -- ---------------------------------------------------------------- the rest of world.lth
 -- Added 2026-10-15 by Claude Opus 5.5, an agent of the coordinating session, on
--- record/IA/v04-2026-10-15/prompt-e.md: the controls of the lines world_laws.lut adds. The broken
+-- record/IA/v04-2026-10-15/prompt-e.md: the controls of the lines world_laws.test.lut adds. The broken
 -- models: an own action that appends to Luthier's store instead of setting it, and a `print`
 -- described as writing the standard output that also writes a log file (`Described`); a validator
 -- that applies every extern, one that grades an extern whose type states no law, one that
@@ -71,7 +71,7 @@ test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- on
 -- review's W1), so a host broken on purpose shows only in the cases it gathers: each control lists
 -- the case `agreement` gathers from such a host (a `print` that forgets the newline, a `readFile`
 -- that finds nothing, an observation that empties the standard output, a `print` that also writes
--- input.txt) on the same `listedHost` as world_laws.lut. `ObserverIsFaithful` has no control: it
+-- input.txt) on the same `listedHost` as world_laws.test.lut. `ObserverIsFaithful` has no control: it
 -- is an axiom and reads nothing of the model (11.R3).
 
 -- §1, §2 descriptions
@@ -93,7 +93,7 @@ test "OwnIsIdempotent" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind
 test "ChangesOnlyDeclared" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "S" "states", bind "A" "unitTypes",
   bind "m" "worldModels", bind "d" "printLogsList", bind "s" "worlds", bind "p" "logPlaces"]) (control <- true)
 
--- §3 externs: world_laws.lut's validator, broken
+-- §3 externs: world_laws.test.lut's validator, broken
 lawful : Term := App (Var "Likelihood") (Var "3")
 lawless : Term := Var "Float64"
 lawsOfType (t : Term) : List String := if t == lawful then ["TangentShapes", "ScoreIsGradient"] else nil

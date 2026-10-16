@@ -1,5 +1,5 @@
--- tests/tester/plan_controls.lut: the controls of the laws of plan.lth that tests/tester/
--- plan_laws.lut certifies. Each line is the law's line written `(control <- true)` (test.lth's
+-- tests/tester/plan_controls.test.lut: the controls of the laws of plan.lth that tests/tester/
+-- plan_laws.test.lut certifies. Each line is the law's line written `(control <- true)` (test.lth's
 -- `control`), with the model replaced by one broken on purpose, and is expected to be refuted: it
 -- shows that the law can fail on a wrong model, so that its passing on the real one is not vacuous
 -- (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The tester records its outcome as
@@ -25,7 +25,7 @@ types : List U := [Nat]
 eqs : List (Nat -> Nat -> Bool) := [eqNat]
 planners : List (Planning Nat eqNat) := [planning]
 
--- the dataflow of plan_laws.lut where first demand is not by levels
+-- the dataflow of plan_laws.test.lut where first demand is not by levels
 uneven : Dataflow Nat eqNat := {
   nodes := [{ name := "a", reads := nil }, { name := "b", reads := ["a"] }, { name := "c", reads := nil },
             { name := "d", reads := ["b", "c"] }],

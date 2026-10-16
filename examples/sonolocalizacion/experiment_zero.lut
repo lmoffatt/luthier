@@ -29,20 +29,11 @@
 --                 whether the distances agree with it
 -- With 22 data and 30 parameters a test on the residuals has little power; the controls say more.
 --
--- The host has no action that writes a table to a file yet (world_model.lut: `print` and
--- `readFile`), so each table is printed to the standard output after a header line `== <path>`, the
--- path it would be written at under outDir. The three plots of the tables (figures.lut, plan G4 of
--- record/plan/plots/plan-plots-2026-10-14-decisions.md) are rendered after them by the host's
--- renderer (plot_model.lut) to outDir/positions.png, residuals.png and transform.png; outDir must
--- exist. The summary line is printed last.
---
--- Run from the root of this repository with
---   PYTHONPATH=src python3 -m luthier.cli run examples/sonolocalizacion/experiment_zero.lut \
---     --set graphDir=examples/sonolocalizacion/A/graph --set outDir=<dir> \
---     --set lmTol=1e-12 --set lmMaxIter=500 --set lmFloor=6.661338147750939e-15
--- (v0.1's values of session A; the floor is v0.1's `n eps` for the 30 coordinates of session A),
--- and the controls with --main priorWidened --set horizontalWidening=5.0, or --main sigmaKnown
--- --set fixedSigma=0.03, each with its own outDir.
+-- The run of the experiment and of its two controls, with its parameters, the figures and what it
+-- writes, is experiment_zero.run.lut, which imports this file: since 2026-10-16 a model and the
+-- demand on it are two files (D-2026-10-16-e; split by Claude Opus 5.5, an agent of the
+-- coordinating session, on record/IA/code-follows-2026-10-16/prompt-file-kinds.md, the
+-- definitions unchanged). The run writes the tables with `writeTable`, below.
 
 import "world_model.lut" HostConsole host : HostConsole
 import "numbers.lth" Doubles Elementary
@@ -57,25 +48,7 @@ import "belief.lth" GaussianBelief Settings MaxResult Maximizer laplaceMode lapl
 import "belief_model.lut" lm : Maximizer
 import "positions.lut" Design Separated flatten
 import "positions_model.lut" positionsModel nodesOf
-import "plot.lth" Canvas
-import "plot_model.lut" matplotlib
-import "figures.lut" Style positionsPlot residualsPlot transformPlot keptCount
 import "distance_graph.lut" DistanceGraph GraphWithColumns ValidDistanceGraph ValidGraph MapInput toMapInput designOf readGraph nameOf iOf jOf dOf intToString realToString
-
--- ---------------------------------------------------------------- parameters
--- run parameters: declared holes that `run --set name=value` fills (3.S9, 8.S1, 12.S18). The graph
--- directory and the directory of the tables, relative to where the run starts.
-graphDir : String
-outDir : String
--- the parameters of the two controls, needed only by their entries
-horizontalWidening : Float64
-fixedSigma : Float64
--- Levenberg-Marquardt: the tolerance on the Newton decrement, in nats, below which it says it
--- converged, its budget of iterations (session A: 1e-12 and 500), and the floor of the step
--- matrix's spectrum below which a direction is neither stepped nor counted (belief.lth `Settings`)
-lmTol : Float64
-lmMaxIter : Int
-lmFloor : Float64
 
 -- ---------------------------------------------------------------- the model on the full position vector
 -- theta is the positions of the graph's nodes, node by node (positions.lut), and the mean model is
@@ -107,11 +80,6 @@ likelihoodOf (m : MapInput) (st : SigmaTreatment) : Likelihood (3 * m.x0.n) :=
     known s -> gaussian (3 * m.x0.n) (knownSigma (3 * m.x0.n) (meanModel m) (elementary.log s)) }
 
 -- ---------------------------------------------------------------- the update
--- The maximizer is the host's Levenberg-Marquardt (belief_model.lut, src/luthier/lm.py), a model
--- of `Maximizer` validated against belief.lth §2 at the first action that asks for it (10.S10),
--- with the settings the run takes from its parameters.
-runSettings : Settings := { tol := lmTol, maxIter := lmMaxIter, floor := lmFloor }
-
 -- The floor of the pseudo-inverse of a posterior precision, its covariance: v0.1's `n eps`, n the
 -- size of the matrix and eps the spacing of the doubles at one (arrays.lth §4, P11).
 covFloor (n : Int) : RankFloor := toFloat64 n * doubles.epsilon
@@ -284,19 +252,6 @@ writeTable (w : W) (path : String) (t : Table) : W * Unit := {
   (w1, done) <- host.print w ("== " + path)
   host.print w1 (csv.render t) }
 
--- The figures (plan G4, figures.lut) and what they take from the demand (P11), each a definition
--- [proposed by the agent of record/IA/plots-2026-10-15/prompt-figures.md]: the canvas, in inches
--- and dots per inch; the marks' sizes in points and the automatic scales' expansion; the
--- ellipses' semi-axes in posterior sds; the node whose measurements the residual plot colours
--- (the speaker placement A2, whose block of distances is in question in session A) and the two
--- colours, for "other" and "touches" in that order; the level of the Kolmogorov band.
-figureCanvas : Canvas := { width := 6.0, height := 5.0, dpi := 100.0 }
-figureStyle : Style := { pointSize := 5.0, textSize := 7.0, lineWidth := 1.0, expand := 0.08 }
-ellipseLevel : Float64 := 2.0
-highlightedNode : String := "parlante_A2"
-pairColours : List String := ["#0072B2", "#D55E00"]
-bandLevel : Float64 := 0.05
-
 -- [proposed] The half-width of the Kolmogorov band at level alpha over n transforms: c / (sqrt n +
 -- 0.12 + 0.11 / sqrt n), with Stephens's correction as in `transformTail`, and c = sqrt(-log(alpha /
 -- 2) / 2), where the first term of Kolmogorov's tail, 2 exp(-2 c^2), equals alpha (c = 1.358 at
@@ -305,36 +260,3 @@ bandHalfWidth (alpha : Float64) (n : Int) : Float64 :=
   if n < 1 then 1.0
   else { q := elementary.sqrt (toFloat64 n)
          elementary.sqrt (0.0 - elementary.log (alpha / 2.0) / 2.0) / (q + 0.12 + 0.11 / q) }
-
-writeReport (w : W) (r : Report) : W * Unit := {
-  (w1, u1) <- writeTable w (outDir + "/positions.csv") r.positions
-  (w2, u2) <- writeTable w1 (outDir + "/residuals.csv") r.residuals
-  (w3, u3) <- writeTable w2 (outDir + "/transform.csv") r.transform
-  (w4, u4) <- matplotlib.render w3 (positionsPlot figureCanvas figureStyle ellipseLevel r.positions) (outDir + "/positions.png")
-  (w5, u5) <- matplotlib.render w4 (residualsPlot figureCanvas figureStyle highlightedNode pairColours r.positions r.residuals)
-                (outDir + "/residuals.png")
-  (w6, u6) <- matplotlib.render w5 (transformPlot figureCanvas figureStyle (bandHalfWidth bandLevel (keptCount r.transform)) r.transform)
-                (outDir + "/transform.png")
-  host.print w6 r.summary }
-
--- The graph is checked against its invariants before the fit; an invalid one is reported, not fit.
--- The run of the experiment and its two controls differ in the prior and in how sigma is treated.
-runOn (w : W) (read : Maybe DistanceGraph) (c : Widening) (st : SigmaTreatment) : W * Unit :=
-  match read {
-    nothing -> host.print w ("FAIL ReadGraph: " + graphDir + " has no nodes.csv and measurements.csv that read as typed tables") ;
-    just g -> if ValidGraph g then (match reportOf runSettings g c st { r -> writeReport w r }) else host.print w ("the graph in " + graphDir + " is not valid") }
-
-runWith (w : W) (c : Widening) (st : SigmaTreatment) : W * Unit := {
-  (w1, read) <- readGraph w graphDir
-  runOn w1 read c st }
-
--- The entries: the experiment, and its two controls (`run --main priorWidened`, `run --main
--- sigmaKnown`). A run parameter is a plain `Float64` (`--set` fills only the plain types), so the
--- control's entry asks it positive, which v0.1 asked in the parameter's type.
-main (w : W) : W * Unit := runWith w 1.0 (eliminated unit)
-priorWidened (w : W) : W * Unit :=
-  if 0.0 < horizontalWidening then runWith w horizontalWidening (eliminated unit)
-  else host.print w ("horizontalWidening must be positive: " + realToString horizontalWidening)
-sigmaKnown (w : W) : W * Unit :=
-  if 0.0 < fixedSigma then runWith w 1.0 (known fixedSigma)
-  else host.print w ("fixedSigma must be positive: " + realToString fixedSigma)

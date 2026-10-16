@@ -1,4 +1,4 @@
--- tests/tester/tables_laws.lut: the laws of `Codec` (on `csv`, tables_model.lut) and of `Table`
+-- tests/tester/tables_laws.test.lut: the laws of `Codec` (on `csv`, tables_model.lut) and of `Table`
 -- (tables.lth §2, §4) as listed cases, on the brief record/IA/evidence-2026-10-14/prompt-tables.md.
 -- `Table`, `Perturbed` and `BrokenText` have no generator (7.R4), so each census is a list: tables
 -- built in Luthier (an empty one, one row, three rows with int, real and text columns, a cell
@@ -102,4 +102,4 @@ test "KindsKnown" ExhaustiveMode (seed <- 20261014) (whereBindings <- tablesOnly
 test "CellsOfTheirKind" ExhaustiveMode (seed <- 20261014) (whereBindings <- tablesOnly)
 test "NoCellsOffSchema" ExhaustiveMode (seed <- 20261014) (whereBindings <- offSchema)
 -- the line expected to be refuted (CellsOfTheirKind on a table with a nothing cell) is a control, in
--- tables_controls.lut
+-- tables_controls.test.lut

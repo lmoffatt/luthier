@@ -421,20 +421,20 @@ session. A file is never a block.
 **2.R3. A name is defined once.** [implemented] `:=` defines a name once. A name bound in a block
 is visible from its binding to the end of that block and inside blocks nested in it. `:=` of a name
 defined in an enclosing scope or at the top level is an error, not a shadowing.
-Files: r12_block.accept.lut, r12_defined_twice.reject.lut.
+Files: r12_block.accept.run.lut, r12_defined_twice.reject.lut.
 
 **2.R4. What `<-` may rebind.** [implemented] `<-` may rebind only a name first bound with `<-` in
 the same block, or a parameter of the enclosing definition, whose default is its first binding
 (D-2026-10-11-c). A name bound with `:=` cannot be rebound.
-Files: r12_block.accept.lut, r12_rebind_defined.reject.lut.
+Files: r12_block.accept.run.lut, r12_rebind_defined.reject.lut.
 
 **2.R5. `<-` needs an order.** [implemented] `<-` exists only in a block, in a parameter's default
 and in a named argument; at the top level of a file, where acts have no order, it is an error.
-Files: r12_block.accept.lut, r12_toplevel_arrow.reject.lut.
+Files: r12_block.accept.run.lut, r12_toplevel_arrow.reject.lut.
 
 **2.R6. Unused binding.** [implemented] A `<-` whose previous binding of the same name has no
 consumer is an error in a file ("unused binding"), and is allowed and reported in a session (2.S18).
-Files: r12_block.accept.lut, r12_unused_rebinding.reject.lut.
+Files: r12_block.accept.run.lut, r12_unused_rebinding.reject.lut.
 
 **2.S18. The session.** [implemented] (decided D-2026-10-11-i) `luthier session [files]` (spec
 12.S20) builds a block one line at a time: a line is an item of a block (§8) or a bare term, which

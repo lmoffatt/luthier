@@ -159,7 +159,7 @@ its value compared: `tests/eval/arithmetic.lut` (19); `k_union.accept.lut` (arit
 **3.S18. Extern.** [implemented] An extern applied to as many closed arguments as its type has
 parameters calls the host and converts the result back (`spec 10`). No k program of `tests/spec/`
 reduces one, and `r5_extern_value.accept.lut` only checks one; the programs of `tests/run/`
-(`read_first_line.lut`, `table_cell.lut`, `record_externs.lut`, `vector_norm.lut`) run them, with
+(`read_first_line.run.lut`, `table_cell.run.lut`, `record_externs.run.lut`, `vector_norm.run.lut`) run them, with
 their output compared in `test_run.py`.
 
 **3.S19. Terms with holes.** [implemented] A term that contains a hole where the reduction needs a
@@ -202,7 +202,7 @@ declared type (`record/IA/run-2026-10-13/report-4.md`), reads the arity (`report
 carries the callback with its count, the record of functions, the opaque host function and the
 partial (`report-8.md`); the laws are world.lth's `Crossing` and term.lth's `ExternPartialIsValue`
 and `HostGivesBackAValue` (`record/IA/theories-2026-10-14/report.md`). Programs:
-`tests/run/callbacks.lut`, `record_of_functions.lut`, `host_function.lut`, `extern_partial.lut`.
+`tests/run/callbacks.run.lut`, `record_of_functions.run.lut`, `host_function.run.lut`, `extern_partial.run.lut`.
 
 **3.S24. Bridge 3, representation by type.** [implemented] `Fin n -> Float64` is a one-dimensional
 ndarray, `Fin m -> Fin n -> Float64` a two-dimensional one, `Fin n -> A` for a non-numeric `A` a

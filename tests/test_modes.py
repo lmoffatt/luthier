@@ -14,7 +14,7 @@ from luthier.run import DEMAND_DEFAULTS, Refused, record_path, run
 ROOT = Path(__file__).resolve().parents[1]
 
 # a provisional extern in the cone of an action; "hello, world" so that the first action's
-# validation is the one examples/hello.lut's runs already keep in world_model.cert.json
+# validation is the one examples/hello.run.lut's runs already keep in world_model.cert.json
 SHOUT = ('import "world_model.lut" HostConsole host : HostConsole\n\n'
          'shout : String -> String := extern "python:builtins.str" '
          '(provisional <- "str stands in for a shout not written yet")\n'

@@ -9,8 +9,8 @@ from luthier import term as t, tester
 from luthier.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
-LAWS = ROOT / "tests" / "tester" / "laws.lut"
-CASES = ROOT / "tests" / "tester" / "cases.lut"
+LAWS = ROOT / "tests" / "tester" / "laws.test.lut"
+CASES = ROOT / "tests" / "tester" / "cases.test.lut"
 
 
 def lines_of(capsys, *args):
@@ -99,7 +99,7 @@ def test_a_name_is_shown_as_its_file_writes_it():
 
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="a few minutes; set LUTHIER_SLOW=1")
 def test_the_laws_of_numbers_lth(capsys):
-    _, lines = lines_of(capsys, ROOT / "tests" / "tester" / "numbers_laws.lut")
+    _, lines = lines_of(capsys, ROOT / "tests" / "tester" / "numbers_laws.test.lut")
     assert not any("refuted" in line for line in lines), lines
     # the log laws settle since the extern's arity is its declared type's (run.py, prompt-6.md)
     assert not any("unsettled" in line for line in lines), lines
@@ -108,7 +108,7 @@ def test_the_laws_of_numbers_lth(capsys):
 
 def test_an_exhaustive_run_is_the_whole_type_weakened_by_its_bindings():
     """test.lth's CoverageIsTheWeakest: `wholeCoverage` is `Exhaustive` weakened by the bindings."""
-    plain, listed = tester.run_tests(ROOT / "tests" / "tester" / "weakest.lut")
+    plain, listed = tester.run_tests(ROOT / "tests" / "tester" / "weakest.test.lut")
     assert tester._base(plain.evidence.coverage) == "Exhaustive" and plain.verdict == "Confirmed"
     assert tester._base(listed.evidence.coverage) == "Listed" and listed.verdict == "Supported"
 
@@ -223,7 +223,7 @@ def test_the_host_generators_give_their_family_and_the_next_seed():
 # record/IA/controls-2026-10-15/prompt-tester.md: a line `(control <- true)` (test.lth's `control`)
 # is a law tested on a model broken on purpose, expected to be refuted
 
-CONTROLS = ROOT / "tests" / "tester" / "tables_controls.lut"
+CONTROLS = ROOT / "tests" / "tester" / "tables_controls.test.lut"
 
 
 def test_a_control_line_is_read_and_its_refutation_is_the_control_passing(capsys):
@@ -353,10 +353,10 @@ def test_a_statistical_control_is_its_own_kind(tmp_path):
 
 
 def test_a_type_a_census_lists_is_no_model_home():
-    # probability_laws.lut binds `S : U` to `[UnitList]`: probability.lth is no model whose store
+    # probability_laws.test.lut binds `S : U` to `[UnitList]`: probability.lth is no model whose store
     # takes the entry; numpy's sort's file is (its `SourceIsUniform` line, the contrast before, went
-    # to generators_laws.lut as `UniformSampleIsUniform`'s; KolmogorovOfOne binds the same `d`)
-    path = ROOT / "tests" / "tester" / "probability_laws.lut"
+    # to generators_laws.test.lut as `UniformSampleIsUniform`'s; KolmogorovOfOne binds the same `d`)
+    path = ROOT / "tests" / "tester" / "probability_laws.test.lut"
     runner, specs, loaded = tester.prepare(path)
     homes = {spec.law: [Path(h).name for h in tester.model_homes(loaded, spec, runner)] for spec in specs
              if spec.law in ("NoAlternativeAtZero", "KolmogorovOfOne")}
@@ -364,25 +364,25 @@ def test_a_type_a_census_lists_is_no_model_home():
 
 
 def test_an_alias_or_a_constructor_is_no_model_home(tmp_path):
-    # report-e.md, finding 1: demand_laws.lut and world_laws.lut as first written, with demand.lth's
+    # report-e.md, finding 1: demand_laws.test.lut and world_laws.test.lut as first written, with demand.lth's
     # alias `Record` and world_model.lut's alias `State` listed for a parameter `K : U` or `S :
     # Concrete`, and test.lth's constructor `Sampled` for `accepts : Grade`; none is a model, so
     # none of their files is a home. A model is a value whose type is the parameter's theory head:
     # certification_model.lut's `certifying : Certifying`, world_model.lut's `host : HostConsole`
     tester_dir = ROOT / "tests" / "tester"
-    demand = (tester_dir / "demand_laws.lut").read_text(encoding="utf-8")
+    demand = (tester_dir / "demand_laws.test.lut").read_text(encoding="utf-8")
     assert "keyTypes : List U := [Key]" in demand
-    (tmp_path / "demand_laws.lut").write_text(
+    (tmp_path / "demand_laws.test.lut").write_text(
         demand.replace("keyTypes : List U := [Key]", "keyTypes : List U := [Record]"), encoding="utf-8")
-    world = (tester_dir / "world_laws.lut").read_text(encoding="utf-8")
+    world = (tester_dir / "world_laws.test.lut").read_text(encoding="utf-8")
     first = (world.replace("cutoff : List Grade := [sampledCutoff, assumedCutoff]",
                            "cutoff : List Grade := [Sampled, AssumedGrade]")
              .replace('bind "S" "hostStates"', 'bind "S" "states"')
              .replace("hosts : List (Host State) := [listedHost]", "hosts : List (Host State) := [host]"))
     assert first.count('bind "S" "states"') > world.count('bind "S" "states"') and "[Sampled, AssumedGrade]" in first
-    (tmp_path / "world_laws.lut").write_text(first, encoding="utf-8")
+    (tmp_path / "world_laws.test.lut").write_text(first, encoding="utf-8")
     homes = {}
-    for name in ("demand_laws.lut", "world_laws.lut"):
+    for name in ("demand_laws.test.lut", "world_laws.test.lut"):
         runner, specs, loaded = tester.prepare(tmp_path / name)
         for spec in specs:
             if spec.law in ("OneIdentityOneResult", "NoPriceRefusesAssumed", "AppliedWhenSettled", "HostAgreesPrint",

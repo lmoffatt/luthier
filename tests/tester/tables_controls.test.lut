@@ -1,9 +1,9 @@
--- tests/tester/tables_controls.lut: the controls of tables.lth's laws. Each line is written
+-- tests/tester/tables_controls.test.lut: the controls of tables.lth's laws. Each line is written
 -- `(control <- true)` (test.lth's `control`) and is expected to be refuted: it shows that a law of
--- tables_laws.lut can fail on a case that breaks it, so that its passing there is not vacuous
+-- tables_laws.test.lut can fail on a case that breaks it, so that its passing there is not vacuous
 -- (7.S19 as D-2026-10-15-a generalized it to every law; L9.14). The tester records its outcome as a
--- control's entry, never the law's failure, and `luthier certify tables_laws.lut
--- tables_controls.lut` reports the law controlled. Kept apart from tables_laws.lut, which it was
+-- control's entry, never the law's failure, and `luthier certify tables_laws.test.lut
+-- tables_controls.test.lut` reports the law controlled. Kept apart from tables_laws.test.lut, which it was
 -- before the control had its own kind of entry.
 
 import "test.lth" test ExhaustiveMode
@@ -24,9 +24,9 @@ holeOnly : List Binding := [ { parameter := just "t", type := nothing, generator
 -- expected to be refuted: the table with a nothing cell breaks the law
 test "CellsOfTheirKind" ExhaustiveMode (seed <- 20261014) (whereBindings <- holeOnly) (control <- true)
 
--- The other laws of tables_laws.lut, added 2026-10-15 by Claude Opus 5.5, an agent of the
+-- The other laws of tables_laws.test.lut, added 2026-10-15 by Claude Opus 5.5, an agent of the
 -- coordinating session, on record/IA/controls-2026-10-15/prompt-mutants.md: each on a codec or a
--- table broken on purpose, over cases like those of tables_laws.lut.
+-- table broken on purpose, over cases like those of tables_laws.test.lut.
 
 parsed (s : String) : Table := match csv.parse s { just t -> t }
 smallText : String := "a:int,b:float\n1,2.5\n-3,4.0\n"

@@ -93,10 +93,10 @@ clearDiagonal : Gen ClearDiagonal := fn size seed { hostGenerators.clearDiagonal
 
 symmetricGives (a : Mat Float64) : Bool := a.m == a.n and approxMat exact a (transposeDef a)
 -- [proposed, 2026-10-15, L9.14] Each law takes the family it speaks of as its first parameter, so
--- that a family broken on purpose can be passed to it (tests/tester/generators_controls.lut);
+-- that a family broken on purpose can be passed to it (tests/tester/generators_controls.test.lut);
 -- named in its body, as before, the family was no parameter and no wrong model could fail the law
 -- (report-mutants.md). A test binds the parameter to a census of one listing the family
--- (generators_laws.lut's `families`): a binding naming a `Gen T` is drawn from, not passed.
+-- (generators_laws.test.lut's `families`): a binding naming a `Gen T` is drawn from, not passed.
 -- The type the family claims is what each law tests, as a model's leaves are tested (7.S1).
 SymmetricGivesSymmetric (g : Gen Symmetric) (size : Nat) (seed : Seed) : Bool := match g size seed { (a, next) -> symmetricGives a }
 SymmetricOfGivesItsSize (g : (k : Dim) -> Gen (SymmetricOf k)) (k : Dim) (size : Nat) (seed : Seed) : Bool :=
@@ -111,8 +111,8 @@ UnitListGivesUnitValues (g : Gen UnitList) (size : Nat) (seed : Seed) : Bool := 
 -- calibrated: the source is uniform (probability.lth's `SourceIsUniform` on numpy's sort), a
 -- statistical law in the form of laws.lth §4 whose verdict is the sequential test's at the
 -- demand's cutoffs (7.S17, L9.15). [proposed, 2026-10-15, L9.14] The source is the law's
--- parameter, bound by the test to `uniformSample` (generators_laws.lut) and, as its control, to
--- `skewedSample` (generators_controls.lut), so that the control is a line of this law, of its cone;
+-- parameter, bound by the test to `uniformSample` (generators_laws.test.lut) and, as its control, to
+-- `skewedSample` (generators_controls.test.lut), so that the control is a line of this law, of its cone;
 -- before, the control was a law of its own, `SkewedSampleIsUniform`, which certify did not count.
 UniformSampleIsUniform (source : Gen UnitList) (c : Sequential) : Law := SourceIsUniform numpySort source c
 ClearDiagonalGivesClear (g : Gen ClearDiagonal) (size : Nat) (seed : Seed) : Bool :=

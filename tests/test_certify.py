@@ -14,7 +14,7 @@ from luthier import certify, term as t, tester
 from luthier.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
-LAWS = ROOT / "tests" / "tester" / "laws.lut"
+LAWS = ROOT / "tests" / "tester" / "laws.test.lut"
 INT = t.Var("Int")
 
 
@@ -218,7 +218,7 @@ def test_the_certificate_grade_and_the_state():
 
 @pytest.fixture
 def laws(tmp_path):
-    path = tmp_path / "laws.lut"
+    path = tmp_path / "laws.test.lut"
     shutil.copy(LAWS, path)
     return path
 
@@ -318,17 +318,17 @@ def test_the_cli_test_and_check(laws, capsys):
 
 def test_certify_several_files(tmp_path, capsys):
     paths = []
-    for name in ("laws.lut", "weakest.lut"):
+    for name in ("laws.test.lut", "weakest.test.lut"):
         shutil.copy(ROOT / "tests" / "tester" / name, tmp_path / name)
         paths.append(str(tmp_path / name))
-    assert main(["certify", "--jobs", "2", *paths]) == 1  # laws.lut has refuted laws
+    assert main(["certify", "--jobs", "2", *paths]) == 1  # laws.test.lut has refuted laws
     out = capsys.readouterr().out.splitlines()
     assert out[0] == f"{paths[0]}: 4 laws, 6 lines ran, 0 known"
     # each law with its control status (7.S19): none of these has a control
     out = [line.replace("; uncontrolled: untested against any wrong model (7.S19)", "") for line in out]
     assert "  NotInvolutive: exhaustive" in out and "  PlusCommutes: sampled" in out
     assert "  Small: refuted at x = 729" in out and "  AndIsOr: refuted at a = true, b = false" in out
-    # weakest.lut: one law under two bindings, the weakest
+    # weakest.test.lut: one law under two bindings, the weakest
     assert out[out.index(f"{paths[1]}: 1 laws, 2 lines ran, 0 known") + 1] == "  NotInvolutive: cases"
     assert main(["certify", paths[1]]) == 0
     assert capsys.readouterr().out.splitlines()[0] == f"{paths[1]}: 1 laws, 0 lines ran, 2 known"
@@ -336,8 +336,8 @@ def test_certify_several_files(tmp_path, capsys):
 
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="a few minutes; set LUTHIER_SLOW=1")
 def test_certify_the_laws_of_numbers(tmp_path, capsys):
-    path = tmp_path / "numbers_laws.lut"
-    shutil.copy(ROOT / "tests" / "tester" / "numbers_laws.lut", path)
+    path = tmp_path / "numbers_laws.test.lut"
+    shutil.copy(ROOT / "tests" / "tester" / "numbers_laws.test.lut", path)
     main(["certify", str(path)])
     out = capsys.readouterr().out.splitlines()
     assert "lines ran" in out[0] and not any("refuted" in line for line in out), out
@@ -635,7 +635,7 @@ def test_the_control_status_of_a_law():
 
 def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
     # the acceptance of the brief, then every law of tables controlled (prompt-mutants.md); no store
-    laws, controls = (ROOT / "tests" / "tester" / f"tables_{n}.lut" for n in ("laws", "controls"))
+    laws, controls = (ROOT / "tests" / "tester" / f"tables_{n}.test.lut" for n in ("laws", "controls"))
     # the stores of the claims (L10.12): tables_model.lut's and tables.lth's; none beside the programs
     claims = [certify.LIBRARY / n for n in ("tables_model.lut", "tables.lth")]
     stores = [certify.store_path(p).read_bytes() for p in claims]
@@ -668,7 +668,7 @@ test "Reflexive" ExhaustiveMode
 PAIR_CONTROLS = '''import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "laws.lut" Idempotent flip always
+import "laws.test.lut" Idempotent flip always
 flips : List (Bool -> Bool) := [flip]
 alwayss : List (Bool -> Bool) := [always]
 onFlip : List Binding := [ { parameter := just "f", type := nothing, generator := "flips", coverage := Listed } ]
@@ -678,7 +678,7 @@ test "Idempotent" ExhaustiveMode (whereBindings <- onFlip) (control <- true)
 
 
 def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
-    laws, controls = tmp_path / "laws.lut", tmp_path / "controls.lut"
+    laws, controls = tmp_path / "laws.test.lut", tmp_path / "controls.lut"
     laws.write_text(PAIR_LAWS, encoding="utf-8")
     controls.write_text(PAIR_CONTROLS, encoding="utf-8")
     assert main(["certify", str(laws), str(controls)]) == 0
@@ -726,7 +726,7 @@ test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)
 STATISTICAL_CONTROLS = '''import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed Sequential
-import "laws.lut" Constant
+import "laws.test.lut" Constant
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.9, initial := 1, budget := 100 }
 zeros : List Float64 := [0.0]
 onZeros : List Binding := [ { parameter := just "p", type := nothing, generator := "zeros", coverage := Listed },
@@ -736,7 +736,7 @@ test "Constant" ExhaustiveMode (seed <- 5) (profile <- onZeros) (control <- true
 
 
 def test_certify_a_statistical_law_with_its_rates_and_its_control(tmp_path, capsys):
-    laws, controls = tmp_path / "laws.lut", tmp_path / "controls.lut"
+    laws, controls = tmp_path / "laws.test.lut", tmp_path / "controls.lut"
     laws.write_text(STATISTICAL_LAWS, encoding="utf-8")
     controls.write_text(STATISTICAL_CONTROLS, encoding="utf-8")
     rates = "by the sequential test (alpha 0.01, beta 0.01, delta 0.9, budget 100)"
@@ -902,12 +902,12 @@ def test_the_store_law_holds_on_the_reference_and_its_controls_refute_the_broken
     # certification.lth's `Recording` and the two laws of a disagreement, on certification_model.lut;
     # the controls (L9.14): a store that absorbs a disagreeing replay, one that keeps a not-run for
     # lack of fuel, and a `certifying` blind to a disagreement, each refuted
-    laws = tester.run_tests(ROOT / "tests" / "tester" / "certification_laws.lut")
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "certification_laws.test.lut")
     assert [o.spec.law for o in laws] == ["ANewIdentityGoesInFront", "AnAgreeingReplayAddsNothing",
                                           "ADisagreeingReplayIsKept", "AnAgreeingPairSettles",
                                           "AnExhaustionIsNeverStored", "ADisagreementRefutes", "ADisagreementIsRefused"]
     assert all(o.grade == "ExhaustiveGrade" or o.grade == "Cases" for o in laws), [tester.line(o) for o in laws]
-    controls = tester.run_tests(ROOT / "tests" / "tester" / "certification_controls.lut")
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "certification_controls.test.lut")
     assert [(o.spec.law, o.verdict) for o in controls] == [
         ("ADisagreeingReplayIsKept", "Refuted"), ("AnExhaustionIsNeverStored", "Refuted"),
         ("ADisagreementRefutes", "Refuted"), ("ADisagreementIsRefused", "Refuted")]
@@ -1046,10 +1046,10 @@ def test_the_budget_bounds_the_test_across_stretches_and_a_larger_one_continues_
 def test_the_union_holds_on_the_reference_and_its_controls_refute_the_broken_ones():
     # certification.lth's `Pooling` on certification_model.lut; the controls (L9.14): a union that
     # counts a replay twice, and one that counts only the latest stretch, each refuted
-    laws = tester.run_tests(ROOT / "tests" / "tester" / "pooling_laws.lut")
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "pooling_laws.test.lut")
     assert [(o.spec.law, o.verdict) for o in laws] == [("TheUnionIsMonotone", "Supported"),
                                                        ("AReplayIsNotANewStretch", "Supported")]
-    controls = tester.run_tests(ROOT / "tests" / "tester" / "pooling_controls.lut")
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "pooling_controls.test.lut")
     assert [(o.spec.law, o.verdict) for o in controls] == [("TheUnionIsMonotone", "Refuted"),
                                                            ("AReplayIsNotANewStretch", "Refuted")]
     twice, = (o for o in controls if o.spec.law == "AReplayIsNotANewStretch")

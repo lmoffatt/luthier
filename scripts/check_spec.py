@@ -43,6 +43,9 @@ DECIDED_RE = re.compile(r"^decided (D-\d{4}-\d{2}-\d{2}-[a-z]+)" + SUSPENDED + "
 DECIDED_CLAUSE_RE = re.compile(r"^decided (L\d+\.\d+)" + SUSPENDED + "$")
 DECISION_LINE_RE = re.compile(r"^(D-\d{4}-\d{2}-\d{2}-[a-z]+)\s")
 FILES_RE = re.compile(r"^Files:\s*(.*)$")
+# a program's verdict, then the kind of file its suffix declares (spec 12.R2, D-2026-10-16-e):
+# x.accept.lut, x.reject.run.lut, x.accept.test.lut, x.reject.lth
+VERDICT_RE = re.compile(r"\.(accept|reject)(?:\.run|\.test)?\.(?:lut|lth)$")
 CHAPTER_NAME_RE = re.compile(r"^(\d\d)-.+\.md$")
 CODE_SPAN_RE = re.compile(r"`[^`]*`")
 CITE_SPEC_RE = re.compile(r"\bspec (\d+)(?:\s*§(\d+)|\.([RS])(\d+))?(?!\d)")
@@ -278,14 +281,14 @@ def check_files(item: Item, tests_dir: Path) -> list[Finding]:
         return []
     out: list[Finding] = []
     for n in item.files:
-        if not n.endswith((".accept.lut", ".reject.lut")):
+        if not VERDICT_RE.search(n):
             out.append((item.files_line, f"{label}: {n} is neither .accept.lut nor .reject.lut"))
         elif not ((tests_dir / n).is_file() or (tests_dir / "v0.1" / n).is_file()):
             # until the new checker exists, a program may still be one of v0.1's (D-2026-10-13-h)
             out.append((item.files_line, f"{label}: {n} not found in tests/spec/ or tests/spec/v0.1/"))
     if item.status == "implemented":
         for kind in ("accept", "reject"):
-            if not any(n.endswith(f".{kind}.lut") for n in item.files):
+            if not any((m := VERDICT_RE.search(n)) and m[1] == kind for n in item.files):
                 out.append((item.files_line, f"{label} is implemented and names no .{kind}.lut file"))
     return out
 

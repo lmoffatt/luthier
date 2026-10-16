@@ -21,7 +21,7 @@ Chapter 12 of the specification, draft 0, 2026-10-12. Sources: `docs/spec/03-lib
 **12.S7. Order inside a file and between files.** [implemented] Inside a file the order of definitions is free: the file is read whole and checked object by object (spec 4). Between files order matters in the one sense import allows, a file sees what it imports.
 
 **12.R1. A `.bib` file imports as a module of references.** [implemented] Importing a `.bib` file gives one `Reference` value per entry, named by its key (the `Reference` theory is `lib/reference.lut`), and `cite name key checked who` accepts only such a value as its reference. This is how a grade `proved` by citation reaches a program (D-2026-10-11-f, spec 6).
-Files: cite_proved.accept.lut, cite_not_reference.reject.lut.
+Files: cite_proved.accept.run.lut, cite_not_reference.reject.run.lut.
 
 ## §3 Declaration in one file, definition in another
 

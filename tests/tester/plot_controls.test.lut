@@ -1,5 +1,5 @@
--- tests/tester/plot_controls.lut: the controls of the laws of `Drawing` (plot.lth §5) and of
--- `Persistence` (world.lth §2) that tests/tester/plot_laws.lut certifies on matplotlib's drawing
+-- tests/tester/plot_controls.test.lut: the controls of the laws of `Drawing` (plot.lth §5) and of
+-- `Persistence` (world.lth §2) that tests/tester/plot_laws.test.lut certifies on matplotlib's drawing
 -- and its store `files` (plot_model.lut). Each line is the law's line written `(control <- true)`
 -- (test.lth's `control`), with the drawing or the store replaced by one broken on purpose, and is
 -- expected to be refuted: it shows that the law can fail on a wrong model, so that its passing on
@@ -7,7 +7,8 @@
 -- tester records its outcome as a control's entry, never the law's failure. Written 2026-10-15 by
 -- Claude Opus 5.5, an agent of the coordinating session, on
 -- record/IA/controls-2026-10-15/prompt-mutants.md. The plots, worlds and censuses are
--- plot_laws.lut's, imported. A broken image is matplotlib's with a mark appended that depends on
+-- plot_cases.lut's, imported (until 2026-10-16 from plot_laws.test.lut; a test program is never
+-- imported, D-2026-10-16-e). A broken image is matplotlib's with a mark appended that depends on
 -- what the law says the image does not depend on (or with the title dropped): the file is then no
 -- image, which no law here reads.
 
@@ -21,7 +22,7 @@ import "plot.lth" Plot Drawing lookupTable nthLayer retitle FileExistsAfter Form
 import "world.lth" Persistence WriteThenRead WriteChangesOnlyItsPlace
 import "world_model.lut" State theWorld
 import "plot_model.lut" matplotlibDrawing files
-import "plot_laws.lut" parsed obsText pointsAndLine states plots again exts stems worlds names obsTables perms
+import "plot_cases.lut" parsed obsText pointsAndLine states plots again exts stems worlds names obsTables perms
   margins positions titles paths contents bind
 
 -- the store writes nothing: drawing leaves no file (FileExistsAfter)

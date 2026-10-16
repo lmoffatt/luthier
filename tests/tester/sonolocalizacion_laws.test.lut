@@ -1,4 +1,4 @@
--- tests/tester/sonolocalizacion_laws.lut: the laws of the port (examples/sonolocalizacion:
+-- tests/tester/sonolocalizacion_laws.test.lut: the laws of the port (examples/sonolocalizacion:
 -- positions.lut, distances.lut, distance_graph.lut) run through `luthier test`, on the brief
 -- record/IA/evidence-2026-10-14/prompt.md. positions.lut's `layout` is an `Iso` (algebra.lth),
 -- whose laws take the two types as parameters (7.R2): `LayoutFromUndoesTo` and
@@ -32,7 +32,7 @@ cutoffs : List Binding := [ { parameter := just "tol", type := nothing, generato
 -- positions.lut: the layout's two round trips, exact. [proposed] The layout is a parameter, a family
 -- over the number of nodes bound to positions.lut's `layout` (2026-10-15, Claude Opus 5.5, on
 -- record/IA/v04-2026-10-15/prompt-e.md: with `layout` named in the body no wrong layout could be
--- passed, so the laws had no control, L9.14; sonolocalizacion_controls.lut passes one)
+-- passed, so the laws had no control, L9.14; sonolocalizacion_controls.test.lut passes one)
 layouts : List ((n : Dim) -> Iso (MatOf 3 n) (VecOf (3 * n))) := [layout]
 onLayout : List Binding := [ { parameter := just "lay", type := nothing, generator := "layouts", coverage := Listed } ]
 test "LayoutFromUndoesTo" (SampledMode linear) (seed <- 20261014) (whereBindings <- onLayout)

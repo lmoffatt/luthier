@@ -278,7 +278,7 @@ def test_eval_loads_imports():
 
 def test_eval_prints_the_states_and_demands_no_certificate():
     # 12.S19: no certificate demanded; the laws of the cone no store serves are listed, not refused.
-    # plan_model.cert.json holds entries since tests/tester/plan_laws.lut was certified
+    # plan_model.cert.json holds entries since tests/tester/plan_laws.test.lut was certified
     # (record/IA/v04-2026-10-15/report-e.md), so this test's copy of it is emptied (conftest.py)
     (Path(os.environ['LUTHIER_LIBRARY_STORES']) / 'plan_model.cert.json').unlink(missing_ok=True)
     r = cli(ROOT / 'tests/eval/plan_agree.lut', 'allHold')

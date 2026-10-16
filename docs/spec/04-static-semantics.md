@@ -265,7 +265,7 @@ block-local `<-` names and the parameters of the enclosing definition; a `<-` wh
 binding has no consumer is rejected in a file (`spec 2.R6`) and reported in a session (O8); actions take and
 return the world, so their order is the dependency through it (`spec 10`). Three kinds of block: a
 body, `main` in a file, the session.
-Files: r12_block.accept.lut, r12_defined_twice.reject.lut.
+Files: r12_block.accept.run.lut, r12_defined_twice.reject.lut.
 
 **4.R13. An operator is resolved by the type, and a type names its model.** [implemented] Decided
 2026-10-11 (D-2026-10-11-j); implemented the same day: resolution by the argument types, and a
