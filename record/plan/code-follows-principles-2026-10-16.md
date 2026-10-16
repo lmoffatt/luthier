@@ -69,6 +69,10 @@ j. D-2026-10-16-i: evidence kept per binding and per labelled region with its n 
    demand combines grades, weakest by default (5.S8); special values and atoms in the generators,
    `classify`/`cover` (7.S14); certification.lth's grade rules rewritten (a theory: Fable); a
    principles clause on null sets [proposed], its sentence written by the coordinator in the brief.
+   Refined by D-2026-10-16-j: the regions that enter a grade come only from three finite sources,
+   the type (its theory declares its degenerate cases once), the law (each cutoff's two sides, each
+   premise's boundary) and the code (each branch of the cone: branch coverage); an author's label is
+   informative and enters no grade.
 v0.4: D-2026-10-16-f, tag when (c) is met with (e) as debt. (c) verified by the coordinator at
 1922758 (741 passed); 3470c54 adds only record files. The tag is his.
 
