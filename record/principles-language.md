@@ -497,7 +497,11 @@ L2.6   The theoretical module of clause 4 is a file of its own: a theory file ho
        certified against the theory. What a file imports has its theory in a theory file
        (D-2026-10-13-i, -j). A theory file may hold the definitions its laws need and a value that
        is part of the theory, never a model of a theory declared elsewhere (D-2026-10-13-o).
-       [settled]
+       A third kind of file is executive: it carries a demand with its entry and is never imported;
+       a `*.run.lut` holds the `main` that `luthier run` applies to the world, a `*.test.lut` the
+       `test` lines `luthier certify` runs; its results live beside it, while certificates live
+       beside the model that makes the claim (L10.12). The suffix declares the kind and the content
+       verifies it (D-2026-10-16-e). [settled]
 L2.7   (His words) A definition is a concept, and a collection of types is not. An alias names a
        structure we use before we know what it is for; a definition promotes it to a theory, and
        what makes it one is a law it must follow, stating the role of each part. Distinct
@@ -529,7 +533,8 @@ History:    draft 0 (6d9dbd3): stated. draft 4 (c7c6396): the elaborated form re
             otherwise as draft 10 had it. draft 11 (2026-10-12): renumbered from L4 of draft 10
             (D-2026-10-12-v). 2026-10-16: clause 7 gains his sentence that the conceptual is the
             practical at another level, with no clause under P13; clause 8 added, proposed
-            (D-2026-10-16-b).
+            (D-2026-10-16-b). 2026-10-16: clause 6 gains the third kind of file, the executive
+            (D-2026-10-16-e).
 
 L3  Equality has levels and belongs to the object.
 From:       G0 (the identity type and its levels) with G2 (under cost, the identity proposition
@@ -690,7 +695,9 @@ From:       G0, the demand directly; the audio of 08.58 (15:35 to 17:12, 30:37 t
             the code object is consumed or stable: kept; with G1 for what is derived (the former L6)
 L5.1   The declarative face states what is known, universal and minimally processed; the executive
        face is a demand from outside, and the demanded type fixes the path, the types and the
-       tolerances actually produced. [settled]
+       tolerances actually produced. The two faces are files: the declarative face is the theories
+       and the models, the executive face an executive file (L2.6) or a demand typed at the
+       terminal, kept in its record (D-2026-10-16-e). [settled]
 L5.2   The evaluation strategy is a parameter separate from the program (clause 18); by default, a
        plan backward from the actions over names, evaluating nothing, then a strict forward run over
        the live subgraph, each node once and whole: forward on demand. [settled]
@@ -823,7 +830,8 @@ History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration st
             planner's candidates; applied where the old word stood. draft 11 (2026-10-12):
             renumbered from L10 of draft 10 (D-2026-10-12-v). 2026-10-16: clause 6 cites
             `plan.lth` for `lib/plan.lut`; clause 18 gains the reading of a domain, a series'
-            truncation and a default the demander could vary (D-2026-10-16-b).
+            truncation and a default the demander could vary (D-2026-10-16-b). 2026-10-16: clause 1
+            gains that the two faces are files (D-2026-10-16-e).
 
 L6  One function, many specimens, chosen by maximizing the performance the demander chooses, along
     certified identities.
