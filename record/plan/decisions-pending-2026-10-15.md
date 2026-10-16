@@ -355,6 +355,8 @@ decides it: no broken model can fail a vacuous run, and BE2 showed the price, a 
 passing `MaximizerStationary` vacuously. Cost: 7.S12's last sentence reworded and one branch of
 tester.py.
 
+*Answered in chat (2026-10-16): (a), with convergence laws for iterative algorithms, D-2026-10-16-m.*
+
 **24. Three rules for binding a law's parameters (7.R1, 7.R2, 7.S-profile).** G6: a parameter bound
 by a `where` type binding versus a profile parameter (7.R1); L5: `(A : U)` inside a law needs a rule
 (7.R2); P8: whether a `Bool` definition outside a `T :=` conjunction is tested or pulled by a

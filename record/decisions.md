@@ -2809,3 +2809,23 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
             export)
 Kind:       spec 7.R1, 7.R2; generators.lth `Resolution`; the theory of `Settling`
 Status:     current
+
+D-2026-10-16-m  Item 23 (a): a law all of whose cases are vacuous (no premise held) is not run, its
+                premise count the reason (L9.14: nothing can refute an empty run). And an iterative
+                algorithm states its convergence as laws: a domain where it must converge, and a
+                bound on its steps derived from its theory as a function of the problem (Newton on a
+                quadratic 1, Levenberg-Marquardt a handful, gradient about κ·log(1/tol)), never a
+                constant (P11). Inside the domain, not converging within the bound is a failure, not
+                a vacuous case: `MaximizerStationary`'s `else true` and `QuadraticConverges`'s
+                `if s.maxIter < budget then true` go; outside it, not converging is the right answer
+                and the result says why it stopped (a `Reason`, Fable's fix of BE2). The step count is
+                the algorithm's resource, recorded for the planner (L6.3) and the first alarm of a
+                fit taking far more steps than its theory says (the 400 iterations of 2026-10-15).
+Author:     Luciano, on the case of the give-up maximizer (BE2)
+Quote:      "es que en el caso de algoritmos si un algoritmo no converge, hay algo mal en el
+            algoritmo. Uno debería tener una idea de cuántos steps debe llevar un algoritmo." ... "Sí"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       spec 7.S12; belief.lth (`MaximizerStationary`, `QuadraticConverges`, `MaxResult`),
+            optimization.lth, lm laws; the theories of every iterative algorithm
+Status:     current
