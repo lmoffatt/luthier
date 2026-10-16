@@ -2724,3 +2724,17 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       certification.lth (the grade rules, `pool`), tester.py, spec 7.S11 (suspended by
             D-2026-10-14-c), L10.3
 Status:     current
+
+D-2026-10-16-h  Item 8 (b): the run records of his runs are tracked in git: with D-2026-10-16-e, the
+                records beside the `.run.lut` files of examples/ (the slice), the runs of tests/
+                ignored. Item 14 (b): the bridge is strict on `Maybe`: tables.py's `parse` and
+                `Table.cell` return the host's `Just` and nothing, their callers follow, the cones
+                that read tables re-certified (L11.1, L11.8). Item 16 (a): no cutoff accepts a
+                failure; running past a failed law is said by naming it (`--accept
+                assumed:LAW`, D-2026-10-16-c), recorded and warned at every run (L5.20).
+Author:     Luciano, on the decision assistant's recommendations
+Quote:      "8b / 14 b / ... / 16 aceptar por nombre"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       .gitignore; tables.py and the cones that read tables; spec 6.S15, run.py's acceptance
+Status:     current

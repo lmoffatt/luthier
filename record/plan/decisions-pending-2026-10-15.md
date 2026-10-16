@@ -146,6 +146,8 @@ P2 (everything derived carries how it was derived) decides it, P8 (no more burea
 for) bounds it to the slice. Cost: a `.gitignore` exception for `examples/sonolocalizacion/` and a
 commit after each of his runs.
 
+*Answered in chat (2026-10-16): (b), D-2026-10-16-h.*
+
 ## The world and the host
 
 **9. How much validates a host action: one case at its first application, or one per cone hash?**
@@ -219,6 +221,8 @@ declared over what it really receives and returns) decides it, with L11.8 (what 
 is recorded). Cost: `parse` and `Table.cell` in tables.py return the host's `Just` and nothing,
 their callers follow, and the cones that read tables are re-certified.
 
+*Answered in chat (2026-10-16): (b), D-2026-10-16-h.*
+
 ## Certification and grades
 
 **15. A certificate's grade across bindings.** Reading taken [proposed]: the strongest pass under
@@ -244,6 +248,8 @@ name lacking a certificate is refused; no opt-out, D-2026-10-12-y). Running past
 through L10.6's exception (O3, priced as an assumption), which keeps L5.20 (every possible behavior
 has a way to be said). The Boolean slice already refuses failures by `OnlyAPassServes`. Cost: one
 sentence in 6.S15.
+
+*Answered in chat (2026-10-16): (a) by naming the law, D-2026-10-16-h.*
 
 **17. What grade does a bounded exhaustive run give, and in what order?** 7.S10 (a `Bounded n` is a
 grade of its own): `test.lth` 125 gives `Confirmed` with `Bounded`, while `laws.lth` 190's
