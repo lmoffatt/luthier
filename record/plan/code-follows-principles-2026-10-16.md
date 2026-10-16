@@ -54,6 +54,9 @@ f. D-2026-10-16-c and -d (one agent, run.py and cli.py): a provisional extern re
    modes of running as fields of `Demand` with declared defaults: strategy (forward on demand the
    default, call by need the specimen under `TheDefaultsAgree`), fuel unbounded by default for run
    with an optional bound in steps or time, `fresh`. Brief: prompt-modes.md.
+f'. 3f landed (cc883f1..749e0e4; 755 passed). The coordinator's choices: the 90 s past-the-bound
+   test behind LUTHIER_SLOW with a cheap one in its place (asked of the same agent); 6.S14's sentence
+   given to the 3i agent, which holds chapter 6.
 g. D-2026-10-16-e (after f; renames many files): executive files `.run.lut` and `.test.lut`; the
    checker's refusals; run and certify take only their kind; the migration of tests/tester and the
    two mixed sonolocalización files. Principles text (L2.6, L5.1) by a separate agent, launched.
