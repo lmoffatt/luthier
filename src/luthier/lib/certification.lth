@@ -154,7 +154,10 @@ State : U := data {
 -- one of the two is removed from the store by hand (the repository's history keeps it). So
 -- `determined` (one outcome per identity: the latest two entries of each identity agree) is no
 -- longer the store's predicate: a store where it fails is a store that records a disagreement,
--- which refuses.
+-- which refuses. [proposed] A later agreeing pair settles the disagreement, not a failure among
+-- its entries: a failure at the current hash still refutes the law (§2, 6.S3; L10.3: a single
+-- counterexample refutes), so a disagreement one side of which failed leaves the law refuted until
+-- that failure is removed by hand.
 -- [D-2026-10-15-d, L14.4: the hole marked] The store is read here and written by `record` below,
 -- but `x.cert.json` (and run.py's `x.results.json`) are read and written by the host, in Python,
 -- outside the token `W`: no action of this file touches them, and a store changed by a third party
