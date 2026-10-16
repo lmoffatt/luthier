@@ -2663,3 +2663,32 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
             export)
 Kind:       demand.lth (`Demand`), plan.lth, spec 8.S1, 8.S4, run.py, cli.py
 Status:     current
+
+D-2026-10-16-e  Three kinds of file. A theory (`.lth`: types, declarations, laws; never executed, the
+                checker reads it); a model or library (`.lut`: definitions that claim a theory;
+                executed only when a demand reaches them, L2.6); an executive file, which carries a
+                demand with its entry and is never imported: `*.run.lut` (an entry `main` that
+                `luthier run` applies to the world, with the run's modes, D-2026-10-16-d) or
+                `*.test.lut` (the `test` lines `luthier certify` runs: which laws, generators, seed,
+                size; verifying is demanding, L5.5). An executive file may define local names, seen
+                nowhere else; its results live beside it, while certificates live beside the model
+                that makes the claim (L10.12). The suffix declares the kind and the content verifies
+                it: the checker refuses an import of an executive file, a `test` line or a demand in a
+                `.lut` or `.lth`, a `.run.lut` without `main`, a `.test.lut` without `test` lines;
+                `run` takes only `.run.lut`, `certify` only `.test.lut`. Demands typed at the
+                terminal (`eval`, `session`) are executive without a file, kept in their record.
+                Migration: tests/tester/*_laws.lut and *_controls.lut become `.test.lut`; files that
+                mix a library and a `main` (examples/sonolocalizacion/validate_graph.lut,
+                experiment_zero.lut) split into a model and a `.run.lut`. Touches L2.6 (a third role
+                of file) and L5.1 (the two faces become files); assumes an action, as a value, is
+                declarative.
+Author:     Luciano, on the decision assistant's proposal (the minimal rule, the suffixes)
+Quote:      "Sí, porque de hecho uno lo tiene que separar. Ponele que querés testear la librería
+            de la. Eso lo tenés que poner en un lut dedicado. Y el modelo de librería no se ejecuta
+            hasta que se pide. Me parece que son tres tipos de archivo nomás?" ... "Vale, todo
+            aceptado"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       principles (L2.6, L5.1); spec 2, 12 (files and tools), 7 (tests); check.py, cli.py;
+            the migration of tests/tester and examples
+Status:     current
