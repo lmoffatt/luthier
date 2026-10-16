@@ -59,6 +59,19 @@ g. D-2026-10-16-e (after f; renames many files): executive files `.run.lut` and 
    two mixed sonolocalización files. Principles text (L2.6, L5.1) by a separate agent, launched.
 Order: 3b's follow-up (done, 741 passed, verified), then f and 3c together (launched), then g, then 3e.
 
+h. D-2026-10-16-h: tables.py returns the host's `Just` or nothing at a `Maybe` (item 14), the
+   table cones re-certified; no cutoff accepts a failure, running past one names it
+   (`--accept assumed:LAW`, item 16); records of `.run.lut` under examples/ tracked, under tests/
+   ignored (item 8, after g).
+i. D-2026-10-16-g: a law's samples pooled across seeds, each stretch keeping its seed; a statistical
+   law continues one sequential test (certify.py, tester.py; after 3c).
+j. D-2026-10-16-i: evidence kept per binding and per labelled region with its n and bound; the
+   demand combines grades, weakest by default (5.S8); special values and atoms in the generators,
+   `classify`/`cover` (7.S14); certification.lth's grade rules rewritten (a theory: Fable); a
+   principles clause on null sets [proposed], its sentence written by the coordinator in the brief.
+v0.4: D-2026-10-16-f, tag when (c) is met with (e) as debt. (c) verified by the coordinator at
+1922758 (741 passed); 3470c54 adds only record files. The tag is his.
+
 ## Step 4. The first cost (v0.5)
 `PinvProjects` returns its distance; the certificate records it; a demand is served by
 `distance <= tolerance` (L10.5, 6.S15 for that law); the pattern written for the other laws.
