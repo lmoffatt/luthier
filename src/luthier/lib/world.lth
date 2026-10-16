@@ -15,6 +15,10 @@
 -- (W1, W2); the declared type in `Route`, the laws over provisional routes built as such,
 -- `RecordCrossesByField` over a field anywhere in a record, `OwnIsIdempotent` with the result,
 -- `settled` at the demand's cutoff (W3 to W8); `readFile` at the standard output's place (M1).
+-- 2026-10-16, by Claude Opus 5.5, an agent of the coordinating session, on record/IA/
+-- code-follows-2026-10-16/prompt-modes.md (D-2026-10-16-c): a provisional extern is refused by
+-- default; the demand names the ones it runs as assumed; a route carries the reason it is
+-- provisional (§3).
 -- Sources: spec 10.S1
 -- to 10.S13; L11; L4.5; D4 and D8 of record/plan/archive/plan-implementation-2026-10-13-decisions.md
 -- (the token used exactly once; `W` optional in `main`); D-2026-10-13-a (one world; an action is a
@@ -48,8 +52,9 @@
 --      other place; what is assumed (10.S7, 10.S13).                                   done
 --   §3 Externs as routes: read at the first demand, the hash of what was read in the
 --      identity, validated against the type's laws at the demand's cutoff before applied,
---      not applied when the type states no law, a provisional one applied as debt without
---      validation (10.S8 to 10.S10, L11.2, L11.3, 4.R5); a Luthier function crossing as a
+--      not applied when the type states no law, a provisional one refused unless the demand
+--      names it, then applied as assumed without validation (10.S8 to 10.S10, L11.2, L11.3,
+--      4.R5, D-2026-10-16-c); a Luthier function crossing as a
 --      callback, its calls counted, a record of functions crossing by field (3.S23;
 --      D-2026-10-14-a, 12.S18).                                                        done
 --   §4 The actions the first slice needs, by their descriptions: `print`, reading a file,
@@ -139,27 +144,35 @@ Persistence (S : Concrete) := WriteThenRead S & WriteChangesOnlyItsPlace S
 -- be said). Its file is read when a demand reaches the node, once per plan, and may be absent
 -- while the program is checked (L11.7); the hash of the bytes read, computed by the core, enters
 -- the identity of what the extern produces and of its certificate (10.S9). `hash` is the core's
--- (spec 6.S8), declared here until core names it.
+-- (spec 6.S8), declared here until core names it. A provisional extern carries the reason its
+-- declaration gives (`extern "..." (provisional <- "the reason")`, D-2026-10-16-c: provisional is
+-- debt taken while exploring, and the reason says what is owed); `nothing` for one that is not.
 hash : String -> String
-Route = { name : String, declared : Term, route : String, provisional : Bool }
-routeOf (n : String) (t : Term) (route : String) (provisional : Bool) : Route :=
+Route = { name : String, declared : Term, route : String, provisional : Maybe String }
+routeOf (n : String) (t : Term) (route : String) (provisional : Maybe String) : Route :=
   { name := n, declared := t, route := route, provisional := provisional }
+isProvisional (r : Route) : Bool := match r.provisional { nothing -> false ; just why -> true }
 
 -- The first time an action asks for an extern, before it is applied, it is tested against the laws
 -- of its declared type like any function, and refused if it fails (10.S10, L11.2). The verdict is
 -- of the bytes read, so a changed file is validated again and the certificate stays by hash. An
 -- extern whose type has no law to validate against is not applied (L11.3). A provisional extern
--- is the declared exception: applied without validation, recorded as debt, listed by `check -v`
--- and never certified (4.R5), so its grade is an assumption. A model of `Externs` is the
--- validator of a run: `lawsOf` the laws a declared type states (6.S1, read by the checker),
--- `gradeOf` the grade of the validation of the bytes at a hash (test.lth's `grade` of its verdict
--- and its coverage; `nothing` when refuted or not run), `applied` whether the extern is applied,
--- `identity` that of what it produces. The test it runs is test.lth's, and what the evidence
--- settles is laws.lth's.
+-- is the declared exception, never validated and never certified (4.R5), so its grade is an
+-- assumption; it is refused by default, as `run` refuses it (6.S14, L10.6, D-2026-10-16-c), and
+-- applied only when the demand names it among those it runs as assumed (`run --accept
+-- assumed:NAME`), the grade assumed then propagating to everything downstream. A blanket
+-- acceptance of assumed evidence (`run --accept assumed`) does not apply it: a provisional
+-- forgotten deep in the code still refuses the run (his danger, D-2026-10-16-c). A model of
+-- `Externs` is the validator of a run: `lawsOf` the laws a declared type states (6.S1, read by
+-- the checker), `gradeOf` the grade of the validation of the bytes at a hash (test.lth's `grade`
+-- of its verdict and its coverage; `nothing` when refuted or not run), `applied` whether the
+-- extern is applied under a demand's cutoff and the names it runs as assumed (demand.lth's
+-- `accepts` and `assumes`), `identity` that of what it produces. The test it runs is test.lth's,
+-- and what the evidence settles is laws.lth's.
 Externs : {
   lawsOf : Term -> List String,
   gradeOf : Route -> String -> Maybe Grade,
-  applied : Route -> String -> Bool,
+  applied : Grade -> List String -> Route -> String -> Bool,
   identity : Route -> String -> String,
 }
 -- settled at the demand's cutoff: the validation's grade is at least the weakest the demand
@@ -168,18 +181,21 @@ Externs : {
 -- apply an extern is the demand's criterion.)
 settled (accepts : Grade) (g : Maybe Grade) : Bool :=
   match g { just k -> gradeRank accepts <= gradeRank k ; nothing -> false }
--- applied exactly when its laws are settled at the cutoff, or it is provisional
-AppliedWhenSettled (e : Externs) (accepts : Grade) (r : Route) (h : String) : Bool :=
-  e.applied r h == (r.provisional or settled accepts (e.gradeOf r h))
+-- applied exactly when its laws are settled at the cutoff; a provisional one exactly when the
+-- demand names it, whatever the cutoff (D-2026-10-16-c)
+AppliedWhenSettled (e : Externs) (accepts : Grade) (assumes : List String) (r : Route) (h : String) : Bool :=
+  e.applied accepts assumes r h
+    == (if isProvisional r then memberStr r.name assumes else settled accepts (e.gradeOf r h))
 -- a type that states no law gives nothing to validate against, so no validation grades the extern
 -- and, by `AppliedWhenSettled`, it is not applied (10.S10, L11.3); over the routes that are not
 -- provisional, built from their parts
 NoLawNoGrade (e : Externs) (n : String) (t : Term) (route h : String) : Bool :=
-  not (e.lawsOf t == nil) or e.gradeOf (routeOf n t route false) h == nothing
+  not (e.lawsOf t == nil) or e.gradeOf (routeOf n t route nothing) h == nothing
 -- a provisional extern is not validated: its grade is an assumption; over the provisional routes,
--- built from their parts (the review's W4: a premise `not r.provisional or` exempted half the draws)
-ProvisionalIsAssumed (e : Externs) (n : String) (t : Term) (route h : String) : Bool :=
-  e.gradeOf (routeOf n t route true) h == just AssumedGrade
+-- built from their parts (the review's W4: a premise `not r.provisional or` exempted half the draws),
+-- whatever its reason
+ProvisionalIsAssumed (e : Externs) (n : String) (t : Term) (route h why : String) : Bool :=
+  e.gradeOf (routeOf n t route (just why)) h == just AssumedGrade
 -- the identity of what it produces carries the hash of what was read: two reads with different
 -- hashes are two identities (`hash` itself is the core's, and what it tells apart is its own law)
 IdentityCarriesHash (e : Externs) (r : Route) (h k : String) : Bool :=

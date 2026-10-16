@@ -14,7 +14,7 @@ import "laws.lth" Listed
 import "kernel_laws.lth" Concrete
 import "term.lth" Term Var App
 import "world.lth" Console appendStr lineOf PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace
-  ReadChangesNothing World Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf settled
+  ReadChangesNothing World Described OwnIsIdempotent ChangesOnlyDeclared Externs Route routeOf isProvisional memberStr settled
   AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash Crossing mapList lengthOf
   CallbackGivesTheFunction CallsAreCounted RecordCrossesByField Host Observed Held held printDescription
   readFileDescription HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
@@ -101,28 +101,41 @@ validations : List (String * Grade) := [("sha256:h1", Sampled), ("sha256:h2", Ca
 lookupGrade (h : String) (vs : List (String * Grade)) : Maybe Grade :=
   match vs { nil -> nothing ; cons (k, g) rest -> if k == h then just g else lookupGrade h rest }
 gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
-  if r.provisional then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+  if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
 -- applies every extern, validated or not
-appliesEvery : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute, applied := fn r h { true },
+appliesEvery : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute, applied := fn a ns r h { true },
   identity := fn r h { r.route + " at " + h } }
 -- grades by the hash whether or not the type states a law
-gradesLawless (r : Route) (h : String) : Maybe Grade := if r.provisional then just AssumedGrade else lookupGrade h validations
+gradesLawless (r : Route) (h : String) : Maybe Grade := if isProvisional r then just AssumedGrade else lookupGrade h validations
 gradesWithoutLaws : Externs := { lawsOf := lawsOfType, gradeOf := gradesLawless,
-  applied := fn r h { r.provisional or settled Sampled (gradesLawless r h) }, identity := fn r h { r.route + " at " + h } }
+  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradesLawless r h) },
+  identity := fn r h { r.route + " at " + h } }
 -- validates a provisional extern as any other
 validatesAll (r : Route) (h : String) : Maybe Grade := if lawsOfType r.declared == nil then nothing else lookupGrade h validations
 validatesProvisional : Externs := { lawsOf := lawsOfType, gradeOf := validatesAll,
-  applied := fn r h { r.provisional or settled Sampled (validatesAll r h) }, identity := fn r h { r.route + " at " + h } }
+  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (validatesAll r h) },
+  identity := fn r h { r.route + " at " + h } }
 -- the identity of what an extern produces is its route, whatever was read
 identityByRoute : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
-  applied := fn r h { r.provisional or settled Sampled (gradeOfRoute r h) }, identity := fn r h { r.route } }
+  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradeOfRoute r h) },
+  identity := fn r h { r.route } }
+-- [2026-10-16, D-2026-10-16-c, L9.14] a blanket acceptance of assumed evidence applies a provisional
+-- extern the demand did not name, the danger he named (a provisional forgotten deep in the code)
+blanketAssumed : Externs := { lawsOf := lawsOfType, gradeOf := gradeOfRoute,
+  applied := fn a ns r h { if isProvisional r then memberStr r.name ns or settled a (just AssumedGrade)
+                           else settled a (gradeOfRoute r h) },
+  identity := fn r h { r.route + " at " + h } }
+blanketAssumedList : List Externs := [blanketAssumed]
 appliesEveryList : List Externs := [appliesEvery]
 gradesWithoutLawsList : List Externs := [gradesWithoutLaws]
 validatesProvisionalList : List Externs := [validatesProvisional]
 identityByRouteList : List Externs := [identityByRoute]
 cutoff : List Grade := [Sampled]
-routes : List Route := [routeOf "fit" lawful "python:m.fit" false, routeOf "raw" lawless "python:m.raw" false,
-  routeOf "guess" lawful "python:m.guess" true, routeOf "rawGuess" lawless "python:m.rawGuess" true]
+assumedCutoff : List Grade := [AssumedGrade]
+noNames : List (List String) := [nil]
+reasons : List String := ["exploring"]
+routes : List Route := [routeOf "fit" lawful "python:m.fit" nothing, routeOf "raw" lawless "python:m.raw" nothing,
+  routeOf "guess" lawful "python:m.guess" (just "exploring"), routeOf "rawGuess" lawless "python:m.rawGuess" (just "exploring")]
 hashes : List String := ["sha256:h1", "sha256:h2", "sha256:h3", "sha256:h4"]
 externNames : List String := ["fit"]
 terms : List Term := [lawful, lawless]
@@ -130,9 +143,12 @@ routeStrings : List String := ["python:m.fit"]
 onRoute (e : String) : List Binding := [bind "e" e, bind "n" "externNames", bind "t" "terms", bind "route" "routeStrings",
   bind "h" "hashes"]
 test "AppliedWhenSettled" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "appliesEveryList",
-  bind "accepts" "cutoff", bind "r" "routes", bind "h" "hashes"]) (control <- true)
+  bind "accepts" "cutoff", bind "assumes" "noNames", bind "r" "routes", bind "h" "hashes"]) (control <- true)
+test "AppliedWhenSettled" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "blanketAssumedList",
+  bind "accepts" "assumedCutoff", bind "assumes" "noNames", bind "r" "routes", bind "h" "hashes"]) (control <- true)
 test "NoLawNoGrade" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRoute "gradesWithoutLawsList") (control <- true)
-test "ProvisionalIsAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRoute "validatesProvisionalList") (control <- true)
+test "ProvisionalIsAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "validatesProvisionalList",
+  bind "n" "externNames", bind "t" "terms", bind "route" "routeStrings", bind "h" "hashes", bind "why" "reasons"]) (control <- true)
 test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "identityByRouteList",
   bind "r" "routes", bind "h" "hashes", bind "k" "hashes"]) (control <- true)
 

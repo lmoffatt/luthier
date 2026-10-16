@@ -1,5 +1,1175 @@
 [
  {
+  "law": "IdentityCarriesHash",
+  "cone": "sha256:376daeb3dd0471829c2fd58d8eed85d04c22dcf6c0878a351e8e2a358f20bd15",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "identityByRouteList (Listed)",
+    "fingerprint": "sha256:0459a8d453998080dbfb78464a5ce4a7a043722ed73190555264cf772ee40457"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:6c6990f00637b6cdd1437e286eccac8aadc094f1a1ee2d1de164e8a332524fcc"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   },
+   {
+    "parameter": "k",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "identityByRoute"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = identityByRoute, r = ((((routeOf \"fit\") lawful) \"python:m.fit\") nothing), h = \"sha256:h1\", k = \"sha256:h2\""
+  },
+  "date": "2026-10-16T00:38:21+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "ProvisionalIsAssumed",
+  "cone": "sha256:dffdb5d8416c905bd5d934f49ac0e921e8eb8fce438c1a5471ea66c96e08aa85",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validatesProvisionalList (Listed)",
+    "fingerprint": "sha256:ca856b27a46a7318193e9bb0ea8640c9a452431688328466a8822e11e5851b5d"
+   },
+   {
+    "parameter": "n",
+    "generator": "externNames (Listed)",
+    "fingerprint": "sha256:eecb2a333d0d60a5808a07a78a31ffba647c4e48be931a205858e639e5c7e742"
+   },
+   {
+    "parameter": "t",
+    "generator": "terms (Listed)",
+    "fingerprint": "sha256:9e3a04b9c2d8b903fc91139045ef3bae43c180bd13e60565acb3fb596310738b,sha256:4f9f77f3640f3b09102ffd38cbd8b354ae818d972fbf44c9c973ed800cfa8611"
+   },
+   {
+    "parameter": "route",
+    "generator": "routeStrings (Listed)",
+    "fingerprint": "sha256:f8ed9ebd049345a465aa6481a592c146a41f022ba0fb2d2ca50015c3884d723f"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   },
+   {
+    "parameter": "why",
+    "generator": "reasons (Listed)",
+    "fingerprint": "sha256:07a67317ad65bf1c814a3dfd1a840df83eedf3056c7a552d24fec1604fdde76f"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validatesProvisional"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lawful"
+      },
+      {
+       "Printed": "lawless"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "route",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"python:m.fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "why",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"exploring\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = validatesProvisional, n = \"fit\", t = lawful, route = \"python:m.fit\", h = \"sha256:h1\", why = \"exploring\""
+  },
+  "date": "2026-10-16T00:38:21+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "NoLawNoGrade",
+  "cone": "sha256:e96dfbef1f06092242c4c201b9de0aa2a24a0de6edaab6851369190ec4595858",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "gradesWithoutLawsList (Listed)",
+    "fingerprint": "sha256:fe2b7a833810a6e62c44819ff2cb3290601c8ea68c7e36970b52b17e9b8c9d1e"
+   },
+   {
+    "parameter": "n",
+    "generator": "externNames (Listed)",
+    "fingerprint": "sha256:eecb2a333d0d60a5808a07a78a31ffba647c4e48be931a205858e639e5c7e742"
+   },
+   {
+    "parameter": "t",
+    "generator": "terms (Listed)",
+    "fingerprint": "sha256:9e3a04b9c2d8b903fc91139045ef3bae43c180bd13e60565acb3fb596310738b,sha256:4f9f77f3640f3b09102ffd38cbd8b354ae818d972fbf44c9c973ed800cfa8611"
+   },
+   {
+    "parameter": "route",
+    "generator": "routeStrings (Listed)",
+    "fingerprint": "sha256:f8ed9ebd049345a465aa6481a592c146a41f022ba0fb2d2ca50015c3884d723f"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "gradesWithoutLaws"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lawful"
+      },
+      {
+       "Printed": "lawless"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "route",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"python:m.fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = gradesWithoutLaws, n = \"fit\", t = lawless, route = \"python:m.fit\", h = \"sha256:h1\""
+  },
+  "date": "2026-10-16T00:38:21+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "AppliedWhenSettled",
+  "cone": "sha256:a7e2b8ac0930a718a0dc3471c46bb8f86a3595e0ae410b5e26303848484bb474",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "blanketAssumedList (Listed)",
+    "fingerprint": "sha256:5f3f37e6647cb0ef17d726c6cb7e0bdd5af7ada86e0415477b10bc12045fb153"
+   },
+   {
+    "parameter": "accepts",
+    "generator": "assumedCutoff (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "assumes",
+    "generator": "noNames (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:6c6990f00637b6cdd1437e286eccac8aadc094f1a1ee2d1de164e8a332524fcc"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blanketAssumed"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "accepts",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "AssumedGrade"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "assumes",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = blanketAssumed, accepts = AssumedGrade, assumes = nil, r = ((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\")), h = \"sha256:h1\""
+  },
+  "date": "2026-10-16T00:38:21+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "AppliedWhenSettled",
+  "cone": "sha256:a7e2b8ac0930a718a0dc3471c46bb8f86a3595e0ae410b5e26303848484bb474",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "appliesEveryList (Listed)",
+    "fingerprint": "sha256:2977ee765428aec1996933be3bec2bfce294cd82eaf7f9459cdc5ce5e739b6f2"
+   },
+   {
+    "parameter": "accepts",
+    "generator": "cutoff (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "assumes",
+    "generator": "noNames (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:6c6990f00637b6cdd1437e286eccac8aadc094f1a1ee2d1de164e8a332524fcc"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "appliesEvery"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "accepts",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Sampled"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "assumes",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "e = appliesEvery, accepts = Sampled, assumes = nil, r = ((((routeOf \"fit\") lawful) \"python:m.fit\") nothing), h = \"sha256:h4\""
+  },
+  "date": "2026-10-16T00:38:21+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
+  "law": "IdentityCarriesHash",
+  "cone": "sha256:376daeb3dd0471829c2fd58d8eed85d04c22dcf6c0878a351e8e2a358f20bd15",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:c9e857f78d723e52af205c7f0fda524d59cdef0204ee8e4bab73c4db0b549249"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:6c6990f00637b6cdd1437e286eccac8aadc094f1a1ee2d1de164e8a332524fcc"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   },
+   {
+    "parameter": "k",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T00:38:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "ProvisionalIsAssumed",
+  "cone": "sha256:dffdb5d8416c905bd5d934f49ac0e921e8eb8fce438c1a5471ea66c96e08aa85",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:c9e857f78d723e52af205c7f0fda524d59cdef0204ee8e4bab73c4db0b549249"
+   },
+   {
+    "parameter": "n",
+    "generator": "externNames (Listed)",
+    "fingerprint": "sha256:eecb2a333d0d60a5808a07a78a31ffba647c4e48be931a205858e639e5c7e742"
+   },
+   {
+    "parameter": "t",
+    "generator": "terms (Listed)",
+    "fingerprint": "sha256:9e3a04b9c2d8b903fc91139045ef3bae43c180bd13e60565acb3fb596310738b,sha256:4f9f77f3640f3b09102ffd38cbd8b354ae818d972fbf44c9c973ed800cfa8611"
+   },
+   {
+    "parameter": "route",
+    "generator": "routeStrings (Listed)",
+    "fingerprint": "sha256:f8ed9ebd049345a465aa6481a592c146a41f022ba0fb2d2ca50015c3884d723f"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   },
+   {
+    "parameter": "why",
+    "generator": "reasons (Listed)",
+    "fingerprint": "sha256:ceccc1523ff7a9ce8a60afc561301ade6c83dbb9937efa2e4ad1bda77a0a64f9"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lawful"
+      },
+      {
+       "Printed": "lawless"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "route",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"python:m.fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "why",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"\""
+      },
+      {
+       "Printed": "\"a fit to try before its laws are written\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 16,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T00:38:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "NoLawNoGrade",
+  "cone": "sha256:e96dfbef1f06092242c4c201b9de0aa2a24a0de6edaab6851369190ec4595858",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:c9e857f78d723e52af205c7f0fda524d59cdef0204ee8e4bab73c4db0b549249"
+   },
+   {
+    "parameter": "n",
+    "generator": "externNames (Listed)",
+    "fingerprint": "sha256:eecb2a333d0d60a5808a07a78a31ffba647c4e48be931a205858e639e5c7e742"
+   },
+   {
+    "parameter": "t",
+    "generator": "terms (Listed)",
+    "fingerprint": "sha256:9e3a04b9c2d8b903fc91139045ef3bae43c180bd13e60565acb3fb596310738b,sha256:4f9f77f3640f3b09102ffd38cbd8b354ae818d972fbf44c9c973ed800cfa8611"
+   },
+   {
+    "parameter": "route",
+    "generator": "routeStrings (Listed)",
+    "fingerprint": "sha256:f8ed9ebd049345a465aa6481a592c146a41f022ba0fb2d2ca50015c3884d723f"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lawful"
+      },
+      {
+       "Printed": "lawless"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "route",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"python:m.fit\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T00:38:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "AppliedWhenSettled",
+  "cone": "sha256:a7e2b8ac0930a718a0dc3471c46bb8f86a3595e0ae410b5e26303848484bb474",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "validators (Listed)",
+    "fingerprint": "sha256:c9e857f78d723e52af205c7f0fda524d59cdef0204ee8e4bab73c4db0b549249"
+   },
+   {
+    "parameter": "accepts",
+    "generator": "cutoff (Listed)",
+    "fingerprint": "sha256:eb173b343aafd45c3e6a8a34db968f0f6402bb7e91d0254560c67af5e2a82431,sha256:3d060440b5b434ed17df8267fade560123a0d41903bf425f7cb824e9723c886b"
+   },
+   {
+    "parameter": "assumes",
+    "generator": "assumedNames (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "r",
+    "generator": "routes (Listed)",
+    "fingerprint": "sha256:6c6990f00637b6cdd1437e286eccac8aadc094f1a1ee2d1de164e8a332524fcc"
+   },
+   {
+    "parameter": "h",
+    "generator": "hashes (Listed)",
+    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "validator"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "accepts",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "sampledCutoff"
+      },
+      {
+       "Printed": "assumedCutoff"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "assumes",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons \"guess\") nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") nothing)"
+      },
+      {
+       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") (just \"exploring\"))"
+      },
+      {
+       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") (just \"exploring\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"sha256:h1\""
+      },
+      {
+       "Printed": "\"sha256:h2\""
+      },
+      {
+       "Printed": "\"sha256:h3\""
+      },
+      {
+       "Printed": "\"sha256:h4\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 64,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T00:38:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
   "law": "HostChangesOnlyDeclared",
   "cone": "sha256:222bd31c9d43d8d36ee62434e4b9704b410827faa4d7e5e00808e7526d7d7800",
   "binding": [
@@ -1883,131 +3053,6 @@
   "kind": "Control"
  },
  {
-  "law": "IdentityCarriesHash",
-  "cone": "sha256:d4ea878dbd61ede1678e7d8c827bf1e49fe40692316a528c0bad897f6bbabf47",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "identityByRouteList (Listed)",
-    "fingerprint": "sha256:c91371d38b45fc0f4bf6bb0cda4f4afd3ebb7bd8c78508c8823114e71fefba86"
-   },
-   {
-    "parameter": "r",
-    "generator": "routes (Listed)",
-    "fingerprint": "sha256:34a99aad609707fc928b504dcab8dd585ddf2c10a2035004d8a2fce13ed0cd6d"
-   },
-   {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
-   },
-   {
-    "parameter": "k",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "identityByRoute"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") false)"
-      },
-      {
-       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") false)"
-      },
-      {
-       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") true)"
-      },
-      {
-       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") true)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 64,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "e = identityByRoute, r = ((((routeOf \"fit\") lawful) \"python:m.fit\") false), h = \"sha256:h1\", k = \"sha256:h2\""
-  },
-  "date": "2026-10-15T06:38:17+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control"
- },
- {
   "law": "ProvisionalIsAssumed",
   "cone": "sha256:296ccf5301604448fe903ba7c16d05d1352fe5dd98659922d73b8b886c59a0c8",
   "binding": [
@@ -2126,131 +3171,6 @@
   "grade": null,
   "outcome": {
    "ControlRefuted": "e = validatesProvisional, n = \"fit\", t = lawful, route = \"python:m.fit\", h = \"sha256:h1\""
-  },
-  "date": "2026-10-15T06:38:17+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control"
- },
- {
-  "law": "NoLawNoGrade",
-  "cone": "sha256:265f8a019dd8c77d59d75ca972f0d061b68d2c4f11fb2a6fc70b45a8d4d0d883",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "gradesWithoutLawsList (Listed)",
-    "fingerprint": "sha256:2cff1604c7717770bb9bc7e9bc711915210f437cf3695b34658b145b3b8ba882"
-   },
-   {
-    "parameter": "n",
-    "generator": "externNames (Listed)",
-    "fingerprint": "sha256:eecb2a333d0d60a5808a07a78a31ffba647c4e48be931a205858e639e5c7e742"
-   },
-   {
-    "parameter": "t",
-    "generator": "terms (Listed)",
-    "fingerprint": "sha256:9e3a04b9c2d8b903fc91139045ef3bae43c180bd13e60565acb3fb596310738b,sha256:4f9f77f3640f3b09102ffd38cbd8b354ae818d972fbf44c9c973ed800cfa8611"
-   },
-   {
-    "parameter": "route",
-    "generator": "routeStrings (Listed)",
-    "fingerprint": "sha256:f8ed9ebd049345a465aa6481a592c146a41f022ba0fb2d2ca50015c3884d723f"
-   },
-   {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "gradesWithoutLaws"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"fit\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "lawful"
-      },
-      {
-       "Printed": "lawless"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "route",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"python:m.fit\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 8,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "e = gradesWithoutLaws, n = \"fit\", t = lawless, route = \"python:m.fit\", h = \"sha256:h1\""
   },
   "date": "2026-10-15T06:38:17+00:00",
   "interpreter": "v0.2",
@@ -3661,252 +4581,8 @@
   "hosts": []
  },
  {
-  "law": "IdentityCarriesHash",
-  "cone": "sha256:d4ea878dbd61ede1678e7d8c827bf1e49fe40692316a528c0bad897f6bbabf47",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "validators (Listed)",
-    "fingerprint": "sha256:bd68b0941c096d6516500fca41cd92549d84cdf00951c76607f2dec83ed0ec15"
-   },
-   {
-    "parameter": "r",
-    "generator": "routes (Listed)",
-    "fingerprint": "sha256:34a99aad609707fc928b504dcab8dd585ddf2c10a2035004d8a2fce13ed0cd6d"
-   },
-   {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
-   },
-   {
-    "parameter": "k",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "validator"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "((((routeOf \"fit\") lawful) \"python:m.fit\") false)"
-      },
-      {
-       "Printed": "((((routeOf \"raw\") lawless) \"python:m.raw\") false)"
-      },
-      {
-       "Printed": "((((routeOf \"guess\") lawful) \"python:m.guess\") true)"
-      },
-      {
-       "Printed": "((((routeOf \"rawGuess\") lawless) \"python:m.rawGuess\") true)"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "k",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 64,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-15T06:36:40+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
   "law": "ProvisionalIsAssumed",
   "cone": "sha256:296ccf5301604448fe903ba7c16d05d1352fe5dd98659922d73b8b886c59a0c8",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "validators (Listed)",
-    "fingerprint": "sha256:bd68b0941c096d6516500fca41cd92549d84cdf00951c76607f2dec83ed0ec15"
-   },
-   {
-    "parameter": "n",
-    "generator": "externNames (Listed)",
-    "fingerprint": "sha256:eecb2a333d0d60a5808a07a78a31ffba647c4e48be931a205858e639e5c7e742"
-   },
-   {
-    "parameter": "t",
-    "generator": "terms (Listed)",
-    "fingerprint": "sha256:9e3a04b9c2d8b903fc91139045ef3bae43c180bd13e60565acb3fb596310738b,sha256:4f9f77f3640f3b09102ffd38cbd8b354ae818d972fbf44c9c973ed800cfa8611"
-   },
-   {
-    "parameter": "route",
-    "generator": "routeStrings (Listed)",
-    "fingerprint": "sha256:f8ed9ebd049345a465aa6481a592c146a41f022ba0fb2d2ca50015c3884d723f"
-   },
-   {
-    "parameter": "h",
-    "generator": "hashes (Listed)",
-    "fingerprint": "sha256:f6476c47e7204cd05316819dcde6ba6d0a80e735a896adc0a6b7fb75eafa8231"
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "validator"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"fit\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "t",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "lawful"
-      },
-      {
-       "Printed": "lawless"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "route",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"python:m.fit\""
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "h",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "\"sha256:h1\""
-      },
-      {
-       "Printed": "\"sha256:h2\""
-      },
-      {
-       "Printed": "\"sha256:h3\""
-      },
-      {
-       "Printed": "\"sha256:h4\""
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 8,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-15T06:36:40+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "NoLawNoGrade",
-  "cone": "sha256:265f8a019dd8c77d59d75ca972f0d061b68d2c4f11fb2a6fc70b45a8d4d0d883",
   "binding": [
    {
     "parameter": "e",

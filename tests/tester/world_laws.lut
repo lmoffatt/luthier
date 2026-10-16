@@ -14,7 +14,7 @@ import "kernel_laws.lth" Concrete
 import "term.lth" Term Var App
 import "world.lth" Console PrintAppendsALine PrintChangesOnlyStdout ReadGivesThePlace ReadChangesNothing
   World Described OwnIsIdempotent ChangesOnlyDeclared printDescription readFileDescription observeDescription
-  Externs Route routeOf settled AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash
+  Externs Route routeOf isProvisional memberStr settled AppliedWhenSettled NoLawNoGrade ProvisionalIsAssumed IdentityCarriesHash
   Crossing mapList lengthOf CallbackGivesTheFunction CallsAreCounted RecordCrossesByField
   Host Observed Held held HostAgreesPrint HostAgreesReadFile HostObserveChangesNothing HostChangesOnlyDeclared
 import "world_model.lut" State console theWorld host
@@ -54,6 +54,10 @@ test "ReadChangesNothing" ExhaustiveMode (seed <- 20261015) (whereBindings <- on
 -- Host law from any entry of the model's store whose reach covers the run's arguments, and the
 -- case is no argument). The cutoff of `AppliedWhenSettled` is a census of one, the demand's
 -- (D-2026-10-14-c): `Sampled`, demand_model.lut's default [proposed].
+-- 2026-10-16, by Claude Opus 5.5, on record/IA/code-follows-2026-10-16/prompt-modes.md
+-- (D-2026-10-16-c): the validator applies a provisional extern only when the demand names it; the
+-- cutoffs are `Sampled` and `AssumedGrade`, so that a blanket acceptance of assumed evidence is seen
+-- not to apply one, and the names the demand runs as assumed are none, or the provisional `guess`.
 
 -- §1, §2 descriptions
 unitTypes : List U := [Unit]
@@ -95,11 +99,11 @@ validations : List (String * Grade) := [("sha256:h1", Sampled), ("sha256:h2", Ca
 lookupGrade (h : String) (vs : List (String * Grade)) : Maybe Grade :=
   match vs { nil -> nothing ; cons (k, g) rest -> if k == h then just g else lookupGrade h rest }
 gradeOfRoute (r : Route) (h : String) : Maybe Grade :=
-  if r.provisional then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
+  if isProvisional r then just AssumedGrade else if lawsOfType r.declared == nil then nothing else lookupGrade h validations
 validator : Externs := {
   lawsOf := lawsOfType,
   gradeOf := gradeOfRoute,
-  applied := fn r h { r.provisional or settled Sampled (gradeOfRoute r h) },
+  applied := fn a ns r h { if isProvisional r then memberStr r.name ns else settled a (gradeOfRoute r h) },
   identity := fn r h { r.route + " at " + h },
 }
 validators : List Externs := [validator]
@@ -108,9 +112,12 @@ validators : List Externs := [validator]
 -- (a constructor of test.lth) nor `State` (an alias, which `_is_type` does not see as a type) is
 -- a model; the Host lines' entries would otherwise land in world_model.cert.json
 sampledCutoff : Grade := Sampled
-cutoff : List Grade := [sampledCutoff]
-routes : List Route := [routeOf "fit" lawful "python:m.fit" false, routeOf "raw" lawless "python:m.raw" false,
-  routeOf "guess" lawful "python:m.guess" true, routeOf "rawGuess" lawless "python:m.rawGuess" true]
+assumedCutoff : Grade := AssumedGrade
+cutoff : List Grade := [sampledCutoff, assumedCutoff]
+assumedNames : List (List String) := [nil, ["guess"]]
+reasons : List String := ["", "a fit to try before its laws are written"]
+routes : List Route := [routeOf "fit" lawful "python:m.fit" nothing, routeOf "raw" lawless "python:m.raw" nothing,
+  routeOf "guess" lawful "python:m.guess" (just "exploring"), routeOf "rawGuess" lawless "python:m.rawGuess" (just "exploring")]
 hashes : List String := ["sha256:h1", "sha256:h2", "sha256:h3", "sha256:h4"]
 externNames : List String := ["fit"]
 terms : List Term := [lawful, lawless]
@@ -118,9 +125,10 @@ routeStrings : List String := ["python:m.fit"]
 onRoute : List Binding := [bind "e" "validators", bind "n" "externNames", bind "t" "terms", bind "route" "routeStrings",
   bind "h" "hashes"]
 test "AppliedWhenSettled" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "validators",
-  bind "accepts" "cutoff", bind "r" "routes", bind "h" "hashes"])
+  bind "accepts" "cutoff", bind "assumes" "assumedNames", bind "r" "routes", bind "h" "hashes"])
 test "NoLawNoGrade" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRoute)
-test "ProvisionalIsAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- onRoute)
+test "ProvisionalIsAssumed" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "validators",
+  bind "n" "externNames", bind "t" "terms", bind "route" "routeStrings", bind "h" "hashes", bind "why" "reasons"])
 test "IdentityCarriesHash" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "e" "validators", bind "r" "routes",
   bind "h" "hashes", bind "k" "hashes"])
 
