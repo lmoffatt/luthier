@@ -41,10 +41,15 @@ The store (bite 2, record/IA/certification-2026-10-14/prompt-certify.md; certifi
 7.S9, 7.S13): each line's identity is the law, the hash of its cone (certify.py), the binding
 expanded per parameter, the seed and `n`. Before a line runs its identity is looked up in
 the store of the file that makes the line's claim (`claim_file`): a known outcome, whatever it is,
-is reused and reported as known with its date; `deep` runs it again (and records nothing new: the
-store keeps one outcome per identity). A line run writes its entry there, with the reach of each
+is reused and reported as known with its date; `deep` runs it again, and its entry is recorded by
+the store law (certify.py's `record`, D-2026-10-15-f): nothing new when it agrees with the known
+entry, written beside it when it disagrees, and the law is then refused until a later run agrees
+(the line says "replay disagrees"). A line run writes its entry there, with the reach of each
 parameter, the evidence, the grade when it passed, the date, the interpreter's revision and the
-host code by route. The file that makes the claim (L10.12, D-2026-10-16-b; record/IA/
+host code by route. [D-2026-10-15-g] A line cut by its fuel (a case or a draw stopped with the
+Runner's fuel at zero) settles nothing and writes nothing: its outcome is `NotRunFor "fuel spent"`,
+the line says how much fuel it was given, and the next run runs it again; the fuel is in no
+identity. The file that makes the claim (L10.12, D-2026-10-16-b; record/IA/
 code-follows-2026-10-16/prompt-claim-store.md) is the file that defines the model of the library
 the line's binding names (`model_homes`), or, when it names none, the file that states the law; a
 test program, which only gathers evidence, keeps no store of its own, and none beside it is read.
@@ -209,8 +214,9 @@ class Outcome:
     entry: dict | None = None   # the store's entry of this line (certification.lth's `Entry`)
     known: str | None = None    # the date of the known entry reused, when the line did not run
     stale: str | None = None    # the date of a stale entry of the same law and binding, kept
-    differs: str | None = None  # under `deep`, the date of a known entry whose outcome differs
+    differs: str | None = None  # the date of the entry a replay disagrees with (D-2026-10-15-f)
     store: object = None        # the file whose store holds the line's entry (`claim_file`)
+    out_of_fuel: int | None = None  # the fuel given, when the run was cut by it (D-2026-10-15-g)
 
 
 # ---------------------------------------------------------------------- loading
@@ -767,7 +773,7 @@ def run_spec(runner, spec, fuel, loaded=None):
                                   f"a generator draws them (SampledMode)")
             plan.append(g if g is not None else census(runner, b, ty, called))
     except (NoGenerator, RunError) as exc:
-        return _not_run(spec, str(exc), names)
+        return _not_run(spec, str(exc), names, _spent(runner, fuel))
     for b in spec.where + spec.profile:  # test.lth's specCoverage: every binding weakens it
         # a generator's coverage is a draw from the spec's seed, whatever the binding says
         is_generator = _is_generator(runner, loaded, b)
@@ -785,14 +791,15 @@ def run_spec(runner, spec, fuel, loaded=None):
     except (NoGenerator, Unfit, Invalid) as exc:
         return _not_run(spec, str(exc), names)
     except RunError as exc:
-        return _not_run(spec, f"drawing the cases: {exc}", names)
+        return _not_run(spec, f"drawing the cases: {exc}", names, _spent(runner, fuel))
 
-    points, raised, refuting = [], [], None
+    points, raised, refuting, spent = [], [], None, None
     for case in cases:
         try:
             ok = evaluate(runner, law, case, fuel)
         except (RunError, RecursionError, ValueError, KeyError, TypeError) as exc:
             raised.append((case, str(exc) or type(exc).__name__))
+            spent = spent or _spent(runner, fuel)
             continue
         points.append((case, ok))
         if not ok and refuting is None:
@@ -805,8 +812,9 @@ def run_spec(runner, spec, fuel, loaded=None):
         verdict = "Unsettled"
     else:
         verdict = "Confirmed" if _base(coverage) == "Exhaustive" else "Supported"
+    # a refutation stands at any fuel; a run cut by its fuel otherwise settles nothing (D-2026-10-15-g)
     return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, loaded), len(points), refuting,
-                   raised, names)
+                   raised, names, out_of_fuel=spent if verdict != "Refuted" else None)
 
 
 def is_statistical(runner, law):
@@ -874,7 +882,7 @@ def run_statistical(runner, spec, fuel, loaded, law, params):
         runner.fuel = fuel
         verdict = runner.value(Runner.apply(con("sequential"), args + [t.Lit(t.IntConst(seed))]))
     except _RAISES as exc:
-        return _not_run(spec, f"the sequential test raised: {exc or type(exc).__name__}", names)
+        return _not_run(spec, f"the sequential test raised: {exc or type(exc).__name__}", names, _spent(runner, fuel))
     if not (isinstance(verdict, t.App) and _base(verdict.function) in SETTLED_BY_TEST
             and isinstance(verdict.argument, t.RecordValue)):
         return _not_run(spec, f"the sequential test gave {_show(verdict)}, not a StatisticalVerdict", names)
@@ -964,8 +972,14 @@ def _base(term):
     return term.name.partition("@")[0] if isinstance(term, t.Var) else None
 
 
-def _not_run(spec, reason, names=()):
-    return Outcome(spec, NotRun(reason), "NotRun", None, 0, None, parameters=names)
+def _not_run(spec, reason, names=(), out_of_fuel=None):
+    return Outcome(spec, NotRun(reason), "NotRun", None, 0, None, parameters=names, out_of_fuel=out_of_fuel)
+
+
+def _spent(runner, fuel):
+    """The fuel given, when the Runner stopped with none left (its `fuel spent`, however a host or
+    a message wrapped it), else None (D-2026-10-15-g)."""
+    return fuel if runner.fuel <= 0 else None
 
 
 # ---------------------------------------------------------------------- the command
@@ -993,7 +1007,11 @@ _CONTROL_FAILED = "CONTROL FAILED: the law held on the model broken on purpose, 
 
 def _tail(outcome):
     """What the line settled: the grade, the refuting case, or why it settled nothing; for a
-    control, whether it passed (its law refuted) or failed (its law held)."""
+    control, whether it passed (its law refuted) or failed (its law held). A run cut by its fuel
+    says so first, with the fuel it was given (D-2026-10-15-g)."""
+    if outcome.out_of_fuel is not None:
+        return f"fuel spent ({outcome.out_of_fuel} given; nothing stored, run again with more): " + _tail(
+            replace(outcome, out_of_fuel=None))
     if isinstance(outcome.evidence, NotRun):
         return f"not run: {outcome.evidence.reason}"
     if isinstance(outcome.evidence, Tested):
@@ -1051,12 +1069,16 @@ def line(outcome):
         mode, counted = f"sequential (seed {spec.seed % SEEDS})", f"{outcome.evaluated} samples"
     head = f"{'control of ' if spec.control else ''}{spec.law}: {mode}, {counted}"
     if outcome.known is not None:
-        return f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known})"
+        tail = f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known}"
+        if outcome.differs is not None:
+            tail += f"; replay disagrees with the entry of {outcome.differs}, the law refused until resolved"
+        return tail + ")"
     how = "ran"
     if outcome.stale is not None:
         how += f"; the entry of {outcome.stale} is stale, kept"
     if outcome.differs is not None:
-        how += f"; the known entry of {outcome.differs} differs and is kept"
+        how += (f"; replay disagrees with the known entry of {outcome.differs}: both kept, the law refused "
+                f"until a later run agrees (D-2026-10-15-f)")
     return f"{head}, {_tail(outcome)} ({how})"
 
 
@@ -1080,8 +1102,9 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
     """Run every `test` line of the file; the outcomes in order. With `store`, each line's identity
     is looked up first in the store of the file that makes its claim (`claim_file`; a known outcome
     is reused unless `deep`) and each line run is recorded there, under its lock
-    (certification.lth's `known` and `record`); the test program's own store is neither read nor
-    written."""
+    (certification.lth's `known` and `record`: an agreeing replay writes nothing, a disagreeing one
+    is kept beside, D-2026-10-15-f; a run cut by its fuel is never written, D-2026-10-15-g); the test
+    program's own store is neither read nor written."""
     runner, specs, loaded = prepare(path, fuel)
     cones = certify.Cones(runner)
     stores = {}  # the file that makes a claim -> its store's entries, as read
@@ -1094,7 +1117,8 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
         if home not in stores:
             stores[home] = certify.read_store(home) if store else []
         entries = stores[home]
-        found = certify.known(entries, certify.identity(entry))
+        key = certify.identity(entry)
+        found = certify.known(entries, key)
         if found is not None and not deep:
             evidence = found["evidence"]
             points = evidence.get("Points", {})
@@ -1102,20 +1126,24 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
             if "Tested" in evidence:
                 verdict = SETTLED_BY_TEST[evidence["Tested"]["verdict"]]
                 evaluated = evidence["Tested"]["spent"]
-            outcomes.append(Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
-                                    entry=found, known=found["date"], store=home))
+            reused = Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
+                             entry=found, known=found["date"], store=home)
+            if certify.disputed_at(entries, key):
+                reused.differs = [e for e in entries if certify.identity(e) == key][1]["date"]
+            outcomes.append(reused)
             continue
         outcome = run_spec(runner, spec, fuel, loaded)
         settle(entry, outcome)
         outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
-        if found is not None and found["outcome"] != entry["outcome"]:
+        fuel_spent = certify.out_of_fuel(entry)
+        if found is not None and not fuel_spent and not certify.agree(entry, found):
             outcome.differs = found["date"]
         old = next((e for e in entries if e["law"] == entry["law"] and e["binding"] == entry["binding"]
                     and certify.stale(entry["cone"], e)), None)
         if old is not None:
             outcome.stale = old["date"]
         outcomes.append(outcome)
-        if store:
+        if store and not fuel_spent:
             certify.add_entry(home, entry)
             stores[home] = certify.read_store(home)
     return outcomes
@@ -1392,7 +1420,12 @@ def new_entry(runner, loaded, spec, cones, fuel):
 def settle(entry, outcome):
     """The entry's evidence, grade and outcome from the line's: passed with its grade; failed at
     the refuting case; not run with its reason, or unsettled with the first case that raised. A
-    control's entry has no grade, and its outcome is `ControlRefuted` or `ControlConfirmed`."""
+    control's entry has no grade, and its outcome is `ControlRefuted` or `ControlConfirmed`. A run
+    cut by its fuel is `NotRunFor "fuel spent"`, which the store never takes (D-2026-10-15-g)."""
+    if outcome.out_of_fuel is not None:
+        settle(entry, replace(outcome, out_of_fuel=None))
+        entry["outcome"], entry["grade"] = {"NotRunFor": certify.FUEL_SPENT}, None
+        return entry
     if isinstance(outcome.evidence, NotRun):
         entry["evidence"] = {"NotRun": outcome.evidence.reason}
         entry["outcome"] = {"NotRunFor": outcome.evidence.reason}

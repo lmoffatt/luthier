@@ -182,14 +182,16 @@ def test_a_store_round_trip(tmp_path):
 
 def test_record_never_edits_an_entry():
     es = certify.record([], entry())
-    assert certify.record(es, entry(outcome={"Failed": "x = 1"}, grade=None)) is es  # a known identity
-    assert len(certify.record(es, entry(seed=5))) == 2                                # a new seed
+    assert certify.record(es, entry()) is es                     # an agreeing replay (D-2026-10-15-f)
+    replay = entry(outcome={"Failed": "x = 1"}, grade=None)
+    assert certify.record(es, replay) == [replay] + es          # a disagreeing one, beside the old
+    assert len(certify.record(es, entry(seed=5))) == 2           # a new seed
 
 
 def test_the_store_predicate_is_checked(tmp_path):
     path = tmp_path / "x.lut"
-    with pytest.raises(certify.StoreError, match="one identity, two outcomes"):
-        certify.write_store(path, [entry(), entry(outcome={"NotRunFor": "fuel"}, grade=None)])
+    # one identity, two outcomes: a disagreement the store records, not an error (D-2026-10-15-f)
+    certify.write_store(path, [entry(), entry(outcome={"NotRunFor": "no generator"}, grade=None)])
     with pytest.raises(certify.StoreError, match="a grade exactly when passed"):
         certify.write_store(path, [entry(grade=None)])
     certify.store_path(path).write_text(json.dumps([entry(outcome={"Failed": "x"})]))
@@ -576,7 +578,7 @@ def test_a_current_failure_is_refused_whatever_serves():
     # same law at the same hash (two seeds), does not save the law; it is refused with the failure
     def entry(outcome, grade, seed):
         return {"law": "L", "cone": "h", "binding": [{"parameter": "m", "generator": "x", "fingerprint": "f"}],
-                "seed": seed, "reach": [{"parameter": "m", "reach": {"Members": [{"Printed": "x"}]}}],
+                "seed": seed, "cases": 1, "reach": [{"parameter": "m", "reach": {"Members": [{"Printed": "x"}]}}],
                 "outcome": outcome, "grade": grade}
     demand = {"law": "L", "cone": "h", "given": [("m", {"Printed": "x"})], "accepts": "Sampled",
               "fingerprints": {"m": "f"}}
@@ -783,3 +785,158 @@ def test_an_unresolved_entry_round_trips_and_a_statistical_pass_is_a_holds_grade
         bad = entry(grade=grade)
         bad["evidence"] = {"Tested": dict(tested, verdict=verdict), "coverage": "Drawn"}
         assert "a Holds graded sampled" in certify.store_errors([bad])[0]
+
+
+# ---------------------------------------------------------------------- an exact replay, and fuel
+# record/IA/code-follows-2026-10-16/prompt-replay-fuel.md (step 3c): an exact replay is absorbed
+# when it agrees and kept beside the old entry when it disagrees, which refuses the law until a
+# later agreeing pair (D-2026-10-15-f); a not-run for lack of fuel is never stored, and the fuel is
+# in no identity (D-2026-10-15-g). The store law is certification.lth's `Recording`.
+
+FLAKY_HOST = '''"""A host function whose result the test changes between two runs, the code unchanged."""
+MODE = "same"
+
+
+def answer(b):
+    if MODE == "raise":
+        raise ValueError("the host is down")
+    return (not b) if MODE == "flip" else b
+'''
+FLAKY_MODEL = '''Small : { f : Bool -> Bool }
+FixesBool (m : Small) (b : Bool) : Bool := m.f b == b
+Small := FixesBool
+answer (b : Bool) : Bool := extern "python:flaky_host.answer" b
+same : Small := { f := fn b { answer b } }
+'''
+
+
+def test_an_agreeing_replay_leaves_the_store_byte_identical(tmp_path, capsys):
+    model, test, uses = _small(tmp_path)
+    assert main(["certify", str(test)]) == 0
+    before = certify.store_path(model).read_bytes()
+    assert main(["certify", "--deep", str(test)]) == 0
+    assert "1 lines ran, 0 known" in capsys.readouterr().out.splitlines()[-2]
+    assert certify.store_path(model).read_bytes() == before
+
+
+def _flaky(tmp_path, monkeypatch):
+    model, test, uses = _small(tmp_path)
+    model.write_text(FLAKY_MODEL, encoding="utf-8")
+    (tmp_path / "flaky_host.py").write_text(FLAKY_HOST, encoding="utf-8")
+    monkeypatch.syspath_prepend(str(tmp_path))
+    import flaky_host
+    return model, test, uses, flaky_host
+
+
+def test_a_disagreeing_replay_is_kept_and_refuses_the_law(tmp_path, monkeypatch, capsys):
+    from luthier.run import Refused, run_file
+    model, test, uses, flaky_host = _flaky(tmp_path, monkeypatch)
+    first, = tester.run_tests(test, store=True)
+    assert first.entry["outcome"] == "Passed" and run_file(uses) == "true\n"
+    # the host's result changes, its code does not: the same identity gives another outcome
+    monkeypatch.setattr(flaky_host, "MODE", "flip")
+    replay, = tester.run_tests(test, store=True, deep=True)
+    assert certify.identity(replay.entry) == certify.identity(first.entry)
+    assert replay.entry["outcome"] == {"Failed": "m = same, b = true"}
+    assert "replay disagrees with the known entry of" in tester.line(replay)
+    assert certify.read_store(model) == [replay.entry, first.entry]  # both kept, the replay in front
+    standing = dict(certify.standings(test))["FixesBool"]
+    assert standing.startswith("replay disagrees at seed")
+    assert f"the entry of {replay.entry['date']} (failed at m = same, b = true)" in standing
+    assert f"the entry of {first.entry['date']} (passed, cases)" in standing
+    main(["check", "-v", str(test)])
+    assert "certificate FixesBool: replay disagrees at seed" in capsys.readouterr().out
+    with pytest.raises(Refused, match="same: FixesBool: replay disagrees at seed"):
+        run_file(uses)
+    # a line reused from the store says so too
+    known, = tester.run_tests(test, store=True)
+    assert known.known == replay.entry["date"] and "replay disagrees with the entry of" in tester.line(known)
+    # a later agreeing pair settles the disagreement, not the failure: a counterexample at the
+    # current hash still refutes the law (6.S3, L10.3) until it is removed by hand
+    monkeypatch.setattr(flaky_host, "MODE", "same")
+    tester.run_tests(test, store=True, deep=True)
+    with pytest.raises(Refused, match="replay disagrees"):
+        run_file(uses)
+    tester.run_tests(test, store=True, deep=True)
+    assert len(certify.read_store(model)) == 4
+    assert dict(certify.standings(test))["FixesBool"] == "refuted at m = same, b = true"
+    with pytest.raises(Refused, match="same: FixesBool: failed at m = same, b = true"):
+        run_file(uses)
+
+
+def test_a_later_agreeing_pair_settles_a_disagreement(tmp_path, monkeypatch):
+    from luthier.run import Refused, run_file
+    model, test, uses, flaky_host = _flaky(tmp_path, monkeypatch)
+    tester.run_tests(test, store=True)
+    # the host fails: the replay settles nothing, and disagrees with the pass
+    monkeypatch.setattr(flaky_host, "MODE", "raise")
+    replay, = tester.run_tests(test, store=True, deep=True)
+    assert replay.entry["outcome"]["NotRunFor"].startswith("unsettled: 2 cases raised")
+    assert dict(certify.standings(test))["FixesBool"].startswith("replay disagrees")
+    # the host back: a pass disagrees with the latest (the not-run), kept; still refused
+    monkeypatch.setattr(flaky_host, "MODE", "same")
+    tester.run_tests(test, store=True, deep=True)
+    assert len(certify.read_store(model)) == 3
+    with pytest.raises(Refused, match="replay disagrees"):
+        run_file(uses)
+    # a later agreeing pair settles it
+    tester.run_tests(test, store=True, deep=True)
+    assert len(certify.read_store(model)) == 4
+    assert dict(certify.standings(test))["FixesBool"] == "cases"
+    assert run_file(uses) == "true\n"
+    # and an agreeing replay of a settled identity writes nothing
+    after = certify.store_path(model).read_bytes()
+    tester.run_tests(test, store=True, deep=True)
+    assert certify.store_path(model).read_bytes() == after
+
+
+def test_a_disagreement_is_kept_through_pruning():
+    # the two entries of a disagreement stay, however many newer seeds the group holds
+    old = [entry(seed=0, outcome={"Failed": "x = 1"}, grade=None), entry(seed=0)]
+    newer = [dict(entry(seed=s), date=f"2026-10-15T00:00:0{s}+00:00") for s in range(1, 6)]
+    kept = certify.prune(newer + old)
+    assert all(e in kept for e in old) and len(kept) == 6
+
+
+def test_the_store_law_holds_on_the_reference_and_its_controls_refute_the_broken_stores():
+    # certification.lth's `Recording` and the two laws of a disagreement, on certification_model.lut;
+    # the controls (L9.14): a store that absorbs a disagreeing replay, one that keeps a not-run for
+    # lack of fuel, and a `certifying` blind to a disagreement, each refuted
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "certification_laws.lut")
+    assert [o.spec.law for o in laws] == ["ANewIdentityGoesInFront", "AnAgreeingReplayAddsNothing",
+                                          "ADisagreeingReplayIsKept", "AnAgreeingPairSettles",
+                                          "AnExhaustionIsNeverStored", "ADisagreementRefutes", "ADisagreementIsRefused"]
+    assert all(o.grade == "ExhaustiveGrade" or o.grade == "Cases" for o in laws), [tester.line(o) for o in laws]
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "certification_controls.lut")
+    assert [(o.spec.law, o.verdict) for o in controls] == [
+        ("ADisagreeingReplayIsKept", "Refuted"), ("AnExhaustionIsNeverStored", "Refuted"),
+        ("ADisagreementRefutes", "Refuted"), ("ADisagreementIsRefused", "Refuted")]
+    absorbed, = (o for o in controls if o.spec.law == "ADisagreeingReplayIsKept")
+    assert "r = absorbing, e = passOne, es = ((cons failOne) ((cons passOne) nil))" in tester.line(absorbed)
+
+
+SLOW = '''import "test.lth" test ExhaustiveMode
+count (n : Int) : Int := if n <= 0 then 0 else count (n - 1)
+Slow (b : Bool) : Bool := count 200 == 0
+test "Slow" ExhaustiveMode
+'''
+
+
+def test_a_line_out_of_fuel_leaves_no_entry_and_runs_again_with_enough(tmp_path, counted):
+    path = tmp_path / "slow.lut"
+    path.write_text(SLOW, encoding="utf-8")
+    cut, = tester.run_tests(path, fuel=100, store=True)
+    assert cut.out_of_fuel == 100 and cut.entry["outcome"] == {"NotRunFor": certify.FUEL_SPENT}
+    assert "fuel spent (100 given; nothing stored" in tester.line(cut)
+    assert not certify.store_path(path).exists()
+    # never written, so the next run runs it again, with the same identity (fuel is in none)
+    counted.clear()
+    again, = tester.run_tests(path, fuel=100, store=True)
+    assert again.known is None and counted and not certify.store_path(path).exists()
+    ran, = tester.run_tests(path, store=True)
+    assert ran.known is None and ran.entry["outcome"] == "Passed"
+    assert certify.identity(ran.entry) == certify.identity(cut.entry)
+    assert certify.read_store(path) == [ran.entry]
+    # and the store law refuses a fuel not-run whatever the store holds
+    assert certify.record([ran.entry], cut.entry) == [ran.entry]
+    assert certify.record([], cut.entry) == []

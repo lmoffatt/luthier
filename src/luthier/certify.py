@@ -15,10 +15,17 @@ route `python:luthier.certify.cone_hash` certification_model.lut names; `Cones` 
 a name from a program.
 
 The store `x.cert.json` beside `x.lut` is a JSON list of entries, the latest in front, each as
-certification.lth's `Entry` reads them. Its predicate (`Store`: one outcome per identity, a grade
-exactly when passed) is checked on every store read or written; `record` never edits an entry and
-leaves the store as it is on a known identity; a stale entry is kept, and is stale only as read
-against the current hash of its law's cone (12.S11), never marked in the file. [D-2026-10-16-b,
+certification.lth's `Entry` reads them. Its predicate (`Store`: a grade exactly when passed) is
+checked on every store read or written; `record` (the store law, certification.lth's `Recording`)
+never edits an entry. [D-2026-10-15-f] An exact replay that agrees with the latest entry of its
+identity leaves the store as it is; one that disagrees is written in front of it, both kept, and
+the law is refused (`disputes`: no grade, `refuse` and `standing` say "replay disagrees", naming
+both entries) until a later run agrees with the latest (a later agreeing pair) or one of the two is
+removed from the store by hand. [proposed] A failure among them still refutes the law after a later
+agreeing pair (6.S3, L10.3): only its removal by hand lifts that. [D-2026-10-15-g] A not-run for lack of fuel (`out_of_fuel`) is
+never written, so the next run of the line runs it again; the fuel given is in no identity. A stale
+entry is kept, and is stale only as read against the current hash of its law's cone (12.S11), never
+marked in the file. [D-2026-10-16-b,
 L10.12] The stores are partitioned by the files that make the claims: an entry lives only in the
 store of the file that defines the model of the library its binding names, or else of the file
 that states its law (tester.py's `claim_file`); a test program keeps none, and `certify` and
@@ -359,13 +366,69 @@ def _laws_own(entries):
 
 def identity(entry):
     """certification.lth's `identity`: the law, the cone's hash, the binding expanded, the seed and
-    `n` (7.S9, 7.S13), as one comparable key; a control's kind is part of it [proposed]."""
-    key = [entry[k] for k in IDENTITY] + ([entry["kind"]] if "kind" in entry else [])
+    `n` (7.S9, 7.S13), as one comparable key; a control's kind is part of it [proposed]. A field an
+    entry lacks reads as null (`store_errors` reports it in a store; a demand's reading may hold
+    entries built in part)."""
+    key = [entry.get(k) for k in IDENTITY] + ([entry["kind"]] if "kind" in entry else [])
     return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
 def passed(entry):
     return entry["outcome"] == "Passed"
+
+
+# certification.lth's `fuelSpent`: the reason of a not-run cut by its fuel, never written to a store
+FUEL_SPENT = "fuel spent"
+
+
+def out_of_fuel(entry):
+    """certification.lth's `outOfFuel`: the entry's outcome is `NotRunFor fuelSpent`."""
+    return entry.get("outcome") == {"NotRunFor": FUEL_SPENT}
+
+
+def agree(e, f):
+    """certification.lth's `agree`: the same outcome and the same grade."""
+    return e["outcome"] == f["outcome"] and e.get("grade") == f.get("grade")
+
+
+def disputes(entries):
+    """certification.lth's `disputes`: for each identity, in the store's order, its latest entry
+    and the one of the same identity behind it, when the two disagree (D-2026-10-15-f)."""
+    latest, found = {}, []
+    for e in entries:
+        i = identity(e)
+        if i not in latest:
+            latest[i] = e
+        elif latest[i] is not None:
+            if not agree(latest[i], e):
+                found.append((latest[i], e))
+            latest[i] = None  # the latest two are read
+    return found
+
+
+def disputed_at(entries, key):
+    """certification.lth's `disputedAt`: whether the latest two entries of the identity disagree."""
+    two = [e for e in entries if identity(e) == key][:2]
+    return len(two) == 2 and not agree(*two)
+
+
+def dispute_of(entries, law, here):
+    """certification.lth's `disputeAt`: the first disagreement among the law's own entries (no
+    control) for which `here` holds (at the current hash, or at a demand's), or None."""
+    return next(iter(disputes([e for e in _laws_own(entries) if e["law"] == law and here(e)])), None)
+
+
+def show_entry(entry):
+    """An entry as a disagreement names it: its date and its outcome, with its grade."""
+    grade = f", {GRADE_WORDS[entry['grade']]}" if entry.get("grade") in GRADE_WORDS else ""
+    return f"the entry of {entry.get('date', '?')} ({show_outcome(entry['outcome'])}{grade})"
+
+
+def show_dispute(latest, before):
+    """The words of a disagreement in `standing`, `show_refusal` and a test line."""
+    return (f"replay disagrees at seed {latest['seed']}, n {latest['cases']}: {show_entry(latest)} and "
+            f"{show_entry(before)}; refused until a later run agrees with the latest or one is removed by hand "
+            f"(D-2026-10-15-f)")
 
 
 def _failed(entry):
@@ -374,9 +437,10 @@ def _failed(entry):
 
 
 def store_errors(entries):
-    """What breaks `Store`'s predicate: two entries of one identity with different outcomes
-    (`determined`), or a grade without a pass or a pass without a grade (`gradedAsOutcome`)."""
-    errors, seen = [], {}
+    """What breaks `Store`'s predicate: a grade without a pass or a pass without a grade
+    (`gradedAsOutcome`). Two entries of one identity that disagree are a disagreement the store
+    records (D-2026-10-15-f), read by `disputes`, not an error of the store."""
+    errors = []
     for k, e in enumerate(entries):
         missing = [f for f in IDENTITY + ("outcome", "grade") if f not in e]
         if missing:
@@ -387,10 +451,6 @@ def store_errors(entries):
         tested = _tested(e)
         if passed(e) and tested and not (tested.get("verdict") == "Holds" and e["grade"] == "Sampled"):
             errors.append(f"entry {k} ({e['law']}): a statistical pass is a Holds graded sampled")
-        i = identity(e)
-        if i in seen and entries[seen[i]]["outcome"] != e["outcome"]:
-            errors.append(f"entries {seen[i]} and {k} ({e['law']}): one identity, two outcomes")
-        seen.setdefault(i, k)
     return errors
 
 
@@ -466,6 +526,8 @@ def prune(entries, current=None, keep=KEEP):
     (latest in front)."""
     current = dict(current or {})
     order = sorted(range(len(entries)), key=lambda k: (entries[k].get("date", ""), -k), reverse=True)
+    # [D-2026-10-15-f] the two entries of a disagreement at the current stamp stay until it is resolved
+    disputing = {id(e) for pair in disputes(entries) for e in pair}
     groups = {}
     for k in order:
         groups.setdefault(_group(entries[k]), []).append(k)
@@ -476,7 +538,7 @@ def prune(entries, current=None, keep=KEEP):
             stamp = _stamp(entries[ks[0]])
         at = [k for k in ks if _stamp(entries[k]) == stamp]
         if at:
-            dropped.update(at[keep:])
+            dropped.update(k for k in at[keep:] if id(entries[k]) not in disputing)
             dropped.update(k for k in ks if _stamp(entries[k]) != stamp)
         else:
             dropped.update(ks[1:])
@@ -484,9 +546,16 @@ def prune(entries, current=None, keep=KEEP):
 
 
 def record(entries, entry):
-    """certification.lth's `record`: a new entry in front, the store unchanged on a known identity;
-    the entry's (law, binding) is then pruned at its cone hash (`prune`)."""
-    if known(entries, identity(entry)) is not None:
+    """certification.lth's `recordEntry`, the store law `Recording`: a new identity in front; an
+    exact replay that agrees with the latest entry of its identity, where no disagreement stands,
+    leaves the store as it is (6.S15); one that disagrees, or that agrees with the latest of an
+    identity in disagreement, goes in front (D-2026-10-15-f); a not-run for lack of fuel is never
+    written (D-2026-10-15-g). The entry's (law, binding) is then pruned at its cone hash (`prune`)."""
+    if out_of_fuel(entry):
+        return entries
+    key = identity(entry)
+    found = known(entries, key)
+    if found is not None and agree(entry, found) and not disputed_at(entries, key):
         return entries
     return prune([entry] + list(entries), {_group(entry): _stamp(entry)})
 
@@ -536,7 +605,7 @@ def certificate_grade(entries, law, current):
     """certification_model's `grade`: over the law's entries at the current hash, none when one
     failed or none passed; under one binding the strongest pass, across bindings the weakest."""
     counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
-    if any(isinstance(e["outcome"], dict) and "Failed" in e["outcome"] for e in counts):
+    if any(isinstance(e["outcome"], dict) and "Failed" in e["outcome"] for e in counts) or disputes(counts):
         return None
     best = {}
     for e in counts:
@@ -602,6 +671,9 @@ def standing(entries, law, current):
         return "uncertified"
     if kind == "stale":
         return f"stale (its entries are at {what[7:19]}, the cone is now at {current[7:19]})"
+    dispute = dispute_of(entries, law, lambda e: e["cone"] == current)
+    if dispute is not None:
+        return show_dispute(*dispute)
     g = certificate_grade(entries, law, current)
     if g is not None:
         # a statistical law's pass carries its rates and what it spent (7.S17), the latest's
@@ -758,6 +830,8 @@ def refuse(entries, cone):
     """certification_model's `refuse`: per name of the cone (`name`, `provisional`, `laws`, each
     law a demand), a provisional name refused whole, otherwise each law no entry serves, listed
     with its state (`RefusalSaysWhy`, `RefusalIsPerLaw`, `ProvisionalIsRefused`). A law with a
+    disagreement at the demand's hash is refused first, whatever serves, its state `Disagrees` with
+    both entries (`ADisagreementIsRefused`, D-2026-10-15-f). Else a law with a
     failure at the demand's hash (`at`) is refused whatever serves, listed with that failure
     (certification_model's `refuseLaws` at 82c4cb4, `ACurrentFailureIsRefused`, C5 of the layer 3
     review: record/IA/layer-3-review-2026-10-15/report-fix-certification.md)."""
@@ -767,9 +841,12 @@ def refuse(entries, cone):
             refusals.append({"name": c["name"], "law": None, "state": ("Provisional", None)})
             continue
         for d in c["laws"]:
+            dispute = dispute_of(entries, d["law"], lambda e: at(d, e))
             failure = next((e for e in _laws_own(entries) if e["law"] == d["law"] and at(d, e) and _failed(e)),
                            None)
-            if failure is not None:
+            if dispute is not None:
+                refusals.append({"name": c["name"], "law": d["law"], "state": ("Disagrees", dispute), "demand": d})
+            elif failure is not None:
                 refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
                                  "demand": d})
             elif not any(serves(d, e) for e in entries):
@@ -787,6 +864,8 @@ def show_refusal(refusal, entries):
         return f"{head}: provisional (built on an extern not yet validated)"
     if kind == "Uncertified":
         return f"{head}: uncertified (no entry)"
+    if kind == "Disagrees":
+        return f"{head}: {show_dispute(*what)}"
     d = refusal["demand"]
     if kind == "Stale":
         if what == d["cone"]:
