@@ -2738,3 +2738,25 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
             export)
 Kind:       .gitignore; tables.py and the cones that read tables; spec 6.S15, run.py's acceptance
 Status:     current
+
+D-2026-10-16-i  Item 15: the evidence of a law is kept per region, not summarized: per binding and
+                per labelled region (7.S14's `classify`), each with its n and its bound ε̂ (L10.3),
+                and the listed cases exhaustive; how the grades combine is the demand's choice,
+                the weakest by default (5.S8, pending until now). Sampling bounds the failure
+                fraction under its distribution and says nothing about its null sets: the cases a
+                law turns on (degenerate inputs, the neighbourhood of a cutoff) are given mass by
+                the generator (special values, atoms, as decided in record/generators-2026-10-06.md
+                section 4) or listed, and their evidence is kept per region; a clause for the
+                principles [proposed]. Work: special values in the generators and `classify` /
+                `cover` (7.S14) implemented, the grade rules of certification.lth rewritten.
+Author:     Luciano, on the decision assistant's reading of the edge cases of `PinvProjects`
+            (rank one, zero, eigenvalues 1e-13 and 1e-16 about the floor, Hilbert's) and of the
+            testing strategies of the generators study
+Quote:      "15, la trabajamos: casos límite son importantes." ... "habíamos hablado de que el
+            testeo random no es muy eficiente, y que las librerías más avanzadas usan otro tipo de
+            estrategias de testeo" ... "Sí"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       principles (a clause, under L9 or L10); certification.lth; tester.py, generators.py;
+            spec 5.S8, 7.S14, 7.S10
+Status:     current

@@ -249,6 +249,8 @@ through L10.6's exception (O3, priced as an assumption), which keeps L5.20 (ever
 has a way to be said). The Boolean slice already refuses failures by `OnlyAPassServes`. Cost: one
 sentence in 6.S15.
 
+*Item 15 answered in chat (2026-10-16): evidence per region, D-2026-10-16-i.*
+
 *Answered in chat (2026-10-16): (a) by naming the law, D-2026-10-16-h.*
 
 **17. What grade does a bounded exhaustive run give, and in what order?** 7.S10 (a `Bounded n` is a
