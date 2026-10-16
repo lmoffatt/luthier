@@ -1,0 +1,233 @@
+[
+ {
+  "law": "ReportsValidity",
+  "cone": "sha256:0ef45647fc8285a2186843e0609451b5c96fe0e6be9d8df75e8766966dde3e93",
+  "binding": [
+   {
+    "parameter": "f",
+    "generator": "checks (Listed)",
+    "fingerprint": "sha256:55f865e6aabf9e323ce166ac2ef19a31f381598ba5780ff75959aa583dcc2aeb"
+   },
+   {
+    "parameter": "g",
+    "generator": "graphs (Listed)",
+    "fingerprint": "sha256:6b62d75ff82419c43529ca6269e8a9307de78c8f40308dea7f4354ee0d3ad865"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "schemaOnly"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      },
+      {
+       "Printed": "((graphFrom \"name:str,x:float,y:float,z:float\\nmic1,0.0,0.0,1.69\\n\") measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) \"i:int,j:int\\n1,2\\n\")"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"1,99,2.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"3,3,1.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"1,2,0.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom ((+ nodesTextA) \"extra,9.0,9.0,1.0,0.0,1.0,0.01\\n\")) measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom ((+ nodesTextA) \"mic1,9.0,9.0,1.0,1.0,1.0,0.01\\n\")) measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"6,7,1.0\\n\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "f = schemaOnly, g = ((graphFrom nodesTextA) ((+ measurementsTextA) \"1,99,2.0\\n\"))"
+  },
+  "date": "2026-10-15T06:45:09+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "kind": "Control"
+ },
+ {
+  "law": "ReportsValidity",
+  "cone": "sha256:0ef45647fc8285a2186843e0609451b5c96fe0e6be9d8df75e8766966dde3e93",
+  "binding": [
+   {
+    "parameter": "f",
+    "generator": "checks (Listed)",
+    "fingerprint": "sha256:e23110ca934f5be141a1f4f9d82f2056072bb49d38cc053233d52cb386c795d7"
+   },
+   {
+    "parameter": "g",
+    "generator": "graphs (Listed)",
+    "fingerprint": "sha256:6b62d75ff82419c43529ca6269e8a9307de78c8f40308dea7f4354ee0d3ad865"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "f",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "firstViolation"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "graphA"
+      },
+      {
+       "Printed": "((graphFrom \"name:str,x:float,y:float,z:float\\nmic1,0.0,0.0,1.69\\n\") measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) \"i:int,j:int\\n1,2\\n\")"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"1,99,2.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"3,3,1.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"1,2,0.0\\n\"))"
+      },
+      {
+       "Printed": "((graphFrom ((+ nodesTextA) \"extra,9.0,9.0,1.0,0.0,1.0,0.01\\n\")) measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom ((+ nodesTextA) \"mic1,9.0,9.0,1.0,1.0,1.0,0.01\\n\")) measurementsTextA)"
+      },
+      {
+       "Printed": "((graphFrom nodesTextA) ((+ measurementsTextA) \"6,7,1.0\\n\"))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-15T02:44:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ]
+ }
+]
