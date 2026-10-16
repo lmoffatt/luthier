@@ -540,6 +540,8 @@ the union of the stretches of one law, cone and binding; (b) each seed stays a s
 today. Recommendation (coordinator): (a). The seed keeps its two other uses: in a run's result key
 (item 5) and in comparing two stochastic functions on the same draws.
 
+*Answered in chat (2026-10-16): (a), D-2026-10-16-g.*
+
 **42. Is `fresh` a field of the demand or only an argument of `run`?** (Added 2026-10-16, the
 result-store agent's question relayed by the coordinator.) `luthier run --fresh` executes literally
 whatever the store holds (L5.20, every possible behavior has a way to be said); today it is an

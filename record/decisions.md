@@ -2705,3 +2705,22 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
             export)
 Kind:       spec 10.S6; the tag v0.4 (his to make)
 Status:     current
+
+D-2026-10-16-g  A law's evidence pools its samples: the seed names a sample of cases, and the
+                samples of one law, cone, binding and generators (one distribution) are one sample of
+                their total size; each stretch keeps its seed so it can be replayed, and the verdict
+                is computed on the union (the same seed is a replay, D-2026-10-15-f). What L10.3
+                (settled) already says: sampling a deterministic law is a statistical claim, a bound
+                ε̂(n, δ) on the fraction where it fails, with n the total; a single counterexample
+                still refutes it exactly. A statistical law pools its stretches as the continuation
+                of one sequential test (D-2026-10-15-b), its alpha held over the total. Pooling across
+                bindings stays item 15. Item 41 (a).
+Author:     Luciano, on his reading that a sample of cases is a statistical law applied to a
+            deterministic problem of infinite cases
+Quote:      "Lo que pasa es que muestra de casos es una ley estadística aplicada a un problema
+            determinista de muestras infinitas" ... "sí"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       certification.lth (the grade rules, `pool`), tester.py, spec 7.S11 (suspended by
+            D-2026-10-14-c), L10.3
+Status:     current
