@@ -162,6 +162,8 @@ coordinator's (night plan, first-action report). Unblocks: the host's validation
 closes W10, S10-2, S10-3. Sources: `summary.md` (top screen item 3, question b);
 `report-second-line.md` (W10, S10-2, S10-3); `record/plan/night-2026-10-13.md` (first-action item).
 
+*Item 9 answered in chat (2026-10-16): (b), D-2026-10-16-k.*
+
 **10. What does a run do with a provisional extern?** 6.S14 and 10.S12: `world.lth` applies a
 provisional extern while `run` refuses it (a contradiction between the two), and a name with no
 laws gets no grade (`NoLawNoGrade`). Options: (a) refuse in both; (b) apply in both, printing the
@@ -269,6 +271,8 @@ it so; laws.lth's `ForallOnPoints` should confirm under `Bounded` on its box. `g
 order is the Boolean slice's stand-in until the cost types, to be marked so. Cost: two theory files,
 no certified store.
 
+*Answered in chat (2026-10-16): (b), D-2026-10-16-k.*
+
 ## The demand and the plan
 
 **18. Is the strategy an argument of the plan or a field of the demand, and is call by need the
@@ -299,6 +303,8 @@ cone was realized, and a plan over names would miss a changed model. B24's other
 identifies) is ordered by D-2026-10-15-h (the key is a function of the record). Cost: one sentence
 in 8.S8 and `Keying`.
 
+*Item 19 answered in chat (2026-10-16): (b), D-2026-10-16-k.*
+
 **20. Do per-law cutoffs get a field in `Demand`?** Today they travel in `sets` under the laws'
 parameter names and `DemandKey` keeps one only if the name is in `live`; whether the backward pass
 reaches laws is not written. Options: (a) a field (per-law cutoffs, typed); (b) `sets` stays.
@@ -307,6 +313,8 @@ No recommendation. Unblocks: B23, and D-2026-10-15-b's alpha, beta, delta reachi
 *Recommendation (coordinator, 2026-10-15):* (a). When a law returns its cost (its distance) instead of
 comparing it with a tolerance it takes, the tolerance leaves the law and becomes the demand's cutoff
 for that law; a typed field is where it will live.
+
+*Item 20 answered in chat (2026-10-16): (a), D-2026-10-16-k.*
 
 **21. What is `run`'s default fuel?** 8.S1 (fuel is a resource limit the demand carries). The
 default of 10,000,000 (kernel bite 10, proposed) is spent before the fit converges (about 10^9
@@ -371,6 +379,8 @@ encodings of `á` would be two names); the blanks and the backslash class are wh
 the three escapes of D-2026-10-13-q need. No source asks for more. Cost: Greek or accented names are
 refused (`σ` is natural for a biologist); widening later is one commit to grammar.lth and parse.py,
 with a normalization rule stated then.
+
+*Item 25 answered in chat (2026-10-16): ASCII, with rules for symbols to be proposed, D-2026-10-16-k.*
 
 **26. Which stands: 3.R1's first paragraph and 3.R2, or D-2026-10-13-x?** 3.R1 and 3.R2 say names
 and labels are binders and `Int * Bool` is one structure with the record; D-2026-10-13-x says the

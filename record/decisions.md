@@ -2780,3 +2780,19 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       the theories of the types (their degenerate cases), laws' cutoffs and premises, the
             tester's branch coverage; certification.lth's grade; spec 7.S14
 Status:     current
+
+D-2026-10-16-k  On the decision assistant's recommendations: item 9 (b), a host action is validated
+                once per hash of the model's cone, host code included, the arguments kept as
+                evidence and not as entries; item 17 (b), `Bounded n` is a domain, not a grade, and
+                exhaustive on its box is `Exhaustive` (7.S10, L10.2), laws.lth's `ForallOnPoints`
+                follows, `gradeRank` marked as the Boolean slice's stand-in; item 19 (b), a model
+                enters a result's key by the cone's hash; item 20 (a), per-law cutoffs a typed field
+                of `Demand`. Item 25: names stay ASCII, with rules for writing symbols (σ, μ, θ) to be
+                proposed.
+Author:     Luciano
+Quote:      "17b / 19b / 20a / 9 b / 25-> ascii reglas para símbolos"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line unknown until the
+            export)
+Kind:       spec 10.S10, 7.S10, 8.S8, 8.S1, 2.S1; world.lth, laws.lth, test.lth, demand.lth,
+            plan.lth; grammar.lth
+Status:     current
