@@ -72,6 +72,11 @@ c'. 3c landed (af07d24..3a364a2). Its question answered by the coordinator (one 
    `luthier certify` of certification_laws.lut and certification_controls.lut waits for 3f.
 i. D-2026-10-16-g: (launched after 3c) a law's samples pooled across seeds, each stretch keeping its seed; a statistical
    law continues one sequential test (certify.py, tester.py; after 3c).
+i'. 3i landed (edaeb6f..5c58dad; budget bounds the whole test, ec3574c; 759 passed). The store and
+   pooling laws certified by the coordinator (4c0549e); three store laws uncontrolled
+   (ANewIdentityGoesInFront, AnAgreeingReplayAddsNothing, AnAgreeingPairSettles): a control each is
+   debt under L9.14, a small bite after 3g. Gap left by 3i: certification.lth's `Entry` does not name
+   its cutoffs parameter (marked at `pooledCases`). 3g launched, alone in the repository.
 j. D-2026-10-16-i: evidence kept per binding and per labelled region with its n and bound; the
    demand combines grades, weakest by default (5.S8); special values and atoms in the generators,
    `classify`/`cover` (7.S14); certification.lth's grade rules rewritten (a theory: Fable); a
