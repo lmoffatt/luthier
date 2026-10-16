@@ -63,7 +63,11 @@ h. D-2026-10-16-h: tables.py returns the host's `Just` or nothing at a `Maybe` (
    table cones re-certified; no cutoff accepts a failure, running past one names it
    (`--accept assumed:LAW`, item 16); records of `.run.lut` under examples/ tracked, under tests/
    ignored (item 8, after g).
-i. D-2026-10-16-g: a law's samples pooled across seeds, each stretch keeping its seed; a statistical
+c'. 3c landed (af07d24..3a364a2). Its question answered by the coordinator (one commit undoes it):
+   a failure in a disagreement keeps refusing until resolved by hand with its reason recorded (P2),
+   two later passes do not erase a counterexample (D-2026-10-15-f); a resolving command later.
+   `luthier certify` of certification_laws.lut and certification_controls.lut waits for 3f.
+i. D-2026-10-16-g: (launched after 3c) a law's samples pooled across seeds, each stretch keeping its seed; a statistical
    law continues one sequential test (certify.py, tester.py; after 3c).
 j. D-2026-10-16-i: evidence kept per binding and per labelled region with its n and bound; the
    demand combines grades, weakest by default (5.S8); special values and atoms in the generators,
