@@ -61,15 +61,18 @@ TestSpec = { law : String, mode : Mode, cases : Nat, size : Nat, seed : Seed,
 -- which every library line but three needed no more than; a default that high lets a case that
 -- never ends run for minutes before it is cut. A line that needs more says so in its own budgets
 -- (`withFuel`; belief_laws.test.lut's `fitA` lines), and `luthier certify --fuel` overrides every
--- line's for a run; the entry records the fuel the line ran with (7.S8).
+-- line's for a run; the entry records the fuel the line ran with (7.S8). The region classifier's
+-- bounds, 4000 doubles of a value and 400 entries of a matrix written as a function, were tester.py's
+-- constants (`numbers`, `_MOST_ENTRIES`) until the core's bite 4b.
 defaultBudgets : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPerCase := 10, coveringAbove := 20000,
                               levelRuns := 10, seedsPerControl := 5, distributionDraws := 10000, fuel := 3000000,
-                              specialMass := 0.05, atomAtZero := 0.01 }
+                              regionNumbers := 4000, regionEntries := 400, specialMass := 0.05, atomAtZero := 0.01 }
 -- the budgets `b` with the fuel `f` in place of its own, the rest unchanged
 withFuel (f : Nat) (b : Budgets) : Budgets :=
   { tries := b.tries, redraws := b.redraws, probes := b.probes, drawsPerCase := b.drawsPerCase,
     coveringAbove := b.coveringAbove, levelRuns := b.levelRuns, seedsPerControl := b.seedsPerControl,
-    distributionDraws := b.distributionDraws, fuel := f, specialMass := b.specialMass, atomAtZero := b.atomAtZero }
+    distributionDraws := b.distributionDraws, fuel := f, regionNumbers := b.regionNumbers,
+    regionEntries := b.regionEntries, specialMass := b.specialMass, atomAtZero := b.atomAtZero }
 test (law : String) (mode : Mode) (cases : Nat <- 100) (size : Nat <- 10)
      (seed : Seed <- 0) (whereBindings : List Binding <- nil) (profile : List Binding <- nil)
      (budgets : Budgets <- defaultBudgets) (control : Bool <- false) : TestSpec :=

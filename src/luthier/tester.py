@@ -30,7 +30,8 @@ and each draw gives the next (7.S1), so one first seed fixes every draw. What it
 to the parameter's type, checked on every draw (7.S1's validity); a value outside it makes the law
 not run, the generator's failure and not the law's. Its coverage is `Drawn` at the spec's seed.
 
-Of the budgets (7.S8) `tries`, `coveringAbove`, `fuel` and the two masses are read, each from the
+Of the budgets (7.S8) `tries`, `coveringAbove`, `fuel`, the two masses and the region classifier's
+two bounds (`regionNumbers`, `regionEntries`) are read, each from the
 line's `Budgets` (test.lth's `defaultBudgets` unless the line gives its own), none held here: a draw a
 filter cannot give within `tries` makes the law not run (7.S6), so `drawsPerCase` and `redraws` have
 nothing to bound yet; `fuel` is the reduction steps a case or a draw may take, which `fuel` given to
@@ -914,7 +915,6 @@ CUTOFF_TYPES = ("Tolerance", "RankFloor", "Sequential")
 # factor of the cutoff, (c, c w] above and [c / w, c) below (generators.py's `specials` draws c w and
 # c / w); and the factor a premise stated by a cutoff is read at to find its boundary.
 CUTOFF_WIDTH = 2.0
-_MOST_ENTRIES = 400  # [proposed] the entries of a matrix written as a function read for its numbers
 
 
 def is_cutoff(runner, ty, cutoff_types=CUTOFF_TYPES):
@@ -1088,10 +1088,13 @@ class Classifier:
         return out
 
     # ---------------------------------------------------------- the numbers of a value
-    def numbers(self, v, out, budget=4000):
+    def numbers(self, v, out, budget=None):
         """The doubles a value holds: a literal, the entries of a vector or a matrix (a host array, or
-        a function on indices read entry by entry up to `_MOST_ENTRIES`), the parts of a pair, a
-        record, an injection, a list."""
+        a function on indices read entry by entry up to the line's `regionEntries`), the parts of a
+        pair, a record, an injection, a list; at most the line's `regionNumbers` of them (7.S8: both
+        budgets of the line, generators.lth's `Budgets`, the core's bite 4b)."""
+        if budget is None:
+            budget = self.values.budgets["regionNumbers"]
         if len(out) > budget:
             return out
         self.runner.fuel = self.values.fuel
@@ -1115,7 +1118,7 @@ class Classifier:
                     f = self.runner.whnf(fields["f"])
                     if getattr(f, "obj", None) is not None:
                         return self.numbers(f, out, budget)
-                    if int(np.prod(shape)) <= _MOST_ENTRIES:
+                    if int(np.prod(shape)) <= self.values.budgets["regionEntries"]:
                         for index in np.ndindex(*shape):
                             self.numbers(Runner.apply(f, [t.Lit(t.IntConst(int(i))) for i in index]), out, budget)
                     return out
