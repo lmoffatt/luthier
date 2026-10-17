@@ -3063,3 +3063,25 @@ within that of the exact sum, so the two sides differ by up to twice it, and com
 difference in floating point adds a factor (1 + u)³; the core's design (record/plan/core-2026-10-17/
 decisions.md, note; 54f6228) claims 3·γ₂·(|x| + |y| + |z|), and the first certification tells
 whether γ₂ alone would have been refuted (the smaller bound serves as a control, L9.14).
+
+D-2026-10-18-a  One thing at a time: the core's rebuild goes alone, from start to end, against its
+                measurable criteria; only what is already running (the regions' code) is finished,
+                and the other queued bites (print and stdout, convergence and vacuity, the rest of
+                D-2026-10-16-k and -l, the hash's annotations) wait until after the core, unless
+                one is a small fix the core needs. The decision window pauses, reopened only by what
+                the core finds that only he can decide. His reason, a principle of style not
+                written in the principles: Luthier's writing must be elegant, in the manner of
+                Haskell (generic laws said once, structures from properties, combinators, functions
+                compared as functions), and the core was not: it was in the manner of Java (a
+                specialized law and helper per type, the same thing restated in each file).
+                [proposed] a clause for the principles, under L1 or L7.
+Author:     Luciano
+Quote:      "el core necesitaba una cirugía mayor ya que no implementaba realmente Luthier. Es lógico
+            que tome tiempo. Quizás querer hacer todo al mismo tiempo genere este problema." ... "Sí,
+            lo del core es fundamental porque hace al estilo de escritura de Luthier que tiene que
+            ser elegante al estilo Haskell y no lo estaba siendo, era al estilo Java"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       the order of work (record/plan/code-follows-principles-2026-10-16.md); principles (a
+            clause on style)
+Status:     current
