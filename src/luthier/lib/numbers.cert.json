@@ -1,5 +1,82 @@
 [
  {
+  "law": "LeqTransitive",
+  "cone": "sha256:ec953dcc63359e63982ecede9e7c3b90d02763f3023b36cbc5a2f61deae4cd2b",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "leqSlack (Listed)",
+    "fingerprint": "sha256:1f359f9af65721cf901f8ad2f4c7d3b4c35aa55e1bed9ae60cc881df771404a3"
+   },
+   {
+    "parameter": "c",
+    "generator": "slackChain (Listed)",
+    "fingerprint": "sha256:d1aab543e7becf8bf7ee5fd0e820253a4adafaf9135087f1f951ac42f2c253ed"
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "leqSlack"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "slackChain"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "d = leqSlack, c = slackChain"
+  },
+  "date": "2026-10-17T14:25:45+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "c boundary"
+    },
+    "n": 1
+   }
+  ]
+ },
+ {
   "law": "LogMultiplies",
   "cone": "sha256:139b697ebc3849cdb75befe34e65e858d03e2a2823b8766eaa47247e5af6e981",
   "binding": [

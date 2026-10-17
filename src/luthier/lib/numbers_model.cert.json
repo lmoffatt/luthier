@@ -74,6 +74,678 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
+  "date": "2026-10-17T14:35:18+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "LogMultiplies",
+  "cone": "sha256:139b697ebc3849cdb75befe34e65e858d03e2a2823b8766eaa47247e5af6e981",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T14:35:17+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "ExpAdds",
+  "cone": "sha256:0cc8e9fe93b07a76b9bc724db364d59c07408a1797663ccd8c734dc5918e6217",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -300.0,
+      300.0
+     ]
+    }
+   },
+   {
+    "parameter": "y",
+    "reach": {
+     "Interval": [
+      -300.0,
+      300.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T14:35:17+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 1
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 1
+   }
+  ]
+ },
+ {
+  "law": "LogOfExp",
+  "cone": "sha256:c9815e21d767ef5e6bce4bcdcf524be87280c4752e459b24383fb56854db090c",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      -300.0,
+      300.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T14:35:17+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "ExpOfLog",
+  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T14:35:16+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 0
+   }
+  ]
+ },
+ {
+  "law": "SqrtSquares",
+  "cone": "sha256:e3dc0419cde7740f8d23434744099d1f47c0a36db8fcdd18edf7662962f19f0a",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      10.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T14:35:16+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "x boundary"
+    },
+    "n": 1
+   }
+  ]
+ },
+ {
+  "law": "ExpOfLog",
+  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
+  "binding": [
+   {
+    "parameter": "e",
+    "generator": "elementary (Listed)",
+    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "x",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Positive",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 0,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "elementary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "x",
+    "reach": {
+     "Interval": [
+      0.0,
+      1000000.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 0)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
   "date": "2026-10-17T09:56:55+00:00",
   "interpreter": "v0.2",
   "hosts": [
