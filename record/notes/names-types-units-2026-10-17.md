@@ -70,3 +70,29 @@ part of its type). Nothing here is decided beyond D-2026-10-17-a; marked: (his) 
 - Equivalences between types (not only between specimens, L6, L10.7) are named values with their
   kind (exact derivable, exact certified, approximate) and certificates transport along them; a gap
   in the principles (L3 says equality has levels; nothing on type equivalences).
+
+## Points, balls and the finite map to the infinite (2026-10-18)
+
+*Candidate for the principles: to be weighed for a clause (with D-2026-10-18-c, the three planes and
+the tower cut by the demand).*
+
+11. (his) One sees points, never lines or surfaces; a bound is a ball in the space, but parametrized
+    by a pair of points: a map from the finite to the infinite, much used in category theory.
+    (proposed) Four precise forms of it:
+    - Generalized elements and Yoneda: an object is known by the arrows into it from test objects
+      (a point is an arrow 1 → X); it is determined by all its probes.
+    - Presentations and colimits: a finitely presented object (`List A`, the free monoid: two finite
+      rules, an infinite set); every set is the filtered colimit of its finite subsets.
+    - Point-free topology (Stone; Vickers, *Topology via Logic*, 1989): an open is a property
+      confirmable from finite information; a ball with rational centre and radius is a basic open,
+      an infinite set named by finite data.
+    - Ball and interval arithmetic (Arb, Fredrik Johansson), computable analysis: a real is held as a
+      ball that contains it, two machine numbers; L5.4 already foresees running code over intervals.
+    In Luthier: theories speak of infinite objects; computation touches only points (a test draws
+    points, a certificate is finite evidence of an infinite claim); a cutoff is a ball, an infinite
+    object with a finite name, so the verdict can be Boolean ("does the point fall in the ball?");
+    the demand chooses the probes and the ball.
+12. (his) Finite theories about the infinite are nothing but abstaining from fixing a maximal bound;
+    then the number of finite explorers is what the budget allows. The new point: how the budget
+    scales with the bounds, which is what the laws of algorithms should say. (Taken up in
+    D-2026-10-18-d if registered.)
