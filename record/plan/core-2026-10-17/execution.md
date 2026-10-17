@@ -593,6 +593,13 @@ updated. Commits of two lines (subject, blank line, body), staged by path. No pu
 (D-2026-10-17-e). Bites 1 and 2 are landed (their sections of 54f6228 stand as history; the reports
 say what was built).
 
+Frame for bites 6 and 7 (D-2026-10-18-c, read it before writing them): three planes, the objects,
+the levels of equivalence as one structure enriched over a base (Bool and, [0, inf] and +, later
+distributions with a t-norm), and the computable types as their certified models; the theories of
+the first two planes only declare and state laws with their mathematical references; whatever
+computes lives in the third. The Boolean and metric bases first. The designer revises sections 2
+and 3 for it before bite 6.
+
 ### Bite 3. The metrics script (Sonnet; first, alone)
 
 Files: new `scripts/core_metrics.py` and `tests/test_core_metrics.py`. The script prints the four
