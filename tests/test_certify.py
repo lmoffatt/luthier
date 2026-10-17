@@ -313,7 +313,7 @@ def test_the_cli_test_and_check(laws, capsys):
     assert capsys.readouterr().out.splitlines() == ran
     main(["check", "-v", str(laws)])
     out = capsys.readouterr().out
-    assert "certificate NotInvolutive: exhaustive" in out and "certificate Small: refuted at x = 729" in out
+    assert "certificate NotInvolutive: exhaustive" in out and "certificate Small: refuted at x = 552" in out
 
 
 # ---------------------------------------------------------------------- luthier certify (12.S16)
@@ -329,7 +329,7 @@ def test_certify_several_files(tmp_path, capsys):
     # each law with its control status (7.S19): none of these has a control
     out = [line.replace("; uncontrolled: untested against any wrong model (7.S19)", "") for line in out]
     assert "  NotInvolutive: exhaustive" in out and "  PlusCommutes: sampled" in out
-    assert "  Small: refuted at x = 729" in out and "  AndIsOr: refuted at a = true, b = false" in out
+    assert "  Small: refuted at x = 552" in out and "  AndIsOr: refuted at a = true, b = false" in out
     # weakest.test.lut: one law under two bindings, the weakest
     assert out[out.index(f"{paths[1]}: 1 laws, 2 lines ran, 0 known") + 1] == "  NotInvolutive: cases"
     assert main(["certify", paths[1]]) == 0
