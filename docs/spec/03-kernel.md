@@ -291,7 +291,11 @@ belongs to `spec 10` (L7.4, L4).
 
 ## §7 The kernel's theory in Luthier
 
-**3.S36. `lib/kernel_laws.lth`.** [implemented] The file states the laws every structure of the
+**3.S36. `lib/kernel_laws.lth`.** [implemented] The core's first bite (2026-10-18) left the file
+split, its laws unrenamed, into `lib/core/structures/equality.lth` (§1, the object),
+`algebraic.lth` (§3, the monoid of §4, §5) and `universal.lth` (§2, the free monoid and lists, §6),
+and `kernel_models.lut`'s models are at the end of `lib/core/core.lut`; the names below keep the
+old file's sections. The file states the laws every structure of the
 kernel satisfies by construction: `Beta`, `PairFst`, `PairSnd` and `Pairing` for the exponential
 and the product; `IfTrue`, `IfFalse`, `CaseNothing` and `CaseJust` for sums (stated on `Bool` and
 `Maybe`); `FoldNeutral`, `FoldInject` and `FoldCombine` for the recursion principle of `List`, the free monoid. Its models are in
