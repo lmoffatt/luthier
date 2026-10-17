@@ -30,7 +30,7 @@ A law into a type with no `verdict` is not a law. The theory `LawValue V` that s
 
 **5.S7. No law carries a cutoff.** [implemented] A law states a property or its degree, never a tolerance to accept it at: a tolerance does not survive composition, since two steps each within ε end up within 2ε, so the cutoff belongs to the demand, which hands it to whatever it asks for. The tolerances written in the libraries today are spec 11.S18.
 
-**5.S8. Grades of parts.** [decided D-2026-10-12-i] When a law is a conjunction certified part by part, how the grades of the parts combine (the vector of grades, or the weakest) is the demand's choice.
+**5.S8. Grades of parts.** [decided D-2026-10-12-i] When a law is a conjunction certified part by part, how the grades of the parts combine (the vector of grades, or the weakest) is the demand's choice. [implemented] For the grades of a law over its regions and its bindings (D-2026-10-16-i): `run --combine` names the combination, the weakest or the strongest, a field of the run's demand with the weakest as its default; `luthier certify` reads the weakest. The parts of a conjunction are not yet certified apart.
 
 ## §4 Checks
 
