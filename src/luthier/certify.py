@@ -567,10 +567,11 @@ def record(entries, entry):
         return entries
     key = identity(entry)
     found = known(entries, key)
-    # [proposed, 3j j2a] an agreeing replay that records its regions where the known entry, written
-    # before the regions were kept (D-2026-10-16-i), recorded none adds that evidence: it goes in front
-    adds_regions = "regions" in entry and "regions" not in found if found is not None else False
-    if found is not None and agree(entry, found) and not disputed_at(entries, key) and not adds_regions:
+    # [proposed, 3j j2a] an agreeing replay whose regions differ from the known entry's (written before
+    # the regions were kept, D-2026-10-16-i, or classified by an earlier reading of them) records that
+    # evidence: it goes in front, and the regions of an identity are its latest entry's (`law_regions`)
+    new_regions = "regions" in entry and entry["regions"] != found.get("regions") if found is not None else False
+    if found is not None and agree(entry, found) and not disputed_at(entries, key) and not new_regions:
         return entries
     return prune([entry] + list(entries), {_group(entry): _stamp(entry)})
 
@@ -653,9 +654,14 @@ def _key(region):
 def law_regions(entries):
     """The grading regions the entries recorded (7.S9), each once in the order first recorded: the
     law's regions, `rs` of certification.lth's `regionedGrade`. Entries written before the regions
-    were kept recorded none."""
-    found = {}
+    were kept recorded none. Of the entries of one identity only the latest is read (`known`): a
+    replay that classified its cases again replaces what the earlier one recorded."""
+    found, seen = {}, set()
     for e in entries:
+        i = identity(e)
+        if i in seen:
+            continue
+        seen.add(i)
         for r in e.get("regions") or ():
             if grades(r["region"]):
                 found.setdefault(_key(r["region"]), r["region"])

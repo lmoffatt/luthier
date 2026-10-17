@@ -73,6 +73,7 @@ test "Dims" ExhaustiveMode (whereBindings <- listed)
 test "Small" (SampledMode linear) (whereBindings <- cut)
 test "Count" (SampledMode linear)
 test "Count" ExhaustiveMode (whereBindings <- badNat)
+test "Small" (SampledMode linear)
 '''
 
 
@@ -110,7 +111,9 @@ def test_an_authors_label_is_recorded_with_its_share_and_never_as_a_region(outco
 
 
 def test_a_cutoff_gives_its_two_sides_and_a_premise_its_boundary(outcomes):
-    assert set(_regions(outcomes[2])) == {"tol above", "tol below"}
+    assert set(_regions(outcomes[5])) == {"tol above", "tol below"}
+    # a cutoff bound to a census is fixed, never drawn: it has no sides (the coordinator, 2026-10-17)
+    assert _regions(outcomes[2]) == {}
     assert _regions(outcomes[3]) == {"k boundary": _regions(outcomes[3])["k boundary"]}
     assert _regions(outcomes[3])["k boundary"] > 0  # 0 and 1, the bound and its neighbour, drawn
 
@@ -164,6 +167,15 @@ def test_an_agreeing_replay_is_written_when_it_adds_the_regions():
     assert certify.record([old], new)[0] is new
     again = dict(new, date="2026-10-17T02:00:00+00:00")
     assert certify.record([new, old], again) == [new, old]
+
+
+def test_a_replay_that_classified_again_replaces_the_regions_of_its_identity():
+    old = _entry("x", regions=[("FromType", "zero", 2), ("FromLaw", "tol above", 0)])
+    new = dict(_entry("x", regions=[("FromType", "zero", 2)]), date="2026-10-17T01:00:00+00:00")
+    store = certify.record([old], new)
+    assert store[0] is new
+    assert certify.certificate_grade(store, "L", "sha256:1") == "Cases"
+    assert certify.certificate_grade([old], "L", "sha256:1") == "Sampled"
 
 
 def test_a_run_is_served_at_the_grade_read_over_the_regions_with_its_combination():

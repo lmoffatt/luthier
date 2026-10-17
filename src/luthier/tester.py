@@ -877,7 +877,8 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
     regions = labels = None
     if loaded is not None and points:
         try:
-            found, named = Classifier(runner, loaded, values, params).classify([c for c, _ in points])
+            fixed = [k for k, p in enumerate(plan) if isinstance(p, list)]  # bound to a census, not drawn
+            found, named = Classifier(runner, loaded, values, params, fixed=fixed).classify([c for c, _ in points])
             regions, labels = regions_record(found), labels_record(named, len(points))
         except _RAISES:
             pass
@@ -973,7 +974,9 @@ class Classifier:
     [proposed] The readings this bite chose, each the tester's and not yet a theory's:
     - a case is just above a cutoff `c` when a number of its other parameters (a scalar, an entry of
       a vector or a matrix), in absolute value, is in (c, c w], and just below when in [c / w, c),
-      `w` the width; a cutoff of 0 has no sides, and gives no region;
+      `w` the width; a cutoff of 0 has no sides, and gives no region; a cutoff bound to a census (a
+      value the demand fixed) has none either: its sides exist only when it is drawn (the
+      coordinator's answer to finding 6, 2026-10-17);
     - the boundary of a premise stated by a cutoff (`PsdAt m fl`) is where its predicate holds at the
       cutoff and fails at the cutoff times w or divided by it; of a premise with bounds (`Nat`,
       `Fin n`, `Seed`), the bounds and their neighbours; of an exact premise (`Symmetric`), every case
@@ -981,9 +984,12 @@ class Classifier:
     - a degenerate case of the type that no case met and whose witness is outside the parameter's
       type at every case is no region of the law (`SymmetricOf 3` and `0 x 0`)."""
 
-    def __init__(self, runner, loaded, values, params, cutoff_types=CUTOFF_TYPES, width=CUTOFF_WIDTH):
+    def __init__(self, runner, loaded, values, params, cutoff_types=CUTOFF_TYPES, width=CUTOFF_WIDTH, fixed=()):
         self.runner, self.values, self.params, self.width = runner, values, params, width
         self.cutoffs = [k for k, (_, ty) in enumerate(params) if is_cutoff(runner, ty, cutoff_types)]
+        # [the coordinator's answer, 2026-10-17] a cutoff bound to a census is fixed by the demand
+        # and is never drawn: its two sides exist only when it is drawn, so only those cutoffs give them
+        self.sided = [k for k in self.cutoffs if k not in set(fixed)]
         self.cases_of = loaded.name(_GENERATORS_LTH, "casesOf") if loaded is not None else None
         defined = {a.name: a for a in runner.program if isinstance(a, t.Define)}
         self.declarations = []
@@ -1118,7 +1124,7 @@ class Classifier:
         names of the cutoffs that have sides (a cutoff of 0 has none)."""
         found, defined = set(), set()
         numbers = None
-        for j in self.cutoffs:
+        for j in self.sided:
             c = _number_of(self.runner, case[j])
             if c is None or c == 0.0:
                 continue
@@ -1232,7 +1238,7 @@ class Classifier:
         premises = self.premises()
         sided = set()
         if first is not None:
-            for j in self.cutoffs:
+            for j in self.sided:
                 c = _number_of(self.runner, first[j])
                 if c is not None and c != 0.0:
                     add(("FromLaw", f"{self.params[j][0]} above"), counts, order, 0)
