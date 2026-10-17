@@ -71,7 +71,7 @@ def test_accept_takes_one_grade_and_names(tmp_path, capsys):
     assert main(["run", str(path), "--accept", "sampled", "--accept", "cases"]) == 1
     assert "--accept names two grades" in capsys.readouterr().err
     assert main(["run", str(path), "--accept", "assumed:shout", "--accept", "assumed:nobody"]) == 0
-    assert "--accept assumed:nobody names no provisional extern of the cone" in capsys.readouterr().err
+    assert "--accept assumed:nobody names no provisional extern and no refuted law of the cone" in capsys.readouterr().err
 
 
 def test_check_v_lists_the_provisionals_with_their_reasons(tmp_path, capsys):

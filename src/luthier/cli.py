@@ -53,9 +53,10 @@ def main(argv: list[str] | None = None) -> int:
                        help="a grade (proved, exhaustive, cases, sampled, assumed): the weakest an entry of the "
                             "store may have to serve the run (6.S15, 7.S15) [proposed: sampled when none is "
                             "named, so an assumed entry serves only a run that accepts assumed]; or assumed:NAME, "
-                            "repeatable: run the provisional extern NAME as assumed, its grade propagating to "
-                            "what is built on it (D-2026-10-16-c; a bare assumed accepts no provisional). The run "
-                            "is refused when its cone is not certified (12.S17)")
+                            "repeatable: run the provisional extern NAME as assumed, or run past the refuted law "
+                            "NAME as assumed, warned at every run, its grade propagating to what is built on it "
+                            "(D-2026-10-16-c, D-2026-10-16-h; a bare assumed accepts no provisional, and no "
+                            "cutoff accepts a failure). The run is refused when its cone is not certified (12.S17)")
     p_run.add_argument("--checked", action="store_true", default=None,
                        help="test each value an extern gives at a declared subtype against its predicate as "
                             "it crosses, refusing the run at the first refuted one (12.S18, 4.R5); off by "
@@ -109,7 +110,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if all(passes(o) for o in outcomes) else 1
 
     if ns.command == "run":
-        from .run import record, run
+        from .run import Cut, record, run
         try:
             grade, assumes = _accepts(ns.accept)
             strategy = {"forward-on-demand": "ForwardOnDemand", "call-by-need": "CallByNeed"}.get(ns.strategy)
@@ -118,6 +119,12 @@ def main(argv: list[str] | None = None) -> int:
             print(output, end="")
             record(ns.file, state["demand"]["entry"], values, output, state)
             return 0
+        except Cut as cut:
+            # cut by its time limit or its fuel: said, and recorded as a run that did not finish
+            import sys
+            print(f"{ns.file}: {cut}", file=sys.stderr)
+            record(ns.file, cut.state["demand"]["entry"], cut.values, None, cut.state, cut=cut)
+            return 1
         except (OSError, ValueError, RecursionError) as exc:
             import sys
             print(f"{ns.file}: {exc}", file=sys.stderr)
@@ -177,7 +184,7 @@ def main(argv: list[str] | None = None) -> int:
 def _accepts(words):
     """`run --accept`'s words (D-2026-10-16-c): at most one grade, the cutoff (None when none is
     given, the demand's default), and the names of `assumed:NAME`, the provisional externs run as
-    assumed."""
+    assumed and the refuted laws run past as assumed (D-2026-10-16-h)."""
     from .certify import GRADES
     grades, names = [], []
     for w in words:

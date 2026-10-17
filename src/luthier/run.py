@@ -73,6 +73,17 @@ class RunError(ValueError):
     pass
 
 
+class Cut(RunError):
+    """A run stopped by its time limit or its fuel (D-2026-10-16-d): it did not finish. `reason`
+    is "fuel" or "time limit", `steps` the reduction steps reached; `values` and `state` are what
+    `record` needs to append it to `x.run.json` as a run that did not finish (the coordinator's
+    answer to 3g's question, record/plan/code-follows-principles-2026-10-16.md g'). Nothing of it
+    goes to the store of results, and it is never served."""
+    def __init__(self, message, reason, steps, values=None, state=None):
+        super().__init__(message)
+        self.reason, self.steps, self.values, self.state = reason, steps, values, state
+
+
 # The three kinds of file (D-2026-10-16-e, spec 12.R2): a theory (`.lth`), a model or library
 # (`.lut`), and an executive file, which carries a demand with its entry and is never imported:
 # `x.run.lut` (the `main` that `luthier run` applies to the world) or `x.test.lut` (the `test`
@@ -648,6 +659,9 @@ class Runner:
         # `time_limit` the seconds the run may take, None for none; `steps` the steps taken
         self.fuel, self.time_limit, self.steps = fuel, time_limit, 0
         self.deadline = None if time_limit is None else time.monotonic() + time_limit
+        # why the run was cut, once a limit cut it: (reason, message), the reason "fuel" or "time
+        # limit"; read by `run` whatever wrapped the error on its way out (a host, a callback)
+        self.cut = None
         # the provisional externs the demand runs as assumed, by route: (names, reason); each warns
         # on standard error at its first application in the run (D-2026-10-16-c)
         self.provisional, self.warned = {}, set()
@@ -829,12 +843,15 @@ class Runner:
     def spend(self):
         if self.fuel is not None:
             if self.fuel <= 0:
+                self.cut = ("fuel", "fuel spent")
                 raise RunError("fuel spent")
             self.fuel -= 1
         self.steps += 1
         # the clock read every 4096 steps, so that a limit costs nothing measurable
         if self.deadline is not None and not self.steps & 4095 and time.monotonic() > self.deadline:
-            raise RunError(f"time limit of {self.time_limit:g} s reached after {self.steps} steps (run --time-limit)")
+            message = f"time limit of {self.time_limit:g} s reached after {self.steps} steps (run --time-limit)"
+            self.cut = ("time limit", message)
+            raise RunError(message)
 
     def route(self, head):
         if getattr(head, "obj", None) is not None:
@@ -2038,7 +2055,13 @@ def certification(loaded, program, entry, demand, refuse=True):
     entry's binding recorded (certify.at). A name built on a provisional extern is refused whole,
     unless the demand names it (`Demand.assumes`, D-2026-10-16-c): then no law of it is demanded and
     it is listed under `assumed` with its reasons and the names of the cone downstream of it, each
-    of grade assumed, since the grade propagates to everything built on it.
+    of grade assumed, since the grade propagates to everything built on it. No cutoff accepts a
+    failure (D-2026-10-16-h, item 16): a law refuted or in disagreement at the current hash is
+    refused whatever the cutoff, unless the demand names the law (`--accept assumed:LAW`); then
+    its refusal is lifted, it is listed under `assumed` with the refutation, grade assumed and the
+    names downstream of the name that states it, the name counts as failed and not certified, and
+    the run warns on standard error (certification.lth's `standingRefusals`, `assumedPast`). A
+    name the demand assumes that is neither a provisional nor a refuted law of the cone is warned.
 
     A law over an observed case (`_Theories.case_law`, world.lth's `Host` laws but the root of
     trust) is run at the action's first application (`FirstActions`), not read here. A law whose
@@ -2130,12 +2153,35 @@ def certification(loaded, program, entry, demand, refuse=True):
         assumed.append({"name": plain, "provisional": reasons, "accept": f"assumed:{plain}", "grade": "assumed",
                         "downstream": downstream})
     refusals = certify.refuse(entries, cone)
+    # a refuted law the demand names is run past as assumed, and only by its name: no cutoff
+    # accepts a failure (D-2026-10-16-h, item 16; certification.lth's `standingRefusals` and
+    # `assumedPast`, `NoCutoffAcceptsAFailure`)
+    past = [r for r in refusals if _named_past(demand.assumes, r)]
+    refusals = [r for r in refusals if not _named_past(demand.assumes, r)]
+    for r in past:
+        here = [m for m in names if m.partition("@")[0] == r["name"]]
+        downstream = sorted({m.partition("@")[0] for m in names
+                             if m not in here and any(h in cones.names(m) for h in here)})
+        shown = certify.show_refusal(r, entries)
+        assumed.append({"name": r["name"], "law": r["law"], "refuted": shown, "accept": f"assumed:{r['law']}",
+                        "grade": "assumed", "downstream": downstream})
+        if refuse:
+            print(f"warning: running past the refuted law {r['law']} of {r['name']} as assumed "
+                  f"(--accept assumed:{r['law']}): {shown}", file=sys.stderr)
+    if refuse:
+        named = {n.partition("@")[0] for n in provisional} | {r["law"] for r in past}
+        for n in demand.assumes:
+            if n not in named:
+                print(f"warning: --accept assumed:{n} names no provisional extern and no refuted law of the cone",
+                      file=sys.stderr)
     if refusals and refuse:
-        lines = [certify.show_refusal(r, entries) for r in refusals]
+        lines = [certify.show_refusal(r, entries) + (f"; run past it as assumed with --accept assumed:{r['law']}"
+                                                      if _refutes(r) else "") for r in refusals]
         raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (accepting "
                       f"{certify.GRADE_WORDS[accept]} and above; 12.S17):\n  " + "\n  ".join(lines), refusals)
-    # each refused name by the state of its first refusal (none when `refuse`: they were raised)
-    refused = {}
+    # each refused name by the state of its first refusal (none when `refuse`: they were raised);
+    # a name run past a refuted law is not certified, and counts as failed
+    refused = {r["name"]: "failed" for r in past}
     for r in refusals:
         kind, what = r["state"]
         refused.setdefault(r["name"], {"Provisional": "provisional", "Stale": "stale"}.get(
@@ -2171,6 +2217,17 @@ def certification(loaded, program, entry, demand, refuse=True):
             "_firsts": firsts,
             # what a refusal would have listed, for `eval` only: a run that starts has none
             **({} if refuse else {"refused": [certify.show_refusal(r, entries) for r in refusals]})}
+
+
+def _refutes(refusal):
+    """certification.lth's `refutes`: a refusal for a failure or a disagreement at the current hash."""
+    kind, what = refusal["state"]
+    return kind == "Disagrees" or (kind == "Current" and isinstance(what, dict) and "Failed" in what)
+
+
+def _named_past(assumes, refusal):
+    """certification.lth's `namedPast`: a refusal of a refuted law whose name the demand assumes."""
+    return refusal["law"] is not None and refusal["law"] in assumes and _refutes(refusal)
 
 
 def _stores_read(files):
@@ -2638,9 +2695,7 @@ def refuse_provisional(kept, entry, assumes=()):
                  f"run it as assumed with --accept assumed:{n}" for n in names]
         raise Refused(f"refused: the cone of {entry.partition('@')[0]} is not certified (12.S17):\n  "
                       + "\n  ".join(lines), refusals)
-    for n in assumes:
-        if n not in found:
-            print(f"warning: --accept assumed:{n} names no provisional extern of the cone", file=sys.stderr)
+    # a name that is neither a provisional nor a refuted law of the cone is warned by `certification`
     return {n: found[n] for n in sorted(found)}
 
 
@@ -2674,8 +2729,12 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     plan records the strategy that ran, `TheDefaultsAgree`); `fresh`. `assumes` names the
     provisional externs the run applies as assumed (`refuse_provisional`, D-2026-10-16-c); each
     warns on standard error at its first application, and the certification lists it under
-    `assumed` with the names of the cone downstream of it, whose grade is then assumed. The file is
-    a run (`x.run.lut`, 12.R2), refused otherwise before anything is read."""
+    `assumed` with the names of the cone downstream of it, whose grade is then assumed. It names
+    too the refuted laws the run goes past as assumed (`certification`, D-2026-10-16-h). The file is
+    a run (`x.run.lut`, 12.R2), refused otherwise before anything is read.
+
+    A run cut by its time limit or its fuel raises `Cut`, which carries the values and the state
+    `record` appends as a run that did not finish; it writes nothing to `x.results.json`."""
     require_kind(path, "run")
     host.reset()
     lock = lock_status(path)
@@ -2733,9 +2792,22 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     value = t.Var(entry)
     if isinstance(definition.type, t.Pi) and isinstance(definition.type.domain, t.World):
         value = t.App(value, runner.token)
-    result = runner.whnf(value)
-    if isinstance(result, t.Pair):
-        runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
+    try:
+        result = runner.whnf(value)
+        if isinstance(result, t.Pair):
+            runner.whnf(result.left)  # Demand the final world chain, even for a lazy pair.
+    except Exception as exc:
+        if runner.cut is None:
+            raise
+        # cut by its time limit or its fuel: recorded as a run that did not finish, with its demand,
+        # the steps reached and the reason; nothing goes to the store of results
+        reason, message = runner.cut
+        plan["schedule"] = list(runner.schedule)
+        plan["hash"] = plan_hash(plan)
+        cut_state = dict(state, fuel={"given": demand.fuel, "spent": runner.steps},
+                         **{"first actions": firsts.done}, files_read=[list(pair) for pair in host.files_read()],
+                         plan=plan, **common, result_store={"pure": pure, "fresh": demand.fresh, "written": None})
+        raise Cut(message, reason, runner.steps, values, cut_state) from exc
     plan["schedule"] = list(runner.schedule)
     plan["hash"] = plan_hash(plan)
     spent = runner.steps
@@ -2906,7 +2978,7 @@ def record_path(path):
     return path.with_name(base_name(path) + ".run.json")
 
 
-def record(path, main, values, output, state=None):
+def record(path, main, values, output, state=None, cut=None):
     """Append this run to `x.run.json` beside `x.lut` (12.S18): the entry, the time, the
     parameters, the output, the calls the host made back into Luthier during the run (`calls`:
     receiving extern's route -> position among its arguments -> count, D-2026-10-14-a), and the
@@ -2931,12 +3003,21 @@ def record(path, main, values, output, state=None):
     bytes of each certificate store read (`stores_read`); and `result_store`: whether the cone is
     pure, whether the run was `--fresh`, and the entry of `x.results.json` that served it
     (`served`), or, for a pure run executed, what `store_result` did with its value under the
-    record's time. Each is said on standard error."""
+    record's time. Each is said on standard error.
+
+    A run cut by its time limit or its fuel (`cut`, a `Cut`) is appended as a run that did not
+    finish: `finished` false, `cut` with the reason, the steps reached and the message, its demand,
+    plan and certification as for any run, no `output`; nothing is written to `x.results.json`,
+    and `breaches` and the store of results never read it."""
     from datetime import datetime, timezone
     where = record_path(path)
     runs = json.loads(where.read_text(encoding="utf-8")) if where.exists() else []
     item = {"entry": main, "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "parameters": values, "output": output, "calls": host.calls()}
+    if cut is not None:
+        del item["output"]
+        item["finished"] = False
+        item["cut"] = {"reason": cut.reason, "steps": cut.steps, "message": str(cut)}
     if state is not None:
         state = dict(state)  # a copy: the entry takes fuel, files_read and lock out of it
         for key in ("demand", "plan", "key", "key_hash", "seed", "certificates", "fuel", "files_read",
@@ -2944,7 +3025,7 @@ def record(path, main, values, output, state=None):
             if key in state:
                 item[key] = state.pop(key)
         store = item.get("result_store")
-        if store is not None:
+        if store is not None and cut is None:
             item["result_store"] = store = dict(store)
             _say_store(path, store, item)
         lock = item.get("lock")
@@ -2956,6 +3037,9 @@ def record(path, main, values, output, state=None):
         item["certification"] = state
     runs.append(item)
     where.write_text(json.dumps(runs, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    if cut is not None:
+        print(f"{where.name}: recorded as a run that did not finish ({cut.reason}, {cut.steps} steps); "
+              f"nothing stored in {results_path(path).name}", file=sys.stderr)
     return where
 
 
@@ -2997,10 +3081,13 @@ def read_runs(path):
 
 def breaches(runs):
     """demand.lth's `determined`, as the pairs that break it: two runs with an equal `demand` and
-    different `output`s."""
+    different `output`s. A run that did not finish (`finished` false, cut by a limit) gave no
+    output and enters no pair."""
     found = []
     for j, b in enumerate(runs):
         for i, a in enumerate(runs[:j]):
+            if a.get("finished", True) is False or b.get("finished", True) is False:
+                continue
             if "demand" in a and a.get("demand") == b.get("demand") and a.get("output") != b.get("output"):
                 found.append((i, j))
     return found
