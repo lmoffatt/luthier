@@ -15,7 +15,8 @@ import "generators.lth" Binding
 import "laws.lth" Listed Cited
 import "certification.lth" Certifying Recording Entry Certificate Demand Outcome Passed Failed NotRunFor fuelSpent
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing ADisagreeingReplayIsKept AnAgreeingPairSettles
-  AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
+  AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused NoCutoffAcceptsAFailure
+import "test.lth" ExhaustiveGrade Sampled AssumedGrade
 import "certification_model.lut" certifying recording
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
@@ -57,3 +58,10 @@ test "ADisagreementRefutes" ExhaustiveMode (seed <- 20261016) (whereBindings <- 
   bind "c" "certificates", bind "e" "ofTheLaw", bind "o" "outcomes", bind "g" "grades", bind "es" "behindStores"])
 test "ADisagreementIsRefused" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
   bind "n" "names", bind "d" "demands", bind "e" "ofTheLaw", bind "o" "outcomes", bind "g" "grades", bind "es" "behindStores"])
+
+-- No cutoff accepts a failure (D-2026-10-16-h, item 16), added 2026-10-17 by Claude Opus 5.5 on
+-- record/IA/code-follows-2026-10-16/prompt-tables-cut.md: every grade as the cutoff, over the entries
+-- of the law at its hash (a pass, a failure, a not-run). Its control is in cutoff_controls.test.lut.
+cutoffs : List Grade := [Proved, ExhaustiveGrade, Cases, Sampled, AssumedGrade]
+test "NoCutoffAcceptsAFailure" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models",
+  bind "d" "demands", bind "e" "ofTheLaw", bind "g" "cutoffs"])

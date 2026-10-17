@@ -34,6 +34,12 @@
 -- sequential test). New: the union of a law's stretches, `pooledCases` (§2); the theory `Pooling`
 -- with its two laws (§5). The grade's fold of §2 is unchanged: the union adds the total `n`.
 --
+-- Draft 4, 2026-10-17, by Claude Opus 5.5, an agent of the coordinating session, on the brief
+-- record/IA/code-follows-2026-10-16/prompt-tables-cut.md (step 3h), after D-2026-10-16-h (item
+-- 16: no cutoff accepts a failure; running past a refuted law names it). New: `refutes`,
+-- `namedPast`, `standingRefusals` and `assumedPast` (§3); the law `NoCutoffAcceptsAFailure` of
+-- `Certifying` (§5). Only the cutoff's parts of §3 and §5 are touched.
+--
 -- What this file states. 6.S16 asks for a theory over a cost type `C`. D-2026-10-14-c says first
 -- everything Boolean, so here a law passes or does not, the bound of an entry is `lift` of its
 -- outcome (a pass is `0`, a failure `top`, refused by every cutoff, 6.S5), and the evidence cutoff
@@ -443,6 +449,30 @@ appendEntries (xs ys : List Entry) : List Entry := match xs { nil -> ys ; cons x
 -- certificates without values (6.S14), which this type does not cover.
 Certified (k : Certifying) (es : List Entry) : U := { cone : List ConeName | k.refuse es cone == nil }
 
+-- [D-2026-10-16-h, item 16] No cutoff accepts a failure. A failure's bound is `top` (6.S5), which no
+-- cutoff admits: whatever grade a demand accepts, the weakest (`AssumedGrade`) included, an entry
+-- that failed serves nothing (`NoCutoffAcceptsAFailure`, §5), and a law with a failure or a
+-- disagreement at the current hash is refused whatever serves (`ACurrentFailureIsRefused`,
+-- `ADisagreementIsRefused`). Lowering the cutoff is never the way past a refuted law; naming it is.
+-- The run's demand holds, beside its cutoff, the names it runs as assumed (demand.lth's `assumes`,
+-- `run --accept assumed:NAME`): a provisional extern (D-2026-10-16-c, 10.S10) or a refuted law. A
+-- refusal of a refuted law whose name the demand holds is lifted, and the law enters the run's
+-- record with grade assumed and the names of the cone downstream of the name that states it, every
+-- run that names it warning on standard error (L5.20). A refusal nobody named stands, so a
+-- refutation forgotten deep in the cone still refuses the run, and a refusal for another state
+-- (stale, uncertified, provisional) is not lifted by naming the law. run.py's `certification` is
+-- the specimen. [proposed] The law is named by its name alone, so naming it lifts its refusal on
+-- every name of the cone whose theory states it.
+refutes (s : State) : Bool := match s { Current o -> isFailure o ; Disagrees e f -> true ; _ -> false }
+nameIn (x : String) (xs : List String) : Bool := match xs { nil -> false ; cons y rest -> x == y or nameIn x rest }
+namedPast (assumes : List String) (r : Refusal) : Bool :=
+  match r.law { nothing -> false ; just l -> nameIn l assumes and refutes r.state }
+-- the refusals a run still owes after the names it assumes, and the ones it runs past as assumed
+standingRefusals (assumes : List String) (rs : List Refusal) : List Refusal :=
+  match rs { nil -> nil ; cons r rest -> if namedPast assumes r then standingRefusals assumes rest else cons r (standingRefusals assumes rest) }
+assumedPast (assumes : List String) (rs : List Refusal) : List Refusal :=
+  match rs { nil -> nil ; cons r rest -> if namedPast assumes r then cons r (assumedPast assumes rest) else assumedPast assumes rest }
+
 -- ---------------------------------------------------------------- §4 The hash of a cone
 
 -- What the hash of a cone covers (6.S8, 12.S11): the code of the cone, each name with its
@@ -607,6 +637,11 @@ ServesAtTheCutoff (k : Certifying) (d : Demand) (e : EntryFor d) : Bool :=
 -- and an entry that meets all of these serves (6.S15: a certificate serves every demand it meets)
 ACoveringPassServes (k : Certifying) (d : Demand) (e : EntryFor d) (g : Grade) : Bool :=
   not (gradeRank d.accepts <= gradeRank g) or k.serves d (toward d e Passed (just g))
+-- 6.S5, D-2026-10-16-h (item 16): no cutoff accepts a failure, the top. Drawn as an entry of the
+-- demand's law at its hash, covering and graded proved, at every cutoff `g`: a failure serves none.
+-- Its control is a model whose weakest cutoff accepts a failure (tests/tester/cutoff_controls.test.lut).
+NoCutoffAcceptsAFailure (k : Certifying) (d : Demand) (e : EntryFor d) (g : Grade) : Bool :=
+  not (isFailure e.outcome) or not (k.serves (withAccepts d g) (toward d e e.outcome (just Proved)))
 -- 6.S16: `serves` is monotone in the cutoff
 ServesIsMonotoneInTheCutoff (k : Certifying) (d : Demand) (e : EntryFor d) (g : Grade) : Bool :=
   not (k.serves d (toward d e Passed e.grade) and gradeRank g <= gradeRank d.accepts)
@@ -664,7 +699,7 @@ Certifying := IdentityIsTheKey & StaleIsAnotherHash & NoEntryNoGrade & AFailureR
   & NotRunAddsNothing & WeakestAcrossBindings & StrongestUnderOneBinding & TransportNeedsTheIdentity & TransportTakesTheWeaker
   & TransportOnTheIntersection & NoEvidenceForFree & PathNeverRaises & ReachesAsSets & StaleCertifiesNothing
   & OnlyAPassServes & CertifiesOnlyUnderItsBinding & ServesAtTheCutoff & ACoveringPassServes
-  & ServesIsMonotoneInTheCutoff & ProvisionalIsRefused & RefusalSaysWhy & ACurrentFailureIsRefused & RefusalIsPerLaw
+  & ServesIsMonotoneInTheCutoff & NoCutoffAcceptsAFailure & ProvisionalIsRefused & RefusalSaysWhy & ACurrentFailureIsRefused & RefusalIsPerLaw
   & ADisagreementRefutes & ADisagreementIsRefused
 
 -- The store law (D-2026-10-15-f, D-2026-10-15-g; 6.S8, 6.S15, 7.S13): how an entry is written to a

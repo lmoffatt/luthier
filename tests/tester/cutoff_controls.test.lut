@@ -1,0 +1,33 @@
+-- tests/tester/cutoff_controls.test.lut: the control of certification.lth's `NoCutoffAcceptsAFailure`
+-- (D-2026-10-16-h, item 16; 7.S19, L9.14), expected to be refuted: a model of `Certifying` whose
+-- weakest cutoff, assumed, accepts any entry of the demand's law at its hash, a failure included.
+-- The law's line is in certification_laws.test.lut. Written 2026-10-17 by Claude Opus 5.5, an agent
+-- of the coordinating session, on record/IA/code-follows-2026-10-16/prompt-tables-cut.md; kept apart
+-- from certification_controls.test.lut, which another agent was editing at the time [proposed: one
+-- commit moves it there].
+
+import "test.lth" test ExhaustiveMode Grade Proved Cases AssumedGrade gradeRank defaultBudgets
+import "generators.lth" Binding
+import "laws.lth" Listed Cited
+import "certification.lth" Certifying Entry Demand Outcome Passed Failed NotRunFor NoCutoffAcceptsAFailure
+import "certification_model.lut" certifying
+
+-- `certifying` but for `serves`: at the cutoff assumed, anything of the law at its hash serves
+lenientServes (d : Demand) (e : Entry) : Bool :=
+  certifying.serves d e or (gradeRank d.accepts <= gradeRank AssumedGrade and e.law == d.law and e.cone == d.cone)
+acceptsAFailure : Certifying := { identity := certifying.identity, stale := certifying.stale, grade := certifying.grade,
+  contains := certifying.contains, serves := lenientServes, refuse := certifying.refuse, transport := certifying.transport }
+wrongModels : List Certifying := [acceptsAFailure]
+
+entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
+ofTheLaw : List Entry := [entry "L" 1 (just Cases) Passed, entry "L" 1 nothing (Failed "x = 1"),
+  entry "L" 1 nothing (NotRunFor "no generator")]
+demands : List Demand := [{ law := "L", cone := "sha256:cccc", given := nil, accepts := Cases }]
+cutoffs : List Grade := [Proved, Cases, AssumedGrade]
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+test "NoCutoffAcceptsAFailure" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "wrongModels",
+  bind "d" "demands", bind "e" "ofTheLaw", bind "g" "cutoffs"]) (control <- true)
