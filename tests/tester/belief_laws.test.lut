@@ -8,7 +8,7 @@
 -- `pitResolution`. Seed 20261014. A `GaussianBelief` is a record of arrays, which the tester draws:
 -- it is run once sampled, to show what a draw that is not a model gives (7.R4), then on the prior.
 
-import "test.lth" test ExhaustiveMode SampledMode
+import "test.lth" test ExhaustiveMode SampledMode withFuel defaultBudgets
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
@@ -66,7 +66,8 @@ test "QuadraticConverges" (SampledMode linear) (seed <- 20261014) (profile <- cu
 test "MaximizerAscends" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
 test "MaximizerStationary" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
 test "MaximizerKeepsDimension" (SampledMode linear) (seed <- 20261014) (whereBindings <- onQuadratics) (profile <- cutoffs)
--- and session A's posterior from its prior mean: the fit itself, one case
-test "MaximizerAscends" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs)
-test "MaximizerStationary" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs)
-test "MaximizerKeepsDimension" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs)
+-- and session A's posterior from its prior mean: the fit itself, one case, with a fuel of 3e7
+-- (MaximizerAscends spent 26,061,725 on it, the core's report-bite-1.md, finding 2; 7.S8)
+test "MaximizerAscends" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs) (budgets <- withFuel 30000000 defaultBudgets)
+test "MaximizerStationary" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs) (budgets <- withFuel 30000000 defaultBudgets)
+test "MaximizerKeepsDimension" ExhaustiveMode (whereBindings <- fitA) (profile <- cutoffs) (budgets <- withFuel 30000000 defaultBudgets)
