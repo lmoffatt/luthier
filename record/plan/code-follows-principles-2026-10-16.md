@@ -110,7 +110,8 @@ Queue after 3g:
   fingerprints, so it goes with 3e's re-certification wave. A pure run past an assumed law is served
   from the result store (`assumes` not in the key; certification is read before serving, so the
   warning stays).
-- 3j (Fable for the theory, after the controls): regions from the type, the law and the code.
+- 3j: j1 the theory (Fable, record/IA/regions-2026-10-17/prompt-theory.md, launched 2026-10-17) with
+  plan.lth's two laws; L9.16 by Sonnet (prompt-principle.md); j2 the code after j1 (Fable for the theory, after the controls): regions from the type, the law and the code.
 - 3e: the hash erases binder annotations; one re-certification wave.
 - print and stdout (after his item 12): a failed write is recorded as a success today (the
   decision-assistant fork's finding of 2026-10-16: `print` appends to a Python buffer, `observe`
