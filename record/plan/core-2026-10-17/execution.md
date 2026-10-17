@@ -1,87 +1,201 @@
 # The new core: execution plan
 
 Written 2026-10-17 by Claude Fable 5.1, an agent of the coordinating session, on the brief
-`record/plan/core-2026-10-17/prompt-design.md`. Inputs: the library at ca90ee8 (`luthier check -v`
-run on it, the greps below), `record/decisions.md` D-2026-10-14-b, D-2026-10-16-l, D-2026-10-17-a
-to -i, `record/principles-language.md` L1 to L3, L7, L9.14, L10.12, spec 4.S14, 5.S6, 12.S22,
-12.S23, 12.R2. The questions this design leaves to Luciano are in `decisions.md` beside this file;
-every choice marked [proposed] here is the agent's, one commit undoes it.
+`record/plan/core-2026-10-17/prompt-design.md`; revised 2026-10-18 by the same agent for
+D-2026-10-18-a (the core alone, to its measurable end) and D-2026-10-18-b (the whole core a prelude,
+names per concept resolved by the type's model, no collisions), on the coordinator's brief of that
+day. Inputs: the library at d280a18 (bites 1 and 2 landed, their reports beside this file),
+`record/decisions.md` D-2026-10-14-b, D-2026-10-16-l, D-2026-10-17-a to -i, D-2026-10-18-a, -b,
+`record/principles-language.md` L1 to L3, L7 (L7.6, the style clause), L9.14, L10.12, spec 4.R13,
+4.S14, 5.S6, 12.S4, 12.S22, 12.S23, 12.R2, `src/luthier/elaborate.py` (`infer`, the operator table),
+`src/luthier/run.py` (`Loaded`), `src/luthier/check.py` (`coreNames`, `resolve`). The questions this
+design leaves to Luciano are in `decisions.md` beside this file; every choice marked [proposed] is
+the agent's, one commit undoes it. The first version of this plan (54f6228) had the core imported by
+name; D-2026-10-18-b decided otherwise and this version replaces it (git keeps the first).
 
-Status: bite 2 landed 2026-10-17 (c05df18, 0fbde1a: the three properties files, core_instances.lut,
-core_laws.test.lut with 58 laws graded and controlled, core_controls.test.lut with 59 controls
-refuted; report-bite-2.md). Bite 1 landed 2026-10-18 (f5acdff..fc27228, report-bite-1.md): the
-hash erases the binders' annotations (ErasureKeepsTheStep, controlled), a census's built members and
-the drawing code are in the identity, certify.FUEL is 3,000,000, core.lut is lib/core/core.lut with
-kernel_models.lut's models, kernel_laws.lth is lib/core/structures/{equality, algebraic,
-universal}.lth, every import repointed (bite 2's included); one re-certification (83 min, every
-line of the 35 non-fixture test programs known after it, no law refuted; 953 entries before, none at
-the new hashes, 536 after); suite 820 passed, 6 skipped, 9 xfailed. The library at ca90ee8: 494 test lines in tests/tester, 31 stores
-with 927 entries over 208 distinct laws; `check -v` reports 38 unclaimed Bool laws in lib/; the
-suite was 799 passed at a1c994b (record/plan/code-follows-principles-2026-10-16.md) and a full
-`pytest tests` run takes well over fifteen minutes, so a bite runs it in the background.
+Status: bites 1 and 2 landed (report-bite-1.md, report-bite-2.md): lib/core/ exists with core.lut,
+properties/{relations, operations, functions}.lth and structures/{equality, algebraic, universal}.lth
+(kernel_laws.lth split without renames, kernel_models.lut absorbed), the hash erases binder
+annotations, the library re-certified once (536 entries in 29 stores), suite 820 passed. Not
+started: bites 3 to 13 below. The library at d280a18: `check -v` reports 70 unclaimed Bool laws (32
+of them bite 2's properties, claimed only by tests/tester/core_instances.lut until the structures
+claim them), the `loose` notice on every top-level function, 48 names defined in more than one file
+(the count of 2026-10-17's survey before bite 1; core_metrics.py of bite 3 gives the number at its
+commit).
 
-## 1. The layout
+## 0. The core's end (D-2026-10-18-a)
+
+His criteria, measured over the whole library by `scripts/core_metrics.py` (bite 3), printed by
+every bite's commit message:
+
+1. names defined at the top level of more than one file: 0 (accepted homonyms listed in the script
+   with their reason, such as algebra.lth's `Field` and grammar.lth's `Field`, until a rename);
+2. list helpers reinvented per type (the `all...`, `any...`, `append...`, `member...`, `lookup...`,
+   `concat...`, `lengthOf`, `listLength`, `mapList` families and the hand-written recursions over
+   `List` that a core function covers): 0;
+3. Bool laws `check -v` reports unclaimed: 0;
+4. `loose` notices: only where real (a top-level function at a bare exponential that no theory
+   names; today the notice fires on every top-level function, 1675 times), the real ones listed;
+5. the suite green, the stores re-certified, `experiment_zero.run.lut` and `validate_graph.run.lut`
+   reproducing their records.
+
+One thing at a time: the core alone, from bite 3 to bite 13; the queued bites of
+record/plan/code-follows-principles-2026-10-16.md wait unless the core needs one (the budgets bite,
+already landed, was one).
+
+## 1. The core as a prelude
 
 ```
 src/luthier/lib/core/
-  core.lut                      what the interpreter provides (11.R2) and the claims of its own
-                                types and of the kernel's forms (absorbs kernel_models.lut)
-  lists.lut                     the generic library of lists (map, filter, fold, all, any, member,
-                                lookup, append, concat, length, ...) with its claims of containers
+  core.lut                      what the interpreter provides (11.R2) and the claims of the kernel's
+                                own types and forms (Unit, Empty, Bool, Maybe, List, Nat, Fin, Int,
+                                String; application, pairing, records, sums)
+  lists.lut                     List's models of the container structures and the functions of
+                                lists no structure covers
   properties/
-    relations.lth               Reflexive, Irreflexive, Symmetric, Antisymmetric, Transitive, Total,
-                                Asymmetric; Equivalence, Preorder, PartialOrder, TotalOrder,
-                                StrictOrder; the subtypes Related, Chain, Both
-    operations.lth              Associative, Commutative, Idempotent, Cancellative, Neutral,
-                                Absorbing, Invertible, Distributive, Absorptive, Complemented,
-                                Distinct; the within-bound versions
-    functions.lth               id, compose, flip, const; Pointwise (the equality of functions);
-                                Injective, Surjective, Bijective, Idempotent, Involutive, Monotone,
-                                Preserving, Congruent, LandsIn, Inverse, Isomorphism
+    relations.lth               Reflexive … Total; Equivalence, Preorder, PartialOrder, TotalOrder,
+                                StrictOrder; Related, Chain, Both             (bite 2, as built)
+    operations.lth              Associative … Distinct; the within-bound versions   (bite 2)
+    functions.lth               id, compose, flip, const; Pointwise; Injective … Isomorphism  (bite 2)
   structures/
-    equality.lth                Object, Concrete, structural, Structural; Metric and its variants,
-                                Ball, Tolerance, MetricWithin
-    order.lth                   Least, Greatest, Discrete, MonotoneIn; OrderedSemiring
-    algebraic.lth               Semigroup, Monoid, CommutativeMonoid, Group, AbelianGroup, Semiring,
-                                Ring, CommutativeRing, Lattice, BooleanAlgebra
-    containers.lth              Sized, Indexed, Functor, Foldable; SizeMap, AtMap, SizeAppend,
-                                Extensional; pointwise equality and sup distance of a container
-    universal.lth               Terminal, Initial, Exponential, Product, Coproduct, NamedProduct,
-                                NamedCoproduct, Equalizer, Pullback, Coequalizer, FreeMonoid
+    equality.lth                Object (eq), Concrete, structural, Structural; Metric (d) and its
+                                variants, Ball, Tolerance, MetricWithin
+    order.lth                   Order (leq); Least, Greatest, Discrete, MonotoneIn; OrderedSemiring
+    algebraic.lth               Semigroup, Monoid (neutral, combine), Group (inverse), Semiring and
+                                Ring (zero, one, plus, times, negate), Lattice (meet, join),
+                                BooleanAlgebra (top, bottom, complement)
+    containers.lth              Functor (map), Indexed (size, at), Foldable (fold), Tabulated
+                                (build); the generic functions over them: all, any, member, count,
+                                lookup, sum, toList, filter, zipWith, sameEntries, supDistance
+    universal.lth               Terminal (point), Initial (absurd), Exponential (apply), Product
+                                (pair, first, second), Coproduct (left, right, cases), NamedProduct,
+                                NamedCoproduct, Equalizer (include, restrict), Pullback,
+                                Coequalizer (project, lift), FreeMonoid (inject)
 ```
 
-This is the layout D-2026-10-17-g proposes, kept. Reasons it holds up against the alternatives
-considered: one file per subsection keeps each under 200 lines (kernel_laws.lth is 296 and
-would reach 600 with the additions); properties and structures are two directories because a
-property is a predicate on data and a structure is a record of data with its properties applied
-(section 2), so the import of a file says which kind enters. Imports from any file name the path
-under lib/: `import "core/properties/relations.lth" Reflexive Transitive`; check.py's `resolve`
-already looks up `d / name` under lib/, so a subpath needs no code. core.lut keeps enclosing the
-top-level scope of every file (12.S22); lists.lut is imported by name (decisions.md, question 1).
+The whole directory is the prelude (D-2026-10-18-b): every file under `lib/core/` is loaded before
+any other file, and its names are visible in every file without an import, as core.lut's are today
+(12.S22). What changes in the loader and the spec (bite 5):
 
-Stores follow their files (L10.12: an entry lives beside the file that makes the claim):
-`lib/core/core.cert.json`, `lib/core/lists.cert.json`; the structures' and properties' laws are
-claimed by core.lut, lists.lut and the libraries, so the .lth files keep no store. Test programs:
-`tests/tester/core_laws.test.lut`, `core_controls.test.lut`, `lists_laws.test.lut`,
-`lists_controls.test.lut`.
+- `run.py`'s `Loaded` visits every `.lth` and `.lut` under `lib/core/` (today `CORE`, one file),
+  each after its imports, and resolves a name a file does not define or import in the core as a
+  whole (`Loaded.__init__`'s `owner in (self.top, self.core)` becomes the set of core files);
+  `core_data` roots a run's slice in core.lut's data as today. The imports among core files stay
+  written (they say what each file reads; a cycle of files is allowed when no name reaches itself,
+  as core.lut notes; bite 2's report asks for the test, which bite 5 adds).
+- `check.py`'s `coreNames` (a frozenset of 30 names) becomes the names defined at the top level of
+  the core's files, read from them; `resolve` is unchanged.
+- 12.S22's sentence "`core.lut` encloses the top-level scope of every file" becomes "the core,
+  `lib/core/`, encloses it"; 12.S4's "`core.lut` is imported implicitly" likewise; `--no-core` keeps
+  its meaning for the whole prelude. The spec's agent writes the two sentences from this plan.
+- A file outside the core that defines a name the core defines is refused by `check` and by the
+  loader, naming the core file (D-2026-10-18-b: no general collision). A file that imports a core
+  name by its path gets a `redundant` notice from `check -v` and the import is dropped in migration
+  [proposed: a notice and not a refusal, so bites land one file at a time].
+- A core file may not define a name another core file defines (the same rule, inside the core);
+  the structures' field names may repeat across structures (`first` of Product and of Pullback)
+  since a use is resolved by the type, and a type that models both says which by qualification.
 
-Host code the layout touches: `run.py:143` (`CORE = ... / "lib" / "core.lut"` becomes
-`lib/core/core.lut`), `run.py:9`'s docstring, and the tests that name kernel_laws.lth
-(`tests/test_run.py:654-657, 687, 1164`, `tests/test_check.py:427, 552`, `tests/test_tester.py:69`,
-`tests/test_elaborate.py:364`, `tests/test_check_quotes.py` if it reads the file).
+Stores: `lib/core/core.cert.json` and `lib/core/lists.cert.json` beside the files that claim
+(L10.12); the .lth files keep none. Test programs: `tests/tester/core_laws.test.lut`,
+`core_controls.test.lut` (bite 2's, extended), `lists_laws.test.lut`, `lists_controls.test.lut`.
+What is not core (arrays, tables, probability, the machinery) is imported by name as today, until
+analysed (D-2026-10-18-b).
 
-## 2. The two forms: property and structure
+## 2. Concepts, names and how a name resolves
 
-A property is a Bool law over a type, its equality and the datum it qualifies, with the quantified
-variables last (D-2026-10-17-b, -c):
+A concept is a structure: a record of its data with its laws, stated once (section 3). Its names are
+per concept, not per type (D-2026-10-18-b): one `map` of `Functor`, one `size` and `at` of
+`Indexed`, one `d` of `Metric`, one `plus` of `Semiring`, one `eq` of `Object`. A type claims the
+structure in the file that defines the type (L2.8), as core.lut claims `UnitIsTerminal : Bool :=
+Terminal Unit { point := unit }` today; that claim is the model the type names.
+
+### 2.1 What a use looks like
+
+```
+-- in arrays.lth, after `VecIsIndexed : Bool := Indexed (Vec A) A { size := fn v { v.n }, at := fn v k { v.f k } }`
+dotDef (x : Vec Float64) (y : VecOf (size x)) : Float64 := sum Float64 (zipWith times x y)
+-- in numbers.lth
+PlusCommutative (d : Doubles) (x y : Moderate) : Bool := Commutative Float64 Float64 d.plus x y
+-- in any file: the list's and the vector's map are one name
+names := map (fn n { n.name }) nodes
+```
+
+`size x` resolves to `Vec`'s `Indexed` model because `x : Vec Float64`; `times` to `Float64`'s
+`Semiring` (the doubles claim `Semiring` within bounds, so `times` is the field of that claim's
+record; see section 4); `Commutative`'s equality parameter `(o : Object Float64)` is filled by
+`Float64`'s `Object` (`structural Float64`) without being written; `map` by `List`'s `Functor` at
+`nodes : List Node`.
+
+### 2.2 The rule
+
+4.R13 says an operator is resolved by the type of its operands and a type names its model; the
+elaborator keeps a table `(operator, domain type) -> function`, filled by `operator` acts, and looks
+it up with the inferred type of the left operand (`elaborate.py`, `walk` of `Binop`, `infer`).
+D-2026-10-18-b extends the rule from operators to every name of a structure. Stated for the
+elaborator:
+
+1. A structure's field name used as a function (`map`, `size`, `d`, `plus`, `eq`) is resolved by the
+   type of its discriminating argument: the argument whose type is the structure's carrier (the
+   first argument of that type in the field's signature; for `map : (A -> B) -> F A -> F B` the
+   second, for `size : C -> Nat` the first, for `d : A -> A -> Float64` the first). The model is the
+   claim of that type (`VecIsIndexed`), found by the structure's head and the type's head.
+2. A parameter whose type is a structure applied to a type (`(o : Object A)`, `(m : Functor F)`,
+   `(f : Foldable F)`) is implicit: the call may omit it and it is filled by the model the type
+   names once `A` or `F` is known from the other arguments; it may be passed by name,
+   `Commutative Int plus x y (o <- parity)`, the surface's named argument (`NamedArg`, as test
+   lines pass `(profile <- models)`). This is what lets a generic function over a structure
+   (`all p xs`, section 3.8) be called as the field names are; decisions.md, question 4.
+3. Qualified access, `Functor.map`, `Indexed.size`, `Product.first`, names the structure when two
+   structures a type models share a field name, or when the argument's type cannot be inferred;
+   `Functor.map listFunctor f xs` names the model too. It parses today as a projection on a name
+   (`Proj(Var "Functor", "map")`); the elaborator reads a projection whose head is a structure's
+   name as the qualified field.
+4. A type with two models of one structure is two types (4.R13: `Int` as a ring and as the
+   max-plus semiring; `Float64` under two metrics); the conversion between them is explicit.
+5. Failure is an error, never a fallback: a field name whose discriminating argument has no
+   inferable type, or whose type names no model of the structure, is refused with the name, the
+   type found and the candidates. Today an operator whose left operand's type is unknown falls
+   back to the bare name (`c.operators.get((op, ty), t.Var(op))`), which is how `x + "a"` passes
+   `check` (report-bite-2.md).
+
+### 2.3 Does the elaborator's `infer` extend as it is? No: the typing bite comes first
+
+`infer` (elaborate.py:74) is partial by design: it knows the types of names declared in the
+context, literals, annotated lambdas, applications whose function has a `Pi` type, projections on
+records whose type it knows, and returns `Hole('type')` for the rest. Three things stand between it
+and rule 2.2:
+
+- the fallback (2.2.5): with per-concept names, an unresolved `map` has no bare function to fall
+  back to (`map` is a field, defined nowhere at the top level), so every unresolved use would be a
+  stuck term found at run time or by a test, not by `check`; item 39's finding (`asBad (x : Int)
+  : Bool := x` passes; `check.py` runs program.lth's predicates and is no type checker) is the same
+  gap;
+- the key: the operator table is keyed by the syntactic domain type (`List A` with `A` a variable
+  does not match `List Int`); resolution by the type's head (`List`, `Vec`, `Float64`) and
+  matching under instantiation is new;
+- the binding: nothing says today which definition is the model of `Functor` at `List`; the claim
+  `ListIsAFunctor : Bool := Functor List {...}` is read by the tester as a law to run, not by the
+  elaborator as a binding.
+
+So the core's next code bite is the typing bite (bite 4), scoped to what resolution needs and not to
+a full type checker (4.R9's strict conversion and 4.R11's refinement checks stay item 39's later
+part). Its criteria are in section 6. Until it lands, bite 2's rule holds: "check clean" in an
+acceptance criterion means the checker's predicates, and the signatures are verified by the test
+programs' instances and controls.
+
+### 2.4 The two forms, kept
+
+A property is a Bool law over a type, its equality and the datum it qualifies (bite 2's files):
 
 ```
 Commutative (A B : U) (o : Object B) (op : A -> A -> B) (x y : A) : Bool := o.eq (op x y) (op y x)
 ```
 
-A structure is a record of its data, with each law a one-line application of a property to a field,
-and its definition the conjunction of those lines (today's pattern, which run.py's theory-law
-enumeration and the tester handle; 5.S6):
+A structure is a record of its data with one line per law applying a property to a field, and the
+conjunction (decisions.md, question 3, still open; the record form is what run.py's enumeration and
+the tester evaluate today, and report-bite-2.md shows the kernel does not reduce a `&` of partially
+applied laws):
 
 ```
 Monoid (M : U) (o : Object M) : { neutral : M, combine : M -> M -> M }
@@ -90,428 +204,196 @@ MonoidNeutral (M : U) (o : Object M) (m : Monoid M o) (x : M) : Bool := Neutral 
 Monoid (M : U) (o : Object M) := MonoidAssociative M o & MonoidNeutral M o
 ```
 
-[proposed] The structure keeps a record rather than being a bare predicate on its data
-(`Monoid A o op e := Associative A o op & Neutral A o op e`): a bare predicate's conjuncts have
-different quantified variables each, and the tester quantifies a conjunction's variables as one
-law's today (tester.py `_conjuncts`, run.py's enumeration); a claim `ListIsAMonoid : Bool := Monoid
-(List A) o { neutral := nil, combine := append A }` is the form the runner already evaluates
-(core.lut's `UnitIsTerminal`). The law's text is still written once, in the property; the one-line
-wrapper names the field it applies to. When the tester learns to quantify each conjunct on its
-own, the record can go; nothing else depends on it.
+With rule 2.2.2 the `(o : Object M)` of every structure and property is filled by `M`'s `Object`
+and written only when it is not the type's own (a second equality on one carrier is a second type,
+2.2.4). The signatures below keep it, as the elaborated form keeps it.
 
-A theory claims a property on its own operation by the same one-line form, binding the drawn
-domain in the wrapper and applying the property at the carrier:
-
-```
-PlusCommutative (d : Doubles) (x y : Moderate) : Bool := Commutative Float64 Float64 (structural Float64) d.plus x y
-```
-
-The wrapper's parameters are the subtype the test draws from (`Moderate`), the property is stated
-at the type the operation is closed on (`Float64`); a subtype passes where its type is expected
-(3.S6). This is why `Commutative` takes a domain `A` and a codomain `B`: an operation drawn on a
-subtype of its carrier is not closed on the subtype. `Associative` needs closure and is stated at
-the carrier only. The wrapper's name is the field's name joined to the adjective
-(`PlusCommutative`, `MeetCommutative`, `CombineAssociative`), and it is what a test line names.
-
-The checker counts a property as claimed when any body mentions it (check.py `claimed_laws`,
-4.S14), so the wrappers claim the properties; the properties are also tested on their own at listed
-instances in `core_laws.test.lut` and refuted at wrong instances in `core_controls.test.lut`
-(L9.14: a law without a refuted model is evidence of nothing).
-
-The equality parameter `o : Object A` is explicit everywhere (D-2026-10-17-b's signature). For a
-concrete type it is `structural A`; for a type holding functions (`Vec`, `Mat`, `Table`) it is the
-pointwise equality containers.lth builds (section 3.8), which is how `approxVec exact` disappears.
+A theory claims a property on its own operation by a one-line wrapper that binds the drawn domain
+(`PlusCommutative (d : Doubles) (x y : Moderate) : Bool := Commutative Float64 Float64 d.plus x y`),
+the property at the carrier (`Float64`), the parameters at the subtype the test draws (`Moderate`;
+3.S6). The wrapper's name is the field's name joined to the adjective and is what a test line names.
+The checker counts a property as claimed when any body mentions it (4.S14, `claimed_laws`).
 
 ## 3. The files, with their declarations
 
-Signatures in Luthier syntax; `luthier check` passed on a scratch file holding the forms used below
-(dependent record fields, `F : U -> U`, conjunctions of partially applied laws, `fn` bodies). Bodies
-are given where they fix the meaning; the rest is the session's.
+Bite 2's three properties files stand as built (report-bite-2.md: the composites quantify their
+parts' variables and conjoin with `and`; `Complemented`'s constant is `z`; functions.lth imports
+`Related`). Below, the files bites 6 and 7 write or rewrite; the `(o : Object A)` parameters are
+implicit by 2.2.2.
 
-### 3.1 properties/relations.lth
-
-```
--- the pairs and chains a relation relates: drawn by their generators, said once (7.S12; replaces
--- EqualPair, EqualChain, LeqPair x3, LeqChain x3, LeqBoth x2)
-Related (A : U) (r : A -> A -> Bool) : U := { x y : A | r x y }
-Chain (A : U) (r : A -> A -> Bool) : U := { x y z : A | r x y and r y z }
-Both (A : U) (r : A -> A -> Bool) : U := { x y : A | r x y and r y x }
-
-Reflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
-Irreflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := not (r x x)
-Symmetric (A : U) (r : A -> A -> Bool) (p : Related A r) : Bool := r p.y p.x
--- by its contrapositive over every pair (numbers.lth's LeqAntisymmetric, 7.S12: no rare premise)
-Antisymmetric (A : U) (o : Object A) (r : A -> A -> Bool) (x y : A) : Bool := o.eq x y or not (r x y and r y x)
-Asymmetric (A : U) (r : A -> A -> Bool) (p : Related A r) : Bool := not (r p.y p.x)
-Transitive (A : U) (r : A -> A -> Bool) (c : Chain A r) : Bool := r c.x c.z
-Total (A : U) (r : A -> A -> Bool) (x y : A) : Bool := r x y or r y x
-
-Equivalence (A : U) (r : A -> A -> Bool) : Bool := Reflexive A r & Symmetric A r & Transitive A r
-Preorder (A : U) (r : A -> A -> Bool) : Bool := Reflexive A r & Transitive A r
-PartialOrder (A : U) (o : Object A) (r : A -> A -> Bool) : Bool := Preorder A r & Antisymmetric A o r
-TotalOrder (A : U) (o : Object A) (r : A -> A -> Bool) : Bool := PartialOrder A o r & Total A r
-StrictOrder (A : U) (r : A -> A -> Bool) : Bool := Irreflexive A r & Asymmetric A r & Transitive A r
-```
-
-`Object` is imported from structures/equality.lth; relations.lth needs only its field `eq`.
-[proposed] The composite predicates (`Equivalence`, orders) are conjunctions of applied properties
-and are claimed through structures' wrappers (`Object`'s laws claim `Equivalence A o.eq`).
-
-### 3.2 properties/operations.lth
-
-```
-Associative (A : U) (o : Object A) (op : A -> A -> A) (x y z : A) : Bool := o.eq (op (op x y) z) (op x (op y z))
-Commutative (A B : U) (o : Object B) (op : A -> A -> B) (x y : A) : Bool := o.eq (op x y) (op y x)
-Idempotent (A : U) (o : Object A) (op : A -> A -> A) (x : A) : Bool := o.eq (op x x) x
-LeftNeutral (A : U) (o : Object A) (op : A -> A -> A) (e : A) (x : A) : Bool := o.eq (op e x) x
-RightNeutral (A : U) (o : Object A) (op : A -> A -> A) (e : A) (x : A) : Bool := o.eq (op x e) x
-Neutral (A : U) (o : Object A) (op : A -> A -> A) (e : A) (x : A) : Bool := LeftNeutral A o op e x and RightNeutral A o op e x
-Absorbing (A : U) (o : Object A) (op : A -> A -> A) (z : A) (x : A) : Bool := o.eq (op x z) z and o.eq (op z x) z
--- by its contrapositive: unequal results on unequal arguments
-Cancellative (A : U) (o : Object A) (op : A -> A -> A) (x y z : A) : Bool := o.eq y z or not (o.eq (op x y) (op x z))
-Invertible (A : U) (o : Object A) (op : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool :=
-  o.eq (op x (inv x)) e and o.eq (op (inv x) x) e
-Distributive (A : U) (o : Object A) (times plus : A -> A -> A) (x y z : A) : Bool :=
-  o.eq (times x (plus y z)) (plus (times x y) (times x z)) and o.eq (times (plus y z) x) (plus (times y x) (times z x))
-Absorptive (A : U) (o : Object A) (meet join : A -> A -> A) (x y : A) : Bool :=
-  o.eq (meet x (join x y)) x and o.eq (join x (meet x y)) x
-Complemented (A : U) (o : Object A) (op : A -> A -> A) (complement : A -> A) (unit : A) (x : A) : Bool :=
-  o.eq (op x (complement x)) unit
-Distinct (A : U) (o : Object A) (a b : A) : Bool := not (o.eq a b)
-
--- the same within a bound over a distance: the bound a function of the arguments, from the
--- claimant's theory, never a constant (D-2026-10-17-f, P11)
-AssociativeWithin (A : U) (d : A -> A -> Float64) (op : A -> A -> A) (bound : A -> A -> A -> Float64) (x y z : A) : Bool :=
-  d (op (op x y) z) (op x (op y z)) <= bound x y z
-CommutativeWithin (A B : U) (d : B -> B -> Float64) (op : A -> A -> B) (bound : A -> A -> Float64) (x y : A) : Bool :=
-  d (op x y) (op y x) <= bound x y
-NeutralWithin (A : U) (d : A -> A -> Float64) (op : A -> A -> A) (e : A) (bound : A -> Float64) (x : A) : Bool :=
-  d (op e x) x <= bound x and d (op x e) x <= bound x
-DistributiveWithin (A : U) (d : A -> A -> Float64) (times plus : A -> A -> A) (bound : A -> A -> A -> Float64) (x y z : A) : Bool :=
-  d (times x (plus y z)) (plus (times x y) (times x z)) <= bound x y z
-InvertibleWithin (A : U) (d : A -> A -> Float64) (op : A -> A -> A) (e : A) (inv : A -> A) (bound : A -> Float64) (x : A) : Bool :=
-  d (op x (inv x)) e <= bound x
-```
-
-The within-bound versions take the distance as a function, not a `Metric` record, so a claimant
-can pass a `MetricWithin`'s `dist` (a floating-point realization, 3.5) as well as a `Metric`'s.
-[proposed] `Distributive` states both sides; a one-sided version is not needed by any present
-claimant (all rings here are commutative).
-
-### 3.3 properties/functions.lth
-
-```
-id (A : U) : A -> A := fn x { x }
-compose (A B C : U) (g : B -> C) (f : A -> B) : A -> C := fn x { g (f x) }
-flip (A B C : U) (f : A -> B -> C) : B -> A -> C := fn b a { f a b }
-const (A B : U) (b : B) : A -> B := fn a { b }
-
--- the equality of functions: pointwise from the codomain's, sampled on the domain (D-2026-10-17-d)
-Pointwise (A B : U) (o : Object B) (f g : A -> B) (x : A) : Bool := o.eq (f x) (g x)
-Pointwise2 (A B C : U) (o : Object C) (f g : A -> B -> C) (x : A) (y : B) : Bool := o.eq (f x y) (g x y)
--- the function type's Object, for a claimant that needs one as a value (an `Indexed` container's
--- entries are a function); its laws are the codomain's, applied pointwise, so it claims nothing new
-functions (A B : U) (o : Object B) : Object (A -> B)
-
--- by its contrapositive over every pair
-Injective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (x y : A) : Bool := oA.eq x y or not (oB.eq (f x) (f y))
--- surjective by a witness: a section `s` with `f (s y) == y`
-Surjective (A B : U) (o : Object B) (f : A -> B) (s : B -> A) (y : B) : Bool := o.eq (f (s y)) y
--- `g` undoes `f`
-Inverse (A B : U) (o : Object A) (f : A -> B) (g : B -> A) (x : A) : Bool := o.eq (g (f x)) x
-Isomorphism (A B : U) (oA : Object A) (oB : Object B) (to : A -> B) (from : B -> A) : Bool :=
-  Inverse A B oA to from & Inverse B A oB from to
-Bijective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (s : B -> A) : Bool :=
-  Injective A B oA oB f & Surjective A B oB f s
-Idempotent (A : U) (o : Object A) (f : A -> A) (x : A) : Bool := o.eq (f (f x)) (f x)
-Involutive (A : U) (o : Object A) (f : A -> A) (x : A) : Bool := o.eq (f (f x)) x
--- order-preserving between two relations, over the pairs the first relates
-Monotone (A B : U) (r : A -> A -> Bool) (s : B -> B -> Bool) (f : A -> B) (p : Related A r) : Bool := s (f p.x) (f p.y)
--- a homomorphism of binary operations (SizeAppend is one from append to +)
-Preserving (A B : U) (o : Object B) (opA : A -> A -> A) (opB : B -> B -> B) (f : A -> B) (x y : A) : Bool :=
-  o.eq (f (opA x y)) (opB (f x) (f y))
--- respects an equivalence: equal arguments, equal results (Substitutive for one function)
-Congruent (A B : U) (rA : A -> A -> Bool) (oB : Object B) (f : A -> B) (p : Related A rA) : Bool := oB.eq (f p.x) (f p.y)
--- the result lies in a subtype, given by its predicate
-LandsIn (A B : U) (f : A -> B) (p : B -> Bool) (x : A) : Bool := p (f x)
-
-IdempotentWithin (A : U) (d : A -> A -> Float64) (f : A -> A) (bound : A -> Float64) (x : A) : Bool := d (f (f x)) (f x) <= bound x
-InvolutiveWithin (A : U) (d : A -> A -> Float64) (f : A -> A) (bound : A -> Float64) (x : A) : Bool := d (f (f x)) x <= bound x
-PointwiseWithin (A B : U) (d : B -> B -> Float64) (f g : A -> B) (bound : A -> Float64) (x : A) : Bool := d (f x) (g x) <= bound x
-```
-
-The file has two `Idempotent`s with operations.lth (one on an operation, one on a function); they
-live in different files and an importer names the one it needs. [proposed] `functions (A B) (o)`
-is declared, not defined: a value of `Object (A -> B)` whose `eq` is a function over an infinite
-domain has no body a test could run; what is tested is `Pointwise`. A claimant that wants a
-container's equality as a value uses containers.lth's `pointwise`, which is finite.
-
-### 3.4 structures/equality.lth, part one: Object
+### 3.1 structures/equality.lth
 
 ```
 Object (A : U) : { eq : A -> A -> Bool }
-ObjectEquivalence (A : U) (o : Object A) : Bool := Equivalence A o.eq
+ObjectEquivalence (A : U) (o : Object A) (x : A) (p : Related A o.eq) (c : Chain A o.eq) : Bool := Equivalence A o.eq x p c
 Object (A : U) := ObjectEquivalence A
 EqualPair (A : U) (o : Object A) : U := Related A o.eq
-
 hasStructuralEquality : U -> Bool
 Concrete : U := { A : U | hasStructuralEquality A }
 structural (A : Concrete) : Object A := { eq := fn x y { x == y } }
--- the structural equality's own laws, each on its own cases (review of layers 0-1, A), and
--- substitutive over every function (D-2026-10-13-z)
-Structural (A : Concrete) : { eq : A -> A -> Bool }
-StructuralEquivalence (A : Concrete) (s : Structural A) : Bool := Equivalence A s.eq
-Substitutive (A : Concrete) (s : Structural A) (B : Concrete) (f : A -> B) (p : Related A s.eq) : Bool := f p.x == f p.y
-Structural (A : Concrete) := StructuralEquivalence A & Substitutive A
-```
+Structural (A : Concrete) : { eq : A -> A -> Bool }        -- its laws: Equivalence and Substitutive, as today
 
-`structural` replaces kernel_models.lut's `structuralEquality`; it is a value the theory of equality
-is about (12.S23 allows one), not a model of a theory declared elsewhere.
-
-### 3.5 structures/equality.lth, part two: Metric
-
-```
--- a metric space over the type's equality (D-2026-10-17-f): d : A x A -> R, realized in Float64
-Metric (A : U) (o : Object A) : { dist : A -> A -> Float64 }
--- M1 in two laws: zero on equal pairs; equal where zero, by its contrapositive over every pair
-MetricZeroOnEqual (A : U) (o : Object A) (d : Metric A o) (p : EqualPair A o) : Bool := d.dist p.x p.y == 0.0
-MetricIndiscernible (A : U) (o : Object A) (d : Metric A o) (x y : A) : Bool := o.eq x y or not (d.dist x y == 0.0)
--- M2: `dist == flip dist`
-MetricSymmetric (A : U) (o : Object A) (d : Metric A o) (x y : A) : Bool := Commutative A Float64 (structural Float64) d.dist x y
--- M3
+-- a metric space over the type's equality (D-2026-10-17-f); its one name is `d`
+Metric (A : U) (o : Object A) : { d : A -> A -> Float64 }
+MetricZeroOnEqual (A : U) (o : Object A) (m : Metric A o) (p : EqualPair A o) : Bool := m.d p.x p.y == 0.0
+MetricIndiscernible (A : U) (o : Object A) (m : Metric A o) (x y : A) : Bool := o.eq x y or not (m.d x y == 0.0)
+MetricSymmetric (A : U) (o : Object A) (m : Metric A o) (x y : A) : Bool := Commutative A Float64 (structural Float64) m.d x y
 Triangular (A : U) (d : A -> A -> Float64) (x y z : A) : Bool := d x z <= d x y + d y z
 Ultratriangular (A : U) (d : A -> A -> Float64) (x y z : A) : Bool := d x z <= larger (d x y) (d y z)
-MetricTriangular (A : U) (o : Object A) (d : Metric A o) (x y z : A) : Bool := Triangular A d.dist x y z
-Metric (A : U) (o : Object A) := MetricZeroOnEqual A o & MetricIndiscernible A o & MetricSymmetric A o & MetricTriangular A o
--- non-negativity is a theorem (0 = d(x,x) <= d(x,y) + d(y,x) = 2 d(x,y)) and is not an axiom; it
--- is stated as a derived law so that a control that returns a negative value is refuted by name
-MetricNonNegative (A : U) (o : Object A) (d : Metric A o) (x y : A) : Bool := 0.0 <= d.dist x y
-
--- the variants, by their exact names
-Pseudometric (A : U) (o : Object A) : { dist : A -> A -> Float64 }      -- M1 one way: zero on equal, not conversely
-Pseudometric (A : U) (o : Object A) := PseudometricZeroOnEqual A o & PseudometricSymmetric A o & PseudometricTriangular A o
-Quasimetric (A : U) (o : Object A) : { dist : A -> A -> Float64 }       -- no M2
-Quasimetric (A : U) (o : Object A) := QuasimetricZeroOnEqual A o & QuasimetricIndiscernible A o & QuasimetricTriangular A o
-Ultrametric (A : U) (o : Object A) : { dist : A -> A -> Float64 }       -- M3 with max
-Ultrametric (A : U) (o : Object A) := UltrametricZeroOnEqual A o & UltrametricIndiscernible A o & UltrametricSymmetric A o & UltrametricUltratriangular A o
--- values in [0, inf]: declared with its laws over `Extended`, with no model until one asks
+MetricTriangular (A : U) (o : Object A) (m : Metric A o) (x y z : A) : Bool := Triangular A m.d x y z
+MetricNonNegative (A : U) (o : Object A) (m : Metric A o) (x y : A) : Bool := 0.0 <= m.d x y     -- a theorem, stated for the control
+Metric (A : U) (o : Object A) := MetricZeroOnEqual A o & MetricIndiscernible A o & MetricSymmetric A o & MetricTriangular A o & MetricNonNegative A o
+Pseudometric (A : U) (o : Object A) : { d : A -> A -> Float64 }      -- M1 one way
+Quasimetric (A : U) (o : Object A) : { d : A -> A -> Float64 }       -- no M2
+Ultrametric (A : U) (o : Object A) : { d : A -> A -> Float64 }       -- M3 with max
 Extended = { finite : NonNegativeFloat || infinite : Unit }
-ExtendedMetric (A : U) (o : Object A) : { dist : A -> A -> Extended }
+ExtendedMetric (A : U) (o : Object A) : { d : A -> A -> Extended }   -- declared; no model until one asks
 
--- a ball: within a radius of a distance, the radius a function of the two points (11.S14: a sum is
--- compared relative to the magnitudes of its terms); replaces the `approx...` and `within` family
 Ball (A : U) (d : A -> A -> Float64) (radius : A -> A -> Float64) (x y : A) : Bool := d x y <= radius x y
 Tolerance : U := { tol : Float64 | 0.0 <= tol }
-
--- a floating-point realization of a metric: not a model of `Metric` (D-2026-10-17-f) but a claim
--- that the computed distance is within `bound` of an exact metric; its testable consequences
-MetricWithin (A : U) (o : Object A) : { dist : A -> A -> Float64, bound : A -> A -> Float64 }
-WithinZeroOnEqual (A : U) (o : Object A) (m : MetricWithin A o) (p : EqualPair A o) : Bool := m.dist p.x p.y <= m.bound p.x p.y
-WithinSymmetric (A : U) (o : Object A) (m : MetricWithin A o) (x y : A) : Bool :=
-  CommutativeWithin A Float64 absDistance m.dist (fn x y { m.bound x y + m.bound y x }) x y
-WithinTriangular (A : U) (o : Object A) (m : MetricWithin A o) (x y z : A) : Bool :=
-  m.dist x z <= m.dist x y + m.dist y z + m.bound x y + m.bound y z + m.bound x z
-MetricWithin (A : U) (o : Object A) := WithinZeroOnEqual A o & WithinSymmetric A o & WithinTriangular A o
+MetricWithin (A : U) (o : Object A) : { d : A -> A -> Float64, bound : A -> A -> Float64 }   -- the floating-point claim, laws WithinZeroOnEqual, WithinSymmetric, WithinTriangular as in 54f6228
+abs (x : Float64) : Float64
+larger (a b : Float64) : Float64
 absDistance (a b : Float64) : Float64 := abs (a - b)
+NonNegativeFloat : U := { x : Float64 | 0.0 <= x }
 ```
 
-`abs` and `larger` move here from numbers.lth and probability.lth (`abs` is exact; core defines
-`Float64`). `NonNegativeFloat` is grammar.lth's `{ x : Float64 | 0.0 <= x }`, moved here. The
-exact models of `Metric` are claimed where their types are defined: core.lut claims `|a - b|` on
-`Small` integers (converted, exact below 2^53), the discrete metric on `Bool`; lists.lut claims the
-Hamming distance on `List Bool` of equal length and the edit distance when written. The controls
-D-2026-10-17-f names go in `core_controls.test.lut`: Kullback-Leibler between two Bernoulli
-parameters (fails M2 and M3), relative error `|a - b| / larger |a| |b|` (fails M3), squared
-Euclidean `(a - b)^2` (fails M3, 0, 1, 2), and a negative-valued "distance" refuted by
-`MetricNonNegative`. The `MetricWithin` model of `absDistance` on `Moderate` doubles is
-numbers.lth's, with `bound := fn a b { u * absDistance a b }` where `u = epsilon / 2`, since
-`fl(a - b) = (a - b)(1 + delta)`, `|delta| <= u`, and `abs` is exact; the triangle law then holds
-with the three bounds, a derivation of one line to cite in the file (Higham 2002, §2.2).
-[proposed] Ultrametric's model, when one is asked for: the p-adic or the longest-common-prefix
-distance on strings; none is needed now.
+The four variants share the field name `d` with `Metric`; a type that models two of them says which
+by qualification (`Ultrametric.d`), and a type with two metrics is two types (2.2.4). Models and
+controls: as in 54f6228's section 3.5 (core.lut claims `|a - b|` on `Small` and the discrete metric
+on `Bool`; lists.lut the Hamming distance; the controls Kullback-Leibler, relative error, squared
+Euclidean, a negative "distance" in `core_controls.test.lut`; `absDistance` on `Moderate` a
+`MetricWithin` in numbers.lth with `bound := fn a b { u * absDistance a b }`).
 
-### 3.6 structures/order.lth
+### 3.2 structures/order.lth
 
 ```
+Order (A : U) (o : Object A) : { leq : A -> A -> Bool }                -- the one name of an order
+OrderIsTotal (A : U) (o : Object A) (r : Order A o) (x y : A) (c : Chain A r.leq) : Bool := TotalOrder A o r.leq x y c
+Order (A : U) (o : Object A) := OrderIsTotal A o
+less (A : U) (o : Object A) (r : Order A o) (x y : A) : Bool := r.leq x y and not (o.eq x y)
 Least (A : U) (leq : A -> A -> Bool) (bottom : A) (x : A) : Bool := leq bottom x
 Greatest (A : U) (leq : A -> A -> Bool) (top : A) (x : A) : Bool := leq x top
--- nothing lies strictly between x and its successor (SuccessorIsNext, generic)
-Discrete (A : U) (o : Object A) (leq : A -> A -> Bool) (succ : A -> A) (p : Related A leq) : Bool :=
-  o.eq p.x p.y or leq (succ p.x) p.y
--- an operation respects the order in its first argument (PlusMonotone x3, TimesMonotone, TimesPositive)
+Discrete (A : U) (o : Object A) (leq : A -> A -> Bool) (succ : A -> A) (p : Related A leq) : Bool := o.eq p.x p.y or leq (succ p.x) p.y
 MonotoneIn (A : U) (leq : A -> A -> Bool) (op : A -> A -> A) (p : Related A leq) (z : A) : Bool := leq (op p.x z) (op p.y z)
--- the product of two non-negatives is non-negative, over the pairs above zero
 NonNegativePair (A : U) (leq : A -> A -> Bool) (zero : A) : U := { x y : A | leq zero x and leq zero y }
-PositiveClosed (A : U) (leq : A -> A -> Bool) (times : A -> A -> A) (zero : A) (p : NonNegativePair A leq zero) : Bool :=
-  leq zero (times p.x p.y)
-
--- Nat's structure (11.R1, D-2026-10-13-t): a commutative semiring totally ordered, the order
--- respected by `+`, zero least, `x + 1` the successor
-OrderedSemiring (S : U) (o : Object S) : { semiring : Semiring S o, leq : S -> S -> Bool }
-OrderedSemiringIsASemiring (S : U) (o : Object S) (s : OrderedSemiring S o) : Bool := Semiring S o s.semiring
-OrderedSemiringTotalOrder (S : U) (o : Object S) (s : OrderedSemiring S o) : Bool := TotalOrder S o s.leq
-OrderedSemiringPlusMonotone (S : U) (o : Object S) (s : OrderedSemiring S o) (p : Related S s.leq) (z : S) : Bool := MonotoneIn S s.leq s.semiring.plus p z
-OrderedSemiringZeroLeast (S : U) (o : Object S) (s : OrderedSemiring S o) (x : S) : Bool := Least S s.leq s.semiring.zero x
-OrderedSemiringDiscrete (S : U) (o : Object S) (s : OrderedSemiring S o) (p : Related S s.leq) : Bool :=
-  Discrete S o s.leq (fn x { s.semiring.plus x s.semiring.one }) p
-OrderedSemiring (S : U) (o : Object S) := OrderedSemiringIsASemiring S o & OrderedSemiringTotalOrder S o
-  & OrderedSemiringPlusMonotone S o & OrderedSemiringZeroLeast S o & OrderedSemiringDiscrete S o
+PositiveClosed (A : U) (leq : A -> A -> Bool) (times : A -> A -> A) (zero : A) (p : NonNegativePair A leq zero) : Bool := leq zero (times p.x p.y)
+OrderedSemiring (S : U) (o : Object S) : { semiring : Semiring S o, order : Order S o }   -- laws: Semiring's, Order's, MonotoneIn plus, Least zero, Discrete (x + 1)
 ```
 
-A structure that includes another passes the included record to the included theory's head
-(`Semiring S o s.semiring`), the form core.lut's claims already use; run.py reads a theory head in a
-conjunct through to its laws.
+[proposed] `Order` as a structure with the one field `leq`, total: every order the library claims
+is total (`Int`, `Nat`, `Float64` on `Moderate`, the grades' rank); a partial order gets its own
+structure when a type asks. `leq` resolved by type replaces the `<=` primitive's role in laws;
+`<=` stays the kernel's comparison (3.S17) and `IntIsOrdered` binds `leq := fn a b { a <= b }`.
 
-### 3.7 structures/algebraic.lth
+### 3.3 structures/algebraic.lth
 
-Each structure: a record, one wrapper per law applying a property of operations.lth, and the
-conjunction. Listed by record and laws; the wrappers follow the naming of section 2.
+Each structure: a record, one wrapper per law, the conjunction. The field names are the concept's
+and are the names every use resolves (section 2):
 
 ```
-Semigroup (A : U) (o : Object A) : { combine : A -> A -> A }                         -- Associative
-Monoid (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A }               -- Associative, Neutral
-CommutativeMonoid (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A }    -- Monoid's, Commutative
+Semigroup (A : U) (o : Object A) : { combine : A -> A -> A }                              -- Associative
+Monoid (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A }                    -- Associative, Neutral
+CommutativeMonoid (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A }         -- Monoid's, Commutative
 Group (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A, inverse : A -> A }   -- Monoid's, Invertible
-AbelianGroup (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A, inverse : A -> A }   -- Group's, Commutative
+AbelianGroup (A : U) (o : Object A) : { neutral : A, combine : A -> A -> A, inverse : A -> A }
 Semiring (A : U) (o : Object A) : { zero one : A, plus times : A -> A -> A }
-  -- CommutativeMonoid on plus/zero, Monoid on times/one, Distributive times plus, Absorbing times zero, Distinct one zero
+  -- CommutativeMonoid plus zero, Monoid times one, Distributive times plus, Absorbing times zero, Distinct one zero
 Ring (A : U) (o : Object A) : { zero one : A, plus times : A -> A -> A, negate : A -> A }
-  -- AbelianGroup on plus/zero/negate, Monoid on times/one, Distributive, Distinct one zero
-CommutativeRing (A : U) (o : Object A) : { zero one : A, plus times : A -> A -> A, negate : A -> A }   -- Ring's, Commutative times
-Lattice (A : U) (o : Object A) : { meet join : A -> A -> A }
-  -- Associative, Commutative, Idempotent on each; Absorptive meet join
-BooleanAlgebra (B : U) (o : Object B) : { top bottom : B, complement : B -> B, meet join : B -> B -> B }
-  -- Huntington: Commutative meet, Commutative join, Neutral meet top, Neutral join bottom,
-  -- Distributive meet join, Distributive join meet, Complemented meet complement bottom,
-  -- Complemented join complement top, Distinct top bottom
+CommutativeRing (A : U) (o : Object A) : { zero one : A, plus times : A -> A -> A, negate : A -> A }
+Lattice (A : U) (o : Object A) : { meet join : A -> A -> A }                              -- Associative, Commutative, Idempotent each; Absorptive
+BooleanAlgebra (B : U) (o : Object B) : { top bottom : B, complement : B -> B, meet join : B -> B -> B }   -- Huntington, as in 54f6228
 ```
 
-`Semiring`'s `Distinct one zero` and `Ring`'s replace `OneIsNotZero` (kernel_laws.lth, algebra.lth)
-and `TopIsNotBottom`. The dual of `Bool`'s algebra is told apart by `if` in core.lut
-(`TopIsTheFirstBranch`), where `Bool` is defined (L2.8).
+`+`, `*`, `-` stay bound by `operator` acts per type in core.lut (they are the kernel's
+primitives); `plus x y` and `x + y` denote the same function at every type that claims `Semiring`
+with them (`IntIsASemiring := Semiring Int { plus := intPlus, ... }`), and a law written with
+`plus` reads at every semiring. [proposed] `List A`'s monoid operation is written `combine xs ys`
+when generic and `xs + ys` at lists, with `operator + := combine` at `List A` in lists.lut, as
+`String`'s `+` is its monoid already (core.lut); decisions.md, question 5.
 
-### 3.8 structures/containers.lth
+### 3.4 structures/containers.lth
 
 ```
-Sized (C : U) : { size : C -> Nat }
--- entries at a finite index; a matrix is indexed row-major by Fin (m * n) [proposed]
-Indexed (C A : U) : { size : C -> Nat, at : (c : C) -> Fin (size c) -> A }
 Functor (F : U -> U) : { map : (A B : U) -> (A -> B) -> F A -> F B }
-Foldable (F : U -> U) : { fold : (A M : U) -> (M -> M -> M) -> M -> (A -> M) -> F A -> M }
+Indexed (C A : U) : { size : C -> Nat, at : (c : C) -> Fin (size c) -> A }
+Foldable (F : U -> U) : { fold : (A M : U) -> (M -> M -> M) -> M -> (A -> M) -> F A -> M }   -- to the right; nil -> neutral
+Tabulated (C A : U) : { build : (n : Nat) -> (Fin n -> A) -> C }     -- the constructor from entries: List, Vec, Mat (row-major)
 
--- the equality of two containers: same size, equal entries; the Object of a container
-sameEntries (C A : U) (i : Indexed C A) (o : Object A) (c d : C) : Bool :=
-  if i.size c == i.size d then forallBelow (i.size c) (fn k { o.eq (i.at c k) (i.at d k) }) else false
+-- the generic functions over the structures, written once (L7.6); their structure parameters are
+-- implicit (2.2.2), so a use reads `all p xs`, `member x xs`, `lookup k kvs`, `sum xs`
+all (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : Bool := f.fold A Bool conj true p c
+any (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : Bool := f.fold A Bool disj false p c
+count (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : Nat
+member (F : U -> U) (A : U) (f : Foldable F) (o : Object A) (x : A) (c : F A) : Bool := any F A f (fn y { o.eq x y }) c
+lookup (F : U -> U) (K V : U) (f : Foldable F) (o : Object K) (k : K) (c : F (K * V)) : Maybe V
+sum (F : U -> U) (A : U) (f : Foldable F) (m : Monoid A o) (c : F A) : A := f.fold A A m.combine m.neutral (id A) c
+toList (F : U -> U) (A : U) (f : Foldable F) (c : F A) : List A
+filter (F : U -> U) (A : U) (f : Foldable F) (p : A -> Bool) (c : F A) : List A
+zipWith (C D E A B R : U) (i : Indexed C A) (j : Indexed D B) (t : Tabulated E R) (g : A -> B -> R) (c : C) (d : { d : D | size d == size c }) : E
+sameEntries (C A : U) (i : Indexed C A) (o : Object A) (c d : C) : Bool
 pointwise (C A : U) (i : Indexed C A) (o : Object A) : Object C := { eq := sameEntries C A i o }
--- the sup distance of two containers over a distance on the entries; of different sizes, infinite
--- is not a value (11.S7), so the distance is 1 + the largest entry and the sizes
 supDistance (C A : U) (i : Indexed C A) (d : A -> A -> Float64) (c e : C) : Float64
--- a ball entry by entry, the radius per entry (what approxMatOf states: 11.S14)
 entrywiseBall (C A : U) (i : Indexed C A) (d : A -> A -> Float64) (radius : (c : C) -> C -> Fin (i.size c) -> Float64) (c e : C) : Bool
 
--- the laws a container with map, fold or append must meet (D-2026-10-17-c)
-SizeMap (F : U -> U) (A B : U) (i : Indexed (F A) A) (j : Indexed (F B) B) (m : Functor F) (f : A -> B) (c : F A) : Bool :=
-  j.size (m.map A B f c) == i.size c
-AtMap (F : U -> U) (A B : U) (i : Indexed (F A) A) (j : Indexed (F B) B) (m : Functor F) (f : A -> B) (c : F A) (k : Fin (i.size c)) : Bool
-SizeAppend (C : U) (s : Sized C) (append : C -> C -> C) (c d : C) : Bool :=
-  Preserving C Nat (structural Nat) append (fn a b { a + b }) s.size c d
-Extensional (C A : U) (i : Indexed C A) (o : Object A) (oc : Object C) (c d : C) : Bool :=
-  oc.eq c d == sameEntries C A i o c d
-MapId (F : U -> U) (A : U) (m : Functor F) (o : Object (F A)) (c : F A) : Bool := o.eq (m.map A A (id A) c) c
-MapCompose (F : U -> U) (A B C : U) (m : Functor F) (o : Object (F C)) (f : A -> B) (g : B -> C) (c : F A) : Bool :=
-  o.eq (m.map A C (compose A B C g f) c) (m.map B C g (m.map A B f c))
-FoldIsTheFreeExtension ...   -- stated in universal.lth's FreeMonoid, claimed by lists.lut
+-- the laws (D-2026-10-17-c), as in 54f6228: SizeMap, AtMap, SizeAppend (Preserving of monoids),
+-- Extensional, MapId, MapCompose, FoldOfBuild; the folds over Fin n: forallBelow, existsBelow,
+-- forallPairs, countBelow, foldWith, foldFrom, moved here from arrays.lth
 ```
 
-`forallBelow`, `existsBelow`, `countBelow`, `foldWith`, `foldFrom` move here from arrays.lth (they
-are folds over `Fin n`, which every container's laws need); `sumTo` and `sumToInt` stay in
-arrays.lth (a sum in 3.S27's order is the arrays' business). Claimants: `List A` (lists.lut:
-`size := length`, `at := nth` made total on `Fin`), `Vec A` and `Mat A` (arrays.lth, D-2026-10-17-c:
-`Mat` by `Fin r × Fin c` through the row-major index), `Table` (tables.lth: its rows). The
-`approxVec`/`approxMat` family becomes `Ball` or `entrywiseBall` of `supDistance` over
-`absDistance` with the radius the law names (section 5, bite 8).
+`conj` and `disj` are core.lut's `and` and `or` as functions. `length` is `size` (one name of
+`Indexed`); `nth` is `at` made total on `Fin (size xs)`, with `nth : List A -> Nat -> Maybe A` kept
+in lists.lut for the callers that index by an `Int`. Claimants: `List` (lists.lut), `Vec` and `Mat`
+(arrays.lth; `Mat` indexed row-major by `Fin (m * n)`, its two-index `f` kept), `Table` (tables.lth,
+over its rows). The `approxVec`/`approxMat` family becomes `Ball` or `entrywiseBall` of
+`supDistance absDistance` with the radius the law names (bite 11).
 
-### 3.9 structures/universal.lth
+### 3.5 structures/universal.lth
 
-Terminal, Initial, Exponential, Product, Coproduct, NamedProduct, NamedCoproduct, Selected with
-their laws keep kernel_laws.lth §2 and §6's text and names (`OnlyThePoint`, `NoValue`, `Beta`,
-`PairFst`, `PairSnd`, `Pairing`, `CaseLeft`, `CaseRight`, `CasesAreAll`, `NamedPairs`,
-`ProjectionNamesDistinct`, `SelectByName`, `NamedCases`, `InjectionNamesDistinct`, `LabelByName`),
-with `(o : Object P)` added where the law compared with `==` on a type parameter. `FreeMonoid` moves
-here from kernel_laws.lth §4 with its laws (`FoldNeutral`, `FoldInject`, `FoldCombine`,
-`FoldIsItself`), `fold` taking the monoid's data `(N : U) -> (N -> N -> N) -> N -> (A -> N) -> M -> N`
-and `IsMonoid` replaced by `Monoid M o { neutral, combine }`. Added, in D-2026-10-17-g's order:
+As bite 1 left it (kernel_laws.lth §2, §4's free monoid, §6, names unchanged), with `(o : Object
+P)` where a law compared a type parameter with `==`, plus `Equalizer`, `Pullback` and `Coequalizer`
+as in 54f6228's section 3.9 (with `agreeing` for the pullback's pairs). `FreeMonoid`'s extension is
+`Foldable`'s `fold`: `FreeMonoid (A : U) (F : U -> U) (o : Object (F A)) : { monoid : Monoid (F A) o,
+inject : A -> F A, foldable : Foldable F }`, its laws `FoldNeutral`, `FoldInject`, `FoldCombine`,
+`FoldIsItself` over `foldable.fold`, so the core has one `fold`. `Pushout` waits for a case
+[proposed, as before]; the pushforward of measures is probability.lth's (bite 12).
 
-```
--- the equalizer of f and g: E with `include` into A, and every x with f x = g x reached once
-Equalizer (A B E : U) (oA : Object A) (oB : Object B) (oE : Object E) : {
-  f g : A -> B, include : E -> A, restrict : { x : A | oB.eq (f x) (g x) } -> E }
-EqualizerEqualizes (…) (e : E) : Bool := oB.eq (f (include e)) (g (include e))
-EqualizerIncludesBack (…) (x : { x : A | oB.eq (f x) (g x) }) : Bool := oA.eq (include (restrict x)) x
-EqualizerRestrictsBack (…) (e : E) : Bool := oE.eq (restrict (include e)) e
--- the pullback of f : A -> C and g : B -> C: the pairs that agree in C (D-2026-10-16-a's join)
-agreeing (A B C : U) (oC : Object C) (f : A -> C) (g : B -> C) (q : A * B) : Bool := match q { (a, b) -> oC.eq (f a) (g b) }
-Pullback (A B C P : U) (oA : Object A) (oB : Object B) (oC : Object C) (oP : Object P) : {
-  f : A -> C, g : B -> C, first : P -> A, second : P -> B,
-  pair : { q : A * B | agreeing A B C oC f g q } -> P }
-PullbackCommutes (…) (p : P) : Bool := oC.eq (f (first p)) (g (second p))
-PullbackFst, PullbackSnd, PullbackPairing   -- the product's three laws on the agreeing pairs
--- the coequalizer of f g : A -> B: the quotient Q with `project : B -> Q` identifying f x and g x,
--- and nothing else that a listed map does not already identify
-Coequalizer (A B Q : U) (oQ : Object Q) : { f g : A -> B, project : B -> Q, lift : (D : U) -> (B -> D) -> Q -> D }
-CoequalizerCoequalizes (…) (x : A) : Bool := oQ.eq (project (f x)) (project (g x))
-CoequalizerLifts (…) (D : U) (oD : Object D) (h : { h : B -> D | ... h (f x) = h (g x) ... }) (b : B) : Bool := oD.eq (lift D h (project b)) (h b)
-```
+### 3.6 core/core.lut
 
-[proposed] `Pushout` is declared when a case asks for one: today's gluing of theories over a shared
-sub-theory (algebra.lth's `OrderedField` from `Field` and `OrderedRing` over `CommutativeRing`) is
-realized by the pullback of their model types, which `Pullback` states; the pushout of theories is
-the same fact read from the side of the presentations and has no second model to test. The
-pushforward of measures is probability.lth's (D-2026-10-17-g), bite 8b. Models: `Product` and
-`Coproduct` the kernel's forms and `Bool`, `Maybe` (core.lut, as today); `Equalizer` `Symmetric` as
-the equalizer of `id` and `transpose` (arrays_model.lut), and every subtype `{ x : A | p x }` as
-the equalizer of `p` and `const true` (core.lut, one instance); `Pullback` the join of nodes and
-measurements by id (distance_graph.lut, bite 8b) and `Mat r k` with `Mat k c` over `k`
-(arrays_model.lut); `Coequalizer` `Fin n` as the quotient of `Int` by `x ~ x + n`,
-`project := fn x { x mod n }` (core.lut), where `lift` takes the maps a census lists (7.R4).
+Keeps its content and its claims, renamed per 54f6228's section 3.10 (`NatIsAnOrderedSemiring`,
+`KernelApplies`, `PairsAreTheProduct`, `RecordsAreNamedProducts`, `SumsAreNamedCoproducts`,
+`BoolIsABooleanAlgebra` with `TopIsTheFirstBranch`, `ListIsTheFreeMonoid` over lists.lut's model),
+and gains the claims that bind the per-concept names at the kernel's types (L2.8): `IntIsASemiring`,
+`IntIsACommutativeRing`, `IntIsOrdered`, `NatIsOrdered`, `FloatIsOrdered` (on `Moderate`, through
+numbers.lth's reading of `<=`: [proposed] the `Order` of `Float64` is claimed in core.lut since
+`Float64` is core's, the within-bound semiring in numbers.lth where the doubles' laws are),
+`StringIsAMonoid`, `IntIsAMetric` (`|a - b|` on `Small`), `BoolIsAMetric`, `FinIsACoequalizer`,
+`SubtypeIsAnEqualizer`, `UnitIsTerminal`, `EmptyIsInitial`, `BoolIsACoproduct`, `MaybeIsACoproduct`.
+Each claim is the binding rule 2.2.1 reads for its structure at its type. `CoreData` names them all;
+`core_laws.test.lut` runs them; the store is `core.cert.json`.
 
-### 3.10 core/core.lut
+### 3.7 core/lists.lut
 
-Keeps its content (the data, the primitives, the operators) and gains every claim of the kernel's
-own types and forms, which kernel_models.lut held (D-2026-10-14-b read to the end: core claims its
-models, and the kernel's forms are the interpreter's): `structural` replaces `structuralEquality`
-(now in equality.lth); `naturals` becomes `NatIsAnOrderedSemiring : Bool := OrderedSemiring Nat
-(structural Nat) { semiring := {...}, leq := fn a b { a <= b } }`; `application`, `pairs`,
-`recordXY`, `sumAB` become `KernelApplies`, `PairsAreTheProduct`, `RecordsAreNamedProducts`,
-`SumsAreNamedCoproducts`, each `: Bool := Theory ... { model }`. The data claims are rewritten over
-the new heads: `BoolIsABooleanAlgebra` (with `TopIsTheFirstBranch` kept here as `Bool`'s own law),
-`BoolIsACoproduct`, `MaybeIsACoproduct`, `ListIsTheFreeMonoid` (with `append` and `fold` imported
-from lists.lut), `UnitIsTerminal`, `EmptyIsInitial`. Added, since core defines these types (L2.8):
-`IntIsACommutativeRing`, `IntIsTotallyOrdered` (numbers_model.lut's `integers`), `StringIsAMonoid`
-(numbers_model.lut's `strings`), `SmallIntegersAreAMetric` (`|a - b|` converted), `BoolIsAMetric`
-(the discrete metric), `FinIsACoequalizer`, `SubtypeIsAnEqualizer`. `CoreData` names them all.
-[proposed] The claims are Bool definitions in a .lut, as `UnitIsTerminal` is today; the test
-program `core_laws.test.lut` runs them and the store is `core.cert.json`.
-
-### 3.11 core/lists.lut
+List's models and the functions no structure covers:
 
 ```
-length (A : U) (xs : List A) : Nat
-append (A : U) (xs ys : List A) : List A
-concat (A : U) (xss : List (List A)) : List A
+mapList (A B : U) (f : A -> B) (xs : List A) : List B           -- the body behind the claims; a use writes `map`
+foldList (A M : U) (combine : M -> M -> M) (neutral : M) (f : A -> M) (xs : List A) : M
+lengthList (A : U) (xs : List A) : Nat
+atList (A : U) (xs : List A) (i : Fin (lengthList A xs)) : A
+buildList (A : U) (n : Nat) (f : Fin n -> A) : List A
+appendList (A : U) (xs ys : List A) : List A
+ListIsAFunctor (A B : U) : Bool := Functor List { map := mapList }
+ListIsFoldable : Bool := Foldable List { fold := foldList }
+ListIsIndexed (A : U) : Bool := Indexed (List A) A { size := lengthList A, at := atList A }
+ListIsTabulated (A : U) : Bool := Tabulated (List A) A { build := buildList A }
+ListIsAMonoid (A : U) : Bool := Monoid (List A) { neutral := nil, combine := appendList A }
+operator + := appendList          -- [proposed] at List A; decisions.md, question 5
+-- functions of lists alone
+concat (A : U) (xss : List (List A)) : List A := sum (List (List A)) ... (the monoid's sum)
 reverse (A : U) (xs : List A) : List A
-map (A B : U) (f : A -> B) (xs : List A) : List B
-filter (A : U) (p : A -> Bool) (xs : List A) : List A
-fold (A M : U) (combine : M -> M -> M) (neutral : M) (f : A -> M) (xs : List A) : M     -- to the right, nil -> neutral
-foldl (A M : U) (step : M -> A -> M) (start : M) (xs : List A) : M
-all (A : U) (p : A -> Bool) (xs : List A) : Bool
-any (A : U) (p : A -> Bool) (xs : List A) : Bool
-member (A : U) (o : Object A) (x : A) (xs : List A) : Bool
-lookup (K V : U) (o : Object K) (k : K) (kvs : List (K * V)) : Maybe V
 nth (A : U) (xs : List A) (i : Nat) : Maybe A
-at (A : U) (xs : List A) (i : Fin (length A xs)) : A
 zip (A B : U) (xs : List A) (ys : List B) : List (A * B)
-zipWith (A B C : U) (f : A -> B -> C) (xs : List A) (ys : List B) : List C
 take (A : U) (n : Nat) (xs : List A) : List A
 drop (A : U) (n : Nat) (xs : List A) : List A
 remove (A : U) (o : Object A) (x : A) (xs : List A) : List A
@@ -521,62 +403,47 @@ insertSorted (A : U) (leq : A -> A -> Bool) (x : A) (xs : List A) : List A
 sortBy (A : U) (leq : A -> A -> Bool) (xs : List A) : List A
 isEmpty (A : U) (xs : List A) : Bool
 singleton (A : U) (x : A) : List A
+hammingList : the Hamming distance on `List Bool` of a length, a `Metric` (3.1)
 ```
 
-Its claims, in the file (L2.8): `ListIsAMonoid`, `ListIsAFunctor` (MapId, MapCompose),
-`ListIsFoldable`, `ListIsIndexed` (length, at), `MapKeepsLength` (SizeMap), `AppendAddsLengths`
-(SizeAppend as `Preserving`), `ReverseIsAnInvolution` (Involutive), `FilterKeeps` (LandsIn of every
-entry), `MemberOfAppend`, `LookupOfZip`, `SortIsSorted` and `SortIsAPermutation` (sortBy), and the
-Hamming distance on `List Bool` of a length as a `Metric`. Tests in `lists_laws.test.lut` at
-`List Int` and `List Bool`; controls (`lists_controls.test.lut`): a `map` that drops the last
-entry (refutes SizeMap), an `append` that reverses its second argument (refutes the monoid's
-associativity), a `reverse` that fixes the head (refutes Involutive), a `sortBy` that drops
-duplicates (refutes the permutation law).
+Laws claimed here: `MapKeepsLength` (SizeMap), `AppendAddsLengths` (SizeAppend), `MapId`,
+`MapCompose`, `FoldOfBuild`, `ReverseIsAnInvolution`, `FilterKeeps` (LandsIn), `SortIsSorted`,
+`SortIsAPermutation`; tests in `lists_laws.test.lut`, controls in `lists_controls.test.lut` (a `map`
+that drops the last entry, an `append` that reverses its second argument, a `reverse` that fixes the
+head, a `sortBy` that drops duplicates). The `...List` bodies are the models' and are not names a
+file uses: the core's end counts a `mapList` written elsewhere as a reinvention.
 
-### 3.12 What leaves the library
+### 3.8 What leaves the library
 
-kernel_laws.lth and kernel_models.lut are removed in bite 1 (content moved). laws.lth §2 (the
-`is...` templates) is removed in bite 6: nothing claims them today (check -v lists all twelve
-unclaimed) and properties/ states each. algebra.lth keeps §3 to §5 (`Field`, `OrderedRing`,
-`OrderedField`, `CompleteOrderedField`) rewritten over the core's records and properties, and loses
-§0 to §2 (`Iso`, `AbelianGroup`, `CommutativeRing`, now the core's) and its three `Leq...` subtypes.
+laws.lth §2 (the twelve `is...` templates, all unclaimed) in bite 9; algebra.lth §0 to §2 (`Iso`,
+`AbelianGroup`, `CommutativeRing`, now the core's) and its three `Leq...` subtypes in bite 8, §3 to
+§5 kept over the core (`Field`, `OrderedRing`, `OrderedField`, `CompleteOrderedField`);
+numbers_model.lut's `integers` and `strings` become core.lut's claims; every `import "core/..."` line
+outside the core (bite 1 wrote eleven) in bite 5.
 
-## 4. Metric, bounds and the within-bound claims of numbers.lth
+## 4. The within-bound claims of numbers.lth
 
-`Doubles` claims (bite 5), each a one-line wrapper over `Moderate`:
-
-- exactly: `PlusCommutative`, `TimesCommutative` (Commutative at Float64), `PlusNeutral` (0.0),
-  `TimesNeutral` (1.0), `DivideNeutral` (`x / 1.0 == x`, kept as its own law), `TimesAbsorbing`
-  (0.0), `MinusSelf`, `DivideSelf`, `MinusIsPlusNegated`, `NegateInvolutive` (Involutive of
-  `fn x { 0.0 - x }`), `LeqTotalOrder` (TotalOrder of `leq` at Float64 over Moderate: Reflexive,
-  Antisymmetric by contrapositive, Transitive over `Chain`, Total), `LessIsStrict`,
-  `GreaterIsLessReversed`, `GeqIsLeqReversed`, `UnequalIsNotEqual`, `PlusMonotone` and
-  `TimesMonotone` (MonotoneIn), `EpsilonIsTheUlpOfOne`;
-- within a bound: `PlusAssociativeWithin` with `bound := fn x y z { 3.0 * gamma2 * (abs x + abs y + abs z) }`,
-  where `gamma2 := 2.0 * u / (1.0 - 2.0 * u)`, `u := epsilon / 2.0` (Higham 2002, Lemma 3.1: each
-  side is within `gamma2 (|x| + |y| + |z|)` of the exact sum, so their difference is within twice
-  that; measuring the difference in floating point and summing the magnitudes in floating point
-  each add a factor `(1 + u)`, and `2 (1 + u)^3 < 3`). [proposed] The constant 3 rounds the
-  derivation up; D-2026-10-17-f writes `gamma2` alone, which the control run of the first
-  certification will confirm or refute (decisions.md, note 3). `TimesAssociativeWithin` with the
-  same form over `|x y z|`: `bound := fn x y z { 3.0 * gamma2 * abs (x * y * z) }`;
-  `TimesDistributiveWithin` over `|x| (|y| + |z|)`; `DivideInvertsWithin` (`x * (1 / x)` within
-  `2 u` of 1, `x : Positive`). Each bound names its source in the file (L9.7, provable by citation);
-  the law stays Boolean and tested.
-- the realization of the absolute distance: `absDistance` on `Moderate` as a `MetricWithin` with
-  `bound := fn a b { u * absDistance a b }` (section 3.5).
-
-`within tol a b` and `withinOf tol scale a b` (numbers.lth) become `Ball Float64 absDistance (fn a b
-{ tol * (1.0 + abs a + abs b) }) a b` and `Ball Float64 absDistance (fn a b { tol * scale }) a b`; the
-two names stay in numbers.lth as abbreviations with those bodies (every importer keeps working;
-the bodies say what they are). `exact : Tolerance := 0.0` stays (arrays.lth) with `Ball` at radius
-zero equal to `pointwise` equality, a law (`ExactBallIsEquality`) that claims it.
+As in 54f6228's section 4, with per-concept names: `Doubles` keeps its record (the machine's
+operations are what numbers.lth is about, 11.S4) and claims, over `Moderate`, `Commutative` on
+`plus` and `times`, `Neutral` on `plus`/`0.0` and `times`/`1.0`, `Absorbing` on `times`/`0.0` (one
+side), `Involutive` on negation, `Order` on `leq` (through core.lut's `FloatIsOrdered`), `MonotoneIn`
+on `plus` and on `times` by a non-negative, and within a bound `AssociativeWithin` on `plus` with
+`bound := fn x y z { 3.0 * gamma2 * (abs x + abs y + abs z) }` (`gamma2 := 2 u / (1 - 2 u)`, `u :=
+epsilon / 2`; Higham 2002, Lemma 3.1, each side within `gamma2` of the exact sum, twice for the
+difference, `(1 + u)^3` for measuring it, rounded up to 3; D-2026-10-17-f writes `gamma2` alone and
+bite 2's instance already certified the 3-gamma2 form, report-bite-2.md), `AssociativeWithin` on
+`times` over `|x y z|`, `DistributiveWithin` over `|x| (|y| + |z|)`, `InvertibleWithin` on
+`divide` (`x * (1 / x)` within `2 u` of one); `absDistance` a `MetricWithin`. The doubles do not
+claim `Semiring` (they are not one, 11.S15): `plus` and `times` at `Float64` resolve to `Doubles`'
+fields through numbers.lth's claim `DoublesHaveTheOperations : Bool := Doubles { plus := floatPlus,
+... }` [proposed], so a law written with `plus` reads at `Float64` too, with the within-bound laws
+as its evidence. `within tol a b` and `withinOf tol scale a b` keep their names, defined by `Ball`.
 
 ## 5. The migration map
 
-Every law and helper of today's library that the new core replaces. Old file paths are under
-`src/luthier/lib/` unless written otherwise; new ones under `src/luthier/lib/core/`. "wrapper" means
-the theory keeps a one-line law of the new name applying the property named. Checked by:
+Every law and helper of today's library that the new core replaces, by concept. Old file paths are
+under `src/luthier/lib/` unless written otherwise. "wrapper" means the theory keeps a one-line law
+of the new name applying the property. Checked by:
 
 ```
 cd /home/lmoffatt/Projects/luthier && awk -F'|' '/^\| `/ { print $2 }' record/plan/core-2026-10-17/execution.md \
@@ -584,428 +451,354 @@ cd /home/lmoffatt/Projects/luthier && awk -F'|' '/^\| `/ { print $2 }' record/pl
   grep -rqE "^$n[ (:]|^$n\$" src/luthier/lib examples tests/tester || echo "MISSING $n"; done
 ```
 
-(at ca90ee8 the command prints nothing: every old name is defined at the top level of some file).
-Names defined in several files are one row per file, or one row naming the files.
+(at d280a18 the command prints nothing). Rows of names that bite 1 moved unchanged
+(kernel_laws.lth's, now in lib/core/structures/) give their present file.
 
 ### 5.1 Laws and theories
 
 | old name | old file | new name | new file | note |
 |---|---|---|---|---|
-| `Object` | kernel_laws.lth | `Object` | structures/equality.lth | laws by `Equivalence` |
-| `EqualPair` | kernel_laws.lth | `EqualPair` := `Related A o.eq` | structures/equality.lth | |
-| `EqualChain` | kernel_laws.lth | `Chain A o.eq` | properties/relations.lth | |
-| `Reflexive` | kernel_laws.lth | `Reflexive` | properties/relations.lth | over a relation |
-| `Symmetric` | kernel_laws.lth | `Symmetric` | properties/relations.lth | |
-| `Transitive` | kernel_laws.lth | `Transitive` | properties/relations.lth | |
-| `hasStructuralEquality` | kernel_laws.lth | same | structures/equality.lth | |
-| `Concrete` | kernel_laws.lth | `Concrete` | structures/equality.lth | importers: generators.lth, world.lth, generators_model.lut, 3 test programs, tests/test_run.py |
-| `Structural` | kernel_laws.lth | `Structural` | structures/equality.lth | |
-| `asObject` | kernel_laws.lth | removed | | `Structural` and `Object` share the field; `structural` gives the value |
-| `StructuralReflexive` | kernel_laws.lth | `StructuralEquivalence` | structures/equality.lth | |
-| `StructuralSymmetric` | kernel_laws.lth | `StructuralEquivalence` | structures/equality.lth | |
-| `StructuralTransitive` | kernel_laws.lth | `StructuralEquivalence` | structures/equality.lth | |
-| `Substitutive` | kernel_laws.lth | `Substitutive` | structures/equality.lth | |
-| `structuralEquality` | kernel_models.lut | `structural` | structures/equality.lth | |
-| `Terminal` | kernel_laws.lth | `Terminal` | structures/universal.lth | |
-| `OnlyThePoint` | kernel_laws.lth | `OnlyThePoint` | structures/universal.lth | |
-| `Initial` | kernel_laws.lth | `Initial` | structures/universal.lth | |
-| `NoValue` | kernel_laws.lth | `NoValue` | structures/universal.lth | |
-| `BooleanAlgebra` | kernel_laws.lth | `BooleanAlgebra` | structures/algebraic.lth | with `(o : Object B)` |
-| `MeetCommutes` | kernel_laws.lth | `MeetCommutative` wrapper of `Commutative` | structures/algebraic.lth, properties/operations.lth | |
-| `JoinCommutes` | kernel_laws.lth | `JoinCommutative` wrapper of `Commutative` | structures/algebraic.lth | |
-| `MeetIdentity` | kernel_laws.lth | `MeetNeutral` wrapper of `Neutral` | structures/algebraic.lth | |
-| `JoinIdentity` | kernel_laws.lth | `JoinNeutral` wrapper of `Neutral` | structures/algebraic.lth | |
-| `MeetDistributes` | kernel_laws.lth | `MeetDistributive` wrapper of `Distributive` | structures/algebraic.lth | |
-| `JoinDistributes` | kernel_laws.lth | `JoinDistributive` wrapper of `Distributive` | structures/algebraic.lth | |
-| `MeetComplement` | kernel_laws.lth | `MeetComplemented` wrapper of `Complemented` | structures/algebraic.lth | |
-| `JoinComplement` | kernel_laws.lth | `JoinComplemented` wrapper of `Complemented` | structures/algebraic.lth | |
-| `TopIsNotBottom` | kernel_laws.lth | `TopDistinct` wrapper of `Distinct` | structures/algebraic.lth | |
-| `TheBooleans` | kernel_laws.lth | removed | | `BoolIsABooleanAlgebra` in core.lut claims the algebra |
-| `TopIsTheFirstBranch` | kernel_laws.lth | `TopIsTheFirstBranch` | core.lut | Bool's own law (L2.8) |
-| `Monoid` | kernel_laws.lth | `Monoid` | structures/algebraic.lth | with `(o : Object A)`; importer numbers_model.lut |
-| `LeftNeutral` | kernel_laws.lth | `LeftNeutral` | properties/operations.lth | |
-| `RightNeutral` | kernel_laws.lth | `RightNeutral` | properties/operations.lth | |
-| `Associative` | kernel_laws.lth | `Associative` | properties/operations.lth | over an operation, not a monoid |
-| `FreeMonoid` | kernel_laws.lth | `FreeMonoid` | structures/universal.lth | `fold` takes the monoid's data |
-| `asMonoid` | kernel_laws.lth | removed | | the claim passes `{ neutral, combine }` |
-| `IsMonoid` | kernel_laws.lth | `FreeMonoidIsAMonoid` wrapper of `Monoid` | structures/universal.lth | |
-| `FoldNeutral` | kernel_laws.lth | `FoldNeutral` | structures/universal.lth | |
-| `FoldInject` | kernel_laws.lth | `FoldInject` | structures/universal.lth | |
-| `FoldCombine` | kernel_laws.lth | `FoldCombine` | structures/universal.lth | |
-| `FoldIsItself` | kernel_laws.lth | `FoldIsItself` | structures/universal.lth | |
-| `Lists` | kernel_laws.lth | removed | | `ListIsTheFreeMonoid` (core.lut) claims `FreeMonoid` with `nil`, `cons` |
-| `NilIsNeutral` | kernel_laws.lth | `NilIsNeutral` | core.lut | |
-| `ConsIsInjectionCombined` | kernel_laws.lth | `ConsIsInjectionCombined` | core.lut | |
-| `OrderedSemiring` | kernel_laws.lth | `OrderedSemiring` | structures/order.lth | |
-| `PlusAssociative` | kernel_laws.lth | `Semiring`'s `PlusAssociative` wrapper | structures/algebraic.lth | |
-| `PlusCommutes` | kernel_laws.lth | `PlusCommutative` wrapper | structures/algebraic.lth | |
-| `PlusZero` | kernel_laws.lth | `PlusNeutral` wrapper | structures/algebraic.lth | |
-| `TimesAssociative` | kernel_laws.lth | `TimesAssociative` wrapper | structures/algebraic.lth | |
-| `TimesCommutes` | kernel_laws.lth | `TimesCommutative` wrapper | structures/algebraic.lth | |
-| `TimesOne` | kernel_laws.lth | `TimesNeutral` wrapper | structures/algebraic.lth | |
-| `TimesDistributes` | kernel_laws.lth | `TimesDistributive` wrapper | structures/algebraic.lth | |
-| `TimesZero` | kernel_laws.lth | `TimesAbsorbing` wrapper | structures/algebraic.lth | |
-| `LeqPair` | kernel_laws.lth | `Related S s.leq` | properties/relations.lth | |
-| `LeqChain` | kernel_laws.lth | `Chain S s.leq` | properties/relations.lth | |
-| `LeqBoth` | kernel_laws.lth | removed | | antisymmetry by contrapositive |
-| `LeqTotal` | kernel_laws.lth | `OrderedSemiringTotalOrder` wrapper of `TotalOrder` | structures/order.lth | |
-| `LeqAntisymmetric` | kernel_laws.lth | same wrapper (`Antisymmetric`) | structures/order.lth | |
-| `LeqTransitive` | kernel_laws.lth | same wrapper (`Transitive`) | structures/order.lth | |
-| `PlusMonotone` | kernel_laws.lth | `OrderedSemiringPlusMonotone` wrapper of `MonotoneIn` | structures/order.lth | |
-| `ZeroLeast` | kernel_laws.lth | `OrderedSemiringZeroLeast` wrapper of `Least` | structures/order.lth | |
-| `OneIsNotZero` | kernel_laws.lth | `OneDistinct` wrapper of `Distinct` | structures/algebraic.lth | |
-| `SuccessorIsNext` | kernel_laws.lth | `OrderedSemiringDiscrete` wrapper of `Discrete` | structures/order.lth | |
-| `naturals` | kernel_models.lut | `NatIsAnOrderedSemiring` | core.lut | |
-| `Exponential`, `Beta` | kernel_laws.lth | same | structures/universal.lth | |
-| `Product`, `PairFst`, `PairSnd`, `Pairing` | kernel_laws.lth | same | structures/universal.lth | |
-| `Coproduct`, `CaseLeft`, `CaseRight`, `CasesAreAll` | kernel_laws.lth | same | structures/universal.lth | |
-| `Selected`, `one`, `two` | kernel_laws.lth | same | structures/universal.lth | |
-| `NamedProduct`, `asProduct`, `NamedPairs`, `ProjectionNamesDistinct`, `SelectByName` | kernel_laws.lth | same | structures/universal.lth | |
-| `NamedCoproduct`, `asCoproduct`, `NamedCases`, `InjectionNamesDistinct`, `LabelByName` | kernel_laws.lth | same | structures/universal.lth | |
-| `application` | kernel_models.lut | `KernelApplies` | core.lut | |
-| `pairs` | kernel_models.lut | `PairsAreTheProduct` | core.lut | |
-| `recordXY` | kernel_models.lut | `RecordsAreNamedProducts` | core.lut | |
-| `sumAB` | kernel_models.lut | `SumsAreNamedCoproducts` | core.lut | |
-| `Iso` | algebra.lth | `Isomorphism` | properties/functions.lth | a predicate on (to, from); positions.lut's `layout` becomes two functions and a claim; tests sonolocalizacion_* |
-| `FromUndoesTo` | algebra.lth | `Inverse A B oA to from` | properties/functions.lth | |
-| `ToUndoesFrom` | algebra.lth | `Inverse B A oB from to` | properties/functions.lth | |
-| `AbelianGroup` | algebra.lth | `AbelianGroup` | structures/algebraic.lth | |
-| `GroupIsMonoid` | algebra.lth | `GroupAssociative`, `GroupNeutral` wrappers | structures/algebraic.lth | |
-| `GroupCommutes` | algebra.lth | `GroupCommutative` wrapper | structures/algebraic.lth | |
-| `GroupInverse` | algebra.lth | `GroupInvertible` wrapper of `Invertible` | structures/algebraic.lth | |
-| `CommutativeRing` | algebra.lth | `CommutativeRing` | structures/algebraic.lth | a flat record |
-| `zeroOf`, `oneOf`, `plusOf`, `timesOf`, `negateOf` | algebra.lth | removed | | the record is flat: `r.zero`, `r.plus` |
-| `RingAdds` | algebra.lth | `Ring`'s plus wrappers (`AbelianGroup`) | structures/algebraic.lth | |
-| `RingMultiplies` | algebra.lth | `Ring`'s times wrappers (`Monoid`) | structures/algebraic.lth | |
-| `TimesCommutes` | algebra.lth | `TimesCommutative` wrapper | structures/algebraic.lth | |
-| `Distributes` | algebra.lth | `TimesDistributive` wrapper of `Distributive` | structures/algebraic.lth | |
-| `OneIsNotZero` | algebra.lth | `OneDistinct` wrapper of `Distinct` | structures/algebraic.lth | |
-| `Field`, `Reciprocal` | algebra.lth | stay | algebra.lth | over `CommutativeRing` of the core |
-| `OrderedRing` | algebra.lth | stays | algebra.lth | laws by `TotalOrder`, `MonotoneIn`, `PositiveClosed` |
-| `LeqPair`, `LeqChain`, `LeqBoth`, `NonNegativePair` | algebra.lth | `Related`, `Chain`, removed, `NonNegativePair` | properties/relations.lth, structures/order.lth | |
-| `LeqTotal`, `LeqAntisymmetric`, `LeqTransitive` | algebra.lth | `OrderedRingTotalOrder` wrapper of `TotalOrder` | algebra.lth | |
-| `PlusMonotone` | algebra.lth | `OrderedRingPlusMonotone` wrapper of `MonotoneIn` | algebra.lth | |
-| `TimesPositive` | algebra.lth | `OrderedRingPositiveClosed` wrapper of `PositiveClosed` | algebra.lth | |
-| `OrderedField`, `FieldIsOrdered` | algebra.lth | stay | algebra.lth | `FieldIsOrdered` passes the ordered ring built in the law, as today |
-| `CompleteOrderedField`, `SupIsUpperBound`, `SupIsLeast` | algebra.lth | stay | algebra.lth | |
-| `integers` | numbers_model.lut | `IntIsACommutativeRing`, `IntIsTotallyOrdered` | core.lut | numbers_model.lut keeps `integers : OrderedRing Int` as a value for the field's laws only if a law needs it; else removed |
-| `strings` | numbers_model.lut | `StringIsAMonoid` | core.lut | |
-| `PlusCommutes` | numbers.lth | `PlusCommutative` wrapper of `Commutative` | numbers.lth | test lines in numbers_laws, numbers_controls, test_certify.py:388-396, test_run.py:657 |
-| `TimesCommutes` | numbers.lth | `TimesCommutative` wrapper | numbers.lth | |
-| `PlusZero` | numbers.lth | `PlusNeutral` wrapper of `Neutral` | numbers.lth | |
-| `TimesOne` | numbers.lth | `TimesNeutral` wrapper | numbers.lth | |
-| `TimesZero` | numbers.lth | `TimesAbsorbing` wrapper of `Absorbing` | numbers.lth | one side: doubles have `x * 0.0 == 0.0`; the wrapper states the side it claims |
-| `NegateTwice` | numbers.lth | `NegateInvolutive` wrapper of `Involutive` | numbers.lth | |
-| `LeqPair`, `LeqChain` | numbers.lth | `Related`, `Chain` | properties/relations.lth | |
-| `LeqReflexive`, `LeqTotal`, `LeqAntisymmetric`, `LeqTransitive` | numbers.lth | `LeqTotalOrder` wrapper of `TotalOrder` | numbers.lth | |
-| `PlusMonotone`, `TimesMonotone` | numbers.lth | wrappers of `MonotoneIn` | numbers.lth | |
-| `SqrtMonotone` | numbers.lth | `SqrtMonotone` wrapper of `Monotone` | numbers.lth | `doublesOrder` stays as the relation passed |
-| `SqrtSquares`, `ExpOfLog`, `LogOfExp`, `ExpAdds`, `LogMultiplies` | numbers.lth | stay, over `Ball` | numbers.lth | `within` keeps its name as the ball's abbreviation |
-| `Tolerance` | numbers.lth | `Tolerance` | structures/equality.lth | importers: arrays, probability, belief, optimization, generators, distances.lut, test programs |
-| `abs` | numbers.lth | `abs` | structures/equality.lth | |
+| `Object`, `EqualPair`, `Reflexive`, `Symmetric`, `Transitive` (of Object) | core/structures/equality.lth | `Object`, `EqualPair`; `ObjectEquivalence` wrapper of `Equivalence` | core/structures/equality.lth | the relation properties are bite 2's |
+| `EqualChain` | core/structures/equality.lth | `Chain A o.eq` | core/properties/relations.lth | |
+| `hasStructuralEquality`, `Concrete`, `Structural`, `Substitutive` | core/structures/equality.lth | same | core/structures/equality.lth | |
+| `asObject`, `StructuralReflexive`, `StructuralSymmetric`, `StructuralTransitive` | core/structures/equality.lth | removed; `StructuralEquivalence` | core/structures/equality.lth | |
+| `structuralEquality` | core/core.lut | `structural` | core/structures/equality.lth | |
+| `Terminal`, `OnlyThePoint`, `Initial`, `NoValue` | core/structures/universal.lth | same | core/structures/universal.lth | |
+| `BooleanAlgebra` | core/structures/algebraic.lth | `BooleanAlgebra` with `(o : Object B)` | core/structures/algebraic.lth | |
+| `MeetCommutes`, `JoinCommutes` | core/structures/algebraic.lth | `MeetCommutative`, `JoinCommutative` wrappers of `Commutative` | core/structures/algebraic.lth | |
+| `MeetIdentity`, `JoinIdentity` | core/structures/algebraic.lth | `MeetNeutral`, `JoinNeutral` wrappers of `Neutral` | core/structures/algebraic.lth | |
+| `MeetDistributes`, `JoinDistributes` | core/structures/algebraic.lth | `MeetDistributive`, `JoinDistributive` wrappers of `Distributive` | core/structures/algebraic.lth | |
+| `MeetComplement`, `JoinComplement` | core/structures/algebraic.lth | `MeetComplemented`, `JoinComplemented` wrappers of `Complemented` | core/structures/algebraic.lth | |
+| `TopIsNotBottom` | core/structures/algebraic.lth | `TopDistinct` wrapper of `Distinct` | core/structures/algebraic.lth | |
+| `TheBooleans` | core/structures/algebraic.lth | removed | | `BoolIsABooleanAlgebra` (core.lut) claims the algebra |
+| `TopIsTheFirstBranch` | core/structures/algebraic.lth | `TopIsTheFirstBranch` | core/core.lut | Bool's own law (L2.8) |
+| `Monoid` | core/structures/algebraic.lth | `Monoid` with `(o : Object A)`; fields `neutral`, `combine` | core/structures/algebraic.lth | importers algebra.lth, numbers_model.lut, universal.lth |
+| `LeftNeutral`, `RightNeutral`, `Associative` (of Monoid) | core/structures/algebraic.lth | `MonoidNeutral`, `MonoidAssociative` wrappers of bite 2's `Neutral`, `Associative` | core/structures/algebraic.lth | the three names of bite 1's file collide with properties/operations.lth's and go |
+| `FreeMonoid`, `asMonoid`, `IsMonoid` | core/structures/universal.lth | `FreeMonoid (A) (F) (o)` over `Foldable F`; `FreeMonoidIsAMonoid` | core/structures/universal.lth | one `fold` in the core |
+| `FoldNeutral`, `FoldInject`, `FoldCombine`, `FoldIsItself` | core/structures/universal.lth | same, over `foldable.fold` | core/structures/universal.lth | |
+| `Lists`, `NilIsNeutral`, `ConsIsInjectionCombined` | core/structures/universal.lth | removed; `NilIsNeutral`, `ConsIsInjectionCombined` | core/core.lut | List's own laws |
+| `OrderedSemiring` and its laws (`PlusAssociative`, `PlusCommutes`, `PlusZero`, `TimesAssociative`, `TimesCommutes`, `TimesOne`, `TimesDistributes`, `TimesZero`, `LeqTotal`, `LeqAntisymmetric`, `LeqTransitive`, `PlusMonotone`, `ZeroLeast`, `OneIsNotZero`, `SuccessorIsNext`) | core/structures/algebraic.lth | `Semiring`'s wrappers (`PlusCommutative`, `PlusNeutral`, `TimesNeutral`, `TimesDistributive`, `TimesAbsorbing`, `OneDistinct`) and `OrderedSemiring`'s (`OrderIsTotal`, `OrderedSemiringPlusMonotone`, `OrderedSemiringZeroLeast`, `OrderedSemiringDiscrete`) | core/structures/algebraic.lth, order.lth | |
+| `LeqPair`, `LeqChain`, `LeqBoth` | core/structures/algebraic.lth | `Related`, `Chain`; removed | core/properties/relations.lth | |
+| `naturals` | core/core.lut | `NatIsAnOrderedSemiring` | core/core.lut | |
+| `Exponential`, `Beta`, `Product`, `PairFst`, `PairSnd`, `Pairing`, `Coproduct`, `CaseLeft`, `CaseRight`, `CasesAreAll`, `Selected`, `one`, `two`, `NamedProduct`, `asProduct`, `NamedPairs`, `ProjectionNamesDistinct`, `SelectByName`, `NamedCoproduct`, `asCoproduct`, `NamedCases`, `InjectionNamesDistinct`, `LabelByName` | core/structures/universal.lth | same | core/structures/universal.lth | |
+| `application`, `pairs`, `recordXY`, `sumAB` | core/core.lut | `KernelApplies`, `PairsAreTheProduct`, `RecordsAreNamedProducts`, `SumsAreNamedCoproducts` | core/core.lut | |
+| `Iso`, `FromUndoesTo`, `ToUndoesFrom` | algebra.lth | `Isomorphism`, `Inverse` | core/properties/functions.lth (bite 2) | positions.lut's `layout` becomes `flatten`, `unflatten` and a claim; tests sonolocalizacion_* |
+| `AbelianGroup`, `GroupIsMonoid`, `GroupCommutes`, `GroupInverse` | algebra.lth | `AbelianGroup` and its wrappers (`GroupInvertible` of `Invertible`) | core/structures/algebraic.lth | |
+| `CommutativeRing`, `RingAdds`, `RingMultiplies`, `TimesCommutes`, `Distributes`, `OneIsNotZero` | algebra.lth | `CommutativeRing` and its wrappers | core/structures/algebraic.lth | |
+| `zeroOf`, `oneOf`, `plusOf`, `timesOf`, `negateOf` | algebra.lth | `zero`, `one`, `plus`, `times`, `negate` | core/structures/algebraic.lth | the fields, resolved by type |
+| `Field`, `Reciprocal`, `OrderedRing`, `OrderedField`, `FieldIsOrdered`, `CompleteOrderedField`, `SupIsUpperBound`, `SupIsLeast` | algebra.lth | stay, over the core's records | algebra.lth | |
+| `LeqPair`, `LeqChain`, `LeqBoth`, `NonNegativePair`, `LeqTotal`, `LeqAntisymmetric`, `LeqTransitive`, `PlusMonotone`, `TimesPositive` | algebra.lth | `Related`, `Chain`, removed, `NonNegativePair`; `OrderedRingIsOrdered` wrapper of `Order`, `OrderedRingPlusMonotone` of `MonotoneIn`, `OrderedRingPositiveClosed` of `PositiveClosed` | core/properties/relations.lth, core/structures/order.lth, algebra.lth | |
+| `integers`, `strings` | numbers_model.lut | `IntIsACommutativeRing`, `IntIsOrdered`, `StringIsAMonoid` | core/core.lut | |
+| `PlusCommutes`, `TimesCommutes` | numbers.lth | `PlusCommutative`, `TimesCommutative` wrappers of `Commutative` | numbers.lth | test lines numbers_laws, numbers_controls; tests/test_certify.py:388-433, test_run.py:654-688, test_tester.py:28-31 |
+| `PlusZero`, `TimesOne`, `TimesZero`, `NegateTwice` | numbers.lth | `PlusNeutral`, `TimesNeutral`, `TimesAbsorbing`, `NegateInvolutive` wrappers | numbers.lth | |
+| `LeqPair`, `LeqChain`, `LeqReflexive`, `LeqTotal`, `LeqAntisymmetric`, `LeqTransitive` | numbers.lth | `Related`, `Chain`; `FloatIsOrdered` (core.lut) claims `Order` | core/properties/relations.lth, core/core.lut | |
+| `PlusMonotone`, `TimesMonotone`, `SqrtMonotone` | numbers.lth | wrappers of `MonotoneIn`, `Monotone` | numbers.lth | |
+| `doublesOrder` | numbers.lth | `Float64`'s `Order` (core.lut) | core/core.lut | |
+| `Tolerance`, `abs` | numbers.lth | `Tolerance`, `abs` | core/structures/equality.lth | prelude: the import lines of arrays, probability, belief, optimization, generators, distances.lut and the test programs go |
 | `within`, `withinOf` | numbers.lth | stay, defined by `Ball` | numbers.lth | |
-| `Metric`, `WithinBounds`, `Grows`, `StartsAtLo`, `LinearMetric`, `LogMetric` and their laws | generators.lth | `Placement`, `LinearPlacement`, `LogPlacement` | generators.lth | frees the name (decisions.md, question 2); importers test.lth (`SampledMode`), generators_model.lut, program.lth's comment |
-| `Sized`, `SizeBounded` | generators.lth | `SizedGenerator`, `SizeBounded` | generators.lth | frees `Sized` for containers.lth |
-| `Enumeration` | generators.lth | stays | generators.lth | |
-| `isReflexive` … `isHomomorphism` (12 templates) | laws.lth | removed | | properties/ states each; all 12 unclaimed today |
-| `CombineCommutes`, `CombineAssociates` | laws.lth | `CombineCommutative`, `CombineAssociative` wrappers | laws.lth | `Settling`'s |
-| `CombineCommutes` | certification.lth | `CombineCommutative` wrapper | certification.lth | `Regioning`'s; test lines regions_laws:98, regions_controls:130, test_certify.py:1084 |
+| `Metric`, `WithinBounds`, `Grows`, `StartsAtLo`, `Translates`, `WithinAnyBounds`, `LinearMetric`, `LinearTranslates`, `LinearWithinAny`, `Scales`, `LogMetric`, `LogScales` | generators.lth | `Placement`, `LinearPlacement`, `LogPlacement` and their laws | generators.lth | decisions.md, question 2 (open); `test.lth`'s `SampledMode`, generators_model.lut, program.lth:328 |
+| `Sized`, `SizeBounded` | generators.lth | `SizedGenerator`, `SizeBounded` | generators.lth | frees nothing now (containers' `Sized` is gone: `Indexed` carries `size`), kept for the clash with the concept's name |
+| `isReflexive` … `isHomomorphism` (12 templates) | laws.lth | removed | | properties/ states each |
+| `CombineCommutes`, `CombineAssociates` | laws.lth | `CombineCommutative`, `CombineAssociative` wrappers | laws.lth | |
+| `CombineCommutes` | certification.lth | `CombineCommutative` wrapper | certification.lth | test lines regions_laws:98, regions_controls:130, tests/test_certify.py:1084 |
 | `OwnIsIdempotent` | world.lth | wrapper of `Idempotent` (functions) | world.lth | |
 | `CanonIdempotent`, `UnqualifyIdempotent` | term.lth | wrappers of `Idempotent` (functions) | term.lth | |
-| `AddPointwise` … `MscalePointwise` (7) | arrays.lth | wrappers of `Pointwise`/`Pointwise2` with `pointwise` equality | arrays.lth | `approxVec exact` becomes the container's `Object` |
+| `AddPointwise`, `SubPointwise`, `ScalePointwise`, `TransposePointwise`, `MaddPointwise`, `MsubPointwise`, `MscalePointwise` | arrays.lth | wrappers of `Pointwise` with `pointwise` equality | arrays.lth | |
 | `DotSymmetric` | arrays.lth | `DotCommutative` wrapper of `Commutative` | arrays.lth | |
-| `DotAgrees`, `MatVecAgrees`, `MatMulAgrees`, `TraceAgrees` | arrays.lth | stay, over `Ball`/`entrywiseBall` with the radius from `absSumTo` | arrays.lth | an equality of two functions within a bound (`PointwiseWithin`) |
-| `MatMulIdentity` | arrays.lth | `MatMulNeutral` wrapper of `Neutral` on square matrices | arrays.lth | the rectangular case stays a law of its own |
-| `PinvSymmetric`, `PrecisionSymmetric`, `PosteriorInfoSymmetric`, `InfoSymmetric`, `StepMatrixSymmetric` | arrays, belief, probability, optimization | wrappers of `Ball` against the transpose | same files | a matrix in the ball of its transpose |
-| `approxVec`, `approxMat`, `approxMatSlack`, `approxMatOf`, `approxMatSlackOf` | arrays.lth | `Ball`/`entrywiseBall` of `supDistance absDistance` with the radius named | structures/equality.lth, containers.lth | arrays.lth keeps `approxVec tol`, `approxMat tol` as abbreviations with those bodies; the `Of`/`Slack` forms become radius functions at the call |
-| `Symmetric` | arrays.lth | `Symmetric` the equalizer of `id` and `transpose` | arrays.lth, arrays_model.lut | the subtype stays; `SymmetricIsAnEqualizer` claims `Equalizer` |
-| `KolmogorovOfMultiset` | probability.lth | wrapper of `Congruent` (reverse) | probability.lth | |
-| `KolmogorovAgrees` | probability.lth | wrapper of `Pointwise` | probability.lth | exact |
-| `forallBelow`, `existsBelow`, `forallPairs`, `forallPairs2`, `countBelow`, `foldWith`, `foldFrom` | arrays.lth | same names | structures/containers.lth | importers: tables, probability, generators_model, distances, positions, distance_graph |
-| `larger` | probability.lth | `larger` | structures/equality.lth | |
-| `NonNegativeFloat` | grammar.lth | `NonNegativeFloat` | structures/equality.lth | grammar.lth imports it (bite 7) |
+| `DotAgrees`, `MatVecAgrees`, `MatMulAgrees`, `TraceAgrees` | arrays.lth | stay, over `PointwiseWithin`/`entrywiseBall` with the radius from `absSumTo` | arrays.lth | |
+| `MatMulIdentity` | arrays.lth | `MatMulNeutral` wrapper of `Neutral` on square matrices; the rectangular case its own law | arrays.lth | |
+| `PinvSymmetric`, `PrecisionSymmetric`, `PosteriorInfoSymmetric`, `InfoSymmetric`, `StepMatrixSymmetric` | arrays, belief, probability, optimization | wrappers of `Ball` against `transpose` | same files | |
+| `approxVec`, `approxMat`, `approxMatSlack`, `approxMatOf`, `approxMatSlackOf` | arrays.lth | `Ball`/`entrywiseBall` of `supDistance absDistance`; `approxVec tol`, `approxMat tol` kept as abbreviations | core/structures/equality.lth, containers.lth, arrays.lth | |
+| `Symmetric` | arrays.lth | `Symmetric` the equalizer of `id` and `transpose` (`SymmetricIsAnEqualizer`) | arrays.lth, arrays_model.lut | |
+| `KolmogorovOfMultiset`, `KolmogorovAgrees` | probability.lth | wrappers of `Congruent`, `Pointwise` | probability.lth | |
+| `forallBelow`, `existsBelow`, `forallPairs`, `forallPairs2`, `countBelow`, `foldWith`, `foldFrom` | arrays.lth | same names | core/structures/containers.lth | prelude: the import lines go |
+| `larger` | probability.lth | `larger` | core/structures/equality.lth | |
+| `NonNegativeFloat` | grammar.lth | `NonNegativeFloat` | core/structures/equality.lth | |
 
-### 5.2 Helpers the list library replaces
+### 5.2 Helpers the concepts replace
 
 Generated by `grep -nE "^(all|any|append|member|lookup|concat|lengthOf)[A-Za-z0-9_]* " src/luthier/lib/*.lth
-src/luthier/lib/*.lut examples/sonolocalizacion/*.lut` (104 lines) plus the names found by hand
-(`listLength`, `distinct`, `noDuplicates`, `memberOf`, `allOf`, `upTo`, `nth`, `remove`,
-`removeAll`, `isEmpty`, `isEmptyList`, `isOneElement`, `insertSorted`, `sortedValues`,
-`reverseOnto`, `mapList`, `appendList`, `foldInto`). Each old name becomes a call of the new name
-with the local predicate or key, unless the note says it keeps its name.
+src/luthier/lib/*.lut examples/sonolocalizacion/*.lut` (104 lines at ca90ee8) plus the names found by
+hand. The new name is the concept's, resolved at `List` (section 2); a row says which concept.
 
-| old name | old file | new name | new file | note |
+| old name | old file | new name | concept | note |
 |---|---|---|---|---|
-| `appendList`, `foldInto` | core.lut | `append`, `fold` | lists.lut | core.lut imports them for `ListIsTheFreeMonoid` |
-| `lengthOf` | generators.lth, certification.lth, probability.lth, world.lth | `length` | lists.lut | world_controls.test.lut:18,159-163 names world.lth's |
-| `listLength` | tables.lth | `length` | lists.lut | |
-| `mapList` | world.lth | `map` | lists.lut | world_controls.test.lut names it |
-| `memberOf` | generators.lth | `member` | lists.lut | |
-| `allOf` | generators.lth | `all` | lists.lut | unclaimed today |
+| `appendList`, `foldInto` | core/core.lut | `appendList`, `foldList` | lists.lut's models | core.lut's claim uses them through lists.lut |
+| `lengthOf` | generators.lth, certification.lth, probability.lth, world.lth | `size` | Indexed | world_controls.test.lut:18,159-163 names world.lth's |
+| `listLength` | tables.lth | `size` | Indexed | |
+| `mapList` | world.lth | `map` | Functor | world_controls.test.lut names it |
+| `memberOf` | generators.lth | `member` | Foldable, Object | |
+| `allOf` | generators.lth | `all` | Foldable | unclaimed today |
 | `noDuplicates` | generators.lth, plan.lth | `distinct` | lists.lut | |
 | `distinct` | tables.lth | `distinct` | lists.lut | |
-| `upTo` | generators.lth | `filter` with `size x <= n` | lists.lut | |
+| `upTo` | generators.lth | `filter` with `size x <= n` | Foldable | |
 | `nth` | generators.lth | `nth` | lists.lut | |
-| `isEmptyList`, `isOneElement` | generators.lth | `isEmpty`, `length xs == 1` | lists.lut | |
-| `isEmpty` | ebnf.lth, checks.lth | `isEmpty` | lists.lut | checks.lth's is over `Failures E = List E` |
-| `member`, `concat`, `remove`, `removeAll` | term.lth, program.lth | `member`, `append`, `remove`, `removeAll` | lists.lut | `concat (xs ys)` is `append`; the `String` equality `structural String` |
-| `memberStr` | plan.lth, tables.lth, world.lth | `member String (structural String)` | lists.lut | |
-| `memberString` | ebnf.lth | `member` | lists.lut | |
-| `memberChars` | grammar.lth | `all (fn c { member ... c ws }) cs` | lists.lut | |
-| `memberRegion` | certification.lth | `member` | lists.lut | |
-| `append` | ebnf.lth | `append` | lists.lut | |
-| `appendRegions`, `appendRefusals`, `appendEntries` | certification.lth | `append` | lists.lut | |
-| `appendOne` | plan.lth | `append xs (singleton n)` | lists.lut | |
-| `appendStrs` | plot.lth | `append` | lists.lut | |
-| `appendLayer`, `appendTable` | plot.lth | `append ls (singleton l)` | lists.lut | |
-| `appendText`, `appendEnv`, `appendBindings` | term_model.lut | `append` | lists.lut | |
-| `appendApps`, `appendTerms` | program.lth | `append` | lists.lut | |
-| `appendNames` | examples/sonolocalizacion/figures.lut | `append` | lists.lut | |
-| `appendStr` | world.lth | keeps its name | world.lth | concatenation of two strings, `+`; not a list |
-| `append` | examples/sonolocalizacion/distances.lut | `pushEntry` | distances.lut | appends an entry to a `Vec`; renamed so `append` names the list's |
-| `concatFailures` | checks.lth | `append` | lists.lut | |
-| `concatNames` | library.lth | `append` | lists.lut | |
-| `concatTerms` | program.lth | `append` | lists.lut | |
-| `concatFields`, `concatStrs` | world.lth | `append` | lists.lut | |
-| `lookupValue` | demand.lth | `lookup` | lists.lut | over `List (String * Value)` |
-| `lookupStr`, `lookupTable`, `lookupScale` | plot.lth | `lookup` | lists.lut | `Mapping = List (String * String)` |
-| `lookupFile` | world_model.lut | `lookup` | lists.lut | |
-| `lookup` | program.lth | `lookup` | lists.lut | `Context = List (String * Term)` |
-| `lookupBody` | term_model.lut | keeps its name | term_model.lut | reads a `Program`'s acts, not an association list; its body may call `lookup` over the pairs it builds |
-| `lookupField` | term_model.lut | `lookup` | lists.lut | over `List (String * Term)` |
-| `allNonNegative` | generators.lth | `all (fn (x, w) { 0.0 <= w })` | lists.lut | |
-| `allNullable`, `anyNullable`, `anyReaches`, `allDefined`, `anyRhs` | ebnf.lth | `all`/`any` with the local predicate | lists.lut | `anySplit` keeps its name: a search over positions, not a fold over a list |
-| `allIn` | certification.lth, library.lth | `all (fn x { member ... x ys }) xs` | lists.lut | |
-| `anyServes`, `anyIs` | certification.lth | `any` | lists.lut | |
-| `anyExtern`, `anyMentions` | library.lth | `any` | lists.lut | |
-| `allNames`, `allPatterns`, `allWf`, `allFields`, `allPairs`, `allItems`, `allParams`, `allArms`, `allBinders`, `allClauses`, `allImportNames`, `allLiteralsLex`, `allKindsKnown` | grammar.lth | `all` with the local predicate | lists.lut | |
-| `allNames` | plan.lth | `all` | lists.lut | |
-| `allNames` | term_model.lut | keeps its name | term_model.lut | collects the names of a term; not a predicate |
-| `allKnown` | tables.lth | `all knownKind` | lists.lut | |
-| `allConfirmed`, `anyRefuted`, `anyConfirmed`, `allRefutedOf`, `allConfirmedOrSupported` | laws.lth | `all`/`any` | lists.lut | |
-| `anyValue`, `anyFailure` | certification_model.lut | `any` | lists.lut | |
-| `allUnqualified`, `allFree` | term.lth | `all` | lists.lut | |
-| `allLayers`, `anyLayer`, `allStr`, `allScales` | plot.lth | `all`/`any` | lists.lut | |
-| `allUnit` | probability.lth | `all unitVec` | lists.lut | |
-| `anyUnknown`, `anyAct`, `anyUnclaimed`, `anyNotIn`, `anyUndefined`, `anyTerm`, `anyTerms`, `anyClause`, `anyIn`, `anyFault`, `anyApp`, `anyArgumentArrow`, `anyTermArrow`, `anyArrow`, `anyDatum` | program.lth | `any` with the local predicate | lists.lut | `anyTerm (f) (t : Surface)` is over one term's children: keeps its name |
+| `isEmptyList`, `isOneElement` | generators.lth | `isEmpty`, `size xs == 1` | lists.lut, Indexed | |
+| `isEmpty` | ebnf.lth, checks.lth | `isEmpty` | lists.lut | checks.lth's over `Failures E = List E` |
+| `member`, `concat`, `remove`, `removeAll` | term.lth, program.lth | `member`, `+` (or `combine`), `remove`, `removeAll` | Foldable, Monoid, lists.lut | |
+| `memberStr` | plan.lth, tables.lth, world.lth | `member` | Foldable | |
+| `memberString` | ebnf.lth | `member` | Foldable | |
+| `memberChars` | grammar.lth | `all (fn c { member c ws }) cs` | Foldable | |
+| `memberRegion` | certification.lth | `member` | Foldable | |
+| `append` | ebnf.lth | `+` (or `combine`) | Monoid | |
+| `appendRegions`, `appendRefusals`, `appendEntries` | certification.lth | `+` | Monoid | |
+| `appendOne` | plan.lth | `xs + singleton n` | Monoid | |
+| `appendStrs` | plot.lth | `+` | Monoid | |
+| `appendLayer`, `appendTable` | plot.lth | `ls + singleton l` | Monoid | |
+| `appendText`, `appendEnv`, `appendBindings` | term_model.lut | `+` | Monoid | |
+| `appendApps`, `appendTerms` | program.lth | `+` | Monoid | |
+| `appendNames` | examples/sonolocalizacion/figures.lut | `+` | Monoid | |
+| `appendStr` | world.lth | keeps its name | | two strings, `+` already; not a list |
+| `append` | examples/sonolocalizacion/distances.lut | `pushEntry` | | appends an entry to a `Vec`; renamed |
+| `concatFailures` | checks.lth | `+` | Monoid | |
+| `concatNames` | library.lth | `+` | Monoid | |
+| `concatTerms` | program.lth | `+` | Monoid | |
+| `concatFields`, `concatStrs` | world.lth | `+` | Monoid | |
+| `lookupValue` | demand.lth | `lookup` | Foldable, Object | over `List (String * Value)` |
+| `lookupStr`, `lookupTable`, `lookupScale` | plot.lth | `lookup` | Foldable | `Mapping = List (String * String)` |
+| `lookupFile` | world_model.lut | `lookup` | Foldable | |
+| `lookup` | program.lth | `lookup` | Foldable | `Context = List (String * Term)` |
+| `lookupBody` | term_model.lut | keeps its name | | reads a `Program`'s acts |
+| `lookupField` | term_model.lut | `lookup` | Foldable | |
+| `allNonNegative` | generators.lth | `all (fn (x, w) { 0.0 <= w })` | Foldable | |
+| `allNullable`, `anyNullable`, `anyReaches`, `allDefined`, `anyRhs` | ebnf.lth | `all`/`any` with the local predicate | Foldable | `anySplit` keeps its name: a search over positions |
+| `allIn` | certification.lth, library.lth | `all (fn x { member x ys }) xs` | Foldable | |
+| `anyServes`, `anyIs` | certification.lth | `any` | Foldable | |
+| `anyExtern`, `anyMentions` | library.lth | `any` | Foldable | |
+| `allNames`, `allPatterns`, `allWf`, `allFields`, `allPairs`, `allItems`, `allParams`, `allArms`, `allBinders`, `allClauses`, `allImportNames`, `allLiteralsLex`, `allKindsKnown` | grammar.lth | `all` with the local predicate | Foldable | |
+| `allNames` | plan.lth | `all` | Foldable | |
+| `allNames` | term_model.lut | keeps its name | | collects the names of a term |
+| `allKnown` | tables.lth | `all knownKind` | Foldable | |
+| `allConfirmed`, `anyRefuted`, `anyConfirmed`, `allRefutedOf`, `allConfirmedOrSupported` | laws.lth | `all`/`any` | Foldable | |
+| `anyValue`, `anyFailure` | certification_model.lut | `any` | Foldable | |
+| `allUnqualified`, `allFree` | term.lth | `all` | Foldable | |
+| `allLayers`, `anyLayer`, `allStr`, `allScales` | plot.lth | `all`/`any` | Foldable | |
+| `allUnit` | probability.lth | `all unitVec` | Foldable | |
+| `anyUnknown`, `anyAct`, `anyUnclaimed`, `anyNotIn`, `anyUndefined`, `anyTerms`, `anyClause`, `anyIn`, `anyFault`, `anyApp`, `anyArgumentArrow`, `anyTermArrow`, `anyArrow`, `anyDatum` | program.lth | `any` with the local predicate | Foldable | `anyTerm (f) (t : Surface)` keeps its name: over one term's children |
 | `insertSorted`, `sortedValues` | probability.lth | `insertSorted`, `sortBy` with `<=` | lists.lut | |
 | `reverseOnto` | probability.lth | `reverse` | lists.lut | |
-| `pooled`, `entriesOnto` | probability.lth | `concat (map entries vs)` | lists.lut | `entries : Vec Float64 -> List Float64` stays in arrays.lth |
-| `isNilStr`, `isJustStr`, `isJustTable` | plot.lth | `isEmpty`, keep | lists.lut, plot.lth | the `Maybe` tests are not list helpers |
+| `pooled`, `entriesOnto` | probability.lth | `concat (map entries vs)` | lists.lut, Functor | `entries : Vec Float64 -> List Float64` is `toList` of `Vec` |
+| `isNilStr`, `isJustStr`, `isJustTable` | plot.lth | `isEmpty`; keep | lists.lut | the `Maybe` tests are not list helpers |
+| `sumTo`, `sumToInt` | arrays.lth | stay | arrays.lth | a sum in 3.S27's order; `sum` of `Foldable` is the monoid's and does not fix the order |
 
 ## 6. The bites
 
-Each bite is accepted when: `luthier check` is clean on every file it touched and `check -v`
-reports no unclaimed law in `lib/core/` (elsewhere, no more than before); `python -m pytest tests -q`
-is green with at least as many tests as before the bite; `luthier certify` on the test programs it
-touched grades every law (none `not run`) and reports every law controlled (certify.py
-`control_status`: no `uncontrolled`); the commit message counts the store entries rewritten
-(`git diff --stat` on the `.cert.json` files and the number of entries at the new cone hashes);
-the plan's Status line is updated. Commits of two lines, staged by path. Nothing is pushed and no
-tag is cut (D-2026-10-17-e).
+Common acceptance (every bite): `luthier check` clean on every file touched, `check -v` with no
+unclaimed law in `lib/core/` (elsewhere no more than before) and, after bite 4, no resolution
+failure; `python -m pytest tests -q` green with at least as many tests as before (run in the
+background, about 22 minutes); `luthier certify` on the test programs touched grades every law
+(none `not run`) and reports every law controlled (no `uncontrolled`); the four counts of
+`scripts/core_metrics.py` in the commit message, none higher than before; the plan's Status line
+updated. Commits of two lines (subject, blank line, body), staged by path. No push, no tag
+(D-2026-10-17-e). Bites 1 and 2 are landed (their sections of 54f6228 stand as history; the reports
+say what was built).
 
-The core's end (D-2026-10-18-a, his criteria, measured over the whole library): names defined in
-more than one file 0; list helpers reinvented per type 0; unclaimed laws 0; `check`'s "loose" notice
-only where it is real (today it fires on every top-level function, 1675 times); the suite green; the
-stores re-certified. A script, `scripts/core_metrics.py`, prints the four counts; it is written
-first, and every bite's commit reports them. One thing at a time: the core alone, from start to
-end; other bites wait unless the core needs them.
+### Bite 3. The metrics script (Sonnet; first, alone)
 
-### Bite 1. The code fixes and the directory (Opus)
+Files: new `scripts/core_metrics.py` and `tests/test_core_metrics.py`. The script prints the four
+counts of section 0 over `src/luthier/lib`, `examples/` and `tests/tester`: (1) names defined at
+the top level in more than one file, with the files, less an explicit list of accepted homonyms
+(each with a one-line reason); (2) reinvented list helpers: a top-level definition whose body is a
+`match` on a `List` with `nil` and `cons` arms, or whose name is in the seven families, outside
+`lib/core/lists.lut`; (3) unclaimed Bool laws, from `luthier check -v`; (4) `loose` notices, split
+into real (a top-level definition at a bare exponential that no theory's record names) and the
+rest. Each count with its list under `-v`. Luciano runs scripts that process the record; this one
+processes the library and a bite's agent may run it (CLAUDE.md).
+Accepted when: the script runs in under a minute; its counts at d280a18 are in its header and in
+this plan's Status; the test checks each count on a fixture of three small files.
+May break: nothing.
 
-Files: `src/luthier/certify.py` (3e: the cone's hash erases the binder annotations the elaborator
-writes, D-2026-10-15-e, with the law that erasure leaves the term's behavior unchanged and its
-control), `src/luthier/tester.py` (`_list_members` fingerprints a census's members built by an
-expression, 3h's finding), `src/luthier/run.py:143` (`CORE`), `tests/test_certify.py`,
-`tests/test_tester.py`, `tests/test_run.py`; the move `lib/core.lut` to `lib/core/core.lut`,
-`lib/kernel_laws.lth` split without renaming any law into `lib/core/structures/equality.lth` (§1),
-`algebraic.lth` (§3, §4's Monoid, §5), `universal.lth` (§2, §4's FreeMonoid, §6), `kernel_models.lut`
-absorbed into core.lut (section 3.10's names), every `import "kernel_laws.lth"` and
-`import "kernel_models.lut"` repointed (generators.lth, world.lth, numbers_model.lut,
-generators_model.lut, algebra.lth, core.lut, 3 test programs, tests/test_run.py:1164); the stores
-moved with their files; one full re-certification, `luthier certify tests/tester/*.test.lut`
-(the examples' test programs are there too, `sonolocalizacion_*`).
-Waits for: the agent now in tester.py and certify.py to land.
-Accepted when, besides the common criteria: the erasure law exists with a refuted control; a
-census built by an expression changes its fingerprint when its members change (a test); every
-store entry is at a new cone hash (the count equals the number of entries, 927 at ca90ee8, less
-the entries whose cones hold no binder); `luthier run examples/sonolocalizacion/experiment_zero.run.lut`
-reproduces its recorded result.
-May break: every store (expected, once); `run`'s core path in any script that names it; the
-`examples/hello.run.json` the suite writes.
+### Bite 4. Typing for resolution (Opus; after 3)
 
-Additions to bite 1 (coordinator, 2026-10-17, from j2a's report, record/IA/regions-2026-10-17/
-report-code.md): the code that draws a sampled entry's cases (tester.py's sampling, generators.py)
-enters the entry's identity, since the interpreter revision is the last tag and there is no tag
-until after the core, so a change in the draws today leaves the identity unchanged and `--deep`
-replays disagree (RankUnderRotation, PrecisionSymmetric, DensityPeaksAtMean); and the fuel default
-of certify is read against PinvProjects' 1.28e6 per 10x10 case (raise it or derive it, P11). The
-re-certification of bite 1 then covers these too.
+Files: `src/luthier/elaborate.py` (`infer`, `walk`, the operator table, the structure table),
+`src/luthier/check.py` (the refusals), `src/luthier/run.py` (`Loaded` reads the structure
+bindings), `tests/test_elaborate.py`, `tests/test_check.py`, `tests/spec/` (new accept and reject
+programs), spec 4.R13 and 4.R9 (the spec's agent, from this plan); `docs/spec/04-static-semantics.md`
+is not this bite's to edit.
+What it does: rule 2.2 as the elaborator's. (a) `infer` total on the fragment the library writes
+(names with declared types, literals, lambdas, applications, projections, `match`, `if`, blocks,
+records, tuples, subtypes), returning the type or raising an error that names the term; a
+`Hole('type')` result is a defect. (b) The structure table: a claim `X : Bool := S T m` (a structure
+head `S`, a type `T`, a model record `m`) binds `(S, head of T) -> m`, read from every loaded file
+at elaboration (the binding is the claim, so there is no second act). (c) A field name of a
+structure, unqualified, resolves by the inferred type of its discriminating argument (2.2.1); a
+structure-typed parameter omitted at a call is filled from the table (2.2.2); `S.f` and `S.f m`
+qualify (2.2.3); operators match under instantiation (`List A` against `List Int`). (d) Failures
+are errors with the name, the type found and the candidates (2.2.5); the bare fallback goes.
+Accepted when: bite 2's three probes (`r x` typed `Bool` with `r : A -> A -> Bool`, a projection of
+a field that does not exist, `x + "a"`) and item 39's `asBad (x : Int) : Bool := x` are refused
+(four `tests/spec/*.reject.lut`); `tests/spec/r13_*` still accept and reject; a new
+`r13_structure_name.accept.lut` resolves `size`, `map` and `eq` at two types and
+`r13_structure_ambiguous.reject.lut` is refused until qualified; every file of the library and every
+test program elaborates with zero `Hole('type')` from `infer` on a definition's body (a pytest test
+walks them); the stores do not change (an explicit model and a resolved one elaborate to the same
+term, so no cone moves; checked by `luthier certify tests/tester/*.test.lut` printing `0 lines ran`
+for every non-fixture program); the suite green.
+May break: files whose terms `infer` could not type before and that now raise (the bite lists them
+and fixes the library's annotations where the error is the library's, as item 39's audit expected);
+`luthier eval`'s and `session`'s terms, which elaborate in a context with no file.
 
-### Bite 2. The properties (Fable; in parallel with bite 1)
+### Bite 5. The prelude, the refusal, qualified access (Opus; after 4)
 
-Files: new `lib/core/properties/relations.lth`, `operations.lth`, `functions.lth` (section 3.1 to
-3.3); new `tests/tester/core_laws.test.lut` and `core_controls.test.lut` with each property tested
-at a listed instance (`Int` with `+`, `*`, `<=`; `Bool` with `and`, `or`; `String` with `+`) and
-refuted at a wrong one (`-` for Commutative and Associative; `<` for Reflexive; `fn x { x + 1 }`
-for Idempotent and Involutive; `fn x y { x }` for Cancellative; a `bound` of zero for
-`AssociativeWithin` on doubles).
-Accepted when: every property has a confirmed instance and a refuted control. The instances are
-the test programs' own definitions, so their entries land beside them (as `cases.test.cert.json` does
-today), untracked under tests/ (D-2026-10-16-h); bite 3 moves the claims into core.lut, where they
-get their tracked store. The test program's header says so. As built: the wrappers and the real
-instances live in `tests/tester/core_instances.lut`, imported by both programs (a control is matched
-to its law by the cone's hash, so both must name one definition, and a test program is never
-imported, D-2026-10-16-e); the store is `core_instances.cert.json`. The composites (`Equivalence`,
-the orders, `Isomorphism`, `Bijective`) quantify the variables of their parts (report-bite-2.md).
-May break: nothing in the library (new files only).
+Files: `src/luthier/run.py` (`Loaded` over the directory; `CORE` becomes the directory), `check.py`
+(`coreNames` read from the core's files; the refusal of a redefinition; the `redundant` notice),
+`cli.py` (`--no-core`), `tests/test_run.py`, `tests/test_check.py`, `tests/spec/` (a reject program
+that redefines `map`; an accept program that uses `size` with no import); every `import "core/..."`
+line outside lib/core/ removed (eleven after bite 1: term.lth, numbers_model.lut, world.lth,
+plot.lth, algebra.lth, generators.lth, generators_model.lut, five test programs,
+tests/test_run.py:1164); spec 12.S4 and 12.S22 (the spec's agent, from section 1).
+Accepted when: a file that defines or declares a core name is refused by `check` and by the loader
+with the core file named; `luthier check` on a file that writes `size xs` with no import passes;
+the file cycle inside the core is tested (a name reaching itself through two core files is an
+error with the path; the present cycle is not one); the suite green; no store changes (the loader's
+scoping gives the same internal names).
+May break: a user file that defines `map`, `size`, `at`, `d`, `plus`, `eq` or any field name of
+section 3 (the examples define none; the refusal names what to rename); scripts that pass
+`--no-core`.
 
-### Bite 3. The structures and core's claims (Fable; after 1 and 2)
+### Bite 6. The structures and core's claims (Fable; after 5)
 
-Files: `lib/core/structures/{equality, order, algebraic, containers, universal}.lth` rewritten over
-properties/ (sections 3.4 to 3.9: Object by Equivalence, Metric and its variants with `Ball`,
-`Tolerance`, `MetricWithin`; the structures as records with one-line wrappers; containers.lth with
-the folds over `Fin n` moved from arrays.lth; the equalizer, pullback, coequalizer); `lib/core/core.lut`
-(section 3.10's claims, `Int`, `String`, `Fin`, the metrics); `numbers_model.lut` (`integers`,
-`strings` gone or reduced); `algebra.lth` (§0 to §2 removed, §3 to §5 over the core); every importer
-of the moved folds (`arrays.lth`, `tables.lth`, `probability.lth`, `generators_model.lut`,
-`distances.lut`, `positions.lut`, `distance_graph.lut`: import lines only); `core_laws.test.lut`,
-`core_controls.test.lut` (the metric controls of section 3.5; the claims of core.lut tested).
-Accepted when: `check -v` lists no unclaimed law in `lib/core/`; every structure has a claimant
-in core.lut or lists.lut or a library; every claim of core.lut graded and controlled;
-`Metric`'s four controls refuted; `numbers_laws` and `numbers_controls` still certify (they import
-numbers.lth, untouched here).
-May break: the test programs that import `kernel_laws.lth Concrete` (repointed in bite 1);
-`algebra.lth`'s store entries (re-certified); `positions.lut`'s `Iso` import (kept until bite 8b:
-`Iso` stays in algebra.lth as a deprecated alias until then, with a note).
+Files: `lib/core/structures/{equality, order, algebraic, containers, universal}.lth` (sections 3.1
+to 3.5), `lib/core/core.lut` (3.6), `numbers_model.lut` (`integers`, `strings` gone), `algebra.lth`
+(§0 to §2 removed; §3 to §5 over the core), the importers of the moved folds (import lines go),
+`tests/tester/core_instances.lut`, `core_laws.test.lut`, `core_controls.test.lut` (the wrappers of
+bite 2 become the structures' and core.lut's claims; the instances that are the kernel's types stay
+in core.lut; the metric controls).
+Accepted when: `check -v` lists no unclaimed law in `lib/core/`; every claim of core.lut graded and
+controlled; `Metric`'s four controls refuted; `size`, `at`, `map`, `eq`, `d`, `plus`, `leq` resolve
+at `Int`, `Bool`, `String`, `Nat` through core.lut's claims (the accept program of bite 5 extended);
+core_metrics' count (1) down by the `Leq...` and `OneIsNotZero` duplicates, count (3) down by bite
+2's 32.
+May break: positions.lut's `Iso` import (an alias `Iso` stays in algebra.lth until bite 12, noted);
+the stores of algebra.lth's and core's laws (re-certified).
 
-### Bite 4. The list library (Sonnet; after 3)
+### Bite 7. The list library (Sonnet; after 6)
 
-Files: new `lib/core/lists.lut` (section 3.11) with its claims; `lib/core/core.lut` imports
-`append` and `fold` and drops `appendList`, `foldInto`; new `tests/tester/lists_laws.test.lut`,
+Files: new `lib/core/lists.lut` (3.7); `lib/core/core.lut` (`ListIsTheFreeMonoid` over lists.lut's
+model; `appendList`, `foldInto` gone); new `tests/tester/lists_laws.test.lut`,
 `lists_controls.test.lut`.
-Accepted when: every function of 3.11 is defined; every claim graded and controlled;
-`ListIsTheFreeMonoid` still holds through the imported `append` and `fold`.
+Accepted when: every function of 3.7 defined; every claim graded and controlled; `map`, `size`,
+`at`, `fold`, `all`, `member`, `lookup`, `+` resolve at `List Int` with no import (an accept
+program); core_metrics' count (2) unchanged (the reinventions go in bites 9 to 12).
 May break: nothing outside core.lut.
 
-### Bite 5. numbers.lth and algebra.lth (Opus; after 3, parallel with 4)
+### Bite 8. numbers.lth and algebra.lth (Opus; after 6, parallel with 7)
 
-Files: `numbers.lth` (section 4), `numbers_model.lut`, `algebra.lth` (its remaining structures
-over the core), `tests/tester/numbers_laws.test.lut`, `numbers_controls.test.lut`,
-`tests/test_certify.py:388-433` (names `PlusCommutes`), `tests/test_run.py:654-688`,
-`tests/test_tester.py:28-31` (the message text names `PlusCommutes`; tests/tester/laws.test.lut's
-own `PlusCommutes` is a local definition and may keep its name).
-Accepted when: `Doubles`' four within-bound laws are graded with the bounds of section 4 and each
-has a control (an `op` that rounds to a coarser grid, refuted; a bound too small, refuted on the
-real doubles, which is also what tells `gamma2` from `3 gamma2`); the `MetricWithin` of
-`absDistance` graded and controlled; no `PlusCommutes` remains in lib/ or tests/ except
-laws.test.lut's local one.
-May break: every importer of `Tolerance`, `within`, `abs` (import lines; `within` and `withinOf`
-keep their names and types).
+Files: `numbers.lth` (section 4), `numbers_model.lut`, `algebra.lth`, `tests/tester/numbers_laws.
+test.lut`, `numbers_controls.test.lut`, `tests/test_certify.py:388-433`, `tests/test_run.py:654-688`,
+`tests/test_tester.py:28-31` (the message names `PlusCommutes`; laws.test.lut's local `PlusCommutes`
+may keep its name).
+Accepted when: `Doubles`' within-bound laws graded with section 4's bounds and each controlled (an
+`op` that rounds to a coarser grid; a bound too small on the real doubles, which also tells
+`gamma2` from `3 gamma2`); `absDistance`'s `MetricWithin` graded and controlled; `plus`, `times`,
+`leq` resolve at `Float64`; no `PlusCommutes` remains in lib/ or tests/ but laws.test.lut's.
+May break: the importers of `Tolerance`, `within`, `abs` (import lines; the names and types stay).
 
-### Bite 6. The machinery's renames and helpers (Sonnet; after 4, parallel with 5 and 7)
+### Bite 9. The machinery (Sonnet; after 7, parallel with 8 and 10)
 
-Files: `laws.lth` (§2 removed; `Settling`'s wrappers), `certification.lth` (`CombineCommutative`,
-helpers), `generators.lth` (`Placement`, `SizedGenerator`, helpers), `generators_model.lut`,
-`test.lth` (`SampledMode : Placement -> Mode`), `world.lth`, `world_model.lut`, `plan.lth`,
-`plan_model.lut`, `demand.lth`, `checks.lth`, `certification_model.lut`; their test programs
-(`regions_*`, `certification_*`, `generators_*`, `world_*`, `plan_*`, `demand_*`, `pooling_*`,
-`cutoff_controls`, `cases`, `weakest`, `laws`); `tests/test_certify.py:1084` (`CombineCommutes`);
-the spec's 7.S2, 7.S4 and 7.R1 wording of "metric" belongs to the spec's agent (a note to the
-coordinator, not this bite's edit).
-Accepted when: no name of section 5.2's rows for these files remains (`grep` of each old name is
-empty); every renamed law graded and controlled.
-May break: every test program that names `SampledMode linear` (no: `linear`'s name is kept; only
-its type's name changes); program.lth's comment on `Metric` (line 328).
+Files: `laws.lth` (§2 removed; `Settling`'s wrappers), `certification.lth`, `generators.lth`
+(`Placement` if question 2 is decided so, else `Metric` kept and the core's named `MetricSpace`;
+`SizedGenerator`; helpers), `generators_model.lut`, `test.lth`, `world.lth`, `world_model.lut`,
+`plan.lth`, `plan_model.lut`, `demand.lth`, `checks.lth`, `certification_model.lut`; their test
+programs (`regions_*`, `certification_*`, `generators_*`, `world_*`, `plan_*`, `demand_*`,
+`pooling_*`, `cutoff_controls`, `cases`, `weakest`, `laws`); `tests/test_certify.py:1084`.
+Accepted when: no name of section 5.2's rows for these files remains; every renamed law graded and
+controlled; core_metrics' count (2) down by these files' rows.
+May break: program.lth's comment on `Metric` (line 328); nothing named `linear` changes.
 
-### Bite 7. Luthier's self-description (Sonnet; after 4, parallel with 5 and 6)
+### Bite 10. Luthier's self-description (Sonnet; after 7, parallel with 8 and 9)
 
 Files: `term.lth`, `term_model.lut`, `program.lth`, `grammar.lth`, `ebnf.lth`, `ebnf_model.lut`,
-`library.lth`, `translation.lth` (section 5.2's rows for these files; `CanonIdempotent`,
-`UnqualifyIdempotent` as wrappers); no test program of these exists today (the finding "11
-theories without tests or stores"): this bite adds none, and notes it in the plan.
+`library.lth`, `translation.lth` (section 5.2's rows; `CanonIdempotent`, `UnqualifyIdempotent` as
+wrappers); no test program of these exists (the finding "11 theories without tests or stores");
+this bite adds none and says so in the plan.
 Accepted when: `check` clean, the suite green (test_check, test_elaborate, test_parse read these
-files), no old name remains.
-May break: `check`'s own reading of program.lth (check.py is a specimen of program.lth; a renamed
-helper there is a renamed docstring reference at most).
+files), no old name remains, count (2) down by these rows.
+May break: check.py's docstrings that name program.lth's helpers.
 
-### Bite 8a. Arrays and tables (Opus; after 5, parallel with 6 and 7)
+### Bite 11. Arrays and tables (Opus; after 8, parallel with 9 and 10)
 
-Files: `arrays.lth` (the containers' claims for `Vec` and `Mat`; `Pointwise` wrappers; `Ball` and
-`entrywiseBall` in place of the `approx...` family, the two abbreviations kept; `Symmetric` as an
-equalizer; `lengthOf` gone), `arrays_model.lut` (`SymmetricIsAnEqualizer`, the shared-`k`
-pullback), `tables.lth` (Table claims `Indexed` over its rows; helpers), `tables_model.lut`,
-`generators_model.lut`'s arrays imports; `tests/tester/arrays_*`, `tables_*`.
-Accepted when: every law of `Arrays` graded and controlled at the new names; `distance_graph.lut`
-and `validate_graph.run.lut` run unchanged (they import `forallBelow` from its new file after bite
-3).
-May break: `probability.lth`, `belief.lth`, `optimization.lth`, the examples (they import
-`approxVec`, `approxMat`, `exact`: kept as abbreviations, so only import lines move).
+Files: `arrays.lth` (`VecIsIndexed`, `VecIsAFunctor`, `VecIsTabulated`, `MatIsIndexed` and the rest
+of 3.4's claims; the `Pointwise` wrappers; `Ball` and `entrywiseBall` for the `approx...` family,
+the two abbreviations kept; `Symmetric` as an equalizer; `lengthOf` gone), `arrays_model.lut`,
+`tables.lth` (`TableIsIndexed` over its rows; helpers), `tables_model.lut`, `generators_model.lut`'s
+arrays imports (two lines, sent to bite 9's agent); `tests/tester/arrays_*`, `tables_*`.
+Accepted when: every law of `Arrays` graded and controlled at the new names; `size v`, `at v k`,
+`map f v` resolve at `Vec Float64`; `distance_graph.lut` and `validate_graph.run.lut` run unchanged.
+May break: probability, belief, optimization, the examples (import lines of `approxVec`, `approxMat`,
+`exact`: the names stay).
 
-### Bite 8b. Probability, belief, optimization, plot, the examples (Opus; after 8a)
+### Bite 12. Probability, belief, optimization, plot, the examples (Opus; after 11)
 
-Files: `probability.lth` (Kolmogorov's wrappers; `pooled`, `sortedValues` by lists.lut; the
-pushforward of a measure as a structure with its law, D-2026-10-17-g, for the generators and the
-probability integral transform), `probability_model.lut`, `belief.lth`, `belief_model.lut`,
-`optimization.lth`, `optimization_model.lut`, `plot.lth` (helpers only: its [proposed] readings
-wait for G1 to G5, D-2026-10-17-h), `plot_model.lut`; `examples/sonolocalizacion/positions.lut`
-(`layout` as `flatten`, `unflatten` and `LayoutIsAnIsomorphism`), `distances.lut` (`pushEntry`),
-`figures.lut`, `distance_graph.lut` (the join as a `Pullback` claim); `algebra.lth` (the `Iso` alias
-removed); their test programs (`probability_*`, `belief_*`, `optimization_*`, `plot_*`, `fit_*`,
-`sonolocalizacion_*`).
-Accepted when: the stores of the examples re-certified; `experiment_zero.run.lut` and
-`validate_graph.run.lut` reproduce their recorded results; no old name of section 5 remains anywhere
-(the check command of section 5 run with the new names: it prints every old name as MISSING).
-May break: the fit's records (`examples/sonolocalizacion/*.run.json`): a changed cone is a changed
-key, so the runs are redone and compared with the recorded values.
+Files: `probability.lth` (Kolmogorov's wrappers; `pooled`, `sortedValues` by the core; the
+pushforward of a measure as a structure with its law, D-2026-10-17-g), `probability_model.lut`,
+`belief.lth`, `belief_model.lut`, `optimization.lth`, `optimization_model.lut`, `plot.lth` (helpers
+only; its [proposed] readings wait for G1 to G5, D-2026-10-17-h), `plot_model.lut`;
+`examples/sonolocalizacion/positions.lut` (`flatten`, `unflatten`, `LayoutIsAnIsomorphism`),
+`distances.lut` (`pushEntry`), `figures.lut`, `distance_graph.lut` (the join as a `Pullback`
+claim); `algebra.lth` (the `Iso` alias removed); their test programs (`probability_*`, `belief_*`,
+`optimization_*`, `plot_*`, `fit_*`, `sonolocalizacion_*`).
+Accepted when: the examples' stores re-certified; `experiment_zero.run.lut` and
+`validate_graph.run.lut` reproduce their records; the check command of section 5 run with the new
+names prints every old name as MISSING; core_metrics' counts (1) to (3) are 0.
+May break: the fit's records (`*.run.json`): a changed cone is a changed key, so the runs are
+redone and compared with the recorded values.
 
-### Bite 9. Closing (Sonnet; after 8b)
+### Bite 13. Closing (Sonnet; after 12)
 
-Files: this plan (Status), `record/plan/code-follows-principles-2026-10-16.md` (the core line
-marked done), `record/handoff-*.md`; `docs/spec/12-files-and-tools.md`'s 12.S22 note that
-`core.lut` lives in `lib/core/` belongs to the spec's agent (a note). The survey rerun: names
-defined in more than one file (expected: the pairs that are not duplicates of meaning, such as
-`Field` of algebra and of grammar, listed as accepted homonyms), `check -v`'s unclaimed count
-(expected 0 in core, the rest listed for the next plan), the loose notice count.
-Accepted when: the plan says nothing false; the two surveys are in the record with the commands.
+Files: this plan (Status), `record/plan/code-follows-principles-2026-10-16.md` (the core done, the
+queue reopened), `record/handoff-*.md`; the notes to the spec's agent gathered (12.S4, 12.S22,
+4.R13, 7.S2/7.S4 if question 2 is yes); `check.py`'s `loose` notice narrowed to the real cases
+(count 4) if no earlier bite did it; `scripts/core_metrics.py` run and its four counts recorded
+with the commit; the tag is Luciano's (D-2026-10-17-e).
+Accepted when: the plan says nothing false; the counts are (1) 0, (2) 0, (3) 0, (4) the real ones
+listed; the suite green; the stores committed.
 
 ## 7. Schedule
 
 ```
-wave 1:  bite 1 (Opus, code and the move)      | bite 2 (Fable, properties)
-wave 2:  bite 3 (Fable, structures and core.lut)
-wave 3:  bite 4 (Sonnet, lists.lut)            | bite 5 (Opus, numbers and algebra)
-wave 4:  bite 6 (Sonnet, machinery)            | bite 7 (Sonnet, self-description)  | bite 8a (Opus, arrays and tables)
-wave 5:  bite 8b (Opus, probability to the examples)
-wave 6:  bite 9 (Sonnet, closing)
+wave 1:  bite 3 (Sonnet, metrics)
+wave 2:  bite 4 (Opus, typing for resolution)
+wave 3:  bite 5 (Opus, prelude and refusal)
+wave 4:  bite 6 (Fable, structures and core.lut)
+wave 5:  bite 7 (Sonnet, lists.lut)          | bite 8 (Opus, numbers and algebra)
+wave 6:  bite 9 (Sonnet, machinery)          | bite 10 (Sonnet, self-description)  | bite 11 (Opus, arrays and tables)
+wave 7:  bite 12 (Opus, probability to the examples)
+wave 8:  bite 13 (Sonnet, closing)
 ```
 
-Disjoint files per wave: wave 1 shares nothing (bite 2 creates files; bite 1 moves others); wave 3
-shares `core.lut` only through bite 4's two import lines, which bite 4 adds last; wave 4's three
-bites touch disjoint libraries and disjoint test programs (bite 8a's `generators_model.lut` edit is
-import lines; bite 6 owns the file's content, so 8a sends its two lines to bite 6's agent instead).
-Never more than three agents at once (the rule of 2026-10-14).
+Waves 1 to 4 are sequential because each changes what the next writes against (the counts, the
+resolution, the prelude, the structures); bite 3 is small and could run beside bite 4 if the code
+agent is free, since they share no file. Wave 5 shares `core.lut` only through bite 7's edit of
+`ListIsTheFreeMonoid`, made last; wave 6's three bites touch disjoint libraries and test programs
+(bite 11's two import lines in `generators_model.lut` go to bite 9's agent). Never more than three
+agents at once.
 
 ## 8. Decisions taken by the agent in this design (one commit undoes each)
 
-- Structures keep a record of their data with one-line wrappers; properties are bare predicates
-  (section 2).
-- `Commutative` takes a domain and a codomain; `Associative` and the rest are at the carrier.
-- `Antisymmetric`, `Cancellative`, `Injective`, `MetricIndiscernible` by their contrapositive over
-  every pair (7.S12's rule, numbers.lth's precedent).
-- `Surjective` by a witnessed section; `functions (A B) (o) : Object (A -> B)` declared, not defined.
-- Metric's M1 as two laws; `MetricNonNegative` stated as a derived law for the control's sake;
-  `MetricWithin` as the floating-point claim with its three within-bound consequences.
-- `Pushout` waits for a case; the pushforward of measures goes to probability.lth (bite 8b).
-- The matrix is indexed row-major by `Fin (m * n)` for `Indexed`; its two-index `f` stays.
-- generators.lth's `Metric` becomes `Placement` and its `Sized` `SizedGenerator`, pending question
-  2 of decisions.md for the first (the second is a plain clash).
-- `within`, `withinOf`, `approxVec tol`, `approxMat tol` keep their names as abbreviations defined by
-  `Ball`.
-- The folds over `Fin n` move to containers.lth; `sumTo` stays in arrays.lth.
-- kernel_models.lut is absorbed into core.lut; `integers` and `strings` of numbers_model.lut become
-  claims of core.lut.
-- The constant of `PlusAssociativeWithin`'s bound is 3 gamma2, rounded up from the derivation,
-  with the test to tell (decisions.md, note 3).
-- Bite 1 moves without renaming; the renames come by group so that each bite re-certifies only
-  its files.
+From 54f6228, still standing: structures keep a record with one-line wrappers (question 3 open);
+`Commutative` takes a domain and a codomain; contrapositive forms; `Surjective` by a section;
+`functions (A B) (o)` declared, not defined; Metric's M1 as two laws and `MetricNonNegative` for the
+control; `MetricWithin` as the floating-point claim; `Pushout` waits for a case; matrices indexed
+row-major; `SizedGenerator`; `within`, `withinOf`, `approxVec tol`, `approxMat tol` kept as
+abbreviations; the folds over `Fin n` in containers.lth; `integers` and `strings` as core.lut's
+claims; the constant 3 gamma2.
+
+New on 2026-10-18:
+- The field names are the concepts' names: `eq`, `d`, `leq`, `neutral`, `combine`, `inverse`,
+  `zero`, `one`, `plus`, `times`, `negate`, `meet`, `join`, `top`, `bottom`, `complement`, `map`,
+  `size`, `at`, `fold`, `build`, `point`, `absurd`, `apply`, `pair`, `first`, `second`, `left`,
+  `right`, `cases`, `include`, `restrict`, `project`, `lift`, `inject`; `length` is `size`, `nth`
+  is `at` where the index is a `Fin`.
+- A structure-typed parameter is implicit and filled from the type's model, passed by name when
+  explicit (2.2.2); pending question 4.
+- The claim is the binding (`ListIsAFunctor : Bool := Functor List {...}`): no second act.
+- An import of a core name by its path is a `redundant` notice, not a refusal.
+- `Order` is a structure with the one field `leq`, total.
+- One `fold` in the core: `FreeMonoid` carries a `Foldable`.
+- `Tabulated` (`build`) joins the container structures, so `map`, `zipWith` and `reverse` can be
+  derived where a type has it.
+- `Float64`'s `Order` is claimed in core.lut; the doubles' operations resolve through numbers.lth's
+  claim of `Doubles` (section 4).
+- The typing bite is scoped to resolution (section 2.3), not to a full type checker.
+- The order of bites: metrics, typing, prelude, structures, lists, then the libraries by group.
