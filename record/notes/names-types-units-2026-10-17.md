@@ -96,3 +96,40 @@ the tower cut by the demand).*
     then the number of finite explorers is what the budget allows. The new point: how the budget
     scales with the bounds, which is what the laws of algorithms should say. (Taken up in
     D-2026-10-18-d if registered.)
+
+## Topology, computability and the fourth level (2026-10-18)
+
+*Exploration, nothing decided; partly candidate for the principles with items 11 and 12.*
+
+13. (his) No three without four: what would generalize the probabilistic level? (proposed, then
+    corrected by him) The observer's budget (computational indistinguishability), Bayesian evidence
+    and bisimulation are other axes, not a level that contains the probabilistic one as a degenerate
+    case (his criterion: equivalence is a metric with values 0 and ∞, a metric is a probabilistic
+    metric with Dirac distributions). The candidate that does contain it is imprecise probability
+    (a p-box, Ferson; lower and upper probabilities, Walley 1991; Dempster-Shafer). (his) It has no
+    notable property that justifies including it. (proposed) It is not a fourth level of equality but
+    the shape of the evidence about the third: ε̂ of L10.3 is an upper probability, the ternary
+    verdict of D-2026-10-15-b falls out of a band, a Kolmogorov band around an empirical
+    distribution (Dvoretzky-Kiefer-Wolfowitz) is a p-box.
+14. (his) Something topological, but the topological lives in Boolean: it collapses metrics to
+    integers; and it is also an operation to descend to a computable level. (proposed) An open is a
+    predicate (point-free topology, geometric logic); the invariants are integers that survive
+    deformation (winding numbers, Betti numbers, Euler characteristic), classes of an equivalence
+    (homotopy), so topology re-enters level 1 as a coarser equivalence (HoTT's paths). Equality of
+    reals is not computable, x < y is semidecidable, every computable function on the reals is
+    continuous (Brouwer; Weihrauch): an open is a semidecidable property (Smyth 1983; Abramsky;
+    Vickers), topology the logic of what is observable. A cutoff is the descent to the computable,
+    and its price is a band at the boundary ("d < ε or d > ε/2" is decidable, "d ≤ ε" is not): the
+    ternary verdict appears whenever one descends from the continuum, not only in statistics. In
+    Luthier: `unseenDirections` collapses singular values to an integer by the rank floor; the rank
+    of a real matrix is not computable, the rank with a floor is, unstable at the floor (the cases
+    1e-13 and 1e-16 of `PinvProjects`); persistent homology is the general form (Betti numbers per
+    scale, stable under the bottleneck distance: Cohen-Steiner, Edelsbrunner and Harer 2007).
+15. (his) Perhaps something of topos would generalize probability, but the integration of topos and
+    probability has not been done well. (proposed, from memory, to be checked) The obstruction:
+    measurable spaces are not Cartesian closed (Aumann 1961). Lines of work: quasi-Borel spaces
+    (Heunen, Kammar, Staton and Yang, LICS 2017, a quasitopos for higher-order probability); Markov
+    categories (Fritz 2020); valuations on opens (Jones and Plotkin's probabilistic powerdomain,
+    1989; constructive measure theory on locales, Coquand and Spitters): probability assigned only to
+    observable properties, computable by construction, the line that fits Luthier; probability
+    sheaves (Simpson, 2017); the quantum topos (Döring and Isham; Heunen, Landsman and Spitters).
