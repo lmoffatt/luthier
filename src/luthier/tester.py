@@ -1142,16 +1142,18 @@ class Classifier:
         return found, defined
 
     def premises(self):
-        """The parameters of a subtype other than the cutoffs: (k, the cutoffs its type names)."""
+        """The parameters of a subtype other than the cutoffs: (k, the cutoffs its type names).
+        [proposed] A type parameter (`S : Concrete`, a subtype of `U`) is no premise of the tester's:
+        its predicate is the checker's to decide (4.R8), and it has no boundary a case can reach."""
         out = []
         for k, (name, ty) in enumerate(self.params):
             if k in self.cutoffs:
                 continue
             try:
-                _, predicates = self.values.form(ty)
+                base, predicates = self.values.form(ty)
             except _RAISES:
                 continue
-            if predicates:
+            if predicates and not isinstance(base, t.Universe):
                 out.append((k, [j for j in self.cutoffs if j < k and _mentions(ty, self.params[j][0])]))
         return out
 
