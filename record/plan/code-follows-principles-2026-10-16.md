@@ -132,6 +132,12 @@ Fable); its bites run before the rest of the queue below, which joins only where
 disjoint. Slice work waits: item 34 (session A with and without A2, both kept, compared on the
 corrected graph he regenerates with src/prepare_experiment_zero.py) after the core; 35 to 37 wait.
 
+Documentation (luthier-8c's review of 2026-10-17): the spec clauses each bite touches are its own;
+three principles clauses written now (L3: equivalences between types as named values; L8: the
+subtype by a law as an equalizer; L11: roots of trust), brief prompt-principles-three.md in
+record/plan/core-2026-10-17/; docs/guide, README, principles-for-readers.md and rationale in one
+pass after the core, so they are not rewritten twice.
+
 Queue added 2026-10-17 (decisions D-2026-10-16-k to -n and D-2026-10-17-a to -d, relayed by the
 decision-assistant fork, now luthier-8c), in this order after j2a:
 - print and stdout, now decided (D-2026-10-16-n, item 12): `print` writes at once and checks what
