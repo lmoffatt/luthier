@@ -1,7 +1,7 @@
 [
  {
-  "law": "KeyReadsTheType",
-  "cone": "sha256:6b875fd78d4b16c2226bb72c1321eb943b4e102fb3d0c81f99487587422b6686",
+  "law": "KeyReadsOnlyTheCone",
+  "cone": "sha256:49ca7cc64f1f7fa91a7a9f0afb11754e7cc3e00e35fae705499b409413a7b70a",
   "binding": [
    {
     "parameter": "A",
@@ -15,18 +15,33 @@
    },
    {
     "parameter": "p",
-    "generator": "planners (Listed)",
-    "fingerprint": "sha256:0e0ea7c6c1589307252e2daf3b141d1008eb8ecfe86fc95ae76ca03f5778ad76"
+    "generator": "wholeGraphs (Listed)",
+    "fingerprint": "sha256:466a6804279a8544bc9385d2e4b430510d4495193ba1816a2ebb430aab9e07de"
+   },
+   {
+    "parameter": "st",
+    "generator": "ExhaustiveMode over Strategy",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "d",
+    "generator": "exampleOnly (Listed)",
+    "fingerprint": "sha256:d6e56bf0f97338ea312d7a12af32bb63122735fdba287d2d08c04cf80c597c33"
    },
    {
     "parameter": "dm",
     "generator": "demands (Listed)",
-    "fingerprint": "sha256:2fb5eb8231dcffded4cf95cc7db299373aee370dd49852784c95fe625c28d626,sha256:191f7d85cb2b129081c7cb3426b87439d54dca54823484cec2ab87411b9e1f87"
+    "fingerprint": "sha256:eef6be56ae5e894b03416379365b8aa04c50d609c3aa2e92271b399c76ddccc8"
    },
    {
-    "parameter": "live",
-    "generator": "lives (Listed)",
-    "fingerprint": "sha256:55b5ee5f175a432605c0965c946922f0edc66a755ce306d9f515c2c02672d44f"
+    "parameter": "n",
+    "generator": "holes (Listed)",
+    "fingerprint": "sha256:8db454b9ea9e93a25f5888f4d0a79a1470153982cc959019e5ac299beaac8cf6"
+   },
+   {
+    "parameter": "v",
+    "generator": "values (Listed)",
+    "fingerprint": "sha256:e15db1fbb580c7521d0dae4d0ca0c9864f4d5f80dff98ab0e0c56a26e6cd1ea0"
    }
   ],
   "seed": 20261015,
@@ -69,7 +84,21 @@
     "reach": {
      "Members": [
       {
-       "Printed": "planning"
+       "Printed": "wholeGraph"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "st",
+    "reach": "Support"
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "example"
       }
      ]
     }
@@ -79,20 +108,39 @@
     "reach": {
      "Members": [
       {
-       "Printed": "plain"
+       "Printed": "((((((((((theDemand \"d\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false)"
       },
       {
-       "Printed": "withSets"
+       "Printed": "((((((((((theDemand \"d\") Sampled) nil) nothing) nothing) ((cons (\"a\", (Number 1.0))) ((cons (\"z\", (Printed \"x\"))) nil))) false) nothing) ForwardOnDemand) false)"
       }
      ]
     }
    },
    {
-    "parameter": "live",
+    "parameter": "n",
     "reach": {
      "Members": [
       {
-       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil))))"
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"e\""
+      },
+      {
+       "Printed": "\"z\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "v",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(Number 2.0)"
+      },
+      {
+       "Printed": "(Printed \"y\")"
       }
      ]
     }
@@ -100,21 +148,24 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 2,
+    "evaluated": 24,
     "raised": 0,
     "coverage": "Listed",
-    "verdict": "Supported"
+    "verdict": "Refuted"
    }
   },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-16T00:43:21+00:00",
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "A = Nat, eq = eqNat, p = wholeGraph, st = ForwardOnDemand, d = example, dm = ((((((((((theDemand \"d\") Sampled) nil) nothing) nothing) nil) false) nothing) ForwardOnDemand) false), n = \"e\", v = (Number 2.0)"
+  },
+  "date": "2026-10-17T04:55:47+00:00",
   "interpreter": "v0.2",
-  "hosts": []
+  "hosts": [],
+  "kind": "Control"
  },
  {
   "law": "KeyReadsOnlyTheCone",
-  "cone": "sha256:e2695a3f4fccfc609aa92d3003ba5751f599dc19dfc3443cbabd3e02955a7508",
+  "cone": "sha256:49ca7cc64f1f7fa91a7a9f0afb11754e7cc3e00e35fae705499b409413a7b70a",
   "binding": [
    {
     "parameter": "A",
@@ -275,7 +326,120 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-16T00:43:13+00:00",
+  "date": "2026-10-17T04:55:36+00:00",
+  "interpreter": "v0.2",
+  "hosts": []
+ },
+ {
+  "law": "KeyReadsTheType",
+  "cone": "sha256:6b875fd78d4b16c2226bb72c1321eb943b4e102fb3d0c81f99487587422b6686",
+  "binding": [
+   {
+    "parameter": "A",
+    "generator": "types (Listed)",
+    "fingerprint": "sha256:d035c4c33bf3ce6660ae565325e44c939d299914ece1fa6c8fca481f129c043f"
+   },
+   {
+    "parameter": "eq",
+    "generator": "eqs (Listed)",
+    "fingerprint": "sha256:edeeee47cfef6ee5c60fffc4e1212396a3416ffafb23c2c13599289f47ff6e56"
+   },
+   {
+    "parameter": "p",
+    "generator": "planners (Listed)",
+    "fingerprint": "sha256:0e0ea7c6c1589307252e2daf3b141d1008eb8ecfe86fc95ae76ca03f5778ad76"
+   },
+   {
+    "parameter": "dm",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:2fb5eb8231dcffded4cf95cc7db299373aee370dd49852784c95fe625c28d626,sha256:191f7d85cb2b129081c7cb3426b87439d54dca54823484cec2ab87411b9e1f87"
+   },
+   {
+    "parameter": "live",
+    "generator": "lives (Listed)",
+    "fingerprint": "sha256:55b5ee5f175a432605c0965c946922f0edc66a755ce306d9f515c2c02672d44f"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "A",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Nat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "eq",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "eqNat"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "planning"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "dm",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "plain"
+      },
+      {
+       "Printed": "withSets"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "live",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"a\") ((cons \"b\") ((cons \"c\") ((cons \"d\") nil))))"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-16T00:43:21+00:00",
   "interpreter": "v0.2",
   "hosts": []
  },
