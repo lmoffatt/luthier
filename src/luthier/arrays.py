@@ -330,18 +330,8 @@ def gen_vec_of(rng: random.Random, size: int, n):
     return _vec(rng, int(n), size)
 
 
-def gen_mat_of(rng: random.Random, size: int, m, n, zero=0.0, deficient=0.0):
-    """A matrix of m rows and n columns, entries uniform in [-size, size]; with probability `zero` the
-    zero matrix, and with probability `deficient` (two rows or more) a rank-deficient one, its last
-    row equal to its first (7.S5's families given a share, report-theory.md section 5 item 2; none
-    by default, as before)."""
-    a = _mat(rng, int(m), int(n), size)
-    u = rng.random() if zero or deficient else 1.0
-    if u < zero:
-        return np.zeros_like(a)
-    if u < zero + deficient and a.shape[0] >= 2:
-        a[-1, :] = a[0, :]
-    return a
+def gen_mat_of(rng: random.Random, size: int, m, n):
+    return _mat(rng, int(m), int(n), size)
 
 
 def gen_mat_rows(rng: random.Random, size: int, m):
@@ -360,10 +350,9 @@ def gen_square_of(rng: random.Random, size: int, n):
     return _mat(rng, int(n), int(n), size)
 
 
-def gen_symmetric(rng: random.Random, size: int, n=None):
-    """B + B^T, of n rows (a size between 1 and size when not given: v0.1's): symmetric, any
-    spectrum."""
-    n = rng.randint(1, max(size, 1)) if n is None else int(n)
+def gen_symmetric(rng: random.Random, size: int):
+    """B + B^T, of a size between 1 and size: symmetric, any spectrum."""
+    n = rng.randint(1, max(size, 1))
     B = _mat(rng, n, n, size)
     return B + B.T
 

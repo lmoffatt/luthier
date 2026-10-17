@@ -126,9 +126,13 @@ def degenerate(rng, a, zero=FAMILY_SHARE, deficient=FAMILY_SHARE):
 def symmetric(size, seed, dims=DIMENSIONS, zero=FAMILY_SHARE, deficient=FAMILY_SHARE):
     """v0.1's `gen_symmetric`: B + B^T, entries of B uniform in [-size, size]; symmetric exactly, any
     spectrum. Its dimension from the census `dims` (7.S5; v0.1 drew it between 1 and the size), and
-    the zero and rank-deficient families with their shares (`degenerate`)."""
+    the zero and rank-deficient families with their shares (`degenerate`). Built here and not in
+    arrays.py, whose bytes are the host hash of every numpy entry (certify.host_hash): editing it
+    makes the model's entries stale."""
     rng = _source(seed)
-    a = arrays.gen_symmetric(rng, int(size), dimension(rng, size, dims))
+    n = dimension(rng, size, dims)
+    b = arrays._mat(rng, n, n, int(size))
+    a = b + b.T
     return degenerate(rng, a, zero, deficient), _next(rng)
 
 
