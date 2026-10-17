@@ -1,0 +1,3 @@
+`tables-control-misfiled.json` holds the `Failed: t = holeT` entry of `CellsOfTheirKind`, moved by hand on 2026-10-17 from src/luthier/lib/tables.cert.json (D-2026-10-15-f, P3: moved, not deleted).
+It was written on 2026-10-14 by the control line when it lived in tests/tester/tables_laws.test.lut, before controls had their own kind of entry; `holeT` is a broken table on purpose, so the failure is right about it and is not the law's evidence.
+The law holds on its census at the current hash (cone sha256:7bdd74d3): the `--deep` replay of its line passed (record/IA/code-follows-2026-10-16/report-tables-cut.md).
