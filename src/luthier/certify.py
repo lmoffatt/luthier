@@ -567,7 +567,10 @@ def record(entries, entry):
         return entries
     key = identity(entry)
     found = known(entries, key)
-    if found is not None and agree(entry, found) and not disputed_at(entries, key):
+    # [proposed, 3j j2a] an agreeing replay that records its regions where the known entry, written
+    # before the regions were kept (D-2026-10-16-i), recorded none adds that evidence: it goes in front
+    adds_regions = "regions" in entry and "regions" not in found if found is not None else False
+    if found is not None and agree(entry, found) and not disputed_at(entries, key) and not adds_regions:
         return entries
     return prune([entry] + list(entries), {_group(entry): _stamp(entry)})
 
@@ -613,22 +616,124 @@ def stale(current, entry):
     return entry["cone"] != current
 
 
-def certificate_grade(entries, law, current):
-    """certification_model's `grade`: over the law's entries at the current hash, none when one
-    failed or none passed; under one binding the strongest pass, across bindings the weakest."""
+def _or_weakest(m, n):
+    """certification.lth's `orWeakest`: the weaker of two grades, `None` (no grade) the unit."""
+    if m is None:
+        return n
+    if n is None:
+        return m
+    return m if GRADE_RANK[m] <= GRADE_RANK[n] else n
+
+
+def _or_strongest(m, n):
+    """certification.lth's `orStrongest`: the stronger of two grades, `None` the unit."""
+    if m is None:
+        return n
+    if n is None:
+        return m
+    return m if GRADE_RANK[m] >= GRADE_RANK[n] else n
+
+
+# The combinations of the grades over regions and bindings a demand may choose (5.S8,
+# D-2026-10-16-i), by the name `Demand.combine` gives; the weakest by default (certification_model's
+# `regioning`). [proposed] The two the theory states, `orWeakest` and `orStrongest`.
+COMBINATIONS = {"weakest": _or_weakest, "strongest": _or_strongest}
+COMBINATION = "weakest"
+
+
+def grades(region):
+    """certification.lth's `grades`: a region enters the grade unless it is a label."""
+    return region.get("source") != "Label"
+
+
+def _key(region):
+    return (region["source"], region["name"])
+
+
+def law_regions(entries):
+    """The grading regions the entries recorded (7.S9), each once in the order first recorded: the
+    law's regions, `rs` of certification.lth's `regionedGrade`. Entries written before the regions
+    were kept recorded none."""
+    found = {}
+    for e in entries:
+        for r in e.get("regions") or ():
+            if grades(r["region"]):
+                found.setdefault(_key(r["region"]), r["region"])
+    return list(found.values())
+
+
+def binding_evidence(entries, law, current, binding):
+    """certification.lth's `casesAt` for one binding: per region, the cases of the passes under it at
+    the current hash, each stretch once (`stretches`: a seed at its largest `n`)."""
+    counts = {}
+    key = binding if isinstance(binding, list) else None
+    for e in _laws_own(entries):
+        if e["law"] == law and e["cone"] == current and e["binding"] == binding:
+            key = union_key(e)
+            break
+    if key is None:
+        return counts
+    for _, e in stretches(entries, law, current, key).values():
+        if e["binding"] != binding:
+            continue
+        for r in e.get("regions") or ():
+            counts[_key(r["region"])] = counts.get(_key(r["region"]), 0) + int(r["n"])
+    return counts
+
+
+def _capped(g):
+    """certification.lth's `capped`: at most sampled."""
+    return None if g is None else _or_weakest(g, "Sampled")
+
+
+def regioned(entries, law, current, binding, base, combine=COMBINATION):
+    """certification.lth's `overRegions`: the binding's grade `base` combined over the law's regions,
+    each the binding's grade where it has cases under the binding and at most sampled where it has
+    none (`regionGrade`); with no region, `base`. With the empty regions that capped it."""
+    comb = COMBINATIONS[combine]
+    counts = binding_evidence(entries, law, current, binding)
+    rs = law_regions([e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current])
+    g, empty = base, []
+    for r in reversed(rs):
+        if counts.get(_key(r), 0):
+            g = comb(base, g)
+        else:
+            g = comb(_capped(base), g)
+            empty.insert(0, r["name"])
+    return g, empty
+
+
+def certificate_grade(entries, law, current, combine=COMBINATION):
+    """certification_model's `grade` read over the regions (certification.lth's `regionedGrade`,
+    D-2026-10-16-i): over the law's entries at the current hash, none when one failed or none passed
+    (or a disagreement stands); under one binding the strongest pass, combined over the law's regions
+    (`regioned`), and across bindings with the same combination, the demand's (5.S8), the weakest by
+    default. A law whose entries recorded no regions keeps the grade of the fold before regions."""
+    return certificate_grade_and_empty(entries, law, current, combine)[0]
+
+
+def certificate_grade_and_empty(entries, law, current, combine=COMBINATION):
+    """`certificate_grade` with the empty regions of each binding whose grade they lowered."""
     counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
     if any(isinstance(e["outcome"], dict) and "Failed" in e["outcome"] for e in counts) or disputes(counts):
-        return None
-    best = {}
+        return None, []
+    best, bindings = {}, {}
     for e in counts:
         if passed(e) and e["grade"] is not None:
             b = json.dumps(e["binding"], sort_keys=True)
             g = e["grade"]
+            bindings.setdefault(b, e["binding"])
             if b not in best or GRADE_RANK[g] > GRADE_RANK[best[b]]:
                 best[b] = g
     if not best:
-        return None
-    return min(best.values(), key=GRADE_RANK.__getitem__)
+        return None, []
+    comb, grade, lowered = COMBINATIONS[combine], None, []
+    for b, g in best.items():
+        h, empty = regioned(entries, law, current, bindings[b], g, combine)
+        if GRADE_RANK[h] < GRADE_RANK[g]:
+            lowered += [n for n in empty if n not in lowered]
+        grade = comb(h, grade)
+    return grade, lowered
 
 
 def state(entries, law, current):
@@ -791,12 +896,14 @@ def standing(entries, law, current):
     dispute = dispute_of(entries, law, lambda e: e["cone"] == current)
     if dispute is not None:
         return show_dispute(*dispute)
-    g = certificate_grade(entries, law, current)
+    g, lowered = certificate_grade_and_empty(entries, law, current)
     if g is not None:
         # a statistical law's pass carries its rates and what it spent (7.S17), the latest's
         tested = next((_tested(e) for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
                        and passed(e) and _tested(e)), None)
         shown = f"supported, {GRADE_WORDS[g]}: held at {tested_text(tested)}" if tested else GRADE_WORDS[g]
+        if lowered:  # the regions with no case that held the grade at sampled (D-2026-10-16-i)
+            shown += f" (no case in {', '.join(lowered)})"
         # the union of its stretches, when it pools two or more (D-2026-10-16-g)
         return "; ".join([shown] + pools(entries, law, current))
     failed = next((e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
@@ -920,15 +1027,30 @@ def at(demand, entry):
                if covers_all(entry["reach"], [(p, given[p])]))
 
 
-def serves(demand, entry):
+def serves(demand, entry, entries=None):
     """certification_model's `serves`: the law's entry at the current hash, passed, at or above the
     grade the demand accepts, its reach covering what the run gives. [proposed] And of the demand's
     kind: a first action's demand (`FIRST_ACTION`) only by an entry a first action wrote, any other
-    demand only by an entry of no kind (a control's has its own, and never passes)."""
-    return (entry["law"] == demand["law"] and entry_kind(entry) == demand.get("kind") and at(demand, entry)
-            and passed(entry)
-            and entry["grade"] is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[entry["grade"]]
+    demand only by an entry of no kind (a control's has its own, and never passes). [3j j2a] With the
+    store's `entries`, the entry's grade is read over the law's regions under its binding with the
+    demand's combination (`served_grade`, D-2026-10-16-i)."""
+    if not (entry["law"] == demand["law"] and entry_kind(entry) == demand.get("kind") and at(demand, entry)
+            and passed(entry) and entry["grade"] is not None):
+        return False
+    grade = served_grade(demand, entry, entries)
+    return (grade is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[grade]
             and covers_all(entry["reach"], demand["given"]))
+
+
+def served_grade(demand, entry, entries=None):
+    """The grade an entry serves a demand at: its own, combined over the law's regions under its
+    binding with the demand's combination (`regioned`; the weakest by default), so a region the
+    binding never reached holds it at sampled (D-2026-10-16-i). Without `entries`, its own."""
+    if not entries or entry_kind(entry) is not None:
+        return entry["grade"]
+    g, _ = regioned(entries, entry["law"], entry["cone"], entry["binding"], entry["grade"],
+                    demand.get("combine", COMBINATION))
+    return _or_weakest(g, entry["grade"])
 
 
 def state_of(demand, entries):
@@ -968,7 +1090,7 @@ def refuse(entries, cone):
             elif failure is not None:
                 refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
                                  "demand": d})
-            elif not any(serves(d, e) for e in entries):
+            elif not any(serves(d, e, entries) for e in entries):
                 refusals.append({"name": c["name"], "law": d["law"], "state": state_of(d, entries),
                                  "demand": d})
     return refusals
@@ -993,9 +1115,16 @@ def show_refusal(refusal, entries):
     if what != "Passed":
         return f"{head}: {show_outcome(what)}"
     current = [e for e in entries if e["law"] == d["law"] and at(d, e) and passed(e)]
-    if all(GRADE_RANK[e["grade"]] < GRADE_RANK[d["accepts"]] for e in current):
-        best = max((e["grade"] for e in current), key=GRADE_RANK.__getitem__)
-        return f"{head}: passed, {GRADE_WORDS[best]}, below the grade accepted ({GRADE_WORDS[d['accepts']]})"
+    served = [served_grade(d, e, entries) for e in current]
+    if all(GRADE_RANK[g] < GRADE_RANK[d["accepts"]] for g in served):
+        best = max(served, key=GRADE_RANK.__getitem__)
+        lowered = [e for e, g in zip(current, served) if g != e["grade"]]
+        why = ""
+        if lowered:  # the regions that held it at sampled (D-2026-10-16-i)
+            _, empty = regioned(entries, d["law"], lowered[0]["cone"], lowered[0]["binding"], lowered[0]["grade"],
+                                d.get("combine", COMBINATION))
+            why = f" (no case in {', '.join(empty)})"
+        return f"{head}: passed, {GRADE_WORDS[best]}{why}, below the grade accepted ({GRADE_WORDS[d['accepts']]})"
     shown = ", ".join(f"{p} = {_shown_value(v)}" for p, v in d["given"])
     return f"{head}: passed, but no passed entry's reach covers {shown}"
 

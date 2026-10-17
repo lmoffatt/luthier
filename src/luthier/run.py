@@ -1715,6 +1715,11 @@ class Demand:
     time_limit: float | None = None
     strategy: str = DEMAND_DEFAULTS["strategy"]
     fresh: bool = False
+    # [proposed, 3j j2a] how a law's grades combine over its regions and bindings (5.S8,
+    # D-2026-10-16-i; certify.COMBINATIONS), the weakest by default (`run --combine`). Not yet
+    # declared in demand.lth or demand_model.lut (`theDemand`), as `axioms`, so not in DEMAND_DEFAULTS
+    # nor in the record
+    combine: str = "weakest"
 
     def inner(self, entry):
         """demand.lth's `inner`: the demand an inner action receives, every cutoff kept (L12.3)."""
@@ -1726,7 +1731,8 @@ class Demand:
         [proposed] `given` is what the caller binds: the model parameter and the sets the law
         takes (`certification`), or the model and the action's arguments (`FirstActions`). For a law
         whose body is an axiom (`axiom`), the cutoff is the weaker of `accepts` and `axioms`."""
-        return {"law": law, "cone": cone, "given": given, "accepts": self.cutoff(axiom), "fingerprints": fingerprints}
+        return {"law": law, "cone": cone, "given": given, "accepts": self.cutoff(axiom), "fingerprints": fingerprints,
+                "combine": self.combine}
 
     def cutoff(self, axiom=False):
         """The weakest grade accepted for a law: `accepts`, or for an axiom the weaker of it and
@@ -1754,19 +1760,23 @@ class Demand:
 
 
 def demand_of(main=None, fuel=None, values=(), accept=None, checked=None, pinned=None, assumes=None,
-              time_limit=None, strategy=None, fresh=None):
+              time_limit=None, strategy=None, fresh=None, combine=None):
     """The run's demand from its arguments, a missing one given its default (`DEMAND_DEFAULTS`,
     demand_model.lut's `theDemand`); `pinned` is what the lock pins (`lock_status`, 12.S13)."""
     d = DEMAND_DEFAULTS
     if strategy is not None and strategy not in RAN:
         raise RunError(f"unknown strategy {strategy}: one of {', '.join(RAN)}")
+    from . import certify
+    if combine is not None and combine not in certify.COMBINATIONS:
+        raise RunError(f"unknown combination {combine}: one of {', '.join(certify.COMBINATIONS)}")
     return Demand(entry=d["entry"] if main is None else main, accepts=accept or d["accepts"],
                   fuel=d["fuel"] if fuel is None else fuel, sets=tuple(dict(values).items()),
                   checked=d["checked"] if checked is None else checked, pinned=pinned,
                   assumes=tuple(dict.fromkeys(d["assumes"] if assumes is None else assumes)),
                   time_limit=d["timeLimit"] if time_limit is None else time_limit,
                   strategy=d["strategy"] if strategy is None else strategy,
-                  fresh=d["fresh"] if fresh is None else fresh)
+                  fresh=d["fresh"] if fresh is None else fresh,
+                  combine=certify.COMBINATION if combine is None else combine)
 
 
 def _head_name(x):
@@ -2139,7 +2149,7 @@ def certification(loaded, program, entry, demand, refuse=True):
         kept_laws = []
         for d in c["laws"]:
             if (id(d) in axioms and d["accepts"] == "AssumedGrade"
-                    and not any(certify.serves(d, e) for e in entries)):
+                    and not any(certify.serves(d, e, entries) for e in entries)):
                 assumed.append({"name": c["name"], "law": d["law"], "axiom": axioms[id(d)],
                                 "accept": certify.GRADE_WORDS[d["accepts"]]})
             else:
@@ -2190,7 +2200,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     # the certificates that served the cone (8.S8): for each law demanded, the latest entry that
     # serves it, by the hash of its canonical JSON
     served = {_entry_hash(e) for c in with_laws for d in c["laws"]
-              if (e := next((e for e in entries if certify.serves(d, e)), None)) is not None}
+              if (e := next((e for e in entries if certify.serves(d, e, entries)), None)) is not None}
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
@@ -2487,7 +2497,7 @@ class FirstActions:
         for _, _, d in demands:
             d["kind"] = certify.FIRST_ACTION
         entries = self.entries()
-        served = [next((e for e in entries if certify.serves(d, e)), None) for _, _, d in demands]
+        served = [next((e for e in entries if certify.serves(d, e, entries)), None) for _, _, d in demands]
         if all(e is not None for e in served):
             for (law, _, _), e in zip(demands, served):
                 self.done.append({"action": spec["action"], "law": law, "arguments": shown,
@@ -2700,7 +2710,7 @@ def refuse_provisional(kept, entry, assumes=()):
 
 
 def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=None, assumes=None,
-        time_limit=None, strategy=None):
+        time_limit=None, strategy=None, combine=None):
     """Run `main` of the file at `path` with its holes filled by `sets`, once the store certifies
     its cone at the grade `accept` (12.S17; `Refused` otherwise, before anything is evaluated);
     gives the standard output, the values set and the certification state of the cone. `checked`
@@ -2740,7 +2750,8 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     lock = lock_status(path)
     loaded = Loaded(path)
     values, empty = fill(loaded, sets)
-    demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh)
+    demand = demand_of(main, fuel, values, accept, checked, lock["pinned"], assumes, time_limit, strategy, fresh,
+                       combine)
     entry = loaded.name(loaded.top, demand.entry) or demand.entry
     kept = runtime_slice(loaded.acts, entry, core_data(loaded))
     roots = _first_action_roots(loaded, kept)

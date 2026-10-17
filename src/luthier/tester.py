@@ -93,7 +93,7 @@ import string
 from dataclasses import dataclass, field, fields, is_dataclass, replace
 from pathlib import Path
 
-from . import certify, host, kernel, surface as s, term as t
+from . import certify, generators, host, kernel, surface as s, term as t
 from .elaborate import elaborate_program, show_term as _show_term
 from .parse import parse
 import numpy as np
@@ -104,6 +104,7 @@ from .run import (Entries, Loaded, Runner, RunError, _applied, _arrow, _instanti
 TRUE, FALSE = t.Var("true"), t.Var("false")
 _TEST_LTH = (Path(__file__).parent / "lib" / "test.lth").resolve()
 _LAWS_LTH = (Path(__file__).parent / "lib" / "laws.lth").resolve()
+_GENERATORS_LTH = (Path(__file__).parent / "lib" / "generators.lth").resolve()
 _LETTERS = string.ascii_letters + string.digits + " "  # [proposed] the alphabet of a drawn String
 
 
@@ -231,6 +232,8 @@ class Outcome:
     differs: str | None = None  # the date of the entry a replay disagrees with (D-2026-10-15-f)
     store: object = None        # the file whose store holds the line's entry (`claim_file`)
     out_of_fuel: int | None = None  # the fuel given, when the run was cut by it (D-2026-10-15-g)
+    regions: list | None = None  # the grading regions with their n (`regions_record`, D-2026-10-16-i)
+    labels: list | None = None   # an author's labels with their share (`labels_record`), no grade
 
 
 # ---------------------------------------------------------------------- loading
@@ -298,8 +301,14 @@ def load_program(path, fuel, extra=()):
     named = tuple(dict.fromkeys(loaded.name(top, n) or n for d in specs for n in _string_literals(d)))
     grading = tuple(_constructor(loaded)(n).name for n in ("grade", "Coverage", "Verdict", "Grade", "sequential",
                                                              "sequentialFrom", "ratioAfter"))
+    # the degenerate cases declared in the files loaded and `casesOf`, which classify reads
+    regioning = tuple(n for n, _ in degeneracies_in(loaded))
+    if regioning and (cases_of := loaded.name(_GENERATORS_LTH, "casesOf")) is not None:
+        regioning += (cases_of,)
+    else:
+        regioning = ()
     roots = (core_data(loaded) + tuple(d.name for d in specs) + named
-             + tuple(loaded.name(top, n) or n for n in extra) + grading)
+             + tuple(loaded.name(top, n) or n for n in extra) + grading + regioning)
     kept = runtime_slice(loaded.acts + specs, specs[0].name if specs else "main", roots)
     loaded.demand(kept)
     program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
@@ -417,6 +426,8 @@ class Values:
     def __init__(self, runner, rng, size, budgets, fuel, seed=0):
         self.runner, self.rng, self.size, self.budgets, self.fuel = runner, rng, size, budgets, fuel
         self.seed = seed % SEEDS  # the seed a generator binding draws from next (7.S1)
+        # the literals of 7.S4's special values: the cutoffs the case has given so far (`_draw_case`)
+        self.literals = ()
 
     def whnf(self, term):
         self.runner.fuel = self.fuel
@@ -643,7 +654,38 @@ class Values:
         count = int(np.prod(shape)) if shape else 1
         entries = [self.draw(leaf).constant.value for _ in range(count)]
         array = np.array(entries, dtype=np.float64 if base == t.Var("Float64") else np.int64).reshape(shape)
+        if base == t.Var("Float64") and len(shape) == 2:
+            array = self.degenerate(array)
         return self.runner.host_object(Entries(array), ty)
+
+    def degenerate(self, array):
+        """7.S5's zero and rank-deficient families given their share in a drawn matrix (D-2026-10-16-i,
+        arrays.lth's `matDegeneracies`): the zero matrix with the budgets' `specialMass`, and with as
+        much again (two rows or more) the last row made equal to the first (`rowsRepeatOrVanish`).
+        [proposed] The special mass of a number read as the mass of each degenerate family of a
+        matrix, until the budgets name one."""
+        share = float(self.budgets.get("specialMass", 0.0))
+        u = self.rng.random()
+        if u < share:
+            return np.zeros_like(array)
+        if u < 2 * share and array.shape[0] >= 2:
+            array = array.copy()
+            array[-1, :] = array[0, :]
+        return array
+
+    def dimension(self, ty):
+        """A dimension of a record (a field a later field's type reads, `m` of `Mat`) from 7.S5's
+        census (generators.py's `DIMENSIONS`), those within the field's bounds and not above the
+        size, that the field's type admits; None when none is, and the field is drawn as any."""
+        base, predicates = self.form(ty)
+        if base != t.Var("Int"):
+            return None
+        lo, hi = self.bounds(predicates, "Int")
+        hi = self.size if hi is None else min(hi, self.size)
+        allowed = [t.Lit(t.IntConst(d)) for d in generators.DIMENSIONS
+                   if (lo is None or lo <= d) and d <= hi]
+        allowed = [v for v in allowed if self.holds(predicates, v)]
+        return allowed[self.rng.randrange(len(allowed))] if allowed else None
 
     def draw_base(self, ty, lo, hi, fixed=None):
         rng, n = self.rng, self.size
@@ -653,6 +695,12 @@ class Values:
             hi = (max(lo, 0) + n) if hi is None else hi
             if hi < lo:
                 raise Unfit(f"an empty interval [{lo}, {hi}]")
+            # 7.S4: the atom at 0 and the special values, with the budgets' masses (generators.py)
+            integer = ty.name == "Int"
+            v = generators.special(rng, lo, hi, integer, self.budgets.get("specialMass", 0.0),
+                                   self.budgets.get("atomAtZero", 0.0), () if integer else self.literals)
+            if v is not None:
+                return t.Lit(t.IntConst(int(v)) if integer else t.FloatConst(float(v)))
             if ty.name == "Int":
                 return t.Lit(t.IntConst(rng.randint(int(lo), int(hi))))
             return t.Lit(t.FloatConst(float(rng.uniform(float(lo), float(hi)))))
@@ -670,6 +718,8 @@ class Values:
             items, types = [], list(ty.fields)
             for k, (label, fty) in enumerate(types):
                 v = self.fixed_value(fixed or {}, label, items)
+                if v is None and any(_mentions(later, label) for _, later in types[k + 1:]):
+                    v = self.dimension(fty)  # 7.S5: a dimension from its census
                 if v is None:
                     v = self.draw(fty)
                 items.append((label, v))
@@ -804,7 +854,8 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
                 return _not_run(spec, f"more than {limit} cases (coveringAbove); covering arrays are a later bite (7.R3)", names)
         else:
             # 7.S6: a draw that a filter cannot give within its tries makes the law not run
-            cases = [_draw_case(values, params, plan, k) for k in range(spec.cases)]
+            cutoffs = tuple(k for k, (_, ty) in enumerate(params) if _base(ty) in CUTOFF_TYPES)
+            cases = [_draw_case(values, params, plan, k, cutoffs) for k in range(spec.cases)]
     except (NoGenerator, Unfit, Invalid) as exc:
         return _not_run(spec, str(exc), names)
     except RunError as exc:
@@ -822,6 +873,14 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
         if not ok and refuting is None:
             refuting = case
     evidence = Points(points, coverage)
+    # the regions of the cases evaluated, and the labels (D-2026-10-16-i, -j; `Classifier`)
+    regions = labels = None
+    if loaded is not None and points:
+        try:
+            found, named = Classifier(runner, loaded, values, params).classify([c for c, _ in points])
+            regions, labels = regions_record(found), labels_record(named, len(points))
+        except _RAISES:
+            pass
     # laws.lth's ForallOnPoints; a case that raised settles nothing (its evidence is NotRun)
     if refuting is not None:
         verdict = "Refuted"
@@ -831,7 +890,396 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
         verdict = "Confirmed" if _base(coverage) == "Exhaustive" else "Supported"
     # a refutation stands at any fuel; a run cut by its fuel otherwise settles nothing (D-2026-10-15-g)
     return Outcome(spec, evidence, verdict, grade_of(runner, verdict, coverage, loaded), len(points), refuting,
-                   raised, names, out_of_fuel=spent if verdict != "Refuted" else None)
+                   raised, names, out_of_fuel=spent if verdict != "Refuted" else None, regions=regions,
+                   labels=labels)
+
+
+# ---------------------------------------------------------------------- the regions (certification.lth §2)
+
+# [proposed] The types of the cutoffs a law takes, the demand's (D-2026-10-14-c; D-2026-10-16-k item
+# 20 makes per-law cutoffs typed fields of `Demand`, which will list them): a parameter of one gives
+# the law's regions just above and just below it (D-2026-10-16-j, certification.lth's `lawRegions`).
+CUTOFF_TYPES = ("Tolerance", "RankFloor", "Sequential")
+# [proposed] How near a cutoff is "just above" or "just below": a number of the case within this
+# factor of the cutoff, (c, c w] above and [c / w, c) below (generators.py's `specials` draws c w and
+# c / w); and the factor a premise stated by a cutoff is read at to find its boundary.
+CUTOFF_WIDTH = 2.0
+_MOST_ENTRIES = 400  # [proposed] the entries of a matrix written as a function read for its numbers
+
+
+def degeneracies_in(loaded):
+    """The declarations of degenerate cases in the files loaded (generators.lth §9: a definition of
+    type `Degeneracies T`), each (the name the program calls it, whether it is a label): a
+    declaration in a theory or a model is its type's, shared by every law over it (D-2026-10-16-j,
+    the first source); [proposed] one the test program makes is an author's label (7.S14's
+    `classify`), recorded with its share and entering no grade (`ALabelEntersNoGrade`)."""
+    if loaded is None:
+        return []
+    found = []
+    for path, acts in loaded.by_file.items():
+        for a in acts:
+            if isinstance(a, s.Define) and a.type is not None and _surface_head(a.type) == "Degeneracies":
+                found.append((a.name, path == loaded.top))
+    return found
+
+
+def _surface_head(ty):
+    while isinstance(ty, s.App):
+        ty = ty.function
+    if isinstance(ty, s.Name):
+        return ty.name.partition("@")[0]
+    if isinstance(ty, s.PApp):
+        return ty.name.partition("@")[0]
+    return None
+
+
+def _match(pattern, term, holes, found):
+    """Whether `term` is `pattern` with its holes (the declaration's type parameters) filled, which
+    `found` collects."""
+    if isinstance(pattern, t.Var) and pattern.name in holes:
+        if pattern.name in found:
+            return found[pattern.name] == term
+        found[pattern.name] = term
+        return True
+    if isinstance(pattern, t.App) and isinstance(term, t.App):
+        return _match(pattern.function, term.function, holes, found) and _match(pattern.argument, term.argument, holes, found)
+    return pattern == term
+
+
+class Classifier:
+    """The regions of a law's cases (D-2026-10-16-i, D-2026-10-16-j, L9.16; certification.lth §2,
+    generators.lth §9; report-theory.md section 5, items 3, 4 and 9): from the type, each degenerate
+    case its theory declares for a parameter's type (the most specific type in the chain a subtype
+    unfolds to that has a declaration whose other parameters the law's give), counted by `casesOf`;
+    from the law, the two sides of each cutoff parameter (`CUTOFF_TYPES`) and the boundary of each
+    other parameter of a subtype (`lawRegions`). An author's labels (`degeneracies_in`) are counted
+    apart and never grade. Branch coverage (the third source, item 5) is not in this bite.
+
+    [proposed] The readings this bite chose, each the tester's and not yet a theory's:
+    - a case is just above a cutoff `c` when a number of its other parameters (a scalar, an entry of
+      a vector or a matrix), in absolute value, is in (c, c w], and just below when in [c / w, c),
+      `w` the width; a cutoff of 0 has no sides, and gives no region;
+    - the boundary of a premise stated by a cutoff (`PsdAt m fl`) is where its predicate holds at the
+      cutoff and fails at the cutoff times w or divided by it; of a premise with bounds (`Nat`,
+      `Fin n`, `Seed`), the bounds and their neighbours; of an exact premise (`Symmetric`), every case
+      (the premise held, 7.S14);
+    - a degenerate case of the type that no case met and whose witness is outside the parameter's
+      type at every case is no region of the law (`SymmetricOf 3` and `0 x 0`)."""
+
+    def __init__(self, runner, loaded, values, params, cutoff_types=CUTOFF_TYPES, width=CUTOFF_WIDTH):
+        self.runner, self.values, self.params, self.width = runner, values, params, width
+        self.cutoffs = [k for k, (_, ty) in enumerate(params) if _base(ty) in cutoff_types]
+        self.cases_of = loaded.name(_GENERATORS_LTH, "casesOf") if loaded is not None else None
+        defined = {a.name: a for a in runner.program if isinstance(a, t.Define)}
+        self.declarations = []
+        for name, label in degeneracies_in(loaded):
+            d = defined.get(name)
+            if d is None or self.cases_of is None:
+                continue
+            binders, ty = [], d.type
+            while isinstance(ty, t.Pi):
+                binders.append((ty.name, ty.domain))
+                ty = ty.codomain
+            if isinstance(ty, t.App) and _base(ty.function) == "Degeneracies":
+                self.declarations.append((name, binders, ty.argument, label))
+
+    # ---------------------------------------------------------- the type's cases
+    def chain(self, ty):
+        """The types a parameter's type unfolds to, the most specific first: itself, the type a
+        subtype refines, a name's definition, a family applied."""
+        out = []
+        for _ in range(30):
+            out.append(ty)
+            if isinstance(ty, t.Subtype):
+                ty = ty.type
+            elif isinstance(ty, t.Var) and ty.name in self.runner.types and self.runner.types[ty.name] != ty:
+                ty = self.runner.types[ty.name]
+            elif (applied := self.runner.family_applied(ty)) is not None:
+                ty = applied
+            else:
+                break
+        return out
+
+    def instance(self, k, ty, labels):
+        """The declaration that classifies parameter `k` of type `ty`: (name, its arguments as a
+        function of the case, T); labels instead, every one that matches. [] when none does."""
+        out = []
+        for element in self.chain(ty):
+            for name, binders, declared, label in self.declarations:
+                if label != labels:
+                    continue
+                holes = {b for b, dom in binders if isinstance(dom, t.Universe)}
+                found = {}
+                if not _match(declared, element, holes, found):
+                    continue
+                args, ok = [], True
+                for b, dom in binders:
+                    if b in holes:
+                        if b not in found:
+                            ok = False
+                            break
+                        args.append(("given", found[b]))
+                        continue
+                    head = _program_head(dom)
+                    j = next((j for j, (_, pty) in enumerate(self.params)
+                              if j != k and head is not None and _program_head(pty) == head), None)
+                    # [proposed] a parameter no parameter of the law gives (the element of
+                    # `listDegeneracies`' witness) stays a hole the predicates never read
+                    args.append(("parameter", j) if j is not None else ("given", t.Var(f"%{b}")))
+                if not ok:
+                    continue
+                out.append((name, args, element))
+                if not labels:
+                    return out
+        return out
+
+    def declared(self, instance, case):
+        name, args, _ = instance
+        values = [case[a] if kind == "parameter" else a for kind, a in args]
+        return t.Proj(Runner.apply(t.Var(name), values), "cases")
+
+    def names_in(self, instance, case, x):
+        self.runner.fuel = self.values.fuel
+        cs = self.declared(instance, case)
+        found = _list(self.runner, Runner.apply(t.Var(self.cases_of), [instance[2], cs, x]))
+        return [_text(self.runner.whnf(n)) for n in found]
+
+    def cases_declared(self, instance, case):
+        """(name, witness) of each case of the declaration."""
+        self.runner.fuel = self.values.fuel
+        out = []
+        for c in _list(self.runner, self.declared(instance, case)):
+            out.append((_text(self.runner.whnf(t.Proj(c, "name"))), t.Proj(c, "witness")))
+        return out
+
+    # ---------------------------------------------------------- the numbers of a value
+    def numbers(self, v, out, budget=4000):
+        """The doubles a value holds: a literal, the entries of a vector or a matrix (a host array, or
+        a function on indices read entry by entry up to `_MOST_ENTRIES`), the parts of a pair, a
+        record, an injection, a list."""
+        if len(out) > budget:
+            return out
+        self.runner.fuel = self.values.fuel
+        v = self.runner.whnf(v)
+        if isinstance(v, t.Lit):
+            if isinstance(v.constant, t.FloatConst):
+                out.append(float(v.constant.value))
+            return out
+        obj = getattr(v, "obj", None)
+        if obj is not None:
+            array = getattr(obj, "array", obj)
+            if isinstance(array, np.ndarray) and array.dtype.kind == "f":
+                out.extend(float(x) for x in array.ravel()[:budget])
+            return out
+        if isinstance(v, t.RecordValue):
+            fields = dict(v.fields)
+            if "f" in fields and ("n" in fields):
+                dims = [self.runner.whnf(fields[d]) for d in ("m", "n") if d in fields]
+                if all(isinstance(d, t.Lit) and isinstance(d.constant, t.IntConst) for d in dims):
+                    shape = [d.constant.value for d in dims]
+                    f = self.runner.whnf(fields["f"])
+                    if getattr(f, "obj", None) is not None:
+                        return self.numbers(f, out, budget)
+                    if int(np.prod(shape)) <= _MOST_ENTRIES:
+                        for index in np.ndindex(*shape):
+                            self.numbers(Runner.apply(f, [t.Lit(t.IntConst(int(i))) for i in index]), out, budget)
+                    return out
+            for _, x in v.fields:
+                self.numbers(x, out, budget)
+            return out
+        if isinstance(v, t.Pair):
+            self.numbers(v.left, out, budget)
+            return self.numbers(v.right, out, budget)
+        if isinstance(v, t.Inj):
+            return self.numbers(v.value, out, budget)
+        if isinstance(v, t.App) and isinstance(v.function, t.App) and _base(v.function.function) == "cons":
+            self.numbers(v.function.argument, out, budget)
+            return self.numbers(v.argument, out, budget)
+        return out
+
+    # ---------------------------------------------------------- the law's regions
+    def sides(self, case):
+        """The cutoffs' sides this case is in: {"c above", "c below"} by parameter name; and the
+        names of the cutoffs that have sides (a cutoff of 0 has none)."""
+        found, defined = set(), set()
+        numbers = None
+        for j in self.cutoffs:
+            c = _number_of(self.runner, case[j])
+            if c is None or c == 0.0:
+                continue
+            name = self.params[j][0]
+            defined.add(name)
+            if numbers is None:
+                numbers = []
+                for k, v in enumerate(case):
+                    if k not in self.cutoffs:
+                        try:
+                            self.numbers(v, numbers)
+                        except _RAISES:
+                            pass
+            c = abs(c)
+            for x in numbers:
+                x = abs(x)
+                if c < x <= c * self.width:
+                    found.add(f"{name} above")
+                elif c / self.width <= x < c:
+                    found.add(f"{name} below")
+        return found, defined
+
+    def premises(self):
+        """The parameters of a subtype other than the cutoffs: (k, the cutoffs its type names)."""
+        out = []
+        for k, (name, ty) in enumerate(self.params):
+            if k in self.cutoffs:
+                continue
+            try:
+                _, predicates = self.values.form(ty)
+            except _RAISES:
+                continue
+            if predicates:
+                out.append((k, [j for j in self.cutoffs if j < k and _mentions(ty, self.params[j][0])]))
+        return out
+
+    def typed_at(self, k, case, replaced=None):
+        """Parameter k's type with the earlier parameters' values put in (one replaced: (j, value))."""
+        ty = self.params[k][1]
+        for j, ((earlier, _), v) in enumerate(zip(self.params[:k], case)):
+            if replaced is not None and replaced[0] == j:
+                v = replaced[1]
+            ty = _instantiate(earlier, v, ty)
+        return ty
+
+    def at_boundary(self, k, stated_by, case):
+        v = case[k]
+        ty = self.typed_at(k, case)
+        if stated_by:
+            for j in stated_by:
+                c = _number_of(self.runner, case[j])
+                if c is None:
+                    continue
+                for moved in (c * self.width, c / self.width):
+                    _, predicates = self.values.form(self.typed_at(k, case, (j, t.Lit(t.FloatConst(moved)))))
+                    if not self.values.holds(predicates, v):
+                        return True
+            return False
+        base, predicates = self.values.form(ty)
+        kind = base.name if isinstance(base, t.Var) else None
+        if kind in ("Int", "Float64"):
+            lo, hi = self.values.bounds(predicates, kind)
+            if lo is not None or hi is not None:
+                x = _number_of(self.runner, v)
+                if x is None:
+                    return False
+                near = [n for b in (lo, hi) if b is not None for n in generators.neighbours(b, kind == "Int")]
+                return any(x == n for n in near)
+        return True  # an exact premise: the premise held (7.S14)
+
+    # ---------------------------------------------------------- classify
+    def classify(self, cases):
+        """The grading regions with their cases, in order (the type's, then each cutoff's sides,
+        then each premise's boundary), and the labels with theirs: ([(source, name, n)], [(name, n)])."""
+        counts, labels = {}, {}
+        order, label_order = [], []
+        def add(key, into, order_, n=1):
+            if key not in into:
+                into[key] = 0
+                order_.append(key)
+            into[key] += n
+        first = cases[0] if cases else None
+        instances, label_instances = {}, {}
+        if first is not None:
+            for k in range(len(self.params)):
+                try:
+                    ty = self.typed_at(k, first)
+                    instances[k] = self.instance(k, ty, labels=False)
+                    label_instances[k] = self.instance(k, ty, labels=True)
+                except _RAISES:
+                    instances[k], label_instances[k] = [], []
+        # every declared case is a region before any case is counted, with its witness to drop it by
+        witnesses = {}
+        for k, found in instances.items():
+            for inst in found:
+                try:
+                    for name, w in self.cases_declared(inst, first):
+                        add(("FromType", name), counts, order, 0)
+                        witnesses.setdefault(name, []).append((k, w))
+                except _RAISES:
+                    pass
+        for k, found in label_instances.items():
+            for inst in found:
+                try:
+                    for name, _ in self.cases_declared(inst, first):
+                        add(name, labels, label_order, 0)
+                except _RAISES:
+                    pass
+        premises = self.premises()
+        sided = set()
+        if first is not None:
+            for j in self.cutoffs:
+                c = _number_of(self.runner, first[j])
+                if c is not None and c != 0.0:
+                    add(("FromLaw", f"{self.params[j][0]} above"), counts, order, 0)
+                    add(("FromLaw", f"{self.params[j][0]} below"), counts, order, 0)
+            for k, _ in premises:
+                add(("FromLaw", f"{self.params[k][0]} boundary"), counts, order, 0)
+        inside = {name: False for name in witnesses}  # a witness inside its parameter's type at some case
+        for case in cases:
+            met = set()
+            for k, found in instances.items():
+                for inst in found:
+                    try:
+                        met |= set(self.names_in(inst, case, case[k]))
+                    except _RAISES:
+                        pass
+            for name in met:
+                if ("FromType", name) in counts:
+                    counts[("FromType", name)] += 1
+            for k, found in label_instances.items():
+                for inst in found:
+                    try:
+                        for name in set(self.names_in(inst, case, case[k])):
+                            add(name, labels, label_order)
+                    except _RAISES:
+                        pass
+            try:
+                found_sides, _ = self.sides(case)
+            except _RAISES:
+                found_sides = set()
+            for name in found_sides:
+                if ("FromLaw", name) in counts:
+                    counts[("FromLaw", name)] += 1
+            for k, stated_by in premises:
+                try:
+                    if self.at_boundary(k, stated_by, case):
+                        counts[("FromLaw", f"{self.params[k][0]} boundary")] += 1
+                except _RAISES:
+                    pass
+            for name, ws in witnesses.items():
+                if inside[name] or counts[("FromType", name)]:
+                    continue
+                for k, w in ws:
+                    try:
+                        _, predicates = self.values.form(self.typed_at(k, case))
+                        self.runner.fuel = self.values.fuel
+                        if self.values.holds(predicates, self.runner.value(w)):
+                            inside[name] = True
+                            break
+                    except _RAISES:
+                        inside[name] = True  # a witness that cannot be read is kept
+                        break
+        regions = [(source, name, counts[(source, name)]) for source, name in order
+                   if not (source == "FromType" and counts[(source, name)] == 0 and not inside.get(name, True))]
+        return regions, [(name, labels[name]) for name in label_order]
+
+
+def regions_record(regions):
+    """certification.lth's `RegionEvidence` as the entry keeps it (7.S9): each region with its n."""
+    return [{"region": {"source": source, "name": name}, "n": n} for source, name, n in regions]
+
+
+def labels_record(labels, evaluated):
+    """An author's labels with their share of the cases evaluated (7.S14): informative, no grade."""
+    return [{"label": name, "n": n, "share": (n / evaluated if evaluated else 0.0)} for name, n in labels]
 
 
 def is_statistical(runner, law):
@@ -937,27 +1385,66 @@ def _every_case(values, params, plan, limit, prefix=()):
     except NoGenerator as exc:
         raise NoGenerator(f"{params[k][0]} : {_show(params[k][1])}: {exc}") from exc
     for v in every:
+        if plan[k] is not None:
+            _in_its_type(values, params[k], ty, v)
         out.extend(_every_case(values, params, plan, limit, prefix + (v,)))
         if len(out) > limit:
             break
     return out
 
 
-def _draw_case(values, params, plan, walked):
+def _draw_case(values, params, plan, walked, cutoffs=()):
+    """One case: each parameter drawn, generated or walked in its census, in order. The numbers the
+    cutoffs among the earlier parameters (`cutoffs`, their indices) have taken are the literals of
+    7.S4's special values for the later ones (D-2026-10-16-j: the two sides of a cutoff given mass)."""
     case = []
     for k, (name, ty) in enumerate(params):
         for (earlier, _), v in zip(params, case):
             ty = _instantiate(earlier, v, ty)
+        values.literals = tuple(x for j in cutoffs if j < k and (x := _number_of(values.runner, case[j])) is not None)
         # a census is walked in turn, each value once per round (generators.lth's `walk`, gen.10);
         # a generator draws from the seed it threads (7.S1)
         try:
             if isinstance(plan[k], Generator):
                 case.append(values.generate(plan[k], {n: v for (n, _), v in zip(params, case)}, ty))
+            elif plan[k] is not None:
+                v = plan[k][walked % len(plan[k])]
+                _in_its_type(values, params[k], ty, v)
+                case.append(v)
             else:
-                case.append(plan[k][walked % len(plan[k])] if plan[k] is not None else values.draw(ty))
+                case.append(values.draw(ty))
         except (NoGenerator, Unfit, Invalid) as exc:
             raise type(exc)(f"{name} : {_show(params[k][1])}: {exc}") from exc
+    values.literals = ()
     return tuple(case)
+
+
+def _in_its_type(values, param, ty, v):
+    """A census value checked against the predicate of its parameter's type, as a generator's is
+    (7.S1; report-theory.md section 4, finding 1: a census bound to `r : GradingRegion` ran a label):
+    Invalid otherwise, and the law is not run. Checked once per value when the type reads no
+    earlier parameter."""
+    key = (param[0], id(v)) if ty == param[1] else None
+    checked = values.__dict__.setdefault("checked", {})
+    if key is not None and checked.get(key) is v:
+        return
+    _, predicates = values.form(ty)
+    if predicates and not values.holds(predicates, v):
+        raise Invalid(f"the census gives {_show(v)}, a value outside {_show(ty)} (7.S1)")
+    if key is not None:
+        checked[key] = v
+
+
+def _number_of(runner, v):
+    """The number a value is (a census of one naming `1.0e-12`, a literal), or None."""
+    try:
+        runner.fuel = 10000
+        w = runner.whnf(v)
+    except _RAISES:
+        return None
+    if isinstance(w, t.Lit) and isinstance(w.constant, (t.IntConst, t.FloatConst)):
+        return float(w.constant.value)
+    return None
 
 
 def _is_generator(runner, loaded, binding):
@@ -1472,6 +1959,11 @@ def settle(entry, outcome):
         return _settle_tested(entry, outcome)
     entry["evidence"] = {"Points": {"evaluated": outcome.evaluated, "raised": len(outcome.raised),
                                     "coverage": _show(outcome.evidence.coverage), "verdict": outcome.verdict}}
+    # 7.S9: the entry records its regions and its labels (certification.lth's `RegionEvidence`)
+    if outcome.regions is not None:
+        entry["regions"] = outcome.regions
+    if outcome.labels:
+        entry["labels"] = outcome.labels
     if outcome.spec.control:
         # a control's outcome: refuted is the control passing, a grade the control failing; neither
         # is the law's grade nor its failure (7.S19, D-2026-10-15-a)
