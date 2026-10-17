@@ -74,6 +74,12 @@ test "Small" (SampledMode linear) (whereBindings <- cut)
 test "Count" (SampledMode linear)
 test "Count" ExhaustiveMode (whereBindings <- badNat)
 test "Small" (SampledMode linear)
+three : Int := 3
+one : Mat Float64 := zeroMat 2 2
+fixedNat : List Binding := [ { parameter := just "k", type := nothing, generator := "three", coverage := Listed } ]
+fixedMat : List Binding := [ { parameter := just "a", type := nothing, generator := "one", coverage := Listed } ]
+test "Count" ExhaustiveMode (whereBindings <- fixedNat)
+test "Dims" ExhaustiveMode (whereBindings <- fixedMat)
 '''
 
 
@@ -116,6 +122,14 @@ def test_a_cutoff_gives_its_two_sides_and_a_premise_its_boundary(outcomes):
     assert _regions(outcomes[2]) == {}
     assert _regions(outcomes[3]) == {"k boundary": _regions(outcomes[3])["k boundary"]}
     assert _regions(outcomes[3])["k boundary"] > 0  # 0 and 1, the bound and its neighbour, drawn
+
+
+def test_a_parameter_bound_to_one_value_gives_no_region_of_any_kind(outcomes):
+    # the law is claimed only at that value (the coordinator, 2026-10-17): no premise's boundary,
+    # no degenerate case of its type, though the value (the zero matrix) is in one
+    assert outcomes[6].verdict == "Confirmed" or outcomes[6].grade is not None
+    assert _regions(outcomes[6]) == {}
+    assert outcomes[7].grade is not None and _regions(outcomes[7]) == {}
 
 
 def test_a_census_value_outside_its_type_makes_the_law_not_run(outcomes):

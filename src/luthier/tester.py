@@ -878,7 +878,9 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
     if loaded is not None and points:
         try:
             fixed = [k for k, p in enumerate(plan) if isinstance(p, list)]  # bound to a census, not drawn
-            found, named = Classifier(runner, loaded, values, params, fixed=fixed).classify([c for c, _ in points])
+            single = [k for k in fixed if len(plan[k]) == 1]  # bound to one value: the law is claimed there only
+            found, named = Classifier(runner, loaded, values, params, fixed=fixed,
+                                      single=single).classify([c for c, _ in points])
             regions, labels = regions_record(found), labels_record(named, len(points))
         except _RAISES:
             pass
@@ -977,6 +979,9 @@ class Classifier:
       `w` the width; a cutoff of 0 has no sides, and gives no region; a cutoff bound to a census (a
       value the demand fixed) has none either: its sides exist only when it is drawn (the
       coordinator's answer to finding 6, 2026-10-17);
+    - a parameter bound to a census of one value gives no region of any kind, neither a degenerate
+      case of its type nor a premise's boundary (nor a cutoff's sides, above): the law is claimed
+      only at that value (the coordinator's answer to the remaining finding, 2026-10-17);
     - the boundary of a premise stated by a cutoff (`PsdAt m fl`) is where its predicate holds at the
       cutoff and fails at the cutoff times w or divided by it; of a premise with bounds (`Nat`,
       `Fin n`, `Seed`), the bounds and their neighbours; of an exact premise (`Symmetric`), every case
@@ -984,8 +989,10 @@ class Classifier:
     - a degenerate case of the type that no case met and whose witness is outside the parameter's
       type at every case is no region of the law (`SymmetricOf 3` and `0 x 0`)."""
 
-    def __init__(self, runner, loaded, values, params, cutoff_types=CUTOFF_TYPES, width=CUTOFF_WIDTH, fixed=()):
+    def __init__(self, runner, loaded, values, params, cutoff_types=CUTOFF_TYPES, width=CUTOFF_WIDTH, fixed=(),
+                 single=()):
         self.runner, self.values, self.params, self.width = runner, values, params, width
+        self.single = set(single)  # bound to one value: no region of any kind from it
         self.cutoffs = [k for k, (_, ty) in enumerate(params) if is_cutoff(runner, ty, cutoff_types)]
         # [the coordinator's answer, 2026-10-17] a cutoff bound to a census is fixed by the demand
         # and is never drawn: its two sides exist only when it is drawn, so only those cutoffs give them
@@ -1153,7 +1160,7 @@ class Classifier:
         its predicate is the checker's to decide (4.R8), and it has no boundary a case can reach."""
         out = []
         for k, (name, ty) in enumerate(self.params):
-            if k in self.cutoffs:
+            if k in self.cutoffs or k in self.single:
                 continue
             try:
                 base, predicates = self.values.form(ty)
@@ -1214,7 +1221,7 @@ class Classifier:
             for k in range(len(self.params)):
                 try:
                     ty = self.typed_at(k, first)
-                    instances[k] = self.instance(k, ty, labels=False)
+                    instances[k] = [] if k in self.single else self.instance(k, ty, labels=False)
                     label_instances[k] = self.instance(k, ty, labels=True)
                 except _RAISES:
                     instances[k], label_instances[k] = [], []
