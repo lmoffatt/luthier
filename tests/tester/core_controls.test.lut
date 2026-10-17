@@ -1,0 +1,229 @@
+-- tests/tester/core_controls.test.lut: the controls of core_laws.test.lut (bite 2 of
+-- record/plan/core-2026-10-17/execution.md). Each line is a law's line of core_laws.test.lut
+-- written `(control <- true)`, its profile binding a wrong instance in place of the real one, and
+-- is expected to be refuted: it shows that the property can fail, so that its passing on the real
+-- instance is not vacuous (L9.14; 7.S19 as D-2026-10-15-a generalized it). The wrong instances are
+-- this program's own; the unbroken ones they stand beside are core_instances.lut's, whose store
+-- holds the entries (tests/tester/core_instances.cert.json, untracked). Written 2026-10-17 by
+-- Claude Fable 5.1, an agent of the coordinating session, on
+-- record/plan/core-2026-10-17/prompt-bite-2.md.
+--
+-- The wrong instances the brief names: `-` for Commutative and Associative; `<` for Reflexive;
+-- `fn x { x + 1 }` for Idempotent and Involutive; `fn x y { x }` for Cancellative; a bound of zero
+-- for AssociativeWithin on the doubles. The rest are chosen so that the refutation does not
+-- depend on a rare draw: `always` (every pair related) against Antisymmetric, `near` (within 3)
+-- against Transitive, `equal` against Total and Asymmetric, implication against the laws of a
+-- Boolean operation, a projection against the neutral law of the other side.
+
+import "test.lth" test ExhaustiveMode SampledMode
+import "generators_model.lut" linear
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "core_instances.lut" leq less equal parity plus minus times first second zero one
+  identity negate succ pred double square timesZero nonNegative flippedMinus
+  boolAnd boolOr boolNot top bottom append
+  fplus ftimes fzero fnegate noBound1 noBound2 noBound3
+  IntReflexive IntIrreflexive IntSymmetric IntAntisymmetric IntAsymmetric IntTransitive IntTotal
+  IntEquivalence IntPreorder IntPartialOrder IntTotalOrder IntStrictOrder IntBothWaysEqual
+  IntAssociative IntCommutative IntIdempotent IntLeftNeutral IntRightNeutral IntNeutral IntAbsorbing
+  IntCancellative IntInvertible IntDistributive IntAbsorptive IntDistinct
+  BoolAssociative BoolCommutative BoolIdempotent BoolNeutral BoolAbsorbing BoolDistributive BoolAbsorptive
+  BoolComplemented StringAssociative StringCommutative StringNeutral
+  FloatAssociativeWithin FloatCommutativeWithin FloatNeutralWithin FloatDistributiveWithin FloatInvertibleWithin
+  IntPointwise IntPointwise2 IntInjective BoolInjective IntSurjective IntInverse IntIsomorphism IntBijective
+  IntIdempotentFunction IntInvolutive BoolInvolutive IntMonotone IntPreserving IntCongruent IntLandsIn
+  FloatIdempotentWithin FloatInvolutiveWithin FloatPointwiseWithin
+
+-- ---------------------------------------------------------------- the wrong instances
+
+-- every pair related, written as comparability so that the predicate reads its arguments (4.R3)
+always : Int -> Int -> Bool := fn a b { a <= b or b <= a }
+near : Int -> Int -> Bool := fn a b { a - b <= 3 and b - a <= 3 }
+-- a partial order that is not total: `<=` within a parity class
+leqSameParity : Int -> Int -> Bool := fn a b { a <= b and a mod 2 == b mod 2 }
+half : Int -> Int := fn y { y / 2 }
+boolImplies : Bool -> Bool -> Bool := fn a b { if a then b else true }
+constTrue : Bool -> Bool := fn b { b or not b }
+appendMarked : String -> String -> String := fn a b { a + b + "x" }
+marker : String := "x"
+fminus : Float64 -> Float64 -> Float64 := fn a b { a - b }
+fone : Float64 := 1.0
+fsucc : Float64 -> Float64 := fn x { x + 1.0 }
+fidentity : Float64 -> Float64 := fn x { x }
+
+-- ---------------------------------------------------------------- the profiles
+
+onLeq : List Binding := [ { parameter := just "r", type := nothing, generator := "leq", coverage := Listed } ]
+onLess : List Binding := [ { parameter := just "r", type := nothing, generator := "less", coverage := Listed } ]
+onEqual : List Binding := [ { parameter := just "r", type := nothing, generator := "equal", coverage := Listed } ]
+onAlways : List Binding := [ { parameter := just "r", type := nothing, generator := "always", coverage := Listed } ]
+onNear : List Binding := [ { parameter := just "r", type := nothing, generator := "near", coverage := Listed } ]
+onLeqSameParity : List Binding := [ { parameter := just "r", type := nothing, generator := "leqSameParity", coverage := Listed } ]
+
+onMinus : List Binding := [ { parameter := just "op", type := nothing, generator := "minus", coverage := Listed } ]
+onPlus : List Binding := [
+  { parameter := just "op", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "zero", coverage := Listed } ]
+onPlusWithOne : List Binding := [
+  { parameter := just "op", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "one", coverage := Listed } ]
+onPlusWithIdentity : List Binding := [
+  { parameter := just "op", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "zero", coverage := Listed },
+  { parameter := just "inv", type := nothing, generator := "identity", coverage := Listed } ]
+onFirst : List Binding := [
+  { parameter := just "op", type := nothing, generator := "first", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "zero", coverage := Listed } ]
+onSecond : List Binding := [
+  { parameter := just "op", type := nothing, generator := "second", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "zero", coverage := Listed } ]
+onPlusOverTimes : List Binding := [
+  { parameter := just "product", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "sum", type := nothing, generator := "times", coverage := Listed },
+  { parameter := just "meet", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "join", type := nothing, generator := "times", coverage := Listed } ]
+zeroAndZero : List Binding := [
+  { parameter := just "a", type := nothing, generator := "zero", coverage := Listed },
+  { parameter := just "b", type := nothing, generator := "zero", coverage := Listed } ]
+
+onImplies : List Binding := [ { parameter := just "op", type := nothing, generator := "boolImplies", coverage := Listed } ]
+onAndWithBottom : List Binding := [
+  { parameter := just "op", type := nothing, generator := "boolAnd", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "bottom", coverage := Listed },
+  { parameter := just "z", type := nothing, generator := "top", coverage := Listed },
+  { parameter := just "complement", type := nothing, generator := "boolNot", coverage := Listed } ]
+onImpliesOverAnd : List Binding := [
+  { parameter := just "product", type := nothing, generator := "boolImplies", coverage := Listed },
+  { parameter := just "sum", type := nothing, generator := "boolAnd", coverage := Listed },
+  { parameter := just "meet", type := nothing, generator := "boolImplies", coverage := Listed },
+  { parameter := just "join", type := nothing, generator := "boolAnd", coverage := Listed } ]
+onConstTrue : List Binding := [ { parameter := just "f", type := nothing, generator := "constTrue", coverage := Listed } ]
+
+onAppend : List Binding := [ { parameter := just "op", type := nothing, generator := "append", coverage := Listed } ]
+onAppendMarked : List Binding := [
+  { parameter := just "op", type := nothing, generator := "appendMarked", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "marker", coverage := Listed } ]
+onAppendWithMarker : List Binding := [
+  { parameter := just "op", type := nothing, generator := "append", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "marker", coverage := Listed } ]
+
+onFloatPlusUnbounded : List Binding := [
+  { parameter := just "op", type := nothing, generator := "fplus", coverage := Listed },
+  { parameter := just "e", type := nothing, generator := "fone", coverage := Listed },
+  { parameter := just "inv", type := nothing, generator := "fidentity", coverage := Listed },
+  { parameter := just "bound3", type := nothing, generator := "noBound3", coverage := Listed },
+  { parameter := just "bound1", type := nothing, generator := "noBound1", coverage := Listed } ]
+onFloatMinus : List Binding := [
+  { parameter := just "op", type := nothing, generator := "fminus", coverage := Listed },
+  { parameter := just "bound2", type := nothing, generator := "noBound2", coverage := Listed } ]
+onFloatTimesOverPlusUnbounded : List Binding := [
+  { parameter := just "product", type := nothing, generator := "ftimes", coverage := Listed },
+  { parameter := just "sum", type := nothing, generator := "fplus", coverage := Listed },
+  { parameter := just "bound3", type := nothing, generator := "noBound3", coverage := Listed } ]
+
+onSucc : List Binding := [ { parameter := just "f", type := nothing, generator := "succ", coverage := Listed } ]
+succAgainstIdentity : List Binding := [
+  { parameter := just "f", type := nothing, generator := "succ", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "identity", coverage := Listed } ]
+minusAgainstFlipped : List Binding := [
+  { parameter := just "f", type := nothing, generator := "minus", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "flippedMinus", coverage := Listed } ]
+onTimesZero : List Binding := [ { parameter := just "f", type := nothing, generator := "timesZero", coverage := Listed } ]
+doubleWithHalf : List Binding := [
+  { parameter := just "f", type := nothing, generator := "double", coverage := Listed },
+  { parameter := just "s", type := nothing, generator := "half", coverage := Listed } ]
+succUndoneBySucc : List Binding := [
+  { parameter := just "f", type := nothing, generator := "succ", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "succ", coverage := Listed },
+  { parameter := just "to", type := nothing, generator := "succ", coverage := Listed },
+  { parameter := just "from", type := nothing, generator := "succ", coverage := Listed } ]
+negateOverLeq : List Binding := [
+  { parameter := just "r", type := nothing, generator := "leq", coverage := Listed },
+  { parameter := just "t", type := nothing, generator := "leq", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "negate", coverage := Listed } ]
+squareOverPlus : List Binding := [
+  { parameter := just "opA", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "opB", type := nothing, generator := "plus", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "square", coverage := Listed } ]
+identityOverParity : List Binding := [
+  { parameter := just "rA", type := nothing, generator := "parity", coverage := Listed },
+  { parameter := just "f", type := nothing, generator := "identity", coverage := Listed } ]
+succInNonNegative : List Binding := [
+  { parameter := just "f", type := nothing, generator := "succ", coverage := Listed },
+  { parameter := just "inside", type := nothing, generator := "nonNegative", coverage := Listed } ]
+onFloatSucc : List Binding := [
+  { parameter := just "f", type := nothing, generator := "fsucc", coverage := Listed },
+  { parameter := just "g", type := nothing, generator := "fidentity", coverage := Listed },
+  { parameter := just "bound1", type := nothing, generator := "noBound1", coverage := Listed } ]
+
+-- ---------------------------------------------------------------- relations.lth
+
+test "IntReflexive" (SampledMode linear) (profile <- onLess) (control <- true)
+test "IntIrreflexive" (SampledMode linear) (profile <- onLeq) (control <- true)
+test "IntSymmetric" (SampledMode linear) (profile <- onLeq) (control <- true)
+test "IntAntisymmetric" (SampledMode linear) (profile <- onAlways) (control <- true)
+test "IntAsymmetric" (SampledMode linear) (profile <- onEqual) (control <- true)
+test "IntTransitive" (SampledMode linear) (profile <- onNear) (control <- true)
+test "IntTotal" (SampledMode linear) (profile <- onEqual) (control <- true)
+test "IntEquivalence" (SampledMode linear) (profile <- onLeq) (control <- true)
+test "IntPreorder" (SampledMode linear) (profile <- onLess) (control <- true)
+test "IntPartialOrder" (SampledMode linear) (profile <- onAlways) (control <- true)
+test "IntTotalOrder" (SampledMode linear) (profile <- onLeqSameParity) (control <- true)
+test "IntStrictOrder" (SampledMode linear) (profile <- onLeq) (control <- true)
+test "IntBothWaysEqual" (SampledMode linear) (profile <- onAlways) (control <- true)
+
+-- ---------------------------------------------------------------- operations.lth
+
+test "IntAssociative" (SampledMode linear) (profile <- onMinus) (control <- true)
+test "IntCommutative" (SampledMode linear) (profile <- onMinus) (control <- true)
+test "IntIdempotent" (SampledMode linear) (profile <- onPlusWithOne) (control <- true)
+test "IntLeftNeutral" (SampledMode linear) (profile <- onFirst) (control <- true)
+test "IntRightNeutral" (SampledMode linear) (profile <- onSecond) (control <- true)
+test "IntNeutral" (SampledMode linear) (profile <- onPlusWithOne) (control <- true)
+test "IntAbsorbing" (SampledMode linear) (profile <- onPlus) (control <- true)
+test "IntCancellative" (SampledMode linear) (profile <- onFirst) (control <- true)
+test "IntInvertible" (SampledMode linear) (profile <- onPlusWithIdentity) (control <- true)
+test "IntDistributive" (SampledMode linear) (profile <- onPlusOverTimes) (control <- true)
+test "IntAbsorptive" (SampledMode linear) (profile <- onPlusOverTimes) (control <- true)
+test "IntDistinct" ExhaustiveMode (profile <- zeroAndZero) (control <- true)
+
+test "BoolAssociative" ExhaustiveMode (profile <- onImplies) (control <- true)
+test "BoolCommutative" ExhaustiveMode (profile <- onImplies) (control <- true)
+test "BoolIdempotent" ExhaustiveMode (profile <- onImplies) (control <- true)
+test "BoolNeutral" ExhaustiveMode (profile <- onAndWithBottom) (control <- true)
+test "BoolAbsorbing" ExhaustiveMode (profile <- onAndWithBottom) (control <- true)
+test "BoolDistributive" ExhaustiveMode (profile <- onImpliesOverAnd) (control <- true)
+test "BoolAbsorptive" ExhaustiveMode (profile <- onImpliesOverAnd) (control <- true)
+test "BoolComplemented" ExhaustiveMode (profile <- onAndWithBottom) (control <- true)
+
+test "StringAssociative" (SampledMode linear) (profile <- onAppendMarked) (control <- true)
+-- `+` on strings is not commutative: a control with no confirmed instance, documenting by absence
+test "StringCommutative" (SampledMode linear) (profile <- onAppend) (control <- true)
+test "StringNeutral" (SampledMode linear) (profile <- onAppendWithMarker) (control <- true)
+
+test "FloatAssociativeWithin" (SampledMode linear) (profile <- onFloatPlusUnbounded) (control <- true)
+test "FloatCommutativeWithin" (SampledMode linear) (profile <- onFloatMinus) (control <- true)
+test "FloatNeutralWithin" (SampledMode linear) (profile <- onFloatPlusUnbounded) (control <- true)
+test "FloatDistributiveWithin" (SampledMode linear) (profile <- onFloatTimesOverPlusUnbounded) (control <- true)
+test "FloatInvertibleWithin" (SampledMode linear) (profile <- onFloatPlusUnbounded) (control <- true)
+
+-- ---------------------------------------------------------------- functions.lth
+
+test "IntPointwise" (SampledMode linear) (profile <- succAgainstIdentity) (control <- true)
+test "IntPointwise2" (SampledMode linear) (profile <- minusAgainstFlipped) (control <- true)
+test "IntInjective" (SampledMode linear) (profile <- onTimesZero) (control <- true)
+test "BoolInjective" ExhaustiveMode (profile <- onConstTrue) (control <- true)
+test "IntSurjective" (SampledMode linear) (profile <- doubleWithHalf) (control <- true)
+test "IntInverse" (SampledMode linear) (profile <- succUndoneBySucc) (control <- true)
+test "IntIsomorphism" (SampledMode linear) (profile <- succUndoneBySucc) (control <- true)
+test "IntBijective" (SampledMode linear) (profile <- doubleWithHalf) (control <- true)
+test "IntIdempotentFunction" (SampledMode linear) (profile <- onSucc) (control <- true)
+test "IntInvolutive" (SampledMode linear) (profile <- onSucc) (control <- true)
+test "BoolInvolutive" ExhaustiveMode (profile <- onConstTrue) (control <- true)
+test "IntMonotone" (SampledMode linear) (profile <- negateOverLeq) (control <- true)
+test "IntPreserving" (SampledMode linear) (profile <- squareOverPlus) (control <- true)
+test "IntCongruent" (SampledMode linear) (profile <- identityOverParity) (control <- true)
+test "IntLandsIn" (SampledMode linear) (profile <- succInNonNegative) (control <- true)
+test "FloatIdempotentWithin" (SampledMode linear) (profile <- onFloatSucc) (control <- true)
+test "FloatInvolutiveWithin" (SampledMode linear) (profile <- onFloatSucc) (control <- true)
+test "FloatPointwiseWithin" (SampledMode linear) (profile <- onFloatSucc) (control <- true)

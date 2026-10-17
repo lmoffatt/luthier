@@ -1,0 +1,195 @@
+-- tests/tester/core_instances.lut: the properties of core/properties/ applied at listed instances,
+-- as laws over the instance, so that core_laws.test.lut confirms each on a real instance and
+-- core_controls.test.lut refutes it on a wrong one (L9.14: a law without a refuted model is
+-- evidence of nothing). Written 2026-10-17 by Claude Fable 5.1, an agent of the coordinating
+-- session, on record/plan/core-2026-10-17/prompt-bite-2.md (bite 2 of execution.md).
+--
+-- Why a file beside the two test programs. A control is matched to its law by the hash of the
+-- law's cone (certify.py `control_status`), so the law the controls file names must be the very
+-- definition the laws file names, with the instance a parameter bound by each program's census;
+-- and a test program is never imported (D-2026-10-16-e). So the wrappers live here, as
+-- fit_cutoffs.lut and plot_cases.lut do for their test programs, and the entries of every line
+-- land in this file's store, tests/tester/core_instances.cert.json, untracked under tests/
+-- (D-2026-10-16-h); bite 3 moves the claims into core.lut, where they get their tracked store.
+-- The real instances are defined here too, since the controls need the unbroken ones beside
+-- the one they break; the broken instances are core_controls.test.lut's own.
+--
+-- Each wrapper is named by the type and the property (`IntReflexive`, `BoolCommutative`); its
+-- first parameters are the instance (`r` a relation, `op` an operation, `f` a function, `e` a
+-- neutral element, `z` an absorbing one, `inv` an inverse, `bound1`..`bound3` a bound by its
+-- arity), bound by name from a profile, and the rest are the quantified variables the tester
+-- draws. The equalities are the structural `==` of each concrete type, as a value of `Object`
+-- (kernel_laws.lth; `structural A` in bite 3).
+
+import "kernel_laws.lth" Object
+import "core/properties/relations.lth" Related Chain Both Reflexive Irreflexive Symmetric Antisymmetric
+  Asymmetric Transitive Total Equivalence Preorder PartialOrder TotalOrder StrictOrder
+import "core/properties/operations.lth" Associative Commutative Idempotent LeftNeutral RightNeutral Neutral
+  Absorbing Cancellative Invertible Distributive Absorptive Complemented Distinct
+  AssociativeWithin CommutativeWithin NeutralWithin DistributiveWithin InvertibleWithin
+import "core/properties/functions.lth" id compose flip const Pointwise Pointwise2 Injective Surjective Inverse
+  Isomorphism Bijective Idempotent as IdempotentFunction Involutive Monotone Preserving Congruent LandsIn
+  IdempotentWithin InvolutiveWithin PointwiseWithin
+
+-- ---------------------------------------------------------------- the equalities
+
+intEq : Object Int := { eq := fn x y { x == y } }
+boolEq : Object Bool := { eq := fn x y { x == y } }
+stringEq : Object String := { eq := fn x y { x == y } }
+
+-- ---------------------------------------------------------------- the instances
+
+-- relations on Int
+leq : Int -> Int -> Bool := fn a b { a <= b }
+less : Int -> Int -> Bool := fn a b { a < b }
+equal : Int -> Int -> Bool := fn a b { a == b }
+-- the same remainder modulo 2 (the host's floor remainder, so -3 mod 2 is 1)
+parity : Int -> Int -> Bool := fn a b { a mod 2 == b mod 2 }
+
+-- operations and elements of Int
+plus : Int -> Int -> Int := fn a b { a + b }
+minus : Int -> Int -> Int := fn a b { a - b }
+times : Int -> Int -> Int := fn a b { a * b }
+smaller : Int -> Int -> Int := fn a b { if a <= b then a else b }
+larger : Int -> Int -> Int := fn a b { if a <= b then b else a }
+-- the projections: `second` is left-neutral for every element and `first` right-neutral
+first : Int -> Int -> Int := fn a b { a }
+second : Int -> Int -> Int := fn a b { b }
+zero : Int := 0
+one : Int := 1
+
+-- functions on Int
+identity : Int -> Int := id Int
+negate : Int -> Int := fn x { 0 - x }
+succ : Int -> Int := fn x { x + 1 }
+pred : Int -> Int := fn x { x - 1 }
+double : Int -> Int := fn x { x * 2 }
+square : Int -> Int := fn x { x * x }
+clamp : Int -> Int := fn x { if x < 0 then 0 else x }
+timesZero : Int -> Int := fn x { x * 0 }
+remainder2 : Int -> Int := fn x { x mod 2 }
+nonNegative : Int -> Bool := fn y { 0 <= y }
+-- built with the combinators, each equal pointwise to a function written by hand
+succThenPred : Int -> Int := compose Int Int Int pred succ
+zeroConst : Int -> Int := const Int Int 0
+flippedMinus : Int -> Int -> Int := flip Int Int Int minus
+reversedMinus : Int -> Int -> Int := fn a b { b - a }
+
+-- Bool
+boolAnd : Bool -> Bool -> Bool := fn a b { a and b }
+boolOr : Bool -> Bool -> Bool := fn a b { a or b }
+boolNot : Bool -> Bool := fn b { not b }
+top : Bool := true
+bottom : Bool := false
+
+-- String
+append : String -> String -> String := fn a b { a + b }
+empty : String := ""
+
+-- Float64, with the distance and the bounds of the within-bound laws. `unitRoundoff` is
+-- 2^-53, the unit roundoff of the doubles; `gamma2 = 2u / (1 - 2u)` (Higham 2002, section 2.2);
+-- `sumBound` is the bound of D-2026-10-17-f as dc781f2 corrects it, `3 gamma2 (|x| + |y| + |z|)`,
+-- and `productBound` the same derivation for `x (y + z)` against `x y + x z`: each side carries
+-- two roundings, so the two differ by at most `(2 gamma2 + gamma2^2) |x| (|y| + |z|)`, below
+-- `3 gamma2 |x| (|y| + |z|)`. `scaleBound` bounds `x * 0.1` against `x / 10`: the first carries
+-- the rounding of 0.1 and of the product, the second one rounding, three in all, below
+-- `gamma2 |x|` by a factor near two. A bound of zero is the exact property, the control's.
+fplus : Float64 -> Float64 -> Float64 := fn a b { a + b }
+ftimes : Float64 -> Float64 -> Float64 := fn a b { a * b }
+fzero : Float64 := 0.0
+fnegate : Float64 -> Float64 := fn x { 0.0 - x }
+fclamp : Float64 -> Float64 := fn x { if x < 0.0 then 0.0 else x }
+tenth : Float64 -> Float64 := fn x { x * 0.1 }
+byTen : Float64 -> Float64 := fn x { x / 10.0 }
+absolute : Float64 -> Float64 := fn x { if x < 0.0 then 0.0 - x else x }
+absDistance : Float64 -> Float64 -> Float64 := fn a b { absolute (a - b) }
+unitRoundoff : Float64 := 1.0 / 9007199254740992.0
+gamma2 : Float64 := 2.0 * unitRoundoff / (1.0 - 2.0 * unitRoundoff)
+sumBound : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 3.0 * gamma2 * (absolute x + absolute y + absolute z) }
+productBound : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 3.0 * gamma2 * absolute x * (absolute y + absolute z) }
+scaleBound : Float64 -> Float64 := fn x { gamma2 * absolute x }
+noBound1 : Float64 -> Float64 := fn x { 0.0 }
+noBound2 : Float64 -> Float64 -> Float64 := fn x y { 0.0 }
+noBound3 : Float64 -> Float64 -> Float64 -> Float64 := fn x y z { 0.0 }
+
+-- ---------------------------------------------------------------- relations.lth at Int
+
+IntReflexive (r : Int -> Int -> Bool) (x : Int) : Bool := Reflexive Int r x
+IntIrreflexive (r : Int -> Int -> Bool) (x : Int) : Bool := Irreflexive Int r x
+IntSymmetric (r : Int -> Int -> Bool) (p : Related Int r) : Bool := Symmetric Int r p
+IntAntisymmetric (r : Int -> Int -> Bool) (x y : Int) : Bool := Antisymmetric Int intEq r x y
+IntAsymmetric (r : Int -> Int -> Bool) (p : Related Int r) : Bool := Asymmetric Int r p
+IntTransitive (r : Int -> Int -> Bool) (c : Chain Int r) : Bool := Transitive Int r c
+IntTotal (r : Int -> Int -> Bool) (x y : Int) : Bool := Total Int r x y
+IntEquivalence (r : Int -> Int -> Bool) (x : Int) (p : Related Int r) (c : Chain Int r) : Bool := Equivalence Int r x p c
+IntPreorder (r : Int -> Int -> Bool) (x : Int) (c : Chain Int r) : Bool := Preorder Int r x c
+IntPartialOrder (r : Int -> Int -> Bool) (x y : Int) (c : Chain Int r) : Bool := PartialOrder Int intEq r x y c
+IntTotalOrder (r : Int -> Int -> Bool) (x y : Int) (c : Chain Int r) : Bool := TotalOrder Int intEq r x y c
+IntStrictOrder (r : Int -> Int -> Bool) (x : Int) (p : Related Int r) (c : Chain Int r) : Bool := StrictOrder Int r x p c
+-- antisymmetry as a premise over `Both`, so that the subtype is drawn too
+IntBothWaysEqual (r : Int -> Int -> Bool) (b : Both Int r) : Bool := b.x == b.y
+
+-- ---------------------------------------------------------------- operations.lth at Int, Bool, String
+
+IntAssociative (op : Int -> Int -> Int) (x y z : Int) : Bool := Associative Int intEq op x y z
+IntCommutative (op : Int -> Int -> Int) (x y : Int) : Bool := Commutative Int Int intEq op x y
+IntIdempotent (op : Int -> Int -> Int) (x : Int) : Bool := Idempotent Int intEq op x
+IntLeftNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := LeftNeutral Int intEq op e x
+IntRightNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := RightNeutral Int intEq op e x
+IntNeutral (op : Int -> Int -> Int) (e : Int) (x : Int) : Bool := Neutral Int intEq op e x
+IntAbsorbing (op : Int -> Int -> Int) (z : Int) (x : Int) : Bool := Absorbing Int intEq op z x
+IntCancellative (op : Int -> Int -> Int) (x y z : Int) : Bool := Cancellative Int intEq op x y z
+IntInvertible (op : Int -> Int -> Int) (e : Int) (inv : Int -> Int) (x : Int) : Bool := Invertible Int intEq op e inv x
+IntDistributive (product sum : Int -> Int -> Int) (x y z : Int) : Bool := Distributive Int intEq product sum x y z
+IntAbsorptive (meet join : Int -> Int -> Int) (x y : Int) : Bool := Absorptive Int intEq meet join x y
+IntDistinct (a b : Int) : Bool := Distinct Int intEq a b
+
+BoolAssociative (op : Bool -> Bool -> Bool) (x y z : Bool) : Bool := Associative Bool boolEq op x y z
+BoolCommutative (op : Bool -> Bool -> Bool) (x y : Bool) : Bool := Commutative Bool Bool boolEq op x y
+BoolIdempotent (op : Bool -> Bool -> Bool) (x : Bool) : Bool := Idempotent Bool boolEq op x
+BoolNeutral (op : Bool -> Bool -> Bool) (e : Bool) (x : Bool) : Bool := Neutral Bool boolEq op e x
+BoolAbsorbing (op : Bool -> Bool -> Bool) (z : Bool) (x : Bool) : Bool := Absorbing Bool boolEq op z x
+BoolDistributive (product sum : Bool -> Bool -> Bool) (x y z : Bool) : Bool := Distributive Bool boolEq product sum x y z
+BoolAbsorptive (meet join : Bool -> Bool -> Bool) (x y : Bool) : Bool := Absorptive Bool boolEq meet join x y
+-- the complement reaches the operation's absorbing element: `false` for `and`, `true` for `or`
+BoolComplemented (op : Bool -> Bool -> Bool) (complement : Bool -> Bool) (z : Bool) (x : Bool) : Bool :=
+  Complemented Bool boolEq op complement z x
+
+StringAssociative (op : String -> String -> String) (x y z : String) : Bool := Associative String stringEq op x y z
+StringCommutative (op : String -> String -> String) (x y : String) : Bool := Commutative String String stringEq op x y
+StringNeutral (op : String -> String -> String) (e : String) (x : String) : Bool := Neutral String stringEq op e x
+
+-- ---------------------------------------------------------------- the within-bound laws at Float64
+
+FloatAssociativeWithin (op : Float64 -> Float64 -> Float64) (bound3 : Float64 -> Float64 -> Float64 -> Float64) (x y z : Float64) : Bool :=
+  AssociativeWithin Float64 absDistance op bound3 x y z
+FloatCommutativeWithin (op : Float64 -> Float64 -> Float64) (bound2 : Float64 -> Float64 -> Float64) (x y : Float64) : Bool :=
+  CommutativeWithin Float64 Float64 absDistance op bound2 x y
+FloatNeutralWithin (op : Float64 -> Float64 -> Float64) (e : Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool :=
+  NeutralWithin Float64 absDistance op e bound1 x
+FloatDistributiveWithin (product sum : Float64 -> Float64 -> Float64) (bound3 : Float64 -> Float64 -> Float64 -> Float64) (x y z : Float64) : Bool :=
+  DistributiveWithin Float64 absDistance product sum bound3 x y z
+FloatInvertibleWithin (op : Float64 -> Float64 -> Float64) (e : Float64) (inv : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool :=
+  InvertibleWithin Float64 absDistance op e inv bound1 x
+
+-- ---------------------------------------------------------------- functions.lth at Int, Bool, Float64
+
+IntPointwise (f g : Int -> Int) (x : Int) : Bool := Pointwise Int Int intEq f g x
+IntPointwise2 (f g : Int -> Int -> Int) (x y : Int) : Bool := Pointwise2 Int Int Int intEq f g x y
+IntInjective (f : Int -> Int) (x y : Int) : Bool := Injective Int Int intEq intEq f x y
+BoolInjective (f : Bool -> Bool) (x y : Bool) : Bool := Injective Bool Bool boolEq boolEq f x y
+IntSurjective (f s : Int -> Int) (y : Int) : Bool := Surjective Int Int intEq f s y
+IntInverse (f g : Int -> Int) (x : Int) : Bool := Inverse Int Int intEq f g x
+IntIsomorphism (to from : Int -> Int) (x y : Int) : Bool := Isomorphism Int Int intEq intEq to from x y
+IntBijective (f s : Int -> Int) (x y z : Int) : Bool := Bijective Int Int intEq intEq f s x y z
+IntIdempotentFunction (f : Int -> Int) (x : Int) : Bool := IdempotentFunction Int intEq f x
+IntInvolutive (f : Int -> Int) (x : Int) : Bool := Involutive Int intEq f x
+BoolInvolutive (f : Bool -> Bool) (x : Bool) : Bool := Involutive Bool boolEq f x
+IntMonotone (r t : Int -> Int -> Bool) (f : Int -> Int) (p : Related Int r) : Bool := Monotone Int Int r t f p
+IntPreserving (opA opB : Int -> Int -> Int) (f : Int -> Int) (x y : Int) : Bool := Preserving Int Int intEq opA opB f x y
+IntCongruent (rA : Int -> Int -> Bool) (f : Int -> Int) (p : Related Int rA) : Bool := Congruent Int Int rA intEq f p
+IntLandsIn (f : Int -> Int) (inside : Int -> Bool) (x : Int) : Bool := LandsIn Int Int f inside x
+
+FloatIdempotentWithin (f : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := IdempotentWithin Float64 absDistance f bound1 x
+FloatInvolutiveWithin (f : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := InvolutiveWithin Float64 absDistance f bound1 x
+FloatPointwiseWithin (f g : Float64 -> Float64) (bound1 : Float64 -> Float64) (x : Float64) : Bool := PointwiseWithin Float64 Float64 absDistance f g bound1 x

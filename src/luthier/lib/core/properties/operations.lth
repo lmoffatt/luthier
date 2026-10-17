@@ -54,8 +54,10 @@ Distributive (A : U) (o : Object A) (times plus : A -> A -> A) (x y z : A) : Boo
   o.eq (times x (plus y z)) (plus (times x y) (times x z)) and o.eq (times (plus y z) x) (plus (times y x) (times z x))
 Absorptive (A : U) (o : Object A) (meet join : A -> A -> A) (x y : A) : Bool :=
   o.eq (meet x (join x y)) x and o.eq (join x (meet x y)) x
-Complemented (A : U) (o : Object A) (op : A -> A -> A) (complement : A -> A) (unit : A) (x : A) : Bool :=
-  o.eq (op x (complement x)) unit
+-- the complement reaches `z`, the operation's absorbing element (`false` for `and`, `true` for
+-- `or`); [proposed] named `z` as in `Absorbing`, not `unit`, which is core's constructor of `Unit`
+Complemented (A : U) (o : Object A) (op : A -> A -> A) (complement : A -> A) (z : A) (x : A) : Bool :=
+  o.eq (op x (complement x)) z
 Distinct (A : U) (o : Object A) (a b : A) : Bool := not (o.eq a b)
 
 -- ---------------------------------------------------------------- the same within a bound
