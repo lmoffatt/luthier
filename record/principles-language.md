@@ -1193,6 +1193,15 @@ L9.16  Sampling bounds the failure fraction under its distribution and says noth
        are listed, and the evidence is kept per region, each with its n and its bound, the demand
        combining the grades, the weakest by default. A label an author adds is informative and
        enters no grade (D-2026-10-16-i, D-2026-10-16-j). [proposed]
+L9.17  (His words, a candidate for a fundamental principle) The law of an algorithm states how its
+       budget scales with the bound demanded: the resource (steps, samples, memory, bits of
+       precision) as a function of the bound and of the problem's features (size, condition, unit
+       roundoff), with the floor below which no budget suffices (L13.5). It is the modulus of
+       Bishop's constructive analysis, what LAPACK states in its error bounds and operation counts,
+       and what the laws of floating point state for each operation; it is tested by measuring the
+       resource at several bounds, the slope in log scale part of the law, and read by the planner
+       to predict a specimen's resources before running (L6.3) (D-2026-10-16-m, D-2026-10-18-d).
+       [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d, D-2026-10-13-ad
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
@@ -1243,6 +1252,8 @@ History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d
             reworded with the certifier and the grade list cited from Terms; clause 9 cites L16.7.
             draft 11 (2026-10-12): renumbered from L7 of draft 10 (D-2026-10-12-v).
             2026-10-17: clause 16 added, proposed (D-2026-10-16-i, -j).
+            2026-10-18: clause 17 added, proposed (D-2026-10-18-d); a candidate for a principle of
+            its own.
 
 L10 A certificate records what is known of a law, its domain, its bound and its evidence; it is
     frozen, it serves every demand it meets, and it transports along identity.
