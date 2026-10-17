@@ -73,7 +73,8 @@ import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed Not
 import "test.lth" Grade Proved ExhaustiveGrade Cases Sampled AssumedGrade gradeRank weakest grade coverageOf
   pointCount
 import "generators.lth" Seed Budgets
-import "term.lth" Term Alpha CanonicalForm
+import "term.lth" Term Pattern Act Program Alpha CanonicalForm Substitution Reduction stepsTo isNormal
+  Lam App Pi Sigma Pair Match Inj Sum Data Subtype Hole Record RecordValue Proj Let Declare Define Datum
 
 -- The cost type of 6.S4, and what an entry carries in it (6.S6: the bound observed and the
 -- evidence cost), compared with a demand's cutoff in the order of `C` (6.S15) and composed by its
@@ -578,9 +579,53 @@ assumedPast (assumes : List String) (rs : List Refusal) : List Refusal :=
 -- installed package and its version); and the interpreter's revision. [proposed] The code and the
 -- hosts are listed in one order the host fixes (by name, by route), so a list is a cone.
 Cone = { code : List (String * Term), hosts : List (String * Hash), interpreter : String }
--- the code in canonical form (3.S34): names without module prefix, terms canonical
+-- the code in canonical form (3.S34): names without module prefix, terms canonical, the binders'
+-- annotations erased (D-2026-10-15-e, below)
 canonCode (a : Alpha) (m : CanonicalForm a) (code : List (String * Term)) : List (String * Term) :=
-  match code { nil -> nil ; cons (x, t) rest -> cons (m.unqualify x, m.canon t) (canonCode a m rest) }
+  match code { nil -> nil ; cons (x, t) rest -> cons (m.unqualify x, m.canon (eraseBinders t)) (canonCode a m rest) }
+
+-- [D-2026-10-15-e] The hash erases the type annotation of each `Lam` and each `Let`, which the
+-- elaborator writes (from a parameter's written type, from the expected type, inferred for a
+-- block's `Let`): the hash is the strict level of equality, fixed by the language, and an
+-- annotation that leaves the term's behaviour unchanged must not stale a certificate. A type's `Pi`,
+-- `Sigma`, `Subtype` and record fields are kept: they are types, which the tester draws from. The
+-- condition is the law `ErasureKeepsTheStep`: one step of a term in a program, erased, agrees up to
+-- alpha with one step of the erased term in the erased program, so by induction the two reduce
+-- alike at any fuel. The reference is `eraseBinders`; the host's is certify.py's `erase`, checked
+-- against kernel.py on the library's code in tests/test_certify.py.
+erased : Term := Hole "erased"
+eraseBinders (t : Term) : Term := match t {
+  Lam x a b -> Lam x erased (eraseBinders b) ;
+  Let x a v b -> Let x erased (eraseBinders v) (eraseBinders b) ;
+  App f a -> App (eraseBinders f) (eraseBinders a) ;
+  Pi x a b -> Pi x (eraseBinders a) (eraseBinders b) ;
+  Sigma x a b -> Sigma x (eraseBinders a) (eraseBinders b) ;
+  Subtype x a b -> Subtype x (eraseBinders a) (eraseBinders b) ;
+  Pair a b -> Pair (eraseBinders a) (eraseBinders b) ;
+  Inj l a -> Inj l (eraseBinders a) ;
+  Match v arms -> Match (eraseBinders v) (eraseArms arms) ;
+  Sum kvs -> Sum (erasePairs kvs) ;
+  Data n cs -> Data n (erasePairs cs) ;
+  Record kvs -> Record (erasePairs kvs) ;
+  RecordValue kvs -> RecordValue (erasePairs kvs) ;
+  Proj r l -> Proj (eraseBinders r) l ;
+  _ -> t ;
+}
+eraseArms (arms : List (Pattern * Term)) : List (Pattern * Term) := match arms { nil -> nil ;
+  cons (p, b) rest -> cons (p, eraseBinders b) (eraseArms rest) }
+erasePairs (kvs : List (String * Term)) : List (String * Term) :=
+  match kvs { nil -> nil ; cons (k, v) rest -> cons (k, eraseBinders v) (erasePairs rest) }
+
+Erasure (a : Alpha) (sb : Substitution a) (m : Reduction a sb) : { erase : Term -> Term }
+-- a program with each definition's type and body erased, and each declaration's type
+eraseProgram (f : Term -> Term) (p : Program) : Program := match p { nil -> nil ;
+  cons act rest -> cons (match act { Define x ty b -> Define x (f ty) (f b) ; Declare x ty -> Declare x (f ty) ;
+                                     Datum v -> Datum v }) (eraseProgram f rest) }
+ErasureKeepsTheStep (a : Alpha) (sb : Substitution a) (m : Reduction a sb) (e : Erasure a sb m) (p : Program) (t : Term) : Bool :=
+  match m.step p t {
+    nothing -> isNormal (m.step (eraseProgram e.erase p) (e.erase t)) ;
+    just u -> stepsTo a (m.step (eraseProgram e.erase p) (e.erase t)) (e.erase u) }
+Erasure (a : Alpha) (sb : Substitution a) (m : Reduction a sb) := ErasureKeepsTheStep a sb m
 
 -- The hash is the host's (an extern, certification_model.lut). Its laws (6.S8): it is a function
 -- of the canonical form, and a change to the code, to the host code or to the interpreter changes

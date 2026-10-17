@@ -28,12 +28,12 @@
 -- weakest (5.S8's default), the reference model of `Regioning`; `deriving` is the theory's
 -- `lawRegions`, the reference model of `Deriving`.
 
-import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
+import "certification.lth" Certifying ConeHashing Erasure eraseBinders Store Entry Identity Certificate Demand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
   Uncertified Provisional Disagrees Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
   disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
 import "test.lth" Grade gradeRank weakest
-import "term_model.lut" alpha canonical
+import "term_model.lut" alpha canonical substitute stepper
 
 -- the store as a value: the entries, the latest in front (6.S8); it starts empty
 emptyStore : Store certifying := nil
@@ -141,3 +141,8 @@ deriving : Deriving := { ofLaw := lawRegions }
 hashing : ConeHashing alpha canonical := {
   hash := extern "python:luthier.certify.cone_hash",
 }
+
+-- D-2026-10-15-e: the hash's erasure of the binders' annotations, the theory's own `eraseBinders`
+-- over term_model.lut's reduction (the host's, certify.py's `erase`, is checked against kernel.py
+-- in tests/test_certify.py)
+erasure : Erasure alpha substitute stepper := { erase := eraseBinders }

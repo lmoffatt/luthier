@@ -18,6 +18,11 @@ import "certification.lth" Certifying Recording Entry Certificate Demand Outcome
   AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused NoCutoffAcceptsAFailure
 import "test.lth" ExhaustiveGrade Sampled AssumedGrade
 import "certification_model.lut" certifying recording
+import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
+  IntConst PVar PPair
+import "term_model.lut" alpha substitute stepper
+import "certification.lth" Erasure ErasureKeepsTheStep
+import "certification_model.lut" erasure
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
   { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
@@ -65,3 +70,29 @@ test "ADisagreementIsRefused" ExhaustiveMode (seed <- 20261016) (whereBindings <
 cutoffs : List Grade := [Proved, ExhaustiveGrade, Cases, Sampled, AssumedGrade]
 test "NoCutoffAcceptsAFailure" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models",
   bind "d" "demands", bind "e" "ofTheLaw", bind "g" "cutoffs"])
+
+-- The hash's erasure of the binders' annotations (D-2026-10-15-e), added 2026-10-18 by Claude Opus
+-- 5.5 on record/plan/core-2026-10-17/prompt-bite-1.md: `ErasureKeepsTheStep` on certification_model's
+-- `erasure` over term_model.lut's reduction, at listed terms that step through an annotated binder
+-- (a beta, a block's `Let`, a delta to an annotated lambda, an annotation that names a bound
+-- variable, a match whose arm holds a `Let`) and terms already normal, in an empty program and in
+-- one that defines `inc`. Its control is in certification_controls.test.lut.
+one : Term := Lit (IntConst 1)
+incBody : Term := Lam "k" (Var "Int") (Pair (Var "k") (Var "k"))
+erasurePrograms : List Program := [nil, [Define "inc" (Pi "_" (Var "Int") (Var "Int")) incBody]]
+erasureTerms : List Term := [
+  App (Lam "x" (Var "Int") (Var "x")) one,
+  Let "y" (Var "Int") one (Pair (Var "y") (Var "y")),
+  App (Var "inc") one,
+  Var "inc",
+  App (Lam "x" (Var "Int") (Lam "y" (Var "x") (Var "x"))) (Var "z"),
+  Match (Pair one one) [(PPair (PVar "a") (PVar "b"), Let "c" (Var "Int") (Var "a") (Var "c"))],
+  Lam "x" (Var "Int") (Var "x"),
+  one ]
+alphas : List Alpha := [alpha]
+substitutions : List (Substitution alpha) := [substitute]
+steppers : List (Reduction alpha substitute) := [stepper]
+erasures : List (Erasure alpha substitute stepper) := [erasure]
+test "ErasureKeepsTheStep" ExhaustiveMode (seed <- 20261018) (whereBindings <- [bind "a" "alphas",
+  bind "sb" "substitutions", bind "m" "steppers", bind "e" "erasures", bind "p" "erasurePrograms",
+  bind "t" "erasureTerms"])

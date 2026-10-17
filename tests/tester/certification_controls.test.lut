@@ -15,6 +15,10 @@ import "certification.lth" Certifying Recording Entry Certificate Demand ConeNam
   fuelSpent outOfFuel known recordEntry anyServes appendRefusals failureAt Current agree disputedAt
   ANewIdentityGoesInFront AnAgreeingReplayAddsNothing AnAgreeingPairSettles ADisagreeingReplayIsKept AnExhaustionIsNeverStored ADisagreementRefutes ADisagreementIsRefused
 import "certification_model.lut" certifying anyFailure passes weakestOfBests serves stateOf
+import "term.lth" Term Act Program Alpha Substitution Reduction Var Lit Lam App Pi Pair Match Let Define
+  IntConst PVar PPair
+import "term_model.lut" alpha substitute stepper
+import "certification.lth" Erasure ErasureKeepsTheStep eraseBinders erased
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
   { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
@@ -106,3 +110,26 @@ test "AnAgreeingReplayAddsNothing" ExhaustiveMode (seed <- 20261016) (whereBindi
   bind "r" "agreeingModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
 test "AnAgreeingPairSettles" ExhaustiveMode (seed <- 20261016) (whereBindings <- [bind "k" "models",
   bind "r" "disputeModels", bind "e" "entries", bind "es" "stores"]) (control <- true)
+
+-- The control of `ErasureKeepsTheStep` (D-2026-10-15-e), added 2026-10-18 by Claude Opus 5.5 on
+-- record/plan/core-2026-10-17/prompt-bite-1.md: an erasure that also erases the binder of a lambda
+-- at the head of a term or of its function, leaving its occurrences free. It goes past the
+-- annotation into what the term does, and the beta of the first term shows it.
+one : Term := Lit (IntConst 1)
+incBody : Term := Lam "k" (Var "Int") (Pair (Var "k") (Var "k"))
+erasurePrograms : List Program := [nil, [Define "inc" (Pi "_" (Var "Int") (Var "Int")) incBody]]
+erasureTerms : List Term := [
+  App (Lam "x" (Var "Int") (Var "x")) one,
+  Let "y" (Var "Int") one (Pair (Var "y") (Var "y")),
+  App (Var "inc") one ]
+eraseBinderNames (t : Term) : Term := match t {
+  Lam x a b -> Lam "erased" erased (eraseBinders b) ;
+  App f a -> App (eraseBinderNames f) (eraseBinders a) ;
+  _ -> eraseBinders t }
+alphas : List Alpha := [alpha]
+substitutions : List (Substitution alpha) := [substitute]
+steppers : List (Reduction alpha substitute) := [stepper]
+greedyErasures : List (Erasure alpha substitute stepper) := [{ erase := eraseBinderNames }]
+test "ErasureKeepsTheStep" ExhaustiveMode (seed <- 20261018) (whereBindings <- [bind "a" "alphas",
+  bind "sb" "substitutions", bind "m" "steppers", bind "e" "greedyErasures", bind "p" "erasurePrograms",
+  bind "t" "erasureTerms"]) (control <- true)
