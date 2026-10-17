@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 565a7bc9b539, commit 48ea785 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-18; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 dfd66e519c91, commit daabef2 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-18; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -567,6 +567,14 @@ its type).
   evidence is kept per region, each with its n and its bound, the demand combining the grades, the
   weakest by default. A label an author adds is informative and enters no grade (D-2026-10-16-i,
   D-2026-10-16-j). [proposed]
+- L9.17 (His words, a candidate for a fundamental principle) The law of an algorithm states how its
+  budget scales with the bound demanded: the resource (steps, samples, memory, bits of precision) as a
+  function of the bound and of the problem's features (size, condition, unit roundoff), with the floor
+  below which no budget suffices (L13.5). It is the modulus of Bishop's constructive analysis, what
+  LAPACK states in its error bounds and operation counts, and what the laws of floating point state
+  for each operation; it is tested by measuring the resource at several bounds, the slope in log scale
+  part of the law, and read by the planner to predict a specimen's resources before running (L6.3)
+  (D-2026-10-16-m, D-2026-10-18-d). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d,
 D-2026-10-13-ad.
 Rests on: O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r).
