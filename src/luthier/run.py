@@ -2149,7 +2149,7 @@ def certification(loaded, program, entry, demand, refuse=True):
         kept_laws = []
         for d in c["laws"]:
             if (id(d) in axioms and d["accepts"] == "AssumedGrade"
-                    and not any(certify.serves(d, e, entries) for e in entries)):
+                    and not any(certify.serves_over(d, e, entries) for e in entries)):
                 assumed.append({"name": c["name"], "law": d["law"], "axiom": axioms[id(d)],
                                 "accept": certify.GRADE_WORDS[d["accepts"]]})
             else:
@@ -2200,7 +2200,7 @@ def certification(loaded, program, entry, demand, refuse=True):
     # the certificates that served the cone (8.S8): for each law demanded, the latest entry that
     # serves it, by the hash of its canonical JSON
     served = {_entry_hash(e) for c in with_laws for d in c["laws"]
-              if (e := next((e for e in entries if certify.serves(d, e, entries)), None)) is not None}
+              if (e := next((e for e in entries if certify.serves_over(d, e, entries)), None)) is not None}
     at_first = {f["name"] for f in firsts}
     code_only = {"code": cones.cone(entry)["code"], "hosts": [], "interpreter": ""}
     return {"cone": cones.hash(entry), "interpreter": certify.interpreter_revision(),
@@ -2497,7 +2497,7 @@ class FirstActions:
         for _, _, d in demands:
             d["kind"] = certify.FIRST_ACTION
         entries = self.entries()
-        served = [next((e for e in entries if certify.serves(d, e, entries)), None) for _, _, d in demands]
+        served = [next((e for e in entries if certify.serves_over(d, e, entries)), None) for _, _, d in demands]
         if all(e is not None for e in served):
             for (law, _, _), e in zip(demands, served):
                 self.done.append({"action": spec["action"], "law": law, "arguments": shown,

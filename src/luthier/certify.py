@@ -1027,19 +1027,27 @@ def at(demand, entry):
                if covers_all(entry["reach"], [(p, given[p])]))
 
 
-def serves(demand, entry, entries=None):
+def serves(demand, entry):
     """certification_model's `serves`: the law's entry at the current hash, passed, at or above the
     grade the demand accepts, its reach covering what the run gives. [proposed] And of the demand's
     kind: a first action's demand (`FIRST_ACTION`) only by an entry a first action wrote, any other
-    demand only by an entry of no kind (a control's has its own, and never passes). [3j j2a] With the
-    store's `entries`, the entry's grade is read over the law's regions under its binding with the
-    demand's combination (`served_grade`, D-2026-10-16-i)."""
-    if not (entry["law"] == demand["law"] and entry_kind(entry) == demand.get("kind") and at(demand, entry)
-            and passed(entry) and entry["grade"] is not None):
+    demand only by an entry of no kind (a control's has its own, and never passes). The entry's own
+    grade; `serves_over` reads it over the law's regions."""
+    return (entry["law"] == demand["law"] and entry_kind(entry) == demand.get("kind") and at(demand, entry)
+            and passed(entry)
+            and entry["grade"] is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[entry["grade"]]
+            and covers_all(entry["reach"], demand["given"]))
+
+
+def serves_over(demand, entry, entries):
+    """`serves` with the entry's grade read over the law's regions under its binding, with the
+    demand's combination (`served_grade`, D-2026-10-16-i; 3j j2a): what a run asks of the store's
+    `entries`. [proposed] A second function and not a third argument of `serves`, which keeps the
+    reference's signature."""
+    if not serves(demand, entry):
         return False
     grade = served_grade(demand, entry, entries)
-    return (grade is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[grade]
-            and covers_all(entry["reach"], demand["given"]))
+    return grade is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[grade]
 
 
 def served_grade(demand, entry, entries=None):
@@ -1090,7 +1098,7 @@ def refuse(entries, cone):
             elif failure is not None:
                 refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
                                  "demand": d})
-            elif not any(serves(d, e, entries) for e in entries):
+            elif not any(serves_over(d, e, entries) for e in entries):
                 refusals.append({"name": c["name"], "law": d["law"], "state": state_of(d, entries),
                                  "demand": d})
     return refusals

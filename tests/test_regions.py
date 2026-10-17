@@ -170,9 +170,9 @@ def test_a_run_is_served_at_the_grade_read_over_the_regions_with_its_combination
     empty = _entry("x", regions=[("FromType", "zero", 0)])
     demand = {"law": "L", "cone": "sha256:1", "given": [], "accepts": "Cases"}
     assert certify.serves(demand, empty)  # without the store, the entry's own grade
-    assert not certify.serves(demand, empty, [empty])
-    assert certify.serves(dict(demand, combine="strongest"), empty, [empty])
-    assert certify.serves(dict(demand, accepts="Sampled"), empty, [empty])
+    assert not certify.serves_over(demand, empty, [empty])
+    assert certify.serves_over(dict(demand, combine="strongest"), empty, [empty])
+    assert certify.serves_over(dict(demand, accepts="Sampled"), empty, [empty])
     assert demand_of().combine == "weakest" and demand_of(combine="strongest").law("L", "c", [], {})["combine"] == "strongest"
     with pytest.raises(RunError):
         demand_of(combine="vector")
