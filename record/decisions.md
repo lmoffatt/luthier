@@ -3106,3 +3106,42 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
             export)
 Kind:       spec 12.S22, 05 R13; the loader (check.py resolve, run.py); the core's layout
 Status:     current
+
+D-2026-10-18-c  The core has three planes: (1) the objects (`Bool`, `Int`, `Float`, `List`, `Map`,
+                functions, functors, and the universal constructions), each with its theory; (2) the
+                levels of equivalence (equivalence relation, metric, probabilistic metric: one
+                structure, a category enriched over a base, Bool with "and", [0, ∞] with "+",
+                distributions with a t-norm, after Lawvere 1973 and Menger 1942), which are objects
+                too and are compared (equivalences by refinement, metrics by Lipschitz equivalence;
+                a metric gives an equivalence by a threshold, an equivalence is a discrete metric;
+                order is the same structure without symmetry); (3) the constructive strategy:
+                computable types whose relations are models of the theories of planes 1 and 2,
+                certified against them. The theories of planes 1 and 2 only declare and state laws
+                (with the mathematical references they are tested against, as `matMulDef`); whatever
+                computes lives in plane 3. The second version failed by mixing planes (plane 3
+                helpers written into plane 1 theories: 608 helpers, the repetitions). The tower of
+                levels is cut by the demand, not by a rule of the theory: theories are finite rules
+                between two nodes; the graph they generate may be infinite; a computation walks only
+                what its demand reaches (L5.2, 8.S3, extended from values to theories), and the
+                parameters of each level touched come from the demand (L5.17). Infinity is potential,
+                as Haskell implements it: no limit for whoever walks the road, and each computation
+                comes with its limits. Implemented first: the Boolean and metric bases; the
+                probabilistic after, on the sequential test (D-2026-10-15-b). [proposed] a clause of
+                L3 (what the core is) and of L5 (the demand cuts the tower). This is the third version
+                (v0.1, the rebuild from zero of 2026-10-13, now this one).
+Author:     Luciano, on the decision assistant's readings
+Quote:      "Estoy de acuerdo que tenés varios planos: 1) los objetos ... 2) los niveles de
+            equivalencia (que también son objetos y sujetos a relaciones de equivalencia) 3) la
+            estrategia constructiva de tipos computables cuyas relaciones son modelos de las teorías
+            1 y 2 ... y esta no es la primera versión, es la tercera" ... "La torre se corta en la
+            demanda. Las teorías abstractas son relaciones entre nodos, y parecen infinitas pero en el
+            fondo son reglas entre dos nodos. Lo infinito es recorrer todo. Pero eso no lo hacés, vos
+            solo recorrés lo que te pide la demanda." ... "A mí me abrió la cabeza que Haskell
+            implementara el infinito como potencialmente infinito ... Es la ausencia de límites para
+            el que quiera recorrer el camino, pero cada uno define sus límites para recorrerlo, es
+            decir cada cálculo viene con sus límites."
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       principles (L3, L5); the core's design (record/plan/core-2026-10-17/); structures/
+            equality.lth
+Status:     current
