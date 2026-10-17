@@ -188,16 +188,20 @@ pairs (A B : U) : Product A B (A * B) := {
   second := fn p { match p { (a, b) -> b } },
 }
 -- a record type is a named product: `.x` and `.y` its projections (D-2026-10-13-x); a labeled sum a
--- named coproduct, its labels the injections. Instances on the labels `x`, `y` and `a`, `b`.
+-- named coproduct, its labels the injections. Instances on the labels `x`, `y` and `one`, `two`.
+-- [proposed, the core's bite 1] `sumAB`'s labels were `a` and `b` in kernel_models.lut, which no
+-- file imported; in core every program loads them, and a label reserves its name in every file of
+-- the program (run.py's `Loaded`), so a user's `a` or `b` would be renamed `a@file` (the record's
+-- plan in test_run.py showed it). `one` and `two` are `Selected`'s, loaded with core already.
 recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
   pair := fn u v { { x := u, y := v } },
   first := fn r { r.x }, second := fn r { r.y },
   firstName := "x", secondName := "y",
   select := fn n r { if n == "x" then just (one r.x) else if n == "y" then just (two r.y) else nothing },
 }
-sumAB (A B : U) : NamedCoproduct A B { a : A || b : B } := {
-  left := fn u { a u }, right := fn v { b v },
-  cases := fn (C : U) f g s { match s { a u -> f u ; b v -> g v } },
-  leftName := "a", rightName := "b",
-  labelOf := fn s { match s { a u -> "a" ; b v -> "b" } },
+sumAB (A B : U) : NamedCoproduct A B { one : A || two : B } := {
+  left := fn u { one u }, right := fn v { two v },
+  cases := fn (C : U) f g s { match s { one u -> f u ; two v -> g v } },
+  leftName := "one", rightName := "two",
+  labelOf := fn s { match s { one u -> "one" ; two v -> "two" } },
 }
