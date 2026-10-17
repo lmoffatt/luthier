@@ -143,6 +143,15 @@ directive forms of 7.R1 are its older surface (`spec 2`). [decided D-2026-10-13-
 `src/luthier/lib/test.lth`, which also states what a run gives (its coverage the weakest of the
 mode's and the bindings', its cases those asked or not run, 7.S12) and the grades ordered (7.S10).
 
+**7.S21. The test lines live in a test program.** [implemented] A `test` line is a demand: verifying
+is demanding (L5.5), so the lines are written in an executive file of their own, `x.test.lut`
+(spec 12.R2), never in the library or the theory whose laws they run. A test program names the
+laws, the generators, the seed and the size, and may define the censuses and the bindings it uses;
+it is never imported, so the cases a law and its controls share are written in a library both
+import. Its entries go to the stores of the claims (7.S13, spec 12.S10), and `luthier certify`
+refuses a file of another kind. The suites of `tests/tester/` are `*_laws.test.lut` and
+`*_controls.test.lut` (D-2026-10-16-e).
+
 ## Open
 
 - O1: the conversion of a sample's statistics to a cost and the algebra of costs (spec 7.S11, spec 7.S17 to spec 7.S19).
