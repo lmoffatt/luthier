@@ -112,6 +112,13 @@ Queue after 3g:
   warning stays).
 - 3j: j1 the theory (Fable, record/IA/regions-2026-10-17/prompt-theory.md, launched 2026-10-17) with
   plan.lth's two laws; L9.16 by Sonnet (prompt-principle.md); j2 the code after j1 (Fable for the theory, after the controls): regions from the type, the law and the code.
+- j1 landed (1b4ea60..a1c994b; 799 passed): degeneracies in generators.lth and arrays.lth, regions
+  in certification.lth (`Regioning`, `Deriving`), plan.lth's KeyReadsOnlyTheCone restated and
+  controlled, KeyReadsTheType removed. Its question answered by the coordinator ([proposed], one
+  commit undoes it): an empty region caps a binding at Sampled (L9.16), a stricter demand chooses
+  another combination. L9.16 landed (dd69450, bdc88d3). j2a launched (prompt-code.md: items 1-4,
+  6, 7, 9, 10 of report-theory.md section 5); j2b later (branch coverage, `cover`). The suite wrote
+  examples/hello.run.json, now tracked: a Sonnet bite makes the suite write no tracked file.
 - 3e: the hash erases binder annotations; one re-certification wave.
 - print and stdout (after his item 12): a failed write is recorded as a success today (the
   decision-assistant fork's finding of 2026-10-16: `print` appends to a Python buffer, `observe`
