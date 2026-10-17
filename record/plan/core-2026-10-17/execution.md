@@ -822,6 +822,14 @@ reproduces its recorded result.
 May break: every store (expected, once); `run`'s core path in any script that names it; the
 `examples/hello.run.json` the suite writes.
 
+Additions to bite 1 (coordinator, 2026-10-17, from j2a's report, record/IA/regions-2026-10-17/
+report-code.md): the code that draws a sampled entry's cases (tester.py's sampling, generators.py)
+enters the entry's identity, since the interpreter revision is the last tag and there is no tag
+until after the core, so a change in the draws today leaves the identity unchanged and `--deep`
+replays disagree (RankUnderRotation, PrecisionSymmetric, DensityPeaksAtMean); and the fuel default
+of certify is read against PinvProjects' 1.28e6 per 10x10 case (raise it or derive it, P11). The
+re-certification of bite 1 then covers these too.
+
 ### Bite 2. The properties (Fable; in parallel with bite 1)
 
 Files: new `lib/core/properties/relations.lth`, `operations.lth`, `functions.lth` (section 3.1 to
