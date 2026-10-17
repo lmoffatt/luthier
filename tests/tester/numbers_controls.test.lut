@@ -14,7 +14,7 @@ import "generators.lth" Binding
 import "laws.lth" Listed
 import "numbers_model.lut" doubles integerDivision conversion elementary
 import "numbers.lth" Tolerance Doubles IntegerDivision Conversion Elementary PlusCommutes TimesCommutes PlusZero TimesOne DivideOne TimesZero MinusSelf DivideSelf
-  MinusIsPlusNegated NegateTwice LeqReflexive LeqTotal LeqAntisymmetric LeqTransitive LessIsStrict
+  MinusIsPlusNegated NegateTwice LeqReflexive LeqTotal LeqAntisymmetric LeqTransitive LeqChain LessIsStrict
   GreaterIsLessReversed GeqIsLeqReversed UnequalIsNotEqual PlusMonotone TimesMonotone EpsilonIsTheUlpOfOne
   DivisionAlgorithm RemainderOfTheDivisorsSign QuotientOfProduct
   ConvertZeroAndOne ConvertAddsExactly ConvertSucceeds ConvertKeepsOrder
@@ -233,6 +233,11 @@ leqSlackProfile : List Binding := [
   { parameter := nothing, type := just "Conversion", generator := "conversion", coverage := Listed },
   { parameter := nothing, type := just "Elementary", generator := "elementary", coverage := Listed },
   { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed } ]
+-- the chain where leqSlack breaks transitivity: 1.5 <= 0.75 + 1 and 0.75 <= 0.0 + 1, but not
+-- 1.5 <= 0.0 + 1 (2026-10-17, 3j j2a)
+slackChain : LeqChain leqSlack := { x := 1.5, y := 0.75, z := 0.0 }
+slackChainBinding : List Binding := [
+  { parameter := just "c", type := nothing, generator := "slackChain", coverage := Listed } ]
 lessLoose : Doubles := { plus := doubles.plus,
   minus := doubles.minus,
   times := doubles.times,
@@ -457,8 +462,10 @@ test "LeqReflexive" (SampledMode linear) (seed <- 20261015) (profile <- leqStric
 test "LeqTotal" (SampledMode linear) (seed <- 20261015) (profile <- leqIsEqualProfile) (control <- true)
 -- leq is always true, so two distinct doubles are each at most the other
 test "LeqAntisymmetric" (SampledMode linear) (seed <- 20261015) (profile <- leqAlwaysProfile) (control <- true)
--- leq allows a slack of one, which does not compose along a chain
-test "LeqTransitive" (SampledMode linear) (seed <- 20261015) (profile <- leqSlackProfile) (control <- true)
+-- leq allows a slack of one, which does not compose along a chain: listed at the chain where it
+-- breaks (x - z in (1, 2]); a draw landed there at seed 20261015 before the special values took
+-- mass and missed it after (3j j2a, finding 5), so the case is listed rather than hoped for
+test "LeqTransitive" ExhaustiveMode (whereBindings <- slackChainBinding) (profile <- leqSlackProfile) (control <- true)
 -- less is a <= b, wrong only at a tie, which the law draws with probability one half (report-weak-laws.md)
 test "LessIsStrict" (SampledMode linear) (seed <- 20261015) (profile <- lessLooseProfile) (control <- true)
 -- greater is a < b, the wrong direction
