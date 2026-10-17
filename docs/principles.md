@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 fe42d050ebbb, commit f02b9c3) by `scripts/project_principles.py` (project_principles v2) on 2026-10-17; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 43c04e3dedb9, commit 48ea785) by `scripts/project_principles.py` (project_principles v2) on 2026-10-18; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -395,6 +395,11 @@ classifier when it means G2's truth values).
 - L7.5 What a library can decide, the core does not: the core asks of each library the fewest
   operations and laws it uses (for costs, spec 6.S5), and the open choices of the library are taken
   when it is implemented and its invariants are found (D-2026-10-12-al, P16). [settled]
+- L7.6 (His words, on the core's rebuild) Luthier is written in the manner of Haskell, not of Java:
+  a property is said once, generic over the operation and its equality, and each type claims it; a
+  helper is written once, generic over the container, and every type uses it; the same thing restated
+  per type or per file is a defect of the library. It is measured: no name defined in two files, no
+  list helper reinvented, no law unclaimed (D-2026-10-18-a). [proposed]
 Rests on: O11 (the kernel's theory stated in Luthier).
 Status: settled; clause 5 on his mark (D-2026-10-13-e).
 
