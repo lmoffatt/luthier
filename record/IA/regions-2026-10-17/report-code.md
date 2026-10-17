@@ -225,3 +225,49 @@ Decisions taken on my own in this part:
   latest entry's: without it the stores would keep the cutoffs' sides the earlier reading recorded.
 - RankUnderRotation's dispute resolved by a one-line copy of the test file, run deep and removed,
   instead of a second deep run of all of arrays_laws.
+
+## 8. A parameter bound to a census of one gives no region (2026-10-18)
+
+The coordinator's answer to what section 7 left: a parameter the demand fixes to one value (a
+census of one) gives no region of any kind, neither a cutoff's sides nor a premise's boundary nor a
+degenerate case of its type, since the law is claimed only at that value.
+
+Commits:
+
+- cbd36e4 tester.py: `Classifier` takes `single`, the parameters bound to a census of one value;
+  they give no type cases and no premise boundary (the cutoffs' sides were already gone for any
+  census). test_regions.py: two lines bound to one value (`Count` at k = 3, `Dims` at the zero
+  2 x 2 matrix, which is in the case "zero") record no region.
+- cc684e2 spec 7.S14 says so.
+- af47a97 the lines of the five laws that had fallen re-certified alone (`luthier certify --deep
+  --fuel 3000000` on temporary copies of belief_laws, plot_laws, plan_laws and world_laws holding
+  only those lines, removed after); the stores of session_a, plot_model and world.
+
+The grades that changed (standings read from the stores before and after af47a97):
+
+| file | law | before | after |
+|---|---|---|---|
+| belief_laws | PrecisionSymmetric | sampled (no case in n boundary) | cases |
+| plot_laws | LayerOrderInvariant | sampled (no case in margin boundary) | cases |
+| world_laws | HostObserveChangesNothing | sampled (no case in empty, one element) | cases |
+
+Two stay sampled, now on regions of parameters bound to a census of several values: Confluent
+(`s1`, `s2 : Schedule`, a census of 4 with no empty or one-element schedule) and
+HostChangesOnlyDeclared (`extra : List String`, a census of 2 with no empty list). Of the laws of
+the files that existed at 5a7b8f1: 122 sampled, 81 cases, 7 uncertified, 1 supported (125, 78, 7, 1
+after section 7). Of the five laws that fell in section 3, two are below cases now.
+
+Not re-certified, since their grade cannot change: the sampled laws whose stored regions still name
+a boundary of a parameter bound to one value (RankUnderRotation's k, PinvRestricts' s, the
+Maximizer laws' s and n). Their printed empty regions keep that boundary until their lines run
+again; each has another empty region or a sampled line that keeps it sampled.
+
+The checks: `python -m pytest -q`, 814 passed, 6 skipped, 9 xfailed in 1334 s (813 plus the new
+test). `python3 scripts/check_spec.py`: its known finding only (03-kernel.md:190), "185
+implemented, 80 decided (of which 33 suspended), 8 proposed".
+
+Decisions taken on my own: the rule applies to a census of exactly one value, a census of several
+keeps its type cases and boundaries (the answer named one value); and an author's labels on such a
+parameter are still recorded, since they enter no grade.
+
+This closes my part of 3j j2a; tester.py and certify.py are free for the core's bite 1.
