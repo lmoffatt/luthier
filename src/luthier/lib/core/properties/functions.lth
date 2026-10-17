@@ -1,0 +1,86 @@
+-- functions.lth: the combinators of functions, the equality of functions, and the properties of a
+-- function, each said once over its domain, its codomain and their equalities.
+--
+-- Draft 0, 2026-10-17, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/plan/core-2026-10-17/prompt-bite-2.md (bite 2 of record/plan/core-2026-10-17/execution.md,
+-- section 3.3). Sources: D-2026-10-17-d (many laws are an equality of two functions, pointwise
+-- from the codomain's equality and sampled when tested; the core provides that equality, the
+-- combinators `id`, composition, `flip`, and the few properties that are not equalities: order,
+-- implications, membership in a subtype), D-2026-10-17-b and -c (generic laws, their names),
+-- D-2026-10-17-f (the within-bound versions, the bound a function of the arguments, P11), 7.S12
+-- (a rare premise by its contrapositive), L9.14.
+--
+-- What this file states. `id`, `compose`, `flip` and `const` are the combinators a commuting
+-- diagram is written with. `Pointwise` is the equality of two functions at a sampled argument,
+-- `Pointwise2` of two functions of two arguments. `functions` is the function type's `Object`
+-- for a claimant that needs one as a value (an `Indexed` container's entries are a function);
+-- [proposed] it is declared and not defined: an `eq` over an infinite domain has no body a test
+-- could run, and what is tested is `Pointwise`; a container's equality as a value is
+-- core/structures/containers.lth's `pointwise`, which is finite (bite 3). `Object` is
+-- kernel_laws.lth's today (relations.lth's note).
+--
+-- The forms. `Injective` is stated by its contrapositive over every pair (equal arguments, or
+-- unequal images); `Surjective` by a witness, a section `s` with `f (s y) == y`, since a search
+-- for a preimage is no law; `Inverse` says `g` undoes `f`; `Monotone` relates two relations over
+-- the pairs the first relates; `Preserving` is a homomorphism of binary operations (`SizeAppend`
+-- is one from `append` to `+`); `Congruent` is respect for an equivalence, Substitutive for one
+-- function; `LandsIn` is membership of the result in a subtype given by its predicate.
+-- [proposed] `Isomorphism` and `Bijective` quantify every variable of their parts and conjoin
+-- them with `and`, as relations.lth's composites do and for the same reason: `&` on partially
+-- applied laws with different quantified variables is a term the kernel does not reduce.
+--
+-- This file and operations.lth each have an `Idempotent`, one on a function, one on an
+-- operation; they live in different files and an importer names the one it needs (`as` renames
+-- the other, 12.S22).
+--
+-- Who claims these laws: the structures (bite 3) and the libraries' theories by one-line
+-- wrappers; until then tests/tester/core_instances.lut's wrappers, tested on functions of `Int`
+-- and `Bool` by core_laws.test.lut and refuted by core_controls.test.lut.
+
+import "kernel_laws.lth" Object
+import "core/properties/relations.lth" Related
+
+-- ---------------------------------------------------------------- the combinators
+
+id (A : U) : A -> A := fn x { x }
+compose (A B C : U) (g : B -> C) (f : A -> B) : A -> C := fn x { g (f x) }
+flip (A B C : U) (f : A -> B -> C) : B -> A -> C := fn b a { f a b }
+const (A B : U) (b : B) : A -> B := fn a { b }
+
+-- ---------------------------------------------------------------- the equality of functions
+
+-- pointwise from the codomain's, sampled on the domain (D-2026-10-17-d)
+Pointwise (A B : U) (o : Object B) (f g : A -> B) (x : A) : Bool := o.eq (f x) (g x)
+Pointwise2 (A B C : U) (o : Object C) (f g : A -> B -> C) (x : A) (y : B) : Bool := o.eq (f x y) (g x y)
+-- the function type's Object: its laws are the codomain's applied pointwise, so it claims nothing new
+functions (A B : U) (o : Object B) : Object (A -> B)
+
+-- ---------------------------------------------------------------- the properties
+
+-- by its contrapositive over every pair
+Injective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (x y : A) : Bool := oA.eq x y or not (oB.eq (f x) (f y))
+-- surjective by a witness: a section `s` with `f (s y) == y`
+Surjective (A B : U) (o : Object B) (f : A -> B) (s : B -> A) (y : B) : Bool := o.eq (f (s y)) y
+-- `g` undoes `f`
+Inverse (A B : U) (o : Object A) (f : A -> B) (g : B -> A) (x : A) : Bool := o.eq (g (f x)) x
+Isomorphism (A B : U) (oA : Object A) (oB : Object B) (to : A -> B) (from : B -> A) (x : A) (y : B) : Bool :=
+  Inverse A B oA to from x and Inverse B A oB from to y
+Bijective (A B : U) (oA : Object A) (oB : Object B) (f : A -> B) (s : B -> A) (x y : A) (z : B) : Bool :=
+  Injective A B oA oB f x y and Surjective A B oB f s z
+Idempotent (A : U) (o : Object A) (f : A -> A) (x : A) : Bool := o.eq (f (f x)) (f x)
+Involutive (A : U) (o : Object A) (f : A -> A) (x : A) : Bool := o.eq (f (f x)) x
+-- order-preserving between two relations, over the pairs the first relates
+Monotone (A B : U) (r : A -> A -> Bool) (s : B -> B -> Bool) (f : A -> B) (p : Related A r) : Bool := s (f p.x) (f p.y)
+-- a homomorphism of binary operations
+Preserving (A B : U) (o : Object B) (opA : A -> A -> A) (opB : B -> B -> B) (f : A -> B) (x y : A) : Bool :=
+  o.eq (f (opA x y)) (opB (f x) (f y))
+-- respects an equivalence: related arguments, equal results
+Congruent (A B : U) (rA : A -> A -> Bool) (oB : Object B) (f : A -> B) (p : Related A rA) : Bool := oB.eq (f p.x) (f p.y)
+-- the result lies in a subtype, given by its predicate
+LandsIn (A B : U) (f : A -> B) (p : B -> Bool) (x : A) : Bool := p (f x)
+
+-- ---------------------------------------------------------------- the same within a bound
+
+IdempotentWithin (A : U) (d : A -> A -> Float64) (f : A -> A) (bound : A -> Float64) (x : A) : Bool := d (f (f x)) (f x) <= bound x
+InvolutiveWithin (A : U) (d : A -> A -> Float64) (f : A -> A) (bound : A -> Float64) (x : A) : Bool := d (f (f x)) x <= bound x
+PointwiseWithin (A B : U) (d : B -> B -> Float64) (f g : A -> B) (bound : A -> Float64) (x : A) : Bool := d (f x) (g x) <= bound x

@@ -1,0 +1,74 @@
+-- relations.lth: the properties of a binary relation, each said once over the type, the relation
+-- and the pair or chain it qualifies, and the orders and the equivalence built from them.
+--
+-- Draft 0, 2026-10-17, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/plan/core-2026-10-17/prompt-bite-2.md (bite 2 of record/plan/core-2026-10-17/execution.md,
+-- section 3.1). Sources: D-2026-10-17-b (the properties are generic laws over a relation or an
+-- operation and the type's equality, said once; a structure is a conjunction of properties),
+-- D-2026-10-17-c (the names: English adjectives without "is", the type first, then what is
+-- qualified), spec 7.S12 (the pairs and chains a relation relates are drawn by their own
+-- generators, said once), 3.S6 (a subtype passes where its type is expected), L9.14 (a law
+-- without a refuted model is evidence of nothing).
+--
+-- What this file states. A property is a Bool law over a type `A`, a relation `r : A -> A -> Bool`
+-- and the datum it qualifies, with the quantified variables last, so that a structure applies it
+-- to a field in one line and a theory applies it to its own relation (execution.md, section 2).
+-- `Antisymmetric` alone needs the type's equality, `o : Object A`, and reads its field `eq`.
+-- `Object` is kernel_laws.lth's today. [proposed] It is imported from there until bite 1 moves it
+-- to core/structures/equality.lth, which repoints this line; bite 3 then defines `Object`'s law as
+-- `Equivalence A o.eq`, a cycle of files and not of names (core.lut's note on kernel_laws.lth).
+--
+-- Who claims these laws. The structures of core/structures/ (bite 3) and the theories of the
+-- libraries, each by a one-line wrapper on its own relation; until then, the wrappers of
+-- tests/tester/core_instances.lut, tested on listed instances by core_laws.test.lut (`Int` with
+-- `<=`, `<`, `==`) and refuted on wrong ones by core_controls.test.lut. So `luthier check -v`
+-- reports each law here unclaimed within the file: the claims are the importers'.
+--
+-- The forms. A law whose premise is rare on drawn values is stated by its contrapositive over
+-- every pair (`Antisymmetric`: equal, or not related both ways; numbers.lth's `LeqAntisymmetric`,
+-- 7.S12), or over the pairs the relation relates, drawn by the subtype's generator (`Symmetric`,
+-- `Asymmetric`, `Transitive`). [proposed] The composite predicates (`Equivalence`, the orders)
+-- quantify every variable of their parts and conjoin the parts with `and`: a conjunction `&` of
+-- partially applied laws whose quantified variables differ is a term the kernel does not reduce
+-- (no rule for `&` on functions; `luthier eval` shows it stuck), so it is no Bool a test can
+-- grade. The parts are drawn independently, each on its own generator; a part that fails names
+-- itself when tested alone, which core_laws.test.lut does.
+
+import "kernel_laws.lth" Object
+
+-- ---------------------------------------------------------------- the pairs a relation relates
+
+-- The pairs and chains a relation relates, drawn by their generators, said once (7.S12). They
+-- replace kernel_laws.lth's `EqualPair`, `EqualChain` and numbers.lth's `LeqPair`, `LeqChain`,
+-- `LeqBoth`, one each per relation. `Both` is the pairs related both ways, for a law that needs
+-- them as a premise rather than by the contrapositive.
+Related (A : U) (r : A -> A -> Bool) : U := { x y : A | r x y }
+Chain (A : U) (r : A -> A -> Bool) : U := { x y z : A | r x y and r y z }
+Both (A : U) (r : A -> A -> Bool) : U := { x y : A | r x y and r y x }
+
+-- ---------------------------------------------------------------- the properties
+
+Reflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := r x x
+Irreflexive (A : U) (r : A -> A -> Bool) (x : A) : Bool := not (r x x)
+Symmetric (A : U) (r : A -> A -> Bool) (p : Related A r) : Bool := r p.y p.x
+-- by its contrapositive over every pair: equal, or not related both ways
+Antisymmetric (A : U) (o : Object A) (r : A -> A -> Bool) (x y : A) : Bool := o.eq x y or not (r x y and r y x)
+Asymmetric (A : U) (r : A -> A -> Bool) (p : Related A r) : Bool := not (r p.y p.x)
+Transitive (A : U) (r : A -> A -> Bool) (c : Chain A r) : Bool := r c.x c.z
+Total (A : U) (r : A -> A -> Bool) (x y : A) : Bool := r x y or r y x
+
+-- ---------------------------------------------------------------- the composites
+
+-- Each conjoins its parts on independently drawn variables (the note above): `x` for the laws
+-- over one value, `p` a related pair, `c` a chain, `y` the second value of the laws over every
+-- pair.
+Equivalence (A : U) (r : A -> A -> Bool) (x : A) (p : Related A r) (c : Chain A r) : Bool :=
+  Reflexive A r x and Symmetric A r p and Transitive A r c
+Preorder (A : U) (r : A -> A -> Bool) (x : A) (c : Chain A r) : Bool :=
+  Reflexive A r x and Transitive A r c
+PartialOrder (A : U) (o : Object A) (r : A -> A -> Bool) (x y : A) (c : Chain A r) : Bool :=
+  Preorder A r x c and Antisymmetric A o r x y
+TotalOrder (A : U) (o : Object A) (r : A -> A -> Bool) (x y : A) (c : Chain A r) : Bool :=
+  PartialOrder A o r x y c and Total A r x y
+StrictOrder (A : U) (r : A -> A -> Bool) (x : A) (p : Related A r) (c : Chain A r) : Bool :=
+  Irreflexive A r x and Asymmetric A r p and Transitive A r c

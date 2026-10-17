@@ -1,0 +1,72 @@
+-- operations.lth: the properties of a binary operation, each said once over the type, its
+-- equality, the operation and the values it qualifies; and the same within a bound over a
+-- distance, for an operation computed with rounding.
+--
+-- Draft 0, 2026-10-17, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/plan/core-2026-10-17/prompt-bite-2.md (bite 2 of record/plan/core-2026-10-17/execution.md,
+-- section 3.2). Sources: D-2026-10-17-b (the properties generic over an operation and the type's
+-- equality, said once: `Doubles` claims `Commutative` and not `Associative`, which documents by
+-- absence where the doubles are not the reals, 11.S15), D-2026-10-17-c (the names, the type
+-- first), D-2026-10-17-f (every property that is an equality has a version within a bound over a
+-- metric, the bound a function of the arguments from the claimant's theory, never a constant,
+-- P11; a floating-point realization is not a model of the exact property), 7.S12 (a rare premise
+-- is stated by its contrapositive), L9.14.
+--
+-- What this file states. Each property takes the type `A`, its equality `o : Object A` (read for
+-- its field `eq`; kernel_laws.lth's today, see relations.lth's note), the operation and its
+-- constants (a neutral `e`, an absorbing `z`, an inverse `inv`), and last the quantified values.
+-- `Commutative` takes a domain `A` and a codomain `B` because an operation drawn on a subtype of
+-- its carrier is not closed on the subtype (a `Metric`'s `dist` has codomain `Float64`;
+-- numbers.lth's `plus` is tested on `Moderate`); the rest need closure and are stated at the
+-- carrier only. [proposed] `Distributive` states both sides; every ring of the library is
+-- commutative, so no claimant needs a one-sided version.
+--
+-- The within-bound versions take the distance as a function `d : A -> A -> Float64`, not a
+-- `Metric` record, so that a claimant can pass the `dist` of a `MetricWithin` (a floating-point
+-- realization, execution.md 3.5) as well as a `Metric`'s. The bound is a function of the
+-- arguments: numbers.lth claims `AssociativeWithin` on the doubles' `plus` with
+-- `3 gamma2 (|x| + |y| + |z|)`, `gamma2 = 2u / (1 - 2u)`, `u` the unit roundoff (Higham,
+-- Accuracy and Stability of Numerical Algorithms, 2002, section 2.2; D-2026-10-17-f as dc781f2
+-- corrects it). A bound of zero is the exact property again and is the control's
+-- (core_controls.test.lut).
+--
+-- Who claims these laws: the structures of core/structures/ (bite 3) and the theories of the
+-- libraries, by one-line wrappers; until then the wrappers of tests/tester/core_instances.lut,
+-- tested on `Int` with `+` and `*`, `Bool` with `and` and `or`, `String` with `+`, and `Float64`
+-- with `+` within its bound, by core_laws.test.lut, and refuted by core_controls.test.lut.
+
+import "kernel_laws.lth" Object
+
+-- ---------------------------------------------------------------- the exact properties
+
+Associative (A : U) (o : Object A) (op : A -> A -> A) (x y z : A) : Bool := o.eq (op (op x y) z) (op x (op y z))
+Commutative (A B : U) (o : Object B) (op : A -> A -> B) (x y : A) : Bool := o.eq (op x y) (op y x)
+Idempotent (A : U) (o : Object A) (op : A -> A -> A) (x : A) : Bool := o.eq (op x x) x
+LeftNeutral (A : U) (o : Object A) (op : A -> A -> A) (e : A) (x : A) : Bool := o.eq (op e x) x
+RightNeutral (A : U) (o : Object A) (op : A -> A -> A) (e : A) (x : A) : Bool := o.eq (op x e) x
+Neutral (A : U) (o : Object A) (op : A -> A -> A) (e : A) (x : A) : Bool := LeftNeutral A o op e x and RightNeutral A o op e x
+Absorbing (A : U) (o : Object A) (op : A -> A -> A) (z : A) (x : A) : Bool := o.eq (op x z) z and o.eq (op z x) z
+-- by its contrapositive over every triple: equal arguments, or unequal results
+Cancellative (A : U) (o : Object A) (op : A -> A -> A) (x y z : A) : Bool := o.eq y z or not (o.eq (op x y) (op x z))
+Invertible (A : U) (o : Object A) (op : A -> A -> A) (e : A) (inv : A -> A) (x : A) : Bool :=
+  o.eq (op x (inv x)) e and o.eq (op (inv x) x) e
+Distributive (A : U) (o : Object A) (times plus : A -> A -> A) (x y z : A) : Bool :=
+  o.eq (times x (plus y z)) (plus (times x y) (times x z)) and o.eq (times (plus y z) x) (plus (times y x) (times z x))
+Absorptive (A : U) (o : Object A) (meet join : A -> A -> A) (x y : A) : Bool :=
+  o.eq (meet x (join x y)) x and o.eq (join x (meet x y)) x
+Complemented (A : U) (o : Object A) (op : A -> A -> A) (complement : A -> A) (unit : A) (x : A) : Bool :=
+  o.eq (op x (complement x)) unit
+Distinct (A : U) (o : Object A) (a b : A) : Bool := not (o.eq a b)
+
+-- ---------------------------------------------------------------- the same within a bound
+
+AssociativeWithin (A : U) (d : A -> A -> Float64) (op : A -> A -> A) (bound : A -> A -> A -> Float64) (x y z : A) : Bool :=
+  d (op (op x y) z) (op x (op y z)) <= bound x y z
+CommutativeWithin (A B : U) (d : B -> B -> Float64) (op : A -> A -> B) (bound : A -> A -> Float64) (x y : A) : Bool :=
+  d (op x y) (op y x) <= bound x y
+NeutralWithin (A : U) (d : A -> A -> Float64) (op : A -> A -> A) (e : A) (bound : A -> Float64) (x : A) : Bool :=
+  d (op e x) x <= bound x and d (op x e) x <= bound x
+DistributiveWithin (A : U) (d : A -> A -> Float64) (times plus : A -> A -> A) (bound : A -> A -> A -> Float64) (x y z : A) : Bool :=
+  d (times x (plus y z)) (plus (times x y) (times x z)) <= bound x y z
+InvertibleWithin (A : U) (d : A -> A -> Float64) (op : A -> A -> A) (e : A) (inv : A -> A) (bound : A -> Float64) (x : A) : Bool :=
+  d (op x (inv x)) e <= bound x
