@@ -45,7 +45,7 @@ models : List Certifying := [certifying]
 laws : List String := ["L"]
 cones : List Hash := ["sha256:cccc"]
 entry (l : String) (h : String) (g : Maybe Grade) (o : Outcome) : Entry :=
-  { law := l, cone := h, binding := nil, seed := 20261015, cases := 1, budgets := defaultBudgets, reach := nil,
+  { law := l, cone := h, binding := nil, seed := 20261015, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-15", interpreter := "listed", hosts := nil }
 assumedPass : Entry := entry "L" "sha256:cccc" (just AssumedGrade) Passed
 sampledPass : Entry := entry "L" "sha256:cccc" (just Sampled) Passed

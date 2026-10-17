@@ -21,7 +21,7 @@ import "term_model.lut" alpha substitute stepper
 import "certification.lth" Erasure ErasureKeepsTheStep eraseBinders erased
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
-  { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+  { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-16", interpreter := "listed", hosts := nil }
 passOne : Entry := entry "L" 1 (just Cases) Passed
 failOne : Entry := entry "L" 1 nothing (Failed "x = 1")

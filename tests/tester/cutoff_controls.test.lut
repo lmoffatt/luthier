@@ -20,7 +20,7 @@ acceptsAFailure : Certifying := { identity := certifying.identity, stale := cert
 wrongModels : List Certifying := [acceptsAFailure]
 
 entry (l : String) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
-  { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+  { law := l, cone := "sha256:cccc", binding := nil, seed := s, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
 ofTheLaw : List Entry := [entry "L" 1 (just Cases) Passed, entry "L" 1 nothing (Failed "x = 1"),
   entry "L" 1 nothing (NotRunFor "no generator")]

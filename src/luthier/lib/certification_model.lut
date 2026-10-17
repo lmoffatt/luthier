@@ -39,7 +39,8 @@ import "term_model.lut" alpha canonical substitute stepper
 emptyStore : Store certifying := nil
 
 -- 7.S9, 7.S13: the identity of an outcome
-identity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases }
+identity (e : Entry) : Identity := { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases,
+                                     conjunct := e.conjunct }
 
 -- 12.S11: stale against the current hash of the cone
 stale (h : Hash) (e : Entry) : Bool := not (e.cone == h)

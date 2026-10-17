@@ -16,11 +16,11 @@ import "certification_model.lut" certifying pooling
 
 -- an entry of the law L at the hash cccc under no binding: drawn from its seed, or over a census
 drawn (s : Int) (n : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
-  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := n, budgets := defaultBudgets, reach := nil,
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := n, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Points Bool nil (Drawn s), grade := g, outcome := o, date := "2026-10-16", interpreter := "listed",
     hosts := nil }
 listed (s : Int) : Entry :=
-  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := 4, budgets := defaultBudgets, reach := nil,
+  { law := "L", cone := "sha256:cccc", binding := nil, seed := s, cases := 4, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := just Cases, outcome := Passed, date := "2026-10-16", interpreter := "listed",
     hosts := nil }
 one : Entry := drawn 1 100 (just Sampled) Passed

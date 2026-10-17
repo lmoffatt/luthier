@@ -138,15 +138,23 @@ outOfFuel (o : Outcome) : Bool := o == NotRunFor fuelSpent
 
 -- The identity of an outcome: 7.S9's identity of an entry (the law, the hash of its cone, the
 -- binding expanded), with the seed and `n` of 7.S13, under which a test is deterministic. The fuel
--- given is not part of it (D-2026-10-15-g), nor of the entry.
-Identity = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat }
+-- given is not part of it (D-2026-10-15-g), nor of the entry. [the core's bite 4b, 7.S22,
+-- D-2026-10-18-f] A law whose body is a conjunction of laws is tested conjunct by conjunct, each
+-- conjunct's entry under the law's name and cone: the conjunct (`just "Symmetric Int r"`, as the law
+-- applies it) is part of the identity, `nothing` for a law's own entry and for a control's.
+Identity = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat, conjunct : Maybe String }
 
 -- An entry: its identity; what it holds, the budgets (7.S8), the reach of each parameter (7.S10),
 -- the evidence of laws.lth, the grade of test.lth (`nothing` unless it passed), its outcome, the
 -- date, the interpreter's revision and the hash of the host code behind each extern the cone
 -- calls, by route (6.S8). The counts of 7.S12 and the labels of 7.S14 are in the evidence and its
 -- reasons. [proposed] `cases` is the `n` asked, which 7.S12 compares with the cases evaluated.
-Entry = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat,
+-- A conjunct's entry (7.S22) names its conjunct and lists the law's conjuncts (`conjuncts`, nil
+-- otherwise), so that a conjunct with no entry leaves the law without a grade (tester.py's
+-- `_run_conjunction`, certify.py's `certificate_grade_and_empty`; the store omits both fields when
+-- the entry is no conjunct's).
+Entry = { law : String, cone : Hash, binding : List Drawing, seed : Seed, cases : Nat, conjunct : Maybe String,
+          conjuncts : List String,
           budgets : Budgets, reach : List ParameterReach, evidence : Evidence, grade : Maybe Grade,
           outcome : Outcome, date : String, interpreter : String, hosts : List (String * Hash) }
 
@@ -316,7 +324,8 @@ orWeakest (m n : Maybe Grade) : Maybe Grade :=
 orStronger (g : Grade) (m : Maybe Grade) : Grade := match m { nothing -> g ; just h -> stronger g h }
 -- an entry moved under a binding, and a list of them (how the fold's laws put passes under one)
 under (b : List Drawing) (e : Entry) : Entry :=
-  { law := e.law, cone := e.cone, binding := b, seed := e.seed, cases := e.cases, budgets := e.budgets, reach := e.reach,
+  { law := e.law, cone := e.cone, binding := b, seed := e.seed, cases := e.cases, conjunct := e.conjunct,
+    conjuncts := e.conjuncts, budgets := e.budgets, reach := e.reach,
     evidence := e.evidence, grade := e.grade, outcome := e.outcome, date := e.date, interpreter := e.interpreter, hosts := e.hosts }
 underAll (b : List Drawing) (es : List Entry) : List Entry := match es { nil -> nil ; cons e rest -> cons (under b e) (underAll b rest) }
 
@@ -520,7 +529,8 @@ anyServes (serves : Demand -> Entry -> Bool) (d : Demand) (es : List Entry) : Bo
 -- serve a demand but for one condition as this image (7.S6: a subtype a filter reaches too rarely
 -- is the image of a construction whose arguments are drawn).
 reshape (e : Entry) (l : String) (r : List ParameterReach) (o : Outcome) (g : Maybe Grade) : Entry :=
-  { law := l, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases, budgets := e.budgets, reach := r,
+  { law := l, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases, conjunct := e.conjunct,
+    conjuncts := e.conjuncts, budgets := e.budgets, reach := r,
     evidence := e.evidence, grade := g, outcome := o, date := e.date, interpreter := e.interpreter, hosts := e.hosts }
 withSupport (given : List (String * Value)) (rs : List ParameterReach) : List ParameterReach :=
   match given { nil -> rs ; cons (p, v) rest -> cons { parameter := p, reach := Support } (withSupport rest rs) }
@@ -660,9 +670,11 @@ Certifying : {
 }
 
 -- §1. 7.S9, 7.S13: the identity of an outcome is the law, the cone's hash, the binding expanded,
--- the seed and `n`, and nothing the entry holds besides
+-- the seed and `n`, and the conjunct of a conjunction's entry (7.S22), and nothing the entry holds
+-- besides
 IdentityIsTheKey (k : Certifying) (e : Entry) : Bool :=
-  k.identity e == { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases }
+  k.identity e == { law := e.law, cone := e.cone, binding := e.binding, seed := e.seed, cases := e.cases,
+                    conjunct := e.conjunct }
 -- 12.S11: an entry is stale when its hash differs from the current hash of its cone
 StaleIsAnotherHash (k : Certifying) (h : Hash) (e : Entry) : Bool := k.stale h e == not (e.cone == h)
 

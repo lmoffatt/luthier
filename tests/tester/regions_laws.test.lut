@@ -49,7 +49,7 @@ test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- 
 -- certification.lth §5, `Regioning`: the entries, certificates, regions and evidence
 bB : List Drawing := [{ parameter := "x", generator := "g", fingerprint := "f" }]
 entry (b : List Drawing) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
-  { law := "L", cone := "sha256:cccc", binding := b, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+  { law := "L", cone := "sha256:cccc", binding := b, seed := s, cases := 1, conjunct := nothing, conjuncts := nil, budgets := defaultBudgets, reach := nil,
     evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
 passA : Entry := entry nil 1 (just Cases) Passed
 passB : Entry := entry bB 2 (just Sampled) Passed
