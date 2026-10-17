@@ -1514,6 +1514,25 @@ def runtime_slice(acts, main, roots=()):
             for field in fields(value):
                 yield from names(getattr(value, field.name))
 
+    # rule 2.2 (the core's bite 4): a field of a structure used free (`size xs`) or qualified
+    # (`Indexed.size`) is resolved through the claims of its structures, so a name reaching it
+    # reaches them; a structure is a name declared at a record with parameters, a claim `X : Bool
+    # := S T m` names it at the head of its body
+    fields_of = {}
+    for act in acts:
+        if isinstance(act, s.Declare) and act.binders and isinstance(act.type, s.Record):
+            for f in act.type.fields:
+                for n in f.names:
+                    fields_of.setdefault(n, set()).add(act.name)
+    claims = {}
+    for act in acts:
+        if isinstance(act, s.Define) and act.type == s.Name("Bool") and isinstance(act.body, s.TermBody):
+            h = act.body.term
+            while isinstance(h, s.App):
+                h = h.function
+            if isinstance(h, s.Name) and any(h.name in owners for owners in fields_of.values()):
+                claims.setdefault(h.name, []).append(act.name)
+
     needed = set()
     pending = [main, *roots]
     while pending:
@@ -1524,7 +1543,15 @@ def runtime_slice(acts, main, roots=()):
         if name in owner:
             pending.append(owner[name])
         for act in by_name.get(name, ()):
-            pending.extend(names(act))
+            written = list(names(act))
+            pending.extend(written)
+            bound = _bound_names(act)
+            for n in written:
+                if n in by_name or n in bound or n in ("left", "right"):
+                    continue
+                root, _, rest = n.partition(".")
+                for structure in fields_of.get(n, set()) | ({root} if rest and root in claims else set()):
+                    pending.extend(claims.get(structure, ()))
     def projections(value):
         if isinstance(value, s.Name) and "." in value.name and value.name not in by_name:
             # a dotted name is a projection, whether its root is a definition (host.print) or a
@@ -1541,6 +1568,27 @@ def runtime_slice(acts, main, roots=()):
         return value
     return tuple(projections(a) for a in acts
                  if a in by_name.get(getattr(a, "name", None), ()) and a.name in needed)
+
+
+def _bound_names(value):
+    """The names an act binds itself (its binders, a lambda's parameters, a block's names, a
+    pattern's variables): a field of a structure written as one of them is no use of the field."""
+    out = set()
+    def visit(x):
+        if isinstance(x, (s.Explicit, s.Implicit, s.TypedParam)):
+            out.update(x.names)
+        elif isinstance(x, (s.PlainParam, s.Bind)):
+            out.add(x.name)
+        elif isinstance(x, s.PApp) and not x.patterns:
+            out.add(x.name)
+        if isinstance(x, tuple):
+            for y in x:
+                visit(y)
+        elif is_dataclass(x) and not isinstance(x, type):
+            for f in fields(x):
+                visit(getattr(x, f.name))
+    visit(value)
+    return out
 
 
 def core_data(loaded):
