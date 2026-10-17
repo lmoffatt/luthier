@@ -597,6 +597,55 @@ test "MaddPointwise" (SampledMode linear) (seed <- 20261015) (profile <- pswapMa
 -- swapMsub: the difference is a sum
 test "MsubPointwise" (SampledMode linear) (seed <- 20261015) (profile <- pswapMsub) (control <- true)
 -- shiftMscale: the entries are not s times a
+-- [2026-10-17, 3j j2a, the coordinator's answer to finding 1] Controls of the corrected error models
+-- of PinvSymmetric and PinvScales (approxMatBoth, a normwise term added): a pinv perturbed just
+-- beyond the bound must still be refuted, so the normwise term does not swallow a real break.
+-- skewNormPinv: entry (0, 1) off by 1e-9 times the norm of p, three hundred times the bound
+-- (1e-12 times |p01| + |p10| + the norm, at most three times the norm)
+skewNormPinv : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { { p := numpy.pinvSym fl a
+    numpy.madd p (mat Float64 a.m a.m (fn i j { if i == 0 and j == 1 then 1.0e-9 * frobDef p else 0.0 })) } },
+}
+pskewNormPinv : List Binding := [
+  { parameter := just "m", type := nothing, generator := "skewNormPinv", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
+-- offsetPinv: 1e-6 added at entry (0, 0), an amount that does not scale as 1 / c
+offsetPinv : Arrays := {
+  add := numpy.add,
+  sub := numpy.sub,
+  scale := numpy.scale,
+  dot := numpy.dot,
+  norm := numpy.norm,
+  matVec := numpy.matVec,
+  matMul := numpy.matMul,
+  madd := numpy.madd,
+  msub := numpy.msub,
+  mscale := numpy.mscale,
+  transpose := numpy.transpose,
+  retainedRank := numpy.retainedRank,
+  trace := numpy.trace,
+  pinvSym := fn fl a { numpy.madd (numpy.pinvSym fl a) (mat Float64 a.m a.m (fn i j { if i == 0 and j == 0 then 1.0e-6 else 0.0 })) },
+}
+poffsetPinv : List Binding := [
+  { parameter := just "m", type := nothing, generator := "offsetPinv", coverage := Listed },
+  { parameter := just "tol", type := nothing, generator := "tolerance", coverage := Listed },
+  { parameter := just "fl", type := nothing, generator := "floor", coverage := Listed } ]
+
 test "MscalePointwise" (SampledMode linear) (seed <- 20261015) (profile <- pshiftMscale) (control <- true)
 -- skewDot: the two orders differ by the coordinates added
 test "DotSymmetric" (SampledMode linear) (seed <- 20261015) (profile <- pskewDot) (control <- true)
@@ -655,3 +704,7 @@ test "PinvTraceIsRank" ExhaustiveMode (whereBindings <- listedS) (profile <- ppi
 -- pinvAbs: scaled to the size of the floor, every eigenvalue is below the absolute floor of 1e-3
 -- (before, ridge: the ridge does not scale as 1 / c; it saw a break of the size of the matrix)
 test "PinvScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- ppinvAbs) (control <- true)
+-- skewNormPinv: p off its transpose by 1e-9 times its norm, beyond the normwise term (2026-10-17)
+test "PinvSymmetric" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- pskewNormPinv) (control <- true)
+-- offsetPinv: an absolute 1e-6 at (0, 0), which P over c does not carry (2026-10-17)
+test "PinvScales" (SampledMode linear) (seed <- 20261015) (whereBindings <- drawnS) (profile <- poffsetPinv) (control <- true)
