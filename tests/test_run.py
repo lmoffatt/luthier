@@ -176,8 +176,11 @@ def command(path, *args, cwd=None, record=False):
             lock.unlink(missing_ok=True)
 
 
-def test_hello():
-    result = command(ROOT / "examples/hello.run.lut")
+def test_hello(tmp_path):
+    # a copy, so that the run's record is written beside the copy and not into examples/
+    hello = tmp_path / "hello.run.lut"
+    hello.write_text((ROOT / "examples/hello.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    result = command(hello)
     assert (result.returncode, result.stdout, result.stderr) == (0, "hello, world\n", "")
 
 
@@ -205,7 +208,9 @@ def test_host_observe_and_reset(tmp_path):
     assert host.observe(token, places)[1]["files"] == [(path, "changed\n"), (absent, "now\n")]
     assert host.read_file(token, path) == (token, host.Just("changed\n"))
     assert host.read_file(token, str(tmp_path / "nope")) == (token, host.NOTHING)
-    assert run_file(ROOT / "examples/hello.run.lut") == "hello, world\n"
+    hello = tmp_path / "hello.run.lut"
+    hello.write_text((ROOT / "examples/hello.run.lut").read_text(encoding="utf-8"), encoding="utf-8")
+    assert run_file(hello) == "hello, world\n"
     assert host.observe(token, ["stdout"]) == (token, {"stdout": "hello, world\n", "files": []})
 
 
