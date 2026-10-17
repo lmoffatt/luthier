@@ -9,7 +9,9 @@ prompt-certify.md (step 5.3 of the plan from zero), by a Claude agent of the coo
 The cone of a name is every definition of the runtime program the name reaches (its type and its
 body, the data of each constructor it names), each in canonical form: binders renamed by
 kernel.canonical, module prefixes and the `@file` tag the loader gives a clashing name not seen,
-an extern by its route only. With it go the host code behind each extern of the cone, by route,
+an extern by its route only, and the type annotation of each `Lam` and `Let` erased (`erase`,
+D-2026-10-15-e: the hash is the strict level of equality, and an annotation the elaborator writes
+changes nothing the term does). With it go the host code behind each extern of the cone, by route,
 and the interpreter's revision. `cone_hash` is certification.lth §4's `ConeHashing.hash`, the
 route `python:luthier.certify.cone_hash` certification_model.lut names; `Cones` builds the cone of
 a name from a program.
@@ -115,10 +117,37 @@ def _plain(x):
     return x
 
 
+# [D-2026-10-15-e] what an erased binder annotation becomes in the hash
+ERASED = t.Hole("erased")
+
+
+def erase(x):
+    """certification.lth's `eraseBinders`: the term with the type annotation of each `Lam` and each
+    `Let` replaced by `ERASED`, everywhere in it (a type's `Pi`, `Sigma`, `Subtype` and record fields
+    are kept: they are types, read by the tester and the bridge, and no annotation of a binder). The
+    elaborator writes those annotations (from a parameter's written type, from the expected type, or
+    inferred for a `Let`) and no step of the kernel or of the Runner reads them, so the hash, the
+    strict level of equality, does not see them (D-2026-10-15-e). The condition, that no erased
+    annotation changes what the term does, is the law `ErasureKeepsTheStep` (certification.lth §4)
+    and tests/test_certify.py's step-by-step check of the library's code."""
+    if isinstance(x, t.Lam):
+        return t.Lam(x.name, ERASED, erase(x.body))
+    if isinstance(x, t.Let):
+        return t.Let(x.name, ERASED, erase(x.value), erase(x.body))
+    if isinstance(x, (str, t.Lit, t.Primitive, t.Axiom, t.Extern)):
+        return x
+    if isinstance(x, tuple):
+        return tuple(erase(y) for y in x)
+    if is_dataclass(x) and not isinstance(x, type):
+        return replace(x, **{f.name: erase(getattr(x, f.name)) for f in fields(x) if f.init})
+    return x
+
+
 def canon(term):
     """term.lth §4's canonical form as the hash reads it: `kernel.canonical` (binders renamed in
-    preorder, free names unqualified) of the term without file tags."""
-    return kernel.canonical(_plain(term))
+    preorder, free names unqualified) of the term without file tags and with its binders'
+    annotations erased (`erase`, D-2026-10-15-e)."""
+    return kernel.canonical(erase(_plain(term)))
 
 
 def canon_code(code):
@@ -280,7 +309,7 @@ class Cones:
                 _walk(term, out)
                 refs |= set(kernel.free_names(term)) | out["constructors"]
                 routes |= out["routes"]
-                code.append((name.partition("@")[0], kernel.canonical(_plain(term))))
+                code.append((name.partition("@")[0], canon(term)))
             self.memo[name] = (code, refs, routes)
         return self.memo[name]
 

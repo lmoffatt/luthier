@@ -73,6 +73,132 @@ def test_hash_sees_the_interpreter():
         assert r == c["interpreter"] or certify.cone_hash(with_(c, interpreter=r)) != certify.cone_hash(c)
 
 
+# ---------------------------------------------------------------------- the erasure (D-2026-10-15-e)
+
+def _erase_names(x):
+    """A control: an erasure that also erases each `Lam`'s binder, leaving its occurrences free. It
+    goes past the annotations into what the term does, so the law below must refute it."""
+    if isinstance(x, t.Lam):
+        return t.Lam("erased", certify.ERASED, _erase_names(x.body))
+    if isinstance(x, t.Let):
+        return t.Let(x.name, certify.ERASED, _erase_names(x.value), _erase_names(x.body))
+    if isinstance(x, (str, t.Lit, t.Primitive, t.Axiom, t.Extern)):
+        return x
+    if isinstance(x, tuple):
+        return tuple(_erase_names(y) for y in x)
+    if certify.is_dataclass(x) and not isinstance(x, type):
+        return certify.replace(x, **{f.name: _erase_names(getattr(x, f.name)) for f in certify.fields(x) if f.init})
+    return x
+
+
+def _erased_program(program, erasure):
+    return tuple(certify.replace(a, type=erasure(a.type), body=erasure(a.body)) if isinstance(a, t.Define) else a
+                 for a in program)
+
+
+def _one_step(program, x):
+    from luthier import kernel
+    try:
+        return ("step", kernel.step(program, x))
+    except Exception as exc:  # a step that raises (a zero divisor) must raise on both sides
+        return ("raised", type(exc).__name__)
+
+
+def _step_disagreement(program, terms, erasure):
+    """certification.lth's `ErasureKeepsTheStep` on the host: for each term, one kernel step in the
+    program, erased, agrees up to alpha with one step from the erased term in the erased program
+    (both none, both raising, or the same term). By induction on the steps the erased term then
+    reduces as the term does at any fuel. The first term where they disagree, or None."""
+    from luthier import kernel
+    erased = _erased_program(program, erasure)
+    before = [_one_step(program, x) for x in terms]       # the kernel caches one program's tables
+    after = [_one_step(erased, erasure(x)) for x in terms]
+    for x, (k, u), (j, v) in zip(terms, before, after):
+        if k != j or (k == "raised" and u != v):
+            return x
+        if k == "step" and (u is None) != (v is None):
+            return x
+        if k == "step" and u is not None and not kernel.alpha_equal(erasure(u), v):
+            return x
+    return None
+
+
+def _library_terms(path, steps=200):
+    """The terms the law is checked at, from the runtime program of a test program: every subterm of
+    every definition (one step each: delta, stuck, a redex where the code holds one), and the
+    trajectory of each definition without parameters, reduced step by step (beta through the
+    annotated lambdas of the functions that build the program's censuses, the `Let`s of blocks)."""
+    from luthier import kernel
+    runner, _, _ = tester.load_program(path, 100_000)
+    program = tuple(a for a in runner.program)
+    terms, pending = [], [a.body for a in program if isinstance(a, t.Define)]
+    while pending:
+        x = pending.pop()
+        terms.append(x)
+        pending.extend(kernel._subterms(x))
+    for a in program:
+        if isinstance(a, t.Define) and not isinstance(a.body, t.Lam) and not isinstance(a.type, t.Pi):
+            x = t.Var(a.name)
+            for _ in range(steps):
+                terms.append(x)
+                try:
+                    x = kernel.step(program, x)
+                except Exception:
+                    break
+                if x is None:
+                    break
+    return program, terms
+
+
+ERASURE_PROGRAMS = [ROOT / "tests" / "tester" / "certification_laws.test.lut",
+                    ROOT / "tests" / "tester" / "numbers_laws.test.lut",
+                    ROOT / "tests" / "tester" / "probability_laws.test.lut",   # blocks: their `Let`s
+                    ROOT / "tests" / "tester" / "optimization_laws.test.lut"]
+
+
+@pytest.fixture(scope="module")
+def library_terms():
+    return [_library_terms(p) for p in ERASURE_PROGRAMS]
+
+
+def test_erasure_keeps_the_step_on_the_library(library_terms):
+    # D-2026-10-15-e's condition, as a law: no erased annotation changes what the term does
+    for program, terms in library_terms:
+        assert any(isinstance(x, (t.Lam, t.Let)) for x in terms)
+        assert _step_disagreement(program, terms, certify.erase) is None
+
+
+def test_erasure_keeps_the_step_control_is_refuted(library_terms):
+    # the control: erasing a binder with its annotation changes what the term does, and the law sees it
+    assert any(_step_disagreement(program, terms, _erase_names) is not None for program, terms in library_terms)
+
+
+def test_the_hash_does_not_see_a_binder_annotation(tmp_path):
+    """Two elaborations that differ only in the annotations the elaborator writes (a parameter
+    typed by hand or from the expected type, a block's `Let` typed or inferred) have one cone hash;
+    a change to what the term does still changes it."""
+    def hash_of(text):
+        path = tmp_path / "p.lut"
+        path.write_text(text, encoding="utf-8")
+        runner, _, _ = tester.load_program(path, 10000, ("Law",))
+        return certify.Cones(runner).hash("Law")
+    typed = "Law (x : Int) : Bool := (fn (k : Int) { k + 1 }) x > x\n"
+    expected = "Law (x : Int) : Bool := (fn k { k + 1 }) x > x\n"
+    assert hash_of(typed) == hash_of(expected)
+    # a block's `Let`, its type inferred by the elaborator or not (the six laws of report-sugar.md)
+    let = lambda a: [("Law", t.Lam("x", INT, t.Let("y", a, t.Var("x"), t.Var("y"))))]
+    cone = lambda code: certify.cone_hash({"code": code, "hosts": [], "interpreter": "i"})
+    assert cone(let(INT)) == cone(let(t.Hole("type"))) == cone(let(t.Var("Float64")))
+    assert cone(let(INT)) != cone([("Law", t.Lam("x", INT, t.Let("y", INT, t.Var("x"), t.Var("x"))))])
+    assert hash_of(typed) != hash_of(typed.replace("k + 1", "k + 2"))
+    # the definition's own type is no binder annotation: it says what the tester draws
+    assert hash_of(typed) != hash_of(typed.replace("(x : Int)", "(x : Nat)"))
+    # the erasure itself: a Lam's and a Let's annotation go, a Pi's domain stays
+    lam = t.Lam("x", INT, t.Let("y", INT, t.Var("x"), t.Pi("z", INT, t.Var("y"))))
+    assert certify.erase(lam) == t.Lam("x", certify.ERASED, t.Let("y", certify.ERASED, t.Var("x"),
+                                                                   t.Pi("z", INT, t.Var("y"))))
+
+
 def test_the_cone_of_a_name_in_a_program(tmp_path):
     """A definition the law reaches changes its hash; one it does not reach leaves it."""
     def hashes(text):
