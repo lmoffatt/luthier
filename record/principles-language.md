@@ -555,6 +555,16 @@ L3.4   Two types that differ only in the names of their fields or injections are
        an equivalence between types is a value with its laws, the two maps and their round trips,
        certified once, and certificates transport along it at its cost, nothing when it is exact
        (L6, L10.7) (D-2026-10-17-a). [proposed]
+L3.5   (His words, on the third version) The core has three planes: the objects (`Bool`, `Int`,
+       `Float`, `List`, `Map`, functions, functors and the universal constructions), each with its
+       theory; the levels of equivalence, objects too, one structure enriched over a base (`Bool`
+       with `and` gives an equivalence, [0, ∞] with `+` a metric, distributions with a t-norm a
+       probabilistic metric; Lawvere 1973, Menger 1942), compared by refinement or by Lipschitz
+       equivalence, order being the same structure without symmetry; and the computable types,
+       models of the first two, certified against them. The theories of the first two planes only
+       declare and state laws, with the mathematical references they are tested against; whatever
+       computes lives in the third, and the second version failed by mixing them (D-2026-10-18-c).
+       [proposed]
 References: D-2026-10-11-m
 Rests on:   O2 (the equality a type comes with)
 Quote:      (L16) "luego de <- lh == rh, de hecho creo que es la ley de <-" (reply, 18da042) (L21,
@@ -585,6 +595,7 @@ History:    (L16) draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: 
             to L16.7 with its intersection rule deleted (D-2026-10-12-q); clause 3 written in their
             place. draft 11 (2026-10-12): renumbered from L5 of draft 10 (D-2026-10-12-v).
             2026-10-17: clause 4 added, proposed (D-2026-10-17-a).
+            2026-10-18: clause 5 added, proposed (D-2026-10-18-c).
 
 L4  A program is a DAG of definitions without effects, and statements commute; actions have effects,
     and are verified by observing the world before and after.
@@ -773,6 +784,12 @@ L5.20  (His words) Every possible behavior has a way to be said in Luthier, more
        into one, or skipping an action whose effect the world already shows are defaults, and the
        program or its demand can always ask for the literal behavior instead (write twice to the
        same file, to see whether a third party writes in between) (D-2026-10-15-c). [settled]
+L5.21  (His words) The tower of levels is cut by the demand, not by a rule of the theory: a theory
+       is a finite rule between two nodes, the graph its rules generate may be infinite, and a
+       computation walks only what its demand reaches, as values are computed forward on demand
+       (clause 2), the parameters of each level it touches coming from the demand (clause 17).
+       Infinity is potential, as Haskell implements it: no limit for whoever walks the road, and
+       each computation comes with its limits (D-2026-10-18-c). [proposed]
 Example:    doubling positives is positive only when positivity is demanded and derivable, sin of
             positives is only Real because no law composes (clause 15)
 References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n
@@ -838,6 +855,7 @@ History:    (L19) draft 1 (5769005): stated. draft 2 (cd24137): the iteration st
             `plan.lth` for `lib/plan.lut`; clause 18 gains the reading of a domain, a series'
             truncation and a default the demander could vary (D-2026-10-16-b). 2026-10-16: clause 1
             gains that the two faces are files (D-2026-10-16-e).
+            2026-10-18: clause 21 added, proposed (D-2026-10-18-c).
 
 L6  One function, many specimens, chosen by maximizing the performance the demander chooses, along
     certified identities.
