@@ -3056,3 +3056,10 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line
             export)
 Kind:       the sonolocalización slice (session A's graph and fits); the order of work
 Status:     current
+
+Correction to D-2026-10-17-f (the decision assistant's, 2026-10-17): the bound written there for
+the doubles' associativity, γ₂·(|x| + |y| + |z|), is too small. Higham's Lemma 3.1 puts each side
+within that of the exact sum, so the two sides differ by up to twice it, and computing the
+difference in floating point adds a factor (1 + u)³; the core's design (record/plan/core-2026-10-17/
+decisions.md, note; 54f6228) claims 3·γ₂·(|x| + |y| + |z|), and the first certification tells
+whether γ₂ alone would have been refuted (the smaller bound serves as a control, L9.14).
