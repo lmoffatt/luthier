@@ -157,6 +157,15 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   notice firing 1675 times; the 11 theories of Luthier itself without tests or stores. Plan: a
   design brief for Fable (the two files and the migration map), then mechanical migration by Opus in
   bites by group, each re-certifying what it touches.
+  Extended by D-2026-10-17-f (Metric in the core beside Object: d over the type's equality, M1 to
+  M3, variants by their exact names; KL, relative error and squared Euclidean as controls; a Float64
+  realization a separate claim within a bound of an exact metric; every equational property with a
+  within-bound version, Doubles associative within gamma_2(|x|+|y|+|z|); the approx families as a
+  ball of a named metric) and D-2026-10-17-g (universal constructions with their universal
+  properties, by priority: equalizer, pullback, pushforward in probability.lth, coequalizer,
+  pushout; product, coproduct, free). Layout proposed by the fork: lib/core/ with core.lut,
+  lists.lut, properties/{relations, operations, functions}.lth, structures/{equality, order,
+  algebraic, containers, universal}.lth; to confirm in the design brief.
 
 ## Step 4. The first cost (v0.5)
 `PinvProjects` returns its distance; the certificate records it; a demand is served by
