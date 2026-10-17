@@ -2997,3 +2997,30 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line
 Kind:       core (structures.lth), numbers.lth, arrays.lth (the `approx…` family), probability.lth
             (Kolmogorov), belief.lth
 Status:     current
+
+D-2026-10-17-g  The universal constructions are named structures of the core, each with its
+                universal property (a law characterizing it up to a unique isomorphism, as the
+                product's gives `Point`'s equivalence): product (records), coproduct (`data`),
+                equalizer ({x : A | f x = g x}: every subtype by a law of L8 is one; symmetric
+                matrices the equalizer of `id` and `transpose`), pullback (A ×_C B: the relational
+                join of D-2026-10-16-a, measurements joined with nodes by id in sonolocalización,
+                `Mat r k` and `Mat k c` sharing k), coequalizer (the quotient: L6.5's classes of
+                specimens, O2's setoids), pushout (gluing theories over a shared sub-theory), free.
+                Priority by present use: equalizer, pullback, the pushforward of measures (in
+                probability.lth: generators, the probability integral transform, a Gaussian belief
+                pushed through a function), coequalizer, pushout. The pullback of a structure along
+                a function (a metric d(f x, f y), a predicate P(f x)) is what L6.8 already calls
+                pulling the tolerance back. The core is a directory with a file per subsection, so
+                no file grows too long; [proposed] layout: lib/core/ with core.lut, lists.lut,
+                properties/ (relations, operations, functions) and structures/ (equality: Object
+                and Metric; order; algebraic; containers; universal).
+Author:     Luciano, on the decision assistant's reading of limits, colimits, pullback, pushforward
+            and equalizers in Luthier
+Quote:      "un concepto de teoría de categorías es el de limit y colimit y de push back y push
+            forward y equalizer. ¿Ves un uso de todo esto?" ... "Sí, yo creo que structures debería
+            ser un directorio con files dedicados a cada subsección, para que no se haga demasiado
+            largo"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line unknown until the
+            export)
+Kind:       core (lib/core/), L8's reading, probability.lth, the imports of every file
+Status:     current
