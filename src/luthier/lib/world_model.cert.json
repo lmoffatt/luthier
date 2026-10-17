@@ -1,5 +1,175 @@
 [
  {
+  "law": "HostChangesOnlyDeclared",
+  "cone": "sha256:e6bc45e74c77710bd7c072a8db7faa0b249a23e232cc133a625d51bcc3572b59",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:79218ab5030b0193e129056d7f277d5e62008a6df503263362774b8fef6df195"
+   },
+   {
+    "parameter": "h",
+    "generator": "host.readFile at p = \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\" (the action held)",
+    "fingerprint": "sha256:ad1b51e3b1836f82e5a253971ca54b7e114b2732a5f119e25462b66de3319e22"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "h",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host.readFile at p = \"examples/sonolocalizacion/A/graph_noA2/nodes.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T18:18:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
+  "law": "HostAgreesReadFile",
+  "cone": "sha256:892eb4ea2f682788efc159d34fe1a753e7982625cba100a83633932832d01110",
+  "binding": [
+   {
+    "parameter": "o",
+    "generator": "host (the run's model)",
+    "fingerprint": "sha256:79218ab5030b0193e129056d7f277d5e62008a6df503263362774b8fef6df195"
+   },
+   {
+    "parameter": "p",
+    "generator": "\"examples/sonolocalizacion/A/graph_noA2/nodes.csv\" (the run's argument)",
+    "fingerprint": "sha256:e0849c075142b9c20d696e7276d6ea7ef6334be8208f9e5353566d45f4efab54"
+   },
+   {
+    "parameter": "extra",
+    "generator": "[\"stdout\"] (the certifier's places)",
+    "fingerprint": "sha256:9211fb1270952270c24088c7734d555fc31f59c561a77ca8c736ee706504497e"
+   }
+  ],
+  "seed": null,
+  "cases": 1,
+  "kind": "FirstAction",
+  "budgets": {},
+  "reach": [
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "host"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"examples/sonolocalizacion/A/graph_noA2/nodes.csv\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "extra",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "[\"stdout\"]"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   },
+   "protocol": "first action (10.S10)",
+   "route": "python:luthier.host.read_file"
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T18:18:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ]
+ },
+ {
   "law": "ChangesOnlyDeclared",
   "cone": "sha256:a867a8ea850fb37e3146220b87b967193a5bff1172c6498dd1f5841f2d0f844c",
   "binding": [
