@@ -67,8 +67,10 @@ hostGenerators : {
   uniformSample := extern "python:luthier.generators.uniform_sample",
   clearDiagonalWith := extern "python:luthier.generators.clear_diagonal",
 }
--- symmetric matrices, v0.1's B + B^T (arrays.py's gen_symmetric), of a size between 1 and the
--- size, entries in [-size, size]; and of k rows
+-- symmetric matrices, v0.1's B + B^T (arrays.py's gen_symmetric), of a size from 7.S5's census
+-- of dimensions (0, 1, 2, 3, 5, 10, those not above the size), entries in [-size, size], the zero
+-- and a rank-deficient matrix each with a share (generators.py's `degenerate`, 2026-10-17); and of
+-- k rows
 symmetric : Gen Symmetric := hostGenerators.symmetric
 symmetricOf (k : Dim) : Gen (SymmetricOf k) := hostGenerators.symmetricOf k
 -- positive semidefinite: B^T B with B of fewer rows than columns in most draws (rank deficient)
