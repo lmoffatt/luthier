@@ -3145,3 +3145,37 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       principles (L3, L5); the core's design (record/plan/core-2026-10-17/); structures/
             equality.lth
 Status:     current
+
+D-2026-10-18-d  [candidate for a fundamental principle] The law of an algorithm states how its
+                budget scales with the bound demanded: the resource (steps, samples, memory, bits of
+                precision) as a function of the bound and of the problem's features (size n,
+                condition κ, unit roundoff u), with the floor below which no budget suffices (the
+                rounding's resolution, L13.5). It is the modulus of Bishop's constructive analysis
+                (1967): a convergent process comes with the function that says how far to walk for a
+                given precision. Examples: certifying a law by sampling with no failure, n ≈
+                ln(1/δ)/ε cases; a sequential test, about log(1/α)/δ² samples; gradient, about κ·
+                log(1/tol) steps; Newton or Levenberg-Marquardt near the optimum, about
+                log log(1/tol); bisection, log₂(L/tol); Monte Carlo, σ²/ε². It is what LAPACK states
+                (error bounds such as p(n)·u·κ(A) and operation counts such as 2n³/3 for LU) and
+                what the laws of floating point state (each operation correctly rounded, |fl(a ∘ b)
+                − a ∘ b| ≤ u·|a ∘ b|; Higham's γₙ), already cited as a documented bound in L10.2.
+                Generalizes D-2026-10-16-m (the step bound of an iterative algorithm) to every
+                resource. Tested by measuring the resource at several bounds (the slope in log
+                scale is part of the law); read by the planner to predict a specimen's resources at
+                the demand's bound before running (L6.3); the first alarm of a run off its scaling
+                (the 400 iterations). Finite theories about the infinite abstain from fixing a
+                maximal bound; the budget is the number of finite explorers; the law says how many
+                each bound needs.
+Author:     Luciano, on the decision assistant's reading (Bishop's modulus)
+Quote:      "la idea es que vos tenés teorías finitas sobre el infinito que no es otra cosa que
+            abstenerse de fijar una cota máxima, luego tenés el número de exploradores finitos que te
+            dé el presupuesto. Aquí entonces un punto nuevo: cómo escala el presupuesto con las cotas
+            y eso es lo que en realidad las leyes de los algoritmos debieran decir." ... "Sí, esto es
+            candidato muy fuerte a principio, a un principio fundamental. LAPACK te dice este tipo de
+            cosas, también las leyes de los floating point."
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       principles (a fundamental clause, to be placed: under L6 or L9, or a principle of its
+            own); the theories of algorithms (optimization, belief, lm, arrays, probability); the
+            tester (measured scaling); the planner
+Status:     current
