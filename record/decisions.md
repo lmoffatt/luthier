@@ -3179,3 +3179,15 @@ Kind:       principles (a fundamental clause, to be placed: under L6 or L9, or a
             own); the theories of algorithms (optimization, belief, lm, arrays, probability); the
             tester (measured scaling); the planner
 Status:     current
+
+D-2026-10-18-e  Core question 2 (record/plan/core-2026-10-17/decisions.md): generators.lth's
+                `Metric` (the placing of a uniform draw into an interval) is renamed `Placement`
+                (`LinearPlacement`, `LogPlacement`), so the word stays with the core's metric space
+                (D-2026-10-17-f); the test lines keep `SampledMode linear`; three sentences of chapter
+                7 reworded.
+Author:     Luciano, the recommendation
+Quote:      "2 ok"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       generators.lth, test.lth (`SampledMode : Placement -> Mode`), spec 7.S2, 7.S4, 7.R1
+Status:     current
