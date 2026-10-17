@@ -615,6 +615,11 @@ another structure passed by name (the author's, part of the definition), and a g
 bound (a metric ball's epsilon) a demand parameter (L5.17), never fixed by the model or the
 resolution. Question 5 (list append as `+`) open.
 
+D-2026-10-18-h (2026-10-18): the rest of the night explores what the principle of the three levels
+of equivalence changes and whether it can be done (record/plan/three-levels-2026-10-18/), read
+only, before more code: bites 4 and 4b wait for its report; the budgets bite, already running,
+finishes.
+
 ### Bite 3. The metrics script (Sonnet; first, alone)
 
 Files: new `scripts/core_metrics.py` and `tests/test_core_metrics.py`. The script prints the four
