@@ -1119,6 +1119,48 @@ def test_a_line_out_of_fuel_leaves_no_entry_and_runs_again_with_enough(tmp_path,
     assert certify.record([], cut.entry) == []
 
 
+# the core's budgets brief (record/plan/core-2026-10-17/prompt-budgets.md; 7.S8, P11): a line's fuel
+# is a budget of the line, test.lth's default unless it gives its own, recorded in its entry, and
+# `--fuel` overrides it for a run, recorded too; fuel is in no identity (D-2026-10-15-g)
+OWN_FUEL = '''import "test.lth" test ExhaustiveMode withFuel defaultBudgets
+count (n : Int) : Int := if n <= 0 then 0 else count (n - 1)
+Slow (b : Bool) : Bool := count 200 == 0
+test "Slow" ExhaustiveMode (budgets <- withFuel 100 defaultBudgets)
+'''
+
+
+def test_a_line_runs_with_its_own_fuel_and_records_it(tmp_path):
+    path = tmp_path / "own.test.lut"
+    path.write_text(OWN_FUEL, encoding="utf-8")
+    cut, = tester.run_tests(path, store=True)
+    assert cut.spec.budgets["fuel"] == 100 and cut.out_of_fuel == 100
+    assert cut.entry["budgets"]["fuel"] == 100 and not certify.store_path(path).exists()
+    # test.lth's default, without a budget of the line's own
+    default, = tester.run_tests(_written(tmp_path / "plain.test.lut", SLOW), store=True)
+    assert default.entry["outcome"] == "Passed" and default.entry["budgets"]["fuel"] == 3_000_000
+
+
+def test_the_fuel_given_overrides_the_line_s_and_is_recorded(tmp_path):
+    path = tmp_path / "own.test.lut"
+    path.write_text(OWN_FUEL, encoding="utf-8")
+    ran, = tester.run_tests(path, fuel=1_000_000, store=True)
+    assert ran.entry["outcome"] == "Passed" and ran.entry["budgets"]["fuel"] == 1_000_000
+    assert certify.read_store(path)[0]["budgets"]["fuel"] == 1_000_000
+    # the line's own fuel would cut it, but the outcome is known: fuel is out of the identity
+    known, = tester.run_tests(path, store=True)
+    assert known.known is not None and known.entry["outcome"] == "Passed"
+    # `luthier certify --fuel`, a file in its own process (certify_file here, in this one)
+    other = _written(tmp_path / "plain.test.lut", SLOW)
+    cut = certify.certify_file(str(other), fuel=100, store=False)
+    assert cut["laws"][0][2] == "not run: fuel spent" and not cut["graded"]
+    assert certify.certify_file(str(other), store=False)["laws"][0][2] == "exhaustive"
+
+
+def _written(path, text):
+    path.write_text(text, encoding="utf-8")
+    return path
+
+
 # ---------------------------------------------------------------------- the union of the stretches
 # record/IA/code-follows-2026-10-16/prompt-pool-seeds.md (step 3i; D-2026-10-16-g, L10.3): a stretch
 # is one run of a law under one binding and one seed; the union of the agreeing stretches is one

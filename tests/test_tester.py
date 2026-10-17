@@ -49,6 +49,7 @@ def test_the_spec_takes_test_lth_defaults():
     spec = tester.run_tests(LAWS)[0].spec
     assert (spec.cases, spec.size, spec.seed, spec.where, spec.profile) == (100, 10, 0, [], [])
     assert spec.budgets["tries"] == 2000 and spec.budgets["coveringAbove"] == 20000
+    assert spec.budgets["fuel"] == 3_000_000  # test.lth's, no longer certify.FUEL (7.S8)
 
 
 def test_a_seed_is_deterministic_and_the_option_replaces_it():
