@@ -144,8 +144,9 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   specific binding wins (G6); a law quantified over `U` a static error, `Settling`'s laws on concrete
   instances (L5); 3.R1 and 3.R2 reworded (D-2026-10-17-a).
 - 3e (hash erases binder annotations; census fingerprint fix; one re-certification wave).
-- v0.3 and v0.4 tags (his): v0.4 at 3470c54 verified; neither tag exists yet.
-- The core (D-2026-10-17-b, -c, -d), after the v0.4 tag and before more theories (his order): the
+- No version tag until after the core's step (D-2026-10-17-e): the names change at large with it.
+- The core (D-2026-10-17-b, -c, -d), before more theories, then the tag (D-2026-10-17-e); 3e's
+  hash change goes in its first bite so the library is re-certified once: the
   algebraic properties as generic laws over an operation and its equality, adjectives without "is";
   properties.lth and structures.lth replace kernel_laws.lth, in five groups (relations, operations,
   functions, containers, the structure of types); the equality of functions derived pointwise from
