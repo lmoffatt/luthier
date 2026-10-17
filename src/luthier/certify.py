@@ -1183,21 +1183,11 @@ def _shown_value(v):
 
 # ---------------------------------------------------------------------- `luthier certify` (12.S16)
 
-# [the core's bite 1, P11 (every criterion is a parameter)] The fuel per case `luthier test` and
-# `luthier certify` give when `--fuel` names none. Raised from 1,000,000 against PinvProjects
-# (arrays_laws.test.lut), which spends about 1.28e6 per case at 10 x 10 (j2a's
-# record/IA/regions-2026-10-17/report-code.md, finding 9; 10 is the largest of generators.py's
-# DIMENSIONS and SampledMode draws it at size 10), to the 3,000,000 j2a's wave ran at, which every
-# library line but three needed no more than. Those three, MaximizerAscends, MaximizerStationary
-# and MaximizerKeepsDimension on belief_laws.test.lut's `fitA` (ExhaustiveMode), spend about 2.6e7
-# per case (measured 2026-10-18 for bite 1's report) and are run with `--fuel` given; a default that
-# high would let a case that never ends run for minutes before it is cut.
-FUEL = 3_000_000
 
 
-def certify_file(path, seed=None, deep=False, fuel=FUEL, store=True):
-    """Run one file's test lines, writing the stores of their claims (reading and writing none
-    without `store`); per
+def certify_file(path, seed=None, deep=False, fuel=None, store=True):
+    """Run one file's test lines, each with the fuel of its budgets or `fuel` when given (7.S8),
+    writing the stores of their claims (reading and writing none without `store`); per
     law its certificate's grade (the weakest across bindings) and the hash of its cone, the entries
     of its control lines, with the counts of lines run and known. Runs in its own process."""
     from .tester import run_tests
@@ -1223,7 +1213,7 @@ def certify_file(path, seed=None, deep=False, fuel=FUEL, store=True):
             "graded": all(certificate_grade(entries, law, cone) is not None for law, cone in laws.items())}
 
 
-def certify(paths, jobs=1, seed=None, deep=False, fuel=FUEL, out=print, store=True):
+def certify(paths, jobs=1, seed=None, deep=False, fuel=None, out=print, store=True):
     """`luthier certify`: each file in its own process, `jobs` at a time; prints per file its laws,
     their grades and their control status, read from the control lines of every file given
     (7.S19, L9.14), and its control lines. True when every law of every file has a grade and no

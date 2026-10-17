@@ -30,8 +30,12 @@ and each draw gives the next (7.S1), so one first seed fixes every draw. What it
 to the parameter's type, checked on every draw (7.S1's validity); a value outside it makes the law
 not run, the generator's failure and not the law's. Its coverage is `Drawn` at the spec's seed.
 
-Of the budgets (7.S8) only `tries` and `coveringAbove` are read: a draw a filter cannot give within `tries`
-makes the law not run (7.S6), so `drawsPerCase` and `redraws` have nothing to bound yet. A case
+Of the budgets (7.S8) `tries`, `coveringAbove`, `fuel` and the two masses are read, each from the
+line's `Budgets` (test.lth's `defaultBudgets` unless the line gives its own), none held here: a draw a
+filter cannot give within `tries` makes the law not run (7.S6), so `drawsPerCase` and `redraws` have
+nothing to bound yet; `fuel` is the reduction steps a case or a draw may take, which `fuel` given to
+`run_tests` (`--fuel`) overrides for a run, and the entry's budgets record the fuel the line ran
+with (the core's budgets brief, 2026-10-18). A case
 whose reduction raises (the host failed, a match stuck, the fuel spent) is not evaluated
 (7.S12); it is reported on that case and leaves the law unsettled unless another case refutes it.
 A name two libraries define is scoped by its file in run.py's loader (12.S22): a law or a census
@@ -597,11 +601,11 @@ class Values:
         kind = base.name if isinstance(base, t.Var) else None
         lo, hi = self.bounds(predicates, kind) if kind in ("Int", "Float64") else (None, None)
         fixed = self.fixed_fields(predicates) if isinstance(base, t.Record) else {}
-        for _ in range(self.budgets.get("tries", 2000)):
+        for _ in range(self.budgets["tries"]):
             v = self.draw_base(base, lo, hi, fixed)
             if self.holds(predicates, v):
                 return v
-        raise Unfit(f"no value of {_show(ty)} in {self.budgets.get('tries', 2000)} tries (7.S6)")
+        raise Unfit(f"no value of {_show(ty)} in {self.budgets['tries']} tries (7.S6)")
 
     def fixed_fields(self, predicates):
         """The fields of a record a refinement equates, conjunct by conjunct, to a value: `v.n == k`
@@ -667,7 +671,7 @@ class Values:
         much again (two rows or more) the last row made equal to the first (`rowsRepeatOrVanish`).
         [proposed] The special mass of a number read as the mass of each degenerate family of a
         matrix, until the budgets name one."""
-        share = float(self.budgets.get("specialMass", 0.0))
+        share = float(self.budgets["specialMass"])
         u = self.rng.random()
         if u < share:
             return np.zeros_like(array)
@@ -700,8 +704,8 @@ class Values:
                 raise Unfit(f"an empty interval [{lo}, {hi}]")
             # 7.S4: the atom at 0 and the special values, with the budgets' masses (generators.py)
             integer = ty.name == "Int"
-            v = generators.special(rng, lo, hi, integer, self.budgets.get("specialMass", 0.0),
-                                   self.budgets.get("atomAtZero", 0.0), () if integer else self.literals)
+            v = generators.special(rng, lo, hi, integer, self.budgets["specialMass"],
+                                   self.budgets["atomAtZero"], () if integer else self.literals)
             if v is not None:
                 return t.Lit(t.IntConst(int(v)) if integer else t.FloatConst(float(v)))
             if ty.name == "Int":
@@ -825,7 +829,7 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
     if is_statistical(runner, law):
         return run_statistical(runner, spec, fuel, loaded, law, params, start)
     values = Values(runner, random.Random(spec.seed), spec.size, spec.budgets, fuel, spec.seed)
-    limit = spec.budgets.get("coveringAbove", 20000)
+    limit = spec.budgets["coveringAbove"]
     # each parameter: a census or a generator its binding names, or the mode's functor over its type
     con = _constructor(loaded)
     drawn = t.App(con("Drawn"), t.Lit(t.IntConst(spec.seed)))
@@ -1655,8 +1659,10 @@ def prepare(path, fuel=1_000_000):
     return runner, specs, loaded
 
 
-def run_tests(path, seed=None, fuel=certify.FUEL, deep=False, store=False):
-    """Run every `test` line of the file; the outcomes in order. With `store`, each line's identity
+def run_tests(path, seed=None, fuel=None, deep=False, store=False):
+    """Run every `test` line of the file; the outcomes in order. Each line runs with the fuel of its
+    budgets (7.S8), or with `fuel` when one is given (`--fuel`), which its entry's budgets then
+    record. With `store`, each line's identity
     is looked up first in the store of the file that makes its claim (`claim_file`; a known outcome
     is reused unless `deep`) and each line run is recorded there, under its lock
     (certification.lth's `known` and `record`: an agreeing replay writes nothing, a disagreeing one
@@ -1664,14 +1670,17 @@ def run_tests(path, seed=None, fuel=certify.FUEL, deep=False, store=False):
     program's own store is neither read nor written. The file is a test program (`x.test.lut`,
     12.R2), refused otherwise before anything is read."""
     require_kind(path, "test")
-    runner, specs, loaded = prepare(path, fuel)
+    runner, specs, loaded = prepare(path) if fuel is None else prepare(path, fuel)
     cones = certify.Cones(runner)
     stores = {}  # the file that makes a claim -> its store's entries, as read
     outcomes = []
     for spec in specs:
         if seed is not None:
             spec.seed = seed
-        entry = new_entry(runner, loaded, spec, cones, fuel)
+        if fuel is not None:
+            spec.budgets["fuel"] = fuel  # the run's fuel in place of the line's, recorded as its budget
+        given = spec.budgets["fuel"]
+        entry = new_entry(runner, loaded, spec, cones, given)
         home = claim_file(loaded, spec, runner)
         if home not in stores:
             stores[home] = certify.read_store(home) if store else []
@@ -1693,7 +1702,7 @@ def run_tests(path, seed=None, fuel=certify.FUEL, deep=False, store=False):
             continue
         # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
         start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
-        outcome = run_spec(runner, spec, fuel, loaded, start)
+        outcome = run_spec(runner, spec, given, loaded, start)
         settle(entry, outcome)
         outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
         fuel_spent = certify.out_of_fuel(entry)
