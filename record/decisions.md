@@ -3256,3 +3256,35 @@ D-2026-10-18-h, record/plan/three-levels-2026-10-18/report.md, 2f9c42b): "a metr
 equivalence by a threshold" is wrong. A threshold on a metric gives a tolerance relation, reflexive
 and symmetric and not transitive (L6.5's ball); only an ultrametric gives an equivalence by a
 threshold. The core declares the tolerance relation, and the equivalence from the ultrametric.
+
+D-2026-10-18-i  "Cost" stops being one word for four things. Error (a value's bound, propagated
+                operation by operation: intervals, balls, derivatives; the metric level) and
+                uncertainty (a value as a distribution: Monte Carlo, the delta method, a pushforward;
+                the probabilistic level) are data, decorations of the output, another model of the
+                same theory over another carrier (L5.4), computed in plane 3. A law propagates
+                nothing: it is a Boolean claim at a bound about those quantities ("the distance to
+                the reference is ≤ ε"), the tester measuring and recording the quantity, the demand
+                supplying ε and collapsing it. Evidence is what a certificate knows of a law with a
+                finite budget (failure fraction at most ε̂ with confidence 1 − δ: an imprecise
+                probability). Resources are the budget (steps, samples, memory, time), scaling with
+                the bound (D-2026-10-18-d). Their common algebra exists and fits the core: each is a
+                model of a commutative ordered monoid, a quantale in its complete form (the base of
+                Lawvere's enriched categories): error ([0, ∞], +, ≤), uncertainty (distribution
+                functions, a t-norm or convolution, pointwise ≥), evidence ([0, 1], + as the union
+                bound or max when nested, ≤), resources (+ in sequence, max in parallel: the tropical
+                semiring). [proposed] `Quantale` declared in the core's structures as the base of the
+                three levels, from its algebraic and order groups. Propagation through a function
+                needs it to be non-expansive or Lipschitz, d(f x, f y) ≤ c·d(x, y) (the functors
+                between enriched categories; Fuzz's sensitivity; L6.8's pull-back), the
+                generalization of `Monotone` in the functions group. Clarifies L12.6 and L6.2, and
+                O1's search for one algebra of costs.
+Author:     Luciano ("los costos entran como propagación de errores o de distribuciones, pero las
+            leyes son booleanas con cotas sobre leyes sobre costos o distribuciones, ¿es así?"), on
+            the decision assistant's reading
+Quote:      "sí, salvo que haya un álgebra común a todas estas cosas, un álgebra que no quepa en
+            alguna de las álgebras que ya están en el core"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       principles (L12.6, L6.2, O1; the words of the record); the core (structures: Quantale;
+            functions: Lipschitz); the decorations (L5.4)
+Status:     current
