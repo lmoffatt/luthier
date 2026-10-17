@@ -98,6 +98,10 @@ Queue after 3g:
   prompt-tables-cut.md.
 - controls (Sonnet): a control for each of the three uncontrolled store laws and the others `certify`
   lists uncontrolled. Brief: prompt-controls.md.
+- controls landed (b55445f, 10d09e8): three store laws controlled. Findings under L9.14:
+  plan.lth's `KeyReadsOnlyTheCone` and `KeyReadsTheType` follow from `demandKey`'s definition for
+  every planner, so no model fails them; restate them so the planner enters, or drop them (a theory
+  bite, with 3j).
 - 3j (Fable for the theory, after the controls): regions from the type, the law and the code.
 - 3e: the hash erases binder annotations; one re-certification wave.
 - print and stdout (after his item 12): a failed write is recorded as a success today (the
