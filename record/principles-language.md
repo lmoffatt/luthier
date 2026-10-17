@@ -1420,8 +1420,8 @@ History:    (L14) draft 0 (6d9dbd3): stated. Draft 0 of the generative plan prop
             executes in a world and enters neither the planner's graph nor a certified theory
             (DeepSeek, GPT en, GPT sp). draft 11 (2026-10-12): renumbered from L14 of draft 10
             (D-2026-10-12-v). 2026-10-16: clause 8 added, proposed (D-2026-10-16-b).
-```
             2026-10-17: clause 9 added, proposed (D-2026-10-16-n).
+```
 
 ### Under G2, cost
 
