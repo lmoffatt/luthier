@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 6c0d2be05df9, commit dd69450 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-17; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 fe42d050ebbb, commit f02b9c3) by `scripts/project_principles.py` (project_principles v2) on 2026-10-17; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -683,8 +683,6 @@ References: D-2026-10-11-m; W5, W10.
 Rests on: O3 (the opt-out's syntax; the world as a value).
 Status: settled by his correction of draft 7; clause 6 candidate, reworded; clause 7 settled
 (D-2026-10-13-g).
-
-            2026-10-17: clause 9 added, proposed (D-2026-10-16-n).
 
 ### Under G2, cost
 
