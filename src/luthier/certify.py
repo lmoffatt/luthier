@@ -408,10 +408,13 @@ def _laws_own(entries):
 
 def identity(entry):
     """certification.lth's `identity`: the law, the cone's hash, the binding expanded, the seed and
-    `n` (7.S9, 7.S13), as one comparable key; a control's kind is part of it [proposed]. A field an
+    `n` (7.S9, 7.S13), as one comparable key; a control's kind is part of it [proposed], and the
+    conjunct of a conjunction's entry (tester.py's `_run_conjunction`, D-2026-10-18-f). A field an
     entry lacks reads as null (`store_errors` reports it in a store; a demand's reading may hold
     entries built in part)."""
     key = [entry.get(k) for k in IDENTITY] + ([entry["kind"]] if "kind" in entry else [])
+    if "conjunct" in entry:
+        key.append({"conjunct": entry["conjunct"]})
     return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
@@ -550,6 +553,8 @@ def _group(entry):
         binding = [{k: v for k, v in d.items() if k != "fingerprint"} if isinstance(d, dict) else d
                    for d in binding]
     key = [entry["law"], binding] + ([entry["kind"]] if "kind" in entry else [])
+    if "conjunct" in entry:
+        key.append({"conjunct": entry["conjunct"]})
     return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
@@ -753,7 +758,26 @@ def certificate_grade(entries, law, current, combine=COMBINATION):
 
 
 def certificate_grade_and_empty(entries, law, current, combine=COMBINATION):
-    """`certificate_grade` with the empty regions of each binding whose grade they lowered."""
+    """`certificate_grade` with the empty regions of each binding whose grade they lowered. A law
+    whose body is a conjunction of laws has an entry per conjunct (tester.py's `_run_conjunction`,
+    D-2026-10-18-f): its grade is the demand's combination (5.S8) of its conjuncts' grades, each read
+    as a law's over its own entries, and none while a conjunct its entries list has none."""
+    counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
+    conjuncts = list(dict.fromkeys(c for e in counts for c in e.get("conjuncts") or ()))
+    if not conjuncts:
+        return _grade_and_empty(entries, law, current, combine)
+    comb, grade, lowered = COMBINATIONS[combine], None, []
+    for c in conjuncts:
+        g, empty = _grade_and_empty([e for e in counts if e.get("conjunct") == c], law, current, combine)
+        if g is None:
+            return None, []
+        grade = comb(g, grade)
+        lowered += [n for n in empty if n not in lowered]
+    return grade, lowered
+
+
+def _grade_and_empty(entries, law, current, combine=COMBINATION):
+    """`certificate_grade_and_empty` over the entries of one law or one conjunct."""
     counts = [e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current]
     if any(isinstance(e["outcome"], dict) and "Failed" in e["outcome"] for e in counts) or disputes(counts):
         return None, []
@@ -949,7 +973,7 @@ def standing(entries, law, current):
     failed = next((e for e in _laws_own(entries) if e["law"] == law and e["cone"] == current
                    and isinstance(e["outcome"], dict) and "Failed" in e["outcome"]), None)
     if failed is not None:
-        return "refuted at " + failed["outcome"]["Failed"]
+        return "refuted at " + (f"{failed['conjunct']}: " if "conjunct" in failed else "") + failed["outcome"]["Failed"]
     return show_outcome(what)
 
 
@@ -1090,6 +1114,18 @@ def serves_over(demand, entry, entries):
     return grade is not None and GRADE_RANK[demand["accepts"]] <= GRADE_RANK[grade]
 
 
+def served(demand, entries):
+    """Whether the entries serve the demand of a law (`serves_over`): one of them does, or, for a law
+    whose body is a conjunction of laws (D-2026-10-18-f), one entry of each conjunct its entries at
+    the demand's hash list does; a conjunct's entry never serves the conjunction alone."""
+    at_hash = [e for e in _laws_own(entries) if e["law"] == demand["law"] and at(demand, e)]
+    conjuncts = list(dict.fromkeys(c for e in at_hash for c in e.get("conjuncts") or ()))
+    if not conjuncts:
+        return any(serves_over(demand, e, entries) for e in entries)
+    return all(any(serves_over(demand, e, [f for f in entries if f.get("conjunct") == c])
+                   for e in entries if e.get("conjunct") == c) for c in conjuncts)
+
+
 def served_grade(demand, entry, entries=None):
     """The grade an entry serves a demand at: its own, combined over the law's regions under its
     binding with the demand's combination (`regioned`; the weakest by default), so a region the
@@ -1138,7 +1174,7 @@ def refuse(entries, cone):
             elif failure is not None:
                 refusals.append({"name": c["name"], "law": d["law"], "state": ("Current", failure["outcome"]),
                                  "demand": d})
-            elif not any(serves_over(d, e, entries) for e in entries):
+            elif not served(d, entries):
                 refusals.append({"name": c["name"], "law": d["law"], "state": state_of(d, entries),
                                  "demand": d})
     return refusals
@@ -1193,8 +1229,10 @@ def certify_file(path, seed=None, deep=False, fuel=None, store=True):
     from .tester import run_tests
     try:
         outcomes = run_tests(path, seed, fuel, deep=deep, store=store)
+        # a conjunction's line holds its conjuncts' entries (tester.py's `_run_conjunction`)
         entries = (read_stores(o.store for o in outcomes) if store
-                   else [o.entry for o in reversed(outcomes) if o.entry is not None])
+                   else [e for o in reversed(outcomes) for e in [o.entry] + [p.entry for p in o.parts or ()]
+                         if e is not None])
     except Exception as exc:  # the file's failure is reported with the file, the others go on
         return {"path": str(path), "error": f"{type(exc).__name__}: {exc}"}
     laws = {}

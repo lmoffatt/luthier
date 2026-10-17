@@ -96,6 +96,7 @@ from __future__ import annotations
 import functools
 import hashlib
 import inspect
+import json
 import random
 import string
 from dataclasses import dataclass, field, fields, is_dataclass, replace
@@ -242,6 +243,8 @@ class Outcome:
     out_of_fuel: int | None = None  # the fuel given, when the run was cut by it (D-2026-10-15-g)
     regions: list | None = None  # the grading regions with their n (`regions_record`, D-2026-10-16-i)
     labels: list | None = None   # an author's labels with their share (`labels_record`), no grade
+    conjunct: str | None = None  # the conjunct this outcome is of, or the one a conjunction's refutation names
+    parts: list | None = None    # a conjunction's line: the outcomes of its conjuncts (D-2026-10-18-f)
 
 
 # ---------------------------------------------------------------------- loading
@@ -321,6 +324,8 @@ def load_program(path, fuel, extra=()):
     loaded.demand(kept)
     program = tuple(_primitive_body(a) for a in elaborate_program(_refined_records(kept)))
     program += tuple(t.Define(op, t.Universe(), t.Primitive(op)) for op in kernel.BOOTSTRAP_PRIMITIVES)
+    # the conjuncts of a law that is a conjunction, each a definition the tester runs (D-2026-10-18-f)
+    program += conjunct_definitions(program, named + tuple(loaded.name(top, n) or n for n in extra))
     return Runner(program, fuel), [d.name for d in specs], loaded
 
 
@@ -816,6 +821,143 @@ def evaluate(runner, law, case, fuel):
     if r == FALSE:
         return False
     raise RunError(f"the law gave {_show(r)}, not a Bool")
+
+
+# ---------------------------------------------------------------------- a conjunction of laws (D-2026-10-18-f)
+
+# A law whose body is a conjunction `&` of partially applied laws (`Equivalence A r := Reflexive A r &
+# Symmetric A r & Transitive A r`) is no Bool the kernel reduces (report-bite-2.md): it is tested
+# conjunct by conjunct (the core's bite 4b, record/plan/core-2026-10-17/prompt-bite-4b.md). Each
+# conjunct is a law of its own, its parameters the conjunction's and then the variables it leaves
+# missing (`x` of `Reflexive A r`, `p` of `Symmetric A r`), each quantified on its own by the
+# generators of its type, bound by name as any parameter (7.R1). A conjunct that is itself a law whose
+# body is a conjunction (`Preorder A r` in `PartialOrder`) is split in turn. The tester runs conjunct k
+# of the law `L` as the definition `L%conjunct<k>`, which `load_program` adds to the program; it is in
+# no cone but its own, so no other name's hash moves.
+
+_CONJUNCT = "%conjunct"
+
+
+@dataclass
+class Conjunct:
+    """A conjunct of a law: the definition the tester runs it as, and the conjunct as the law
+    applies it, the conjunction's parameters free (`Reflexive Int r`)."""
+    called: str
+    shown: str
+
+
+def _spine(term):
+    """The head of an application and its arguments, in order."""
+    args = []
+    while isinstance(term, t.App):
+        args.append(term.argument)
+        term = term.function
+    return term, args[::-1]
+
+
+def _is_conjunction(term):
+    return isinstance(term, t.App) and isinstance(term.function, t.App) and term.function.function == t.Var("&")
+
+
+def _parts(defined, term, depth=0):
+    """The conjuncts of a term that is a conjunction or unfolds to one through definitions applied
+    to all their parameters (`BareEquivalence Int r`); None when it is neither."""
+    if depth > 64:
+        return None
+    if _is_conjunction(term):
+        out = []
+        for side in (term.function.argument, term.argument):
+            out += _parts(defined, side, depth + 1) or [side]
+        return out
+    head, args = _spine(term)
+    d = defined.get(head.name) if isinstance(head, t.Var) else None
+    if d is None or not args:
+        return None
+    body = d.body
+    for a in args:
+        if not isinstance(body, t.Lam):
+            return None
+        body = kernel.substitute(body.name, a, body.body)
+    return None if isinstance(body, t.Lam) else _parts(defined, body, depth + 1)
+
+
+def _missing(defined, term, used):
+    """The variables a conjunct leaves missing, (name, type), from the type of the law at its head
+    with the arguments given; each renamed apart from `used` (the conjunction's parameters and the
+    conjunct's free names) and from the others."""
+    head, args = _spine(term)
+    d = defined.get(head.name) if isinstance(head, t.Var) else None
+    out = []
+    if d is not None and d.type is not None:
+        ty = d.type
+        for a in args:
+            if not isinstance(ty, t.Pi):
+                return out
+            ty = _instantiate(ty.name, a, ty.codomain)
+        while isinstance(ty, t.Pi):
+            name = ty.name if ty.name != "_" else "x"
+            while name in used:
+                name += "'"
+            used.add(name)
+            out.append((name, ty.domain))
+            ty = ty.codomain if name == ty.name else kernel.substitute(ty.name, t.Var(name), ty.codomain)
+    return out
+
+
+def conjunction_parts(program, law):
+    """The conjuncts of the law `law` (as the program calls it) whose body is a conjunction of
+    partially applied laws: [(the definition's type, its body, the conjunct)], each definition taking
+    the law's parameters and then the conjunct's missing variables; None when the law is no
+    conjunction."""
+    defined = {}
+    for a in program:
+        if isinstance(a, t.Define):
+            defined.setdefault(a.name, a)
+    d = defined.get(law)
+    if d is None or _CONJUNCT in law:
+        return None
+    params, body = [], d.body
+    while isinstance(body, t.Lam):
+        params.append((body.name, body.type))
+        body = body.body
+    parts = _parts(defined, body)
+    if parts is None:
+        return None
+    out = []
+    for part in parts:
+        used = {n for n, _ in params} | set(kernel.free_names(part))
+        missing = _missing(defined, part, used)
+        ty, value = t.Var("Bool"), Runner.apply(part, [t.Var(n) for n, _ in missing])
+        for name, domain in reversed(params + missing):
+            ty, value = t.Pi(name, domain, ty), t.Lam(name, domain, value)
+        out.append((ty, value, part))
+    return out
+
+
+def conjunct_definitions(program, laws):
+    """The definitions the conjuncts of the laws among `laws` run as (`L%conjunct<k>`)."""
+    out = []
+    for law in dict.fromkeys(laws):
+        for k, (ty, value, _) in enumerate(conjunction_parts(program, law) or ()):
+            out.append(t.Define(f"{law}{_CONJUNCT}{k}", ty, value))
+    return tuple(out)
+
+
+def _shown_conjunct(part):
+    """A conjunct as its law applies it, `Reflexive Int r`, a compound argument in parentheses."""
+    head, args = _spine(part)
+    shown = [_show(head)]
+    for a in args:
+        text = _show(a)
+        shown.append(f"({text})" if " " in text and not text.startswith(("(", "[", "{")) else text)
+    return " ".join(shown)
+
+
+def conjuncts_of(runner, law):
+    """The conjuncts of the law (as the program calls it), in the order written; [] when it is no
+    conjunction."""
+    return [Conjunct(f"{law}{_CONJUNCT}{k}", _shown_conjunct(part))
+            for k, (_, _, part) in enumerate(conjunction_parts(runner.program, law) or ())]
 
 
 def run_spec(runner, spec, fuel, loaded=None, start=None):
@@ -1550,6 +1692,14 @@ def show_case(names, case):
     return ", ".join(f"{n} = {_show(v)}" for n, v in zip(names, case))
 
 
+def _case_text(outcome):
+    """The refuting case of an outcome; of a conjunction's, or a control's of one, with the conjunct it
+    refuted (`Symmetric Int r: p = ...`)."""
+    case = show_case(outcome.parameters, outcome.refuting)
+    named = outcome.conjunct is not None and (outcome.parts is not None or outcome.spec.control)
+    return f"{outcome.conjunct}: {case}" if named else case
+
+
 def control_passes(verdict):
     """test.lth's `controlPasses`: a control passes when its law is refuted on the broken model."""
     return verdict == "Refuted"
@@ -1575,11 +1725,11 @@ def _tail(outcome):
     if isinstance(outcome.evidence, Tested):
         return _tested_tail(outcome)
     if outcome.spec.control and outcome.verdict == "Refuted":
-        return f"refuted at {show_case(outcome.parameters, outcome.refuting)}: the control passed"
+        return f"refuted at {_case_text(outcome)}: the control passed"
     if outcome.spec.control and outcome.grade is not None:
         return f"{_CONTROL_FAILED} ({_GRADE_WORDS.get(outcome.grade, outcome.grade)})"
     if outcome.verdict == "Refuted":
-        return f"refuted at {show_case(outcome.parameters, outcome.refuting)}"
+        return f"refuted at {_case_text(outcome)}"
     if outcome.verdict == "Unsettled":
         case, message = outcome.raised[0]
         return (f"unsettled: {len(outcome.raised)} cases raised, the first at "
@@ -1627,11 +1777,14 @@ def line(outcome):
     """One line per test: the law, the mode, the cases evaluated, the grade or the refuting case,
     and whether it ran or its outcome was known (7.S13)."""
     spec = outcome.spec
+    if outcome.parts is not None and not spec.control:
+        return _conjunction_line(outcome)
     mode = f"sampled (seed {spec.seed}, size {spec.size}, metric ignored)" if spec.sampled else "exhaustive"
     counted = f"{outcome.evaluated} cases"
     if isinstance(outcome.evidence, Tested) or "Tested" in (outcome.evidence if isinstance(outcome.evidence, dict) else {}):
         mode, counted = f"sequential (seed {spec.seed % SEEDS})", f"{outcome.evaluated} samples"
-    head = f"{'control of ' if spec.control else ''}{spec.law}: {mode}, {counted}"
+    law = spec.law if outcome.conjunct is None or spec.control else f"conjunct {outcome.conjunct}"
+    head = f"{'control of ' if spec.control else ''}{law}: {mode}, {counted}"
     if outcome.known is not None:
         tail = f"{head}, {_entry_tail(outcome.entry)} (known, {outcome.known}"
         if outcome.differs is not None:
@@ -1646,6 +1799,21 @@ def line(outcome):
     return f"{head}, {_tail(outcome)} ({how})"
 
 
+def _conjunction_line(outcome):
+    """A conjunction's line: the law with the conjunction's outcome and how many conjuncts ran, then
+    one indented line per conjunct (D-2026-10-18-f)."""
+    ran = sum(1 for o in outcome.parts if o.known is None)
+    how = "known" if ran == 0 else f"{ran} of {len(outcome.parts)} ran"
+    base = next(o for o in outcome.parts if o.conjunct == outcome.conjunct)
+    tail = _entry_tail(base.entry) if base.known is not None else _tail(base)
+    if outcome.verdict == "Refuted":
+        tail = f"refuted at {outcome.conjunct}: " + tail.removeprefix("refuted at ")
+    elif outcome.grade is not None:
+        tail = _GRADE_WORDS.get(outcome.grade, outcome.grade)
+    else:
+        tail = f"not graded, {outcome.conjunct}: {tail}"
+    head = f"{outcome.spec.law}: conjunction of {len(outcome.parts)}, {outcome.evaluated} cases, {tail} ({how})"
+    return "\n".join([head] + ["  " + line(o) for o in outcome.parts])
 
 
 def prepare(path, fuel=1_000_000):
@@ -1670,8 +1838,9 @@ def run_tests(path, seed=None, fuel=None, deep=False, store=False):
     is reused unless `deep`) and each line run is recorded there, under its lock
     (certification.lth's `known` and `record`: an agreeing replay writes nothing, a disagreeing one
     is kept beside, D-2026-10-15-f; a run cut by its fuel is never written, D-2026-10-15-g); the test
-    program's own store is neither read nor written. The file is a test program (`x.test.lut`,
-    12.R2), refused otherwise before anything is read."""
+    program's own store is neither read nor written. A line on a law whose body is a conjunction of
+    laws runs its conjuncts (`_run_conjunction`, D-2026-10-18-f). The file is a test program
+    (`x.test.lut`, 12.R2), refused otherwise before anything is read."""
     require_kind(path, "test")
     runner, specs, loaded = prepare(path) if fuel is None else prepare(path, fuel)
     cones = certify.Cones(runner)
@@ -1683,43 +1852,115 @@ def run_tests(path, seed=None, fuel=None, deep=False, store=False):
         if fuel is not None:
             spec.budgets["fuel"] = fuel  # the run's fuel in place of the line's, recorded as its budget
         given = spec.budgets["fuel"]
-        entry = new_entry(runner, loaded, spec, cones, given)
         home = claim_file(loaded, spec, runner)
         if home not in stores:
             stores[home] = certify.read_store(home) if store else []
-        entries = stores[home]
-        key = certify.identity(entry)
-        found = certify.known(entries, key)
-        if found is not None and not deep:
-            evidence = found["evidence"]
-            points = evidence.get("Points", {})
-            verdict, evaluated = points.get("verdict", "NotRun"), points.get("evaluated", 0)
-            if "Tested" in evidence:
-                verdict = SETTLED_BY_TEST[evidence["Tested"]["verdict"]]
-                evaluated = evidence["Tested"]["spent"]
-            reused = Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
-                             entry=found, known=found["date"], store=home)
-            if certify.disputed_at(entries, key):
-                reused.differs = [e for e in entries if certify.identity(e) == key][1]["date"]
-            outcomes.append(reused)
+        parts = conjuncts_of(runner, _as_called(loaded, spec.law))
+        if parts:
+            outcomes.append(_run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, deep, store))
             continue
-        # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
-        start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
-        outcome = run_spec(runner, spec, given, loaded, start)
-        settle(entry, outcome)
-        outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
-        fuel_spent = certify.out_of_fuel(entry)
-        if found is not None and not fuel_spent and not certify.agree(entry, found):
-            outcome.differs = found["date"]
-        old = next((e for e in entries if e["law"] == entry["law"] and e["binding"] == entry["binding"]
-                    and certify.stale(entry["cone"], e)), None)
-        if old is not None:
-            outcome.stale = old["date"]
-        outcomes.append(outcome)
-        if store and not fuel_spent:
-            certify.add_entry(home, entry)
-            stores[home] = certify.read_store(home)
+        entry = new_entry(runner, loaded, spec, cones, given)
+        outcomes.append(_run_line(runner, loaded, spec, entry, given, home, stores, deep, store))
     return outcomes
+
+
+def _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run=None):
+    """One line whose entry is `entry`: its known outcome from the store of `home`, unless `deep`;
+    else run (`run_spec`, or `run` given the statistical start) and recorded there when `store`."""
+    entries = stores[home]
+    key = certify.identity(entry)
+    found = certify.known(entries, key)
+    if found is not None and not deep:
+        evidence = found["evidence"]
+        points = evidence.get("Points", {})
+        verdict, evaluated = points.get("verdict", "NotRun"), points.get("evaluated", 0)
+        if "Tested" in evidence:
+            verdict = SETTLED_BY_TEST[evidence["Tested"]["verdict"]]
+            evaluated = evidence["Tested"]["spent"]
+        reused = Outcome(spec, evidence, verdict, found["grade"], evaluated, None, cone=entry["cone"],
+                         entry=found, known=found["date"], store=home)
+        if certify.disputed_at(entries, key):
+            reused.differs = [e for e in entries if certify.identity(e) == key][1]["date"]
+        return reused
+    # a statistical stretch continues the test of the law under its binding (D-2026-10-16-g)
+    start = (lambda c, p, entry=entry, entries=entries: certify.continuation(entries, entry, c, p)) if store else None
+    outcome = run_spec(runner, spec, given, loaded, start) if run is None else run(start)
+    settle(entry, outcome)
+    outcome.cone, outcome.entry, outcome.store = entry["cone"], entry, home
+    fuel_spent = certify.out_of_fuel(entry)
+    if found is not None and not fuel_spent and not certify.agree(entry, found):
+        outcome.differs = found["date"]
+    old = next((e for e in entries if e["law"] == entry["law"] and e["binding"] == entry["binding"]
+                and e.get("conjunct") == entry.get("conjunct") and certify.stale(entry["cone"], e)), None)
+    if old is not None:
+        outcome.stale = old["date"]
+    if store and not fuel_spent:
+        certify.add_entry(home, entry)
+        stores[home] = certify.read_store(home)
+    return outcome
+
+
+def _run_conjunction(runner, loaded, spec, parts, cones, given, home, stores, deep, store):
+    """A line on a law whose body is a conjunction of laws (D-2026-10-18-f; the core's bite 4b). Each
+    conjunct runs as a line of its own (`conjuncts_of`), under the line's mode, seed, `n`, budgets and
+    bindings by name, its missing variables drawn by the generators of their types. A law's line
+    gives each conjunct its entry, in the store of the conjunction's claim: the conjunction's law and
+    cone, the conjunct named (`conjunct`, part of the identity) and the conjuncts listed
+    (`conjuncts`), and its outcome is the conjunction's (`_conjunction_outcome`). A control's line
+    passes when it refutes one conjunct: the conjuncts run in order until one is refuted, and the
+    line writes one control entry, the conjunction's, whose binding is every conjunct's."""
+    of = _as_called(loaded, spec.law)
+    specs = [replace(spec, law=c.called) for c in parts]
+    entries = [new_entry(runner, loaded, s, cones, given, (spec.law, c, parts)) for s, c in zip(specs, parts)]
+    if not spec.control:
+        done = []
+        for s, c, e in zip(specs, parts, entries):
+            o = _run_line(runner, loaded, s, e, given, home, stores, deep, store)
+            o.conjunct = c.shown
+            done.append(o)
+        return _conjunction_outcome(spec, done, cones.hash(of), home)
+    entry = dict(entries[0], law=spec.law)
+    for k in ("conjunct", "conjuncts"):
+        entry.pop(k, None)
+    entry["binding"] = list({json.dumps(b, sort_keys=True): b for e in entries for b in e["binding"]}.values())
+    entry["reach"] = list({json.dumps(r, sort_keys=True): r for e in entries for r in e["reach"]}.values())
+    entry["hosts"] = sorted({tuple(h) for e in entries for h in e["hosts"]})
+    entry["hosts"] = [list(h) for h in entry["hosts"]]
+
+    def run(start):
+        done = []
+        for s, c in zip(specs, parts):
+            o = run_spec(runner, s, given, loaded)
+            o.conjunct = c.shown
+            done.append(o)
+            if o.verdict == "Refuted":
+                break
+        return _conjunction_outcome(spec, done, entry["cone"], home)
+    return _run_line(runner, loaded, spec, entry, given, home, stores, deep, store, run)
+
+
+def _conjunction_outcome(spec, parts, cone, home):
+    """A conjunction's outcome from its conjuncts': refuted when one is, at its case; when every one
+    has a grade, the combination of their grades the demand chooses (5.S8; `certify.COMBINATION`,
+    the weakest by default), confirmed when every one is; otherwise what the first conjunct without
+    a grade settled. Known when every conjunct's outcome was."""
+    refuted = next((o for o in parts if o.verdict == "Refuted"), None)
+    if refuted is not None:
+        base, verdict, grade = refuted, "Refuted", None
+    elif all(o.grade is not None for o in parts):
+        comb = certify.COMBINATIONS[certify.COMBINATION]
+        grade = functools.reduce(lambda g, o: comb(o.grade, g), parts, None)
+        base = next(o for o in parts if o.grade == grade)
+        verdict = "Confirmed" if all(o.verdict == "Confirmed" for o in parts) else "Supported"
+    else:
+        base = next(o for o in parts if o.grade is None)
+        verdict, grade = base.verdict, None
+    known = [o.known for o in parts]
+    return Outcome(spec, base.evidence, verdict, grade, sum(o.evaluated for o in parts), base.refuting,
+                   list(base.raised), base.parameters, cone=cone, store=home,
+                   known=max(known) if all(known) else None,
+                   out_of_fuel=base.out_of_fuel if verdict != "Refuted" else None,
+                   regions=base.regions, labels=base.labels, conjunct=base.conjunct, parts=parts)
 
 
 def law_file(loaded, law):
@@ -1961,7 +2202,7 @@ def drawing_revision():
     return "sha256:" + h.hexdigest()
 
 
-def new_entry(runner, loaded, spec, cones, fuel):
+def new_entry(runner, loaded, spec, cones, fuel, conjunct=None):
     """The entry of a line before it runs: its identity (the law, the hash of its cone, the binding
     expanded per parameter, the seed, `n`), the budgets, the reach of each parameter, the date, the
     interpreter and the host code by route (the law's cone's and each census's). The evidence, the
@@ -1976,12 +2217,17 @@ def new_entry(runner, loaded, spec, cones, fuel):
     code under SampledMode and empty under ExhaustiveMode. The reach: a census's members; the support of the
     type under ExhaustiveMode; under SampledMode, for an `Int` or a `Float64` (refined or not, not
     dependent on an earlier parameter), the interval it is drawn from; no reach otherwise, which
-    covers no value a run gives (certification.lth's `coversAll`)."""
+    covers no value a run gives (certification.lth's `coversAll`).
+
+    `conjunct`, (the conjunction's law as the line writes it, the `Conjunct`, every conjunct), makes
+    the entry a conjunct's (D-2026-10-18-f): the conjunction's law and the hash of its cone, the
+    conjunct's parameters, the conjunct and the list of them recorded."""
     law = _as_called(loaded, spec.law)
     params = parameters(runner, law) or []
     statistical = is_statistical(runner, law)  # its bindings are censuses of one, a stream among them
     values = Values(runner, random.Random(0), spec.size, spec.budgets, fuel)
-    binding, reach, hosts = [], [], dict(cones.hosts(law))
+    of = law if conjunct is None else _as_called(loaded, conjunct[0])
+    binding, reach, hosts = [], [], dict(cones.hosts(of))
     for k, (name, ty) in enumerate(params):
         b = resolve_binding(spec, name, _head_name(ty))
         if b is not None:
@@ -2032,10 +2278,13 @@ def new_entry(runner, loaded, spec, cones, fuel):
         lo = -spec.size if lo is None else lo        # draw_base's defaults
         hi = (max(lo, 0) + spec.size) if hi is None else hi
         reach.append({"parameter": name, "reach": {"Interval": [float(lo), float(hi)]}})
-    entry = {"law": spec.law, "cone": cones.hash(law), "binding": binding, "seed": spec.seed, "cases": spec.cases,
+    entry = {"law": spec.law if conjunct is None else conjunct[0], "cone": cones.hash(of), "binding": binding,
+             "seed": spec.seed, "cases": spec.cases,
              "budgets": dict(spec.budgets), "reach": reach, "evidence": None, "grade": None, "outcome": None,
              "date": certify.now(), "interpreter": certify.interpreter_revision(),
              "hosts": [[r, h] for r, h in sorted(hosts.items())]}
+    if conjunct is not None:
+        entry["conjunct"], entry["conjuncts"] = conjunct[1].shown, [c.shown for c in conjunct[2]]
     if spec.control:
         entry["kind"] = certify.CONTROL  # its own kind, part of its identity (certify.identity)
     return entry
@@ -2067,7 +2316,7 @@ def settle(entry, outcome):
         # a control's outcome: refuted is the control passing, a grade the control failing; neither
         # is the law's grade nor its failure (7.S19, D-2026-10-15-a)
         if control_passes(outcome.verdict):
-            entry["outcome"] = {"ControlRefuted": show_case(outcome.parameters, outcome.refuting)}
+            entry["outcome"] = {"ControlRefuted": _case_text(outcome)}
         elif outcome.grade is not None:
             entry["outcome"] = {"ControlConfirmed": _GRADE_WORDS.get(outcome.grade, outcome.grade)}
         else:
