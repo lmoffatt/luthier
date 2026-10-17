@@ -3024,3 +3024,20 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line
             export)
 Kind:       core (lib/core/), L8's reading, probability.lth, the imports of every file
 Status:     current
+
+D-2026-10-17-h  Item 27 (a): a refutable pattern on `<-` (`(w, just x) <- ...`) is refused by the
+                checker with a message until a real case asks otherwise; the explicit `match` is the
+                verbose form (L5.20). Item 28 (a): the agents' `[proposed]` readings are ratified in
+                bulk, for their meaning (the core step will rename the laws), except: a theory file
+                importing a model by name (both slice batches; L2.6); the fit's item 5 (series
+                truncation as constants) and item 9 (damping as the host's values), D-2026-10-16-b;
+                demand/plan item 5 (the record as identity), D-2026-10-15-h; items 7 (fuel default),
+                9 and 10 (the strategy), D-2026-10-16-d; all of plot.lth, waiting for G1 to G5 of
+                record/plan/plots/; 4.S13's borrowed `[decided D-2026-10-12-z]`, marked `[proposed]`
+                (P1). The ratified readings lose their `[proposed]` markers.
+Author:     Luciano, the recommendations
+Quote:      "ok"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line unknown until the
+            export)
+Kind:       spec 2.S17, 4.S13 and the flips of item 28; the theories' `[proposed]` markers
+Status:     current

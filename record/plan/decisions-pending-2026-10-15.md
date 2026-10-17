@@ -407,6 +407,8 @@ the checker refuses it with a message; alternative: a `Failures` of the block. O
 until a real case; (b) `Failures`. Recommended: (a), the night default (the night plan asks "keep the
 refusal until a real case?"). Source: `record/plan/night-2026-10-13.md` ("Questions").
 
+*Item 27 answered in chat (2026-10-17): (a), D-2026-10-17-h.*
+
 **28. Ratify, in bulk, the `[proposed]` readings the agents took.** Each is one commit to undo (P6).
 The batches: the slice's theories (18 readings, `record/IA/slice-theories-2026-10-14/`), the fit's
 theories (14, `slice-theories-2-2026-10-14/`), plot.lth (15, with the canvas as a field of `Plot`),
@@ -443,6 +445,8 @@ questions.
   `Assumed`; `LeqBoth` as a constructive subtype, 7.S6); they are defects, not readings.
 
 ## Principles
+
+*Item 28 answered in chat (2026-10-17): (a) with exceptions, D-2026-10-17-h.*
 
 The four clauses below are proposals of a fork (luthier-5d); the wording is the model's, the
 quoted words his. Source for 29 to 33: `record/principles-candidates-2026-10-15.md`.
