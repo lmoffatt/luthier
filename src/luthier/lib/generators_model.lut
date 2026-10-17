@@ -13,7 +13,7 @@
 import "generators.lth" Metric LinearMetric LogMetric Support Filter Resolution Gen power pick resolve filtered Seed
   Random DrawsAreUniform DrawsAreIndependent nextSeed
 import "laws.lth" Law Sequential
-import "kernel_laws.lth" Concrete
+import "core/structures/equality.lth" Concrete
 
 -- `linear`: uniform between the bounds, for a quantity whose meaning does not change when shifted
 linear : Metric := { place := fn lo hi v { lo + v * (hi - lo) } }

@@ -66,7 +66,7 @@ def test_a_failure_on_a_case_is_reported_on_that_case(capsys):
     assert stuck == "Partial: exhaustive, 1 cases, unsettled: 1 cases raised, the first at b = false: stuck match (ran)"
     assert census == "DivisionAlgorithm: sampled (seed 0, size 10, metric ignored), 30 cases, sampled (ran)"
     assert "not run: m : IntegerDivision" in unbound and "bind a census (7.R4)" in unbound
-    # numbers.lth's LeqTransitive over its own LeqChain (kernel_laws.lth and algebra.lth define one too)
+    # numbers.lth's LeqTransitive over its own LeqChain (core/structures/algebraic.lth and algebra.lth define one too)
     assert scoped == "LeqTransitive: sampled (seed 0, size 10, metric ignored), 30 cases, sampled (ran)"
     assert "not run: a : Int" in infinite
 

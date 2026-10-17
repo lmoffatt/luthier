@@ -1,0 +1,108 @@
+-- core/structures/algebraic.lth: the Boolean algebra, the monoid and the ordered commutative
+-- semiring (kernel_laws.lth §3, §4's monoid, §5).
+--
+-- Moved as §3, the monoid of §4 and §5, from kernel_laws.lth in the core's bite 1 (2026-10-18, Claude Opus 5.5, on
+-- record/plan/core-2026-10-17/prompt-bite-1.md; execution.md §1 and §6), without renaming any law
+-- and with the text of each section unchanged; bite 3 rewrites the file over core/properties/
+-- (execution.md §3.4 to §3.9). kernel_laws.lth's history is this file's under git (`git log
+-- --follow src/luthier/lib/core/structures/equality.lth`), its v0.1 file at the tag v0.1-final.
+--
+-- kernel_laws.lth's header, for the sections here: draft 0, 2026-10-13, by Claude Opus 5.5 in the
+-- session (step 2.1 of record/plan/luthier-from-zero/plan-from-zero-2026-10-13-execution.md).
+-- Sources: spec 3.S7, 3.S8, 3.S36, 3.S37, 4.R8; D-2026-10-12-ak (an object is a type with its
+-- equality, whose laws the kernel guarantees for a structural `==`); D-2026-10-13-t (the roles of
+-- the core's `data`: `Unit` terminal, `Empty` initial, `Bool` a Boolean algebra, `Nat` its laws,
+-- `List` the free monoid); L2.7 (every constructor has a law of its role; everything has laws,
+-- found in the place the thing holds in a known structure). Each section is a known structure as a
+-- theory, in the pattern of ebnf.lth: a record type of its operations, its laws over a model
+-- `(m : T)`, and `T := laws`. The core's types are models of them (core/core.lut, which also holds
+-- what kernel_models.lut held). Names: `and`, `or`, `not` and `mod` are operators or core names, so
+-- fields are named by the structure's own words (`meet`, `join`, `complement`); `unit` is a
+-- constructor of core, so a monoid's element is `neutral`.
+
+-- ---------------------------------------------------------------- §3 Boolean algebra
+
+-- `Bool` is a Boolean algebra (D-2026-10-13-t): the role of `true` is its top, of `false` its
+-- bottom, with `not`, `and`, `or` its complement, meet and join (§7). Huntington's laws (1904):
+-- each operation commutative, each with its identity, each distributive over the other, and the
+-- complement; with top and bottom distinct, so the algebra has two values at least.
+BooleanAlgebra (B : U) : {
+  top : B, bottom : B,
+  complement : B -> B,
+  meet : B -> B -> B, join : B -> B -> B,
+}
+MeetCommutes (B : U) (m : BooleanAlgebra B) (x y : B) : Bool := m.meet x y == m.meet y x
+JoinCommutes (B : U) (m : BooleanAlgebra B) (x y : B) : Bool := m.join x y == m.join y x
+MeetIdentity (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.meet x m.top == x
+JoinIdentity (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.join x m.bottom == x
+MeetDistributes (B : U) (m : BooleanAlgebra B) (x y z : B) : Bool :=
+  m.meet x (m.join y z) == m.join (m.meet x y) (m.meet x z)
+JoinDistributes (B : U) (m : BooleanAlgebra B) (x y z : B) : Bool :=
+  m.join x (m.meet y z) == m.meet (m.join x y) (m.join x z)
+MeetComplement (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.meet x (m.complement x) == m.bottom
+JoinComplement (B : U) (m : BooleanAlgebra B) (x : B) : Bool := m.join x (m.complement x) == m.top
+TopIsNotBottom (B : U) (m : BooleanAlgebra B) : Bool := not (m.top == m.bottom)
+
+-- The algebra is self-dual: exchanging `top` and `bottom`, `meet` and `join` gives another model,
+-- so the laws above do not say which of `true` and `false` is the top (Fable, review of layers
+-- 0-1). What tells them apart is `if`, which takes its first branch on `true`: `Bool`'s algebra has
+-- its top where `if` takes the first branch.
+TheBooleans : { algebra : BooleanAlgebra Bool }
+TopIsTheFirstBranch (b : TheBooleans) : Bool :=
+  (if b.algebra.top then 1 else 0) == 1 and (if b.algebra.bottom then 1 else 0) == 0
+TheBooleans := TopIsTheFirstBranch
+
+BooleanAlgebra (B : U) := MeetCommutes B & JoinCommutes B & MeetIdentity B & JoinIdentity B
+  & MeetDistributes B & JoinDistributes B & MeetComplement B & JoinComplement B & TopIsNotBottom B
+
+-- ---------------------------------------------------------------- §4 Monoid (the free monoid and lists: universal.lth)
+
+-- A monoid: an associative operation with a neutral element.
+Monoid (M : U) : { neutral : M, combine : M -> M -> M }
+LeftNeutral (M : U) (m : Monoid M) (x : M) : Bool := m.combine m.neutral x == x
+RightNeutral (M : U) (m : Monoid M) (x : M) : Bool := m.combine x m.neutral == x
+Associative (M : U) (m : Monoid M) (x y z : M) : Bool := m.combine (m.combine x y) z == m.combine x (m.combine y z)
+Monoid (M : U) := LeftNeutral M & RightNeutral M & Associative M
+
+-- ---------------------------------------------------------------- §5 Commutative semiring, ordered
+
+-- `Nat` (11.R1, `{ k : Int | 0 <= k }`) has the laws of its operations (D-2026-10-13-t): a
+-- commutative semiring, `+` and `*` with `0` and `1`, ordered by `<=` totally, the order agreeing
+-- with `+`, `0` its least element, and `x + 1` the next value after `x` (the role of the successor:
+-- `Nat` is a subtype of `Int`, 11.R1, so it has no `succ` constructor). The order laws are the
+-- model's reading of "its laws", proposed.
+OrderedSemiring (S : U) : {
+  zero : S, one : S,
+  plus : S -> S -> S, times : S -> S -> S,
+  leq : S -> S -> Bool,
+}
+PlusAssociative (S : U) (s : OrderedSemiring S) (x y z : S) : Bool := s.plus (s.plus x y) z == s.plus x (s.plus y z)
+PlusCommutes (S : U) (s : OrderedSemiring S) (x y : S) : Bool := s.plus x y == s.plus y x
+PlusZero (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.plus x s.zero == x
+TimesAssociative (S : U) (s : OrderedSemiring S) (x y z : S) : Bool := s.times (s.times x y) z == s.times x (s.times y z)
+TimesCommutes (S : U) (s : OrderedSemiring S) (x y : S) : Bool := s.times x y == s.times y x
+TimesOne (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.times x s.one == x
+TimesDistributes (S : U) (s : OrderedSemiring S) (x y z : S) : Bool :=
+  s.times x (s.plus y z) == s.plus (s.times x y) (s.times x z)
+TimesZero (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.times x s.zero == s.zero
+-- the order: total, antisymmetric and transitive over the pairs and chains it relates (drawn by
+-- their generators, 7.S12), agreeing
+-- with `+`, with `0` least
+LeqPair (S : U) (s : OrderedSemiring S) : U := { x y : S | s.leq x y }
+LeqChain (S : U) (s : OrderedSemiring S) : U := { x y z : S | s.leq x y and s.leq y z }
+LeqBoth (S : U) (s : OrderedSemiring S) : U := { x y : S | s.leq x y and s.leq y x }
+LeqTotal (S : U) (s : OrderedSemiring S) (x y : S) : Bool := s.leq x y or s.leq y x
+LeqAntisymmetric (S : U) (s : OrderedSemiring S) (p : LeqBoth S s) : Bool := p.x == p.y
+LeqTransitive (S : U) (s : OrderedSemiring S) (c : LeqChain S s) : Bool := s.leq c.x c.z
+PlusMonotone (S : U) (s : OrderedSemiring S) (p : LeqPair S s) (z : S) : Bool := s.leq (s.plus p.x z) (s.plus p.y z)
+ZeroLeast (S : U) (s : OrderedSemiring S) (x : S) : Bool := s.leq s.zero x
+OneIsNotZero (S : U) (s : OrderedSemiring S) : Bool := not (s.one == s.zero)
+-- the successor `x + 1` is the next value: nothing lies strictly between them, so with `0` least
+-- every value is reached from `0` by successors (no other naturals). Induction itself quantifies
+-- over predicates and is not statable by tests, as the uniqueness of `fold` in §4.
+SuccessorIsNext (S : U) (s : OrderedSemiring S) (p : LeqPair S s) : Bool :=
+  p.x == p.y or s.leq (s.plus p.x s.one) p.y
+
+OrderedSemiring (S : U) := PlusAssociative S & PlusCommutes S & PlusZero S & TimesAssociative S
+  & TimesCommutes S & TimesOne S & TimesDistributes S & TimesZero S & LeqTotal S
+  & LeqAntisymmetric S & LeqTransitive S & PlusMonotone S & ZeroLeast S & OneIsNotZero S & SuccessorIsNext S

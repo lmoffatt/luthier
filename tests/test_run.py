@@ -651,10 +651,10 @@ def _mentions(value, names):
 # grade is `AssumedGrade`, so those two are no longer clashes; `LeqBoth` is gone from numbers.lth
 # (4a158b0).
 CLASHES = {
-    "LeqPair": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
-    "LeqChain": ("kernel_laws.lth", "algebra.lth", "numbers.lth"),
-    "LeqBoth": ("kernel_laws.lth", "algebra.lth"),
-    "PlusCommutes": ("kernel_laws.lth", "numbers.lth"),
+    "LeqPair": ("core/structures/algebraic.lth", "algebra.lth", "numbers.lth"),
+    "LeqChain": ("core/structures/algebraic.lth", "algebra.lth", "numbers.lth"),
+    "LeqBoth": ("core/structures/algebraic.lth", "algebra.lth"),
+    "PlusCommutes": ("core/structures/algebraic.lth", "numbers.lth"),
     "NonNegative": ("generators.lth", "numbers.lth"),
 }
 SEEN_FROM = {}
@@ -684,7 +684,7 @@ def test_a_name_several_libraries_define_does_not_collide(numbers_laws, name):
 
 
 def test_the_numbers_laws_import_resolves_in_numbers_lth(numbers_laws):
-    # the test file imports numbers.lth's PlusCommutes; kernel_laws.lth's is another definition
+    # the test file imports numbers.lth's PlusCommutes; core/structures/algebraic.lth's is another definition
     assert numbers_laws.name(numbers_laws.top, "PlusCommutes") == "PlusCommutes@numbers"
     assert numbers_laws.name(numbers_laws.top, "LeqPair") is None
 
@@ -1161,7 +1161,7 @@ FIRST_ACTION_LAWS = """\
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "kernel_laws.lth" Concrete
+import "core/structures/equality.lth" Concrete
 import "world.lth" Host Observed HostAgreesPrint
 import "world_model.lut" State
 import "first_action_models.lut" honest

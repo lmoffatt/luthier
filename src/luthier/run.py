@@ -6,7 +6,7 @@ v2 for world.lth draft 1 (prompt-2.md, choices in opus-2.md): the bridge carries
 bridge reads by the type the extern's definition declares (spec 3.S22 to 3.S26, 11.S6 to 11.S9):
 `Vec`/`Mat` records and `Fin n -> Float64`/`Int` as ndarrays, `Float64` and `Int` checked,
 `Table` as tables.py reads it, sums as `(label, value)`. v5 (prompt-5.md, report-5.md): every
-run loads `lib/core.lut` before the file (12.S22, 11.R2), defines kernel.BOOTSTRAP_PRIMITIVES as
+run loads `lib/core/core.lut` before the file (12.S22, 11.R2), defines kernel.BOOTSTRAP_PRIMITIVES as
 `eval` does, and the Runner brings the operands of a primitive and of `and`/`or` to weak head
 normal form itself, with the host. v6 (prompt-6.md): the loader scopes each file's names by the
 file (12.S22, `Loaded`), and an extern's arity is read from its declared type, the host's signature
@@ -140,7 +140,7 @@ def require_kind(path, kind, command=None):
 
 
 # the core encloses the top-level scope of every file (12.S22); its data and `not` are read here
-CORE = Path(__file__).parent / "lib" / "core.lut"
+CORE = Path(__file__).parent / "lib" / "core" / "core.lut"
 
 
 _FREE = {"extern", "primitive", "axiom", "quote"}

@@ -377,7 +377,7 @@ def test_conjunction_with_a_law_part_is_a_law_over_the_model():
                            t.Pi('F', t.Universe(), t.Pi('m', record, V(value))))
 
 
-CORE = Path(__file__).resolve().parents[1] / 'src' / 'luthier' / 'lib' / 'core.lut'
+CORE = Path(__file__).resolve().parents[1] / 'src' / 'luthier' / 'lib' / 'core' / 'core.lut'
 
 
 def test_a_primitive_refining_a_type_is_a_type_and_its_arrow_is_the_arrow():

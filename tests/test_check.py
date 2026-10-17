@@ -424,7 +424,7 @@ def test_an_imported_definition_does_not_take_a_labels_name(tmp_path):
 
 
 def test_an_imported_alias_does_not_take_a_labels_name(tmp_path):
-    # report-e.md, finding 3: kernel_laws.lth's alias `Selected (A B : U)` and term_model.lut's sum
+    # report-e.md, finding 3: kernel_laws.lth's alias `Selected (A B : U)` (core/structures/universal.lth's since the core's bite 1) and term_model.lut's sum
     # label `Selected`, both brought by demand_laws.test.lut's imports, failed to elaborate together;
     # the typing fell back to the file alone and the imported alias `Hash` (certification.lth's
     # `Hash = String`) was an opaque name, so 4.R9 refused a string literal passed at `Hash`

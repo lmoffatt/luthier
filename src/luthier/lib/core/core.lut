@@ -12,9 +12,10 @@
 -- Its name and its kind. The specification names this file `core.lut` (11.R2 allows `primitive`
 -- here only; library.lth's policies anchor on the path); it is read as a model file by its
 -- extension (library.lth, `KindByExtension`), which is its kind: it holds the interpreter's
--- values, not laws. Its laws live in theory files: kernel_laws.lth states what `Unit`, `Empty`,
+-- values, not laws. Its laws live in theory files: core/structures/ states what `Unit`, `Empty`,
 -- `Bool`, `Maybe` and `List` are, and core claims those theories for its data below
--- (D-2026-10-14-b); kernel_models.lut names `Nat` and the kernel's forms as models; numbers.lth states
+-- (D-2026-10-14-b); the end of this file names `Nat` and the kernel's forms as models (they were
+-- kernel_models.lut's until the core's bite 1, 2026-10-18); numbers.lth states
 -- what `Int`, `Float64` and `String` are, with numbers_model.lut naming the operations below as
 -- models (12.S23, Z8). [proposed] That core is a `.lut` under `lib/` and not a third kind of
 -- file; one commit undoes it.
@@ -27,17 +28,20 @@
 -- `==` is one operation on every concrete type (4.R8). [proposed] So the comparisons are named
 -- here in this comment and nowhere else; the arithmetic is named below and bound by `operator`.
 
-import "kernel_laws.lth" Terminal Initial TheBooleans Coproduct Lists Monoid
+import "core/structures/universal.lth" Terminal Initial Coproduct Lists
+  Exponential Product NamedProduct NamedCoproduct Selected one two
+import "core/structures/algebraic.lth" TheBooleans Monoid OrderedSemiring
+import "core/structures/equality.lth" Concrete Structural
 
 -- ---------------------------------------------------------------- the core's data (3.S7, 3.R3)
 
 -- the terminal and the initial structure, as data (3.S7; D-2026-10-13-t gives their roles in
--- kernel_laws.lth: `unit` the point of a terminal object, `Empty` initial)
+-- core/structures/universal.lth: `unit` the point of a terminal object, `Empty` initial)
 Unit : U := data { unit : Unit }
 Empty : U := data { }
 
 -- `Bool`: a sum of two units written as a `data` without recursion (3.R3, D-2026-10-13-o); its
--- role, a Boolean algebra with `true` its top, is kernel_laws.lth §3, claimed below.
+-- role, a Boolean algebra with `true` its top, is core/structures/algebraic.lth §3, claimed below.
 -- [proposed] `data` and not the labeled sum `{ true : Unit || false : Unit }` of 2.S12: 3.R3 is
 -- the later decision, and the kernel represents `true` as the constructor `Var "true"`
 -- (term.lth, `truth`), not as an injection.
@@ -54,21 +58,21 @@ operator and := conj
 operator or := disj
 
 -- `Maybe` and `List`, as data (3.R3, 3.S36); their roles: a coproduct with `Unit`
--- and the free monoid (kernel_laws.lth §4), claimed below. `[a, b, c]`
+-- and the free monoid (core/structures/universal.lth §4), claimed below. `[a, b, c]`
 -- is `cons a (cons b (cons c nil))` (2.S12).
 Maybe (A : U) : U := data { nothing : Maybe A ; just : A -> Maybe A }
 List (A : U) : U := data { nil : List A ; cons : A -> List A -> List A }
 
 -- The roles of the data above (L2.7; D-2026-10-14-b: 4.R3 is read per file, and a data's role
 -- laws live in the file that defines it, without repeating a law). Each data is the model of a
--- structure of kernel_laws.lth, and core claims that structure here: the law is kernel_laws.lth's,
+-- structure of core/structures/, and core claims that structure here: the law is that file's,
 -- applied to core's model written with the constructors. `unit` is the point of a terminal
 -- object; `true` and `false` the top and bottom of a Boolean algebra, `true` where `if` takes its
 -- first branch; `nothing` and `just` the injections of a coproduct with `Unit`; `nil` the neutral
 -- element of the free monoid and `cons` the injection combined. `Empty` has no constructor to
 -- give a role to; it is initial, its elimination `match e { }` the map out. Moved from
--- kernel_models.lut. [proposed] Importing kernel_laws.lth from core is a cycle of files and not of
--- names: kernel_laws.lth sees core's names unqualified (12.S22) and core names its theories, but
+-- kernel_models.lut. [proposed] Importing core/structures/ from core is a cycle of files and not of
+-- names: core/structures/ sees core's names unqualified (12.S22) and core names its theories, but
 -- no definition reaches itself through the other file (the theories mention `Bool` and `List`, the
 -- data mention no theory), and a demand reads definitions, not files (3.S1, 12.S22).
 UnitIsTerminal : Bool := Terminal Unit { point := unit }
@@ -104,7 +108,7 @@ Rational : Real := primitive "rational"
 String   : U := primitive "unicode"
 
 -- the naturals and the finite type of `n` indices (11.R1): subtypes of `Int`, so neither has a
--- constructor of its own; `Nat`'s laws are kernel_laws.lth §5
+-- constructor of its own; `Nat`'s laws are core/structures/algebraic.lth §5
 Nat : U := { k : Int | 0 <= k }
 Fin (n : Int) : U := { k : Int | 0 <= k and k < n }
 
@@ -118,7 +122,7 @@ ExtendedReal = { finite : Float64 || negInf : Unit || posInf : Unit }
 -- at one type, and the infix symbol is bound to it by `operator` at that type (4.R13, 2.R2: a
 -- type names its model; `Int + Int` and `Float64 + Float64` are two models of one symbol).
 -- What each one is: numbers.lth (`Doubles`, `IntegerDivision`, `Conversion`; the ring of `Int`
--- in algebra.lth) and kernel_laws.lth (`Monoid` for `String`).
+-- in algebra.lth) and core/structures/algebraic.lth (`Monoid` for `String`).
 
 -- the integers: exact (11.S4); the quotient and the remainder are the host's floor division,
 -- `(a / b) * b + a mod b == a` with the remainder taking the sign of the divisor
@@ -145,7 +149,7 @@ operator - := floatMinus
 operator * := floatTimes
 operator / := floatDivide
 
--- text: `+` is concatenation, the free monoid on characters (kernel_laws.lth `Monoid`,
+-- text: `+` is concatenation, the free monoid on characters (core/structures/algebraic.lth `Monoid`,
 -- numbers_model.lut `strings`)
 stringAppend : String -> String -> String := primitive "+"
 operator + := stringAppend
@@ -154,3 +158,46 @@ operator + := stringAppend
 -- (11.S5, D-2026-10-05-c). Here and not in a library, since every program that draws a double
 -- from an integer needs it (v0.1 real.lut bound it to the host for the same reason).
 toFloat64 : Int -> Float64 := primitive "toFloat64"
+
+-- ---------------------------------------------------------------- the kernel's own models (kernel_models.lut)
+
+-- What kernel_models.lut held until the core's bite 1 (2026-10-18), moved here with its text and
+-- names unchanged (D-2026-10-14-b read to the end: core claims its models, and the kernel's forms
+-- are the interpreter's; record/plan/core-2026-10-17/execution.md §3.10, whose renames come in bite
+-- 3). Its draft 0 was by Claude Opus 5.5 in the session, 2026-10-13 (step 2.1; §7 of
+-- kernel_laws.lth): each value says which known structure a core type or a kernel form is (L2.7,
+-- D-2026-10-13-t).
+
+-- the structural equality of every concrete type is an object (D-2026-10-12-ak, 4.R8)
+structuralEquality (A : Concrete) : Structural A := { eq := fn x y { x == y } }
+
+-- `Nat` is an ordered commutative semiring (11.R1)
+naturals : OrderedSemiring Nat := {
+  zero := 0, one := 1,
+  plus := fn a b { a + b },
+  times := fn a b { a * b },
+  leq := fn a b { a <= b },
+}
+
+-- the kernel's application, pairing and match are the exponential, the product and the coproduct
+-- (3.S8, 3.S36); on `Bool` and `Maybe` the coproduct is core.lut's
+application (A B : U) : Exponential A B := { apply := fn f x { f x } }
+pairs (A B : U) : Product A B (A * B) := {
+  pair := fn a b { (a, b) },
+  first := fn p { match p { (a, b) -> a } },
+  second := fn p { match p { (a, b) -> b } },
+}
+-- a record type is a named product: `.x` and `.y` its projections (D-2026-10-13-x); a labeled sum a
+-- named coproduct, its labels the injections. Instances on the labels `x`, `y` and `a`, `b`.
+recordXY (A B : U) : NamedProduct A B { x : A, y : B } := {
+  pair := fn u v { { x := u, y := v } },
+  first := fn r { r.x }, second := fn r { r.y },
+  firstName := "x", secondName := "y",
+  select := fn n r { if n == "x" then just (one r.x) else if n == "y" then just (two r.y) else nothing },
+}
+sumAB (A B : U) : NamedCoproduct A B { a : A || b : B } := {
+  left := fn u { a u }, right := fn v { b v },
+  cases := fn (C : U) f g s { match s { a u -> f u ; b v -> g v } },
+  leftName := "a", rightName := "b",
+  labelOf := fn s { match s { a u -> "a" ; b v -> "b" } },
+}
