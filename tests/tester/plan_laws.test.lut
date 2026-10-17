@@ -1,6 +1,6 @@
 -- tests/tester/plan_laws.test.lut: the laws of plan.lth on plan_model.lut: `Dataflow` (§1) on its
 -- `example` and two dataflows written here, `Confluent` (§2) on listed schedules, `Planning` (§5)
--- on `planning`, and the two statements of `demandKey` (§4), as listed cases. Written 2026-10-15
+-- on `planning`, and the law of the key (§4), as listed cases. Written 2026-10-15
 -- by Claude Opus 5.5, an agent of the coordinating session, on record/IA/v04-2026-10-15/prompt-e.md
 -- (criterion e of v0.4, L9.14). There is no generator of dataflows (record/IA/demand-2026-10-15/
 -- report.md), so the dataflows are a census: plan_model.lut's `example` (five names, the entry `d`
@@ -18,7 +18,7 @@ import "demand.lth" Demand
 import "demand_model.lut" theDemand
 import "plan.lth" Planning Dataflow Schedule reaches NamesAreUnique Acyclic StepIsLocal Confluent PlanIsTheLiveCone
   PlanLinearizes StrategiesAgree TheDefaultsAgree ForwardIsByLevels ByNeedIsFirstDemand PlanIsConfluent
-  KeyReadsOnlyTheCone KeyReadsTheType
+  KeyReadsOnlyTheCone
 import "plan_model.lut" planning example eqNat
 
 types : List U := [Nat]
@@ -71,7 +71,6 @@ onConfluentPlan : List Binding := [bind "A" "types", bind "eq" "eqs", bind "p" "
   bind "e" "entries", bind "cs" "choices"]
 onKey : List Binding := [bind "A" "types", bind "eq" "eqs", bind "p" "planners", bind "d" "dataflows",
   bind "dm" "demands", bind "n" "holes", bind "v" "values"]
-onType : List Binding := [bind "A" "types", bind "eq" "eqs", bind "p" "planners", bind "dm" "demands", bind "live" "lives"]
 
 -- §1 the dataflow
 test "NamesAreUnique" ExhaustiveMode (seed <- 20261015) (whereBindings <- onDataflow)
@@ -87,6 +86,6 @@ test "TheDefaultsAgree" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPl
 test "ForwardIsByLevels" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPlan)
 test "ByNeedIsFirstDemand" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPlan)
 test "PlanIsConfluent" ExhaustiveMode (seed <- 20261015) (whereBindings <- onConfluentPlan)
--- §4 the demand's key; both follow from `demandKey`'s definition (plan.lth: no model can fail them)
+-- §4 the demand's key: a hole the entry does not reach leaves it as it was (restated 2026-10-17 so
+-- that the planner enters it; `KeyReadsTheType` removed, plan.lth §4 says why)
 test "KeyReadsOnlyTheCone" ExhaustiveMode (seed <- 20261015) (whereBindings <- onKey)
-test "KeyReadsTheType" ExhaustiveMode (seed <- 20261015) (whereBindings <- onType)

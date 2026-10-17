@@ -329,17 +329,24 @@ ForwardIsByLevels (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflo
   byLevels d.nodes (p.plan ForwardOnDemand d e).live 0 (p.plan ForwardOnDemand d e).schedule
 ByNeedIsFirstDemand (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (d : Dataflow A eq) (e : String) : Bool :=
   (p.plan CallByNeed d e).schedule == firstDemand A eq d e
--- §4. 8.S8: a value given to a hole the cone does not read leaves the demand's key as it was, and
--- the type demanded is always in the key. [proposed, B13 of summary-BCD.md] Both follow from the
--- definition of `demandKey` for every planner, so no model can fail them (L9.14): they are kept
--- as statements of the definition, not claimed by `Planning`; a law of the key a model can fail
--- is `Keying`'s.
+-- §4. 8.S8: a value given to a hole the cone does not read leaves the demand's key as it was. The
+-- key reads the plan's live set (`demandKey`), so the planner enters through it: the hole is one
+-- the entry does not reach in the dataflow, and a planner whose live set is wider than the cone
+-- (the whole graph, plan_controls.test.lut's `wholeGraph`) puts the hole into the key and fails
+-- this; one whose live set is the cone leaves the key as it was. [restated 2026-10-17 by Claude
+-- Fable 5.1 on record/IA/regions-2026-10-17/prompt-theory.md, item 4; L9.14] Before, the hole
+-- was tested against the plan's own live set, which `demandKey` reads, so the law held of every
+-- planner by the definition (B13 of summary-BCD.md) and no control could fail it; tested against
+-- what the entry reaches it is a law of `Planning`, claimed below. The second statement of 8.S8,
+-- that the type demanded is always in the key (`KeyReadsTheType`, until this draft), is
+-- `demandKey`'s definition (`decoration := d.decoration`) and no planner enters it: the claim a
+-- model can fail is `Keying`'s `KeySeesTheDemand` on two keys that differ in the decoration (a
+-- value and its derivative have two keys), which waits for a model of `Keying` (8.S10, the result
+-- store). Removed, not restated.
 KeyReadsOnlyTheCone (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (st : Strategy) (d : Dataflow A eq) (dm : Demand) (n : String) (v : Value) : Bool :=
-  memberStr n (p.plan st d dm.entry).live
+  memberStr n (reaches A eq d dm.entry)
     or demandKey (withSet dm n v) (p.plan st d dm.entry).live == demandKey dm (p.plan st d dm.entry).live
--- 8.S8: the type demanded is always in the key: a value and its derivative have two keys
-KeyReadsTheType (A : U) (eq : A -> A -> Bool) (p : Planning A eq) (dm : Demand) (live : List String) : Bool :=
-  (demandKey dm live).decoration == dm.decoration
 
 Planning (A : U) (eq : A -> A -> Bool) := PlanIsTheLiveCone A eq & PlanLinearizes A eq & StrategiesAgree A eq
   & TheDefaultsAgree A eq & ForwardIsByLevels A eq & ByNeedIsFirstDemand A eq & PlanIsConfluent A eq
+  & KeyReadsOnlyTheCone A eq

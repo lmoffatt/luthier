@@ -10,15 +10,20 @@
 -- planner of those laws is right, and the break they see is the dataflow's); for `Planning`, a
 -- planner whose live set is the whole graph, one whose schedule is reversed, one whose forward
 -- plan drops its first name, one whose forward plan is the order of first demand, and one whose
--- call by need is the forward order. `KeyReadsOnlyTheCone` and `KeyReadsTheType` have no control:
--- they follow from `demandKey`'s definition for every planner (plan.lth §4, B13), see the report.
+-- call by need is the forward order. `KeyReadsOnlyTheCone`, restated 2026-10-17 so that the
+-- planner enters it (plan.lth §4), is controlled by `wholeGraph`: its live set holds `e`, which the
+-- entry `d` does not reach, so a value set on `e` enters its key. `KeyReadsTheType` is gone, plan.lth
+-- §4 says why.
 
 import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
+import "certification.lth" Value Number Printed
+import "demand.lth" Demand
+import "demand_model.lut" theDemand
 import "plan.lth" Planning Dataflow Plan Schedule Strategy CallByNeed ForwardOnDemand reaches names firstDemand
   NamesAreUnique Acyclic StepIsLocal Confluent PlanIsTheLiveCone PlanLinearizes StrategiesAgree TheDefaultsAgree
-  ForwardIsByLevels ByNeedIsFirstDemand PlanIsConfluent
+  ForwardIsByLevels ByNeedIsFirstDemand PlanIsConfluent KeyReadsOnlyTheCone
 import "plan_model.lut" planning example eqNat byNeed forward plan
 
 types : List U := [Nat]
@@ -99,6 +104,11 @@ exampleOnly : List (Dataflow Nat eqNat) := [example]
 unevenOnly : List (Dataflow Nat eqNat) := [uneven]
 entryD : List String := ["d"]
 entryF : List String := ["f"]
+-- the demands, holes and values of plan_laws.test.lut: `e` is a name of `example` the entry `d`
+-- does not reach, `z` is no name of it
+demands : List Demand := [theDemand (entry <- "d"), theDemand (entry <- "d") (sets <- [("a", Number 1.0), ("z", Printed "x")])]
+holes : List String := ["a", "e", "z"]
+values : List Value := [Number 2.0, Printed "y"]
 
 bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
 onDataflow (d : String) : List Binding := [bind "A" "types", bind "eq" "eqs", bind "d" d]
@@ -118,3 +128,5 @@ test "ForwardIsByLevels" ExhaustiveMode (seed <- 20261015) (whereBindings <- onP
 test "ByNeedIsFirstDemand" ExhaustiveMode (seed <- 20261015) (whereBindings <- onPlan "needAsForwards" "unevenOnly" "entryD") (control <- true)
 test "PlanIsConfluent" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "eq" "eqs",
   bind "p" "planners", bind "d" "hiddens", bind "e" "entryF", bind "cs" "choices"]) (control <- true)
+test "KeyReadsOnlyTheCone" ExhaustiveMode (seed <- 20261015) (whereBindings <- [bind "A" "types", bind "eq" "eqs",
+  bind "p" "wholeGraphs", bind "d" "exampleOnly", bind "dm" "demands", bind "n" "holes", bind "v" "values"]) (control <- true)
