@@ -4,8 +4,9 @@ Read `CLAUDE.md` first, then `record/plan/core-2026-10-17/execution.md` sections
 its parts) and 6 (bite 4), `decisions.md` beside it, and `record/decisions.md` at D-2026-10-18-a,
 -b, -c (the core alone; names per concept resolved by the model the type names; the three planes).
 Build bite 4 exactly as section 6 describes it. Part (c)'s filling of an omitted structure parameter
-from the table (2.2.2) follows question 4's recommendation, which Luciano has not answered yet:
-build it in its own commit so it can be undone alone.
+from the table (2.2.2) is decided (D-2026-10-18-g): the structure comes from the type's model when
+omitted; another structure passed by name is the author's; a graded structure's bound (a metric
+ball's epsilon) is never filled by the resolution, it stays a parameter the demand supplies.
 
 Where `infer` now raises on a library file, fix the library's annotation if the error is the
 library's, and list each such fix in the report; if a fix would change a law's meaning, stop and

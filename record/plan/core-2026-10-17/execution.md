@@ -603,6 +603,18 @@ the first two planes only declare and state laws with their mathematical referen
 computes lives in the third. The Boolean and metric bases first. The designer revises sections 2
 and 3 for it before bite 6.
 
+His answers of 2026-10-18 (D-2026-10-18-e, -f, -g): question 2 as recommended, generators.lth's
+`Metric` becomes `Placement` (`LinearPlacement`, `LogPlacement`), test lines keep `SampledMode
+linear`, done in bite 5 with chapter 7's three sentences; question 3 otherwise: no one-line wrappers
+per law and structure; the tester first learns to split a conjunction of laws into its conjuncts,
+each partially applied law with its missing variables quantified on its own (a new bite, 4b, Opus,
+after the budgets bite and beside bite 5, in tester.py), then structures and composite properties
+are written bare (bite 6, which also rewrites bite 2's composites to the bare form); question 4 as
+recommended with three owners: the structure from the type's model when omitted (the theory's),
+another structure passed by name (the author's, part of the definition), and a graded structure's
+bound (a metric ball's epsilon) a demand parameter (L5.17), never fixed by the model or the
+resolution. Question 5 (list append as `+`) open.
+
 ### Bite 3. The metrics script (Sonnet; first, alone)
 
 Files: new `scripts/core_metrics.py` and `tests/test_core_metrics.py`. The script prints the four
