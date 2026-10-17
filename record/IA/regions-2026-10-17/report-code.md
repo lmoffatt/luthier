@@ -146,3 +146,82 @@ PinvSymmetric and PinvScales fail only because their tolerance scale is entrywis
 you want their error model corrected (the scale of both entries compared, plus tol times |s| |p| in
 norm on every entry), after which arrays_model is re-certified and committed, or the refutations
 committed now, with runs over numpy refused until the laws change?
+
+## 7. After the coordinator's answer (2026-10-17)
+
+The answer to section 6 and to findings 5 and 6, in three items; findings 3 (the drawing code in a
+sampled entry's identity) and 7 (fuel) go to the core's first bite and are not handled here.
+
+Commits, in order:
+
+- fdfc2a2 the evidence of the two pinv refutations (arrays_model's re-certified store and the two
+  matrices) moved to record/archive/stores-2026-10-17/, with `pinv-refutations.md` saying why they
+  are kept (P3, keep the original evidence and its corrections).
+- c494171 arrays.lth: PinvSymmetric and PinvScales compare with the scale of both entries plus a
+  normwise term (`approxMatBoth`; Higham, Accuracy and Stability of Numerical Algorithms, 2002,
+  section 3.5, cited in the comment). The terms: the norm of p for p against its transpose, the
+  product of the norms of s and p for s p, the norm of p over c for P at a scale.
+- ec53d1f arrays_controls: a control per corrected law, a pinv perturbed beyond the new bound
+  (`skewNormPinv` for PinvSymmetric, `offsetPinv` for PinvScales; L9.14, every law has its refuted
+  model in the evidence).
+- 6e57ac4, 70d5497 LeqTransitive's control lists the chain where leqSlack breaks (`slackChain`: x
+  1.5, y 0.75, z 0) instead of drawing it; its two sampled control entries (refuted on 2026-10-15,
+  held on the deep replay) moved to the archive with `leqtransitive-sampled-control.md`.
+- 6351e95, 5b34916 tester.py: a cutoff bound to a census gives no sides, only a drawn one does
+  (`Classifier`'s `sided`); spec 7.S14 says so. certify.py: an agreeing replay whose regions differ
+  from the known entry's is written in front, and an identity's regions are its latest entry's
+  (`law_regions`), so the stores re-classified under the new reading drop the old sides.
+- f0d854c the stores re-certified (`luthier certify` of the files with cutoffs, `--deep`,
+  `--fuel 3000000`), and the controls of arrays and numbers; arrays_model aside.
+- 6c0e8a8 arrays_model.cert.json, the numpy store, committed. The deep run had left
+  RankUnderRotation in a replay dispute (finding 4: its not-run of 2026-10-14 at k = 9 against the
+  one of 2026-10-17 at k = 3); one more run of that line alone (a one-line copy of
+  arrays_laws.test.lut, removed after) agreed with the latest and resolved it (D-2026-10-15-f).
+
+The checks:
+
+- `luthier certify tests/tester/arrays_laws.test.lut tests/tester/arrays_controls.test.lut --fuel
+  3000000`: "35 laws, 0 lines ran, 52 known", "0 laws, 37 controls, 0 lines ran, 37 known", exit 0.
+  Every law of arrays_laws is graded and controlled; PinvSymmetric and PinvScales are sampled and
+  refuted on both their controls (the old ones and the new).
+- numbers_controls: LeqTransitive's control "refuted at d = leqSlack, c = slackChain: the control
+  passed".
+- `python3 scripts/check_spec.py`: its known finding only (03-kernel.md:190), "185 implemented, 80
+  decided (of which 33 suspended), 8 proposed".
+- `python -m pytest -q` with the stores committed: 813 passed, 6 skipped, 9 xfailed in 1345 s
+  (812 at the report above, plus the test of a cutoff bound to a census in test_regions.py);
+  test_run, test_lm and test_plots green with the numpy store committed.
+
+The grades, again (standings read from the stores at 5a7b8f1 and now, the laws of the files that
+existed then; core_laws.test.lut is new and not mine): 120 sampled, 83 cases, 7 uncertified, 1
+supported before; 125 sampled, 78 cases, 7, 1 now. The same five laws fall, one with fewer empty
+regions now that a cutoff bound to a census gives no sides:
+
+| file | law | before | after | empty regions |
+|---|---|---|---|---|
+| belief_laws | PrecisionSymmetric | cases | sampled | n boundary (before the answer: also tol above, tol below) |
+| plan_laws | Confluent | cases | sampled | empty, one element (List) |
+| plot_laws | LayerOrderInvariant | cases | sampled | margin boundary |
+| world_laws | HostObserveChangesNothing | cases | sampled | empty, one element |
+| world_laws | HostChangesOnlyDeclared | cases | sampled | empty, one element |
+
+Sampled before and after, now printing their empty regions: RankBounded, PinvProjects, PinvSymmetric
+and PinvTraceIsRank (0 x 0), PinvRestricts (0 x 0, 1 x 1, s boundary), RankUnderRotation (1 x 1, k
+boundary, q boundary), and in belief_laws MaximizerAscends, MaximizerStationary and
+MaximizerKeepsDimension (s, n and x0 boundary). No law is refuted.
+
+What remains of the findings: PrecisionSymmetric still caps on `n : Nat` bound to 3, a premise's
+boundary (0 and 1) that a census of one never reaches; the answer covered cutoffs, so I left
+premises as they were. RankUnderRotation's sampled line is still not run (finding 3: `Orthogonal
+tol k` by filtering; its graded lines are the others).
+
+Decisions taken on my own in this part:
+
+- The normwise term of each corrected law (which norm, for which comparison), as listed above.
+- The two new controls' perturbations: `skewNormPinv` moves entry (0, 1) by 1e-9 times the norm of p,
+  about three hundred times the new bound; `offsetPinv` adds an absolute 1e-6 at (0, 0), which P over c
+  does not carry.
+- An agreeing replay whose regions differ is written in front, and an identity's regions are its
+  latest entry's: without it the stores would keep the cutoffs' sides the earlier reading recorded.
+- RankUnderRotation's dispute resolved by a one-line copy of the test file, run deep and removed,
+  instead of a second deep run of all of arrays_laws.
