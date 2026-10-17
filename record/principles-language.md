@@ -954,6 +954,12 @@ L7.5   What a library can decide, the core does not: the core asks of each libra
        operations and laws it uses (for costs, spec 6.S5), and the open choices of the library are
        taken when it is implemented and its invariants are found (D-2026-10-12-al, P16).
        [settled]
+L7.6   (His words, on the core's rebuild) Luthier is written in the manner of Haskell, not of Java:
+       a property is said once, generic over the operation and its equality, and each type claims
+       it; a helper is written once, generic over the container, and every type uses it; the same
+       thing restated per type or per file is a defect of the library. It is measured: no name
+       defined in two files, no list helper reinvented, no law unclaimed (D-2026-10-18-a).
+       [proposed]
 Rests on:   O11 (the kernel's theory stated in Luthier)
 Quote:      (L7) "Luthier tendría que ser ejecutable a mano" (2026-05-29)
 Source:     (L6) Luciano, 2022-06-15 (written:2022-06-15_sin-titulo-2:codigo-es-dato) (L7) Luciano,
@@ -966,7 +972,8 @@ History:    (L6) draft 1 (5769005): stated. (L7) draft 0 (6d9dbd3): stated. Draf
             merged. draft 11, step 3 (2026-10-12): the formulation split into numbered clauses with
             the status each sentence had in draft 10, the examples into Example, the provenance
             phrases into this History, the wording otherwise as draft 10 had it. draft 11
-            (2026-10-12): renumbered from L15 of draft 10 (D-2026-10-12-v).
+            (2026-10-12): renumbered from L15 of draft 10 (D-2026-10-12-v). 2026-10-18: clause 6
+            added, proposed (D-2026-10-18-a).
 
 L14 What can be written in Luthier is written in Luthier.
 From:       G0 (a type theory states its own rules in its own terms; L7, programs are data and the
