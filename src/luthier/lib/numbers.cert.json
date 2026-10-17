@@ -2594,73 +2594,6 @@
   ]
  },
  {
-  "law": "LeqTransitive",
-  "cone": "sha256:ec953dcc63359e63982ecede9e7c3b90d02763f3023b36cbc5a2f61deae4cd2b",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "leqSlack (Listed)",
-    "fingerprint": "sha256:1f359f9af65721cf901f8ad2f4c7d3b4c35aa55e1bed9ae60cc881df771404a3"
-   },
-   {
-    "parameter": "c",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqChain d)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "leqSlack"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 20261015)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlConfirmed": "sampled"
-  },
-  "date": "2026-10-17T09:56:22+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "c boundary"
-    },
-    "n": 100
-   }
-  ]
- },
- {
   "law": "LeqAntisymmetric",
   "cone": "sha256:bbf4b36fed624640c3e4cd64b2b951b9fe63234da31a03967dd002f13d2d1184",
   "binding": [
@@ -6160,64 +6093,6 @@
    "ControlRefuted": "d = lessLoose, x = 8.286853166110046, y = -6.0312359869088645"
   },
   "date": "2026-10-15T02:12:15+00:00",
-  "interpreter": "v0.2",
-  "hosts": [],
-  "kind": "Control"
- },
- {
-  "law": "LeqTransitive",
-  "cone": "sha256:ec953dcc63359e63982ecede9e7c3b90d02763f3023b36cbc5a2f61deae4cd2b",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "leqSlack (Listed)",
-    "fingerprint": "sha256:1f359f9af65721cf901f8ad2f4c7d3b4c35aa55e1bed9ae60cc881df771404a3"
-   },
-   {
-    "parameter": "c",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqChain d)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261015,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "leqSlack"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 20261015)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "d = leqSlack, c = { x := -6.294800540902887, y := -7.239803179956146, z := -7.647279309527011 }"
-  },
-  "date": "2026-10-15T02:12:14+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "kind": "Control"
