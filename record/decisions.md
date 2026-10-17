@@ -2872,3 +2872,29 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16/17; the li
             the export)
 Kind:       spec 3.R1, 3.R2; tests k_named_product, k_bool_is_sum
 Status:     current
+
+D-2026-10-17-b  The algebraic properties are generic laws over an operation and its equality, said
+                once: `Commutes (A : U) (o : Object A) (op : A -> A -> A)`, `Associative`,
+                `Neutral`, `Reflexive`, `Transitive` and the like. A structure is a conjunction of
+                properties (`Monoid = Associative & Neutral`, an abelian group adds `Commutes` and
+                an inverse), and each type claims only the properties it satisfies: `Doubles`
+                claims `Commutes Moderate exact d.plus` and not `Associative`, which documents by
+                absence where the doubles are not the reals (11.S15). They live in kernel_laws.lth,
+                the laws of the core that core.lut claims (D-2026-10-14-b), since core's own types
+                need them (`List` the free monoid, `Bool` a Boolean algebra); they are predicates,
+                not primitives, so the kernel stays minimal (L7.1). algebra.lth keeps the richer
+                structures (groups, rings) built from them. Replaces the duplicates found on
+                2026-10-17: `PlusCommutes`, `TimesCommutes` (numbers.lth), `GroupCommutes`,
+                `TimesCommutes R` (algebra.lth), `MeetCommutes`, `JoinCommutes` (kernel_laws.lth);
+                the theories that claim them re-certified. Precedent: Lean's Mathlib
+                (`Std.Commutative op`, `Std.Associative op`).
+Author:     Luciano, on the example of `PlusCommutes` (numbers.lth) and the decision assistant's
+            proposal
+Quote:      "¿por qué tenemos PlusCommutes sino que debería ser Commutes plus Float64 o algo así?"
+            ... "Sí, registralo como decisión. El problema es que algebra debe estar en el core,
+            ¿no?"
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-17; the line unknown until the
+            export)
+Kind:       kernel_laws.lth, algebra.lth, numbers.lth and every theory that states a commutation,
+            an identity or an order; their stores; L2.8
+Status:     current
