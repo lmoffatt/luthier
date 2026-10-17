@@ -126,6 +126,12 @@ Queue after 3g:
   tautological). Direction: write at once, check what the OS accepted, fail the action otherwise;
   stdout observed according to what fd 1 is.
 
+Priority from 2026-10-17 (D-2026-10-17-i, his words "Primero tenemos que rehacer todo el core"):
+the core first. Its design is launched beside j2a (record/plan/core-2026-10-17/prompt-design.md,
+Fable); its bites run before the rest of the queue below, which joins only where files are
+disjoint. Slice work waits: item 34 (session A with and without A2, both kept, compared on the
+corrected graph he regenerates with src/prepare_experiment_zero.py) after the core; 35 to 37 wait.
+
 Queue added 2026-10-17 (decisions D-2026-10-16-k to -n and D-2026-10-17-a to -d, relayed by the
 decision-assistant fork, now luthier-8c), in this order after j2a:
 - print and stdout, now decided (D-2026-10-16-n, item 12): `print` writes at once and checks what
