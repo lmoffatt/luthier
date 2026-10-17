@@ -2927,3 +2927,30 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-17; the line 
 Kind:       core (properties.lth, structures.lth replacing kernel_laws.lth), every theory's law
             names, core.lut's claims, arrays.lth, tables.lth
 Status:     current
+
+D-2026-10-17-d  Refines D-2026-10-17-b and -c. Many laws are an equality of two functions: the
+                function type carries an equality derived pointwise from its codomain's
+                (`eq_{A -> B} f g := for all x, eq_B (f x) (g x)`, extensionality, sampled when
+                tested, with whatever equality the codomain has, exact or with a tolerance, L3).
+                So `…Agrees` (`DotAgrees` is `dot == dotDef`), `…Pointwise` (`vadd == zipWith
+                plus`), `Commutative op` (`op == flip op`), homogeneity (`f ∘ scale c == scale (c^k)
+                ∘ f`), `SizeMap` (`size ∘ map f == size`), `Neutral op e` (`op e == id`) are that
+                equality applied to two constructions with combinators: a commuting diagram. The
+                core provides the equality of functions, the combinators with their laws (`id`,
+                composition, `flip`, `zipWith`, `map`), and the few properties that are not
+                equalities (order: Reflexive, Transitive, Total, Monotone; implications: Injective,
+                Cancellative; membership: `LandsIn`, a result in a subtype); names such as
+                `Commutative` stay as readable abbreviations of an equality. And a generic library of
+                lists and containers in the core (`map`, `filter`, `all`, `any`, `fold`, `member` and
+                `lookup` over the element's `Object`, `append`, `concat`, `length`), with the
+                containers' laws, replacing about 110 functions reinvented per type (58 `all…` /
+                `any…`, 15 `append…`, 9 `member…`, 8 `lookup…`, 7 `concat…`, `lengthOf` four times).
+Author:     Luciano ("pero AgreesWith ¿no es Map eq?"), on the decision assistant's survey of the
+            library's duplications
+Quote:      "fijate qué otra cosa se puede abstraer para evitar duplicaciones, especialmente en
+            cosas básicas" ... "pero agreeswith no es Map eq?" ... "Sí, registralo."
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-17; the line unknown until the
+            export)
+Kind:       core (properties.lth, structures.lth, core.lut's list library), every theory's laws and
+            helpers, their stores
+Status:     current
