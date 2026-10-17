@@ -40,6 +40,9 @@
 --   §7 The programs a rule of the checker is tested on (program.lth).                        done
 --   §8 The functors over the forms of a type, with the core's instances (7.S3): waits for
 --      core.lut.                                                                            todo
+--   §9 The degenerate cases a type declares once, named predicates with a witness, the
+--      first source of the regions a grade is kept per (D-2026-10-16-i, D-2026-10-16-j);
+--      `List` as the example.                                                               done
 
 import "kernel_laws.lth" Concrete
 import "laws.lth" Coverage Drawn Law Statistical StatisticalLaw Sequential byPValue
@@ -314,3 +317,50 @@ CleanCensusFirst (v : SurfaceProgram -> String -> Bool) (c : RuleCases v) (i : S
   match nth (Clean v) c.cleanCensus i { nothing -> true ;
     just w -> (match c.clean 0 i { (x, s) -> x.p == w.p and x.n == w.n and s == nextSeed i }) }
 RuleCases (v : SurfaceProgram -> String -> Bool) := CensusFirst v & CleanCensusFirst v
+
+-- ---------------------------------------------------------------- §9 The degenerate cases of a type
+
+-- [D-2026-10-16-i, D-2026-10-16-j; written 2026-10-17 by Claude Fable 5.1, an agent of the
+-- coordinating session, on record/IA/regions-2026-10-17/prompt-theory.md] Sampling bounds the
+-- fraction of cases where a law fails under the generator's distribution and says nothing of its
+-- null sets (L10.3): the cases a law turns on are given mass by the generator or listed, and the
+-- evidence of a law is kept per region (certification.lth §2). The regions that enter a grade come
+-- from three finite sources, and this is the first, the type: its theory declares once the
+-- degenerate cases of the type, shared by every law over it. A degenerate case is a named predicate
+-- with a witness. The predicate classifies every value a generator gives (a value can be in several
+-- cases, and in none); the witness is one value of the case, so that a census of the declaration
+-- reaches every case at least once (the decision's "or they are listed") and no declared case is
+-- empty. The names are distinct, since a region is named by its source and its name
+-- (certification.lth's `Region`). How a generator gives the cases mass (7.S4's special values and
+-- atom at zero, 7.S5's list of dimensions) is the generator's, outside this theory; which cases a
+-- run met is 7.S14's `classify`, read by the tester with `casesOf` below. [proposed] Where this
+-- lives: the lists a type's theory carried were a census (§5) and `RuleCases`'s (§7), both lists
+-- of values and not of named cases, so the declaration is new, here, beside the censuses it
+-- generalizes. The examples: `Mat Float64` and `Symmetric` in arrays.lth §5, and `List A` below,
+-- not in kernel_laws.lth (this file imports it: a cycle of files) nor in core (D-2026-10-14-b, and
+-- the brief touches no other theory). [proposed] A subtype takes its base's cases: a case no value
+-- of the subtype can meet (0 x 0 for `SymmetricOf 3`) is no region of a law over it, which the
+-- tester reads from the witness and the draws; a number's cases (0, +1, -1, D-2026-10-16-j) wait
+-- for numbers.lth.
+DegenerateCase (T : U) = { name : String, holds : T -> Bool, witness : T }
+Degeneracies (T : U) : { cases : List (DegenerateCase T) }
+caseNames (T : U) (cs : List (DegenerateCase T)) : List String :=
+  match cs { nil -> nil ; cons c rest -> cons c.name (caseNames T rest) }
+witnessesHold (T : U) (cs : List (DegenerateCase T)) : Bool :=
+  match cs { nil -> true ; cons c rest -> c.holds c.witness and witnessesHold T rest }
+-- each witness is in its case, and no two cases share a name
+EachWitnessIsItsCase (T : U) (d : Degeneracies T) : Bool := witnessesHold T d.cases
+CaseNamesAreDistinct (T : U) (d : Degeneracies T) : Bool := noDuplicates String (caseNames T d.cases)
+Degeneracies (T : U) := EachWitnessIsItsCase T & CaseNamesAreDistinct T
+-- the names of the cases a value is in: what `classify` records of it (7.S14)
+casesOf (T : U) (cs : List (DegenerateCase T)) (x : T) : List String :=
+  match cs { nil -> nil ; cons c rest -> if c.holds x then cons c.name (casesOf T rest x) else casesOf T rest x }
+
+-- a list: empty, and one element (D-2026-10-16-j); the element the second witness needs is a
+-- parameter, since nothing here draws one
+isEmptyList (A : U) (xs : List A) : Bool := match xs { nil -> true ; cons x rest -> false }
+isOneElement (A : U) (xs : List A) : Bool :=
+  match xs { nil -> false ; cons x rest -> (match rest { nil -> true ; cons y more -> false }) }
+listDegeneracies (A : U) (a : A) : Degeneracies (List A) := { cases := [
+  { name := "empty", holds := fn xs { isEmptyList A xs }, witness := nil },
+  { name := "one element", holds := fn xs { isOneElement A xs }, witness := [a] } ] }
