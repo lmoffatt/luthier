@@ -1,5 +1,120 @@
 [
  {
+  "law": "HostObserveChangesNothing",
+  "cone": "sha256:995adc0d6d06698e4967329978799bda849e3263828ff1552ff1eade8565391a",
+  "binding": [
+   {
+    "parameter": "S",
+    "generator": "hostStates (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "o",
+    "generator": "hosts (Listed)",
+    "fingerprint": "sha256:2610dffbdfc6bf478374286195d90a4c0d8f30e5a6a85ae4328bf41aecb825fe"
+   },
+   {
+    "parameter": "ps",
+    "generator": "observed (Listed)",
+    "fingerprint": "sha256:568789cff0483ede56f6f2e3356bee0fe59c2272e6c44f3cc92a8be0d4c8aba0"
+   },
+   {
+    "parameter": "c",
+    "generator": "observeCases (Listed)",
+    "fingerprint": "sha256:14866116eb0b1ee6a37645416bb76f9ec965a4e6bf129f3b1a94925f6b5c0ee4"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "S",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ stdout : String, files : (List (_ : String) * String) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "listedHost"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ps",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"stdout\") ((cons \"input.txt\") nil))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) withFiles) withFiles) withFiles)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) printed) printed) printed)"
+      },
+      {
+       "Printed": "(((((case { stdout : String, files : (List (_ : String) * String) }) { stdout : String, files : (List (_ : String) * String) }) blank) blank) blank)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 3,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T15:46:46+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.host.observe",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.print_line",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ],
+   [
+    "python:luthier.host.read_file",
+    "sha256:412a72191e3e39ab9805bf4792f81ba817303a15fd6b1ccd1793f103a532aa11"
+   ]
+  ],
+  "regions": []
+ },
+ {
   "law": "HostChangesOnlyDeclared",
   "cone": "sha256:222bd31c9d43d8d36ee62434e4b9704b410827faa4d7e5e00808e7526d7d7800",
   "binding": [
