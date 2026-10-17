@@ -276,18 +276,21 @@ Resolution := ParameterWins & WhereWins & TypeBindsEveryParameter & NothingBinds
 -- type, the draws per evaluated case (a multiple of `n`), the product of finite parameters above
 -- which a covering array chooses the cases (7.R3), the runs that estimate a level, the seeds per
 -- control (7.S19), the draws that certify a generator's distribution (7.S1), and the total
--- probability of special values and of the atom at 0 of a `log` metric. The largest size is the
--- spec's (`TestSpec.size`, test.lth). The defaults are `test`'s.
-positiveBudgets (tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws : Nat) : Bool :=
+-- probability of special values and of the atom at 0 of a `log` metric; and the fuel, the reduction
+-- steps a case or a draw may take before the line is cut (the core's budgets brief, 2026-10-18: a
+-- line carries its own fuel, `luthier certify --fuel` overrides it for a run, and either is
+-- recorded in the entry; fuel only cuts, so it stays out of the identity, D-2026-10-15-g). The
+-- largest size is the spec's (`TestSpec.size`, test.lth). The defaults are `test`'s.
+positiveBudgets (tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws fuel : Nat) : Bool :=
   0 < tries and 0 < redraws and 0 < probes and 0 < drawsPerCase and 0 < coveringAbove
-  and 0 < levelRuns and 0 < seedsPerControl and 0 < distributionDraws
+  and 0 < levelRuns and 0 < seedsPerControl and 0 < distributionDraws and 0 < fuel
 -- [proposed, G9 of summary-BCD.md] the two masses together below one, so that something is left
 -- for the continuous draw (0.9 and 0.9 were admitted)
 budgetMasses (specialMass atomAtZero : Float64) : Bool :=
   0.0 <= specialMass and 0.0 <= atomAtZero and specialMass + atomAtZero < 1.0
-Budgets : U := { tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws : Nat,
+Budgets : U := { tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws fuel : Nat,
                    specialMass atomAtZero : Float64 |
-                   positiveBudgets tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws
+                   positiveBudgets tries redraws probes drawsPerCase coveringAbove levelRuns seedsPerControl distributionDraws fuel
                      and budgetMasses specialMass atomAtZero }
 
 -- ---------------------------------------------------------------- §7 The programs a rule is tested on

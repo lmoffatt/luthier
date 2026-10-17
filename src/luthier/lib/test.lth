@@ -54,10 +54,22 @@ TestSpec = { law : String, mode : Mode, cases : Nat, size : Nat, seed : Seed,
 
 -- `test`: every option a named argument with a default (7.S20). The defaults of the budgets that
 -- today's code holds (the tries of a filter, the redraws, the probes) are those numbers, named
--- here as defaults and not as constants (7.S8, L5.18); the rest are proposed.
+-- here as defaults and not as constants (7.S8, L5.18); the rest are proposed. The fuel per case,
+-- 3,000,000, was certify.py's `FUEL` (the core's bite 1): raised from 1,000,000 against
+-- PinvProjects (arrays_laws.test.lut), which spends about 1.28e6 per case at 10 x 10 (j2a's
+-- record/IA/regions-2026-10-17/report-code.md, finding 9), to the 3,000,000 j2a's wave ran at,
+-- which every library line but three needed no more than; a default that high lets a case that
+-- never ends run for minutes before it is cut. A line that needs more says so in its own budgets
+-- (`withFuel`; belief_laws.test.lut's `fitA` lines), and `luthier certify --fuel` overrides every
+-- line's for a run; the entry records the fuel the line ran with (7.S8).
 defaultBudgets : Budgets := { tries := 2000, redraws := 50, probes := 5, drawsPerCase := 10, coveringAbove := 20000,
-                              levelRuns := 10, seedsPerControl := 5, distributionDraws := 10000,
+                              levelRuns := 10, seedsPerControl := 5, distributionDraws := 10000, fuel := 3000000,
                               specialMass := 0.05, atomAtZero := 0.01 }
+-- the budgets `b` with the fuel `f` in place of its own, the rest unchanged
+withFuel (f : Nat) (b : Budgets) : Budgets :=
+  { tries := b.tries, redraws := b.redraws, probes := b.probes, drawsPerCase := b.drawsPerCase,
+    coveringAbove := b.coveringAbove, levelRuns := b.levelRuns, seedsPerControl := b.seedsPerControl,
+    distributionDraws := b.distributionDraws, fuel := f, specialMass := b.specialMass, atomAtZero := b.atomAtZero }
 test (law : String) (mode : Mode) (cases : Nat <- 100) (size : Nat <- 10)
      (seed : Seed <- 0) (whereBindings : List Binding <- nil) (profile : List Binding <- nil)
      (budgets : Budgets <- defaultBudgets) (control : Bool <- false) : TestSpec :=
