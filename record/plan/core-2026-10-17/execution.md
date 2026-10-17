@@ -9,8 +9,13 @@ every choice marked [proposed] here is the agent's, one commit undoes it.
 
 Status: bite 2 landed 2026-10-17 (c05df18, 0fbde1a: the three properties files, core_instances.lut,
 core_laws.test.lut with 58 laws graded and controlled, core_controls.test.lut with 59 controls
-refuted; report-bite-2.md); bite 1 not started, so the properties import `Object` from
-kernel_laws.lth until it lands. The library at ca90ee8: 494 test lines in tests/tester, 31 stores
+refuted; report-bite-2.md). Bite 1 landed 2026-10-18 (f5acdff..fc27228, report-bite-1.md): the
+hash erases the binders' annotations (ErasureKeepsTheStep, controlled), a census's built members and
+the drawing code are in the identity, certify.FUEL is 3,000,000, core.lut is lib/core/core.lut with
+kernel_models.lut's models, kernel_laws.lth is lib/core/structures/{equality, algebraic,
+universal}.lth, every import repointed (bite 2's included); one re-certification (83 min, every
+line of the 35 non-fixture test programs known after it, no law refuted; 953 entries before, none at
+the new hashes, 536 after); suite 820 passed, 6 skipped, 9 xfailed. The library at ca90ee8: 494 test lines in tests/tester, 31 stores
 with 927 entries over 208 distinct laws; `check -v` reports 38 unclaimed Bool laws in lib/; the
 suite was 799 passed at a1c994b (record/plan/code-follows-principles-2026-10-16.md) and a full
 `pytest tests` run takes well over fifteen minutes, so a bite runs it in the background.
