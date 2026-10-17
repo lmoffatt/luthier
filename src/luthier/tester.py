@@ -88,6 +88,9 @@ seed's stretch started, so it is deterministic given its identity and that recor
 """
 from __future__ import annotations
 
+import functools
+import hashlib
+import inspect
 import random
 import string
 from dataclasses import dataclass, field, fields, is_dataclass, replace
@@ -1921,6 +1924,31 @@ def _value(runner, v):
     return {"Printed": _show(v)}
 
 
+# [the coordinator's addition to the core's bite 1, 2026-10-17; j2a's finding 4] The code that draws
+# a sampled entry's cases: the tester's sampling (the draw over a type, a generator driven, a census
+# walked, the cutoffs' literals) and generators.py. The interpreter's revision is the last tag
+# (D-2026-10-15-i) and no tag comes until after the core, so without this a change to the draws
+# left the identity as it was and `--deep` replays disagreed (RankUnderRotation,
+# PrecisionSymmetric, DensityPeaksAtMean). [proposed] The functions are named here rather than the
+# whole of tester.py hashed, so that a change to how a line is reported stales nothing.
+def _drawing_code():
+    return (Values, _draw_case, _in_its_type, census, generator_of, resolve_binding, is_cutoff, run_spec,
+            parameters)
+
+
+@functools.cache
+def drawing_revision():
+    """The hash of the code that draws a sampled entry's cases (`_drawing_code`'s sources, the
+    alphabet of a drawn string and the range of a seed, generators.py's bytes); it is the
+    fingerprint of a parameter drawn under SampledMode and is added to a generator's."""
+    h = hashlib.sha256()
+    for code in _drawing_code():
+        h.update(inspect.getsource(code).encode("utf-8"))
+    h.update(repr((_LETTERS, SEEDS)).encode("utf-8"))
+    h.update(Path(generators.__file__).read_bytes())
+    return "sha256:" + h.hexdigest()
+
+
 def new_entry(runner, loaded, spec, cones, fuel):
     """The entry of a line before it runs: its identity (the law, the hash of its cone, the binding
     expanded per parameter, the seed, `n`), the budgets, the reach of each parameter, the date, the
@@ -1930,9 +1958,10 @@ def new_entry(runner, loaded, spec, cones, fuel):
     [proposed] A parameter's generator is the census its binding names, printed with the binding's
     coverage, its fingerprint the hash of the census's cone; or the generator its binding names
     (bite 3), printed with the parameters it reads and the size, its fingerprint the hash of its
-    cone (7.S9: a name with its fingerprint), no reach (a draw lists no values); otherwise the mode's functor over the
-    parameter's type, printed with the metric and the size, its fingerprint empty (the drawing code
-    is the interpreter's, in the cone's hash). The reach: a census's members; the support of the
+    cone and the hash of the code that drives it (`drawing_revision`) (7.S9: a name with its
+    fingerprint), no reach (a draw lists no values); otherwise the mode's functor over the
+    parameter's type, printed with the metric and the size, its fingerprint the hash of the drawing
+    code under SampledMode and empty under ExhaustiveMode. The reach: a census's members; the support of the
     type under ExhaustiveMode; under SampledMode, for an `Int` or a `Float64` (refined or not, not
     dependent on an earlier parameter), the interval it is drawn from; no reach otherwise, which
     covers no value a run gives (certification.lth's `coversAll`)."""
@@ -1952,7 +1981,7 @@ def new_entry(runner, loaded, spec, cones, fuel):
             if g is not None:
                 reads = "".join(f" {r}" for r in g.reads)
                 binding.append({"parameter": name, "generator": f"{b.generator}{reads} (generator, size {spec.size})",
-                                "fingerprint": cones.hash(called)})
+                                "fingerprint": f"{cones.hash(called)},{drawing_revision()}"})
                 hosts.update(cones.hosts(called))
                 continue
             # a census that lists models: the hashes of its members, comma-joined, so that a run
@@ -1974,7 +2003,8 @@ def new_entry(runner, loaded, spec, cones, fuel):
             reach.append({"parameter": name, "reach": {"Members": [_value(runner, v) for v in members]}})
             continue
         mode = f"SampledMode {_show(spec.metric)} (size {spec.size})" if spec.sampled else "ExhaustiveMode"
-        binding.append({"parameter": name, "generator": f"{mode} over {_show(ty)}", "fingerprint": ""})
+        binding.append({"parameter": name, "generator": f"{mode} over {_show(ty)}",
+                        "fingerprint": drawing_revision() if spec.sampled else ""})
         if not spec.sampled:
             reach.append({"parameter": name, "reach": "Support"})
             continue

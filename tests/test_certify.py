@@ -494,7 +494,31 @@ def test_the_reach_of_a_census_and_of_a_drawn_number(tmp_path):
         {"parameter": "s", "reach": {"Members": [{"Printed": '"a"'}, {"Printed": '"b"'}]}},
         {"parameter": "x", "reach": {"Interval": [-10.0, 10.0]}}]
     assert [d["generator"] for d in e["binding"][:2]] == ["tol (Listed)", "names (Listed)"]
-    assert e["binding"][0]["fingerprint"].startswith("sha256:") and e["binding"][2]["fingerprint"] == ""
+    # a number drawn under SampledMode: the hash of the code that draws it
+    assert e["binding"][0]["fingerprint"].startswith("sha256:")
+    assert e["binding"][2]["fingerprint"] == tester.drawing_revision()
+
+
+def test_the_drawing_code_is_in_a_sampled_entry_s_identity(tmp_path, monkeypatch, counted):
+    """The coordinator's addition to the core's bite 1 (j2a's finding 4): a change to the code that
+    draws a sampled line's cases makes it a new identity, which runs again, while the interpreter's
+    revision (the last tag) stays; a line that draws nothing keeps its identity."""
+    path = tmp_path / "census.test.lut"
+    path.write_text(CENSUS + EXHAUSTIVE_LINE, encoding="utf-8")
+    first = tester.run_tests(path, store=True)
+    assert [o.known for o in first] == [None, None] and len(counted) == 12  # 10 cases, then b in {true, false}
+    monkeypatch.setattr(tester, "drawing_revision", lambda: "sha256:other draws")
+    del counted[:]
+    again = tester.run_tests(path, store=True)
+    assert again[0].known is None and again[1].known is not None and len(counted) == 10
+    assert again[0].entry["binding"][2]["fingerprint"] == "sha256:other draws"
+    assert certify.identity(again[0].entry) != certify.identity(first[0].entry)
+
+
+EXHAUSTIVE_LINE = '''import "test.lth" ExhaustiveMode
+Small (b : Bool) : Bool := b or not b
+test "Small" ExhaustiveMode
+'''
 
 
 # ---------------------------------------------------------------------- the model's own store
