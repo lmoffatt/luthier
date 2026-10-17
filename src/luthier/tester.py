@@ -1438,14 +1438,17 @@ def _in_its_type(values, param, ty, v):
     """A census value checked against the predicate of its parameter's type, as a generator's is
     (7.S1; report-theory.md section 4, finding 1: a census bound to `r : GradingRegion` ran a label):
     Invalid otherwise, and the law is not run. Checked once per value when the type reads no
-    earlier parameter."""
+    earlier parameter. [proposed] A predicate that reduces to neither `true` nor `false` (stuck on a
+    leaf with no body, `hasStructuralEquality` of `Concrete`, which the checker decides, 4.R8) is not
+    the tester's to decide, and is passed over."""
     key = (param[0], id(v)) if ty == param[1] else None
     checked = values.__dict__.setdefault("checked", {})
     if key is not None and checked.get(key) is v:
         return
     _, predicates = values.form(ty)
-    if predicates and not values.holds(predicates, v):
-        raise Invalid(f"the census gives {_show(v)}, a value outside {_show(ty)} (7.S1)")
+    for name, p in predicates:
+        if values.whnf(kernel.substitute(name, v, p)) == FALSE:
+            raise Invalid(f"the census gives {_show(v)}, a value outside {_show(ty)} (7.S1)")
     if key is not None:
         checked[key] = v
 
