@@ -25,6 +25,11 @@ over lib alone 81, 0, 397, 70, 1737 (1116, 621). The library at d280a18: `check 
 of them bite 2's properties, claimed only by tests/tester/core_instances.lut until the structures
 claim them), the `loose` notice on every top-level function, 48 names defined in more than one file
 (the count of 2026-10-17's survey before bite 1; core_metrics.py counts 81 over lib at ded76d4).
+Bite 4b landed 2026-10-18 (report-bite-4b.md): the tester splits a law whose body is a `&` of
+partially applied laws into its conjuncts, each with its entry, the grade their combination (spec
+7.S22), so bite 6 can write the structures and composites bare; the classifier's two bounds are
+fields of `Budgets` (`regionNumbers`, `regionEntries`). core_metrics unchanged (96, 112, 427, 137,
+1974).
 
 ## 0. The core's end (D-2026-10-18-a)
 
