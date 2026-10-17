@@ -14,7 +14,7 @@ Commits on `numbers`, in order:
   at zero, with the budgets' `specialMass` and `atomAtZero`; 7.S5's census of dimensions
   (`DIMENSIONS` = 0, 1, 2, 3, 5, 10, those not above the size) and the zero and rank-deficient
   families with a share (`degenerate`) in `symmetric`, `symmetricOf`, `gram` (items 1, 2).
-- 02ce948 arrays.py restored (see finding 3); the families live in generators.py.
+- 02ce948 arrays.py restored (see finding 2); the families live in generators.py.
 - 1335113 tester.py: the `Classifier` (items 3, 4, 9): the degenerate cases a theory declares for a
   parameter's type, counted with `casesOf`; the two sides of each cutoff parameter (`Tolerance`,
   `RankFloor`, `Sequential`); the boundary of each other parameter of a subtype; an author's
@@ -95,7 +95,9 @@ and fl).
    and `host_hash` hashes the bytes of the module behind a route, so every numpy entry went stale.
    Restored in 02ce948. generators.py is the same for generators_model: editing it stales that
    model's entries and changes the fingerprint of every generator binding.
-3. (Part of 2.) The families were moved to generators.py for that reason.
+3. RankUnderRotation's sampled line is not run, before and after: `Orthogonal tol k` is drawn by
+   filtering and no value comes in 2000 tries (k = 9 before, k = 3 now). The family `orthogonal`
+   exists in generators.py; the line does not bind it.
 4. `--deep` replays disagree wherever the tester's draws changed, since `interpreter_revision` is
    the last tag and no tag comes until after the core (D-2026-10-17-e): RankUnderRotation,
    PrecisionSymmetric and DensityPeaksAtMean (two not-runs whose reasons name another dimension).
