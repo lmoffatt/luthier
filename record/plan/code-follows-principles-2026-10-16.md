@@ -133,6 +133,11 @@ cases). The core: design 54f6228, bite 2 (properties) landed, bite 1 launched 20
 record/plan/core-2026-10-17/prompt-bite-1.md). His three core questions wait
 (record/plan/core-2026-10-17/decisions.md); bites 3 and 4 wait on them.
 
+D-2026-10-18-a (2026-10-18): one thing at a time. The core goes alone to its measurable end
+(record/plan/core-2026-10-17/execution.md, "The core's end"); everything else in this queue waits,
+unless the core needs it. The budgets bite (fuel per test line), launched just before the decision
+was known, finishes: the core's re-certification needs it.
+
 Priority from 2026-10-17 (D-2026-10-17-i, his words "Primero tenemos que rehacer todo el core"):
 the core first. Its design is launched beside j2a (record/plan/core-2026-10-17/prompt-design.md,
 Fable); its bites run before the rest of the queue below, which joins only where files are

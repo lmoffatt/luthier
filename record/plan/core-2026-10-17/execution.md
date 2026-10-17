@@ -804,6 +804,13 @@ touched grades every law (none `not run`) and reports every law controlled (cert
 the plan's Status line is updated. Commits of two lines, staged by path. Nothing is pushed and no
 tag is cut (D-2026-10-17-e).
 
+The core's end (D-2026-10-18-a, his criteria, measured over the whole library): names defined in
+more than one file 0; list helpers reinvented per type 0; unclaimed laws 0; `check`'s "loose" notice
+only where it is real (today it fires on every top-level function, 1675 times); the suite green; the
+stores re-certified. A script, `scripts/core_metrics.py`, prints the four counts; it is written
+first, and every bite's commit reports them. One thing at a time: the core alone, from start to
+end; other bites wait unless the core needs them.
+
 ### Bite 1. The code fixes and the directory (Opus)
 
 Files: `src/luthier/certify.py` (3e: the cone's hash erases the binder annotations the elaborator
