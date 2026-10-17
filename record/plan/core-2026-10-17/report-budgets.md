@@ -32,7 +32,7 @@ identity; report-bite-1.md's question on fuel). Started at 321e394.
   exit 1. Numbers that remain in tester.py and are not a test's budget: the fuel that reads a test
   line into a spec (`read_spec`, and `prepare`'s and `line_claims`'s default, 1,000,000), which runs
   before any line's budgets are known; the fuel of reading a census member as a number and of
-  printing it in an entry (10,000, `_number_of`, `_value`, `model_homes`) and of reducing test.lth's
+  printing it in an entry (10,000, `_number_of`, `_value`) and of reducing test.lth's
   `grade` (100,000). Two bound what the region classifier reads from a value (`numbers`'s 4,000
   doubles, `_MOST_ENTRIES`'s 400 entries of a matrix written as a function); they are the closest
   to a budget of the test and are the question below.
