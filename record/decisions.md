@@ -3085,3 +3085,24 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       the order of work (record/plan/code-follows-principles-2026-10-16.md); principles (a
             clause on style)
 Status:     current
+
+D-2026-10-18-b  Question 1 of record/plan/core-2026-10-17/decisions.md, decided otherwise than
+                recommended there: the whole core is the prelude, visible in every file without an
+                import (12.S22 and the loader changed), since the base of names will be large;
+                names are per concept, not per type (one `map` of `Functor`, one `size` and `at` of
+                `Indexed`, one `d` of `Metric`), each use resolved by the model the type names (R13
+                extended from operators to every name of a structure), so the base grows by
+                concepts and the core is not re-implemented in each structure; a general collision
+                of names must not occur: a file does not redefine a core name (refused, not only
+                warned), and qualified access (`Functor.map`) disambiguates where needed. What is
+                not core (arrays, probability, tables) is imported by name as today, until analysed:
+                some of it may become core. The great problem is finding the core.
+Author:     Luciano, on the decision assistant's proposal
+Quote:      "sí, tiene que ser así, la alternativa era la versión javaesca de reimplementar el core
+            en cada estructura. Entonces acá el problema grande es encontrar el core ... Y la
+            colisión general de nombres no tiene que ocurrir. 5--> no es core por ahora, quizás lo
+            sea cuando lo analicemos."
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       spec 12.S22, 05 R13; the loader (check.py resolve, run.py); the core's layout
+Status:     current
