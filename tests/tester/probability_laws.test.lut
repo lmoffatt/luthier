@@ -27,7 +27,7 @@
 -- computed the same test (the same distance, source, seed and cutoffs); its control `lump` went
 -- with it to generators_controls.test.lut.
 
-import "test.lth" test ExhaustiveMode SampledMode
+import "test.lth" test ExhaustiveMode SampledMode withFuel defaultBudgets
 import "generators_model.lut" linear unitList
 import "generators.lth" Binding byParameter
 import "laws.lth" Listed Sequential StatisticalLaw NoAlternativeAtZero RatioNonNegative
@@ -112,17 +112,20 @@ test "JacIsJacobian" (SampledMode linear) (cases <- 20) (seed <- 20261014) (wher
 test "ScaledShapes" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
 test "DLogSigmaIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
 -- §3 the likelihoods: session A's profile, distances.lut's full and profile
+-- five lines on distances.lut's native likelihoods carry a fuel of 1e7 in their budgets: each spent
+-- at most 3.5e6 to 6.2e6 per case at 1e8 (measured 2026-10-18 for
+-- record/plan/core-2026-10-17/report-budgets.md; 7.S8)
 test "TangentShapes" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- cutoffs)
 test "ScoreIsGradient" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- cutoffs)
 test "InfoSymmetric" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- cutoffs)
 test "InfoNonNegative" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- cutoffs)
-test "TangentShapes" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs)
+test "TangentShapes" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs) (budgets <- withFuel 10000000 defaultBudgets)
 test "ScoreIsGradient" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs)
-test "InfoSymmetric" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs)
+test "InfoSymmetric" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs) (budgets <- withFuel 10000000 defaultBudgets)
 test "InfoNonNegative" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- cutoffs)
-test "TangentShapes" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
+test "TangentShapes" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs) (budgets <- withFuel 10000000 defaultBudgets)
 test "ScoreIsGradient" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
-test "InfoSymmetric" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
+test "InfoSymmetric" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs) (budgets <- withFuel 10000000 defaultBudgets)
 test "InfoNonNegative" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- cutoffs)
 -- §4 the construction, a census of one, probability_model.lut's (since 2026-10-15 a parameter of
 -- its laws, record/IA/controls-2026-10-15/prompt-weak-laws.md, L9.14), with the cutoffs
@@ -132,4 +135,4 @@ onConstruction : List Binding := [
   { parameter := just "r", type := nothing, generator := "pitResolution", coverage := Listed } ]
 test "GaussianPeaksAtMean" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onFullModel) (profile <- onConstruction)
 test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 20) (seed <- 20261014) (whereBindings <- onModelA) (profile <- onConstruction)
-test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- onConstruction)
+test "ProfiledIsGaussianAtItsSigma" (SampledMode linear) (cases <- 5) (seed <- 20261014) (whereBindings <- onPosModel) (profile <- onConstruction) (budgets <- withFuel 10000000 defaultBudgets)

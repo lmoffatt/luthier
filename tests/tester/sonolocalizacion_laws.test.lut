@@ -14,7 +14,7 @@
 -- added or a column removed. Each cutoff a census of one, the demand's (D-2026-10-14-c): the
 -- tolerance 1e-12 [proposed]. Seed 20261014.
 
-import "test.lth" test ExhaustiveMode SampledMode
+import "test.lth" test ExhaustiveMode SampledMode withFuel defaultBudgets
 import "generators_model.lut" linear
 import "generators.lth" Binding
 import "laws.lth" Listed
@@ -41,8 +41,10 @@ test "LayoutToUndoesFrom" (SampledMode linear) (seed <- 20261014) (whereBindings
 -- distances.lut: the native likelihoods as the implementations
 onFull : List Binding := [ { parameter := just "l", type := nothing, generator := "nativeFull", coverage := Listed } ]
 onProfile : List Binding := [ { parameter := just "l", type := nothing, generator := "nativeProfile", coverage := Listed } ]
-test "FullAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onFull) (profile <- cutoffs)
-test "ProfileAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs)
+-- FullAgrees and ProfileAgrees with a fuel of 1e7: they spent at most 7,754,360 and 8,010,427 per
+-- case (measured 2026-10-18 for record/plan/core-2026-10-17/report-budgets.md; 7.S8)
+test "FullAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onFull) (profile <- cutoffs) (budgets <- withFuel 10000000 defaultBudgets)
+test "ProfileAgrees" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs) (budgets <- withFuel 10000000 defaultBudgets)
 test "ProfileIsFullAtItsSigma" (SampledMode linear) (cases <- 5) (size <- 5) (seed <- 20261014) (whereBindings <- onProfile) (profile <- cutoffs)
 
 -- distance_graph.lut: session A's graph and one broken per invariant, in ValidGraph's order
