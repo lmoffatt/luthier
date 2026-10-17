@@ -1151,6 +1151,13 @@ L9.15  (His words) A statistical law's verdict is ternary: it holds, it fails, o
        and the verdict carries its error rates in the certificate as the price of a sampled grade,
        operated on when the cost types come (G2, L12.6). A law universal over seeds is not a
        statistical law (D-2026-10-15-b). [settled]
+L9.16  Sampling bounds the failure fraction under its distribution and says nothing of its null
+       sets. The cases a law turns on come from three finite sources: the degenerate cases its
+       type's theory declares once, the two sides of each cutoff and the boundary of each premise
+       of the law, and each branch of the code in its cone; the generator gives them mass or they
+       are listed, and the evidence is kept per region, each with its n and its bound, the demand
+       combining the grades, the weakest by default. A label an author adds is informative and
+       enters no grade (D-2026-10-16-i, D-2026-10-16-j). [proposed]
 References: spec 4.R8; D-2026-10-11-d, D-2026-10-11-f, D-2026-10-12-k, D-2026-10-13-d, D-2026-10-13-ad
 Rests on:   O1 (what a sampled level asserts, and its conversion to a cost, D-2026-10-12-r)
 Quote:      (L5) "La idea en realidad es buscar el objeto matematico que mejor lo represente y
@@ -1200,6 +1207,7 @@ History:    (L5) draft 1 (5769005): stated. draft 3 (c085ba4), on D-2026-10-11-d
             en's distinction); delegation as citation moved here from L14.8 as clause 7; clause 5
             reworded with the certifier and the grade list cited from Terms; clause 9 cites L16.7.
             draft 11 (2026-10-12): renumbered from L7 of draft 10 (D-2026-10-12-v).
+            2026-10-17: clause 16 added, proposed (D-2026-10-16-i, -j).
 
 L10 A certificate records what is known of a law, its domain, its bound and its evidence; it is
     frozen, it serves every demand it meets, and it transports along identity.
