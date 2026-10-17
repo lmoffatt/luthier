@@ -3209,3 +3209,22 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       tester.py (a conjunction of laws split into conjuncts), run.py's enumeration of a
             theory's laws, the core's structures and composite properties
 Status:     current
+
+D-2026-10-18-g  Core question 4: three decisions in a generic call (`member x xs`), each with its
+                owner. (1) The kind of equality, or the structure, of the type: the theory's (L3,
+                equality belongs to the object), resolved from the model the type names when the call
+                omits it (Haskell's instance resolution). (2) Another structure, which is another
+                concept (`member x xs (o <- parity)`): the author's, written in the definition by
+                name. (3) How close "equal" is when the equality is graded (the ε of a metric ball):
+                the demand's, a cutoff (L5.17, P11), a parameter the theory leaves open and the
+                demand fills, never fixed by the type's model or by the resolution. The demand fills
+                parameters; it does not swap structures. Over the doubles, whose natural equality is
+                the metric, `member 0.3 xs` asks whether one lies within ε.
+Author:     Luciano ("me suena que una cosa es la teoría y otra la demanda"), on the decision
+            assistant's reading
+Quote:      "sí"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       the elaborator (instance resolution at a call), the typing bite, the core's generic
+            functions, demand.lth (the cutoffs reaching a structure's bound)
+Status:     current
