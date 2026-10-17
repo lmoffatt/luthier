@@ -1,5 +1,115 @@
 [
  {
+  "law": "NoCutoffAcceptsAFailure",
+  "cone": "sha256:461f775b9b6199e54fc989738b48b3d25846170140c374752f20e106aae65e85",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "wrongModels (Listed)",
+    "fingerprint": "sha256:d7f94747e4bb0efe0794e307f56cb880b12f1aea317d5c56d3d1514a789e896a"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:cbdbc022cb36df8389726fcc8a4e5f83a7fd7821b76e0e2cbf97f7a723102963"
+   },
+   {
+    "parameter": "e",
+    "generator": "ofTheLaw (Listed)",
+    "fingerprint": "sha256:6731b654c56a693db94b65c1260321ae4c2b69716cd54da376afcbc98f4a734e"
+   },
+   {
+    "parameter": "g",
+    "generator": "cutoffs (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "acceptsAFailure"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", given := nil, accepts := Cases }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((entry \"L\") 1) (just Cases)) Passed)"
+      },
+      {
+       "Printed": "((((entry \"L\") 1) nothing) (Failed \"x = 1\"))"
+      },
+      {
+       "Printed": "((((entry \"L\") 1) nothing) (NotRunFor \"no generator\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Proved"
+      },
+      {
+       "Printed": "Cases"
+      },
+      {
+       "Printed": "AssumedGrade"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = acceptsAFailure, d = { law := \"L\", cone := \"sha256:cccc\", given := nil, accepts := Cases }, e = ((((entry \"L\") 1) nothing) (Failed \"x = 1\")), g = AssumedGrade"
+  },
+  "date": "2026-10-17T04:01:01+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control"
+ },
+ {
   "law": "ADisagreementIsRefused",
   "cone": "sha256:4ebc78e126ccda9c1277b3bd93a999970ea7c62bd474ca7fb9634b18ee5cf5bc",
   "binding": [
