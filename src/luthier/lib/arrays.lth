@@ -160,6 +160,19 @@ approxMatSlackOf (slack : Float64) (tol : Tolerance) (scale a b : Mat Float64) :
   if a.m == b.m and a.n == b.n and scale.m == a.m and scale.n == a.n then
     forallPairs2 a.m a.n (fn i j { abs (a.f i j - b.f i j) <= slack + tol * scale.f i j })
   else false
+-- the same with the scale of both entries compared and a normwise term [proposed, 2026-10-17, on
+-- record/IA/regions-2026-10-17/report-code.md finding 1, the coordinator's answer]: the entries
+-- differ by at most the tolerance times the scale of the first (`sa`), the scale of the second
+-- (`sb`) and `norm`. Rounding in a product of matrices is bounded componentwise by the product of
+-- the magnitudes and normwise by the product of the norms (Higham, Accuracy and Stability of
+-- Numerical Algorithms, 2nd ed., 2002, section 3.5: |C - fl(AB)| <= gamma_n |A| |B|, and
+-- ||C - fl(AB)|| <= gamma_n ||A|| ||B||); an entry that is an exact zero on one side (a structural
+-- zero, a zero row of s) has a componentwise scale of zero while its computed twin carries the
+-- rounding of the whole product, which only the normwise term bounds.
+approxMatBoth (tol : Tolerance) (sa sb : Mat Float64) (norm : Float64) (a b : Mat Float64) : Bool :=
+  if a.m == b.m and a.n == b.n and sa.m == a.m and sa.n == a.n and sb.m == a.m and sb.n == a.n then
+    forallPairs2 a.m a.n (fn i j { abs (a.f i j - b.f i j) <= tol * (sa.f i j + sb.f i j + norm) })
+  else false
 
 -- ---------------------------------------------------------------- §4 The leaves (3.S28, 12.S9)
 
@@ -305,10 +318,20 @@ PsdAt (m : Arrays) (fl : RankFloor) : U := { s : Symmetric | m.retainedRank fl (
 PinvProjects (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   { p := m.pinvSym fl s
     approxMatOf tol (matMulDef (absMat p) (matMulDef (absMat s) (absMat p))) (m.matMul p (m.matMul s p)) p }
+-- [proposed, 2026-10-17; 3j j2a finding 1, the coordinator's answer] PinvSymmetric and PinvScales
+-- compare with the scale of both entries compared and a normwise term (`approxMatBoth`, Higham 2002
+-- section 3.5): with the scale of one entry only they were refuted on the rank-deficient family,
+-- where an exact zero (s p)[3,5] faced a rounded -1.75e-16 at [5,3] (a 10 x 10 matrix of rank 9),
+-- and pinv(c s)[2,1] = -5.06e-19 faced p[2,1] / c = 0. The error model was wrong, numpy within
+-- rounding; the evidence is in record/archive/stores-2026-10-17/. The normwise terms: the norm of p
+-- for p against its transpose, the product of the norms for s p, and the norm of p over c, times
+-- the condition read as before, for P at a scale.
 PinvSymmetric (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) : Bool :=
   { p := m.pinvSym fl s
-    approxMatOf tol (absMat p) p (m.transpose p)
-      and approxMatOf tol (matMulDef (absMat s) (absMat p)) (m.matMul s p) (m.transpose (m.matMul s p)) }
+    sp := m.matMul s p
+    scale := matMulDef (absMat s) (absMat p)
+    approxMatBoth tol (absMat p) (transposeDef (absMat p)) (frobDef p) p (m.transpose p)
+      and approxMatBoth tol scale (transposeDef scale) (frobDef s * frobDef p) sp (m.transpose sp) }
 PinvRestricts (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : PsdAt m fl) : Bool :=
   { p := m.pinvSym fl s
     -- [proposed, 2026-10-15; 11.S14] the rounding of s p s is of the magnitudes (cond times eps, as
@@ -322,13 +345,15 @@ PinvTraceIsRank (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s : Symmetric) 
 -- absolute floor above c fl, while a floor relative to the largest retains what it retained in s;
 -- P there is P over that scale, compared as at c. A zero floor or a zero matrix has nothing to
 -- scale to.
+-- P at the scale k against P over k, each entry scaled by both sides, the norm of P over k the
+-- normwise term, all times the condition read from the retained spectrum (`approxMatBoth`)
+pinvAtScale (m : Arrays) (tol : Tolerance) (fl : RankFloor) (s p : Mat Float64) (k : Float64) : Bool :=
+  { q := m.pinvSym fl (mscaleDef k s)
+    approxMatBoth (frobDef s * frobDef p * tol) (absMat q) (mscaleDef (1.0 / k) (absMat p)) (frobDef p / k) q
+      (mscaleDef (1.0 / k) p) }
 PinvScales (m : Arrays) (tol : Tolerance) (fl : RankFloor) (c : Positive) (s : Symmetric) : Bool :=
   { p := m.pinvSym fl s
-    approxMatOf (frobDef s * frobDef p * tol) (mscaleDef (1.0 / c) (absMat p) )
-      (m.pinvSym fl (mscaleDef c s)) (mscaleDef (1.0 / c) p)
-    and (fl == 0.0 or frobDef s == 0.0
-         or approxMatOf (frobDef s * frobDef p * tol) (mscaleDef (frobDef s / (c * fl)) (absMat p))
-              (m.pinvSym fl (mscaleDef (c * fl / frobDef s) s)) (mscaleDef (frobDef s / (c * fl)) p)) }
+    pinvAtScale m tol fl s p c and (fl == 0.0 or frobDef s == 0.0 or pinvAtScale m tol fl s p (c * fl / frobDef s)) }
 
 Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & MaddPointwise & MsubPointwise & MscalePointwise
   & DotSymmetric & DotOnBasis & DotAgrees & NormOfBasis & NormOfDot & NormScales
