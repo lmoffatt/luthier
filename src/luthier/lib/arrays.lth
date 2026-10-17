@@ -38,6 +38,9 @@
 --      11.S14, 11.S18); the retained rank with its floor (P11); the trace and the
 --      pseudo-inverse of a symmetric matrix (added 2026-10-14 for the fit's theories,
 --      record/IA/slice-theories-2-2026-10-14/prompt.md item 3).                           done
+--   §5 The degenerate cases of `Mat Float64` and of `Symmetric`, declared once for every law
+--      over them (generators.lth §9; D-2026-10-16-j; added 2026-10-17 on
+--      record/IA/regions-2026-10-17/prompt-theory.md).                                    done
 
 import "numbers.lth" Tolerance within withinOf abs Positive Elementary
 import "numbers_model.lut" elementary : Elementary
@@ -333,3 +336,40 @@ Arrays := AddPointwise & SubPointwise & ScalePointwise & TransposePointwise & Ma
   & RankOfDiagonal & RankOfZeroAndIdentity & RankBounded & RankScales & RankUnderRotation
   & TraceOfIdentity & TraceAdditive & TraceCyclic & TraceAgrees
   & PinvOfDiagonal & PinvOfZero & PinvOfIdentity & PinvProjects & PinvSymmetric & PinvRestricts & PinvTraceIsRank & PinvScales
+
+-- ---------------------------------------------------------------- §5 The degenerate cases
+
+import "generators.lth" DegenerateCase Degeneracies
+
+-- [D-2026-10-16-j; written 2026-10-17 by Claude Fable 5.1, an agent of the coordinating session,
+-- on record/IA/regions-2026-10-17/prompt-theory.md] The cases a law over matrices turns on,
+-- declared once and shared by every law of §4 (generators.lth §9: a named predicate with a
+-- witness; the tester classifies each case it draws or lists by the predicates and keeps the
+-- evidence per case, certification.lth §2). For `Mat Float64`: the zero matrix, the empty matrix
+-- 0 x 0, the 1 x 1 matrix, and rank deficiency. [proposed] The rank deficiency a general matrix's
+-- entries decide exactly, with no spectrum and no floor: a zero row, or two equal rows (the
+-- decision names the case; the predicate names the part of it the type can see). For `Symmetric`
+-- the same three and rank deficiency at a floor, through the leaf that decides it
+-- (`retainedRank`, §4; P11: the floor is a parameter), so the declaration takes the model and the
+-- floor as the laws of §4 do. A row of zeros is a degenerate case and a case of rank deficiency
+-- both: a value is in every case whose predicate it meets.
+zeroRow (a : Mat Float64) (i : Fin a.m) : Bool := forallBelow a.n (fn j { a.f i j == 0.0 })
+sameRows (a : Mat Float64) (i k : Fin a.m) : Bool := forallBelow a.n (fn j { a.f i j == a.f k j })
+isZeroMat (a : Mat Float64) : Bool := forallBelow a.m (fn i { zeroRow a i })
+isEmptyMat (a : Mat Float64) : Bool := a.m == 0 and a.n == 0
+isOneByOne (a : Mat Float64) : Bool := a.m == 1 and a.n == 1
+rowsRepeatOrVanish (a : Mat Float64) : Bool :=
+  existsBelow a.m (fn i { zeroRow a i or existsBelow a.m (fn k { not (i == k) and sameRows a i k }) })
+oneByOne : Mat Float64 := mat Float64 1 1 (fn i j { 1.0 })
+-- diag(1, 0): symmetric, rank one of two
+rankOneOfTwo : Mat Float64 := mat Float64 2 2 (fn i j { if i == j and i == 0 then 1.0 else 0.0 })
+matDegeneracies : Degeneracies (Mat Float64) := { cases := [
+  { name := "zero", holds := fn a { isZeroMat a }, witness := zeroMat 2 2 },
+  { name := "0 x 0", holds := fn a { isEmptyMat a }, witness := zeroMat 0 0 },
+  { name := "1 x 1", holds := fn a { isOneByOne a }, witness := oneByOne },
+  { name := "rank deficient", holds := fn a { rowsRepeatOrVanish a }, witness := rankOneOfTwo } ] }
+symmetricDegeneracies (m : Arrays) (fl : RankFloor) : Degeneracies Symmetric := { cases := [
+  { name := "zero", holds := fn s { isZeroMat s }, witness := zeroMat 2 2 },
+  { name := "0 x 0", holds := fn s { isEmptyMat s }, witness := zeroMat 0 0 },
+  { name := "1 x 1", holds := fn s { isOneByOne s }, witness := oneByOne },
+  { name := "rank deficient", holds := fn s { m.retainedRank fl s < s.m }, witness := rankOneOfTwo } ] }
