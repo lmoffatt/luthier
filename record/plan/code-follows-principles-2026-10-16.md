@@ -143,6 +143,12 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   `ForallOnPoints` following (item 17); per-law cutoffs a typed field of `Demand` (item 20); the most
   specific binding wins (G6); a law quantified over `U` a static error, `Settling`'s laws on concrete
   instances (L5); 3.R1 and 3.R2 reworded (D-2026-10-17-a).
+- D-2026-10-17-h: the checker refuses a refutable pattern on `<-` (item 27); the agents' [proposed]
+  readings ratified in bulk for their meaning, their markers removed (item 28), except: a theory file
+  importing a model by name (L2.6); the fit's items 5 and 9 (D-2026-10-16-b); demand/plan items 5,
+  7, 9, 10; all of plot.lth (waits for G1 to G5); 4.S13's borrowed [decided D-2026-10-12-z] becomes
+  [proposed] (P1). A Sonnet bite after j2a lands (it touches theory comments and spec statuses), from
+  item 28's list in record/plan/decisions-pending-2026-10-15.md.
 - 3e (hash erases binder annotations; census fingerprint fix; one re-certification wave).
 - No version tag until after the core's step (D-2026-10-17-e): the names change at large with it.
 - The core (D-2026-10-17-b, -c, -d), before more theories, then the tag (D-2026-10-17-e); 3e's
