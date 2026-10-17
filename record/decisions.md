@@ -2966,3 +2966,34 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line
             export)
 Kind:       tags and pushes; the plan's milestones
 Status:     current
+
+D-2026-10-17-f  A metric space enters the core's structures.lth, beside `Object`, with its precise
+                definition: a pair (X, d), d : X × X → ℝ, declared over the type's equality
+                (`Metric (A : U) (o : Object A)`), with (M1) d(x, y) = 0 if and only if x = y,
+                (M2) d(x, y) = d(y, x) (`d == flip d`), (M3) d(x, z) ≤ d(x, y) + d(y, z);
+                non-negativity a theorem, not an axiom. The standard variants by their exact names:
+                pseudometric (M1 one way), quasimetric (no M2), ultrametric (M3 with max),
+                extended metric (values in [0, ∞]); a divergence such as Kullback-Leibler is none
+                of them and serves as a control (L9.14), as do relative error and squared Euclidean
+                distance. A floating-point realization is not a model of `Metric`: it is a separate
+                claim, that the computed distance is within a bound of an exact metric, the bound
+                from error analysis; only distances computed without rounding (ulps, |x − y| on
+                integers, the discrete metric, edit and Hamming distances) are exact models. Every
+                property that is an equality has a version within a bound over a metric, the bound a
+                function of the arguments from the theory, never a constant (P11): `Doubles` claims
+                `Commutative` exactly and associativity within γ₂·(|x| + |y| + |z|), γ₂ = 2u/(1 − 2u)
+                (Higham, Accuracy and Stability of Numerical Algorithms, 2002), provable by citation
+                (L9.7) and testable, instead of not claiming it (refines D-2026-10-17-b). The
+                `approx…` families become membership in a ball of a named metric. Already in the
+                principles: O2 (a metric space where equality is a cost), L4.6, L12.6, L12.7 (the
+                triangle inequality is transport along an identity, L10.7).
+Author:     Luciano ("¿los espacios métricos no serían una buena abstracción también, con
+            desigualdad triangular?"; "los double cumplen una pseudo asociatividad, con cotas";
+            "los espacios métricos tienen una definición bien precisa y no la estás poniendo,
+            ¿dónde está la seriedad matemática?"), on the decision assistant's proposal, corrected
+Quote:      "Ok, todo esto tiene que entrar en el core, ¿no?"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line unknown until the
+            export)
+Kind:       core (structures.lth), numbers.lth, arrays.lth (the `approx…` family), probability.lth
+            (Kolmogorov), belief.lth
+Status:     current
