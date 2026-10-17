@@ -497,6 +497,8 @@ points to a systematic error in that block, not noise. Both fits predate D-2026-
 Regenerate the corrected graph first, then decide; if A2 goes, record why and keep the with-A2 fit
 (P3, keep the original evidence).
 
+*Answered in chat (2026-10-17): both, and compare, D-2026-10-17-i. Items 35 to 37 wait for the core.*
+
 **35. How to make the fit faster?** About 95 s per iteration, mostly the native 22 x 30 Jacobian
 crossing entry by entry through the Runner, and the score and information asked twice at the same
 point. Options: (a) speed the Runner (kernel.step rebuilds its environment per call; the native

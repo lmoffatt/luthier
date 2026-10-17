@@ -3041,3 +3041,18 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line
             export)
 Kind:       spec 2.S17, 4.S13 and the flips of item 28; the theories' `[proposed]` markers
 Status:     current
+
+D-2026-10-17-i  Item 34: both, and compare: session A's fit is run with and without the A2 block,
+                both kept (P3), on the corrected graph (`python src/prepare_experiment_zero.py
+                2026-09-07/distancias.csv <out> --array 3.5m`, his to run), and the two compared
+                (sigma, tail probability, standardized residuals; today 0.235 m with A2 against
+                0.022 m without, three of 22 measurements). Items 35 to 37 (the fit's speed, S4 and
+                S5 of the slice's plan, Laplace by information or curvature) wait: the core is
+                rebuilt first (D-2026-10-17-b to -g).
+Author:     Luciano
+Quote:      "34 --> ambos y comparar; el resto en otro momento. Primero tenemos que rehacer todo
+            el core"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-17; the line unknown until the
+            export)
+Kind:       the sonolocalización slice (session A's graph and fits); the order of work
+Status:     current
