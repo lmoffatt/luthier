@@ -1,0 +1,154 @@
+-- tests/tester/regions_controls.test.lut: the controls of the laws tests/tester/regions_laws.test.lut
+-- certifies (7.S19 as D-2026-10-15-a generalized it, L9.14). Each line is the law's line written
+-- `(control <- true)`, with the model replaced by one broken on purpose, and is expected to be
+-- refuted. Written 2026-10-17 by Claude Fable 5.1, an agent of the coordinating session, on
+-- record/IA/regions-2026-10-17/prompt-theory.md. The broken models: a declaration whose witness is
+-- not in its case, and one that names a case twice; a regioning that grades a label as a region,
+-- one that reads no region at all, one that drops the failures before grading, one that grades
+-- nothing without regions, one that reads only the first binding, and three combinations (the
+-- strongest, the first argument, proved whatever the arguments); a derivation that gives one side
+-- per cutoff, one that gives no boundary, and one that lists an author's label among the law's
+-- regions. The entries, regions and censuses are regions_laws.test.lut's.
+
+import "test.lth" test ExhaustiveMode Grade Cases Sampled Proved defaultBudgets
+import "generators.lth" Binding Degeneracies isEmptyList isOneElement EachWitnessIsItsCase CaseNamesAreDistinct
+import "laws.lth" Listed Cited
+import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
+  FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
+  AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings CombineCommutes
+  NothingIsTheUnit CombineNeverRaises EachCutoffGivesTwoSides EachPremiseGivesItsBoundary OnlyTheLawsRegions
+  regionGrade overRegions overBindings bindingsOf standsOnNothing regionedGrade orWeakest orStrongest above
+  cutoffRegions premiseRegions appendRegions lawRegions
+import "certification_model.lut" certifying
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+-- broken declarations of the cases of a list: the witness of "empty" has an element; "empty" twice
+wrongWitness : Degeneracies (List Int) := { cases := [
+  { name := "empty", holds := fn xs { isEmptyList Int xs }, witness := [1] } ] }
+twiceNamed : Degeneracies (List Int) := { cases := [
+  { name := "empty", holds := fn xs { isEmptyList Int xs }, witness := nil },
+  { name := "empty", holds := fn xs { isOneElement Int xs }, witness := [1] } ] }
+listTypes : List U := [List Int]
+wrongWitnesses : List (Degeneracies (List Int)) := [wrongWitness]
+twiceNameds : List (Degeneracies (List Int)) := [twiceNamed]
+
+test "EachWitnessIsItsCase" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "T" "listTypes",
+  bind "d" "wrongWitnesses"]) (control <- true)
+test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "T" "listTypes",
+  bind "d" "twiceNameds"]) (control <- true)
+
+-- the entries, certificates, regions and evidence of regions_laws.test.lut
+bB : List Drawing := [{ parameter := "x", generator := "g", fingerprint := "f" }]
+entry (b : List Drawing) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := b, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
+passA : Entry := entry nil 1 (just Cases) Passed
+passB : Entry := entry bB 2 (just Sampled) Passed
+provedA : Entry := entry nil 3 (just Proved) Passed
+failA : Entry := entry nil 4 nothing (Failed "x = 1")
+cert (es : List Entry) : Certificate := { law := "L", cone := "sha256:cccc", entries := es }
+certificates : List Certificate := [cert nil, cert [passA], cert [passB, passA], cert [failA, passA], cert [provedA, passB]]
+passes : List Entry := [passA, passB, provedA]
+zero : Region := { source := FromType, name := "zero" }
+tolAbove : Region := { source := FromLaw, name := "tol above" }
+branch : Region := { source := FromCode, name := "if 1 then" }
+kappa : Region := { source := Label, name := "kappa above 1e8" }
+regionLists : List (List Region) := [nil, [zero], [kappa, branch]]
+-- the grading regions, a census of `GradingRegion`: the label is not one (the census is the
+-- author's obligation, 7.R4; the tester takes it as values of the type and filters nothing)
+regions : List Region := [zero, tolAbove, branch]
+evidences : List (List BindingEvidence) := [nil,
+  [{ binding := nil, regions := [{ region := zero, n := 3 }] }],
+  [{ binding := nil, regions := [{ region := zero, n := 0 }, { region := tolAbove, n := 2 }] },
+   { binding := bB, regions := [{ region := zero, n := 1 }, { region := kappa, n := 5 }] }]]
+labels : List String := ["kappa above 1e8"]
+counts : List Nat := [0, 4]
+names : List String := ["zero", "fl"]
+grades : List (Maybe Grade) := [nothing, just Sampled, just Cases, just Proved]
+models : List Certifying := [certifying]
+
+-- broken regionings
+-- a label graded as a region: the fold of `overRegions` without passing labels over
+overAll (c : Certificate) (b : List Drawing) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  match rs { nil -> certifying.grade { law := c.law, cone := c.cone, entries := underOnly b c.entries } ;
+    cons r rest -> orWeakest (regionGrade certifying c b r ev) (overAll c b rest ev) }
+underOnly (b : List Drawing) (es : List Entry) : List Entry :=
+  match es { nil -> nil ; cons e rest -> if e.binding == b then cons e (underOnly b rest) else underOnly b rest }
+allBindings (c : Certificate) (bs : List (List Drawing)) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  match bs { nil -> nothing ; cons b rest -> orWeakest (overAll c b rs ev) (allBindings c rest rs ev) }
+labelGraded (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  if standsOnNothing certifying c then nothing else allBindings c (bindingsOf c) rs ev
+labelsCount : Regioning certifying := { combine := orWeakest, graded := labelGraded }
+-- no region read: the certificate's grade whatever the regions
+ignoringEmpty : Regioning certifying := { combine := orWeakest, graded := fn c rs ev { certifying.grade c } }
+-- the failures dropped before grading
+keepPasses (es : List Entry) : List Entry :=
+  match es { nil -> nil ; cons e rest -> if e.outcome == Passed then cons e (keepPasses rest) else keepPasses rest }
+passesOnly (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  regionedGrade certifying orWeakest { law := c.law, cone := c.cone, entries := keepPasses c.entries } rs ev
+blindToFailure : Regioning certifying := { combine := orWeakest, graded := passesOnly }
+-- nothing without regions
+nothingAlone (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  match rs { nil -> nothing ; cons r rest -> regionedGrade certifying orWeakest c rs ev }
+gradingNothingAlone : Regioning certifying := { combine := orWeakest, graded := nothingAlone }
+-- only the first binding read
+firstBinding (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  if standsOnNothing certifying c then nothing
+  else match bindingsOf c { nil -> nothing ; cons b rest -> overRegions certifying orWeakest c b rs ev }
+firstBindingOnly : Regioning certifying := { combine := orWeakest, graded := firstBinding }
+-- three combinations: the strongest (the grade read stays the weakest's), the first argument, proved
+strongestCombine : Regioning certifying := { combine := orStrongest, graded := fn c rs ev { regionedGrade certifying orWeakest c rs ev } }
+firstCombine : Regioning certifying := { combine := fn g h { g }, graded := fn c rs ev { regionedGrade certifying orWeakest c rs ev } }
+provedCombine : Regioning certifying := { combine := fn g h { just Proved }, graded := fn c rs ev { regionedGrade certifying orWeakest c rs ev } }
+labelsCounts : List (Regioning certifying) := [labelsCount]
+ignoringEmpties : List (Regioning certifying) := [ignoringEmpty]
+blindToFailures : List (Regioning certifying) := [blindToFailure]
+gradingNothingAlones : List (Regioning certifying) := [gradingNothingAlone]
+firstBindingOnlys : List (Regioning certifying) := [firstBindingOnly]
+strongestCombines : List (Regioning certifying) := [strongestCombine]
+firstCombines : List (Regioning certifying) := [firstCombine]
+provedCombines : List (Regioning certifying) := [provedCombine]
+
+onRegioning (q : String) : List Binding := [bind "k" "models", bind "q" q, bind "c" "certificates", bind "rs" "regionLists",
+  bind "ev" "evidences"]
+onPass (q : String) : List Binding := [bind "k" "models", bind "q" q, bind "c" "certificates", bind "rs" "regionLists",
+  bind "ev" "evidences", bind "p" "passes"]
+onRegion (q : String) : List Binding := [bind "k" "models", bind "q" q, bind "c" "certificates", bind "r" "regions",
+  bind "rs" "regionLists", bind "ev" "evidences", bind "p" "passes"]
+
+test "NoRegionsLeaveTheGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegioning "gradingNothingAlones") (control <- true)
+test "RefutedInEveryRegion" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegioning "blindToFailures") (control <- true)
+test "ALabelEntersNoGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "labelsCounts",
+  bind "c" "certificates", bind "rs" "regionLists", bind "ev" "evidences", bind "l" "labels", bind "n" "counts",
+  bind "p" "passes"]) (control <- true)
+test "AnEmptyRegionLeavesBelowCases" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegion "ignoringEmpties") (control <- true)
+test "TheThreeSourcesGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "ignoringEmpties",
+  bind "c" "certificates", bind "nm" "names", bind "rs" "regionLists", bind "ev" "evidences", bind "p" "passes"]) (control <- true)
+test "CombinesOverRegions" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegion "strongestCombines") (control <- true)
+test "CombinesAcrossBindings" ExhaustiveMode (seed <- 20261017) (whereBindings <- onPass "firstBindingOnlys") (control <- true)
+test "CombineCommutes" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "firstCombines",
+  bind "g" "grades", bind "h" "grades"]) (control <- true)
+test "NothingIsTheUnit" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "firstCombines",
+  bind "g" "grades"]) (control <- true)
+test "CombineNeverRaises" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "provedCombines",
+  bind "g" "grades", bind "h" "grades"]) (control <- true)
+
+-- broken derivations
+aboveOnly (cs : List String) : List Region := match cs { nil -> nil ; cons c rest -> cons (above c) (aboveOnly rest) }
+oneSided : Deriving := { ofLaw := fn cs ps { appendRegions (aboveOnly cs) (premiseRegions ps) } }
+noBoundary : Deriving := { ofLaw := fn cs ps { cutoffRegions cs } }
+labelling : Deriving := { ofLaw := fn cs ps { cons kappa (lawRegions cs ps) } }
+oneSideds : List Deriving := [oneSided]
+noBoundaries : List Deriving := [noBoundary]
+labellings : List Deriving := [labelling]
+cutoffLists : List (List String) := [["tol", "fl"], ["tol"], nil]
+premiseLists : List (List String) := [["s"], nil]
+parameterNames : List String := ["tol", "fl", "s", "x"]
+
+test "EachCutoffGivesTwoSides" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "d" "oneSideds",
+  bind "cs" "cutoffLists", bind "ps" "premiseLists", bind "c" "parameterNames"]) (control <- true)
+test "EachPremiseGivesItsBoundary" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "d" "noBoundaries",
+  bind "cs" "cutoffLists", bind "ps" "premiseLists", bind "p" "parameterNames"]) (control <- true)
+test "OnlyTheLawsRegions" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "d" "labellings",
+  bind "cs" "cutoffLists", bind "ps" "premiseLists"]) (control <- true)

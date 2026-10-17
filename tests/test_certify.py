@@ -1069,3 +1069,22 @@ def test_the_union_holds_on_the_reference_and_its_controls_refute_the_broken_one
                                                            ("AReplayIsNotANewStretch", "Refuted")]
     twice, = (o for o in controls if o.spec.law == "AReplayIsNotANewStretch")
     assert "p = counting" in tester.line(twice)
+
+
+def test_the_regions_hold_on_the_references_and_their_controls_refute_the_broken_ones():
+    # record/IA/regions-2026-10-17/prompt-theory.md (D-2026-10-16-i, D-2026-10-16-j): generators.lth's
+    # `Degeneracies` on the declared cases of List, Mat and Symmetric; certification.lth's `Regioning`
+    # (the weakest, 5.S8's default) and `Deriving` on certification_model.lut; every control refuted
+    laws = tester.run_tests(ROOT / "tests" / "tester" / "regions_laws.test.lut")
+    assert [o.spec.law for o in laws] == (
+        ["EachWitnessIsItsCase"] * 3 + ["CaseNamesAreDistinct"] * 3
+        + ["NoRegionsLeaveTheGrade", "RefutedInEveryRegion", "ALabelEntersNoGrade", "AnEmptyRegionLeavesBelowCases",
+           "TheThreeSourcesGrade", "CombinesOverRegions", "CombinesAcrossBindings", "CombineCommutes",
+           "NothingIsTheUnit", "CombineNeverRaises", "EachCutoffGivesTwoSides", "EachPremiseGivesItsBoundary",
+           "OnlyTheLawsRegions"])
+    assert all(o.verdict in ("Confirmed", "Supported") for o in laws), [tester.line(o) for o in laws]
+    controls = tester.run_tests(ROOT / "tests" / "tester" / "regions_controls.test.lut")
+    assert [o.spec.law for o in controls] == ["EachWitnessIsItsCase", "CaseNamesAreDistinct"] + [o.spec.law for o in laws[6:]]
+    assert all(o.verdict == "Refuted" for o in controls), [tester.line(o) for o in controls]
+    empty, = (o for o in controls if o.spec.law == "AnEmptyRegionLeavesBelowCases")
+    assert "q = ignoringEmpty" in tester.line(empty)

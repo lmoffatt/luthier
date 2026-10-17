@@ -1,0 +1,116 @@
+-- tests/tester/regions_laws.test.lut: the laws of the regions (D-2026-10-16-i, D-2026-10-16-j) as
+-- listed cases: generators.lth §9's `Degeneracies` on the declared cases of `List Int`,
+-- `Mat Float64` and `Symmetric` at a floor (arrays.lth §5, through numpy's leaves);
+-- certification.lth §5's `Regioning` on certification_model.lut's `regioning` (the weakest, 5.S8's
+-- default) and `Deriving` on its `deriving`. Written 2026-10-17 by Claude Fable 5.1, an agent of
+-- the coordinating session, on record/IA/regions-2026-10-17/prompt-theory.md. The entries are of
+-- one law at one hash under two bindings: passes graded cases and proved under no binding, one
+-- graded sampled under a binding of `x`, a failure and a not-run; the certificates: empty, one
+-- pass, two bindings, a failure in front of a pass, proved beside sampled. The regions: a type's
+-- case, a law's side, a branch of the code and an author's label; the evidence lists: none, the
+-- case with cases under the first binding, the case empty under it and reached under the second,
+-- and the label with cases. The law's parameters: `PinvProjects`'s and `PinvRestricts`'s cutoffs
+-- `tol` and `fl` (arrays.lth §4) and the premise `s` of `PinvRestricts` (`s : PsdAt m fl`),
+-- `DotAgrees`'s one cutoff, and a law with none. Seed 20261017 (the censuses are listed; the seed
+-- only names the run).
+
+import "test.lth" test ExhaustiveMode Grade Cases Sampled Proved defaultBudgets
+import "generators.lth" Binding Degeneracies EachWitnessIsItsCase CaseNamesAreDistinct listDegeneracies
+import "laws.lth" Listed Cited
+import "arrays.lth" Mat Symmetric RankFloor matDegeneracies symmetricDegeneracies
+import "arrays_model.lut" numpy
+import "certification.lth" Certifying Entry Certificate Outcome Passed Failed NotRunFor Drawing Region FromType FromLaw
+  FromCode Label BindingEvidence Regioning Deriving NoRegionsLeaveTheGrade RefutedInEveryRegion ALabelEntersNoGrade
+  AnEmptyRegionLeavesBelowCases TheThreeSourcesGrade CombinesOverRegions CombinesAcrossBindings CombineCommutes
+  NothingIsTheUnit CombineNeverRaises EachCutoffGivesTwoSides EachPremiseGivesItsBoundary OnlyTheLawsRegions
+import "certification_model.lut" certifying regioning deriving
+
+bind (p g : String) : Binding := { parameter := just p, type := nothing, generator := g, coverage := Listed }
+
+-- generators.lth §9: the declared cases of three types
+floor : RankFloor := 1.0e-12
+listTypes : List U := [List Int]
+listDegs : List (Degeneracies (List Int)) := [listDegeneracies Int 7]
+matTypes : List U := [Mat Float64]
+matDegs : List (Degeneracies (Mat Float64)) := [matDegeneracies]
+symTypes : List U := [Symmetric]
+symDegs : List (Degeneracies Symmetric) := [symmetricDegeneracies numpy floor]
+onList : List Binding := [bind "T" "listTypes", bind "d" "listDegs"]
+onMat : List Binding := [bind "T" "matTypes", bind "d" "matDegs"]
+onSym : List Binding := [bind "T" "symTypes", bind "d" "symDegs"]
+
+test "EachWitnessIsItsCase" ExhaustiveMode (seed <- 20261017) (whereBindings <- onList)
+test "EachWitnessIsItsCase" ExhaustiveMode (seed <- 20261017) (whereBindings <- onMat)
+test "EachWitnessIsItsCase" ExhaustiveMode (seed <- 20261017) (whereBindings <- onSym)
+test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- onList)
+test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- onMat)
+test "CaseNamesAreDistinct" ExhaustiveMode (seed <- 20261017) (whereBindings <- onSym)
+
+-- certification.lth §5, `Regioning`: the entries, certificates, regions and evidence
+bB : List Drawing := [{ parameter := "x", generator := "g", fingerprint := "f" }]
+entry (b : List Drawing) (s : Int) (g : Maybe Grade) (o : Outcome) : Entry :=
+  { law := "L", cone := "sha256:cccc", binding := b, seed := s, cases := 1, budgets := defaultBudgets, reach := nil,
+    evidence := Cited "listed", grade := g, outcome := o, date := "2026-10-17", interpreter := "listed", hosts := nil }
+passA : Entry := entry nil 1 (just Cases) Passed
+passB : Entry := entry bB 2 (just Sampled) Passed
+provedA : Entry := entry nil 3 (just Proved) Passed
+failA : Entry := entry nil 4 nothing (Failed "x = 1")
+notRunA : Entry := entry nil 5 nothing (NotRunFor "no generator")
+cert (es : List Entry) : Certificate := { law := "L", cone := "sha256:cccc", entries := es }
+certificates : List Certificate := [cert nil, cert [passA], cert [passB, passA], cert [failA, passA], cert [provedA, passB]]
+passes : List Entry := [passA, passB, provedA]
+zero : Region := { source := FromType, name := "zero" }
+tolAbove : Region := { source := FromLaw, name := "tol above" }
+branch : Region := { source := FromCode, name := "if 1 then" }
+kappa : Region := { source := Label, name := "kappa above 1e8" }
+regionLists : List (List Region) := [nil, [zero], [kappa, branch]]
+-- the grading regions, a census of `GradingRegion`: the label is not one (the census is the
+-- author's obligation, 7.R4; the tester takes it as values of the type and filters nothing)
+regions : List Region := [zero, tolAbove, branch]
+evidences : List (List BindingEvidence) := [nil,
+  [{ binding := nil, regions := [{ region := zero, n := 3 }] }],
+  [{ binding := nil, regions := [{ region := zero, n := 0 }, { region := tolAbove, n := 2 }] },
+   { binding := bB, regions := [{ region := zero, n := 1 }, { region := kappa, n := 5 }] }]]
+labels : List String := ["kappa above 1e8"]
+counts : List Nat := [0, 4]
+names : List String := ["zero", "fl"]
+grades : List (Maybe Grade) := [nothing, just Sampled, just Cases, just Proved]
+models : List Certifying := [certifying]
+regionings : List (Regioning certifying) := [regioning]
+onRegioning : List Binding := [bind "k" "models", bind "q" "regionings", bind "c" "certificates", bind "rs" "regionLists",
+  bind "ev" "evidences"]
+onPass : List Binding := [bind "k" "models", bind "q" "regionings", bind "c" "certificates", bind "rs" "regionLists",
+  bind "ev" "evidences", bind "p" "passes"]
+
+test "NoRegionsLeaveTheGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegioning)
+test "RefutedInEveryRegion" ExhaustiveMode (seed <- 20261017) (whereBindings <- onRegioning)
+test "ALabelEntersNoGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
+  bind "c" "certificates", bind "rs" "regionLists", bind "ev" "evidences", bind "l" "labels", bind "n" "counts",
+  bind "p" "passes"])
+test "AnEmptyRegionLeavesBelowCases" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models",
+  bind "q" "regionings", bind "c" "certificates", bind "r" "regions", bind "rs" "regionLists", bind "ev" "evidences",
+  bind "p" "passes"])
+test "TheThreeSourcesGrade" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
+  bind "c" "certificates", bind "nm" "names", bind "rs" "regionLists", bind "ev" "evidences", bind "p" "passes"])
+test "CombinesOverRegions" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
+  bind "c" "certificates", bind "r" "regions", bind "rs" "regionLists", bind "ev" "evidences", bind "p" "passes"])
+test "CombinesAcrossBindings" ExhaustiveMode (seed <- 20261017) (whereBindings <- onPass)
+test "CombineCommutes" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
+  bind "g" "grades", bind "h" "grades"])
+test "NothingIsTheUnit" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
+  bind "g" "grades"])
+test "CombineNeverRaises" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "k" "models", bind "q" "regionings",
+  bind "g" "grades", bind "h" "grades"])
+
+-- certification.lth §5, `Deriving`: the law's regions from its cutoffs and premises
+derivings : List Deriving := [deriving]
+cutoffLists : List (List String) := [["tol", "fl"], ["tol"], nil]
+premiseLists : List (List String) := [["s"], nil]
+parameterNames : List String := ["tol", "fl", "s", "x"]
+onDeriving : List Binding := [bind "d" "derivings", bind "cs" "cutoffLists", bind "ps" "premiseLists"]
+
+test "EachCutoffGivesTwoSides" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "d" "derivings",
+  bind "cs" "cutoffLists", bind "ps" "premiseLists", bind "c" "parameterNames"])
+test "EachPremiseGivesItsBoundary" ExhaustiveMode (seed <- 20261017) (whereBindings <- [bind "d" "derivings",
+  bind "cs" "cutoffLists", bind "ps" "premiseLists", bind "p" "parameterNames"])
+test "OnlyTheLawsRegions" ExhaustiveMode (seed <- 20261017) (whereBindings <- onDeriving)
