@@ -1852,18 +1852,36 @@ def _listed_called(loaded, called):
     return out
 
 
-def _list_members(loaded, found):
-    """The names a definition's list literal body holds (`[csv, built]`), as the file that defines
-    the census writes them; none when its body is anything else."""
+def _list_literal(loaded, found):
+    """A definition's body when it is a list literal (`[csv, parsed text]`), as the file that defines
+    the census writes it; None when its body is anything else."""
     file = loaded.files.get(found[0])
     if file is None:
-        return []
+        return None
     for act in file.acts:
         if isinstance(act, s.Define) and act.name == found[1] and not act.binders:
             body = getattr(act.body, "term", None)
             if isinstance(body, s.List):
-                return [v.name for v in body.values if isinstance(v, s.Name)]
-    return []
+                return body
+    return None
+
+
+def _list_members(loaded, found):
+    """The names a definition's list literal body holds (`[csv, built]`), as the file that defines
+    the census writes them; none when its body is anything else."""
+    body = _list_literal(loaded, found)
+    return [] if body is None else [v.name for v in body.values if isinstance(v, s.Name)]
+
+
+def _builds_members(loaded, called):
+    """Whether a census is a list literal some of whose members are built by an expression
+    (`parsed smallText`) rather than named, so that no member's cone holds that code."""
+    if loaded is None:
+        return False
+    found = next(((f, n) for f in loaded.files for n in loaded.files[f].defined
+                  if loaded.internal(f, n) == called), None)
+    body = None if found is None else _list_literal(loaded, found)
+    return body is not None and any(not isinstance(v, s.Name) for v in body.values)
 
 
 def line_claims(path, fuel=1_000_000):
@@ -1938,10 +1956,16 @@ def new_entry(runner, loaded, spec, cones, fuel):
                 hosts.update(cones.hosts(called))
                 continue
             # a census that lists models: the hashes of its members, comma-joined, so that a run
-            # naming one model finds its own hash there (`at` in certify.py) [proposed]
+            # naming one model finds its own hash there (`at` in certify.py) [proposed]; and the
+            # hash of the census's own cone when it names none, or when a member is built by an
+            # expression, whose code is in no named member's cone (3h's finding: a change to
+            # tables.py left `parsed ...` members' lines known)
             listed = _listed_called(loaded, called)
+            prints = [cones.hash(m) for m in listed]
+            if not listed or _builds_members(loaded, called):
+                prints.append(cones.hash(called))
             binding.append({"parameter": name, "generator": f"{b.generator} ({_show(b.coverage)})",
-                            "fingerprint": ",".join(cones.hash(m) for m in listed) if listed else cones.hash(called)})
+                            "fingerprint": ",".join(prints)})
             hosts.update(cones.hosts(called))
             try:
                 members = census(runner, b, ty, called)

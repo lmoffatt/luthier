@@ -321,6 +321,37 @@ def test_a_statistical_law_runs_the_sequential_test(tmp_path):
                                        "fingerprint": holds.entry["binding"][0]["fingerprint"]}]
 
 
+BUILT = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+one : Int := 1
+double (x : Int) : Int := x + x
+xs : List Int := [one, double 2]
+Positive (x : Int) : Bool := x > 0
+test "Positive" ExhaustiveMode (whereBindings <- [{ parameter := just "x", type := nothing, generator := "xs", coverage := Listed }])
+'''
+
+
+def test_a_census_built_by_an_expression_changes_its_fingerprint_when_its_members_change(tmp_path):
+    # 3h's finding: a census that names some members and builds others (`[one, double 2]`) was
+    # fingerprinted by its named members only, so a change to the code that builds the others left
+    # the line known
+    def fingerprint(text):
+        path = tmp_path / "built.test.lut"
+        path.write_text(text, encoding="utf-8")
+        [outcome] = tester.run_tests(path)
+        assert outcome.grade is not None
+        return outcome.entry["binding"][0]["fingerprint"]
+    base = fingerprint(BUILT)
+    assert fingerprint(BUILT.replace("x + x", "2 * x")) != base          # the code that builds a member
+    assert fingerprint(BUILT.replace("double 2", "double 3")) != base    # the expression itself
+    assert fingerprint(BUILT.replace("one : Int := 1", "one : Int := 2")) != base  # a named member
+    assert fingerprint(BUILT) == base
+    # a census of names only keeps the hashes of its members, as a run naming one model reads them
+    names = fingerprint(BUILT.replace("[one, double 2]", "[one]"))
+    assert "," not in names and names.startswith("sha256:")
+
+
 def test_the_lines_of_a_statistical_law(tmp_path, capsys):
     path = tmp_path / "statistical.test.lut"
     path.write_text(STATISTICAL, encoding="utf-8")
