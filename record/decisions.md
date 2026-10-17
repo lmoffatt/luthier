@@ -3228,3 +3228,25 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       the elaborator (instance resolution at a call), the typing bite, the core's generic
             functions, demand.lth (the cutoffs reaching a structure's bound)
 Status:     current
+
+D-2026-10-18-h  The three levels of equivalence (equivalence relation, metric, probabilistic metric:
+                one structure over three bases, D-2026-10-18-c) are taken as a fundamental principle
+                of Luthier, the principle he finds for costs and probability, with the verdict Boolean
+                and the bound metric or probabilistic (the cost computed, the demand collapsing it)
+                and the budget scaling with the bound (D-2026-10-18-d). The rest of the night of
+                2026-10-18 goes to exploring which changes this principle implies across Luthier
+                (principles, spec, theories, tester, certification, planner) and whether they are
+                possible, before more code; the term of art to be checked (quantitative equational
+                theories, Mardare, Panangaden and Plotkin, LICS 2016; Lawvere 1973; Menger 1942).
+                Core question 5 (the list's append written `+`) left unanswered for now.
+Author:     Luciano
+Quote:      "hay mucho cambio en Luthier, creo haber encontrado el principio para los costes y la
+            probabilidad. Creo que distinguir tres niveles de equivalencia (o el término técnico que
+            corresponda) va a ser un principio fundamental de Luthier. Me parece que el resto de la
+            noche se debería dedicar a explorar qué cambios supone este nuevo principio y si estos
+            cambios son posibles."
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       principles (a fundamental principle); the night's work: an exploration, read only but
+            for its report
+Status:     current
