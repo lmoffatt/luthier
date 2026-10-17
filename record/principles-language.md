@@ -550,6 +550,11 @@ L3.2   In the kernel the binding is exact: the name denotes the term, and reduct
 L3.3   Equality is a law of the object: Boolean where the carrier is decidable, a distance where it
        carries one, and the type of the identity law's result, `Bool` or `Cost`, says which (L9);
        how a certified identity composes along a path is L10.7. [proposed]
+L3.4   Two types that differ only in the names of their fields or injections are distinct at the
+       strict level, the hash, and equivalent by a named value, the renaming of their projections:
+       an equivalence between types is a value with its laws, the two maps and their round trips,
+       certified once, and certificates transport along it at its cost, nothing when it is exact
+       (L6, L10.7) (D-2026-10-17-a). [proposed]
 References: D-2026-10-11-m
 Rests on:   O2 (the equality a type comes with)
 Quote:      (L16) "luego de <- lh == rh, de hecho creo que es la ley de <-" (reply, 18da042) (L21,
@@ -579,6 +584,7 @@ History:    (L16) draft 0 (6d9dbd3): stated. draft 3 (c085ba4), his annotation: 
             clause (2) moved to L9, the identity-law clause (4) to L13, the composition clause (5)
             to L16.7 with its intersection rule deleted (D-2026-10-12-q); clause 3 written in their
             place. draft 11 (2026-10-12): renumbered from L5 of draft 10 (D-2026-10-12-v).
+            2026-10-17: clause 4 added, proposed (D-2026-10-17-a).
 
 L4  A program is a DAG of definitions without effects, and statements commute; actions have effects,
     and are verified by observing the world before and after.
@@ -1046,6 +1052,9 @@ L8.9   Everything has laws, at the least those of its equality (D-2026-10-12-ak)
        D-2026-10-06-aa, D-2026-10-13-j). `W`, which has no `==`, is a structure: a thousand laws
        are associated with it, the observations of what actions do, and none of them defines it
        (D-2026-10-13-n). [settled]
+L8.10  The certified subtype from a law is the equalizer of the law and the constant `true`, the
+       forgetful projection its universal arrow; so each construction of clause 5 is an instance of
+       a structure of the core with its universal property (D-2026-10-17-g). [proposed]
 References: D-2026-10-11-n, D-2026-10-12-h, D-2026-10-12-j
 Rests on:   O1 (the bound in a certificate)
 Source:     Luciano, 2022-08-03 (written:2022-08-03_haskell:proposicion-que-cada-tipo-cumple);
@@ -1076,6 +1085,7 @@ History:    draft 1 (5769005): stated. draft 4 (c7c6396): one judgment, structur
             10, the examples into Example, the provenance phrases into this History, the wording
             otherwise as draft 10 had it. draft 11 (2026-10-12): renumbered from L2 of draft 10
             (D-2026-10-12-v).
+            2026-10-17: clause 10 added, proposed (D-2026-10-17-g).
 
 L9  A law characterizes; a certifier produces its evidence, exact or statistical; and the
     certificate of identity is not the certificate of the law.
@@ -1349,6 +1359,13 @@ L11.8  A function crosses the bridge as a callback: the host calls it through th
        its laws (L11.2); a partial application of an extern is a value, its arity from its
        declared type (D-2026-10-14-a, D-2026-10-16-b; world.lth `Crossing`, term.lth
        `ExternPartialIsValue`, `HostGivesBackAValue`). [proposed]
+L11.9  What has no feedback to check it is a root of trust: the system's delivery to the terminal,
+       the file system, the interpreter, the floating-point hardware. The roots of trust are
+       declared once per project and listed in every run's record; above them everything is checked:
+       an action writes at once and fails when the system rejects what it writes, and a place is
+       observed according to what it is, a file by re-reading it, a pipe by its own copy, a terminal
+       by the bytes it accepted. Which kind of feedback each place has, and the grade an action
+       there earns by it, is open (D-2026-10-16-n). [proposed]
 References: D-2026-10-11-m; W5, W10
 Rests on:   O3 (the opt-out's syntax; the world as a value)
 Quote:      (L14) "si el tipo no sigue la ley no se aplica el calculo" (chat, 2026-10-10) "que la IA
@@ -1404,6 +1421,7 @@ History:    (L14) draft 0 (6d9dbd3): stated. Draft 0 of the generative plan prop
             (DeepSeek, GPT en, GPT sp). draft 11 (2026-10-12): renumbered from L14 of draft 10
             (D-2026-10-12-v). 2026-10-16: clause 8 added, proposed (D-2026-10-16-b).
 ```
+            2026-10-17: clause 9 added, proposed (D-2026-10-16-n).
 
 ### Under G2, cost
 
