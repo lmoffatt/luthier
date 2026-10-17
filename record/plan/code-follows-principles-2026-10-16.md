@@ -126,6 +126,37 @@ Queue after 3g:
   tautological). Direction: write at once, check what the OS accepted, fail the action otherwise;
   stdout observed according to what fd 1 is.
 
+Queue added 2026-10-17 (decisions D-2026-10-16-k to -n and D-2026-10-17-a to -d, relayed by the
+decision-assistant fork, now luthier-8c), in this order after j2a:
+- print and stdout, now decided (D-2026-10-16-n, item 12): `print` writes at once and checks what
+  `write()` returns, failing the action when the system rejects bytes; a file checked by re-reading
+  it; stdout observed according to what it is connected to (file re-read, pipe with an own tee,
+  terminal the bytes accepted); the roots of trust declared once per project and listed in every
+  run's record. Later: each place's kind of feedback grades its actions.
+- convergence and vacuity (D-2026-10-16-m): a law whose cases are all vacuous is not run, its premise
+  count the reason; `MaximizerStationary`'s `else true` and `QuadraticConverges`'s
+  `if s.maxIter < budget then true` go; convergence as a domain plus a step bound derived from the
+  theory (Newton 1, LM a handful, gradient about kappa log(1/tol)), never a constant; a `Reason` why
+  an algorithm stopped; the step count recorded.
+- the rest of D-2026-10-16-k and -l: a host action validated once per hash of the model's cone, its
+  arguments kept as evidence (item 9); `Bounded n` a domain, exhaustive on its box `Exhaustive`,
+  `ForallOnPoints` following (item 17); per-law cutoffs a typed field of `Demand` (item 20); the most
+  specific binding wins (G6); a law quantified over `U` a static error, `Settling`'s laws on concrete
+  instances (L5); 3.R1 and 3.R2 reworded (D-2026-10-17-a).
+- 3e (hash erases binder annotations; census fingerprint fix; one re-certification wave).
+- v0.3 and v0.4 tags (his): v0.4 at 3470c54 verified; neither tag exists yet.
+- The core (D-2026-10-17-b, -c, -d), after the v0.4 tag and before more theories (his order): the
+  algebraic properties as generic laws over an operation and its equality, adjectives without "is";
+  properties.lth and structures.lth replace kernel_laws.lth, in five groups (relations, operations,
+  functions, containers, the structure of types); the equality of functions derived pointwise from
+  the codomain's, with the combinators (id, compose, flip, zipWith, map) and the few non-equational
+  properties (order, injective/cancellative, LandsIn); a generic list library in the core replacing
+  about 110 per-type helpers. Survey findings to fold in: 25 names defined in more than one file;
+  models re-exporting their fields as top-level names; 38 unclaimed Bool laws; `check`'s "loose"
+  notice firing 1675 times; the 11 theories of Luthier itself without tests or stores. Plan: a
+  design brief for Fable (the two files and the migration map), then mechanical migration by Opus in
+  bites by group, each re-certifying what it touches.
+
 ## Step 4. The first cost (v0.5)
 `PinvProjects` returns its distance; the certificate records it; a demand is served by
 `distance <= tolerance` (L10.5, 6.S15 for that law); the pattern written for the other laws.
