@@ -5,6 +5,380 @@
   "binding": [
    {
     "parameter": "lay",
+    "generator": "layouts (Listed)",
+    "fingerprint": "sha256:6b8519ff5ea005b498d31b5c30a0064c1fc55dea0a68922839b2228f3a3dffa1"
+   },
+   {
+    "parameter": "n",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Dim",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf ((* 3) n))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "lay",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "layout"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Interval": [
+      1.0,
+      11.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:29:49+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 22
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "LayoutFromUndoesTo",
+  "cone": "sha256:1f1b0196affa64ece3fd108cf9e132c270f2dd26edc8b2988eb89266d4d0a3be",
+  "binding": [
+   {
+    "parameter": "lay",
+    "generator": "layouts (Listed)",
+    "fingerprint": "sha256:6b8519ff5ea005b498d31b5c30a0064c1fc55dea0a68922839b2228f3a3dffa1"
+   },
+   {
+    "parameter": "n",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Dim",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((MatOf 3) n)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "lay",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "layout"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Interval": [
+      1.0,
+      11.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:29:36+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 3
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 10
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 15
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "LayoutToUndoesFrom",
+  "cone": "sha256:ae8776d1108afe4608fb6244aa518e7b3cac779ceff7a77569929f6274ce9c89",
+  "binding": [
+   {
+    "parameter": "lay",
+    "generator": "rowMajors (Listed)",
+    "fingerprint": "sha256:58b9972c45b444ff8b7984e8ed69246713d0639bf2434348ee1a466dedc0ed5a"
+   },
+   {
+    "parameter": "n",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Dim",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "p",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf ((* 3) n))",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "lay",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "rowMajor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Interval": [
+      1.0,
+      11.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "lay = rowMajor, n = 3, p = { n := 9, f := extern \"host:2261\" }"
+  },
+  "date": "2026-10-17T12:28:41+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 22
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "p boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "LayoutFromUndoesTo",
+  "cone": "sha256:1f1b0196affa64ece3fd108cf9e132c270f2dd26edc8b2988eb89266d4d0a3be",
+  "binding": [
+   {
+    "parameter": "lay",
+    "generator": "rowMajors (Listed)",
+    "fingerprint": "sha256:58b9972c45b444ff8b7984e8ed69246713d0639bf2434348ee1a466dedc0ed5a"
+   },
+   {
+    "parameter": "n",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Dim",
+    "fingerprint": ""
+   },
+   {
+    "parameter": "a",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ((MatOf 3) n)",
+    "fingerprint": ""
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "lay",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "rowMajor"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Interval": [
+      1.0,
+      11.0
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 100,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "lay = rowMajor, n = 3, a = { m := 3, n := 3, f := extern \"host:1\" }"
+  },
+  "date": "2026-10-17T12:28:30+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "zero"
+    },
+    "n": 3
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "rank deficient"
+    },
+    "n": 10
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "n boundary"
+    },
+    "n": 15
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "a boundary"
+    },
+    "n": 100
+   }
+  ]
+ },
+ {
+  "law": "LayoutToUndoesFrom",
+  "cone": "sha256:ae8776d1108afe4608fb6244aa518e7b3cac779ceff7a77569929f6274ce9c89",
+  "binding": [
+   {
+    "parameter": "lay",
     "generator": "rowMajors (Listed)",
     "fingerprint": "sha256:58b9972c45b444ff8b7984e8ed69246713d0639bf2434348ee1a466dedc0ed5a"
    },

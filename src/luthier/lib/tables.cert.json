@@ -1,5 +1,951 @@
 [
  {
+  "law": "NoCellsOffSchema",
+  "cone": "sha256:d16696e649bb1a978efa1bff0a4f0c008364452f6596d722c0d80a2a64cf56ea",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "withRows (Listed)",
+    "fingerprint": "sha256:a16bef621322b8f3356fe1e13faf916ba8ff6bf28af99726e394fbab6b94198f,sha256:53a4e49c3a92eb651121fe1b99c38ca096b1ec25b45d493c23e1ea73bfb1ad3b"
+   },
+   {
+    "parameter": "c",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:0bea23fb4a7a53e0d175e80376bc3cd0a119ac8383c8fe0753add8c23ba73f8e"
+   },
+   {
+    "parameter": "r",
+    "generator": "rows (Listed)",
+    "fingerprint": "sha256:1df62fe2badec7b852ed98f0b579e7195a3f443f9240bc184b5aff09b37266fc"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneRow"
+      },
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "(parsed smallText)"
+      },
+      {
+       "Printed": "(parsed nodesTextA)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"n\""
+      },
+      {
+       "Printed": "\"k\""
+      },
+      {
+       "Printed": "\"a\""
+      },
+      {
+       "Printed": "\"name\""
+      },
+      {
+       "Printed": "\"nope\""
+      },
+      {
+       "Printed": "\"\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 24,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:34:10+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "r boundary"
+    },
+    "n": 24
+   }
+  ]
+ },
+ {
+  "law": "CellsOfTheirKind",
+  "cone": "sha256:7bdd74d3fee578b3bfdc5b16330c4b387178fde0cbff1e5af6c8ca2a585289dd",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tables (Listed)",
+    "fingerprint": "sha256:6253d7a7efa274ad38648f2ac462d32dfe99a85de390e5b550243186444db53e,sha256:84d065b6b6164528f6f29103cd6bde8af9466f9f1af4aebc23f10aa301f6bfe1,sha256:a16bef621322b8f3356fe1e13faf916ba8ff6bf28af99726e394fbab6b94198f,sha256:53a4e49c3a92eb651121fe1b99c38ca096b1ec25b45d493c23e1ea73bfb1ad3b"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "emptyT"
+      },
+      {
+       "Printed": "noColumns"
+      },
+      {
+       "Printed": "oneRow"
+      },
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "(parsed nodesTextA)"
+      },
+      {
+       "Printed": "(parsed measurementsTextA)"
+      },
+      {
+       "Printed": "(parsed smallText)"
+      },
+      {
+       "Printed": "(parsed quotedText)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:34:10+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "KindsKnown",
+  "cone": "sha256:6cb957ca70c2f84b36ffeb2ac4532d5c76a007e2001cec5b86c412e1d08e0f29",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tables (Listed)",
+    "fingerprint": "sha256:6253d7a7efa274ad38648f2ac462d32dfe99a85de390e5b550243186444db53e,sha256:84d065b6b6164528f6f29103cd6bde8af9466f9f1af4aebc23f10aa301f6bfe1,sha256:a16bef621322b8f3356fe1e13faf916ba8ff6bf28af99726e394fbab6b94198f,sha256:53a4e49c3a92eb651121fe1b99c38ca096b1ec25b45d493c23e1ea73bfb1ad3b"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "emptyT"
+      },
+      {
+       "Printed": "noColumns"
+      },
+      {
+       "Printed": "oneRow"
+      },
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "(parsed nodesTextA)"
+      },
+      {
+       "Printed": "(parsed measurementsTextA)"
+      },
+      {
+       "Printed": "(parsed smallText)"
+      },
+      {
+       "Printed": "(parsed quotedText)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:34:10+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "SchemaWellFormed",
+  "cone": "sha256:41633ddd0a0ff3eb355f09dfde4c122780c7b15b6822e3e89f5fa4ccdcbb0f62",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "tables (Listed)",
+    "fingerprint": "sha256:6253d7a7efa274ad38648f2ac462d32dfe99a85de390e5b550243186444db53e,sha256:84d065b6b6164528f6f29103cd6bde8af9466f9f1af4aebc23f10aa301f6bfe1,sha256:a16bef621322b8f3356fe1e13faf916ba8ff6bf28af99726e394fbab6b94198f,sha256:53a4e49c3a92eb651121fe1b99c38ca096b1ec25b45d493c23e1ea73bfb1ad3b"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "emptyT"
+      },
+      {
+       "Printed": "noColumns"
+      },
+      {
+       "Printed": "oneRow"
+      },
+      {
+       "Printed": "threeRows"
+      },
+      {
+       "Printed": "(parsed nodesTextA)"
+      },
+      {
+       "Printed": "(parsed measurementsTextA)"
+      },
+      {
+       "Printed": "(parsed smallText)"
+      },
+      {
+       "Printed": "(parsed quotedText)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 8,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:34:10+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "NoCellsOffSchema",
+  "cone": "sha256:d16696e649bb1a978efa1bff0a4f0c008364452f6596d722c0d80a2a64cf56ea",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "answersAllList (Listed)",
+    "fingerprint": "sha256:f41b27765d9942e8bbd8505c27446c7bc7e2036ba5a4fb0a09a0e13961338c21"
+   },
+   {
+    "parameter": "c",
+    "generator": "offNames (Listed)",
+    "fingerprint": "sha256:4bbc3a443025aee587d22488bb57a026d0aac0a99fdfc30cacca35953c95b6da"
+   },
+   {
+    "parameter": "r",
+    "generator": "rowZero (Listed)",
+    "fingerprint": "sha256:cfc2b40fb644af5df23412e1bb8c6ba31df538002bad4d367ebd843b98cccaaf"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "answersAll"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"k\""
+      },
+      {
+       "Printed": "\"nope\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Number": 0.0
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = answersAll, c = \"nope\", r = 0"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "r boundary"
+    },
+    "n": 2
+   }
+  ]
+ },
+ {
+  "law": "KindsKnown",
+  "cone": "sha256:6cb957ca70c2f84b36ffeb2ac4532d5c76a007e2001cec5b86c412e1d08e0f29",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "unknownKindList (Listed)",
+    "fingerprint": "sha256:079faa11523ce4cb4c75d6e01cfae485c3e41585eda7539dfe696e1450174ba1"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "unknownKind"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = unknownKind"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "SchemaWellFormed",
+  "cone": "sha256:41633ddd0a0ff3eb355f09dfde4c122780c7b15b6822e3e89f5fa4ccdcbb0f62",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "twiceNamedList (Listed)",
+    "fingerprint": "sha256:c7b21cd1f00dba1556a2981b0cbc7ee67772fbffe249bd6f47c9db72061eb501"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twiceNamed"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = twiceNamed"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Rejects",
+  "cone": "sha256:64fdc2c0f7a39095328adb75784bf682c3c9ba5ab71b64eda488a902514b54d6",
+  "binding": [
+   {
+    "parameter": "c",
+    "generator": "lenientList (Listed)",
+    "fingerprint": "sha256:c2404a4621f79d787a137d4a1d5beddb24ca25adfc47b811b61c1de995d379be"
+   },
+   {
+    "parameter": "b",
+    "generator": "brokenTexts (Listed)",
+    "fingerprint": "sha256:9810ad3b4ec83576bbe348301d9666b07cedbb45ddacaf7da61c28f0c1f6a4f9"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "lenient"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "b",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ s := \"k:int,k:float\\n1,2.0\\n\" }"
+      },
+      {
+       "Printed": "{ s := \"a:int,b:float\\n1,abc\\n\" }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "c = lenient, b = { s := \"k:int,k:float\\n1,2.0\\n\" }"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Tolerant",
+  "cone": "sha256:5d786e8e9a1a93a9baf348faf6b7d756a1a5c5baab0b4421ee51560013edaa4f",
+  "binding": [
+   {
+    "parameter": "c",
+    "generator": "dropsLastReadList (Listed)",
+    "fingerprint": "sha256:d151f93f5863b6209c104ef7d2b8ddc34ad7e6cff7fc39575fe2ab1c94951ed9"
+   },
+   {
+    "parameter": "p",
+    "generator": "perturbedSmall (Listed)",
+    "fingerprint": "sha256:61324f0b9715217fd7599d5c3cb20ff9cfc11b5d61ddee5c80b613cd612c012d"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "dropsLastRead"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ table := (parsed smallText), text := \"a:int,b:float\\n1,2.5\\n-3,4.0\\n\" }"
+      },
+      {
+       "Printed": "{ table := (parsed smallText), text := \" a : int , b : float \\n 1 , 2.5 \\n -3 , 4.0\" }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "c = dropsLastRead, p = { table := (parsed smallText), text := \"a:int,b:float\\n1,2.5\\n-3,4.0\\n\" }"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "Canonical",
+  "cone": "sha256:45c828c841c38cf441dcaafe184f588632974b206ae56e991c08f82669013b58",
+  "binding": [
+   {
+    "parameter": "c",
+    "generator": "dropsLastWrittenList (Listed)",
+    "fingerprint": "sha256:ef86bb3b9a51340d317bd6d8531ea436293c6328b467f3b80413f41b750ecf31"
+   },
+   {
+    "parameter": "p",
+    "generator": "perturbedSmall (Listed)",
+    "fingerprint": "sha256:61324f0b9715217fd7599d5c3cb20ff9cfc11b5d61ddee5c80b613cd612c012d"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "dropsLastWritten"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ table := (parsed smallText), text := \"a:int,b:float\\n1,2.5\\n-3,4.0\\n\" }"
+      },
+      {
+       "Printed": "{ table := (parsed smallText), text := \" a : int , b : float \\n 1 , 2.5 \\n -3 , 4.0\" }"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "c = dropsLastWritten, p = { table := (parsed smallText), text := \"a:int,b:float\\n1,2.5\\n-3,4.0\\n\" }"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "RoundTrip",
+  "cone": "sha256:62a3bf142b29dfb31e20ff44d2f8b686fd1b44976e6c5e87196465e0f2146b77",
+  "binding": [
+   {
+    "parameter": "c",
+    "generator": "dropsLastWrittenList (Listed)",
+    "fingerprint": "sha256:ef86bb3b9a51340d317bd6d8531ea436293c6328b467f3b80413f41b750ecf31"
+   },
+   {
+    "parameter": "t",
+    "generator": "tablesWithRows (Listed)",
+    "fingerprint": "sha256:a16bef621322b8f3356fe1e13faf916ba8ff6bf28af99726e394fbab6b94198f"
+   }
+  ],
+  "seed": 20261015,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "dropsLastWritten"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneRow"
+      },
+      {
+       "Printed": "(parsed smallText)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 2,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "c = dropsLastWritten, t = oneRow"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.tables.parse",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ],
+   [
+    "python:luthier.tables.render",
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
+   ]
+  ],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "CellsOfTheirKind",
+  "cone": "sha256:7bdd74d3fee578b3bfdc5b16330c4b387178fde0cbff1e5af6c8ca2a585289dd",
+  "binding": [
+   {
+    "parameter": "t",
+    "generator": "holes (Listed)",
+    "fingerprint": "sha256:53ce16f64dca200c26ea4e6a8805d90ac52c33198e317d98c9a0cf51441194df"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "holeT"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "t = holeT"
+  },
+  "date": "2026-10-17T12:34:05+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
   "law": "Rejects",
   "cone": "sha256:64fdc2c0f7a39095328adb75784bf682c3c9ba5ab71b64eda488a902514b54d6",
   "binding": [

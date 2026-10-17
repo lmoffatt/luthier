@@ -86,6 +86,865 @@
   "outcome": {
    "ControlRefuted": "d = labelling, cs = ((cons \"tol\") ((cons \"fl\") nil)), ps = ((cons \"s\") nil)"
   },
+  "date": "2026-10-17T12:28:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 4
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 4
+   }
+  ]
+ },
+ {
+  "law": "EachPremiseGivesItsBoundary",
+  "cone": "sha256:8695c913183b16342b52f853fa04294a1fe7319c48f31844a623a3b31347269f",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "noBoundaries (Listed)",
+    "fingerprint": "sha256:b9975c0a006cde2c7a76f1af98b01884fbf4b6302f5fa776be25b29d87478ace"
+   },
+   {
+    "parameter": "cs",
+    "generator": "cutoffLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "ps",
+    "generator": "premiseLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "p",
+    "generator": "parameterNames (Listed)",
+    "fingerprint": "sha256:4a7dad4a1f2e8bafe49526452e7d480817ca11520254097becba2252c4e791af"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noBoundary"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"tol\") ((cons \"fl\") nil))"
+      },
+      {
+       "Printed": "((cons \"tol\") nil)"
+      },
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ps",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"s\") nil)"
+      },
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"tol\""
+      },
+      {
+       "Printed": "\"fl\""
+      },
+      {
+       "Printed": "\"s\""
+      },
+      {
+       "Printed": "\"x\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 24,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "d = noBoundary, cs = ((cons \"tol\") ((cons \"fl\") nil)), ps = ((cons \"s\") nil), p = \"s\""
+  },
+  "date": "2026-10-17T12:28:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 16
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 16
+   }
+  ]
+ },
+ {
+  "law": "EachCutoffGivesTwoSides",
+  "cone": "sha256:14cfbfe724960b2bc543efff591fd6f521fefa40a585c466b2a331d52131d697",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "oneSideds (Listed)",
+    "fingerprint": "sha256:1ef887c63a25721da0b11a2ef2e7c5949f871029a5bf8d59e0b54d99567c5fd1"
+   },
+   {
+    "parameter": "cs",
+    "generator": "cutoffLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "ps",
+    "generator": "premiseLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "c",
+    "generator": "parameterNames (Listed)",
+    "fingerprint": "sha256:4a7dad4a1f2e8bafe49526452e7d480817ca11520254097becba2252c4e791af"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "oneSided"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"tol\") ((cons \"fl\") nil))"
+      },
+      {
+       "Printed": "((cons \"tol\") nil)"
+      },
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ps",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"s\") nil)"
+      },
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"tol\""
+      },
+      {
+       "Printed": "\"fl\""
+      },
+      {
+       "Printed": "\"s\""
+      },
+      {
+       "Printed": "\"x\""
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 24,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "d = oneSided, cs = ((cons \"tol\") ((cons \"fl\") nil)), ps = ((cons \"s\") nil), c = \"tol\""
+  },
+  "date": "2026-10-17T12:28:23+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 16
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 16
+   }
+  ]
+ },
+ {
+  "law": "NoCutoffAcceptsAFailure",
+  "cone": "sha256:461f775b9b6199e54fc989738b48b3d25846170140c374752f20e106aae65e85",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "wrongModels (Listed)",
+    "fingerprint": "sha256:d7f94747e4bb0efe0794e307f56cb880b12f1aea317d5c56d3d1514a789e896a"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:cbdbc022cb36df8389726fcc8a4e5f83a7fd7821b76e0e2cbf97f7a723102963"
+   },
+   {
+    "parameter": "e",
+    "generator": "ofTheLaw (Listed)",
+    "fingerprint": "sha256:6731b654c56a693db94b65c1260321ae4c2b69716cd54da376afcbc98f4a734e"
+   },
+   {
+    "parameter": "g",
+    "generator": "cutoffs (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "acceptsAFailure"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", given := nil, accepts := Cases }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((((entry \"L\") 1) (just Cases)) Passed)"
+      },
+      {
+       "Printed": "((((entry \"L\") 1) nothing) (Failed \"x = 1\"))"
+      },
+      {
+       "Printed": "((((entry \"L\") 1) nothing) (NotRunFor \"no generator\"))"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Proved"
+      },
+      {
+       "Printed": "Cases"
+      },
+      {
+       "Printed": "AssumedGrade"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 9,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = acceptsAFailure, d = { law := \"L\", cone := \"sha256:cccc\", given := nil, accepts := Cases }, e = ((((entry \"L\") 1) nothing) (Failed \"x = 1\")), g = AssumedGrade"
+  },
+  "date": "2026-10-17T09:54:13+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "e boundary"
+    },
+    "n": 9
+   }
+  ]
+ },
+ {
+  "law": "ADisagreementIsRefused",
+  "cone": "sha256:4ebc78e126ccda9c1277b3bd93a999970ea7c62bd474ca7fb9634b18ee5cf5bc",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "blindModels (Listed)",
+    "fingerprint": "sha256:60d69c8bfba27de978128c1360235405fb64ff2df239671de35f93fa73b80270"
+   },
+   {
+    "parameter": "n",
+    "generator": "names (Listed)",
+    "fingerprint": "sha256:83aa0d5482cd6fa0d970f584c6af66f0b6fbe9494aadfcac8fe37a4118df8f44"
+   },
+   {
+    "parameter": "d",
+    "generator": "demands (Listed)",
+    "fingerprint": "sha256:cbdbc022cb36df8389726fcc8a4e5f83a7fd7821b76e0e2cbf97f7a723102963"
+   },
+   {
+    "parameter": "e",
+    "generator": "ofTheLaw (Listed)",
+    "fingerprint": "sha256:f6eb1b05fc57fff0da78537a292d6c22592dd4f7f0345e996c13744015afcd73,sha256:5f0d0688569917965e2f6830e36632ad2934f167bf542fcb916b25c7eac69bcc,sha256:a7240db9d667a07861655d3c3240488c719409f2ad211843ed37c6c931143ddd,sha256:e5c15a197ef274c9ecbc15cba30e941d6b8c051fd951755bc56c589dea891230"
+   },
+   {
+    "parameter": "o",
+    "generator": "outcomes (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "g",
+    "generator": "grades (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "es",
+    "generator": "behindStores (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   }
+  ],
+  "seed": 20261016,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blind"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "\"n\""
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", given := nil, accepts := Cases }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "passOne"
+      },
+      {
+       "Printed": "failOne"
+      },
+      {
+       "Printed": "passTwo"
+      },
+      {
+       "Printed": "notRunOne"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Passed"
+      },
+      {
+       "Printed": "(Failed \"x = 2\")"
+      },
+      {
+       "Printed": "(NotRunFor \"no generator\")"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothing"
+      },
+      {
+       "Printed": "(just Cases)"
+      },
+      {
+       "Printed": "(just Proved)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons passTwo) nil)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 72,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = blind, n = \"n\", d = { law := \"L\", cone := \"sha256:cccc\", given := nil, accepts := Cases }, e = passOne, o = Passed, g = nothing, es = nil"
+  },
+  "date": "2026-10-17T09:54:07+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 36
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 36
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "e boundary"
+    },
+    "n": 72
+   }
+  ]
+ },
+ {
+  "law": "ADisagreementRefutes",
+  "cone": "sha256:fef218fa8342188aecf6d6d53125db326587c596d9df8705acfc6056c897bcb3",
+  "binding": [
+   {
+    "parameter": "k",
+    "generator": "blindModels (Listed)",
+    "fingerprint": "sha256:60d69c8bfba27de978128c1360235405fb64ff2df239671de35f93fa73b80270"
+   },
+   {
+    "parameter": "c",
+    "generator": "certificates (Listed)",
+    "fingerprint": "sha256:3cab92561a0cfa80c6f94cbead098876e44d195528cce0953ae78511688a1462"
+   },
+   {
+    "parameter": "e",
+    "generator": "ofTheLaw (Listed)",
+    "fingerprint": "sha256:f6eb1b05fc57fff0da78537a292d6c22592dd4f7f0345e996c13744015afcd73,sha256:5f0d0688569917965e2f6830e36632ad2934f167bf542fcb916b25c7eac69bcc,sha256:a7240db9d667a07861655d3c3240488c719409f2ad211843ed37c6c931143ddd,sha256:e5c15a197ef274c9ecbc15cba30e941d6b8c051fd951755bc56c589dea891230"
+   },
+   {
+    "parameter": "o",
+    "generator": "outcomes (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "g",
+    "generator": "grades (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "es",
+    "generator": "behindStores (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   }
+  ],
+  "seed": 20261016,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "k",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "blind"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "c",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", entries := nil }"
+      },
+      {
+       "Printed": "{ law := \"L\", cone := \"sha256:cccc\", entries := ((cons passTwo) nil) }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "passOne"
+      },
+      {
+       "Printed": "failOne"
+      },
+      {
+       "Printed": "passTwo"
+      },
+      {
+       "Printed": "notRunOne"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "o",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Passed"
+      },
+      {
+       "Printed": "(Failed \"x = 2\")"
+      },
+      {
+       "Printed": "(NotRunFor \"no generator\")"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "g",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nothing"
+      },
+      {
+       "Printed": "(just Cases)"
+      },
+      {
+       "Printed": "(just Proved)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "es",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons passTwo) nil)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 144,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "k = blind, c = { law := \"L\", cone := \"sha256:cccc\", entries := nil }, e = passOne, o = Passed, g = nothing, es = nil"
+  },
+  "date": "2026-10-17T09:54:03+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 72
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 72
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "e boundary"
+    },
+    "n": 144
+   }
+  ]
+ },
+ {
+  "law": "OnlyTheLawsRegions",
+  "cone": "sha256:f995eb384d3f9057dc5fc4b9b31045f3b226fa615ccb69d4878b69b37721c3b8",
+  "binding": [
+   {
+    "parameter": "d",
+    "generator": "labellings (Listed)",
+    "fingerprint": "sha256:41aeaafb2d3672ee81b5fc40b40b6d7939b93830252761ca030530ba7deceb24"
+   },
+   {
+    "parameter": "cs",
+    "generator": "cutoffLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   },
+   {
+    "parameter": "ps",
+    "generator": "premiseLists (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "labelling"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "cs",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"tol\") ((cons \"fl\") nil))"
+      },
+      {
+       "Printed": "((cons \"tol\") nil)"
+      },
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "ps",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((cons \"s\") nil)"
+      },
+      {
+       "Printed": "nil"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "d = labelling, cs = ((cons \"tol\") ((cons \"fl\") nil)), ps = ((cons \"s\") nil)"
+  },
   "date": "2026-10-17T04:53:38+00:00",
   "interpreter": "v0.2",
   "hosts": [],

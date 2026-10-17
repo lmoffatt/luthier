@@ -16,7 +16,7 @@
    {
     "parameter": "p",
     "generator": "plots (Listed)",
-    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+    "fingerprint": "sha256:7f2a85838d6bad9aa21b54cc9803542259b7df2f1868ae581cddb528e5886985"
    },
    {
     "parameter": "s",
@@ -122,7 +122,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = noTitle, p = (pointsAndLine (parsed obsText)), s = \"\", ext = \"png\""
   },
-  "date": "2026-10-15T02:19:10+00:00",
+  "date": "2026-10-17T10:07:39+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -135,14 +135,23 @@
    ],
    [
     "python:luthier.tables.parse",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ],
    [
     "python:luthier.tables.render",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ]
   ],
-  "kind": "Control"
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "S boundary"
+    },
+    "n": 16
+   }
+  ]
  },
  {
   "law": "LayerOrderInvariant",
@@ -166,7 +175,7 @@
    {
     "parameter": "p",
     "generator": "plots (Listed)",
-    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+    "fingerprint": "sha256:7f2a85838d6bad9aa21b54cc9803542259b7df2f1868ae581cddb528e5886985"
    },
    {
     "parameter": "i",
@@ -282,7 +291,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = layerOrdered, margin = 0.05, p = ((apartLayers (parsed obsText)) (parsed farText)), i = 0, ext = \"png\""
   },
-  "date": "2026-10-15T02:18:59+00:00",
+  "date": "2026-10-17T10:07:09+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -295,14 +304,37 @@
    ],
    [
     "python:luthier.tables.parse",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ],
    [
     "python:luthier.tables.render",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ]
   ],
-  "kind": "Control"
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "S boundary"
+    },
+    "n": 16
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "margin boundary"
+    },
+    "n": 0
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "i boundary"
+    },
+    "n": 16
+   }
+  ]
  },
  {
   "law": "RowOrderInvariant",
@@ -321,7 +353,7 @@
    {
     "parameter": "p",
     "generator": "plots (Listed)",
-    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+    "fingerprint": "sha256:7f2a85838d6bad9aa21b54cc9803542259b7df2f1868ae581cddb528e5886985"
    },
    {
     "parameter": "name",
@@ -331,7 +363,7 @@
    {
     "parameter": "t",
     "generator": "obsTables (Listed)",
-    "fingerprint": "sha256:d521ab224e95f996ffb21f11724077057f186ab200b95781500249dfee14f841"
+    "fingerprint": "sha256:93d3562d69c334ec5295f1a75cace16ebcb4346cf766b5b52ac0b0c1c538912b"
    },
    {
     "parameter": "f",
@@ -469,7 +501,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = firstRowApart, p = (pointsAndLine (parsed obsText)), name = \"obs\", t = (parsed obsText), f = fn (r : ?type) { match ((== r) 0) { true -> 1; false -> match ((== r) 1) { true -> 0; false -> 2 } } }, ext = \"png\""
   },
-  "date": "2026-10-15T02:18:18+00:00",
+  "date": "2026-10-17T10:05:43+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -482,14 +514,23 @@
    ],
    [
     "python:luthier.tables.parse",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ],
    [
     "python:luthier.tables.render",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ]
   ],
-  "kind": "Control"
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "S boundary"
+    },
+    "n": 48
+   }
+  ]
  },
  {
   "law": "ImageOfTheValue",
@@ -508,12 +549,12 @@
    {
     "parameter": "p",
     "generator": "plainPlots (Listed)",
-    "fingerprint": "sha256:648e66f6c009bfc0201c906290b47bb24736daaf47112cb5883b3d13e55abefb"
+    "fingerprint": "sha256:f75b4383d6b4f5e7674fa1ada7e528504718ae9e37b6f25ea1c14d386f688e81"
    },
    {
     "parameter": "q",
     "generator": "leakyPlots (Listed)",
-    "fingerprint": "sha256:67c42418937f5bcfa2f01ba6d10038673ccede2e4cc561218fb9bb8edb1def00"
+    "fingerprint": "sha256:e1de3fc7efd9e5a5d6f4dda9d576a3cc7be5f50b2001e4b00d1447edbf88027b"
    },
    {
     "parameter": "ext",
@@ -602,7 +643,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = readsOffSchema, p = (pointsAndLine (parsed obsText)), q = (pointsAndLine (leaky (parsed obsText))), ext = \"png\""
   },
-  "date": "2026-10-15T02:18:16+00:00",
+  "date": "2026-10-17T10:05:40+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -615,14 +656,23 @@
    ],
    [
     "python:luthier.tables.parse",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ],
    [
     "python:luthier.tables.render",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ]
   ],
-  "kind": "Control"
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "S boundary"
+    },
+    "n": 2
+   }
+  ]
  },
  {
   "law": "FormatByExtension",
@@ -641,7 +691,7 @@
    {
     "parameter": "p",
     "generator": "plots (Listed)",
-    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+    "fingerprint": "sha256:7f2a85838d6bad9aa21b54cc9803542259b7df2f1868ae581cddb528e5886985"
    },
    {
     "parameter": "ext",
@@ -729,7 +779,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = allPng, p = (pointsAndLine (parsed obsText)), ext = \"svg\""
   },
-  "date": "2026-10-15T02:18:11+00:00",
+  "date": "2026-10-17T10:05:33+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -742,14 +792,23 @@
    ],
    [
     "python:luthier.tables.parse",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ],
    [
     "python:luthier.tables.render",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ]
   ],
-  "kind": "Control"
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "S boundary"
+    },
+    "n": 8
+   }
+  ]
  },
  {
   "law": "FileExistsAfter",
@@ -768,7 +827,7 @@
    {
     "parameter": "p",
     "generator": "plots (Listed)",
-    "fingerprint": "sha256:0a62326daf23c7c1c5bb5547afc09e50592589bcb5c38837198e9f8156596655"
+    "fingerprint": "sha256:7f2a85838d6bad9aa21b54cc9803542259b7df2f1868ae581cddb528e5886985"
    },
    {
     "parameter": "stem",
@@ -889,7 +948,7 @@
   "outcome": {
    "ControlRefuted": "S = { stdout : String, files : (List (_ : String) * String) }, d = noFile, p = (pointsAndLine (parsed obsText)), stem = \"plot\", ext = \"png\", st = blank"
   },
-  "date": "2026-10-15T02:17:58+00:00",
+  "date": "2026-10-17T10:05:16+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -902,13 +961,22 @@
    ],
    [
     "python:luthier.tables.parse",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ],
    [
     "python:luthier.tables.render",
-    "sha256:1b050c94c125ad76a6533312b529b151e4e5a54ee1e7ba683627b86c5d4c3494"
+    "sha256:b543114666304e9fc5e8c5f589b22afbb09f6e77c10acc16e1e9f2a74a3b7097"
    ]
   ],
-  "kind": "Control"
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "S boundary"
+    },
+    "n": 16
+   }
+  ]
  }
 ]

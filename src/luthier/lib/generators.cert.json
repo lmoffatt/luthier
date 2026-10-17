@@ -5,6 +5,522 @@
   "binding": [
    {
     "parameter": "T",
+    "generator": "symTypes (Listed)",
+    "fingerprint": "sha256:0ece4bea3948681e3874973006ba97d4eb89bebb9e9891fa889a88810db6aea4"
+   },
+   {
+    "parameter": "d",
+    "generator": "symDegs (Listed)",
+    "fingerprint": "sha256:399a35c4dd4045f136d8f147b1a933cecd7c239ade07d726be7f7c5bc52bc1fc"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Symmetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((symmetricDegeneracies numpy) floor)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:24:01+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "CaseNamesAreDistinct",
+  "cone": "sha256:1689cf3c93419d7776d493930f586063adc2086683a1e01df1e93fb2794cbdf0",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "listTypes (Listed)",
+    "fingerprint": "sha256:29328b93853faf35e952b28efbe4968a238839a871fc5853ec5606df03dd307c"
+   },
+   {
+    "parameter": "d",
+    "generator": "listDegs (Listed)",
+    "fingerprint": "sha256:cbdea0b57054b2c44cdc1178dcdd66d6402b67ace27a4fc7ecade21034ab7e87"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(List Int)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((listDegeneracies Int) 7)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:24:01+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "EachWitnessIsItsCase",
+  "cone": "sha256:33009e4f459ba2bc81bb3b6581748ac7047cee54f1eb2f3b783d9fb397a6b6ba",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "symTypes (Listed)",
+    "fingerprint": "sha256:0ece4bea3948681e3874973006ba97d4eb89bebb9e9891fa889a88810db6aea4"
+   },
+   {
+    "parameter": "d",
+    "generator": "symDegs (Listed)",
+    "fingerprint": "sha256:399a35c4dd4045f136d8f147b1a933cecd7c239ade07d726be7f7c5bc52bc1fc"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "Symmetric"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((symmetricDegeneracies numpy) floor)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:24:01+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ]
+  ],
+  "regions": []
+ },
+ {
+  "law": "EachWitnessIsItsCase",
+  "cone": "sha256:33009e4f459ba2bc81bb3b6581748ac7047cee54f1eb2f3b783d9fb397a6b6ba",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "listTypes (Listed)",
+    "fingerprint": "sha256:29328b93853faf35e952b28efbe4968a238839a871fc5853ec5606df03dd307c"
+   },
+   {
+    "parameter": "d",
+    "generator": "listDegs (Listed)",
+    "fingerprint": "sha256:cbdea0b57054b2c44cdc1178dcdd66d6402b67ace27a4fc7ecade21034ab7e87"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(List Int)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((listDegeneracies Int) 7)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Cases",
+  "outcome": "Passed",
+  "date": "2026-10-17T12:24:01+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "regions": []
+ },
+ {
+  "law": "CaseNamesAreDistinct",
+  "cone": "sha256:1689cf3c93419d7776d493930f586063adc2086683a1e01df1e93fb2794cbdf0",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "listTypes (Listed)",
+    "fingerprint": "sha256:29328b93853faf35e952b28efbe4968a238839a871fc5853ec5606df03dd307c"
+   },
+   {
+    "parameter": "d",
+    "generator": "twiceNameds (Listed)",
+    "fingerprint": "sha256:5766eaa091b61010c49de57f1b38e404c247b7140d24d24ca96a3bc7d1ba3cab"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(List Int)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "twiceNamed"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "T = (List Int), d = twiceNamed"
+  },
+  "date": "2026-10-17T12:22:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "EachWitnessIsItsCase",
+  "cone": "sha256:33009e4f459ba2bc81bb3b6581748ac7047cee54f1eb2f3b783d9fb397a6b6ba",
+  "binding": [
+   {
+    "parameter": "T",
+    "generator": "listTypes (Listed)",
+    "fingerprint": "sha256:29328b93853faf35e952b28efbe4968a238839a871fc5853ec5606df03dd307c"
+   },
+   {
+    "parameter": "d",
+    "generator": "wrongWitnesses (Listed)",
+    "fingerprint": "sha256:e7bd5bcaf6278e45048e13c23b9ce6a0a05c4610ff421c50f9949e8f651a9027"
+   }
+  ],
+  "seed": 20261017,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "T",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "(List Int)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "d",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "wrongWitness"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 1,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "T = (List Int), d = wrongWitness"
+  },
+  "date": "2026-10-17T12:22:24+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": []
+ },
+ {
+  "law": "CaseNamesAreDistinct",
+  "cone": "sha256:1689cf3c93419d7776d493930f586063adc2086683a1e01df1e93fb2794cbdf0",
+  "binding": [
+   {
+    "parameter": "T",
     "generator": "listTypes (Listed)",
     "fingerprint": "sha256:29328b93853faf35e952b28efbe4968a238839a871fc5853ec5606df03dd307c"
    },
