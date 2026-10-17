@@ -88,6 +88,24 @@ j. D-2026-10-16-i: evidence kept per binding and per labelled region with its n 
 v0.4: D-2026-10-16-f, tag when (c) is met with (e) as debt. (c) verified by the coordinator at
 1922758 (741 passed); 3470c54 adds only record files. The tag is his.
 
+g'. 3g landed (6c9be06..bf25747; 781 passed, verified by the coordinator). Its question answered by
+   the coordinator (P2, one commit undoes it): a run cut by its time limit or fuel is recorded as a
+   run that did not finish (its demand, the step reached, the reason), never served; in 3h.
+Queue after 3g:
+- 3h (Opus): D-2026-10-16-h (tables `Just`, table cones re-certified, `CellsOfTheirKind` refuted at
+  baseline to be read in that light; no cutoff accepts a failure, `--accept assumed:LAW`; records of
+  `.run.lut` under examples/ tracked, under tests/ ignored) and the cut run recorded. Brief:
+  prompt-tables-cut.md.
+- controls (Sonnet): a control for each of the three uncontrolled store laws and the others `certify`
+  lists uncontrolled. Brief: prompt-controls.md.
+- 3j (Fable for the theory, after the controls): regions from the type, the law and the code.
+- 3e: the hash erases binder annotations; one re-certification wave.
+- print and stdout (after his item 12): a failed write is recorded as a success today (the
+  decision-assistant fork's finding of 2026-10-16: `print` appends to a Python buffer, `observe`
+  reads the same buffer, the real write happens at exit outside W, so `HostAgreesPrint` is
+  tautological). Direction: write at once, check what the OS accepted, fail the action otherwise;
+  stdout observed according to what fd 1 is.
+
 ## Step 4. The first cost (v0.5)
 `PinvProjects` returns its distance; the certificate records it; a demand is served by
 `distance <= tolerance` (L10.5, 6.S15 for that law); the pattern written for the other laws.
