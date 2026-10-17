@@ -126,6 +126,13 @@ Queue after 3g:
   tautological). Direction: write at once, check what the OS accepted, fail the action otherwise;
   stdout observed according to what fd 1 is.
 
+Status 2026-10-18: 3j's code (j2a) closed at 6df1ba9 (814 passed; PinvSymmetric and PinvScales'
+error model corrected to a normwise bound after the rank-deficient family refuted them, the
+refutations archived; a parameter fixed to one value gives no regions; grades 122 sampled, 81
+cases). The core: design 54f6228, bite 2 (properties) landed, bite 1 launched 2026-10-18 (brief
+record/plan/core-2026-10-17/prompt-bite-1.md). His three core questions wait
+(record/plan/core-2026-10-17/decisions.md); bites 3 and 4 wait on them.
+
 Priority from 2026-10-17 (D-2026-10-17-i, his words "Primero tenemos que rehacer todo el core"):
 the core first. Its design is launched beside j2a (record/plan/core-2026-10-17/prompt-design.md,
 Fable); its bites run before the rest of the queue below, which joins only where files are
