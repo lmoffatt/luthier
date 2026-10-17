@@ -3250,3 +3250,9 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
 Kind:       principles (a fundamental principle); the night's work: an exploration, read only but
             for its report
 Status:     current
+
+Correction to D-2026-10-18-c (the decision assistant's wording, found by the exploration of
+D-2026-10-18-h, record/plan/three-levels-2026-10-18/report.md, 2f9c42b): "a metric gives an
+equivalence by a threshold" is wrong. A threshold on a metric gives a tolerance relation, reflexive
+and symmetric and not transitive (L6.5's ball); only an ultrametric gives an equivalence by a
+threshold. The core declares the tolerance relation, and the equivalence from the ultrametric.
