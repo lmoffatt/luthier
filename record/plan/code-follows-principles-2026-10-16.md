@@ -162,6 +162,11 @@ decision-assistant fork, now luthier-8c), in this order after j2a:
   [proposed] (P1). A Sonnet bite after j2a lands (it touches theory comments and spec statuses), from
   item 28's list in record/plan/decisions-pending-2026-10-15.md.
 - 3e (hash erases binder annotations; census fingerprint fix; one re-certification wave).
+- The typing bite (item 39, recommended after the next tag; the tag now follows the core): after the
+  core, before the tag. Bite 2 of the core found `luthier check` passes a predicate typed wrong, a
+  missing field and `x + "a"` (check.py runs program.lth's predicates, it is no type checker); until
+  then the core's signatures are verified by its test programs (instances and controls), and
+  "check clean" in an acceptance criterion means only that.
 - No version tag until after the core's step (D-2026-10-17-e): the names change at large with it.
 - The core (D-2026-10-17-b, -c, -d), before more theories, then the tag (D-2026-10-17-e); 3e's
   hash change goes in its first bite so the library is re-certified once: the

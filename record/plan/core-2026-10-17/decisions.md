@@ -33,6 +33,13 @@ one-line wrappers across the core and a longer name on each test line. The bare 
 tester to quantify each conjunct on its own: code, in the file another agent is changing now. Recommended:
 the record form now, the bare form when the tester allows it; one commit per structure undoes it.
 
+*Addition to 3 (coordinator, 2026-10-17, after bite 2):* the same holds for the composite properties
+(`Equivalence`, `PartialOrder`, `Isomorphism`, `Bijective`): the `&` of partially applied laws is a
+term the kernel does not reduce, so bite 2 wrote each as one Bool law over its parts' variables,
+drawn independently. One tester change, splitting a `&` of laws into its conjuncts, each quantified
+on its own, would let both the composites and the structures take the bare form. Recommended: as
+built now, the tester's split as a bite after the core.
+
 **Note.** D-2026-10-17-f writes the doubles' associativity within `gamma2 (|x| + |y| + |z|)`. Higham's
 Lemma 3.1 puts each side within that of the exact sum, so the two sides differ by up to twice it, and
 computing the difference and the magnitudes in floating point adds a factor `(1 + u)^3`; the design
