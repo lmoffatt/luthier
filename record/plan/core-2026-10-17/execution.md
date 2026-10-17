@@ -620,6 +620,16 @@ of equivalence changes and whether it can be done (record/plan/three-levels-2026
 only, before more code: bites 4 and 4b wait for its report; the budgets bite, already running,
 finishes.
 
+For bite 6 (D-2026-10-18-i): "cost" splits into error (a value's propagated bound, the metric
+level), uncertainty (a value as a distribution, the probabilistic level), evidence (what a
+certificate knows with a finite budget, eps-hat at 1 - delta) and resources (the budget, D-2026-10-
+18-d). Their common algebra is a commutative ordered monoid, a quantale in complete form (the
+Lawvere base): bite 6 declares `Quantale` in structures as the base of the three levels, with its
+models named (error [0, inf] with + and <=; uncertainty distribution functions with a t-norm or
+convolution; evidence [0, 1] with + or max; resources + in sequence and max in parallel), and the
+functions group gains NonExpansive and Lipschitz, the generalization of Monotone (L6.8; Fuzz).
+Declarations only; the recording bites belong to the three-levels plan after the core.
+
 ### Bite 3. The metrics script (Sonnet; first, alone)
 
 Files: new `scripts/core_metrics.py` and `tests/test_core_metrics.py`. The script prints the four
