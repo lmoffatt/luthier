@@ -3191,3 +3191,21 @@ Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line
             export)
 Kind:       generators.lth, test.lth (`SampledMode : Placement -> Mode`), spec 7.S2, 7.S4, 7.R1
 Status:     current
+
+D-2026-10-18-f  Core question 3, decided otherwise than recommended there: no one-line wrappers per
+                law and structure (about sixty, `MonoidAssociative …`), which would restate each
+                property under another name, the Java manner D-2026-10-18-a leaves behind. First the
+                tester learns to split a conjunction of laws into its conjuncts, each a partially
+                applied law whose missing variables are quantified on its own (`Monoid M o m :=
+                Associative M o m.combine & Neutral M o m.combine m.neutral` means (∀ x y z.
+                Associative …) ∧ (∀ x. Neutral …)); then the structures and the composite
+                properties (`Equivalence`, `PartialOrder`, `Isomorphism`, `Bijective`) are written
+                in the bare form. The tester's split is core infrastructure, sequenced after the agent
+                now changing the tester (one thing at a time).
+Author:     Luciano, on the decision assistant's reading
+Quote:      "b"
+Source:     chat:luthier-8c:0 (the decision-assistant fork, 2026-10-18; the line unknown until the
+            export)
+Kind:       tester.py (a conjunction of laws split into conjuncts), run.py's enumeration of a
+            theory's laws, the core's structures and composite properties
+Status:     current
