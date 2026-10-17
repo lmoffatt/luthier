@@ -1080,14 +1080,14 @@ def test_the_store_law_holds_on_the_reference_and_its_controls_refute_the_broken
     assert [o.spec.law for o in laws] == ["ANewIdentityGoesInFront", "AnAgreeingReplayAddsNothing",
                                           "ADisagreeingReplayIsKept", "AnAgreeingPairSettles",
                                           "AnExhaustionIsNeverStored", "ADisagreementRefutes", "ADisagreementIsRefused",
-                                          "NoCutoffAcceptsAFailure"]
+                                          "NoCutoffAcceptsAFailure", "ErasureKeepsTheStep"]
     assert all(o.grade == "ExhaustiveGrade" or o.grade == "Cases" for o in laws), [tester.line(o) for o in laws]
     controls = tester.run_tests(ROOT / "tests" / "tester" / "certification_controls.test.lut")
     assert [(o.spec.law, o.verdict) for o in controls] == [
         ("ADisagreeingReplayIsKept", "Refuted"), ("AnExhaustionIsNeverStored", "Refuted"),
         ("ADisagreementRefutes", "Refuted"), ("ADisagreementIsRefused", "Refuted"),
         ("ANewIdentityGoesInFront", "Refuted"), ("AnAgreeingReplayAddsNothing", "Refuted"),
-        ("AnAgreeingPairSettles", "Refuted")]
+        ("AnAgreeingPairSettles", "Refuted"), ("ErasureKeepsTheStep", "Refuted")]
     absorbed, = (o for o in controls if o.spec.law == "ADisagreeingReplayIsKept")
     assert "r = absorbing, e = passOne, es = ((cons failOne) ((cons passOne) nil))" in tester.line(absorbed)
 
