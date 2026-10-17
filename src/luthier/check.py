@@ -7,7 +7,7 @@ R10 is author judgement, R11 a typing law, S23 is an elaboration law.
 from functools import lru_cache
 from dataclasses import dataclass, fields, is_dataclass
 from . import surface as s, term as t
-from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError
+from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError, TypingError, fits as type_fits, refines as type_refines
 from .kernel import alpha_equal, substitute, reduce, free_names, pattern_names
 from .run import FileScope, EXECUTIVE, KIND_NAME, SUFFIX, executive_import, file_kind
 
@@ -150,7 +150,22 @@ def acts(p, n, cls=None):
 
 def unknown(p, ns):
     known = coreNames | constructors(p) | {a.name for a in p if hasattr(a, 'name')} | {i.asName or i.name for a in p if isinstance(a, s.ImportAct) for i in a.names}
-    return {x for x in ns if x not in known and namePrefix(x) not in known}
+    missing = {x for x in ns if x not in known and namePrefix(x) not in known}
+    # a field of a structure is a name resolved by the type of its argument (rule 2.2, the core's
+    # bite 4); whether it resolves is the typing's to say (4.R13)
+    return missing - structure_fields(p) if missing else missing
+
+
+def structure_fields(p):
+    """The field names of the structures the file, its imports and core declare: a name declared
+    at a record with parameters (rule 2.2)."""
+    from .elaborate import prelude
+    acts = tuple(p) + tuple(getattr(p, 'imported', ()))
+    out = {n for st in prelude().structures.values() for n, _ in st.record.fields}
+    for a in acts:
+        if isinstance(a, s.Declare) and a.binders and isinstance(a.type, s.Record):
+            out.update(n for f in a.type.fields for n in f.names)
+    return out
 
 
 def declared(p, n):
@@ -352,19 +367,28 @@ def violatesR12(p, n):
 
 
 class Typing:
-    """Small rules-needed typing; no unification or complete dependent checking."""
-    untyped = {}; untyped_names = frozenset(); acts = ()  # set by `typed`: the acts left untyped
-    def __init__(self, p):
-        self.program = elaborate_program(p)
+    """Small rules-needed typing; no unification or complete dependent checking. Every act is
+    elaborated in the context of the whole program (its imports and core's included); an act that
+    does not elaborate is left out, its error in `errors` (the core's bite 4)."""
+    untyped = {}; untyped_names = frozenset(); acts = (); failures = {}  # set by `typed`
+    def __init__(self, p, hidden=frozenset()):
         self.context = context_of(p)
-        # Preserve written declarations: context_of currently overwrites them with
-        # a Hole for a later unannotated definition.
+        # the constructors of an imported file the file does not list are not its (run.py's
+        # `Loaded`): a pattern variable of that name is a variable
+        self.context.constructors -= set(hidden)
+        self.errors = {}
+        self.program = elaborate_program(p, self.context, self.errors)
+        # Preserve written declarations: a later unannotated definition writes its inferred type
+        # into the context.
         declarations = {}
         for a in p:
-            if isinstance(a, s.Declare):
+            if isinstance(a, s.Declare) and a not in self.errors:
                 inner = self.context.child()
-                ps = parameters(a.binders, inner)
-                declarations[a.name] = curry(t.Pi, ps, walk_type(a.type, inner))
+                try:
+                    ps = parameters(a.binders, inner)
+                    declarations[a.name] = curry(t.Pi, ps, walk_type(a.type, inner))
+                except ElaborationError:
+                    continue
         self.program = tuple(t.Declare(a.name, declarations[a.name])
                              if isinstance(a, t.Declare) else a for a in self.program)
         self.types = {a.name: a.type for a in self.program if isinstance(a, (t.Declare, t.Define))}
@@ -376,7 +400,7 @@ class Typing:
         if isinstance(a, t.Record) and isinstance(b, t.Record):
             return len(a.fields) == len(b.fields) and all(
                 n == m and self.same(x, y) for (n, x), (m, y) in zip(a.fields, b.fields))
-        return alpha_equal(a, b)
+        return alpha_equal(a, b) or up_to_unknowns(a, b)
 
     def refines(self, a, b):
         # a hole is a type not inferred (an unannotated lambda parameter): unknown, never compared
@@ -393,7 +417,11 @@ class Typing:
 
     def typeOf(self, u, ctx=None):
         c = self.context.child(); c.types.update(self.types); c.types.update(ctx or {})
-        ty = infer(u, c)
+        try:
+            ty = infer(u, c)
+        except ElaborationError:
+            # a term the typing cannot read (its refusal is reported on the act, 4.R9, 4.R13)
+            return None
         return None if isinstance(ty, t.Hole) else as_type(ty)
 
     def theory_record(self, u):
@@ -434,6 +462,26 @@ class Typing:
         return next((a.body for a in self.program if isinstance(a, t.Define) and a.name == n), None)
 
 
+def up_to_unknowns(a, b):
+    """Whether two types agree wherever both are known: an unknown (`?A` of a constructor's
+    instance, a lambda's parameter, a pattern variable's type) matches anything (the core's bite 4,
+    whose typing knows a list's head and not always its element). Binder names are not compared."""
+    if isinstance(a, t.Hole) or isinstance(b, t.Hole):
+        return True
+    if type(a) is not type(b):
+        return False
+    if isinstance(a, (t.Pi, t.Sigma, t.Lam, t.Subtype)):
+        return up_to_unknowns(a.domain if hasattr(a, 'domain') else a.type, b.domain if hasattr(b, 'domain') else b.type) and \
+            up_to_unknowns(a.codomain if hasattr(a, 'codomain') else a.predicate if isinstance(a, t.Subtype) else a.body,
+                           substitute(b.name, t.Var(a.name), b.codomain if hasattr(b, 'codomain') else b.predicate if isinstance(b, t.Subtype) else b.body) if a.name != b.name else
+                           (b.codomain if hasattr(b, 'codomain') else b.predicate if isinstance(b, t.Subtype) else b.body))
+    if isinstance(a, tuple):
+        return len(a) == len(b) and all(up_to_unknowns(x, y) for x, y in zip(a, b))
+    if is_dataclass(a):
+        return all(up_to_unknowns(getattr(a, f.name), getattr(b, f.name)) for f in fields(a))
+    return a == b
+
+
 @lru_cache(maxsize=8)
 def _typing(p):
     return typed(Typing, (), p)
@@ -441,8 +489,10 @@ def _typing(p):
 
 class Program(tuple):
     """A file's acts, with the acts its imports bring (12.S22), read for typing only: the rules are
-    still checked on the file's own names, and the surface rules see the file alone."""
+    still checked on the file's own names, and the surface rules see the file alone; `hidden` the
+    constructors of imported files the file does not list."""
     imported = ()
+    hidden = frozenset()
     typing = None
 
 
@@ -482,6 +532,22 @@ def load_imports(program, path, seen=None):
     return tuple(a for target, a in brought
                  if not isinstance(a, (s.Declare, s.Define, s.Alias)) or a.name not in taken
                  or (target, a.name) in scope.listed and a.name not in own) + scope.aliases
+
+
+def hidden_constructors(program, imported):
+    """The constructors of the data an imported file defines that the file neither lists (the
+    constructor or its data) nor defines, nor core gives: not the file's (run.py's `Loaded`
+    resolves a constructor as a definition), so a pattern variable of that name is a variable
+    (grammar.lth's `name`, reached through world_model.lut, is `name` in distance_graph.lut's
+    `schema name ->`)."""
+    listed = {n for act in program if isinstance(act, s.ImportAct) for i in act.names for n in (i.name, i.asName) if n}
+    own = _constructors_of(tuple(program))
+    core = {'true', 'false', 'nil', 'cons', 'just', 'nothing', 'ok', 'failed', 'unit'}
+    hidden = set()
+    for a in imported:
+        if isinstance(a, s.Define) and isinstance(a.body, s.DataBody) and a.name not in listed:
+            hidden.update(n for n, _ in a.body.constructors)
+    return frozenset(hidden - own - listed - core)
 
 
 class _File:
@@ -626,20 +692,17 @@ def typed_part(prefix, acts):
     return tuple(kept), left
 
 
-def typed(make, imported, own):
-    """A typing of the file's own acts after its imported ones (12.S22): of the whole when it
-    elaborates; else of the file alone when that elaborates; else act by act (`typed_part`). It
-    records the acts left untyped with the elaborator's message, so that a rule's clean verdict is
-    known to cover only the typed acts."""
-    def attempt(acts):
-        try: return make(acts)
-        except ElaborationError: return None
-    q = imported and attempt(imported + own) or attempt(own); left = {}
-    if q is None:
-        prefix = imported if imported and elaboration_error(imported) is None else ()
-        kept, left = typed_part(prefix, own)
-        q = make(prefix + kept)
-    q.untyped = {a: m for a, m in left.items() if not isinstance(a, s.ImportAct)}
+def typed(make, imported, own, hidden=frozenset()):
+    """A typing of the file's own acts after its imported ones (12.S22), each act elaborated in the
+    context of all of them (the core's bite 4; before it, of the whole file when it elaborated,
+    else act by act alone). It records the acts left untyped with the elaborator's message, so that
+    a rule's clean verdict is known to cover only the typed acts, and among them the typing's
+    refusals (`TypingError`, 4.R9 and 4.R13), which `check` reports."""
+    q = make(imported + own, hidden)
+    mine = set(own)
+    left = {a: e for a, e in q.errors.items() if a in mine and not isinstance(a, s.ImportAct)}
+    q.untyped = {a: str(e) or 'not elaborated' for a, e in left.items()}
+    q.failures = {a: e for a, e in left.items() if isinstance(e, TypingError)}
     q.untyped_names = {a.name for a in q.untyped if hasattr(a, 'name')}
     q.acts = tuple(a for a in own if not isinstance(a, s.ImportAct))
     return q
@@ -647,12 +710,12 @@ def typed(make, imported, own):
 
 def typing_of(p):
     """The typing of a file read with its imports (12.S22, so that `base` sees an imported
-    subtype's definition; an imported act the elaborator cannot read alone is dropped); see `typed`."""
+    subtype's definition); see `typed`."""
     if not isinstance(p, Program) or not p.imported: return _typing(tuple(p))
     if p.typing is None:
         own = {a.name for a in p if hasattr(a, 'name')}
-        imported = tuple(a for a in p.imported if a.name not in own and elaborates(a))
-        p.typing = typed(Typing, imported, tuple(p))
+        imported = tuple(a for a in p.imported if a.name not in own)
+        p.typing = typed(Typing, imported, tuple(p), p.hidden)
     return p.typing
 
 
@@ -775,9 +838,48 @@ def theory_head(q, u):
             any(isinstance(a, t.Declare) and a.name == u.name for a in q.program) and q.theory_record(u) is not None)
 
 
+def body_misfit(q, a, n):
+    """4.R9 on a definition's body (the core's bite 4): its type fits the type written for it,
+    through the binders; the message when it does not, else None. A projection of a field the
+    record does not have is the typing's refusal, named."""
+    from .elaborate import show, Untyped
+    expected = q.types.get(n)
+    body = q.body(n)
+    if expected is None or body is None or a.type is None or isinstance(a.body, s.DataBody):
+        return None
+    c = q.context.child(); c.types.update(q.types)
+    try:
+        actual = infer(body, c)
+    except TypingError as e:
+        return str(e)
+    except ElaborationError:
+        return None
+    e, x = expected, actual
+    for _ in range(sum(len(b.names) for b in a.binders)):
+        if not (isinstance(e, t.Pi) and isinstance(x, t.Pi)):
+            return None
+        x = substitute(x.name, t.Var(e.name), x.codomain) if x.name != e.name else x.codomain
+        e = e.codomain
+        body = body.body if isinstance(body, t.Lam) else body
+    if isinstance(body, t.RecordValue) and isinstance(x, t.Record):
+        # a record written with its labels is read by them, whatever their order
+        from .elaborate import record_of
+        want = record_of(e, c)
+        if want is not None and sorted(n for n, _ in want.fields) == sorted(n for n, _ in x.fields):
+            got = dict(x.fields)
+            x = t.Record(tuple((n, got[n]) for n, _ in want.fields))
+    if type_fits(x, e, c):
+        return None
+    return f'its body has type {show(x)}, which does not fit the type written for it, {show(e)}'
+
+
 def violatesR9(p, n):
     """4.R9: application argument bases must refine domain bases, with function variance."""
     q = typing_for(p, n)
+    for a in acts(p, n, s.Define):
+        misfit = body_misfit(q, a, n)
+        if misfit:
+            return misfit
     for a in acts(p, n, s.Define):
         if isinstance(a.type, s.Record):
             expected = q.types.get(n); actual = q.typeOf(q.body(n))
@@ -786,8 +888,13 @@ def violatesR9(p, n):
                 expected = expected.codomain
             if isinstance(actual, t.Record) and isinstance(expected, t.Record) and not q.refines(actual, expected): return True
     for c, f, x in q.applications(q.body(n)):
-        ft = q.typeOf(f, c); at = t.Universe() if theory_head(q, x) else q.typeOf(x, c)
-        if isinstance(ft, t.Pi) and at is not None and not q.refines(base(q, at), base(q, ft.domain)): return True
+        ft = q.typeOf(f, c); at = t.Universe() if theory_head(q, x) or isinstance(x, t.Var) and x.name in q.context.refinements else q.typeOf(x, c)
+        if isinstance(ft, t.Pi) and at is not None and not q.refines(base(q, at), base(q, ft.domain)):
+            # [bite 4] the typing knows more types than this rule read before (core's, a pattern
+            # variable's, a constructor's instance): through a type, a subtype refines its base, a
+            # value index of a family is not compared, an unknown agrees (elaborate.refines)
+            ctx = q.context.child(); ctx.types.update(q.types); ctx.types.update(c)
+            if not type_refines(base(q, at), base(q, ft.domain), ctx): return True
     return False
 
 
@@ -949,6 +1056,7 @@ def check(program, path=None) -> list[Failure]:
     if path is not None:
         result += kinds(program, path)
         program = Program(program); program.imported = load_imports(program, path)
+        program.hidden = hidden_constructors(program, program.imported)
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for rule, predicate in [(f'4.R{k}', globals()[f'violatesR{k}']) for k in range(1, 14)] + [('2.R1', violatesR2R1), ('2.R6', violatesR2R6), ('6.R1', violates6R1)]:
             try:
@@ -957,10 +1065,15 @@ def check(program, path=None) -> list[Failure]:
                 # Surface rules still run; missing elaboration is recorded by the audit.
                 bad = False
             if bad:
-                message = predicate.__doc__.split(': ', 1)[1]
+                message = bad if isinstance(bad, str) else predicate.__doc__.split(': ', 1)[1]
                 if rule == '4.R12': message = 'defined twice: ' + message
                 result.append(Failure(rule, n, message))
-    _checked[:] = [tuple(program), typing_of(program)]
+    # the typing's refusals (the core's bite 4): a type that does not fit (4.R9), a name no model
+    # resolves (4.R13), each on the act the elaborator could not read for it
+    q = typing_of(program)
+    for a, e in q.failures.items():
+        result.append(Failure(e.rule, getattr(a, 'name', None) or label(a), str(e)))
+    _checked[:] = [tuple(program), q]
     return result
 
 
