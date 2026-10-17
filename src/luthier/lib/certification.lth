@@ -40,6 +40,14 @@
 -- `namedPast`, `standingRefusals` and `assumedPast` (§3); the law `NoCutoffAcceptsAFailure` of
 -- `Certifying` (§5). Only the cutoff's parts of §3 and §5 are touched.
 --
+-- Draft 5, 2026-10-17, by Claude Fable 5.1, an agent of the coordinating session, on the brief
+-- record/IA/regions-2026-10-17/prompt-theory.md (step 3j), after D-2026-10-16-i and D-2026-10-16-j
+-- (item 15: the evidence of a law kept per binding and per region, the regions from three finite
+-- sources, a label informative, the combination the demand's and the weakest by default). New: a
+-- region and its sources, the evidence per binding and region, the law's regions from its cutoffs
+-- and premises, the grade read over the regions (§2); the theories `Regioning` and `Deriving`
+-- beside `Certifying` (§5). `Certifying`'s fields and `Entry` are unchanged.
+--
 -- What this file states. 6.S16 asks for a theory over a cost type `C`. D-2026-10-14-c says first
 -- everything Boolean, so here a law passes or does not, the bound of an entry is `lift` of its
 -- outcome (a pass is `0`, a failure `top`, refused by every cutoff, 6.S5), and the evidence cutoff
@@ -57,7 +65,8 @@
 --   §3 What a run requires: `serves`, the refusal, `Certified` (6.S14, 6.S15, 7.S15, 12.S17).  done
 --   §4 The hash of a cone (6.S8, 12.S11, 3.S34).                                                 done
 --   §5 The theory `Certifying`, the laws of §1 to §3 claimed; the store law `Recording`; the
---      union of the stretches, `Pooling`.                                                       done
+--      union of the stretches, `Pooling`; the grade over the regions, `Regioning`, and the
+--      law's regions, `Deriving`.                                                              done
 
 import "laws.lth" Evidence Coverage Listed Confirmed Supported Cited Assumed NotRun Tested Holds Rates
   Points Drawn spentOf
@@ -359,6 +368,94 @@ pooledCases (c : Certificate) (b : List Drawing) : Nat :=
 -- one grade at most another, where `nothing` (no grade) is below every grade
 atMost (m n : Maybe Grade) : Bool :=
   match m { nothing -> true ; just g -> (match n { nothing -> false ; just h -> gradeRank g <= gradeRank h }) }
+
+-- [D-2026-10-16-i, D-2026-10-16-j] The evidence of a law is kept per binding and per region, not
+-- summarized: each region with its `n` and its bound. A region is named by its source and its
+-- name, and the sources are three and finite, so the regions of a law are bounded by the size of
+-- the theory, the law and the code: the type, whose theory declares its degenerate cases once
+-- (generators.lth §9, `Degeneracies`; arrays.lth §5); the law, each cutoff parameter giving the
+-- side just above it and the side just below, each premise its boundary (`lawRegions` below); and
+-- the code, each branch of the cone (an `if`, a `match`: branch coverage), which the tester reads
+-- from the cone and names. A label an author adds (`κ` above 1e8, 7.S14) is a fourth source,
+-- recorded with its share of cases and informative (L10.11): it enters no grade and no combination
+-- (`grades`). The bound of a region is ε̂(n, δ) (L10.3, 7.S11), the cost form, a hole as
+-- `entryBound` is; in this draft a region with cases has the bound of its certificate (a pass `0`,
+-- a failure anywhere `top`) and a region with none bounds nothing, which caps the grade
+-- (`regionGrade`). The evidence per region is the entries' (7.S9: an entry records its labels);
+-- here it is given beside the certificate, as `BindingEvidence`, since `Entry` does not carry it
+-- yet [proposed: the labels' field of 7.S9, a gap of this draft as the cutoffs' parameter is].
+Source : U := data { FromType : Source ; FromLaw : Source ; FromCode : Source ; Label : Source }
+Region = { source : Source, name : String }
+grades (r : Region) : Bool := match r.source { Label -> false ; _ -> true }
+RegionEvidence = { region : Region, n : Nat }
+regionBound : RegionEvidence -> C
+BindingEvidence = { binding : List Drawing, regions : List RegionEvidence }
+-- the cases of a region recorded under a binding, none when none is recorded
+casesIn (r : Region) (rs : List RegionEvidence) : Nat :=
+  match rs { nil -> 0 ; cons e rest -> (if e.region == r then e.n else 0) + casesIn r rest }
+casesAt (b : List Drawing) (r : Region) (ev : List BindingEvidence) : Nat :=
+  match ev { nil -> 0 ; cons x rest -> (if x.binding == b then casesIn r x.regions else 0) + casesAt b r rest }
+-- the evidence with a region's cases under a binding added, or removed (how the laws of §5 build
+-- the evidence they quantify over)
+withCases (b : List Drawing) (r : Region) (n : Nat) (ev : List BindingEvidence) : List BindingEvidence :=
+  cons { binding := b, regions := [{ region := r, n := n }] } ev
+dropIn (r : Region) (rs : List RegionEvidence) : List RegionEvidence :=
+  match rs { nil -> nil ; cons e rest -> if e.region == r then dropIn r rest else cons e (dropIn r rest) }
+dropCases (b : List Drawing) (r : Region) (ev : List BindingEvidence) : List BindingEvidence :=
+  match ev { nil -> nil ; cons x rest ->
+    cons (if x.binding == b then { binding := x.binding, regions := dropIn r x.regions } else x) (dropCases b r rest) }
+-- The law's regions, the second source: each cutoff parameter its two sides, each premise its
+-- boundary, named by the parameter as the law writes it. Which parameters are cutoffs
+-- (`Tolerance`, `RankFloor`, `Sequential`: the types the demand supplies, D-2026-10-14-c,
+-- D-2026-10-16-k item 20) and which are premises (a parameter of a subtype, `s : PsdAt m fl`) the
+-- tester reads from the law's signature. [proposed] The boundary of a premise is where its
+-- predicate barely holds: at the cutoff for a predicate stated by one (`PsdAt m fl`, barely
+-- semidefinite at the floor); for an exact predicate (`Symmetric`) the boundary is the premise
+-- itself, and the region records that the premise held (7.S14). The law is `Deriving` (§5).
+above (c : String) : Region := { source := FromLaw, name := c + " above" }
+below (c : String) : Region := { source := FromLaw, name := c + " below" }
+boundary (p : String) : Region := { source := FromLaw, name := p + " boundary" }
+cutoffRegions (cs : List String) : List Region :=
+  match cs { nil -> nil ; cons c rest -> cons (above c) (cons (below c) (cutoffRegions rest)) }
+premiseRegions (ps : List String) : List Region := match ps { nil -> nil ; cons p rest -> cons (boundary p) (premiseRegions rest) }
+appendRegions (xs ys : List Region) : List Region := match xs { nil -> ys ; cons x rest -> cons x (appendRegions rest ys) }
+lawRegions (cutoffs premises : List String) : List Region := appendRegions (cutoffRegions cutoffs) (premiseRegions premises)
+memberRegion (r : Region) (rs : List Region) : Bool := match rs { nil -> false ; cons s rest -> s == r or memberRegion r rest }
+allIn (rs within : List Region) : Bool := match rs { nil -> true ; cons r rest -> memberRegion r within and allIn rest within }
+countRegions (rs : List Region) : Nat := match rs { nil -> 0 ; cons r rest -> 1 + countRegions rest }
+countStrings (xs : List String) : Nat := match xs { nil -> 0 ; cons x rest -> 1 + countStrings rest }
+-- The grade of a law in one region under one binding: none where the certificate stands on
+-- nothing; the binding's grade (the fold above) where the region has cases under it; and at most
+-- sampled where it has none (D-2026-10-16-i: a sample says nothing of a null set, so the law is
+-- below cases there, and a census or an enumeration that reached no case of the region does not
+-- say of it what its grade says). The grade over the regions is their combination, region by
+-- region and then binding by binding, with the combination `comb` the demand chooses (5.S8), the
+-- weakest by default (`orWeakest`, the reference model `regioning`): with no region it is the
+-- certificate's grade, a label is passed over, and a certificate with no pass has none. The law is
+-- `Regioning` (§5).
+capped (m : Maybe Grade) : Maybe Grade := match m { nothing -> nothing ; just g -> just (weakest g Sampled) }
+orStrongest (m n : Maybe Grade) : Maybe Grade :=
+  match m { nothing -> n ; just g -> (match n { nothing -> m ; just h -> just (stronger g h) }) }
+regionGrade (k : Certifying) (c : Certificate) (b : List Drawing) (r : Region) (ev : List BindingEvidence) : Maybe Grade :=
+  if standsOnNothing k c then nothing
+  else if casesAt b r ev == 0 then capped (k.grade (only b c)) else k.grade (only b c)
+overRegions (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (b : List Drawing)
+            (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  match rs { nil -> k.grade (only b c) ; cons r rest ->
+    if grades r then comb (regionGrade k c b r ev) (overRegions k comb c b rest ev) else overRegions k comb c b rest ev }
+-- the bindings of the passes that count, each once, in the order of the entries
+bindingSeen (b : List Drawing) (bs : List (List Drawing)) : Bool := match bs { nil -> false ; cons x rest -> x == b or bindingSeen b rest }
+bindingsFrom (c : Certificate) (es : List Entry) (seen : List (List Drawing)) : List (List Drawing) :=
+  match es { nil -> nil ; cons e rest ->
+    if e.law == c.law and e.cone == c.cone and e.outcome == Passed and not (e.grade == nothing) and not (bindingSeen e.binding seen)
+    then cons e.binding (bindingsFrom c rest (cons e.binding seen)) else bindingsFrom c rest seen }
+bindingsOf (c : Certificate) : List (List Drawing) := bindingsFrom c c.entries nil
+overBindings (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (bs : List (List Drawing))
+             (rs : List Region) (ev : List BindingEvidence) : Maybe Grade :=
+  match bs { nil -> nothing ; cons b rest -> comb (overRegions k comb c b rs ev) (overBindings k comb c rest rs ev) }
+regionedGrade (k : Certifying) (comb : Maybe Grade -> Maybe Grade -> Maybe Grade) (c : Certificate) (rs : List Region)
+              (ev : List BindingEvidence) : Maybe Grade :=
+  if standsOnNothing k c then nothing else overBindings k comb c (bindingsOf c) rs ev
 
 -- The older names of a grade (point, census of k, bounded, witnessed, sampled) read as the five
 -- (6.S7, decided D-2026-10-13-g; 7.S10): a point is cases with one case, a census is cases,
@@ -749,3 +846,80 @@ TheUnionIsMonotone (k : Certifying) (p : Pooling k) (c : Certificate) (s : Curre
 AReplayIsNotANewStretch (k : Certifying) (p : Pooling k) (c : Certificate) (e : EntryOf c) : Bool :=
   p.pooled (withEntry (withEntry c e) (replayOf e e.outcome e.grade)) e.binding == p.pooled (withEntry c e) e.binding
 Pooling (k : Certifying) := TheUnionIsMonotone k & AReplayIsNotANewStretch k
+
+-- The law of the regions (D-2026-10-16-i, D-2026-10-16-j; 5.S8, 7.S14, L10.3): how the grade of a
+-- law is read over its regions and its bindings. A model is a combination of grades, the demand's
+-- choice (5.S8), and the grade it reads with it; `regionedGrade` with `orWeakest` is the
+-- reference, certification_model's `regioning`, and the specimen is certify.py's grade over the
+-- regions the tester records (the code that follows this draft). The regions a law is graded over
+-- are given (`rs`): the type's cases, the law's `lawRegions` and the cone's branches, as the tester
+-- lists them; the evidence per binding and region likewise (`ev`).
+Regioning (k : Certifying) : {
+  combine : Maybe Grade -> Maybe Grade -> Maybe Grade,
+  graded : Certificate -> List Region -> List BindingEvidence -> Maybe Grade,
+}
+GradingRegion : U := { r : Region | grades r }
+-- with no region the grade is the certificate's (7.S10 as §2 fixes it)
+NoRegionsLeaveTheGrade (k : Certifying) (q : Regioning k) (c : Certificate) (ev : List BindingEvidence) : Bool :=
+  q.graded c nil ev == k.grade c
+-- a refuted certificate, or one with a disagreement, has no grade in any region
+RefutedInEveryRegion (k : Certifying) (q : Regioning k) (c : Certificate) (rs : List Region) (ev : List BindingEvidence) : Bool :=
+  not (standsOnNothing k c) or q.graded c rs ev == nothing
+-- an author's label changes no grade, whatever cases it records under the binding of a pass
+ALabelEntersNoGrade (k : Certifying) (q : Regioning k) (c : Certificate) (rs : List Region) (ev : List BindingEvidence)
+                    (l : String) (n : Nat) (p : CurrentPass c) : Bool :=
+  q.graded (withEntry c p) (cons { source := Label, name := l } rs) (withCases p.binding { source := Label, name := l } n ev)
+    == q.graded (withEntry c p) rs ev
+-- a region with no evidence under a binding leaves the law below cases (D-2026-10-16-i), whatever
+-- the combination: drawn as a pass under the binding with the region's cases under it removed
+belowCasesWithout (k : Certifying) (q : Regioning k) (c : Certificate) (p : Entry) (rs : List Region) (ev : List BindingEvidence)
+                  (r : Region) : Bool :=
+  atMost (q.graded (withEntry c p) (cons r rs) (dropCases p.binding r ev)) (just Sampled)
+AnEmptyRegionLeavesBelowCases (k : Certifying) (q : Regioning k) (c : Certificate) (r : GradingRegion) (rs : List Region)
+                              (ev : List BindingEvidence) (p : CurrentPass c) : Bool :=
+  standsOnNothing k (withEntry c p) or belowCasesWithout k q c p rs ev r
+-- and so for each of the three sources by name: the type's case, the law's side or boundary, the
+-- cone's branch (D-2026-10-16-j); only a label is passed over
+TheThreeSourcesGrade (k : Certifying) (q : Regioning k) (c : Certificate) (nm : String) (rs : List Region)
+                     (ev : List BindingEvidence) (p : CurrentPass c) : Bool :=
+  standsOnNothing k (withEntry c p)
+    or (belowCasesWithout k q c p rs ev { source := FromType, name := nm }
+        and belowCasesWithout k q c p rs ev { source := FromLaw, name := nm }
+        and belowCasesWithout k q c p rs ev { source := FromCode, name := nm })
+-- the grade over the regions is the combination, region by region, of the region's grade with the
+-- grade over the rest, under one binding (the fold the reference fixes, as `pool`'s laws fix §2's)
+CombinesOverRegions (k : Certifying) (q : Regioning k) (c : Certificate) (r : GradingRegion) (rs : List Region)
+                    (ev : List BindingEvidence) (p : CurrentPass c) : Bool :=
+  standsOnNothing k (withEntry c p)
+    or q.graded (only p.binding (withEntry c p)) (cons r rs) ev
+         == q.combine (regionGrade k (only p.binding (withEntry c p)) p.binding r ev) (q.graded (only p.binding (withEntry c p)) rs ev)
+-- and across bindings: the combination of one binding's grade over the regions with the others'
+CombinesAcrossBindings (k : Certifying) (q : Regioning k) (c : Certificate) (rs : List Region) (ev : List BindingEvidence)
+                       (p : CurrentPass c) : Bool :=
+  standsOnNothing k (withEntry c p)
+    or q.graded (withEntry c p) rs ev
+         == q.combine (q.graded (only p.binding (withEntry c p)) rs ev) (q.graded (without p.binding c) rs ev)
+-- what every combination keeps, the rest being the demand's (5.S8): it is commutative, no grade is
+-- its unit (a binding or a region with no grade adds nothing), and it raises no grade above the
+-- stronger of the two (L10.9: no operation raises a grade without new evidence)
+CombineCommutes (k : Certifying) (q : Regioning k) (g h : Maybe Grade) : Bool := q.combine g h == q.combine h g
+NothingIsTheUnit (k : Certifying) (q : Regioning k) (g : Maybe Grade) : Bool := q.combine nothing g == g
+CombineNeverRaises (k : Certifying) (q : Regioning k) (g h : Maybe Grade) : Bool := atMost (q.combine g h) (orStrongest g h)
+Regioning (k : Certifying) := NoRegionsLeaveTheGrade k & RefutedInEveryRegion k & ALabelEntersNoGrade k
+  & AnEmptyRegionLeavesBelowCases k & TheThreeSourcesGrade k & CombinesOverRegions k & CombinesAcrossBindings k & CombineCommutes k
+  & NothingIsTheUnit k & CombineNeverRaises k
+
+-- The law of the regions a law derives from its own parameters (D-2026-10-16-j, the second
+-- source): a model lists them from the names of the law's cutoff parameters and of its premises;
+-- `lawRegions` (§2) is the reference, certification_model's `deriving`, and the specimen is the
+-- tester's reading of a law's signature. Each cutoff gives its two sides, each premise its
+-- boundary, and nothing else is listed: every region is one of the law's and the count is two per
+-- cutoff and one per premise, so no region is listed twice and no author's label enters.
+Deriving : { ofLaw : List String -> List String -> List Region }
+EachCutoffGivesTwoSides (d : Deriving) (cs ps : List String) (c : String) : Bool :=
+  not (nameIn c cs) or (memberRegion (above c) (d.ofLaw cs ps) and memberRegion (below c) (d.ofLaw cs ps))
+EachPremiseGivesItsBoundary (d : Deriving) (cs ps : List String) (p : String) : Bool :=
+  not (nameIn p ps) or memberRegion (boundary p) (d.ofLaw cs ps)
+OnlyTheLawsRegions (d : Deriving) (cs ps : List String) : Bool :=
+  allIn (d.ofLaw cs ps) (lawRegions cs ps) and countRegions (d.ofLaw cs ps) == 2 * countStrings cs + countStrings ps
+Deriving := EachCutoffGivesTwoSides & EachPremiseGivesItsBoundary & OnlyTheLawsRegions

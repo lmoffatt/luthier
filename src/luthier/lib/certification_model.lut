@@ -22,11 +22,16 @@
 -- Draft 3, 2026-10-16, by Claude Opus 5.5, on record/IA/code-follows-2026-10-16/
 -- prompt-pool-seeds.md (D-2026-10-16-g): `pooling` is the theory's `pooledCases`, the reference
 -- model of `Pooling`, the union of a law's stretches.
+--
+-- Draft 4, 2026-10-17, by Claude Fable 5.1, on record/IA/regions-2026-10-17/prompt-theory.md
+-- (D-2026-10-16-i, D-2026-10-16-j): `regioning` is the theory's `regionedGrade` combined by the
+-- weakest (5.S8's default), the reference model of `Regioning`; `deriving` is the theory's
+-- `lawRegions`, the reference model of `Deriving`.
 
 import "certification.lth" Certifying ConeHashing Store Entry Identity Certificate Demand ConeName Refusal
   Standing Link ParameterReach Reach Value Hash Support Interval Members Number Printed Passed Failed State Current Stale
   Uncertified Provisional Disagrees Drawing stronger reachOf coversAll anyServes appendRefusals latestOf latestAt failureAt
-  disputeAt Recording recordEntry Pooling pooledCases
+  disputeAt Recording recordEntry Pooling pooledCases Regioning regionedGrade orWeakest Deriving lawRegions
 import "test.lth" Grade gradeRank weakest
 import "term_model.lut" alpha canonical
 
@@ -125,6 +130,12 @@ recording : Recording certifying := { record := fn e es { recordEntry certifying
 
 -- D-2026-10-16-g: the union of the stretches' reference, the theory's own `pooledCases`
 pooling : Pooling certifying := { pooled := pooledCases }
+
+-- D-2026-10-16-i, D-2026-10-16-j: the grade over the regions, combined by the weakest (5.S8's
+-- default; a demand that chooses another combination is another model), and the law's regions
+-- from its cutoffs and premises, the theory's own `regionedGrade` and `lawRegions`
+regioning : Regioning certifying := { combine := orWeakest, graded := fn c rs ev { regionedGrade certifying orWeakest c rs ev } }
+deriving : Deriving := { ofLaw := lawRegions }
 
 -- 6.S8: the hash of a cone, the host's
 hashing : ConeHashing alpha canonical := {
