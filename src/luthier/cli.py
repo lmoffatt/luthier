@@ -72,8 +72,8 @@ def main(argv: list[str] | None = None) -> int:
     p_test = sub.add_parser("test", help="run the test lines of a test program, x.test.lut (test.lth's Tester, 12.R2)")
     p_test.add_argument("file")
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
-    p_test.add_argument("--fuel", type=int, default=1_000_000,
-                        help="reduction fuel per case [proposed: default 1,000,000]")
+    p_test.add_argument("--fuel", type=int, default=None,
+                        help="reduction fuel per case [default certify.FUEL, 3,000,000, read against PinvProjects]")
     p_test.add_argument("--deep", action="store_true", help="run again a line whose outcome the store knows (7.S13)")
     p_test.add_argument("--no-cert", action="store_true", help="neither read nor write the store x.cert.json (12.S15)")
     p_cert = sub.add_parser("certify", help="run the test lines of several test programs (x.test.lut, 12.R2), each in its own "
@@ -84,7 +84,8 @@ def main(argv: list[str] | None = None) -> int:
     p_cert.add_argument("--jobs", type=int, default=1, help="files run at a time")
     p_cert.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
     p_cert.add_argument("--deep", action="store_true", help="run again the lines whose outcome a store knows")
-    p_cert.add_argument("--fuel", type=int, default=1_000_000, help="reduction fuel per case")
+    p_cert.add_argument("--fuel", type=int, default=None,
+                        help="reduction fuel per case [default certify.FUEL, 3,000,000, read against PinvProjects]")
     p_cert.add_argument("--no-cert", action="store_true",
                         help="neither read nor write the stores x.cert.json: run every line and report")
     ns = parser.parse_args(argv)
@@ -95,14 +96,18 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.command == "certify":
         from .certify import certify
-        return 0 if certify(ns.files, ns.jobs, ns.seed, ns.deep, ns.fuel, store=not ns.no_cert) else 1
+        from .certify import FUEL
+        fuel = FUEL if ns.fuel is None else ns.fuel
+        return 0 if certify(ns.files, ns.jobs, ns.seed, ns.deep, fuel, store=not ns.no_cert) else 1
 
     if ns.command == "test":
         from .run import require_kind
         from .tester import line, passes, run_tests
         try:
             require_kind(ns.file, "test", "luthier test")
-            outcomes = run_tests(ns.file, ns.seed, ns.fuel, deep=ns.deep, store=not ns.no_cert)
+            from .certify import FUEL
+            outcomes = run_tests(ns.file, ns.seed, FUEL if ns.fuel is None else ns.fuel, deep=ns.deep,
+                                 store=not ns.no_cert)
         except (OSError, ValueError, RecursionError) as exc:
             import sys
             print(f"{ns.file}: {exc}", file=sys.stderr)

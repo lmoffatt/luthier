@@ -1655,7 +1655,7 @@ def prepare(path, fuel=1_000_000):
     return runner, specs, loaded
 
 
-def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
+def run_tests(path, seed=None, fuel=certify.FUEL, deep=False, store=False):
     """Run every `test` line of the file; the outcomes in order. With `store`, each line's identity
     is looked up first in the store of the file that makes its claim (`claim_file`; a known outcome
     is reused unless `deep`) and each line run is recorded there, under its lock
