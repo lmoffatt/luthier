@@ -1,17 +1,17 @@
 [
  {
   "law": "InfoNonNegative",
-  "cone": "sha256:8e7c93a01f33df99ec3c678922ab048d60b551f6573bab94e93bf53f5fbf47af",
+  "cone": "sha256:b053d157ed953e1150c2173f8438fcb6730e69134954ed1c197522e10891add5",
   "binding": [
    {
     "parameter": "n",
     "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "l",
     "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
+    "fingerprint": "sha256:27de011b2c7a6225e0966cbed9f2eccd4b3da5670927c00510589387a0147c9e"
    },
    {
     "parameter": "tol",
@@ -21,17 +21,17 @@
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "v",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -90,7 +90,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T15:07:43+00:00",
+  "date": "2026-10-17T17:57:35+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -167,13 +167,6 @@
    ]
   ],
   "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
    {
     "region": {
      "source": "FromLaw",
@@ -198,380 +191,18 @@
   ]
  },
  {
-  "law": "InfoNonNegative",
-  "cone": "sha256:8e7c93a01f33df99ec3c678922ab048d60b551f6573bab94e93bf53f5fbf47af",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:54:01+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "t boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "v boundary"
-    },
-    "n": 5
-   }
-  ]
- },
- {
-  "law": "ProfileIsFullAtItsSigma",
-  "cone": "sha256:0197353b09f4943eb6009d58db1e99f87096b715e69b54d2a9b183ee4691f690",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:36:48+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "t boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   }
-  ]
- },
- {
-  "law": "InfoNonNegative",
-  "cone": "sha256:8e7c93a01f33df99ec3c678922ab048d60b551f6573bab94e93bf53f5fbf47af",
+  "law": "InfoSymmetric",
+  "cone": "sha256:8a4ef7fddb83377e98ee8e5d09dabe659b62a94476f54eedd99568fb19ef5f1b",
   "binding": [
    {
     "parameter": "n",
     "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "l",
     "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
+    "fingerprint": "sha256:27de011b2c7a6225e0966cbed9f2eccd4b3da5670927c00510589387a0147c9e"
    },
    {
     "parameter": "tol",
@@ -581,17 +212,12 @@
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -650,7 +276,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T13:02:22+00:00",
+  "date": "2026-10-17T17:52:39+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -730,27 +356,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "y boundary"
     },
     "n": 5
@@ -759,13 +364,6 @@
     "region": {
      "source": "FromLaw",
      "name": "t boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "v boundary"
     },
     "n": 5
    }
@@ -773,37 +371,37 @@
  },
  {
   "law": "ScoreIsGradient",
-  "cone": "sha256:63e14b0eddf0283b2f7d98baa9dfba246cfe2d4b2ff1006c98bab1a57f7dd920",
+  "cone": "sha256:d1ae99c0445845ec778b24d367d55d06ebe3bc408a091e23bf43b39b642ed80c",
   "binding": [
    {
     "parameter": "n",
     "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "l",
     "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
+    "fingerprint": "sha256:27de011b2c7a6225e0966cbed9f2eccd4b3da5670927c00510589387a0147c9e"
    },
    {
     "parameter": "r",
     "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
+    "fingerprint": "sha256:658ca3b5fed111997b4b111a018442dd554ed2335dd91d2cdb26e9b561c81d1e"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "v",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -862,7 +460,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:55:37+00:00",
+  "date": "2026-10-17T17:50:19+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -942,20 +540,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "r boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "y boundary"
     },
     "n": 5
@@ -977,38 +561,28 @@
   ]
  },
  {
-  "law": "InfoNonNegative",
-  "cone": "sha256:8e7c93a01f33df99ec3c678922ab048d60b551f6573bab94e93bf53f5fbf47af",
+  "law": "TangentShapes",
+  "cone": "sha256:07aaf9508579e8fdb9bafc75fc3b8d79afc5c999196b3a333340874fdc29e998",
   "binding": [
    {
     "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
+    "generator": "dimFull (Listed)",
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+    "generator": "nativeFull (Listed)",
+    "fingerprint": "sha256:27de011b2c7a6225e0966cbed9f2eccd4b3da5670927c00510589387a0147c9e"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -1031,7 +605,7 @@
     "reach": {
      "Members": [
       {
-       "Number": 11.0
+       "Number": 12.0
       }
      ]
     }
@@ -1041,17 +615,7 @@
     "reach": {
      "Members": [
       {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
+       "Printed": "nativeFull"
       }
      ]
     }
@@ -1067,7 +631,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:48:20+00:00",
+  "date": "2026-10-17T17:43:37+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1147,27 +711,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "y boundary"
     },
     "n": 5
@@ -1178,24 +721,17 @@
      "name": "t boundary"
     },
     "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "v boundary"
-    },
-    "n": 5
    }
   ]
  },
  {
   "law": "ProfileIsFullAtItsSigma",
-  "cone": "sha256:0197353b09f4943eb6009d58db1e99f87096b715e69b54d2a9b183ee4691f690",
+  "cone": "sha256:5d6768b4977edfc2604e313e2171a78c5ad86c79108ab3fa566b899851d9d4fc",
   "binding": [
    {
     "parameter": "l",
     "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
+    "fingerprint": "sha256:ca4f0752bb408c9ecda3eb1f4aac4f18c2660261713659714e2cb19a2d9d9c37"
    },
    {
     "parameter": "tol",
@@ -1205,12 +741,12 @@
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -1259,7 +795,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:41:28+00:00",
+  "date": "2026-10-17T17:46:58+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1336,406 +872,6 @@
    ]
   ],
   "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "t boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   }
-  ]
- },
- {
-  "law": "ScoreIsGradient",
-  "cone": "sha256:63e14b0eddf0283b2f7d98baa9dfba246cfe2d4b2ff1006c98bab1a57f7dd920",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "r",
-    "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "pitResolution"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T12:40:47+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "r boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "t boundary"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "v boundary"
-    },
-    "n": 5
-   }
-  ]
- },
- {
-  "law": "ProfileIsFullAtItsSigma",
-  "cone": "sha256:0197353b09f4943eb6009d58db1e99f87096b715e69b54d2a9b183ee4691f690",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "noConstantProfiles (Listed)",
-    "fingerprint": "sha256:ca6b13444029b7be842c7da003f4a4a8792f13a5b0f3abac294dd42becfcd7bb"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "noConstantProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "l = noConstantProfile, tol = tolerance, t = { n := 11, f := extern \"host:2444\" }, y = { n := 21, f := extern \"host:2445\" }"
-  },
-  "date": "2026-10-17T12:33:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "kind": "Control",
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 2
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 1
-   },
    {
     "region": {
      "source": "FromLaw",
@@ -1754,12 +890,12 @@
  },
  {
   "law": "ProfileAgrees",
-  "cone": "sha256:c899ea35b3261bd155d6b9b2e97b3ecfad0b4c16d80e6c1462b0d3f331787428",
+  "cone": "sha256:d6ef0b109ead528e7ba2a4cd949c29b4cff75c5a03df34eabc7028e106f86d7c",
   "binding": [
    {
     "parameter": "l",
-    "generator": "noConstantProfiles (Listed)",
-    "fingerprint": "sha256:ca6b13444029b7be842c7da003f4a4a8792f13a5b0f3abac294dd42becfcd7bb"
+    "generator": "nativeProfile (Listed)",
+    "fingerprint": "sha256:ca4f0752bb408c9ecda3eb1f4aac4f18c2660261713659714e2cb19a2d9d9c37"
    },
    {
     "parameter": "tol",
@@ -1769,12 +905,1065 @@
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nativeProfile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T17:34:50+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "t boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "InfoNonNegative",
+  "cone": "sha256:b053d157ed953e1150c2173f8438fcb6730e69134954ed1c197522e10891add5",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "dimPos (Listed)",
+    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
+   },
+   {
+    "parameter": "l",
+    "generator": "nativeProfile (Listed)",
+    "fingerprint": "sha256:ca4f0752bb408c9ecda3eb1f4aac4f18c2660261713659714e2cb19a2d9d9c37"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "v",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 11.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nativeProfile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T17:40:51+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "t boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "v boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "InfoSymmetric",
+  "cone": "sha256:8a4ef7fddb83377e98ee8e5d09dabe659b62a94476f54eedd99568fb19ef5f1b",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "dimPos (Listed)",
+    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
+   },
+   {
+    "parameter": "l",
+    "generator": "nativeProfile (Listed)",
+    "fingerprint": "sha256:ca4f0752bb408c9ecda3eb1f4aac4f18c2660261713659714e2cb19a2d9d9c37"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 11.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nativeProfile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T17:35:16+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "t boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "ScoreIsGradient",
+  "cone": "sha256:d1ae99c0445845ec778b24d367d55d06ebe3bc408a091e23bf43b39b642ed80c",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "dimPos (Listed)",
+    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
+   },
+   {
+    "parameter": "l",
+    "generator": "nativeProfile (Listed)",
+    "fingerprint": "sha256:ca4f0752bb408c9ecda3eb1f4aac4f18c2660261713659714e2cb19a2d9d9c37"
+   },
+   {
+    "parameter": "r",
+    "generator": "pitResolution (Listed)",
+    "fingerprint": "sha256:658ca3b5fed111997b4b111a018442dd554ed2335dd91d2cdb26e9b561c81d1e"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "v",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 11.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nativeProfile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "r",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "pitResolution"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T17:32:56+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "t boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "v boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "FullAgrees",
+  "cone": "sha256:af26a3c0cb00d9b526a7f1a86de2d2f0595f17ed72c56b0b35cc8ac7b1875486",
+  "binding": [
+   {
+    "parameter": "l",
+    "generator": "nativeFull (Listed)",
+    "fingerprint": "sha256:27de011b2c7a6225e0966cbed9f2eccd4b3da5670927c00510589387a0147c9e"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((((ScaledPositionsWithin freeDim) positionBox) ((elementary).log sigmaLow)) ((elementary).log sigmaHigh))",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nativeFull"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T17:22:08+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "t boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "TangentShapes",
+  "cone": "sha256:07aaf9508579e8fdb9bafc75fc3b8d79afc5c999196b3a333340874fdc29e998",
+  "binding": [
+   {
+    "parameter": "n",
+    "generator": "dimPos (Listed)",
+    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
+   },
+   {
+    "parameter": "l",
+    "generator": "nativeProfile (Listed)",
+    "fingerprint": "sha256:ca4f0752bb408c9ecda3eb1f4aac4f18c2660261713659714e2cb19a2d9d9c37"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "n",
+    "reach": {
+     "Members": [
+      {
+       "Number": 11.0
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nativeProfile"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Supported"
+   }
+  },
+  "grade": "Sampled",
+  "outcome": "Passed",
+  "date": "2026-10-17T17:25:33+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "regions": [
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "y boundary"
+    },
+    "n": 5
+   },
+   {
+    "region": {
+     "source": "FromLaw",
+     "name": "t boundary"
+    },
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "ProfileIsFullAtItsSigma",
+  "cone": "sha256:5d6768b4977edfc2604e313e2171a78c5ad86c79108ab3fa566b899851d9d4fc",
+  "binding": [
+   {
+    "parameter": "l",
+    "generator": "noConstantProfiles (Listed)",
+    "fingerprint": "sha256:6977302a5aca178bc396317341ec80742251fafee7b3a39f8e068bda808b99a0"
+   },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -1823,9 +2012,9 @@
   },
   "grade": null,
   "outcome": {
-   "ControlRefuted": "l = noConstantProfile, tol = tolerance, t = { n := 11, f := extern \"host:2424\" }, y = { n := 21, f := extern \"host:2425\" }"
+   "ControlRefuted": "l = noConstantProfile, tol = tolerance, t = { n := 11, f := extern \"host:3040\" }, y = { n := 21, f := extern \"host:3041\" }"
   },
-  "date": "2026-10-17T12:32:36+00:00",
+  "date": "2026-10-17T17:25:06+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1906,17 +2095,170 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
+     "name": "t boundary"
     },
-    "n": 2
+    "n": 5
    },
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol below"
+     "name": "y boundary"
     },
-    "n": 1
+    "n": 5
+   }
+  ]
+ },
+ {
+  "law": "ProfileAgrees",
+  "cone": "sha256:d6ef0b109ead528e7ba2a4cd949c29b4cff75c5a03df34eabc7028e106f86d7c",
+  "binding": [
+   {
+    "parameter": "l",
+    "generator": "noConstantProfiles (Listed)",
+    "fingerprint": "sha256:6977302a5aca178bc396317341ec80742251fafee7b3a39f8e068bda808b99a0"
    },
+   {
+    "parameter": "tol",
+    "generator": "tolerance (Listed)",
+    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
+   },
+   {
+    "parameter": "t",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   },
+   {
+    "parameter": "y",
+    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
+   }
+  ],
+  "seed": 20261014,
+  "cases": 5,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "l",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "noConstantProfile"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "tol",
+    "reach": {
+     "Members": [
+      {
+       "Number": 1e-12
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 5,
+    "raised": 0,
+    "coverage": "(Drawn 20261014)",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "l = noConstantProfile, tol = tolerance, t = { n := 11, f := extern \"host:3020\" }, y = { n := 21, f := extern \"host:3021\" }"
+  },
+  "date": "2026-10-17T17:24:34+00:00",
+  "interpreter": "v0.2",
+  "hosts": [
+   [
+    "python:luthier.arrays.add",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.dot",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.madd",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_mul",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mat_vec",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.mscale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.msub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.norm",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.pinv_sym_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.retained_rank_at",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.scale",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.sub",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.trace",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:luthier.arrays.transpose",
+    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
+   ],
+   [
+    "python:math.erf",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.exp",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.log",
+    "python 3.13.2"
+   ],
+   [
+    "python:math.sqrt",
+    "python 3.13.2"
+   ]
+  ],
+  "kind": "Control",
+  "regions": [
    {
     "region": {
      "source": "FromLaw",
@@ -1935,12 +2277,12 @@
  },
  {
   "law": "FullAgrees",
-  "cone": "sha256:10b656e7bcfc5742f165ff4c81f4aec7fecf23af9f65fc8b25a63dad573f8249",
+  "cone": "sha256:af26a3c0cb00d9b526a7f1a86de2d2f0595f17ed72c56b0b35cc8ac7b1875486",
   "binding": [
    {
     "parameter": "l",
     "generator": "noConstantFulls (Listed)",
-    "fingerprint": "sha256:b61b1b3fc7dd27615fe7bd05d5e2c3d4b7c89fd0a527c32544b7ffd61187b296"
+    "fingerprint": "sha256:1b644e4cb83ae1b7ddd5aba75286c58a02c42b10d66ec47464d28d76861ab127"
    },
    {
     "parameter": "tol",
@@ -1950,12 +2292,12 @@
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((((ScaledPositionsWithin freeDim) positionBox) ((elementary).log sigmaLow)) ((elementary).log sigmaHigh))",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -1996,8 +2338,8 @@
   ],
   "evidence": {
    "Points": {
-    "evaluated": 3,
-    "raised": 2,
+    "evaluated": 5,
+    "raised": 0,
     "coverage": "(Drawn 20261014)",
     "verdict": "Refuted"
    }
@@ -2006,7 +2348,7 @@
   "outcome": {
    "ControlRefuted": "l = noConstantFull, tol = tolerance, t = { n := 12, f := extern \"host:2365\" }, y = { n := 21, f := extern \"host:2366\" }"
   },
-  "date": "2026-10-17T12:28:43+00:00",
+  "date": "2026-10-17T17:18:13+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2087,61 +2429,47 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
-    "n": 3
+    "n": 5
    },
    {
     "region": {
      "source": "FromLaw",
      "name": "y boundary"
     },
-    "n": 3
+    "n": 5
    }
   ]
  },
  {
   "law": "DLogSigmaIsGradient",
-  "cone": "sha256:7320dbef4b2a568827a91b1a74191533ce780f4f1590360443922fc024fcfb7b",
+  "cone": "sha256:67a8459e3973f31277bf9ed7eb77233461ebc54c8ed9c2fe37072a7b060892f0",
   "binding": [
    {
     "parameter": "n",
     "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "m",
     "generator": "fullModel (Listed)",
-    "fingerprint": "sha256:c6bb76c86372664d43c6ca23c93b4343c57326b36dbafba01755cf9bbb637e75"
+    "fingerprint": "sha256:95d127366664d39ff8161bc8ff6c44f4e589843dfc5cc3d340d8d0bcf916952b"
    },
    {
     "parameter": "r",
     "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
+    "fingerprint": "sha256:658ca3b5fed111997b4b111a018442dd554ed2335dd91d2cdb26e9b561c81d1e"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "v",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -2200,7 +2528,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:30:51+00:00",
+  "date": "2026-10-17T17:19:43+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2280,20 +2608,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "r boundary"
-    },
-    "n": 20
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
     "n": 20
@@ -2309,22 +2623,22 @@
  },
  {
   "law": "ScaledShapes",
-  "cone": "sha256:4deb319b26ffff1ea0c18d1a6d9ee865da93b79549ce2584e65eb2688acf9dff",
+  "cone": "sha256:6114390b9aae1a142c93a12b9494532d148b8a317278c4d11ef84fc691df1f34",
   "binding": [
    {
     "parameter": "n",
     "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "m",
     "generator": "fullModel (Listed)",
-    "fingerprint": "sha256:c6bb76c86372664d43c6ca23c93b4343c57326b36dbafba01755cf9bbb637e75"
+    "fingerprint": "sha256:95d127366664d39ff8161bc8ff6c44f4e589843dfc5cc3d340d8d0bcf916952b"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -2373,7 +2687,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:30:51+00:00",
+  "date": "2026-10-17T17:19:43+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2397,13 +2711,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
     "n": 20
@@ -2412,7 +2719,7 @@
  },
  {
   "law": "JacIsJacobian",
-  "cone": "sha256:508163c24813fdaa7fb890272a0b4dd9bc15e59982af5eab3874e9b4c74b1848",
+  "cone": "sha256:fd1b96314d8ef37a62104c6f21c95fc60dfd2e2a3895abb6ed8cea75f312bde5",
   "binding": [
    {
     "parameter": "n",
@@ -2422,22 +2729,22 @@
    {
     "parameter": "m",
     "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
+    "fingerprint": "sha256:3db18c4008a04341a1d05aced3a450cc877ea3bda16a4942f9f86353188fb8f0"
    },
    {
     "parameter": "r",
     "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
+    "fingerprint": "sha256:658ca3b5fed111997b4b111a018442dd554ed2335dd91d2cdb26e9b561c81d1e"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "v",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -2496,7 +2803,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:22:26+00:00",
+  "date": "2026-10-17T17:09:51+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2576,20 +2883,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "r boundary"
-    },
-    "n": 20
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
     "n": 20
@@ -2605,12 +2898,12 @@
  },
  {
   "law": "ProfiledIsGaussianAtItsSigma",
-  "cone": "sha256:ea00341dc0b7cd46bd3bc5c18034114017ff70d4ae9c01c00050b27c50d1e9ba",
+  "cone": "sha256:0518391b2da898c266ad656715b458004a6f9bdbb4821b56e9caacc1fba35d6f",
   "binding": [
    {
     "parameter": "g",
     "generator": "unbiased (Listed)",
-    "fingerprint": "sha256:a895379b613e04575783fdae5013289c7c66c103c55d2dc8d0fc5f39a526fedf"
+    "fingerprint": "sha256:2458621c8537d273bdff3dc5f82dc33ac48e46d7b9e4e65fad1e7509b6ec4c5b"
    },
    {
     "parameter": "n",
@@ -2620,7 +2913,7 @@
    {
     "parameter": "m",
     "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
+    "fingerprint": "sha256:3db18c4008a04341a1d05aced3a450cc877ea3bda16a4942f9f86353188fb8f0"
    },
    {
     "parameter": "tol",
@@ -2630,12 +2923,12 @@
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (m).k)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261015,
@@ -2706,7 +2999,7 @@
   "outcome": {
    "ControlRefuted": "g = unbiased, n = freeDim, m = posModel, tol = tolerance, t = { n := 11, f := extern \"host:38572\" }, y = { n := 21, f := extern \"host:38573\" }"
   },
-  "date": "2026-10-17T12:22:49+00:00",
+  "date": "2026-10-17T17:10:04+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2787,27 +3080,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 5
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
     "n": 5
@@ -2823,32 +3095,32 @@
  },
  {
   "law": "GaussianPeaksAtMean",
-  "cone": "sha256:a249ab22aba26058787c0c451eb2021421ac5984713e9770cd42efbfa74998e5",
+  "cone": "sha256:16b4af290fdf61cd7810e0089dff791902b15148ddc4d26e4fd93a6c89e53c49",
   "binding": [
    {
     "parameter": "g",
     "generator": "residualFlipped (Listed)",
-    "fingerprint": "sha256:2d3033ddeb88b4dad4ea4cf65be50822edec43639cb136958d90cfa8872d8158"
+    "fingerprint": "sha256:f88f88808843c626143de5c65a3f5112b8e1e8cc90ad07dde731e94666f769c5"
    },
    {
     "parameter": "n",
     "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
+    "fingerprint": "sha256:5c2d52f158db37cb2228a8d69943e8104d617fad875761caba54caf52d446758"
    },
    {
     "parameter": "m",
     "generator": "fullModel (Listed)",
-    "fingerprint": "sha256:c6bb76c86372664d43c6ca23c93b4343c57326b36dbafba01755cf9bbb637e75"
+    "fingerprint": "sha256:95d127366664d39ff8161bc8ff6c44f4e589843dfc5cc3d340d8d0bcf916952b"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf ((m).model).k)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261015,
@@ -2909,7 +3181,7 @@
   "outcome": {
    "ControlRefuted": "g = residualFlipped, n = ((+ freeDim) 1), m = fullModel, t = { n := 12, f := extern \"host:38542\" }, y = { n := 21, f := extern \"host:38543\" }"
   },
-  "date": "2026-10-17T12:20:43+00:00",
+  "date": "2026-10-17T17:08:07+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2990,13 +3262,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
     "n": 5
@@ -3012,7 +3277,7 @@
  },
  {
   "law": "JacShape",
-  "cone": "sha256:4d2e276b3e113d9a753c08a03e9d168ba75e33432f6e442067b4bfafe8ba7513",
+  "cone": "sha256:0f9752633244a8eeac4dd9d97ab0b4a88799e5a92b09f5dfd2085908041ee75f",
   "binding": [
    {
     "parameter": "n",
@@ -3022,12 +3287,12 @@
    {
     "parameter": "m",
     "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
+    "fingerprint": "sha256:3db18c4008a04341a1d05aced3a450cc877ea3bda16a4942f9f86353188fb8f0"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -3076,7 +3341,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:20:51+00:00",
+  "date": "2026-10-17T17:08:39+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -3097,13 +3362,6 @@
    ]
   ],
   "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
    {
     "region": {
      "source": "FromLaw",
@@ -3115,7 +3373,7 @@
  },
  {
   "law": "MeanShape",
-  "cone": "sha256:2eb68f00935fd1fbccf8ce41a485f045dabf142069680cfa79d719e9513241ad",
+  "cone": "sha256:ccc54b5e71a4af35d2ff5e701611d02ea93cb5fbe7a37f014c7f54a58446453d",
   "binding": [
    {
     "parameter": "n",
@@ -3125,12 +3383,12 @@
    {
     "parameter": "m",
     "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
+    "fingerprint": "sha256:3db18c4008a04341a1d05aced3a450cc877ea3bda16a4942f9f86353188fb8f0"
    },
    {
     "parameter": "t",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 20261014,
@@ -3179,7 +3437,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T12:20:51+00:00",
+  "date": "2026-10-17T17:08:39+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -3203,818 +3461,11 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "n boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "t boundary"
     },
     "n": 20
    }
   ]
- },
- {
-  "law": "ProfileIsFullAtItsSigma",
-  "cone": "sha256:0197353b09f4943eb6009d58db1e99f87096b715e69b54d2a9b183ee4691f690",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "noConstantProfiles (Listed)",
-    "fingerprint": "sha256:ca6b13444029b7be842c7da003f4a4a8792f13a5b0f3abac294dd42becfcd7bb"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "noConstantProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "l = noConstantProfile, tol = tolerance, t = { n := 11, f := extern \"host:1624\" }, y = { n := 21, f := extern \"host:1625\" }"
-  },
-  "date": "2026-10-15T06:44:34+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "kind": "Control"
- },
- {
-  "law": "ProfileAgrees",
-  "cone": "sha256:c899ea35b3261bd155d6b9b2e97b3ecfad0b4c16d80e6c1462b0d3f331787428",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "noConstantProfiles (Listed)",
-    "fingerprint": "sha256:ca6b13444029b7be842c7da003f4a4a8792f13a5b0f3abac294dd42becfcd7bb"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "noConstantProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "l = noConstantProfile, tol = tolerance, t = { n := 11, f := extern \"host:1604\" }, y = { n := 21, f := extern \"host:1605\" }"
-  },
-  "date": "2026-10-15T06:44:10+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "kind": "Control"
- },
- {
-  "law": "FullAgrees",
-  "cone": "sha256:10b656e7bcfc5742f165ff4c81f4aec7fecf23af9f65fc8b25a63dad573f8249",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "noConstantFulls (Listed)",
-    "fingerprint": "sha256:b61b1b3fc7dd27615fe7bd05d5e2c3d4b7c89fd0a527c32544b7ffd61187b296"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((((ScaledPositionsWithin freeDim) positionBox) ((elementary).log sigmaLow)) ((elementary).log sigmaHigh))",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "noConstantFull"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "l = noConstantFull, tol = tolerance, t = { n := 12, f := extern \"host:645\" }, y = { n := 21, f := extern \"host:646\" }"
-  },
-  "date": "2026-10-15T06:37:52+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "kind": "Control"
- },
- {
-  "law": "ProfiledIsGaussianAtItsSigma",
-  "cone": "sha256:ea00341dc0b7cd46bd3bc5c18034114017ff70d4ae9c01c00050b27c50d1e9ba",
-  "binding": [
-   {
-    "parameter": "g",
-    "generator": "unbiased (Listed)",
-    "fingerprint": "sha256:a895379b613e04575783fdae5013289c7c66c103c55d2dc8d0fc5f39a526fedf"
-   },
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "m",
-    "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (m).k)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261015,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "g",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "unbiased"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "posModel"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261015)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "g = unbiased, n = freeDim, m = posModel, tol = tolerance, t = { n := 11, f := extern \"host:33\" }, y = { n := 21, f := extern \"host:34\" }"
-  },
-  "date": "2026-10-15T04:09:40+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "kind": "Control"
- },
- {
-  "law": "GaussianPeaksAtMean",
-  "cone": "sha256:a249ab22aba26058787c0c451eb2021421ac5984713e9770cd42efbfa74998e5",
-  "binding": [
-   {
-    "parameter": "g",
-    "generator": "residualFlipped (Listed)",
-    "fingerprint": "sha256:2d3033ddeb88b4dad4ea4cf65be50822edec43639cb136958d90cfa8872d8158"
-   },
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "m",
-    "generator": "fullModel (Listed)",
-    "fingerprint": "sha256:c6bb76c86372664d43c6ca23c93b4343c57326b36dbafba01755cf9bbb637e75"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf ((m).model).k)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261015,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "g",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "residualFlipped"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "fullModel"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261015)",
-    "verdict": "Refuted"
-   }
-  },
-  "grade": null,
-  "outcome": {
-   "ControlRefuted": "g = residualFlipped, n = ((+ freeDim) 1), m = fullModel, t = { n := 12, f := extern \"host:3\" }, y = { n := 21, f := extern \"host:4\" }"
-  },
-  "date": "2026-10-15T04:08:28+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "kind": "Control"
  },
  {
   "law": "ProfiledIsGaussianAtItsSigma",
@@ -4181,2096 +3632,6 @@
  },
  {
   "law": "ScoreIsGradient",
-  "cone": "sha256:63e14b0eddf0283b2f7d98baa9dfba246cfe2d4b2ff1006c98bab1a57f7dd920",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
-   },
-   {
-    "parameter": "r",
-    "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeFull"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "pitResolution"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T03:10:55+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "InfoNonNegative",
-  "cone": "sha256:8e7c93a01f33df99ec3c678922ab048d60b551f6573bab94e93bf53f5fbf47af",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T03:08:30+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "InfoSymmetric",
-  "cone": "sha256:feda3599adc2c2314a12b1adaffc60b8b8d64b43d50cea0e321798f7edc5ba92",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T03:03:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ScoreIsGradient",
-  "cone": "sha256:63e14b0eddf0283b2f7d98baa9dfba246cfe2d4b2ff1006c98bab1a57f7dd920",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "r",
-    "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "pitResolution"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T03:01:31+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "TangentShapes",
-  "cone": "sha256:af0ed2a42e3616ee897ecc8414eae91e1b98fffdf94235c02791591cb4c5af82",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:54:12+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "DLogSigmaIsGradient",
-  "cone": "sha256:7320dbef4b2a568827a91b1a74191533ce780f4f1590360443922fc024fcfb7b",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "m",
-    "generator": "fullModel (Listed)",
-    "fingerprint": "sha256:c6bb76c86372664d43c6ca23c93b4343c57326b36dbafba01755cf9bbb637e75"
-   },
-   {
-    "parameter": "r",
-    "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 20,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "fullModel"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "pitResolution"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 20,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:50:46+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "JacIsJacobian",
-  "cone": "sha256:508163c24813fdaa7fb890272a0b4dd9bc15e59982af5eab3874e9b4c74b1848",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "m",
-    "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
-   },
-   {
-    "parameter": "r",
-    "generator": "pitResolution (Listed)",
-    "fingerprint": "sha256:1bd9cc7bf4fc3e2ff052f3a9d6db21f4fdf592bbb11643fef147c356adb65841"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 20,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "posModel"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "r",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "pitResolution"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 20,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:44:15+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "JacShape",
-  "cone": "sha256:4d2e276b3e113d9a753c08a03e9d168ba75e33432f6e442067b4bfafe8ba7513",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "m",
-    "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 20,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "posModel"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 20,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:43:16+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "MeanShape",
-  "cone": "sha256:2eb68f00935fd1fbccf8ce41a485f045dabf142069680cfa79d719e9513241ad",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimPos (Listed)",
-    "fingerprint": "sha256:453d7adf80cd3c5310d602484c840010a1499253fa7f5b37e88a558afd2d87cc"
-   },
-   {
-    "parameter": "m",
-    "generator": "posModel (Listed)",
-    "fingerprint": "sha256:f4323161f7da8e9ca369c76cece422915d923e007231e6a68a1a4d10856222c3"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 20,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 11.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "posModel"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 20,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:43:16+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ProfileIsFullAtItsSigma",
-  "cone": "sha256:0197353b09f4943eb6009d58db1e99f87096b715e69b54d2a9b183ee4691f690",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:42:10+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ProfileAgrees",
-  "cone": "sha256:c899ea35b3261bd155d6b9b2e97b3ecfad0b4c16d80e6c1462b0d3f331787428",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "nativeProfile (Listed)",
-    "fingerprint": "sha256:0922ceda3aa71b22b69f7f8fccc5ae032f75ce0e4e0a76e96c2791017e89023c"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((PositionsWithin freeDim) positionBox)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeProfile"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:31:31+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "FullAgrees",
-  "cone": "sha256:10b656e7bcfc5742f165ff4c81f4aec7fecf23af9f65fc8b25a63dad573f8249",
-  "binding": [
-   {
-    "parameter": "l",
-    "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over ((((ScaledPositionsWithin freeDim) positionBox) ((elementary).log sigmaLow)) ((elementary).log sigmaHigh))",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 5) over (VecOf nPairs)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeFull"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T02:19:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "InfoNonNegative",
-  "cone": "sha256:8e7c93a01f33df99ec3c678922ab048d60b551f6573bab94e93bf53f5fbf47af",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "v",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeFull"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T17:30:05+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "InfoSymmetric",
-  "cone": "sha256:feda3599adc2c2314a12b1adaffc60b8b8d64b43d50cea0e321798f7edc5ba92",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeFull"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T17:25:48+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ScoreIsGradient",
   "cone": "sha256:f921d2a314cab9602e25785c99ecedd3d39130540f4a1047abf81c54417c2369",
   "binding": [
    {
@@ -6356,154 +3717,6 @@
   "grade": "Sampled",
   "outcome": "Passed",
   "date": "2026-10-14T17:23:50+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:luthier.arrays.add",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.dot",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.madd",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_mul",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mat_vec",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.mscale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.msub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.norm",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.pinv_sym_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.retained_rank_at",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.scale",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.sub",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.trace",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:luthier.arrays.transpose",
-    "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
-   ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "TangentShapes",
-  "cone": "sha256:af0ed2a42e3616ee897ecc8414eae91e1b98fffdf94235c02791591cb4c5af82",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "l",
-    "generator": "nativeFull (Listed)",
-    "fingerprint": "sha256:f8a75a7e593f041354543252168a5669ce3ebd90f225dd6abd5bcb58dca97e5f"
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf (l).k)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 5,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "l",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "nativeFull"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 5,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T17:18:14+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -6883,93 +4096,6 @@
     "python:luthier.arrays.transpose",
     "sha256:c7402a82220449d91a36e663f3353b6b02799c9894a45655584167b122b6f2ef"
    ],
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ScaledShapes",
-  "cone": "sha256:4deb319b26ffff1ea0c18d1a6d9ee865da93b79549ce2584e65eb2688acf9dff",
-  "binding": [
-   {
-    "parameter": "n",
-    "generator": "dimFull (Listed)",
-    "fingerprint": "sha256:e9ba41a8cd5bef23463074278e98f62a822672945867be18b30fd8345c24fb26"
-   },
-   {
-    "parameter": "m",
-    "generator": "fullModel (Listed)",
-    "fingerprint": "sha256:c6bb76c86372664d43c6ca23c93b4343c57326b36dbafba01755cf9bbb637e75"
-   },
-   {
-    "parameter": "t",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (VecOf n)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 20261014,
-  "cases": 20,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "n",
-    "reach": {
-     "Members": [
-      {
-       "Number": 12.0
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "fullModel"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 20,
-    "raised": 0,
-    "coverage": "(Drawn 20261014)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:59:11+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
    [
     "python:math.erf",
     "python 3.13.2"

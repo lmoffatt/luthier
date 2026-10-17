@@ -1,7 +1,7 @@
 [
  {
   "law": "ExpOfLog",
-  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
+  "cone": "sha256:7da21bcf6253959c2f6187a60f6fdf678a13b6718d441a17625d4a92f0b178d6",
   "binding": [
    {
     "parameter": "e",
@@ -16,7 +16,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Positive",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -74,7 +74,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T14:35:18+00:00",
+  "date": "2026-10-17T16:50:58+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -95,692 +95,6 @@
    ]
   ],
   "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 0
-   }
-  ]
- },
- {
-  "law": "LogMultiplies",
-  "cone": "sha256:139b697ebc3849cdb75befe34e65e858d03e2a2823b8766eaa47247e5af6e981",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:35:17+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 0
-   }
-  ]
- },
- {
-  "law": "ExpAdds",
-  "cone": "sha256:0cc8e9fe93b07a76b9bc724db364d59c07408a1797663ccd8c734dc5918e6217",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:35:17+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "y boundary"
-    },
-    "n": 1
-   }
-  ]
- },
- {
-  "law": "LogOfExp",
-  "cone": "sha256:c9815e21d767ef5e6bce4bcdcf524be87280c4752e459b24383fb56854db090c",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:35:17+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 0
-   }
-  ]
- },
- {
-  "law": "ExpOfLog",
-  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:35:16+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 0
-   }
-  ]
- },
- {
-  "law": "SqrtSquares",
-  "cone": "sha256:e3dc0419cde7740f8d23434744099d1f47c0a36db8fcdd18edf7662962f19f0a",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T14:35:16+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "x boundary"
-    },
-    "n": 1
-   }
-  ]
- },
- {
-  "law": "ExpOfLog",
-  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-17T09:56:55+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ],
-  "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 0
-   },
    {
     "region": {
      "source": "FromLaw",
@@ -792,7 +106,7 @@
  },
  {
   "law": "SqrtOfSquare",
-  "cone": "sha256:804bc927ce89ad8d95cd16945e3eeed921d114a01db5e99157a5df7b3f6cb3e2",
+  "cone": "sha256:93fe8fbd88677cce496956e06278d96c44ec75c378a31a6755132d5d39736f98",
   "binding": [
    {
     "parameter": "e",
@@ -802,7 +116,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -850,7 +164,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:55+00:00",
+  "date": "2026-10-17T16:50:58+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -882,7 +196,7 @@
  },
  {
   "law": "LogMultiplies",
-  "cone": "sha256:139b697ebc3849cdb75befe34e65e858d03e2a2823b8766eaa47247e5af6e981",
+  "cone": "sha256:e8d1d4c5f323eecf534d0e3b8519238d5d5abb56d0434914e92b56017984e1e6",
   "binding": [
    {
     "parameter": "e",
@@ -897,12 +211,12 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -969,7 +283,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:54+00:00",
+  "date": "2026-10-17T16:50:58+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -990,20 +304,6 @@
    ]
   ],
   "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 2
-   },
    {
     "region": {
      "source": "FromLaw",
@@ -1022,7 +322,7 @@
  },
  {
   "law": "ExpAdds",
-  "cone": "sha256:0cc8e9fe93b07a76b9bc724db364d59c07408a1797663ccd8c734dc5918e6217",
+  "cone": "sha256:b267b251bf428429924ba405cc8792f7ea68fc413f838eba5b89020433af3c6c",
   "binding": [
    {
     "parameter": "e",
@@ -1037,12 +337,12 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1109,7 +409,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:54+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1130,20 +430,6 @@
    ]
   ],
   "regions": [
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 1
-   },
    {
     "region": {
      "source": "FromLaw",
@@ -1162,7 +448,7 @@
  },
  {
   "law": "LogOfExp",
-  "cone": "sha256:c9815e21d767ef5e6bce4bcdcf524be87280c4752e459b24383fb56854db090c",
+  "cone": "sha256:4ae8aca1c08981780737b4ba217a79456c655d8f36756ec8f6b4b86cc166e7be",
   "binding": [
    {
     "parameter": "e",
@@ -1177,7 +463,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1235,7 +521,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:53+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1259,20 +545,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 1
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "x boundary"
     },
     "n": 0
@@ -1281,7 +553,7 @@
  },
  {
   "law": "ExpOfLog",
-  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
+  "cone": "sha256:7da21bcf6253959c2f6187a60f6fdf678a13b6718d441a17625d4a92f0b178d6",
   "binding": [
    {
     "parameter": "e",
@@ -1296,7 +568,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1354,7 +626,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:53+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1378,20 +650,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "x boundary"
     },
     "n": 0
@@ -1400,7 +658,7 @@
  },
  {
   "law": "SqrtSquares",
-  "cone": "sha256:e3dc0419cde7740f8d23434744099d1f47c0a36db8fcdd18edf7662962f19f0a",
+  "cone": "sha256:bbcc9f420e410a20c6cabc94c237a1563285886b38b999147b9cf53b4c8861d9",
   "binding": [
    {
     "parameter": "e",
@@ -1415,7 +673,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1473,7 +731,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:53+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1497,20 +755,6 @@
    {
     "region": {
      "source": "FromLaw",
-     "name": "tol above"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
-     "name": "tol below"
-    },
-    "n": 0
-   },
-   {
-    "region": {
-     "source": "FromLaw",
      "name": "x boundary"
     },
     "n": 1
@@ -1519,7 +763,7 @@
  },
  {
   "law": "ErfBounded",
-  "cone": "sha256:1a1e8bae6e3fc4fd3f525556cbc567a4dbdb12bc29b809e785c2281ae624a352",
+  "cone": "sha256:4ebbba624ee3411d04ad67e70c185c8ae9cc2a28da8598f9c90b2260c8864229",
   "binding": [
    {
     "parameter": "e",
@@ -1529,7 +773,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1577,7 +821,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:52+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1609,7 +853,7 @@
  },
  {
   "law": "ErfOdd",
-  "cone": "sha256:b1adeaa1fad7fd548f966073addcd5634498844a837b24b4d3d11d7f8214cc97",
+  "cone": "sha256:985a01c6a7e9b5e636860a3715b9a5d9c04e15d47df08c2d9f79b5ad1264f759",
   "binding": [
    {
     "parameter": "e",
@@ -1619,7 +863,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1667,7 +911,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:52+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1699,7 +943,7 @@
  },
  {
   "law": "ExpPositive",
-  "cone": "sha256:fbb75ae709872d41b116cbd20fececee41c9168a2b78700ba3a595c799f0c1e4",
+  "cone": "sha256:821c78b8901e242d36163e7ac5a4e669e8e4bafddb584e388ef1321bacad9101",
   "binding": [
    {
     "parameter": "e",
@@ -1709,7 +953,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1757,7 +1001,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:52+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1789,7 +1033,7 @@
  },
  {
   "law": "SqrtOfSquare",
-  "cone": "sha256:804bc927ce89ad8d95cd16945e3eeed921d114a01db5e99157a5df7b3f6cb3e2",
+  "cone": "sha256:93fe8fbd88677cce496956e06278d96c44ec75c378a31a6755132d5d39736f98",
   "binding": [
    {
     "parameter": "e",
@@ -1799,7 +1043,7 @@
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1847,7 +1091,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:52+00:00",
+  "date": "2026-10-17T16:50:57+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1879,7 +1123,7 @@
  },
  {
   "law": "SqrtMonotone",
-  "cone": "sha256:943ca686a2777c19533287773fd6b3874e277c941c45a2afc99c617fcedcd33d",
+  "cone": "sha256:5fa58585d258864fca9603659754eb097b8e36043719814a1323e5447931efb0",
   "binding": [
    {
     "parameter": "e",
@@ -1889,7 +1133,7 @@
    {
     "parameter": "p",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqPair doublesOrder)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -1928,7 +1172,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -1960,7 +1204,7 @@
  },
  {
   "law": "ErfOfZero",
-  "cone": "sha256:7b0f9321b5a6921d35e26c161b3999cd32f57a2e50558288b93bfa471eea616a",
+  "cone": "sha256:b396dc58056f3a2bf34679a2fe42cddcb022595e3333ff1836509a4e7ffd5f4f",
   "binding": [
    {
     "parameter": "e",
@@ -2004,7 +1248,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2028,7 +1272,7 @@
  },
  {
   "law": "LogOfOne",
-  "cone": "sha256:81b0d2b37d58b4b7aa798bd947832b018a326d1eaa19f639e8f9b11153ef97c4",
+  "cone": "sha256:06aaa3683f91d29ae1b218e133b182264036abb3e3a47e1291a8dd6c64df0d28",
   "binding": [
    {
     "parameter": "e",
@@ -2072,7 +1316,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2096,7 +1340,7 @@
  },
  {
   "law": "ExpOfZero",
-  "cone": "sha256:6ef7b331c077d5a8d611d7ea656171c6697fd89fdff65e0325f692011e6e13b0",
+  "cone": "sha256:bf8f4607245cf0733a37c40d8031ae8dde8dbc1c6a3389133ec09a9b666e8b39",
   "binding": [
    {
     "parameter": "e",
@@ -2140,7 +1384,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2164,7 +1408,7 @@
  },
  {
   "law": "SqrtOfSquares",
-  "cone": "sha256:620ab8ab03edad388ad53d961e441d6764edd673350deda615cd8eb05134ddb1",
+  "cone": "sha256:c1fdb138d8e2b13c141e8335f946b8c8af98247a5c99bf19b016d45f29217530",
   "binding": [
    {
     "parameter": "e",
@@ -2208,7 +1452,7 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [
    [
@@ -2232,7 +1476,7 @@
  },
  {
   "law": "ConvertKeepsOrder",
-  "cone": "sha256:41ca90fd1a64b20ab264dc1ec13e547a706cdb001d7ea41e353de76bb0b7603f",
+  "cone": "sha256:d3084e197e6f74e26a27caebeb3001d05deff9fbed45f91d48b3e985657602e9",
   "binding": [
    {
     "parameter": "c",
@@ -2242,12 +1486,12 @@
    {
     "parameter": "i",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "j",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2304,14 +1548,14 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": []
  },
  {
   "law": "ConvertSucceeds",
-  "cone": "sha256:02e5e81c09cace1d861b81d09a216276c80bef855e3bc9d68b90bde7c2a1cdc6",
+  "cone": "sha256:e4170e556d61a4370bd9ddc0f48738599ba2cb67099ab6d4a86de45510187c83",
   "binding": [
    {
     "parameter": "c",
@@ -2321,7 +1565,7 @@
    {
     "parameter": "i",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Small",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2369,7 +1613,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:51+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2384,7 +1628,7 @@
  },
  {
   "law": "ConvertAddsExactly",
-  "cone": "sha256:8db857e265cb6121d861d3fe0656a623410dc8feab96eb71930ad83f4dc135e9",
+  "cone": "sha256:ca2d4b0504fcfab595752ae693a47e657939bd14ccd00260f4208f25139d7be9",
   "binding": [
    {
     "parameter": "c",
@@ -2394,12 +1638,12 @@
    {
     "parameter": "i",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Small",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "j",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Small",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2456,7 +1700,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:50+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2478,7 +1722,7 @@
  },
  {
   "law": "ConvertZeroAndOne",
-  "cone": "sha256:da153e7c393b1ebcbc346c7efb2db0f8cf41a1464987c5f579321c18a2cb7b5d",
+  "cone": "sha256:cd72695e0b977c993b700528101e736cce48024301ae3ae8acee3b170a57ffc4",
   "binding": [
    {
     "parameter": "c",
@@ -2522,29 +1766,29 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:50+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": []
  },
  {
   "law": "RemainderOfTheDivisorsSign",
-  "cone": "sha256:f9d685f0de57f277508e8e750e88478b9ff3a22ea56561886603f30e61cd962d",
+  "cone": "sha256:1d064523c897e6d76feca1afd39ca219b54259f8f7e7312f2eea74bcc3d922f0",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "b",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonZeroInt",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2601,7 +1845,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:50+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2616,22 +1860,22 @@
  },
  {
   "law": "DivisionAlgorithm",
-  "cone": "sha256:4d535e970bbd3dd06624a230c7880a64ed032d2b0ed6762c76f5d408136da1b6",
+  "cone": "sha256:355367ea62b2dd84370ec6f65920118b2f1b44b03e900bf9ec0e61c59dee3cf9",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "b",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonZeroInt",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2688,7 +1932,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:50+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2703,22 +1947,22 @@
  },
  {
   "law": "QuotientOfProduct",
-  "cone": "sha256:45724e4c9ff7219c906eae18acdc8963874807ec25faf69b4b6cd0e9060b7b91",
+  "cone": "sha256:a89c84cf65966e4cc69b6ced0674dd3094dc5a5e87c1ed4308ea63129e774aa9",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "b",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2775,7 +2019,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:50+00:00",
+  "date": "2026-10-17T16:50:56+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2790,22 +2034,22 @@
  },
  {
   "law": "RemainderOfTheDivisorsSign",
-  "cone": "sha256:f9d685f0de57f277508e8e750e88478b9ff3a22ea56561886603f30e61cd962d",
+  "cone": "sha256:1d064523c897e6d76feca1afd39ca219b54259f8f7e7312f2eea74bcc3d922f0",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "b",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2862,7 +2106,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:49+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2877,22 +2121,22 @@
  },
  {
   "law": "DivisionAlgorithm",
-  "cone": "sha256:4d535e970bbd3dd06624a230c7880a64ed032d2b0ed6762c76f5d408136da1b6",
+  "cone": "sha256:355367ea62b2dd84370ec6f65920118b2f1b44b03e900bf9ec0e61c59dee3cf9",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "b",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -2949,7 +2193,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:49+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -2964,22 +2208,22 @@
  },
  {
   "law": "TimesMonotone",
-  "cone": "sha256:0f7ee63a4b4f952cb0587197a251f89e2a737851a71ece65d66f7268e27af262",
+  "cone": "sha256:08d277a7d1ccb79475c41abca6035bf1b4287a199bde2b25040cb5c13105e2cd",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "p",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over (LeqPair d)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "z",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonNegative",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3027,7 +2271,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:48+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3049,22 +2293,22 @@
  },
  {
   "law": "PlusMonotone",
-  "cone": "sha256:62320c098230aae7137f54d766d49867a076ce9ba00f90baa10bf084943c97f9",
+  "cone": "sha256:9d98d1e570b4aa42bd23abfa9f30290ffa7c3fcc81466e763bbd784ab9874e3f",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "p",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over (LeqPair d)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "z",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3112,7 +2356,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:48+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3134,17 +2378,17 @@
  },
  {
   "law": "NegateTwice",
-  "cone": "sha256:f25f2a7309757f69a3c03b230e548501cac9b0019e43ae3f1348a9cf82af62bc",
+  "cone": "sha256:d01285e173455df7448c1c84538d2bd19c0b7967b7f0b644d74b595b1a2c4374",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3192,7 +2436,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:47+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3207,17 +2451,17 @@
  },
  {
   "law": "DivideSelf",
-  "cone": "sha256:e34baa36a78e2a79bff44f23c91de866087c69c8d026942afc3c2cf75adb5fde",
+  "cone": "sha256:0a76b9242d28bab4e9a3f6f8c279796dc3e7e653dc1edc465c0a725265e46be1",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Positive",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3265,7 +2509,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:47+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3280,22 +2524,22 @@
  },
  {
   "law": "PlusCommutes",
-  "cone": "sha256:bff41eef99db004491a2c6b37760ecaf76ce93575a46747c379306bf23ef891c",
+  "cone": "sha256:126f1720189bd5443215dbebaa6fcfb245b9eca4abdb4ea15993413c9034c685",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3352,7 +2596,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:47+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3374,12 +2618,12 @@
  },
  {
   "law": "EpsilonIsTheUlpOfOne",
-  "cone": "sha256:e7231692551193fb36654d902505d778643cba3585ff724379edcd53c9f553f3",
+  "cone": "sha256:f30c0c5f9a546baaf1c0ef20b4e76a4451226c1e7e79018ab8fef2fabde86802",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    }
   ],
   "seed": 0,
@@ -3418,29 +2662,29 @@
   },
   "grade": "Cases",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:47+00:00",
+  "date": "2026-10-17T16:50:55+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": []
  },
  {
   "law": "TimesMonotone",
-  "cone": "sha256:0f7ee63a4b4f952cb0587197a251f89e2a737851a71ece65d66f7268e27af262",
+  "cone": "sha256:08d277a7d1ccb79475c41abca6035bf1b4287a199bde2b25040cb5c13105e2cd",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "p",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqPair d)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "z",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3488,7 +2732,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:46+00:00",
+  "date": "2026-10-17T16:50:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3510,22 +2754,22 @@
  },
  {
   "law": "PlusMonotone",
-  "cone": "sha256:62320c098230aae7137f54d766d49867a076ce9ba00f90baa10bf084943c97f9",
+  "cone": "sha256:9d98d1e570b4aa42bd23abfa9f30290ffa7c3fcc81466e763bbd784ab9874e3f",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "p",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqPair d)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "z",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3573,7 +2817,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:45+00:00",
+  "date": "2026-10-17T16:50:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3595,22 +2839,22 @@
  },
  {
   "law": "UnequalIsNotEqual",
-  "cone": "sha256:0a183a645010c6845809b61e725d24bfc9941f61e6934471bdc1d1467fc5f4fd",
+  "cone": "sha256:a023789bcec9ab2b8c0f5554bb15bdbeb4deb038d049b9107983d97bfa74d0d8",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3667,7 +2911,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:45+00:00",
+  "date": "2026-10-17T16:50:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3689,22 +2933,22 @@
  },
  {
   "law": "GeqIsLeqReversed",
-  "cone": "sha256:d91e89d285112585995fec9f8f0eac24152d0b3bc50c50f158e9e66cdf069ce1",
+  "cone": "sha256:e888d762eb88080f04564ba3b016fd6d1bfb24fd4ed53c2a48f6557f9818eb4d",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3761,7 +3005,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:45+00:00",
+  "date": "2026-10-17T16:50:54+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3783,22 +3027,22 @@
  },
  {
   "law": "GreaterIsLessReversed",
-  "cone": "sha256:2ea08dad9f0eccbe7a11c179862619aa83b584f332b4812a02fbc31546c3d7f0",
+  "cone": "sha256:f1caddd47098ed14af1784370f291c52910dfa43708183e1fe669932cfc1700e",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3855,7 +3099,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:44+00:00",
+  "date": "2026-10-17T16:50:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3877,27 +3121,27 @@
  },
  {
   "law": "LessIsStrict",
-  "cone": "sha256:288be110ee2a5a5af5d5ab7f35610ba162a4953df4975e36fa65a1113959293c",
+  "cone": "sha256:bb2cb097d90ec5d8165a629b4d2900e529f94cadc01e6afebdfc5f8052642825",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "tie",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -3954,7 +3198,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:44+00:00",
+  "date": "2026-10-17T16:50:53+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -3976,17 +3220,17 @@
  },
  {
   "law": "LeqTransitive",
-  "cone": "sha256:ec953dcc63359e63982ecede9e7c3b90d02763f3023b36cbc5a2f61deae4cd2b",
+  "cone": "sha256:1207c3f87c532db9a869aeb9f5596f4dd96dbfd0531a92c04a3a3e23adfebe63",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "c",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqChain d)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4025,7 +3269,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:42+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4040,22 +3284,22 @@
  },
  {
   "law": "LeqAntisymmetric",
-  "cone": "sha256:bbf4b36fed624640c3e4cd64b2b951b9fe63234da31a03967dd002f13d2d1184",
+  "cone": "sha256:b19d0882b6058147059ff0da41d607aa5037a04e0b2a750aa654d447ca96c767",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4112,7 +3356,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:41+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4134,22 +3378,22 @@
  },
  {
   "law": "LeqTotal",
-  "cone": "sha256:f3cfca1c22bca4bbd842157285544b6e8a161f7fb471a31f1abcc8a26230d821",
+  "cone": "sha256:4aefd904997c4357c041a92e3f63e7c44b8ca7ee3d7d58a911adb1a44a577699",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4206,7 +3450,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:41+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4228,17 +3472,17 @@
  },
  {
   "law": "LeqReflexive",
-  "cone": "sha256:77a525bac4e3d77e158c91f86e89df1fe734f6662bfee34e4851314224cda6f3",
+  "cone": "sha256:d207c8d374c9046b91350a30c9a36d139aacf572cdbef7025ed87da857c553e9",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4286,7 +3530,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:41+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4301,17 +3545,17 @@
  },
  {
   "law": "NegateTwice",
-  "cone": "sha256:f25f2a7309757f69a3c03b230e548501cac9b0019e43ae3f1348a9cf82af62bc",
+  "cone": "sha256:d01285e173455df7448c1c84538d2bd19c0b7967b7f0b644d74b595b1a2c4374",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4359,7 +3603,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:41+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4374,22 +3618,22 @@
  },
  {
   "law": "MinusIsPlusNegated",
-  "cone": "sha256:eb53c81789a8244751dfcbcbb424d1ea5e57d73d9005d7aca828742f3fac4046",
+  "cone": "sha256:26e661accbea01204c0cd8983b73667eecb64bf2ca1283b88a83e3a37c16b8a4",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4446,7 +3690,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:40+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4468,17 +3712,17 @@
  },
  {
   "law": "DivideSelf",
-  "cone": "sha256:e34baa36a78e2a79bff44f23c91de866087c69c8d026942afc3c2cf75adb5fde",
+  "cone": "sha256:0a76b9242d28bab4e9a3f6f8c279796dc3e7e653dc1edc465c0a725265e46be1",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4526,7 +3770,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:40+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4541,17 +3785,17 @@
  },
  {
   "law": "MinusSelf",
-  "cone": "sha256:dbca600ee7fdb9a7d0fdd206f9ad86551e5fcc2bd69340d0bb931ef0be5d168d",
+  "cone": "sha256:48f2b4fc81dbb417c8d5f67283bbcb9351fc045183ec6b5c970aac262789623c",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4599,7 +3843,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:40+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4614,17 +3858,17 @@
  },
  {
   "law": "TimesZero",
-  "cone": "sha256:0c0048a48637ef19e5c0e86767a48ccb5f5d47ecd359b60e96188d1a17c5cd23",
+  "cone": "sha256:feb3e8eacd198079ee5ce36916500aed9a2b4c7af0cfa12b121bc05e6952ea28",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4672,7 +3916,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:40+00:00",
+  "date": "2026-10-17T16:50:52+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4687,17 +3931,17 @@
  },
  {
   "law": "DivideOne",
-  "cone": "sha256:de5907972c8250836ddb4b482d9d39ae74a6d56e5bcfabc95bacbec4bf845157",
+  "cone": "sha256:7f8417ffdd5045035d0869b6d426b6e59bd418de9ba0373fed78561e98f12a69",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4745,7 +3989,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:40+00:00",
+  "date": "2026-10-17T16:50:51+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4760,17 +4004,17 @@
  },
  {
   "law": "TimesOne",
-  "cone": "sha256:a0b830c5634a4750533424377e24ab67114ae8777ffd72e2bc42f60a7a80043e",
+  "cone": "sha256:84c81c554fac215b835c71a828a0ca1724f0ea64afc6e45bcc3cea8c993549ea",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4818,7 +4062,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:39+00:00",
+  "date": "2026-10-17T16:50:51+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4833,17 +4077,17 @@
  },
  {
   "law": "PlusZero",
-  "cone": "sha256:696d896cfb4d552505db3d5603a5ee7fa14374bc3eb75962beec585674ca58f5",
+  "cone": "sha256:cdb2c1360a86a455ad015a2cbff5bd30427509e4714f58229f841949d4463891",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4891,7 +4135,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:39+00:00",
+  "date": "2026-10-17T16:50:51+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -4906,22 +4150,22 @@
  },
  {
   "law": "TimesCommutes",
-  "cone": "sha256:c5f99e1a02507bf9da638ae7380fa8ced02bdba87dbca546bdacdc51385d9521",
+  "cone": "sha256:e570e5c10b7495e081ce00c0571a05e8ad18e485b1e6a1ce3b699a68d7c6c1b9",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -4978,7 +4222,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:39+00:00",
+  "date": "2026-10-17T16:50:51+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -5000,22 +4244,22 @@
  },
  {
   "law": "PlusCommutes",
-  "cone": "sha256:bff41eef99db004491a2c6b37760ecaf76ce93575a46747c379306bf23ef891c",
+  "cone": "sha256:126f1720189bd5443215dbebaa6fcfb245b9eca4abdb4ea15993413c9034c685",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "x",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "y",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -5072,7 +4316,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:56:39+00:00",
+  "date": "2026-10-17T16:50:51+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -5094,12 +4338,12 @@
  },
  {
   "law": "DivisionAlgorithm",
-  "cone": "sha256:4d535e970bbd3dd06624a230c7880a64ed032d2b0ed6762c76f5d408136da1b6",
+  "cone": "sha256:355367ea62b2dd84370ec6f65920118b2f1b44b03e900bf9ec0e61c59dee3cf9",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
@@ -5153,23 +4397,23 @@
   "outcome": {
    "NotRunFor": "a : Int: Int is infinite: ExhaustiveMode needs its bounds or a census (7.R3)"
   },
-  "date": "2026-10-17T09:53:59+00:00",
+  "date": "2026-10-17T16:48:33+00:00",
   "interpreter": "v0.2",
   "hosts": []
  },
  {
   "law": "LeqTransitive",
-  "cone": "sha256:ec953dcc63359e63982ecede9e7c3b90d02763f3023b36cbc5a2f61deae4cd2b",
+  "cone": "sha256:1207c3f87c532db9a869aeb9f5596f4dd96dbfd0531a92c04a3a3e23adfebe63",
   "binding": [
    {
     "parameter": "d",
     "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
+    "fingerprint": "sha256:393499f7fc147cef5dbefa4531ee1eb8ad7f553ef9252fc14fd8b3c17dd191b0"
    },
    {
     "parameter": "c",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqChain d)",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -5208,7 +4452,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:53:59+00:00",
+  "date": "2026-10-17T16:48:33+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -5223,22 +4467,22 @@
  },
  {
   "law": "DivisionAlgorithm",
-  "cone": "sha256:4d535e970bbd3dd06624a230c7880a64ed032d2b0ed6762c76f5d408136da1b6",
+  "cone": "sha256:355367ea62b2dd84370ec6f65920118b2f1b44b03e900bf9ec0e61c59dee3cf9",
   "binding": [
    {
     "parameter": "m",
     "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
+    "fingerprint": "sha256:27f7cff1c18870e64c5335642c2c94bb3c692b9fdcc00a9349d613dac7a9e22e"
    },
    {
     "parameter": "a",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    },
    {
     "parameter": "b",
     "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
+    "fingerprint": "sha256:4472fff8a2df4bd384fb2458a6c5d4c8aa03c262df7285f17cdc60d3a061bbf4"
    }
   ],
   "seed": 0,
@@ -5295,7 +4539,7 @@
   },
   "grade": "Sampled",
   "outcome": "Passed",
-  "date": "2026-10-17T09:53:59+00:00",
+  "date": "2026-10-17T16:48:33+00:00",
   "interpreter": "v0.2",
   "hosts": [],
   "regions": [
@@ -5307,2864 +4551,6 @@
     "n": 30
    }
   ]
- },
- {
-  "law": "LessIsStrict",
-  "cone": "sha256:288be110ee2a5a5af5d5ab7f35610ba162a4953df4975e36fa65a1113959293c",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "tie",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Bool",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-15T04:26:21+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "ExpOfLog",
-  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:38+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "SqrtOfSquare",
-  "cone": "sha256:804bc927ce89ad8d95cd16945e3eeed921d114a01db5e99157a5df7b3f6cb3e2",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:38+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "LogMultiplies",
-  "cone": "sha256:139b697ebc3849cdb75befe34e65e858d03e2a2823b8766eaa47247e5af6e981",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ExpAdds",
-  "cone": "sha256:0cc8e9fe93b07a76b9bc724db364d59c07408a1797663ccd8c734dc5918e6217",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "LogOfExp",
-  "cone": "sha256:c9815e21d767ef5e6bce4bcdcf524be87280c4752e459b24383fb56854db090c",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ExpOfLog",
-  "cone": "sha256:7c0aa95560640b44a682e0ec283e26e9f71a5359c24bf4030db5b8764e2aa845",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "SqrtSquares",
-  "cone": "sha256:e3dc0419cde7740f8d23434744099d1f47c0a36db8fcdd18edf7662962f19f0a",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "tol",
-    "generator": "tolerance (Listed)",
-    "fingerprint": "sha256:287b8308028a32ee077110a9b7a9da6629d1e36b59a5884ec5afeb25d6826500"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "tol",
-    "reach": {
-     "Members": [
-      {
-       "Number": 1e-12
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ErfBounded",
-  "cone": "sha256:1a1e8bae6e3fc4fd3f525556cbc567a4dbdb12bc29b809e785c2281ae624a352",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ErfOdd",
-  "cone": "sha256:b1adeaa1fad7fd548f966073addcd5634498844a837b24b4d3d11d7f8214cc97",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ExpPositive",
-  "cone": "sha256:fbb75ae709872d41b116cbd20fececee41c9168a2b78700ba3a595c799f0c1e4",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over ExpDomain",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -300.0,
-      300.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "SqrtOfSquare",
-  "cone": "sha256:804bc927ce89ad8d95cd16945e3eeed921d114a01db5e99157a5df7b3f6cb3e2",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:37+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "SqrtMonotone",
-  "cone": "sha256:943ca686a2777c19533287773fd6b3874e277c941c45a2afc99c617fcedcd33d",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqPair doublesOrder)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ErfOfZero",
-  "cone": "sha256:7b0f9321b5a6921d35e26c161b3999cd32f57a2e50558288b93bfa471eea616a",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "LogOfOne",
-  "cone": "sha256:81b0d2b37d58b4b7aa798bd947832b018a326d1eaa19f639e8f9b11153ef97c4",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ExpOfZero",
-  "cone": "sha256:6ef7b331c077d5a8d611d7ea656171c6697fd89fdff65e0325f692011e6e13b0",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "SqrtOfSquares",
-  "cone": "sha256:620ab8ab03edad388ad53d961e441d6764edd673350deda615cd8eb05134ddb1",
-  "binding": [
-   {
-    "parameter": "e",
-    "generator": "elementary (Listed)",
-    "fingerprint": "sha256:b460514aa71a460566e168e40e5ea498bde47c5f6cb4ff312efb02fa132c3260"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "e",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "elementary"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": [
-   [
-    "python:math.erf",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.exp",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.log",
-    "python 3.13.2"
-   ],
-   [
-    "python:math.sqrt",
-    "python 3.13.2"
-   ]
-  ]
- },
- {
-  "law": "ConvertKeepsOrder",
-  "cone": "sha256:41ca90fd1a64b20ab264dc1ec13e547a706cdb001d7ea41e353de76bb0b7603f",
-  "binding": [
-   {
-    "parameter": "c",
-    "generator": "conversion (Listed)",
-    "fingerprint": "sha256:5e545a2f17c6247ae954dea80ee4fae90c9f5b8143cd0178716090b7f80c1ca6"
-   },
-   {
-    "parameter": "i",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "j",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "conversion"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "i",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "j",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "ConvertSucceeds",
-  "cone": "sha256:02e5e81c09cace1d861b81d09a216276c80bef855e3bc9d68b90bde7c2a1cdc6",
-  "binding": [
-   {
-    "parameter": "c",
-    "generator": "conversion (Listed)",
-    "fingerprint": "sha256:5e545a2f17c6247ae954dea80ee4fae90c9f5b8143cd0178716090b7f80c1ca6"
-   },
-   {
-    "parameter": "i",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Small",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "conversion"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "i",
-    "reach": {
-     "Interval": [
-      -4503599627370496.0,
-      4503599627370496.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "ConvertAddsExactly",
-  "cone": "sha256:8db857e265cb6121d861d3fe0656a623410dc8feab96eb71930ad83f4dc135e9",
-  "binding": [
-   {
-    "parameter": "c",
-    "generator": "conversion (Listed)",
-    "fingerprint": "sha256:5e545a2f17c6247ae954dea80ee4fae90c9f5b8143cd0178716090b7f80c1ca6"
-   },
-   {
-    "parameter": "i",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Small",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "j",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Small",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "conversion"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "i",
-    "reach": {
-     "Interval": [
-      -4503599627370496.0,
-      4503599627370496.0
-     ]
-    }
-   },
-   {
-    "parameter": "j",
-    "reach": {
-     "Interval": [
-      -4503599627370496.0,
-      4503599627370496.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "ConvertZeroAndOne",
-  "cone": "sha256:da153e7c393b1ebcbc346c7efb2db0f8cf41a1464987c5f579321c18a2cb7b5d",
-  "binding": [
-   {
-    "parameter": "c",
-    "generator": "conversion (Listed)",
-    "fingerprint": "sha256:5e545a2f17c6247ae954dea80ee4fae90c9f5b8143cd0178716090b7f80c1ca6"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "c",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "conversion"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "RemainderOfTheDivisorsSign",
-  "cone": "sha256:f9d685f0de57f277508e8e750e88478b9ff3a22ea56561886603f30e61cd962d",
-  "binding": [
-   {
-    "parameter": "m",
-    "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Int",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonZeroInt",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "integerDivision"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "DivisionAlgorithm",
-  "cone": "sha256:4d535e970bbd3dd06624a230c7880a64ed032d2b0ed6762c76f5d408136da1b6",
-  "binding": [
-   {
-    "parameter": "m",
-    "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Int",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonZeroInt",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "integerDivision"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "QuotientOfProduct",
-  "cone": "sha256:45724e4c9ff7219c906eae18acdc8963874807ec25faf69b4b6cd0e9060b7b91",
-  "binding": [
-   {
-    "parameter": "m",
-    "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "integerDivision"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "RemainderOfTheDivisorsSign",
-  "cone": "sha256:f9d685f0de57f277508e8e750e88478b9ff3a22ea56561886603f30e61cd962d",
-  "binding": [
-   {
-    "parameter": "m",
-    "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "integerDivision"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "DivisionAlgorithm",
-  "cone": "sha256:4d535e970bbd3dd06624a230c7880a64ed032d2b0ed6762c76f5d408136da1b6",
-  "binding": [
-   {
-    "parameter": "m",
-    "generator": "integerDivision (Listed)",
-    "fingerprint": "sha256:d5ec2ed56c37fb073789e255b686075231c3bd277b0855f1f4ec308db4e4f111"
-   },
-   {
-    "parameter": "a",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Int",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "b",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonZeroInt",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "m",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "integerDivision"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "a",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "b",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:36+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "TimesMonotone",
-  "cone": "sha256:0f7ee63a4b4f952cb0587197a251f89e2a737851a71ece65d66f7268e27af262",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over (LeqPair d)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over NonNegative",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      0.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "PlusMonotone",
-  "cone": "sha256:62320c098230aae7137f54d766d49867a076ce9ba00f90baa10bf084943c97f9",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over (LeqPair d)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "NegateTwice",
-  "cone": "sha256:f25f2a7309757f69a3c03b230e548501cac9b0019e43ae3f1348a9cf82af62bc",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "DivideSelf",
-  "cone": "sha256:e34baa36a78e2a79bff44f23c91de866087c69c8d026942afc3c2cf75adb5fde",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "PlusCommutes",
-  "cone": "sha256:bff41eef99db004491a2c6b37760ecaf76ce93575a46747c379306bf23ef891c",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 1000000) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -1000000.0,
-      1000000.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "EpsilonIsTheUlpOfOne",
-  "cone": "sha256:e7231692551193fb36654d902505d778643cba3585ff724379edcd53c9f553f3",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 1,
-    "raised": 0,
-    "coverage": "Listed",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Cases",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "TimesMonotone",
-  "cone": "sha256:0f7ee63a4b4f952cb0587197a251f89e2a737851a71ece65d66f7268e27af262",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqPair d)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over NonNegative",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:35+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "PlusMonotone",
-  "cone": "sha256:62320c098230aae7137f54d766d49867a076ce9ba00f90baa10bf084943c97f9",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "p",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqPair d)",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "z",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "z",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:34+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "UnequalIsNotEqual",
-  "cone": "sha256:0a183a645010c6845809b61e725d24bfc9941f61e6934471bdc1d1467fc5f4fd",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:34+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "GeqIsLeqReversed",
-  "cone": "sha256:d91e89d285112585995fec9f8f0eac24152d0b3bc50c50f158e9e66cdf069ce1",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:34+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "GreaterIsLessReversed",
-  "cone": "sha256:2ea08dad9f0eccbe7a11c179862619aa83b584f332b4812a02fbc31546c3d7f0",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:34+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
  },
  {
   "law": "LessIsStrict",
@@ -8241,963 +4627,6 @@
   "grade": "Sampled",
   "outcome": "Passed",
   "date": "2026-10-14T16:55:34+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "LeqTransitive",
-  "cone": "sha256:ec953dcc63359e63982ecede9e7c3b90d02763f3023b36cbc5a2f61deae4cd2b",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "c",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over (LeqChain d)",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:33+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "LeqAntisymmetric",
-  "cone": "sha256:bbf4b36fed624640c3e4cd64b2b951b9fe63234da31a03967dd002f13d2d1184",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:33+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "LeqTotal",
-  "cone": "sha256:f3cfca1c22bca4bbd842157285544b6e8a161f7fb471a31f1abcc8a26230d821",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:33+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "LeqReflexive",
-  "cone": "sha256:77a525bac4e3d77e158c91f86e89df1fe734f6662bfee34e4851314224cda6f3",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:33+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "NegateTwice",
-  "cone": "sha256:f25f2a7309757f69a3c03b230e548501cac9b0019e43ae3f1348a9cf82af62bc",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:33+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "MinusIsPlusNegated",
-  "cone": "sha256:eb53c81789a8244751dfcbcbb424d1ea5e57d73d9005d7aca828742f3fac4046",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "DivideSelf",
-  "cone": "sha256:e34baa36a78e2a79bff44f23c91de866087c69c8d026942afc3c2cf75adb5fde",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Positive",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      0.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "MinusSelf",
-  "cone": "sha256:dbca600ee7fdb9a7d0fdd206f9ad86551e5fcc2bd69340d0bb931ef0be5d168d",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "TimesZero",
-  "cone": "sha256:0c0048a48637ef19e5c0e86767a48ccb5f5d47ecd359b60e96188d1a17c5cd23",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "DivideOne",
-  "cone": "sha256:de5907972c8250836ddb4b482d9d39ae74a6d56e5bcfabc95bacbec4bf845157",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "TimesOne",
-  "cone": "sha256:a0b830c5634a4750533424377e24ab67114ae8777ffd72e2bc42f60a7a80043e",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "PlusZero",
-  "cone": "sha256:696d896cfb4d552505db3d5603a5ee7fa14374bc3eb75962beec585674ca58f5",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "TimesCommutes",
-  "cone": "sha256:c5f99e1a02507bf9da638ae7380fa8ced02bdba87dbca546bdacdc51385d9521",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
-  "interpreter": "v0.2",
-  "hosts": []
- },
- {
-  "law": "PlusCommutes",
-  "cone": "sha256:bff41eef99db004491a2c6b37760ecaf76ce93575a46747c379306bf23ef891c",
-  "binding": [
-   {
-    "parameter": "d",
-    "generator": "doubles (Listed)",
-    "fingerprint": "sha256:085e096b60052af4499c1b616acdb2bf5e34269f041d06a1be4f19c1c607484a"
-   },
-   {
-    "parameter": "x",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   },
-   {
-    "parameter": "y",
-    "generator": "SampledMode { place := fn (lo : ?type) { fn (hi : ?type) { fn (v : ?type) { ((+ lo) ((* v) ((- hi) lo))) } } } } (size 10) over Moderate",
-    "fingerprint": ""
-   }
-  ],
-  "seed": 0,
-  "cases": 100,
-  "budgets": {
-   "tries": 2000,
-   "redraws": 50,
-   "probes": 5,
-   "drawsPerCase": 10,
-   "coveringAbove": 20000,
-   "levelRuns": 10,
-   "seedsPerControl": 5,
-   "distributionDraws": 10000,
-   "specialMass": 0.05,
-   "atomAtZero": 0.01
-  },
-  "reach": [
-   {
-    "parameter": "d",
-    "reach": {
-     "Members": [
-      {
-       "Printed": "doubles"
-      }
-     ]
-    }
-   },
-   {
-    "parameter": "x",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   },
-   {
-    "parameter": "y",
-    "reach": {
-     "Interval": [
-      -10.0,
-      10.0
-     ]
-    }
-   }
-  ],
-  "evidence": {
-   "Points": {
-    "evaluated": 100,
-    "raised": 0,
-    "coverage": "(Drawn 0)",
-    "verdict": "Supported"
-   }
-  },
-  "grade": "Sampled",
-  "outcome": "Passed",
-  "date": "2026-10-14T16:55:32+00:00",
   "interpreter": "v0.2",
   "hosts": []
  }

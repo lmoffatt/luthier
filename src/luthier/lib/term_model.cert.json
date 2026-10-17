@@ -1,0 +1,155 @@
+[
+ {
+  "law": "ErasureKeepsTheStep",
+  "cone": "sha256:b744007509870946b79fe5f56a3d89f4fe0502da055eed9184d5096fc6c369b8",
+  "binding": [
+   {
+    "parameter": "a",
+    "generator": "alphas (Listed)",
+    "fingerprint": "sha256:96dc574c43644bc2b33f0962f117b68e1b710236149377735c73af8e96abcb33"
+   },
+   {
+    "parameter": "sb",
+    "generator": "substitutions (Listed)",
+    "fingerprint": "sha256:26388dc29d612182cf25ace005ecdecae6674bd77d2181ecc9387de2d4439bdb"
+   },
+   {
+    "parameter": "m",
+    "generator": "steppers (Listed)",
+    "fingerprint": "sha256:612afc7d543d3a5dafae200d2560a18ddb47022f3610ef1c1f50b52d631cf5a4"
+   },
+   {
+    "parameter": "e",
+    "generator": "greedyErasures (Listed)",
+    "fingerprint": "sha256:fc20ef459e76277d54460d53237cf0a2a089dbd89a8b0963feeb395f8c19efdd"
+   },
+   {
+    "parameter": "p",
+    "generator": "erasurePrograms (Listed)",
+    "fingerprint": "sha256:c39138c2b78689d6a7a5c4b0a7bf2a15dabbe6f7e676a8d6ffe190f1bd65885a,sha256:edc85767ca07b1dcd48f5d08777fdf4a5c8147e4d965740eb336a122fe6166ab"
+   },
+   {
+    "parameter": "t",
+    "generator": "erasureTerms (Listed)",
+    "fingerprint": "sha256:f0368698b57ab8c757c26dbb85e8546bdb06ae1cbcd8b5246d5b85aea6fe473c"
+   }
+  ],
+  "seed": 20261018,
+  "cases": 100,
+  "budgets": {
+   "tries": 2000,
+   "redraws": 50,
+   "probes": 5,
+   "drawsPerCase": 10,
+   "coveringAbove": 20000,
+   "levelRuns": 10,
+   "seedsPerControl": 5,
+   "distributionDraws": 10000,
+   "specialMass": 0.05,
+   "atomAtZero": 0.01
+  },
+  "reach": [
+   {
+    "parameter": "a",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "alpha"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "sb",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "substitute"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "m",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "stepper"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "e",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "{ erase := eraseBinderNames }"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "p",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "nil"
+      },
+      {
+       "Printed": "((cons (((Define \"inc\") (((Pi \"_\") (Var \"Int\")) (Var \"Int\"))) incBody)) nil)"
+      }
+     ]
+    }
+   },
+   {
+    "parameter": "t",
+    "reach": {
+     "Members": [
+      {
+       "Printed": "((App (((Lam \"x\") (Var \"Int\")) (Var \"x\"))) one)"
+      },
+      {
+       "Printed": "((((Let \"y\") (Var \"Int\")) one) ((Pair (Var \"y\")) (Var \"y\")))"
+      },
+      {
+       "Printed": "((App (Var \"inc\")) one)"
+      }
+     ]
+    }
+   }
+  ],
+  "evidence": {
+   "Points": {
+    "evaluated": 6,
+    "raised": 0,
+    "coverage": "Listed",
+    "verdict": "Refuted"
+   }
+  },
+  "grade": null,
+  "outcome": {
+   "ControlRefuted": "a = alpha, sb = substitute, m = stepper, e = { erase := eraseBinderNames }, p = nil, t = ((App (((Lam \"x\") (Var \"Int\")) (Var \"x\"))) one)"
+  },
+  "date": "2026-10-17T16:48:43+00:00",
+  "interpreter": "v0.2",
+  "hosts": [],
+  "kind": "Control",
+  "regions": [
+   {
+    "region": {
+     "source": "FromType",
+     "name": "empty"
+    },
+    "n": 3
+   },
+   {
+    "region": {
+     "source": "FromType",
+     "name": "one element"
+    },
+    "n": 3
+   }
+  ]
+ }
+]
