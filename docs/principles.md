@@ -1,6 +1,6 @@
 # The principles of Luthier
 
-Projected from `record/principles-language.md` (sha256 43c04e3dedb9, commit 48ea785) by `scripts/project_principles.py` (project_principles v2) on 2026-10-18; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
+Projected from `record/principles-language.md` (sha256 565a7bc9b539, commit 48ea785 (modified in the working tree)) by `scripts/project_principles.py` (project_principles v2) on 2026-10-18; not edited by hand: edit the record and rerun the script (D-2026-10-12-d). Written for the agent that builds the specification. Each entry gives its statement, its current formulation (the model's unless a clause is marked his), what it derives from, its clauses each with its status, and its status; his quotes, the sources and the history by draft are in the record, and the way of working, W1 to W15, is `docs/way-of-working.md`.
 
 ## Purpose
 
@@ -173,6 +173,15 @@ distance); clause 4 from G1 (the specimen can be recognized as the same specimen
   equivalence between types is a value with its laws, the two maps and their round trips, certified
   once, and certificates transport along it at its cost, nothing when it is exact (L6, L10.7)
   (D-2026-10-17-a). [proposed]
+- L3.5 (His words, on the third version) The core has three planes: the objects (`Bool`, `Int`,
+  `Float`, `List`, `Map`, functions, functors and the universal constructions), each with its theory;
+  the levels of equivalence, objects too, one structure enriched over a base (`Bool` with `and` gives
+  an equivalence, [0, ∞] with `+` a metric, distributions with a t-norm a probabilistic metric;
+  Lawvere 1973, Menger 1942), compared by refinement or by Lipschitz equivalence, order being the same
+  structure without symmetry; and the computable types, models of the first two, certified against
+  them. The theories of the first two planes only declare and state laws, with the mathematical
+  references they are tested against; whatever computes lives in the third, and the second version
+  failed by mixing them (D-2026-10-18-c). [proposed]
 References: D-2026-10-11-m.
 Rests on: O2 (the equality a type comes with).
 Status: settled; clause 3 proposed.
@@ -307,6 +316,12 @@ object is consumed or stable: kept; with G1 for what is derived (the former L6).
   skipping an action whose effect the world already shows are defaults, and the program or its demand
   can always ask for the literal behavior instead (write twice to the same file, to see whether a
   third party writes in between) (D-2026-10-15-c). [settled]
+- L5.21 (His words) The tower of levels is cut by the demand, not by a rule of the theory: a theory
+  is a finite rule between two nodes, the graph its rules generate may be infinite, and a computation
+  walks only what its demand reaches, as values are computed forward on demand (clause 2), the
+  parameters of each level it touches coming from the demand (clause 17). Infinity is potential, as
+  Haskell implements it: no limit for whoever walks the road, and each computation comes with its
+  limits (D-2026-10-18-c). [proposed]
 Example: doubling positives is positive only when positivity is demanded and derivable, sin of
 positives is only Real because no law composes (clause 15).
 References: spec 3; D-2026-10-11-c, D-2026-10-11-i, D-2026-10-12-h, D-2026-10-12-n.
