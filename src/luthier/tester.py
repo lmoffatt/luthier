@@ -854,7 +854,7 @@ def run_spec(runner, spec, fuel, loaded=None, start=None):
                 return _not_run(spec, f"more than {limit} cases (coveringAbove); covering arrays are a later bite (7.R3)", names)
         else:
             # 7.S6: a draw that a filter cannot give within its tries makes the law not run
-            cutoffs = tuple(k for k, (_, ty) in enumerate(params) if _base(ty) in CUTOFF_TYPES)
+            cutoffs = tuple(k for k, (_, ty) in enumerate(params) if is_cutoff(runner, ty))
             cases = [_draw_case(values, params, plan, k, cutoffs) for k in range(spec.cases)]
     except (NoGenerator, Unfit, Invalid) as exc:
         return _not_run(spec, str(exc), names)
@@ -905,6 +905,21 @@ CUTOFF_TYPES = ("Tolerance", "RankFloor", "Sequential")
 # c / w); and the factor a premise stated by a cutoff is read at to find its boundary.
 CUTOFF_WIDTH = 2.0
 _MOST_ENTRIES = 400  # [proposed] the entries of a matrix written as a function read for its numbers
+
+
+def is_cutoff(runner, ty, cutoff_types=CUTOFF_TYPES):
+    """Whether a parameter's type is a cutoff's: one of `cutoff_types`, or a subtype of one
+    (`ClearFloor`, a `RankFloor` below 0.001)."""
+    for _ in range(20):
+        if _base(ty) in cutoff_types:
+            return True
+        if isinstance(ty, t.Subtype):
+            ty = ty.type
+        elif isinstance(ty, t.Var) and ty.name in runner.types and runner.types[ty.name] != ty:
+            ty = runner.types[ty.name]
+        else:
+            return False
+    return False
 
 
 def degeneracies_in(loaded):
@@ -968,7 +983,7 @@ class Classifier:
 
     def __init__(self, runner, loaded, values, params, cutoff_types=CUTOFF_TYPES, width=CUTOFF_WIDTH):
         self.runner, self.values, self.params, self.width = runner, values, params, width
-        self.cutoffs = [k for k, (_, ty) in enumerate(params) if _base(ty) in cutoff_types]
+        self.cutoffs = [k for k, (_, ty) in enumerate(params) if is_cutoff(runner, ty, cutoff_types)]
         self.cases_of = loaded.name(_GENERATORS_LTH, "casesOf") if loaded is not None else None
         defined = {a.name: a for a in runner.program if isinstance(a, t.Define)}
         self.declarations = []
