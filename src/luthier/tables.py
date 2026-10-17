@@ -9,6 +9,11 @@ extra final newline, spaces around numbers and header cells, floats written with
 trailing zeros. It rejects what it cannot read without guessing: an unknown or missing type, a
 repeated column name, a row with the wrong number of cells, a number that does not parse, a
 float that is not finite.
+
+Where tables.lth declares a `Maybe` (`Codec.parse : String -> Maybe Table`, `Table.cell : String
+-> Fin nRows -> Maybe Cell`), the functions here return the host's `Just x` or `NOTHING`
+(host.py), never a bare value or None: the bridge is strict on `Maybe` (D-2026-10-16-h, item 14).
+Python's callers that want the table or an error use `parse_or_raise`.
 """
 from __future__ import annotations
 
@@ -18,7 +23,7 @@ import math
 import re
 import random
 from dataclasses import dataclass
-from typing import Optional
+from .host import NOTHING, Just
 
 TYPES = ("int", "float", "str")
 
@@ -48,18 +53,21 @@ class Table:
         return [ty for _, ty in self.columns]
 
     def cell(self, name: str, row: int):
-        """None where there is no such column; otherwise (label, value) of the sum Cell."""
+        """`Maybe Cell`: NOTHING where there is no such column; otherwise Just (label, value) of the
+        sum Cell (D-2026-10-16-h)."""
         for k, (n, ty) in enumerate(self.columns):
             if n == name:
-                return (_LABEL[ty], self.rows[row][k])
-        return None
+                return Just((_LABEL[ty], self.rows[row][k]))
+        return NOTHING
 
 
 _LABEL = {"int": "int", "float": "real", "str": "text"}
 
 
 def as_table(x) -> "Table":
-    """A table built in Luthier crosses as a record of its components; read it back as a Table."""
+    """A table built in Luthier crosses as a record of its components; read it back as a Table.
+    Its `cell` gives Just (label, value) or NOTHING, as `Table.cell` does; a column whose cell is
+    NOTHING is not a table of tables.lth (`CellsOfTheirKind`) and is refused."""
     if isinstance(x, Table):
         return x
     names, kinds, n = list(x.names), list(x.kinds), int(x.nRows)
@@ -68,7 +76,9 @@ def as_table(x) -> "Table":
         row = []
         for name in names:
             c = x.cell(name, r)
-            row.append(c[1] if isinstance(c, tuple) else c)
+            if not isinstance(c, Just):
+                raise ValueError(f"the table has no cell at column {name!r}, row {r} (CellsOfTheirKind)")
+            row.append(c.value[1] if isinstance(c.value, tuple) else c.value)
         rows.append(tuple(row))
     return Table(tuple(zip(names, kinds)), tuple(rows))
 
@@ -148,11 +158,13 @@ def parse_or_raise(text: str) -> Table:
     return Table(tuple(columns), tuple(rows))
 
 
-def parse(text: str) -> Optional[Table]:
+def parse(text: str):
+    """`Codec.parse : String -> Maybe Table`: Just the table, or NOTHING when the text is not of
+    the format (D-2026-10-16-h)."""
     try:
-        return parse_or_raise(text)
+        return Just(parse_or_raise(text))
     except ParseError:
-        return None
+        return NOTHING
 
 
 def parse_error(text: str) -> str:
@@ -163,7 +175,8 @@ def parse_error(text: str) -> str:
         return str(e)
 
 
-def read_file(path: str) -> Optional[Table]:
+def read_file(path: str):
+    """The file's table as `parse` gives it: Just the table or NOTHING."""
     with open(path, newline="") as f:
         return parse(f.read())
 

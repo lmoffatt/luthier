@@ -1090,7 +1090,8 @@ class Runner:
     def record_to_host(self, value, ty, at=None):
         """A record by its fields, a later field's type reading the earlier ones (`f : Fin n -> A`).
         A `Vec` `{ n, f }` or a `Mat` `{ m, n, f }` is the array of `f`, its shape the record's;
-        a `Table` the record `tables.as_table` reads, its `cell` giving None or (label, value); a
+        a `Table` the record `tables.as_table` reads, its `cell` giving host.Just (label, value) or
+        host.NOTHING as tables.py's `Table.cell` does (D-2026-10-16-h); a
         record whose fields are one host object's attributes is that object."""
         given = dict(value.fields)
         out, types = HostRecord(), list(ty.fields)
@@ -1109,9 +1110,6 @@ class Runner:
         owner = next((getattr(v, "__self__", None) for v in out.values() if hasattr(v, "__self__")), None)
         if owner is not None and all(_same(getattr(owner, label, None), v) for label, v in out.items()):
             return owner
-        if labels == ("nRows", "names", "kinds", "cell") and not hasattr(out["cell"], "__self__"):
-            cell = out["cell"]
-            out["cell"] = lambda name, row: (lambda c: None if c is host.NOTHING else c.value)(cell(name, row))
         return out
 
     def from_host(self, value, ty=None, at=None):
@@ -1189,13 +1187,14 @@ class Runner:
                 raise RunError(f"the host gave {value!r} where a Bool is declared (11.S6)")
             return t.Var("true" if value else "false")
         if (element := _applied(ty, "Maybe")) is not None:
-            # host.NOTHING or None is nothing (tables.parse gives None); host.Just or a value is just
-            if value is None or value is host.NOTHING:
+            # strict (D-2026-10-16-h, item 14): host.NOTHING is nothing and host.Just x is just x;
+            # a bare value, None included, is refused, with or without `--checked`
+            if value is host.NOTHING:
                 return t.Var("nothing")
-            # [proposed, kept from report-4.md choice 5] a bare value is `just`: tables.py's `parse`
-            # and `Table.cell` give one (prompt-12.md asks none; see report-12.md)
-            inner = value.value if isinstance(value, host.Just) else value
-            return t.App(t.Var("just"), self.from_host(inner, element, at))
+            if isinstance(value, host.Just):
+                return t.App(t.Var("just"), self.from_host(value.value, element, at))
+            raise RunError(f"the host gave {value!r} where a Maybe is declared: a Maybe crosses as "
+                           f"host.Just or host.NOTHING (D-2026-10-16-h)")
         if (element := _applied(ty, "List")) is not None:
             if not isinstance(value, (list, tuple)):
                 raise RunError(f"the host gave {value!r} where a List is declared")

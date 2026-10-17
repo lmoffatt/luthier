@@ -16,7 +16,7 @@ NOTES = "x:float,y:float,name:str\n1.5,3.0,first\n"
 
 
 def table(text):
-    return tables.parse(text)
+    return tables.parse_or_raise(text)
 
 
 def auto(e):
@@ -51,11 +51,13 @@ def test_two_renders_of_one_value_give_the_same_bytes(ext, tmp_path):
 
 def test_a_table_built_in_luthier_draws_as_the_parsed_one():
     # ImageOfTheValue across representations: the record tables.as_table reads, its cell giving
-    # (label, value), is the same table as the parsed one, and draws the same bytes
+    # Just (label, value) or NOTHING (D-2026-10-16-h), is the same table as the parsed one, and
+    # draws the same bytes
     t = table(OBS)
     labels = {"int": "int", "float": "real", "str": "text"}
     built = SimpleNamespace(nRows=t.nRows, names=t.names, kinds=t.kinds,
-                            cell=lambda c, r: (labels[t.kinds[t.index(c)]], t.rows[r][t.index(c)]) if c in t.names else None)
+                            cell=lambda c, r: host.Just((labels[t.kinds[t.index(c)]], t.rows[r][t.index(c)]))
+                            if c in t.names else host.NOTHING)
     p = figure()
     q = figure(tables=[("obs", built), ("notes", table(NOTES))])
     assert plots.image(p, "png") == plots.image(q, "png")
