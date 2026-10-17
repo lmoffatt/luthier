@@ -2859,3 +2859,16 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16; the line 
 Kind:       host.py (`print_line`, `observe`), cli.py, world.lth (`ObserverIsFaithful` becomes the
             named roots), luthier.lock, the run record; spec 10.S7, 10.S10
 Status:     current
+
+D-2026-10-17-a  Item 26 (a): D-2026-10-13-x stands, the names of a record's fields and of a sum's
+                injections are part of the type; 3.R1's first paragraph and 3.R2 are reworded.
+                `{ x : Float64, y : Float64 }` and `Float64 * Float64` are distinct at the strict
+                level (the hash) and isomorphic by renaming the projections, an exact certified
+                equivalence along which certificates transport at no cost (L6).
+Author:     Luciano
+Quote:      "26 a, los nombres son parte del tipo, la pregunta es si point y Pair son
+            equivalentes."
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-16/17; the line unknown until
+            the export)
+Kind:       spec 3.R1, 3.R2; tests k_named_product, k_bool_is_sum
+Status:     current

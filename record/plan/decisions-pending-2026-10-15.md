@@ -400,6 +400,8 @@ makes a definition a concept is a law stating the role of each part) agrees: two
 not `Bool` without `Bool`'s laws. Cost: 3.R1 and 3.R2 reworded; `k_named_product` and
 `k_bool_is_sum` flip to reject when the checker follows.
 
+*Answered in chat (2026-10-17): (a), D-2026-10-17-a.*
+
 **27. A refutable pattern on `<-` (`(w, just x) <- ...`).** 2.S17, D-2026-10-13-ag. Night default:
 the checker refuses it with a message; alternative: a `Failures` of the block. Options: (a) refuse
 until a real case; (b) `Failures`. Recommended: (a), the night default (the night plan asks "keep the
