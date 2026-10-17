@@ -2898,3 +2898,32 @@ Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-17; the line 
 Kind:       kernel_laws.lth, algebra.lth, numbers.lth and every theory that states a commutation,
             an identity or an order; their stores; L2.8
 Status:     current
+
+D-2026-10-17-c  Refines D-2026-10-17-b. Names are English adjectives without "is" (`Commutative`,
+                `Associative`, `Distributive`, `Reflexive`), the first argument the type, the next
+                what is qualified (the operation, the relation, the function); today's mixture
+                (`PlusCommutes`, `CombineAssociates`, `Distributes`, `isReflexive`) is renamed. The
+                generic vocabulary lives in two files of the core named by content, replacing
+                kernel_laws.lth: `properties.lth` (the loose properties) and `structures.lth` (what
+                is built from them and what core.lut claims); algebra.lth keeps what goes beyond the
+                core. Five groups: relations (Reflexive, Irreflexive, Symmetric, Antisymmetric,
+                Transitive, Total; Equivalence, Preorder, PartialOrder, TotalOrder, StrictOrder);
+                operations (Associative, Commutative, Idempotent, Cancellative, Neutral, Absorbing,
+                Invertible, Distributive, Absorptive; Semigroup, Monoid, CommutativeMonoid, Group,
+                AbelianGroup, Semiring, Ring, Lattice, BooleanAlgebra); functions (Injective,
+                Surjective, Bijective, Idempotent, Involutive, Monotone, Preserving, Congruent;
+                Isomorphism); containers (`size`, `at` over `Fin (size c)` or any finite index,
+                `map`, `fold`: SizeMap, AtMap, SizeAppend as a `Preserving` of monoids, Extensional;
+                Sized, Indexed, Functor, Foldable), claimed by `List`, `Vec n`, `Mat r c` (indexed
+                by `Fin r × Fin c`), `Table`, replacing the four copies of `lengthOf`; the structure
+                of types (Terminal, Initial, Product, Coproduct, Free).
+Author:     Luciano, on the decision assistant's list
+Quote:      "¿cuáles serían las teorías más genéricas, las que todos usan? ... todas estas tienen
+            que estar en core o un nombre más descriptivo. Y ¿es commutes o commutative? Tenemos que
+            ser coherentes" ... "por ejemplo size es una que combina con at o algo así" ... "Sí,
+            agregalo."
+Source:     chat:decision-assistant:0 (fork of luthier-3e, 2026-10-17; the line unknown until the
+            export)
+Kind:       core (properties.lth, structures.lth replacing kernel_laws.lth), every theory's law
+            names, core.lut's claims, arrays.lth, tables.lth
+Status:     current
