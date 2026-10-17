@@ -9,7 +9,7 @@ from dataclasses import dataclass, fields, is_dataclass
 from . import surface as s, term as t
 from .elaborate import elaborate_program, context_of, walk, walk_type, as_type, infer, parameters, curry, theory_domains, ElaborationError
 from .kernel import alpha_equal, substitute, reduce, free_names, pattern_names
-from .run import FileScope
+from .run import FileScope, EXECUTIVE, KIND_NAME, SUFFIX, executive_import, file_kind
 
 
 @dataclass(frozen=True)
@@ -901,11 +901,53 @@ def violates6R1(p, n):
     return False
 
 
+def test_lines(program):
+    """The file's `test` lines: the bare terms whose head is `test` (2.S5, 7.S20)."""
+    found = []
+    for a in program:
+        if isinstance(a, s.Datum):
+            h = a.value
+            while isinstance(h, s.App): h = h.function
+            if h == s.Name('test'): found.append(a)
+    return found
+
+
+def kinds(program, path) -> list[Failure]:
+    """12.R2 (D-2026-10-16-e): the kind a file's suffix declares, verified by its content. An import
+    of an executive file (x.run.lut, x.test.lut) is refused anywhere; a `test` line or a demand (an
+    entry `main`) in a model or library (.lut) or a theory (.lth) is refused; a run without `main`,
+    and a test program without `test` lines, are refused; [proposed] so are a `test` line in a run
+    and a `main` in a test program, each executive file carrying the one demand its suffix names."""
+    from pathlib import Path
+    name = Path(path).name
+    kind = file_kind(path)
+    if kind is None: return []
+    out = []
+    for act in program:
+        if isinstance(act, s.ImportAct):
+            target = resolve(path, act.path) or Path(path).parent / act.path
+            refusal = executive_import(path, target)
+            if refusal: out.append(Failure('12.R2', 'import', refusal))
+    tests = test_lines(program)
+    has_main = any(isinstance(a, (s.Define, s.Declare)) and a.name == 'main' for a in program)
+    where = f'{name} is {KIND_NAME[kind]} ({SUFFIX[kind]})'
+    if tests and kind != 'test':
+        out.append(Failure('12.R2', 'test', f'{where}: a `test` line belongs to a test program, a {EXECUTIVE["test"]} file'))
+    if has_main and kind != 'run':
+        out.append(Failure('12.R2', 'main', f'{where}: `main`, the entry of a demand, belongs to a run, a {EXECUTIVE["run"]} file'))
+    if kind == 'run' and not has_main:
+        out.append(Failure('12.R2', 'main', f'{where} and has no `main`, the entry `luthier run` applies'))
+    if kind == 'test' and not tests:
+        out.append(Failure('12.R2', 'test', f'{where} and has no `test` line, which `luthier certify` runs'))
+    return out
+
+
 def check(program, path=None) -> list[Failure]:
     """Report each implemented program.lth predicate on each introduced name; with the file's
-    `path`, its imports are read for typing (12.S22)."""
+    `path`, its imports are read for typing (12.S22) and its kind is verified (12.R2, `kinds`)."""
     result = []
     if path is not None:
+        result += kinds(program, path)
         program = Program(program); program.imported = load_imports(program, path)
     for n in dict.fromkeys(a.name for a in program if isinstance(a, (s.Declare, s.Define, s.Alias))):
         for rule, predicate in [(f'4.R{k}', globals()[f'violatesR{k}']) for k in range(1, 14)] + [('2.R1', violatesR2R1), ('2.R6', violatesR2R6), ('6.R1', violates6R1)]:

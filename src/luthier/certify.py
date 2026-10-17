@@ -1038,9 +1038,21 @@ def certify(paths, jobs=1, seed=None, deep=False, fuel=1_000_000, out=print, sto
     """`luthier certify`: each file in its own process, `jobs` at a time; prints per file its laws,
     their grades and their control status, read from the control lines of every file given
     (7.S19, L9.14), and its control lines. True when every law of every file has a grade and no
-    control failed."""
+    control failed. Every file is a test program (`x.test.lut`, 12.R2): another kind refuses the
+    command before any line runs."""
     from concurrent.futures import ProcessPoolExecutor
     import multiprocessing
+    from .run import RunError, require_kind
+    refused = []
+    for p in paths:
+        try:
+            require_kind(p, "test")
+        except RunError as exc:
+            refused.append(f"{p}: {exc}")
+    if refused:
+        for line in refused:
+            out(line)
+        return False
     context = multiprocessing.get_context("spawn")
     ok = True
     with ProcessPoolExecutor(max_workers=max(1, jobs), mp_context=context, max_tasks_per_child=1) as pool:

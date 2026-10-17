@@ -70,11 +70,12 @@ class CheckerResult:
 
 # Adapter uses the semantic checker; syntax failures are distinct verdicts.
 def checker(path):
-    from luthier.check import check
+    from luthier.check import check, kinds
     result = parse(path.read_text(encoding='utf-8'))
     if isinstance(result, ParseFailed):
         return CheckerResult(False, 'syntax: ' + '; '.join(e.message for e in result.errors))
-    failures = check(result.program)
+    # the rules of the file's own names, then its kind against its suffix (spec 12.R2)
+    failures = check(result.program) + kinds(result.program, path)
     return CheckerResult(not failures, '; '.join(f'{f.rule} {f.name}: {f.message}' for f in failures))
 
 
@@ -105,6 +106,8 @@ EXPECTED_RULE = {
     'r12_toplevel_arrow.reject.lut': 'syntax',
     'r13_two_models.reject.lut': '4.R13',
     'r4_data_nonrecursive.reject.lut': '4.R3',
+    # the three kinds of file (spec 12.R2, D-2026-10-16-e)
+    **{p.name: '12.R2' for p in SPEC.glob('kind_*.reject.*')},
 }
 
 

@@ -1,0 +1,8 @@
+-- spec 12.R2: a `test` line belongs to a test program (x.test.lut), not to a theory.
+-- expect (proposed): belongs to a test program
+-- Written 2026-10-16 by Claude Opus 5.5, an agent of the coordinating session, on record/IA/code-follows-2026-10-16/prompt-file-kinds.md (D-2026-10-16-e).
+
+import "test.lth" test ExhaustiveMode
+
+Excluded (b : Bool) : Bool := b or not b
+test "Excluded" ExhaustiveMode

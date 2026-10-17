@@ -23,7 +23,7 @@ REASON = "str stands in for a shout not written yet"
 
 
 def _shout(tmp_path):
-    path = tmp_path / "shout.lut"
+    path = tmp_path / "shout.run.lut"
     path.write_text(SHOUT, encoding="utf-8")
     return path
 
@@ -83,7 +83,7 @@ def test_check_v_lists_the_provisionals_with_their_reasons(tmp_path, capsys):
 # ---------------------------------------------------------------- the modes of running (D-2026-10-16-d)
 
 def test_the_default_demand_records_no_fuel_bound_and_fuel_records_its_bound(tmp_path, capsys):
-    path = tmp_path / "small.lut"
+    path = tmp_path / "small.run.lut"
     path.write_text("main : Int := 1 + 2\n", encoding="utf-8")
     assert main(["run", str(path)]) == 0
     assert _last(path)["demand"]["fuel"] is None and _last(path)["fuel"]["given"] is None
@@ -94,7 +94,7 @@ def test_the_default_demand_records_no_fuel_bound_and_fuel_records_its_bound(tmp
 @pytest.mark.skipif(not os.environ.get("LUTHIER_SLOW"), reason="about 90 seconds; set LUTHIER_SLOW=1")
 def test_no_fuel_bound_by_default_finishes_past_the_old_bound_slow(tmp_path, capsys):
     # the old default cut a run at 10,000,000 steps; this one takes about 10,150,000 (35 a turn)
-    path = tmp_path / "count.lut"
+    path = tmp_path / "count.run.lut"
     path.write_text("count (n : Int) (k : Int) : Int := if k == 0 then n else if n < 0 then 0 "
                     "else count (n + 1) (k - 1)\nmain : Int := count 0 290000\n", encoding="utf-8")
     assert DEMAND_DEFAULTS["fuel"] is None
@@ -105,7 +105,7 @@ def test_no_fuel_bound_by_default_finishes_past_the_old_bound_slow(tmp_path, cap
 
 
 def test_a_time_limit_stops_a_loop_and_says_so(tmp_path, capsys):
-    path = tmp_path / "spin.lut"
+    path = tmp_path / "spin.run.lut"
     path.write_text("spin (k : Int) : Int := if k < 0 then k else spin (k + 1)\nmain : Int := spin 0\n",
                     encoding="utf-8")
     assert main(["run", str(path), "--time-limit", "0.5"]) == 1
@@ -113,7 +113,7 @@ def test_a_time_limit_stops_a_loop_and_says_so(tmp_path, capsys):
 
 
 def test_the_strategy_fresh_and_the_limits_are_recorded_in_the_demand(tmp_path, capsys):
-    path = tmp_path / "pure.lut"
+    path = tmp_path / "pure.run.lut"
     path.write_text("main : Int := 1 + 2\n", encoding="utf-8")
     assert main(["run", str(path)]) == 0
     d, plan = _last(path)["demand"], _last(path)["plan"]

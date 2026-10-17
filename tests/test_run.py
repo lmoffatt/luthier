@@ -222,7 +222,7 @@ def test_observe_through_the_bridge(tmp_path):
     ('main : Unit := extern "python:missing_luthier_module.fail" unit', (), "extern"),
 ])
 def test_errors(tmp_path, source, args, message):
-    path = tmp_path / "bad.lut"
+    path = tmp_path / "bad.run.lut"
     path.write_text(source, encoding="utf-8")
     result = command(path, *args)
     assert result.returncode == 1
@@ -239,7 +239,7 @@ def test_relative_import_and_custom_main(tmp_path, capsys):
 
 
 def test_unused_extern_is_not_resolved(tmp_path):
-    path = tmp_path / "lazy.lut"
+    path = tmp_path / "lazy.run.lut"
     path.write_text('unused : Unit := extern "python:missing_luthier_module.fail" unit\nmain : Unit := unit')
     assert run_file(path) == ""
 
@@ -250,7 +250,7 @@ def test_missing_file_is_nothing(tmp_path):
 
 
 def test_world_chain_and_undemanded_action(tmp_path):
-    path = tmp_path / "chain.lut"
+    path = tmp_path / "chain.run.lut"
     path.write_text('''
 print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
 main (w : W) : W * Unit := {
@@ -262,7 +262,7 @@ main (w : W) : W * Unit := {
 
 
 def test_nested_constructor_demand(tmp_path):
-    path = tmp_path / "nested.lut"
+    path = tmp_path / "nested.run.lut"
     path.write_text('''
 first (text : String) : String := extern "python:test_run.first_line" text
 main (w : W) : W * Unit := match cons (first "one\\ntwo") nil {
@@ -335,7 +335,7 @@ showInt (x : Int) : String := extern "python:builtins.repr" x
      'main (w : W) : W * Unit := print w (showInt (m unit).n)', "dimensions"),
 ])
 def test_crossing_errors(tmp_path, source, message):
-    path = tmp_path / "bad.lut"
+    path = tmp_path / "bad.run.lut"
     path.write_text(PRELUDE + source, encoding="utf-8")
     result = command(path, cwd=ROOT / "tests")
     if not message:  # the control: the same program in range runs
@@ -406,7 +406,7 @@ SHAPES = {
 @pytest.mark.parametrize("honest", [True, False], ids=["control", "refused"])
 def test_each_declared_type_is_checked_where_it_crosses(tmp_path, case, honest):
     source, good, bad, message = SHAPES[case]
-    path = tmp_path / "shape.lut"
+    path = tmp_path / "shape.run.lut"
     path.write_text(PRELUDE + source.format(good if honest else bad), encoding="utf-8")
     result = command(path, cwd=ROOT / "tests")
     if honest:
@@ -465,7 +465,7 @@ def test_a_refined_record_and_a_type_family_cross(tmp_path):
     # the fit's crossings (record/IA/fit-host-2026-10-14/prompt.md): a record with a refinement
     # (belief.lth's `Settings`) crosses as its record, by key or attribute; a type family applied
     # (`VecOf 2`) is unfolded to the vectors of length 2 and crosses as an ndarray
-    path = tmp_path / "families.lut"
+    path = tmp_path / "families.run.lut"
     path.write_text(PRELUDE + '''
 import "arrays.lth" VecOf vec
 Opts : U := { tol : Float64, maxIter : Int | 0.0 < tol and 0 < maxIter }
@@ -478,7 +478,7 @@ main (w : W) : W * Unit := print w (showFloat (total opts (vec Float64 2 (fn k {
 
 
 def test_each_entry_once(tmp_path):
-    path = tmp_path / "once.lut"
+    path = tmp_path / "once.run.lut"
     path.write_text(PRELUDE + '''
 tick (k : Int) : Float64 := extern "python:test_run.tick" k
 ticks (u : Unit) : String := extern "python:test_run.ticks" u
@@ -511,7 +511,7 @@ def test_host_cell_under_an_operator_crosses_first():
 
 def test_bootstrap_primitives_and_not(tmp_path):
     # prompt-5.md: run_file defines kernel.BOOTSTRAP_PRIMITIVES; `not` is core's
-    path = tmp_path / "ops.lut"
+    path = tmp_path / "ops.run.lut"
     path.write_text('''
 print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
 main (w : W) : W * Unit := print w (if not (0 >= 3) and 7 mod 3 /= 0 and "ab" == "a" + "b" then "ok" else "no")
@@ -521,7 +521,7 @@ main (w : W) : W * Unit := print w (if not (0 >= 3) and 7 mod 3 /= 0 and "ab" ==
 
 def test_equality_on_strings_and_parameterized_data(tmp_path):
     # prompt-10.md: `/=` on strings, `==` and `/=` on core's Maybe and List
-    path = tmp_path / "eq.lut"
+    path = tmp_path / "eq.run.lut"
     path.write_text('''
 print (w : W) (s : String) : W * Unit := extern "python:luthier.host.print_line" w s
 main (w : W) : W * Unit := print w (if "mic2" /= "mic1" and just 1 == just 1 and [1, 2] == [1, 2] and nothing /= just 1 and not ([1, 2] /= [1, 2]) then "ok" else "no")
@@ -793,7 +793,7 @@ def test_an_extern_applied_to_fewer_arguments_is_a_value():
 
 
 def test_a_callbacks_result_crosses_by_the_codomain(tmp_path):
-    path = tmp_path / "bad_callback.lut"
+    path = tmp_path / "bad_callback.run.lut"
     path.write_text(PRELUDE + '''
 maximize (f : Float64 -> Float64) : Float64 := extern "python:run.bridge_host.maximize" f
 main (w : W) : W * Unit := print w (showFloat (maximize (fn x { "no" })))
@@ -1027,7 +1027,7 @@ def test_the_same_code_has_the_same_fingerprint_and_other_code_another(tmp_path)
     a.mkdir(), b.mkdir()
     one = _hello(a)
     two = _hello(b)
-    other = b / "other.lut"
+    other = b / "other.run.lut"
     other.write_text(two.read_text(encoding="utf-8").replace("hello, world", "hello, there"), encoding="utf-8")
     for p in (one, two, other):
         assert main(["run", str(p)]) == 0
@@ -1141,7 +1141,7 @@ def test_a_first_action_is_validated_once_recorded_and_then_served(tmp_path, cap
     before = store.read_bytes()
     assert main(["run", str(path)]) == 0 and store.read_bytes() == before
     # another argument is another case, validated again
-    other = tmp_path / "first_action_other.lut"
+    other = tmp_path / "first_action_other.run.lut"
     other.write_text(path.read_text(encoding="utf-8").replace('"once"', '"again"'), encoding="utf-8")
     assert main(["run", str(other)]) == 0
     assert json.loads(record_path(other).read_text(encoding="utf-8"))[-1]["certification"]["first actions"][0]["outcome"] == "confirmed"
@@ -1180,7 +1180,7 @@ def test_a_testers_entry_on_the_model_never_serves_its_first_action(tmp_path, ca
     # still gathers its own case (10.S10) and writes an entry of the first action's kind.
     from luthier import certify, tester
     _first_action_copy(tmp_path)
-    laws = tmp_path / "first_action_laws.lut"
+    laws = tmp_path / "first_action_laws.test.lut"
     laws.write_text(FIRST_ACTION_LAWS, encoding="utf-8")
     assert tester.passes(tester.run_tests(laws, store=True)[0])
     store = tmp_path / "first_action_models.cert.json"

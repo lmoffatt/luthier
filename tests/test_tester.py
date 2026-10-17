@@ -77,9 +77,15 @@ def test_a_census_weakens_the_coverage():
 
 
 def test_a_file_without_test_lines(tmp_path, capsys):
-    path = tmp_path / "none.lut"
+    # the tester runs none; the checker refuses such a test program (12.R2), and `luthier test`
+    # refuses a file that is not a test program
+    path = tmp_path / "none.test.lut"
     path.write_text("x : Int := 1\n", encoding="utf-8")
     assert lines_of(capsys, path) == (0, [])
+    model = tmp_path / "none.lut"
+    model.write_text("x : Int := 1\n", encoding="utf-8")
+    assert main(["test", str(model)]) == 1
+    assert "`luthier test` takes a .test.lut file" in capsys.readouterr().err
 
 
 def test_the_grade_is_test_lth_s_assumed_not_laws_lth_s():
@@ -135,7 +141,7 @@ def test_arrays_are_drawn_and_a_census_of_lists_lists_its_elements(tmp_path, cap
     # record/IA/evidence-2026-10-14/prompt.md: a `Fin n -> Float64` is drawn as the host array it
     # is, a field a refinement equates to a value is built (`VecOf n`, `MatOf r c`, `Square`), and
     # a census of lists for a parameter that is a list gives its elements
-    program = tmp_path / "shapes.lut"
+    program = tmp_path / "shapes.test.lut"
     program.write_text(SHAPES)
     code, lines = lines_of(capsys, program)
     assert code == 0
@@ -172,7 +178,7 @@ def test_a_binding_names_a_generator(tmp_path, capsys):
     # record/IA/tester-2026-10-14/prompt-3.md: a binding names a value of `Gen T`, in Luthier
     # (`counter`) or the host's (generators_model.lut), or a family reading an earlier parameter
     # (`orthogonal k`); what it gives is checked against the parameter's type (7.S1)
-    program = tmp_path / "generated.lut"
+    program = tmp_path / "generated.test.lut"
     program.write_text(GENERATED)
     code, lines = lines_of(capsys, program)
     assert code == 1
@@ -186,7 +192,7 @@ def test_a_binding_names_a_generator(tmp_path, capsys):
 
 
 def test_a_generator_threads_its_seed_and_its_entry_names_it(tmp_path):
-    program = tmp_path / "generated.lut"
+    program = tmp_path / "generated.test.lut"
     program.write_text(GENERATED)
     outcomes = tester.run_tests(program)
     drawn = [case[0].constant.value for case, _ in outcomes[0].evidence.cases]
@@ -247,7 +253,7 @@ def test_a_law_line_is_no_control_by_default():
 
 
 def test_a_control_its_law_holds_on_is_a_failed_control(tmp_path, capsys):
-    path = tmp_path / "held.lut"
+    path = tmp_path / "held.test.lut"
     path.write_text('import "test.lth" test ExhaustiveMode\n'
                     'Reflexive (a : Bool) : Bool := a == a\n'
                     'test "Reflexive" ExhaustiveMode (control <- true)\n', encoding="utf-8")
@@ -294,7 +300,7 @@ RATES = "by the sequential test (alpha 0.01, beta 0.01, delta 0.9, budget 400)"
 
 
 def test_a_statistical_law_runs_the_sequential_test(tmp_path):
-    path = tmp_path / "statistical.lut"
+    path = tmp_path / "statistical.test.lut"
     path.write_text(STATISTICAL, encoding="utf-8")
     fails, holds, unresolved, *_ = tester.run_tests(path)
     # laws.lth's StatisticalByTest: Fails refutes, Holds supports (sampled over Drawn seed), Unresolved
@@ -316,7 +322,7 @@ def test_a_statistical_law_runs_the_sequential_test(tmp_path):
 
 
 def test_the_lines_of_a_statistical_law(tmp_path, capsys):
-    path = tmp_path / "statistical.lut"
+    path = tmp_path / "statistical.test.lut"
     path.write_text(STATISTICAL, encoding="utf-8")
     code, lines = lines_of(capsys, path)
     assert code == 1
@@ -342,7 +348,7 @@ def test_the_lines_of_a_statistical_law(tmp_path, capsys):
 
 
 def test_a_statistical_control_is_its_own_kind(tmp_path):
-    path = tmp_path / "statistical.lut"
+    path = tmp_path / "statistical.test.lut"
     path.write_text(STATISTICAL, encoding="utf-8")
     outcomes = tester.run_tests(path)
     passed, failed = outcomes[3], outcomes[4]

@@ -34,7 +34,7 @@ def main(argv: list[str] | None = None) -> int:
                            help="[proposed] the session block takes the world as `w`, and its actions run with "
                                 "the run's token, validated at their first action as run validates them (10.S10); "
                                 "without it the session has no world and acts on nothing")
-    p_run = sub.add_parser("run", help="run a program with the host world")
+    p_run = sub.add_parser("run", help="run a program (x.run.lut, 12.R2) with the host world")
     p_run.add_argument("file")
     # the defaults of `run`'s arguments are the demand's, declared in lib/demand_model.lut's
     # `theDemand` and mirrored in run.DEMAND_DEFAULTS (L5.19, P11): None here means "not given"
@@ -65,14 +65,15 @@ def main(argv: list[str] | None = None) -> int:
                        help="execute even when x.results.json holds this run's key (L5.20); nothing is written "
                             "if the value agrees, and both are kept if it does not [default off, a field of the "
                             "demand, D-2026-10-16-d]")
-    p_test = sub.add_parser("test", help="run the file's test lines (test.lth's Tester)")
+    p_test = sub.add_parser("test", help="run the test lines of a test program, x.test.lut (test.lth's Tester, 12.R2)")
     p_test.add_argument("file")
     p_test.add_argument("--seed", type=int, default=None, help="the seed of every test, in place of each line's")
     p_test.add_argument("--fuel", type=int, default=1_000_000,
                         help="reduction fuel per case [proposed: default 1,000,000]")
     p_test.add_argument("--deep", action="store_true", help="run again a line whose outcome the store knows (7.S13)")
     p_test.add_argument("--no-cert", action="store_true", help="neither read nor write the store x.cert.json (12.S15)")
-    p_cert = sub.add_parser("certify", help="run the test lines of several files, each in its own process (12.S16)")
+    p_cert = sub.add_parser("certify", help="run the test lines of several test programs (x.test.lut, 12.R2), each in its own "
+                                            "process (12.S16)")
     p_cert.add_argument("files", nargs="+")
     p_cert.add_argument("--prune", action="store_true",
                         help="rewrite the stores of FILES (x.cert.json) bounded (6.S8), running nothing")
@@ -93,8 +94,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if certify(ns.files, ns.jobs, ns.seed, ns.deep, ns.fuel, store=not ns.no_cert) else 1
 
     if ns.command == "test":
+        from .run import require_kind
         from .tester import line, passes, run_tests
         try:
+            require_kind(ns.file, "test", "luthier test")
             outcomes = run_tests(ns.file, ns.seed, ns.fuel, deep=ns.deep, store=not ns.no_cert)
         except (OSError, ValueError, RecursionError) as exc:
             import sys

@@ -73,6 +73,61 @@ class RunError(ValueError):
     pass
 
 
+# The three kinds of file (D-2026-10-16-e, spec 12.R2): a theory (`.lth`), a model or library
+# (`.lut`), and an executive file, which carries a demand with its entry and is never imported:
+# `x.run.lut` (the `main` that `luthier run` applies to the world) or `x.test.lut` (the `test`
+# lines `luthier certify` runs). The suffix declares the kind; the checker (check.py's `kinds`),
+# the loader (an import of an executive file) and the commands (`require_kind`) verify it.
+EXECUTIVE = {"run": ".run.lut", "test": ".test.lut"}
+SUFFIX = {"theory": ".lth", "model": ".lut", **EXECUTIVE}
+KIND_NAME = {"theory": "a theory", "model": "a model or library", "run": "a run", "test": "a test program"}
+COMMAND_OF = {"run": "luthier run", "test": "luthier certify"}
+
+
+def file_kind(path):
+    """The kind a file's name declares: `run`, `test`, `theory` or `model`; None for another file
+    (a `.bib`)."""
+    name = Path(path).name
+    for kind, suffix in EXECUTIVE.items():
+        if name.endswith(suffix) and len(name) > len(suffix):
+            return kind
+    if name.endswith(".lth"):
+        return "theory"
+    if name.endswith(".lut"):
+        return "model"
+    return None
+
+
+def base_name(path):
+    """A file's name without the suffix of its kind: `x` for x.run.lut, x.test.lut, x.lut and x.lth
+    (so that the record of x.run.lut is x.run.json and its results x.results.json, L10.12)."""
+    kind = file_kind(path)
+    name = Path(path).name
+    return name[:-len(SUFFIX[kind])] if kind else Path(path).stem
+
+
+def executive_import(importer, target):
+    """Why an import of `target` by `importer` is refused (12.R2): an executive file is never
+    imported; None when it is not one."""
+    kind = file_kind(target)
+    if kind not in EXECUTIVE:
+        return None
+    return (f"{Path(importer).name} imports {Path(target).name}, {KIND_NAME[kind]} ({EXECUTIVE[kind]}): an "
+            f"executive file is never imported (12.R2, D-2026-10-16-e); what it shares belongs in a .lut")
+
+
+def require_kind(path, kind, command=None):
+    """`luthier run` takes a .run.lut, `luthier certify` and `luthier test` a .test.lut (12.R2):
+    a RunError naming the suffix wanted, and what the file is, otherwise."""
+    has = file_kind(path)
+    if has == kind:
+        return
+    what = (f"{KIND_NAME[has]} ({SUFFIX[has]}" + (f", for `{COMMAND_OF[has]}`)" if has in COMMAND_OF else ")")
+            if has else "no Luthier file")
+    raise RunError(f"`{command or COMMAND_OF[kind]}` takes a {EXECUTIVE[kind]} file (12.R2, D-2026-10-16-e); "
+                   f"{Path(path).name} is {what}")
+
+
 # the core encloses the top-level scope of every file (12.S22); its data and `not` are read here
 CORE = Path(__file__).parent / "lib" / "core.lut"
 
@@ -306,6 +361,9 @@ class Loaded(FileScope):
                     target = Path(__file__).parent / "lib" / act.path
                 if not target.exists():
                     raise RunError(f"{path.name}: no file {act.path} to import")
+                refusal = executive_import(path, target)
+                if refusal:
+                    raise RunError(refusal)
                 self.visit(target, active)
                 for name in act.names:
                     f.imports[name.asName or name.name] = (target.resolve(), name.name)
@@ -2617,7 +2675,9 @@ def run(path, main=None, fuel=None, sets=(), accept=None, checked=None, fresh=No
     plan records the strategy that ran, `TheDefaultsAgree`); `fresh`. `assumes` names the
     provisional externs the run applies as assumed (`refuse_provisional`, D-2026-10-16-c); each
     warns on standard error at its first application, and the certification lists it under
-    `assumed` with the names of the cone downstream of it, whose grade is then assumed."""
+    `assumed` with the names of the cone downstream of it, whose grade is then assumed. The file is
+    a run (`x.run.lut`, 12.R2), refused otherwise before anything is read."""
+    require_kind(path, "run")
     host.reset()
     lock = lock_status(path)
     loaded = Loaded(path)
@@ -2744,9 +2804,10 @@ def key_hash(key):
 
 
 def results_path(path):
-    """`x.results.json` beside `x.lut` (L10.12: in the store of the file that makes the claim)."""
+    """`x.results.json` beside `x.run.lut` (L10.12: in the store of the file that makes the claim;
+    `base_name`, 12.R2)."""
     path = Path(path)
-    return path.with_name(path.stem + ".results.json")
+    return path.with_name(base_name(path) + ".results.json")
 
 
 def read_results(path):
@@ -2841,8 +2902,9 @@ def run_file(path, main=None, fuel=None, sets=(), accept=None, checked=None, fre
 
 
 def record_path(path):
+    """`x.run.json` beside `x.run.lut` (12.S18; `base_name`, 12.R2)."""
     path = Path(path)
-    return path.with_name(path.stem + ".run.json")
+    return path.with_name(base_name(path) + ".run.json")
 
 
 def record(path, main, values, output, state=None):

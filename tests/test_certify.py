@@ -356,7 +356,7 @@ test "Close" (SampledMode linear) (cases <- 10) (whereBindings <- [
 
 
 def test_the_reach_of_a_census_and_of_a_drawn_number(tmp_path):
-    path = tmp_path / "census.lut"
+    path = tmp_path / "census.test.lut"
     path.write_text(CENSUS, encoding="utf-8")
     [outcome] = tester.run_tests(path, store=True)
     e = outcome.entry
@@ -398,7 +398,7 @@ test "Wrapper" (SampledMode linear) (profile <- models)
 
 def test_an_entry_goes_into_the_store_of_the_file_that_defines_the_model(tmp_path):
     (tmp_path / "m_model.lut").write_text(MODEL, encoding="utf-8")
-    top = tmp_path / "t_laws.lut"
+    top = tmp_path / "t_laws.test.lut"
     top.write_text(LAWS_OF_MODEL, encoding="utf-8")
     outcomes = tester.run_tests(top, store=True)
     home = certify.read_store(tmp_path / "m_model.lut")
@@ -423,7 +423,7 @@ models : List Binding := [
 
 def test_a_census_that_lists_a_model_sends_the_entry_to_its_file(tmp_path):
     (tmp_path / "m_model.lut").write_text(MODEL, encoding="utf-8")
-    top = tmp_path / "t_laws.lut"
+    top = tmp_path / "t_laws.test.lut"
     top.write_text(LAWS_OF_LIST, encoding="utf-8")
     assert LAWS_OF_LIST != LAWS_OF_MODEL
     tester.run_tests(top, store=True)
@@ -455,9 +455,10 @@ main (w : W) : W * Unit := host.print w (show (same.f true))
 
 
 def _small(tmp_path):
-    for name, text in (("small_model.lut", SMALL_MODEL), ("small_test.lut", SMALL_TEST), ("uses.lut", SMALL_USE)):
+    for name, text in (("small_model.lut", SMALL_MODEL), ("small_test.test.lut", SMALL_TEST),
+                       ("uses.run.lut", SMALL_USE)):
         (tmp_path / name).write_text(text, encoding="utf-8")
-    return tmp_path / "small_model.lut", tmp_path / "small_test.lut", tmp_path / "uses.lut"
+    return tmp_path / "small_model.lut", tmp_path / "small_test.test.lut", tmp_path / "uses.run.lut"
 
 
 def test_a_law_certified_from_a_test_program_is_found_by_a_run_that_imports_only_the_model(tmp_path, capsys):
@@ -652,14 +653,18 @@ def test_certify_lists_the_laws_of_tables_with_their_controls(capsys):
     assert all(line.endswith(": the control passed") for line in out[10:18])
 
 
-PAIR_LAWS = '''import "test.lth" test ExhaustiveMode
-import "generators.lth" Binding
-import "laws.lth" Listed
-Idempotent (f : Bool -> Bool) (b : Bool) : Bool := f (f b) == f b
+# the laws and the functions live in a library (a test program is never imported, 12.R2), whose
+# store holds the entries and the controls of the laws it states (L10.12)
+PAIR = '''Idempotent (f : Bool -> Bool) (b : Bool) : Bool := f (f b) == f b
 Reflexive (a : Bool) : Bool := a == a
 keep (x : Bool) : Bool := x
 flip (x : Bool) : Bool := if x then false else true
 always (x : Bool) : Bool := true
+'''
+PAIR_LAWS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Listed
+import "pair.lut" Idempotent Reflexive keep always
 goods : List (Bool -> Bool) := [keep, always]
 onGoods : List Binding := [ { parameter := just "f", type := nothing, generator := "goods", coverage := Listed } ]
 test "Idempotent" ExhaustiveMode (whereBindings <- onGoods)
@@ -668,7 +673,7 @@ test "Reflexive" ExhaustiveMode
 PAIR_CONTROLS = '''import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed
-import "laws.test.lut" Idempotent flip always
+import "pair.lut" Idempotent flip always
 flips : List (Bool -> Bool) := [flip]
 alwayss : List (Bool -> Bool) := [always]
 onFlip : List Binding := [ { parameter := just "f", type := nothing, generator := "flips", coverage := Listed } ]
@@ -678,16 +683,18 @@ test "Idempotent" ExhaustiveMode (whereBindings <- onFlip) (control <- true)
 
 
 def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
-    laws, controls = tmp_path / "laws.test.lut", tmp_path / "controls.lut"
+    laws, controls, pair = tmp_path / "laws.test.lut", tmp_path / "controls.test.lut", tmp_path / "pair.lut"
+    pair.write_text(PAIR, encoding="utf-8")
     laws.write_text(PAIR_LAWS, encoding="utf-8")
     controls.write_text(PAIR_CONTROLS, encoding="utf-8")
     assert main(["certify", str(laws), str(controls)]) == 0
     out = capsys.readouterr().out.splitlines()
     assert "  Idempotent: cases; controlled (refuted on its control at f = flip, b = true)" in out
     assert "  Reflexive: exhaustive; uncontrolled: untested against any wrong model (7.S19)" in out
-    # the control lives beside the claim it controls, the file that states the law (L10.12): the
-    # controls file keeps no store
-    stored = [e for e in certify.read_store(laws) if certify.is_control(e)]
+    # the control lives beside the claim it controls, the file that states the law (L10.12): no
+    # test program keeps a store
+    assert not certify.store_path(laws).exists()
+    stored = [e for e in certify.read_store(pair) if certify.is_control(e)]
     assert [(e["kind"], e["outcome"], e["grade"]) for e in stored] == \
         [("Control", {"ControlRefuted": "f = flip, b = true"}, None)]
     assert not certify.store_path(controls).exists()
@@ -712,11 +719,15 @@ def test_controls_through_the_stores_in_certify_and_check(tmp_path, capsys):
 # record/IA/statistical-2026-10-15/prompt-tester.md: a statistical law's entry holds `Tested` with
 # its rates, its grade shows them (7.S17), its control is matched by the law's cone as any
 
-STATISTICAL_LAWS = '''import "test.lth" test ExhaustiveMode
-import "generators.lth" Seed Binding
-import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue Listed
+CONSTANT = '''import "generators.lth" Seed
+import "laws.lth" Law Statistical StatisticalLaw Sequential byPValue
 pv : StatisticalLaw Float64 := byPValue Float64 (fn p { p })
 Constant (p : Float64) (c : Sequential) : Law := Statistical Float64 Seed pv (fn n s { (p, s) }) c
+'''
+STATISTICAL_LAWS = '''import "test.lth" test ExhaustiveMode
+import "generators.lth" Binding
+import "laws.lth" Sequential Listed
+import "constant.lut" Constant
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.9, initial := 1, budget := 100 }
 ones : List Float64 := [1.0]
 onOnes : List Binding := [ { parameter := just "p", type := nothing, generator := "ones", coverage := Listed },
@@ -726,7 +737,7 @@ test "Constant" ExhaustiveMode (seed <- 5) (profile <- onOnes)
 STATISTICAL_CONTROLS = '''import "test.lth" test ExhaustiveMode
 import "generators.lth" Binding
 import "laws.lth" Listed Sequential
-import "laws.test.lut" Constant
+import "constant.lut" Constant
 wald : Sequential := { alpha := 0.01, beta := 0.01, delta := 0.9, initial := 1, budget := 100 }
 zeros : List Float64 := [0.0]
 onZeros : List Binding := [ { parameter := just "p", type := nothing, generator := "zeros", coverage := Listed },
@@ -736,7 +747,8 @@ test "Constant" ExhaustiveMode (seed <- 5) (profile <- onZeros) (control <- true
 
 
 def test_certify_a_statistical_law_with_its_rates_and_its_control(tmp_path, capsys):
-    laws, controls = tmp_path / "laws.test.lut", tmp_path / "controls.lut"
+    laws, controls = tmp_path / "laws.test.lut", tmp_path / "controls.test.lut"
+    (tmp_path / "constant.lut").write_text(CONSTANT, encoding="utf-8")
     laws.write_text(STATISTICAL_LAWS, encoding="utf-8")
     controls.write_text(STATISTICAL_CONTROLS, encoding="utf-8")
     rates = "by the sequential test (alpha 0.01, beta 0.01, delta 0.9, budget 100)"
@@ -751,7 +763,7 @@ def test_certify_a_statistical_law_with_its_rates_and_its_control(tmp_path, caps
             f"  control of Constant on zeros (Listed), wald (Listed): refuted at 8 samples of 1 {rates}: "
             "the control passed",
         ]
-    entry, = [e for e in certify.read_store(laws) if not certify.is_control(e)]
+    entry, = [e for e in certify.read_store(tmp_path / "constant.lut") if not certify.is_control(e)]
     assert entry["evidence"]["Tested"] == {"verdict": "Holds", "alpha": 0.01, "beta": 0.01, "delta": 0.9,
                                            "spent": 2, "initial": 1, "budget": 100}
     assert certify.store_errors([entry]) == []
@@ -923,7 +935,7 @@ test "Slow" ExhaustiveMode
 
 
 def test_a_line_out_of_fuel_leaves_no_entry_and_runs_again_with_enough(tmp_path, counted):
-    path = tmp_path / "slow.lut"
+    path = tmp_path / "slow.test.lut"
     path.write_text(SLOW, encoding="utf-8")
     cut, = tester.run_tests(path, fuel=100, store=True)
     assert cut.out_of_fuel == 100 and cut.entry["outcome"] == {"NotRunFor": certify.FUEL_SPENT}
@@ -956,7 +968,7 @@ test "PlusCommutes" (SampledMode linear) (seed <- 2)
 
 
 def _pooled_law(tmp_path, text=POOLED):
-    path = tmp_path / "pooled.lut"
+    path = tmp_path / "pooled.test.lut"
     path.write_text(text, encoding="utf-8")
     outcomes = tester.run_tests(path, store=True)
     return path, outcomes, certify.read_store(path)
@@ -1014,7 +1026,7 @@ test "Constant" ExhaustiveMode (seed <- 7) (profile <- on "ten")
 
 
 def test_the_budget_bounds_the_test_across_stretches_and_a_larger_one_continues_it(tmp_path):
-    path = tmp_path / "stretched.lut"
+    path = tmp_path / "stretched.test.lut"
     path.write_text(STRETCHED, encoding="utf-8")
     # alone, each line is its own test: unresolved at the budget of 3, held at 7 under 10
     alone = tester.run_tests(path)

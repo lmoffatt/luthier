@@ -15,7 +15,7 @@ PURE = "a : Int := 1 + 2\nn : Int\nmain : Int := a * n\n"
 
 
 def _pure(tmp_path):
-    path = tmp_path / "pure.lut"
+    path = tmp_path / "pure.run.lut"
     path.write_text(PURE, encoding="utf-8")
     return path
 

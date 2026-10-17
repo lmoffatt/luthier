@@ -62,3 +62,10 @@ Lambda syntax migration: D-2026-10-13-y, grammar commit `5d81039`;
 Codex fn migration v1, deterministic textual edits, no seed or parameters.
 Lambdas use `fn`, for example `fn e (j : J) { e + j }`; the final term
 is the block value, with no `return`.
+
+Kinds of file (spec 12.R2, D-2026-10-16-e), 2026-10-16: the suffix after the verdict declares the
+kind of file, `x.accept.lut` a model or library, `x.reject.lth` a theory, `x.accept.run.lut` a run
+and `x.reject.test.lut` a test program; the runner checks the kind against the content as the
+checker does. The three programs with a `main` became runs: `r12_block.accept.run.lut`,
+`cite_proved.accept.run.lut` and `cite_not_reference.reject.run.lut`. The `kind_*` programs are the
+accept and reject programs of 12.R2.

@@ -99,7 +99,7 @@ from .parse import parse
 import numpy as np
 
 from .run import (Entries, Loaded, Runner, RunError, _applied, _arrow, _instantiate, _primitive_body, core_data,
-                  runtime_slice)
+                  require_kind, runtime_slice)
 
 TRUE, FALSE = t.Var("true"), t.Var("false")
 _TEST_LTH = (Path(__file__).parent / "lib" / "test.lth").resolve()
@@ -1138,7 +1138,9 @@ def run_tests(path, seed=None, fuel=1_000_000, deep=False, store=False):
     is reused unless `deep`) and each line run is recorded there, under its lock
     (certification.lth's `known` and `record`: an agreeing replay writes nothing, a disagreeing one
     is kept beside, D-2026-10-15-f; a run cut by its fuel is never written, D-2026-10-15-g); the test
-    program's own store is neither read nor written."""
+    program's own store is neither read nor written. The file is a test program (`x.test.lut`,
+    12.R2), refused otherwise before anything is read."""
+    require_kind(path, "test")
     runner, specs, loaded = prepare(path, fuel)
     cones = certify.Cones(runner)
     stores = {}  # the file that makes a claim -> its store's entries, as read
