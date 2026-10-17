@@ -9,6 +9,7 @@ section 0, D-2026-10-18-a), measured over src/luthier/lib, examples/ and tests/t
      families (all..., any..., append..., member..., lookup..., concat..., lengthOf, listLength,
      mapList).
   3. unclaimed: the Bool laws `luthier check -v` reports `unclaimed`.
+  5. shadows: names an executive file defines that an importable file also defines.
   4. loose: the `loose` notices of `luthier check -v`, split into real and the rest. [proposed]
      A notice is real when the name is a function defined at the top level that no theory names,
      the rest being the names a theory names (they stand to be absorbed by their theory):
@@ -21,14 +22,20 @@ roots, the seed (none: the script is deterministic).
 Version: 1, 2026-10-18, Claude Sonnet 5.5, on record/plan/core-2026-10-17/prompt-bite-3.md.
 Inputs: the library at ded76d4, luthier 0.2.0.dev0.
 
-Counts at ded76d4 (the commit bite 3 started from; the total, then the entries counted):
-  all three roots (23 s):  homonyms 284, list helpers 427, unclaimed 144, loose 2126 (real 1490, the rest 636)
-  src/luthier/lib alone:   homonyms 81,  list helpers 397, unclaimed 70,  loose 1737 (real 1116, the rest 621)
+Roots rule (D-2026-10-16-e): an executive file (`*.run.lut`, `*.test.lut`) may define local names
+seen nowhere else, so counts 1 and 3 and 4 read the importable files only (`.lth` and the `.lut`
+that are not executive); count 2 reads every file, since a reinvented recursion is one wherever it
+is; a fifth count, the names an executive file defines that an importable file also defines (the
+collisions D-2026-10-18-b refuses), stands apart from the homonyms.
+
+Counts at the tree after ded76d4 (9a3d665 plus bite 3's files), 24 s:
+  all three roots:  homonyms 96, executive shadows 112, list helpers 427, unclaimed 137,
+                    loose 1974 (real 1341, the rest 633)
+  lib alone:        homonyms 81, executive shadows 0, list helpers 397, unclaimed 70,
+                    loose 1737 (real 1116, the rest 621)
 The 70 unclaimed of the library are `check -v`'s own; the loose total differs from the 1675 of the
 plan's survey because this one counts the .lut files and the data constructors the survey did not.
-The homonyms of the tests (`bind`, `tolerance`, `cutoffs`, ... each defined by a dozen programs
-under tests/tester) are the bulk of the first count over all roots. ACCEPTED_HOMONYMS is empty: no
-homonym is required by the language.
+ACCEPTED_HOMONYMS is empty: no homonym is required by the language.
 """
 from __future__ import annotations
 
@@ -52,6 +59,11 @@ LISTS_FILE = "core/lists.lut"
 # no homonym is required by the language (a rename removes each one, 12.S4)
 ACCEPTED_HOMONYMS: dict[str, str] = {}
 FAMILIES = re.compile(r"^(all|any|append|member|lookup|concat)([A-Z0-9_].*)?$|^(lengthOf|listLength|mapList)$")
+
+
+def executive(p):
+    """D-2026-10-16-e: a `*.run.lut` or `*.test.lut` is executive; its names are local, seen nowhere else."""
+    return p.name.endswith((".run.lut", ".test.lut"))
 
 
 def rel(p, base):
@@ -119,11 +131,24 @@ def reinvents(a):
 
 
 def homonyms(paths, programs, base):
+    """Names defined in more than one importable file (executive files are left out)."""
     where = defaultdict(list)
     for p in paths:
+        if executive(p): continue
         for n in defined(programs[p]): where[n].append(str(rel(p, base)))
     found = {n: fs for n, fs in where.items() if len(fs) > 1 and n not in ACCEPTED_HOMONYMS}
     return dict(sorted(found.items(), key=lambda kv: (-len(kv[1]), kv[0])))  # most files first
+
+
+def shadows(paths, programs, base):
+    """Names an executive file defines that an importable file also defines (D-2026-10-18-b refuses them)."""
+    library = defaultdict(list)
+    for p in paths:
+        if not executive(p):
+            for n in defined(programs[p]): library[n].append(str(rel(p, base)))
+    out = [f"{rel(p, base)}: {n} (also in {', '.join(library[n][:3])})"
+           for p in paths if executive(p) for n in defined(programs[p]) if n in library]
+    return sorted(out)
 
 
 def helpers(paths, programs, base):
@@ -169,12 +194,13 @@ def measure(roots=ROOTS, base=REPO):
     paths = files(roots, base)
     programs = {p: program_of(p) for p in paths}
     paths = [p for p in paths if programs[p] is not None]
-    notices = check_notices(paths, programs, base)
+    notices = check_notices([p for p in paths if not executive(p)], programs, base)
     named = set().union(*(theory_names(programs[p]) for p in paths))
     loose = notices["loose"]
     real = [x for x in loose if x[2] not in named]
     return {
         "homonyms": homonyms(paths, programs, base),
+        "shadows": shadows(paths, programs, base),
         "helpers": helpers(paths, programs, base),
         "unclaimed": [f"{f}:{l}: {n}" for f, l, n in notices["unclaimed"]],
         "loose_real": [f"{f}:{l}: {n}" for f, l, n in real],
@@ -189,11 +215,13 @@ def main(argv=None):
     ns = ap.parse_args(argv)
     m = measure(ns.roots)
     print(f"homonyms {len(m['homonyms'])}")
+    print(f"executive names shadowing {len(m['shadows'])}")
     print(f"list helpers {len(m['helpers'])}")
     print(f"unclaimed {len(m['unclaimed'])}")
     print(f"loose {len(m['loose_real']) + len(m['loose_rest'])} (real {len(m['loose_real'])}, the rest {len(m['loose_rest'])})")
     if ns.verbose:
         for n, fs in m["homonyms"].items(): print(f"homonym {n}: {', '.join(fs)}")
+        for x in m["shadows"]: print(f"shadow {x}")
         for h in m["helpers"]: print(f"helper {h}")
         for u in m["unclaimed"]: print(f"unclaimed {u}")
         for r in m["loose_real"]: print(f"loose real {r}")

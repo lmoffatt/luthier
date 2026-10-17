@@ -17,9 +17,11 @@ Status: bites 1 and 2 landed (report-bite-1.md, report-bite-2.md): lib/core/ exi
 properties/{relations, operations, functions}.lth and structures/{equality, algebraic, universal}.lth
 (kernel_laws.lth split without renames, kernel_models.lut absorbed), the hash erases binder
 annotations, the library re-certified once (536 entries in 29 stores), suite 820 passed. Not
-started: bites 4 to 13 below. Bite 3 landed (scripts/core_metrics.py): its four counts at ded76d4 over
-lib, examples and tests/tester are homonyms 284, list helpers 427, unclaimed 144, loose 2126 (real
-1490, the rest 636); over lib alone 81, 397, 70, 1737 (1116, 621). The library at d280a18: `check -v` reports 70 unclaimed Bool laws (32
+started: bites 4 to 13 below. Bite 3 landed (scripts/core_metrics.py): at the tree after ded76d4,
+over lib, examples and tests/tester, homonyms among importable files 96, executive-file names
+shadowing an importable name 112 (D-2026-10-16-e, D-2026-10-18-b), list helpers 427 (every file),
+unclaimed 137, loose 1974 (real 1341, the rest 633; unclaimed and loose over importable files);
+over lib alone 81, 0, 397, 70, 1737 (1116, 621). The library at d280a18: `check -v` reports 70 unclaimed Bool laws (32
 of them bite 2's properties, claimed only by tests/tester/core_instances.lut until the structures
 claim them), the `loose` notice on every top-level function, 48 names defined in more than one file
 (the count of 2026-10-17's survey before bite 1; core_metrics.py counts 81 over lib at ded76d4).

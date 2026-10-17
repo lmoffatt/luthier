@@ -28,14 +28,27 @@ size (xs : List Int) : Int := match xs { nil -> 0 ; cons x rest -> 1 + size rest
 """
 
 
+D = """\
+shared : Int := 3
+mine : Int := 4
+double (x : Int) : Int := x
+"""
+
+
 def fixture(tmp_path):
-    for name, text in (("a.lth", A), ("b.lth", B), ("c.lut", C)):
+    for name, text in (("a.lth", A), ("b.lth", B), ("c.lut", C), ("d.test.lut", D)):
         (tmp_path / name).write_text(text)
     return core_metrics.measure(["."], tmp_path)
 
 
 def test_homonyms(tmp_path):
     assert fixture(tmp_path)["homonyms"] == {"shared": ["a.lth", "b.lth"]}
+
+
+def test_executive_names_shadowing_are_apart(tmp_path):
+    m = fixture(tmp_path)
+    assert m["shadows"] == ["d.test.lut: double (also in a.lth)", "d.test.lut: shared (also in a.lth, b.lth)"]
+    assert "d.test.lut" not in str(m["homonyms"]) and not any("mine" in x for x in m["shadows"])
 
 
 def test_accepted_homonyms_are_left_out(tmp_path, monkeypatch):
@@ -57,7 +70,7 @@ def test_loose_real_and_the_rest(tmp_path):
     assert sorted(x.split(": ")[1] for x in m["loose_rest"]) == ["lawA", "size"]
 
 
-def test_command_prints_four_counts(tmp_path):
+def test_command_prints_the_counts(tmp_path):
     fixture(tmp_path)
     out = subprocess.run([sys.executable, str(SCRIPT), str(tmp_path / "a.lth")], capture_output=True, text=True, check=True).stdout
-    assert [l.split(" (")[0] for l in out.splitlines()] == ["homonyms 0", "list helpers 0", "unclaimed 1", "loose 2"]
+    assert [l.split(" (")[0] for l in out.splitlines()] == ["homonyms 0", "executive names shadowing 0", "list helpers 0", "unclaimed 1", "loose 2"]
