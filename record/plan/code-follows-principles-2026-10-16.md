@@ -102,6 +102,14 @@ Queue after 3g:
   plan.lth's `KeyReadsOnlyTheCone` and `KeyReadsTheType` follow from `demandKey`'s definition for
   every planner, so no model fails them; restate them so the planner enters, or drop them (a theory
   bite, with 3j).
+- 3h landed (227065a..c1ca37d; 798 passed). The coordinator's answer: CellsOfTheirKind's 2026-10-14
+  failure, written by a control line misfiled among the laws, moved to the archive with its reason
+  (P3), not deleted. examples/ run records tracked. Findings for later: tester.py's `_list_members`
+  fingerprints only a census's named members, not those built by an expression (`parsed ...`), so a
+  change to tables.py left three lines known (replayed with --deep, they agree); its fix restales
+  fingerprints, so it goes with 3e's re-certification wave. A pure run past an assumed law is served
+  from the result store (`assumes` not in the key; certification is read before serving, so the
+  warning stays).
 - 3j (Fable for the theory, after the controls): regions from the type, the law and the code.
 - 3e: the hash erases binder annotations; one re-certification wave.
 - print and stdout (after his item 12): a failed write is recorded as a success today (the
