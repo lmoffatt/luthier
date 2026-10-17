@@ -7,7 +7,10 @@ to -i, `record/principles-language.md` L1 to L3, L7, L9.14, L10.12, spec 4.S14, 
 12.S23, 12.R2. The questions this design leaves to Luciano are in `decisions.md` beside this file;
 every choice marked [proposed] here is the agent's, one commit undoes it.
 
-Status: design; no bite started. The library at ca90ee8: 494 test lines in tests/tester, 31 stores
+Status: bite 2 landed 2026-10-17 (c05df18, 0fbde1a: the three properties files, core_instances.lut,
+core_laws.test.lut with 58 laws graded and controlled, core_controls.test.lut with 59 controls
+refuted; report-bite-2.md); bite 1 not started, so the properties import `Object` from
+kernel_laws.lth until it lands. The library at ca90ee8: 494 test lines in tests/tester, 31 stores
 with 927 entries over 208 distinct laws; `check -v` reports 38 unclaimed Bool laws in lib/; the
 suite was 799 passed at a1c994b (record/plan/code-follows-principles-2026-10-16.md) and a full
 `pytest tests` run takes well over fifteen minutes, so a bite runs it in the background.
@@ -828,9 +831,13 @@ refuted at a wrong one (`-` for Commutative and Associative; `<` for Reflexive; 
 for Idempotent and Involutive; `fn x y { x }` for Cancellative; a `bound` of zero for
 `AssociativeWithin` on doubles).
 Accepted when: every property has a confirmed instance and a refuted control. The instances are
-the test program's own definitions, so their entries land beside it (as `cases.test.cert.json` does
+the test programs' own definitions, so their entries land beside them (as `cases.test.cert.json` does
 today), untracked under tests/ (D-2026-10-16-h); bite 3 moves the claims into core.lut, where they
-get their tracked store. The test program's header says so.
+get their tracked store. The test program's header says so. As built: the wrappers and the real
+instances live in `tests/tester/core_instances.lut`, imported by both programs (a control is matched
+to its law by the cone's hash, so both must name one definition, and a test program is never
+imported, D-2026-10-16-e); the store is `core_instances.cert.json`. The composites (`Equivalence`,
+the orders, `Isomorphism`, `Bijective`) quantify the variables of their parts (report-bite-2.md).
 May break: nothing in the library (new files only).
 
 ### Bite 3. The structures and core's claims (Fable; after 1 and 2)
